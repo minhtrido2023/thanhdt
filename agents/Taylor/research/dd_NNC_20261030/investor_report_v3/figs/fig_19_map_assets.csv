@@ -1,0 +1,4 @@
+name,lat,lon,kind,dx,dy,note
+Mỏ Mũi Tàu (xã Tân Lập – nay xã Đồng Phú),11.46917,106.97056,mine,0.04,0.03,toạ độ trung tâm huyện Đồng Phú (vi.wikipedia.org/wiki/Đồng_Phú_(huyện)); toạ độ xã Tân Lập không tra được
+Trụ sở + mỏ Núi Nhỏ cũ (Tân Đông Hiệp),10.92194,106.76944,hq,0.04,-0.06,vi.wikipedia.org/wiki/Tân_Đông_Hiệp
+Cụm mỏ cạnh tranh Phú Giáo (Tam Lập),11.29417,106.80778,rival,-0.55,0.0,toạ độ trung tâm huyện Phú Giáo (vi.wikipedia.org/wiki/Phú_Giáo_(huyện)); vị trí từng mỏ không tra được

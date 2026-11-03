@@ -1,0 +1,8 @@
+Gia 46,100 = 0.51x tam 90,742 | 0.48x base | 0.59x P50 | P/B 1.54x | luoi < gia 0.0% (min 51,608)
+Vung: RE (duoi P10)
+ROE ben ham y cua GIA (Gordon r13 g3): 18.4%
+Tam = gia khi tran gia da cum tu 2028 = 217k/m3 (tien 2026, sau do theo duong gia) -> GPM da mo hinh 28% (dinh 2026 ~59%; GPM NNC TB 2012-25 34%)
+  tran 270: tam 64,079
+  tran 242: tam 54,996
+  tran 220: tam 47,240
+P(tieu cuc) ham y o gia 46,100: 85% (mo hinh 25%)

@@ -1,0 +1,10 @@
+LOCK 2026-11-03 20:04:30 ICT (TRUOC khi doc gia NNC 03/11). Trung thuc: NNC v1/v2 (30-31/10) da biet gia 47.100 va brief MVC skeptic co neu so ~48k
+=> khoa nay chi chung minh THU TU CHAY (mo hinh r3 khong sua sau khi so gia), khong chung minh chua tung thay gia.
+d3fb9637389ca6d9c7472e28f4846506  ../../../dd_MVC_20261103/r6/calc/valuation_base.py
+9fd64a26a7daca9b0244c3f62ce7dd91  ../../../dd_MVC_20261103/r6/calc/model_r5.py
+bd93107a93a7f958eea03e1a5f01eed0  ../../../dd_MVC_20261103/r6/calc/model_r6.py
+c992769f86794f5d6f39b0df7e13bd91  model_r3.py
+44145f4a32e4520163564e32b5acc42d  model_r3_out.txt
+1c36e8d4e35d7f14c423612c9b5e328c  model_r3_out.json
+16a2156db62ddac5411cb859821eff72  grid_r3.csv
+e896ecfb84241240a4f1faf3ba1d90d3  sector_gpm_roe.csv

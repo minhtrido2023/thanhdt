@@ -1456,10 +1456,10 @@
    "price_ref": 47100,
    "price_date": "2026-10-30",
    "verdict_label": "giá 47.100 DƯỚI vùng theo mô hình nhất quán 62.220–86.914 (tâm 77.656); LỆCH báo cáo NĐT NNC v2 (59.000–79.000, giữa 69.000) chưa dựng lại",
-   "source_file": "agents/Taylor/research/dd_NNC_20261030/REPORT.md",
+   "source_file": "agents/Taylor/research/dd_NNC_20261030/archive_internal/REPORT_v2_20261031.md",
    "evidence": [
     {
-     "file": "agents/Taylor/research/dd_NNC_20261030/REPORT.md",
+     "file": "agents/Taylor/research/dd_NNC_20261030/archive_internal/REPORT_v2_20261031.md",
      "quote": "Kỳ vọng (W 25/50/20/5): phẳng **62.220** · g2031 **73.337** · thực **86.914** đ/cp NNC; tâm theo trọng số đường giá r3 (phẳng 10 / g2031 50 / thực 40) = **77.656**.",
      "fields": [
       "zone_low",
@@ -1479,7 +1479,7 @@
    "expires_on": "2027-02-28",
    "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
    "null_reason": null,
-   "notes": "Rev 3 đồng bộ mô hình MVC r3 (hệ phương trình sở hữu chéo): vùng = phẳng 62.220 … thực 86.914, tâm kỳ vọng 77.656. LỆCH bản báo cáo NĐT NNC v2 (59.000–79.000, giữa 69.000, mô hình độc lập cũ) — bản đó KHÔNG dựng lại, KHÔNG gửi email. Không phải tín hiệu mua.",
+   "notes": "Rev 3 đồng bộ mô hình MVC r3 (hệ phương trình sở hữu chéo): vùng = phẳng 62.220 … thực 86.914, tâm kỳ vọng 77.656. LỆCH bản báo cáo NĐT NNC v2 (59.000–79.000, giữa 69.000, mô hình độc lập cũ) — bản đó KHÔNG dựng lại, KHÔNG gửi email. Không phải tín hiệu mua. [03/11 20:30: chỉ đổi con trỏ file nguồn sang bản lưu nội bộ vì REPORT.md được viết lại (r3, job Taylor_20261103_130007); giá trị không đổi]",
    "recorded_at": "2026-11-03T17:30:00+07:00",
    "center_desc": "kỳ vọng xác suất theo mô hình NHẤT QUÁN với MVC (V_NNC = N_ex + 0,103·V_MVC), W 25/50/20/5, đường giá 10/50/40",
    "rev": 3,
@@ -1584,6 +1584,49 @@
    "supersedes": "MVC@2026-11-03#4",
    "correction_reason": "r6 áp nguyên tắc sổ sách ĐỐI XỨNG (SKEPTIC4): đất ở 150→sổ sách 30 (option ngoài tâm); bỏ upside mỏ mới khỏi tâm (cả upside/downside sang độ nhạy); thêm stress biên về TB chu kỳ + hạn GP Tân Lập vào lưới ⇒ thang hạ",
    "center_alt": 19800,
+   "center_alt_kind": "median"
+  },
+  {
+   "ticker": "NNC",
+   "dd_date": "2026-11-03",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 68100,
+   "center": 90700,
+   "center_kind": "expected_weighted",
+   "zone_high": 89200,
+   "center_range": null,
+   "price_ref": 46100,
+   "price_date": "2026-11-03",
+   "verdict_label": "RẺ (giá dưới P10 = 61.200 của lưới 729 bộ; 0/729 dưới giá); biên an toàn CÓ ĐIỀU KIỆN: giá đá cụm từ 2028 ≥~217k/m³ (GPM đá ≥~28%, dưới TB 2012–25 34%); chu kỳ ở đỉnh (GPM 53% cao nhất 15 năm); Gordon ROE chuẩn hoá 12–20% cho 26.900–50.900 — giá hàm ý ROE bền 18,4%; tâm 90.700 nằm vùng nghiêng đắt của lưới vì giả định biên cơ sở; trung vị 78.100",
+   "source_file": "agents/Taylor/research/dd_NNC_20261030/investor_report_v3/NNC_DD_investor_report_20261103.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_NNC_20261030/investor_report_v3/NNC_DD_investor_report_20261103.md",
+     "quote": "| Kỳ vọng · trung vị lưới · vùng hợp lý (ước lượng) | **≈90.700 · ≈78.100 · 68.100–89.200 đ/cp** |",
+     "fields": [
+      "center",
+      "center_alt",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_NNC_20261030/investor_report_v3/NNC_DD_investor_report_20261103.md",
+     "quote": "Ở giá đóng cửa 03/11/2026 (46.100 đ), NNC dưới P10 của lưới (61.200): RẺ.",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "skeptic_status": "r3 dựng lại theo nguyên tắc sổ sách đối xứng (user 03/11); mô hình khoá md5 r3/calc/LOCK_md5_r3.txt 20:04:30 ICT trước khi so giá (v1/v2 đã biết giá ⇒ khoá chỉ chứng minh thứ tự chạy); CHƯA chạy fundamental-skeptic trên r3",
+   "expires_on": "2027-03-03",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "null_reason": null,
+   "notes": "Tâm chính xác 90.742 (W 25/50/20/5 × g2031/thực 50:50; r13; K 0,97; SL co_so 1,40; CIP Tam Lập sổ sách mọi kịch bản − trễ GP; ký quỹ + thuế hoãn lại; 10,3% MVC giải hệ với MVC r6). Lưới 729: P10 61.195, P25 68.069, P50 78.070, P75 89.171, P90 99.160; min 51.608. Thang: RẺ ≤61.195; rẻ có điều kiện –68.069; hợp lý –89.171; nghiêng đắt –99.160; đắt ≥99.160. Cơ sở 96.433; stress biên 1,0: 63.930; GPM đá 36%: 55.175; phẳng 72.697. Giá 03/11 46.100 = DNSE close (khớp BQ). Số: dd_NNC_20261030/r3/calc/model_r3_out.txt, compare_r3_out.txt. V_NNC cho MVC: 90.742 (vs 83.887 trong MVC r6 ⇒ MVC +662 đ/cp).",
+   "recorded_at": "2026-11-03T20:35:00+07:00",
+   "center_desc": "kỳ vọng xác suất DCF hữu hạn Mũi Tàu 2027–43 + tiền ròng sau nghĩa vụ + tài sản/dự án theo sổ sách + 10,3% MVC nội tại (sở hữu chéo giải hệ), r 13%, 2 đường giá (phẳng = stress)",
+   "rev": 1,
+   "center_alt": 78100,
    "center_alt_kind": "median"
   }
  ],

@@ -1,0 +1,129 @@
+{
+ "tam": 90741.69557971695,
+ "mvc_simul": 23755.339449787883,
+ "base_co_so": 96432.81331836864,
+ "cells": {
+  "tot|g2031": 125448.51239681419,
+  "co_so|g2031": 88891.0695380377,
+  "xau|g2031": 34551.28072111606,
+  "rat_xau|g2031": 21741.049414103476,
+  "tot|real": 144740.88910503092,
+  "co_so|real": 103974.55709869959,
+  "xau|real": 41608.07957496993,
+  "rat_xau|real": 23686.058713632396
+ },
+ "sc3": {
+  "tich_cuc": 135094.70075092255,
+  "co_so": 96432.81331836864,
+  "tieu_cuc": 35006.45493120799
+ },
+ "bridge": {
+  "g2031": {
+   "DCF_Mui_Tau_2027_43_gom_cho_thue": 1336.4135982679693,
+   "Q4_2026": 60.0,
+   "tien_rong_sau_nghia_vu": 223.62,
+   "ky_quy_PHMT": 4.57,
+   "thue_hoan_lai": 4.31,
+   "NHC_so_sach": 14.128844106,
+   "CIP_TamLap_so_sach": 83.506,
+   "tre_GP_ky_vong": -9.275319899757221,
+   "co_phan_MVC_10_3pct": 231.2191217995739,
+   "TONG": 1948.4922442737864,
+   "TONG_dcp": 88891.0695380377
+  },
+  "real": {
+   "DCF_Mui_Tau_2027_43_gom_cho_thue": 1629.5545750856838,
+   "Q4_2026": 60.0,
+   "tien_rong_sau_nghia_vu": 223.62,
+   "ky_quy_PHMT": 4.57,
+   "thue_hoan_lai": 4.31,
+   "NHC_so_sach": 14.128844106,
+   "CIP_TamLap_so_sach": 83.506,
+   "tre_GP_ky_vong": -9.275319899757221,
+   "co_phan_MVC_10_3pct": 268.7081923115677,
+   "TONG": 2279.122291603495,
+   "TONG_dcp": 103974.55709869959
+  }
+ },
+ "gordon": {
+  "ROE 12%": {
+   "pb": 0.8999999999999999,
+   "ps": 26923.499999999996
+  },
+  "ROE TB 2021-25 (mot mo) 16.1%": {
+   "pb": 1.3113999999999997,
+   "ps": 39230.53099999999
+  },
+  "ROE 20%": {
+   "pb": 1.7,
+   "ps": 50855.5
+  },
+  "ROE TB 2012-25 33.8% (gom thoi 2 mo)": {
+   "pb": 3.0849285714285712,
+   "ps": 92285.6382142857
+  },
+  "ROE Q3/26 TTM 35,9% (tham chieu)": {
+   "pb": 3.2920000000000003,
+   "ps": 98480.18000000001
+  }
+ },
+ "roe_implied_by_tam": 0.3333317585817047,
+ "grid_pct": {
+  "5": 57688.75259794941,
+  "10": 61194.904161244296,
+  "25": 68069.31394303431,
+  "50": 78070.0841484798,
+  "75": 89170.62941501406,
+  "90": 99160.29374191488,
+  "95": 104466.16818106528,
+  "min": 51607.812037775046,
+  "max": 122583.68052878561
+ },
+ "grid_n": 729,
+ "stress_model_cost": {
+  "cost_unit": 155.2,
+  "p": 242.49999999999997,
+  "s": 1.5352767987621418
+ },
+ "tornado": {
+  "[cu] SL co_so 1,10 (2028-30) / 1,20 (2031+) (khoi NNC trong MVC r6)": -6873.80716911405,
+  "SL co_so 1,20 ca ky 2028+": -5873.61105853667,
+  "[cu] bo doi xung BCDKT (khong cong ky quy 4,57 + thue hoan lai 4,31)": -424.37062046086066,
+  "bo chi phi tre GP Tam Lap 1 khu II (CIP so sach tron)": 443.2627545982832,
+  "[cu] CIP Tam Lap chi o tot/co_so (xau/rat_xau = 0)": -997.677168699418,
+  "[cu] vach gia co_so 300 (2028-30) thay truot 360/340/320": -2740.0028066563245,
+  "stress bien cum 0,5 tu 2028": -13406.035093626793,
+  "stress bien cum 1,0 (GPM ve TB 2012-25) tu 2028": -26812.070187253594,
+  "STRESS duong gia danh nghia phang 100%": -18044.67207283911,
+  "[cu] PW them phang 10% (10/50/40)": -2498.1396169405198,
+  "K chi phi 0,87": 6704.509057309871,
+  "K chi phi 1,07": -6595.4614705397835,
+  "r 11%": 8398.742987053847,
+  "r 15%": -6970.58731757151,
+  "W 15/60/20/5": -3960.1782914831274,
+  "W 35/50/10/5": 9954.570600625171,
+  "[cu] W 20/45/25/10": -8710.12062157513,
+  "bo LN cho thue Nui Nho": -3500.422959285177,
+  "holding MVC->NNC 15% (MVC phia cau)": -642.5711281278636,
+  "MVC: han GP Tan Lap 2035": -842.2185358296701,
+  "MVC: han GP Tan Lap 2045": 670.1212965957093,
+  "MVC: mo moi hai phia co trong so (phia MVC)": -433.97807578460197,
+  "(+) may nghien 350t/h CIP 24,5 o gia von (neu la mo rong, khong thay the)": 1170.842365010234,
+  "(+) tra truoc dai han CNBP 59,2: PV khau tru phi tien mat 12,8/nam x 4,6 nam (CHUA XAC MINH ban chat)": 2145.9135715224256,
+  "STRESS bien da ve GPM 36% tren chi phi mo hinh (tran gia 242k tu 2028 moi kich ban, cum; NGOAI luoi)": -35566.235780119736
+ },
+ "vnnc_for_mvc": {
+  "NNC-DD cong bo (77.656)": {
+   "v_old": 77656,
+   "v_new": 90741.69557971695,
+   "d_nnc": 13085.69557971695,
+   "d_mvc_slope": 1264.0781930006574
+  },
+  "V_NNC nhat quan MVC r6 (83.887)": {
+   "v_old": 83887,
+   "v_new": 90741.69557971695,
+   "d_nnc": 6854.69557971695,
+   "d_mvc_slope": 662.1635930006574
+  }
+ }
+}

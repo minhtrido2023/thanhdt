@@ -1,0 +1,6 @@
+name,lat,lon,kind,dx,dy,note
+Mỏ Mũi Tàu,11.46917,106.97056,mine,0.04,0.03,huyện Đồng Phú (vi.wikipedia.org/wiki/Đồng_Phú_(huyện))
+TP.HCM,10.769444,106.681944,market,-0.3,-0.1,vi.wikipedia.org/wiki/Thành_phố_Hồ_Chí_Minh
+Đồng Nai (Biên Hòa),10.95,106.87389,market,0.06,0.0,vi.wikipedia.org/wiki/Biên_Hòa_(thành_phố)
+Tây Ninh,11.36778,106.11889,market,0.06,-0.14,vi.wikipedia.org/wiki/Tây_Ninh_(thành_phố)
+Sân bay Long Thành,10.7725,107.04528,project,0.05,-0.05,vi.wikipedia.org/wiki/Sân_bay_quốc_tế_Long_Thành

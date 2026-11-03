@@ -1,0 +1,54 @@
+P_CYC (gia chu ky, tien 2026) 270k/m3 = 380 x (1-0,533)/(1-0.341); GPM TB NNC 2012-25 0.341
+=== TAM NNC r3 (W 25/50/20/5 x PW g2031 50/real 50; r13; K 0,97; SL co_so 1,40; doi xung BCDKT; CIP so sach - tre GP): 90,742 d/cp | BASE co_so 96,433
+  g2031: tot 125,449 co_so  88,891 xau  34,551 rat_xau  21,741
+  real : tot 144,741 co_so 103,975 xau  41,608 rat_xau  23,686
+  3 kich ban NDT (25/50/25): tich_cuc 135,095 | co_so 96,433 | tieu_cuc 35,006
+[g2031] DCF_Mui_Tau_2027_43_gom_cho_thue 1,336.4 | Q4_2026 60.0 | tien_rong_sau_nghia_vu 223.6 | ky_quy_PHMT 4.6 | thue_hoan_lai 4.3 | NHC_so_sach 14.1 | CIP_TamLap_so_sach 83.5 | tre_GP_ky_vong -9.3 | co_phan_MVC_10_3pct 231.2 | TONG 1,948.5 | TONG_dcp 88,891.1
+[real] DCF_Mui_Tau_2027_43_gom_cho_thue 1,629.6 | Q4_2026 60.0 | tien_rong_sau_nghia_vu 223.6 | ky_quy_PHMT 4.6 | thue_hoan_lai 4.3 | NHC_so_sach 14.1 | CIP_TamLap_so_sach 83.5 | tre_GP_ky_vong -9.3 | co_phan_MVC_10_3pct 268.7 | TONG 2,279.1 | TONG_dcp 103,974.6
+
+=== Kiem Gordon P/B=(ROE-g)/(r-g), r13 g3, BVPS 29.915 ===
+  ROE 12%                                  P/B 0.90x ->   26,923
+  ROE TB 2021-25 (mot mo) 16.1%            P/B 1.31x ->   39,231
+  ROE 20%                                  P/B 1.70x ->   50,856
+  ROE TB 2012-25 33.8% (gom thoi 2 mo)     P/B 3.08x ->   92,286
+  ROE Q3/26 TTM 35,9% (tham chieu)         P/B 3.29x ->   98,480
+  ROE ben ham y cua TAM 90,742 (P/B 3.03x): 33.3%
+
+=== Luoi 729 bo: P5 57,689 P10 61,195 P25 68,069 P50 78,070 P75 89,171 P90 99,160 P95 104,466 Pmin 51,608 Pmax 122,584
+   stress 0.0: P10 80,208 P50 92,322 P90 107,473
+   stress 0.5: P10 68,207 P50 78,594 P90 91,388
+   stress 1.0: P10 56,001 P50 65,405 P90 75,606
+NGUONG (dang ky truoc): RE <= 61,195 | RE CO DIEU KIEN 61,195-68,069 | HOP LY 68,069-89,171 | NGHIENG DAT 89,171-99,160 | DAT >= 99,160
+
+=== Kiem ke & do nhay (so voi tam r3) ===
+  [cu] SL co_so 1,10 (2028-30) / 1,20 (2031+) (khoi NNC trong MVC r6)              83,868 ( -6,874)
+  SL co_so 1,20 ca ky 2028+                                                        84,868 ( -5,874)
+  [cu] bo doi xung BCDKT (khong cong ky quy 4,57 + thue hoan lai 4,31)             90,317 (   -424)
+  bo chi phi tre GP Tam Lap 1 khu II (CIP so sach tron)                            91,185 (   +443)
+  [cu] CIP Tam Lap chi o tot/co_so (xau/rat_xau = 0)                               89,744 (   -998)
+  [cu] vach gia co_so 300 (2028-30) thay truot 360/340/320                         88,002 ( -2,740)
+  stress bien cum 0,5 tu 2028                                                      77,336 (-13,406)
+  stress bien cum 1,0 (GPM ve TB 2012-25) tu 2028                                  63,930 (-26,812)
+  STRESS duong gia danh nghia phang 100%                                           72,697 (-18,045)
+  [cu] PW them phang 10% (10/50/40)                                                88,244 ( -2,498)
+  K chi phi 0,87                                                                   97,446 ( +6,705)
+  K chi phi 1,07                                                                   84,146 ( -6,595)
+  r 11%                                                                            99,140 ( +8,399)
+  r 15%                                                                            83,771 ( -6,971)
+  W 15/60/20/5                                                                     86,782 ( -3,960)
+  W 35/50/10/5                                                                    100,696 ( +9,955)
+  [cu] W 20/45/25/10                                                               82,032 ( -8,710)
+  bo LN cho thue Nui Nho                                                           87,241 ( -3,500)
+  holding MVC->NNC 15% (MVC phia cau)                                              90,099 (   -643)
+  MVC: han GP Tan Lap 2035                                                         89,899 (   -842)
+  MVC: han GP Tan Lap 2045                                                         91,412 (   +670)
+  MVC: mo moi hai phia co trong so (phia MVC)                                      90,308 (   -434)
+  (+) may nghien 350t/h CIP 24,5 o gia von (neu la mo rong, khong thay the)        91,913 ( +1,171)
+  (+) tra truoc dai han CNBP 59,2: PV khau tru phi tien mat 12,8/nam x 4,6 nam (CHUA XAC MINH ban chat)   92,888 ( +2,146)
+  STRESS bien da ve GPM 36% tren chi phi mo hinh (tran gia 242k tu 2028 moi kich ban, cum; NGOAI luoi)   55,175 (-35,566)
+  Tam Lap 1 khu II upside: KHONG dinh luong (chua co GP, tru luong, cong suat, capex cong bo; AWM thu cap) -> 0 o tam, chi neu dinh tinh
+
+=== V_NNC cho MVC (do doc 966 d/cp MVC moi 10.000 d/cp NNC, MVC r6) ===
+  so NNC-DD cong bo (77.656): V_NNC moi 90,742 (+13,086) -> MVC +1,264 d/cp
+  so V_NNC nhat quan MVC r6 (83.887): V_NNC moi 90,742 (+6,855) -> MVC +662 d/cp
+  (doi chieu: MVC giai dong thoi trong he r3 = 23,755 d/cp; KHONG phai so MVC moi — Mike dung lai MVC)
