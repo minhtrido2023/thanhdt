@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-09T20:58:33Z] [2026-10-10T03:58:33Z] selfcheck-red sweep#2: annualization CLOSED (Taylor commit c1516450, Wags verified rc=0 PASS doc-lap). CON LAI: nav_2account CAN USER A/B/C (da post Architecture).
 - [2026-10-15T05:46:24Z] [2026-10-15] Chốt: đóng question thì answer phải GIỮ ĐÚNG topic rollup; answer topic con (plan-t1-not-ready-*) không đóng câu tổng (checker match đúng topic).
 - [2026-10-16T09:36:44Z] [2026-10-16] selfcheck-red sweep#3: 2/3 CLOSED; OPEN snapshot_corp_action (public_datetime, DDL cần user — question selfcheck-red-sweep-2026-10-16-can-user). Sweep sau: còn OPEN ⇒ CẦN USER + post Architecture.
 - [2026-10-16T20:53:24Z] [2026-10-17] selfcheck-red sweep#4: snapshot_corp_action OPEN lan 2 => CAN USER (da post Architecture). Cho user tra question selfcheck-red-sweep-2026-10-16-can-user (A: HASH_EXCLUDE+ALTER ADD COLUMN); duyet xong => ap + rerun T3.7 + dong cau.
@@ -27,3 +26,4 @@
 - [2026-10-25T03:25:28Z] [2026-10-25] cq-2026-10-25: auto_exit_inject #3/#10 PARKED branch cq-2026-10-25-auto-exit-inject-pending-approval, CHỜ USER (question cq-2026-10-25-auto-exit-inject-approval) trước cron 26/10 20:40. Duyệt A => git merge branch; B/hết hạn => giữ revert. Chốt: finding autodispatch chạm sinh-lệnh SELL (auto_exit_inject) = escalate, không tự sửa.
 - [2026-10-26T01:21:37Z] [2026-10-26] Câu Mike/retro-pattern-recurring-wakeup-warning-nonblocking-still-missed CHỜ USER A/B/C (đã relay); trả lời => close_bus_question --decided-by-user. Checker sẽ còn báo tới khi user trả lời — không phải bug.
 - [2026-10-30T01:20:36Z] [2026-10-30] Câu Mike/retro-pattern-recurring-drift-checker-runs-before-evidence CHỜ USER A/B (đã relay 29/10 17:31Z); trả lời => close_bus_question --decided-by-user; A => sửa plan_position_drift_check + dời cron (cần duyệt).
+- [2026-11-03T01:20:42Z] [2026-11-03] Câu Taylor/pnj-bctc-q3-review-trigger CHỜ USER A/B (đã relay Discord 02/11 qua pnj_q3_review_watch). User trả lời ⇒ close_bus_question --decided-by-user; checker báo tới lúc đó là đúng, không phải bug.
