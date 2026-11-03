@@ -21,7 +21,7 @@ def ok(cond, msg):
     N_OK += 1
 
 
-def run(cmd, stub_rc=0):
+def run(cmd, stub_rc=0, job="vnindex_tr_update"):
     d = tempfile.mkdtemp(prefix="fbc_")
     sent = os.path.join(d, "sent.txt")
     stub = os.path.join(d, "stub.sh")
@@ -29,13 +29,24 @@ def run(cmd, stub_rc=0):
         f.write(f'#!/usr/bin/env bash\nprintf "%s\\n--ch=%s\\n" "$1" "$2" >> "{sent}"\nexit {stub_rc}\n')
     os.chmod(stub, 0o755)
     env = dict(os.environ, NOTIFY_CMD=stub)
-    p = subprocess.run(["bash", SH, "vnindex_tr_update", "bash", "-c", cmd], capture_output=True, text=True,
+    p = subprocess.run(["bash", SH, job, "bash", "-c", cmd], capture_output=True, text=True,
                        env=env)
     msg = open(sent).read() if os.path.exists(sent) else ""
     return p.returncode, p.stdout, p.stderr, msg
 
 
 def main() -> int:
+    # --- tiêu đề theo họ việc (§29): job cũ NGUYÊN VĂN, dcf_rstar_* không mang câu của chuỗi benchmark
+    legacy = ('🔴 **Quỹ bước 4 — nav_sleeve_ZaloPay lỗi (rc=3)** — chuỗi benchmark/bot KHÔNG được cập nhật lần này; '
+              'bảng 3.2 sẽ in "chưa có số" nếu không sửa trước báo cáo tuần. Đầu ra thật (8 dòng cuối):\n```\nboom\n```\n--ch=trading_daily\n')
+    rc, _, _, msg = run("echo boom; exit 3", job="nav_sleeve_ZaloPay")
+    ok(msg == legacy, f"job cũ: thông điệp lỗi NGUYÊN VĂN không đổi: {msg!r}")
+    for j in ("dcf_rstar_refresh", "dcf_rstar_expiry"):
+        rc, _, _, msg = run("echo boom; exit 5", job=j)
+        ok(rc == 5 and f"DCF r* — {j} lỗi (rc=5)" in msg and "boom" in msg and "--ch=trading_daily" in msg, f"{j}: tiêu đề riêng + bằng chứng: {msg!r}")
+        ok("chuỗi benchmark" not in msg and "bảng 3.2" not in msg and "Quỹ bước 4" not in msg, f"{j}: không mang câu của chuỗi benchmark (§29): {msg!r}")
+    rc, _, _, msg = run("echo ok; exit 0", job="dcf_rstar_refresh")
+    ok(rc == 0 and msg == "", f"dcf_rstar rc=0 ⇒ im lặng: {msg!r}")
     rc, out, _, msg = run("echo dựng xong; exit 0")
     ok(rc == 0 and "dựng xong" in out and msg == "", f"rc=0 ⇒ im lặng, đầu ra vẫn ra log: {rc} {msg!r}")
 
