@@ -1,5 +1,5 @@
 """Dựng biểu đồ + PDF cho báo cáo DD nhà đầu tư MVC (03/11/2026; skill dd-investor-report luật 1–19).
-Số định giá: ../r8/calc/model_r8_out.json + compare_r8_out.json (khoá md5 ../r8/calc/LOCK_md5_r8.txt 20:58:31 TRƯỚC khi so giá); chuỗi giá ngầm ../r3/calc/price_path_implied.csv. Số BCTC: BCTC HN Q3/2026, KT 2025, SX 6T/2026.
+Số định giá: ../r9/calc/model_r9_out.json + compare_r9_out.json (khoá md5 ../r9/calc/LOCK_md5_r9.txt 22:38:41 TRƯỚC khi so giá + thanh khoản); chuỗi giá ngầm ../r3/calc/price_path_implied.csv. Số BCTC: BCTC HN Q3/2026, KT 2025, SX 6T/2026.
 Chạy:  /home/trido/thanhdt/wc_venv/bin/python -I build_report.py [figs|pdf|all]   (bản đồ: make_map_inputs.py)
 Đầu vào figs/: fin_quarterly_bq.csv (tav2_bq.ticker_financial MVC; dòng 2026Q3 của BQ lặp Q2 nên thay bằng BCTC Q3), price_raw.csv (tav2_bq.ticker MVC).
 Ảnh sản phẩm: src_img/ (vlxdbd.com.vn, 03/11/2026). Mỗi hình kèm CSV dữ liệu vẽ (figs/*.csv).
@@ -16,12 +16,14 @@ FONT = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Regular
 FONT_B = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Bold.ttf"
 
 import json as _json
-R5 = _json.load(open(os.path.join(HERE, "..", "r8", "calc", "model_r8_out.json")))   # khoá md5 ../r8/calc/LOCK_md5_r8.txt TRƯỚC khi so giá
-CP7 = _json.load(open(os.path.join(HERE, "..", "r8", "calc", "compare_r8_out.json")))
+R5 = _json.load(open(os.path.join(HERE, "..", "r9", "calc", "model_r9_out.json")))   # khoá md5 ../r9/calc/LOCK_md5_r9.txt TRƯỚC khi so giá
+CP7 = _json.load(open(os.path.join(HERE, "..", "r9", "calc", "compare_r9_out.json")))
 PX = 13_300                                     # đóng cửa 03/11/2026 (02/11: 13.700, tav2_bq.ticker) — đọc SAU khoá md5
 FV_MID = round(R5["tam"])                         # giá trị kỳ vọng (W 25/50/20/5 × đường giá g2031/thực 50:50)
 Z = {q: round(v) for q, v in R5["grid_pct"].items()}   # P5/10/25/50/75/90 lưới 118.098 bộ tham số
-SAFE = Z["10"]                                    # RẺ ≤ P10 lưới (đăng ký trước, ../r8/calc/model_r8.py)
+LIQ = CP7["liq"]["5_Y1.0"]["d"]                  # chiết khấu thanh khoản vị thế 5 tỷ (đăng ký trước, ../r9/calc/model_r9.py)
+ZL = {q: round(v * (1 - LIQ)) for q, v in Z.items() if q not in ("min", "max")}
+SAFE = ZL["10"]                                   # RẺ ≤ P10 lưới SAU chiết khấu thanh khoản
 BRN = R5["branches"]; BP = R5["branch_path"]; STRESS = round(BRN["CYCLICAL"]["V_MVC"]); BOOK = 15_460
 _ST = {"Biên đỉnh bền": "STRUCTURAL", "Hành chính được gỡ": "ADMIN_GATED", "Chu kỳ dự án": "CYCLICAL"}
 SC3 = {n: (BRN[c]["w"], round(BP[f"{c}|g2031"]["V_MVC"]), round(BRN[c]["V_MVC"]), round(BP[f"{c}|real"]["V_MVC"])) for n, c in _ST.items()}
@@ -84,7 +86,7 @@ def figs():
     band = fig.add_axes([0, 0.86, 1, 0.14]); band.axis("off")
     band.add_patch(mp.Rectangle((0, 0), 1, 1, fc=NAVY, transform=band.transAxes))
     band.text(0.015, 0.5, "MVC · Đá xây dựng, gạch, BOT — Bình Dương / Đồng Phú", color="white", fontsize=10.2, fontweight="bold", va="center")
-    band.text(0.985, 0.5, "Giá 13,3k: rẻ, biên an toàn có điều kiện", color="white", fontsize=10, fontweight="bold", va="center", ha="right",
+    band.text(0.985, 0.5, "Giá 13,3k: rẻ có điều kiện sau chiết khấu thanh khoản", color="white", fontsize=10, fontweight="bold", va="center", ha="right",
               bbox=dict(boxstyle="round,pad=0.3", fc=ACCENT, ec="none"))
     a = fig.add_axes([0.0, 0.15, 0.28, 0.66]); a.axis("off"); a.set_xlim(0, 3); a.set_ylim(0, 3.2)
     a.add_patch(mp.Polygon([[0.2, 0.9], [1.0, 2.4], [1.5, 1.7], [2.1, 2.6], [2.85, 0.9]], fc="#8A98A8", ec=NAVY, lw=0.8))
@@ -108,20 +110,20 @@ def figs():
         c.spines[sp].set_visible(False)
     c.set_xticks([]); c.yaxis.tick_right(); c.tick_params(labelsize=6.4)
     c.yaxis.set_major_formatter(lambda v, p: f"{v/1e3:.0f}k")
-    c.add_patch(mp.Rectangle((0.08, Z["25"]), 0.42, Z["75"] - Z["25"], fc=GREEN, alpha=0.85, ec="none"))
-    c.text(0.53, (Z["25"] + Z["75"]) / 2, f"hợp lý {k(Z['25'])}–{k(Z['75'])}", ha="left", va="center", fontsize=5.6, color=GREEN, fontweight="bold")
+    c.add_patch(mp.Rectangle((0.08, ZL["25"]), 0.42, ZL["75"] - ZL["25"], fc=GREEN, alpha=0.85, ec="none"))
+    c.text(0.53, (ZL["25"] + ZL["75"]) / 2, f"hợp lý {k(ZL['25'])}–{k(ZL['75'])}", ha="left", va="center", fontsize=5.6, color=GREEN, fontweight="bold")
     c.add_patch(mp.Rectangle((0.08, 0), 0.42, SAFE, fc=ACCENT, alpha=0.22, ec="none"))
-    c.add_patch(mp.Rectangle((0.08, SAFE), 0.42, Z["25"] - SAFE, fc=ACCENT, alpha=0.07, ec="none"))
+    c.add_patch(mp.Rectangle((0.08, SAFE), 0.42, ZL["25"] - SAFE, fc=ACCENT, alpha=0.07, ec="none"))
     c.text(0.29, SAFE / 2, f"rẻ (dưới P10)\n≤{k(SAFE)}", ha="center", va="center", fontsize=5.6, color=ACCENT)
-    c.text(0.29, Z["90"] + 1200, f"đắt ≥{k(Z['90'])}", ha="center", va="bottom", fontsize=5.8, color="#555")
+    c.text(0.29, ZL["90"] + 1200, f"đắt ≥{k(ZL['90'])}", ha="center", va="bottom", fontsize=5.8, color="#555")
     c.axhline(PX, xmin=0.02, xmax=0.98, color=NAVY, lw=1.6)
     c.text(0.53, PX - 1200, "Giá 13,3k\n(03/11)", fontsize=6.2, color=NAVY, fontweight="bold", va="top")
     fig.text(0.70, 0.83, "3 · ĐỊNH GIÁ", fontsize=7.6, fontweight="bold", color=ACCENT)
-    fig.text(0.70, 0.81, f"tâm ≈{k(FV_MID)}; giá thấp hơn {round((1-PX/FV_MID)*100)}%;\nthấp hơn cả sổ sách {k(BOOK)}", fontsize=6.3, color="#333", va="top")
-    fig.text(0.01, 0.005, "Nguồn: BCTC hợp nhất Q3/2026, tav2_bq NP_P0 (cộng 4 quý); mô hình SOTP hữu hạn của nhóm (ước lượng; vùng đậm = P25–P75, vùng nhạt = P10–P90 của giá trị kỳ vọng "
-             "trên lưới 118.098 bộ tham số); giá đóng cửa 03/11/2026.", fontsize=5.8, color="#666", va="bottom", wrap=True)
+    fig.text(0.70, 0.81, f"tâm ≈{k(FV_MID)}, sau CK thanh khoản {k(FV_MID*(1-LIQ))};\nvùng = sau CK thanh khoản vị thế 5 tỷ", fontsize=6.3, color="#333", va="top")
+    fig.text(0.01, 0.005, "Nguồn: BCTC hợp nhất Q3/2026, tav2_bq NP_P0 (cộng 4 quý); mô hình SOTP hữu hạn của nhóm (ước lượng; vùng = P10/P25/P75/P90 của lưới 118.098 bộ tham số, "
+             "nhân (1 − chiết khấu thanh khoản 8,4% cho vị thế 5 tỷ đồng)); giá đóng cửa 03/11/2026.", fontsize=5.8, color="#666", va="bottom", wrap=True)
     fig.savefig(os.path.join(FIGS, "fig_00_hero.png"), dpi=200); plt.close(fig)
-    pd.DataFrame([*[(f"lnst_{x}", round(y, 1), "BQ NP_P0 + BCTC Q3/26") for x, y in ann.items()], ("tam", FV_MID, "model_r7_out.json"), *[(f"grid_p{q}", v, "model_r7_out.json") for q, v in Z.items()], ("gia_0311", PX, "giao dịch 03/11/2026")], columns=["chi_tieu", "gia_tri", "nguon"]).to_csv(os.path.join(FIGS, "fig_00_hero.csv"), index=False)
+    pd.DataFrame([*[(f"lnst_{x}", round(y, 1), "BQ NP_P0 + BCTC Q3/26") for x, y in ann.items()], ("tam", FV_MID, "model_r9_out.json"), *[(f"grid_p{q}", v, "model_r9_out.json") for q, v in Z.items()], ("gia_0311", PX, "giao dịch 03/11/2026")], columns=["chi_tieu", "gia_tri", "nguon"]).to_csv(os.path.join(FIGS, "fig_00_hero.csv"), index=False)
 
     # 01 KPI ----------------------------------------------------------------
     kpi = [("Doanh thu thuần 9T/26", "659,4 tỷ", "+26% YoY; Q3 221,5 tỷ", "DT"), ("LNST hợp nhất 9T/26", "231,8 tỷ", "+123% YoY; Q3 81,3 tỷ", "LN"),
@@ -188,7 +190,7 @@ def figs():
     ax.set_ylabel("đ/cp"); ax.set_ylim(0, 28_000)
     ax.set_title(f"Giá trị kỳ vọng {k(cum)}/cp: Tân Lập và cổ phần NNC là hai trụ; mỏ mới ghi theo giá vốn")
     fig.subplots_adjust(bottom=0.29, top=0.9)
-    save(fig, "fig_10_bridge", "Nguồn: mô hình SOTP của nhóm (kỳ vọng qua ba trạng thái biên, bốn kịch bản giá, hai đường giá; r 13%; 100 tr cp; sở hữu chéo giải bằng hệ phương trình). "
+    save(fig, "fig_10_bridge", "Nguồn: mô hình SOTP của nhóm (kỳ vọng qua ba trạng thái biên, bốn kịch bản giá, hai đường giá; r 13,5%; 100 tr cp; sở hữu chéo giải bằng hệ phương trình). "
          "Hai mỏ mới: 438,4 tỷ đã chi (BCTC HN Q3/2026) theo giá vốn, trừ chi phí kỳ vọng nếu giấy phép trễ 1–2 năm; phần vốn còn lại ≈1.062 tỷ đối ứng bằng giá trị tương đương. Ước lượng của nhóm.",
          pd.DataFrame([(n.replace("\n", " "), round(v * 10)) for n, v in comp] + [("tong_kb_co_so", round(cum))], columns=["thanh_phan", "dong_cp"])); plt.close(fig)
 
@@ -206,14 +208,14 @@ def figs():
     ax.xaxis.set_major_formatter(lambda v, p_: f"{v/1e3:.0f}k")
     ax.set_title("Ba trạng thái biên: trái = giá theo lạm phát từ 2031 · ◆ kỳ vọng · phải = giá thực")
     fig.subplots_adjust(left=0.2, bottom=0.2, top=0.88)
-    save(fig, "fig_11_scenarios", "Nguồn: mô hình SOTP của nhóm (r 13%). Xác suất = phân loại của người đọc ngành độc lập (cơ cấu 0,20 · hành chính 0,45 · chu kỳ 0,35); mỗi trạng thái gồm bốn kịch bản giá; giá danh nghĩa phẳng chỉ là kiểm tra chịu đựng.",
+    save(fig, "fig_11_scenarios", "Nguồn: mô hình SOTP của nhóm (r 13,5%). Xác suất = phân loại của người đọc ngành độc lập (cơ cấu 0,20 · hành chính 0,45 · chu kỳ 0,35); mỗi trạng thái gồm bốn kịch bản giá; giá danh nghĩa phẳng chỉ là kiểm tra chịu đựng.",
          pd.DataFrame([(n, *SC3[n]) for n in names], columns=["trang_thai", "xac_suat", "gia_g2031", "ky_vong", "gia_thuc"])); plt.close(fig)
 
     # 12 Độ nhạy (tornado 2 chiều) -------------------------------------------------
     T = R5["tornado"]
     tk = lambda pre: [kk for kk in T if kk.startswith(pre)][0]
     pairs = [("Xác suất trạng thái: chu kỳ 50% · biên đỉnh 40%", T["trong so nghieng CYCLICAL 15/35/50"], T["trong so nghieng STRUCTURAL 40/35/25"]),
-             ("Chiết khấu r 15% · 11%", T["r 15%"], T["r 11%"]),
+             ("Chiết khấu r 15,5% · 11,5%", T["r 15,5%"], T["r 11,5%"]),
              ("Chi phí Tân Lập +15% · −15%", T["chi phi Tan Lap +15%"], T["chi phi Tan Lap -15%"]),
              ("Hạn giấy phép Tân Lập 2035 · 2045", T["han GP Tan Lap 2035"], T["han GP Tan Lap 2045"]),
              ("Biên chu kỳ Tân Lập 25% · 30% (chưa kiểm)", T[tk("bien chu ky Tan Lap 25%")], T[tk("bien chu ky Tan Lap 30%")]),
@@ -252,14 +254,15 @@ def figs():
           ("P/E nhóm 3,7–7,1× nhân EPS TTM 2.725–3.068", PEERS["VLB"] * EPS_LO, PEERS["KSB"] * EPS_HI),
           ("SOTP: ba trạng thái biên (kỳ vọng)", min(cv), max(cv)),
           ("SOTP: lưới tham số, P10–P90", Z["10"], Z["90"]),
-          ("SOTP: vùng hợp lý (P25–P75 lưới)", Z["25"], Z["75"])]
+          ("SOTP: vùng hợp lý (P25–P75 lưới)", Z["25"], Z["75"]),
+          ("Vùng hợp lý sau CK thanh khoản 5 tỷ", ZL["25"], ZL["75"])]
     fig, ax = plt.subplots(figsize=(7.2, 2.7))
-    ax.axvspan(0, SAFE, color=ACCENT, alpha=0.14); ax.axvspan(SAFE, Z["25"], color=ACCENT, alpha=0.05); ax.axvspan(Z["90"], 36_000, color=GREY, alpha=0.12); ax.axvline(BOOK, color=GREY, lw=1, ls=":"); ax.text(BOOK + 300, -0.62, "sổ sách 15,5k", fontsize=6.0, color="#555")
+    ax.axvspan(0, SAFE, color=ACCENT, alpha=0.14); ax.axvspan(SAFE, ZL["25"], color=ACCENT, alpha=0.05); ax.axvspan(ZL["90"], 36_000, color=GREY, alpha=0.12); ax.axvline(BOOK, color=GREY, lw=1, ls=":"); ax.text(BOOK + 300, -0.62, "sổ sách 15,5k", fontsize=6.0, color="#555")
     ax.text(SAFE / 2, len(ff) - 0.65, "RẺ (<P10)", ha="center", fontsize=5.4, color=ACCENT, fontweight="bold")
-    ax.text((SAFE + Z["25"]) / 2, len(ff) - 0.65, "ĐK", ha="center", fontsize=5.4, color=ACCENT, fontweight="bold")
-    ax.text(Z["90"] + 3500, len(ff) - 0.65, "ĐẮT", ha="left", fontsize=6.6, color="#555", fontweight="bold")
+    ax.text((SAFE + ZL["25"]) / 2, len(ff) - 0.65, "ĐK", ha="center", fontsize=5.4, color=ACCENT, fontweight="bold")
+    ax.text(ZL["90"] + 3500, len(ff) - 0.65, "ĐẮT", ha="left", fontsize=6.6, color="#555", fontweight="bold")
     for i, (n, lo, hi) in enumerate(ff):
-        ax.barh(i, hi - lo, left=lo, color=GREEN if i == 4 else NAVY, alpha=1 if i == 4 else 0.7, height=0.5)
+        ax.barh(i, hi - lo, left=lo, color=GREEN if i >= 4 else NAVY, alpha=1 if i >= 4 else 0.7, height=0.5)
         ax.text(hi + 700, i, f"{k(lo)}–{k(hi)}", va="center", fontsize=6.8)
     ax.axvline(PX, color=ACCENT, lw=1.6); ax.text(PX - 400, -0.62, "giá 13,3k", color=ACCENT, ha="right", fontsize=6.8, fontweight="bold")
     ax.axvline(FV_MID, color=GREY, lw=1, ls="--"); ax.text(FV_MID + 300, len(ff) - 0.65, f"kỳ vọng {k(FV_MID)}", fontsize=6.0, color="#555")
@@ -267,7 +270,7 @@ def figs():
     ax.set_yticks(range(len(ff)), [n for n, _, _ in ff], fontsize=6.6); ax.set_xlim(0, 36_000)
     ax.xaxis.set_major_formatter(lambda v_, p_: f"{v_/1e3:.0f}k"); ax.set_title("Football field và ngưỡng nhận định (đ/cp)")
     fig.subplots_adjust(left=0.36, bottom=0.24, top=0.9)
-    save(fig, "fig_13_football_field", "Nguồn: tav2_bq.ticker (giá 03/11/2025–02/11/2026; 03/11/2026 13.300); PE TTM nhóm BQ 30/10/2026; EPS TTM theo BCTC (3.068) và ex-hoàn nhập Q4/25 (2.725, ước lượng); SOTP của nhóm. Giá chỉ để đối chiếu, không dùng để dựng mô hình.",
+    save(fig, "fig_13_football_field", "Nguồn: tav2_bq.ticker (giá 03/11/2025–02/11/2026; 03/11/2026 13.300); PE TTM nhóm BQ 30/10/2026; EPS TTM theo BCTC (3.068) và ex-hoàn nhập Q4/25 (2.725, ước lượng); SOTP của nhóm. Vùng nền RẺ/ĐK/ĐẮT = thang sau chiết khấu thanh khoản 8,4% (vị thế 5 tỷ đồng). Giá chỉ để đối chiếu, không dùng để dựng mô hình.",
          pd.DataFrame(ff, columns=["phuong_phap", "thap", "cao"]).round(0)); plt.close(fig)
 
     # 14 Đường giá đá: giá thực hiện ngầm từ biên gộp -----------------------------------

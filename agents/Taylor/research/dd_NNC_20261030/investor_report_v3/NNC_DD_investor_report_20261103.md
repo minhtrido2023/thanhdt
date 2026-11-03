@@ -129,7 +129,7 @@ Mỗi 0,5 điểm % lãi suất đổi giá trị ≈900–1.000 đ/cp (≈1,5%)
 | Kỳ vọng sau chiết khấu (hệ số 1,0) | 59.700 | 58.500 | 57.600 |
 | Nhận định ở giá 46.100 | Rẻ | Rẻ | Rẻ |
 
-Nhận định dùng quy mô 5 tỷ đồng.
+Nhận định dùng quy mô 5 tỷ đồng. Theo thanh khoản 60 phiên gần nhất (1,39 tỷ), chiết khấu 5 tỷ ≈4,5%; giá vẫn dưới P10.
 
 **Điều thị trường có thể chưa tính:** (i) ≈25.300 đ/cp là tiền, cổ phần và vốn đã chi; (ii) mỏ đối thủ hết giấy phép trước Mũi Tàu 8–10 năm; (iii) tiền thuê Núi Nhỏ. **Điều thị trường có thể đã đúng:** biên ở đỉnh, cầu dự án trọng điểm qua đỉnh 2027, cung mới 2028–30, cổ tức thấp. Ở giá này, thị trường định giá như thể biên về bình quân chu kỳ và sản lượng giảm về năm thường.
 
@@ -188,7 +188,7 @@ Kiểm toán 2025 (AASCs): chấp nhận toàn phần. Rủi ro pháp lý chỉ 
 
 **Phương pháp.** Giá trị = PV NOPAT mỏ Mũi Tàu 2027–2043 (thuế 20%, capex duy trì ≈ khấu hao, chi phí +3%/năm) + lợi nhuận gộp cho thuê Núi Nhỏ + LNST Q4/2026 ước 60 tỷ + tiền ròng sau nghĩa vụ + ký quỹ và thuế hoãn lại + Tam Lập 1 khu II theo vốn đã chi (trừ chi phí trễ giấy phép kỳ vọng 9,3 tỷ, xác suất trễ 0/1/2 năm = 0,30/0,40/0,30) + NHC sổ sách + 10,3% MVC (mô hình nội tại MVC, giải đồng thời). Từ 2028 trộn ba trạng thái biên 20/45/35 (trạng thái hành chính: năm 2028 nửa đường, từ 2029 về hẳn giá chu kỳ). Giá chu kỳ (tiền 2026) = chi phí đơn vị ở sản lượng năm thường ÷ (1 − biên chu kỳ 34,3%). Lưới 4.374 bộ: cách hồi biên của trạng thái hành chính (giữ nửa mức đỉnh vĩnh viễn / trễ một năm / hồi ngay 2028) × lãi suất 11,5/13,5/15,5% × chi phí ±10% × 3 bộ xác suất kịch bản giá × 3 tỷ trọng đường giá × 3 bộ xác suất trạng thái (20/45/35; 40/35/25; 15/35/50 — hai bộ sau là điều kiện đổi phân loại của người đọc ngành) × sản lượng năm thường 1,05 / 1,10–1,20 / 1,20–1,30 × giá chu kỳ tính ở sản lượng năm thường hoặc ở trần. Ngưỡng nhận định và phương pháp chiết khấu thanh khoản đăng ký trước khi so giá; nhận định dựa trên thang sau chiết khấu thanh khoản.
 
-**Giới hạn.** Công ty không công bố sản lượng m³ (2024–2025 lấy từ tài liệu thứ cấp), nên giá × sản lượng là suy luận. Biên 2012–2020 gồm cả mỏ Núi Nhỏ. Xác suất ba trạng thái là nhận định của người đọc ngành, không phải tần suất đo được. Trữ lượng còn lại và dữ liệu mỏ cạnh tranh là thứ cấp. Tam Lập 1 khu II chưa có giấy phép, trữ lượng, công suất công bố nên không cộng lợi nhuận tiềm năng. Khoản trả trước dài hạn 59,2 tỷ chưa rõ bản chất (nếu là tiền thuê đất đã trả: +2.100). Thời hạn cho thuê Núi Nhỏ chưa xác minh. Bản đồ định vị gần đúng.
+**Giới hạn.** Công ty không công bố sản lượng m³ (2024–2025 lấy từ tài liệu thứ cấp), nên giá × sản lượng là suy luận. Biên 2012–2020 gồm cả mỏ Núi Nhỏ. Xác suất ba trạng thái là nhận định của người đọc ngành, không phải tần suất đo được. Trữ lượng còn lại và dữ liệu mỏ cạnh tranh là thứ cấp. Tam Lập 1 khu II chưa có giấy phép, trữ lượng, công suất công bố nên không cộng lợi nhuận tiềm năng. Khoản trả trước dài hạn 59,2 tỷ chưa rõ bản chất (nếu là tiền thuê đất đã trả: +2.100). Thời hạn cho thuê Núi Nhỏ chưa xác minh. Lãi suất chiết khấu đổi cùng mức với lãi huy động là giả định. Hệ số tác động giá trong chiết khấu thanh khoản lấy từ nghiên cứu thực nghiệm, chưa hiệu chỉnh bằng lệnh thực tế trên NNC. Bản đồ định vị gần đúng.
 
 ## Phụ lục E. Quy trình độc lập
 

@@ -1,4 +1,28 @@
-# DD — MVC (CTCP Vật liệu và Xây dựng Bình Dương) · r8 · as-of 03/11/2026 · job `Taylor_20261103_134709`
+# DD — MVC · r9 · as-of 03/11/2026 · job `Taylor_20261103_152936`
+
+> NGHIÊN CỨU READ-ONLY, hồ sơ NỘI BỘ. r8 lưu `REPORT_r8_20261103.md` (thân giữ nguyên bên dưới — giả định phán đoán r8 user DUYỆT, GIỮ NGUYÊN); báo cáo NĐT r8
+> lưu `archive_internal/MVC_DD_investor_report_20261103_rev7_r8.md`. **Thứ tự chạy — trung thực:** `r9/calc/model_r9.py` không dùng giá thị trường làm đầu vào;
+> khoá md5 `r9/calc/LOCK_md5_r9.txt` 22:38:41 ICT trước so giá + thanh khoản (`compare_r9.py`). r1–r8 đã biết giá 13.300 ⇒ khoá chỉ chứng minh THỨ TỰ CHẠY.
+
+## r9 — chỉ đổi chi phí vốn + thêm thanh khoản (luật 21)
+
+- **r = 13,5%** @ lãi huy động 12T hiệu dụng 7,40% (cctg_12m 02/11/2026), β=1. Hệ thống = NNC r6 (tiêm r qua `N3.EV3`) + MVC r8 không sửa; V_NNC giải
+  đồng thời ở CÙNG r: **60.606** (NNC r6 60.702; cố định V_NNC = 60.702 ⇒ MVC 16.491, +9). Chân đối chứng r13 = 16.702 (= r8, lệch +0,3).
+- **Tâm 16.482** (r8 16.702; −220, −1,3%). Nhánh STRUCTURAL 23.267 · ADMIN 15.020 · CYCLICAL 14.485.
+- **Phản ứng theo r:** 12,0% 17.170 · 12,5% 16.931 · 13,0% 16.702 · **13,5% 16.482** · 14,0% 16.270 · 14,5% 16.066 · 15,0% 15.870.
+- **Độ nhạy huy động** β=1: −100bp 16.931 (+2,7%) · −50bp 16.702 (+1,3%) · +50bp 16.270 (−1,3%) · +100bp 16.066 (−2,5%); β=0,5: ±50bp +109/−107, ±100bp +220/−212.
+- **Lưới 118.098** (r 11,5/13,5/15,5): P10 14.331 · P25 15.229 · P50 16.493 · P75 18.027 · P90 19.587.
+- **Gordon r13,5:** trộn ROE 10,1% ⇒ 10.382; CYC 6.462; ROE hàm ý giá 12,0%, tâm 14,2%.
+- **Thanh khoản** (`../dd_NNC_20261030/r6/calc/liquidity_r6.py`, đăng ký trước): 250 phiên ADV trung vị 0,45 tỷ, TB 0,86, σ 2,51%, 0,4% phiên trắng, Amihud
+  trung vị 0,0188/tỷ; free float ≈30,2% (BCTN 2025: 4 cổ đông lớn 69,8%). Không có fill quỹ cho MVC. CK Y=1: 1 tỷ 3,7% · **5 tỷ 8,4%** · 10 tỷ 11,8%; phiên
+  thoát 10%/20%: 22/11 · 111/55 · 221/111. ADV 60 phiên 0,19 tỷ ⇒ CK 5 tỷ 12,9% (độ nhạy, nêu trong bản NĐT).
+- **So giá:** 13.300 = 0,81× tâm; lưới < giá 1,32%. Trước CK: RẺ (≤14.331). **Sau CK 5 tỷ:** tâm 15.105, P10/25/75/90 13.133/13.957/16.521/17.950 ⇒
+  **RẺ CÓ ĐIỀU KIỆN** (1 tỷ: RẺ; 10 tỷ: RẺ CÓ ĐK; Y1,5 10 tỷ: HỢP LÝ). Hoà vốn giá đá NNC 235k (Tân Lập 214k, biên 29,9%); SL trần 223k.
+- Báo cáo NĐT dựng lại `investor_report/` (cùng tên file). Sổ mức giá MVC@2026-11-03#8 (vùng SAU CK). CHƯA fundamental-skeptic r9; emailed=false.
+
+---
+
+## (thân r8 — giữ nguyên)
 
 > NGHIÊN CỨU READ-ONLY, hồ sơ NỘI BỘ. Không phải khuyến nghị. r7 lưu `REPORT_r7_20261103.md`; r6 `REPORT_r6_20261103.md` (BCTC/nguồn/kiểm kê dự án mới — vẫn là gốc);
 > báo cáo NĐT r7 lưu `archive_internal/MVC_DD_investor_report_20261103_rev6_r7.md`.
