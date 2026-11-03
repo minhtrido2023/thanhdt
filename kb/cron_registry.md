@@ -172,3 +172,9 @@ enforced_by: kb/coding_guidelines.md §11
 > - Quy tắc thêm/sửa cron (4 câu hỏi §11 + chống xung đột + buffer + ghi ở đâu) → [`cron_registry/_adding-cron-policy.md`](cron_registry/_adding-cron-policy.md)
 > - Chi tiết step `papertrade_daily.sh` (15:30) → [`cron_registry/papertrade_daily_steps.md`](cron_registry/papertrade_daily_steps.md)
 > - Log thay đổi lịch cron → [`cron_registry/CHANGELOG.md`](cron_registry/CHANGELOG.md)
+
+## dcf_rstar_refresh — ĐÃ CÀI 2026-11-03 12:38 ICT (Mike, user duyệt; backup crontab `backups/crontab_pre_dcf_rstar_20261103_1237.txt`)
+Làm mới cache r* cho dòng hiển thị DCF (display-only). Đề xuất + runbook rc=4: `kb/cron_registry_dcf_rstar_refresh.proposed`. Code WC `f3e6b9f8c`, mike `a7038237f`; arch-review vòng 2 APPROVED.
+- `23 18 2-7 * *` (01:23 ICT ngày 3–8): `fund_bench_cron.sh dcf_rstar_refresh timeout 2400 … dcf_rstar_refresh.py` dưới `flock -n`; cache đã đủ tháng ⇒ rc=0 thoát ngay; dựng thật ~9 phút/1GB RAM. Log `logs/dcf_rstar_refresh.log`.
+- `37 3 * * *` (10:37 ICT hằng ngày): `fund_bench_cron.sh dcf_rstar_expiry timeout 120 … --check-expiry`; chỉ báo Trading Daily khi cache > 38 ngày.
+- §11: (1) nguồn BQ (panel) + `bq_cache`; (2) tươi sau phiên cuối tháng đã sync (23:45 ICT); (3) không cần T same-day; (4) consumer = `converge_report` DC book (hiển thị). Cache hết hạn hiển thị 2026-12-14 nếu job lỗi liên tục; lần dựng thật đầu tiên dự kiến 2026-12-03.
