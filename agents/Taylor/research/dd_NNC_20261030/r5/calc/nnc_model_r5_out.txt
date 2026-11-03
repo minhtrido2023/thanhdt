@@ -1,0 +1,59 @@
+=== 1. TAM NNC r5 (Bobby 20/45/35; ADMIN 0,5@2028->1,0; W 25/50/20/5 x PW 50/50; r13; K 0,97): 61,666 d/cp | MVC dong thoi 16,912
+  STRUCTURAL  w 0.20: NNC   90,742 | MVC  23,755
+  ADMIN_GATED w 0.45: NNC   55,268 | MVC  15,437
+  CYCLICAL    w 0.35: NNC   53,278 | MVC  14,898
+  anh xa ADMIN perm05: tam   67,596 ( +5,930) | MVC  18,392
+  anh xa ADMIN ramp  : tam   61,666 (     +0) | MVC  16,912
+  anh xa ADMIN full  : tam   60,770 (   -896) | MVC  16,670
+
+=== 2. Bien o tran chu ky (tien 2026) ===
+  tran 249.7k, chi phi 164.2k @SL 1.181: bien duong thuc 34.3% (giu gia tri thuc) ; duong g2031 nam 2030 26.0%
+
+=== 3. Gordon P/B = (ROE-g)/(r-g), r13 g3; ROE chuan hoa nhat quan anh xa (ADMIN = CYC o nam dien hinh 2031+) ===
+  ban khoa (khong LN tai chinh)   : ROE tron 14.7% -> P/B 1.17x -> 34,913 d/cp
+  ban bo sung (+LN tai chinh)     : ROE tron 17.2% -> P/B 1.42x -> 42,504 d/cp
+  ROE ben ham y cua TAM 61,666 (P/B 2.06x): 23.6%
+
+=== 4. Luoi 4.374 bo (r4 x truc anh xa ADMIN) ===
+  N=4374: P5 50,565 P10 53,044 P25 57,944 P50 63,982 P75 70,691 P90 76,981 P95 80,944 Pmin 42,229 Pmax 98,606
+   admin=full: P10 51,354 P50 61,575 P90 73,590
+   admin=perm05: P10 57,220 P50 68,037 P90 80,784
+   admin=ramp: P10 52,232 P50 62,403 P90 74,531
+   CW=Bobby: P10 52,690 P50 62,510 P90 73,901
+   CW=nghieng STRUCT: P10 59,989 P50 70,072 P90 82,131
+   CW=nghieng CYC: P10 50,565 P50 59,821 P90 70,610
+   VR=SL 1,05: P10 52,140 P50 63,177 P90 76,274
+   VR=SL 1,10/1,20: P10 53,190 P50 64,026 P90 76,944
+   VR=SL 1,20/1,30: P10 54,041 P50 64,767 P90 77,605
+   cap=1.40: P10 51,468 P50 62,373 P90 75,388
+   cap=branch: P10 54,884 P50 65,660 P90 78,144
+NGUONG (dang ky truoc): RE <= 53,044 | RE CO DIEU KIEN 53,044-57,944 | HOP LY 57,944-70,691 | NGHIENG DAT 70,691-76,981 | DAT >= 76,981
+
+=== 5. Do nhay (so voi tam r5) ===
+  tran chu ky 242,5k (neo skeptic)                                                       59,846 ( -1,820)
+  tran chu ky SL 1,40 = 236.1k                                                           58,220 ( -3,446)
+  anh xa ADMIN 0,5 vinh vien (= r4)                                                      67,596 ( +5,930)
+  anh xa ADMIN 1,0 tu 2028 (khong tre)                                                   60,770 (   -896)
+  trong so nghieng STRUCTURAL 40/35/25                                                   68,960 ( +7,294)
+  trong so nghieng CYCLICAL 15/35/50                                                     59,594 ( -2,072)
+  chi CYCLICAL                                                                           53,278 ( -8,388)
+  chi STRUCTURAL (= tam r3)                                                              90,742 (+29,076)
+  SL nam thuong 1,05 ca ky                                                               61,990 (   +324)
+  SL nam thuong 1,20/1,30                                                                61,489 (   -177)
+  (+) upside doi thu het GP: tu 2034 stress giam mot nua                                 66,992 ( +5,326)
+  K chi phi 0,87                                                                         68,076 ( +6,410)
+  K chi phi 1,07                                                                         55,368 ( -6,298)
+  r 11%                                                                                  65,998 ( +4,332)
+  r 15%                                                                                  58,054 ( -3,612)
+  PW g2031 70/real 30                                                                    59,583 ( -2,083)
+  PW g2031 30/real 70                                                                    63,749 ( +2,083)
+  STRESS duong gia danh nghia phang 100%                                                 48,739 (-12,927)
+  bo LN cho thue Nui Nho (thoi han CHUA XAC MINH)                                        58,166 ( -3,500)
+  cho thue Nui Nho chi toi 2030 (xap xi = 61% PV dong thue)                              59,533 ( -2,133)
+  (+) tra truoc dai han CNBP 59,2 la tien thue da tra (ban chat CHUA XAC MINH)           63,812 ( +2,146)
+  bo doi xung BCDKT                                                                      61,242 (   -424)
+  holding MVC->NNC 15%                                                                   61,229 (   -437)
+
+  Cau noi: tam r4 (ADMIN 0,5 vinh vien) 67,596 -> r5 61,666
+
+=== 6. V_NNC cho MVC r8: 61,666 d/cp (MVC dong thoi 16,912) ===

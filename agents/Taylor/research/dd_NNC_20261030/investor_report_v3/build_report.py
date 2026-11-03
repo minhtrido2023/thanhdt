@@ -1,5 +1,5 @@
-"""Báo cáo DD nhà đầu tư NNC — dữ liệu đến 03/11/2026. Số định giá đọc từ ../r4/calc/model_r4_out.json + extras_r4_out.json (khoá
-../r4/calc/LOCK_md5_r4.txt 20:24:58 ICT, TRƯỚC khi so giá); so giá: ../r4/calc/compare_r4_out.txt. Hình không phụ thuộc định giá (01–10, 18–22)
+"""Báo cáo DD nhà đầu tư NNC — dữ liệu đến 03/11/2026. Số định giá đọc từ ../r5/calc/nnc_model_r5_out.json + extras_r5_out.json (khoá
+../r5/calc/LOCK_md5_r5.txt 20:49:47 ICT, TRƯỚC khi so giá); so giá: ../r5/calc/compare_r5_out.txt. Hình không phụ thuộc định giá (01–10, 18–22)
 chép nguyên từ bộ hình 31/10/2026 (cùng số BCTC Q3/2026; CSV đi kèm). Khuôn PDF/CSS/md_to_html: _base_v2.py (không sửa).
 Chạy: /home/trido/thanhdt/wc_venv/bin/python -I build_report.py [figs|pdf|all]
 """
@@ -8,15 +8,15 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import _base_v2 as B
 B.HERE = HERE; B.FIGS = os.path.join(HERE, "figs"); B.BREAK_BEFORE = ("5.",)
 FIGS = B.FIGS; NAVY, ACCENT, GREY, GREEN = B.NAVY, B.ACCENT, B.GREY, B.GREEN
-CALC = os.path.join(HERE, "..", "r4", "calc")
-O = json.load(open(os.path.join(CALC, "model_r4_out.json"))); X = json.load(open(os.path.join(CALC, "extras_r4_out.json")))
-CP = json.load(open(os.path.join(CALC, "compare_r4_out.json")))
+CALC = os.path.join(HERE, "..", "r5", "calc")
+O = json.load(open(os.path.join(CALC, "nnc_model_r5_out.json"))); X = json.load(open(os.path.join(CALC, "extras_r5_out.json")))
+CP = json.load(open(os.path.join(CALC, "compare_r5_out.json")))
 PX = 46_100                                   # đóng cửa 03/11/2026 (DNSE G1) — đọc SAU khoá md5
 TAM = round(O["tam"]); G = {k: round(v) for k, v in O["grid_pct"].items()}
 TOR = O["tornado"]; BP = X["branch_path"]
 SC = {"Biên đỉnh bền (20%)": (BP["STRUCTURAL|g2031"]["V_NNC"], BP["STRUCTURAL|real"]["V_NNC"]),
-      "Hồi biên một nửa (45%)": (BP["ADMIN_GATED|g2031"]["V_NNC"], BP["ADMIN_GATED|real"]["V_NNC"]),
-      "Về bình quân chu kỳ (35%)": (BP["CYCLICAL|g2031"]["V_NNC"], BP["CYCLICAL|real"]["V_NNC"])}
+      "Hành chính được gỡ (45%)": (BP["ADMIN_GATED|g2031"]["V_NNC"], BP["ADMIN_GATED|real"]["V_NNC"]),
+      "Chu kỳ dự án (35%)": (BP["CYCLICAL|g2031"]["V_NNC"], BP["CYCLICAL|real"]["V_NNC"])}
 BE = CP["breakeven"]["SL 1,10/1,20"]["cap"]
 GPM = {"NNC": [.35, .21, .36, .35, .37, .43, .34, .30, .37, .40, .21, .28, .32, .49, .53],
        "KSB": [.31, .34, .35, .34, .39, .36, .49, .49, .46, .45, .37, .45, .44, .41, .33],
@@ -63,9 +63,9 @@ def figs():
     c.plot([0.6, 0.88], [st1, st1], color=ACCENT, lw=1.2, ls="--"); c.text(0.74, st1 + 1200, f"biên về TB\nchu kỳ: {st1/1e3:.0f}k", ha="center", va="bottom", fontsize=5.6, color=ACCENT)
     c.axhline(PX, xmin=0.02, xmax=0.98, color=NAVY, lw=1.6); c.text(0.02, PX - 5200, "Giá 46,1k (03/11)", fontsize=6.6, color=NAVY, fontweight="bold")
     fig.text(0.70, 0.83, "3 · ĐỊNH GIÁ", fontsize=7.6, fontweight="bold", color=ACCENT)
-    fig.text(0.70, 0.81, "dưới P10 của 1.458 bộ tham số;\nđiều kiện: giá đá ≥≈228k/m³ từ 2028", fontsize=6.3, color="#333", va="top")
+    fig.text(0.70, 0.81, "dưới P10 của 4.374 bộ tham số;\nđiều kiện: giá đá ≥≈228k/m³ từ 2028", fontsize=6.3, color="#333", va="top")
     fig.text(0.01, 0.005, "Nguồn: BCTN 2025 (giấy phép, công suất); biên gộp 4 quý từ cơ sở dữ liệu tài chính (Q4 mỗi năm); mô hình DCF hữu hạn 2027–2043 + tài sản theo sổ sách "
-             "(ước lượng; vùng đậm = P25–P75, nhạt = P10–P90 của 1.458 bộ tham số); giá đóng cửa 03/11/2026.", fontsize=5.8, color="#666", va="bottom", wrap=True)
+             "(ước lượng; vùng đậm = P25–P75, nhạt = P10–P90 của 4.374 bộ tham số); giá đóng cửa 03/11/2026.", fontsize=5.8, color="#666", va="bottom", wrap=True)
     fig.savefig(os.path.join(FIGS, "fig_00_hero.png"), dpi=200); plt.close(fig)
     pd.DataFrame([("grid_p10", G["10"]), ("grid_p25", G["25"]), ("grid_p75", G["75"]), ("grid_p90", G["90"]), ("bien_ve_TB_chu_ky", round(st1)), ("ky_vong", TAM), ("gia_0311", PX)],
                  columns=["chi_tieu", "gia_tri"]).to_csv(os.path.join(FIGS, "fig_00_hero.csv"), index=False)
@@ -96,12 +96,13 @@ def figs():
            pd.DataFrame([(a, round(b[0]), round(b[1])) for a, b in SC.items()], columns=["kich_ban", "g2031", "gia_thuc"])); plt.close(fig)
 
     # 13 FOOTBALL FIELD
-    GO = O["gordon"]["by_state"]
-    rows = [("Lưới 1.458 bộ tham số (P10–P90)", G["10"], G["90"]), ("  vùng hợp lý (P25–P75)", G["25"], G["75"]),
+    GO = O["gordon"]
+    rows = [("Lưới 4.374 bộ tham số (P10–P90)", G["10"], G["90"]), ("  vùng hợp lý (P25–P75)", G["25"], G["75"]),
             ("Ba trạng thái biên (kỳ vọng)", O["branches"]["CYCLICAL"]["V_NNC"], O["branches"]["STRUCTURAL"]["V_NNC"]),
             ("Biên về bình quân chu kỳ, sản lượng năm thường", st1, st1), ("  như trên, giá chu kỳ tính ở trần sản lượng", X["cyc_cap140"], X["cyc_cap140"]),
             ("Gordon P/B, ROE chuẩn hoá 14,1–29,6%", X["gordon_fin"]["CYCLICAL"]["ps"], X["gordon_fin"]["STRUCTURAL"]["ps"]),
-            ("  Gordon, ROE trộn theo xác suất 19,5%", X["gordon_fin"]["tron"]["ps"], X["gordon_fin"]["tron"]["ps"])]
+            ("  Gordon, ROE trộn 17,2% (gồm lãi tiền gửi)", X["gordon_fin"]["tron"]["ps"], X["gordon_fin"]["tron"]["ps"]),
+            ("  Gordon, ROE trộn 14,7% (không lãi tiền gửi)", X["gordon_lock_tron"]["ps"], X["gordon_lock_tron"]["ps"])]
     fig, ax = plt.subplots(figsize=(7.2, 3.3)); fig.subplots_adjust(bottom=0.17, left=0.36, right=0.97, top=0.9)
     for i, (lab, lo, hi) in enumerate(rows):
         if hi - lo < 500: ax.plot(lo, i, "D", color=ACCENT, ms=6); ax.text(lo + 1500, i, k(lo), va="center", fontsize=7)
@@ -114,12 +115,13 @@ def figs():
 
     # 14 DO NHAY
     tk = lambda pre: [kk for kk in TOR if kk.startswith(pre)][0]
-    keep = [("trong so phan loai nghieng STRUCTURAL 40/35/25", "trong so nghieng CYCLICAL 15/35/50", "Xác suất biên đỉnh bền 40% / chu kỳ 50%"),
+    keep = [("trong so nghieng STRUCTURAL 40/35/25", "trong so nghieng CYCLICAL 15/35/50", "Xác suất biên đỉnh bền 40% / chu kỳ 50%"),
             ("K chi phi 0,87", "K chi phi 1,07", "Chi phí ±10%"), ("r 11%", "r 15%", "Lãi suất chiết khấu 11% / 15%"),
             (tk("(+) upside doi thu"), None, "Mỏ đối thủ hết giấy phép 2033–35"),
-            ("bo LN cho thue Nui Nho", None, "Không có thu nhập cho thuê Núi Nhỏ"), (tk("tran chu ky co so SL 1,40"), None, "Giá chu kỳ tính ở trần sản lượng"),
+            (tk("bo LN cho thue Nui Nho"), None, "Không có thu nhập cho thuê Núi Nhỏ"), (tk("tran chu ky SL 1,40"), None, "Giá chu kỳ tính ở trần sản lượng"),
+            ("anh xa ADMIN 0,5 vinh vien (= r4)", "anh xa ADMIN 1,0 tu 2028 (khong tre)", "Hành chính: giữ nửa đỉnh / hồi ngay 2028"),
             ("PW g2031 30/real 70", "PW g2031 70/real 30", "Giá giữ giá trị thực 70% / 30%"),
-            ("SL nam thuong 1,20/1,30", "SL nam thuong 1,05 ca ky (quan sat 2024)", "Sản lượng năm thường 1,2–1,3 / 1,05 tr m³")]
+            ("SL nam thuong 1,05 ca ky", "SL nam thuong 1,20/1,30", "Sản lượng năm thường 1,05 / 1,2–1,3 tr m³")]
     data = [(lab, TOR[a], TOR[b] if b else 0.0) for a, b, lab in keep]
     fig, ax = plt.subplots(figsize=(7.2, 3.3)); fig.subplots_adjust(bottom=0.16, left=0.42, right=0.97, top=0.9)
     for i, (lab, u, d) in enumerate(data):
