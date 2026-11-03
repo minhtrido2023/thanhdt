@@ -1,0 +1,78 @@
+=== 1. TAM MVC r8 (Bobby 20/45/35; ADMIN tre 1 nam; dinh phi Tan Lap; bien chu ky Tan Lap ~NNC; W 25/50/20/5 x PW 50/50; r13): 16,702 d/cp | V_NNC 61,567
+  Tan Lap o tran: gia 0,91 x 249.7 = 227.2k; chi phi @SL 1.181 = 150.0k (costA 145.2 x 1.033) -> bien 34.0% (NNC 34.3%)
+  STRUCTURAL  w 0.20: MVC  23,690 | NNC   90,711 | tot  35,082 co_so  24,268 xau  11,910 rat_xau   8,069
+  ADMIN_GATED w 0.45: MVC  15,191 | NNC   55,152 | tot  18,957 co_so  15,340 xau  11,891 rat_xau   8,069
+  CYCLICAL    w 0.35: MVC  14,652 | NNC   53,162 | tot  17,956 co_so  14,763 xau  11,890 rat_xau   8,069
+  Cau noi: r7_lap_lai (ADMIN 0,5 vv, khong dinh phi) 18,392 -> + ADMIN tre 1 nam (V_NNC r5) 16,912 -> + dinh phi Tan Lap chi o ADMIN/CYC (cach skeptic) 16,712 -> + dinh phi Tan Lap doi xung moi kich ban (tam r8) 16,702
+  bien chu ky Tan Lap 0.25: tam  15,565 (-1,138) | ADMIN  13,812 | CYC  13,175
+  bien chu ky Tan Lap 0.3 : tam  16,110 (  -592) | ADMIN  14,473 | CYC  13,884
+  bien chu ky Tan Lap nnc : tam  16,702 (    +0) | ADMIN  15,191 | CYC  14,652
+  anh xa ADMIN: perm05 18,182 | ramp 16,702 | full 16,460
+
+=== 2. CAU NOI KY VONG (ty; d/cp = x10) ===
+  A 487.3 | B 389.7 | BOT 93.7 | gach_xang 41.5 | dat_o 30.0 | LK_nho_ICD 99.9 | Q4 50.0 | NETFIN -116.6 | Dm 1,075.5 | stake 594.7 | VM 1,670.2
+  nhanh CYCLICAL: A 363.5 | B 389.7 | BOT 93.7 | gach_xang 41.5 | dat_o 30.0 | LK_nho_ICD 99.9 | Q4 50.0 | NETFIN -116.6 | Dm 951.7 | stake 513.5 | VM 1,465.2
+
+=== 3. Gordon nhat quan anh xa (ADMIN = CYC o nam dien hinh) + phan ra DCF-CYC vs Gordon-CYC ===
+  STRUCTURAL : ROE 20.7% ->  27,364
+  ADMIN_GATED: ROE  7.4% ->   6,785
+  CYCLICAL   : ROE  7.4% ->   6,785
+  tron       : ROE 10.1% ->  10,901
+  DCF-CYC 14,652 = 44,07% NNC 5,135 + so sach/NPV0 (mo moi, dat, LK, Q4, tai chinh rong) 4,530 + van hanh (Tan Lap+BOT+gach) 4,987 d/cp ; Gordon-CYC (ROE TB 2017-25 7.4%) 6,785 ; ROE ham y DCF-CYC 12.5%
+  ROE ben ham y cua TAM 16,702: 13.8%
+
+=== 4. Lo trinh no rong (uoc luong; lai suat GIA DINH 7%; NOPAT - lai sau thue; chua tinh KH/von luu dong) ===
+  cuoi 2026 67 | 2027 608 (lai 24) | 2028 ky vong 1,069 (STRUCTURAL 987: NOPAT 179 vs lai 56, ADMIN_GATED 1,070: NOPAT 99 vs lai 59, CYCLICAL 1,115: NOPAT 55 vs lai 60)
+  [nnc|0.07] 2028 ky vong 1,069 ; CYC 1,115 ; lai 2027+2028 82
+  [nnc|0.045] 2028 ky vong 1,045 ; CYC 1,090 ; lai 2027+2028 52
+  [0.25|0.07] 2028 ky vong 1,080 ; CYC 1,135 ; lai 2027+2028 83
+  [0.25|0.045] 2028 ky vong 1,056 ; CYC 1,110 ; lai 2027+2028 52
+  Nguong canh bao: no rong 2027 > 758 ; 2028 > 1,219 ; HOAC lai vay 4 quy > 50% LN gop da 4 quy
+
+=== 5. Luoi 118.098 bo ===
+  N=118098: P5 14,030 P10 14,486 P25 15,411 P50 16,715 P75 18,295 P90 19,913 P95 20,959 Pmin 12,020 Pmax 27,743
+   admin=full: P10 14,130 P50 16,073 P90 19,009
+   admin=perm05: P10 15,485 P50 17,783 P90 20,963
+   admin=ramp: P10 14,357 P50 16,318 P90 19,254
+   tl_m=0.25: P10 14,275 P50 16,284 P90 19,313
+   tl_m=0.3: P10 14,746 P50 16,776 P90 19,766
+   tl_m=nnc: P10 14,483 P50 17,122 P90 20,537
+   CW=0: P10 14,479 P50 16,332 P90 19,070
+   CW=1: P10 16,107 P50 18,261 P90 21,239
+   CW=2: P10 14,002 P50 15,678 P90 18,134
+   endA=2035: P10 14,162 P50 16,061 P90 18,600
+   endA=2045: P10 14,910 P50 17,390 P90 20,858
+   endA=W: P10 14,572 P50 16,820 P90 19,956
+   cap=1.40: P10 14,287 P50 16,497 P90 19,672
+   cap=branch: P10 14,710 P50 16,928 P90 20,140
+NGUONG (dang ky truoc): RE <= 14,486 | RE CO DIEU KIEN 14,486-15,411 | HOP LY 15,411-18,295 | NGHIENG DAT 18,295-19,913 | DAT >= 19,913
+
+=== 6. Do nhay (so voi tam r8) ===
+  bien chu ky Tan Lap 25% (CHUA KIEM)                                                    15,565 ( -1,138)
+  bien chu ky Tan Lap 30% (CHUA KIEM)                                                    16,110 (   -592)
+  anh xa ADMIN 0,5 vinh vien                                                             18,182 ( +1,480)
+  anh xa ADMIN 1,0 tu 2028                                                               16,460 (   -242)
+  tran chu ky SL 1,40 (236,1k)                                                           15,827 (   -875)
+  trong so nghieng STRUCTURAL 40/35/25                                                   18,456 ( +1,754)
+  trong so nghieng CYCLICAL 15/35/50                                                     16,196 (   -506)
+  chi CYCLICAL                                                                           14,652 ( -2,050)
+  chi STRUCTURAL                                                                         23,690 ( +6,988)
+  SL nam thuong 1,05                                                                     16,779 (    +76)
+  SL nam thuong 1,20/1,30                                                                16,661 (    -41)
+  (+) upside doi thu het GP tu 2034                                                      17,921 ( +1,219)
+  han GP Tan Lap 2035                                                                    15,938 (   -764)
+  han GP Tan Lap 2045                                                                    17,310 (   +608)
+  chi phi Tan Lap +15%                                                                   15,174 ( -1,528)
+  chi phi Tan Lap -15%                                                                   18,375 ( +1,673)
+  REL 0,88                                                                               16,958 (   +256)
+  REL 0,95                                                                               16,363 (   -339)
+  r 11%                                                                                  17,678 (   +976)
+  r 15%                                                                                  15,870 (   -832)
+  PW g2031 70/real 30                                                                    16,174 (   -529)
+  PW g2031 30/real 70                                                                    17,231 (   +529)
+  STRESS duong gia danh nghia phang 100%                                                 13,854 ( -2,848)
+  mo moi: hai phia co trong so (upside + NPV gia xau)                                    14,675 ( -2,027)
+  mo moi: bo rui ro tre GP                                                               17,212 (   +510)
+  holding 15%                                                                            15,774 (   -928)
+  holding 30%                                                                            14,860 ( -1,843)
+  do doc: MVC +966 d/cp moi +10.000 d/cp V_NNC

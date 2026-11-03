@@ -1686,10 +1686,10 @@
    "price_ref": 13300,
    "price_date": "2026-11-03",
    "verdict_label": "RẺ (giá dưới P10 = 15.600 của lưới 13.122 bộ; 0,1% dưới giá, min 12.854); biên an toàn CÓ ĐIỀU KIỆN: giá đá cụm (giá NNC) từ 2028 ≥~230k/m³ tiền 2026 (Tân Lập ~210k, biên ~31% < TB chu kỳ ~34%); trạng thái biên về TB chu kỳ 14.900 (+12% so giá); Gordon ROE chuẩn hoá trộn 13,0% ⇒ 15.500 (+17%); dưới BVPS 15.460; thanh khoản 0,19 tỷ/phiên",
-   "source_file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
+   "source_file": "agents/Taylor/research/dd_MVC_20261103/archive_internal/MVC_DD_investor_report_20261103_rev6_r7.md",
    "evidence": [
     {
-     "file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_MVC_20261103/archive_internal/MVC_DD_investor_report_20261103_rev6_r7.md",
      "quote": "| Kỳ vọng · trung vị lưới · vùng hợp lý (ước lượng) | **≈18.400 · ≈18.300 · 16.800–20.000 đ/cp** |",
      "fields": [
       "center",
@@ -1699,7 +1699,7 @@
      ]
     },
     {
-     "file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_MVC_20261103/archive_internal/MVC_DD_investor_report_20261103_rev6_r7.md",
      "quote": "Ở giá đóng cửa 03/11/2026 (13.300 đ), MVC dưới P10 của 13.122 bộ tham số (15.600)",
      "fields": [
       "price_ref"
@@ -1710,7 +1710,7 @@
    "expires_on": "2027-03-03",
    "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
    "null_reason": null,
-   "notes": "Tâm chính xác 18.392 = 0,20×23.755 + 0,45×18.726 + 0,35×14.898; V_NNC giải đồng thời 67.596 (= tâm NNC r4). Lưới 13.122: P10 15.597, P25 16.765, P50 18.276, P75 19.997, P90 21.723; min 12.854. Thang: RẺ ≤15.597; rẻ có ĐK –16.765; hợp lý –19.997; nghiêng đắt –21.723; đắt ≥21.723. Tham chiếu skeptic 18.305 (+0,5%). Nợ ròng lộ trình 2027 589 / 2028 997 tỷ (CYCLICAL 1.040); ngưỡng cảnh báo +150. Độ dốc 966 đ/cp MVC / 10k NNC; V_NNC = thị giá 46.100 ⇒ 16.316. Giá 13.300 = DNSE close G1. Số: dd_MVC_20261103/r7/calc/model_r7_out.txt, compare_r7_out.txt.",
+   "notes": "Tâm chính xác 18.392 = 0,20×23.755 + 0,45×18.726 + 0,35×14.898; V_NNC giải đồng thời 67.596 (= tâm NNC r4). Lưới 13.122: P10 15.597, P25 16.765, P50 18.276, P75 19.997, P90 21.723; min 12.854. Thang: RẺ ≤15.597; rẻ có ĐK –16.765; hợp lý –19.997; nghiêng đắt –21.723; đắt ≥21.723. Tham chiếu skeptic 18.305 (+0,5%). Nợ ròng lộ trình 2027 589 / 2028 997 tỷ (CYCLICAL 1.040); ngưỡng cảnh báo +150. Độ dốc 966 đ/cp MVC / 10k NNC; V_NNC = thị giá 46.100 ⇒ 16.316. Giá 13.300 = DNSE close G1. Số: dd_MVC_20261103/r7/calc/model_r7_out.txt, compare_r7_out.txt. [03/11 21:10: chỉ đổi con trỏ file nguồn sang bản lưu nội bộ vì báo cáo NĐT cùng tên được dựng lại (r8, rev 7); giá trị không đổi]",
    "recorded_at": "2026-11-03T21:15:00+07:00",
    "center_desc": "kỳ vọng trộn 3 trạng thái biên (Bobby 20/45/35) × 4 kịch bản giá × 2 đường giá; SOTP hữu hạn Tân Lập + mỏ mới sổ sách (− trễ GP) + BOT/gạch/xăng + LK/ICD sổ sách + đất sổ sách + 44,07% NNC nội tại (sở hữu chéo giải hệ) − nợ ròng; r 13%",
    "rev": 6,
@@ -1763,6 +1763,51 @@
    "center_alt_kind": "median",
    "supersedes": "NNC@2026-11-03#2",
    "correction_reason": "SKEPTIC_R4 REFUTED tâm rev2 67.600: ADMIN_GATED ánh xạ \"hồi biên một nửa vĩnh viễn\" không có cơ sở (Bobby §4: nghẽn tạm thời 6–18 tháng; sàn giá bền đã ở STRUCTURAL) ⇒ hồi trọn trễ 1 năm; thêm trục ánh xạ ADMIN vào lưới."
+  },
+  {
+   "ticker": "MVC",
+   "dd_date": "2026-11-03",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 15400,
+   "center": 16700,
+   "center_kind": "expected_weighted",
+   "zone_high": 18300,
+   "center_range": null,
+   "price_ref": 13300,
+   "price_date": "2026-11-03",
+   "verdict_label": "RẺ (giá dưới P10 = 14.500 của lưới 118.098 bộ; 0,9% dưới giá, min 12.020); biên an toàn CÓ ĐIỀU KIỆN: giá đá cụm (giá NNC) từ 2028 ≥~233k/m³ tiền 2026 (Tân Lập ~212k, biên ~29% < TB chu kỳ ~34%); biên chu kỳ Tân Lập CHƯA KIỂM (25% ⇒ tâm 15.600, nhánh CYC 13.200 ≈ giá); Gordon ROE chuẩn hoá trộn 10,1% ⇒ 10.900 (giá CAO hơn 22%); nợ ròng ≈1.070 tỷ cuối 2028; thanh khoản 0,19 tỷ/phiên",
+   "source_file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
+     "quote": "| Kỳ vọng · trung vị lưới · vùng hợp lý (ước lượng) | **≈16.700 · ≈16.700 · 15.400–18.300 đ/cp** |",
+     "fields": [
+      "center",
+      "center_alt",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md",
+     "quote": "Ở giá đóng cửa 03/11/2026 (13.300 đ), MVC dưới P10 của 118.098 bộ tham số (14.500)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "skeptic_status": "r8 sửa theo SKEPTIC_R7_20261103 (ADMIN trễ 1 năm như NNC r5; định phí Tân Lập đối xứng; trục biên chu kỳ Tân Lập 25/30/≈NNC — CHƯA KIỂM; nợ ròng trừ lãi vay); khoá md5 r8/calc/LOCK_md5_r8.txt 20:58:31 ICT trước khi so giá (r1–r7 đã biết giá ⇒ khoá chỉ chứng minh thứ tự chạy); CHƯA chạy fundamental-skeptic trên r8",
+   "expires_on": "2027-03-03",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "null_reason": null,
+   "notes": "Tâm chính xác 16.702 = 0,20×23.690 + 0,45×15.191 + 0,35×14.652; V_NNC đồng thời 61.567. Lưới 118.098: P10 14.486, P25 15.411, P50 16.715, P75 18.295, P90 19.913; min 12.020. Thang: RẺ ≤14.486; rẻ có ĐK –15.411; hợp lý –18.295; nghiêng đắt –19.913; đắt ≥19.913. Trục biên Tân Lập 25/30/≈NNC: 15.565/16.110/16.702. Hoà vốn NNC 233k (SL năm thường), 221k (SL 1,40). Nợ ròng 2027 608 / 2028 1.069 tỷ (CYC 1.115), lãi giả định 7% (hiệu dụng 9T/26 ≈4,5%); cảnh báo +150. Giá 13.300 = DNSE close G1. Số: dd_MVC_20261103/r8/calc/model_r8_out.txt, compare_r8_out.txt.",
+   "recorded_at": "2026-11-03T21:10:00+07:00",
+   "center_desc": "kỳ vọng trộn 3 trạng thái biên (Bobby 20/45/35) × 4 kịch bản giá × 2 đường giá; SOTP hữu hạn Tân Lập + mỏ mới sổ sách (− trễ GP) + BOT/gạch/xăng + LK/ICD sổ sách + đất sổ sách + 44,07% NNC nội tại (sở hữu chéo giải hệ) − nợ ròng; r 13%",
+   "rev": 7,
+   "center_alt": 16700,
+   "center_alt_kind": "median",
+   "supersedes": "MVC@2026-11-03#6",
+   "correction_reason": "SKEPTIC_R7: V_NNC r4 bị REFUTED (ADMIN) ⇒ V_NNC r5 61,7k; Tân Lập không chịu định phí (biên ở trần 36,1% > NNC); biên chu kỳ Tân Lập mượn NNC chưa kiểm; lộ trình nợ dùng NOPAT không trừ lãi."
   }
  ],
  "center_kinds": [

@@ -1,0 +1,14 @@
+Gia 13,300 = 0.80x tam 16,702 | 0.80x P50 | P/B 0.86x | luoi < gia 0.91% (min 12,020) | gia/P10 -8.2% -> RE (duoi P10)
+  tl_m=0.25: < gia 0.97%; P10 14,275
+  tl_m=0.3: < gia 0.14%; P10 14,746
+  tl_m=nnc: < gia 1.61%; P10 14,483
+  nhanh STRUCTURAL: 23,690 -> gia/gia tri 0.56x
+  nhanh ADMIN_GATED: 15,191 -> gia/gia tri 0.88x
+  nhanh CYCLICAL: 14,652 -> gia/gia tri 0.91x
+  bien Tan Lap 0.25: tam 15,565 (-15%) | CYC 13,175 (-1% so gia)
+  bien Tan Lap 0.3: tam 16,110 (-17%) | CYC 13,884 (+4% so gia)
+  bien Tan Lap nnc: tam 16,702 (-20%) | CYC 14,652 (+10% so gia)
+Gordon tron 10,901 ; CYC 6,785 ; ROE ham y gia 11.6%
+Hoa von (100% hoi bien, SL 1,10/1,20): gia da NNC 233k (tien 2026) = Tan Lap 212k -> bien Tan Lap 29.4%, bien NNC 29.6% (tran 250k)
+Hoa von (100% hoi bien, SL 1,40): gia da NNC 221k (tien 2026) = Tan Lap 201k -> bien Tan Lap 29.6%, bien NNC 29.9% (tran 236k)
+Tham chieu (khong vao tam): V_NNC = thi gia NNC 46,100 -> MVC 15,208 (-1,494)
