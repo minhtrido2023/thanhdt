@@ -4,11 +4,13 @@ lnst_2023,71.3,BQ NP_P0 + BCTC Q3/26
 lnst_2024,86.3,BQ NP_P0 + BCTC Q3/26
 lnst_2025,179.2,BQ NP_P0 + BCTC Q3/26
 lnst_TTM,306.8,BQ NP_P0 + BCTC Q3/26
-tam,25725.0,model_r5_out.json
-grid_p5,20917.0,model_r5_out.json
-grid_p10,21824.0,model_r5_out.json
-grid_p25,23622.0,model_r5_out.json
-grid_p50,25924.0,model_r5_out.json
-grid_p75,28829.0,model_r5_out.json
-grid_p90,31565.0,model_r5_out.json
+tam,23093.0,model_r6_out.json
+grid_p5,14782.0,model_r6_out.json
+grid_p10,15586.0,model_r6_out.json
+grid_p25,17345.0,model_r6_out.json
+grid_p50,19755.0,model_r6_out.json
+grid_p75,22540.0,model_r6_out.json
+grid_p90,25132.0,model_r6_out.json
+grid_pmin,12857.0,model_r6_out.json
+grid_pmax,33150.0,model_r6_out.json
 gia_0311,13300.0,giao dịch 03/11/2026

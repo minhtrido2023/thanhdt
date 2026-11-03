@@ -1,0 +1,7 @@
+LOCK 2026-11-03 17:37:37 ICT (truoc khi doc gia; r1-r5 da biet gia => khoa chi chung minh thu tu chay)
+d3fb9637389ca6d9c7472e28f4846506  valuation_base.py
+9fd64a26a7daca9b0244c3f62ce7dd91  model_r5.py
+bd93107a93a7f958eea03e1a5f01eed0  model_r6.py
+c8f7f277c1c2ed1c3c458080119c9dff  model_r6_out.txt
+0ad111625e9d82adfa853f682df6fc99  model_r6_out.json
+74f002d18ab69f04546adefc44434eae  grid_r6.csv

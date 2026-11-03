@@ -1,0 +1,69 @@
+GPM NNC chu ky TB 0.342 vs nay 0.533; gia chu ky (tien 2026) 270k/m3 NNC = 0.709x 380; MVC 245k, bien don vi Tan Lap 100k vs dinh 201k = 50% bien dinh
+=== TAM r6 (W 25/50/20/5 x PW g2031 50/real 50; r13; holding 0; mo moi so sach MOI kb; dat o so sach 30): 23,093 d/cp | BASE co_so 22,942
+  g2031: tot  32,358 co_so  21,227 xau  11,549 rat_xau   8,076
+  real : tot  37,200 co_so  24,657 xau  13,612 rat_xau   8,376
+  STRESS phang danh nghia 100%: KV 19,010 | co_so 18,645
+  STRESS bien cum ve TB chu ky tu 2028: 0,5 -> 19,858 ; 1,0 -> 16,622
+  DOI CHIEU mo moi hai phia co trong so (upside tot + NPV xau/rat xau): 22,170 (-924)
+
+=== 1. CAU NOI co_so (ty; d/cp = x10) ===
+[g2031] TanLap 798.0 | mo_moi_so_sach_sau_tre 389.7 | BOT 93.7 | gach_xang 41.5 | dat_o_so_sach 30.0 | LK_nho_ICD 99.9 | Q4 50.0 | no_rong -116.6 | TRUC_TIEP 1,386.2 | phan_NNC 736.5 | TONG 2,122.7 | TONG_dcp 21,227.4 | V_NNC_dcp 76,249.5
+[real] TanLap 1,016.3 | mo_moi_so_sach_sau_tre 389.7 | BOT 93.7 | gach_xang 41.5 | dat_o_so_sach 30.0 | LK_nho_ICD 99.9 | Q4 50.0 | no_rong -116.6 | TRUC_TIEP 1,604.5 | phan_NNC 861.2 | TONG 2,465.7 | TONG_dcp 24,657.1 | V_NNC_dcp 89,158.7
+  V_NNC nhat quan (ky vong): 83,887 d/cp NNC
+
+=== 2. Mo moi: NPV toan du an (gom 438,4 da chi) & IRR (khong vao tam) ===
+  tot     flat : IRR  13.3% | NPV r11     169 r13      19 r15    -106
+  tot     g2031: IRR  17.1% | NPV r11     562 r13     338 r15     156
+  tot     real : IRR  21.1% | NPV r11     994 r13     712 r15     482
+  co_so   flat : IRR   1.5% | NPV r11    -530 r13    -590 r15    -639
+  co_so   g2031: IRR   8.0% | NPV r11    -230 r13    -346 r15    -440
+  co_so   real : IRR  12.3% | NPV r11     105 r13     -55 r15    -185
+  xau     flat : IRR   nan% | NPV r11   -1129 r13   -1119 r15   -1111
+  xau     g2031: IRR  -3.1% | NPV r11    -890 r13    -925 r15    -952
+  xau     real : IRR   2.2% | NPV r11    -630 r13    -700 r15    -755
+  rat_xau flat : IRR   nan% | NPV r11   -1464 r13   -1412 r15   -1369
+  rat_xau g2031: IRR -17.5% | NPV r11   -1242 r13   -1233 r15   -1223
+  rat_xau real : IRR  -6.3% | NPV r11   -1024 r13   -1044 r15   -1057
+
+=== 3. Kiem Gordon P/B = (ROE-g)/(r-g), r13 g3, BVPS 15.460 ===
+  ROE 9%                           P/B 0.60x ->   9,276
+  ROE 12%                          P/B 0.90x ->  13,914
+  ROE 13,5%                        P/B 1.05x ->  16,233
+  ROE TB 2017-25 7.4%              P/B 0.44x ->   6,785
+  ROE hien tai 18,5% (tham chieu)  P/B 1.55x ->  23,963
+  ROE ben ham y cua TAM 23,093 (P/B 1.49x): 17.9%
+
+=== 4. Luoi 2187 bo: P5 14,782 P10 15,586 P25 17,345 P50 19,755 P75 22,540 P90 25,132 Pmin 12,857 Pmax 33,150
+   stress 0.0: P10 19,786 P50 23,207 P90 27,559
+   stress 0.5: P10 17,188 P50 19,897 P90 23,419
+   stress 1.0: P10 14,447 P50 16,634 P90 19,431
+NGUONG (dang ky truoc): RE <= 15,586 | RE CO DIEU KIEN 15,586-17,345 | HOP LY 17,345-22,540 | NGHIENG DAT 22,540-25,132 | DAT >= 25,132
+
+=== 5. Do nhay / kich ban co nhan (so voi tam r6) ===
+  OPTION dat o theo ky vong r5 (400/100/0/0, khong co IRR/chu truong)        24,350 ( +1,257)
+  dat o so sach 23,5                                                         23,025 (    -68)
+  mo moi: + upside kich ban tot (IRR 17-21%)                                 24,468 ( +1,375)
+  mo moi: + NPV gia xau/rat xau (khong quyen dung)                           20,795 ( -2,299)
+  mo moi: hai phia co trong so                                               22,170 (   -924)
+  mo moi: bo rui ro tre GP                                                   23,603 (   +510)
+  holding 15% (NNC co tuc ve tien 15%, quy DTPT 87->353)                     21,829 ( -1,264)
+  holding 30%                                                                20,583 ( -2,511)
+  vach gia co_so 300 (2028-30) thay truot                                    22,435 (   -658)
+  stress bien cum 0,5 tu 2028                                                19,858 ( -3,236)
+  stress bien cum 1,0 (TB chu ky) tu 2028                                    16,622 ( -6,471)
+  han GP Tan Lap 2035 moi muc                                                21,301 ( -1,792)
+  han GP Tan Lap 2045 moi muc                                                24,519 ( +1,426)
+  NNC SL co_so 1,20 (2028-30)                                                23,190 (    +97)
+  NNC SL co_so 1,30 ca ky (2028+)                                            23,473 (   +380)
+  Tan Lap SL co_so 1,10 (2028-30) — cat doi xung cum                         22,790 (   -303)
+  chi phi Tan Lap +15%                                                       21,404 ( -1,689)
+  chi phi Tan Lap -15%                                                       24,828 ( +1,735)
+  r 11%                                                                      24,903 ( +1,810)
+  r 15%                                                                      21,566 ( -1,527)
+  PW g2031 70/real 30                                                        22,423 (   -671)
+  PW g2031 30/real 70                                                        23,764 (   +671)
+  V_NNC co dinh 77.656 (NNC-DD cong bo)                                      22,491 (   -602)
+  do doc: MVC +966 d/cp moi +10.000 d/cp V_NNC (V_NNC co dinh)
+
+=== 6. Lo trinh no rong base (uoc luong, chua tinh khau hao/von luu dong; mo moi chua co dong tien 2028): cuoi 2026 67 | 2027 589 | 2028 924 ty ; CFO hoat dong uoc 2027 204, 2028 179
+  Nguong canh bao: no rong vuot lo trinh base > 150 ty (2027 > 739; 2028 > 1,074)

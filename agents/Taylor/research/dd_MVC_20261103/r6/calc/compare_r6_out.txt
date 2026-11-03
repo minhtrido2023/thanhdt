@@ -1,0 +1,8 @@
+Gia 13,300 = 0.58x tam 23,093 | 0.58x base | 0.67x trung vi luoi | P/B 0.86x | luoi < gia 0.3% (min 12,857)
+Vung: RE (duoi P10)
+ROE ben ham y cua GIA (Gordon r13 g3): 11.6% | ROE TB 2017-25 MVC 7.4%
+Tam = gia khi stress s=1.54: bien don vi da cum dai han = 37% bien dinh 2026 (base dai han 73%; TB chu ky 50%)
+  stress 1.0: tam 16,622 ; bien dai han 50% bien dinh
+  stress 1.5: tam 13,505 ; bien dai han 38% bien dinh
+  stress 2.0: tam 11,948 ; bien dai han 27% bien dinh
+V_NNC co dinh 48.000 (tham chieu SKEPTIC4 #9, gia thi truong NNC theo skeptic — Taylor KHONG truy van): MVC 19,627

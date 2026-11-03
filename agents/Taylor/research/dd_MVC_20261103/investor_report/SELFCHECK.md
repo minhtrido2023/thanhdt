@@ -16,3 +16,11 @@
 - Email dry-run --html-out: to=dtienthanh@gmail.com, 16 ảnh, 8,6MB, mọi <img có alt; KHÔNG gửi thật.
 - Đọc mắt PDF trang 1, 6, 9 (70 dpi): dấu tiếng Việt đúng; bảng không tràn. Hình 00/10/11/12/13/14 dựng lại; 09 bỏ cột mua NNC (chưa có giá).
 - Sổ mức giá kb/dd_price_zones.json MVC rev 4 (zone 23.600–28.800, tâm 25.700, center_alt cơ sở 24.200, giá 13.300 03/11); rev 3 chỉ đổi con trỏ sang archive_internal/..._rev3.md; dd_price_zones_selfcheck.py lỗi 0.
+## r6 (job Taylor_20261103_103341) — sửa đối xứng sau SKEPTIC4
+- PDF 11 trang md5 f69eef686484512d051f526fd70ea6a5; md md5 e69a9f0824e0fc49d9e401ae6945a706. Dựng: venv python -I build_report.py all/pdf; banner make_title_banner.py (tiêu đề = dòng 1 md). Hình đọc ../r6/calc/model_r6_out.json (khoá ../r6/calc/LOCK_md5_r6.txt 17:37:37, md5sum -c 6/6 OK).
+- Số khớp REPORT.md r6: tâm 23.093 (≈23.100); P50 19.755 (≈19.800); lưới P10/25/75/90 15.586/17.345/22.540/25.132 (hiển thị 15.600/17.300/22.500/25.100); cơ sở 22.942; stress biên 16.622; phẳng 19.010; hai phía mỏ mới 22.170; kịch bản (g2031·thực) 32.358·37.200 / 21.227·24.657 / 10.854·12.565.
+- Thân trước Phụ lục bỏ bảng/hình (cách đếm python split): 1.966 từ; bản r5 cùng cách đếm 1.969 (r5 báo 1.814 theo cách đếm khác) ⇒ tương đương ≈1.810.
+- grep luật 18 + tên nội bộ trên md / html (bỏ base64) / subject: 0·0·0. Không còn: chi phí vốn hỗn hợp 5,98%/4,6%, "thị trường chưa tính 23,5 ha", ngưỡng nợ ròng 600 tỷ tuyệt đối, "biên an toàn" trơn.
+- Email dry-run --html-out: to=dtienthanh@gmail.com, 16 ảnh, 8,6MB, mọi <img có alt; KHÔNG gửi thật.
+- Đọc mắt PDF trang 1, 7, 9 (70 dpi): sửa nhãn hero "rẻ, biên an toàn có điều kiện"; tornado mở trục −10.500; nhãn stress hình 11 bị đẩy ra ngoài khung (đường vẫn hiện) — tồn.
+- Sổ mức giá kb/dd_price_zones.json MVC rev 5 (zone 17.300–22.500, tâm 23.100, center_alt trung vị 19.800); rev 4 chỉ đổi con trỏ sang archive_internal/..._rev4_r5.md; selfcheck lỗi 0.
