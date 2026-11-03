@@ -27,3 +27,6 @@
 - [2026-11-03T09:35:12Z] ĐANG DỞ: DD MVC vòng3 job Taylor_20261103_093502 — research/dd_MVC_20261103/r3/ MÙ GIÁ | NEXT: đọc SKEPTIC2, dựng bridge+đường giá
 - [2026-11-03T09:51:05Z] [dd-MVC r3 03/11] XONG job Taylor_20261103_093502 commit 995ed3a54: tam 20.181, hop ly 17.5-22.9k, re ro <=15.3k; CHUA gui email, chua skeptic v3 tren r3
 - [2026-11-03T10:03:06Z] [dd-MVC r4 03/11] XONG job Taylor_20261103_095718 commit 5eacb12e0: thang co dieu kien, than 1811 tu; CHUA gui email, cho user bao 'gui email'
+- [2026-11-03T10:07:27Z] ĐANG DỞ: DD MVC r5 job Taylor_20261103_100718 — research/dd_MVC_20261103/r5/ đổi nguyên tắc base=sổ sách | NEXT: kiểm kê giảm trừ r4
+- [2026-11-03T10:16:03Z] ĐANG DỞ DD MVC r5 job Taylor_20261103_100718: r5/calc khoa (tam 25.725, luoi P10 21.824) | NEXT: build_report.py doc r5 json, viet lai md NDT, REPORT.md, zones, bus
+- [2026-11-03T10:24:14Z] [dd-MVC r5 03/11] XONG job Taylor_20261103_100718 commit fda8c27a0: tam 25.725, re co bien an toan <=21.800; CHUA skeptic r5, CHUA gui email; NNC CIP +952 cho user quyet dung lai
