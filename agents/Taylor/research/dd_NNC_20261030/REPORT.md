@@ -343,3 +343,13 @@ Nhóm đá niêm yết giao dịch PE ~4–7x LN hiện tại — cả ngành đ
 Không dùng giá thị trường MVC/NNC bên trong định giá NNC: V_NNC = N_ex + 0,103·V_MVC, V_MVC giải từ mô hình MVC r3 (mù giá, khoá md5 `r3/calc/LOCK_md5_r3.txt`).
 Kỳ vọng (W 25/50/20/5): phẳng **62.220** · g2031 **73.337** · thực **86.914** đ/cp NNC; tâm theo trọng số đường giá r3 (phẳng 10 / g2031 50 / thực 40) = **77.656**.
 (Phẳng là STRESS — 2012–2025 không mã đá ĐNB nào đi theo đường giá danh nghĩa phẳng: `r3/calc/price_path_out.txt`.) Thay cho cặp 59.307/79.498 của v2 (v2 định giá cổ phần MVC theo thị giá — sai D1).
+
+## Ghi chú nội bộ 03/11/2026 (job `Taylor_20261103_100718`, DD MVC r5) — rà lỗi "dự án mới bị giảm trừ ở base" theo nguyên tắc user 03/11 17:06
+KHÔNG dựng lại/gửi PDF NNC — chờ user quyết. Số: `../dd_MVC_20261103/r5/calc/model_r5_out.txt` mục 5, `nnc_glide_out.txt`.
+| Khoản | Trong mô hình NNC (calc/valuation_v2.py) | Đúng nguyên tắc? | Hiệu ứng |
+|---|---|---|---|
+| CIP Tam Lập 1 khu II 83,5 tỷ (QSDĐ 79,48 + đặt trước tiền CQ 4,03) | Chỉ cộng ở tốt/cơ sở; xấu/rất xấu = 0 | **SAI** — dự án mở rộng bị gạch ở 25% trọng số không có cơ sở độc lập; phải ở giá vốn mọi kịch bản | **+952 đ/cp NNC** (khung NNC-DD, không vòng chéo: 0,25 × 83,5 tỷ / 21,92 tr cp); trong mô hình MVC r5 (vòng chéo) +998 đ/cp NNC, **+96 đ/cp MVC** |
+| Vách giá cơ sở 380→300 (2028–30) | Nhãn "giả định nhóm/FPTS, cung mới" (đã sửa nhãn 03/11) | Không có dữ liệu cung cụ thể ⇒ chỉ là độ nhạy; mốc 320 từ 2031 có cơ sở GPM | MVC r5 dùng trượt 360/340/320: tâm NNC nhất quán **85.124 vs 82.924** nếu giữ vách (**+2.200 đ/cp NNC**); trong MVC +658 đ/cp |
+| Vách sản lượng NNC 1,40→1,10 (2028–30) | FPTS base 0,8 tr m³ từ 2028 | CHƯA RÀ — cần xác định lý do (giới hạn GP/trữ lượng mỏ NNC = có cơ sở; "cung mới" = không) | MVC r5 giữ nguyên; chưa đo |
+| Chiết khấu holding/hệ số khác | Không áp ở NNC | — | — |
+Tâm NNC nhất quán theo đầu vào MVC r5 (W 25/50/20/5 × g2031/thực 50:50, r13, CIP mọi kịch bản, trượt giá): **85.124 đ/cp** (r3: 77.656) — chỉ là đầu vào vòng chéo cho MVC, KHÔNG thay số công bố của NNC-DD cho tới khi user quyết dựng lại.

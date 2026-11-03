@@ -1,0 +1,7 @@
+LOCK 2026-11-03 17:15:01 ICT
+d3fb9637389ca6d9c7472e28f4846506  valuation_base.py
+9fd64a26a7daca9b0244c3f62ce7dd91  model_r5.py
+ab3a0f3376d5b82ac35992c3868f78ea  model_r5_out.txt
+a45c97d60e81aafc29b5cc67f2c21d15  model_r5_out.json
+9b3145ec2709675bbc1eb468c9d0f945  grid_r5.csv
+5afcd88dad860df80a81924ff675f416  inventory_r5.md

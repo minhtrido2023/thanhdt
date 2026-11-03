@@ -1,0 +1,13 @@
+02/11 gia 13,700: = 0.53x tam 25,725 | 0.57x base co_so | 0.67x stress phang | ty le luoi < gia 0.0% | P/B 0.89x
+03/11 gia 13,300: = 0.52x tam 25,725 | 0.55x base co_so | 0.65x stress phang | ty le luoi < gia 0.0% | P/B 0.86x
+  r 15%: 23,659
+  r 18%: 21,222
+  r 20%: 19,997
+  r 22%: 19,003
+  r 25%: 17,852
+  W tot 0%/co_so 50/xau 45%/rat 5, PW phang 100%: 14,266
+  W tot 5%/co_so 50/xau 40%/rat 5, PW phang 100%: 15,449
+  W tot 10%/co_so 50/xau 35%/rat 5, PW phang 100%: 16,646
+  100% rat_xau x phang: 6,516
+  100% xau x g2031: 10,218
+  holding 30% + r 15% + W 15/60/20/5 + PW g2031 70: 18,987

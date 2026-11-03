@@ -1,0 +1,5 @@
+4 moc tieu cuc (W15/60, capex+30%, GP TL 2035, PW 70/30, tre giu) 20,894
+4 moc tieu cuc + holding 30%                                 18,618
+4 moc tieu cuc + holding 30% + mo moi DCF r13 moi kb         15,052
+4 moc tich cuc (W35/50/10, capex-30%, GP TL 2045, PW 30/70, khong tre) 33,332
+rat_xau 100% x g2031 (khong phang)                           6,516

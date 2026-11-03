@@ -9,3 +9,10 @@
 - Sổ mức giá: kb/dd_price_zones.json MVC rev 2 (zone 17.500–22.900, tâm 20.200, center_alt cơ sở 14.600); rev 1 chỉ đổi con trỏ nguồn sang archive_internal/ (bản gốc git 3f0e3dc2f); dd_price_zones_selfcheck.py: lỗi 0.
 
 - Thân (không bảng/hình/phụ lục): 1.811 từ (cũ 2.211; mục tiêu ≈1.800). grep luật 18 + tên nội bộ + 'rẻ rõ' trên md/html/subject: 0 dòng. Email dry-run --html-out: 16 ảnh, mọi <img có alt; KHÔNG gửi thật. Đọc mắt trang 1 và trang 10 (ngưỡng) OK.
+## r5 (job Taylor_20261103_100718) — đổi nguyên tắc: dự án mới = giá vốn ở base
+- PDF 10 trang md5 30e9b5e3a83f00f9995408a4bef4bbb3; md md5 dc28037bb8651d5a94cbe7248093b255. Dựng: venv python -I build_report.py all; banner make_title_banner.py (tiêu đề = dòng 1 md). Hình đọc ../r5/calc/model_r5_out.json (khoá ../r5/calc/LOCK_md5_r5.txt 17:15:01, md5sum -c 6/6 OK).
+- Số khớp REPORT.md r5: tâm 25.725 (≈25.700); lưới P10/25/75/90 21.824/23.622/28.829/31.565 (hiển thị 21.800/23.600/28.800/31.600); cơ sở 24.199; stress 20.316; kịch bản (g2031·thực) 37.155·45.916 / 22.484·25.914 / 12.112·13.822.
+- Thân (không bảng/hình/phụ lục) 1.814 từ. grep luật 18 + tên nội bộ + 'rẻ rõ' trên md / html (bỏ base64) / subject: 0·0·0. Không còn câu "đầu tư mới ⇒ giảm giá trị" (luật 20); mua NNC 51% bỏ con số dựa giá thị trường.
+- Email dry-run --html-out: to=dtienthanh@gmail.com, 16 ảnh, 8,6MB, mọi <img có alt; KHÔNG gửi thật.
+- Đọc mắt PDF trang 1, 6, 9 (70 dpi): dấu tiếng Việt đúng; bảng không tràn. Hình 00/10/11/12/13/14 dựng lại; 09 bỏ cột mua NNC (chưa có giá).
+- Sổ mức giá kb/dd_price_zones.json MVC rev 4 (zone 23.600–28.800, tâm 25.700, center_alt cơ sở 24.200, giá 13.300 03/11); rev 3 chỉ đổi con trỏ sang archive_internal/..._rev3.md; dd_price_zones_selfcheck.py lỗi 0.

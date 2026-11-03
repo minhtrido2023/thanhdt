@@ -1,0 +1,10 @@
+lai vay thuc te ~4.55%/nam; chi phi von hon hop (25% Ke13 + 75% vay sau thue) ~5.98%
+  co_so  g2031 NPV@6.0%     208 | @13%    -346
+  co_so  real  NPV@6.0%     705 | @13%     -55
+  co_so  flat  NPV@6.0%    -315 | @13%    -590
+  tot    g2031 NPV@6.0%    1396 | @13%     338
+  tot    real  NPV@6.0%    2039 | @13%     712
+  tot    flat  NPV@6.0%     709 | @13%      19
+  xau    g2031 NPV@6.0%    -742 | @13%    -925
+  xau    real  NPV@6.0%    -356 | @13%    -700
+  xau    flat  NPV@6.0%   -1162 | @13%   -1119

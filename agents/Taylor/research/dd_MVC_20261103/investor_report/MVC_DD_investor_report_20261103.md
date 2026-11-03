@@ -1,33 +1,34 @@
-# MVC: giá trị kỳ vọng ≈20.200 đ/cp, vùng hợp lý 17.500–22.900; giá 13.700 ở vùng rẻ có điều kiện (biên an toàn ≤13.000), cần kịch bản tốt ≥10% và vốn hai mỏ mới ≤1.500 tỷ
+# MVC: giá trị kỳ vọng ≈25.700 đ/cp, kể cả khi giá đá đi ngang vẫn ≈20.300; giá 13.300 thấp hơn vốn chủ sở hữu/cp, rẻ có biên an toàn, đổi lại thanh khoản mỏng và vay ngắn hạn tài trợ hai mỏ mới
 
 **Báo cáo Due Diligence · 03/11/2026 · Nhóm nghiên cứu** · Sàn UPCOM · Khai thác đá xây dựng, gạch, thu phí BOT ĐT743; sở hữu 44,07% CTCP Đá Núi Nhỏ (NNC)
 
 ![MVC: ngành nghề, tăng trưởng và định giá](figs/fig_00_hero.png)
 
-**Kết luận: giá trị kỳ vọng ≈20.200 đ/cp (ước lượng); vùng hợp lý 17.500–22.900. Ở giá đóng cửa 02/11/2026 (13.700 đ), MVC thấp hơn vùng hợp lý và nằm trong vùng RẺ CÓ ĐIỀU KIỆN (13.000–17.500), chưa phải RẺ CÓ BIÊN AN TOÀN (≤13.000); đắt từ 25.400.** Đòn bẩy lớn nhất là xác suất kịch bản giá đá tốt: giá 13.700 hàm ý chỉ ≈8% so với 25% mô hình giả định, mà 48% giá trị kỳ vọng đến từ kịch bản tốt. Nhãn "rẻ có điều kiện" đứng vững khi (1) xác suất kịch bản tốt ≥ ≈10% và (2) vốn hai mỏ mới ≤1.500 tỷ, cụm công nghiệp (tới 500 tỷ, ĐHĐCĐ đã duyệt, chưa có NPV) có NPV ≈ 0. Rủi ro: 37% kết cục (theo kịch bản có trọng số) cho giá trị thấp hơn 13.700.
+**Kết luận: giá trị kỳ vọng ≈25.700 đ/cp (ước lượng); vùng hợp lý 23.600–28.800. Ở giá đóng cửa 03/11/2026 (13.300 đ; 02/11: 13.700), MVC thấp hơn tâm 48%, thấp hơn vốn chủ sở hữu/cp (15.460) và nằm trong vùng RẺ CÓ BIÊN AN TOÀN (≤21.800); đắt từ 31.600.** Giá trị dựa trên hai tài sản đang sinh tiền: mỏ Tân Lập và 44% NNC. Hai mỏ mới chỉ được ghi theo số vốn đã chi (438 tỷ), chưa cộng lợi nhuận kỳ vọng ở kịch bản cơ sở. Nếu giá đá danh nghĩa đi ngang vĩnh viễn, giá trị kỳ vọng vẫn ≈20.300. Rủi ro chính nằm ở việc hiện thực hoá giá trị: thanh khoản ≈0,19 tỷ đ/phiên, vay ngắn hạn tài trợ tài sản dài hạn, giấy phép hai mỏ mới chưa cấp, quản trị gắn với nhóm Thanh Lễ.
 
 | Dữ liệu chính | Giá trị | Ghi chú |
 |---|---|---|
-| Tâm · vùng hợp lý (ước lượng) | **≈20.200 · 17.500–22.900 đ/cp** | Tâm = giá trị kỳ vọng; vùng = P25–P75 của 243 bộ tham số |
-| Ngưỡng nhận định | Rẻ có biên an toàn ≤13.000 · rẻ có điều kiện 13.000–17.500 · đắt ≥25.400 | ≤13.000: P10 của 2.187 bộ tham số (14.300) trừ cụm công nghiệp 500 tỷ thu hồi 70%; đắt = P90 của 243 bộ |
-| Ba kịch bản (25/50/25) | 29.700–44.700 · 9.800–20.200 · 7.700–10.100 | Tích cực · cơ sở · tiêu cực (giá đá danh nghĩa phẳng → giữ giá trị thực) |
+| Tâm · vùng hợp lý (ước lượng) | **≈25.700 · 23.600–28.800 đ/cp** | Tâm = giá trị kỳ vọng; vùng = P25–P75 của 729 bộ tham số |
+| Ngưỡng nhận định | Rẻ có biên an toàn ≤21.800 · rẻ có điều kiện 21.800–23.600 · đắt ≥31.600 | P10 · P25 · P90 của lưới tham số |
+| Ba kịch bản (25/50/25) | 37.200–45.900 · 22.500–25.900 · 12.100–13.800 | Tích cực · cơ sở · tiêu cực (giá về bình quân lịch sử → giữ giá trị thực) |
+| Kiểm tra chịu đựng | ≈20.300 | Giá đá danh nghĩa đi ngang vĩnh viễn |
 | LNST hợp nhất 9T/2026 | 231,8 tỷ (+123%) | Q3: 81,3 tỷ (+128%); ≈70% từ hoạt động trực tiếp, ≈30% từ liên kết |
-| P/E · P/B tại 13.700 | 4,5× · 0,89× | P/E 4,9–5,0× nếu loại khoản hoàn nhập dự phòng Q4/2025 (ước lượng) |
-| Nợ ròng 30/9/2026 | 116,6 tỷ; tiền ròng 315 tỷ nếu không tính 432 tỷ đất mỏ mới đã chi | Còn cam kết ≈1,75 nghìn tỷ (mục 4) |
+| P/E · P/B tại 13.300 | 4,3× · 0,86× | P/E ≈4,9× nếu loại khoản hoàn nhập dự phòng Q4/2025 (ước lượng) |
+| Nợ ròng 30/9/2026 | 116,6 tỷ | Đối ứng 438 tỷ đã chi cho hai mỏ mới (tài sản dở dang) |
 | Thanh khoản | ADV trung vị ≈0,19 tỷ đ/phiên | 60 phiên; free float ước ≈26% |
 
 
 
 ## 1. Tóm tắt điều hành
 
-**Một doanh nghiệp đá hưởng giá cao ở đỉnh chu kỳ hạ tầng phía Nam, đang nhân đôi quy mô khai thác bằng vốn vay.**
+**Một doanh nghiệp đá hưởng giá cao ở đỉnh chu kỳ hạ tầng phía Nam, đang mở rộng gấp đôi công suất khai thác bằng vốn vay.**
 
 ![Khung KPI 9 tháng 2026](figs/fig_01_kpi.png)
 
-- **Câu hỏi.** Giá đá sẽ đi đâu sau 2028, khi cung mới (gồm của chính MVC) vào, và hai mỏ mới cộng hay trừ giá trị? MVC không sống bằng liên kết: 70% lợi nhuận 9T/2026 đến từ hoạt động trực tiếp, chủ yếu mỏ Tân Lập.
-- **Trả lời.** Tâm ≈20.200 đ/cp; vùng hợp lý 17.500–22.900. Chỉ khi giá đá danh nghĩa đi ngang vĩnh viễn (kịch bản kiểm tra chịu đựng) thì giá trị kịch bản cơ sở mới xuống ≈9.800.
+- **Câu hỏi.** Giá đá sau 2028 đi đâu, và giá cổ phiếu đang phản ánh bao nhiêu phần giá trị các tài sản đang sinh lời? 70% lợi nhuận 9T/2026 đến từ hoạt động trực tiếp, chủ yếu mỏ Tân Lập.
+- **Trả lời.** Tâm ≈25.700; kịch bản cơ sở ≈24.200 = Tân Lập 9.100 + cổ phần NNC 8.000 + hai mỏ mới theo vốn đã chi 3.900 + mảng khác 4.400 − nợ ròng 1.200 (đ/cp). Giá 13.300 thấp hơn riêng phần Tân Lập cộng NNC.
 
-**Điều đổi nhận định:** bốn mốc ở mục 8 (cả bốn tiêu cực: tâm ≈13.900, khi đó 13.700 không còn rẻ; cả bốn tích cực: tâm ≈28.000), cộng nợ ròng >600 tỷ hoặc tổng đầu tư mỏ mới >1.950 tỷ.
+**Điều đổi nhận định:** cả bốn mốc ở mục 8 cùng tiêu cực đưa tâm về ≈20.900 (thêm chiết khấu công ty mẹ 30%: ≈18.600), vẫn trên giá hiện tại; cả bốn tích cực: ≈33.300. Nhận định chuyển xấu khi có bằng chứng làm giảm giá trị tài sản: giá đá công bố giảm >7%, vốn mỏ mới vượt 1.950 tỷ, giấy phép bị từ chối, hoặc nợ ròng >600 tỷ trước khi mỏ mới có doanh thu.
 
 ## 2. Ngành: đá xây dựng phía Nam ở đỉnh chu kỳ, cung bị nghẽn hành chính
 
@@ -70,7 +71,7 @@ Vị trí gần đúng theo xã/huyện, không phải ranh giấy phép. Mỏ T
 
 ## 4. Tài chính: lợi nhuận tăng nhờ biên gộp đá; bảng cân đối chuyển từ tiền ròng sang nợ ròng
 
-**Biên gộp 9T tăng từ 24,4% lên 38,1%; đồng thời MVC chi 445 tỷ đầu tư (chủ yếu đất mỏ mới), vượt xa dòng tiền kinh doanh 155 tỷ.**
+**Biên gộp 9T tăng từ 24,4% lên 38,1%; MVC chi 445 tỷ đầu tư (chủ yếu đất mỏ mới), lớn hơn dòng tiền kinh doanh 155 tỷ, phần chênh tài trợ bằng tiền gửi và vay.**
 
 ![Doanh thu, LNST quý và biên gộp](figs/fig_02_quarterly.png)
 
@@ -86,57 +87,53 @@ Vị trí gần đúng theo xã/huyện, không phải ranh giấy phép. Mỏ T
 
 - **Chất lượng lợi nhuận:** ≈30% LNST là lợi nhuận liên kết ghi theo vốn chủ; cổ tức tiền nhận 9T chỉ 10,6 tỷ (≈15%). Tiền thu bán hàng 221 tỷ so doanh thu 659 tỷ: chưa đánh giá được chất lượng tiền của mảng trực tiếp.
 - **Cơ cấu vốn:** đất mỏ mới (432 tỷ) được tài trợ bằng vay vốn lưu động ngắn hạn; dư nợ BIDV 452 tỷ lớn hơn hạn mức 350 tỷ của hợp đồng đã công bố, hợp đồng mới chưa công bố.
-- **Cam kết còn lại:** ≈1.062 tỷ mỏ mới + cụm công nghiệp tới 500 tỷ + mua NNC lên 51% (≈72 tỷ) = ≈1,75 nghìn tỷ trước dòng tiền 2027–28; nợ ròng 2028 ước ≈1,4–1,5 nghìn tỷ, D/E ≈0,9–1,0 (ước lượng).
+- **Cam kết đã duyệt:** ≈1.062 tỷ còn lại cho hai mỏ mới + cụm công nghiệp tới 500 tỷ (chưa có kế hoạch) + mua NNC lên 51% (≈1,52 tr cp, chưa có giá). Đây là vốn đầu tư tạo tài sản; nợ ròng sẽ tăng trước khi mỏ mới có doanh thu (2028 theo kế hoạch), nên khả năng gia hạn/chuyển vay ngắn hạn sang vay dự án là điểm phải theo dõi.
 - **Cổ tức:** 2025 trả 600 đ/cp (60 tỷ), trong khi quỹ cổ tức trích 85,8 tỷ; mức 2026 do ĐHĐCĐ 2027 quyết.
 
 
 ## 5. Định giá nội tại (dựng từ nền tảng, không dùng giá thị trường)
 
-**Tâm ≈20.200 đ/cp, vùng hợp lý 17.500–22.900; mỏ Tân Lập, NNC và tiền ròng mang giá trị, hai mỏ mới trừ giá trị ở kịch bản cơ sở.**
+**Tâm ≈25.700 đ/cp, vùng hợp lý 23.600–28.800; Tân Lập và 44% NNC mang phần lớn giá trị, hai mỏ mới ghi theo vốn đã chi.**
 
-- **Phương pháp:** SOTP bằng dòng tiền hữu hạn theo đời mỏ/hợp đồng, r = 13% (dải 11–15%, Ke nội địa 12,3–13,4%), không giá trị cuối vô hạn. Sở hữu chéo MVC – NNC (44,07% / 10,3%) giải bằng hệ phương trình, không dùng giá thị trường; chiết khấu holding 15% trên phần NNC.
-- **Ba đường giá đá, trọng số theo dữ liệu:** giá danh nghĩa phẳng vĩnh viễn 10% (kiểm tra chịu đựng); vách 2028 rồi theo lạm phát từ 2031 50%; giữ giá trị thực 40%.
+- **Phương pháp:** SOTP bằng dòng tiền hữu hạn theo đời mỏ/hợp đồng, r = 13% (dải 11–15%), không giá trị cuối vô hạn. Sở hữu chéo giải bằng hệ phương trình; liên kết nhỏ, ICD theo giá trị ghi sổ. Giá bán của Tân Lập = 0,91 × giá NNC (giá đá 1x2 tại mỏ vùng Bình Phước cũ ≈334–360 nghìn đ/m³ so với ≈380 của NNC). Không áp chiết khấu công ty mẹ (chưa có dữ liệu so sánh; độ nhạy 15%/30%: −1.300/−2.500).
+- **Dự án mới ghi theo vốn đã chi.** Doanh nghiệp đầu tư để có lãi. Vì vậy kịch bản cơ sở ghi hai mỏ mới bằng 438 tỷ đã chi; 1.062 tỷ còn phải chi được coi là tạo ra giá trị tương đương. Mô hình chỉ lệch khỏi mức này khi có số liệu: (+) ở kịch bản tích cực, IRR dự án 17–21% cộng thêm 340–710 tỷ; (−) giấy phép trễ 1–2 năm (thường mất 2–4 năm từ đấu giá tới sản xuất; xác suất có mỏ được cấp phép trước 30/06/2027 là 0,30) trừ ≈490 đ/cp kỳ vọng. Kiểm tra: ở giá cơ sở, IRR dự án chưa tính vay là 8–12%, cao hơn lãi vay thực tế hiện tại ≈4,6%/năm (vay ≤75%). Với chi phí vốn hỗn hợp ≈6%, NPV dương 210–700 tỷ, nên quyết định đầu tư phù hợp với kỳ vọng có lãi. Cụm công nghiệp (≤500 tỷ) và mua NNC lên 51% chưa có kế hoạch/giá nên cũng ghi theo giá vốn.
+- **Đường giá đá:** giá NNC giữ ≈380 nghìn đ/m³ năm 2027 rồi trượt 360/340/320 (2028–30). Hai đường có trọng số bằng nhau: một đường về mức giá thực bình quân 2012–2025 vào 2031 (≈0,75× 2026), một đường giữ giá trị thực từ 2030 (≈0,84×). Giá danh nghĩa đi ngang vĩnh viễn chỉ dùng làm kiểm tra chịu đựng.
 
-![Đường giá đá: giá bán ngầm từ biên gộp và ba đường giả định](figs/fig_14_price_path.png)
+![Đường giá đá: giá bán ngầm từ biên gộp và kịch bản cơ sở](figs/fig_14_price_path.png)
 
 | Bằng chứng đường giá (2012–2025, bốn DN đá NNC/KSB/DHA/VLB) | Số đo |
 |---|---|
 | Giá bán ngầm danh nghĩa, tăng bình quân năm | 3,2–5,3% (lạm phát bình quân 3,25%) |
 | Cửa sổ 8 năm giá danh nghĩa gần như phẳng (tăng ≤5%) | 1/20 |
-| Cửa sổ 4 năm giá thực giảm ≥10% · ≥25% | 3/36 · 0/36 |
-| Biên gộp 2026 so với bình quân 2012–2025 | Cao nhất chuỗi (NNC 51,6% 9T/26): có cơ sở cho một nhịp giảm |
-| Kịch bản cơ sở: giá 2028–30 so với 2026 (theo tiền 2026) | −21% (giữ giá trị thực) · −30% (vách rồi lạm phát) |
+| Các đỉnh giá thực trong lịch sử: mức giảm 3–4 năm sau | 3/5 đỉnh ≥10%, 0/5 ≥25% (−4% đến −23%) |
+| Giá thực NNC 2026 so với bình quân 2012–2025 | Cao hơn ≈35%: có cơ sở cho một nhịp giảm |
+| Kịch bản cơ sở: giá thực từ 2031 so với 2026 | −25% (về bình quân lịch sử) · −16% (giữ giá trị thực) |
 
-Giá bán ngầm = (1 − biên gộp gốc)/(1 − biên gộp năm) × CPI, giả định chi phí đơn vị thực không đổi; khai thác xuống sâu làm chi phí thực tăng (thiên về đánh giá thấp giá thực), nhưng chiều sai số tổng không xác định (đòn bẩy vận hành, cơ cấu sản phẩm, 4 mã cùng vùng nên số mẫu độc lập ít).
+Giá bán ngầm = (1 − biên gộp gốc)/(1 − biên gộp năm) × CPI, giả định chi phí đơn vị thực không đổi; 4 mã cùng vùng nên số mẫu độc lập ít.
 
 ![Cấu thành giá trị kịch bản cơ sở](figs/fig_10_bridge.png)
 
-- **Chương trình hai mỏ mới, kịch bản cơ sở:** dòng tiền vận hành 870 tỷ − vốn còn phải chi 933 tỷ − đất đã chi 432 tỷ = **−495 tỷ (−4.950 đ/cp)**; ở đường giá phẳng −745 tỷ, ở giữ giá trị thực −230 tỷ. Phần còn lại (Tân Lập 6.900, NNC 5.700, tiền ròng không gồm đất mỏ 3.150, BOT/gạch/đất 3.450 đ/cp) gánh khoản này.
-- **Tổng MVC luôn lớn hơn phần NNC** (kể cả cơ sở giá phẳng: 9.400 so với 4.700 đ/cp). Chỉ phần hoạt động trực tiếp nhỏ hơn phần NNC, và chỉ vì chương trình mỏ mới.
+- **Đối chiếu sổ sách:** kịch bản cơ sở 24.200 đ/cp = 1,57× vốn chủ sở hữu/cp. Với ROE ≈18,5% (loại hoàn nhập), r 13% và tăng trưởng 3%, P/B hợp lý ≈(18,5 − 3)/(13 − 3) ≈1,55×, khớp với kết quả SOTP. Phần NNC 8.000 đ/cp so với giá trị ghi sổ 4.700; tổng MVC lớn hơn phần NNC ở mọi kịch bản.
 
 ![Ba kịch bản giá trị](figs/fig_11_scenarios.png)
 
-| Kịch bản (xác suất) | Giả định chính | Giá trị (đ/cp): phẳng · vách+lạm phát · thực |
+| Kịch bản (xác suất) | Giả định chính | Giá trị (đ/cp): về bình quân · giữ giá trị thực |
 |---|---|---|
-| Tích cực (25%) | Giá đá giữ ≈400–420 nghìn đ/m³ (NNC); mỏ mới chạy 60/100% công suất từ 2028 | 29.700 · 36.200 · 44.700 |
-| Cơ sở (50%) | Giá đá giữ 2027, giảm ≈21% từ 2028 khi cung mới vào, nhích lại từ 2031; mỏ mới chạy 50/80% | 9.800 · 14.600 · 20.200 |
-| Tiêu cực (25%) | Giá giảm sâu hơn, mỏ mới trễ 1–2 năm và chạy 30–50%; dừng dự án thu lại 30% giá đất | 7.700 · 8.400 · 10.100 |
+| Tích cực (25%) | Giá NNC giữ ≈400–420 nghìn đ/m³; mỏ mới chạy đủ công suất, IRR 17–21% | 37.200 · 45.900 |
+| Cơ sở (50%) | Giá trượt về 320 nghìn (2030); Tân Lập 1,3 tr m³/năm; mỏ mới theo vốn đã chi | 22.500 · 25.900 |
+| Tiêu cực (25%) | Giá 250/210 nghìn từ 2028, sản lượng giảm; mỏ mới theo vốn đã chi (còn quyền dừng phần chưa chi) | 12.100 · 13.800 |
 
-Xác suất kịch bản dựa trên lịch sử đỉnh giá: 3/5 đỉnh giá thực ở bốn DN đá đã giảm ≥10% trong 3–4 năm, 2/5 giảm <10% (−4%, −8%), 0/5 giảm ≥25%. Hạng mục riêng của MVC (hạn giấy phép, BOT, đất nhà ở, liên kết nhỏ) có xác suất độc lập với giá đá. Kịch bản được tính với hạng mục riêng ở mức kỳ vọng.
+Xác suất dựa trên lịch sử đỉnh giá và xác suất giá công bố Q2/2027 giảm >7% (0,15) của người đọc ngành độc lập; hạng mục riêng (hạn giấy phép, BOT, đất) tính ở mức kỳ vọng.
 
-| Hai loại dải | P10 | P25 | P50 | P75 | P90 |
+| Dải theo tham số (729 bộ: r 11/13/15% × chi phí Tân Lập ±15% × hệ số giá 0,88–0,95 × xác suất kịch bản × trọng số đường giá × vốn mỏ mới ±30%) | P10 | P25 | P50 | P75 | P90 |
 |---|---|---|---|---|---|
-| Theo tham số (243 bộ: r 11/13/15% × holding 0/15/30% × vốn mỏ mới ±30% × chi phí Tân Lập ±15% × hệ số giá MVC/NNC 0,80–0,95) | 15.300 | 17.500 | 20.200 | 22.900 | 25.400 |
-| Theo kịch bản (giá đá × đường giá × hạng mục riêng, có trọng số) | 8.300 | 11.400 | 16.200 | 25.500 | 40.000 |
-
-Dải tham số đo độ chắc của tâm (dùng làm ngưỡng); dải kịch bản đo rủi ro kết cục (phân bố lệch phải: trung vị thấp hơn tâm).
+| Giá trị kỳ vọng (đ/cp) | 21.800 | 23.600 | 25.900 | 28.800 | 31.600 |
 
 ![Độ nhạy giá trị](figs/fig_12_sensitivity.png)
 
-- **Nhạy nhất:** xác suất kịch bản tích cực (−2.800 / +3.900 đ/cp), chiết khấu (−2.300 / +2.700), giả định mỏ mới (vốn ±30%: ∓2.200; chi phí 105–165 nghìn/m³: ±2.300). r 13% là chi phí vốn chủ, áp cho cả dự án vay tới 75% mà không tính lá chắn thuế lãi vay: nghiêng thận trọng.
-- **Mỏ mới trễ 1 năm** (lùi cả vách giá theo cung mới): −700 đ/cp. **Cụm công nghiệp tới 500 tỷ** (ĐHĐCĐ đã duyệt, chưa có NPV) chưa nằm trong mô hình: thu hồi 70% / 50% thì giảm ≈1.300 / ≈2.100 đ/cp. Lưới mở rộng 2.187 bộ (thêm trọng số kịch bản 15/60/20/5 và 35/50/10/5, trọng số đường giá 25/50/25 và 5/35/60): P10 14.300; trừ cụm công nghiệp thu hồi 70%: P10 13.000, 13% kết cục dưới 13.700.
+- **Nhạy nhất:** xác suất kịch bản (−2.200 / +3.700 đ/cp), chi phí Tân Lập ±15% (∓2.300), r 15% / 11% (−2.100 / +2.500), chiết khấu công ty mẹ. Không giả định đơn lẻ nào đưa tâm xuống dưới 21.800. Nếu định giá hai mỏ mới bằng dòng tiền ở r 13% cho mọi kịch bản thay vì vốn đã chi: −1.350 đ/cp. Nếu giá cụm giảm 21% ngay năm 2028 do cung mới (chưa có số liệu cung cụ thể): −660.
 
-**Điều thị trường có thể chưa tính:** (+) giá đá vùng có lịch sử theo lạm phát; (+) Tân Lập hưởng cùng giá cụm như NNC; (+) 23,5 ha đất nhà ở; (+) mua NNC lên 51%. **Có thể đã tính đúng:** (−) vốn 1.500 tỷ cao; (−) cung mới của MVC ép giá cụm; (−) lợi nhuận liên kết ít về tiền; (−) thanh khoản mỏng.
+**Thị trường có thể chưa tính:** giá đá vùng tăng theo lạm phát; 23,5 ha đất nhà ở; hợp nhất NNC khi lên 51%. **Có thể đã tính đúng:** thanh khoản mỏng, lợi nhuận liên kết ít về tiền, vay ngắn hạn, quản trị đan xen.
 
 ## 6. Rủi ro (pre-mortem)
 
@@ -154,20 +151,20 @@ Dải tham số đo độ chắc của tâm (dùng làm ngưỡng); dải kịch
 
 ## 7. Đối chiếu với giá thị trường (sau khi khoá kết quả mô hình)
 
-**Ở 13.700 đ (đóng cửa 02/11/2026), MVC thấp hơn tâm 32%, nằm trong vùng RẺ CÓ ĐIỀU KIỆN (13.000–17.500) và cao hơn ngưỡng biên an toàn 13.000 khoảng 5%; P/E 4,5×, P/B 0,89×.**
+**Ở 13.300 đ (đóng cửa 03/11/2026; 02/11: 13.700), MVC thấp hơn tâm 48%, thấp hơn ngưỡng biên an toàn 21.800 khoảng 39% và thấp hơn vốn chủ sở hữu/cp 14%; P/E 4,3×, P/B 0,86×.**
 
 ![Football field](figs/fig_13_football_field.png)
 
-| Định giá ngược: điều gì phải đúng để giá trị = 13.700 | Kết quả |
+| Định giá ngược: điều gì phải đúng để giá trị = 13.300 | Kết quả |
 |---|---|
-| Trọng số đường giá phẳng (giữ tỉ lệ hai đường còn lại) | Không đạt: kể cả 100% phẳng, giá trị vẫn ≈14.200 |
-| Xác suất tích cực / tiêu cực (cơ sở giữ 50%) | 8% / 42% (trong báo cáo: 25% / 25%) |
-| Không có kịch bản tích cực | Tiêu cực ≈21%, cơ sở 79% |
-| Chi phí vốn hàm ý | ≈20% (báo cáo dùng 13%, dải 11–15%) |
-| Tỷ trọng kết cục có giá trị < 13.700 (theo kịch bản) | 37% |
+| Giá đá danh nghĩa phẳng vĩnh viễn và không có kịch bản tích cực (tiêu cực 50%) | ≈14.300: vẫn cao hơn giá |
+| Chi phí vốn hàm ý | >25% (r 25% cho ≈17.900; báo cáo dùng 13%) |
+| Toàn bộ kịch bản xấu (giá 250 nghìn từ 2028) | ≈10.200 |
+| Tỷ trọng bộ tham số có giá trị < 13.300 | 0/729 |
 
-- **So ngang ngành (P/E TTM, BQ 30/10/2026):** VLB 3,7× · NNC 4,8× · DHA 5,4× · KSB 7,1×; MVC 4,5× (4,9–5,0× ex-hoàn nhập Q4/2025, ước lượng). Dùng để đối chiếu chéo, không làm mỏ neo.
-- **Thanh khoản:** ADV trung vị 60 phiên 0,19 tỷ đ/phiên (trung bình 20 phiên 0,61 do vài phiên lớn). 10 tỷ đ cần ≈53 phiên ở 100% khối lượng, ≈270–530 phiên ở 10–20%; thoát lệnh khi thị trường căng thẳng là điểm yếu.
+- **Đọc kết quả:** giá hiện tại chỉ hợp lý nếu tin vào kịch bản xấu toàn phần, hoặc áp chiết khấu thanh khoản và quản trị rất lớn. Các yếu tố đó có thật nhưng không làm giảm giá trị tài sản; chúng quyết định thời gian để giá phản ánh giá trị.
+- **So ngang ngành (P/E TTM, BQ 30/10/2026):** VLB 3,7× · NNC 4,8× · DHA 5,4× · KSB 7,1×; MVC 4,3× (≈4,9× loại hoàn nhập Q4/2025, ước lượng). Chỉ dùng để đối chiếu chéo, không làm mỏ neo.
+- **Thanh khoản:** ADV trung vị 60 phiên 0,19 tỷ đ/phiên (trung bình 20 phiên 0,61 do vài phiên lớn). Giao dịch 10 tỷ đ cần ≈270–530 phiên ở mức 10–20% khối lượng.
 
 ![Giá 12 tháng và các mốc công bố](figs/fig_15_price.png)
 
@@ -175,22 +172,22 @@ Dải tham số đo độ chắc của tâm (dùng làm ngưỡng); dải kịch
 
 | Vùng giá (đ/cp) | Nhận định | Ý nghĩa |
 |---|---|---|
-| ≤13.000 | **Rẻ có biên an toàn** | P10 của 2.187 bộ tham số, đã trừ cụm công nghiệp 500 tỷ thu hồi 70% |
-| 13.000–17.500 | **Rẻ có điều kiện** | Chỉ khi xác suất kịch bản tốt ≥ ≈10% (giá hàm ý ≈8%) và vốn mỏ mới ≤1.500 tỷ, cụm công nghiệp NPV ≈ 0 |
-| 17.500–22.900 | **Hợp lý** | Nửa giữa của các bộ tham số |
-| 22.900–25.400 | Nghiêng đắt | |
-| ≥25.400 | **Đắt** | Cần kịch bản tích cực hoặc giá đá giữ giá trị thực mới biện minh được |
+| ≤21.800 | **Rẻ có biên an toàn** | P10 của 729 bộ tham số: 90% bộ tham số cho giá trị cao hơn |
+| 21.800–23.600 | **Rẻ có điều kiện** | Tâm rơi vào vùng này nếu xác suất tích cực chỉ 15% hoặc chi phí Tân Lập tăng 15% |
+| 23.600–28.800 | **Hợp lý** | Nửa giữa của các bộ tham số |
+| 28.800–31.600 | Nghiêng đắt | |
+| ≥31.600 | **Đắt** | Chỉ biện minh được khi các mốc ở dưới cùng nghiêng tích cực (≈33.300) |
 
 ![Lịch kiểm chứng](figs/fig_18_catalysts.png)
 
 | Mốc | Nội dung | Chiều tích cực | Chiều tiêu cực | Thu hẹp gì |
 |---|---|---|---|---|
-| ≈20–30/01/2027 | BCTC Q4/2026 | Biên gộp ≥35%, doanh thu ≥200 tỷ/quý | Biên gộp <28% | Xác suất kịch bản (±3–4 nghìn đ/cp) |
-| ≈04/2027 | ĐHĐCĐ 2027, BCTN 2026 | Vốn mỏ mới <1.500 tỷ; hạn giấy phép Tân Lập ≥2045 | Vốn >1.950 tỷ; hạn ≤2035 | Vốn mỏ mới (±2.200), hạn giấy phép (−1.600/+1.300) |
-| 30/06/2027 | Giấy phép khai thác hai mỏ mới | Có trước mốc | Trễ sau 2028 | Độ trễ mỏ mới (−700/năm) |
-| ≈31/08/2027 | Giá đá công bố Sở XD Đồng Nai Q2/2027 so Q3/2026 | > +7% | < −7% | Trọng số đường giá (−1.400/+1.300) |
+| ≈20–30/01/2027 | BCTC Q4/2026 | Biên gộp ≥35%, doanh thu ≥200 tỷ/quý | Biên gộp <28% | Xác suất kịch bản (−2.200 / +3.700) |
+| ≈04/2027 | ĐHĐCĐ 2027, BCTN 2026 | Hạn giấy phép Tân Lập ≥2045; vốn mỏ mới ≤1.500 tỷ | Hạn ≤2035; vốn >1.950 tỷ | Hạn giấy phép (−1.800 / +1.400); vốn mỏ mới (−700) |
+| 30/06/2027 | Giấy phép khai thác hai mỏ mới | Có trước mốc (+500) | Trễ sau 2028 (≈−500/năm) | Độ trễ mỏ mới |
+| ≈31/08/2027 | Giá đá công bố Sở XD Đồng Nai Q2/2027 so Q3/2026 | > +7% | < −7% | Trọng số đường giá (−900 / +900) |
 
-Nếu cả bốn mốc nghiêng tiêu cực: tâm ≈13.900; nếu nghiêng tích cực: tâm ≈28.000. Khi đó cần định giá lại với số liệu mới.
+Nếu cả bốn mốc nghiêng tiêu cực: tâm ≈20.900; nếu nghiêng tích cực: ≈33.300. Khi đó cần định giá lại với số liệu mới.
 
 ## Phụ lục
 
@@ -200,7 +197,7 @@ Nếu cả bốn mốc nghiêng tiêu cực: tâm ≈13.900; nếu nghiêng tíc
 
 **C. Nguồn.** BCTC hợp nhất và riêng Q3/2026 (CBTT 30/10/2026); BCTC soát xét 6T/2026 và kiểm toán 2025 (AASCs); báo cáo thường niên 2025; tài liệu và nghị quyết ĐHĐCĐ 15/04/2026; nghị quyết HĐQT số 69; báo cáo quản trị 6T/2026; website vlxdbd.com.vn (logo, ảnh sản phẩm, trang đơn vị); Báo Đấu thầu 22/10/2024 (trạm Bình Thắng). Toạ độ: vi.wikipedia.org (tâm huyện/thị xã/phường: Đồng Phú, Phú Giáo, Dầu Tiếng, Bàu Bàng, Bến Cát, Lộc Ninh, Tân Đông Hiệp). Ranh giới tỉnh: geoBoundaries VNM-ADM1 (2008). Đọc ngành độc lập: đá xây dựng Nam Bộ (30/10/2026), gạch nung và ICD Bình Dương (03/11/2026). Logo: website công ty, chỉ để nhận diện, không ngụ ý bảo chứng.
 
-**D. Phương pháp và giới hạn dữ liệu.** (1) Mô hình dựng không dùng giá thị trường của MVC hay NNC; kết quả được khoá bằng mã băm trước khi so với giá (mục 7). (2) Doanh thu/lãi gộp mỏ đá được suy bằng phép trừ (BCTC gộp đá và gạch), sản lượng ≈1,3 tr m³ và chi phí ≈130 nghìn đ/m³ là hiệu chỉnh — ước lượng. (3) Hạn giấy phép Tân Lập, hạn thu phí BOT, cơ cấu 1.500 tỷ, giá trúng đấu giá: chưa công bố; đặt theo kịch bản. (4) Hoàn nhập dự phòng Q4/2025 (≈34 tỷ trước thuế) là ước lượng từ thuyết minh năm 2025 và chi phí tài chính 9T/2025. (5) Xác suất kịch bản và trọng số đường giá dựa trên biên gộp lịch sử của bốn DN đá (dữ liệu quý, có thể lẫn mảng khác như cho thuê đất); hệ số giá MVC/NNC 0,87 và chiết khấu holding 15% là giả định có độ nhạy ở mục 5. (6) Chưa có thuyết minh tách thu/chi khác 608/325 tỷ, đối tượng tạm ứng 60,6 tỷ, room ngoại. (7) Ảnh sản phẩm do công ty công bố; vị trí là gần đúng.
+**D. Phương pháp và giới hạn dữ liệu.** (1) Mô hình dựng không dùng giá thị trường của MVC hay NNC; kết quả được khoá bằng mã băm trước khi so với giá (mục 7). (2) Doanh thu/lãi gộp mỏ đá được suy bằng phép trừ (BCTC gộp đá và gạch); sản lượng ≈1,3 tr m³ và biên gộp ≈200 nghìn đ/m³ là hiệu chỉnh (ước lượng). (3) Hạn giấy phép Tân Lập, hạn thu phí BOT, cơ cấu 1.500 tỷ, giá trúng đấu giá: chưa công bố; đặt theo kịch bản. (4) Hoàn nhập dự phòng Q4/2025 (≈34 tỷ trước thuế) là ước lượng từ thuyết minh năm 2025 và chi phí tài chính 9T/2025. (5) Xác suất kịch bản và trọng số đường giá dựa trên biên gộp lịch sử của bốn DN đá (dữ liệu quý, có thể lẫn mảng khác như cho thuê đất). Dự án đầu tư mới ghi theo vốn đã chi; mọi khoản giảm trừ khỏi mức đó phải có số liệu và được nêu ở mục 5. Lãi vay thực tế ≈4,6%/năm là ước lượng từ lãi đã trả 9T/2026 trên dư nợ bình quân; chi phí vay dự án dài hạn chưa công bố. (6) Chưa có thuyết minh tách thu/chi khác 608/325 tỷ, đối tượng tạm ứng 60,6 tỷ, room ngoại. (7) Ảnh sản phẩm do công ty công bố; vị trí là gần đúng.
 
 **E. Quy trình độc lập.** Số liệu được đối chiếu với báo cáo tài chính gốc; hai người đọc độc lập (ngành đá/gạch/ICD; số liệu và giả định) soát lại nguồn và tính nhất quán; mô hình tái lập được từ mã nguồn và dữ liệu lưu cùng báo cáo. Giới hạn dữ liệu nêu ở Phụ lục D.
 

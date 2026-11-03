@@ -1,0 +1,66 @@
+=== TAM r5 (W 25/50/20/5 x PW g2031 50/real 50; r13; holding 0; mo moi so sach): 25,725 d/cp | BASE (co_so) 24,199
+  g2031: tot  37,155 co_so  22,484 xau  12,806 rat_xau   9,334
+  real : tot  45,916 co_so  25,914 xau  14,869 rat_xau   9,633
+  STRESS phang danh nghia 100%: KV 20,316 | co_so 19,902
+
+=== 1. CAU NOI co_so (ty; d/cp = x10) ===
+[g2031] TanLap 798.0 | mo_moi_so_sach_sau_tre 389.7 | BOT 93.7 | gach_xang 41.5 | dat_o 150.0 | LK_nho_ICD 99.9 | Q4 50.0 | no_rong -116.6 | TRUC_TIEP 1,506.2 | phan_NNC 742.2 | TONG 2,248.4 | TONG_dcp 22,484.4 | V_NNC_dcp 76,840.2
+[real] TanLap 1,016.3 | mo_moi_so_sach_sau_tre 389.7 | BOT 93.7 | gach_xang 41.5 | dat_o 150.0 | LK_nho_ICD 99.9 | Q4 50.0 | no_rong -116.6 | TRUC_TIEP 1,724.5 | phan_NNC 866.9 | TONG 2,591.4 | TONG_dcp 25,914.1 | V_NNC_dcp 89,749.3
+  Kiem so: VCSH HN 30/09 1.546,0 (BVPS 15.460); NNC ghi so (VCSH) 470,0; CIP 436,7; LK 525,1
+
+=== 2. Mo moi: NPV toan du an (gom 438,4 da chi) & IRR — tu du lieu ===
+  tot     flat : IRR  13.3% | NPV r11     169 r13      19 r15    -106
+  tot     g2031: IRR  17.1% | NPV r11     562 r13     338 r15     156
+  tot     real : IRR  21.1% | NPV r11     994 r13     712 r15     482
+  co_so   flat : IRR   1.5% | NPV r11    -530 r13    -590 r15    -639
+  co_so   g2031: IRR   8.0% | NPV r11    -230 r13    -346 r15    -440
+  co_so   real : IRR  12.3% | NPV r11     105 r13     -55 r15    -185
+  xau     flat : IRR   nan% | NPV r11   -1129 r13   -1119 r15   -1111
+  xau     g2031: IRR  -3.1% | NPV r11    -890 r13    -925 r15    -952
+  xau     real : IRR   2.2% | NPV r11    -630 r13    -700 r15    -755
+  rat_xau flat : IRR   nan% | NPV r11   -1464 r13   -1412 r15   -1369
+  rat_xau g2031: IRR -17.5% | NPV r11   -1242 r13   -1233 r15   -1223
+  rat_xau real : IRR  -6.3% | NPV r11   -1024 r13   -1044 r15   -1057
+  REL 0.91 -> gia MVC 2026 346k/m3, chi phi tien mat 145.2k/m3, SGA mo moi 15 ty/nam
+  capex/tru luong thanh pham: 56.3k/m3
+  chi phi tre ky vong (r13): 48.7 ty = 487 d/cp truc tiep
+
+=== 3. Luoi 729 bo: P5 20,917 P10 21,824 P25 23,622 P50 25,924 P75 28,829 P90 31,565
+NGUONG (dang ky truoc): RE CO BIEN AN TOAN <= 21,824 | RE CO DIEU KIEN 21,824-23,622 | HOP LY 23,622-28,829 | nghieng dat 28,829-31,565 | DAT >= 31,565
+
+=== 4. Hieu ung tung khoan giam tru r3/r4 (dua lai vao r5, so voi tam r5) ===
+  holding 15%                                                              24,442 ( -1,283)
+  holding 30%                                                              23,178 ( -2,548)
+  REL 0,87 (r3)                                                            25,898 (   +173)
+  REL 0,95                                                                 25,559 (   -166)
+  REL 0,88                                                                 25,855 (   +130)
+  vach co_so 300 (2028-30, nhan FPTS cung moi) thay truot                  25,067 (   -658)
+  san luong Tan Lap co_so 1,20 tu 2028 (r3)                                25,339 (   -386)
+  LK nho x0,8 so sach (r3 co_so)                                           25,610 (   -115)
+  NNC: CIP Tam Lap chi o tot/co_so (r3)                                    25,629 (    -96)
+  mo moi: bo upside kich ban tot                                           24,350 ( -1,375)
+  mo moi: bo rui ro tre                                                    26,235 (   +510)
+  mo moi: ap NPV gia xau/rat xau (doi xung, khong quyen dung)              23,427 ( -2,299)
+  capex mo moi +30% (chi qua upside)                                       25,021 (   -704)
+  chi phi mo moi +30k/m3 (chi qua upside)                                  24,954 (   -771)
+  chi phi Tan Lap +15%                                                     23,476 ( -2,249)
+  chi phi Tan Lap -15%                                                     28,020 ( +2,294)
+  r 11%                                                                    28,197 ( +2,472)
+  r 15%                                                                    23,659 ( -2,066)
+  W 15/60/20/5                                                             23,477 ( -2,248)
+  W 35/50/10/5                                                             29,453 ( +3,727)
+  PW g2031 70/real 30                                                      24,859 (   -867)
+  PW g2031 30/real 70                                                      26,592 (   +867)
+  PW them phang 10% (r3)                                                   24,968 (   -758)
+  dat du an nha o = 0                                                      24,154 ( -1,571)
+  han GP Tan Lap 2035 moi muc                                              23,933 ( -1,792)
+  han GP Tan Lap 2045 moi muc                                              27,151 ( +1,426)
+  cum CN 500 ty thu hoi 70% (r4, KHONG co co so)                           24,154 ( -1,571)
+  TAT CA giam tru r3/r4 (holding15, REL0,87, vach, SL1,20, LK0,8, CIP, mo moi kieu r3 khong lam), PW +phang   22,773 ( -2,952)
+  mo moi cach r3/r4 (NPV moi kich ban, dat da chi la mat, san 30% o xau)   24,375 ( -1,351)
+  TAT CA + mo moi cach r3/r4                                               20,898 ( -4,827)
+
+=== 5. NNC nhat quan V_N = N_ex + c V_M (d/cp NNC) ===
+  tam NNC (r5 inputs): 85,124
+  chi sua CIP Tam Lap moi kich ban: NNC +998 d/cp NNC ; MVC +96 d/cp
+  tren khung NNC-DD (khong vong cheo): +952 d/cp NNC
