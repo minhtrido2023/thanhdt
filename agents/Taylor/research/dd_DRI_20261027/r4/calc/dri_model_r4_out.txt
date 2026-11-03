@@ -1,0 +1,26 @@
+0) SELFCHECK engine cu @ r 12%: T1 (tai canh day du) 9,078 / 11,116 | D (khong thanh ly/tai canh) 13,096 / 15,172
+   PASS (9.078/11.116 va 13.096/15.172 khop bao cao cu)
+
+1) RSS3 THUC (USD 2025/kg; CPI-U TB2025 322.19): TB 2013-26 2.341 | trung vi 2013-26 2.221 | TB 2006-26 3.025 | (danh nghia TB 2013-26 1.941; TB2025 2.183; Q3/26 2.753)
+   TB nam thuc: 2007:3.51 2008:3.87 2009:2.88 2010:5.40 2011:6.92 2012:4.74 2013:3.87 2014:2.66 2015:2.14 2016:2.15 2017:2.63 2018:2.01 2019:2.07 2020:2.15 2021:2.47 2022:2.00 2023:1.67 2024:2.34 2025:2.18
+   phan vi gia Q3/26 trong chuoi thuc 2013-26: 82%
+
+2) TAM (mid 2.341, L27, r 13,5%): 16,950 d/cp  (trong do XDCB gia von 993)
+   kich ban 'tai canh bi buoc, kinh te nhu gia dinh cu' (T1): 11,971 | chenh -4,978
+   CAU NOI (mid 1,97 -> chuan hoa): T1 cu r12% 9,078 | tai canh NPV0 +4,018 | XDCB gia von +993 | r 12->13,5% -514 | mid 1,97->2.341 +3,375 => 16,950
+
+3) THANG (luoi 27 o, trong so): P10 14,414 / P25 15,857 / P50 16,950 / P75 19,222 / P90 23,175 | min 13,166 max 27,796 | TB co trong so 17,927
+   mot truc quanh tam [mid]: thap: 15,857 | tam: 16,950 | cao: 23,175
+   mot truc quanh tam [L_tap]: 22: 14,414 | 27: 16,950 | 32: 18,232
+   mot truc quanh tam [r]: 0.115: 18,043 | 0.135: 16,950 | 0.155: 15,994
+
+4) KY VONG co xac suat (chu quan): 80% base 16,950 + 20% tai canh bi buoc 11,971 = 15,954
+   T1 theo mid thap/tam/cao (L27, r13,5): 10,928 / 11,971 / 17,921
+   stress duong day RSS3 2027=2028=1,60 (tam con lai): 14,186
+   (doi chieu) giu vuon qua L27 (L99 - khong het doi, khong tai canh): 19,027
+
+5) DO NHAY LAI HUY DONG 12T (diem neo 7,40% -> r 13,5%)
+   beta 1.0: -100bp (r 12.50%): 17,478 (+3.1%) | -50bp (r 13.00%): 17,209 (+1.5%) | +0bp (r 13.50%): 16,950 (+0.0%) | +50bp (r 14.00%): 16,699 (-1.5%) | +100bp (r 14.50%): 16,456 (-2.9%)
+   beta 0.5: -100bp (r 13.00%): 17,209 (+1.5%) | -50bp (r 13.25%): 17,078 (+0.8%) | +0bp (r 13.50%): 16,950 (+0.0%) | +50bp (r 13.75%): 16,823 (-0.7%) | +100bp (r 14.00%): 16,699 (-1.5%)
+
+OUT -> dri_model_r4_out.json, grid_r4.csv
