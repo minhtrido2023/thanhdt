@@ -38,3 +38,6 @@
 - [2026-11-03T13:20:55Z] ĐANG DỞ: chain NNC r4 → MVC r7 job Taylor_20261103_132045 | NEXT: đọc SKEPTIC_R3 + r3/calc, dựng r4
 - [2026-11-03T13:31:38Z] ĐANG DỞ chain job Taylor_20261103_132045: NNC r4 XONG 80375a611 (tam 67.596) | NEXT: MVC r7 o dd_MVC_20261103/r7/ dung engine r4 (MVC dong thoi 18.392), luoi MVC, bao cao, zones rev6 (rev5 da archive _rev5_r6.md)
 - [2026-11-03T13:38:00Z] [dd-chain 03/11] XONG job Taylor_20261103_132045: NNC r4 80375a611 tam 67.596 / MVC r7 2ef7aa868 tam 18.392, ca 2 RE duoi P10 co dieu kien; CHUA skeptic, CHUA email
+- [2026-11-03T13:47:18Z] ĐANG DỞ: chain2 NNC r5 → MVC r8 job Taylor_20261103_134709 | NEXT: đọc SKEPTIC_R4, dựng dd_NNC_20261030/r5/
+- [2026-11-03T13:54:19Z] ĐANG DỞ chain2 job Taylor_20261103_134709: NNC r5 XONG 8806ca48e (tam 61.666) | NEXT: MVC r8 o dd_MVC_20261103/r8/ (doc SKEPTIC_R7, model_r7.py)
+- [2026-11-03T14:04:06Z] [dd-chain2 03/11] XONG job Taylor_20261103_134709: NNC r5 8806ca48e tam 61.666 / MVC r8 7fca32c51 tam 16.702, ca 2 RE duoi P10 co dieu kien; CHUA skeptic, CHUA email
