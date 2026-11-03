@@ -1,0 +1,13 @@
+chi_tieu,gia_tri,nguon
+lnst_2023,45.3,BQ NP_P0 / BCTC
+lnst_2024,26.6,BQ NP_P0 / BCTC
+lnst_2025,64.3,BQ NP_P0 / BCTC
+lnst_4Q gần nhất,117.7,BQ NP_P0 / BCTC
+tam_cum_liq,24139.0,compare_r2_out.json
+cum_liq_p5,17738.0,compare_r2_out.json
+cum_liq_p10,18841.0,compare_r2_out.json
+cum_liq_p25,21128.0,compare_r2_out.json
+cum_liq_p50,24442.0,compare_r2_out.json
+cum_liq_p75,27120.0,compare_r2_out.json
+cum_liq_p90,28953.0,compare_r2_out.json
+gia_0311,30000.0,tav2_bq.ticker 03/11/2026

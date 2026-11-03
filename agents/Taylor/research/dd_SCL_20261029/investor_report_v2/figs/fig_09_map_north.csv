@@ -1,0 +1,5 @@
+name,lat,lon,kind,dx,dy,note
+"Trụ sở + nhà máy, dự án Phả Lại (Chí Linh)",21.107744,106.388995,hq,0.04,0.05,"tâm TP Chí Linh (Hải Dương cũ, nay thuộc Hải Phòng); vi.wikipedia.org/wiki/Chí_Linh_(thành_phố)"
+Hà Nội,21.028333,105.853333,market,-0.05,0.06,vi.wikipedia.org/wiki/Hà_Nội
+Hải Phòng,20.866389,106.6825,market,0.04,-0.05,vi.wikipedia.org/wiki/Hải_Phòng
+Bắc Ninh,21.187548,106.073406,market,-0.05,0.06,vi.wikipedia.org/wiki/Bắc_Ninh

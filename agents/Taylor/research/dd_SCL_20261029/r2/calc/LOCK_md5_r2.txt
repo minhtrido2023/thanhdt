@@ -1,0 +1,5 @@
+2026-11-03 22:34:41 ICT
+4a50351356894ef14d9b6222de244f81  model_r2.py
+52585bae69ac03d1ddae968d8840ace7  model_r2_out.json
+406d173a92579956449e0e3040eb70e7  model_r2_out.txt
+9f1c48d525410d34c1309d5a64bdecfe  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_SCL_20261029/r2/calc/fin_bq_scl.csv
