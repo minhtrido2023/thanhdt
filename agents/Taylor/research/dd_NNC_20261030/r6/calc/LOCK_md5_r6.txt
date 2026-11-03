@@ -1,0 +1,11 @@
+LOCK 2026-11-03 22:31:57 ICT (TRUOC buoc so gia + thanh khoan r6). Trung thuc: r1-r5 da biet gia NNC (46.100) => khoa chi chung minh THU TU CHAY; mo hinh khong dung gia thi truong lam dau vao. Chan doi chung r13 = 61.666 (r5).
+6688f1e61c8568f63fae889312462442  nnc_model_r6.py
+728534061454e9aebc47053f2e17d238  nnc_model_r6_out.txt
+5f3c34d1269245483a87ceb9c7c72989  nnc_model_r6_out.json
+e9ad4299b529b0bde6fa94342e1f70c7  grid_r6.csv
+14f3fb87c2d0b4c340382a371b26be29  ../../r5/calc/nnc_model_r5.py
+812ca351e968913e2e4787bbcff9f552  ../../r4/calc/model_r4.py
+c992769f86794f5d6f39b0df7e13bd91  ../../r3/calc/model_r3.py
+d3fb9637389ca6d9c7472e28f4846506  ../../../dd_MVC_20261103/r6/calc/valuation_base.py
+9fd64a26a7daca9b0244c3f62ce7dd91  ../../../dd_MVC_20261103/r6/calc/model_r5.py
+bd93107a93a7f958eea03e1a5f01eed0  ../../../dd_MVC_20261103/r6/calc/model_r6.py

@@ -1,0 +1,10 @@
+Gia 46,100 = 0.76x tam 60,702 | luoi < gia 0.9% (min 41,846) | TRUOC CK thanh khoan: RE (duoi P10)
+  vi the 1 ty (Y1,0, CK 1.6%): tam 59,717 | P10/25/75/90 51,474/56,175/68,287/74,304 -> RE (duoi P10)
+  vi the 5 ty (Y1,0, CK 3.6%): tam 58,499 | P10/25/75/90 50,425/55,029/66,894/72,789 -> RE (duoi P10)
+  vi the 10 ty (Y1,0, CK 5.1%): tam 57,587 | P10/25/75/90 49,638/54,171/65,851/71,654 -> RE (duoi P10)
+  nhanh STRUCTURAL: 88,878 -> gia/gia tri 0.52x
+  nhanh ADMIN_GATED: 54,522 -> gia/gia tri 0.85x
+  nhanh CYCLICAL: 52,547 -> gia/gia tri 0.88x
+Gordon r13,5 khoa 33,250 (+39%) | bo sung 40,480 (+14%)
+Hoa von (100% hoi bien, SL 1,10/1,20, r13,5): gia da 229k/m3 -> bien 28.4%
+Hoa von (100% hoi bien, SL 1,40, r13,5): gia da 218k/m3 -> bien 28.8%

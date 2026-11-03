@@ -1,4 +1,31 @@
-# DD — NNC (CTCP Đá Núi Nhỏ) · r5 · as-of 03/11/2026 · job `Taylor_20261103_134709`
+# DD — NNC (CTCP Đá Núi Nhỏ) · r6 · as-of 03/11/2026 · job `Taylor_20261103_152936`
+
+> NGHIÊN CỨU READ-ONLY, hồ sơ NỘI BỘ. r5 lưu `archive_internal/REPORT_r5_20261103.md` (giữ nguyên bên dưới mục r6 làm phần thân — mọi giả định phán đoán r5
+> user DUYỆT, GIỮ NGUYÊN); báo cáo NĐT r5 lưu `archive_internal/NNC_DD_investor_report_20261103_r5.md`.
+> **Thứ tự chạy — trung thực:** `r6/calc/nnc_model_r6.py` không dùng giá thị trường làm đầu vào; khoá md5 `r6/calc/LOCK_md5_r6.txt` 22:31:57 ICT, sau đó mới
+> chạy `liquidity_r6.py` (BQ khối lượng/giá) + `compare_r6.py`. r1–r5 đã biết giá 46.100 ⇒ khoá chỉ chứng minh THỨ TỰ CHẠY.
+
+## r6 — chỉ đổi chi phí vốn + thêm thanh khoản (luật 21, user 03/11 22:27)
+
+- **r = 13,5%** tại điểm neo lãi huy động 12T hiệu dụng **7,40%** (`cctg_12m` 02/11/2026; `deposit_rate_vn.macro_killswitch_a_status()` đọc 03/11/2026: rate 0,074,
+  stale False). r(dep) = 13,5% + β(dep − 7,40%), β=1 (độ nhạy β 0,5). Tiêm r vào mọi lần gọi `N3.EV3` (r5 mặc định 13%). Gordon/ROE, PV thuê Núi Nhỏ, CNBP cùng r.
+- **Chân đối chứng:** r 13% tái lập r5 = 61.666 (lệch +0,1 đ/cp).
+- **Tâm 60.702** (r5 61.666; −964, −1,6%). Nhánh: STRUCTURAL 88.878 · ADMIN 54.522 · CYCLICAL 52.547. MVC đồng thời 16.687.
+- **Phản ứng theo r** (`nnc_model_r6_out.txt` §2): 12,0% 63.731 · 12,5% 62.675 · 13,0% 61.666 · **13,5% 60.702** · 14,0% 59.780 · 14,5% 58.898 · 15,0% 58.054.
+- **Độ nhạy lãi huy động** β=1: −100bp 62.675 (+3,3%) · −50bp 61.666 (+1,6%) · +50bp 59.780 (−1,5%) · +100bp 58.898 (−3,0%); β=0,5: ±50bp ±477/−466, ±100bp +964/−922.
+- **Lưới 4.374** (trục r 11,5/13,5/15,5): P10 52.323 · P25 57.101 · P50 62.953 · P75 69.413 · P90 75.530.
+- **Gordon r13,5** (r−g 10,5%): khoá (ROE 14,7%) 33.250; bổ sung (17,2%) 40.480 — giá 46.100 cao hơn +39%/+14%. ROE hàm ý giá 19,2%, tâm 24,3%.
+- **Thanh khoản** (`liquidity_r6.py`, phương pháp đăng ký trước trong docstring model): BQ `tav2_bq.ticker` 250 phiên 31/10/2025–03/11/2026: ADV trung vị 2,10 tỷ,
+  TB 2,79 tỷ, σ ngày 2,35%, 0 phiên trắng, Amihud trung vị 0,0028/tỷ; free float ≈36,3% (FPTS 01/2026 cổ đông lớn 63,7%). Không có số liệu thực thi của
+  quỹ cho NNC (`data/execution_logs` grep 0). CK = Y·σ·√(Q/ADV): Y=1 ⇒ 1 tỷ 1,6% · **5 tỷ 3,6%** · 10 tỷ 5,1% (Y 0,5/1,5: 1,8/5,4% ở 5 tỷ). Amihud kiểm chéo
+  ≈0,1%/phiên ở 15% ADV ⇒ Y=1 phía thận trọng. Phiên thoát 10%/20% ADV: 5/2 · 24/12 · 48/24.
+- **So giá** (`compare_r6_out.txt`): 46.100 = 0,76× tâm; lưới < giá 0,9%. Trước CK: RẺ (≤P10 52.323). Sau CK 5 tỷ: tâm 58.499, P10/25/75/90
+  50.425/55.029/66.894/72.789 ⇒ **RẺ** (cả 1/5/10 tỷ). Hoà vốn giá đá (r13,5): 229k (SL 1,10/1,20), 218–236k theo SL; biên 27,3–28,8%.
+- Báo cáo NĐT dựng lại `investor_report_v3/` (cùng tên file). CHƯA fundamental-skeptic r6; emailed=false.
+
+---
+
+## (thân r5 — giữ nguyên)
 
 > NGHIÊN CỨU READ-ONLY, hồ sơ NỘI BỘ. Không phải khuyến nghị. r4 lưu `archive_internal/REPORT_r4_20261103.md`; báo cáo NĐT r4 lưu
 > `archive_internal/NNC_DD_investor_report_20261103_r4.md`. Bản 30–31/10: `archive_internal/REPORT_v2_20261031.md` (gốc số BCTC/nguồn trang).

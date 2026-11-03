@@ -1,0 +1,8 @@
+NNC 2025-10-31..2026-11-03 N=250: ADV trung vi 2.10 ty | TB 2.79 ty | sigma ngay 2.35% | phien 0 KL 0.0% | Amihud trung vi 0.0028/ty | free float 36.3%
+   vi the    1 ty: CK Y0,5/1,0/1,5 = 0.8%/1.6%/2.4% | phien thoat 10%/15%/20% ADV = 5/3/2 | Amihud/phien @15% 0.1%
+   vi the    5 ty: CK Y0,5/1,0/1,5 = 1.8%/3.6%/5.4% | phien thoat 10%/15%/20% ADV = 24/16/12 | Amihud/phien @15% 0.1%
+   vi the   10 ty: CK Y0,5/1,0/1,5 = 2.6%/5.1%/7.7% | phien thoat 10%/15%/20% ADV = 48/32/24 | Amihud/phien @15% 0.1%
+MVC 2025-10-31..2026-11-03 N=250: ADV trung vi 0.45 ty | TB 0.86 ty | sigma ngay 2.51% | phien 0 KL 0.4% | Amihud trung vi 0.0188/ty | free float 30.2%
+   vi the    1 ty: CK Y0,5/1,0/1,5 = 1.9%/3.7%/5.6% | phien thoat 10%/15%/20% ADV = 22/15/11 | Amihud/phien @15% 0.1%
+   vi the    5 ty: CK Y0,5/1,0/1,5 = 4.2%/8.4%/12.5% | phien thoat 10%/15%/20% ADV = 111/74/55 | Amihud/phien @15% 0.1%
+   vi the   10 ty: CK Y0,5/1,0/1,5 = 5.9%/11.8%/17.7% | phien thoat 10%/15%/20% ADV = 221/148/111 | Amihud/phien @15% 0.1%
