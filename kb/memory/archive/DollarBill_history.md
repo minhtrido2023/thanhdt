@@ -334,3 +334,6 @@
 
 ## Archived 2026-11-03 (keep=12 days=0 require_done=False)
 - [2026-10-28T12:05:43Z] [2026-10-28 19:xx ICT] Plan ZaloPay 10-29 XONG: BUY MCH 200cp LO 139.800 (~27,99tr), chuyen egg >=20,6tr truoc 09:05; cho duyet truoc 08:45 29/10 (job DollarBill_20261028_120432)
+
+## Archived 2026-11-03 (keep=12 days=0 require_done=False)
+- [2026-10-28T12:06:02Z] [2026-10-28 19:xx ICT] Plan SpaceX 10-29 XONG: MUA MCH 200cp LO 139.800 (LAG_LO 8%), MSR ACK_DROP bỏ, egg>=19,4tr; chờ duyệt trước 08:45 29/10 (job DollarBill_20261028_120434)

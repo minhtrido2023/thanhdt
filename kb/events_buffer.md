@@ -820,3 +820,7 @@
 - [2026-11-03T12:11:25Z] DollarBill/heartbeat — DollarBill_20261103_121024: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261103_121024", "source": "watcher"}
 - [2026-11-03T12:11:27Z] DollarBill/heartbeat — DollarBill_20261103_121026: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261103_121026", "source": "watcher"}
 - [2026-11-03T12:11:58Z] DollarBill/decision — plan-ZaloPay-2026-11-04: {"plan": "data/trade_plans/plan_ZaloPay_2026-11-04.json", "state": "NEUTRAL", "orders": "SELL TV1 1100cp LO ref 19600 (phan chua khop cua lenh ban het da duyet 02/11; hom qua khop 300/1400)", "buys": 0, "skipped": "TV2 LAG_DD_FLAG_NO_ACK; TCH FLOOR_FAIL (user 02/11)", "egg": "khong can chuyen", "status": "cho user duyet truoc 08:45 04/11"}
+
+## Consolidation 2026-11-03T12:12:32Z
+- [2026-11-03T12:12:22Z] DollarBill/decision — plan-2026-11-04-SpaceX: {"plan": "SELL TV1 2200cp (tiếp tục lệnh user 02/11); 0 lệnh mua: TV2 FLAG_NO_ACK, TCH FLOOR_FAIL loại, DCM vào 05/11", "dt5g": "NEUTRAL", "file": "data/trade_plans/plan_SpaceX_2026-11-04.json", "status": "chờ user duyệt trước 08:45"}
+- [2026-11-03T12:12:27Z] DollarBill/heartbeat — DollarBill_20261103_121026: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261103_121026", "source": "watcher"}
