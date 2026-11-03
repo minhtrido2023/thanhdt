@@ -2052,7 +2052,8 @@ if runonce_label and account == runonce_label:
         # python gán env khung/mode (os.environ[..]=, setdefault/putenv, dict {"DCF_..": ..}) — cùng regex [3a] của selfcheck
         _rf_pat_py = re.compile(r"environ\[\s*['\"]DCF_(RATE_FRAME|TERMINAL_MODE)['\"]\s*\]\s*=|"
                                 r"(setdefault|putenv)\(\s*['\"]DCF_(RATE_FRAME|TERMINAL_MODE)|['\"]DCF_(RATE_FRAME|TERMINAL_MODE)['\"]\s*:")
-        _rf_skip_py = ("dcf_valuation.py", "dcf_earning_power.py", "dcf_rate_robustness.py")   # nguồn sự thật / CLI cùng lớp / nghiên cứu ghim legacy
+        _rf_skip_py = ("dcf_valuation.py", "dcf_earning_power.py", "dcf_rate_robustness.py",   # nguồn sự thật / CLI cùng lớp / nghiên cứu ghim legacy
+                       "dcf_rstar_refresh.py")   # r* DISPLAY-ONLY, tiến trình riêng; engine nghiên cứu tự ghim domestic_v2 khi import (2026-11-03)
         _rf_files = [os.path.join(wc_root, "wc_env.sh")] + sorted(
             glob.glob(os.path.join(wc_root, "*.sh")) + glob.glob(os.path.join(wc_root, "trading_bot", "*.sh"))
             + glob.glob(os.path.join(wc_root, "mike", "bin", "*.sh"))
