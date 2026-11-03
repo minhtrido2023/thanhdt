@@ -289,7 +289,7 @@ def cases(m):
                           {"days": {"2026-11-03": {"AAA": {"dd_date": eZ["dd_date"], "alert": True, "basis": "zone_low"}}}})
     tZ = m.render_table(rZ, [], D(2026, 11, 4), "t")
     ok("X5 bảng: tiêu đề 'đáy vùng' + ô mức 15.300; khối ghi 'đáy vùng'", "Mức −15% đáy vùng" in tZ and "| 15.300 |" in tZ
-       and "Dưới đáy vùng ≥15%" in m.render_block(rZ, [], D(2026, 11, 4), "t", "/tmp/x") and "giữ do trễ" in m.render_block(rZ, [], D(2026, 11, 4), "t", "/tmp/x"))
+       and "ỨNG VIÊN (dưới đáy vùng ≥15%" in m.render_block(rZ, [], D(2026, 11, 4), "t", "/tmp/x") and "giữ do trễ" in m.render_block(rZ, [], D(2026, 11, 4), "t", "/tmp/x"))
     m.DD_ALERT_BASIS = "center"
     ok("X5 trở lại cơ sở center: mức −15% = 17.000", m._lvl(eZ) == 17000)
     # 19. (vòng 3) X10/X11 ghi chú asof / lịch lễ xuất hiện trong đầu ra khi không đọc được lịch lễ
@@ -322,6 +322,125 @@ def cases(m):
        m.CENTER_BELOW_LOW in m.render_block(rFp, [], D(2026, 11, 2), "t", "/tmp/x") and m.CENTER_BELOW_LOW in m.render_table(rFp, [], D(2026, 11, 2), "t"))
     rOk, _, _ = m.evaluate({"entries": [ent("AAA")]}, D(2026, 11, 2), {"AAA": {"close": 19000.0}}, {}, None, {})
     ok("tâm>đáy: không in câu đó", m.CENTER_BELOW_LOW not in m.render_block(rOk, [], D(2026, 11, 2), "t", "/tmp/x"))
+    # 30. (02/11 quy tắc 4) ỨNG VIÊN sleeve discretionary: lọc + cờ cảnh báo + file máy đọc
+    cl = {"entries": [ent("AAA"), ent("BBB"), ent("TV1", dd="2026-11-02"), ent("DRI", dd="2026-10-27"),
+                      ent("HHH"), ent("CCC"), ent("TVN", dd="2026-11-02")]}
+    cl["entries"].append(dict(ent("TV1", dd="2026-11-10"), ticker="TVX"))
+    pr30 = {t: {"close": 16000.0} for t in ("AAA", "BBB", "TV1", "DRI", "HHH", "TVX", "TVN")}
+    pr30["CCC"] = {"close": 19500.0}
+    fl30 = {"AAA": ["forensic exclude (01/09/2026)"], "HHH": ["đang giữ SpaceX 1.000"]}
+    r30, _, _ = m.evaluate(cl, D(2026, 11, 12), pr30, fl30, None, {})
+    h30 = {"held": {"HHH": ["SpaceX"]}, "err": []}
+    df30 = {"AAA": ("FLAGGED", ["QF:FLOOR_FAIL"], "cờ QF:FLOOR_FAIL"), "BBB": ("CLEAN", [], ""),
+            "TVX": ("UNKNOWN", [], "universe_pit không đọc được"), "TVN": ("CLEAN", [], "")}
+    c30, x30 = m.build_candidates(r30, h30, df30)
+    ct = [c["ticker"] for c in c30]
+    ok("ứng viên = mã ≤ tâm −15%, trừ đang giữ + user chốt không giữ; mã không cảnh báo (CCC) không vào",
+       ct == ["AAA", "BBB", "TVN", "TVX"] and sorted(x["ticker"] for x in x30) == ["DRI", "HHH", "TV1"])
+    ok("sổ thật USER_NO_HOLD có TV1 + DRI (quyết định user 02/11)", {"TV1", "DRI"} <= set(m.USER_NO_HOLD))
+    ok("user chốt không giữ chỉ chặn tới khi có DD MỚI hơn ngày chốt (TV1 DD 10/11 ⇒ xét lại)",
+       m.USER_NO_HOLD.get("TV1", ("",))[0] < "2026-11-10" and
+       [c["ticker"] for c in m.build_candidates(m.evaluate({"entries": [ent("TV1", dd="2026-11-10")]}, D(2026, 11, 12),
+                                                          {"TV1": {"close": 16000.0}}, {}, None, {})[0], h30, {})[0]] == ["TV1"])
+    cA = c30[0]
+    ok("cờ DD FLAGGED đi kèm dạng CẢNH BÁO, KHÔNG loại", "QF:FLOOR_FAIL" in " ".join(cA["warnings"])
+       and "chỉ cảnh báo" in " ".join(cA["warnings"]) and cA["dd_flag_codes"] == ["QF:FLOOR_FAIL"])
+    ok("cờ tĩnh (forensic/pháp lý) giữ trong warnings", any("forensic exclude" in w for w in cA["warnings"]))
+    ok("mã sạch không có cảnh báo DD", not any("cờ DD" in w for w in c30[1]["warnings"]))
+    ok("cờ DD UNKNOWN ⇒ cảnh báo 'không kết luận được'", any("không kết luận được" in w for w in c30[3]["warnings"]))
+    cN, _ = m.build_candidates(r30, h30, None)
+    ok("không kiểm cờ DD (dd_flags None) ⇒ cảnh báo 'chưa kiểm', không im lặng", all(any("chưa kiểm" in w for w in c["warnings"]) for c in cN))
+    cE, xE = m.build_candidates(r30, {"held": {}, "err": ["ZaloPay"]}, df30)
+    ok("vị thế đọc lỗi ⇒ vẫn liệt kê + cảnh báo 'có thể đang giữ'",
+       "HHH" in [c["ticker"] for c in cE] and all(any("có thể đang giữ" in w for w in c["warnings"]) for c in cE))
+    b30 = m.render_block(r30, [], D(2026, 11, 12), "t", "/tmp/x", c30, x30)
+    ok("khối: nhãn ỨNG VIÊN sleeve discretionary + 'user duyệt từng lần, KHÔNG tự mua'",
+       "ỨNG VIÊN sleeve discretionary" in b30 and "KHÔNG tự mua" in b30 and "GHI CHÚ ĐỂ ANH" not in b30)
+    ok("khối: mã bị loại nêu riêng ở 'KHÔNG xét', không có dòng ứng viên",
+       "KHÔNG xét" in b30 and "TV1 (đã có quyết định không giữ" in b30 and "• HHH" not in b30 and "• TV1" not in b30)
+    ok("khối: dòng ứng viên mang cờ cảnh báo", "• AAA" in b30 and "QF:FLOOR_FAIL" in b30.split("• AAA")[1].split("\n")[0])
+    # account_flags có cấu trúc held
+    ipw.load_accounts = lambda: [{"label": "SpaceX", "account_id": "1", "excluded": []},
+                                 {"label": "ZaloPay", "account_id": "2", "excluded": []}]
+
+    class HalfM:
+        def positions(self, acc):
+            if acc == "2":
+                raise TimeoutError("x")
+            return {"AAA": {"qty": 1250}}
+    try:
+        hh = {"held": {}, "err": []}
+        m.account_flags(["AAA", "BBB"], HalfM(), {"AAA": [], "BBB": []}, hh)
+    finally:
+        ipw.load_accounts = orig
+    ok("account_flags: held có cấu trúc + TK đọc lỗi vào err", hh == {"held": {"AAA": ["SpaceX"]}, "err": ["ZaloPay"]})
+    # dd_flag_map: thiếu dd_flag_verdict ⇒ UNKNOWN; có ⇒ gọi run_due_diligence book DISCRETIONARY, skip dcf/corp
+    import types as _ty
+    import trading_bot as _tb
+    calls = []
+    fk = _ty.ModuleType("trading_bot.due_diligence")
+    fk.run_due_diligence = lambda t, b, c, as_dict=False: calls.append((t, b, c, as_dict)) or {"q": t}
+    _sv_mod, _sv_attr = sys.modules.get("trading_bot.due_diligence"), getattr(_tb, "due_diligence", None)
+    sys.modules["trading_bot.due_diligence"] = fk
+    _tb.due_diligence = fk
+    try:
+        u = m.dd_flag_map(["AAA"], D(2026, 11, 3))
+        fk.dd_flag_verdict = lambda d: ("FLAGGED", ["QF:X"], "x") if d["q"] == "AAA" else ("CLEAN", [], "")
+        v = m.dd_flag_map(["AAA", "BBB"], D(2026, 11, 3))
+    finally:
+        if _sv_mod is None:
+            sys.modules.pop("trading_bot.due_diligence", None)
+        else:
+            sys.modules["trading_bot.due_diligence"] = _sv_mod
+        if _sv_attr is None:
+            delattr(_tb, "due_diligence")
+        else:
+            _tb.due_diligence = _sv_attr
+    ok("dd_flag_map: due_diligence thiếu dd_flag_verdict ⇒ UNKNOWN có lý do (không im lặng CLEAN)", u["AAA"][0] == "UNKNOWN")
+    ok("dd_flag_map: dùng dd_flag_verdict, run_due_diligence(book DISCRETIONARY, skip_dcf+skip_corp, as_dict, asof)",
+       v["AAA"][0] == "FLAGGED" and v["BBB"][0] == "CLEAN" and calls and all(
+           c[1] == "DISCRETIONARY" and c[2]["skip_dcf"] and c[2]["skip_corp_flags"] and c[3] and c[2]["asof"] == "2026-11-03" for c in calls))
+    # file máy đọc: run() ghi, không lùi asof, '' = không ghi
+    with tempfile.TemporaryDirectory() as td:
+        lp = os.path.join(td, "l.json")
+        json.dump({"entries": [ent("AAA"), ent("TV1", dd="2026-10-30")]}, open(lp, "w"))
+        cp = os.path.join(td, "p.csv")
+        open(cp, "w").write("ticker,date,close\nAAA,2026-10-30,16000\nTV1,2026-10-30,16000\nAAA,2026-10-29,16000\nTV1,2026-10-29,16000\n")
+        cj = os.path.join(td, "cand.json")
+
+        def go3(asof, cjp=cj):
+            a = argparse.Namespace(asof=asof, ledger=lp, state=os.path.join(td, "s.json"), out_dir=td, price_csv=cp,
+                                   report_block=True, no_bq=True, no_positions=True, no_state=True, candidates_json=cjp)
+            with contextlib.redirect_stdout(io.StringIO()):
+                return m.run(a, now=dt.datetime(2026, 11, 2, 21, 0, tzinfo=_ICT))
+        go3("2026-10-30")
+        P = json.load(open(cj, encoding="utf-8"))
+        ok("file ứng viên: schema + asof + no_orders + ứng viên AAA, TV1 ở excluded",
+           P["schema"] == m.CAND_SCHEMA and P["asof"] == "2026-10-30" and P["no_orders"] is True
+           and [c["ticker"] for c in P["candidates"]] == ["AAA"] and [x["ticker"] for x in P["excluded"]] == ["TV1"]
+           and P["checked"] == 2 and P["total"] == 2)
+        ok("file ứng viên: --no-positions ⇒ ứng viên mang cảnh báo 'có thể đang giữ'",
+           any("có thể đang giữ" in w for w in P["candidates"][0]["warnings"]))
+        go3("2026-10-29")
+        ok("file ứng viên: chạy --asof CŨ hơn KHÔNG ghi đè bản mới", json.load(open(cj, encoding="utf-8"))["asof"] == "2026-10-30")
+        cj2 = os.path.join(td, "none.json")
+        go3("2026-10-30", cjp="")
+        ok("--candidates-json '' ⇒ không ghi file", not os.path.exists(cj2))
+        # mặc định (không truyền --candidates-json): --no-state / --price-csv KHÔNG đè file thật
+        dflt = os.path.join(td, "default_cand.json")
+        _sv_cj = m.CAND_JSON
+        m.CAND_JSON = dflt
+        try:
+            for nst in (True, False):
+                a4 = argparse.Namespace(asof="2026-10-30", ledger=lp, state=os.path.join(td, "s4.json"), out_dir=td,
+                                        price_csv=cp, report_block=True, no_bq=True, no_positions=True,
+                                        no_state=nst, candidates_json=None)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    m.run(a4, now=dt.datetime(2026, 11, 2, 21, 0, tzinfo=_ICT))
+                ok(f"mặc định + --price-csv (no_state={nst}) ⇒ KHÔNG ghi file ứng viên mặc định",
+                   not os.path.exists(dflt))
+        finally:
+            m.CAND_JSON = _sv_cj
     # 10. không đụng Notifier/Telegram/plan
     src = open(SRC, encoding="utf-8").read()
     ok("module không gọi notify/Notifier/ghi plan", not any(k in src for k in ("notify_telegram", "Notifier(", "trade_plans", "place_order(", "send_telegram")))
@@ -363,7 +482,22 @@ MUTANTS = [
     ("X5 cột mức −15% luôn theo tâm", "def _lvl(e):\n    b = alert_base(e)", 'def _lvl(e):\n    b = e.get("center")'),
     ("X10 bỏ ghi chú asof khỏi đầu ra", "    if asof_note:\n        src += f\"; {asof_note}\"", "    if False:\n        src += ''"),
     ("X11 default_asof nuốt ghi chú lịch lễ", ', f"⚠️ không đọc được lịch lễ ({type(e).__name__}) — chỉ loại T7/CN"', ', ""'),
+    ("V2a mặc định luôn ghi file ứng viên", "cjson = None if (args.no_state or args.price_csv) else CAND_JSON", "cjson = CAND_JSON"),
     ("nit: bỏ câu tâm<đáy ở bảng", "if c is not None and lo is not None and c < lo:", "if False:"),
+    ("C1 bỏ loại USER_NO_HOLD", 'if nh and e["dd_date"] <= nh[0]:', 'if False:'),
+    ("C2 USER_NO_HOLD vĩnh viễn (bỏ điều kiện DD mới)", 'if nh and e["dd_date"] <= nh[0]:', 'if nh:'),
+    ("C3 bỏ loại đang giữ", 'if held["held"].get(t):', 'if False:'),
+    ("C4 cờ DD LOẠI ứng viên", '            warns.append(f"⚠ cờ DD {', '            continue\n            warns.append(f"⚠ cờ DD {'),
+    ("C5 bỏ cờ tĩnh khỏi warnings", 'warns = [f for f in r["flags"] if not f.startswith("đang giữ")] + ', 'warns = [] + '),
+    ("C6 vị thế lỗi im lặng", 'if held["err"]:', 'if False:'),
+    ("C7 ghi đè bằng asof cũ", 'str(cur.get("asof", "")) > payload["asof"]', 'False'),
+    ("C8 dd_flags None im lặng", 'if df is None:\n            warns.append', 'if False:\n            warns.append'),
+    ("C9 không ghi file ứng viên", "    if cjson:\n", "    if False:\n"),
+    ("C10 ứng viên gồm mã không cảnh báo", 'if not r.get("alert") or r.get("frame_block"):\n            continue', 'if r.get("frame_block"):\n            continue'),
+    ("C11 dd_flag_map thiếu hàm ⇒ CLEAN", 'return {t: ("UNKNOWN", [], "due_diligence chưa có dd_flag_verdict', 'return {t: ("CLEAN", [], "due_diligence chưa có dd_flag_verdict'),
+    ("C12 khối không lọc theo ứng viên", 'shown = al if cmap is None else [r for r in al if r["ticker"] in cmap]', 'shown = al'),
+    ("C13 nhãn quay về ghi chú", '"ỨNG VIÊN sleeve discretionary — xét, user duyệt từng lần, KHÔNG tự mua; "', '"GHI CHÚ ĐỂ ANH CÂN NHẮC; "'),
+    ("C14 dd_flag_map sai book", 't, "DISCRETIONARY", {"asof"', 't, "BAL", {"asof"'),
     ("nit: bỏ câu tâm<đáy ở khối", 'e["center"] < e["zone_low"]:\n            notes', 'False:\n            notes'),
 ]
 

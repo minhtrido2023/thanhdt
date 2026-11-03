@@ -4,7 +4,14 @@
 User yêu cầu 2026-11-01 22:39 ICT: "Mã nào cuối ngày nằm dưới vùng của mức giá hợp lý 15% thì note vào
 trong quá trình tạo plan buổi tối mỗi ngày để tôi biết có nên đưa vào plan không".
 
-CHỈ GHI CHÚ — KHÔNG đặt lệnh, KHÔNG ghi plan, KHÔNG gọi bot/Notifier. DNSE chỉ-đọc qua
+User chốt 2026-11-02 23:01 ICT (quy tắc 4, kb/projects/dd-flag-rules-20261102.md): mã có DD mà giá ≤ tâm×(1−15%)
+ĐƯỢC XÉT làm ỨNG VIÊN sleeve discretionary (user duyệt từng lần, KHÔNG tự mua). Khối đổi nhãn "ghi chú" →
+"ỨNG VIÊN"; danh sách ứng viên xuất ra file máy đọc `data/dd_zone_candidates_latest.json` (schema
+CAND_SCHEMA) cho phễu discretionary + bản tin 08:00. Ứng viên GIỮ cờ dưới dạng CẢNH BÁO (BANNED/forensic/
+excluded/cờ DD) — không loại (discretionary là ngoại lệ của luật "mã có cờ ⇒ loại"). LOẠI khỏi ứng viên:
+mã đang giữ (DNSE positions) và mã user đã chốt không giữ (USER_NO_HOLD, tới khi có DD mới hơn).
+
+KHÔNG đặt lệnh, KHÔNG ghi plan, KHÔNG gọi bot/Notifier. DNSE chỉ-đọc qua
 `intraday_price_watch.LiveMarket` (ReadOnlyDNSE: ohlc 1D + positions). Giá cùng ngày KHÔNG lấy từ BQ
 (BQ sync 23:45 ICT); BQ chỉ dùng để phát hiện BCTC quý mới hơn DD (dữ liệu lịch sử, trễ ≤1 ngày).
 
@@ -49,7 +56,16 @@ CLOSE_READY = dt.time(15, 5)  # trước giờ này bar 1D của hôm nay chưa 
 LEDGER = os.path.join(MIKE, "kb", "dd_price_zones.json")
 STATE = os.environ.get("DDZ_STATE") or os.path.join(WC, "data", "dd_price_zone_watch_state.json")
 OUT_DIR = os.path.join(WC, "data", "dd_price_zone")
-NOTE = "GHI CHÚ ĐỂ ANH CÂN NHẮC, không phải tín hiệu mua; không tự đưa vào plan."
+NOTE = ("ỨNG VIÊN sleeve discretionary — xét, user duyệt từng lần, KHÔNG tự mua; "
+        "không phải tín hiệu mua; không tự đưa vào plan.")
+CAND_SCHEMA = "dd_zone_candidates/v1"
+CAND_JSON = os.environ.get("DDZ_CANDIDATES") or os.path.join(WC, "data", "dd_zone_candidates_latest.json")
+# Mã user ĐÃ CHỐT không giữ — không đưa lại làm ứng viên CHO TỚI KHI có DD mới hơn ngày quyết định
+# (dd_date > ngày chốt). Hằng số trong code (có version control), cùng khuôn LAG_USER_EXCLUDED.
+USER_NO_HOLD = {
+    "TV1": ("2026-11-02", "user chốt 02/11: chưa có biên an toàn, không giữ"),
+    "DRI": ("2026-11-02", "user chốt 02/11: giá cao hơn giá hợp lý nhiều, bán hết"),
+}
 ST_IN, ST_BELOW, ST_ABOVE = "TRONG vùng", "DƯỚI vùng", "TRÊN vùng"
 ST_ALERT = f"DƯỚI {'TÂM' if DD_ALERT_BASIS == 'center' else 'ĐÁY VÙNG'} ≥{THRESHOLD_PCT}% (NGƯỠNG CẢNH BÁO)"
 ST_FRAME = "CẦN DD/ĐIỀU CHỈNH TÂM (sự kiện quyền sau DD)"
@@ -251,6 +267,86 @@ def _checked(rows):
     return len(ok), len(rows)
 
 
+def build_candidates(rows, held, dd_flags):
+    """→ (candidates, excluded). Ứng viên = dòng đang CẢNH BÁO (giá ≤ tâm −15%, trễ tắt −10%) và không bị
+    chặn hệ giá; LOẠI: user đã chốt không giữ (USER_NO_HOLD, DD chưa mới hơn ngày chốt) + đang giữ.
+    held = {"held": {t: [label]}, "err": [label]} ; dd_flags = {t: (status, codes, why)} | None.
+    Cờ KHÔNG loại — đi kèm dưới dạng warnings (sleeve discretionary: cờ = cảnh báo)."""
+    cands, excl = [], []
+    for r in rows:
+        if not r.get("alert") or r.get("frame_block"):
+            continue
+        t, e = r["ticker"], r["entry"]
+        nh = USER_NO_HOLD.get(t)
+        if nh and e["dd_date"] <= nh[0]:
+            excl.append({"ticker": t, "why": f"đã có quyết định không giữ ({nh[1]})"})
+            continue
+        if held["held"].get(t):
+            excl.append({"ticker": t, "why": "đang giữ " + ", ".join(held["held"][t])})
+            continue
+        warns = [f for f in r["flags"] if not f.startswith("đang giữ")] + list(r.get("frame_notes", []))
+        if held["err"]:
+            warns.append(f"⚠️ chưa kiểm được vị thế ({', '.join(held['err'])}) — có thể đang giữ")
+        df = (dd_flags or {}).get(t)
+        if df is None:
+            warns.append("⚠️ cờ DD (chất lượng/🔴) chưa kiểm")
+        elif df[0] == "FLAGGED":
+            warns.append(f"⚠ cờ DD {', '.join(df[1])} (sleeve discretionary: chỉ cảnh báo)")
+        elif df[0] == "UNKNOWN":
+            warns.append(f"⚠️ cờ DD không kết luận được: {df[2]}")
+        cands.append({"ticker": t, "close": r["close"], "center": e.get("center"),
+                      "center_kind": e.get("center_kind"), "zone_low": e.get("zone_low"),
+                      "zone_high": e.get("zone_high"), "pct_center": r.get("pct_center"),
+                      "level_threshold": _lvl(e), "new_alert": bool(r.get("new_alert")),
+                      "hold_band": bool(r.get("hold_band")), "adv20": r.get("adv20"),
+                      "dd_date": e["dd_date"], "dd_rev": int(e.get("rev", 1)),
+                      "source_file": e.get("source_file"),
+                      "dd_flag_status": df[0] if df else None, "dd_flag_codes": list(df[1]) if df else [],
+                      "warnings": warns})
+    return cands, excl
+
+
+def dd_flag_map(tickers, asof):
+    """{t: (status, codes, why)} qua trading_bot.due_diligence.dd_flag_verdict (định nghĩa "cờ" DUY NHẤT,
+    luật 02/11 — không tính lại ở đây). Thiếu hàm/lỗi ⇒ UNKNOWN có lý do, không im lặng CLEAN."""
+    try:
+        from trading_bot import due_diligence as ddm
+        verdict = getattr(ddm, "dd_flag_verdict", None)
+        if verdict is None:
+            return {t: ("UNKNOWN", [], "due_diligence chưa có dd_flag_verdict (cần merge nhánh cổng cờ DD)")
+                    for t in tickers}
+    except Exception as e:  # noqa: BLE001
+        return {t: ("UNKNOWN", [], f"không nạp được due_diligence ({type(e).__name__})") for t in tickers}
+    out = {}
+    for t in tickers:
+        try:
+            out[t] = verdict(ddm.run_due_diligence(
+                t, "DISCRETIONARY", {"asof": asof.isoformat(), "skip_dcf": True, "skip_corp_flags": True},
+                as_dict=True))
+        except Exception as e:  # noqa: BLE001
+            out[t] = ("UNKNOWN", [], f"{type(e).__name__}")
+    return out
+
+
+def candidates_payload(cands, excl, rows, expired, asof, src, now):
+    n, m = _checked(rows)
+    return {"schema": CAND_SCHEMA, "asof": asof.isoformat(), "generated_at": now.isoformat(timespec="seconds"),
+            "rule": f"giá ≤ {BASIS_VN[DD_ALERT_BASIS]}×(1−{THRESHOLD_PCT}%) (trễ: tắt khi > −{RELEASE_PCT}%)",
+            "label": NOTE, "no_orders": True, "price_source": src, "checked": n, "total": m,
+            "candidates": cands, "excluded": excl,
+            "not_checked": [{"ticker": r["ticker"], "err": r.get("err")} for r in rows if r.get("close") is None],
+            "expired": [x["ticker"] for x in expired]}
+
+
+def write_candidates(path, payload):
+    """Ghi atomic; KHÔNG ghi đè bằng asof CŨ hơn file hiện có (chạy --asof quá khứ không làm lùi bản tin)."""
+    cur = _read_json(path, {})
+    if cur.get("schema") == CAND_SCHEMA and str(cur.get("asof", "")) > payload["asof"]:
+        return False
+    _atomic_write(path, json.dumps(payload, ensure_ascii=False, indent=1))
+    return True
+
+
 def render_table(rows, expired, asof, src):
     bv = BASIS_VN[DD_ALERT_BASIS]
     n, m = _checked(rows)
@@ -273,13 +369,15 @@ def render_table(rows, expired, asof, src):
     return "\n".join(L) + "\n"
 
 
-def render_block(rows, expired, asof, src, table_path):
-    """Khối NGẮN cho báo cáo plan / Discord. KHÔNG bao giờ khẳng định 'không mã nào' khi có mã không kiểm được."""
+def render_block(rows, expired, asof, src, table_path, cands=None, excl=None):
+    """Khối NGẮN cho báo cáo plan / Discord. KHÔNG bao giờ khẳng định 'không mã nào' khi có mã không kiểm được.
+    cands/excl (build_candidates) ⇒ mục cảnh báo chỉ liệt kê ỨNG VIÊN + cờ cảnh báo, mã bị loại nêu riêng."""
     bv = BASIS_VN[DD_ALERT_BASIS]
     n, m = _checked(rows)
     cov = f"KIỂM ĐƯỢC {n}/{m} mã" if n else "KHÔNG KIỂM ĐƯỢC"
-    L = [f"📌 **Mã DD dưới vùng giá hợp lý** (đóng cửa {asof:%d/%m}, {src}) — {cov}. {NOTE}"]
+    L = [f"📌 **Sổ DD vs giá đóng cửa** (ứng viên khi giá ≤ {bv} −{THRESHOLD_PCT}%; đóng cửa {asof:%d/%m}, {src}) — {cov}. {NOTE}"]
     al = [r for r in rows if r.get("alert")]
+    cmap = {c["ticker"]: c for c in cands} if cands is not None else None
     below = [r for r in rows if not r.get("alert") and r.get("zone_status") == ST_BELOW]
     framed = [r for r in rows if r.get("frame_block")]
 
@@ -288,14 +386,21 @@ def render_block(rows, expired, asof, src, table_path):
         notes = r["flags"] + r.get("frame_notes", [])
         if e.get("center") is not None and e.get("zone_low") is not None and e["center"] < e["zone_low"]:
             notes = notes + [CENTER_BELOW_LOW]
+        if cmap is not None and r["ticker"] in cmap:
+            notes = [x for x in cmap[r["ticker"]]["warnings"] if x not in notes] + notes
         fl = f" · {'; '.join(notes)}" if notes else ""
         adv = "" if r.get("adv20") is None else f" · ADV20 {r['adv20'] / 1e9:.1f} tỷ".replace(".", ",")
         return (f"  • {r['ticker']} {_f(r['close'])} — {_label(r)}; tâm {_f(e.get('center'))} ({_pct(r.get('pct_center'))})"
                 f", vùng {_f(e.get('zone_low'))}–{_f(e.get('zone_high'))} ({_pct(r.get('pct_low'))} so đáy)"
                 f"{adv}{fl} · DD {e['dd_date']}")
+    shown = al if cmap is None else [r for r in al if r["ticker"] in cmap]
+    if shown:
+        L.append(f"  ỨNG VIÊN (dưới {bv} ≥{THRESHOLD_PCT}%; cờ = CẢNH BÁO, không loại):")
+        L += [line(r) for r in sorted(shown, key=lambda r: (not r.get("new_alert"), r["pct_center"] if r.get("pct_center") is not None else 0))]
+    if excl:
+        L.append(f"  Dưới {bv} ≥{THRESHOLD_PCT}% nhưng KHÔNG xét: " + "; ".join(f"{x['ticker']} ({x['why']})" for x in excl))
     if al:
-        L.append(f"  Dưới {bv} ≥{THRESHOLD_PCT}%:")
-        L += [line(r) for r in sorted(al, key=lambda r: (not r.get("new_alert"), r["pct_center"] if r.get("pct_center") is not None else 0))]
+        pass                                    # đã liệt kê ứng viên / mã không xét ở trên
     elif n == m and m:
         L.append(f"  Không mã nào dưới {bv} ≥{THRESHOLD_PCT}% (đã kiểm {n}/{m}).")
     elif n:
@@ -477,8 +582,9 @@ def static_flags(tickers, asof):
     return fl
 
 
-def account_flags(tickers, market, fl):
-    """Đang giữ (DNSE positions, chỉ-đọc, lọc account §12 trong LiveMarket.positions) + excluded_tickers."""
+def account_flags(tickers, market, fl, held=None):
+    """Đang giữ (DNSE positions, chỉ-đọc, lọc account §12 trong LiveMarket.positions) + excluded_tickers.
+    held (tuỳ chọn) = {"held": {t: [label]}, "err": [label]} — bản có cấu trúc cho build_candidates."""
     from intraday_price_watch import load_accounts
     for a in load_accounts():
         for t in tickers:
@@ -489,9 +595,13 @@ def account_flags(tickers, market, fl):
             for t in tickers:
                 if (pos.get(t) or {}).get("qty"):
                     fl[t].append(f"đang giữ {a['label']} {pos[t]['qty']:,}".replace(",", "."))
+                    if held is not None:
+                        held["held"].setdefault(t, []).append(a["label"])
         except Exception as e:  # noqa: BLE001
             for t in tickers:
                 fl[t].append(f"⚠️ không đọc được vị thế {a['label']} ({type(e).__name__})")
+            if held is not None:
+                held["err"].append(a["label"])
     return fl
 
 
@@ -516,15 +626,17 @@ def run(args, now=None):
         market = LiveMarket()
         prices, src = dnse_prices(tickers, asof, market), "DNSE ohlc 1D"
     flags = static_flags(tickers, asof)
+    held = {"held": {}, "err": ["--no-positions"] if args.no_positions else []}
     if not args.no_positions:
         try:
             if market is None:
                 from intraday_price_watch import LiveMarket
                 market = LiveMarket()
-            account_flags(tickers, market, flags)
+            account_flags(tickers, market, flags, held)
         except Exception as e:  # noqa: BLE001
             for t in tickers:
                 flags[t].append(f"⚠️ không kiểm được vị thế/excluded ({type(e).__name__})")
+            held["err"].append(f"vị thế ({type(e).__name__})")
     newer = None if args.no_bq else bq_newer_releases(tickers, [e["bctc_quarter"] for e in ents.values()])
     corp = None if args.no_bq else corp_events(tickers, ents, asof) if ents else {}
     state = _read_json(args.state, {}) if not args.no_state else {}
@@ -536,6 +648,17 @@ def run(args, now=None):
     if asof_note:
         src += f"; {asof_note}"
     os.makedirs(args.out_dir, exist_ok=True)
+    alert_t = [r["ticker"] for r in rows if r.get("alert") and not r.get("frame_block")]
+    dflags = None if (args.no_bq or not alert_t) else dd_flag_map(alert_t, asof)
+    cands, excl = build_candidates(rows, held, dflags)
+    cjson = getattr(args, "candidates_json", None)
+    if cjson is None:
+        # Mặc định CHỈ ghi file máy đọc khi là lượt chạy THẬT: --no-state (thử/selfcheck) hoặc
+        # --price-csv (ngày quá khứ/khẩn cấp) KHÔNG được đè file ứng viên mà bản tin 08:00 đọc
+        # (arch-review 2026-11-02). Muốn ghi trong 2 chế độ đó ⇒ truyền --candidates-json PATH.
+        cjson = None if (args.no_state or args.price_csv) else CAND_JSON
+    if cjson:
+        write_candidates(cjson, candidates_payload(cands, excl, rows, expired, asof, src, now))
     tpath = os.path.join(args.out_dir, f"{asof.isoformat()}.md")
     _atomic_write(tpath, render_table(rows, expired, asof, src))
     prune_md(args.out_dir, now.date())
@@ -544,7 +667,8 @@ def run(args, now=None):
         for d in sorted(state["days"])[:-60]:          # giữ 60 phiên gần nhất
             del state["days"][d]
         _atomic_write(args.state, json.dumps(state, ensure_ascii=False, indent=1))
-    print(render_block(rows, expired, asof, src, tpath) if args.report_block else open(tpath, encoding="utf-8").read())
+    print(render_block(rows, expired, asof, src, tpath, cands, excl) if args.report_block
+          else open(tpath, encoding="utf-8").read())
     return 0
 
 
@@ -561,6 +685,10 @@ def main(argv=None):
     rp.add_argument("--no-bq", action="store_true")
     rp.add_argument("--no-positions", action="store_true")
     rp.add_argument("--no-state", action="store_true")
+    rp.add_argument("--candidates-json", default=None,
+                    help="file ứng viên máy đọc (phễu discretionary + bản tin 08:00); '' = không ghi; "
+                         "bỏ trống ⇒ $DDZ_CANDIDATES/data/dd_zone_candidates_latest.json, TRỪ KHI "
+                         "--no-state hoặc --price-csv (khi đó không ghi)")
     a = ap.parse_args(argv)
     try:
         return run(a)

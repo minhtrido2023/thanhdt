@@ -228,7 +228,9 @@ if [ -n "$NOWCAST_CMD" ] && [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
 fi
 export NOWCAST_BLOCK
 
-# --- Mã DD dưới vùng giá hợp lý (user yêu cầu 2026-11-01 22:39 ICT; job Taylor_20261101_154045).
+# --- ỨNG VIÊN sleeve discretionary từ sổ DD (giá ≤ tâm −15%; user yêu cầu 2026-11-01 22:39 ICT, job
+# Taylor_20261101_154045; đổi nhãn "ghi chú" → "ứng viên" theo quy tắc 4 user 02/11 — vẫn KHÔNG sinh lệnh).
+# Lượt chạy này cũng ghi data/dd_zone_candidates_latest.json cho phễu discretionary + bản tin 08:00.
 # GHI CHÚ cho user cân nhắc đưa vào plan — KHÔNG đụng orders/sizing, KHÔNG tự thêm lệnh. Sổ
 # kb/dd_price_zones.json + giá đóng cửa DNSE chỉ-đọc (bin/dd_price_zone_watch.py). CHỈ ZaloPay (cùng tiền lệ
 # NOWCAST) để khỏi lặp một khối giống hệt 2 lần/đêm; plan report SpaceX cũng đi tới kênh duyệt plan của user
@@ -249,7 +251,7 @@ if [ -n "$DDZONE_CMD" ]; then
   DDZONE_RC=$?
   if [ "$DDZONE_RC" -ne 0 ] || [ -z "$DDZONE_BLOCK" ]; then
     _dzerr="$(grep -v '^\s*$' "$DDZONE_ERR" | tail -1 | cut -c1-160)"
-    DDZONE_BLOCK="⚠️ Mã DD dưới vùng giá hợp lý: KHÔNG KIỂM ĐƯỢC (dd_price_zone_watch rc=$DDZONE_RC${_dzerr:+, $_dzerr}) — plan không bị ảnh hưởng."
+    DDZONE_BLOCK="⚠️ Ứng viên sleeve từ sổ DD: KHÔNG KIỂM ĐƯỢC (dd_price_zone_watch rc=$DDZONE_RC${_dzerr:+, $_dzerr}) — plan không bị ảnh hưởng."
   fi
   sed 's/^/[ddzone] /' "$DDZONE_ERR" >&2
   rm -f "$DDZONE_ERR"
