@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-02T16:47:58Z] ĐANG DỞ: job Taylor_20261102_164745 vòng2 dd-flag-gate (V1 netting order) + dd-zone (V2 vặt) | NEXT: sửa bot_execute thứ tự cổng
-- [2026-11-02T17:10:53Z] [dd-flag r2 03/11] XONG job Taylor_20261102_164745: V1 55c6883f6 + V2 2fd8ebd1d (chua merge) — cho Mike arch-review r2 + merge V1 truoc V2
 - [2026-11-03T01:30:18Z] ĐANG DỞ: crisis-DD DRI ngày2 job Taylor_20261103_013001 | NEXT: legal-vn + web tin mới + giá đóng 02/11, viết dd-note
 - [2026-11-03T01:34:33Z] [crisis-dd DRI 03/11] XONG ngày2 (không cờ, GIỮ) — mở: NQ ĐHĐCĐ BT 26/10 + giải trình Q3 PDF chưa đọc, SXKD T10 ~10/11
 - [2026-11-03T02:41:31Z] ĐANG DỞ: job Taylor_20261103_024121 research CAPIT flag gate A/B — research/capit_flag_gate_20261103/ | NEXT: tìm engine CAPIT + pin trong results_registry
@@ -26,3 +24,5 @@
 - [2026-11-03T08:36:11Z] ĐANG DỞ DD MVC job Taylor_20261103_082601: SOTP khoa md5 calc/LOCK_md5.txt tam 19.540 | NEXT: ADV/gia BQ, viet REPORT.md, bus finding
 - [2026-11-03T08:40:43Z] [dd-MVC 03/11] XONG job Taylor_20261103_082601 commit e63ff1041 — tam 19.540 (14.600-24.500), gia 13.700 duoi tam; cho Mike goi fundamental-skeptic
 - [2026-11-03T09:04:19Z] [dd-MVC 03/11 vong2] XONG job Taylor_20261103_085129: PDF NDT 10tr + so muc gia rev1, tam 19.540 khong doi; CHUA gui email — cho user bao 'gui email' (gui 1 lan)
+- [2026-11-03T09:35:12Z] ĐANG DỞ: DD MVC vòng3 job Taylor_20261103_093502 — research/dd_MVC_20261103/r3/ MÙ GIÁ | NEXT: đọc SKEPTIC2, dựng bridge+đường giá
+- [2026-11-03T09:51:05Z] [dd-MVC r3 03/11] XONG job Taylor_20261103_093502 commit 995ed3a54: tam 20.181, hop ly 17.5-22.9k, re ro <=15.3k; CHUA gui email, chua skeptic v3 tren r3
