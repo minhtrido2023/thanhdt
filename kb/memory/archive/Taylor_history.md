@@ -1870,3 +1870,12 @@
 
 ## Archived 2026-11-03 (keep=12 days=0 require_done=False)
 - [2026-11-02T15:27:06Z] ĐANG DỞ job Taylor_20261102_152306: v2 xong (valuation_blind_v2.py tâm 18.116, P20-80 11.386-24.177) | NEXT: INTRINSIC_v2.md → investor_report/ mới (figs, md, pdf, html, SELFCHECK) → commit → bus tv1-dd-final-20261102
+
+## Archived 2026-11-03 (keep=12 days=0 require_done=False)
+- [2026-11-02T15:35:50Z] [tv1-final 02/11] XONG job Taylor_20261102_152306 commit a2a067cb8 — tam v2 18.100 (P20-80 11.400-24.200), gia 19.500 trong dai; cho Mike gui email + sua dd_price_zones
+
+## Archived 2026-11-03 (keep=12 days=0 require_done=False)
+- [2026-11-02T16:08:19Z] ĐANG DỞ: job Taylor_20261102_160806 dd-flag gate (V1 bot_execute) + DD zone candidates (V2) | NEXT: đọc kb/projects/dd-flag-rules-20261102.md
+
+## Archived 2026-11-03 (keep=12 days=0 require_done=False)
+- [2026-11-02T16:19:33Z] ĐANG DỞ job Taylor_20261102_160806: V1 XONG 8cb89c7da (feat/dd-flag-gate-20261102). NEXT V2: dd_price_zone_watch -> ung vien sleeve, nhanh rieng mike repo

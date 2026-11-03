@@ -1715,6 +1715,21 @@ Bản đầy đủ: **`sector_read_cntt_vienthong_giaoduc_vn_20261101.md`** (fil
   với VN ngày 31/03/27 ≤15% P=0,65; USTR hành động thuế từ điều tra dư thừa công suất/IP lên VN trước 30/04/27 P=0,40; FDI thực hiện Q1/27 ≥+5% YoY P=0,70.
   **Không phải khuyến nghị mua/bán.**
 
+
+## SECTOR READ (không phải episode VNINDEX) — Gạch nung/block ĐNB + ICD Bình Dương–Đồng Nai, as-of 03/11/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby KHÔNG tra mã, giá, BCTC của DN nào (kiểm toán blind ở mục 0 file con: tên file dispatch chứa một mã 3 ký tự, không tra;
+snippet lộ tóm tắt ĐHĐCĐ của 1 DN ICD niêm yết, KHÔNG dùng). Bản đầy đủ: **`sector_read_gach_nung_icd_binhduong_20261103.md`** (file con).
+- **A. Gạch nung/block: `CYCLICAL` 0,50 / `ADMIN_GATED` 0,25 / `STRUCTURAL` (suy giảm chậm) 0,25, `ambiguous` ~60/40.** Cầu nhà ở thương mại gãy
+  Q3/26, NOXH TP.HCM là đệm 2027-28. QĐ 1266 khoá công suất và vùng nguyên liệu, tạo tô cho lò có mỏ sét. VLKN khoảng 28%, tuynel không bị cấm,
+  QCVN 19:2024 có mốc 2032. Chi phí: coal BQ +43% YoY, heating oil +108%. Không có giá gạch 2026.
+- **B. ICD: `CYCLICAL` 0,45 / `ADMIN_GATED` 0,30 / `STRUCTURAL` 0,25 (hai chiều), `ambiguous` ~55/45.** XNK 10T/26 +32,3%, cước container BQ gấp 2,9
+  lần ⇒ gần đỉnh. Mới 17/125 ICD theo QĐ 979 hoạt động, nghị định ICD treo. Đe doạ: Cái Mép ICD (02/26), Cần Giờ 21 tr TEU (nhà đầu tư 14/04/26),
+  vành đai. Đỡ: xà lan Cái Mép→thượng nguồn, Soài Rạp quá tải. Phí hạ tầng cảng TP.HCM miễn tới 30/06/29. Đường sắt không phải động lực trước 2030.
+- **FORECAST khoá 03/11 (9 mục):** XK 2026 ≥+20% P=0,85; container VN 2026 ≥+10% P=0,60; CFI 05/27 <2.500 P=0,50; coal 03/27 <130 P=0,45; NĐ ICD
+  ≤2027 P=0,45; Cần Giờ khởi công ≤06/27 P=0,55; lộ trình cấm tuynel có chế tài ≤2027 P=0,07; gạch ống Sở XD TP.HCM Q2/27 trong ±5% P=0,55;
+  NQ 12/2026 còn hiệu lực 06/27 P=0,85. **Không phải khuyến nghị mua/bán.**
+
 ---
 
 ## APPENDIX: MACRO CONTEXT 2016-2019 — GROWTH REGIME (không phải episode khủng hoảng)
