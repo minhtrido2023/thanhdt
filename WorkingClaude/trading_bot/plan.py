@@ -970,6 +970,13 @@ def filter_lag_governance_orders(plan, asof=None):
 DD_FLAG_EXEMPT_PREFIX = "DISCRETIONARY"
 DD_FLAG_EXEMPT_BOOKS = frozenset({"PROBE"})
 DD_FLAG_PROBE_ACCOUNTS = frozenset({"main"})
+# Book PARK (custom30V parking) MIỄN cổng — user chốt 2026-11-03 (`decided_by: user`): lệnh MUA PARK
+# đi qua cổng bình thường kể cả mã FLOOR_FAIL/CTCK (VIX/VND/EVF...). Cổng VẪN áp CAPIT/BAL/LAG/mọi
+# book mua khác. Nhãn book THẬT trong plan_*.json (đo 2026-11-03, 110 nhóm lệnh SpaceX/ZaloPay):
+# "custom30V_parking" (BUY NEUTRAL_park/PARK_ENTRY/không play_type) và "PARK" (PARK_ADD; SELL
+# PARK_TRIM/JIT_UNPARK do merge_park_orders.py ghi). So khớp TUYỆT ĐỐI (upper), KHÔNG prefix/substring.
+# Cổng chạy TRƯỚC netting nên nhãn book luôn là nhãn gốc của lệnh, không phải nhãn NET.
+DD_FLAG_EXEMPT_PARK_BOOKS = frozenset({"PARK", "CUSTOM30V_PARKING"})
 
 
 def _dd_flag_gate_deps():
@@ -982,7 +989,7 @@ def _dd_flag_gate_deps():
 
 
 def filter_dd_flag_orders(plan, asof=None):
-    """CỔNG "MÃ CÓ CỜ ⇒ LOẠI" cho lệnh MUA mọi book (trừ DISCRETIONARY*/PROBE) — TẦNG ORDER.
+    """CỔNG "MÃ CÓ CỜ ⇒ LOẠI" cho lệnh MUA mọi book (trừ DISCRETIONARY*/PARK/PROBE) — TẦNG ORDER.
 
     VÌ SAO: user chốt 2026-11-02 23:01 ICT (`decided_by: user`, kb/projects/dd-flag-rules-20261102.md
     quy tắc 1): "mã nào có cờ thì bị loại khỏi candidate của tất cả các book" — ĐẢO luật 08-04
@@ -994,7 +1001,9 @@ def filter_dd_flag_orders(plan, asof=None):
     với skip_dcf + skip_corp_flags và KHÔNG truyền est_value ⇒ cờ CẤP MÃ (khớp cột due_diligence
     mà user thấy trong golive CSV); LENH_QUA_LON_VS_ADV là cờ cỡ-lệnh, đã có cap_capit/cap_lag.
 
-    PHẠM VI: chỉ side=buy. Lệnh BÁN KHÔNG BAO GIỜ bị chặn. Book DISCRETIONARY* ⇒ không chặn, trả
+    PHẠM VI: chỉ side=buy. Lệnh BÁN KHÔNG BAO GIỜ bị chặn. Book PARK/custom30V_parking ⇒ MIỄN
+    hẳn (DD_FLAG_EXEMPT_PARK_BOOKS; user 2026-11-03: park mua mã cờ qua cổng bình thường; không
+    bản ghi, không gọi DD); CAPIT/BAL/LAG và book khác vẫn bị chặn. Book DISCRETIONARY* ⇒ không chặn, trả
     bản ghi action="WARN_DISCRETIONARY" để caller in cảnh báo. Book PROBE ⇒ bỏ qua hẳn, CHỈ KHI
     plan.account ∈ DD_FLAG_PROBE_ACCOUNTS ("main" paper); PROBE ở account khác bị cổng như thường.
     Live-only: không đổi backtest/số pin R3 (backtest không đi qua hàm này).
@@ -1018,7 +1027,7 @@ def filter_dd_flag_orders(plan, asof=None):
         return (o.book or "").upper()
 
     def _exempt(o):
-        return probe_ok and _bk(o) in DD_FLAG_EXEMPT_BOOKS
+        return _bk(o) in DD_FLAG_EXEMPT_PARK_BOOKS or (probe_ok and _bk(o) in DD_FLAG_EXEMPT_BOOKS)
 
     buys = [o for o in plan.orders if (o.side or "").lower() == "buy" and not _exempt(o)]
     if not buys:

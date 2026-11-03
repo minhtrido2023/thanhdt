@@ -43,6 +43,16 @@ MUT = [
       ("        plan, net_adj = net_offsetting_orders(plan)\n",
        "        plan, net_adj = net_offsetting_orders(plan)\n"
        "        plan, dd_blocked = filter_dd_flag_orders(plan)\n")]),
+    ("M14 bỏ miễn PARK", "trading_bot/plan.py",
+     [('DD_FLAG_EXEMPT_PARK_BOOKS = frozenset({"PARK", "CUSTOM30V_PARKING"})',
+       'DD_FLAG_EXEMPT_PARK_BOOKS = frozenset()')]),
+    ("M15 miễn nhầm CAPIT", "trading_bot/plan.py",
+     [('DD_FLAG_EXEMPT_PARK_BOOKS = frozenset({"PARK", "CUSTOM30V_PARKING"})',
+       'DD_FLAG_EXEMPT_PARK_BOOKS = frozenset({"PARK", "CUSTOM30V_PARKING", "CAPIT"})')]),
+    ("M16 miễn PARK theo substring", "trading_bot/plan.py",
+     [('return _bk(o) in DD_FLAG_EXEMPT_PARK_BOOKS or', 'return "PARK" in _bk(o) or')]),
+    ("M17 chỉ nhận 1 nhãn park (bỏ custom30V_parking)", "trading_bot/plan.py",
+     [('frozenset({"PARK", "CUSTOM30V_PARKING"})', 'frozenset({"PARK"})')]),
     ("M13 không gửi tin tóm tắt", "bot_execute.py",
      [("            _notify_dd_flag_summary(p[\"label\"], plan_date, _dd_lines)", "            pass")]),
 ]

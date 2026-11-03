@@ -113,7 +113,7 @@ check("TCH BAL buy FLOOR_FAIL ⇒ BLOCKED (ca gốc plan 03/11)",
       and out[0]["codes"] == ["QF:FLOOR_FAIL"] and out[0]["qty_before"] == 1000, out)
 
 # 2. Mọi book mua bị áp
-for bk in ("BAL", "LAG", "CAPIT", "PARK", "DC", None):
+for bk in ("BAL", "LAG", "CAPIT", "DC", None):
     pl, out = run([("TCH", bk, "buy")])
     check(f"book {bk!r} buy có cờ ⇒ BLOCKED", pl.orders == [] and out[0]["action"] == "BLOCKED")
 
@@ -126,11 +126,39 @@ for tk, code in (("RTF", "QF:RATING_FAIL"), ("UNK", "QF:UNKNOWN_FLOOR"),
           pl.orders == [] and out and out[0]["action"] == "BLOCKED" and code in out[0]["codes"], out)
 
 # 4. Sạch ⇒ giữ, không bản ghi
-pl, out = run([("FPT", "BAL", "buy"), ("VCB", "PARK", "buy")])
+pl, out = run([("FPT", "BAL", "buy"), ("VCB", "CAPIT", "buy")])
 check("mã sạch (QUALITY_OK / quality_flag None trong universe) ⇒ GIỮ, 0 bản ghi",
       [o.ticker for o in pl.orders] == ["FPT", "VCB"] and out == [], out)
 pl, out = run([("JNK", "BAL", "buy")])
 check("red_flag lạ ngoài RED_FLAG_CODES KHÔNG tính là cờ", len(pl.orders) == 1 and out == [], out)
+
+# 4b. Book PARK MIỄN (user 2026-11-03) — nhãn THẬT trong plan_*.json: "PARK" (PARK_ADD) và
+#     "custom30V_parking" (NEUTRAL_park/PARK_ENTRY). Mã cờ vẫn được mua; không gọi DD, 0 bản ghi.
+for bk in ("PARK", "custom30V_parking", "park"):
+    pl, out = run([("TCH", bk, "buy")])
+    check(f"PARK-1 book {bk!r} buy mã FLOOR_FAIL ⇒ GIỮ, 0 bản ghi, 0 lần gọi DD",
+          len(pl.orders) == 1 and out == [] and CALLS == [], (out, CALLS))
+for tk in ("DEAD", "OUT", "ERR"):
+    pl, out = run([(tk, "PARK", "buy")])
+    check(f"PARK-2 {tk} (cờ đỏ/lỗi DD) book PARK ⇒ GIỮ, không FAIL_OPEN", len(pl.orders) == 1 and out == [], out)
+pl, out = run([("TCH", "CAPIT", "buy"), ("TCH", "BAL", "buy"), ("TCH", "LAG", "buy"),
+               ("TCH", "PARK", "buy"), ("TCH", "custom30V_parking", "buy")])
+check("PARK-3 CAPIT/BAL/LAG cùng mã cờ VẪN BLOCKED, 2 chân park giữ",
+      sorted(o.book for o in pl.orders) == ["PARK", "custom30V_parking"]
+      and sorted(a["book"] for a in out) == ["BAL", "CAPIT", "LAG"]
+      and all(a["action"] == "BLOCKED" for a in out), out)
+pl, out = run([("TCH", "BAL_PARKING_X", "buy"), ("TCH", "NOTPARK", "buy"), ("TCH", "PARKING", "buy")])
+check("PARK-4 khớp TUYỆT ĐỐI: book chứa chữ PARK nhưng không phải 2 nhãn park ⇒ BLOCKED",
+      pl.orders == [] and len(out) == 3, out)
+# park đi qua netting: BUY PARK mã cờ + SELL LAG cùng mã ⇒ cổng giữ BUY PARK, netting ra 1 lệnh
+sent, out, adj = cascade([("TCH", "PARK", "buy", 1000), ("TCH", "LAG", "sell", 300)])
+check("PARK-5 gate→net: BUY PARK 1000 (mã cờ) + SELL LAG 300 ⇒ NET BUY 700, không BLOCKED",
+      sent == [("TCH", "buy", 700, "PARK")] and out == [], (sent, out, adj))
+# PARK + LAG cùng mã cờ: chân LAG chặn, chân PARK sống, không trốn vào lệnh NET
+sent, out, adj = cascade([("TCH", "LAG", "buy", 500), ("TCH", "custom30V_parking", "buy", 200)])
+check("PARK-6 LAG 500 BLOCKED + PARK 200 giữ ⇒ ra broker chỉ BUY 200 park",
+      sent == [("TCH", "buy", 200, "custom30V_parking")]
+      and [(a["action"], a["book"]) for a in out] == [("BLOCKED", "LAG")], (sent, out))
 
 # 5. Lệnh BÁN không bao giờ bị chặn (và không gọi DD)
 pl, out = run([("TCH", "BAL", "sell"), ("DEAD", "LAG", "sell"), ("ERR", "PARK", "sell")])
