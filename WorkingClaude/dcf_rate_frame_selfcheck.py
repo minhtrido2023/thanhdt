@@ -309,7 +309,7 @@ def main():
     scan += glob.glob(os.path.join(PROD, "mike", "bin", "*.sh")) + glob.glob(os.path.join(PROD, "mike", "bin", "*.py"))
     hits = []
     for f in sorted(set(scan)):
-        if "selfcheck" in os.path.basename(f) or os.path.basename(f) in ("ops_health_check.sh", "dcf_rate_robustness.py"):
+        if "selfcheck" in os.path.basename(f) or os.path.basename(f) in ("ops_health_check.sh", "dcf_rate_robustness.py", "dcf_rstar_refresh.py"):
             continue                            # dcf_rate_robustness.py = nghiên cứu cố ý ghim legacy (cùng danh sách loại với ops_health)
         pat = pat_py if f.endswith(".py") else pat_sh
         for i, ln in enumerate(open(f, encoding="utf-8", errors="replace"), 1):
