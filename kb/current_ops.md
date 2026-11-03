@@ -26,8 +26,8 @@
 ## DRI — giảm 50% 27/10 (user duyệt; SUPERSEDED bởi bán hết 02/11): `kb/projects/dri-triggers-20261027.md`
 
 ## 4 QUY TẮC USER CHỐT 02/11/2026 23:01 ICT (`decided_by: user`) — KHÔNG HỎI LẠI: `kb/projects/dd-flag-rules-20261102.md`
-1. **Mã có CỜ (🔴 RED_FLAG_CODES + ⚠ quality_flag≠QUALITY_OK, gồm FLOOR_FAIL) ⇒ LOẠI khỏi candidate MỌI book khi lên plan** (đảo luật 08-04; discretionary sleeve ngoại lệ, cờ = WARNING). TCH đã bỏ khỏi plan 03/11.
-2. **DRI bán HẾT** (giá > giá hợp lý nhiều) · 3. **TV1 KHÔNG giữ** (chưa có biên an toàn) — cả hai trong plan 03/11.
+1. **Mã có CỜ (RED_FLAG_CODES ∪ quality_flag≠OK) ⇒ LOẠI khỏi candidate khi lên plan** (đảo luật 08-04). User 03/11: KHÔNG áp PARK; CÓ áp CAPIT (research A/B: Taylor_20261103_024121); discretionary = WARNING. Cổng tầng lệnh MUA LIVE từ 03/11 (main 7eb1f434d).
+2. **DRI bán HẾT** · 3. **TV1 KHÔNG giữ** — trong plan 03/11 (user duyệt).
 4. **Mã có DD mà giá < tâm 15% ⇒ ĐƯỢC xét làm candidate discretionary** (user duyệt từng lần, không tự mua).
 
 ## LAG — SCL thoái hết + luật cảnh báo tăng vốn (user 29/10): `kb/projects/scl-dd-20261029.md`; luật: BẤT KỲ tăng vốn trong chu kỳ đầu tư ⇒ WARNING user, không tự bán
