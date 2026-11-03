@@ -35,3 +35,6 @@
 - [2026-11-03T13:00:17Z] ĐANG DỞ: DD NNC r3 job Taylor_20261103_130007 — research/dd_NNC_20261030/r3/ MÙ GIÁ base=sổ sách | NEXT: kiểm kê khoản giảm trừ v2
 - [2026-11-03T13:05:41Z] [dd-audit-newproject 03/11] XONG job Taylor_20261103_130010: AUDIT.md; dung lai DRI,SZL,SCL; cho Mike/user quyet
 - [2026-11-03T13:13:06Z] [dd-NNC r3 03/11] XONG job Taylor_20261103_130007 commit af3ed6f17: tam 90.742, gia 46.100 RE duoi P10 (co dieu kien gia da >=217k); V_NNC 90.742 -> MVC +662 cho Mike dung lai MVC; CHUA skeptic, CHUA email
+- [2026-11-03T13:20:55Z] ĐANG DỞ: chain NNC r4 → MVC r7 job Taylor_20261103_132045 | NEXT: đọc SKEPTIC_R3 + r3/calc, dựng r4
+- [2026-11-03T13:31:38Z] ĐANG DỞ chain job Taylor_20261103_132045: NNC r4 XONG 80375a611 (tam 67.596) | NEXT: MVC r7 o dd_MVC_20261103/r7/ dung engine r4 (MVC dong thoi 18.392), luoi MVC, bao cao, zones rev6 (rev5 da archive _rev5_r6.md)
+- [2026-11-03T13:38:00Z] [dd-chain 03/11] XONG job Taylor_20261103_132045: NNC r4 80375a611 tam 67.596 / MVC r7 2ef7aa868 tam 18.392, ca 2 RE duoi P10 co dieu kien; CHUA skeptic, CHUA email
