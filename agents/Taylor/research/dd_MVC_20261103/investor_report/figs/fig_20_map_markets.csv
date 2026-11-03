@@ -1,0 +1,5 @@
+name,lat,lon,kind,dx,dy,note
+TP.HCM,10.769444,106.681944,market,-0.2,-0.1,"vi.wikipedia.org/wiki/Thành_phố_Hồ_Chí_Minh (toạ độ dùng ở báo cáo NNC, vi.wikipedia)"
+Đồng Nai (Biên Hòa),10.95,106.87389,market,0.06,0.0,vi.wikipedia.org/wiki/Biên_Hòa_(thành_phố)
+Bình Dương (Bến Cát),11.14944,106.5975,market,-0.2,0.05,vi.wikipedia.org/wiki/Bến_Cát_(thị_xã)
+Mỏ Tân Lập,11.46917,106.97056,mine,0.05,0.03,vi.wikipedia.org/wiki/Đồng_Phú_(huyện)

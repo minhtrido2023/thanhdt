@@ -1,0 +1,8 @@
+name,lat,lon,kind,dx,dy,note
+Mỏ đá Tân Lập (CN Bình Phước),11.46917,106.97056,mine,0.05,0.05,tâm huyện Đồng Phú; vi.wikipedia.org/wiki/Đồng_Phú_(huyện); toạ độ xã Tân Lập không tra được
+Mỏ mới Tam Lập 1 khu 1,11.29417,106.80778,mine,0.05,-0.02,tâm huyện Phú Giáo; vi.wikipedia.org/wiki/Phú_Giáo_(huyện); vị trí mỏ không tra được
+Mỏ mới Minh Hòa,11.27222,106.37806,mine,-0.02,0.09,tâm huyện Dầu Tiếng (xã Minh Thạnh thuộc Dầu Tiếng); vi.wikipedia.org/wiki/Dầu_Tiếng_(huyện)
+NM gạch Long Nguyên,11.2725,106.63472,plant,-0.1,-0.09,tâm huyện Bàu Bàng (xã Long Nguyên); vi.wikipedia.org/wiki/Bàu_Bàng_(huyện)
+NM gạch Mỹ Phước (dừng 08/2025),11.14944,106.5975,plant,-0.2,-0.07,tâm thị xã Bến Cát; vi.wikipedia.org/wiki/Bến_Cát_(thị_xã)
+Trụ sở + BOT ĐT743,10.92194,106.76944,hq,0.05,-0.07,phường Tân Đông Hiệp; vi.wikipedia.org/wiki/Tân_Đông_Hiệp
+ICD Hoa Lư (Lộc Thạnh),11.82444,106.58639,project,0.05,-0.02,tâm huyện Lộc Ninh (xã Lộc Thạnh); vi.wikipedia.org/wiki/Lộc_Ninh_(huyện)

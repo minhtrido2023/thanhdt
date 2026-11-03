@@ -1,0 +1,10 @@
+TAM goc (khong doi): 19,540
+(1) mo moi co_so tre 1 nam (van hanh 2029): tam 19,069 (-470); co_so phang 8,413 / thuc 19,053
+(1b) CA tot cung tre 1 nam: tam 18,586 (-954)
+(2) CCN 500 ty thu hoi 70%: -128 ty = -1,275 d/cp (uoc luong: he so 0,85 chiet khau thanh toan)
+(2) CCN 500 ty thu hoi 50%: -212 ty = -2,125 d/cp (uoc luong: he so 0,85 chiet khau thanh toan)
+(2) CCN 500 ty thu hoi 0%: -425 ty = -4,250 d/cp (uoc luong: he so 0,85 chiet khau thanh toan)
+(3) no rong 30/09 sau nghia vu: 116.6 ty; +mo moi con lai 1062 + CCN 500 + mua NNC len 51% ~72 = 1,750 ty (truoc dong tien HD 2027-28, tren VCSH 1.546)
+    D/E tho = 1.13 neu KHONG co dong tien HD; skeptic uoc 1,4-1,5 nghin ty sau 2 nam dong tien (uoc luong)
+(4) hoan nhap Q4/25 ~34.3 ty truoc thue; co thue 20%: sau thue 27.5 -> TTM ex 279.3 ty, EPS 2,793 d, P/E tai 13.700 = 4.90x, tam/EPS 7.0x
+(4) hoan nhap Q4/25 ~34.3 ty truoc thue; khong thue: sau thue 34.3 -> TTM ex 272.5 ty, EPS 2,725 d, P/E tai 13.700 = 5.03x, tam/EPS 7.2x

@@ -1,0 +1,4 @@
+7998b12653a06036e0ab17883d3ca9f6  valuation_v2.py
+5a482aa940dad7ceabeba0488ae53c23  valuation_v2_out.txt
+aaba502ab2f777d7ba523b483caaffd9  px_median_out.txt
+78778191fcdb878c52af8d71be1956e0  px_median.sql
