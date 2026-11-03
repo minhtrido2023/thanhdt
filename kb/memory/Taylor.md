@@ -30,3 +30,5 @@
 - [2026-11-03T10:07:27Z] ĐANG DỞ: DD MVC r5 job Taylor_20261103_100718 — research/dd_MVC_20261103/r5/ đổi nguyên tắc base=sổ sách | NEXT: kiểm kê giảm trừ r4
 - [2026-11-03T10:16:03Z] ĐANG DỞ DD MVC r5 job Taylor_20261103_100718: r5/calc khoa (tam 25.725, luoi P10 21.824) | NEXT: build_report.py doc r5 json, viet lai md NDT, REPORT.md, zones, bus
 - [2026-11-03T10:24:14Z] [dd-MVC r5 03/11] XONG job Taylor_20261103_100718 commit fda8c27a0: tam 25.725, re co bien an toan <=21.800; CHUA skeptic r5, CHUA gui email; NNC CIP +952 cho user quyet dung lai
+- [2026-11-03T10:33:49Z] ĐANG DỞ: DD MVC r6 job Taylor_20261103_103341 — research/dd_MVC_20261103/r6/ sửa đối xứng SKEPTIC4 | NEXT: đọc SKEPTIC4 + r5/calc
+- [2026-11-03T10:44:10Z] [dd-MVC r6 03/11] XONG job Taylor_20261103_103341 commit 014d36e17: tam 23.093, P50 19.755, RE <=15.586 (bien an toan co dieu kien); CHUA skeptic r6, CHUA email; NNC chua dung lai cho user
