@@ -41,3 +41,9 @@
 - [2026-11-03T13:47:18Z] ĐANG DỞ: chain2 NNC r5 → MVC r8 job Taylor_20261103_134709 | NEXT: đọc SKEPTIC_R4, dựng dd_NNC_20261030/r5/
 - [2026-11-03T13:54:19Z] ĐANG DỞ chain2 job Taylor_20261103_134709: NNC r5 XONG 8806ca48e (tam 61.666) | NEXT: MVC r8 o dd_MVC_20261103/r8/ (doc SKEPTIC_R7, model_r7.py)
 - [2026-11-03T14:04:06Z] [dd-chain2 03/11] XONG job Taylor_20261103_134709: NNC r5 8806ca48e tam 61.666 / MVC r8 7fca32c51 tam 16.702, ca 2 RE duoi P10 co dieu kien; CHUA skeptic, CHUA email
+- [2026-11-03T15:29:45Z] ĐANG DỞ: chain3 NNC r6 → MVC r9 job Taylor_20261103_152936 (r 13,5% neo huy động 7,40%, β=1, CK thanh khoản) | NEXT: đọc r5/r8 calc, skill mục mới
+- [2026-11-03T15:29:47Z] ĐANG DỞ: DD DRI r4 job Taylor_20261103_152938 — research/dd_DRI_20261027/r4/ base=sổ sách tái canh | NEXT: đọc audit parts/DRI.md + REPORT.md + src
+- [2026-11-03T15:29:49Z] ĐANG DỞ: DD SCL r2 job Taylor_20261103_152941 — research/dd_SCL_20261029/r2/ MÙ GIÁ base=sổ sách | NEXT: đọc audit parts/SCL.md + REPORT cũ
+- [2026-11-03T15:34:52Z] ĐANG DỞ DD DRI r4 job Taylor_20261103_152938: calc ở dd_DRI_20261027/r4/calc, engine = exec dri_val_supply_adj_r4_20261027/model.py; base = D (không thanh lý/không tái canh)+XDCB 72,71 tỷ; legal-vn: tái canh KHÔNG phải nghĩa vụ rõ | NEXT: khoá md5, thanh khoản, báo cáo
+- [2026-11-03T15:36:28Z] ĐANG DỞ chain3 job Taylor_20261103_152936: NNC r6 XONG 284df0965 (tam 60.702, sau CK TK 58.499) | NEXT: MVC r9 o dd_MVC_20261103/r9/ import nnc_model_r6 (r 13,5% tiem qua N3.EV3), liquidity MVC da tinh o NNC r6/calc/liquidity_r6_out.json
+- [2026-11-03T15:44:09Z] [dd-chain3 03/11] XONG job Taylor_20261103_152936: NNC r6 284df0965 tam 60.702 (sau CK TK 58.499, RE) / MVC r9 c92c8d64f tam 16.482 (sau CK 15.105, RE CO DK); r 13,5% neo huy dong 7,40%; CHUA skeptic, CHUA email (Mike gui)
