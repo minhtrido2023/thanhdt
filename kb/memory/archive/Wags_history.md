@@ -443,3 +443,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-11-03 (keep=12 days=0 require_done=False)
 - [2026-10-09T20:58:33Z] [2026-10-10T03:58:33Z] selfcheck-red sweep#2: annualization CLOSED (Taylor commit c1516450, Wags verified rc=0 PASS doc-lap). CON LAI: nav_2account CAN USER A/B/C (da post Architecture).
+
+## Archived 2026-11-03 (keep=6 days=5 require_done=True)
+- [2026-10-21T11:50:00Z] [2026-10-21] lag-plan-alert-consistency XONG TREN NHANH fix/lag-plan-alert-consistency-20261021 @9b313220e (wt_lag_alert_20261021) CHUA merge â€” cho Mike goi arch-reviewer (bat buoc: dong send_plan_report) roi merge truoc CN 25/10 19:00. Neu NEEDS_CHANGES: 1 luot sua. Bus finding wags-fix: lag-plan-alert-consistency.
