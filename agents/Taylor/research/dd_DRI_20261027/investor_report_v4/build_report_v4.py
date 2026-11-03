@@ -79,7 +79,7 @@ def figs_new():
     a2.bar(px["time"], px["Volume"]/1e6, color=GREY, width=1.0); a2.set_ylabel("KL, triệu cp")
     a1.set_title("Giá 12 tháng: đỉnh 16.900 (09/10/2026), 13.400 ngày 03/11")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
-    save(fig, "fig_08_price_12m", "Nguồn: tav2_bq.ticker (Close điều chỉnh cổ tức, Volume) 03/11/2025–02/11/2026; điểm 03/11: đóng cửa DNSE.",
+    save(fig, "fig_08_price_12m", "Nguồn: dữ liệu giao dịch (Close điều chỉnh cổ tức, Volume) 03/11/2025–02/11/2026; điểm 03/11: đóng cửa DNSE.",
          px[["time", "Close", "Price", "Volume"]])
     plt.close(fig)
 
@@ -174,7 +174,7 @@ def figs_new():
     a2.set_ylabel("chiết khấu thanh khoản, %"); a2.set_title("Chiết khấu theo quy mô vị thế", fontsize=8.4); a2.set_ylim(0, 3.6)
     fig.tight_layout(rect=(0, 0.1, 1, 1))
     save(fig, "fig_22_rate_liquidity", "Nguồn: mô hình của nhóm; lãi huy động 12T neo 7,40% (02/11/2026), r = 13,5% + 1 × thay đổi. Thanh khoản: "
-         "tav2_bq.ticker 250 phiên tới 02/11/2026, giá trị khớp trung vị 8,33 tỷ đ/phiên, biến động ngày 2,58%; số phiên thoát ở 15% khối lượng.",
+         "dữ liệu giao dịch 250 phiên tới 02/11/2026, giá trị khớp trung vị 8,33 tỷ đ/phiên, biến động ngày 2,58%; số phiên thoát ở 15% khối lượng.",
          pd.DataFrame({"bp": xs, "gia_tri_sau_ck": [s1[str(x)]*F5 for x in xs]}))
     plt.close(fig)
 

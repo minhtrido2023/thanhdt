@@ -1,0 +1,7 @@
+# NT2 — rà luật "đầu tư dự án mới" (03/11/2026)
+1. **Sổ**: dd_date 2026-10-26, tâm 25.400 (expected_weighted), không có vùng (3 kịch bản 17.800/25.600/32.500). Nguồn: agents/Taylor/research/dd_NT2_20261026/REPORT.md (không có REPORT khác).
+2. **Dự án mới**: NT2 không có dự án đang đầu tư. NT3&4 (1.624 MW) là của POW, không phải NT2 (REPORT.md:17). Nhơn Trạch 5 (~9.000 tỷ, 300-600 MW LNG) mới là khả năng POW muốn dùng tiền của NT2, chưa được ĐHCĐ duyệt (REPORT.md:64, 69); mới có quỹ đầu tư phát triển 791 tỷ "dành cho NT5" (REPORT.md:69). Không có capex đang chạy.
+3. **Trừ ở base?** Không trừ gì vì dự án. SOTP = net cash 3.578 tỷ cộng đủ + DCF vận hành 10 năm (REPORT.md:48). NT5 chỉ là điều kiện hạ verdict (REPORT.md:64), không vào base, đúng luật. Không có khoản cộng thiếu cơ sở. Hai lựa chọn ngoài phạm vi luật dự án: giá trị kết thúc sau 2036 = 0 (thận trọng, không phải vì dự án) và Ke 12% (REPORT.md:48-55); Ke 14% chỉ giảm 25.360 xuống 24.370 (-4%), tức Ke cao không làm NPV âm của dự án nào.
+4. **Phân loại: KHÔNG_VẤN_ĐỀ** (với luật này).
+5. **Hiệu ứng khi đặt dự án = sổ sách/NPV 0: 0 đ/cp, 0%.** Ước lượng: base đã không có dự án nào để điều chỉnh, nên không chạy lại (không có calc trong thư mục).
+6. **Giá 03/11 = 21.800** (close_20261103.md). Tâm gốc 25.400 → -14,2% (so tâm đã trừ cổ tức 1.000 ex 29/10, tức 24.400, là -10,7%, ước lượng cách tính). Tâm điều chỉnh = tâm gốc (25.400). Ngưỡng ứng viên 25.400x0,85 = 21.590: 21.800 > 21.590, nhãn KHÔNG đổi (chưa qua ngưỡng, kể cả khi chưa trừ cổ tức). Báo cáo không có thang rẻ/đắt.

@@ -1,0 +1,87 @@
+{
+ "version": 1,
+ "stem": "ZaloPay_daily_report_2026-11-03",
+ "cadence": "daily",
+ "account": "ZaloPay",
+ "pdf": "ZaloPay_daily_report_2026-11-03.pdf",
+ "pdf_sha256": "8a769dbc2fdd13e0affa5a9c2cb1f5f5b4d43b9be9b880a2584f12d3f56fe07c",
+ "html": "ZaloPay_daily_report_2026-11-03_email.html",
+ "html_sha256": "3e4be109153200579536609ae790d0a4ffda8555d0e7e0868871622e3c0fc869",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "9ebf86a19333e619b23fe7c99bcdb7f9e6aa6f67326cb49bbe98404c2847bb05"
+  },
+  "fig1": {
+   "file": "03_pair.png",
+   "sha256": "56ef256e7295af49168ba3fd442497ff662e04ad240f1ad218a63053126063ba"
+  }
+ },
+ "pages": 1,
+ "page_cap": 1,
+ "lint": {
+  "pages": 1,
+  "words_total": 220,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu ngày + lãi/lỗ + nạp/rút so với NAV cuối ngày",
+   932776631.0,
+   932776631.0,
+   0.0
+  ]
+ ],
+ "positions": [
+  [
+   "MCH",
+   200.0,
+   "−2,05%"
+  ],
+  [
+   "TV1",
+   1100.0,
+   "+3,43%"
+  ],
+  [
+   "HT1",
+   1600.0,
+   "−4,97%"
+  ],
+  [
+   "VPB",
+   930.0,
+   "−7,48%"
+  ],
+  [
+   "MBB",
+   52.0,
+   "−7,85%"
+  ],
+  [
+   "VIB",
+   19.0,
+   "+2,15%"
+  ]
+ ],
+ "period": "2026-11-03",
+ "report_date": "2026-11-03",
+ "nav_date": "2026-11-03",
+ "numbers": {
+  "day_pct": 0.218,
+  "mtd_pct": -0.75,
+  "inception_pct": -7.391,
+  "nav1": 932776631.0,
+  "pnl_vnd": 2030260.0,
+  "flow_vnd": 0.0,
+  "n_traded": 2
+ },
+ "fills_error": null,
+ "positions_error": null,
+ "narrative": false
+}

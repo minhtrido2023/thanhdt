@@ -54,10 +54,10 @@
 
 | Chỉ báo | Hiện tại | Nguồn |
 |---|---|---|
-| TSR20 SGX | 254,3 ¢/kg (23/10), +50% YoY | tav2_bq.commodity_prices |
+| TSR20 SGX | 254,3 ¢/kg (23/10), +50% YoY | dữ liệu giá hàng hoá |
 | Nhập khẩu cao su Trung Quốc T9 | 588 nghìn t, −20,8% YoY | ECHEMI 16/10/2026 |
 | Tồn kho Qingdao | 62,77 vạn t (30/08), ~+45% YoY | Longzhong/Ruida |
-| Brent | 116,7 USD/thùng (23/10) — đỡ giá cao su tổng hợp | tav2_bq.commodity_prices |
+| Brent | 116,7 USD/thùng (23/10) — đỡ giá cao su tổng hợp | dữ liệu giá hàng hoá |
 
 - Chuyển sang đáy nếu Brent < 85, Qingdao > 70 vạn t và TSR20 < 220¢ trong hai tháng.
 
@@ -203,7 +203,7 @@ Xác suất 20% là nhận định, không ước lượng từ dữ liệu (h�
 
 ## Phụ lục C. Nguồn
 
-BCTC hợp nhất Q3/2026 (ký 22/10/2026) và bán niên 2026 soát xét; báo cáo SXKD 9 tháng 2026 (20/10/2026); BCTN 2024, 2025; thông báo chi cổ tức 94/TB-CT; World Bank Pink Sheet (RSS3 tháng); FRED CPIAUCSL; tav2_bq (ticker, commodity_prices); Luật Khuyến khích Đầu tư Lào 14/NA (2016), Luật Đất đai Lào 70/NA (2019) qua tóm tắt của Tilleke & Gibbins, DFDL, UNEP LEAP; giá đóng cửa: DNSE.
+BCTC hợp nhất Q3/2026 (ký 22/10/2026) và bán niên 2026 soát xét; báo cáo SXKD 9 tháng 2026 (20/10/2026); BCTN 2024, 2025; thông báo chi cổ tức 94/TB-CT; World Bank Pink Sheet (RSS3 tháng); FRED CPIAUCSL; dữ liệu giao dịch và giá hàng hoá; Luật Khuyến khích Đầu tư Lào 14/NA (2016), Luật Đất đai Lào 70/NA (2019) qua tóm tắt của Tilleke & Gibbins, DFDL, UNEP LEAP; giá đóng cửa: DNSE.
 
 ## Phụ lục D. Phương pháp và giới hạn
 

@@ -4,25 +4,25 @@
 
 ![kpi](figs/fig_01_kpi.png)
 
-**Kết luận.** Giá trị hợp lý chuẩn hoá chu kỳ của SCL ≈ **24.100 đ/cp** trên cơ sở còn quyền mua (vùng 21.100–27.100 đ), tương đương ≈ **22.500 đ/cp** sau phát hành quyền (vùng 19.900–25.100 đ), đã trừ chiết khấu thanh khoản 2,3% ở quy mô 1 tỷ đ. Giá đóng cửa 03/11/2026 là **30.000 đ** (còn quyền; giá ex-quyền lý thuyết 27.659 đ) — **TRÊN vùng giá trị hợp lý**, cao hơn tâm khoảng 23–24%.
+**Kết luận.** Giá trị hợp lý chuẩn hoá chu kỳ của SCL ≈ **22.800 đ/cp** trên cơ sở còn quyền mua (vùng 19.700–25.700 đ), tương đương ≈ **21.400 đ/cp** sau phát hành quyền (vùng 18.600–23.900 đ), đã trừ chiết khấu thanh khoản 4,6% ở quy mô 5 tỷ đ. Nếu tính toàn bộ nợ vay theo mệnh giá (cận dưới), tâm còn ≈ 21.700 đ trước quyền và ≈ 20.400 đ sau quyền. Giá đóng cửa 03/11/2026 là **30.000 đ** (còn quyền; giá ex-quyền lý thuyết 27.659 đ) — **TRÊN vùng giá trị hợp lý**, cao hơn tâm khoảng 31% (giá ex-quyền lý thuyết cao hơn tâm sau quyền 29%).
 
 **3 điều cần biết**
 - Lợi nhuận là hoạt động lõi, tăng thật: biên gộp 9T/2026 40,1%, kiểm toán 2025 chấp nhận toàn phần; LNST 4 quý 118 tỷ.
 - Dự án Phả Lại (đã chi 190,7 tỷ) được tính đúng giá vốn: không làm giảm giá trị; chưa cộng lợi nhuận vì thiếu số liệu đầu ra kiểm được.
-- Kể cả khi biên lợi nhuận đỉnh hiện nay giữ nguyên mãi, giá trị ≈ 25.800 đ/cp sau quyền vẫn dưới giá ex-quyền lý thuyết.
+- Kể cả khi biên lợi nhuận đỉnh hiện nay giữ nguyên mãi, giá trị ≈ 24.500 đ/cp sau quyền vẫn dưới giá ex-quyền lý thuyết.
 
 | Kịch bản (xác suất) | Điều kiện | Giá trị/cp sau quyền | Tương đương trước quyền |
 |---|---|---|---|
-| Chu kỳ (50%) | Biên ròng quay về trung bình 2020–nay hoặc 2023–nay | 20.800 | 22.100 |
-| Hành chính (30%) | Biên quay nửa đường nhờ tỷ lệ vật liệu không nung bắt buộc, nhà ở xã hội | 23.300 | 25.000 |
-| Biên bền (20%) | Biên ròng 12,7% hiện tại giữ nguyên | 25.800 | 27.900 |
-| **Kỳ vọng** | **có trọng số** | **22.500** | **24.100** |
+| Chu kỳ (50%) | Biên ròng quay về trung bình 2020–nay hoặc 2023–nay | 19.700 | 20.900 |
+| Hành chính (30%) | Biên quay nửa đường nhờ tỷ lệ vật liệu không nung bắt buộc, nhà ở xã hội | 22.100 | 23.700 |
+| Biên bền (20%) | Biên ròng 12,7% hiện tại giữ nguyên | 24.500 | 26.500 |
+| **Kỳ vọng** | **có trọng số** | **21.400** | **22.800** |
 
 ## 1. Tóm tắt điều hành
 
 - **Bối cảnh:** SCL chế biến tro xỉ nhiệt điện thành tro bay, gạch nhẹ, vữa; doanh thu gấp đôi trong 4 quý nhờ nhà máy Vĩnh Tân và cầu xây dựng 2026 mạnh.
 - **Vấn đề:** biên ròng 12,7% là đỉnh 7 năm; ngành có quyền định giá thấp và kênh nhà ở thương mại đã chậm lại từ Q3/2026.
-- **Câu trả lời:** giá hiện tại ngầm định lãi huy động ≈ 5,6% (thấp hơn mức 7,40% hôm nay 1,85 điểm %) hoặc lợi nhuận chuẩn hoá cao hơn mức đỉnh hiện tại 24%.
+- **Câu trả lời:** giá hiện tại ngầm định lãi huy động ≈ 5,1% (thấp hơn mức 7,40% hôm nay 2,3 điểm %) hoặc lợi nhuận chuẩn hoá cao hơn mô hình 32%.
 
 ![quy](figs/fig_02_quarterly.png)
 
@@ -72,6 +72,7 @@
 | Phả Lại, đã chi 190,7 tỷ | Tài sản theo giá vốn; nợ vay tài trợ trừ đủ; lãi vay tương ứng không trừ lần hai | BCTC Q3/2026: XDCB dở dang; chi đầu tư 198,1 tỷ |
 | Phả Lại, còn ≈72 tỷ (ước lượng) | Giá trị bằng chi phí (NPV 0) | Tổng vốn 262,9 tỷ − đã chi |
 | Tách tro Vĩnh Tân GĐ2, 14,8 tỷ | Như trên | BCTC Q3/2026 |
+| Hiệu ứng của cách tính trên | Cộng lại lãi vay thực Q3/2026 (4,96%/năm trên nợ) của phần nợ tài trợ: ≈ +1.470 đ/cp sau quyền | BCTC Q3/2026: chi phí đi vay 5,17 tỷ/quý trên dư nợ 416,5 tỷ |
 | Lợi nhuận khi Phả Lại chạy | Không cộng: chưa có giá, sản lượng, hợp đồng đầu ra công bố | Chỉ độ nhạy: suất sinh lời 15% thay vì 13,5% ⇒ +650 đ/cp |
 | Rủi ro thừa cung vùng | Không trừ: chưa có số công suất vùng | Theo dõi khi nhà máy vận hành |
 
@@ -83,9 +84,9 @@
 |---|---|---|
 | Số cổ phiếu | 38,84 triệu | 44,84 triệu |
 | Giá trị sổ sách/cp | 13.688 | 13.529 |
-| Giá trị hợp lý/cp (sau CK thanh khoản) | 24.100 | 22.500 |
+| Giá trị hợp lý/cp (sau CK thanh khoản) | 22.800 | 21.400 |
 | Giá thị trường / giá ex-quyền lý thuyết | 30.000 | 27.659 |
-| Giá trị một quyền/cp đang giữ | — | 2.341 theo giá thị trường; ≈1.550 theo giá trị hợp lý |
+| Giá trị một quyền/cp đang giữ | — | 2.341 theo giá thị trường; ≈1.370 theo giá trị hợp lý |
 
 - Ngày đăng ký cuối cùng 10/11/2026; chuyển nhượng quyền 17/11–03/12; nộp tiền 17/11–08/12; thu 75 tỷ trả vay ngân hàng.
 - Người không thực hiện cũng không bán quyền sẽ mất phần giá trị quyền; người thực hiện đủ giữ nguyên tổng giá trị.
@@ -93,6 +94,7 @@
 ## 7. Định giá: chuẩn hoá chu kỳ, r = 13,5% gắn với lãi huy động
 
 - Phương pháp: lợi nhuận chuẩn hoá × P/E nội tại (1 − g/ROE)/(r − g); g 3–5%, ROE 15–20%; P/E nội tại 7,7–8,8 lần.
+- Cận dưới: tính toàn bộ nợ vay theo mệnh giá (trừ nợ ngoài dự án 211,0 tỷ, cộng tiền 95,1 tỷ, cộng lại lãi sau thuế của nợ này) cho tâm thấp hơn ≈ 1.070 đ/cp so với giá trị cơ sở; dùng như cận dưới, không thay giá trị cơ sở.
 - Đối chiếu ngành (không làm mỏ neo): P/E trung vị 8 doanh nghiệp vật liệu ≈ 8,9 lần (dải 5,1–13,1).
 - r = 13,5% tương ứng lãi huy động 12 tháng 7,40% (chứng chỉ tiền gửi, 02/11/2026); r đổi cùng chiều lãi huy động.
 
@@ -100,11 +102,11 @@
 
 | Lãi huy động | r | Giá trị/cp sau quyền | Thay đổi |
 |---|---|---|---|
-| −1,0 điểm % (6,40%) | 12,5% | 25.000 | +11,0% |
-| −0,5 điểm % (6,90%) | 13,0% | 23.700 | +5,2% |
-| 7,40% (hiện tại) | 13,5% | 22.500 | — |
-| +0,5 điểm % (7,90%) | 14,0% | 21.500 | −4,7% |
-| +1,0 điểm % (8,40%) | 14,5% | 20.500 | −8,9% |
+| −1,0 điểm % (6,40%) | 12,5% | 23.700 | +11,0% |
+| −0,5 điểm % (6,90%) | 13,0% | 22.500 | +5,2% |
+| 7,40% (hiện tại) | 13,5% | 21.400 | — |
+| +0,5 điểm % (7,90%) | 14,0% | 20.400 | −4,7% |
+| +1,0 điểm % (8,40%) | 14,5% | 19.500 | −8,9% |
 
 - Lãi suất giảm thì giá trị tăng — thị trường thường phản ứng tốt khi lãi huy động hạ. Nếu chỉ truyền dẫn một nửa, độ nhạy giảm còn một nửa.
 - Mặt bằng thị trường: lãi suất chiết khấu ngầm định của thị trường 15,1% (30/10/2026, phân vị 75% từ 2014); trái phiếu Chính phủ 10 năm 4,58%, +0,62 điểm % trong 12 tháng (nguồn chưa đối chiếu độc lập).
@@ -116,7 +118,7 @@
 | 10 tỷ đ | 447% | 22–45 | 6,2% (dải 3,4–6,2%) |
 
 - Cơ sở: giá trị giao dịch trung vị 120 phiên 2,24 tỷ đ/ngày (trung bình 2,96); biến động ngày 2,7%; chênh lệch mua–bán ước 1,0%.
-- Nhãn trên/trong/dưới vùng dùng giá trị sau chiết khấu ở quy mô 1 tỷ đ; trước chiết khấu kết luận không đổi.
+- Nhãn trên/trong/dưới vùng dùng giá trị sau chiết khấu ở quy mô 5 tỷ đ (quy ước chung); ở 1 tỷ hoặc trước chiết khấu, kết luận không đổi.
 
 ![rate](figs/fig_06_rate_sens.png)
 
@@ -162,11 +164,12 @@
 
 ## Phụ lục C. Nguồn
 
-BCTC hợp nhất Q3/2026 (ký 15/10/2026); BCTC bán niên 2026 soát xét và BCTC 2025 kiểm toán (AVA); giải trình 1295/GT-SCL; NQ HĐQT 1363 (26/10/2026); TB chào bán 1368/TB-SCL (27/10/2026); dữ liệu quý và giá tav2_bq; lãi huy động: chứng chỉ tiền gửi 12 tháng 02/11/2026. Ngành: VARS, Bộ Xây dựng, Bộ Tài chính, báo Tuổi Trẻ 02/10/2026 (tổng hợp đọc ngành 29/10/2026). Ảnh, logo: songdacaocuong.vn (03/11/2026). Toạ độ: vi.wikipedia.org (03/11/2026). Ranh giới tỉnh: geoBoundaries.
+BCTC hợp nhất Q3/2026 (ký 15/10/2026); BCTC bán niên 2026 soát xét và BCTC 2025 kiểm toán (AVA); giải trình 1295/GT-SCL; NQ HĐQT 1363 (26/10/2026); TB chào bán 1368/TB-SCL (27/10/2026); dữ liệu giao dịch và BCTC quý; lãi huy động: chứng chỉ tiền gửi 12 tháng 02/11/2026. Ngành: VARS, Bộ Xây dựng, Bộ Tài chính, báo Tuổi Trẻ 02/10/2026 (tổng hợp đọc ngành 29/10/2026). Ảnh, logo: songdacaocuong.vn (03/11/2026). Toạ độ: vi.wikipedia.org (03/11/2026). Ranh giới tỉnh: geoBoundaries.
 
 ## Phụ lục D. Phương pháp và giới hạn
 
-- Giá trị = lợi nhuận chuẩn hoá chu kỳ × P/E nội tại + dự án dở dang theo giá vốn − nợ tài trợ dự án + tiền thu quyền mua; lưới 72 bộ tham số × 3 kịch bản (216 điểm); vùng = phân vị 25–75%.
+- Giá trị = lợi nhuận chuẩn hoá chu kỳ × P/E nội tại + dự án dở dang theo giá vốn − nợ tài trợ dự án + tiền thu quyền mua; lưới 36 bộ tham số × 3 kịch bản (108 điểm); vùng = phân vị 25–75%. Lãi vay cộng lại cho nợ tài trợ dự án = lãi vay thực trong kết quả kinh doanh Q3/2026 (4,96%/năm), không cao hơn mức đã bị trừ trong lợi nhuận.
+- Mức quay về trung bình theo kịch bản (100% / 50% / 0%) là giả định thiết kế của nhóm nghiên cứu; chỉ trọng số 50/30/20 theo chế độ ngành có nguồn (đọc ngành độc lập 29/10/2026). Kịch bản bị chi phối bởi giả định này nên đọc như dải độ nhạy.
 - Mô hình không dùng giá thị trường làm đầu vào; giá trị được ghi và khoá trước khi so với giá.
 - Chiết khấu thanh khoản: nửa chênh lệch mua–bán (ước từ giá cao/thấp ngày) + tác động giá căn bậc hai theo khối lượng; Amihud chỉ đối chiếu.
 - Giới hạn: không có cơ cấu mảng, tuổi nợ, backlog, công suất từng dây chuyền, hợp đồng tro; số Phả Lại còn phải chi là ước lượng.

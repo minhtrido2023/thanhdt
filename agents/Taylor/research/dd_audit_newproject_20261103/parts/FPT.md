@@ -1,0 +1,7 @@
+# FPT — rà soát luật "đầu tư dự án mới" (03/11/2026)
+1. Tâm 54.800 (expected_weighted), vùng cơ sở 55.000–66.700, DD 2026-11-01 (center_alt 59.800 = tâm kịch bản cơ sở). Nguồn: /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_FPT_20261101/REPORT.md (v2; chưa có REPORT khác).
+2. Dự án/cam kết vốn: không có dự án đơn lẻ có tên/vốn/NPV trong mô hình. Chỉ có capex chung: 9T/26 capex 2.029 tỷ, 56% (1.426) là khuôn viên giáo dục dở dang (Bình Dương 415, Hoà Lạc 247, Quy Nhơn 61, Long An 37) — REPORT.md:110-112. TTDL: FPT không công bố MW/capex (REPORT.md:115, GAPS G5). Không có M&A mới.
+3. Trừ giá trị vì dự án: KHÔNG có dòng trừ riêng. Capex đi vào hệ số chuyển tiền conv (FCFE = LN lõi × conv; calc/valuation.py:134-138). Base conv 0,75, RONIC ngầm định 16% > Ke 12,85% (REPORT.md:140) => đầu tư mới tạo giá trị ở base. Chỉ kịch bản Xấu (P 0,35) có conv 0,40 / RONIC 5% < Ke, nhưng gắn với quan sát cụ thể (conv đo 9T/26 = -0,12; 2025 = 0,39 theo định nghĩa cũ; REPORT.md:105,140) — đúng dạng "(-) có rủi ro quan sát được, thành kịch bản có xác suất". Không có khoản CỘNG không cơ sở liên quan dự án.
+4. Phân loại: KHÔNG_VẤN_ĐỀ.
+5. Hiệu ứng: 0 đ/cp, 0%. Không chạy lại (không có tham số dự án để đặt về sổ sách); lý do: base đã RONIC > Ke. Ước lượng, không đo.
+6. Giá 03/11 = 50.400 (close_20261103.md). Tâm gốc 54.800 (giá -8,0%); tâm điều chỉnh = 54.800 (không đổi). Ngưỡng ứng viên ×0,85 = 46.580: giá chưa chạm, nhãn không đổi (hiện "DƯỚI vùng" 55.000–66.700, giá còn quyền cổ tức 1.000đ).

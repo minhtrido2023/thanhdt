@@ -51,3 +51,4 @@
 - [2026-11-03T15:45:04Z] [dd-DRI r4 03/11] XONG job Taylor_20261103_152938 commit bdbdea02f: tam 16.950 -> sau CK 16.610 (cu 10.500), gia 13.400 RE co DK; CHUA skeptic, CHUA email
 - [2026-11-03T16:10:08Z] ĐANG DỞ: DD DRI r5 job Taylor_20261103_160959 — research/dd_DRI_20261027/r5/ sửa SKEPTIC_R4 | NEXT: đọc SKEPTIC_R4 + r4/calc
 - [2026-11-03T16:13:27Z] [dd-SCL r3 03/11] XONG job Taylor_20261103_161002: tam sau quyen 21.383 (CK 5 ty), cum 22.843, gia 30.000/TERP 27.659 TREN vung; CHUA email; chua commit
+- [2026-11-03T16:19:13Z] [dd-DRI r5 03/11] XONG job Taylor_20261103_160959 commit 620e32216: tam sau CK 15.543, gia 13.400 HOP LY sat P25, luat -15% khong dat; CHUA email; SCL r3 job song song dang sua dd_price_zones.json (chua commit)

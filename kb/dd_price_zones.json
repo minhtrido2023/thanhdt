@@ -1824,7 +1824,7 @@
    "source_file": "agents/Taylor/research/dd_SCL_20261029/investor_report_v2/SCL_DD_investor_report_20261103.md",
    "evidence": [
     {
-     "file": "agents/Taylor/research/dd_SCL_20261029/investor_report_v2/SCL_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_SCL_20261029/archive_internal/SCL_DD_investor_report_20261103_r2.md",
      "quote": "tương đương ≈ **22.500 đ/cp** sau phát hành quyền (vùng 19.900–25.100 đ)",
      "fields": [
       "center",
@@ -1833,7 +1833,7 @@
      ]
     },
     {
-     "file": "agents/Taylor/research/dd_SCL_20261029/investor_report_v2/SCL_DD_investor_report_20261103.md",
+     "file": "agents/Taylor/research/dd_SCL_20261029/archive_internal/SCL_DD_investor_report_20261103_r2.md",
      "quote": "Giá đóng cửa 03/11/2026 là **30.000 đ**",
      "fields": [
       "price_ref"
@@ -2009,6 +2009,50 @@
    "rev": 1,
    "center_alt": 16610,
    "center_alt_kind": "base_scenario"
+  },
+  {
+   "ticker": "SCL",
+   "dd_date": "2026-10-29",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 18600,
+   "center": 21400,
+   "center_kind": "expected_weighted",
+   "zone_high": 23900,
+   "center_range": null,
+   "price_ref": 30000,
+   "price_date": "2026-11-03",
+   "verdict_label": "trung dung — giá TRÊN vùng hợp lý (TERP 27.659 > P90 25.100 sau CK thanh khoản 5 tỷ; cum 30.000 > P90 cum 27.100); kể cả kịch bản biên đỉnh bền (24.500 sau quyền) vẫn dưới TERP; cận dưới nợ mệnh giá 20.400 sau quyền; giá ngầm định lãi huy động ≈5,1% (−2,3 điểm %)",
+   "source_file": "agents/Taylor/research/dd_SCL_20261029/investor_report_v2/SCL_DD_investor_report_20261103.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_SCL_20261029/investor_report_v2/SCL_DD_investor_report_20261103.md",
+     "quote": "tương đương ≈ **21.400 đ/cp** sau phát hành quyền (vùng 18.600–23.900 đ)",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_SCL_20261029/investor_report_v2/SCL_DD_investor_report_20261103.md",
+     "quote": "Giá đóng cửa 03/11/2026 là **30.000 đ**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "skeptic_status": "r3 sửa theo SKEPTIC_R2_20261103 (khoá md5 dd_SCL_20261029/r3/calc/LOCK_md5_r3.txt 23:11:00 ICT trước khi đọc giá/ADV; r1/r2 đã biết giá ⇒ khoá chỉ chứng minh thứ tự chạy); KHÔNG còn vòng skeptic — Mike kiểm cơ học",
+   "expires_on": "2027-02-26",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "null_reason": null,
+   "notes": "Cơ sở SAU QUYỀN (44,84tr cp) và SAU chiết khấu thanh khoản 4,6% @5 tỷ đ (quy ước fleet). Tâm sau quyền 21.383 (trước CK 22.403); trước quyền (cum) 22.843 (trước CK 23.933), vùng cum 19.683–25.712, P10 17.605, P90 27.104. Lưới 108 (36 × 3 nhánh 50/30/20): P10 16.846, P25 18.646, P50 21.842, P75 23.867, P90 25.074 (sau quyền, sau CK). Nhánh: CYC 19.686 / ADMIN 22.111 / STRUCT 24.535. r 13,5% @ CCTG 12M 7,40%; ±50bp −4,7%/+5,2%; ±100bp −8,9%/+11,0% (β=1). i_cip = lãi P&L thực 4,96% (r2 có 9,5% ⇒ cộng lại lãi chưa từng bị trừ) ⇒ Phả Lại+Vĩnh Tân GĐ2 +1.471 đ/cp sau quyền. Biến thể cận dưới 'toàn bộ nợ theo mệnh giá' (script model_r3.py value_par): tâm sau quyền trước CK 21.329 (−1.074), sau CK 5 tỷ 20.358; cum sau CK 21.660. Bảng quy đổi biên 1,0/0,5/0,0 là THIẾT KẾ của nhóm nghiên cứu (chỉ trọng số 50/30/20 có nguồn). Thanh khoản 1/5/10 tỷ: 2,31%/4,55%/6,24%. TERP @30.000 = 27.659. Số: dd_SCL_20261029/r3/calc/model_r3_out.txt, compare_r3_out.txt, reverse_r3_out.json.",
+   "recorded_at": "2026-11-03T23:20:00+07:00",
+   "center_desc": "kỳ vọng 3 nhánh chu kỳ (nhóm nghiên cứu 50/30/20; quay về TB biên 1/0,5/0 là thiết kế của nhóm) × lưới (DT TTM/2026E, cửa sổ TB, g 3–5%, ROE 15–20%); P/E nội tại (1−g/ROE)/(r−g); dự án dở dang theo giá vốn (ròng 0, cộng lại lãi vay thực 4,96%) + 75 tỷ tiền quyền; sau CK thanh khoản 5 tỷ đ",
+   "rev": 3,
+   "supersedes": "SCL@2026-10-29#2",
+   "center_alt": null,
+   "center_alt_kind": null,
+   "correction_reason": "r3 theo SKEPTIC_R2 03/11: i_cip 9,5% → 4,96% (lãi P&L thực; không cộng lại lãi chưa bị trừ); thêm biến thể cận dưới nợ theo mệnh giá có script; thống nhất CK thanh khoản tham chiếu 5 tỷ (r2 dùng 1 tỷ); tâm sau quyền 22.500 → 21.400, cum 24.100 → 22.800."
   },
   {
    "ticker": "DRI",

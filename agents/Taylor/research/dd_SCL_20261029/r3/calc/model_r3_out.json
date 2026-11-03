@@ -1,0 +1,235 @@
+{
+ "asof": "2026-11-03",
+ "r0": 0.135,
+ "dep0": 0.074,
+ "dep0_src": "deposit_rate_vn.macro_killswitch_a_status(): cctg_12m(2026-11-02) 7,40%",
+ "tax": 0.20042676004556004,
+ "eq_parent": 531.616281045,
+ "bvps_cum": 13688.46237893092,
+ "bvps_post": 13529.424002240123,
+ "debt": 416.461671173,
+ "cip_total": 205.5,
+ "phalai_remain": 72.19999999999999,
+ "int_q3_rate": 0.04962787307121566,
+ "npm_ttm": 0.12727587250789257,
+ "npm_2026e": 0.13473431524127272,
+ "npm_mean": {
+  "2020-TTM": 0.08315562830705588,
+  "2023-TTM": 0.09723887211914861,
+  "GM-gap": 0.12438741417855714
+ },
+ "gm_gap": 0.0036125000000000185,
+ "gpm_bq": {
+  "2023": 0.405375,
+  "2024": 0.33199999999999996,
+  "2025": 0.34595,
+  "TTM": 0.365925
+ },
+ "hist_npm": {
+  "2020": 0.08093144439016448,
+  "2021": 0.06561806426710412,
+  "2022": 0.04658440101552813,
+  "2023": 0.0956132384311572,
+  "2024": 0.062118626236177026,
+  "2025": 0.10394775130136763
+ },
+ "grid": {
+  "rev": [
+   "TTM",
+   "2026E"
+  ],
+  "norm": [
+   "2020-TTM",
+   "2023-TTM",
+   "GM-gap"
+  ],
+  "g": [
+   0.03,
+   0.04,
+   0.05
+  ],
+  "roe": [
+   0.15,
+   0.2
+  ],
+  "i_cip": [
+   0.04962787307121566
+  ]
+ },
+ "n_grid": 108,
+ "tam_post": 22402.83481475959,
+ "tam_cum": 23932.749378777193,
+ "e_exist": 114.93571247910411,
+ "v_total_pre": 929.4717600649348,
+ "pct_post": {
+  "5": 16950.387341491158,
+  "10": 17649.598413349308,
+  "25": 19535.112950262643,
+  "50": 22883.86793954076,
+  "75": 25005.873715959875,
+  "90": 26269.898704965817
+ },
+ "pct_cum": {
+  "5": 17637.93919271652,
+  "10": 18445.173191561575,
+  "25": 20621.98574612852,
+  "50": 24488.098555188426,
+  "75": 26937.93849253229,
+  "90": 28397.245971465272
+ },
+ "branch_post": {
+  "CYCLICAL": 20624.71912939303,
+  "ADMIN_GATED": 23164.884394202345,
+  "STRUCTURAL": 25705.049659011678
+ },
+ "branch_e": {
+  "CYCLICAL": 105.07715073241455,
+  "ADMIN_GATED": 119.16081037054215,
+  "STRUCTURAL": 133.24447000866977
+ },
+ "sens_rate": {
+  "b1.0_-100": {
+   "r": 0.125,
+   "v_post": 24870.22423489324,
+   "v_cum": 26781.33217228098,
+   "d_pct": 0.11013737504809296
+  },
+  "b1.0_-50": {
+   "r": 0.13,
+   "v_post": 23566.657424908874,
+   "v_cum": 25276.373954172464,
+   "d_pct": 0.05194979205857142
+  },
+  "b1.0_+0": {
+   "r": 0.135,
+   "v_post": 22402.83481475959,
+   "v_cum": 23932.749378777193,
+   "d_pct": 0.0
+  },
+  "b1.0_+50": {
+   "r": 0.14,
+   "v_post": 21357.287646021563,
+   "v_cum": 22725.672923653838,
+   "d_pct": -0.04667030656536342
+  },
+  "b1.0_+100": {
+   "r": 0.14500000000000002,
+   "v_post": 20412.75492935804,
+   "v_cum": 21635.21690457791,
+   "d_pct": -0.08883161001082018
+  },
+  "b0.5_-100": {
+   "r": 0.13,
+   "v_post": 23566.657424908874,
+   "v_cum": 25276.373954172464,
+   "d_pct": 0.05194979205857142
+  },
+  "b0.5_-50": {
+   "r": 0.1325,
+   "v_post": 22968.732379190948,
+   "v_cum": 24586.073921620362,
+   "d_pct": 0.025260087355486238
+  },
+  "b0.5_+0": {
+   "r": 0.135,
+   "v_post": 22402.83481475959,
+   "v_cum": 23932.749378777193,
+   "d_pct": 0.0
+  },
+  "b0.5_+50": {
+   "r": 0.1375,
+   "v_post": 21866.441107341765,
+   "v_cum": 23313.486820128743,
+   "d_pct": -0.023943117549768078
+  },
+  "b0.5_+100": {
+   "r": 0.14,
+   "v_post": 21357.287646021563,
+   "v_cum": 22725.672923653838,
+   "d_pct": -0.04667030656536342
+  }
+ },
+ "irr_sens_post": {
+  "0.100": -1520.1628228780135,
+  "0.120": -651.498352662006,
+  "0.135": 0.0,
+  "0.150": 651.4983526620047,
+  "0.170": 1520.1628228780135
+ },
+ "inventory": [
+  {
+   "item": "Phả Lại — phần đã chi 190,7 tỷ (XDCB dở dang)",
+   "base": "tài sản theo giá vốn; nợ vay tài trợ nó trừ đủ ở mệnh giá; bỏ lãi vay tương ứng khỏi E",
+   "basis": "BCTC HN Q3/2026 thuyết minh XDCB; LCTT capex 9T 198,1 tỷ; CFO 9T 9,9 tỷ ⇒ tài trợ bằng vay"
+  },
+  {
+   "item": "Phả Lại — phần còn phải chi ~72 tỷ (ước lượng)",
+   "base": "NPV 0 (tài sản = nợ/vốn đối ứng)",
+   "basis": "tổng vốn 262,9 tỷ − 190,7 tỷ"
+  },
+  {
+   "item": "Tách tro Vĩnh Tân GĐ2 14,8 tỷ",
+   "base": "như Phả Lại (giá vốn, ròng 0, bỏ lãi vay)",
+   "basis": "BCTC HN Q3/2026 XDCB"
+  },
+  {
+   "item": "Phả Lại — lợi nhuận tăng thêm khi vận hành",
+   "base": "KHÔNG cộng (không có giá/sản lượng/hợp đồng đầu ra kiểm được)",
+   "basis": "chỉ độ nhạy IRR"
+  },
+  {
+   "item": "Phả Lại — rủi ro thừa cung vùng",
+   "base": "KHÔNG trừ (chỉ có nhận định ngành chung, không dữ liệu vùng)",
+   "basis": "sector read: không có số công suất toàn quốc"
+  },
+  {
+   "item": "Trả trước người bán 86,6 tỷ (một phần có thể là thiết bị)",
+   "base": "không cộng thêm (đã nằm trong vốn lưu động, mục đích từng khoản không công bố đủ)",
+   "basis": "BCTC HN Q3 V.3"
+  }
+ ],
+ "par_debt_lower_bound": {
+  "v_pre": 881.306972654512,
+  "v_cum": 22692.56561472696,
+  "v_post": 21328.61071096403,
+  "pct_post": {
+   "10": 16637.764822595647,
+   "25": 18428.9151036788,
+   "50": 21741.014271399068,
+   "75": 23863.020047818187,
+   "90": 25244.26557347808
+  },
+  "pct_cum": {
+   "10": 17277.018812284914,
+   "25": 19344.8885330672,
+   "50": 23168.682467887233,
+   "75": 25618.522405231095,
+   "90": 27213.160124714283
+  },
+  "debt_other": 210.961671173,
+  "cash": 95.1,
+  "net_other_debt": 115.86167117300002,
+  "delta_vs_base_post": -1074.224103795561
+ },
+ "i_cip_note": "r3: i_cip = INT_Q3*4/DEBT = lãi P&L thực; r2 có thêm 9,5% (đã bỏ)",
+ "conversion_table_note": "REVERT 1,0/0,5/0,0 là THIẾT KẾ của nhóm nghiên cứu; chỉ trọng số chế độ ngành 0,5/0,3/0,2 có nguồn (sector read VLXD nhẹ 29/10)",
+ "cip_effect": {
+  "cip_effect_total_ty": 65.94425203335254,
+  "cip_effect_post_dcp": 1470.7612936679946,
+  "cip_effect_cum_dcp": 1697.9830100216132
+ },
+ "thresholds_preregistered": {
+  "rule": "nhãn dựa trên giá trị SAU chiết khấu thanh khoản ở quy mô tham chiếu 5 tỷ đ",
+  "cheap_margin": "giá ≤ P10 (sau CK thanh khoản) ⇒ RẺ có biên an toàn",
+  "below": "P10 < giá < P25 ⇒ DƯỚI vùng hợp lý",
+  "inside": "P25..P75 ⇒ TRONG vùng",
+  "above": "> P75 ⇒ TRÊN vùng",
+  "compare": "giá cum-quyền so với giá trị/cp TRƯỚC quyền; TERP so với giá trị/cp SAU quyền"
+ },
+ "liquidity_method_preregistered": {
+  "exit_cost": "nửa spread (Corwin-Schultz từ High/Low 120 phiên, tav2_bq.ticker) + tác động giá căn bậc hai Y·σ_ngày·√(Q/ADV_trung vị), Y∈{0,5;1,0}",
+  "days": "số phiên thoát = Q/(p·ADV_trung vị), p∈{10%,20%}",
+  "cross_check": "Amihud ILLIQ 120 phiên (|r|/giá trị GD) × Q, chỉ đối chiếu",
+  "discount": "chiết khấu = chi phí thoát 1 chiều (Y=1, trung điểm) ở quy mô 1/5/10 tỷ đ; tham chiếu 5 tỷ"
+ }
+}

@@ -1,0 +1,5 @@
+2026-11-03 23:11:00 ICT
+052dc8cca2f48d72146a40aa972e502c  model_r3.py
+f773265c653695221f10b2a182bd8fe7  model_r3_out.json
+f9e7346cfe70813e2c37763d7f6153d1  model_r3_out.txt
+9f1c48d525410d34c1309d5a64bdecfe  fin_bq_scl.csv

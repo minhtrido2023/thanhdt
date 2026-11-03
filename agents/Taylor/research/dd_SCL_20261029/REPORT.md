@@ -1,4 +1,36 @@
-# DD SCL r2 — CTCP Sông Đà Cao Cường · 03/11/2026 · job `Taylor_20261103_152941` (NỘI BỘ)
+# DD SCL r3 — CTCP Sông Đà Cao Cường · 03/11/2026 · job `Taylor_20261103_161002` (NỘI BỘ)
+
+> r3 = r2 sửa theo `SKEPTIC_R2_20261103.md`. Bản r2 lưu ở `archive_internal/REPORT_r2_20261103.md`; r1 ở `REPORT_r1_20261029.md`.
+> Mô hình `r3/calc/model_r3.py` → khoá `r3/calc/LOCK_md5_r3.txt` 23:11:00 ICT → rồi `compare_r3.py`, `reverse_r3.py`. r1/r2 đã biết giá ⇒ khoá chỉ chứng minh thứ tự chạy.
+> Báo cáo NĐT: `investor_report_v2/SCL_DD_investor_report_20261103.{md,pdf,html}` (9 trang, CHƯA gửi email).
+
+## 0. Thay đổi r2 → r3 (đo từ `r3/calc/*_out.*`)
+1. `i_cip` = lãi P&L thực 5,167×4/416,5 = **4,96%** (bỏ 9,5%: cộng lại lãi chưa từng bị trừ). Phả Lại+Vĩnh Tân: +2.143 → **+1.471 đ/cp** sau quyền (cum +1.698).
+2. Biến thể cận dưới "toàn bộ nợ theo mệnh giá" (`value_par`, có script): nợ ngoài dự án 211,0 tỷ − tiền 95,1 tỷ trừ mệnh giá, cộng lại lãi sau thuế → tâm sau quyền **21.329 (−1.074 so base)**, sau CK 5 tỷ 20.358; cum sau CK 21.660. Thay dòng "≈ −400" không script.
+3. Bảng quy đổi biên 1,0/0,5/0,0 ghi là **thiết kế của nhóm**; chỉ trọng số 50/30/20 có nguồn (Bobby §3). "Vĩnh Hảo" → "Vĩnh Tân"; "tav2_bq" bỏ khỏi bản NĐT; CK thanh khoản tham chiếu **5 tỷ** (r2: 1 tỷ). Lưới 36 × 3 = 108 điểm.
+
+## 1. Kết quả (đ/cp)
+| | Trước CK | Sau CK 5 tỷ (4,55%) |
+|---|---|---|
+| Tâm sau quyền | 22.403 | **21.383** |
+| P10/P25/P75/P90 sau quyền | 17.650/19.535/25.006/26.270 | 16.846/18.646/23.867/25.074 |
+| Tâm cum | 23.933 | **22.843** |
+| P25–P75 cum | 20.622–26.938 | 19.683–25.712 |
+| Nhánh CYC/ADMIN/STRUCT (sau quyền) | 20.625/23.165/25.705 | 19.686/22.111/24.535 |
+| Cận dưới nợ mệnh giá (tâm sau quyền) | 21.329 | 20.358 |
+- Giá 30.000 cum / TERP 27.659: **TRÊN vùng** (cum > P90 cum 27.104; TERP > P90 25.074); kể cả STRUCT 24.535 < TERP. Giá cao hơn tâm cum 31,3%, TERP cao hơn tâm sau quyền 29,3%.
+- Định giá ngược: TERP ngầm định r 11,24% ⇔ lãi huy động 5,14% (−226bp); hoặc E cần 151,4 tỷ (+31,7% so 114,9).
+- Độ nhạy (β=1, sau CK): −100bp +11,0% · −50bp +5,2% · +50bp −4,7% · +100bp −8,9% (chưa tới TERP kể cả −100bp: 23.700 < 27.659).
+- Thanh khoản 1/5/10 tỷ: 2,31%/4,55%/6,24%; số phiên thoát @20%/10%: 2,2/4,5 · 11/22 · 22/45.
+
+## 2. Tái lập
+`cd r3/calc && python3 -I model_r3.py && python3 -I compare_r3.py && python3 -I reverse_r3.py`; md5 `model_r3_out.{json,txt}` không đổi sau compare/reverse (đã kiểm). `dd_price_zones.json` SCL rev 3 (rev 2 trỏ evidence sang `archive_internal/SCL_DD_investor_report_20261103_r2.md`); `dd_price_zones_selfcheck` 0 lỗi.
+
+## 3. Còn mở
+Không còn vòng skeptic (Mike kiểm cơ học). Email CHƯA gửi. Điểm yếu còn: P/E dùng E TTM/2026E (lệch ~−4%, thận trọng); mức quay về trung bình theo kịch bản là giả định thiết kế.
+
+---
+# (Nền dữ kiện r2 giữ nguyên dưới đây — §2/§3/§5/§6/§7 phần dữ kiện còn đúng; số định giá cũ ở §1/§2 bảng cầu/§4 cuối KHÔNG còn hiệu lực)
 
 > Bản r1 (29/10, tâm 25.500 ex-quyền) lưu ở `archive_internal/REPORT_r1_20261029.md` — §2–§7, §11–§13 của r1 (phải thu, chất lượng LN,
 > bảng cân đối, quyền mua, pháp lý, đối chiếu BQ, đính chính skeptic) VẪN là nền dữ kiện; r2 chỉ làm lại ĐỊNH GIÁ theo luật user 03/11.

@@ -1,6 +1,6 @@
 """Dựng biểu đồ + PDF cho báo cáo DD nhà đầu tư SCL (03/11/2026; skill dd-investor-report luật 1–21).
-Số định giá: ../r2/calc/model_r2_out.json (khoá md5 ../r2/calc/LOCK_md5_r2.txt 22:34:41 TRƯỚC khi đọc giá) + compare_r2_out.json + reverse_r2_out.json.
-Số BCTC: BCTC HN Q3/2026 (ký 15/10/2026), soát xét bán niên 2026, kiểm toán 2025. Lịch sử quý: ../r2/calc/fin_bq_scl.csv (tav2_bq.ticker_financial). Giá: ../r2/calc/px_scl.csv.
+Số định giá: ../r3/calc/model_r3_out.json (khoá md5 ../r3/calc/LOCK_md5_r3.txt 23:11:00 TRƯỚC khi đọc giá) + compare_r3_out.json + reverse_r3_out.json.
+Số BCTC: BCTC HN Q3/2026 (ký 15/10/2026), soát xét bán niên 2026, kiểm toán 2025. Lịch sử quý: ../r3/calc/fin_bq_scl.csv (dữ liệu BCTC quý). Giá: ../r3/calc/px_scl.csv.
 Chạy:  /home/trido/thanhdt/wc_venv/bin/python -I build_report.py [figs|pdf|all]   (bản đồ: make_map_inputs.py)
 Ảnh: src_img/ (songdacaocuong.vn, tải 03/11/2026). Mỗi hình kèm CSV (figs/*.csv).
 """
@@ -11,17 +11,17 @@ import json as _json
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIGS = os.path.join(HERE, "figs")
 IMGS = os.path.join(HERE, "src_img")
-CALC = os.path.join(HERE, "..", "r2", "calc")
+CALC = os.path.join(HERE, "..", "r3", "calc")
 NAVY, ACCENT, GREY, LIGHT, GREEN = "#1F3A5F", "#C8553D", "#9AA5B1", "#D9DEE4", "#3C7A5A"
 FONT = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Regular.ttf"
 FONT_B = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Bold.ttf"
 
-M = _json.load(open(os.path.join(CALC, "model_r2_out.json")))
-C = _json.load(open(os.path.join(CALC, "compare_r2_out.json")))
-RV = _json.load(open(os.path.join(CALC, "reverse_r2_out.json")))
+M = _json.load(open(os.path.join(CALC, "model_r3_out.json")))
+C = _json.load(open(os.path.join(CALC, "compare_r3_out.json")))
+RV = _json.load(open(os.path.join(CALC, "reverse_r3_out.json")))
 D = C["ref_discount"]
 PX, TERP = C["px_cum"], C["terp"]
-ZP = {q: round(v) for q, v in C["pct_post_liq"].items()}     # sau quyền, sau CK thanh khoản 1 tỷ
+ZP = {q: round(v) for q, v in C["pct_post_liq"].items()}     # sau quyền, sau CK thanh khoản 5 tỷ
 ZC = {q: round(v) for q, v in C["pct_cum_liq"].items()}      # trước quyền (cum), sau CK
 TP, TC = round(C["tam_post_liq"]), round(C["tam_cum_liq"])
 TP0, TC0 = round(M["tam_post"]), round(M["tam_cum"])
@@ -111,11 +111,11 @@ def figs():
     c.text(0.53, PX + 500, "Giá 30,0k (03/11)", fontsize=6.2, color=NAVY, fontweight="bold", va="bottom")
     fig.text(0.70, 0.83, "3 · ĐỊNH GIÁ", fontsize=7.6, fontweight="bold", color=ACCENT)
     fig.text(0.70, 0.81, f"tâm ≈{k(TC)} trước quyền (≈{k(TP)} sau);\ngiá cao hơn tâm {round((PX/TC-1)*100)}%", fontsize=6.3, color="#333", va="top")
-    fig.text(0.01, 0.005, "Nguồn: BCTC hợp nhất Q3/2026; tav2_bq NP_P0 (cộng 4 quý); mô hình chuẩn hoá chu kỳ của nhóm (ước lượng; vùng đậm P25–P75, nhạt P10–P90, "
-             "sau chiết khấu thanh khoản ở quy mô 1 tỷ đ; cơ sở trước quyền mua); giá đóng cửa 03/11/2026.", fontsize=5.8, color="#666", va="bottom", wrap=True)
+    fig.text(0.01, 0.005, "Nguồn: BCTC hợp nhất Q3/2026; dữ liệu BCTC quý NP_P0 (cộng 4 quý); mô hình chuẩn hoá chu kỳ của nhóm (ước lượng; vùng đậm P25–P75, nhạt P10–P90, "
+             "sau chiết khấu thanh khoản ở quy mô 5 tỷ đ; cơ sở trước quyền mua); giá đóng cửa 03/11/2026.", fontsize=5.8, color="#666", va="bottom", wrap=True)
     fig.savefig(os.path.join(FIGS, "fig_00_hero.png"), dpi=200); plt.close(fig)
-    pd.DataFrame([*[(f"lnst_{x}", y, "BQ NP_P0 / BCTC") for x, y in ann_np.items()], ("tam_cum_liq", TC, "compare_r2_out.json"),
-                  *[(f"cum_liq_p{q}", v, "compare_r2_out.json") for q, v in ZC.items()], ("gia_0311", PX, "tav2_bq.ticker 03/11/2026")],
+    pd.DataFrame([*[(f"lnst_{x}", y, "BQ NP_P0 / BCTC") for x, y in ann_np.items()], ("tam_cum_liq", TC, "compare_r3_out.json"),
+                  *[(f"cum_liq_p{q}", v, "compare_r3_out.json") for q, v in ZC.items()], ("gia_0311", PX, "dữ liệu giao dịch 03/11/2026")],
                  columns=["chi_tieu", "gia_tri", "nguon"]).to_csv(os.path.join(FIGS, "fig_00_hero.csv"), index=False)
 
     # 01 KPI ----------------------------------------------------------------
@@ -143,7 +143,7 @@ def figs():
     ax.tick_params(axis="x", labelsize=6.2, rotation=0); ax.set_ylabel("Doanh thu, tỷ đ", fontsize=7); ax2.set_ylabel("LNST, tỷ đ", fontsize=7, color=ACCENT)
     ax2.set_ylim(0, 48); ax.set_title("Doanh thu gấp đôi trong 4 quý; LNST quý đi ngang ≈38 tỷ ở Q2–Q3/2026")
     fig.subplots_adjust(bottom=0.17, top=0.88, right=0.92)
-    save(fig, "fig_02_quarterly", "Nguồn: tav2_bq.ticker_financial (Revenue_P0 = doanh thu gộp; NP_P0 = LNST cổ đông mẹ), đối chiếu BCTC HN Q3/2026 (DT thuần Q3 263,4 tỷ; LNST 38,1 tỷ).",
+    save(fig, "fig_02_quarterly", "Nguồn: dữ liệu BCTC quý (Revenue_P0 = doanh thu gộp; NP_P0 = LNST cổ đông mẹ), đối chiếu BCTC HN Q3/2026 (DT thuần Q3 263,4 tỷ; LNST 38,1 tỷ).",
          fin[["quarter", "rev", "np"]]); plt.close(fig)
 
     # 03 Biên ròng theo năm + chuẩn hoá chu kỳ -----------------------------------------
@@ -158,14 +158,14 @@ def figs():
     ax.set_ylim(0, 15); ax.set_ylabel("LNST / doanh thu gộp, %", fontsize=7)
     ax.set_title("Biên ròng 12,7% là đỉnh 7 năm; mô hình cho biên quay về trung bình chu kỳ theo xác suất")
     fig.subplots_adjust(bottom=0.24, top=0.88)
-    save(fig, "fig_03_margin_cycle", "Nguồn: tav2_bq.ticker_financial (NP_P0 / Revenue_P0, cộng 4 quý mỗi năm). Chuẩn hoá: chu kỳ (xác suất 50%) quay về trung bình, hành chính (30%) quay nửa đường, cấu trúc (20%) giữ mức hiện tại — xác suất theo đọc ngành độc lập 29/10/2026.",
+    save(fig, "fig_03_margin_cycle", "Nguồn: dữ liệu BCTC quý (NP_P0 / Revenue_P0, cộng 4 quý mỗi năm). Chuẩn hoá: chu kỳ (xác suất 50%) quay về trung bình, hành chính (30%) quay nửa đường, cấu trúc (20%) giữ mức hiện tại — xác suất theo đọc ngành độc lập 29/10/2026.",
          pd.DataFrame(npm_years, columns=["nam", "bien_rong_pct"])); plt.close(fig)
 
     # 04 Cầu giá trị (đ/cp sau quyền) -----------------------------------------------------
     sp = 1e9 / (M["eq_parent"] * 0 + 44_836_815)
     v_ops = (M["v_total_pre"]) * sp
     steps = [("Hoạt động hiện hữu\n(chuẩn hoá chu kỳ)", v_ops), ("Dự án dở dang\ntheo giá vốn", M["cip_total"] * sp), ("Nợ vay tài\ntrợ dự án", -M["cip_total"] * sp),
-             ("Tiền thu từ\nquyền mua", 75 * sp), ("Chiết khấu thanh\nkhoản (1 tỷ đ)", -TP0 * D)]
+             ("Tiền thu từ\nquyền mua", 75 * sp), ("Chiết khấu thanh\nkhoản (5 tỷ đ)", -TP0 * D)]
     fig, ax = plt.subplots(figsize=(7.2, 2.7)); cum = 0
     for i, (lab, v) in enumerate(steps):
         ax.bar(i, v, bottom=cum if v >= 0 else cum + v, color=NAVY if i == 0 else (GREEN if v >= 0 else ACCENT), width=0.6)
@@ -194,7 +194,7 @@ def figs():
     ax.set_xlim(14_000, 31_000); ax.xaxis.set_major_formatter(lambda v_, p_: f"{v_/1e3:.0f}k"); ax.set_ylim(-0.8, 3.7)
     ax.set_title("Giá ex-quyền lý thuyết cao hơn cả kịch bản biên bền (đ/cp sau quyền)")
     fig.subplots_adjust(left=0.2, bottom=0.25, top=0.88)
-    save(fig, "fig_05_football", f"Nguồn: mô hình của nhóm, lưới {M['n_grid']} bộ tham số (ước lượng); TERP tính từ giá đóng cửa 03/11/2026 (30.000 đ, còn quyền). Chiết khấu thanh khoản {vn(D*100,1)}% ở quy mô 1 tỷ đ.",
+    save(fig, "fig_05_football", f"Nguồn: mô hình của nhóm, lưới {M['n_grid']} bộ tham số (ước lượng); TERP tính từ giá đóng cửa 03/11/2026 (30.000 đ, còn quyền). Chiết khấu thanh khoản {vn(D*100,1)}% ở quy mô 5 tỷ đ.",
          pd.DataFrame(rows + [(f"grid_p{q}", v) for q, v in ZP.items()] + [("TERP", round(TERP)), ("tam", TP)], columns=["muc", "dcp"])); plt.close(fig)
 
     # 06 Độ nhạy lãi huy động --------------------------------------------------------------
@@ -211,7 +211,7 @@ def figs():
     ax.set_ylim(15_000, 31_500); ax.yaxis.set_major_formatter(lambda v_, p_: f"{v_/1e3:.0f}k"); ax.legend(fontsize=6.4, loc="upper center", frameon=False, ncol=2)
     ax.set_title("Lãi huy động giảm 1 điểm % nâng giá trị ≈11%; vẫn chưa tới mức giá hiện tại")
     fig.subplots_adjust(bottom=0.3, top=0.88)
-    save(fig, "fig_06_rate_sens", "Nguồn: mô hình của nhóm. r = 13,5% + β × (lãi huy động 12 tháng − 7,40%); điểm neo 7,40% = chứng chỉ tiền gửi 12 tháng 02/11/2026. Đ/cp sau quyền, sau chiết khấu thanh khoản 1 tỷ đ.",
+    save(fig, "fig_06_rate_sens", "Nguồn: mô hình của nhóm. r = 13,5% + β × (lãi huy động 12 tháng − 7,40%); điểm neo 7,40% = chứng chỉ tiền gửi 12 tháng 02/11/2026. Đ/cp sau quyền, sau chiết khấu thanh khoản 5 tỷ đ.",
          pd.DataFrame({"bp": bps, "v_beta1": [round(v) for v in v1], "v_beta05": [round(v) for v in v05]})); plt.close(fig)
 
     # 07 Giá 12T + sự kiện ----------------------------------------------------------------------
@@ -225,7 +225,7 @@ def figs():
     ax.yaxis.set_major_formatter(lambda v_, p_: f"{v_/1e3:.0f}k"); ax.set_ylim(p2["Close"].min() * 0.85, p2["Close"].max() * 1.12)
     ax.set_title(f"Giá 12 tháng (điều chỉnh): {k(p2['Close'].min())}–{k(p2['Close'].max())}; giá đã vượt tâm giá trị từ giữa 2026")
     fig.subplots_adjust(bottom=0.12, top=0.86)
-    save(fig, "fig_07_price", "Nguồn: tav2_bq.ticker SCL Close (giá điều chỉnh) 01/11/2025–03/11/2026; ngày KQKD là ước lượng theo hạn công bố. Quan sát, không suy nhân quả.",
+    save(fig, "fig_07_price", "Nguồn: dữ liệu giao dịch SCL, giá đóng cửa (giá điều chỉnh) 01/11/2025–03/11/2026; ngày KQKD là ước lượng theo hạn công bố. Quan sát, không suy nhân quả.",
          p2[["time", "Close", "Volume"]]); plt.close(fig)
 
     # 08 Ảnh sản phẩm/hoạt động (website công ty) ----------------------------------------------
