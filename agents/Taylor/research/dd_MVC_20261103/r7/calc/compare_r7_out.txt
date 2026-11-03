@@ -1,0 +1,9 @@
+Gia 13,300 = 0.72x tam 18,392 | 0.73x P50 | P/B 0.86x | luoi < gia 0.1% (min 12,854) | gia/P10 -14.7%
+Vung (nguong dang ky truoc): RE (duoi P10)
+ROE ben ham y cua GIA (Gordon r13 g3): 11.6% | ROE chuan hoa tron 13.0% -> 15,531
+  nhanh STRUCTURAL: 23,755 -> gia/gia tri 0.56x
+  nhanh ADMIN_GATED: 18,726 -> gia/gia tri 0.71x
+  nhanh CYCLICAL: 14,898 -> gia/gia tri 0.89x
+Hoa von (100% hoi bien, SL 1,10/1,20): gia da NNC 231k/m3 (tien 2026) = Tan Lap 210k -> bien Tan Lap 30.8%, bien NNC 28.8% (TB chu ky 34.3%)
+Hoa von (100% hoi bien, SL tran 1,40 ca hai mo): gia da NNC 223k/m3 (tien 2026) = Tan Lap 203k -> bien Tan Lap 28.4%, bien NNC 30.3% (TB chu ky 34.3%)
+Tham chieu (trai D1, khong vao tam): V_NNC = thi gia NNC 46,100 -> MVC 16,316 (-2,076)

@@ -24,3 +24,9 @@
 - Email dry-run --html-out: to=dtienthanh@gmail.com, 16 ảnh, 8,6MB, mọi <img có alt; KHÔNG gửi thật.
 - Đọc mắt PDF trang 1, 7, 9 (70 dpi): sửa nhãn hero "rẻ, biên an toàn có điều kiện"; tornado mở trục −10.500; nhãn stress hình 11 bị đẩy ra ngoài khung (đường vẫn hiện) — tồn.
 - Sổ mức giá kb/dd_price_zones.json MVC rev 5 (zone 17.300–22.500, tâm 23.100, center_alt trung vị 19.800); rev 4 chỉ đổi con trỏ sang archive_internal/..._rev4_r5.md; selfcheck lỗi 0.
+## r7 (job Taylor_20261103_132045, 03/11/2026)
+- PDF 12 trang md5 c7a09871092a84b166a06ed2b287d402; md md5 10973bc6819173e0018ae335f4db3bef; html 24a134f209a17a044ec195f16cbe2246.
+  Dựng: venv python -I build_report.py all + make_title_banner.py (tiêu đề = dòng 1 md). Hình đọc ../r7/calc/model_r7_out.json + compare_r7_out.json (khoá LOCK_md5_r7.txt 20:33:44).
+- Thân (trước Phụ lục, bỏ bảng/tiêu đề/ảnh) 1.796 từ. grep luật 18/4/12 trên md + subject: rỗng. Dry-run email --html-out: 16 ảnh, 8,6 MB, 16/16 <img> alt. KHÔNG gửi.
+- Nhìn bằng mắt: 12 trang (50 dpi), trang 1 (80 dpi), hình 00/10/11/12/13. Số khớp model_r7_out.txt / compare_r7_out.txt (làm tròn trăm).
+- fundamental-skeptic CHƯA chạy trên r7.

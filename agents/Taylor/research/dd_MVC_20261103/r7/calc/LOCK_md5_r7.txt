@@ -1,0 +1,11 @@
+LOCK 2026-11-03 20:33:44 ICT (TRUOC khi so gia MVC trong r7). Trung thuc: r1-r6 da biet gia MVC (13.700/13.300) va gia MVC 03/11 da hien trong phien nay khi doc gia NNC (20:26, dnse_close_prices tra ca 2 ma) — sau khi model NNC r4 (chua MVC dong thoi 18.392) da khoa; khoa nay chi chung minh THU TU CHAY.
+812ca351e968913e2e4787bbcff9f552  ../../../dd_NNC_20261030/r4/calc/model_r4.py
+175fffdadb267eeb348fc4029f360e3c  ../../../dd_NNC_20261030/r4/calc/LOCK_md5_r4.txt
+c992769f86794f5d6f39b0df7e13bd91  ../../../dd_NNC_20261030/r3/calc/model_r3.py
+d3fb9637389ca6d9c7472e28f4846506  ../../r6/calc/valuation_base.py
+9fd64a26a7daca9b0244c3f62ce7dd91  ../../r6/calc/model_r5.py
+bd93107a93a7f958eea03e1a5f01eed0  ../../r6/calc/model_r6.py
+f154e4ad075c2000d283c2df6813c147  model_r7.py
+37c82c334382b9d03ef1c46fafb8dce1  model_r7_out.txt
+dce8c722b261f1cb09ae0a4a1f4ea599  model_r7_out.json
+f992fce25b9d9f8fae2450939bf21f96  grid_r7.csv
