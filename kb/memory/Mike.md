@@ -9,3 +9,4 @@
 - Theo dõi: dcf_refresh_gate log 03/11 08:12; dcf-rstar-refresh (nhánh feat/dcf-rstar-refresh-20261102) → arch-review → cài cron, hạn tay 2026-12-07; crontab báo cáo quý CHƯA cài (cần user, trước 31/12).
 - Mốc: nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; measurement audit ~12-27.
 
+- [2026-11-03T02:54:33Z] 03/11 09:5x V1 cổng cờ (PARK miễn, CAPIT áp) MERGED main 7eb1f434d; V2 ứng viên DD MERGED mike 77c6b6a86 (user duyệt). Đang chờ: CAPIT research Taylor_20261103_024121 → quant-skeptic → báo user. Kiểm fill bán DRI+TV1 sau 15:00 (SpaceX DRI 950/TV1 2300, ZaloPay DRI 450/TV1 1100 lúc 09:41). Sáng nay cổng cờ có hiệu lực từ lượt run_bot 13:00 / plan 04/11.

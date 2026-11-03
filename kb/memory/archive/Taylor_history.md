@@ -1867,3 +1867,6 @@
 
 ## Archived 2026-11-03 (keep=12 days=0 require_done=False)
 - [2026-11-02T15:23:20Z] ĐANG DỞ: job Taylor_20261102_152306 TV1 INTRINSIC_v2 + investor_report sạch — research/dd_TV1_blind_20261102/ | NEXT: đọc SKEPTIC_BLIND, valuation_blind.py, skill luật
+
+## Archived 2026-11-03 (keep=12 days=0 require_done=False)
+- [2026-11-02T15:27:06Z] ĐANG DỞ job Taylor_20261102_152306: v2 xong (valuation_blind_v2.py tâm 18.116, P20-80 11.386-24.177) | NEXT: INTRINSIC_v2.md → investor_report/ mới (figs, md, pdf, html, SELFCHECK) → commit → bus tv1-dd-final-20261102

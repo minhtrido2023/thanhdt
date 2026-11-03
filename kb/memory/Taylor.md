@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-02T15:27:06Z] ĐANG DỞ job Taylor_20261102_152306: v2 xong (valuation_blind_v2.py tâm 18.116, P20-80 11.386-24.177) | NEXT: INTRINSIC_v2.md → investor_report/ mới (figs, md, pdf, html, SELFCHECK) → commit → bus tv1-dd-final-20261102
 - [2026-11-02T15:35:50Z] [tv1-final 02/11] XONG job Taylor_20261102_152306 commit a2a067cb8 — tam v2 18.100 (P20-80 11.400-24.200), gia 19.500 trong dai; cho Mike gui email + sua dd_price_zones
 - [2026-11-02T16:08:19Z] ĐANG DỞ: job Taylor_20261102_160806 dd-flag gate (V1 bot_execute) + DD zone candidates (V2) | NEXT: đọc kb/projects/dd-flag-rules-20261102.md
 - [2026-11-02T16:19:33Z] ĐANG DỞ job Taylor_20261102_160806: V1 XONG 8cb89c7da (feat/dd-flag-gate-20261102). NEXT V2: dd_price_zone_watch -> ung vien sleeve, nhanh rieng mike repo
@@ -26,3 +25,4 @@
 - [2026-11-03T02:41:31Z] ĐANG DỞ: job Taylor_20261103_024121 research CAPIT flag gate A/B — research/capit_flag_gate_20261103/ | NEXT: tìm engine CAPIT + pin trong results_registry
 - [2026-11-03T02:49:52Z] ĐANG DỞ job Taylor_20261103_024121: 6 chân chạy, logs ở research/capit_flag_gate_20261103/logs | NEXT: analyze_exp_.py → REPORT_exp_.md → bus finding
 - [2026-11-03T02:50:12Z] [dd-flag r3 03/11] XONG job Taylor_20261103_024119: 1bca09394 PARK mien cong (chua merge) — cho Mike arch-review + merge; KB dd-flag-rules chua commit
+- [2026-11-03T03:02:28Z] [capit-flag-gate 03/11] XONG job Taylor_20261103_024121 commit e697d2f2e — KHONG PHAN BIET DUOC, chi phi co hoc -1,77pp; cho Mike goi quant-skeptic
