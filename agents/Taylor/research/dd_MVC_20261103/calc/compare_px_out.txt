@@ -1,0 +1,9 @@
+flat: gia 12,500 -> P(tieu cuc) ham y 41% (mo hinh 25%)
+flat: gia 13,700 -> P(tieu cuc) ham y 32% (mo hinh 25%)
+flat: gia 15,000 -> P(tieu cuc) ham y 22% (mo hinh 25%)
+real: gia 12,500 -> P(tieu cuc) ham y 76% (mo hinh 25%)
+real: gia 13,700 -> P(tieu cuc) ham y 71% (mo hinh 25%)
+real: gia 15,000 -> P(tieu cuc) ham y 65% (mo hinh 25%)
+tam 19,540: gia/tam = -30%; vs phang -6%; vs thuc -44%
+P/E TTM 4.5x ; P/B 0.89x ; von hoa 1,370 ty
+Doi chieu: 9,66 tr cp NNC x 47.100 = 455 ty = 33% von hoa MVC

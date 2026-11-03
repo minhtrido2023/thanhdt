@@ -1,0 +1,55 @@
+Mo moi: capex/tru luong = 80k/m3 nguyen khoi (Gia Canh ~16k, nguoi doc nganh)
+NETFIN -116.6 | MCC so sach x30,08% 22.2 | NHC 18.2 | s=0.4407 c=0.103
+
+=== SOTP chi tiet (r=13%, holding 15%) ty dong ===
+flat tot A_TanLap=1,337 B_moMoi=564 C_BOT=128 D_gach_xang=90 Q4=50 NETFIN=-117 MCC_NHC_ICD=85 LAND=400 NNC_stake=916 VM=3,454 per_share=34,538 N_ex=2,090
+flat co_so A_TanLap=556 B_moMoi=-313 C_BOT=94 D_gach_xang=41 Q4=50 NETFIN=-117 MCC_NHC_ICD=59 LAND=100 NNC_stake=470 VM=941 per_share=9,406 N_ex=1,159
+flat xau A_TanLap=202 B_moMoi=130 C_BOT=63 D_gach_xang=0 Q4=50 NETFIN=-117 MCC_NHC_ICD=20 LAND=0 NNC_stake=208 VM=557 per_share=5,567 N_ex=499
+flat rat_xau A_TanLap=14 B_moMoi=130 C_BOT=44 D_gach_xang=-28 Q4=50 NETFIN=-117 MCC_NHC_ICD=12 LAND=0 NNC_stake=125 VM=230 per_share=2,300 N_ex=310
+real tot A_TanLap=2,011 B_moMoi=1,253 C_BOT=128 D_gach_xang=90 Q4=50 NETFIN=-117 MCC_NHC_ICD=85 LAND=400 NNC_stake=1,243 VM=5,144 per_share=51,441 N_ex=2,790
+real co_so A_TanLap=884 B_moMoi=202 C_BOT=94 D_gach_xang=41 Q4=50 NETFIN=-117 MCC_NHC_ICD=59 LAND=100 NNC_stake=682 VM=1,994 per_share=19,942 N_ex=1,614
+real xau A_TanLap=337 B_moMoi=130 C_BOT=63 D_gach_xang=0 Q4=50 NETFIN=-117 MCC_NHC_ICD=20 LAND=0 NNC_stake=288 VM=771 per_share=7,709 N_ex=689
+real rat_xau A_TanLap=48 B_moMoi=130 C_BOT=44 D_gach_xang=-28 Q4=50 NETFIN=-117 MCC_NHC_ICD=12 LAND=0 NNC_stake=142 VM=281 per_share=2,811 N_ex=350
+
+=== Gia tri/cp theo kich ban (tot/co_so/xau/rat_xau | KV 25/50/20/5) ===
+flat r=11% hold=0%:  40,352  11,653   6,062   2,519 | KV  17,253
+flat r=11% hold=15%:  38,505  10,727   5,673   2,288 | KV  16,238
+flat r=11% hold=30%:  36,684   9,813   5,289   2,060 | KV  15,239
+flat r=13% hold=0%:  36,231  10,276   5,952   2,531 | KV  15,513
+flat r=13% hold=15%:  34,538   9,406   5,567   2,300 | KV  14,566
+flat r=13% hold=30%:  32,868   8,549   5,187   2,072 | KV  13,632
+flat r=15% hold=0%:  32,762   9,107   5,851   2,540 | KV  14,041
+flat r=15% hold=15%:  31,198   8,285   5,469   2,309 | KV  13,151
+flat r=15% hold=30%:  29,657   7,475   5,093   2,081 | KV  12,274
+real r=11% hold=0%:  61,138  24,590   8,631   3,114 | KV  29,462
+real r=11% hold=15%:  58,573  23,201   8,072   2,848 | KV  28,001
+real r=11% hold=30%:  56,043  21,832   7,522   2,586 | KV  26,560
+real r=13% hold=0%:  53,739  21,202   8,241   3,074 | KV  25,838
+real r=13% hold=15%:  51,441  19,942   7,709   2,811 | KV  24,514
+real r=13% hold=30%:  49,174  18,700   7,184   2,553 | KV  23,208
+real r=15% hold=0%:  47,648  18,421   7,901   3,038 | KV  22,854
+real r=15% hold=15%:  45,569  17,267   7,391   2,779 | KV  21,643
+real r=15% hold=30%:  43,520  16,130   6,888   2,524 | KV  20,449
+
+TAM r13 hold15: phang 14,566 .. thuc 24,514 ; diem giua 19,540
+LUOI 2 duong gia x 3 r x 3 holding = 18: min 12,274 P10 13,488 trung vi 18,851 P90 26,993 max 29,462
+
+3 kich ban NDT (tich cuc / co so / tieu cuc=xau:rat_xau 20:5), r13 hold15:
+flat 34538 9406 4914
+real 51441 19942 6729
+
+=== Do nhay (diem giua phang..thuc, r13 hold15) ===
+han GP Tan Lap 2035 moi kich ban         17,702 (-1,837)
+han GP Tan Lap 2045 moi kich ban         19,997 (+457)
+chi phi da cu +15% (150k)                18,025 (-1,514)
+chi phi da cu -15% (110k)                21,095 (+1,555)
+mo moi chi phi 165k                      17,230 (-2,309)
+mo moi capex con lai +30%                17,356 (-2,184)
+he so gia MVC/NNC 0,80                   16,194 (-3,346)
+he so gia MVC/NNC 0,95                   23,393 (+3,853)
+dat du an = 0 moi kb                     17,980 (-1,560)
+KHONG san dung du an (mo moi chay bang moi gia) 17,272 (-2,268)
+
+NNC ex-MVC (ty) co_so: phang 1159 / thuc 1614; = 52885 / 73646 d/cp NNC
+
+LNST HN TTM 306.8 ty, EPS TTM 3068 d; BVPS 30/09 15460 d; tam/BVPS = 1.26x; tam/EPS = 6.4x
