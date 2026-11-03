@@ -32,3 +32,5 @@
 - [2026-11-03T10:24:14Z] [dd-MVC r5 03/11] XONG job Taylor_20261103_100718 commit fda8c27a0: tam 25.725, re co bien an toan <=21.800; CHUA skeptic r5, CHUA gui email; NNC CIP +952 cho user quyet dung lai
 - [2026-11-03T10:33:49Z] ĐANG DỞ: DD MVC r6 job Taylor_20261103_103341 — research/dd_MVC_20261103/r6/ sửa đối xứng SKEPTIC4 | NEXT: đọc SKEPTIC4 + r5/calc
 - [2026-11-03T10:44:10Z] [dd-MVC r6 03/11] XONG job Taylor_20261103_103341 commit 014d36e17: tam 23.093, P50 19.755, RE <=15.586 (bien an toan co dieu kien); CHUA skeptic r6, CHUA email; NNC chua dung lai cho user
+- [2026-11-03T13:00:17Z] ĐANG DỞ: DD NNC r3 job Taylor_20261103_130007 — research/dd_NNC_20261030/r3/ MÙ GIÁ base=sổ sách | NEXT: kiểm kê khoản giảm trừ v2
+- [2026-11-03T13:05:41Z] [dd-audit-newproject 03/11] XONG job Taylor_20261103_130010: AUDIT.md; dung lai DRI,SZL,SCL; cho Mike/user quyet
