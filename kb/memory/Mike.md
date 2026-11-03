@@ -10,3 +10,4 @@
 - Mốc: nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; measurement audit ~12-27.
 
 - [2026-11-03T02:54:33Z] 03/11 09:5x V1 cổng cờ (PARK miễn, CAPIT áp) MERGED main 7eb1f434d; V2 ứng viên DD MERGED mike 77c6b6a86 (user duyệt). Đang chờ: CAPIT research Taylor_20261103_024121 → quant-skeptic → báo user. Kiểm fill bán DRI+TV1 sau 15:00 (SpaceX DRI 950/TV1 2300, ZaloPay DRI 450/TV1 1100 lúc 09:41). Sáng nay cổng cờ có hiệu lực từ lượt run_bot 13:00 / plan 04/11.
+- [2026-11-03T05:38:09Z] 03/11 12:40 dcf-rstar-refresh MERGED (WC f3e6b9f8c, mike a7038237f) + 2 cron ĐÃ CÀI (23 18 2-7 refresh; 37 3 check-expiry; backup backups/crontab_pre_dcf_rstar_20261103_1237.txt). Theo dõi: logs/dcf_rstar_refresh.log lần đầu 04/11 01:23 ICT (đường tắt rc=0) và 03/12 (dựng thật đầu tiên). Xong chuỗi DCF 02-03/11.
