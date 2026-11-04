@@ -14,8 +14,12 @@ import sys
 from zoneinfo import ZoneInfo
 
 PROJECT = "lithe-record-440915-m9"
-DAILY = ["us_sp500", "us_bond_10y", "us_dxy", "vn_usdvnd", "vn_bond_10y", "cn_usdcny"]
+DAILY = ["us_sp500", "us_bond_10y", "us_dxy", "vn_usdvnd", "vn_bond_10y", "cn_usdcny",
+         "vn_interbank_3m", "us_bond_2y", "jp_usdjpy"]
 MAX_LAG_DAYS = 3  # lịch; cuối tuần T6→T2 = 3 ngày vẫn OK, >3 ⇒ WARN
+# Ngưỡng riêng: vn_interbank_3m quan sát hay trễ 1-2 ngày (đo 05/11: obs cuối 11-02 khi nhóm kia 11-04)
+# ⇒ 5 ngày lịch, khớp LIQ_MAX_AGE_IB của dna_report (dòng Thanh khoản VN fail-closed cùng ngưỡng).
+MAX_LAG_OVERRIDE = {"vn_interbank_3m": 5}
 SQL = ("SELECT t.series_key, CAST(MAX(t.observation_date) AS STRING) AS mx "
        "FROM `%s.tav2_bq.macro_indicator` AS t WHERE t.series_key IN (%s) GROUP BY 1"
        % (PROJECT, ",".join("'%s'" % s for s in DAILY)))
@@ -34,8 +38,9 @@ def evaluate(rows, today):
         except ValueError:
             warns.append("%s: observation_date không parse được: %r" % (s, v))
             continue
-        if lag > MAX_LAG_DAYS:
-            warns.append("%s: observation_date=%s cách hôm nay %dd (>%dd)" % (s, v, lag, MAX_LAG_DAYS))
+        lim = MAX_LAG_OVERRIDE.get(s, MAX_LAG_DAYS)
+        if lag > lim:
+            warns.append("%s: observation_date=%s cách hôm nay %dd (>%dd)" % (s, v, lag, lim))
         else:
             oks.append("%s=%s(lag %dd)" % (s, v, lag))
     return warns, oks
