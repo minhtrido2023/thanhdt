@@ -75,15 +75,63 @@ ok(r["status"] == "alert" and any(a["vs"] == "fiinprox" for a in r["cpi"]["alert
    and r["cpi"]["tier_assessment"]["can_replace_interpolation"] is False, "8. CPI lệch fiinprox 0,5pp ⇒ cảnh báo + KHÔNG đề xuất làm tầng")
 
 r, out = run(pf="2026-10-20T15:00:00+00:00")
-ok(r["status"] == "unavailable" and "policy" not in r and "KHÔNG dùng số cũ" in out, "9. series stale >7 ngày ⇒ unavailable, không điền số cũ")
+ok(r["status"] == "partial" and "policy" not in r and "cpi" in r and "KHÔNG dùng số cũ" in r["policy_unavailable"]
+   and "nhánh policy KHÔNG kiểm được" in out, "9. policy stale >7 ngày, CPI sạch ⇒ partial, vẫn chạy nhánh CPI, không điền số cũ")
 
 r, out = run(cerr="403 quota")
-ok(r["status"] == "unavailable" and "403 quota" in r["unavailable"], "10. BQ lỗi ⇒ unavailable, trích lỗi thật (§29)")
+ok(r["status"] == "partial" and "403 quota" in r["cpi_unavailable"] and "policy" in r, "10. CPI BQ lỗi, policy sạch ⇒ partial, trích lỗi thật (§29)")
+
+r, out = run(pf="2026-10-20T15:00:00+00:00", cerr="403 quota")
+ok(r["status"] == "unavailable" and "403 quota" in r["unavailable"] and "KHÔNG dùng số cũ" in r["unavailable"],
+   "10b. cả hai nhánh hỏng ⇒ unavailable, liệt kê cả hai lý do")
+
+r, out = run(pol=p2, cerr="403 quota")
+ok(r["status"] == "alert" and "HIỆN TẠI" in out and "Nhánh cpi KHÔNG kiểm được" in out and "403 quota" in out
+   and out.count("[no-notify]") == 1, "13. policy-alert + CPI unavailable ⇒ MỘT tin gộp có cả cảnh báo lẫn nhánh unavailable")
+
+r, out = run(cpi=c2, pf="2026-10-20T15:00:00+00:00")
+ok(r["status"] == "alert" and any(a["vs"] == "NSO" for a in r["cpi"]["alerts"]) and "Nhánh policy KHÔNG kiểm được" in out
+   and out.count("[no-notify]") == 1, "14. CPI-alert + policy stale ⇒ MỘT tin gộp có cả cảnh báo CPI lẫn nhánh policy unavailable")
+
+# policy-alert + CPI-stale (ca đối xứng yêu cầu: CPI stale)
+r, out = run(pol=p2, cf="2026-10-20T15:00:00+00:00")
+ok(r["status"] == "alert" and "HIỆN TẠI" in out and "Nhánh cpi KHÔNG kiểm được" in out, "15. policy-alert + CPI-stale ⇒ tin gộp")
+
+# notify hỏng ⇒ main() non-zero, vẫn save_log
+import subprocess as _sp
+orig_notify, orig_argv = T._notify, sys.argv
+T._notify = lambda m: False
+json.dump({"vn_policy_rate": {"rows": p2, "fetched_at": FRESH}, "vn_cpi_yoy": {"rows": cpi_te, "fetched_at": FRESH}},
+          open(os.environ["TE_XCHECK_FIXTURE"], "w"))
+n_hist = len(json.load(open(T.LOG_PATH))["history"])
+sys.argv = ["x"]
+with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+    rc = T.main()
+ok(rc != 0 and len(json.load(open(T.LOG_PATH))["history"]) == n_hist + 1, "16. có tin cần gửi mà notified=False ⇒ main() non-zero, log vẫn lưu")
+T._notify = orig_notify
+# _notify thật: FileNotFoundError không được nổ ra ngoài
+T._SELFCHECK = False
+os.environ.pop("TE_XCHECK_NO_NOTIFY", None)
+orig_path = T.NOTIFY
+T.NOTIFY = os.path.join(tmp, "khong_ton_tai.sh")
+with contextlib.redirect_stderr(io.StringIO()):
+    got = T._notify("x")
+T.NOTIFY, T._SELFCHECK = orig_path, True
+ok(got is False, "17. notify_thread.sh không tồn tại (FileNotFoundError) ⇒ _notify trả False, không nổ")
+# không có tin ⇒ main 0
+json.dump({"vn_policy_rate": {"rows": pol_te, "fetched_at": FRESH}, "vn_cpi_yoy": {"rows": cpi_te, "fetched_at": FRESH}},
+          open(os.environ["TE_XCHECK_FIXTURE"], "w"))
+with contextlib.redirect_stdout(io.StringIO()):
+    rc = T.main()
+sys.argv = orig_argv
+ok(rc == 0, "18. không có tin cần gửi ⇒ main() == 0")
+# đưa trạng thái log cuối về unavailable cho ca 12
+run(pf="2026-10-20T15:00:00+00:00", cerr="403 quota")
 
 after = os.stat(sbv_log).st_mtime_ns if os.path.exists(sbv_log) else None
 ok(before == after, "11. data/sbv_verify_log.json KHÔNG bị đụng")
 lg = json.load(open(T.LOG_PATH))
-ok(lg["last"]["status"] == "unavailable" and len(lg["history"]) == 8 and os.path.dirname(T.LOG_PATH) == tmp,
+ok(lg["last"]["status"] == "unavailable" and len(lg["history"]) >= 8 and os.path.dirname(T.LOG_PATH) == tmp,
    "12. log riêng ghi đúng, history tăng, ghi vào data dir tạm")
 print("\nTZ env =", os.environ.get("TZ"))
 print("TẤT CẢ PASS" if not FAIL else f"FAIL {len(FAIL)}: {FAIL}")

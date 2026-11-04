@@ -38,6 +38,7 @@ EDGE_DAYS = 3
 CPI_NSO_EPS = 0.05          # NSO là số chính thức, TE phải khớp (đo 13/13 diff 0,00)
 CPI_FIIN_EPS = 0.30         # fiinprox: đo 224 tháng max 0,15
 HISTORY_KEEP = 52
+BQ_TIMEOUT_S = 120          # job.result() không được treo vô hạn
 
 _OVR = os.environ.get("TE_XCHECK_DATA_DIR") if os.environ.get("TE_XCHECK_SELFCHECK") == "1" else None
 _SELFCHECK = bool(_OVR)
@@ -73,7 +74,7 @@ def fetch_te(series_key):
             f"WHERE series_key=@k ORDER BY d, f",
             job_config=bigquery.QueryJobConfig(
                 query_parameters=[bigquery.ScalarQueryParameter("k", "STRING", series_key)]))
-        res = list(job.result())
+        res = list(job.result(timeout=BQ_TIMEOUT_S))
     except Exception as e:  # noqa: BLE001 — trích lỗi thật (§29)
         raise Unavailable(f"{series_key}: truy vấn BQ lỗi: {e!r}"[:400])
     if not res:
@@ -211,7 +212,11 @@ def _notify(msg):
     if _SELFCHECK or os.environ.get("TE_XCHECK_NO_NOTIFY") == "1":
         print(f"[no-notify] {msg}")
         return True
-    r = subprocess.run([NOTIFY, msg, "trading_daily"], capture_output=True, text=True)
+    try:
+        r = subprocess.run([NOTIFY, msg, "trading_daily"], capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as e:  # FileNotFoundError, PermissionError, TimeoutExpired
+        print(f"LỖI notify_thread.sh không chạy được: {e!r}"[:300], file=sys.stderr)
+        return False
     if r.returncode != 0:
         print(f"LỖI notify_thread.sh rc={r.returncode}: {r.stderr.strip()[:300]}", file=sys.stderr)
     return r.returncode == 0
@@ -231,6 +236,9 @@ def format_alert(res):
     if k:
         for a in k["alerts"][:8]:
             L.append(f"• CPI {a['month']} vs {a['vs']}: TE {a['te']} vs {a['ref']} (lệch {a['diff']:+.2f}pp)")
+    for br in ("policy", "cpi"):
+        if res.get(f"{br}_unavailable"):
+            L.append(f"• 🔴 Nhánh {br} KHÔNG kiểm được: {res[f'{br}_unavailable']} (không điền số cũ)")
     L.append(f"Chi tiết: data/te_crosscheck_log.json")
     return "\n".join(L)
 
@@ -244,24 +252,39 @@ def run(dry_run=False):
         require_fresh("vn_policy_rate", pf)
         res["policy_fetched_at"] = pf.isoformat(timespec="seconds")
         res["policy"] = check_policy(pol, [(t, r) for t, r in SBV_REFI_EVENTS])
+    except Unavailable as e:
+        res["policy_unavailable"] = str(e)
+    try:
         cpi, cf = fetch_te("vn_cpi_yoy")
         require_fresh("vn_cpi_yoy", cf)
         res["cpi_fetched_at"] = cf.isoformat(timespec="seconds")
         from cpi_vn import CPI_ANCHORS, NSO_CPI_YOY_REAL
         res["cpi"] = check_cpi(cpi, NSO_CPI_YOY_REAL, load_fiin(), CPI_ANCHORS)
     except Unavailable as e:
-        res["status"], res["unavailable"] = "unavailable", str(e)
+        res["cpi_unavailable"] = str(e)
     n_alert = 0
-    if res["status"] == "ok":
-        n_alert = len(res["policy"]["alerts"]) + (0 if res["policy"]["current"]["match"] else 1) \
-            + len(res["cpi"]["alerts"])
-        res["status"] = "alert" if n_alert else "ok"
+    if "policy" in res:
+        n_alert += len(res["policy"]["alerts"]) + (0 if res["policy"]["current"]["match"] else 1)
+    if "cpi" in res:
+        n_alert += len(res["cpi"]["alerts"])
+    unav = [k for k in ("policy", "cpi") if f"{k}_unavailable" in res]
+    if len(unav) == 2:
+        res["status"] = "unavailable"
+        res["unavailable"] = " | ".join(res[f"{k}_unavailable"] for k in unav)
+    elif n_alert:
+        res["status"] = "alert"
+    elif unav:
+        res["status"] = "partial"   # một nhánh không kiểm được, nhánh kia sạch
     res["n_alerts"] = n_alert
     if res["status"] == "unavailable":
         msg = (f"🔴 TE cross-check {res['at']}: KHÔNG kiểm được — {res['unavailable']}. "
                f"Tuần này chưa có đối chiếu TE (không điền số cũ).")
     elif res["status"] == "alert":
         msg = format_alert(res)
+    elif res["status"] == "partial":
+        k = unav[0]
+        msg = (f"🔴 TE cross-check {res['at']}: nhánh {k} KHÔNG kiểm được — {res[f'{k}_unavailable']}. "
+               f"Nhánh còn lại sạch. Không điền số cũ.")
     else:
         msg = None
     if dry_run:
@@ -274,7 +297,7 @@ def run(dry_run=False):
     log.setdefault("history", []).append({"at": res["at"], "status": res["status"], "n_alerts": n_alert})
     log["history"] = log["history"][-HISTORY_KEEP:]
     save_log(log)
-    print(f"te_macro_crosscheck: status={res['status']} n_alerts={n_alert}")
+    print(f"te_macro_crosscheck: status={res['status']} n_alerts={n_alert} notified={res['notified']}")
     return res
 
 
@@ -282,7 +305,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
-    run(a.dry_run)
+    res = run(a.dry_run)
+    if not a.dry_run and res.get("notified") is False:   # có tin cần gửi mà gửi hỏng ⇒ không im lặng
+        print("LỖI: có tin TE cross-check cần gửi nhưng notify thất bại", file=sys.stderr)
+        return 3
     return 0
 
 

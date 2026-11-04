@@ -282,12 +282,12 @@ fi
 
 # --- TE cross-check (C1, job Taylor_20261104_170501): TradingEconomics vn_policy_rate / vn_cpi_yoy vs
 # SBV_REFI_EVENTS / NSO / fiinprox. ALERT ONLY: never edits a source, never touches sbv_verify_log.json or
-# the macro gate. The module notifies by itself on a mismatch / unavailable feed; rc!=0 only on a crash. ---
+# the macro gate. The module notifies by itself on a mismatch / unavailable feed; rc!=0 on a crash, a timeout (300s) or a failed notify. ---
 echo "--- TE macro cross-check ---" >> "$LOG"
 if [ "$DRY_RUN" -eq 1 ]; then
-  "$PY" te_macro_crosscheck.py --dry-run >> "$LOG" 2>&1
+  timeout 300 "$PY" te_macro_crosscheck.py --dry-run >> "$LOG" 2>&1
 else
-  "$PY" te_macro_crosscheck.py >> "$LOG" 2>&1
+  timeout 300 "$PY" te_macro_crosscheck.py >> "$LOG" 2>&1
 fi
 TE_RC=$?
 echo "te macro crosscheck exit_code=${TE_RC}" >> "$LOG"
