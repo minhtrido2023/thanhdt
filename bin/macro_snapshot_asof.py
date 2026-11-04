@@ -17,6 +17,9 @@ Nguồn lag (WebSearch 2026-11-05; lag = số ngày lịch sau observation_date,
   NBS PMI TQ: ~ngày cuối tháng tham chiếu — https://www.finlogix.com/calendar/cn/nbs-manufacturing-pmi
   VAMA: ~ngày 9-13 tháng sau — https://www.wardsauto.com/table-vietnam-april-auto-sales-jump-34-pct-yy-industry
   vn_fx_reserves, vn_wages: KHÔNG tìm được lịch ⇒ lag lớn (90 / 60).
+Caveat: giá trị lịch sử là bản hiệu chỉnh HIỆN HÀNH (bảng không có vintage, backfill 2026-10-30), không phải số công bố
+  lúc đó; lag chỉ chặn việc "thấy sớm hơn ngày công bố", không khôi phục số liệu gốc.
+Δ tắt (NO_DELTA): vn_gdp_construction (luỹ kế YTD tới Q4/2023, theo quý từ Q1/2024), vn_fdi Δ3T (luỹ kế YTD reset tháng 1).
 Env chỉ dùng test: MACRO_SNAP_TODAY (YYYY-MM-DD).
 Exit: 0 ok · 2 lỗi dữ liệu/BQ (không in số).
 """
@@ -37,7 +40,7 @@ Q = 140
 SPEC = {
     # chính sách / thanh khoản
     "vn_policy_rate":      ("Chính sách/thanh khoản", "Lãi suất tái cấp vốn SBV (%)", 7, "pp", 400, ""),
-    "vn_interbank_3m":     ("Chính sách/thanh khoản", "Liên ngân hàng 3M (%)", 1, "pp", D + 3, ""),
+    "vn_interbank_3m":     ("Chính sách/thanh khoản", "Liên ngân hàng 3M (%)", 3, "pp", D + 3, "lag 3 (quan sát thực trễ 2 ngày)"),
     # lạm phát
     "vn_cpi_yoy":          ("Lạm phát", "CPI YoY (%)", 10, "pp", M, ""),
     "vn_core_cpi_yoy":     ("Lạm phát", "CPI lõi YoY (%)", 10, "pp", M, ""),
@@ -49,9 +52,9 @@ SPEC = {
     "vn_exports":          ("Hoạt động", "Xuất khẩu (tỷ USD/tháng)", 10, "pct", M, ""),
     "vn_imports":          ("Hoạt động", "Nhập khẩu (tỷ USD/tháng)", 10, "pct", M, ""),
     "vn_trade_balance":    ("Hoạt động", "Cán cân thương mại (tỷ USD)", 10, "pp", M, ""),
-    "vn_fdi":              ("Hoạt động", "FDI (tỷ USD, theo TE)", 10, "pct", M, "định nghĩa luỹ kế/tháng chưa kiểm"),
+    "vn_fdi":              ("Hoạt động", "FDI luỹ kế từ đầu năm (tỷ USD)", 10, "pct", M, "luỹ kế YTD, reset mỗi tháng 1 ⇒ chỉ Δ12T (cùng kỳ năm trước), không Δ3T"),
     "vn_gdp_growth_yoy":   ("Hoạt động", "GDP YoY (%)", 15, "pp", Q, ""),
-    "vn_gdp_construction": ("Hoạt động", "GDP xây dựng (nghìn tỷ VND/quý)", 15, "pct", Q, ""),
+    "vn_gdp_construction": ("Hoạt động", "GDP xây dựng (nghìn tỷ VND)", 15, "pct", Q, "định nghĩa gãy: luỹ kế YTD tới Q4/2023, theo quý từ Q1/2024 ⇒ không in Δ"),
     "vn_car_registrations": ("Hoạt động", "Ô tô đăng ký/bán (xe)", 25, "pct", M, ""),
     "vn_tourist_arrivals": ("Hoạt động", "Khách quốc tế (nghìn)", 10, "pct", M, ""),
     "vn_wages":            ("Hoạt động", "Lương (nghìn VND/tháng)", 60, "pct", Q, "lag không có nguồn lịch"),
@@ -67,6 +70,10 @@ SPEC = {
     "vn_fx_reserves":      ("Ngoại sinh/FX", "Dự trữ ngoại hối (triệu USD)", 90, "pct", 160, "lag không có nguồn lịch"),
 }
 LAG = {k: v[2] for k, v in SPEC.items()}
+# Δ bị tắt do định nghĩa series gãy/luỹ kế (quét dữ liệu thật 2026-11-05): key -> các Δ không in
+NO_DELTA = {"vn_gdp_construction": ("d3", "d12"), "vn_fdi": ("d3",)}
+# series CÓ trong bảng nhưng CỐ Ý không đưa vào snapshot (giá thị trường: Bobby đọc mù sẽ nhận ra giai đoạn)
+EXCLUDED_ON_PURPOSE = ("us_sp500", "jp_usdjpy")
 SPREAD_KEY = "spread_interbank3m_minus_policy"
 
 SECTOR_MAP = [
@@ -130,6 +137,16 @@ def table_max():
     return dt.date.fromisoformat(m[0]["m"])
 
 
+def all_series_keys():
+    """mọi series_key phân biệt trong bảng (để khai báo series bị bỏ). Raise RuntimeError khi lỗi."""
+    sql = "SELECT DISTINCT t.series_key AS k FROM `%s.tav2_bq.macro_indicator` AS t ORDER BY 1" % PROJECT
+    p = subprocess.run(["bq", "query", "--use_legacy_sql=false", "--project_id=" + PROJECT, "--format=json", "--quiet",
+                        "--max_rows=1000", sql], capture_output=True, text=True, timeout=90)
+    if p.returncode != 0:
+        raise RuntimeError("bq(all_series_keys) rc=%d: %s" % (p.returncode, (p.stderr.strip() or p.stdout.strip())[:300]))
+    return [r["k"] for r in json.loads(p.stdout or "[]")]
+
+
 def visible(rows, cutoff, lag):
     """dòng mới nhất có obs + lag <= cutoff (lag=0 ⇒ chế độ live)."""
     best = None
@@ -151,11 +168,11 @@ def delta(cur, old, kind):
     return cur[1] - old[1]
 
 
-def build(data, asof, tmax):
+def build(data, asof, tmax, all_keys=None):
     """→ dict snapshot. data = fetch(), tmax = table_max(). Thuần hàm (selfcheck dùng)."""
     live = asof >= tmax
     snap = {"asof": asof.isoformat(), "mode": "live" if live else "historical-lag", "series": {}, "missing": [],
-            "omitted_no_lag": sorted(set(data) - set(SPEC))}
+            "omitted_no_lag": sorted(set(all_keys or ()) - set(SPEC))}
     c3, c12 = months_back(asof, 3), months_back(asof, 12)
     for k, (grp, label, lag, kind, maxage, note) in SPEC.items():
         rows = data.get(k, [])
@@ -167,6 +184,9 @@ def build(data, asof, tmax):
         # cùng dòng quan sát (series quý/chậm) ⇒ Δ không có nghĩa, không in 0 giả
         o3 = None if (o3 and o3[0] == cur[0]) else o3
         o12 = None if (o12 and o12[0] == cur[0]) else o12
+        nd = NO_DELTA.get(k, ())
+        o3 = None if "d3" in nd else o3
+        o12 = None if "d12" in nd else o12
         age = (asof - cur[0]).days
         snap["series"][k] = dict(group=grp, label=label, kind=kind, value=cur[1], obs=cur[0].isoformat(),
                                  d3=delta(cur, o3, kind), d12=delta(cur, o12, kind),
@@ -208,7 +228,9 @@ def fmt(x, kind=None, signed=False):
 def render_md(snap):
     L = ["## Bối cảnh vĩ mô as-of %s (%s)" % (snap["asof"], snap["mode"]),
          "_Nguồn: tav2_bq.macro_indicator (TradingEconomics, status UNVERIFIED). DISPLAY-ONLY, không chứa forward return. "
-         "Δ: `pp` = hiệu tuyệt đối, `%` = % thay đổi. Chế độ historical-lag: dòng chỉ hiện nếu ngày quan sát + độ trễ công bố bảo thủ <= as-of._", ""]
+         "Δ: `pp` = hiệu tuyệt đối, `%` = % thay đổi. Chế độ historical-lag: dòng chỉ hiện nếu ngày quan sát + độ trễ công bố bảo thủ <= as-of._",
+         "_⚠ Giá trị lịch sử là bản hiệu chỉnh HIỆN HÀNH (bảng không có vintage, backfill 2026-10-30), không phải số công bố lúc đó._",
+         "_us_sp500, jp_usdjpy bị loại CÓ CHỦ ĐÍCH (giá thị trường — Bobby đọc mù sẽ nhận ra giai đoạn)._", ""]
     grp_prev = None
     for k, s in snap["series"].items():
         if s["group"] != grp_prev:
@@ -222,8 +244,9 @@ def render_md(snap):
         L.append("| %s | %s | %s | %s | %s | %s |" % (lab, fmt(s["value"]), s["obs"], d3, d12, flag))
     if snap["missing"]:
         L += ["", "**KHÔNG CÓ DỮ LIỆU tại as-of (không điền số cũ):** " + ", ".join(snap["missing"])]
-    L += ["", "**Ngoài snapshot (không khai lag / không thuộc nhóm):** %d series khác trong bảng bị bỏ." % len(snap["omitted_no_lag"])
-          if snap["omitted_no_lag"] else "", "",
+    om = [k for k in snap["omitted_no_lag"] if k not in EXCLUDED_ON_PURPOSE]
+    L += ["", "**Ngoài snapshot (không khai lag / không thuộc nhóm):** %d series khác trong bảng bị bỏ (%s)." % (len(om), ", ".join(om))
+          if om else "", "",
           "### Ánh xạ ngành → chỉ báo (cho DD)", "", "| Ngành | Chỉ báo |", "|---|---|"]
     L += ["| %s | %s |" % x for x in SECTOR_MAP]
     return "\n".join(L)
@@ -238,7 +261,7 @@ def main():
         asof = dt.date.fromisoformat(a.asof)
         if asof > today_ict():
             raise ValueError("asof %s ở tương lai (hôm nay ICT %s)" % (asof, today_ict()))
-        snap = build(fetch(asof), asof, table_max())
+        snap = build(fetch(asof), asof, table_max(), all_series_keys())
         if not snap["series"]:
             raise RuntimeError("không có series nào tại as-of")
     except Exception as e:
