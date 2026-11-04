@@ -1929,3 +1929,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T15:34:52Z] ĐANG DỞ DD DRI r4 job Taylor_20261103_152938: calc ở dd_DRI_20261027/r4/calc, engine = exec dri_val_supply_adj_r4_20261027/model.py; base = D (không thanh lý/không tái canh)+XDCB 72,71 tỷ; legal-vn: tái canh KHÔNG phải nghĩa vụ rõ | NEXT: khoá md5, thanh khoản, báo cáo
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T15:36:28Z] ĐANG DỞ chain3 job Taylor_20261103_152936: NNC r6 XONG 284df0965 (tam 60.702, sau CK TK 58.499) | NEXT: MVC r9 o dd_MVC_20261103/r9/ import nnc_model_r6 (r 13,5% tiem qua N3.EV3), liquidity MVC da tinh o NNC r6/calc/liquidity_r6_out.json
