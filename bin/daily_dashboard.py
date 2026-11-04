@@ -243,7 +243,7 @@ def _releasers(se):
     """{'released': {ticker: Release_Date}, 'universe': #mã đã công bố quý trước, 'max_known': ngày}."""
     code = ("import pandas as pd, json\n"
             "f=pd.read_parquet('data/bq_cache/ticker_financial.parquet',columns=['ticker','quarter','Release_Date'])\n"
-            f"q=f[f.quarter=={se['q']!r}]\n"
+            f"q=f[(f.quarter=={se['q']!r})&f.Release_Date.notna()]\n"
             f"p=f[f.quarter=={se['prev_q']!r}]\n"
             "print(json.dumps({'released':{r.ticker:str(r.Release_Date) for r in q.itertuples()},"
             "'universe':int(p.ticker.nunique()),'max_known':str(q.Release_Date.max()) if len(q) else 'n/a'}))")
