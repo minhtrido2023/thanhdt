@@ -7,7 +7,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "macro_indicator_freshness.py"
 SH = HERE / "bq_freshness_check.sh"
-DAILY = ["us_sp500", "us_bond_10y", "us_dxy", "vn_usdvnd", "vn_bond_10y", "cn_usdcny"]
+DAILY = ["us_sp500", "us_bond_10y", "us_dxy", "vn_usdvnd", "vn_bond_10y", "cn_usdcny",
+         "vn_interbank_3m", "us_bond_2y", "jp_usdjpy"]
 F = 0
 
 
@@ -39,6 +40,18 @@ for tz in (None, "America/Los_Angeles", "UTC"):
     ok("stale lag4→WARN [%s]" % t, rc == 1 and "us_sp500" in o and o.startswith("WARN"), o)
     rc, o = run(csv({"us_sp500": "2026-11-02"}), "2026-11-05", tz)  # lag 3 = biên, vẫn OK
     ok("boundary lag3→OK [%s]" % t, rc == 0, o)
+# 3 series mới (05/11): ngưỡng riêng của vn_interbank_3m = 5d, 2 series kia = 3d như nhóm cũ
+for tz in (None, "America/New_York"):
+    t = tz or "unset"
+    rc, o = run(csv({"vn_interbank_3m": "2026-11-02"}), "2026-11-05", tz); ok("interbank lag3→OK [%s]" % t, rc == 0, o)
+    rc, o = run(csv({"vn_interbank_3m": "2026-10-31"}), "2026-11-05", tz); ok("interbank lag5=biên→OK [%s]" % t, rc == 0, o)
+    rc, o = run(csv({"vn_interbank_3m": "2026-10-30"}), "2026-11-05", tz)
+    ok("interbank lag6→WARN (>5d) [%s]" % t, rc == 1 and "vn_interbank_3m" in o and "(>5d)" in o, o)
+    for sk in ("us_bond_2y", "jp_usdjpy"):
+        rc, o = run(csv({sk: "2026-11-01"}), "2026-11-05", tz); ok("%s lag4→WARN (>3d) [%s]" % (sk, t), rc == 1 and sk in o and "(>3d)" in o, o)
+        rc, o = run(csv({sk: "2026-11-02"}), "2026-11-05", tz); ok("%s lag3→OK [%s]" % (sk, t), rc == 0, o)
+    for sk in ("vn_interbank_3m", "us_bond_2y", "jp_usdjpy"):
+        rc, o = run(csv(drop=(sk,)), "2026-11-05", tz); ok("thiếu %s→WARN [%s]" % (sk, t), rc == 1 and sk in o and "KHÔNG CÓ" in o, o)
 rc, o = run(csv(drop=("vn_bond_10y",)), "2026-11-05"); ok("thiếu series→WARN", rc == 1 and "vn_bond_10y" in o and "KHÔNG CÓ" in o, o)
 rc, o = run("", "2026-11-05"); ok("output rỗng→WARN không phải OK", rc == 1 and o.startswith("WARN") and "header" in o, o)
 rc, o = run(csv({"us_dxy": "garbage"}), "2026-11-05"); ok("ngày rác→WARN", rc == 1 and "us_dxy" in o, o)
