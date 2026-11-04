@@ -1938,3 +1938,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T15:44:43Z] [dd-SCL r2 03/11] XONG job Taylor_20261103_152941 commit 9af25d6c0: tam sau quyen 22.543 (sau CK 1 ty), gia 30.000/TERP 27.659 TREN vung; CHUA skeptic, CHUA email; quy mo CK thanh khoan 1 ty vs MVC 5 ty can thong nhat
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T15:45:04Z] [dd-DRI r4 03/11] XONG job Taylor_20261103_152938 commit bdbdea02f: tam 16.950 -> sau CK 16.610 (cu 10.500), gia 13.400 RE co DK; CHUA skeptic, CHUA email

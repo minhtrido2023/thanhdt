@@ -690,3 +690,22 @@
 - [2026-11-04T16:47:49Z] Taylor/heartbeat — Taylor_20261104_164310: {"status": "in_progress", "note": "PDF dựng xong, kiểm bằng mắt"}
 - [2026-11-04T16:48:12Z] Taylor/heartbeat — Taylor_20261104_164310: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261104_164310", "source": "watcher"}
 - [2026-11-04T16:48:51Z] Taylor/finding — dd-DCM-20261104-investor: {"pdf": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261104.pdf", "md5_pdf": "ce268afb8bad86788163593d8a24788b", "pages": 9, "body_words": 1596, "grep_forbidden": "0 hit (luật cấm + luật 18, md và HTML)", "price": "33.000 DNSE đóng cửa 04/11 (ATC 14:45:02)", "ev": 27021, "email": "chỉ --dry-run, CHƯA gửi", "limits": "không có ảnh sản phẩm công bố (sơ đồ minh họa); logo = huy hiệu chữ; football field ở đầu trang 2; chưa skeptic r3/dd_price_zones chưa ghi", "measured_by": "md5sum PDF; pymupdf page_count; python đếm từ thân md; grep trên md + HTML bỏ base64"}
+
+## Consolidation 2026-11-04T17:07:02Z
+- [2026-11-04T17:01:48Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "in_progress", "note": "đã đọc r3+model_r2; đọc EGM2025 Phần II hợp đồng 3918"}
+- [2026-11-04T17:02:26Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261104_170125", "source": "watcher"}
+- [2026-11-04T17:02:28Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "in_progress", "note": "PL11=chỉ đổi bên bán (không giá); VDSC bảng 3-4 đã bóc; đang tìm nguồn web PSC/PL12"}
+- [2026-11-04T17:03:08Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "in_progress", "note": "NQ34/27 PV GAS (GSPA Nam Du thượng nguồn) không công bố giá; đang tìm Jadestone RNS + tài liệu ĐHĐCĐ DCM 09/2026 (PL12)"}
+- [2026-11-04T17:03:26Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261104_170125", "source": "watcher"}
+- [2026-11-04T17:03:48Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "in_progress", "note": "Biên bản ĐHĐCĐ 05/11/2025 (Q1): HĐ mua khí Petronas kết thúc cuối 2027; PSC gia hạn tới 2047; không nêu giá. Đang đọc elibook/nguoiduatin về PL12"}
+- [2026-11-04T17:04:26Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261104_170125", "source": "watcher"}
+- [2026-11-04T17:04:29Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "in_progress", "note": "TÌM ĐƯỢC tài liệu gốc ĐHĐCĐ bất thường 2026 (vietstock static2) có dự thảo SĐBS 12: P0 10,39 USD/MMBTU +2,25%/năm, LKNTT 445,5 tr Sm3; đang đọc hết"}
+- [2026-11-04T17:05:01Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "in_progress", "note": "Đã đọc hết dự thảo SĐBS12 (pdf p22-34). Đang hiệu chỉnh giá khí thực tế từ BCTC/TM38 + sản lượng"}
+- [2026-11-04T17:05:26Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261104_170125", "source": "watcher"}
+- [2026-11-04T17:05:50Z] Taylor/heartbeat — Taylor_20261104_170501: {"status": "in_progress", "note": "C1: đọc TE vn_policy_rate/vn_cpi_yoy + sbv_policy_verify"}
+- [2026-11-04T17:06:02Z] Taylor/heartbeat — Taylor_20261104_170501: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261104_170501", "source": "watcher"}
+- [2026-11-04T17:06:26Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261104_170125", "source": "watcher"}
+- [2026-11-04T17:06:53Z] Taylor/heartbeat — Taylor_20261104_170125: {"status": "in_progress", "note": "facts xong; đang viết calc/model_r4.py (đường giá khí theo năm, 2 biến thể giá PM3 sau 2028, Brent 67.8/82/90/103)"}
+- [2026-11-04T17:05:59Z] Winston/heartbeat — Winston_20261104_170458: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261104_170458", "source": "watcher"}
+- [2026-11-04T17:06:33Z] Winston/heartbeat — Winston_20261104_170458: {"status": "in_progress", "note": "A1 đo BQ xong (41 series, không phải 45); worktree wt-macro-ind-1105; đang viết A2 freshness"}
+- [2026-11-04T17:06:59Z] Winston/heartbeat — Winston_20261104_170458: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261104_170458", "source": "watcher"}
