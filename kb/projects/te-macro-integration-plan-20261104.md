@@ -1,6 +1,12 @@
 # Kế hoạch tích hợp `tav2_bq.macro_indicator` (TradingEconomics) — 04/11/2026
 > User duyệt 5 đề xuất 04/11 23:52 ICT (`decided_by: user`). Mọi mục là DISPLAY/CROSS-CHECK/PAPER — KHÔNG gắn gate, KHÔNG đổi sizing.
 
+## CẬP NHẬT 05/11 00:0x ICT — user trả lời 3 câu mở (`decided_by: user`)
+1. Writer = **bq_admin** (cùng nguồn TradingEconomics với giá hàng hoá; cập nhật hằng ngày là việc của bq_admin, càng sớm càng tốt).
+2. **KHÔNG duyệt tạo view mới** trong BQ ⇒ **BỎ B1** (view `macro_indicator_pit`). Không tạo object BQ nào.
+3. Lag công bố: dùng cho BACKTEST/NGHIÊN CỨU (tránh nhìn trộm), KHÔNG liên quan tốc độ cập nhật của bq_admin; dùng live không cần lag. ⇒ Nếu cần, lag nằm ở helper local trong code nghiên cứu (D2/F1), không ở BQ; hoặc nhờ bq_admin thêm cột ngày công bố thật (quyết định của user, chưa đề xuất chính thức).
+Hệ quả: Làn 1 còn A1+A2 (Winston) + C1 (Taylor). E1 chỉ dùng live (as-of = hôm nay) nên không cần lag; as-of lịch sử cho nghiên cứu mới cần helper lag.
+
 ## Bẫy phải xử lý trước (ràng buộc cho mọi bước)
 1. Look-ahead: `observation_date` series tháng/quý = cuối kỳ, không phải ngày công bố; `fetched_at` chỉ có từ 30/10 ⇒ phải có độ trễ công bố giả định.
 2. `vn_bond_10y` lệch VBMA +0,13…+0,21pp ⇒ chỉ dùng Δ, mức giữ UNVERIFIED.
@@ -12,7 +18,7 @@
 |---|---|---|---|
 | A1 | Registry: thay `macro_indicator_tpcp10y.md` bằng `macro_indicator.md` (45 series, cadence, bẫy 1-4); cập nhật `macro/index.md` | Winston (data-ops), sonnet/medium | registry đúng số series, ghi rõ writer = "ngoài repo, chủ: <user xác nhận>" |
 | A2 | Thêm dòng freshness `macro_indicator` vào `bq_freshness_check.sh` (fail-closed: series hằng ngày cách >3 ngày lịch ⇒ cảnh báo Trading Daily) | Winston → arch-review nhẹ (script ops, không chạm tiền) | selfcheck rc=0 dưới `env -u TZ`; giả lập stale ⇒ cảnh báo |
-| B1 | View `tav2_bq.macro_indicator_pit`: bảng độ trễ công bố theo series (nguồn lịch GSO/NHNN/ISM… phải dẫn), `available_date = observation_date + lag`, chọn bản ghi sớm nhất theo `available_date` (không dùng fetched_at); daily series lag 0-1 | Taylor, sonnet/medium; quant-skeptic verify | selfcheck: 0 dòng nhìn thấy trước available_date; CPI/PMI khớp NSO/fiinprox 13/13 tháng; ghi `data_registry` |
+| ~~B1~~ | ~~(BỎ 05/11 — user không duyệt view)~~ View `tav2_bq.macro_indicator_pit`: bảng độ trễ công bố theo series (nguồn lịch GSO/NHNN/ISM… phải dẫn), `available_date = observation_date + lag`, chọn bản ghi sớm nhất theo `available_date` (không dùng fetched_at); daily series lag 0-1 | Taylor, sonnet/medium; quant-skeptic verify | selfcheck: 0 dòng nhìn thấy trước available_date; CPI/PMI khớp NSO/fiinprox 13/13 tháng; ghi `data_registry` |
 | C1 | Check chéo tuần (CHỈ CẢNH BÁO, không tự sửa): (a) TE `vn_policy_rate` vs `sbv_refi_events.json` — mở rộng `sbv_policy_verify.py` có sẵn thành nguồn thứ 2; (b) TE `vn_cpi_yoy` vs `NSO_CPI_YOY_REAL` + `fiinprox_cpi_monthly` | Taylor, sonnet/medium (chung phiên B1 nếu muốn tiết kiệm) | selfcheck có ca lệch giả lập ⇒ cảnh báo; gắn vào cron tuần có sẵn `refresh_deposit_cctg_weekly.sh` (KHÔNG thêm dòng crontab) |
 
 ## Làn 2 (sau B1)
