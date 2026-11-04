@@ -1941,3 +1941,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T15:45:04Z] [dd-DRI r4 03/11] XONG job Taylor_20261103_152938 commit bdbdea02f: tam 16.950 -> sau CK 16.610 (cu 10.500), gia 13.400 RE co DK; CHUA skeptic, CHUA email
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T16:10:08Z] ĐANG DỞ: DD DRI r5 job Taylor_20261103_160959 — research/dd_DRI_20261027/r5/ sửa SKEPTIC_R4 | NEXT: đọc SKEPTIC_R4 + r4/calc

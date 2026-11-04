@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-03T16:10:08Z] ĐANG DỞ: DD DRI r5 job Taylor_20261103_160959 — research/dd_DRI_20261027/r5/ sửa SKEPTIC_R4 | NEXT: đọc SKEPTIC_R4 + r4/calc
 - [2026-11-03T16:13:27Z] [dd-SCL r3 03/11] XONG job Taylor_20261103_161002: tam sau quyen 21.383 (CK 5 ty), cum 22.843, gia 30.000/TERP 27.659 TREN vung; CHUA email; chua commit
 - [2026-11-03T16:19:13Z] [dd-DRI r5 03/11] XONG job Taylor_20261103_160959 commit 620e32216: tam sau CK 15.543, gia 13.400 HOP LY sat P25, luat -15% khong dat; CHUA email; SCL r3 job song song dang sua dd_price_zones.json (chua commit)
 - [2026-11-04T01:30:15Z] ĐANG DỞ: crisis-DD HT1 ngày6 job Taylor_20261104_013004 | NEXT: đọc dossier, tin mới, dd-note
@@ -26,3 +25,4 @@
 - [2026-11-04T16:32:57Z] [dd-DCM r2 04/11] XONG job Taylor_20261104_162755: tam 27.021 (r1 28.072), gia 33.000 DAT (co dieu kien bien: 220 NGHIENG DAT, >=233 HOP LY); REPORT_r2.md; CHUA skeptic r2, CHUA commit, CHUA email
 - [2026-11-04T16:48:51Z] [dd-DCM investor 04/11] XONG job Taylor_20261104_164310: PDF 9tr ở research/dd_DCM_20261104/investor_report/; dry-run email OK, CHƯA gửi; CHƯA ghi dd_price_zones.json (cần skeptic xác nhận)
 - [2026-11-04T17:01:34Z] ĐANG DỞ: DD DCM r4 (hợp đồng khí PM3 CAA) job Taylor_20261104_170125 — research/dd_DCM_20261104/ | NEXT: đọc egm2025 txt KEY CONTENTS, model_r2.py, REPORT_r3.md
+- [2026-11-04T17:09:05Z] [C1 te-crosscheck 05/11] XONG job Taylor_20261104_170501: branch feat/te-crosscheck-20261105 (worktree wt-te-crosscheck-20261105), CHỜ arch-review rồi merge; đề xuất TE làm tầng CPI chờ user duyệt
