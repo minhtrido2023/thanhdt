@@ -2110,6 +2110,63 @@
    "recorded_at": "2026-11-03T23:25:00+07:00",
    "supersedes": "DRI@2026-11-03#1",
    "correction_reason": "SKEPTIC_R4 REFUTED (medium-high): mid RSS3 cửa sổ 2013–26 có hai đầu cao + lưới mid bất đối xứng (TB 2006–26 chứa siêu chu kỳ) ⇒ r5 đăng ký trước cửa sổ 2014-01..2026-09, lưới P25/P75 đối xứng; L_tập ghi giả định; kịch bản bị buộc cộng XDCB; kỳ vọng = hỗn hợp 80/20 trên TB lưới (bỏ dải tích cực P75–P90). Bản r4 lưu tại archive_internal/..._rev1_r4.md (file gốc bị ghi đè theo dispatch)."
+  },
+  {
+   "ticker": "DCM",
+   "dd_date": "2026-11-04",
+   "rev": 1,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 25121,
+   "center": 27021,
+   "zone_high": 28458,
+   "center_kind": "expected_weighted",
+   "center_desc": "trung bình trọng số 3 kịch bản (Chu kỳ 0,50 = 28.017; Chính sách 0,30 = 28.017; Cấu trúc 0,20 = 23.037), thuế 20% từ 2027, đã trừ quỹ KTPL; sau chiết khấu thanh khoản = trước (ADV 74 tỷ/phiên)",
+   "center_alt": 28017,
+   "center_alt_kind": "base_scenario",
+   "center_range": null,
+   "price_ref": 33000,
+   "price_date": "2026-11-04",
+   "verdict_label": "Giá 33.000 TRÊN vùng giá trị nếu biên urê–khí dài hạn = TB 10 năm (179 USD/t; +22,1% so tâm, trên P90 29.691); NGHIÊNG/TRONG vùng nếu biên bền 220–260 (+9,9% … +0,1% so EV). Phụ thuộc lựa chọn biên. Luật sổ mức giá (giá < tâm −15%): giá CAO hơn tâm ⇒ KHÔNG đạt",
+   "skeptic_status": "Phản biện độc lập 2 vòng: vòng 1 REFUTED (thuế 20% có nguồn BCTC, quỹ KTPL, nhãn có điều kiện, diễn giải vay khí) đã áp ở vòng sửa; vòng 2 REFUTED phạm vi hẹp (kịch bản khí sai dấu, luật đổi nhận định, lưới lệch lên) — lõi định giá tái lập đúng md5, Mike áp sửa chữ theo danh sách skeptic, KHÔNG chạy vòng 3 (circuit-breaker); số định giá không đổi",
+   "source_file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261104.md",
+   "evidence": [
+    {
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261104.md",
+     "quote": "| Vùng giá trị (lưới 270): P10 – P90 | 24.065 – 29.691 | P25 25.121 · P50 26.745 · P75 28.458 |"
+    },
+    {
+     "fields": [
+      "center"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261104.md",
+     "quote": "| **Kỳ vọng** | | | **27.021** |"
+    },
+    {
+     "fields": [
+      "center_alt"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261104.md",
+     "quote": "| Chu kỳ | 0,50 | 179 (TB 10 năm) | 28.017 |"
+    },
+    {
+     "fields": [
+      "price_ref"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261104.md",
+     "quote": "| Giá đóng cửa 04/11/2026 | **33.000 đ** | DNSE, khớp ATC 14:45:02; sàn HOSE |"
+    }
+   ],
+   "notes": "Vùng = P25–P75 lưới 270 (khớp cách ghi DRI); P10–P90 24.065–29.691. Giá trị theo biên dài hạn 150/179/220/242/260 = 24.876/27.009/30.025/31.643/32.967. r 13,5% neo huy động 12T 7,40% (±100bp β1: −881/+1.021). Thuế lịch sử 2021–24 thấp hơn 10,8% ⇒ tâm có thể thổi +280…+560 (chưa vào tâm). Khí hai chiều theo Brent (hoà vốn ~75,8). Số: agents/Taylor/research/dd_DCM_20261104/calc/model_r2_out.txt; nội bộ REPORT_r3.md.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-04",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "recorded_at": "2026-11-04T23:55:00+07:00",
+   "supersedes": null,
+   "correction_reason": null
   }
  ],
  "center_kinds": [

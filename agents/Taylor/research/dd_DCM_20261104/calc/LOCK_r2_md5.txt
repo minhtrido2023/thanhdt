@@ -1,0 +1,6 @@
+LOCK_r2 2026-11-04 23:30:41 ICT
+019593798a0814db939f05e65cb738b3  calc/model_r2.py
+18aa96b34f1bf2675fbe929bbf01b7ab  calc/model_r2_out.txt
+94d6310c75c35d4c8f6a87beb64404c7  calc/model_r2_out.json
+d8f1bd5e8c993b7dcc39845673b8359c  calc/model.py
+4719aa8f968027b534f41e6f131a4b27  calc/compare_px_r2.py

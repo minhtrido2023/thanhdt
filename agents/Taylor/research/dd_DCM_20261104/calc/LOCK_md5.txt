@@ -1,0 +1,8 @@
+LOCK 2026-11-04 23:12:56 ICT
+d8f1bd5e8c993b7dcc39845673b8359c  calc/model.py
+f182c53b616c9b4d049b05571b1ad459  calc/model_out.txt
+cda5f0cde09f6a2756ea368103b91150  calc/model_out.json
+864d90c58d8cc354179accd2f5fc391e  calc/quarterly.py
+ac6578cd8699e1b5906e4a104f6d5671  calc/quarterly_out.txt
+1b4fb5fc8f33123f4ff4e1ff310cc59f  calc/bq_np_hist_out.csv
+49afc18eba7b6ca9b9f73f58a506e406  calc/bq_commod_out.csv

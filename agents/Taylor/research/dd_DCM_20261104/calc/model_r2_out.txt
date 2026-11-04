@@ -1,0 +1,14 @@
+0. Hằng số r2: TAX_LR 20% · TAX_Y1 0.1770 (=0,25×10,8%+0,75×20%) · KTPL 5.9678% LNST (136,19/2.282,09) · quỹ KTPL trừ khỏi net cash 265.3 · net cash gộp 7539.1 -> 7273.8 (13,740 đ/cp)
+   tiết kiệm thuế XK chuẩn hoá = 5%×4051.6 = 202.6 tỷ/năm trước thuế (r1: 285,4/0,75 = 380.5); kỳ vọng ×0.55 = 111.4
+1. Giá trị r2 (đ/cp): CYC 28,017 · ADMIN 28,017 (≡CYC, chính sách đã vào mọi nhánh) · STRUCT 23,037 · KỲ VỌNG 27,021
+2. Cầu nối r1->r2 (cộng dồn): r1 28,072 | +S1 thuế năm 1 27,886 (Δ-187; skeptic −187) | +S2 quỹ KTPL 26,570 (Δ-1,316; skeptic −1.289) | +ADMIN 27,021 (Δ+451; skeptic +479) | tổng Δ-1,051
+   (S2 tách: trừ LNST -814 · trừ quỹ số dư -501)
+3. Biên dài hạn -> giá trị (đ/cp; CYC = 100% biên đó; EV = 0,8×biên + 0,2×STRUCT125): 150: CYC 25,336 · EV 24,876 (LNTT ht 913) | 179: CYC 28,002 · EV 27,009 (LNTT ht 1201) | 220: CYC 31,772 · EV 30,025 (LNTT ht 1607) | 242: CYC 33,795 · EV 31,643 (LNTT ht 1825) | 260: CYC 35,450 · EV 32,967 (LNTT ht 2004)
+4. Độ nhạy kỳ vọng (đ/cp): {"dep-1.0_b0.5": 27512, "dep-1.0_b1.0": 28042, "dep-0.5_b0.5": 27262, "dep-0.5_b1.0": 27512, "dep+0.5_b0.5": 26789, "dep+0.5_b1.0": 26565, "dep+1.0_b0.5": 26565, "dep+1.0_b1.0": 26140, "restricted-332": 26394, "near_170": 26357, "near_285": 27826, "tc_150": 24876, "tc_210": 29289, "struct_100": 26561, "policy_p0": 25988, "policy_p1": 27866, "export_r1_381_norm_off": 27929}
+5. NPK ưu đãi còn lại — PHÍA TĂNG (giảm 50% thuế = −10đ% LNTT NPK; share LNTT NPK {10%,20%} × N năm còn lại {5,10}; năm bắt đầu NPK KHÔNG nêu ⇒ ước lượng) (đ/cp cộng thêm): {"sh10_N5": 65, "sh10_N10": 100, "sh20_N5": 131, "sh20_N10": 200}
+6. Chi phí khí (độc lập; KHÔNG vào base — nguồn CTCK): Brent TB 2016-25 = 67.8; Petronas +1pp×Brent×50%×25 MMBtu/t = 8.48 USD/t -> 216 tỷ/năm trước thuế (×966.7 kt, 26400 đ/USD) ⇒ Δ kỳ vọng -2,216 đ/cp
+   Nam Du namdu_w0.35_brent90: giá thay thế 7.90 USD/MMBtu, chi phí tăng 556 tỷ/năm trước thuế từ Q4/2028 ⇒ -4,543 đ/cp (chưa tính +2,25%/năm)
+   Nam Du namdu_w0.35_brent68: giá thay thế 6.57 USD/MMBtu, chi phí tăng 853 tỷ/năm trước thuế từ Q4/2028 ⇒ -6,969 đ/cp (chưa tính +2,25%/năm)
+   Nam Du namdu_w0.6_brent68: giá thay thế 6.57 USD/MMBtu, chi phí tăng 1462 tỷ/năm trước thuế từ Q4/2028 ⇒ -11,947 đ/cp (chưa tính +2,25%/năm)
+7. Lưới 270 (r±100bp × biên TC 150/179/210 × năm1 170/222/285 × STRUCT 100/125/150 × phong toả 0/−332; thuế 20%): P10 24,065 · P25 25,121 · P50 26,745 · P75 28,458 · P90 29,691
+8. Lưới MỞ RỘNG (biên TC 150/179/220/260, 360 ô; phụ — cho nhãn có điều kiện): P10 24,331 · P25 25,705 · P50 28,255 · P75 31,204 · P90 33,075

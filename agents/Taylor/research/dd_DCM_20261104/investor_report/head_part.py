@@ -1,0 +1,181 @@
+"""Dựng biểu đồ + PDF báo cáo DD nhà đầu tư DCM (04/11/2026).
+Chạy: /home/trido/thanhdt/wc_venv/bin/python -I build_report.py [figs|pdf|all]
+Số liệu hard-code lấy từ ../calc/quarterly_out.txt, ../calc/model_r2_out.txt, ../calc/compare_px_r2_out.txt (mỗi hình kèm CSV)."""
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+FIGS = os.path.join(HERE, "figs")
+NAVY, ACCENT, GREY, LIGHT, GREEN = "#1F3A5F", "#C8553D", "#9AA5B1", "#D9DEE4", "#2E7D5B"
+FONT = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Regular.ttf"
+FONT_B = "/home/trido/.claude/skills/dd-investor-report/fonts/BeVietnamPro-Bold.ttf"
+
+PX = 33000
+EV = 27021
+Q = ["Q1/25", "Q2/25", "Q3/25", "Q4/25", "Q1/26", "Q2/26", "Q3/26"]
+DTT = [3407, 6037, 2988, 4528, 5286, 6712, 5742]
+GP = [885, 1241, 657, 1252, 1346, 2001, 1099]
+GPM = [26.0, 20.6, 22.0, 27.6, 25.5, 29.8, 19.1]
+LNST = [412, 788, 328, 389, 789, 1067, 432]
+UREGP = [876, 881, 537, 1155, 1212, 1792, 908]
+UREM = [35.9, 36.3, 39.0, 48.1, 41.5, 46.0, 35.3]
+
+
+def setup_mpl():
+    import matplotlib
+    matplotlib.use("Agg")
+    from matplotlib import font_manager as fm
+    import matplotlib.pyplot as plt
+    for f in (FONT, FONT_B):
+        fm.fontManager.addfont(f)
+    plt.rcParams.update({
+        "font.family": "Be Vietnam Pro", "font.size": 9, "axes.titlesize": 9.8, "axes.titleweight": "bold",
+        "axes.titlelocation": "left", "axes.spines.top": False, "axes.spines.right": False,
+        "figure.facecolor": "white", "savefig.facecolor": "white", "axes.grid": True,
+        "grid.color": "#ECEFF2", "grid.linewidth": 0.8, "axes.axisbelow": True})
+    return plt
+
+
+def save(fig, name, source, df=None):
+    import textwrap
+    fig.text(0.01, 0.01, "\n".join(textwrap.wrap(source, 150)), fontsize=6.6, color="#666", ha="left", va="bottom")
+    fig.savefig(os.path.join(FIGS, name + ".png"), dpi=200)
+    if df is not None:
+        df.to_csv(os.path.join(FIGS, name + ".csv"), index=False)
+
+
+def vn(x, d=0):
+    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def figs():
+    import numpy as np
+    import pandas as pd
+    from matplotlib.patches import FancyBboxPatch
+    plt = setup_mpl()
+    x = np.arange(7)
+    SRC = "Nguồn: BCTC hợp nhất DCM các quý 2025–Q3/2026 (Q3/26 công bố 29/10/2026); Q2/25 theo số trình bày lại."
+
+    # 0 HERO
+    fig, ax = plt.subplots(figsize=(7.2, 1.9)); ax.axis("off"); ax.set_xlim(0, 100); ax.set_ylim(6, 36)
+    steps = [("Khí tự nhiên\ngắn giá dầu", "PM3–CAA, Nam Du"), ("Nhà máy đạm\nCà Mau", "urê · NPK"), ("Phân phối\nnội địa", "ĐBSCL, ĐNB"), ("Nông dân &\nxuất khẩu", "XK 5.289 tỷ 9T/26")]
+    for i, (a, b) in enumerate(steps):
+        ax.add_patch(FancyBboxPatch((1 + i * 15.5, 18), 13.5, 14, boxstyle="round,pad=0.3", fc=NAVY if i != 1 else ACCENT, ec="none"))
+        ax.text(7.75 + i * 15.5, 27, a, ha="center", va="center", color="white", fontsize=6.6, fontweight="bold")
+        ax.text(7.75 + i * 15.5, 20.4, b, ha="center", va="center", color="#DDE6F0", fontsize=5.2)
+        if i < 3:
+            ax.annotate("", (16.3 + i * 15.5, 25), (14.7 + i * 15.5, 25), arrowprops=dict(arrowstyle="->", color=GREY))
+    ax.text(1, 13, "Biên urê–khí (USD/t) quyết định lợi nhuận", fontsize=8, fontweight="bold", color=NAVY)
+    ax.text(1, 9, "Lợi nhuận 9T/26 +49,6% so cùng kỳ; Q3/26 giảm 59,5% so Q2/26 khi biên urê về 35,3%.", fontsize=6.8, color="#333")
+    # value bar at right
+    x0, x1 = 68, 97
+    sc = lambda v: x0 + (v - 22000) / (36000 - 22000) * (x1 - x0)
+    ax.add_patch(plt.Rectangle((sc(24065), 20), sc(29691) - sc(24065), 6, fc=LIGHT, ec="none"))
+    ax.add_patch(plt.Rectangle((sc(25121), 20), sc(28458) - sc(25121), 6, fc=GREY, ec="none"))
+    ax.plot([sc(EV)] * 2, [19, 27], color=NAVY, lw=2); ax.plot([sc(PX)] * 2, [19, 27], color=ACCENT, lw=2)
+    ax.text(sc(EV), 28.2, "Giá trị kỳ vọng\n27.021", ha="center", fontsize=6.3, color=NAVY, fontweight="bold")
+    ax.text(sc(PX), 28.2, "Đóng cửa 04/11\n33.000", ha="center", fontsize=6.3, color=ACCENT, fontweight="bold")
+    ax.text(x0, 15.5, "Xám đậm: P25–P75; xám nhạt: P10–P90 (đ/cp)", fontsize=5.6, color="#555")
+    ax.set_title("Chuỗi khí – đạm và vị trí của giá so với vùng giá trị", x=0.0, fontsize=9)
+    save(fig, "fig_00_hero", "Minh họa dựng từ số của báo cáo (không phải ảnh công ty). Giá trị: mô hình DCF 04/11/2026.", pd.DataFrame({"chi_tieu": ["P10", "P25", "EV", "P75", "P90", "gia"], "dong_cp": [24065, 25121, EV, 28458, 29691, PX]}))
+    plt.close(fig)
+
+    # 1 football
+    rows = [("Lưới 270 (P10–P90), tâm = giá trị kỳ vọng", 24065, 29691, 26745),
+            ("Lưới 360 lệch lên (P10–P90)", 24331, 33075, 28255),
+            ("Theo biên dài hạn 150–260 USD/t", 24876, 32967, 27009),
+            ("Ba kịch bản (STRUCT đến CYC/ADMIN)", 23037, 28017, 27021),
+            ("Giá 250 phiên (thấp–cao)", 28900, 50200, None)]
+    ff = pd.DataFrame(rows, columns=["phuong_phap", "thap", "cao", "giua"])
+    fig, ax = plt.subplots(figsize=(7.2, 2.9))
+    for i, r in ff.iterrows():
+        y = len(ff) - 1 - i
+        ax.barh(y, r.cao - r.thap, left=r.thap, color=GREY if i == 4 else NAVY, height=0.5, alpha=0.9)
+        ax.text(r.thap - 300, y, vn(r.thap / 1e3, 1), ha="right", va="center", fontsize=7.3)
+        ax.text(r.cao + 300, y, vn(r.cao / 1e3, 1), ha="left", va="center", fontsize=7.3)
+        if r.giua == r.giua and r.giua is not None:
+            ax.plot(r.giua, y, "|", color="white", ms=14, mew=2)
+    ax.set_yticks(range(len(ff)), ff.phuong_phap[::-1], fontsize=7.4)
+    ax.axvline(EV, color=NAVY, ls="--", lw=1.1, label="Giá trị kỳ vọng 27.021")
+    ax.axvline(PX, color=ACCENT, ls="-", lw=1.4, label="Đóng cửa 04/11/2026: 33.000")
+    ax.set_xlim(20000, 54000); ax.legend(fontsize=7, frameon=False, loc="lower right")
+    ax.xaxis.set_major_formatter(lambda v, p: f"{v/1e3:.0f}k"); ax.set_xlabel("đồng/cổ phiếu")
+    ax.set_title("Giá 33.000 nằm trên hầu hết vùng giá trị; chỉ lọt vào khi biên dài hạn ≥ ~233 USD/t")
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
+    save(fig, "fig_01_football", "Nguồn: mô hình DCF của nhóm nghiên cứu, giá DNSE 04/11/2026; giá 250 phiên: BQ. Vạch trắng = giữa (P50 hoặc kỳ vọng).", ff)
+    plt.close(fig)
+
+    # 2 DT & biên
+    fig, ax = plt.subplots(figsize=(7.2, 3.0))
+    ax.bar(x, DTT, color=[LIGHT] * 4 + [NAVY] * 3, width=0.7)
+    ax.set_xticks(x, Q); ax.set_ylabel("DT thuần, tỷ đồng")
+    ax2 = ax.twinx(); ax2.grid(False); ax2.spines["right"].set_visible(True)
+    ax2.plot(x, GPM, color=ACCENT, marker="o", lw=1.6)
+    for i, v in enumerate(GPM):
+        ax2.annotate(vn(v, 1) + "%", (i, v), xytext=(0, 6), textcoords="offset points", ha="center", fontsize=7.5, color=ACCENT, fontweight="bold")
+    ax2.set_ylim(10, 36); ax2.set_ylabel("Biên gộp, %")
+    ax.set_title("Biên gộp lên 29,8% ở Q2/26 rồi về 19,1% ở Q3/26")
+    fig.tight_layout(rect=(0, 0.07, 1, 1)); save(fig, "fig_02_revenue_margin", SRC, pd.DataFrame({"quy": Q, "dt_thuan": DTT, "bien_gop_pct": GPM})); plt.close(fig)
+
+    # 3 LNST + LN gộp urê
+    fig, ax = plt.subplots(figsize=(7.2, 3.0)); w = 0.38
+    ax.bar(x - w / 2, LNST, w, color=NAVY, label="LNST")
+    ax.bar(x + w / 2, UREGP, w, color=ACCENT, label="LN gộp urê")
+    for i in range(7):
+        ax.text(i - w / 2, LNST[i] + 25, vn(LNST[i]), ha="center", fontsize=6.8); ax.text(i + w / 2, UREGP[i] + 25, vn(UREGP[i]), ha="center", fontsize=6.8)
+    ax.set_xticks(x, Q); ax.set_ylabel("tỷ đồng"); ax.legend(frameon=False, fontsize=7.5, loc="upper left")
+    ax.set_title("LNST Q3/26 432 tỷ: LN gộp urê giảm 884 tỷ so với Q2/26")
+    fig.tight_layout(rect=(0, 0.07, 1, 1)); save(fig, "fig_03_npat_ure", SRC + " LN gộp urê theo thuyết minh doanh thu/giá vốn theo sản phẩm.", pd.DataFrame({"quy": Q, "lnst": LNST, "ln_gop_ure": UREGP, "bien_ure_pct": UREM})); plt.close(fig)
+
+    # 4 waterfall
+    steps = [("LNTT\nQ3/25", 378.6, "t"), ("LN gộp\nthuần", 442.0, "d"), ("CP bán\nhàng", -87.3, "d"), ("QLDN", -46.7, "d"), ("DT tài\nchính", -72.5, "d"), ("CP tài\nchính", -116.3, "d"), ("LN\nkhác", 3.7, "d"), ("LNTT\nQ3/26", 501.4, "t")]
+    fig, ax = plt.subplots(figsize=(7.2, 3.0)); cum = 0
+    for i, (l, v, k) in enumerate(steps):
+        if k == "t":
+            ax.bar(i, v, color=NAVY); cum = v; ax.text(i, v + 10, vn(v, 1), ha="center", fontsize=7.5, fontweight="bold")
+        else:
+            b = cum if v >= 0 else cum + v
+            ax.bar(i, abs(v), bottom=b, color=GREEN if v >= 0 else ACCENT); cum += v
+            ax.text(i, max(cum, cum - v) + 10, ("+" if v > 0 else "−") + vn(abs(v), 1), ha="center", fontsize=7.5)
+    ax.set_xticks(range(8), [s[0] for s in steps], fontsize=7.4); ax.set_ylabel("tỷ đồng"); ax.set_ylim(0, 950)
+    ax.set_title("LN gộp tăng 442 tỷ nhưng chi phí và tài chính ăn 319 tỷ: LNTT chỉ +123 tỷ")
+    fig.tight_layout(rect=(0, 0.07, 1, 1)); save(fig, "fig_04_bridge", "Nguồn: BCTC hợp nhất Q3/2026 và Q3/2025 (cột quý). Tài chính ròng −189 tỷ gồm chi phí tài chính khác 71,2 tỷ chưa có thuyết minh.", pd.DataFrame(steps, columns=["buoc", "tyd", "loai"])); plt.close(fig)
+
+    # 5 cash
+    fig, (a, b) = plt.subplots(1, 2, figsize=(7.2, 2.9), gridspec_kw={"width_ratios": [1, 1]})
+    a.bar(["31/12/2025", "30/9/2026"], [5409, 7539], color=[LIGHT, NAVY], width=0.55)
+    for i, v in enumerate([5409, 7539]): a.text(i, v + 120, vn(v), ha="center", fontsize=8, fontweight="bold")
+    a.set_title("Net cash gộp, tỷ đồng"); a.set_ylim(0, 9000)
+    b.bar(["CFO 9T/25", "CFO 9T/26", "Capex 9T/26"], [-2017, 2331, -546], color=[GREY, NAVY, ACCENT], width=0.55)
+    for i, v in enumerate([-2017, 2331, -546]): b.text(i, v + (120 if v > 0 else -300), vn(v), ha="center", fontsize=8, fontweight="bold")
+    b.axhline(0, color="#555", lw=0.8); b.set_title("Dòng tiền 9 tháng, tỷ đồng"); b.set_ylim(-2600, 2900)
+    fig.tight_layout(rect=(0, 0.1, 1, 1)); save(fig, "fig_05_cash", "Nguồn: BCTC hợp nhất Q3/2026. Net cash = tiền + đầu tư nắm giữ đến hạn + tiền gửi phong tỏa − vay (chưa trừ quỹ khen thưởng phúc lợi 265 tỷ). CFO 9T/25 âm do tích tồn kho 1.609 tỷ.", pd.DataFrame({"chi_tieu": ["net_cash_1/1/26", "net_cash_30/9/26", "CFO_9T25", "CFO_9T26", "capex_9T26"], "ty_dong": [5409, 7539, -2017, 2331, -546]})); plt.close(fig)
+
+    # 6 sensitivity to margin
+    mg = [150, 179, 220, 242, 260]; val = [24876, 27009, 30025, 31643, 32967]
+    fig, ax = plt.subplots(figsize=(7.2, 3.0))
+    ax.plot(mg, val, color=NAVY, marker="o", lw=1.8)
+    for m, v in zip(mg, val): ax.annotate(vn(v), (m, v), xytext=(0, 8), textcoords="offset points", ha="center", fontsize=7.5)
+    ax.axhline(PX, color=ACCENT, lw=1.4); ax.text(151, PX + 250, "Đóng cửa 04/11: 33.000", color=ACCENT, fontsize=8, fontweight="bold")
+    ax.axvspan(180, 260, color=LIGHT, alpha=0.5); ax.text(220, 23900, "dải bền 180–260 (người đọc ngành độc lập)", ha="center", fontsize=7, color="#444")
+    for m, s, ha in ((152, "trung vị 10 năm 152", "right"), (179, "TB 10 năm 179", "left"), (257, "2025: 257", "right")):
+        ax.axvline(m, color=GREY, ls=":", lw=0.9); ax.text(m + (-1 if ha == "right" else 1), 34700, s, ha=ha, fontsize=6.8, color="#444")
+    ax.set_ylim(23500, 35400); ax.set_xlabel("Biên urê–khí dài hạn, USD/t"); ax.set_ylabel("giá trị kỳ vọng, đ/cp")
+    ax.set_title("Giá trị phụ thuộc biên dài hạn: 33.000 ứng với biên ≈ 233–260 USD/t")
+    fig.tight_layout(rect=(0, 0.07, 1, 1)); save(fig, "fig_06_margin_sensitivity", "Nguồn: mô hình DCF của nhóm nghiên cứu (kỳ vọng = 0,8 × biên + 0,2 × kịch bản cấu trúc 125). Biên = giá urê − 25 × (2,5 + 0,06 × Brent), thước đo hướng.", pd.DataFrame({"bien": mg, "gia_tri": val})); plt.close(fig)
+
+    # 7 mix (minh họa)
+    fig, ax = plt.subplots(figsize=(7.2, 2.6))
+    mix = [("Urê", 2573, NAVY), ("NPK", 1624, GREEN), ("Phân bón\nthương mại", 1536, ACCENT), ("Khác", 260, GREY)]
+    left = 0; tot = sum(m[1] for m in mix)
+    for n, v, c in mix:
+        ax.barh(0, v, left=left, color=c, height=0.5)
+        ax.text(left + v / 2, 0, f"{n}\n{vn(v)} ({vn(v/tot*100)}%)", ha="center", va="center", color="white", fontsize=7.3, fontweight="bold")
+        left += v
+    ax.set_ylim(-0.6, 0.9); ax.axis("off")
+    ax.text(0, 0.62, "Sản phẩm: urê (hạt đục) · NPK · phân bón kinh doanh thương mại · khí công nghiệp và CO₂ (dự án đang xây)", fontsize=7.3, color="#333")
+    ax.set_title("Cơ cấu doanh thu gộp Q3/26 (tỷ đồng): urê 43%, NPK 27%, thương mại 26%")
+    fig.tight_layout(rect=(0, 0.1, 1, 1)); save(fig, "fig_07_mix", "Sơ đồ minh họa tự vẽ (không dùng ảnh công ty). Nguồn số: BCTC hợp nhất Q3/2026, thuyết minh doanh thu theo sản phẩm, Q3 = 9T − 6T.", pd.DataFrame(mix, columns=["san_pham", "dt_ty", "mau"]).drop(columns="mau")); plt.close(fig)
+    print("figs ok")
+
+
