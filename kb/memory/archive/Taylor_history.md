@@ -1947,3 +1947,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T16:13:27Z] [dd-SCL r3 03/11] XONG job Taylor_20261103_161002: tam sau quyen 21.383 (CK 5 ty), cum 22.843, gia 30.000/TERP 27.659 TREN vung; CHUA email; chua commit
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T16:19:13Z] [dd-DRI r5 03/11] XONG job Taylor_20261103_160959 commit 620e32216: tam sau CK 15.543, gia 13.400 HOP LY sat P25, luat -15% khong dat; CHUA email; SCL r3 job song song dang sua dd_price_zones.json (chua commit)
