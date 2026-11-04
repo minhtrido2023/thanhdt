@@ -31,3 +31,5 @@
 - [2026-11-04T18:25:39Z] [D1+freshness 05/11] XONG job Taylor_20261104_182153: 2 nhánh feat/liq-spread-d1-20261105 (outer 246e38553, mike d83ae9762) CHỜ arch-review rồi merge; D2 (nghiên cứu spread dẫn lãi huy động) chưa làm
 - [2026-11-04T18:27:22Z] [D2 liq-spread 05/11] XONG job Taylor_20261104_182158: ỦNG HỘ biên N=3 (LOO→không KL), nhánh research/liquidity-spread-deposit-lead-20261105 CHƯA merge, chờ quant-skeptic (Mike)
 - [2026-11-04T18:29:19Z] [E1 macro_snapshot 05/11] XONG job Taylor_20261104_182156: commit 1447c2a90 nhánh feat/macro-snapshot-asof-20261105, CHỜ arch-review nhẹ, chưa merge
+- [2026-11-04T18:36:45Z] [D2 r2 05/11] XONG job Taylor_20261104_183446: nhãn KHÔNG KẾT LUẬN, commit 18748ac7c nhánh research/liquidity-spread-deposit-lead-20261105, CHƯA merge
+- [2026-11-04T18:37:18Z] [CPI-TE 05/11] XONG job Taylor_20261104_182151: nhanh feat/cpi-te-tier-20261105 (wt-cpi-te-20261105) commit 1cdd76581, CHO arch-review+merge; golive CAPIT PIT CPI 4.69->5.09 can Mike xac nhan; chua quet results_registry theo DCF mode

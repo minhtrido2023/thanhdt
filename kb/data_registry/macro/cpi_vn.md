@@ -3,7 +3,7 @@ kind: config
 status: CANONICAL-PROXY
 source: cpi_vn.py (NSO_CPI_YOY_REAL + CPI_ANCHORS)
 group: macro
-note: 2 tầng — Tier 1 NSO thật (rolling 13 tháng) đè Tier 2 proxy nội suy; CHƯA có cron
+note: [05/11 nhánh feat/cpi-te-tier-20261105, CHỜ arch-review+merge: thêm Tầng 1.4 TE, xem mục cuối] 2 tầng — Tier 1 NSO thật (rolling 13 tháng) đè Tier 2 proxy nội suy; CHƯA có cron
 writer: fetch tay 1 lần (job Taylor_20260706_105930, 2026-07-06)
 ---
 
@@ -39,3 +39,15 @@ file proposal trên).
 - Lịch sử 2011-01→2026-10 (3838 phiên): CPI lệch tuyệt đối TB 0,547pp, max 3,617pp; cổng CPI≥6 lật 141 phiên, chỉ 5 phiên trong vùng dd52≤−20% (2012-09: chặn→cho phép).
 - ⚠️ Số nghiên cứu `macro_confidence_regime` đã pin trong `data/results_registry.md` là theo `pit=False`; chạy lại sẽ khác. Trích dẫn phải nói rõ quy ước.
 - Việc dở không chặn: `NSO_CPI_YOY_REAL` stale từ 2026-06 (FiinPro 08/2026 = 4,89 vs cổng đọc 4,69 — Winston refresh); `engine_2008.py:222-230` cùng look-ahead chép tay (ticket riêng); nếu GSO công bố ngày 6 tháng M+1 thì ngày 1–5 vẫn rò rỉ (0 lật cổng 6%).
+
+## Tầng 1.4 — TradingEconomics `vn_cpi_yoy` (job Taylor_20261104_182151, user duyệt 05/11; CHỜ MERGE)
+- **Thứ tự**: NSO > fiinprox ≥ TE > Tier 3 > Tier 2. TE chỉ phục vụ tháng NSO+fiinprox không phủ: **2026-09+**
+  (fiinprox đóng băng ở 2026-08) và **2007** (thay Tier 3). Lệch TE–NSO >0,05pp hoặc TE–fiinprox >0,3pp ⇒ cảnh báo
+  1 lần và DÙNG tầng cao hơn.
+- **Nguồn đọc**: `data/te_cpi_yoy_snapshot.csv` (append-only; cột `month,te_cpi_yoy_pct,obs_date,fetched_at,snapshot_at`),
+  do `te_macro_crosscheck.py` (thứ Hai 08:05 ICT, trong `refresh_deposit_cctg_weekly.sh`) ghi thêm: tháng mới / giá
+  trị đổi + 1 dòng heartbeat tháng mới nhất mỗi lần chạy. `cpi_vn.py` KHÔNG gọi BQ lúc import. Writer BQ = bq_admin.
+- **Fail-closed**: file thiếu / header lạ / rỗng / `snapshot_at` mới nhất cũ >14 ngày ⇒ TE TẮT, output GIỐNG HỆT
+  trước khi có tầng này (selfcheck so từng cột), cảnh báo stderr nêu lý do; `python3 cpi_vn.py` in `Tier 1.4 TE: ON/OFF`.
+- **Bẫy**: file `.csv` bị `.gitignore:59` ⇒ KHÔNG nằm trong git, chỉ sống ở máy chạy cron; worktree không có ⇒ TE tắt
+  (đúng thiết kế, không phải lỗi). Hạn chế PIT (GSO công bố ~6 ngày sau tháng) giữ nguyên như Tier khác.
