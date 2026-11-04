@@ -183,6 +183,18 @@ def _heartbeat_lines(series_data, today):
     return lines
 
 
+def _liquidity_line():
+    """Dòng DISPLAY 'Thanh khoản VN' (liên NH 3M − điều hành) cạnh lãi huy động để người đọc log tuần
+    thấy cùng lúc — chính cặp D2 đang kiểm (spread có dẫn lãi huy động không). Chỉ vào LOG/stdout:
+    KHÔNG vào cảnh báo, state, exit code; lỗi bất kỳ ⇒ 'không có dữ liệu' chứ không làm hỏng cảnh báo
+    lãi huy động (đường cảnh báo tiền thật không được phụ thuộc vào giả thuyết chưa kiểm)."""
+    try:
+        from dna_report import build_vn_liquidity_line
+        return "- " + build_vn_liquidity_line(html=False)
+    except Exception as e:
+        return f"- Thanh khoản VN: không có dữ liệu ({type(e).__name__}) [GIẢ THUYẾT CHƯA KIỂM — chỉ hiển thị, không gate]"
+
+
 def _notify_off():
     """Same kill-switch notify.sh itself honors (MIKE_NOTIFY_OFF=1 or mike/state/NOTIFY_OFF) —
     re-implemented here because this script now posts via notify_thread.sh directly (see
@@ -236,6 +248,7 @@ def main():
     print("=== deposit_cctg_trend_check ===")
     for line in _heartbeat_lines(series_data, today):
         print(line)
+    print(_liquidity_line())
 
     if not declines and not staleness:
         print("Không phát hiện xu hướng hạ mới, không có cảnh báo stale mới (hoặc đã báo rồi).")

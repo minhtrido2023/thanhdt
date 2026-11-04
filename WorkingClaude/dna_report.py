@@ -546,6 +546,90 @@ def build_margin_spread_line(html=True):
             f"= {B(f'{sp:+.2f}pp')} · chỉ hiển thị, không tác động sizing/gate  {asof}")
 
 
+LIQ_SINCE = "2012-01-01"      # mốc bắt đầu mẫu phân vị (user chốt, 05/11)
+LIQ_MAX_AGE_IB = 5            # ngày lịch: interbank hay trễ 1-2 ngày; >5 ⇒ fail-closed
+LIQ_MAX_AGE_POLICY = 75       # ngày lịch: policy là chuỗi THÁNG (obs cuối tháng) ⇒ thiếu >2 kỳ ⇒ stale
+LIQ_MIN_N = 500               # mẫu tối thiểu cho phân vị (~2 năm quan sát hằng ngày)
+_LIQ_CACHE = {"t": 0.0, "val": None}
+LIQ_LABEL = "GIẢ THUYẾT CHƯA KIỂM — chỉ hiển thị, không gate"
+
+
+def _bq_liquidity():
+    """→ DataFrame[k, d, v] cho vn_interbank_3m + vn_policy_rate (tav2_bq.macro_indicator).
+    Policy lấy từ 2000 để as-of ffill có điểm neo trước LIQ_SINCE. Mẫu cron: google.cloud client
+    (mẫu dcf_rate_display._bq_tpcp), không phụ thuộc `bq` CLI/shell."""
+    os.environ.setdefault("CLOUDSDK_CONFIG", "/home/trido/thanhdt/gcloud_dtienthanh")
+    from google.cloud import bigquery
+    q = ("SELECT t.series_key AS k, t.observation_date AS d, t.value AS v "
+         "FROM tav2_bq.macro_indicator AS t "
+         "WHERE t.series_key IN ('vn_interbank_3m','vn_policy_rate') AND t.observation_date >= '2000-01-01'")
+    return bigquery.Client(project=PROJECT).query(q, timeout=90).result(timeout=90).to_dataframe()
+
+
+def get_vn_liquidity_spread(today=None, loader=None):
+    """Thanh khoản VN = vn_interbank_3m − vn_policy_rate (pp), DISPLAY-ONLY.
+    Policy là chuỗi tháng ⇒ as-of forward-fill (merge_asof backward) lên từng ngày interbank; một
+    thay đổi điều hành giữa tháng chỉ hiện ở obs cuối tháng ⇒ spread có thể lệch tới ~1 tháng quanh
+    sự kiện (bảo thủ, không nhìn trước). Phân vị = tỷ lệ spread ≤ giá trị hiện tại trên MẪU MỞ RỘNG
+    từ LIQ_SINCE tới quan sát cuối. FAIL-CLOSED → dict {"ok": False, "reason": ...}, không bao giờ
+    điền số cũ: BQ lỗi / thiếu series / interbank cuối cách hôm nay > LIQ_MAX_AGE_IB ngày /
+    policy cuối cách > LIQ_MAX_AGE_POLICY ngày / mẫu < LIQ_MIN_N."""
+    import datetime as _dt
+    from zoneinfo import ZoneInfo
+    live = today is None and loader is None
+    if live and _LIQ_CACHE["val"] is not None and (time.time() - _LIQ_CACHE["t"]) < 300:
+        return _LIQ_CACHE["val"]       # bot gọi build_report mỗi tin nhắn — không query BQ lại trong 5 phút
+    res = _get_vn_liquidity_spread(today, loader)
+    if live:
+        _LIQ_CACHE.update(t=time.time(), val=res)
+    return res
+
+
+def _get_vn_liquidity_spread(today, loader):
+    import datetime as _dt
+    from zoneinfo import ZoneInfo
+    today = today or _dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date()   # §16: neo ICT
+    try:
+        df = (loader or _bq_liquidity)()
+        df = df.dropna(subset=["v"]).copy()
+        df["d"] = pd.to_datetime(df["d"])
+        df = df[df["d"] <= pd.Timestamp(today)]            # không nhìn quá hôm nay
+        ib = df[df["k"] == "vn_interbank_3m"].sort_values("d")[["d", "v"]].rename(columns={"v": "ib"})
+        po = df[df["k"] == "vn_policy_rate"].sort_values("d")[["d", "v"]].rename(columns={"v": "po"})
+        if ib.empty or po.empty:
+            return {"ok": False, "reason": "thiếu series interbank hoặc policy"}
+        ib_last, po_last = ib["d"].iloc[-1].date(), po["d"].iloc[-1].date()
+        age_ib, age_po = (today - ib_last).days, (today - po_last).days
+        if age_ib > LIQ_MAX_AGE_IB:
+            return {"ok": False, "reason": f"interbank cuối {ib_last} cách {age_ib} ngày (>{LIQ_MAX_AGE_IB})"}
+        if age_po > LIQ_MAX_AGE_POLICY:
+            return {"ok": False, "reason": f"policy cuối {po_last} cách {age_po} ngày (>{LIQ_MAX_AGE_POLICY})"}
+        m = pd.merge_asof(ib[ib["d"] >= pd.Timestamp(LIQ_SINCE)], po, on="d").dropna()
+        if len(m) < LIQ_MIN_N:
+            return {"ok": False, "reason": f"mẫu quá nhỏ ({len(m)} < {LIQ_MIN_N})"}
+        m["s"] = m["ib"] - m["po"]
+        cur = float(m["s"].iloc[-1])
+        return {"ok": True, "spread": cur, "ib": float(m["ib"].iloc[-1]), "po": float(m["po"].iloc[-1]),
+                "pct": float((m["s"] <= cur + 1e-9).mean() * 100), "n": int(len(m)),
+                "asof": m["d"].iloc[-1].date().isoformat(), "age": int(age_ib)}
+    except Exception as e:
+        return {"ok": False, "reason": f"{type(e).__name__}: {str(e)[:120]}"}
+
+
+def build_vn_liquidity_line(html=True, today=None, loader=None):
+    """Dòng 'Thanh khoản VN' (DISPLAY-ONLY, KHÔNG gate/sizing, không phải tín hiệu mua/bán). Luôn trả
+    một dòng (kể cả fail-closed → 'không có dữ liệu') để người đọc thấy chỉ báo bị tắt, không im lặng."""
+    v = get_vn_liquidity_spread(today=today, loader=loader)
+    lab = f"[{LIQ_LABEL}]"
+    lab = f"<i>{lab}</i>" if html else lab
+    if not v["ok"]:
+        return f"Thanh khoản VN: không có dữ liệu ({v['reason']})  {lab}"
+    sp = f"{v['spread']:+.2f}pp"
+    sp = f"<b>{sp}</b>" if html else sp
+    return (f"Thanh khoản VN: liên NH 3M {v['ib']:.2f}% − điều hành {v['po']:.2f}% = {sp} · "
+            f"phân vị {v['pct']:.0f}% (mẫu từ 2012-01, n={v['n']}) · quan sát cuối {v['asof']} (trễ {v['age']}d)  {lab}")
+
+
 def build_neutral_base_line(html=True):
     """One-line unconditional NEUTRAL→BEAR/CRISIS historical base-rate, shared by the
     dna_report NOW block and eod_trading_report.sh. None when not NEUTRAL / data failure
@@ -767,6 +851,9 @@ def build_report(tk):
     vrline = build_value_radar_line()
     if vrline:
         L.append(vrline)
+    liqline = build_vn_liquidity_line()
+    if liqline:
+        L.append(liqline)
     comp = build_compass_line()
     if comp:
         L.append(comp)
