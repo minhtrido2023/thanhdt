@@ -1935,3 +1935,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T15:44:09Z] [dd-chain3 03/11] XONG job Taylor_20261103_152936: NNC r6 284df0965 tam 60.702 (sau CK TK 58.499, RE) / MVC r9 c92c8d64f tam 16.482 (sau CK 15.105, RE CO DK); r 13,5% neo huy dong 7,40%; CHUA skeptic, CHUA email (Mike gui)
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T15:44:43Z] [dd-SCL r2 03/11] XONG job Taylor_20261103_152941 commit 9af25d6c0: tam sau quyen 22.543 (sau CK 1 ty), gia 30.000/TERP 27.659 TREN vung; CHUA skeptic, CHUA email; quy mo CK thanh khoan 1 ty vs MVC 5 ty can thong nhat

@@ -38,6 +38,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`sector_read_xe_tai_thuong_mai_vn_20261101.md`](sector_read_xe_tai_thuong_mai_vn_20261101.md) — sector read BLIND xe tải thương mại VN (nhẹ/trung/nặng, đầu kéo, CBU/CKD, đại lý, trả góp), Bobby 2026-11-01 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_kcn_cho_thue_dat_20261101.md`](sector_read_kcn_cho_thue_dat_20261101.md) — sector read BLIND KCN cho thuê đất & hạ tầng miền Nam + nhóm gắn DNNN (FDI, thuế Mỹ, giá thuê/lấp đầy, quỹ đất, TT 99 ghi nhận doanh thu), Bobby 2026-11-01 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_cntt_vienthong_giaoduc_vn_20261101.md`](sector_read_cntt_vienthong_giaoduc_vn_20261101.md) — sector read BLIND nhóm CNTT VN 3 khối (xuất khẩu phần mềm + CĐS nội địa, băng rộng cố định + TTDL, giáo dục tư nhân), Bobby 2026-11-01 (parent `vn_macro_regime_history.md`) | CANONICAL |
+| [`sector_read_phan_dam_ure_20261104.md`](sector_read_phan_dam_ure_20261104.md) — sector read BLIND phân đạm urê VN (giá urê quốc tế, biên urê−khí, hạn ngạch TQ, thuế XK/VAT, nguồn khí), Bobby 2026-11-04 | CANONICAL |
 | [`vnindex_5state.md`](vnindex_5state.md) — tav2_bq.vnindex_5state | TRAP |
 | [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_bq.vnindex_5state_staging / _archive_* / _v2g_* / _tam_quan_v31/v33b_clean / _baseline_* | ARCHIVE |
 | [`vnindex_5state_csv_local.md`](vnindex_5state_csv_local.md) — data/vnindex_5state.csv | TRAP |
