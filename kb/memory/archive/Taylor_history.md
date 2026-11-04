@@ -1932,3 +1932,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T15:36:28Z] ĐANG DỞ chain3 job Taylor_20261103_152936: NNC r6 XONG 284df0965 (tam 60.702, sau CK TK 58.499) | NEXT: MVC r9 o dd_MVC_20261103/r9/ import nnc_model_r6 (r 13,5% tiem qua N3.EV3), liquidity MVC da tinh o NNC r6/calc/liquidity_r6_out.json
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T15:44:09Z] [dd-chain3 03/11] XONG job Taylor_20261103_152936: NNC r6 284df0965 tam 60.702 (sau CK TK 58.499, RE) / MVC r9 c92c8d64f tam 16.482 (sau CK 15.105, RE CO DK); r 13,5% neo huy dong 7,40%; CHUA skeptic, CHUA email (Mike gui)

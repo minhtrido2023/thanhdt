@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-03T15:44:09Z] [dd-chain3 03/11] XONG job Taylor_20261103_152936: NNC r6 284df0965 tam 60.702 (sau CK TK 58.499, RE) / MVC r9 c92c8d64f tam 16.482 (sau CK 15.105, RE CO DK); r 13,5% neo huy dong 7,40%; CHUA skeptic, CHUA email (Mike gui)
 - [2026-11-03T15:44:43Z] [dd-SCL r2 03/11] XONG job Taylor_20261103_152941 commit 9af25d6c0: tam sau quyen 22.543 (sau CK 1 ty), gia 30.000/TERP 27.659 TREN vung; CHUA skeptic, CHUA email; quy mo CK thanh khoan 1 ty vs MVC 5 ty can thong nhat
 - [2026-11-03T15:45:04Z] [dd-DRI r4 03/11] XONG job Taylor_20261103_152938 commit bdbdea02f: tam 16.950 -> sau CK 16.610 (cu 10.500), gia 13.400 RE co DK; CHUA skeptic, CHUA email
 - [2026-11-03T16:10:08Z] ĐANG DỞ: DD DRI r5 job Taylor_20261103_160959 — research/dd_DRI_20261027/r5/ sửa SKEPTIC_R4 | NEXT: đọc SKEPTIC_R4 + r4/calc
@@ -26,3 +25,4 @@
 - [2026-11-04T01:33:20Z] [crisis-dd HT1 04/11] XONG ngay6 (khong co, GIU) — con: BCTC goc, ngay 7 tong ket
 - [2026-11-04T15:54:57Z] ĐANG DỞ: DD DCM job Taylor_20261104_155446 — research/dd_DCM_20261104/ | NEXT: đọc skill+template, render BCTC Q3/26
 - [2026-11-04T16:16:14Z] [dd-DCM 04/11] XONG job Taylor_20261104_155446: tam 28.072 (sau CK TK 28.072), gia 33.000 DAT (>P90 31.901); CHUA skeptic, CHUA commit, CHUA investor report/price_zones
+- [2026-11-04T16:32:57Z] [dd-DCM r2 04/11] XONG job Taylor_20261104_162755: tam 27.021 (r1 28.072), gia 33.000 DAT (co dieu kien bien: 220 NGHIENG DAT, >=233 HOP LY); REPORT_r2.md; CHUA skeptic r2, CHUA commit, CHUA email
