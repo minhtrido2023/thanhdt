@@ -337,3 +337,6 @@
 
 ## Archived 2026-11-03 (keep=12 days=0 require_done=False)
 - [2026-10-28T12:06:02Z] [2026-10-28 19:xx ICT] Plan SpaceX 10-29 XONG: MUA MCH 200cp LO 139.800 (LAG_LO 8%), MSR ACK_DROP bỏ, egg>=19,4tr; chờ duyệt trước 08:45 29/10 (job DollarBill_20261028_120434)
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-10-29T12:04:58Z] [2026-10-29 19:xx ICT] Plan ZaloPay 10-30 XONG HOLD ALL; SCL bi ban 500cp ngoai plan (chua ro nguon) -> can doi soat; cho duyet truoc 08:45 30/10 (job DollarBill_20261029_120347)

@@ -1,7 +1,6 @@
 # Working memory — DollarBill
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của DollarBill.
 
-- [2026-10-29T12:04:58Z] [2026-10-29 19:xx ICT] Plan ZaloPay 10-30 XONG HOLD ALL; SCL bi ban 500cp ngoai plan (chua ro nguon) -> can doi soat; cho duyet truoc 08:45 30/10 (job DollarBill_20261029_120347)
 - [2026-10-29T12:06:03Z] [2026-10-29 19:xx ICT] Plan SpaceX 10-30 XONG HOLD ALL 0 lenh; SCL bi ban 800cp ngoai plan (question len bus) -> cho user tra loi; active_nav chua refresh (compute_active_nav refuse); job DollarBill_20261029_120349
 - [2026-10-29T16:55:44Z] [2026-10-29 23:5x ICT] Plan SpaceX 10-30 DUNG LAI XONG: SELL SCL 300cp chieu 30/10 (user thoai SCL), 0 mua; cho user duyet truoc 08:45; job DollarBill_20261029_165344
 - [2026-10-29T16:55:52Z] [2026-10-29 23:5x ICT] Plan ZaloPay 10-30 DỰNG LẠI XONG: SELL SCL 200cp LO 29.500 chiều T+2; chờ duyệt (job DollarBill_20261029_165347)
@@ -13,3 +12,4 @@
 - [2026-11-02T12:12:52Z] [2026-11-02 19:xx ICT] Plan ZaloPay 11-03 XONG: BUY TCH 2600cp LO 11.850 (BAL, FLOOR_FAIL flagged), egg>=0.6tr; cho duyet truoc 08:45 03/11 (job DollarBill_20261102_121028)
 - [2026-11-03T12:11:58Z] [2026-11-03 19:xx ICT] Plan ZaloPay 11-04 XONG: SELL TV1 1100cp (tiep tuc thoai), 0 mua; cho duyet truoc 08:45 04/11 (job DollarBill_20261103_121024)
 - [2026-11-03T12:12:22Z] [2026-11-03 19:xx ICT] Plan SpaceX 11-04 XONG: SELL TV1 2200cp, 0 mua; chờ duyệt trước 08:45 04/11 (job DollarBill_20261103_121026)
+- [2026-11-04T18:29:40Z] [2026-11-05 01:3x ICT] Plan 05/11 DỰNG LẠI cả 2 acct: bỏ DCM (user), chỉ SELL TV1 (SpaceX 1800/ZaloPay 700); 0 thay thế; chờ duyệt lại trước 08:45 (job DollarBill_20261104_182729)
