@@ -280,6 +280,30 @@ ${SBV_TAIL}" \
   fi
 fi
 
-echo "===== deposit+CCTG weekly refresh DONE (dispatch_rc=${DISPATCH_RC}, confirmed=${CONFIRMED:-no}, trend_rc=${TREND_RC}, sbv_rc=${SBV_RC}, dry_run=${DRY_RUN}) =====" >> "$LOG"
-[ "$TREND_RC" -eq 0 ] && [ "$SBV_RC" -eq 0 ] || exit 1
+# --- TE cross-check (C1, job Taylor_20261104_170501): TradingEconomics vn_policy_rate / vn_cpi_yoy vs
+# SBV_REFI_EVENTS / NSO / fiinprox. ALERT ONLY: never edits a source, never touches sbv_verify_log.json or
+# the macro gate. The module notifies by itself on a mismatch / unavailable feed; rc!=0 only on a crash. ---
+echo "--- TE macro cross-check ---" >> "$LOG"
+if [ "$DRY_RUN" -eq 1 ]; then
+  "$PY" te_macro_crosscheck.py --dry-run >> "$LOG" 2>&1
+else
+  "$PY" te_macro_crosscheck.py >> "$LOG" 2>&1
+fi
+TE_RC=$?
+echo "te macro crosscheck exit_code=${TE_RC}" >> "$LOG"
+if [ "$TE_RC" -ne 0 ]; then
+  if [ "$DRY_RUN" -eq 0 ] && [ -x "$WORKDIR_8L/mike/bin/notify_thread.sh" ]; then
+    TE_TAIL="$(tail -c 800 "$LOG")"
+    "$WORKDIR_8L/mike/bin/notify_thread.sh" \
+      "🔴 te_macro_crosscheck.py LỖI (exit=${TE_RC}, ${TODAY}) — đối chiếu TradingEconomics tuần này KHÔNG chạy được. Log: ${LOG}
+Cuối log:
+${TE_TAIL}" \
+      trading_daily >> "$LOG" 2>&1 || true
+  else
+    echo "[--dry-run or notify_thread.sh missing] te crosscheck failed (exit=${TE_RC}) — skipping live notify" >> "$LOG"
+  fi
+fi
+
+echo "===== deposit+CCTG weekly refresh DONE (dispatch_rc=${DISPATCH_RC}, confirmed=${CONFIRMED:-no}, trend_rc=${TREND_RC}, sbv_rc=${SBV_RC}, te_rc=${TE_RC}, dry_run=${DRY_RUN}) =====" >> "$LOG"
+[ "$TREND_RC" -eq 0 ] && [ "$SBV_RC" -eq 0 ] && [ "$TE_RC" -eq 0 ] || exit 1
 exit 0
