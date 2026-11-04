@@ -17,3 +17,4 @@ Mã có cờ loại khỏi candidate (không PARK, có CAPIT); DD base = sổ s�
 ## Mốc
 nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; crontab báo cáo quý trước 31/12; measurement audit ~12-27. Wakeup MISS 04/11 = 0/6.
 
+- [2026-11-04T17:34:43Z] 05/11 00:55: DD DCM vòng 3 XONG: tâm 24.326 (A 24.192/B 24.459), PDF NĐT 20261105 (md5 08356b32…), sổ mức giá rev=2, KB pointer cập nhật, claim release. r5 CHƯA qua skeptic; CHƯA email — user báo 'gửi email' thì gửi đúng 1 lần (kiểm lại grep luật 18). Nhắc plan 05/11 BUY DCM 33.000 LAG_LO.

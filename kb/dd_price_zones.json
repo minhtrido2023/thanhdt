@@ -2167,6 +2167,63 @@
    "recorded_at": "2026-11-04T23:55:00+07:00",
    "supersedes": null,
    "correction_reason": null
+  },
+  {
+   "ticker": "DCM",
+   "dd_date": "2026-11-04",
+   "rev": 2,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 21643,
+   "center": 24326,
+   "zone_high": 26243,
+   "center_kind": "expected_weighted",
+   "center_desc": "trung bình trọng số 3 kịch bản (Chu kỳ 0,50 = 25.322; Chính sách 0,30 = 25.322; Cấu trúc 0,20 = 20.342); cơ cấu khí = trung bình hai cách đọc nhất quán A 24.192 / B 24.459; thuế 20% từ 2027; đã trừ quỹ KTPL; sau chiết khấu thanh khoản = trước",
+   "center_alt": 25322,
+   "center_alt_kind": "base_scenario",
+   "center_range": null,
+   "price_ref": 33000,
+   "price_date": "2026-11-04",
+   "verdict_label": "Giá 33.000 TRÊN vùng giá trị ở mọi lưới đối xứng (+35,7% so tâm 24.326; trên P90 27.708); giá chỉ bằng giá trị khi biên urê–khí dài hạn ≈297 USD/t (hoặc ≈243–260 nếu khí bổ sung PM3 theo kịch bản rẻ và Nam Du ≈30%). Luật sổ mức giá (giá < tâm −15%): giá CAO hơn tâm ⇒ KHÔNG đạt",
+   "skeptic_status": "Phản biện độc lập 3 vòng: v1 REFUTED (thuế 20% có nguồn BCTC, KTPL, nhãn có điều kiện, vay khí); v2 REFUTED hẹp (khí sai dấu, luật đổi nhận định, lưới lệch lên); v3 REFUTED có phạm vi (điều kiện đảo nhãn sai số, tâm chồng hai cách đọc, 2028 lời ảo, thiếu độ nhạy 2035+) — các điểm đã áp ở bản chốt (model_r5, khoá md5 00:24:45 ICT 05/11, tái lập đúng). Vòng sửa cuối CHƯA qua phản biện lần nữa",
+   "source_file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261105.md",
+   "evidence": [
+    {
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261105.md",
+     "quote": "| Vùng giá trị (lưới 270): P10 – P90 | 20.522 – 27.708 | P25 21.643 · P50 24.095 · P75 26.243 |"
+    },
+    {
+     "fields": [
+      "center"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261105.md",
+     "quote": "| **Kỳ vọng** | | | **24.326** |"
+    },
+    {
+     "fields": [
+      "center_alt"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261105.md",
+     "quote": "| Chu kỳ | 0,50 | 179 (TB 10 năm) | 25.322 |"
+    },
+    {
+     "fields": [
+      "price_ref"
+     ],
+     "file": "agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261105.md",
+     "quote": "| Giá đóng cửa 04/11/2026 | **33.000 đ** | DNSE, khớp ATC 14:45:02; sàn HOSE |"
+    }
+   ],
+   "notes": "Vùng = P25–P75 lưới đối xứng 270 (138/179/220): P10–P90 20.522–27.708; lưới 450 ô (98…260): P10–P90 18.062–29.991. Giá trị theo biên 98/138/179/220/260 = 18.356/21.298/24.314/27.330/30.272. Dải hai cách đọc cơ cấu khí 24.192–24.459. Giá khí: Nam Du–U Minh 10,39 USD/MMBtu cố định +2,25%/năm từ ≤Q4/2028 (dự thảo sửa đổi số 12 hợp đồng 3918; bản ký/NQ ĐHĐCĐ 23/9/2026 chưa thấy); độ nhạy 2035+ khí 10,39 phẳng = 16.719. r 13,5% neo huy động 12T 7,40% (±100bp β1: −776/+911). Số: agents/Taylor/research/dd_DCM_20261104/calc/model_r5_out.txt; nội bộ REPORT_r5.md.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-04",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "recorded_at": "2026-11-05T00:50:00+07:00",
+   "supersedes": "DCM@2026-11-04#1",
+   "correction_reason": "Hợp đồng khí 3918 (dự thảo sửa đổi số 12: Nam Du–U Minh giá cố định 10,39 USD/MMBtu +2,25%/năm, bao tiêu 90% đến 24/4/2032) thay đường giá khí; phản biện vòng 3 sửa điều kiện đảo nhãn, cách đọc cơ cấu khí nhất quán, năm 2028 và thêm độ nhạy 2035+; tâm 27.021 → 24.326."
   }
  ],
  "center_kinds": [
