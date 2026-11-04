@@ -1,21 +1,19 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Trạng thái cuối ngày 03/11 (sang 04/11)
-- Retro 03/11 ghi (retro-2026-11-03.md, Wags gaps đã sửa). Pattern A (DD chốt sớm trên giả định chưa khoá) tái diễn 3 ngày; đề xuất prevention: bước 0 "bảng giả định khoá + md5" trong skill due-diligence. Escalate (slug dd-multi-round-assumption-unlocked) nếu 04–05/11 vẫn ≥3 vòng/mã mà không có nguyên tắc user mới.
-- Plan T+1 04/11 user ĐÃ DUYỆT 23:28 ICT: SpaceX SELL TV1 2200 + PARK trim TPB 30/VPB 86; ZaloPay SELL TV1 1100 (@ref 19.600). SAU 15:00 04/11: kiểm fill TV1 còn bao nhiêu (UPCOM mỏng, có thể khớp thiếu). DRI đã bán hết/đang theo plan; TCH bỏ theo luật cờ.
-- DD hôm nay: NNC r6 + MVC r9 chốt (MVC tâm 16.482 / 15.105 sau CK; NNC 60.702 / 58.499). Email: working memory ghi gửi 22:48 ICT nhưng bus ghi emailed:false — CHƯA đối chiếu hộp thư; KHÔNG gửi lại khi chưa kiểm. DRI r5 (PDF 8e1b052d) + SCL r3 (fcc61a4a) đã đưa user, CHƯA email — chờ user báo.
-- Chờ user: gửi email DRI/SCL?; SZL dựng lại? (AUDIT.md); pnj-bctc-q3-review-trigger (A/B); state_TV1_*.json; DGC vòng 6; TV2 watchlist.
-- Theo dõi: logs/dcf_rstar_refresh.log lần đầu 04/11 01:23 ICT (rc=0 đường tắt); wakeup MISS 1/12 (cổng exit 8, escalate nếu ≥2 ngày >10%); anomaly-flags-stale giả CN/lễ chưa quan sát.
-- Luật mới 02–03/11 (kb/projects/dd-flag-rules-20261102.md): mã có cờ loại khỏi candidate (không áp PARK, áp CAPIT); DD mới base = sổ sách/NPV 0; r gắn lãi huy động; email DD chỉ khi user báo, 1 lần bản chốt.
-- Mốc: nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; crontab báo cáo quý chưa cài (trước 31/12); measurement audit ~12-27.
+# Working memory — Mike (cuối ngày 04/11 → 05/11)
 
-- [2026-11-04T15:54:58Z] 04/11 22:5x: DD DCM đang chạy. Bobby urê xong (sector_read_phan_dam_ure_20261104.md; chưa thêm vào market-state/index.md). BCTC Q3/26 tải từ Vietstock static2 (pvcfc.com.vn Cloudflare 403 — không vượt rào). Taylor job Taylor_20261104_155446 (opus, brief agents/Taylor/research/dd_DCM_20261104/BRIEF.txt). Kế: skeptic -> dd-investor-report PDF -> trình user, CHƯA email. Claim topic:dd-dcm-20261104.
-- [2026-11-04T16:28:06Z] 04/11 23:30: DD DCM r1 xong (Taylor_20261104_155446), skeptic REFUTED mức văn bản (S1 thuế 20% có nguồn, S2 KTPL, S3 biên phán đoán, S4 vay khí). Vòng 2 Taylor_20261104_162755 (sonnet) -> REPORT_r2.md; sau đó skeptic chạy lại -> dd-investor-report PDF -> trình user, CHƯA email. Lưu ý user: plan 05/11 có BUY DCM 33.000 (LAG_LO) trong khi DD r1 nhãn ĐẮT (tâm ~27-28k) — nêu khi trình. Còn nợ: thêm sector_read_phan_dam_ure vào market-state/index.md; release claim topic:dd-dcm-20261104.
-- [2026-11-04T16:43:46Z] 04/11 23:50: DCM r3 nội bộ xong (REPORT_r3.md, Mike áp sửa skeptic vòng 2; tâm 27.021; KHÔNG dispatch vòng 3). Taylor_20261104_164310 dựng báo cáo NĐT (investor_report/). Kế: đọc kiểm (grep luật 4/12/18, render PDF), ghi kb/dd_price_zones.json (quote từ md NĐT) + selfcheck, kb/projects/dcm-dd-20261104.md, trình user kèm PDF, nhắc plan 05/11 BUY DCM 33.000 LAG_LO, release claim topic:dd-dcm-20261104. Index market-state đã thêm.
-- [2026-11-04T16:50:33Z] 04/11 24:00: DD DCM XONG, chờ user. PDF NĐT ce268afb (investor_report/), sổ mức giá DCM@2026-11-04 ghi, KB kb/projects/dcm-dd-20261104.md. CHƯA email — user báo 'gửi email' thì gửi đúng 1 lần (kiểm lại grep luật 18). Claim đã release. Nhắc user: plan 05/11 BUY DCM 33.000 LAG_LO.
-- [2026-11-04T16:53:48Z] 04/11 23:5x: user duyệt 5 đề xuất macro_indicator TE; plan ở kb/projects/te-macro-integration-plan-20261104.md (Làn1: Winston A1+A2, Taylor B1 view PIT + C1 check chéo refi/CPI; Làn2 D1/D2/E1; Làn3 F1). CHƯA dispatch — chờ user trả lời 3 câu hỏi mở (chủ writer, duyệt view PIT, lag bảo thủ).
-- [2026-11-04T17:01:39Z] 05/11 00:10: user yêu cầu DD DCM VÒNG 3 (ghi đè quy tắc dừng): hợp đồng khí PM3-CAA/Malaysia đổi giá khí tương lai. Taylor_20261104_170125 (opus) -> REPORT_r4.md + calc/model_r4.py. Sau đó: skeptic lại -> dựng lại báo cáo NĐT (investor_report) + cập nhật dd_price_zones (rev=2 supersedes DCM@2026-11-04#1) + kb/projects/dcm-dd-20261104.md. Claim topic:dd-dcm-20261104 đặt lại. CHƯA email.
-- [2026-11-04T17:05:08Z] 05/11 00:1x: user trả lời: writer macro=bq_admin; KHÔNG duyệt view PIT (bỏ B1); lag chỉ cho backtest. Đã dispatch --bg --no-followup Winston_20261104_170458 (A1 registry+A2 freshness) + Taylor_20261104_170501 (C1 check chéo refi/CPI) — tự báo topic; Làn 2 (D1/D2/E1) chờ C1; D2/F1 cần lag helper local nếu làm.
-- [2026-11-04T17:16:25Z] 05/11 00:2x: Làn 1 macro TE XONG + merge (A1/A2 mike b66165196; C1 outer main bb0f8f4ba, arch-review vòng 2 áp đủ 4 sửa). Chờ user: (1) làm Làn 2 D1/D2/E1? (2) duyệt thêm TE làm tầng CPI trong cpi_vn.py (TE khớp NSO 13/13, fiinprox max 0,15pp). Thiếu 3 series daily chưa trong freshness: vn_interbank_3m, us_bond_2y, jp_usdjpy. Dọn worktree wt-macro-ind-1105, wt-te-crosscheck-20261105 sau.
-- [2026-11-04T17:22:56Z] 05/11 00:25: DD DCM vòng 3: r4 xong (tâm 23.644, hợp đồng khí: Nam Du 10,39 USD/MMBtu +2,25%/năm cố định, SĐBS 12 dự thảo), skeptic REFUTED có phạm vi. Taylor_20261104_172238 (sonnet, timeout 7200) làm r5 (2 cách đọc A/B, sửa 2028, độ nhạy 2035+) + dựng lại báo cáo NĐT 20261105 (archive bản cũ). Sau: Mike chạy lại model_r5 (md5 LOCK), kiểm grep luật 18, render PDF, dd_price_zones rev=2 supersedes DCM@2026-11-04#1 + selfcheck, cập nhật kb/projects/dcm-dd-20261104.md, trình user kèm PDF, release claim. CHƯA email.
+## Đang chờ user
+- DD DCM r5 XONG (tâm 24.326; dải A/B 24.192–24.459; giá 33.000 cao hơn tâm ~35,7%, nhãn ĐẮT). Báo cáo NĐT mới: agents/Taylor/research/dd_DCM_20261104/investor_report/DCM_DD_investor_report_20261105.pdf. CHƯA email (user báo mới gửi, 1 lần). Plan 05/11 có BUY DCM 33.000 LAG_LO (SpaceX 1000cp, ZaloPay 700cp) — nhắc user.
+- Mike còn nợ cho DCM: chạy lại model_r5 (md5 LOCK), grep luật 18, render PDF, dd_price_zones rev=2 supersedes DCM@2026-11-04#1 + selfcheck, cập nhật kb/projects/dcm-dd-20261104.md, release claim topic:dd-dcm-20261104.
+- Escalation mở: retro-pattern-recurring-dd-multi-round-assumption-unlocked (A khoá giả định / B = A + dd_price_zones từ chối khi md5 lệch / C giữ; khuyến nghị B). KHÔNG mở question trùng.
+- Macro TE: Làn 1 xong+merge (A1/A2 b66165196; C1 bb0f8f4ba). Chờ user: làm Làn 2 (D1/D2/E1)? duyệt TE làm tầng CPI trong cpi_vn.py? Writer macro=bq_admin; bỏ B1 view PIT. Thiếu freshness: vn_interbank_3m, us_bond_2y, jp_usdjpy. Dọn worktree wt-macro-ind-1105, wt-te-crosscheck-20261105.
+- Khác chờ user: email DRI r5/SCL r3 (chưa gửi); NNC r6/MVC r9 email chưa đối chiếu hộp thư (đừng gửi lại); pnj-bctc-q3-review-trigger; drift CANNOT_CHECK ZaloPay/SpaceX (câu hỏi 29/10 A/B); SZL; DGC vòng 6; TV2.
+- Sau 15:00 05/11: kiểm fill TV1 (plan 04/11) còn bao nhiêu.
+
+## Luật hiện hành (kb/projects/dd-flag-rules-20261102.md)
+Mã có cờ loại khỏi candidate (không PARK, có CAPIT); DD base = sổ sách/NPV 0; r gắn lãi huy động; email DD chỉ khi user báo.
+
+## Mốc
+nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; crontab báo cáo quý trước 31/12; measurement audit ~12-27. Wakeup MISS 04/11 = 0/6.
+
