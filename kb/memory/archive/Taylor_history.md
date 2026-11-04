@@ -1944,3 +1944,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T16:10:08Z] ĐANG DỞ: DD DRI r5 job Taylor_20261103_160959 — research/dd_DRI_20261027/r5/ sửa SKEPTIC_R4 | NEXT: đọc SKEPTIC_R4 + r4/calc
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T16:13:27Z] [dd-SCL r3 03/11] XONG job Taylor_20261103_161002: tam sau quyen 21.383 (CK 5 ty), cum 22.843, gia 30.000/TERP 27.659 TREN vung; CHUA email; chua commit
