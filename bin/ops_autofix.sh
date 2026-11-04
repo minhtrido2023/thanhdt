@@ -143,7 +143,7 @@ echo "$NOW" > "$GLOBAL_STAMP"
 date -u +%Y-%m-%dT%H:%M:%SZ > "$STARTED_ISO_FILE"
 rm -f "$CONFIRM_FILE"  # dispatch mới — chưa xác nhận, lần gọi sau phải tự tra lại bus
 
-"$ROOT/bin/notify_thread.sh" "🔧 [ops-autofix] Phát hiện vấn đề '$LABEL' — đã tự động cử agent chẩn đoán + sửa (Winston/fable). Sẽ báo kết quả vào đây khi xong." "$TRADING_DAILY_THREAD" 2>/dev/null || true
+"$ROOT/bin/notify_thread.sh" "🔧 [ops-autofix] Phát hiện vấn đề '$LABEL' — đã tự động cử agent chẩn đoán + sửa (Winston/opus). Sẽ báo kết quả vào đây khi xong." "$TRADING_DAILY_THREAD" 2>/dev/null || true
 
 # Known-issue lookup (cost-opt #2, 2026-07-30): grep kb/incidents/ by keyword BEFORE
 # dispatch, inline the top matches into the prompt — saves the fixer its own search round-trips
