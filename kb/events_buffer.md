@@ -622,3 +622,7 @@
 - [2026-11-04T12:11:03Z] DollarBill/heartbeat — DollarBill_20261104_121002: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261104_121002", "source": "watcher"}
 - [2026-11-04T12:11:05Z] DollarBill/heartbeat — DollarBill_20261104_121004: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261104_121004", "source": "watcher"}
 - [2026-11-04T12:11:40Z] DollarBill/decision — plan-2026-11-05-SpaceX: {"orders": ["BUY DCM 1000cp LO 33000 (LAG_LO)", "SELL TV1 1800cp LO 19600"], "egg_transfer_tr": 6.6, "skipped": "PHP/PVT/TV2 FLAG_NO_ACK; TCH FLOOR_FAIL", "dt5g": "NEUTRAL"}
+
+## Consolidation 2026-11-04T12:12:09Z
+- [2026-11-04T12:12:00Z] DollarBill/decision — plan-2026-11-05-ZaloPay: {"plan": "plan_ZaloPay_2026-11-05.json", "orders": "SELL TV1 700 @19.6k; BUY DCM 700 LO<=33k (LAG_LO)", "egg_transfer_tr": 0, "blocked": "PHP/PVT/TV2 FLAG_NO_ACK; TCH FLOOR_FAIL", "status": "awaiting user approval"}
+- [2026-11-04T12:12:03Z] DollarBill/heartbeat — DollarBill_20261104_121002: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261104_121002", "source": "watcher"}
