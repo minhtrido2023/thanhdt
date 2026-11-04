@@ -29,3 +29,4 @@
 - [2026-11-04T18:22:08Z] ĐANG DỞ: D2 liquidity-spread→deposit lead job Taylor_20261104_182158 — agents/Taylor/research/liquidity_spread_deposit_lead_20261105/ | NEXT: PREREG khoá md5 rồi chạy
 - [2026-11-04T18:24:03Z] ĐANG DỞ: E1 macro_snapshot_asof job Taylor_20261104_182156 — worktree wt-macro-snapshot-asof-20261105 | NEXT: selfcheck 3 asof + DD_SKILL_PROPOSAL.md + bus finding
 - [2026-11-04T18:25:39Z] [D1+freshness 05/11] XONG job Taylor_20261104_182153: 2 nhánh feat/liq-spread-d1-20261105 (outer 246e38553, mike d83ae9762) CHỜ arch-review rồi merge; D2 (nghiên cứu spread dẫn lãi huy động) chưa làm
+- [2026-11-04T18:27:22Z] [D2 liq-spread 05/11] XONG job Taylor_20261104_182158: ỦNG HỘ biên N=3 (LOO→không KL), nhánh research/liquidity-spread-deposit-lead-20261105 CHƯA merge, chờ quant-skeptic (Mike)
