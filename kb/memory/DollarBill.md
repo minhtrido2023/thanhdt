@@ -1,9 +1,6 @@
 # Working memory — DollarBill
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của DollarBill.
 
-- [2026-10-29T12:06:03Z] [2026-10-29 19:xx ICT] Plan SpaceX 10-30 XONG HOLD ALL 0 lenh; SCL bi ban 800cp ngoai plan (question len bus) -> cho user tra loi; active_nav chua refresh (compute_active_nav refuse); job DollarBill_20261029_120349
-- [2026-10-29T16:55:44Z] [2026-10-29 23:5x ICT] Plan SpaceX 10-30 DUNG LAI XONG: SELL SCL 300cp chieu 30/10 (user thoai SCL), 0 mua; cho user duyet truoc 08:45; job DollarBill_20261029_165344
-- [2026-10-29T16:55:52Z] [2026-10-29 23:5x ICT] Plan ZaloPay 10-30 DỰNG LẠI XONG: SELL SCL 200cp LO 29.500 chiều T+2; chờ duyệt (job DollarBill_20261029_165347)
 - [2026-10-30T12:07:14Z] [2026-10-30 19:xx ICT] Plan SpaceX 11-02 XONG HOLD ALL 0 lenh (MCH ALREADY_HELD); cho user duyet truoc 08:45 02/11; job DollarBill_20261030_120558
 - [2026-10-30T12:07:35Z] [2026-10-30 19:xx ICT] Plan ZaloPay 11-02 XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 02/11 (job DollarBill_20261030_120556)
 - [2026-11-01T12:05:33Z] [2026-11-01 19:xx ICT] Plan ZaloPay 11-02 (vong CN) XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 02/11 (job DollarBill_20261101_120459)

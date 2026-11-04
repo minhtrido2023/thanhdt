@@ -340,3 +340,8 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-10-29T12:04:58Z] [2026-10-29 19:xx ICT] Plan ZaloPay 10-30 XONG HOLD ALL; SCL bi ban 500cp ngoai plan (chua ro nguon) -> can doi soat; cho duyet truoc 08:45 30/10 (job DollarBill_20261029_120347)
+
+## Archived 2026-11-04 (keep=6 days=5 require_done=True)
+- [2026-10-29T12:06:03Z] [2026-10-29 19:xx ICT] Plan SpaceX 10-30 XONG HOLD ALL 0 lenh; SCL bi ban 800cp ngoai plan (question len bus) -> cho user tra loi; active_nav chua refresh (compute_active_nav refuse); job DollarBill_20261029_120349
+- [2026-10-29T16:55:44Z] [2026-10-29 23:5x ICT] Plan SpaceX 10-30 DUNG LAI XONG: SELL SCL 300cp chieu 30/10 (user thoai SCL), 0 mua; cho user duyet truoc 08:45; job DollarBill_20261029_165344
+- [2026-10-29T16:55:52Z] [2026-10-29 23:5x ICT] Plan ZaloPay 10-30 DỰNG LẠI XONG: SELL SCL 200cp LO 29.500 chiều T+2; chờ duyệt (job DollarBill_20261029_165347)
