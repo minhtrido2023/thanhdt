@@ -319,8 +319,11 @@ def _load_icb_map():
                 f"SELECT ticker, MAX(ICB_Code) icb FROM read_parquet('{WORKDIR}/data/bq_cache/ticker_1m.parquet') "
                 "GROUP BY ticker").df()
             _ICB_CACHE = dict(zip(df.ticker, df.icb))
-        except Exception:
-            _ICB_CACHE = {}
+        except Exception as e:
+            # KHÔNG cache kết quả rỗng: lỗi đọc tạm thời sẽ làm is_financial()=False cho MỌI mã
+            # (ngân hàng/BH/CK bị định giá FCFE sai) tới hết process. Trả rỗng cho lần gọi này, retry lần sau.
+            print(f"⚠️ dcf_valuation._load_icb_map đọc ticker_1m lỗi (không cache, sẽ thử lại): {e}", file=sys.stderr)
+            return {}
     return _ICB_CACHE
 
 
@@ -335,8 +338,10 @@ def _load_routes():
                 f"SELECT ticker, time, route FROM read_parquet('{WORKDIR}/data/bq_cache/fa_ratings_8l.parquet')").df()
             df["time"] = pd.to_datetime(df["time"])
             _ROUTE_CACHE = df.sort_values(["ticker", "time"]).reset_index(drop=True)
-        except Exception:
-            _ROUTE_CACHE = pd.DataFrame(columns=["ticker", "time", "route"])
+        except Exception as e:
+            # xem _load_icb_map: không cache rỗng khi đọc lỗi.
+            print(f"⚠️ dcf_valuation._load_routes đọc fa_ratings_8l lỗi (không cache, sẽ thử lại): {e}", file=sys.stderr)
+            return pd.DataFrame(columns=["ticker", "time", "route"])
     return _ROUTE_CACHE
 
 
