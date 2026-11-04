@@ -1926,3 +1926,6 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T15:29:49Z] ĐANG DỞ: DD SCL r2 job Taylor_20261103_152941 — research/dd_SCL_20261029/r2/ MÙ GIÁ base=sổ sách | NEXT: đọc audit parts/SCL.md + REPORT cũ
+
+## Archived 2026-11-04 (keep=12 days=0 require_done=False)
+- [2026-11-03T15:34:52Z] ĐANG DỞ DD DRI r4 job Taylor_20261103_152938: calc ở dd_DRI_20261027/r4/calc, engine = exec dri_val_supply_adj_r4_20261027/model.py; base = D (không thanh lý/không tái canh)+XDCB 72,71 tỷ; legal-vn: tái canh KHÔNG phải nghĩa vụ rõ | NEXT: khoá md5, thanh khoản, báo cáo

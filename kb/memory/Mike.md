@@ -10,3 +10,4 @@
 - Luật mới 02–03/11 (kb/projects/dd-flag-rules-20261102.md): mã có cờ loại khỏi candidate (không áp PARK, áp CAPIT); DD mới base = sổ sách/NPV 0; r gắn lãi huy động; email DD chỉ khi user báo, 1 lần bản chốt.
 - Mốc: nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; crontab báo cáo quý chưa cài (trước 31/12); measurement audit ~12-27.
 
+- [2026-11-04T15:54:58Z] 04/11 22:5x: DD DCM đang chạy. Bobby urê xong (sector_read_phan_dam_ure_20261104.md; chưa thêm vào market-state/index.md). BCTC Q3/26 tải từ Vietstock static2 (pvcfc.com.vn Cloudflare 403 — không vượt rào). Taylor job Taylor_20261104_155446 (opus, brief agents/Taylor/research/dd_DCM_20261104/BRIEF.txt). Kế: skeptic -> dd-investor-report PDF -> trình user, CHƯA email. Claim topic:dd-dcm-20261104.
