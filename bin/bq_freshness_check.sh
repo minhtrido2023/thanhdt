@@ -711,6 +711,17 @@ if printf '%s\n' "$_pnj_out" | grep -q '^ALERT pnj-q3-watch:'; then
   WARNED=$((WARNED + 1))
 fi
 
+# --- macro_indicator daily-series freshness (kế hoạch TE-macro A2, user duyệt 2026-11-05; writer = bq_admin,
+# ngoài repo, ~15:00 UTC). WARN-only, fail-closed: series hằng ngày (us_sp500, us_bond_10y, us_dxy,
+# vn_usdvnd, vn_bond_10y, cn_usdcny) có observation_date cách hôm nay >3 ngày lịch, thiếu series, hoặc
+# truy vấn lỗi ⇒ WARN (rc!=0 hay output không có dòng OK cũng là WARN — không bao giờ im lặng).
+_mi_out="$(cd "$ROOT" && timeout 120 python3 bin/macro_indicator_freshness.py 2>&1)"; _mi_rc=$?
+echo "$_mi_out"
+if [ "$_mi_rc" -ne 0 ] || ! printf '%s\n' "$_mi_out" | grep -q '^OK   macro_indicator'; then
+  "$ROOT/bin/notify_thread.sh" "🟡 MACRO_INDICATOR WARN ($TODAY $NOW_ICT): rc=$_mi_rc — $(printf '%s' "$_mi_out" | head -c 700). Không chặn pipeline; writer = bq_admin (TradingEconomics scrape ~15:00 UTC)." "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
+  WARNED=$((WARNED + 1))
+fi
+
 [ "$WARNED" -gt 0 ] && echo "NOTE: $WARNED WARN non-blocking (đã post Discord Trading Daily) — pipeline vẫn chạy"
 
 # --- [pipeline-0] nav_exdate_forecast — cảnh báo TRƯỚC corp-action ≤1 PHIÊN trên mã đang giữ
