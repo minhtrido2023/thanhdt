@@ -48,6 +48,19 @@ DATA PROVENANCE (tier order, best first: T1 > T1.5 > T3 > T2):
     blocked leverage: 2012-07 6.88 -> 5.35, 2012-08 6.87 -> 5.04, 2013-10 6.23 -> 5.92, 2013-11
     6.11 -> 5.78. The gate is evaluated live-only, so those are informational, not a re-run.
 
+  TIER 1.4 — REAL, TradingEconomics `vn_cpi_yoy` (1996-01 .. latest, monthly) — ADDED 2026-11-05, job
+    Taylor_20261104_182151 (user duyệt riêng). NOT read from BigQuery here: te_macro_crosscheck.py
+    (weekly, refresh_deposit_cctg_weekly.sh) appends to data/te_cpi_yoy_snapshot.csv (append-only);
+    this module reads that CSV. Evidence (C1): TE == NSO 13/13 months (max diff 0.00pp), vs fiinprox
+    224 months max 0.15pp. RANK: NSO > fiinprox >= TE > Tier 3 > Tier 2. TE therefore only SERVES
+    months that neither NSO nor fiinprox covers (2026-09+, i.e. past the frozen fiinprox file) and
+    pre-2008 (replaces Tier 3 for 2007). Where TE and fiinprox both exist and differ by >TE_FIIN_EPS
+    (0.3pp) or TE and NSO by >TE_NSO_EPS (0.05pp): one-time WARNING and the higher tier is used.
+    FAIL-CLOSED: snapshot missing / unreadable / bad schema / newest snapshot_at older than
+    TE_STALE_DAYS (14d, weekly cron + slack) => TE is ignored entirely and the module behaves EXACTLY as
+    before (Tier 2 forward-fill past fiinprox), warning once with the reason. The active tier is
+    exposed via `is_te` in cpi_monthly_df() and printed by `python3 cpi_vn.py`.
+
   TIER 2 — PROXY / ANCHOR (2011-01 .. 2025-05, pre-NSO-window): best-estimate MONTHLY
     YoY anchors from well-documented public GSO / IMF / news prints for the pivotal
     turning points, linearly interpolated between anchors (same treatment
@@ -204,6 +217,56 @@ def fiinpro_cpi_series():
     return _FIINPRO_CPI
 
 
+# ---------------- TIER 1.4 — TradingEconomics snapshot (append-only CSV written by te_macro_crosscheck) ----------------
+TE_CPI_CSV = os.environ.get(
+    "TE_CPI_CSV", os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "te_cpi_yoy_snapshot.csv"))
+TE_STALE_DAYS = 14          # cron weekly (Mon 08:05 ICT) + 1 tuần dung sai
+TE_FIIN_EPS = 0.30          # = CPI_FIIN_EPS của te_macro_crosscheck.py
+TE_NSO_EPS = 0.05           # = CPI_NSO_EPS
+_TE_CPI = None
+_TE_STATE = "chưa nạp"      # chuỗi mô tả tầng TE đang dùng / lý do bị tắt (để in ra)
+
+
+def _utcnow():
+    fake = os.environ.get("TE_CPI_FAKE_NOW")          # chỉ cho selfcheck
+    return pd.Timestamp(fake, tz="UTC") if fake else pd.Timestamp.now(tz="UTC")
+
+
+def te_cpi_series():
+    """Tier-1.4 TE headline CPI YoY (%) keyed by month-start Timestamp, latest snapshot row per month.
+    Empty Series (=> exactly the pre-TE behaviour) when file is missing/bad/stale -- never raises."""
+    global _TE_CPI, _TE_STATE
+    if _TE_CPI is not None:
+        return _TE_CPI
+    _TE_CPI = pd.Series(dtype=float)
+    try:
+        f = pd.read_csv(TE_CPI_CSV)
+        need = {"month", "te_cpi_yoy_pct", "snapshot_at"}
+        if not need <= set(f.columns):
+            raise ValueError(f"thiếu cột {sorted(need - set(f.columns))}")
+        f["snapshot_at"] = pd.to_datetime(f["snapshot_at"], utc=True)
+        f["v"] = pd.to_numeric(f["te_cpi_yoy_pct"], errors="coerce")
+        f = f.dropna(subset=["v"]).sort_values("snapshot_at", kind="stable")
+        if f.empty:
+            raise ValueError("snapshot rỗng")
+        age = _utcnow() - f["snapshot_at"].max()
+        if age > pd.Timedelta(days=TE_STALE_DAYS):
+            raise ValueError(f"snapshot cũ {age.days} ngày (> {TE_STALE_DAYS}) -- te_macro_crosscheck không còn chạy?")
+        last = f.groupby("month")["v"].last()                      # bản mới nhất mỗi tháng (revision ghi đè)
+        _TE_CPI = pd.Series(last.values, index=pd.to_datetime(last.index.astype(str) + "-01")).sort_index()
+        _TE_STATE = f"ON ({len(_TE_CPI)} tháng, {_TE_CPI.index.min():%Y-%m}..{_TE_CPI.index.max():%Y-%m}, snapshot mới nhất cách {age.days}d)"
+    except Exception as e:
+        _TE_STATE = f"OFF ({e}) -> hành vi CŨ"
+        _warn_once(f"Tier 1.4 TE UNAVAILABLE ({TE_CPI_CSV}: {e}) -> hành vi cũ (fiinprox/Tier 2/Tier 3); "
+                   f"các tháng sau fiinprox là forward-fill, KHÔNG phải số thật.")
+    return _TE_CPI
+
+
+def te_state():
+    te_cpi_series()
+    return _TE_STATE
+
+
 def cpi_coverage(end):
     """FRESHNESS CHECK (coding_guidelines §14) for the producer->consumer pair
     `fiinprox_cpi_monthly_20260914.csv` (frozen) -> this module (read live).
@@ -215,18 +278,32 @@ def cpi_coverage(end):
     real_last = max(pd.to_datetime(list(NSO_CPI_YOY_REAL))) if NSO_CPI_YOY_REAL else pd.NaT
     fp = fiinpro_cpi_series()
     fp_last = fp.index.max() if len(fp) else pd.NaT
-    covered = max([d for d in (real_last, fp_last) if pd.notna(d)], default=pd.NaT)
+    te = te_cpi_series()
+    te_last = te.index.max() if len(te) else pd.NaT
+    covered = max([d for d in (real_last, fp_last, te_last) if pd.notna(d)], default=pd.NaT)
     if pd.isna(covered) or end_ts <= covered:
         return real_last, fp_last, []
     gap = list(pd.date_range(covered + pd.offsets.MonthBegin(1), end_ts, freq="MS"))
     _m = lambda d: "(none)" if pd.isna(d) else f"{d:%Y-%m}"     # NaT = that tier has no month at all
     _warn_once(
         f"CPI COVERAGE GAP: {len(gap)} month(s) {gap[0]:%Y-%m}..{gap[-1]:%Y-%m} have NO real source. "
-        f"Tier 1 (live NSO) ends {_m(real_last)}; Tier 1.5 (FiinPro snapshot {FIINPRO_CPI_VINTAGE}, "
+        f"Tier 1 (live NSO) ends {_m(real_last)}; Tier 1.4 (TE snapshot) ends {_m(te_last)}; Tier 1.5 (FiinPro snapshot {FIINPRO_CPI_VINTAGE}, "
         f"trial ended 2026-09-28 -> FROZEN) ends {_m(fp_last)}. Those months are Tier 2's "
         f"forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO "
         f"monthly release; refreshing the FiinPro file is impossible.")
     return real_last, fp_last, gap
+
+
+def _te_divergence_warn(te, fp, real):
+    """TE vs tầng cao hơn: lệch quá ngưỡng => cảnh báo MỘT LẦN; giá trị phục vụ vẫn là tầng cao hơn."""
+    for name, ref, eps in (("NSO", real, TE_NSO_EPS), ("fiinprox", fp, TE_FIIN_EPS)):
+        if not len(te) or not len(ref):
+            continue
+        d = (te.reindex(ref.index) - ref).dropna()
+        bad = d[d.abs() > eps]
+        if len(bad):
+            _warn_once(f"TE vs {name} LỆCH > {eps}pp ở {len(bad)} tháng (max {bad.abs().max():.2f}pp, "
+                       f"vd {bad.index[0]:%Y-%m}) -> dùng {name}, KHÔNG dùng TE ở các tháng đó.")
 
 
 def cpi_monthly_df(end="2026-06-01"):
@@ -248,6 +325,12 @@ def cpi_monthly_df(end="2026-06-01"):
     # Overlay Tier 1.5 (FiinPro-X real prints, 2008-01..2026-08) above Tier 2/Tier 3. With the file
     # present this leaves Tier 3 serving 2007 only; with the file absent Tier 3 still covers
     # 2007-2010 and Tier 2 still covers 2011+ -- i.e. exactly the pre-wire behaviour.
+    # Tier 1.4 TE overlays Tier 2/3 FIRST (lowest of the real tiers); fiinprox and NSO then overwrite it, so
+    # TE only survives on months neither covers (>fiinprox end, <2008).
+    te = te_cpi_series()
+    if len(te):
+        out["cpi_yoy"] = out["time"].map(te).fillna(out["cpi_yoy"])
+    out["is_te"] = out["time"].isin(te.index)
     fp = fiinpro_cpi_series()
     out["cpi_yoy"] = out["time"].map(fp).fillna(out["cpi_yoy"]) if len(fp) else out["cpi_yoy"]
     out["is_fiinpro"] = out["time"].isin(fp.index)
@@ -256,10 +339,12 @@ def cpi_monthly_df(end="2026-06-01"):
     out["cpi_yoy"] = out["time"].map(real).fillna(out["cpi_yoy"])
     out["is_real_nso"] = out["time"].isin(real.index)
     out["is_fiinpro"] = out["is_fiinpro"] & ~out["is_real_nso"]
+    out["is_te"] = out["is_te"] & ~out["is_fiinpro"] & ~out["is_real_nso"]     # "TE là cái bạn đang đọc"
+    _te_divergence_warn(te, fp, real)
     # `is_backfill_2007_2010` must mean "Tier 3 is what you are actually reading", so it is computed
     # AFTER the higher tiers have overridden -- otherwise 2008-2010 would keep claiming Tier 3.
     out["is_backfill_2007_2010"] = (out["time"].isin(backfill.index)
-                                    & ~out["is_fiinpro"] & ~out["is_real_nso"])
+                                    & ~out["is_te"] & ~out["is_fiinpro"] & ~out["is_real_nso"])
     cpi_coverage(end)          # §14 freshness gate: warns once if `end` reaches past every real tier
     # 3-month change of YoY = "inflation accelerating?" (direction signal)
     out["cpi_yoy_chg3"] = out["cpi_yoy"].diff(3)
@@ -289,11 +374,12 @@ def merge_cpi(df, time_col="time", end="2026-06-01", pit=True):
 
 
 if __name__ == "__main__":
-    c = cpi_monthly_df(end="2026-08-01")
+    c = cpi_monthly_df(end="2026-10-01")
+    print("Tier 1.4 TE:", te_state())
     ann = c.groupby(c.time.dt.year).cpi_yoy.mean().round(2)
     src = c.assign(tier=lambda d: pd.Series(
-        ["T1 NSO" if a else "T1.5 FiinPro" if b else "T3 backfill" if cc else "T2 proxy"
-         for a, b, cc in zip(d.is_real_nso, d.is_fiinpro, d.is_backfill_2007_2010)], index=d.index))
+        ["T1 NSO" if a else "T1.5 FiinPro" if b else "T1.4 TE" if t else "T3 backfill" if cc else "T2 proxy"
+         for a, b, t, cc in zip(d.is_real_nso, d.is_fiinpro, d.is_te, d.is_backfill_2007_2010)], index=d.index))
     print("VN CPI YoY (annual mean of monthly, %) and the tier each year is served from:")
     for y, v in ann.items():
         tiers = "+".join(sorted(src[src.time.dt.year == y].tier.unique()))

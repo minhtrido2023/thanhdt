@@ -47,6 +47,11 @@ def ok(cond, label, detail=""):
     else: FAILS.append(label + (f" -- {detail}" if detail else ""))
 
 
+# Tier 1.4 (TE, 2026-11-05) bật ở cpi_vn.py mới sẽ đổi 2007 + 2026-09/10 -- ngoài phạm vi selfcheck Tier 1.5 này
+# (phủ bởi cpi_vn_te_selfcheck.py). Ghim TE TẮT để A/B vẫn đo đúng cái nó đo.
+os.environ["TE_CPI_CSV"] = "/nonexistent/te_off_for_tier15_selfcheck.csv"
+
+
 def load(path, name):
     spec = importlib.util.spec_from_file_location(name, path)
     m = importlib.util.module_from_spec(spec); sys.modules[name] = m
