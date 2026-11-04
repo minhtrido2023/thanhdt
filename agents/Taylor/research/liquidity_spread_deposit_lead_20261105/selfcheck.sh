@@ -26,6 +26,18 @@ D2_TE_CSV="$T/te.csv" $PY analysis.py --asof 2026-11-05 >/dev/null 2>"$T/e2"; rc
 head -50 data/fiinprox_deposit_1m_big4_monthly_2019_2026.csv >"$T/dep.csv"
 D2_DEP1M_CSV="$T/dep.csv" $PY analysis.py --asof 2026-11-05 >/dev/null 2>"$T/e3"; rc=$?
 [ $rc -eq 2 ] && grep -q "CSV 1T" "$T/e3" && ok "truncated dep -> rc2" || bad "dep rc=$rc"
+# --- vòng 2: analysis_r2.py (post-hoc) ---
+env -u TZ $PY analysis_r2.py --asof 2026-11-05 >"$T/r2a.txt" 2>&1 && cp results_r2.json "$T/r2a.json" || bad "r2 run env -u TZ"
+TZ=America/New_York $PY analysis_r2.py --asof 2026-11-05 >"$T/r2b.txt" 2>&1 && cp results_r2.json "$T/r2b.json" || bad "r2 run TZ=NY"
+cmp -s "$T/r2a.txt" "$T/r2b.txt" && cmp -s "$T/r2a.json" "$T/r2b.json" && ok "r2 TZ byte-identical" || bad "r2 TZ output differs"
+$PY - "$T/r2a.json" <<'PY' && ok "r2 asserts (scan h1-9 x3 ep, level n_days, regimes N=2)" || bad "r2 asserts"
+import json,sys; R=json.load(open(sys.argv[1]))
+assert len(R["scan_h1_9"])==3 and all(R["scan_n_eval"][f"h{h}"]==3 for h in range(1,10)), R["scan_n_eval"]
+assert all(R["scan_median"][f"h{h}"]==0.0 for h in range(1,5)) and R["scan_median"]["h6"]==0.5, R["scan_median"]
+assert R["level_conditional"]["2.0"]["d6"]["median"]==0.0 and R["level_conditional"]["2.0"]["d6"]["n_days"]==170
+assert R["regimes"]["n_regimes_eval"]==2 and R["regimes"]["verdict_rule_applied"]=="KHÔNG KẾT LUẬN"
+PY
 # restore canonical results
 $PY analysis.py --asof 2026-11-05 >run_main.txt 2>&1
+$PY analysis_r2.py --asof 2026-11-05 >run_r2.txt 2>&1
 rm -rf "$T"; echo "fails=$fails"; exit $fails
