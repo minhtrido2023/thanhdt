@@ -12,3 +12,4 @@
 - [2026-11-04T18:29:40Z] [2026-11-05 01:3x ICT] Plan 05/11 DỰNG LẠI cả 2 acct: bỏ DCM (user), chỉ SELL TV1 (SpaceX 1800/ZaloPay 700); 0 thay thế; chờ duyệt lại trước 08:45 (job DollarBill_20261104_182729)
 - [2026-11-05T12:11:14Z] [2026-11-05 19:xx ICT] Plan SpaceX 11-06 XONG: SELL TV1 400cp LO 20.600, 0 mua; cho duyet truoc 08:45 06/11; cron 21:00 gui report (job DollarBill_20261105_120929)
 - [2026-11-05T12:11:29Z] [2026-11-05 19:xx ICT] Plan ZaloPay 11-06 XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 06/11 (job DollarBill_20261105_120927)
+- [2026-11-05T15:21:57Z] [2026-11-05 22:4x ICT] Plan 06/11 rev2 ca 2 acct: chen BUY DISC FPT/NNC (SpaceX 800/900, ZaloPay 500/600, tran RuleA 54.487/48.719, cash_only); gate DD+funding OK; cho user duyet truoc 08:45 06/11; Mike gui report. Sau fill: theo doi gia von/so phien/±10% -> Livermore (job DollarBill_20261105_151839)

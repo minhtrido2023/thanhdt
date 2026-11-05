@@ -161,3 +161,9 @@
 
 ## Archived 2026-11-02 (keep=12 days=0 require_done=False)
 - [2026-11-01T19:09:58Z] 02/11 02:10 nhánh feat/dcf-bctc-season-20261102 (c4b721b06; registry mike 25bc7383b) arch-review vòng 2 APPROVED. CHỜ USER: duyệt merge + cài cron '12 1 * * *' --season (gỡ '10 1 11 * *'); merge code TRƯỚC khi cài cron (gate hardcode path canonical). Và quyết nối STALE vào đường plan echo (đề xuất: KHÔNG). Mặc định domestic_v2 giữ.
+
+## Archived 2026-11-05 (keep=12 days=0 require_done=False)
+- [2026-11-04T17:34:43Z] 05/11 00:55: DD DCM vòng 3 XONG: tâm 24.326 (A 24.192/B 24.459), PDF NĐT 20261105 (md5 08356b32…), sổ mức giá rev=2, KB pointer cập nhật, claim release. r5 CHƯA qua skeptic; CHƯA email — user báo 'gửi email' thì gửi đúng 1 lần (kiểm lại grep luật 18). Nhắc plan 05/11 BUY DCM 33.000 LAG_LO.
+
+## Archived 2026-11-05 (keep=12 days=0 require_done=False)
+- [2026-11-04T18:27:43Z] 05/11 01:30: user rút BUY DCM khỏi plan 05/11; đã dispatch DollarBill_20261104_182729 (opus/medium) làm lại plan 2 account (flag-exception: BAL không có cơ sở loại mã có cờ + còn vùng mua thì được mua, phải ghi notes). Chờ kết quả → user duyệt lại plan trước 09:00.
