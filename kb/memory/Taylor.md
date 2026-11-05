@@ -59,3 +59,4 @@
 - [2026-11-05T09:43:22Z] ĐANG DỞ job Taylor_20261105_093502 GĐ3 clearing: worktree /home/trido/thanhdt/WorkingClaude/wt-clearing-g3-20261105 (nhánh session/clearing-g3-20261105); xong config/book_clearing.json + bin/book_clearing.py | NEXT apply_book_transfers.py, clear_books --apply, merge revert, preflight, send_plan_report, run_bot, selfcheck
 - [2026-11-05T09:56:44Z] ĐANG DỞ job Taylor_20261105_093502 GĐ3: code+selfcheck book_clearing_g3_selfcheck PASS ở worktree wt-clearing-g3-20261105 | NEXT §23 quét rộng 2 TZ, byte-compare park_holdings, commit, bus finding
 - [2026-11-05T10:28:27Z] [clearing GĐ3 05/11] XONG build job Taylor_20261105_093502 commit 9acbe593e nhánh session/clearing-g3-20261105 (wt-clearing-g3-20261105); CHỜ Mike arch-review + quant-skeptic; cờ apply_to_plan=false, cron chưa cài
+- [2026-11-05T12:00:49Z] [clearing GĐ3 r2 05/11] XONG commit db490ba1d; CHỜ Mike re-review; manifest md chưa tái sinh (nợ master)
