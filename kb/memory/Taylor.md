@@ -39,3 +39,5 @@
 - [2026-11-05T02:00:29Z] ĐANG DỞ: DD redo r2 SIP SCL TV1 TV2 job Taylor_20261105_020018 | NEXT: đọc STANDARD_r2, làm SIP→SCL→TV1→TV2
 - [2026-11-05T02:00:31Z] ĐANG DỞ: DD redo vòng2 NT2 SAS SZL TCH job Taylor_20261105_020021 → dd_redo_20261105/<MÃ>/REPORT_r2.md | NEXT: đọc STANDARD_r2, làm lần lượt
 - [2026-11-05T02:00:34Z] ĐANG DỞ: DD redo VÒNG 2 NNC DRI MVC job Taylor_20261105_020023 | NEXT: đọc STANDARD_r2 + E_CORRECTIONS, NNC→DRI→MVC
+- [2026-11-05T02:03:44Z] ĐANG DỞ job Taylor_20261105_020018 (r2 SIP SCL TV1 TV2): lib _common_g2r2/ddr2.py xong | NEXT model_sip_r2.py → SCL → TV1 → TV2
+- [2026-11-05T02:05:51Z] ĐANG DỞ job Taylor_20261105_020023: NNC r2 XONG; NEXT DRI r2 (E_CORRECTIONS DRI: bo haircut Dakruco 50%, tien Lao 15%, NQ15 dau gia 1.975 ha, LOCK thieu) roi MVC
