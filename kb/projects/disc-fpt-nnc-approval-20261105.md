@@ -18,3 +18,8 @@ Nguyên văn 22:17: "1. Size 5% Nav. 2. Target 10% so với giá vốn. Trước
 ## Trạng thái
 - 22:2x: dispatch DollarBill chèn BUY vào plan 06/11 (chưa duyệt, user duyệt plan như thường).
 - Việc còn: theo dõi hằng ngày sau khi có fill (ngày vào, giá vốn broker, số phiên, +10%/−10%) → báo để Mike gọi Livermore. Chưa có cron — dựng sau khi biết fill thật.
+
+## Cập nhật 06/11/2026 00:09 ICT (`decided_by: user`)
+- User DUYỆT cho Livermore giữ cửa quyết bán FPT/NNC (dù bài thử 100 chuỗi trượt PREREG 0,0007 — xem `agents/Mike/research/livermore_stock_battery_20261105/REPORT.md`). Bán vẫn đi qua plan + user duyệt.
+- User DUYỆT 2 plan 06/11 rev2 (SpaceX: SELL TV1 400 + BUY FPT 800/NNC 900; ZaloPay: BUY FPT 500/NNC 600). approved_by ghi qua approve_plan_simple.sh (chuỗi mang "00:0x ICT" = 00:09 ICT).
+- User yêu cầu thêm: model kỹ thuật định lượng bổ trợ Livermore (thanh khoản cao; mua → bán được từ chiều T+2; chốt +5% / cắt lỗ −5%).

@@ -60,3 +60,5 @@
 - [2026-11-05T09:56:44Z] ĐANG DỞ job Taylor_20261105_093502 GĐ3: code+selfcheck book_clearing_g3_selfcheck PASS ở worktree wt-clearing-g3-20261105 | NEXT §23 quét rộng 2 TZ, byte-compare park_holdings, commit, bus finding
 - [2026-11-05T10:28:27Z] [clearing GĐ3 05/11] XONG build job Taylor_20261105_093502 commit 9acbe593e nhánh session/clearing-g3-20261105 (wt-clearing-g3-20261105); CHỜ Mike arch-review + quant-skeptic; cờ apply_to_plan=false, cron chưa cài
 - [2026-11-05T12:00:49Z] [clearing GĐ3 r2 05/11] XONG commit db490ba1d; CHỜ Mike re-review; manifest md chưa tái sinh (nợ master)
+- [2026-11-05T17:11:13Z] ĐANG DỞ: TA model ±5% job Taylor_20261105_171103 → agents/Taylor/research/ta_model_5pct_20261106/ | NEXT: tra NO-GO, data_registry universe_pit, lấy data, backtest
+- [2026-11-05T17:20:36Z] [ta-model-5pct 06/11] XONG job Taylor_20261105_171103 NO-GO (research/ta_model_5pct_20261106); CHỜ Mike quant-skeptic
