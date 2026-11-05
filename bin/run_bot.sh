@@ -68,23 +68,15 @@ if [ "$DRY_RUN" = true ]; then
   exit 0
 fi
 
-# GĐ3 clearing PARK→LAG/BAL: áp plan["book_transfers"] (chuyển nhãn sổ lô, ghi journal
-# BOOK_TRANSFER) TRƯỚC bot_execute — lệnh mua/bán đã bị clear_books giảm m chỉ đúng khi chuyển
-# nhãn xảy ra. Plan không có book_transfers ⇒ no-op (thoát ở tầng stdlib). Idempotent theo id nên
-# lượt 13:00/autoheal chạy lại vô hại. rc=3: có mã bị TẠM DỪNG (lệnh liên kết đã gỡ khỏi plan, bus
-# đã báo) ⇒ bot vẫn chạy phần còn lại. rc khác: KHÔNG pause được ⇒ không chạy bot account này.
-set +e
-python3 "$ROOT/bin/apply_book_transfers.py" --account "$ACCOUNT" --date "$PLAN_DATE" 2>&1 | tee -a "$LOG"
-_xrc=${PIPESTATUS[0]}
-set -e
-if [ "$_xrc" -eq 3 ]; then
-  _discord "⛔ **Chuyển nhãn sổ bị TẠM DỪNG** — account **$ACCOUNT** ($PLAN_DATE): bot KHÔNG đặt các lệnh liên kết của mã đó (không đoán); các lệnh khác chạy bình thường. Lý do: $LOG"
-elif [ "$_xrc" -ne 0 ]; then
-  _discord "❌ **apply_book_transfers lỗi nặng (rc=$_xrc)** — account **$ACCOUNT** ($PLAN_DATE): KHÔNG chạy bot cho account này (plan có lệnh đã giảm theo chuyển nhãn mà không chuyển/tạm dừng được). Log: $LOG"
-  "$ROOT/bin/append_event.sh" Mafee error "book-transfer-fatal" \
-    "{\"account\":\"$ACCOUNT\",\"plan_date\":\"$PLAN_DATE\",\"rc\":$_xrc,\"log\":\"$LOG\"}" 2>/dev/null || true
-  exit "$_xrc"
-fi
+# GĐ3 clearing PARK→LAG/BAL: áp plan["book_transfers"] TRƯỚC bot_execute (logic + ngữ nghĩa rc ở
+# bin/book_transfers_gate.sh — dùng chung với autoheal của bot_heartbeat.sh). Fail-closed (không chạy
+# bot) CHỈ khi plan còn transfer chưa APPLIED/PAUSED; không có transfer (kể cả cờ TẮT) thì lỗi apply
+# chỉ cảnh báo + bus.
+# shellcheck source=book_transfers_gate.sh
+. "$ROOT/bin/book_transfers_gate.sh"
+_xrc=0
+book_transfers_gate "$ACCOUNT" "$PLAN_DATE" "$LOG" || _xrc=$?
+[ "$_xrc" -eq 0 ] || exit "$_xrc"
 
 set +e
 cd "$WC_ROOT"

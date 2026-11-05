@@ -178,7 +178,9 @@ if _bad_qty: flags.append("BAD_QTY:" + ",".join(sorted(set(_bad_qty))))
 # 2026-07-06), gate thực thi thật (trading_bot/plan.py approval_block_reason) chỉ đọc
 # approved_by — flag cứng ở đây tạo RED giả lặp lại cho plan đã duyệt thật (07-06, 07-15).
 # Vẫn hiển thị giá trị mafee ở dòng kết quả để đối chiếu khi field có mặt.
-if n_orders > 0:
+# GĐ3: clearing có thể làm orders=[] trong khi book_transfers (PLANNED/APPLIED) vẫn đòi ghi journal
+# ⇒ cũng phải có chữ ký duyệt (n_orders==0 một mình không còn là "không có gì để thực thi").
+if n_orders > 0 or _xfers:
     if not approved:   flags.append("NOT_APPROVED")
 if mode != "live": flags.append(f"mode={mode}")
 if rc_ok is False: flags.append("RISK_CHECK_FAIL")

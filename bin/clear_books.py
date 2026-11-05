@@ -314,7 +314,7 @@ def _approved(plan):
     return bool(v) and str(v).strip().lower() not in ("none", "null", "nil", "nan")
 
 
-def apply_to_plan(plan, rep, acct, plan_date, gates_fn, created_at):
+def apply_to_plan(plan, rep, acct, plan_date, gates_fn, created_at, events_fn=None):
     """GĐ3 lõi (không I/O): từ `plan` ĐÃ hoàn tác + `rep` của analyze() ⇒ (plan mới, transfers).
     Cơ hội nào lệnh MUA đích trượt cổng book đích ⇒ chuyển sang `rep["blocked"]`, không ghi.
     Hậu kiểm tự nhất quán (bảo toàn + Σ bán+chuyển ≤ sellable) ⇒ DataError nếu hỏng."""
@@ -331,6 +331,11 @@ def apply_to_plan(plan, rep, acct, plan_date, gates_fn, created_at):
             rep["blocked"].append({"ticker": op["ticker"], "to_book": op["to_book"],
                                    "reason": f"lệnh MUA {op['to_book']} không qua cổng book đích: {why}"})
             continue
+        cwhy = BC.corp_action_problem(op["ticker"], rep.get("asof"), plan_date, events_fn)
+        if cwhy:
+            rep["blocked"].append({"ticker": op["ticker"], "to_book": op["to_book"],
+                                   "reason": f"corp-action: {cwhy}"})
+            continue
         keep.append(op)
     rep["opportunities"] = keep
     rep["total_saving_est_vnd"] = sum(o["saving_est_vnd"] for o in keep)
@@ -343,7 +348,8 @@ def apply_to_plan(plan, rep, acct, plan_date, gates_fn, created_at):
 
 
 def run_account(acct, plan_date, asof, plan_dir, out_dir, missed_lookback, count_fn=None,
-                holdings_fn=None, apply=False, knob_fn=BC.knob_enabled, gates_fn=None):
+                holdings_fn=None, apply=False, knob_fn=BC.knob_enabled, gates_fn=None,
+                events_fn=None):
     """I/O wrapper. Trả (rc, report). rc=2 ⇒ lỗi dữ liệu (report có status=ERROR + error).
     `apply=True` CHỈ có hiệu lực khi knob bật (`knob_fn()`); ngược lại chạy SHADOW + ghi lý do."""
     plan_path = os.path.join(plan_dir, f"plan_{acct}_{plan_date}.json")
@@ -417,7 +423,7 @@ def run_account(acct, plan_date, asof, plan_dir, out_dir, missed_lookback, count
         if mode == APPLY:
             rep["_excluded"] = holdings.get("excluded_tickers") or []
             new, xs = apply_to_plan(base, rep, acct, plan_date, gates_fn or BC.target_book_gates,
-                                    rep["generated_at"])
+                                    rep["generated_at"], events_fn)
             rep.pop("_excluded", None)
             new["book_clearing"] = {"mode": APPLY, "generated_at": rep["generated_at"],
                                     "n_transfers": len(xs),

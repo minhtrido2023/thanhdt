@@ -96,8 +96,8 @@ def revert_clearing(plan):
             if ro.get("id") not in have:
                 orders.append(ro)
                 have.add(ro.get("id"))
-    # PAUSED chỉ xảy ra sáng ngày thực thi (plan đã duyệt) — writer plan đều từ chối plan đã duyệt,
-    # nên không có nhánh hoàn tác cho `paused_orders`.
+    # PAUSED chỉ xảy ra sáng ngày thực thi (plan đã duyệt) và đã tự KHÔI PHỤC lệnh gốc (pause_transfer);
+    # lệnh còn marker `book_clearing` được đưa về qty gốc ở trên, removed_orders không bị thêm đôi (have).
     p["orders"] = orders
     p.pop("book_transfers", None)
     return p, [x.get("id") for x in xs if isinstance(x, dict)]
@@ -219,23 +219,78 @@ def binding_problems(plan, x):
     return probs
 
 
+def _orig_qty(o, ref):
+    """qty GỐC (trước mọi clearing) của lệnh `o`: marker `book_clearing.orig_qty` nếu có (giữ qty gốc
+    NHẤT khi nhiều transfer giảm nối tiếp), không thì `orig_qty` của ref."""
+    bc = o.get("book_clearing") if isinstance(o, dict) else None
+    if isinstance(bc, dict) and bc.get("orig_qty") is not None:
+        return int(bc["orig_qty"])
+    return int(ref["orig_qty"])
+
+
+def approval_problem(plan):
+    """Plan yêu cầu duyệt (requires_user_approval truthy) mà `approved_by` rỗng ⇒ lý do chặn, BẤT KỂ
+    số lệnh. Khác `trading_bot.plan.approval_block_reason` ở đúng 1 điểm: nó trả None khi orders=[]
+    (HOLD), nhưng clearing có thể làm orders rỗng (chỉ có cặp PARK bán + LAG mua) trong khi
+    book_transfers vẫn đòi ghi journal ⇒ chữ ký duyệt phải có. Cùng chuẩn hoá chuỗi như bản gốc."""
+    req = plan.get("requires_user_approval")
+    if isinstance(req, str):
+        req = req.strip().lower() not in ("", "false", "no", "0", "none")
+    if not req:
+        return None
+    ap = plan.get("approved_by") or plan.get("approved_by_user")   # load_plan map approved_by_user→approved_by
+    if isinstance(ap, str):
+        ap = ap.strip()
+        if ap.lower() in ("none", "null", "nil", "nan"):
+            ap = ""
+    if ap:
+        return None
+    return "plan requires_user_approval nhưng approved_by rỗng — chưa duyệt thì không ghi BOOK_TRANSFER"
+
+
 def pause_transfer(plan, xid, reason, now_iso):
-    """Plan MỚI: transfer `xid` → PAUSED, GỠ mọi lệnh liên kết (mua/bán đã bị giảm) còn trong
-    orders[] — chúng chỉ đúng khi transfer xảy ra; thiếu transfer thì Σ không còn bảo toàn ⇒
-    không đặt (fail-safe pause mã đó). Lệnh khác của mã (không liên kết) giữ nguyên."""
+    """Plan MỚI: transfer `xid` → PAUSED và KHÔI PHỤC lệnh GỐC của nó (fail-safe = đúng hành vi
+    production khi không có clearing): lệnh đã bị giảm trả về qty gốc, lệnh đã bị gỡ (qty_after=0,
+    nằm ở `removed_orders`) trả lại vào orders[]. Nếu lệnh còn bị transfer KHÁC (chưa PAUSE) giảm
+    chung thì chỉ trả phần của transfer này (qty gốc − Σ giảm của các transfer còn lại). Tính từ qty
+    GỐC chứ không cộng delta lên qty hiện tại ⇒ plan bị sửa tay sau clearing vẫn về đúng gốc."""
     p = copy.deepcopy(plan)
-    for x in p.get("book_transfers") or []:
+    xs = [x for x in p.get("book_transfers") or [] if isinstance(x, dict)]
+    for x in xs:
         if x.get("id") != xid:
             continue
-        ids = {r.get("id") for s in ("buy_orders", "sell_orders") for r in x.get(s) or []}
-        keep, gone = [], []
-        for o in p.get("orders") or []:
-            (gone if o.get("id") in ids else keep).append(o)
-        p["orders"] = keep
+        orders = p.setdefault("orders", [])
+        by_id = {}
+        for o in orders:
+            by_id.setdefault(o.get("id"), o)
+        # bản gốc lệnh đã bị gỡ có thể nằm ở transfer KHÁC (lệnh bán PARK bị 2 sổ đích giảm nối tiếp,
+        # transfer sau mới gỡ hẳn) ⇒ tìm trên mọi transfer, ưu tiên transfer này
+        gone = {}
+        for y in [x] + [y for y in xs if y is not x]:
+            for ro in y.get("removed_orders") or []:
+                gone.setdefault(ro.get("id"), ro)
+        restored = []
+        for side in ("buy_orders", "sell_orders"):
+            for ref in x.get(side) or []:
+                oid = ref.get("id")
+                o = by_id.get(oid)
+                if o is None:
+                    ro = gone.get(oid)
+                    if ro is None:
+                        raise ValueError(f"không khôi phục được {oid}: không còn trong orders và không có removed_orders")
+                    o = copy.deepcopy(ro)
+                    orders.append(o)
+                    by_id[oid] = o
+                others = sum(int(r["orig_qty"]) - int(r["qty_after"])
+                             for y in xs if y is not x and y.get("status") != ST_PAUSED
+                             for sd in ("buy_orders", "sell_orders") for r in y.get(sd) or []
+                             if r.get("id") == oid)
+                o["qty"] = _orig_qty(o, ref) - others
+                restored.append(oid)
         x["status"] = ST_PAUSED
         x["paused_at"] = now_iso
         x["pause_reason"] = reason
-        x["paused_orders"] = gone
+        x["restored_orders"] = restored
     return p
 
 
@@ -252,22 +307,67 @@ def sell_cap_problems(plan):
     """Σ bán mỗi mã + Σ chuyển ra khỏi PARK (transfer CHƯA áp) ≤ min(sellable khai trong lệnh).
     Dùng cho clear_books (hậu kiểm) — preflight tự có bản riêng trong khối bash."""
     cap, sold = {}, {}
-    for o in plan.get("orders") or []:
-        if str(o.get("side") or "").lower() != "sell":
-            continue
+
+    def _cap_from(o):
         tk = o.get("ticker")
-        sold[tk] = sold.get(tk, 0) + _qty(o)
         for s in (o.get("sellable"), (o.get("merged_from") or {}).get("sellable_at_calc")):
             if s is not None:
                 cap[tk] = min(cap.get(tk, 10 ** 12), int(s))
+
+    for o in plan.get("orders") or []:
+        if str(o.get("side") or "").lower() != "sell":
+            continue
+        sold[o.get("ticker")] = sold.get(o.get("ticker"), 0) + _qty(o)
+        _cap_from(o)
     for x in plan.get("book_transfers") or []:
         if x.get("status") in (ST_PLANNED, None):
             sold[x["ticker"]] = sold.get(x["ticker"], 0) + int(x["qty"])
+        # trần cũng lấy từ lệnh bán đã bị clearing GỠ (chỉ nó mang `sellable`) — như preflight
+        for ro in x.get("removed_orders") or []:
+            if isinstance(ro, dict) and str(ro.get("side") or "").lower() == "sell":
+                _cap_from(ro)
     return [f"{tk}: bán+chuyển {q} > sellable {cap[tk]}" for tk, q in sorted(sold.items())
             if tk in cap and q > cap[tk]]
 
 
 # ─────────────────────────────────────────── cổng book ĐÍCH (dùng lại NGUYÊN hàm của bot)
+
+# Tên hàm cổng của bot_execute (trading_bot.plan) áp cho lệnh MUA, theo thứ tự bot gọi. KHÔNG có
+# cap_lag_orders (xem docstring). `book_clearing_g3_selfcheck` có AST parity test: tập này phải
+# BẰNG tập `filter_*` mà bot_execute.py gọi — bot thêm cổng mới mà quên ở đây ⇒ selfcheck đỏ.
+GATE_STEPS = ("filter_excluded_tickers", "filter_signal_holds", "filter_dd_flag_orders",
+              "filter_lag_rating_orders", "filter_lag_governance_orders")
+
+
+def corp_action_problem(ticker, asof, plan_date, events_fn=None):
+    """Chuyển nhãn một mã có sự kiện giá (ex-date cổ tức/phát hành) trong (asof, plan_date] ⇒ khung
+    giá/KL của lệnh mua (lập lúc asof, cum-quyền) và lô sổ (ghi theo ngày thực thi, ex-quyền) lệch
+    nhau ⇒ chặn (chưa có cách chuyển nhãn đúng qua ex-date). Lỗi đọc nguồn ⇒ CHẶN (fail-closed).
+    `events_fn(tickers, since, until)`; mặc định corp_action_lib.pricing_events (gồm `announced`).
+    Trả lý do hoặc None."""
+    if not asof:
+        return "không biết asof (plan thiếu park_trim_proposal.asof/signal_date) ⇒ không kiểm được corp-action"
+    try:
+        if events_fn is None:
+            wc = os.path.dirname(os.path.dirname(_HERE))
+            if wc not in sys.path:
+                sys.path.insert(0, wc)
+            import corp_action_lib as _cal
+            events_fn = _cal.pricing_events
+        ev = list(events_fn([ticker], since=str(asof), until=str(plan_date)) or [])
+    except Exception as e:
+        return f"không đọc được corp-action {ticker} ({type(e).__name__}: {e}) ⇒ chặn chuyển (fail-closed)"
+    ev = [e for e in ev if isinstance(e, dict) and e.get("ticker", ticker) == ticker]
+    if ev:
+        e0 = ev[0]
+        return (f"{ticker} có sự kiện giá {e0.get('event_code')} ex-date {e0.get('exright_date')} trong "
+                f"({asof}, {plan_date}] ⇒ không chuyển nhãn qua ex-date")
+    return None
+
+
+def plan_asof(plan):
+    return (plan.get("park_trim_proposal") or {}).get("asof") or plan.get("signal_date")
+
 
 def target_book_gates(plan, x, excluded):
     """Lệnh MUA đích (qty GỐC, trước khi giảm) có qua đủ cổng của book đích không — đúng các hàm
@@ -305,10 +405,9 @@ def target_book_gates(plan, x, excluded):
     except Exception as e:
         return False, f"không dựng được TradePlan ({type(e).__name__}: {e})"
     want = {o.id for o in pos}
-    steps = [("excluded", lambda t: TP.filter_excluded_tickers(t, sorted(excluded))),
-             ("dd_flag", TP.filter_dd_flag_orders),
-             ("lag_rating_8L", TP.filter_lag_rating_orders),
-             ("lag_governance", TP.filter_lag_governance_orders)]
+    steps = [(name, (lambda t: TP.filter_excluded_tickers(t, sorted(excluded)))
+              if name == "filter_excluded_tickers" else getattr(TP, name))
+             for name in GATE_STEPS]
     for name, fn in steps:
         try:
             tp, acts = fn(tp)
@@ -320,6 +419,7 @@ def target_book_gates(plan, x, excluded):
                 return False, f"cổng {name} FAIL_OPEN (nguồn hỏng) ⇒ không chuyển: {a.get('reason')}"
         left = {o.id for o in tp.orders}
         if want - left:
-            why = "; ".join(str((a.get("reason") if isinstance(a, dict) else a))[:120] for a in acts or [])
+            why = "; ".join(str((a.get("reason") or a.get("hold") if isinstance(a, dict) else a))[:120]
+                            for a in acts or [])
             return False, f"cổng {name} loại lệnh mua {sorted(want - left)}: {why}"
-    return True, "qua excluded/dd_flag/8L/governance"
+    return True, "qua " + "/".join(n.replace("filter_", "") for n in GATE_STEPS)

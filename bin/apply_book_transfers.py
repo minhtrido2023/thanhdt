@@ -12,42 +12,57 @@ Mỗi transfer PLANNED, lần lượt:
   3. Ghi 1 dòng BOOK_TRANSFER vào `exec_<acct>_<date>_journal.csv` (O_APPEND một lần write + fsync;
      KHÔNG tmp+replace: executor cũng append file này, thay cả file có thể nuốt dòng FILL của nó),
      đọc lại bằng chính parser của sổ lô, rồi mới đánh dấu APPLIED trong plan (atomic).
-PAUSE = gỡ khỏi orders[] mọi lệnh liên kết của transfer đó (chúng chỉ đúng khi chuyển nhãn xảy ra),
-lưu ở `paused_orders`, báo bus. Lệnh khác của account chạy bình thường.
+PAUSE = KHÔI PHỤC lệnh gốc của transfer đó (lệnh bị giảm trả qty gốc, lệnh bị gỡ trả lại vào orders[]
+= đúng hành vi production khi không có clearing, fail-safe), transfer → PAUSED, báo bus. Lệnh khác
+của account chạy bình thường.
 
 §5 kill giữa chừng: journal là nguồn sự thật — ghi journal TRƯỚC, plan SAU; chạy lại thấy id trong
 journal ⇒ chỉ đánh dấu APPLIED. Plan chưa duyệt / BOT_STOP ⇒ không làm gì (bot cũng không chạy).
 
 rc: 0 = xong/không có gì · 3 = có transfer bị PAUSE (bot vẫn chạy phần còn lại) · 2 = lỗi nặng, KHÔNG
-pause được ⇒ run_bot.sh KHÔNG chạy bot cho account (lệnh đã giảm mà không chuyển được nhãn = đoán).
+pause được ⇒ `book_transfers_gate.sh` (run_bot.sh + autoheal của bot_heartbeat.sh) KHÔNG chạy bot cho
+account NẾU plan còn transfer chưa APPLIED/PAUSED (lệnh đã giảm mà không chuyển được nhãn = đoán);
+plan không có transfer ⇒ rc≠0 chỉ cảnh báo, bot vẫn chạy.
+
+Chỉ stdlib ở tầng 0: `book_clearing`/`wc_paths` import MUỘN (sau khi biết plan CÓ transfer) ⇒ lỗi import
+không chặn account khi cờ clearing TẮT. Khoá `fcntl.flock` per-account (chạy tay + cron song song).
 
     python3 mike/bin/apply_book_transfers.py --account SpaceX [--date 2026-11-06] [--check]
 """
 import argparse
 import csv
 import datetime as dt
+import fcntl
 import io
 import json
 import math
 import os
 import subprocess
 import sys
+import time
 import traceback
 from zoneinfo import ZoneInfo
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _HERE)
-import book_clearing as BC  # noqa: E402  (stdlib-only)
-
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")   # §16
-import wc_paths  # noqa: E402
-WC_ROOT = wc_paths.find_wc_root(__file__)
-PLAN_DIR = os.path.join(WC_ROOT, "data", "trade_plans")
-EXEC_DIR = os.path.join(WC_ROOT, "data", "execution_logs")
-BOT_STOP = os.path.join(WC_ROOT, "data", "BOT_STOP")
 HEADER = ["ts", "event", "parent_id", "ticker", "side", "child_oid", "qty", "price",
           "filled_total", "book", "play_type", "note"]
 RC_OK, RC_FATAL, RC_PAUSED = 0, 2, 3
+LOCK_TIMEOUT_S = float(os.environ.get("APPLY_BT_LOCK_TIMEOUT", "120"))
+BC = None   # book_clearing — import MUỘN (_late_imports), sau tầng 0 stdlib
+
+
+def _wc_root():
+    import wc_paths   # stdlib-only
+    return wc_paths.find_wc_root(__file__)
+
+
+def _late_imports():
+    global BC
+    if BC is None:
+        import book_clearing as _bc
+        BC = _bc
 
 
 def now_ict():
@@ -177,18 +192,24 @@ def notify_bus(kind, topic, payload):
         print(f"[apply_book_transfers] bus lỗi ({type(e).__name__}: {e})", file=sys.stderr)
 
 
-def run(account, date, plan_path, plan, exec_dir, deps, check_only=False, bot_stop=BOT_STOP):
+def run(account, date, plan_path, plan, exec_dir, deps, check_only=False, bot_stop=None):
     """Trả (rc, plan_mới, log_lines). `deps` = dict callable: ph, holdings_fn(acct, date),
     banned_fn(), count_fn, gates_fn(plan, x, excluded), approval_fn(plan_dict) [, now_fn()]."""
     log = []
     now_fn = deps.get("now_fn") or now_ict
+    if bot_stop is None:
+        bot_stop = os.path.join(_wc_root(), "data", "BOT_STOP")
     if os.path.exists(bot_stop):
         return RC_OK, plan, ["BOT_STOP tồn tại ⇒ không áp transfer (bot cũng dừng)"]
     why = deps["approval_fn"](plan)
-    if why:
-        return RC_OK, plan, [f"plan chưa qua cổng duyệt ⇒ không áp transfer: {why}"]
     xs = [x for x in plan.get("book_transfers") or [] if isinstance(x, dict)]
     pending = [x for x in xs if x.get("status") not in (BC.ST_APPLIED, BC.ST_PAUSED)]
+    if pending and not why:
+        # cổng bot (approval_block_reason) im lặng khi orders=[] — clearing có thể làm rỗng orders mà
+        # transfer vẫn đòi ghi journal ⇒ chữ ký duyệt bắt buộc BẤT KỂ số lệnh
+        why = BC.approval_problem(plan)
+    if why:
+        return RC_OK, plan, [f"plan chưa qua cổng duyệt ⇒ không áp transfer (để HOLD): {why}"]
     if not pending:
         return RC_OK, plan, [f"{len(xs)} transfer, không còn PLANNED"]
     ph = deps["ph"]
@@ -211,6 +232,9 @@ def run(account, date, plan_path, plan, exec_dir, deps, check_only=False, bot_st
             probs = [f"journal có id {xid} nhưng KHÁC nội dung {jidx[xid]} ≠ {sig_of(x)}"]
         if not probs:
             probs = BC.binding_problems(plan, x)
+        if not probs:
+            cwhy = BC.corp_action_problem(x["ticker"], BC.plan_asof(plan), date, deps.get("events_fn"))
+            probs = [f"corp-action: {cwhy}"] if cwhy else []
         if not probs:
             if h is None and h_err is None:
                 try:
@@ -235,12 +259,12 @@ def run(account, date, plan_path, plan, exec_dir, deps, check_only=False, bot_st
             plan = BC.pause_transfer(plan, xid, reason, now_fn().isoformat(timespec="seconds"))
             _atomic_write_json(plan_path, plan)
             rc = RC_PAUSED
-            log.append(f"⛔ {xid}: PAUSE (gỡ lệnh liên kết) — {reason}")
+            log.append(f"⛔ {xid}: PAUSE (khôi phục lệnh gốc) — {reason}")
             notify_bus("error", "book-transfer-paused",
                        {"account": account, "plan_date": date, "transfer_id": xid,
                         "ticker": x.get("ticker"), "qty": x.get("qty"), "reason": reason,
-                        "paused_order_ids": [r.get("id") for s in ("buy_orders", "sell_orders")
-                                             for r in x.get(s) or []],
+                        "restored_order_ids": [r.get("id") for s in ("buy_orders", "sell_orders")
+                                               for r in x.get(s) or []],
                         "measured_by": f"apply_book_transfers.py --account {account} --date {date}"})
             continue
         ts = now_fn().isoformat(timespec="seconds")
@@ -272,6 +296,7 @@ def emergency_pause_all(plan_path, reason, account, date, exec_dir):
     nội dung (chết sau khi ghi journal, trước khi lưu plan) ⇒ đánh dấu APPLIED (journal là sự thật,
     lệnh liên kết giữ nguyên); còn lại ⇒ PAUSE. Không đọc được journal ⇒ PAUSE tất cả (chiều an
     toàn: không đặt lệnh liên kết) — lúc đó sổ có thể đã chuyển mà lệnh không chạy, báo to."""
+    _late_imports()
     with open(plan_path, encoding="utf-8") as f:
         plan = json.load(f)
     try:
@@ -296,7 +321,7 @@ def live_deps(account, date):
     import park_holdings as ph
     import clear_books as CB
     from portfolio_status import count_trading_days
-    sys.path.insert(0, WC_ROOT)
+    sys.path.insert(0, _wc_root())
     from trading_bot.plan import load_plan, approval_block_reason
 
     def approval_fn(plan):
@@ -308,26 +333,66 @@ def live_deps(account, date):
     return {"ph": ph,
             "holdings_fn": lambda a, d: ph.park_holdings(a, asof=d, need_price=False),
             "banned_fn": CB.load_banned, "count_fn": count_trading_days,
-            "gates_fn": BC.target_book_gates, "approval_fn": approval_fn}
+            "gates_fn": BC.target_book_gates, "approval_fn": approval_fn, "events_fn": None}
+
+
+def _read_plan(plan_path):
+    with open(plan_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+class _Lock:
+    """flock per-account trên file khoá riêng (chạy tay + cron/autoheal song song). Chờ tới
+    LOCK_TIMEOUT_S giây; quá hạn ⇒ TimeoutError (caller trả RC_FATAL, KHÔNG chạy không khoá)."""
+
+    def __init__(self, path, timeout=None):
+        self.path, self.timeout = path, LOCK_TIMEOUT_S if timeout is None else timeout
+        self.fd = None
+
+    def __enter__(self):
+        self.fd = os.open(self.path, os.O_WRONLY | os.O_CREAT, 0o644)
+        end = time.monotonic() + self.timeout
+        while True:
+            try:
+                fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return self
+            except BlockingIOError:
+                if time.monotonic() >= end:
+                    os.close(self.fd)
+                    self.fd = None
+                    raise TimeoutError(f"không lấy được khoá {self.path} sau {self.timeout}s "
+                                       "(tiến trình apply khác đang chạy)")
+                time.sleep(0.2)
+
+    def __exit__(self, *a):
+        if self.fd is not None:
+            os.close(self.fd)     # đóng fd = nhả flock
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Áp book_transfers của plan trước bot_execute")
     ap.add_argument("--account", required=True)
     ap.add_argument("--date", default=None, help="ngày thực thi (mặc định hôm nay ICT)")
-    ap.add_argument("--plan-dir", default=PLAN_DIR)
-    ap.add_argument("--exec-dir", default=EXEC_DIR)
+    ap.add_argument("--plan-dir", default=None)
+    ap.add_argument("--exec-dir", default=None)
     ap.add_argument("--check", action="store_true", help="chỉ kiểm, không ghi journal/plan")
     a = ap.parse_args(argv)
     date = a.date or now_ict().date().isoformat()
-    plan_path = os.path.join(a.plan_dir, f"plan_{a.account}_{date}.json")
+    try:
+        wc = _wc_root() if not (a.plan_dir and a.exec_dir) else None
+    except Exception as e:
+        print(f"[apply_book_transfers] {a.account} {date}: không xác định được gốc WorkingClaude "
+              f"({type(e).__name__}: {e})", file=sys.stderr)
+        return RC_FATAL
+    plan_dir = a.plan_dir or os.path.join(wc, "data", "trade_plans")
+    exec_dir = a.exec_dir or os.path.join(wc, "data", "execution_logs")
+    plan_path = os.path.join(plan_dir, f"plan_{a.account}_{date}.json")
     # Tầng 0 — chỉ stdlib: ngày thường không có transfer thì thoát trước mọi import nặng.
     if not os.path.exists(plan_path):
         print(f"[apply_book_transfers] {a.account} {date}: không có plan — không làm gì")
         return RC_OK
     try:
-        with open(plan_path, encoding="utf-8") as f:
-            plan = json.load(f)
+        plan = _read_plan(plan_path)
         xs = plan.get("book_transfers")
     except Exception as e:
         # plan hỏng thì bot_execute cũng không đọc được — không phải việc của bước này
@@ -337,8 +402,26 @@ def main(argv=None):
     if not xs:
         print(f"[apply_book_transfers] {a.account} {date}: plan không có book_transfers — không làm gì")
         return RC_OK
+    # Từ đây plan CÓ transfer ⇒ cần lõi + khoá. Lỗi import ⇒ RC_FATAL (gate quyết định theo transfer chờ).
     try:
-        rc, _, log = run(a.account, date, plan_path, plan, a.exec_dir, live_deps(a.account, date),
+        _late_imports()
+    except Exception as e:
+        print(f"[apply_book_transfers] {a.account} {date}: không import được book_clearing "
+              f"({type(e).__name__}: {e}) — plan CÓ transfer ⇒ lỗi nặng", file=sys.stderr)
+        return RC_FATAL
+    try:
+        lock = _Lock(os.path.join(plan_dir, f".apply_book_transfers_{a.account}.lock"))
+        with lock:
+            plan = _read_plan(plan_path)       # đọc lại TRONG khoá (tiến trình trước có thể đã áp)
+            return _main_locked(a, date, plan_dir, exec_dir, plan_path, plan)
+    except TimeoutError as e:
+        print(f"[apply_book_transfers] {a.account} {date}: {e}", file=sys.stderr)
+        return RC_FATAL
+
+
+def _main_locked(a, date, plan_dir, exec_dir, plan_path, plan):
+    try:
+        rc, _, log = run(a.account, date, plan_path, plan, exec_dir, live_deps(a.account, date),
                          check_only=a.check)
         for line in log:
             print(f"[apply_book_transfers] {a.account} {date}: {line}")
@@ -350,7 +433,7 @@ def main(argv=None):
         if a.check:
             return RC_FATAL
         try:
-            emergency_pause_all(plan_path, f"{type(e).__name__}: {e}", a.account, date, a.exec_dir)
+            emergency_pause_all(plan_path, f"{type(e).__name__}: {e}", a.account, date, exec_dir)
         except Exception as e2:
             print(f"[apply_book_transfers] KHÔNG pause được: {type(e2).__name__}: {e2}", file=sys.stderr)
             notify_bus("error", "book-transfer-fatal",
