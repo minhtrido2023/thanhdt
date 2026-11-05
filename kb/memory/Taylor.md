@@ -52,3 +52,4 @@
 - [2026-11-05T02:12:25Z] ĐANG DỞ job Taylor_20261105_020013 (DD r2): MBB, FPT, HPG XONG; NEXT HHS (trục gov/BĐSĐT/I.14/ký quỹ) rồi bảng tổng + bus
 - [2026-11-05T02:13:40Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020016 DGC/DDV/PVP/PVT (SUMMARY_r2_job020016.md); CHỜ Mike skeptic; DGC đổi DƯỚI→TRONG; PVT 2 bản song song TRÊN vùng
 - [2026-11-05T02:13:50Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020023 NNC/DRI/MVC (TABLE_r2_Taylor_20261105_020023.md); CHỜ Mike skeptic vòng 2 + legal-vn Đ195/ngưỡng GD BLQ DRI
+- [2026-11-05T02:14:14Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020021 (NT2 SAS SZL TCH, TABLE_Taylor_20261105_020021.md); SZL đổi DƯỚI vùng; CHỜ Mike skeptic; chưa sửa dd_price_zones
