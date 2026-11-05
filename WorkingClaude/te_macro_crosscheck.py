@@ -44,6 +44,8 @@ _OVR = os.environ.get("TE_XCHECK_DATA_DIR") if os.environ.get("TE_XCHECK_SELFCHE
 _SELFCHECK = bool(_OVR)
 DATA_DIR = _OVR if _SELFCHECK else os.path.join(HERE, "data")
 LOG_PATH = os.path.join(DATA_DIR, "te_crosscheck_log.json")
+CPI_SNAPSHOT = os.path.join(DATA_DIR, "te_cpi_yoy_snapshot.csv")   # đọc bởi cpi_vn.py (Tier 1.4)
+SNAP_HDR = "month,te_cpi_yoy_pct,obs_date,fetched_at,snapshot_at"
 NOTIFY = os.path.join(HERE, "mike", "bin", "notify_thread.sh")
 FIIN_CSV = os.environ.get("FIINPRO_CPI_CSV") or os.path.join(
     HERE, "mike", "data", "fiinprox_cpi_monthly_20260914.csv")
@@ -193,6 +195,38 @@ def check_cpi(te, nso, fiin, anchors=None):
     return {"alerts": alerts, "vs_nso": r_nso, "vs_fiinprox": r_fiin, "tier_assessment": tier}
 
 
+def write_cpi_snapshot(te, fetched_at, now, path=None):
+    """Ghi APPEND-ONLY snapshot TE CPI cho cpi_vn.py. Thêm dòng khi tháng mới / giá trị đổi (revision) +
+    luôn 1 dòng "heartbeat" cho tháng mới nhất (để cpi_vn phân biệt "TE không đổi" với "cron chết").
+    Ghi nguyên tử (tmp + os.replace, §5). Trả số dòng đã thêm."""
+    path = path or CPI_SNAPSHOT
+    last = {}
+    if os.path.exists(path):
+        with open(path) as fh:
+            hdr = fh.readline().strip()
+            if hdr != SNAP_HDR:
+                raise Unavailable(f"{path}: header lạ {hdr!r} — không append vào file không nhận ra")
+            for ln in fh:
+                p = ln.rstrip("\n").split(",")
+                if len(p) == 5:
+                    last[p[0]] = float(p[1])
+    by_m = {}
+    for d, v in sorted(te.items()):
+        by_m[_ym(d)] = (d, v)
+    snap = now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    fa = fetched_at.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    newest = max(by_m)
+    rows = [f"{m},{v},{d},{fa},{snap}" for m, (d, v) in by_m.items()
+            if m not in last or abs(last[m] - v) > 1e-9 or m == newest]
+    old = open(path).read() if os.path.exists(path) else SNAP_HDR + "\n"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w") as fh:
+        fh.write(old + "\n".join(rows) + "\n")
+    os.replace(tmp, path)
+    return len(rows)
+
+
 # ───────────────────────── log + cảnh báo ─────────────────────────
 def load_log():
     try:
@@ -260,6 +294,11 @@ def run(dry_run=False):
         res["cpi_fetched_at"] = cf.isoformat(timespec="seconds")
         from cpi_vn import CPI_ANCHORS, NSO_CPI_YOY_REAL
         res["cpi"] = check_cpi(cpi, NSO_CPI_YOY_REAL, load_fiin(), CPI_ANCHORS)
+        if not dry_run:
+            try:
+                res["cpi_snapshot_rows_added"] = write_cpi_snapshot(cpi, cf, now)
+            except (Unavailable, OSError, ValueError) as e:
+                res["cpi_snapshot_error"] = str(e)[:300]
     except Unavailable as e:
         res["cpi_unavailable"] = str(e)
     n_alert = 0
@@ -276,17 +315,23 @@ def run(dry_run=False):
     elif unav:
         res["status"] = "partial"   # một nhánh không kiểm được, nhánh kia sạch
     res["n_alerts"] = n_alert
+    snap_err = res.get("cpi_snapshot_error")
+    if snap_err and res["status"] == "ok":
+        res["status"] = "partial"   # đối chiếu sạch nhưng KHÔNG ghi được snapshot ⇒ Tier 1.4 sẽ stale sau 14 ngày
     if res["status"] == "unavailable":
         msg = (f"🔴 TE cross-check {res['at']}: KHÔNG kiểm được — {res['unavailable']}. "
                f"Tuần này chưa có đối chiếu TE (không điền số cũ).")
     elif res["status"] == "alert":
         msg = format_alert(res)
-    elif res["status"] == "partial":
+    elif res["status"] == "partial" and unav:
         k = unav[0]
         msg = (f"🔴 TE cross-check {res['at']}: nhánh {k} KHÔNG kiểm được — {res[f'{k}_unavailable']}. "
                f"Nhánh còn lại sạch. Không điền số cũ.")
     else:
         msg = None
+    if snap_err:
+        extra = f"🔴 TE cross-check {res['at']}: GHI snapshot CPI THẤT BẠI — {snap_err}. Tier 1.4 (cpi_vn) sẽ tự TẮT khi snapshot cũ >14 ngày."
+        msg = f"{msg}\n{extra}" if msg else extra
     if dry_run:
         print(json.dumps(res, indent=1, ensure_ascii=False))
         print("[dry-run] không ghi log, không notify;", "sẽ gửi:\n" + msg if msg else "không có gì để gửi")
@@ -309,6 +354,9 @@ def main():
     if not a.dry_run and res.get("notified") is False:   # có tin cần gửi mà gửi hỏng ⇒ không im lặng
         print("LỖI: có tin TE cross-check cần gửi nhưng notify thất bại", file=sys.stderr)
         return 3
+    if not a.dry_run and res.get("cpi_snapshot_error"):  # snapshot không ghi được ⇒ không im lặng
+        print(f"LỖI: ghi snapshot CPI thất bại: {res['cpi_snapshot_error']}", file=sys.stderr)
+        return 4
     return 0
 
 

@@ -125,6 +125,22 @@ with contextlib.redirect_stdout(io.StringIO()):
     rc = T.main()
 sys.argv = orig_argv
 ok(rc == 0, "18. không có tin cần gửi ⇒ main() == 0")
+# 19. ghi snapshot CPI hỏng ⇒ status partial, tin notify nêu lỗi, main() != 0
+_orig_w = T.write_cpi_snapshot
+def _boom(*a, **k): raise OSError("disk full (giả lập)")
+T.write_cpi_snapshot = _boom
+sent = []
+T._notify = lambda m: (sent.append(m), True)[1]
+json.dump({"vn_policy_rate": {"rows": pol_te, "fetched_at": FRESH}, "vn_cpi_yoy": {"rows": cpi_te, "fetched_at": FRESH}},
+          open(os.environ["TE_XCHECK_FIXTURE"], "w"))
+sys.argv = ["x"]
+with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+    rc = T.main()
+sys.argv = orig_argv
+lg = json.load(open(T.LOG_PATH))
+ok(rc != 0 and lg["last"]["status"] == "partial" and sent and "disk full" in sent[0] and lg["history"][-1]["status"] == "partial",
+   f"19. snapshot ghi lỗi ⇒ status partial + tin nêu lỗi + main() != 0 (rc={rc})")
+T.write_cpi_snapshot = _orig_w; T._notify = orig_notify
 # đưa trạng thái log cuối về unavailable cho ca 12
 run(pf="2026-10-20T15:00:00+00:00", cerr="403 quota")
 
