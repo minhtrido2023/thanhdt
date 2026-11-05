@@ -38,3 +38,9 @@ Làn 1 = 3 dispatch (Winston A1+A2 gộp 1; Taylor B1+C1 gộp 1) · Làn 2 = 2�
 1. Ai/đâu chạy writer 15:00 UTC (để Winston ghi registry + biết nơi sửa nếu scrape hỏng)?
 2. Duyệt tạo view mới `tav2_bq.macro_indicator_pit` (read-write BQ; chỉ tạo view, không đổi bảng gốc)?
 3. Độ trễ công bố: chấp nhận nguyên tắc BẢO THỦ (lấy muộn hơn lịch thật vài ngày) cho series tháng/quý?
+
+## TRẠNG THÁI 05/11 09:2x ICT
+- Làn 1 XONG + merge: A1/A2 (b66165196), C1 (outer bb0f8f4ba).
+- Làn 2: D1 merged (arch-review APPROVED) · D2 merged, nhãn KHÔNG KẾT LUẬN (quant-skeptic INCONCLUSIVE; D1 giữ hiển thị) · E1 merged (arch-review vòng 2 áp đủ 6 điểm) · CPI-TE (Tier 1.4 trong cpi_vn.py, user duyệt riêng) merged outer aed5a562b sau 2 vòng arch-review; không số công bố/pin nào đổi, CAPIT live tắt.
+- Chờ user: áp DD_SKILL_PROPOSAL.md (agents/Taylor/research/macro_snapshot_asof_20261105/) vào skill due-diligence + nhắc Bobby? Làn 3 (F1 Pillar B) chưa mở.
+- Số series đúng = 41 (không phải 45).

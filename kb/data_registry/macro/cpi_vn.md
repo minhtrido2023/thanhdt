@@ -40,7 +40,7 @@ file proposal trên).
 - ⚠️ Số nghiên cứu `macro_confidence_regime` đã pin trong `data/results_registry.md` là theo `pit=False`; chạy lại sẽ khác. Trích dẫn phải nói rõ quy ước.
 - Việc dở không chặn: `NSO_CPI_YOY_REAL` stale từ 2026-06 (FiinPro 08/2026 = 4,89 vs cổng đọc 4,69 — Winston refresh); `engine_2008.py:222-230` cùng look-ahead chép tay (ticket riêng); nếu GSO công bố ngày 6 tháng M+1 thì ngày 1–5 vẫn rò rỉ (0 lật cổng 6%).
 
-## Tầng 1.4 — TradingEconomics `vn_cpi_yoy` (job Taylor_20261104_182151, user duyệt 05/11; CHỜ MERGE)
+## Tầng 1.4 — TradingEconomics `vn_cpi_yoy` (job Taylor_20261104_182151, user duyệt 05/11; ĐÃ MERGE 2026-11-05 (outer main aed5a562b))
 - **Thứ tự**: NSO > fiinprox ≥ TE > Tier 3 > Tier 2. TE chỉ phục vụ tháng NSO+fiinprox không phủ: **2026-09+**
   (fiinprox đóng băng ở 2026-08) và **2007** (thay Tier 3). Lệch TE–NSO >0,05pp hoặc TE–fiinprox >0,3pp ⇒ cảnh báo
   1 lần và DÙNG tầng cao hơn.
@@ -51,3 +51,9 @@ file proposal trên).
   trước khi có tầng này (selfcheck so từng cột), cảnh báo stderr nêu lý do; `python3 cpi_vn.py` in `Tier 1.4 TE: ON/OFF`.
 - **Bẫy**: file `.csv` bị `.gitignore:59` ⇒ KHÔNG nằm trong git, chỉ sống ở máy chạy cron; worktree không có ⇒ TE tắt
   (đúng thiết kế, không phải lỗi). Hạn chế PIT (GSO công bố ~6 ngày sau tháng) giữ nguyên như Tier khác.
+
+## Guard Tầng 1.4 TE (vòng 2 arch-review, 2026-11-05)
+- Giá trị phải hữu hạn và trong [-5, 40]%; ngoài khoảng/NaN/inf ⇒ TE OFF + cảnh báo stderr (không rơi inf vào artifact golive).
+- `snapshot_at` ở tương lai (>1 ngày) ⇒ TE OFF. `TE_CPI_FAKE_NOW` chỉ có hiệu lực khi `TE_CPI_SELFCHECK=1`.
+- Lỗi ghi snapshot (te_macro_crosscheck) ⇒ status partial + notify + rc≠0.
+- Snapshot gitignored (`data/te_cpi_yoy_snapshot.csv`); hạn stale 14 ngày; seed 2026-11-04 hạn 2026-11-18; cron tuần Thứ Hai 09/11 làm mới.
