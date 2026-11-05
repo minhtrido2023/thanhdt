@@ -27,3 +27,6 @@
 - [2026-11-05T01:48:27Z] ĐANG DỞ: DD redo job Taylor_20261105_014125 — MBB XONG (dd_redo_20261105/MBB); NEXT: FPT → HPG → HHS
 - [2026-11-05T01:48:58Z] ĐANG DỞ job Taylor_20261105_014130: SIP, SCL XONG; NEXT TV1 (dd_TV1_blind_20261102 INTRINSIC_v2), TV2
 - [2026-11-05T01:49:29Z] [DD redo NNC/DRI/MVC 05/11] XONG job Taylor_20261105_014135 → dd_redo_20261105/{NNC,DRI,MVC} + TABLE_Taylor_20261105_014135.md; CHỜ Mike chạy fundamental-skeptic
+- [2026-11-05T01:50:54Z] ĐANG DỞ job Taylor_20261105_014130: SIP, SCL, TV1 XONG; NEXT TV2 (dd_TV2_20261101 REPORT_v3, calc/valuation_v2.py)
+- [2026-11-05T01:50:57Z] ĐANG DỞ: DD redo job Taylor_20261105_014125 — MBB, FPT XONG; NEXT: HPG → HHS
+- [2026-11-05T01:52:58Z] [dd-redo 05/11] XONG job Taylor_20261105_014130 (SIP/SCL/TV1/TV2 ở dd_redo_20261105/); CHỜ Mike chạy fundamental-skeptic; chưa sửa dd_price_zones
