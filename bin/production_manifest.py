@@ -142,6 +142,9 @@ ROOT_TIER = {
     # SHADOW, chỉ ghi state/clear_books_shadow/, nhưng ĐỌC data/trade_plans ⇒ nghiêng CHẶT khi chạm plan
     # (cùng lập luận plan_position_drift_check) ⇒ T0; T0 chỉ chặt hơn, không nới ranh giới tự-sửa.
     "clear_books_daily.sh": T0,  # vỏ cron 20:45 ICT, chạy clear_books.py shadow cho plan T+1
+    # GĐ3 clearing (2026-11-05): apply_book_transfers ghi journal BOOK_TRANSFER + sửa plan TRƯỚC bot_execute
+    # (run_bot.sh/autoheal) ⇒ money-path T0; book_clearing là lõi dùng chung của nó + clear_books --apply.
+    "apply_book_transfers.py": T0, "book_clearing.py": T0, "book_transfers_gate.sh": T0,
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,

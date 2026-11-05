@@ -45,9 +45,14 @@ _notify() {
 # chế độ loop mới vào CLOSED ⇒ _await_postclose_fills (aria-K) chờ kết quả ATC. Xem ops_runbook.
 _restart_bot() {
   local rlog="$ROOT/logs/run_bot_${ACCOUNT}_autoheal_$(TZ=Asia/Ho_Chi_Minh date +%Y%m%d_%H%M%S).log"
+  # GĐ3 clearing: autoheal gọi thẳng bot_execute nên PHẢI áp book_transfers trước (cùng ngữ nghĩa rc
+  # với run_bot.sh). Fail-closed ⇒ không restart (rỗng = "AUTO-RESTART THẤT BẠI" → báo người).
+  # shellcheck source=book_transfers_gate.sh
+  . "$ROOT/bin/book_transfers_gate.sh"
+  book_transfers_gate "$ACCOUNT" "$PLAN_DATE" "$rlog" || return 0
   ( cd "$WC_ROOT" && setsid env TZ=Asia/Ho_Chi_Minh python3 -u bot_execute.py \
       --account "$ACCOUNT" --date "$PLAN_DATE" --auto-otp \
-      > "$rlog" 2>&1 < /dev/null & )
+      >> "$rlog" 2>&1 < /dev/null & )
   sleep 5
   pgrep -f "bot_execute.py --account $ACCOUNT --date $PLAN_DATE" | head -1 || true
 }

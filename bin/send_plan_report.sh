@@ -1253,6 +1253,32 @@ def _lk_info_line(exit_caps):
     return ("ℹ️ CP chờ niêm yết bổ sung, CHƯA bán được (không cần duyệt gì, tự bán khi giao "
             "dịch được): " + "; ".join(parts) + ".")
 
+# ── GĐ3 clearing PARK→LAG (clear_books.py --apply): CHUYỂN NHÃN sổ, không đặt lệnh ─────────
+# Người duyệt phải thấy lệnh mua/bán ĐÃ bị giảm vì sao, và thấy rằng duyệt plan = duyệt chuyển nhãn
+# (apply_book_transfers.py thực hiện trước bot 09:05). Lỗi render ⇒ WARN, không chặn (fail-open).
+try:
+    _bx = [x for x in (plan.get("book_transfers") or []) if isinstance(x, dict)]
+    if _bx:
+        ACT.append(f"🔁 **Chuyển nhãn sổ {len(_bx)} mã** (KHÔNG đặt lệnh, 0 phí/thuế; duyệt plan = "
+                   f"duyệt chuyển, áp trước bot 09:05):")
+        for _x in _bx:
+            def _chg(refs):
+                return ", ".join(f"{r.get('id')} {int(r.get('orig_qty') or 0):,}→{int(r.get('qty_after') or 0):,}cp"
+                                 for r in refs or [])
+            ACT.append(f"   • {_x.get('ticker')} {int(_x.get('qty') or 0):,}cp "
+                       f"{_x.get('from_book')}→{_x.get('to_book')} @{float(_x.get('ref_price') or 0):,.0f} — "
+                       f"mua {_chg(_x.get('buy_orders'))}; bán {_chg(_x.get('sell_orders'))}; "
+                       f"tiết kiệm ước tính ~{int(_x.get('saving_est_vnd') or 0):,}đ (so với 2 lệnh riêng)"
+                       + (f" [{_x.get('status')}]" if _x.get("status") not in (None, "PLANNED") else ""))
+        INFO.append("ℹ️ Chuyển nhãn PARK→LAG: lô LAG mới tính ngày vào sổ = ngày chuyển (đồng hồ T+25 "
+                    "bắt đầu lại); giá vốn sổ lô = giá tham chiếu lệnh mua. Stop-loss không áp cho LAG và "
+                    "giá vốn trung bình (avg_cost) của broker KHÔNG đổi (broker không biết sổ). Không "
+                    "chuyển được ⇒ KHÔI PHỤC lệnh gốc của mã đó (mua/bán đủ như khi không có clearing) rồi "
+                    "bot đặt lệnh như bình thường, và báo bus.")
+except Exception as _e:
+    WARN.append(f"⚠️ Không render được khối book_transfers ({type(_e).__name__}: {_e}) — đọc thẳng "
+                f"`book_transfers` trong file plan trước khi duyệt.")
+
 _aei_notes = plan.get("auto_exit_inject_notes") or []
 if _aei_notes:
     # §29 vòng 4 (arch-review): `_aei_notes[-1]` một mình bị che khi có entry ghi tay

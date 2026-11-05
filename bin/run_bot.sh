@@ -68,6 +68,16 @@ if [ "$DRY_RUN" = true ]; then
   exit 0
 fi
 
+# GĐ3 clearing PARK→LAG/BAL: áp plan["book_transfers"] TRƯỚC bot_execute (logic + ngữ nghĩa rc ở
+# bin/book_transfers_gate.sh — dùng chung với autoheal của bot_heartbeat.sh). Fail-closed (không chạy
+# bot) CHỈ khi plan còn transfer chưa APPLIED/PAUSED; không có transfer (kể cả cờ TẮT) thì lỗi apply
+# chỉ cảnh báo + bus.
+# shellcheck source=book_transfers_gate.sh
+. "$ROOT/bin/book_transfers_gate.sh"
+_xrc=0
+book_transfers_gate "$ACCOUNT" "$PLAN_DATE" "$LOG" || _xrc=$?
+[ "$_xrc" -eq 0 ] || exit "$_xrc"
+
 set +e
 cd "$WC_ROOT"
 OTP_FLAG=""
