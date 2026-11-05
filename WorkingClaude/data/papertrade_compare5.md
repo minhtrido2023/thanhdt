@@ -1,8 +1,8 @@
 # Paper-Trade Comparison — 5 Systems
 
-*Generated: 2026-11-04 15:39*
+*Generated: 2026-11-05 15:38*
 
-*Window: 2026-04-01 → 2026-11-03 (216 calendar days)*
+*Window: 2026-04-01 → 2026-11-04 (217 calendar days)*
 
 *Init NAV: 50B VND fresh, all-cash, no positions (each system)*
 
@@ -11,30 +11,30 @@
 
 | System | Final NAV | Total Ret | CAGR | Vol (ann) | Sharpe | Max DD | Calmar |
 |---|---|---|---|---|---|---|---|
-| **V11 Song Sinh + KELLY + DT5G ⭐** | 49.348B | -1.16% | -1.95% | 16.28% | -0.04 | -11.80% | -0.17 |
-| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 47.918B | -4.11% | -6.86% | 9.19% | -0.73 | -7.49% | -0.92 |
-| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 47.004B | -5.94% | -13.44% | 10.05% | -1.37 | -6.84% | -1.96 |
-| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 45.700B | -8.60% | -20.27% | 12.62% | -1.73 | -12.20% | -1.66 |
-| **VNINDEX Buy & Hold (rebased 50B)** | 49.903B | -0.19% | -0.33% | 16.75% | +0.06 | -13.46% | -0.02 |
+| **V11 Song Sinh + KELLY + DT5G ⭐** | 50.959B | +2.07% | +3.51% | 16.70% | +0.29 | -11.80% | +0.30 |
+| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 48.599B | -2.75% | -4.59% | 9.25% | -0.46 | -7.30% | -0.63 |
+| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 48.136B | -3.68% | -8.40% | 10.68% | -0.76 | -6.84% | -1.23 |
+| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 46.702B | -6.60% | -15.69% | 13.05% | -1.24 | -12.17% | -1.29 |
+| **VNINDEX Buy & Hold (rebased 50B)** | 50.883B | +1.77% | +2.99% | 16.89% | +0.26 | -13.46% | +0.22 |
 
 ## Delta vs V23 (production baseline)
 
 | System | ΔRet | ΔDD | Verdict |
 |---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | +7.44pp | +0.39pp | Both better |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +4.49pp | +4.71pp | Both better |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +2.66pp | +5.36pp | Both better |
-| VNINDEX Buy & Hold (rebased 50B) | +8.41pp | -1.26pp | Return better, DD worse |
+| V11 Song Sinh + KELLY + DT5G ⭐ | +8.67pp | +0.36pp | Both better |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +3.84pp | +4.87pp | Both better |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +2.92pp | +5.33pp | Both better |
+| VNINDEX Buy & Hold (rebased 50B) | +8.36pp | -1.29pp | Return better, DD worse |
 
 ## Grind lens — current drawdown & recent momentum
 
 | System | Cur DD (from peak) | Underwater | Peak date | Trailing 1M | Trailing 3M |
 |---|---|---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | -11.3% | 173d | 2026-05-14 | -3.9% | -4.7% |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -7.5% | 180d | 2026-05-07 | -1.7% | -2.7% |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -6.3% | 125d | 2026-07-01 | -2.5% | -2.9% |
-| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -12.1% | 125d | 2026-07-01 | -2.8% | -4.3% |
-| VNINDEX Buy & Hold (rebased 50B) | -11.8% | 169d | 2026-05-18 | -3.1% | -3.6% |
+| V11 Song Sinh + KELLY + DT5G ⭐ | -8.4% | 174d | 2026-05-14 | -1.2% | -2.0% |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -6.2% | 181d | 2026-05-07 | -0.5% | -1.7% |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -4.0% | 126d | 2026-07-01 | -0.5% | -1.0% |
+| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -10.2% | 126d | 2026-07-01 | -0.8% | -3.1% |
+| VNINDEX Buy & Hold (rebased 50B) | -10.1% | 170d | 2026-05-18 | -1.5% | -2.5% |
 
 *Grind = sustained underwater stretch where the book bleeds while the index holds/rises (style-divergence). V2.3's known weak spot is the 2025-08→ style-divergence grind (momentum lags the VIC-led megacap index); watch V2.3 trailing-3M vs VNINDEX.*
 
@@ -71,8 +71,8 @@
 | 2026-10-08 | 51.23B | 48.70B | 48.09B | 46.60B | 51.06B |
 | 2026-10-15 | 49.78B | 48.03B | 47.27B | 46.26B | 49.87B |
 | 2026-10-22 | 51.23B | 49.07B | 48.13B | 47.14B | 51.69B |
-| 2026-10-29 | 51.14B | 48.98B | 48.15B | 47.00B | 51.55B |
-| 2026-11-03 | 49.35B | 47.92B | 47.00B | 45.70B | 49.90B |
+| 2026-10-29 | 51.25B | 49.08B | 48.15B | 47.00B | 51.55B |
+| 2026-11-04 | 50.96B | 48.60B | 48.14B | 46.70B | 50.88B |
 
 ## Files
 

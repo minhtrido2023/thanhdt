@@ -23,9 +23,8 @@ _Cập nhật 2026-10-30 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunS
 
 ## Xu thế dài hạn — TREND_BREAK (tầng ĐỘC LẬP, nhịp THÁNG)
 - **Trạng thái:** 🟢 TREND_OK (trên đường) — từ 2026-02
-- **Giá tháng:** 2.83 USD/kg · **MA200-eq (MA10 tháng):** 2.59 → **+9.2%** so với đường
+- **Giá tháng:** 2.83 USD/kg · **MA200-eq (MA10 tháng):** 2.59 → **+9.1%** so với đường
 - Tháng dưới đường trong 2 kỳ gần nhất: 0/2 · chuỗi 247 tháng (World Bank Pink Sheet)
-- Tháng 2026-10 là ước lượng từ các phiên ngày thật (trạng thái KHÔNG phụ thuộc vào nó)
 - Cách đọc: **XÁC NHẬN CHẾ ĐỘ dài hạn, KHÔNG phải tín hiệu bán/dự báo.** P(giảm thêm ≥15%/6th sau tín hiệu) = 31% ≈ base 32%; rổ CP cao su fwd-12m sau tín hiệu +26.5% vs base +12.5%.
 - Độc lập với WATCH/ALERT ở trên (khác chân trời: 6–24 tháng vs 1 tuần; khác nhịp: ~1 lần/18.7 tháng vs hàng tuần).
 
