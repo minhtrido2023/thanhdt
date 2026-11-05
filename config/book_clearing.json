@@ -1,0 +1,4 @@
+{
+  "apply_to_plan": false,
+  "_doc": "Knob DUY NHẤT của GĐ3 clearing (kb/projects/book-clearing-plan-20261029.md). apply_to_plan=true (đúng kiểu bool true, KHÔNG chuỗi) ⇒ clear_books.py --apply được ghi plan[\"book_transfers\"] + giảm qty lệnh. Mọi giá trị khác / file thiếu / JSON hỏng ⇒ TẮT (chỉ SHADOW). Bật cần user duyệt + arch-review + quant-skeptic APPROVED. apply_book_transfers.py KHÔNG đọc knob: plan đã duyệt có book_transfers thì phải áp hoặc pause, không được lờ đi."
+}

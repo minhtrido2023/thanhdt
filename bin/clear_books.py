@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""Clearing giữa các sổ (PARK → LAG/BAL) — GIAI ĐOẠN 1: chế độ SHADOW (chỉ báo cáo).
+"""Clearing giữa các sổ (PARK → LAG/BAL) — SHADOW (GĐ1, mặc định) + APPLY-TO-PLAN (GĐ3, sau knob).
+
+GĐ3 (05/11/2026, user duyệt): `--apply` + knob `mike/config/book_clearing.json` `apply_to_plan=true`
+(CẢ HAI, fail-closed: thiếu một ⇒ SHADOW) ⇒ ghi `plan["book_transfers"]` + giảm qty lệnh mua đích /
+bán PARK đi m (lõi `book_clearing.py`, giữ bội lô), sau khi lệnh MUA đích qua đủ cổng book đích
+(`book_clearing.target_book_gates` = đúng các hàm bot_execute). Chạy CUỐI chuỗi plan (sau
+merge_park_orders 20:20 / auto_exit_inject 20:40, trước send_plan_report 21:00). Idempotent: luôn
+HOÀN TÁC clearing cũ rồi tính lại. Plan đã duyệt ⇒ TỪ CHỐI sửa. Thực thi: `apply_book_transfers.py`.
+⚠️ `net_offsetting_orders` của bot ĐÃ gộp mua/bán ngược chiều cùng mã trong một plan ⇒ "tiết kiệm"
+ở đây là so với đặt riêng 2 lệnh; giá trị THẬT so với hiện trạng là sổ lô đúng nhãn (netting gắn cả
+lệnh net vào sổ bên lớn ⇒ PARK vẫn còn lô ⇒ L1 bán lại phiên sau = vòng tròn thật).
 
 Thiết kế: `kb/projects/book-clearing-plan-20261029.md`. Broker không có "sổ"; PARK/LAG/BAL chỉ là
 NHÃN trong sổ lô (`park_holdings.LotBook`). Khi plan T+1 vừa BÁN PARK mã X vừa MUA LAG/BAL mã X,
@@ -43,6 +53,7 @@ from zoneinfo import ZoneInfo
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _HERE)
+import book_clearing as BC  # noqa: E402
 import dnse_fee_rates as fees  # noqa: E402
 import park_holdings as ph  # noqa: E402
 import wc_paths  # noqa: E402
@@ -51,10 +62,12 @@ ICT = ZoneInfo("Asia/Ho_Chi_Minh")   # §16
 WC_ROOT = wc_paths.find_wc_root(__file__)
 PLAN_DIR = os.path.join(WC_ROOT, "data", "trade_plans")
 OUT_DIR = os.path.join(WC_ROOT, "mike", "state", "clear_books_shadow")
-LOT = 100
-TO_BOOKS = ("LAG", "BAL")
-FROM_BOOK = "PARK"
+LOT = BC.LOT
+TO_BOOKS = BC.TO_BOOKS
+FROM_BOOK = BC.FROM_BOOK
 STATUS = "SHADOW"
+APPLY = "APPLY"
+RETENTION_DAYS = 90          # state/clear_books_shadow/ ~2 file/ngày (checklist R7 mục 5)
 
 
 class DataError(Exception):
@@ -71,12 +84,7 @@ def saving_vnd(m, px_buy, px_sell, r):
     return m * px_buy * r["buy_fee"] + m * px_sell * (r["sell_fee"] + r["sell_tax"])
 
 
-def lot_feasible(m_raw, buy_qty, sell_qty):
-    """m lớn nhất ≤ m_raw sao cho phần lệnh còn lại (mua − m, bán − m) đều là bội lô 100."""
-    for m in range(int(m_raw), -1, -1):
-        if (buy_qty - m) % LOT == 0 and (sell_qty - m) % LOT == 0:
-            return m
-    return 0
+lot_feasible = BC.lot_feasible   # một định nghĩa (GĐ3: giữ phần lẻ full-exit của lệnh bán gốc)
 
 
 def load_banned():
@@ -241,13 +249,17 @@ def analyze(plan, holdings, plan_date, banned, count_fn, missed_lookback=5, r=No
 
 
 def summary_line(acct, plan_date, rep):
+    tag = rep.get("mode") or STATUS
     if rep.get("status") == "ERROR":
-        return f"[{STATUS}] clear_books {acct} {plan_date}: LỖI DỮ LIỆU — {rep['error']} (KHÔNG kết luận)"
+        return f"[{tag}] clear_books {acct} {plan_date}: LỖI DỮ LIỆU — {rep['error']} (KHÔNG kết luận)"
     parts = [f"{o['transfer_qty']}cp {o['ticker']} {o['from_book']}→{o['to_book']} "
              f"(~{o['saving_est_vnd']:,}đ)" for o in rep["opportunities"]]
-    s = (f"[{STATUS}] clear_books {acct} {plan_date}: "
-         + (f"lẽ ra chuyển {'; '.join(parts)}, tiết kiệm ~{rep['total_saving_est_vnd']:,}đ"
+    verb = "ĐÃ GHI vào plan: chuyển" if tag == APPLY else "lẽ ra chuyển"
+    s = (f"[{tag}] clear_books {acct} {plan_date}: "
+         + (f"{verb} {'; '.join(parts)}, tiết kiệm ~{rep['total_saving_est_vnd']:,}đ (so với 2 lệnh riêng)"
             if parts else "không có cơ hội chuyển nhãn"))
+    if rep.get("apply_refused"):
+        s += f" | APPLY không bật: {rep['apply_refused']}"
     if rep["missed"]:
         s += " | missed: " + "; ".join(
             f"{x['ticker']} {x['would_have_transferred_qty']}cp (mất ~{x['forgone_saving_est_vnd']:,}đ)"
@@ -259,6 +271,36 @@ def summary_line(acct, plan_date, rep):
     return s
 
 
+def _atomic_write_json_plan(path, obj):
+    """Plan: cùng định dạng writer plan khác (merge_park_orders: indent=2)."""
+    tmp = f"{path}.tmp.{os.getpid()}"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
+def prune_old_reports(out_dir, today, keep_days=RETENTION_DAYS):
+    """Xoá `<acct>_<YYYY-MM-DD>.json` có plan_date cũ hơn `keep_days` ngày. Chỉ đụng đúng mẫu tên
+    đó (file lạ giữ nguyên). Trả danh sách đã xoá."""
+    cut = (dt.date.fromisoformat(today) - dt.timedelta(days=keep_days)).isoformat()
+    gone = []
+    for fn in sorted(os.listdir(out_dir)) if os.path.isdir(out_dir) else []:
+        stem, ext = os.path.splitext(fn)
+        acct, _, d = stem.rpartition("_")
+        if ext != ".json" or not acct:
+            continue
+        try:
+            dt.date.fromisoformat(d)
+        except ValueError:
+            continue
+        if d < cut:
+            os.remove(os.path.join(out_dir, fn))
+            gone.append(fn)
+    return gone
+
+
 def _atomic_write_json(path, obj):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = f"{path}.tmp.{os.getpid()}"
@@ -267,13 +309,58 @@ def _atomic_write_json(path, obj):
     os.replace(tmp, path)
 
 
+def _approved(plan):
+    v = plan.get("approved_by") or plan.get("approved_by_user")
+    return bool(v) and str(v).strip().lower() not in ("none", "null", "nil", "nan")
+
+
+def apply_to_plan(plan, rep, acct, plan_date, gates_fn, created_at):
+    """GĐ3 lõi (không I/O): từ `plan` ĐÃ hoàn tác + `rep` của analyze() ⇒ (plan mới, transfers).
+    Cơ hội nào lệnh MUA đích trượt cổng book đích ⇒ chuyển sang `rep["blocked"]`, không ghi.
+    Hậu kiểm tự nhất quán (bảo toàn + Σ bán+chuyển ≤ sellable) ⇒ DataError nếu hỏng."""
+    keep = []
+    excluded = set(rep.get("_excluded") or [])
+    for op in rep["opportunities"]:
+        trial, xs, sk = BC.apply_opportunities(plan, [op], acct, plan_date, created_at)
+        if sk or not xs:
+            rep["blocked"].append({"ticker": op["ticker"], "to_book": op["to_book"],
+                                   "reason": f"không ghi được vào plan: {sk}"})
+            continue
+        ok, why = gates_fn(trial, xs[0], excluded)
+        if not ok:
+            rep["blocked"].append({"ticker": op["ticker"], "to_book": op["to_book"],
+                                   "reason": f"lệnh MUA {op['to_book']} không qua cổng book đích: {why}"})
+            continue
+        keep.append(op)
+    rep["opportunities"] = keep
+    rep["total_saving_est_vnd"] = sum(o["saving_est_vnd"] for o in keep)
+    new, xs, sk = BC.apply_opportunities(plan, keep, acct, plan_date, created_at)
+    probs = [p for x in xs for p in BC.binding_problems(new, x)] + BC.sell_cap_problems(new) \
+        + [f"bỏ qua {s}" for s in sk]
+    if probs:
+        raise DataError(f"hậu kiểm APPLY hỏng ⇒ KHÔNG ghi plan: {probs}")
+    return new, xs
+
+
 def run_account(acct, plan_date, asof, plan_dir, out_dir, missed_lookback, count_fn=None,
-                holdings_fn=None):
-    """I/O wrapper. Trả (rc, report). rc=2 ⇒ lỗi dữ liệu (report có status=ERROR + error)."""
+                holdings_fn=None, apply=False, knob_fn=BC.knob_enabled, gates_fn=None):
+    """I/O wrapper. Trả (rc, report). rc=2 ⇒ lỗi dữ liệu (report có status=ERROR + error).
+    `apply=True` CHỈ có hiệu lực khi knob bật (`knob_fn()`); ngược lại chạy SHADOW + ghi lý do."""
     plan_path = os.path.join(plan_dir, f"plan_{acct}_{plan_date}.json")
-    rep = {"status": STATUS, "account": acct, "plan_date": plan_date, "plan_file": plan_path,
+    mode = STATUS
+    rep = {"status": STATUS, "mode": STATUS, "account": acct, "plan_date": plan_date,
+           "plan_file": plan_path,
            "generated_at": dt.datetime.now(ICT).isoformat(timespec="seconds"),
            "fee_rates": rates(), "mode_note": "SHADOW: không sửa plan, không ghi journal, không gọi API"}
+    if apply:
+        on, why = knob_fn()
+        if on:
+            mode = APPLY
+            rep.update(status=APPLY, mode=APPLY,
+                       mode_note="APPLY: ghi plan[book_transfers] + giảm qty lệnh; KHÔNG ghi journal "
+                                 "(apply_book_transfers.py làm trước bot_execute)")
+        else:
+            rep["apply_refused"] = why
     try:
         if not os.path.exists(plan_path):
             raise DataError(f"thiếu plan {plan_path}")
@@ -283,6 +370,17 @@ def run_account(acct, plan_date, asof, plan_dir, out_dir, missed_lookback, count
             plan = json.loads(raw)
         except ValueError as e:
             raise DataError(f"plan không parse được: {e}")
+        if not isinstance(plan, dict):
+            raise DataError("plan không phải JSON object")
+        if mode == APPLY and _approved(plan):
+            raise DataError("plan ĐÃ DUYỆT (approved_by) — sửa orders[] sau khi duyệt = vô hiệu chữ ký; "
+                            "TỪ CHỐI APPLY (cùng luật merge_park_orders)")
+        try:   # luôn phân tích trên plan CHƯA clearing (idempotent: chạy lại ra cùng kết quả)
+            base, reverted = BC.revert_clearing(plan)
+        except ValueError as e:
+            raise DataError(str(e))
+        if reverted:
+            rep["reverted_previous_transfers"] = reverted
         plan_asof = (plan.get("park_trim_proposal") or {}).get("asof")
         if asof is None:
             asof = plan_asof
@@ -315,7 +413,23 @@ def run_account(acct, plan_date, asof, plan_dir, out_dir, missed_lookback, count
         rep["ledger"] = {"reconcile_ok": holdings["reconcile"]["ok"],
                          "unverified_tickers": holdings.get("unverified_tickers"),
                          "bootstrap": holdings.get("bootstrap")}
-        rep.update(analyze(plan, holdings, plan_date, banned, count_fn, missed_lookback))
+        rep.update(analyze(base, holdings, plan_date, banned, count_fn, missed_lookback))
+        if mode == APPLY:
+            rep["_excluded"] = holdings.get("excluded_tickers") or []
+            new, xs = apply_to_plan(base, rep, acct, plan_date, gates_fn or BC.target_book_gates,
+                                    rep["generated_at"])
+            rep.pop("_excluded", None)
+            new["book_clearing"] = {"mode": APPLY, "generated_at": rep["generated_at"],
+                                    "n_transfers": len(xs),
+                                    "total_saving_est_vnd": rep["total_saving_est_vnd"],
+                                    "source": "clear_books.py --apply"}
+            rep["book_transfers"] = xs
+            if json.dumps(new, sort_keys=True) != json.dumps(plan, sort_keys=True):
+                _atomic_write_json_plan(plan_path, new)
+                rep["plan_written"] = True
+                rep["plan_md5_after"] = hashlib.md5(open(plan_path, "rb").read()).hexdigest()
+            else:
+                rep["plan_written"] = False
         rc = 0
     except (DataError, SystemExit) as e:
         rep["status"] = "ERROR"
@@ -338,22 +452,30 @@ def live_accounts():
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Clearing PARK→LAG/BAL — SHADOW (chỉ báo cáo)")
+    ap = argparse.ArgumentParser(description="Clearing PARK→LAG/BAL — SHADOW / APPLY-TO-PLAN (knob)")
     ap.add_argument("--plan-date", required=True)
     ap.add_argument("--account", action="append", help="mặc định: mọi account live enabled")
     ap.add_argument("--asof", default=None, help="ngày sổ lô/broker (mặc định park_trim_proposal.asof)")
     ap.add_argument("--plan-dir", default=PLAN_DIR)
     ap.add_argument("--out-dir", default=OUT_DIR)
     ap.add_argument("--missed-lookback-sessions", type=int, default=5)
+    ap.add_argument("--apply", action="store_true",
+                    help="GĐ3: ghi vào plan — CHỈ khi knob config/book_clearing.json apply_to_plan=true")
     a = ap.parse_args()
     rc_all = 0
     for acct in a.account or live_accounts():
         rc, rep = run_account(acct, a.plan_date, a.asof, a.plan_dir, a.out_dir,
-                              a.missed_lookback_sessions)
+                              a.missed_lookback_sessions, apply=a.apply)
         print(rep["summary_line"])
         if rc:
             print(f"[clear_books] {acct}: {rep['error']}", file=sys.stderr)
         rc_all = max(rc_all, rc)
+    try:
+        gone = prune_old_reports(a.out_dir, dt.datetime.now(ICT).date().isoformat())
+        if gone:
+            print(f"[clear_books] retention {RETENTION_DAYS} ngày: xoá {len(gone)} file cũ")
+    except OSError as e:
+        print(f"[clear_books] retention lỗi (không ảnh hưởng kết quả): {e}", file=sys.stderr)
     return rc_all
 
 

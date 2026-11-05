@@ -122,15 +122,55 @@ _stale = sorted({k[1] for k, v in _by_key.items()
                  if len(v) > 1 and any(o.get("merged_from") for o in v)
                  and sum(1 for o in v if _merge_domain(o)) > 1})
 if _stale: flags.append("MERGE_STALE_SRC:" + ",".join(_stale))
+# ── GĐ3 clearing (2026-11-05): `book_transfers` CHƯA PAUSE (PLANNED/APPLIED) cũng rút PARK ⇒
+# (b) tính Σ bán + Σ chuyển; trần lấy cả từ lệnh bán đã bị clearing gỡ (removed_orders). Thêm
+# (c) BOOK_XFER_MISMATCH: lệnh liên kết phải đúng `qty_after` (lệnh mua ĐÃ giảm m, lệnh bán
+# PARK đã giảm m, Σ giảm mỗi chiều = qty chuyển) — writer nào sửa plan sau clear_books ⇒ đỏ.
+_xfers = [x for x in (d.get("book_transfers") or []) if isinstance(x, dict)
+          and x.get("status") in (None, "PLANNED", "APPLIED")]
+_xout, _xcap_src = {}, {}
+for _x in _xfers:
+    _xout[_x.get("ticker")] = _xout.get(_x.get("ticker"), 0) + _q(_x)
+    for _ro in (_x.get("removed_orders") or []):
+        if isinstance(_ro, dict) and str(_ro.get("side") or "").lower() == "sell":
+            _xcap_src.setdefault(_ro.get("ticker"), []).append(_ro)
 _over = []
-for (_side, _tk), _os in _by_key.items():
-    if _side != "sell": continue
+for _tk in sorted({k[1] for k in _by_key if k[0] == "sell"} | set(_xout)):
+    _os = _by_key.get(("sell", _tk), [])
     # (… or {}) chứ KHÔNG phải .get(k, {}): merged_from=null có thật trong plan ⇒ default
     # không được dùng ⇒ None.get() AttributeError giết cả khối (idiom giống dòng approved).
-    _cap = max(((o.get("merged_from") or {}).get("sellable_at_calc") or 0) for o in _os)
-    if _cap and sum(_q(o) for o in _os) > _cap:
-        _over.append(f"{_tk}({sum(_q(o) for o in _os)}>{_cap})")
+    _cap = max([((o.get("merged_from") or {}).get("sellable_at_calc") or 0)
+                for o in _os + _xcap_src.get(_tk, [])] or [0])
+    _tot = sum(_q(o) for o in _os) + _xout.get(_tk, 0)
+    if _cap and _tot > _cap:
+        _over.append(f"{_tk}({_tot}>{_cap})")
 if _over: flags.append("SELL_GT_SELLABLE:" + ",".join(sorted(_over)))
+_xbad = []
+_by_id = {}
+for _o in _orders:
+    _by_id.setdefault(_o.get("id"), []).append(_o)
+# qty CUỐI mỗi lệnh = min(qty_after) trên mọi transfer chưa PAUSE (2 sổ đích có thể giảm nối tiếp
+# cùng một lệnh bán PARK) — cùng định nghĩa `book_clearing.final_qty_map`.
+_final = {}
+for _x in _xfers:
+    for _side in ("buy_orders", "sell_orders"):
+        for _r in (_x.get(_side) or []):
+            _v = _q({"qty": _r.get("qty_after")})
+            _final[_r.get("id")] = min(_v, _final.get(_r.get("id"), _v))
+for _x in _xfers:
+    _bad = False
+    for _side in ("buy_orders", "sell_orders"):
+        _refs = _x.get(_side) or []
+        if sum(_q({"qty": r.get("orig_qty")}) - _q({"qty": r.get("qty_after")}) for r in _refs) != _q(_x):
+            _bad = True
+        for _r in _refs:
+            _got = _by_id.get(_r.get("id"), [])
+            _want = _final.get(_r.get("id"), 0)
+            if (_want == 0 and _got) or (_want > 0 and (len(_got) != 1 or _q(_got[0]) != _want)):
+                _bad = True
+    if _bad or _q(_x) <= 0:
+        _xbad.append(str(_x.get("id") or _x.get("ticker") or "?"))
+if _xbad: flags.append("BOOK_XFER_MISMATCH:" + ",".join(sorted(_xbad)))
 if _bad_qty: flags.append("BAD_QTY:" + ",".join(sorted(set(_bad_qty))))
 
 # Plan HOLD (0 lệnh) không có gì để thực thi — approval chỉ bắt buộc khi có lệnh thật.

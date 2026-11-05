@@ -94,6 +94,7 @@ if _BIN_DIR not in sys.path:
     sys.path.insert(0, _BIN_DIR)
 from dnse_fee_rates import FEE_RATE_SELL_PCT  # noqa: E402  phí bán THẬT 0,097% (aria-F1 CONFIRMED)
 import wc_paths  # noqa: E402
+import book_clearing as BC  # noqa: E402  GĐ3 clearing: hoàn tác trước khi dựng lại vùng PARK
 
 LOT = 100
 OWNER = "park_merge_v1"
@@ -269,6 +270,24 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
               "per_ticker": {}, "dropped_owned": [], "kept_foreign": [],
               "generated": [], "invariants": []}
     p = copy.deepcopy(plan)
+    # ── −1. HOÀN TÁC clearing GĐ3 (clear_books --apply) ──────────────────────────────────
+    # clear_books đã giảm lệnh bán PARK (vùng merge sở hữu) và lệnh mua đích (ngoài vùng) đi m,
+    # dựa trên L1/L2 CỦA LẦN TRƯỚC. Merge dựng lại vùng PARK từ L1/L2 HIỆN TẠI ⇒ transfer cũ mất
+    # căn cứ: giữ nó thì bán PARK đủ S + chuyển m = rút PARK quá tay, lệnh mua đích hụt m. Nên
+    # hoàn tác TRƯỚC (khôi phục qty gốc, xoá `book_transfers`) — chiều an toàn: tệ nhất mất phần
+    # tiết kiệm; clear_books chạy SAU merge trong chuỗi (20:45) sẽ tính lại. Transfer đã APPLIED
+    # (journal đã ghi) ⇒ không hoàn tác được ⇒ REFUSED.
+    try:
+        p, _cleared = BC.revert_clearing(p)
+    except ValueError as e:
+        _cleared, _clear_err = None, str(e)
+    else:
+        _clear_err = None
+        if _cleared:
+            report["warnings"].append(
+                f"HOÀN TÁC clearing GĐ3 {_cleared} (khôi phục qty gốc lệnh mua/bán, xoá book_transfers) "
+                f"— vùng PARK dựng lại từ L1/L2 hiện tại; chạy lại clear_books --apply sau merge.")
+            report["clearing_reverted"] = _cleared
     orig_orders = list(p.get("orders") or [])
 
     # ── 0. XOÁ VÔ ĐIỀU KIỆN mọi khoá `jit_*` trên MỌI lệnh (kể cả ngoài vùng sở hữu) ──
@@ -331,6 +350,9 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
         report["status"] = "REFUSED"
         report["errors"].append(msg)
         return copy.deepcopy(plan), report
+
+    if _clear_err:
+        return refuse(f"clearing GĐ3 không hoàn tác được: {_clear_err}")
 
     # ── cổng duyệt ────────────────────────────────────────────────────────────────────
     # Đọc CẢ HAI tên field, đúng tập mà tầng dưới công nhận (quant-skeptic vòng 8 — lỗ
@@ -694,7 +716,7 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
             f"sống qua merge thì đặt tên KHÔNG bắt đầu bằng `jit_`.")
 
     # ── 7. BẤT BIẾN HẬU KIỂM trên TOÀN BỘ orders[] ───────────────────────────────────
-    inv = _check_invariants(p["orders"], agg, orig_orders)
+    inv = _check_invariants(p["orders"], agg, orig_orders, p.get("book_transfers"))
     report["invariants"] = inv["checks"]
     if inv["failed"]:
         report["status"] = "REFUSED"
@@ -715,8 +737,10 @@ def merge_park_orders(plan, l1=None, l2=None, *, allow_approved=False, ex_map=No
     return p, report
 
 
-def _check_invariants(orders, agg, orig_orders):
-    """Bất biến hậu kiểm — chạy trên MỌI lệnh, không riêng lệnh merge sinh ra."""
+def _check_invariants(orders, agg, orig_orders, transfers=None):
+    """Bất biến hậu kiểm — chạy trên MỌI lệnh, không riêng lệnh merge sinh ra.
+    `transfers` = plan["book_transfers"] (GĐ3): lượng PARK chuyển nhãn CHƯA áp cũng rút khỏi
+    sellable ⇒ tính chung vào I2 (sau bước −1 hoàn tác thì rỗng; giữ để bất biến tự đứng)."""
     failed, checks = [], []
 
     ids = [o.get("id") for o in orders]
@@ -736,6 +760,9 @@ def _check_invariants(orders, agg, orig_orders):
         s = o.get("sellable")
         if s is not None and _i(s, None) is not None:
             cap_by_tk[tk] = min(cap_by_tk.get(tk, 10**12), _i(s))
+    for x in transfers or []:
+        if isinstance(x, dict) and x.get("status") in (None, BC.ST_PLANNED):
+            sell_by_tk[x.get("ticker")] = sell_by_tk.get(x.get("ticker"), 0) + max(0, _i(x.get("qty")))
     for tk, d in agg.items():
         if d.get("sellable") is not None:
             cap_by_tk[tk] = min(cap_by_tk.get(tk, 10**12), d["sellable"])
