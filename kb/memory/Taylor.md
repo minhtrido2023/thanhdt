@@ -41,3 +41,14 @@
 - [2026-11-05T02:00:34Z] ĐANG DỞ: DD redo VÒNG 2 NNC DRI MVC job Taylor_20261105_020023 | NEXT: đọc STANDARD_r2 + E_CORRECTIONS, NNC→DRI→MVC
 - [2026-11-05T02:03:44Z] ĐANG DỞ job Taylor_20261105_020018 (r2 SIP SCL TV1 TV2): lib _common_g2r2/ddr2.py xong | NEXT model_sip_r2.py → SCL → TV1 → TV2
 - [2026-11-05T02:05:51Z] ĐANG DỞ job Taylor_20261105_020023: NNC r2 XONG; NEXT DRI r2 (E_CORRECTIONS DRI: bo haircut Dakruco 50%, tien Lao 15%, NQ15 dau gia 1.975 ha, LOCK thieu) roi MVC
+- [2026-11-05T02:07:18Z] ĐANG DỞ job Taylor_20261105_020016 (DD r2): DGC XONG (REPORT_r2); NEXT DDV → PVP → PVT, dùng _common_014127/common_r2.py, compare_r2.py, lock_r2.sh
+- [2026-11-05T02:08:36Z] ĐANG DỞ job Taylor_20261105_020013 (DD r2): MBB XONG (MBB/REPORT_r2.md); NEXT FPT→HPG→HHS dùng _common_014125/r2common.py
+- [2026-11-05T02:09:12Z] ĐANG DỞ job Taylor_20261105_020016 (DD r2): DGC, DDV XONG; NEXT PVP → PVT (common_r2/compare_r2/lock_r2.sh ở _common_014127)
+- [2026-11-05T02:10:13Z] ĐANG DỞ job Taylor_20261105_020023: NNC, DRI r2 XONG; NEXT MVC r2 (bo tre GP -527 khoi base, dua lai truc bien Tan Lap, CK sleeve, WARNING uy quyen mua NNC 51%)
+- [2026-11-05T02:10:32Z] ĐANG DỞ job Taylor_20261105_020013 (DD r2): MBB, FPT XONG; NEXT HPG (trục TLSH + slope LN) → HHS (gov/BĐSĐT/I.14)
+- [2026-11-05T02:11:31Z] ĐANG DỞ job Taylor_20261105_020016 (DD r2): DGC, DDV, PVP XONG; NEXT PVT rồi bảng tổng hợp + bus
+- [2026-11-05T02:11:42Z] ĐANG DỞ job Taylor_20261105_020018 r2: 4 model r2 xong+selfcheck OK; SIP REPORT_r2/SUMMARY/bus XONG | NEXT meta_r2+REPORT_r2 SCL, TV1, TV2 rồi bảng cuối
+- [2026-11-05T02:11:53Z] ĐANG DỞ job Taylor_20261105_020021 DD r2: NT2,SAS,SZL XONG (REPORT_r2 + bus); NEXT TCH (hold axis 0/10/20/30, gov+s_new song song, cờ skeptic B9 Sài Gòn Tài Lộc 678)
+- [2026-11-05T02:12:25Z] ĐANG DỞ job Taylor_20261105_020013 (DD r2): MBB, FPT, HPG XONG; NEXT HHS (trục gov/BĐSĐT/I.14/ký quỹ) rồi bảng tổng + bus
+- [2026-11-05T02:13:40Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020016 DGC/DDV/PVP/PVT (SUMMARY_r2_job020016.md); CHỜ Mike skeptic; DGC đổi DƯỚI→TRONG; PVT 2 bản song song TRÊN vùng
+- [2026-11-05T02:13:50Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020023 NNC/DRI/MVC (TABLE_r2_Taylor_20261105_020023.md); CHỜ Mike skeptic vòng 2 + legal-vn Đ195/ngưỡng GD BLQ DRI
