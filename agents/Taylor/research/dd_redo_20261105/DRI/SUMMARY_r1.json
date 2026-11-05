@@ -1,0 +1,47 @@
+{
+ "ticker": "DRI",
+ "asof_price_date": "2026-11-04",
+ "price": 13500.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+ },
+ "center_pre_liq": 14621,
+ "center_post_liq": 14329,
+ "p10_post": 11255,
+ "p50_post": 14296,
+ "p90_post": 17422,
+ "p10_pre": 11485,
+ "p90_pre": 17777,
+ "liq_disc_5bn": 0.01997128813888818,
+ "px_vs_center_post": -0.05788195020150433,
+ "px_vs_p10_post": 0.1994333702652502,
+ "px_vs_p90_post": -0.22510823946537473,
+ "grid_desc": "Luoi co trong so n=18: kich ban (co so NPV0 tai canh 0,80 / tai canh bi buoc 0,20 - nhan dinh) x mid RSS3 thuc P25/TB/P75 (2014-01..2026-09; trong so .25/.5/.25) x doi cao L 22/27/32 (gia dinh; .25/.5/.25); r co dinh 13.50%. Phan vi co trong so. Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 13300,
+  "center": 14360,
+  "high": 16490,
+  "dd_date": "2026-11-03",
+  "rev": 2,
+  "zone_def": "P25-P75 sau CK thanh khoan (ban cu)",
+  "source_file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md"
+ },
+ "center_change_pct": -0.0021299126856888506,
+ "change_reason": "Tam cu 14.360 = 0,8xTB luoi base + 0,2xTB luoi bi buoc TREN luoi co truc r 11,5/13,5/15,5 (ham loi theo r keo TB len) va CK 2,0% (ADV 8,33 ty toi 02/11). Moi: r co dinh 13,5% (lai huy dong khong doi), ADV toi 04/11. Vung cu = P25-P75 luoi base; moi = P10-P90 luoi co kich ban la truc => cận dưới thap hon nhieu (gom ca nhanh bi buoc).",
+ "warnings": [
+  "Phap ly/quan tri (WARNING): cho Dakruco (co dong ~45%) vay con 40 ty, TSDB 6 tr cp DRI",
+  "NQ HDQT 15 (11/2026): nghien cuu mua Dakruwood tu Dakruco - giao dich ben lien quan (HDQT xet 12/2026)",
+  "Tien gui Quy TDND Cao su Dak Lak 70 ty + gop von 3 ty (kiem toan ban nien chua xac dinh gia tri thu hoi khoan gop)",
+  "~197 ty tien tai Lao khong thuyet minh nguyen te/lai suat/ky han; van ban to nhuong chua cong khai; mot phan dat thuoc quy hoach rung bao ton"
+ ],
+ "open_issues": [
+  "Hop dong to nhuong 01616/KD/DDT4 chua xac minh (quyet dinh p tai canh bi buoc = 20% nhan dinh)",
+  "Doi cao L 22/27/32 la gia dinh, khong co dinh muc nguon",
+  "SXKD thang 10 (~10/11/2026) - kiem toc do ban hang ton 1.717 t",
+  "Chuyen san HOSE Q4/2026 chua co chap thuan"
+ ]
+}

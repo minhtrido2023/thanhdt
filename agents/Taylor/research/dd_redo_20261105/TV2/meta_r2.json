@@ -1,0 +1,22 @@
+{
+ "grid_desc": "5 trục: LNST bền 2027–28 kịch bản 250/177,5/110 tỷ (0,25/0,5/0,25) × LNST ×0,9/1/1,1 × g 3/4/5% × mất phơi nhiễm CMC 0/15/30/50% sau thuế (0,45/0,30/0,15/0,10) × độ bền LN sau 2028 sập 70%/bền/+30% (0,25/0,5/0,25); P/E nội tại sàn 0, vốn chủ sàn 0; phân vị wpct mức kết cục",
+ "label_note": "TRONG vùng giữ nguyên so vòng 1 — NHƯNG nhãn này có được CHỈ vì định nghĩa vùng P10–P90 (điều 7): theo định nghĩa v3 01/11 (vùng = dải kịch bản cơ sở 17.100–25.300) và theo phản biện 01/11, giá 27.400 nằm TRÊN vùng; 84,1% trọng số kết cục dưới giá, giá cao hơn tâm 73% và cao hơn P75 (23.133) 18%; P90 30.675 do riêng nhánh tích cực (84% trọng số quanh P90, w 0,25).",
+ "center_vs_p50_note": "Tâm (kỳ vọng) 15.832 ≈ P50 15.843; tham số trung tâm (177,5 | g4 | CMC 0% | bền) 18.883 cao hơn tâm 19% vì tham số trung tâm đặt CMC ở sổ sách và độ bền 'bền', còn lưới có xác suất mất CMC và sập LN. P10 do nhánh tiêu cực (70% quanh P10); P90 do nhánh tích cực.",
+ "change_reason": "Tâm sau CK 15.832 vs vòng 1 18.784 (−15,7%, >10%). Nguyên nhân: (1) CMC tách thành trục độc lập 0/15/30/50% áp cho MỌI kịch bản (vòng 1: −80 tỷ chỉ ở nhánh tiêu cực) — kỳ vọng mất 14,0% phơi nhiễm ×0,8 thay vì 0,25×80 tỷ; (2) thêm trục độ bền LN sau 2028 hai chiều (base rate sập ~70% sau đỉnh 2017–21, SKEPTIC CAO-1) — ở ROE thấp P/E nội tại nhỏ nên chiều xuống lớn hơn chiều lên. Song song: không trục độ bền 17.690; chính sách trả hết khi ROE<r 17.268; lưới vòng 1 + wpct 18.783. Nhãn không đổi (TRONG, xem label_note).",
+ "warnings": [
+  "Vụ án EVNNPT/PC1: cựu Chủ tịch Nguyễn Chơn Hùng + KTT Bùi Thị Ngọc Lý khởi tố (CBTT 21/05/2026; VKSND tối cao phê chuẩn — thanhtra.com.vn); HĐQT mới, Chủ tịch Phạm Liên Hải từ 30/06/2026 (nhadautu.vn); pháp nhân chưa bị khởi tố; soát xét H1 UHY có đoạn nhấn mạnh",
+  "Họp báo Bộ Công an 02/07/2026 nêu 13 pháp nhân vi phạm gồm 'các công ty tư vấn xây dựng điện' (không nêu tên) — chưa xác định TV2 có trong danh sách (SKEPTIC TB-3); làn sóng khởi tố PECC1/PECC3 cùng kỳ",
+  "Phơi nhiễm CMC (liên kết 25%): phải thu 657–666 + đầu tư 188,6 ≈ 64% VCSH mẹ, không dự phòng, thu tiền Q3 ≈ 0 (nay là TRỤC lưới); TM3 vs TM32 lệch số dư chưa giải",
+  "HĐ tổng thầu với bên liên quan do HĐQT/TGĐ tự duyệt (NQ HĐQT 29/10 loại HĐ nhận thầu khỏi ngưỡng 35% ĐHĐCĐ) — phù hợp Đ.167 LDN 2020 chưa thẩm định (legal-vn)",
+  "Room ngoại 0% từ 14/09/2026 (hồ sơ nộp 08/09 viện dẫn NĐ 245/2025 — liên hệ với bổ sung ngành nghề NQ26 Đ.11 chỉ là giả thuyết)",
+  "Điểm tích cực đã kiểm: HĐ kiểm toán + soát xét 2026 với UHY ký 15/07/2026 (CBTT 2604/PECC2-TC&PC) — không có rủi ro 'không có kiểm toán viên' kiểu TV1",
+  "Tra tin 05/11/2026 (WebSearch: doanhnhan.baophapluat.vn, nhadautu.vn, vietnamfinance.vn, thanhtra.com.vn): không thấy khởi tố pháp nhân/kết luận mới sau 01/11; WebSearch ≠ CBTT sàn"
+ ],
+ "open_issues": [
+  "Giá trị HĐ EPC không công bố ⇒ không tính được tỷ lệ ứng/giá trị HĐ, lãi gộp còn lại",
+  "Xác suất CMC, độ bền LN, trọng số 25/50/25 [UL]; độ nhạy trọng số 30/50/20 ⇒ tâm 16.750, 20/50/30 ⇒ 14.915",
+  "Chính sách cổ tức khi ROE<r (sàn P/E 0 vs trả hết) đổi P10 2.726 ↔ 6.319",
+  "Danh sách 13 pháp nhân (họp báo 02/07) chưa có"
+ ],
+ "fearbuy_sleeve_eligible": "KHÔNG — giá cao hơn tâm 73%, không phải trạng thái sợ hãi; vụ án chưa kết luận"
+}

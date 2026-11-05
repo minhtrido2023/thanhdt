@@ -1,0 +1,50 @@
+{
+ "ticker": "TV2",
+ "asof_price_date": "2026-11-04",
+ "price": 27400.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 7.4,
+  "date": "2026-11-03",
+  "current_rate": 7.4,
+  "current_source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 19270,
+ "center_post_liq": 18784,
+ "p10_post": 6967,
+ "p50_post": 18883,
+ "p90_post": 31157,
+ "p10_pre": 7147,
+ "p90_pre": 31963,
+ "liq_discount_ref": 0.0252,
+ "liq_ref_size_ty": 5.0,
+ "adv120_median_ty": 3.22,
+ "px_vs_center": 0.4587,
+ "px_vs_p10": 2.9328,
+ "px_vs_p90": -0.1206,
+ "grid_desc": "3 kịch bản LNST bền 2027–28 (tích cực 250 / cơ sở 177,5 / tiêu cực 110 tỷ + one-off CMC −80; trọng số 25/50/25, ước lượng) × LNST ×{0,9;1;1,1} × g {3;4;5}% trong P/E nội tại (1−g/ROE)/(r−g), đều trong kịch bản (n=27)",
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 17100,
+  "center": 20700,
+  "high": 25300,
+  "dd_date": "2026-11-01",
+  "basis": "v3: kỳ vọng 25/50/25, P/E gán 7–9x; vùng = dải kịch bản cơ sở; chưa CK thanh khoản"
+ },
+ "center_new_vs_old": -0.0925,
+ "change_reason": "Tâm sau CK 18.784 vs cũ v3 20.700 (−9,3%, <10%). Nguyên nhân: P/E gán tay 7–9x (mọi kịch bản) → P/E nội tại từ r 13,5% và ROE kịch bản (8,28 / 7,37 / 5,43x) — chủ yếu hạ kịch bản tiêu cực (11.000 → 7.665); CK thanh khoản 2,52% @5 tỷ (−486). Đối chiếu P/E pha đỉnh 7,45x cho 19.425 trước CK, sát tâm mới.",
+ "warnings": [
+  "Vụ án EVNNPT/PC1: cựu Chủ tịch + KTT bị khởi tố tham ô (Đ.353), VKSND tối cao phê chuẩn 05/2026; pháp nhân TV2 chưa bị khởi tố; soát xét H1 có đoạn nhấn mạnh",
+  "Phơi nhiễm CMC (bên liên quan, TV2 giữ 25%): phải thu 657–666 + đầu tư 188,6 ≈ 64% VCSH mẹ, không dự phòng, thu tiền Q3 ≈ 0; mất 15/30/50% ⇒ −1.519/−3.039/−5.065 đ/cp",
+  "Room ngoại 0% từ 14/09/2026",
+  "HĐ tổng thầu với bên liên quan HĐQT/TGĐ tự duyệt (NQ HĐQT 29/10) — tính phù hợp Đ.167 LDN chưa thẩm định",
+  "Nhãn TRONG vùng nhưng giá +45,9% so tâm: P90 rơi vào cụm kịch bản tích cực (trọng số 25%); so P75 21.859 giá cao hơn 25%"
+ ],
+ "open_issues": [
+  "Giá trị HĐ EPC không công bố ⇒ không tính được tỷ lệ ứng/giá trị HĐ, lãi gộp còn lại",
+  "TM3 vs TM32 lệch số dư CMC chưa giải",
+  "LNST kịch bản 2027–28 và trọng số 25/50/25 là ước lượng (giữ từ v3)",
+  "Chưa quét tin vụ án sau 01/11"
+ ],
+ "source_calc": "calc/model_tv2_out.json"
+}

@@ -1,0 +1,140 @@
+{
+ "ticker": "DGC",
+ "ore_weight_sens_pre": {
+  "w_molai0.0": 40652,
+  "w_molai0.2": 43394,
+  "w_molai0.5": 47506,
+  "w_molai0.8": 51618
+ },
+ "r": 0.135,
+ "center_pre": 47505.97110436479,
+ "grid_vals": [
+  31372.67409009107,
+  32584.183543147115,
+  33795.692996203165,
+  35007.2024492592,
+  36218.711902315255,
+  45079.63338047818,
+  46291.14283353422,
+  47502.65228659028,
+  48714.16173964631,
+  49925.67119270235,
+  37968.701190179425,
+  39845.03862784501,
+  41721.37606551061,
+  43597.7135031762,
+  45474.0509408418,
+  51675.66048056654,
+  53551.997918232126,
+  55428.33535589774,
+  57304.67279356332,
+  59181.0102312289,
+  43203.982447990835,
+  45734.73004288286,
+  48265.477637774886,
+  50796.225232666904,
+  53326.972827558915,
+  56910.94173837795,
+  59441.68933326996,
+  61972.43692816198,
+  64503.18452305401,
+  67033.93211794604
+ ],
+ "grid_wts": [
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.05,
+  0.05,
+  0.05,
+  0.05,
+  0.05,
+  0.05,
+  0.05,
+  0.05,
+  0.05,
+  0.05,
+  0.02,
+  0.02,
+  0.02,
+  0.02,
+  0.02,
+  0.02,
+  0.02,
+  0.02,
+  0.02,
+  0.02
+ ],
+ "grid_desc": "3 kich ban (xau/co so/tot, w 0,3/0,5/0,2) x nguon quang 2 trang thai (dung/mo lai 2028, w 0,5/0,5) x he so EBIT loi 5 diem 0,8-1,2 (deu); n=30; trong so o = w_kb x w_quang / 5",
+ "r_sens_pre": {
+  "beta0.5_-100bp": 48771,
+  "beta0.5_-50bp": 48123,
+  "beta0.5_+50bp": 46918,
+  "beta0.5_+100bp": 46357,
+  "beta1.0_-100bp": 50171,
+  "beta1.0_-50bp": 48771,
+  "beta1.0_+50bp": 46357,
+  "beta1.0_+100bp": 45309,
+  "base": 47506
+ },
+ "scenarios_pre": {
+  "xau|dung": 33796,
+  "xau|molai": 47503,
+  "coso|dung": 41721,
+  "coso|molai": 55428,
+  "tot|dung": 48265,
+  "tot|molai": 61972
+ },
+ "parts": {
+  "net_cash": 8370.2,
+  "prov": 200.0,
+  "fund_ktpl": 592.8,
+  "ns_book": 1408.8,
+  "s_np": 0.07469749304434821,
+  "s_eq": 0.029737431908924937,
+  "t_near": 0.13181385912635518,
+  "ebit_9t": 1053.76,
+  "core_coso_dung": 7701.201358637002,
+  "other_ps_coso": 22958.001688854667,
+  "tv_share_coso_dung": 0.7793364705571789
+ },
+ "g_x_r": {
+  "g2%": {
+   "r12.5%": 49190,
+   "r13.5%": 46836,
+   "r14.5%": 44863
+  },
+  "g3%": {
+   "r12.5%": 50171,
+   "r13.5%": 47506,
+   "r14.5%": 45309
+  },
+  "g4%": {
+   "r12.5%": 51402,
+   "r13.5%": 48335,
+   "r14.5%": 45856
+  }
+ },
+ "free_float": 0.6901,
+ "free_float_src": "1 - co dong lon 30/09 (Dao Huu Huyen 18,38%, Ngo Thi Ngoc Lan 6,64%, Dao Huu Kha 5,97%; 1 nguon bao chi, dgc_valuation_20261029_r12/REPORT)",
+ "change_reason": "Ke 13,5% neo lai huy dong (cu 13%/12,5-13,5%); bo haircut phap ly tien rong 3-29% khoi co so (phap ly = WARNING); Nghi Son co so = so sach NPV=0 (cu: rong -447 d/cp); DCF loi Gordon (g 3%, RONIC 20%) thay P/E 6-8 tren LN loi; co trong so cho trang thai nguon quang (cu: A7/B7 khong chon); co chiet khau thanh khoan",
+ "warnings": [
+  "Phap ly: vu an moi truong/khai thac, Chu tich HDQT cu Dao Huu Huyen (18,38%) la 1 trong 14 bi can; khai truong dung — WARNING, khong loai, khong dinh luong trong co so",
+  "HOSE han che giao dich (chi phien chieu) — thanh khoan thap hon lich su",
+  "Du phong phai tra 200 ty: mot lan hay lap lai CHUA phan dinh (kich ban xau = lap lai 100 ty/quy)",
+  "Tap trung vi the ZaloPay (10.000 cp) — xem ho so cu"
+ ],
+ "open_issues": [
+  "Von Nghi Son 2.400 hay 2.900 ty chua co van ban goc",
+  "Ty trong nguon quang mo lai 0,5 la uoc luong",
+  "EBIT 2027-28 lay tu nen r12 (bien gop 14,5-19%), chua cap nhat gia luu huynh/P4 moi",
+  "LCTT 9T lech 48,23 ty trong ban goc"
+ ]
+}

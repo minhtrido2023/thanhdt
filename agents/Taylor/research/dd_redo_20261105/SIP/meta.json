@@ -1,0 +1,16 @@
+{
+ "grid_desc": "3 kịch bản (tốt/cơ sở/xấu, trọng số 20/50/30) × tỷ/ha toàn phần cho 937 ha ×{0,75;1;1,25} × g mảng vận hành {−1;0;+1}pp, trọng số đều trong kịch bản",
+ "change_reason": "Tâm sau CK 53.175 vs cũ 47.700 (+11,5%, >10%). Nguyên nhân chính: (1) bỏ chiết khấu quản trị 10% khỏi cơ sở (pháp lý/quản trị chỉ WARNING; riêng mục này ≈ −5.300 đ/cp nếu giữ); (2) thu hồi chi phí đã chi cho quỹ đất 60% → 100% ở cơ sở (luật NPV=0; ≈ +2.300); (3) lỗ tín dụng cơ sở 5% → 0% (không có dự phòng/ngoại trừ; ≈ +900). Ngược chiều: PE mảng vận hành nay suy từ r 13,5% (8,56x vs 9x gán tay) và PV đất chiết khấu 13,5% thay 13%.",
+ "warnings": [
+  "Tín dụng phi ngân hàng 6.016 tỷ = 116% VCSH mẹ: cho CTCK vay 4.223 (68,93% không TS bảo đảm bên vay, bên vay không nêu tên) + TP DN 1.792 (GTHL chưa xác định) — TM4a/4b BCTC HN Q3/2026; mỗi 10% lỗ phần không bảo đảm ≈ −1.800 đ/cp",
+  "Tạm ứng 635,6 tỷ cho thành viên HĐQT/BGĐ/BKS/quản lý (TM40), đứng yên ≥2 năm — cờ bên liên quan; mất trọn ≈ −2.600 đ/cp",
+  "Nếu áp chiết khấu quản trị 10% (như DD cũ) tâm còn ≈ 47.900 — chỉ là độ nhạy, không vào tâm",
+  "Vay NH tín chấp ~4.374 tỷ song song khoản cho vay CTCK (suy luận từ số dư)"
+ ],
+ "open_issues": [
+  "Chưa có BCTC từng công ty con ⇒ NCI hiệu dụng 8,5/20/31% là ước lượng (GAPS G14 DD cũ)",
+  "Giá thực thu/ha Phước Đông chưa xác minh bằng hợp đồng (báo chí ~90–110 USD/m²)",
+  "Chưa quét CBTT/tin mới sau 01/11/2026",
+  "Q3/2026 HN chưa soát xét"
+ ]
+}

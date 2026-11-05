@@ -1,0 +1,3 @@
+6688f1e61c8568f63fae889312462442  ../../../dd_NNC_20261030/r6/calc/nnc_model_r6.py
+8f3a3cc715f1fec193c47cb62393bd6b  ../../../dd_MVC_20261103/r8/calc/model_r8.py
+7486a7f322a400a441844d67ffbbdbfb  ../../../dd_MVC_20261103/r9/calc/grid_r9.csv

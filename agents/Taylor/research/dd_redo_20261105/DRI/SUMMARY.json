@@ -1,0 +1,153 @@
+{
+ "ticker": "DRI",
+ "round": 2,
+ "job": "Taylor_20261105_020023",
+ "asof_price_date": "2026-11-04",
+ "price": 13500.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+ },
+ "center_pre_liq": 14379,
+ "center_post_liq": 14092,
+ "p10_post": 12006,
+ "p50_post": 14235,
+ "p90_post": 16146,
+ "p10_pre": 12250,
+ "p90_pre": 16475,
+ "p10_out": 12006,
+ "p50_out": 14235,
+ "p90_out": 16146,
+ "min_out": 9737,
+ "pct_weight_below_price": 0.35250000000000004,
+ "n_outcomes": 36,
+ "n_cells": 18,
+ "liq_disc_5bn": 0.01997128813888818,
+ "ck_ref_size": {
+  "size_vnd": 5000000000.0,
+  "Y": 1.0,
+  "disc_adv250": 0.01997128813888818,
+  "disc_adv60": 0.015503364391520665,
+  "q_over_adv250": 0.60056054158934,
+  "note": "5 ty = quy uoc fleet (~65x vi the that 75 tr da dong); Q/ADV250 0,6x trong vung hieu chinh"
+ },
+ "ck_real_sleeve": {
+  "10tr": {
+   "adv250": 0.0008931431575357847,
+   "adv60": 0.0006933315331877975
+  },
+  "40tr": {
+   "adv250": 0.0017862863150715693,
+   "adv60": 0.001386663066375595
+  }
+ },
+ "px_vs_center_post": -0.04201388924906313,
+ "px_vs_p10_post": 0.12445432727824879,
+ "px_vs_p90_post": -0.16388059343928985,
+ "label": "TRONG vùng",
+ "label_note": "TRONG vung nhu vong 1. Vung so voi so muc gia cu doi chu yeu do DINH NGHIA (P25-P75 luoi base -> P10-P90 muc ket cuc). Luat 4 (gia <= 0,85 x tam): KHONG dat.",
+ "center_vs_p50_note": "tam = ky vong luoi 14,379 truoc CK; gia tri tai tham so trung tam (mid TB, L27, 0,8 NPV0 + 0,2 kinh te) 14,730; P50 ket cuc 14,525. Duoi P10 do nhanh KINH TE (0,20) quyet dinh mot phan (min 9,737 sau CK).",
+ "axes_included": [
+  "doc NQ15: NPV0 0,80 / KINH TE (tai canh kinh te engine m7) 0,20 [trong so nhan dinh UL]",
+  "mid RSS3 thuc 2014-01..2026-09 P25/TB/P75 (.25/.5/.25)",
+  "doi cao L 22/27/32 (.25/.5/.25) [gia dinh, khong co dinh muc nguon]",
+  "ket cuc trong o: duong gia PEAK/MID wp 0,6/0,4 [UL]"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "r",
+   "reason": "co dinh 13,5%; do nhay +-50/100bp rieng"
+  },
+  {
+   "axis": "ban cu giu vuon toi L27 (bo qua NQ15)",
+   "reason": "NQ HDQT 15 Dieu 4 la du lieu quan sat; bao song song tam 15,577 sau CK"
+  },
+  {
+   "axis": "wp PEAK",
+   "reason": "khai [UL]; nhay wp 0 -> 14,532, 0,5 -> 14,165, 1 -> 13,799"
+  },
+  {
+   "axis": "FCF = 90% LN loi",
+   "reason": "[UL]; 80% 13,219 / 100% 14,965"
+  },
+  {
+   "axis": "haircut khoan vay Dakruco / tien Lao",
+   "reason": "khong co co so du lieu -> WARNING + do nhay"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "Khoan vay Dakruco 40 ty",
+   "effect_dong_per_share": 0,
+   "basis": "so sach day du (dang tra dung han 80->40 ty H1, lai ~9%, TSDB 6 tr cp DRI)",
+   "source": "BCTC HN Q3/2026; vong 1 cat 50% (-268 sau CK) -> do nhay"
+  },
+  {
+   "item": "Tien tai Lao ~197 ty",
+   "effect_dong_per_share": 0,
+   "basis": "so sach; vong 1 giu lai 15% la DOAN -> do nhay (-395)",
+   "source": "BCTC HN Q3/2026"
+  },
+  {
+   "item": "Thue chuyen LN Lao wht 10% + quy du phong TC Lao TAU + KTPL",
+   "effect_dong_per_share": null,
+   "basis": "giu nhu engine r4: TAU/KTPL tu BCTC; wht 10% = gia dinh engine, CHUA dan nguon luat thue Lao",
+   "source": "r3/model.py dong 26-28"
+  },
+  {
+   "item": "Gia go thanh ly",
+   "effect_dong_per_share": 791,
+   "basis": "gia khoi diem NQ15 36 tr LAK/ha = 41.05 tr VND/ha thay uoc 20,87 tu ~54 ha; ap cho MOI ha thanh ly",
+   "source": "NQ HDQT 15 Dieu 4 (04/11/2026)"
+  },
+  {
+   "item": "XDCB do dang 72,71 ty",
+   "effect_dong_per_share": 993,
+   "basis": "so sach (NPV0)",
+   "source": "BCTC HN Q3 ma 252"
+  }
+ ],
+ "grid_desc": "Luoi MUC KET CUC n=36 (18 o x 2 duong gia). Doc NQ15 (NPV0 0,80 / KINH TE 0,20) x mid 3 x L 3; ket cuc PEAK 0,6/MID 0,4. r 13,5%. Base: khoan vay Dakruco, tien Lao theo so sach; thanh ly 1.975,23 ha 2027-30 gia khoi diem NQ15; tai canh NPV0. Phan vi _shared/wpct.py. Sau CK = x(1 - CK 5 ty).",
+ "zone_old": {
+  "low": 13300,
+  "center": 14360,
+  "high": 16490,
+  "dd_date": "2026-11-03",
+  "rev": 2,
+  "zone_def": "P25-P75 sau CK thanh khoan (ban cu)",
+  "source_file": "agents/Taylor/research/dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md"
+ },
+ "r1": {
+  "center_post": 14329,
+  "p10": 11255,
+  "p50": 14296,
+  "p90": 17422,
+  "label": "TRONG vùng"
+ },
+ "center_change_pct": -0.018658610952211108,
+ "change_reason": "Tam sau CK 14.329 -> 14,092. Cau noi diem (TB, L27, truoc CK): base cu 15.860 -> bo haircut Dakruco 16,134 -> bo giu 15% tien Lao 16,537 -> gia go NQ15 17,044 -> doc NQ15 thanh ly 1.975 ha 2027-30 14,924. Hai sua base (+) bi NQ15 (-) bu tru; phan vi o muc ket cuc.",
+ "warnings": [
+  "Vu an Dakruco (co dong ~45%, ma DRG): 2 cuu TGD bi khoi to, 5 bi can bi truy to 02/2025 -> rui ro di cu sang DRI qua ben lien quan",
+  "DHDCD 22/10/2026 nang nguong giao dich ben lien quan can DHDCD duyet tu 10% -> 30% tong tai san, CUNG NGAY To trinh 40 (Dakruwood) - doi chieu LDN D167 k2, ND155 D293 k4b (can legal-vn)",
+  "NQ HDQT 15: nghien cuu mua Dakruwood tu Dakruco (HDQT xet 12/2026) - giao dich ben lien quan",
+  "Dau gia 1.975,23 ha mot lo, gia co dinh 4 nam, khong cam ben lien quan mua -> theo doi DANH TINH ben trung (Dakruco/Dakruwood = ben lien quan)",
+  "Cho Dakruco vay con 40 ty (TSDB 6 tr cp DRI) - dang tra dung han; mat trang = -536 sau CK",
+  "Tien gui Quy TDND Cao su DL 70 ty + gop 3 ty (soat xet chua xac dinh gia tri thu hoi khoan gop)",
+  "~197 ty tai Lao khong thuyet minh nguyen te/lai suat/ky han; van ban to nhuong chua cong khai; mot phan dat thuoc quy hoach rung bao ton",
+  "Lien he framework §3 HARD ABANDON #4 (giao dich ben lien quan chuyen gia tri ra co dong lon)",
+  "Tra cuu 'khoi to/xu phat DRI 2026': WebSearch 05/11/2026 khong thay vu moi lien quan DRI; tim thay bai Bao Thanh tra ve khoi to lanh dao Dakruco (cu)",
+  "Ngoai redo (Mike xu ly): broker openQuantity DRI = 0 o ca 2 account"
+ ],
+ "open_issues": [
+  "Hop dong to nhuong 01616/KD/DDT4 chua xac minh",
+  "Doi cao L 22/27/32 la gia dinh",
+  "Trong so nhanh KINH TE 0,20 vs luat 20 (NPV0) - nhan dinh",
+  "wht 10% thue chuyen LN Lao chua dan nguon",
+  "Gia trung dau gia thuc (>= khoi diem) va danh tinh ben mua",
+  "SXKD T10 (~10/11)",
+  "HOSE Q4/2026"
+ ],
+ "fear_buy_2_5": "Ho so crisis-DD DRI dang mo (ngay 4 GIU); muc gia nay KHONG thoa luat 4 (gia <= 0,85 x tam) -> khong du dieu kien vao them theo §2.5 o gia 04/11"
+}

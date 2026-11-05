@@ -1,0 +1,28 @@
+== HHS VONG 2 | gia 9,550 (2026-11-04) | r 13.50%
+Luoi chinh (sau CK 5 ty): n=5400 | tam 10,387 | P10 8,252 P25 9,097 P50 10,194 P75 11,468 P90 12,827 | %duoi gia 35.2% | min 6,070 max 16,834
+Truoc CK: n=5400 | tam 10,539 | P10 8,373 P25 9,230 P50 10,344 P75 11,636 P90 13,015 | %duoi gia 31.8% | min 6,159 max 17,080
+Song song co_truc_r_pm1pp: n=16200 | tam 10,388 | P10 8,253 P25 9,096 P50 10,196 P75 11,470 P90 12,823 | %duoi gia 35.1% | min 6,069 max 16,963
+Song song khong_truc_hd: n=1080 | tam 13,506 | P10 11,823 P25 12,618 P50 13,509 P75 14,415 P90 15,181 | %duoi gia 0.0% | min 9,808 max 16,834
+Song song khong_truc_gov: n=1350 | tam 10,820 | P10 8,703 P25 9,543 P50 10,612 P75 11,890 P90 13,261 | %duoi gia 25.5% | min 7,142 max 16,834
+Song song khong_truc_bds: n=1800 | tam 10,053 | P10 8,014 P25 8,805 P50 9,871 P75 11,086 P90 12,373 | %duoi gia 42.6% | min 6,070 max 15,880
+Song song khong_truc_i14: n=1800 | tam 10,346 | P10 8,225 P25 9,068 P50 10,152 P75 11,402 P90 12,745 | %duoi gia 36.1% | min 6,136 max 16,460
+Song song khong_truc_kq: n=2700 | tam 10,406 | P10 8,275 P25 9,106 P50 10,218 P75 11,506 P90 12,840 | %duoi gia 35.0% | min 6,125 max 16,834
+Doi chieu: luoi vong 1 tinh lai bang wpct: n=45 | tam 10,611 | P10 8,415 P25 9,214 P50 10,615 P75 11,644 P90 13,010 | %duoi gia 28.0% | min 7,779 max 14,202
+Gia tri tai tham so trung tam (CO_SO, ds 0, CK holding 0 = NAV thuan, gov 0, BDSDT 0, I.14 NPV0, ky quy 0) sau CK: 13,731 | cung tham so nhung CK holding 25%: 10,805
+Nhom kich ban quanh P10: {'CO_SO': 0.457, 'TICH_CUC': 0.052, 'TIEU_CUC': 0.49} | quanh P90: {'CO_SO': 0.486, 'TICH_CUC': 0.353, 'TIEU_CUC': 0.16}
+Thanh khoan: ADV250 16.2 ty, ADV60 8.9 ty | CK 5 ty 1.443% (ADV60 1.535%) | sleeve 10tr 0.0645% 40tr 0.1291%
+  Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 30.835% -> TREN vung (luat can bac hai co the danh gia THAP CK); 10tr 0.062% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.247% -> trong vung; 5 ty / ADV60 = 56.13%
+NHAN: TRONG vùng (vung P10-P90 muc ket cuc, CK o co 5 ty)
+Don vi truc: BDSDT 100% = +967 d/cp truoc CK holding; ky quy mat trang = -66 d/cp; I.14 +40% = +379 d/cp truoc CK holding (PV4 @ r)
+LOCK b386c537b1d288dcfba3a39e253bcbd0 HHS/calc/hhs_r2.py
+LOCK ea4b14d14be090b7dcc602e772ce624e HHS/calc/hhs_redo.py
+LOCK 89e390381402790204264c5c2ae1254a _common_014125/common.py
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 820180d3042303876d46a5a3bcd9bfbd ../../../../kb/dd_price_zones.json
+SUMMARY.json (r2) written

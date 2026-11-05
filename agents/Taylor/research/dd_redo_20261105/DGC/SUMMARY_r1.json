@@ -1,0 +1,136 @@
+{
+ "ticker": "DGC",
+ "asof_price_date": "2026-11-04",
+ "price": 33450.0,
+ "center_pre_liq": 47506,
+ "center_post_liq": 47168,
+ "p10_pre": 34805,
+ "p50_pre": 46897,
+ "p90_pre": 59218,
+ "p10_post": 34557,
+ "p25_post": 40493,
+ "p50_post": 46563,
+ "p75_post": 54102,
+ "p90_post": 58796,
+ "liq_disc_5ty": 0.007123534794358433,
+ "grid_desc": "3 kich ban (xau/co so/tot, w 0,3/0,5/0,2) x nguon quang 2 trang thai (dung/mo lai 2028, w 0,5/0,5) x he so EBIT loi 5 diem 0,8-1,2 (deu); n=30; trong so o = w_kb x w_quang / 5",
+ "grid_n": 30,
+ "px_vs_center_post": -0.2908261625680093,
+ "px_vs_p10_post": -0.03204376586703983,
+ "px_vs_p90_post": -0.43108768377237316,
+ "label": "DƯỚI vùng",
+ "zone_old": {
+  "low": 33514,
+  "center": null,
+  "high": 38832,
+  "dd_date": "2026-10-30",
+  "center_kind": null
+ },
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "2026-11-03",
+  "source": "cctg_12m(2026-11-02)",
+  "r_at_anchor": 0.135
+ },
+ "r_sens_post": {
+  "beta0.5_-100bp": 48424,
+  "beta0.5_-50bp": 47780,
+  "beta0.5_+50bp": 46584,
+  "beta0.5_+100bp": 46027,
+  "beta1.0_-100bp": 49814,
+  "beta1.0_-50bp": 48424,
+  "beta1.0_+50bp": 46027,
+  "beta1.0_+100bp": 44986,
+  "base": 47168
+ },
+ "r_sens_pre": {
+  "beta0.5_-100bp": 48771,
+  "beta0.5_-50bp": 48123,
+  "beta0.5_+50bp": 46918,
+  "beta0.5_+100bp": 46357,
+  "beta1.0_-100bp": 50171,
+  "beta1.0_-50bp": 48771,
+  "beta1.0_+50bp": 46357,
+  "beta1.0_+100bp": 45309,
+  "base": 47506
+ },
+ "scenarios_pre": {
+  "xau|dung": 33796,
+  "xau|molai": 47503,
+  "coso|dung": 41721,
+  "coso|molai": 55428,
+  "tot|dung": 48265,
+  "tot|molai": 61972
+ },
+ "liquidity": {
+  "window": "2025-11-03..2026-11-04",
+  "n": 250,
+  "adv_med": 86749605000.0,
+  "sigma_d": 0.029671827857119994,
+  "amihud_med_per_bn": 0.00014480771794040791,
+  "zero_vol_share": 0.0,
+  "free_float": 0.6901,
+  "free_float_src": "1 - co dong lon 30/09 (Dao Huu Huyen 18,38%, Ngo Thi Ngoc Lan 6,64%, Dao Huu Kha 5,97%; 1 nguon bao chi, dgc_valuation_20261029_r12/REPORT)",
+  "last_price": 33450.0,
+  "last_date": "2026-11-04",
+  "pos": {
+   "1": {
+    "disc": {
+     "Y0.5": 0.001592870804027044,
+     "Y1.0": 0.003185741608054088,
+     "Y1.5": 0.004778612412081132
+    },
+    "days": {
+     "p10": 0.11527430009623675,
+     "p15": 0.07684953339749116,
+     "p20": 0.057637150048118375
+    },
+    "amihud_day15": 0.0018843018498422698
+   },
+   "5": {
+    "disc": {
+     "Y0.5": 0.0035617673971792166,
+     "Y1.0": 0.007123534794358433,
+     "Y1.5": 0.01068530219153765
+    },
+    "days": {
+     "p10": 0.5763715004811838,
+     "p15": 0.3842476669874558,
+     "p20": 0.2881857502405919
+    },
+    "amihud_day15": 0.0018843018498422698
+   },
+   "10": {
+    "disc": {
+     "Y0.5": 0.005037099759109167,
+     "Y1.0": 0.010074199518218334,
+     "Y1.5": 0.0151112992773275
+    },
+    "days": {
+     "p10": 1.1527430009623676,
+     "p15": 0.7684953339749117,
+     "p20": 0.5763715004811838
+    },
+    "amihud_day15": 0.0018843018498422698
+   }
+  },
+  "d_label": 0.007123534794358433
+ },
+ "old_ref": 36173.0,
+ "old_ref_kind": "zone_midpoint",
+ "delta_vs_old_pct": 0.30395598927376777,
+ "change_reason": "Ke 13,5% neo lai huy dong (cu 13%/12,5-13,5%); bo haircut phap ly tien rong 3-29% khoi co so (phap ly = WARNING); Nghi Son co so = so sach NPV=0 (cu: rong -447 d/cp); DCF loi Gordon (g 3%, RONIC 20%) thay P/E 6-8 tren LN loi; co trong so cho trang thai nguon quang (cu: A7/B7 khong chon); co chiet khau thanh khoan",
+ "warnings": [
+  "Phap ly: vu an moi truong/khai thac, Chu tich HDQT cu Dao Huu Huyen (18,38%) la 1 trong 14 bi can; khai truong dung — WARNING, khong loai, khong dinh luong trong co so",
+  "HOSE han che giao dich (chi phien chieu) — thanh khoan thap hon lich su",
+  "Du phong phai tra 200 ty: mot lan hay lap lai CHUA phan dinh (kich ban xau = lap lai 100 ty/quy)",
+  "Tap trung vi the ZaloPay (10.000 cp) — xem ho so cu"
+ ],
+ "open_issues": [
+  "Von Nghi Son 2.400 hay 2.900 ty chua co van ban goc",
+  "Ty trong nguon quang mo lai 0,5 la uoc luong",
+  "EBIT 2027-28 lay tu nen r12 (bien gop 14,5-19%), chua cap nhat gia luu huynh/P4 moi",
+  "LCTT 9T lech 48,23 ty trong ban goc"
+ ]
+}

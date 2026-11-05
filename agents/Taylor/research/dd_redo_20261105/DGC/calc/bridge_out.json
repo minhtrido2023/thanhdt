@@ -1,0 +1,29 @@
+{
+ "center_pre": 47505.97110436479,
+ "ore_weight_0p5_contrib": 6853.971104364791,
+ "ns_book_ps": 3599.211321722024,
+ "ns_bad_overrun_weighted_ps": -383.2209669635886,
+ "ns_old_net_ps": -447,
+ "ns_delta_vs_old": 3662.9903547584354,
+ "legal_haircut_old_weighted_rate": 0.13799999999999998,
+ "legal_haircut_removed_ps": 2951.0252466643387,
+ "residual_method_r_core": -2135.015601422774,
+ "ore_closed_only": {
+  "center_pre": 40652,
+  "q_pre": {
+   "10": 32786,
+   "25": 35815,
+   "50": 40783,
+   "75": 44724,
+   "90": 48265
+  },
+  "q_post": {
+   "10": 32553,
+   "25": 35560,
+   "50": 40493,
+   "75": 44405,
+   "90": 47922
+  },
+  "center_post": 40363
+ }
+}

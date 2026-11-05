@@ -1,0 +1,70 @@
+{
+ "axes_excluded": [
+  {
+   "axis": "truy thu tien thue dat them (sau 2015-2024 da hach toan Q4/2025)",
+   "reason": "khong co du lieu so tien/quyet dinh moi; WARNING"
+  },
+  {
+   "axis": "pha loang khi phat hanh/chuyen HOSE",
+   "reason": "chua co gia/ty le; phat hanh theo gia thi truong ~ NPV 0; WARNING"
+  },
+  {
+   "axis": "trich lap HTK 204,3 / phai thu DH 242 khong thu hoi",
+   "reason": "chua doc thuyet minh; khong co du lieu suy giam => ghi so sach; song song bo phai thu DH duoc bao"
+  }
+ ],
+ "axes_included": [
+  "Delta Long Thanh 2 chieu quanh -25%",
+  "N0 +-10%",
+  "r +-100bp",
+  "g 2/3/4% (MOI r2)"
+ ],
+ "base_adjustments": [
+  {
+   "basis": "lo trinh Cuc HK chuyen chuyen quoc te sang Long Thanh 28/3/2027-25/3/2028; DT mien thue+phong cho ~57% DT Q3 gan khach quoc te; DO LON tam = nhan dinh [UL] — da la truc xac suat 2 chieu",
+   "effect_dong_per_share": null,
+   "item": "Delta Long Thanh tam -25% tu 2028 (2027 = -12,5%)",
+   "source": "dd_SAS_20261026 §2-3"
+  },
+  {
+   "basis": "BCTC ma 215; khong co du lieu suy giam",
+   "effect_dong_per_share": 1813.2645298656419,
+   "item": "phai thu DH khac 242,0 ghi theo so (MOI r2, vong 1 loai)",
+   "source": "src/Q3_2026_tonghop_kemgiaitrinh.pdf in tr.1-2"
+  },
+  {
+   "basis": "BCTC ma 315/323/314",
+   "effect_dong_per_share": -2181.0381109610025,
+   "item": "tru phai tra NLD 141,2 + quy KTPL 99,7 + thue 50,2 khoi tien",
+   "source": "BCTC in tr.3-4"
+  },
+  {
+   "basis": "EPS 2025 4.602 / (LNST 695,6 / 133,45 tr cp)",
+   "effect_dong_per_share": null,
+   "item": "LN x 0,883 (trich quy khong thuoc co dong)",
+   "source": "DHDCD 2026 (vietnambiz 25/06/2026) + BQ"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong trong so luoi (Gordon loi => phan phoi lech phai nhe, tam > P50); P50 = trung vi ket cuc; gia tri tai tham so trung tam (Delta -25, g 3) thap hon tam vi Gordon loi theo g. Khong nhanh trong so nho nao quyet dinh P10/P90.",
+ "change_reason": "Vong 1 -10,5% vs zone cu 32.600 (CK thanh khoan + cau truc BCTC goc + r). Vong 2 them phai thu DH 242 (+1.813 d truoc CK) va truc g (loi Gordon => nang tam).",
+ "change_vs_r1": "(1) +phai thu DH 242 theo so; (2) +truc g 2/3/4%; (3) tam = ky vong luoi (trung voi 3 kich ban ve Delta trung binh -25%).",
+ "grid_desc": "4 truc, n=135 ket cuc tat dinh: tac dong Long Thanh len LN van hanh tu 2028 Delta {-55;-40;-25;-10;+5}% (0,1/0,2/0,4/0,2/0,1) [UL; bien duoi ~ mat toan bo mang gan khach quoc te ~57% DT Q3] x N0 {-10%;0;+10%} quanh 518,4 (1/4-1/2-1/4) x r {R-1;R;R+1}% x g {2;3;4}% (moi truc 1/4-1/2-1/4). 2027 = nua tac dong [UL]. Tien thua 654,1 + dau tu DH so sach 253,8 + phai thu DH khac so sach 242,0 co dinh; LN x 0,883 (EPS/LNST 2025). Phan vi = wpct tren 135 o; tam = ky vong luoi. CK thanh khoan 5 ty ADV250 ap dong loat.",
+ "label_note": "Nhan theo co 5 ty/ADV250 (CK ~6%, Q/ADV ~850% — NGOAI xa vung hieu chinh, con so CK chi mang tinh quy uoc). O co sleeve 10-40 tr (CK <=0,6%) xem label_sleeve40 trong model_r2_out.json. Dinh nghia vung P10-P90 khong doi.",
+ "open_issues": [
+  "Thuyet minh V.5b phai thu DH khac 242,0 (ky quy ACV?) — r2 ghi so sach, can doc",
+  "Khoan bu DFS Q4/2025 chua co so",
+  "Ben tra co tuc dau tu 195,0 9T",
+  "Ket qua thau Long Thanh + lo trinh chuyen bay chinh thuc",
+  "HTK 68,9 -> 204,3 chua trich lap",
+  "Thieu sector read dich vu hang khong",
+  "BQ EPS = 0 moi quy SAS (cot hong)"
+ ],
+ "warnings": [
+  "Mat bang ACV giao truc tiep khong dau thau (KL TTCP 2017); lo dat chua hoan tat thu tuc; truy thu tien thue dat 2015-2024 'hang chuc ty' hach toan Q4/2025 [vietstock] — rui ro truy thu them",
+  "Giao dich ben lien quan nhom IPP (IPPG 24,98%/ACFC 14,89%/DAFC 4,92%/DAT 1,71% = 46,5%) vua co dong vua doi tac; lich su phai thu LD Nha Viet ~292 ty trich lap ~251 ty",
+  "Free float ~4,4% (ACV 49,07% + IPP 46,50%) — rang buoc thuc thi; Chu tich noi tu van hanh mien thue 'khong the keo dai', doi tac moi chua cong bo dieu khoan",
+  "Ke hoach chuyen HOSE + co the phat hanh them (chua co lich)",
+  "Nhan su: HDQT bo nhiem TGD moi Du Kim Thang 03/08/2026, TGD cu Nguyen Van Hung Cuong ve ACV [cafef 04/08/2026]",
+  "'Khong thay vu viec hinh su/khoi to lien quan SASCO': nguon = DD 26/10/2026 (anninhthudo, thuonghieucongluan, vietstock) + web search 05/11/2026 (cafef, dnse, baophapluat) — khong co ket qua moi; khong thay NQ HDQT 10-11/2026 ve Long Thanh"
+ ]
+}

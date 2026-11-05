@@ -1,0 +1,11 @@
+SIP r2 giá 49.000 (2026-11-04) | r 0.1350 | n kết cục 2916
+Tâm (kỳ vọng lưới) TRƯỚC 54.981 SAU CK 54.230 | P50 SAU 53.086 | tham số trung tâm SAU 55.421
+Kết cục SAU CK p10 43.784 p25 47.059 p50 53.086 p75 58.725 p90 68.713 | min 34.356 max 81.487
+% trọng số dưới giá 33.0% | nhãn TRONG vùng | giá/tâm -9.6%
+Nhánh đất quanh P10 {'co_so': 0.05, 'xau': 0.95} | quanh P90 {'tot': 1.0} | tín dụng quanh P10 {'0%': 0.522, '10%': 0.331, '30%': 0.147}
+CK @5 tỷ 1.37% (ADV120 3.93 tỷ; Q/ADV 127%; trong vùng √: False) | ADV250 10.37 → 0.92% | ADV60 3.16 → 1.50% | sleeve 10/20/40tr 0.26%/0.28%/0.31%
+SONG SONG có tạm ứng bên liên quan (mất trọn p0,15): tâm 53.842 P10 43.334 P90 68.257
+SONG SONG đất 25/50/25: tâm 55.416 P10 44.319 P90 70.560
+SONG SONG lưới vòng 1 (n27) + wpct chuẩn: tâm 53.265 P10 35.041 P50 54.263 P90 73.949
+Độ nhạy r (tâm SAU CK): b1.0_-100 57.753 (+6.5%) | b1.0_-50 55.914 (+3.1%) | b1.0_+0 54.230 (+0.0%) | b1.0_+50 52.681 (-2.9%) | b1.0_+100 51.251 (-5.5%) | b0.5_-100 55.914 (+3.1%) | b0.5_-50 55.054 (+1.5%) | b0.5_+0 54.230 (+0.0%) | b0.5_+50 53.440 (-1.5%) | b0.5_+100 52.681 (-2.9%)
+Gordon g3% (trước CK): có lãi TG (ROE 24.2%) 43.263 | không lãi TG (ROE vận hành 41.3% + TS tài chính ròng theo sổ) 39.050

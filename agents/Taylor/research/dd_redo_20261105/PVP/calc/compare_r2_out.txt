@@ -1,0 +1,23 @@
+price: 18400.0
+asof_price_date: 2026-11-04
+n_outcomes: 270
+center_pre: 22823
+center_post: 22366
+center_param_post: 25173
+p10_out: 12702
+p25_out: 16549
+p50_out: 22377
+p75_out: 26371
+p90_out: 32834
+min_out: 9643
+max_out: 42300
+pct_weight_below_price: 0.30600000000000005
+px_vs_center_post: -0.1773227219887329
+label: TRONG vùng
+liq_disc_5ty: 0.019992057673030278
+delta_center_vs_r1_pct: 0.02577508713997423
+r1: {"center_post": 21804, "p10_post": 13523, "p90_post": 28201, "label": "TRONG vùng"}
+w250 2025-11-03..2026-11-04 ADV 8.11 ty sigma 0.0255 | 5000tr: CK 1.999% Q/ADV 61.6741% calib=False phien@15% 4.11 | 10tr: CK 0.089% Q/ADV 0.1233% calib=True phien@15% 0.01 | 20tr: CK 0.126% Q/ADV 0.2467% calib=True phien@15% 0.02 | 40tr: CK 0.179% Q/ADV 0.4934% calib=True phien@15% 0.03
+w60 2026-08-10..2026-11-04 ADV 21.58 ty sigma 0.0293 | 5000tr: CK 1.413% Q/ADV 23.1747% calib=False phien@15% 1.54 | 10tr: CK 0.063% Q/ADV 0.0463% calib=False phien@15% 0.00 | 20tr: CK 0.089% Q/ADV 0.0927% calib=False phien@15% 0.01 | 40tr: CK 0.126% Q/ADV 0.1854% calib=True phien@15% 0.01
+parallel r1_ship_downside_only: {"desc": "NPV tau chi chieu xuong (xau -30%, co so/tot 0) nhu vong 1 — tach ket cuc mua", "n_outcomes": 270, "center_post": 21505, "p10_out": 12702, "p50_out": 22377, "p90_out": 27955, "pct_weight_below_price": 0.30600000000000005, "label": "TRONG vùng"}
+r_sens_post: {"beta1.0_-100bp": 22770, "beta1.0_-50bp": 22565, "beta1.0_+50bp": 22170, "beta1.0_+100bp": 21979, "base": 22367}

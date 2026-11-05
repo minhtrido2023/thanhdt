@@ -1,0 +1,261 @@
+{
+ "ticker": "TV2",
+ "round": 2,
+ "job": "Taylor_20261105_020018",
+ "asof_price_date": "2026-11-04",
+ "price": 27400.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 7.4,
+  "date": "2026-11-03",
+  "current_rate": 7.4,
+  "current_source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 16242,
+ "center_post_liq": 15832,
+ "p10_post": 2726,
+ "p50_post": 15843,
+ "p90_post": 30675,
+ "p10_pre": 2797,
+ "p90_pre": 31468,
+ "p10_out": 2726,
+ "p50_out": 15843,
+ "p90_out": 30675,
+ "min_out": 0,
+ "max_out": 44938,
+ "pct_weight_below_price": 0.841,
+ "n_outcomes": 324,
+ "center_param_post": 18883,
+ "liq_discount_ref": 0.0252,
+ "liq_ref_size_ty": 5.0,
+ "ck_ref_size": {
+  "size_ty": 5.0,
+  "discount_adv120": 0.0252,
+  "discount_adv250": 0.0189,
+  "discount_adv60": 0.0278,
+  "pct_adv120": 1.554,
+  "in_sqrt_calibration_zone": false
+ },
+ "ck_real_sleeve": {
+  "10tr": 0.0038,
+  "20tr": 0.0042,
+  "40tr": 0.0048
+ },
+ "adv250_median_ty": 6.25,
+ "adv120_median_ty": 3.22,
+ "adv60_median_ty": 2.59,
+ "px_vs_center": 0.7306,
+ "px_vs_p10": 9.0502,
+ "px_vs_p90": -0.1068,
+ "grid_desc": "5 trục: LNST bền 2027–28 kịch bản 250/177,5/110 tỷ (0,25/0,5/0,25) × LNST ×0,9/1/1,1 × g 3/4/5% × mất phơi nhiễm CMC 0/15/30/50% sau thuế (0,45/0,30/0,15/0,10) × độ bền LN sau 2028 sập 70%/bền/+30% (0,25/0,5/0,25); P/E nội tại sàn 0, vốn chủ sàn 0; phân vị wpct mức kết cục (n=324)",
+ "label": "TRONG vùng",
+ "label_note": "TRONG vùng giữ nguyên so vòng 1 — NHƯNG nhãn này có được CHỈ vì định nghĩa vùng P10–P90 (điều 7): theo định nghĩa v3 01/11 (vùng = dải kịch bản cơ sở 17.100–25.300) và theo phản biện 01/11, giá 27.400 nằm TRÊN vùng; 84,1% trọng số kết cục dưới giá, giá cao hơn tâm 73% và cao hơn P75 (23.133) 18%; P90 30.675 do riêng nhánh tích cực (84% trọng số quanh P90, w 0,25).",
+ "center_vs_p50_note": "Tâm (kỳ vọng) 15.832 ≈ P50 15.843; tham số trung tâm (177,5 | g4 | CMC 0% | bền) 18.883 cao hơn tâm 19% vì tham số trung tâm đặt CMC ở sổ sách và độ bền 'bền', còn lưới có xác suất mất CMC và sập LN. P10 do nhánh tiêu cực (70% quanh P10); P90 do nhánh tích cực.",
+ "axes_included": [
+  {
+   "axis": "scen",
+   "values": [
+    [
+     "tich_cuc",
+     250.0,
+     0.25
+    ],
+    [
+     "co_so",
+     177.5,
+     0.5
+    ],
+    [
+     "tieu_cuc",
+     110.0,
+     0.25
+    ]
+   ],
+   "basis": "LNST bền 2027–28: 250 (lặp 2019–21, LNST 256–272 BQ) / 177,5 (4 HĐ EPC đúng tiến độ) / 110 (vượt chi phí, lãi float giảm) — trọng số 25/50/25 [UL] (DD v3 01/11)"
+  },
+  {
+   "axis": "mult",
+   "values": [
+    [
+     "x0.9",
+     0.9,
+     0.3333333333333333
+    ],
+    [
+     "x1",
+     1.0,
+     0.3333333333333333
+    ],
+    [
+     "x1.1",
+     1.1,
+     0.3333333333333333
+    ]
+   ],
+   "basis": "LNST ×0,9/1/1,1 trong kịch bản, đều — hai chiều"
+  },
+  {
+   "axis": "gg",
+   "values": [
+    [
+     "g3",
+     0.03,
+     0.3333333333333333
+    ],
+    [
+     "g4",
+     0.04,
+     0.3333333333333333
+    ],
+    [
+     "g5",
+     0.05,
+     0.3333333333333333
+    ]
+   ],
+   "basis": "g 3/4/5% (ước lượng), đều — hai chiều"
+  },
+  {
+   "axis": "cmc",
+   "values": [
+    [
+     "0%",
+     0.0,
+     0.45
+    ],
+    [
+     "15%",
+     0.15,
+     0.3
+    ],
+    [
+     "30%",
+     0.3,
+     0.15
+    ],
+    [
+     "50%",
+     0.5,
+     0.1
+    ]
+   ],
+   "basis": "mất trên phơi nhiễm CMC 854,97 tỷ (phải thu 666,4 + đầu tư 188,6; BCTC Q3 tr.25, 43), sau thuế: 0% = sổ sách (chưa dự phòng) p0,45 · 15% p0,30 · 30% p0,15 · 50% p0,10 [UL]; cơ sở chiều xuống: phải thu 666 không dự phòng, thu tiền Q3 ≈ 0, Tân Thuận GĐ3 chưa COD. Không có phía trên sổ sách ⇒ trục một phía là CẬN SỔ SÁCH"
+  },
+  {
+   "axis": "persist",
+   "values": [
+    [
+     "sap70%",
+     0.3,
+     0.25
+    ],
+    [
+     "ben",
+     1.0,
+     0.5
+    ],
+    [
+     "+30%",
+     1.3,
+     0.25
+    ]
+   ],
+   "basis": "độ bền LN sau 2028: sập 70% p0,25 (base rate: LNST 214–272 tỷ 2017–21 → pha đáy 2022–25, SKEPTIC CAO-1) · bền p0,50 · +30% p0,25 (HĐ EPC mới nối tiếp) [UL] — hai chiều"
+  }
+ ],
+ "axes_excluded": [
+  {
+   "axis": "vụ án (cựu Chủ tịch + KTT khởi tố Đ.353; 13 pháp nhân 'tư vấn xây dựng điện' chưa nêu tên)",
+   "reason": "pháp lý ⇒ WARNING (ngoài tâm)"
+  },
+  {
+   "axis": "tiền thô 1.951 tỷ (cộng tiền riêng)",
+   "reason": "float khách ứng 2.418,6 là nợ thực chất; lãi float đã nằm trong LNST kịch bản ⇒ cộng tiền = đếm hai lần; chiều xuống (float ròng −55 tỷ) cũng không trừ riêng vì cùng lý do"
+  },
+  {
+   "axis": "HĐ tổng thầu bên liên quan (NQ HĐQT 29/10 loại khỏi ngưỡng 35%)",
+   "reason": "quản trị ⇒ WARNING; chưa thẩm định pháp lý"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "không có điều chỉnh khỏi sổ sách trong cơ sở",
+   "effect_dong_per_share": 0.0,
+   "basis": "CMC theo sổ (0%) ở tham số trung tâm; mọi lệch nằm ở trục có xác suất",
+   "source": "BCTC HN Q3/2026"
+  }
+ ],
+ "parallel": {
+  "payout_when_roe_below_r": {
+   "center_post": 17268,
+   "p10_post": 6319,
+   "p50_post": 16018,
+   "p90_post": 30675,
+   "pct_weight_below_price": 0.841
+  },
+  "w_30_50_20": {
+   "center_post": 16750,
+   "p10_post": 2895,
+   "p50_post": 16469,
+   "p90_post": 32144,
+   "pct_weight_below_price": 0.8137
+  },
+  "w_20_50_30": {
+   "center_post": 14915,
+   "p10_post": 2632,
+   "p50_post": 14474,
+   "p90_post": 29179,
+   "pct_weight_below_price": 0.8682
+  },
+  "no_persist_axis": {
+   "center_post": 17690,
+   "p10_post": 6743,
+   "p50_post": 17402,
+   "p90_post": 29736,
+   "pct_weight_below_price": 0.8528
+  },
+  "r1_grid_wpct": {
+   "center_post": 18783,
+   "p10_post": 7018,
+   "p50_post": 18883,
+   "p90_post": 31032,
+   "pct_weight_below_price": 0.8333
+  }
+ },
+ "gordon": {
+  "g": 0.04,
+  "np2026e": 229.5,
+  "with_interest": 27477.500736149337,
+  "without_interest": 11736.234096454158,
+  "note": "LNST 2026E ước lượng; 'không lãi TG' trừ 44% (tỷ trọng TC trong LNTT 9T)"
+ },
+ "zone_old": {
+  "round": 1,
+  "center_post_liq": 18784,
+  "p10_post": 6967,
+  "p50_post": 18883,
+  "p90_post": 31157,
+  "label": "TRONG vùng",
+  "grid": "3 kịch bản LNST bền 2027–28 (tích cực 250 / cơ sở 177,5 / tiêu cực 110 tỷ + one-off CMC −80; trọng số 25/50/25, ước lượng) × LNST ×{0,9;1;1,1} × g {3;4;5}% trong P/E nội tại (1−g/ROE)/(r−g), đều trong kịch bản (n=27)"
+ },
+ "center_new_vs_old": -0.1571,
+ "change_reason": "Tâm sau CK 15.832 vs vòng 1 18.784 (−15,7%, >10%). Nguyên nhân: (1) CMC tách thành trục độc lập 0/15/30/50% áp cho MỌI kịch bản (vòng 1: −80 tỷ chỉ ở nhánh tiêu cực) — kỳ vọng mất 14,0% phơi nhiễm ×0,8 thay vì 0,25×80 tỷ; (2) thêm trục độ bền LN sau 2028 hai chiều (base rate sập ~70% sau đỉnh 2017–21, SKEPTIC CAO-1) — ở ROE thấp P/E nội tại nhỏ nên chiều xuống lớn hơn chiều lên. Song song: không trục độ bền 17.690; chính sách trả hết khi ROE<r 17.268; lưới vòng 1 + wpct 18.783. Nhãn không đổi (TRONG, xem label_note).",
+ "warnings": [
+  "Vụ án EVNNPT/PC1: cựu Chủ tịch Nguyễn Chơn Hùng + KTT Bùi Thị Ngọc Lý khởi tố (CBTT 21/05/2026; VKSND tối cao phê chuẩn — thanhtra.com.vn); HĐQT mới, Chủ tịch Phạm Liên Hải từ 30/06/2026 (nhadautu.vn); pháp nhân chưa bị khởi tố; soát xét H1 UHY có đoạn nhấn mạnh",
+  "Họp báo Bộ Công an 02/07/2026 nêu 13 pháp nhân vi phạm gồm 'các công ty tư vấn xây dựng điện' (không nêu tên) — chưa xác định TV2 có trong danh sách (SKEPTIC TB-3); làn sóng khởi tố PECC1/PECC3 cùng kỳ",
+  "Phơi nhiễm CMC (liên kết 25%): phải thu 657–666 + đầu tư 188,6 ≈ 64% VCSH mẹ, không dự phòng, thu tiền Q3 ≈ 0 (nay là TRỤC lưới); TM3 vs TM32 lệch số dư chưa giải",
+  "HĐ tổng thầu với bên liên quan do HĐQT/TGĐ tự duyệt (NQ HĐQT 29/10 loại HĐ nhận thầu khỏi ngưỡng 35% ĐHĐCĐ) — phù hợp Đ.167 LDN 2020 chưa thẩm định (legal-vn)",
+  "Room ngoại 0% từ 14/09/2026 (hồ sơ nộp 08/09 viện dẫn NĐ 245/2025 — liên hệ với bổ sung ngành nghề NQ26 Đ.11 chỉ là giả thuyết)",
+  "Điểm tích cực đã kiểm: HĐ kiểm toán + soát xét 2026 với UHY ký 15/07/2026 (CBTT 2604/PECC2-TC&PC) — không có rủi ro 'không có kiểm toán viên' kiểu TV1",
+  "Tra tin 05/11/2026 (WebSearch: doanhnhan.baophapluat.vn, nhadautu.vn, vietnamfinance.vn, thanhtra.com.vn): không thấy khởi tố pháp nhân/kết luận mới sau 01/11; WebSearch ≠ CBTT sàn"
+ ],
+ "open_issues": [
+  "Giá trị HĐ EPC không công bố ⇒ không tính được tỷ lệ ứng/giá trị HĐ, lãi gộp còn lại",
+  "Xác suất CMC, độ bền LN, trọng số 25/50/25 [UL]; độ nhạy trọng số 30/50/20 ⇒ tâm 16.750, 20/50/30 ⇒ 14.915",
+  "Chính sách cổ tức khi ROE<r (sàn P/E 0 vs trả hết) đổi P10 2.726 ↔ 6.319",
+  "Danh sách 13 pháp nhân (họp báo 02/07) chưa có"
+ ],
+ "fearbuy_sleeve_eligible": "KHÔNG — giá cao hơn tâm 73%, không phải trạng thái sợ hãi; vụ án chưa kết luận",
+ "source_calc": "calc/model_tv2_r2_out.json",
+ "lock": "calc/LOCK_r2_md5.txt"
+}

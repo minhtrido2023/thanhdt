@@ -1,0 +1,25 @@
+== FPT redo | gia 53,900 (2026-11-04, con quyen co tuc 1.000d chot 30/11) | r 13.50% (neo 13,5% @ 7.40% cctg_12m(2026-11-02))
+Tien rong 30/09 12,233 ty (6,487 d/cp) | FTEL 45.66% thi gia 04/11 18,789 ty (9,964 d/cp) | FRT 11,984 ty (6,355 d/cp)
+XDCB do dang GD (NPV 0, gia so) 760 ty (403 d/cp) | LN loi van hanh TTM 6,705 ty (uoc luong) | PE loi ngam dinh 8.3x
+  XAU w=0.35 g1 3% conv 0.40 gT 3.0% FTELck 30%: FV 34,198 (TV 62%)
+  CO_SO w=0.45 g1 9% conv 0.75 gT 4.0% FTELck 15%: FV 57,418 (TV 67%)
+  TOT w=0.2 g1 14% conv 0.85 gT 4.0% FTELck 0%: FV 72,370 (TV 69%)
+  phan KHONG phu thuoc r (kich ban co so): 21,740 d/cp
+  KY VONG truoc CK: 52,281
+  do nhay trong so w_xau_045 (0.45, 0.4, 0.15): 49,211
+  do nhay trong so w_tot_030 (0.25, 0.45, 0.3): 56,098
+Do nhay r theo lai huy dong:
+  b0.5_-100bp: r 13.00% -> 54,019 (+1,739; +3.3%)
+  b0.5_-50bp: r 13.25% -> 53,127 (+846; +1.6%)
+  b0.5_+50bp: r 13.75% -> 51,478 (-803; -1.5%)
+  b0.5_+100bp: r 14.00% -> 50,715 (-1,566; -3.0%)
+  b1.0_-100bp: r 12.50% -> 55,961 (+3,680; +7.0%)
+  b1.0_-50bp: r 13.00% -> 54,019 (+1,739; +3.3%)
+  b1.0_+50bp: r 14.00% -> 50,715 (-1,566; -3.0%)
+  b1.0_+100bp: r 14.50% -> 49,297 (-2,984; -5.7%)
+Luoi n=45: truoc CK P10 30,577 P50 53,800 P90 72,370
+Thanh khoan: ADV trung vi 250 phien 566.1 ty | sigma 1.99% | CK @5 ty 0.187% (1 ty 0.083%; 10 ty 0.264%) | phien thoat 5 ty @10/20% 0.09/0.04 | Amihud 1.92e-05
+SAU CK: tam 52,183 | P10 30,520 P25 37,882 P50 53,699 P75 63,906 P90 72,235
+Gia 53,900: vs tam +3.3% | vs P10 +76.6% | vs P90 -25.4% | NHAN TRONG vùng
+Cau noi: tam cu 54,800 (Ke kich ban, FOX/FRT 30/10) -> gia LK 04/11 + XDCB NPV0, Ke cu 55,042 (trong do XDCB +403; gia LK -161) -> r 13,5% 52,281 (-2,761) -> sau CK 52,183; lech -4.8%
+SUMMARY.json written

@@ -1,0 +1,60 @@
+{
+ "axes_excluded": [
+  {
+   "axis": "NT5 dung tien NT2",
+   "reason": "luat du an moi 03/11: NPV 0 => ban co truc trung voi ban khong truc; chi WARNING quan tri"
+  },
+  {
+   "axis": "rui ro doi tac tien gui SHB",
+   "reason": "khong co du lieu (chua doc thuyet minh tien gui theo NH); chi WARNING, khong luong hoa"
+  },
+  {
+   "axis": "gia han PPA > 12 nam",
+   "reason": "1 nguon; bao song song nhanh 15 nam (trong so 0,2)"
+  }
+ ],
+ "axes_included": [
+  "LNST chuan hoa (Qc/thuy van/FMP-gas gop vao) 2 chieu quanh 800",
+  "thoi han dong tien 8/10/12 nam (2 chieu quanh 10)",
+  "r +-100bp"
+ ],
+ "base_adjustments": [
+  {
+   "basis": "thoi han PPA ~10/2036 (substack, 1 nguon) [UL]; truc thoi han 8/10/12 + song song 15 nam",
+   "effect_dong_per_share": null,
+   "item": "gia tri sau thoi han PPA/GSA = 0",
+   "source": "dd_NT2_20261026 §5"
+  },
+  {
+   "basis": "BCTC 30/09/2026 ma 131/311/315..: phai thu KH 4.252,0 - phai tra NB 2.637,4 - CP phai tra 777,4",
+   "effect_dong_per_share": 819.6953406471448,
+   "item": "von luu dong rong 837,2 thu hoi cuoi thoi han (MOI r2, cong vao)",
+   "source": "src/Q3_2026_hopnhat_va_giaitrinh.pdf tr.2-3"
+  },
+  {
+   "basis": "BCTC ma 313; GDKHQ 29/10/2026, gia 04/11 da ex-div",
+   "effect_dong_per_share": -1032.1312215856638,
+   "item": "co tuc phai tra 297,1 tru khoi net cash",
+   "source": "BCTC tr.3 + BQ Price"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong trong so luoi; P50 = trung vi ket cuc (wpct); gia tri tai tham so trung tam = LNST 800/10 nam/r 13,5%. Luoi gan doi xung => 3 so sat nhau; khong nhanh trong so nho nao quyet dinh P10/P90.",
+ "change_reason": "Tam sau CK r2 vs zone cu 25.400 (26/10): xem center_change_vs_old; cau vong 1 (-10,9%) giu nguyen (co tuc 297, r, thu nhap TC, CK); r2 them von luu dong (+) va doi tam sang ky vong luoi.",
+ "change_vs_r1": "(1) +von luu dong 837 thu hoi cuoi thoi han; (2) tam = ky vong luoi (LNST TB 800 thay 787,5); nhan khong doi.",
+ "grid_desc": "3 truc, n=45 ket cuc tat dinh (1 o = 1 ket cuc): LNST chuan hoa/nam {450;625;800;975;1150} ty (0,1/0,2/0,4/0,2/0,1) [UL] x thoi han dong tien con lai {8;10;12} nam (1/4-1/2-1/4) [UL, PPA/GSA ~2036 1 nguon] x r {R-1;R;R+1}% (1/4-1/2-1/4). Net cash 3.281,3 co dinh; von luu dong rong 837,2 thu hoi cuoi thoi han (PV). Gia tri sau thoi han = 0 [UL]. LNST van hanh = LNST - 168 thu nhap TC rong sau thue (nam hoa 9T). Phan vi = _shared/wpct.py tren 45 o; tam = ky vong trong so cua luoi. CK thanh khoan 5 ty (ADV250) ap dong loat.",
+ "label_note": "Nhan theo gia tri sau CK o co 5 ty (ADV250); o co sleeve 10-40 tr CK ~0,03-0,05% — nhan khong doi. Vung P10-P90 nhu vong 1 (khong doi dinh nghia).",
+ "open_issues": [
+  "NQ HDQT 08/07/2026 lay y kien co dong Phu luc 13 HD mua ban khi PV Gas [24hmoney] — noi dung chua doc, khong vao mo hinh",
+  "Thoi han PPA/GSA 2036 1 nguon",
+  "Cong thuc pass-through nhien lieu PPA",
+  "Qc 2027 (cuoi 2026)",
+  "Thuyet minh tien gui theo NH, phai thu EPTC qua han",
+  "Rating 8L=3 co hoc tu power_lens.csv cu 08-28 (D/E gop, bo qua tien gui)"
+ ],
+ "warnings": [
+  "Xung dot loi ich voi POW (59,4%): chia co tuc hay giu tien cho NT5; quy dau tu phat trien 791 ty (BCTC 30/09) gan NT5 [elibook 22/10/2026]",
+  "Tien gui tap trung SHB (bao chi Vietstock, DD 26/10; chua doi chieu thuyet minh)",
+  "Lich su so lieu: soat xet H1/2026 giam LNST ~94 ty; dinh chinh BCTC 2022; phat thue 10,6 ty (2020); TTCP QHD VII (lich su); DHCD 2026 de xuat mien nhiem 1 TV BKS (ly do chua ro)",
+  "'Chua thay vu viec phap ly dang mo cham tai san loi': nguon = tra bao chi trong DD 26/10/2026 (vneconomy, baophapluat, thuongtruong) + web search 05/11/2026 (xem REPORT_r2 §6)"
+ ]
+}

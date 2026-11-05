@@ -1,0 +1,15 @@
+Tien+HTM 945.2; tien thua = tru phai tra NLD 141.2, quy KTPL 99.7, thue 50.2 = 654.1 ty (4,900 d/cp); vay = 0
+Dau tu TC dai han gia so 253.8 (1,902 d/cp); phai thu dai han khac 242.0 KHONG tinh
+LNST 9T 539.5; thu nhap TC rong sau thue 9T 150.6 => LN van hanh 9T 388.8, nam hoa N0 518.4; CFO 9T 294.2 (0.55x LNST); HTK 68.9 -> 204.3
+Bien gop 9T 66.7%; r = 13.50% (dep 7.40% [cctg_12m(2026-11-02)]); gia 34,700 (2026-11-04)
+xau (truot thau LT chinh, -50%)      p=0.30: 23,457 -> sau CK TK 22,047
+co so (thi phan LT nho hon, -25%)    p=0.45: 31,029 -> sau CK TK 29,164
+tot (thang thau lon LT, +5%)         p=0.25: 40,115 -> sau CK TK 37,705
+TAM truoc CK 31,029 | CK thanh khoan 6.01% (5 ty) | sau 29,164 | gia/tam +19.0%
+LUOI n=45: truoc P10 23,456, P50 30,996, P90 38,546 | sau P10 22,047, P50 29,133, P90 36,230
+Gia 34,700: vs tam +19.0%, vs P10 +57.4%, vs P90 -4.2% => TRONG vung
+Do nhay lai huy dong: b0.5_d-100bp: r 13.00% -> 32,220 (+1,191, +3.8%); b0.5_d-50bp: r 13.25% -> 31,610 (+581, +1.9%); b0.5_d50bp: r 13.75% -> 30,475 (-554, -1.8%); b0.5_d100bp: r 14.00% -> 29,946 (-1,083, -3.5%); b1.0_d-100bp: r 12.50% -> 33,536 (+2,507, +8.1%); b1.0_d-50bp: r 13.00% -> 32,220 (+1,191, +3.8%); b1.0_d50bp: r 14.00% -> 29,946 (-1,083, -3.5%); b1.0_d100bp: r 14.50% -> 28,957 (-2,072, -6.7%)
+Vi the 1 ty: CK Y0,5/1/1,5 = 1.3%/2.7%/4.0%; 8-17 phien @20-10%
+Vi the 5 ty: CK Y0,5/1/1,5 = 3.0%/6.0%/9.0%; 42-85 phien @20-10%
+Vi the 10 ty: CK Y0,5/1/1,5 = 4.2%/8.5%/12.7%; 85-169 phien @20-10%
+ADV trung vi 0.59 ty (16,188 cp; 2025-11-03..2026-11-04), sigma 2.07%

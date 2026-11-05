@@ -1,0 +1,25 @@
+price: 33450.0
+asof_price_date: 2026-11-04
+n_outcomes: 810
+center_pre: 45088
+center_post: 44767
+center_param_post: 40515
+p10_out: 32518
+p25_out: 37507
+p50_out: 44633
+p75_out: 51570
+p90_out: 57101
+min_out: 23462
+max_out: 70079
+pct_weight_below_price: 0.12208333333333332
+px_vs_center_post: -0.25279781982263716
+label: TRONG vùng
+liq_disc_5ty: 0.007123534794358433
+delta_center_vs_r1_pct: -0.050903154681139706
+r1: {"center_post": 47168, "p10_post": 34557, "p90_post": 58796, "label": "DƯỚI vùng"}
+w250 2025-11-03..2026-11-04 ADV 86.75 ty sigma 0.0297 | 5000tr: CK 0.712% Q/ADV 5.7637% calib=True phien@15% 0.38 | 10tr: CK 0.032% Q/ADV 0.0115% calib=False phien@15% 0.00 | 20tr: CK 0.045% Q/ADV 0.0231% calib=False phien@15% 0.00 | 40tr: CK 0.064% Q/ADV 0.0461% calib=False phien@15% 0.00
+w60 2026-08-10..2026-11-04 ADV 18.32 ty sigma 0.0213 | 5000tr: CK 1.112% Q/ADV 27.2955% calib=False phien@15% 1.82 | 10tr: CK 0.050% Q/ADV 0.0546% calib=False phien@15% 0.00 | 20tr: CK 0.070% Q/ADV 0.1092% calib=True phien@15% 0.01 | 40tr: CK 0.099% Q/ADV 0.2184% calib=True phien@15% 0.01
+parallel legal_axis: {"desc": "CO truc phap ly: haircut tien rong 3/9/29% (w 0,2/0,5/0,3, r12) — loai khoi base theo luat user 02/11 (vu an chi WARNING)", "n_outcomes": 2430, "center_post": 41837, "p10_out": 29355, "p50_out": 41761, "p90_out": 54552, "pct_weight_below_price": 0.21204166666666666, "label": "TRONG vùng"}
+parallel ore_closed: {"desc": "khai truong dung vinh vien (w mo lai = 0)", "n_outcomes": 405, "center_post": 37953, "p10_out": 29771, "p50_out": 37513, "p90_out": 45756, "pct_weight_below_price": 0.24416666666666667, "label": "TRONG vùng"}
+parallel ore_closed_legal: {"desc": "khai truong dung + CO truc phap ly (canh xau cua ca hai truc lien quan vu an)", "n_outcomes": 1215, "center_post": 35023, "p10_out": 26360, "p50_out": 34889, "p90_out": 43599, "pct_weight_below_price": 0.4165833333333333, "label": "TRONG vùng"}
+r_sens_post: {"beta1.0_-100bp": 47192, "beta1.0_-50bp": 45903, "beta1.0_+50bp": 43685, "beta1.0_+100bp": 42724, "base": 44767}

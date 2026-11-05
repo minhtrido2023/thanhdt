@@ -1,0 +1,69 @@
+{
+ "axes_excluded": [
+  {
+   "axis": "CK quan tri (governance)",
+   "reason": "luat phap ly/quan tri = WARNING (2026-09-27); bao song song 5/10/15%"
+  },
+  {
+   "axis": "thang du quy dat moi 150 To Hieu + I.14",
+   "reason": "luat du an moi 03/11: NPV 0; bao song song +-10%"
+  },
+  {
+   "axis": "rui ro doi tac tien gui NH Sai Gon Tai Loc 678,3",
+   "reason": "skeptic B9 INCONCLUSIVE, khong co du lieu han che rut; bao stress mat 100% (can duoi cuc doan, khong phai kich ban)"
+  },
+  {
+   "axis": "thang du dat cu theo bien lich su ~70%",
+   "reason": "giu tam 40% (dem chi phi hoan thanh chua quan sat, skeptic B3); bao song song {40;55;70}"
+  }
+ ],
+ "axes_included": [
+  "bien rong backlog 2 chieu",
+  "thang du dat cu 2 chieu quanh 40%",
+  "CK holding 0-30% (MOI r2 gom 0)",
+  "r +-100bp"
+ ],
+ "base_adjustments": [
+  {
+   "basis": "cau truc 2 tang niem yet, CRV free float ~3%, khop 24/62 phien (DNSE, dd_TCH_20261031 GAPS §1) — co so CHO SU TON TAI, DO LON = nhan dinh [UL]",
+   "effect_dong_per_share": null,
+   "item": "CK holding — vong 1 tam 20% trong base; r2 chuyen thanh truc xac suat {0;10;20;30} deu (ky vong 15%)",
+   "source": "dd_TCH_20261031/GAPS.md + SKEPTIC_20261031.md B4/B7"
+  },
+  {
+   "basis": "dem chi phi hoan thanh HH1-HH4 + cao tang chua cong bo [UL]; skeptic B3 quy doi 40% <=> bien gop 40%",
+   "effect_dong_per_share": null,
+   "item": "thang du dat cu tam 40% (< ~70% bien lich su)",
+   "source": "SKEPTIC_20261031.md B3"
+  },
+  {
+   "basis": "TM17 mua dat 6T FY26: 150 To Hieu 1.677,5 (me), I.14 1.328,8 (CRV)",
+   "effect_dong_per_share": 0.0,
+   "item": "quy dat moi 3.006,3 = gia so (NPV 0)",
+   "source": "notes_read.md TM17"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong luoi; P50 = trung vi ket cuc; gia tri tai tham so trung tam dung hold 15% (= ky vong truc hold). Phan phoi gan doi xung; khong nhanh trong so nho nao quyet dinh P10/P90.",
+ "change_reason": "Vong 1 +5,9% vs zone cu 12.650 (bo CK quan tri khoi base, quy dat moi NPV0). Vong 2: CK holding ky vong 20% -> 15% (truc gom 0) => tam tang.",
+ "change_vs_r1": "(1) CK holding tu base 20% -> truc {0;10;20;30} (ky vong 15%); (2) tam = ky vong luoi; nhan TRONG giu nguyen.",
+ "grid_desc": "4 truc, n=108 ket cuc tat dinh: bien rong backlog {30;33,5;36}% (1/4-1/2-1/4) [UL; skeptic B12 ~33-34%] x thang du HTK dat cu sau thue {25;40;55}% (1/4-1/2-1/4) [UL; duoi bien lich su ~70% (51,9% gop) — dem chi phi hoan thanh chua cong bo] x CK holding phan qua cong ty con {0;10;20;30}% (deu 1/4) [UL] x r {R-1;R;R+1}% (1/4-1/2-1/4). Co dinh: VCSH me 12.159,1 (truc tiep 5.958,6 + qua con 6.200,5); backlog NMTT NC-II 3.099 (68,02%), Green River 1.838, H2 618 (PV 1-2 nam); thang du dat cu PV 4 nam; quy dat moi 150 To Hieu + I.14 = NPV 0 (gia so). Phan vi wpct tren 108 o; tam = ky vong luoi. CK thanh khoan 5 ty ADV250.",
+ "label_note": "Nhan theo co 5 ty/ADV250 (CK 0,64%, Q/ADV 5,7% — TRONG vung hieu chinh). Sleeve 10-40 tr CK <0,06%. Dinh nghia vung P10-P90 khong doi.",
+ "open_issues": [
+  "BCTC Q3 rieng CRV (toc do tieu NMTT NC-II, skeptic B5)",
+  "Xac minh NH Sai Gon Tai Loc",
+  "legal-vn: nhom uy quyen 7,37% + chuan duy tri niem yet CRV",
+  "BLQ ngoai tap doan (BC quan tri tu tr.13)",
+  "BQ OShares TCH 912,1 tr (truoc cp thuong) — dung 1.003,3",
+  "HHS SOTP thi truong ~0,5x phan CRV (skeptic B7) chua dung lam neo"
+ ],
+ "warnings": [
+  "QD 1020/QD-XPHC 03/04/2026 Thue TP Hai Phong: khai sai TNDN, phat 2,735 + truy thu 13,676 + cham nop 3,798 = 20,21 ty (da nop, CBTT 07/04/2026)",
+  "QD 1357/QD-XPHC 12/2024 UBCKNN (CBTT/giao dich ben lien quan, 295 tr) — 2 co quan, 2 loai vi pham trong 16 thang",
+  "Nhom kiem soat (Do Huu Ha 30,18% + HH Finance 5,81%, nguoi lien quan) = 35,99%, chiem 71,2% phieu DHDCD 2026; Truong BKS kiem KTT cong ty con; CRV free float ~3% (chuan duy tri niem yet chua kiem)",
+  "Tien gui 678,3 ty tai NH TMCP Sai Gon Tai Loc (21% tien+HTM) gan nhu khong rut khi HTM giam 2.025 — NH la ai/han che rut: INCONCLUSIVE (skeptic B9)",
+  "BLQ trong tap doan da duoc cong bo (BC quan tri 6T 2026, 3 NQ HDQT 16/04, 23/06, 21/07/2026; TCH cho CRV vay 30 ty, han muc 500 ty) — con mo: BLQ NGOAI tap doan (HH Finance, gia dinh Do)",
+  "Dragon Capital ban rong xuong 4,71% (15/06/2026) — nguon cung co to chuc",
+  "BCTC 6T FY26 chua soat xet; su dung von chao ban 865,5 ty (M7)",
+  "'Khong co khoi to/kiem toan ngoai tru': nguon = GAPS 31/10/2026 (27 PDF hoanghuy.vn) + web search 05/11/2026 (cafeland, baophapluat, stockbiz) — khong co NQ HDQT 10-11/2026 moi; NQ 08/2026 co phieu thuong 10% (da phat hanh, DKCC 04/09)"
+ ]
+}

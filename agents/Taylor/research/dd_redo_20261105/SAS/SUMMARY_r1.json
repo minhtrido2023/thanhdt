@@ -1,0 +1,59 @@
+{
+ "ticker": "SAS",
+ "asof_price_date": "2026-11-04",
+ "price": 34700.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.074,
+  "date": "2026-11-03",
+  "source": "effective_deposit_rate = max(Big-4 12M 6,8%, CCTG 12M 7,4% ngay 02/11/2026); r neo 13,5%"
+ },
+ "dep_now": {
+  "rate": 0.07400000000000001,
+  "source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 31028.896300728855,
+ "center_post_liq": 29164.25155703676,
+ "p10_post": 22046.842986292795,
+ "p50_post": 29133.04713126048,
+ "p90_post": 36229.73994649953,
+ "p10_pre": 23456.42930154582,
+ "p50_pre": 30995.69678968903,
+ "p90_pre": 38546.12355142259,
+ "liq_discount_ref": 0.060093814669402,
+ "liq_ref_position_bn_vnd": 5,
+ "adv_med_bn_vnd": 0.590423,
+ "grid_n": 45,
+ "grid_desc": "3 bien, n=45: tac dong Long Thanh len LN van hanh tu 2028 Delta {-55; -40; -25; -10; +5}% (trong so 0,1/0,2/0,4/0,2/0,1, doi xung quanh -25%) x LN van hanh nam hoa N0 {-10%; 0; +10%} quanh 518,4 ty (1/4-1/2-1/4) x r {12,5; 13,5; 14,5}% (1/4-1/2-1/4). g=3%, 2027 = nua tac dong. Tien thua 654,1 + dau tu dai han gia so 253,8 co dinh. CK thanh khoan 5 ty (6,0%) ap dong loat.",
+ "label": "TRONG vung",
+ "px_vs_center": 0.18981280668687583,
+ "px_vs_p10": 0.5739214916881326,
+ "px_vs_p90": -0.04222332119298955,
+ "zone_old": {
+  "low": null,
+  "center": 32600,
+  "high": null,
+  "dd_date": "2026-10-26",
+  "center_kind": "expected_weighted"
+ },
+ "center_change_vs_old": -0.10539105653261471,
+ "change_reason": "Tam sau CK 29.164 vs cu 32.600 (-10,5%, >10%). Nguyen nhan chinh: (1) chiet khau thanh khoan 6,0% cho vi the 5 ty (ADV 0,59 ty, 42-85 phien @20-10%) = -1.865 d — moi theo luat 03/11; (2) cau truc mo hinh dung lai tu BCTC goc: LN van hanh N0 518 (loai thu nhap tai chinh) thay LN 650 gop + tien thua 654 (4.900 d/cp, thay 3.500 uoc luong) + dau tu dai han gia so 253,8 => -2.654 d truoc CK; (3) r 14% -> 13,5% = +1.083 d. Truoc CK chi -4,8%. Gia 37.000 -> 34.700.",
+ "warnings": [
+  "Mat bang ACV giao truc tiep khong dau thau (TTCP 2017), lo dat chua hoan tat thu tuc; truy thu tien thue dat 2015-2024 hach toan Q4/2025",
+  "Giao dich ben lien quan nhom IPP (IPPG/ACFC/DAFC/DAT ~46,5%); lich su phai thu lien doanh Nha Viet ~292 ty trich lap ~251 ty",
+  "Free float ~4,4% (ACV 49,07% + nhom IPP 46,50%) — rang buoc thuc thi",
+  "Ke hoach chuyen HOSE + co the phat hanh them (pha loang/cung co phieu)"
+ ],
+ "open_issues": [
+  "Thuyet minh V.5b phai thu dai han khac 242,0 ty chua doc (ky quy ACV?) — KHONG tinh vao gia tri",
+  "Khoan bu DFS Q4/2025 chua co so tien",
+  "Ben tra co tuc dau tu (FIN_REV 9T 195,0) chua xac dinh",
+  "Ket qua dau thau mat bang Long Thanh + lo trinh chuyen chuyen bay chinh thuc",
+  "HTK 68,9 -> 204,3 (tu van hanh mien thue) chua trich lap",
+  "Thieu sector read (dich vu hang khong/san bay)"
+ ],
+ "sources": {
+  "model": "calc/model.py -> calc/model_out.json/txt",
+  "liq": "_common/liq.py + _common/bq_px_4ma_20261104.csv"
+ }
+}

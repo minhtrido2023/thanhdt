@@ -1,0 +1,25 @@
+price: 21000.0
+asof_price_date: 2026-11-04
+n_outcomes: 90
+center_pre: 17794
+center_post: 17675
+center_param_post: 18493
+p10_out: 12533
+p25_out: 14645
+p50_out: 17425
+p75_out: 20624
+p90_out: 23135
+min_out: 9670
+max_out: 28070
+pct_weight_below_price: 0.7825
+px_vs_center_post: 0.18811881188118806
+label: TRONG vùng
+liq_disc_5ty: 0.0067071400472102525
+delta_center_vs_r1_pct: -0.0042814489324545235
+r1: {"center_post": 17751, "p10_post": 13001, "p90_post": 22965, "label": "TRONG vùng"}
+w250 2025-11-03..2026-11-04 ADV 94.60 ty sigma 0.0292 | 5000tr: CK 0.671% Q/ADV 5.2855% calib=True phien@15% 0.35 | 10tr: CK 0.030% Q/ADV 0.0106% calib=False phien@15% 0.00 | 20tr: CK 0.042% Q/ADV 0.0211% calib=False phien@15% 0.00 | 40tr: CK 0.060% Q/ADV 0.0423% calib=False phien@15% 0.00
+w60 2026-08-10..2026-11-04 ADV 128.76 ty sigma 0.0260 | 5000tr: CK 0.513% Q/ADV 3.8833% calib=True phien@15% 0.26 | 10tr: CK 0.023% Q/ADV 0.0078% calib=False phien@15% 0.00 | 20tr: CK 0.032% Q/ADV 0.0155% calib=False phien@15% 0.00 | 40tr: CK 0.046% Q/ADV 0.0311% calib=False phien@15% 0.00
+parallel plan_anchor: {"desc": "neo ke hoach 5 nam NQ HDQT: LN me/nam 2027-30 = 933 ty, ROE giua chu ky 9.46%", "n_outcomes": 90, "center_post": 11456, "p10_out": 7414, "p50_out": 11122, "p90_out": 15496, "pct_weight_below_price": 1.0, "label": "TRÊN vùng"}
+parallel roe_ex_interest: {"desc": "ROE giua chu ky BO lai tien gui hien tai (215 ty/nam phan me): 10.97%", "n_outcomes": 90, "center_post": 14219, "p10_out": 9695, "p50_out": 13955, "p90_out": 19004, "pct_weight_below_price": 0.9699999999999999, "label": "TRÊN vùng"}
+parallel ship_npv0: {"desc": "NPV tau moi = 0 o moi kich ban (nhu vong 1)", "n_outcomes": 90, "center_post": 17761, "p10_out": 13133, "p50_out": 17631, "p90_out": 22878, "pct_weight_below_price": 0.7975, "label": "TRONG vùng"}
+r_sens_post: {"beta1.0_-100bp": 19479, "beta1.0_-50bp": 18521, "beta1.0_+50bp": 16868, "beta1.0_+100bp": 16149, "base": 17675}

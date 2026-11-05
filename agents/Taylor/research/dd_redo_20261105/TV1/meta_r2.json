@@ -1,0 +1,22 @@
+{
+ "grid_desc": "5 trục: giá PPA SB5 2027+ 949/600/520/440/340 (0,05/0,25/0,30/0,20/0,20) × biên tư vấn 5/8/11/14% (0,20/0,30/0,40/0,10) × sản lượng 175/187,5/200 GWh (đều) × thời điểm áp bậc thấp: truy thu hồi tố 2022–26 / đúng 2027 / lùi 1 năm / lùi 2 năm (0,10/0,70/0,15/0,05) × vốn lưu động tư vấn 45/49/53% ΔDT (đều); sàn vốn chủ 0; phân vị wpct mức kết cục",
+ "label_note": "TRONG vùng giữ nguyên so vòng 1; không do đổi định nghĩa vùng (vòng 1 đã P10–P90). So rev5 02/11 (vùng P20–P80 11.400–24.200) giá 19.600 cũng TRONG. 71,3% trọng số kết cục dưới giá — 'TRONG vùng' ở đây là vùng rất rộng (P10 4.693 – P90 24.544), giá cao hơn tâm 27%.",
+ "center_vs_p50_note": "Tâm (kỳ vọng) 15.379 ≈ P50 15.532; tham số trung tâm (PPA 520, tư vấn giữa 11%, Q187,5, đúng 2027, VLĐ 49%) 19.165 — cao hơn tâm 25% vì 520 và biên 11% đều ở trên kỳ vọng xác suất (PPA kỳ vọng 509; tư vấn có 50% xác suất biên ≤8%) và tâm gồm 10% truy thu. P10 do nhánh PPA 340 (63% trọng số quanh P10) + truy thu (31%); P90 do PPA 600/520 với tư vấn cao. 5,5% trọng số chạm sàn 0 (truy thu + PPA thấp + biên 5%).",
+ "change_reason": "Tâm sau CK 15.379 vs vòng 1 16.348 (−5,9%): thêm trục thời điểm hai chiều (truy thu hồi tố p0,10 ≈ −17.397 đ/cp, lùi hạ bậc 1–2 năm p0,20) — kỳ vọng ròng âm; P10 8.366 → 4.693 (truy thu kéo đuôi dưới), P90 24.571 → 24.544. Bản không trục thời điểm: tâm 16.348, P10 8.420 (song song). Nhãn không đổi.",
+ "warnings": [
+  "Vụ án EVNNPT/PC1: Chủ tịch HĐQT Nguyễn Hữu Chỉnh + phó phòng TCKT khởi tố, tạm giam (05/2026; nhadautu.vn, baolaocai.vn); pháp nhân: công ty chỉ nói 'chưa nhận thông tin/kết luận chính thức' (H1 TM33) — không phải 'chưa bị khởi tố'. Song song CÓ cấm thầu 3 năm −50% p0,35: tâm 12.981, P10 1.431",
+  "Cấm thầu/nộp tiền (đ/cp ở r 13,5%): cấm 3 năm −50% ≈ −8.194; 5 năm ≈ −12.983; nộp 20/50/100 tỷ ≈ −660/−1.650/−3.301 (vòng 1)",
+  "Big4 cả 4 hãng từ chối kiểm toán FY2026 (vietnamfinance 01/07/2026) — ĐÃ ĐÓNG: ký An Việt 18/08 (REPORT 02/11 §); rủi ro chất lượng kiểm toán còn (mốc M4 ~31/03/2027)",
+  "Truy thu bậc giá SB5 2022–26 (≈657 tỷ trước thuế) nay là nhánh lưới p0,10 [UL] — tranh chấp hợp đồng, chưa có văn bản đòi",
+  "Giá PPA SB5 từ 2027 không có văn bản (lãnh đạo 500–600 qua KBSV, chưa kiểm bản gốc; bậc 2018 243,66+O&M ≈ 340)",
+  "Cổ đông: EVN 54,34%; Lê Minh Hà 9,84% đồng thời bên cho vay (lãi vay cá nhân phải trả 64,3 tỷ); không trả cổ tức tiền FY2016–22",
+  "Tra tin 05/11/2026 (WebSearch): không thấy khởi tố/kết luận mới liên quan TV1 sau 02/11. Kết quả 'NQ ĐHĐCĐ bất thường 2/11 bán đấu giá SB5' là 02/11/2020 (vietnamfinance 07/11/2020; en.evn.com.vn) — 6 lần rao bán 2019–06/2021 đều bất thành; không phải dữ liệu mới"
+ ],
+ "open_issues": [
+  "Phụ lục PPA SB5 / CBTT giá 2027+ — chờ ĐHĐCĐ 2027 hoặc BCTC FY2026",
+  "Xác suất PPA, tư vấn, thời điểm [UL]; KBSV 500–600 chưa kiểm bản gốc",
+  "Điện mặt trời nổi 46 MWp: NPV 0 (chưa đầu tư)",
+  "Gordon dùng LNST 2025 (không có TTM trong lõi) — chỉ đối chiếu"
+ ],
+ "fearbuy_sleeve_eligible": "KHÔNG đủ điều kiện §2.5 ở trạng thái hiện tại: giá cao hơn tâm 27% (không có biên an toàn), vụ án chưa kết luận; nếu xét sau này phải mang trigger HARD ABANDON §3 và trần size 2–4% NAV (SKEPTIC_BLIND N7)"
+}

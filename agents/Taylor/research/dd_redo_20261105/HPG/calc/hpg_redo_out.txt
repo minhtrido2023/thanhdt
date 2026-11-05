@@ -1,0 +1,27 @@
+== HPG redo | gia 21,700 (2026-11-04) | BVPS 30/09 17,624 | P/B 1.23x | r 13.50% (neo 13,5% @ 7.40% cctg_12m(2026-11-02))
+  XAU w=0.25: LN [5500, 16000, 15000, 16000] g 3% -> RI 9,769 d/cp (P/B 0.55x; ROE terminal sau thue 20% 7.9%; TV -65%)
+  TRUNG_LAP w=0.5: LN [7000, 26000, 26000, 27000] g 5% -> RI 16,731 d/cp (P/B 0.95x; ROE terminal sau thue 20% 11.8%; TV -13%)
+  TOT w=0.25: LN [8000, 31000, 33000, 35000] g 5% -> RI 22,215 d/cp (P/B 1.26x; ROE terminal sau thue 20% 14.3%; TV 7%)
+  KY VONG truoc CK: 16,361
+  do nhay trong so w_len_015_050_035: 17,606
+  do nhay trong so w_xuong_035_050_015: 15,117
+  Duoi trai TLSH (khong vao base): mat 50% khoan 9,915 = -587 d/cp
+Do nhay r theo lai huy dong:
+  b0.5_-100bp: r 13.00% -> 17,287 (+926; +5.7%)
+  b0.5_-50bp: r 13.25% -> 16,813 (+452; +2.8%)
+  b0.5_+50bp: r 13.75% -> 15,931 (-431; -2.6%)
+  b0.5_+100bp: r 14.00% -> 15,520 (-842; -5.1%)
+  b1.0_-100bp: r 12.50% -> 18,311 (+1,950; +11.9%)
+  b1.0_-50bp: r 13.00% -> 17,287 (+926; +5.7%)
+  b1.0_+50bp: r 14.00% -> 15,520 (-842; -5.1%)
+  b1.0_+100bp: r 14.50% -> 14,792 (-1,569; -9.6%)
+Luoi n=45: truoc CK P10 9,274 P50 16,731 P90 23,612
+Thanh khoan: ADV trung vi 250 phien 602.1 ty | sigma 1.65% | CK @5 ty 0.150% (1 ty 0.067%; 10 ty 0.212%) | phien thoat 5 ty @10/20% 0.08/0.04 | Amihud 1.50e-05
+SAU CK: tam 16,337 | P10 9,261 P25 12,290 P50 16,706 P75 19,680 P90 23,577
+Gia 21,700: vs tam +32.8% | vs P10 +134.3% | vs P90 -8.0% | NHAN TRONG vùng
+r ma tam sau CK = gia: 11.27%
+Doi chieu: EV/EBITDA 5x (2027 theo kich ban) 22,025 d/cp; EV/EBITDA loi TTM hien tai 5.31x
+Cau noi: RI trong so cu 19,221 (Ke 11.83%, tai 30/09) | tai lap 19,221 -> day toi 2026-11-04 19,428 -> r 13,5% (terminal cu, g tren RI am) 15,285 (-4,143) -> terminal NPV0 16,361 (+1,076) -> sau CK 16,337
+  [doi chieu] terminal NPV0 o Ke cu 11.83%: 19,882 (chi XAU doi vi ROE_T 7,9% < Ke cu)
+  vs tam cu (blend) 20,200: -19.1% ; vs RI cu 19,221: -15.0%
+SUMMARY.json written

@@ -1,0 +1,22 @@
+NNC redo | dep 7.40% (cctg_12m(2026-11-02)) -> r 13.50%
+  tam truoc CK 60,702 (pin r6 60.702, lech -0.0) | MVC dong thoi 16,687
+   STRUCTURAL  w 0.20: 88,878
+   ADMIN_GATED w 0.45: 54,522
+   CYCLICAL    w 0.35: 52,547
+  luoi 243 o (trong so): TB 62,393 | P10 46,610 P25 50,751 P50 58,521 P75 70,225 P90 88,878
+  [so sanh] luoi r6 ky-vong r13,5 n=1458: P10 52,755 P50 63,040 P90 74,160
+   dep b1.0_-100: r 12.50% -> 62,675 (+1,973; +3.3%)
+   dep b1.0_-50: r 13.00% -> 61,666 (+964; +1.6%)
+   dep b1.0_+50: r 14.00% -> 59,780 (-922; -1.5%)
+   dep b1.0_+100: r 14.50% -> 58,898 (-1,804; -3.0%)
+   dep b0.5_-100: r 13.00% -> 61,666 (+964; +1.6%)
+   dep b0.5_-50: r 13.25% -> 61,179 (+477; +0.8%)
+   dep b0.5_+50: r 13.75% -> 60,236 (-466; -0.8%)
+   dep b0.5_+100: r 14.00% -> 59,780 (-922; -1.5%)
+  thanh khoan 2025-11-03..2026-11-04: ADV trung vi 2.10 ty | ADV60 1.39 | sigma 2.35% | CK 5 ty Y1 3.63% (ADV60: 4.46%)
+   1 ty: CK 0.8%/1.6%/2.4% | phien thoat 10/20% 5/2
+   5 ty: CK 1.8%/3.6%/5.4% | phien thoat 10/20% 24/12
+   10 ty: CK 2.6%/5.1%/7.7% | phien thoat 10/20% 48/24
+  tam SAU CK 58,497 | P10 44,917 P25 48,907 P50 56,395 P75 67,674 P90 85,649
+  gia 46,900 (2026-11-04): vs tam -19.8% | vs P10 +4.4% | vs P90 -45.2% | TRONG vùng | o duoi gia 17.6%
+  SUMMARY: tam 58,497 P10 44,917 P50 56,395 P90 85,649 | cu {'low': 55000, 'center': 58500, 'high': 66900, 'dd_date': '2026-11-03', 'rev': 4, 'zone_def': 'P25-P75 sau CK thanh khoan (ban cu)', 'source_file': 'agents/Taylor/research/dd_NNC_20261030/investor_report_v3/NNC_DD_investor_report_20261103.md'} | doi tam -0.0%

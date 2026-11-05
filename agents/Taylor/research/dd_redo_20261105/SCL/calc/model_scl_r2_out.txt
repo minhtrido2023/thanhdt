@@ -1,0 +1,12 @@
+SCL r2 giá 30.000 (2026-11-04, CUM) TERP 27.659 | r 0.1350 | n kết cục 324
+CUM: tâm TRƯỚC 23.842 SAU CK 22.769 | P50 SAU 23.312 | tham số trung tâm SAU 22.360
+CUM kết cục SAU CK p10 17.348 p25 19.700 p50 23.312 p75 25.566 p90 27.119 | min 15.270 max 30.509
+CUM % trọng số dưới giá 98.4% | nhãn TRÊN vùng (>P90) | giá/tâm +31.8% | giá/P90 +10.6%
+SAU QUYỀN: tâm SAU CK 21.319 p10 16.624 p25 18.661 p50 21.790 p75 23.742 p90 25.087 | TERP dưới-giá-trọng-số 98.4% ⇒ TRÊN vùng (>P90)
+Nhánh quanh P10 {'CYCLICAL': 1.0} | quanh P90 {'ADMIN_GATED': 0.178, 'STRUCTURAL': 0.822}
+CK @5 tỷ 4.50% (ADV120 2.28 tỷ; Q/ADV 219%; trong vùng √: False) | ADV250 1.26 → 5.88% | ADV60 3.63 → 3.67% | sleeve 10/20/40tr 0.67%/0.74%/0.85%
+SONG SONG có IRR Phả Lại: tâm 22.769 P10 17.348 P90 27.672 | dưới giá 98.2%
+SONG SONG nhánh đối xứng (TROUGH 0,2): tâm 21.648 P10 15.987 P90 26.942
+SONG SONG khung nợ mệnh giá: tâm 21.584 P10 16.232 P90 25.983
+Độ nhạy r (CUM tâm SAU CK): b1.0_-100 25.489 (+11.9%) | b1.0_-50 24.052 (+5.6%) | b1.0_+0 22.769 (+0.0%) | b1.0_+50 21.616 (-5.1%) | b1.0_+100 20.575 (-9.6%) | b0.5_-100 24.052 (+5.6%) | b0.5_-50 23.393 (+2.7%) | b0.5_+0 22.769 (+0.0%) | b0.5_+50 22.177 (-2.6%) | b0.5_+100 21.616 (-5.1%)
+Gordon g4% (CUM, trước CK): ROE TTM 22.1% ⇒ 26.143 (một biến thể — không có lãi tiền gửi đáng kể)

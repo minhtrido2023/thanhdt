@@ -1,0 +1,14 @@
+Giá 33,000 vs kỳ vọng r4 23,644: +39.6%; vs CYC +33.9%; STRUCT +67.8%
+  lưới sym3 (n=270; P75 25,561 · P90 26,993): ĐẮT
+  lưới sym5 (n=450; P75 27,108 · P90 29,334): ĐẮT
+  lưới old270 (n=270; P75 25,081 · P90 26,244): ĐẮT
+  lưới sym3_brent4 (n=1080; P75 25,170 · P90 26,478): ĐẮT
+  Brent 67.8: biên dài hạn hàm ý (kỳ vọng) 306 · (100% CYC) 270 USD/t
+  Brent 82.0: biên dài hạn hàm ý (kỳ vọng) 312 · (100% CYC) 274 USD/t
+  Brent 90.0: biên dài hạn hàm ý (kỳ vọng) 315 · (100% CYC) 277 USD/t
+  Brent 103.0: biên dài hạn hàm ý (kỳ vọng) 320 · (100% CYC) 281 USD/t
+  biên 150: Brent 67.8: +53.5% | Brent 82: +56.4% | Brent 90: +58.1% | Brent 103: +61.0%
+  biên 179: Brent 67.8: +39.6% | Brent 82: +42.1% | Brent 90: +43.5% | Brent 103: +45.8%
+  biên 220: Brent 67.8: +23.8% | Brent 82: +25.7% | Brent 90: +26.8% | Brent 103: +28.7%
+  biên 242: Brent 67.8: +16.7% | Brent 82: +18.4% | Brent 90: +19.4% | Brent 103: +21.0%
+  biên 260: Brent 67.8: +11.5% | Brent 82: +13.1% | Brent 90: +14.0% | Brent 103: +15.4%

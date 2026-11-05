@@ -1,0 +1,9 @@
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+409582a3d2dd624aebc94d00e9988d1a  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_TCH_20261031/calc/notes_read.md
+0029a4434c6ebdc85142bea70bc5e0f0  TCH/SUMMARY_r1.json
+0038a43a28ef5658777d2faab99464d5  TCH/calc/model_r2.py
+74fb44444ac20d28ffeafc657821b116  _common/bq_px_4ma_20261104.csv
+ced2dcc1ba3d5fbc7d691ea00732920d  _common/liq.py
+c48da959c789ba976dc1f653bb9e09b2  _common_020021/r2lib.py
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py

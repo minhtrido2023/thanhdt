@@ -1,0 +1,14 @@
+Net cash that = tien 11.8 + HTM 5362.3 - vay 1795.8 - co tuc phai tra 297.1 = 3,281.3 ty = 11,398 d/cp
+Von luu dong: phai thu KH 4,252.0 - phai tra NB 2,637.4 - CP phai tra 777.4 = 837.2 (KHONG cong vao gia tri)
+Thu nhap TC rong sau thue nam hoa 168; LNST 9T 906.4 (Q3 418.6); KH 9T 114.8; CFO 9T 1256.2 (CFO/LNST 1.39)
+r = 13.50% (dep 7.40% [cctg_12m(2026-11-02)], neo 7.40%); gia 22,650 (2026-11-04)
+xau     p=0.25 LNST chuan hoa 400 (van hanh 232), PPA 10 nam: 15,677 -> sau CK TK 15,533
+co so   p=0.50 LNST chuan hoa 800 (van hanh 632), PPA 10 nam: 23,068 -> sau CK TK 22,856
+tot     p=0.25 LNST chuan hoa 1150 (van hanh 982), PPA 10 nam: 29,536 -> sau CK TK 29,264
+TAM truoc CK 22,837 | CK thanh khoan 0.92% | sau 22,628 | gia/tam +0.1%
+LUOI n=45: truoc P10 17,757, P50 23,068, P90 27,784 | sau P10 17,594, P50 22,856, P90 27,529
+Gia 22,650: vs tam +0.1%, vs P10 +28.7%, vs P90 -17.7% => TRONG vung
+Do nhay lai huy dong: b0.5_d-100bp: r 13.00% -> 23,067 (+230, +1.0%); b0.5_d-50bp: r 13.25% -> 22,951 (+114, +0.5%); b0.5_d50bp: r 13.75% -> 22,725 (-112, -0.5%); b0.5_d100bp: r 14.00% -> 22,615 (-222, -1.0%); b1.0_d-100bp: r 12.50% -> 23,304 (+466, +2.0%); b1.0_d-50bp: r 13.00% -> 23,067 (+230, +1.0%); b1.0_d50bp: r 14.00% -> 22,615 (-222, -1.0%); b1.0_d100bp: r 14.50% -> 22,400 (-438, -1.9%)
+Do nhay thoi han dong tien (tam sau CK): PPA_8y 21,345, PPA_12y 23,623, PPA_15y 24,714
+PE ngam dinh: gia 22,650 - net cash 11,398 = 11,252 d/cp tren LNST van hanh co so 2,194 d/cp = 5.1x
+Thanh khoan: ADV 18.0 ty (2025-11-03..2026-11-04), sigma 1.74%; CK 1/5/10 ty = 0.4%/0.9%/1.3%; 5 ty = 1.4-2.8 phien @20-10%

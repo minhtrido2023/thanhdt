@@ -1,0 +1,12 @@
+TV2 r2 giá 27.400 (2026-11-04) | r 0.1350 | n kết cục 324
+Tâm TRƯỚC 16.242 SAU CK 15.832 | P50 SAU 15.843 | tham số trung tâm (177,5|g4|CMC0|bền) SAU 18.883
+Kết cục SAU CK p10 2.726 p25 6.597 p50 15.843 p75 23.133 p90 30.675 | min 0 max 44.938
+% trọng số dưới giá 84.1% | nhãn TRONG vùng | giá/tâm +73.1% | giá/P90 -10.7%
+Kịch bản quanh P10 {'co_so': 0.273, 'tich_cuc': 0.027, 'tieu_cuc': 0.7} | quanh P90 {'co_so': 0.159, 'tich_cuc': 0.841} | độ bền quanh P90 {'+30%': 0.381, 'ben': 0.619}
+CK @5 tỷ 2.52% (ADV120 3.22 tỷ; Q/ADV 155%; trong vùng √: False) | ADV250 6.25 → 1.89% | ADV60 2.59 → 2.78% | sleeve 10/20/40tr 0.38%/0.42%/0.48%
+SONG SONG trọng số 30/50/20: tâm 16.750 P10 2.895 P90 32.144 | 20/50/30: tâm 14.915 P90 29.179
+SONG SONG chính sách trả hết khi ROE<r (g=0): tâm 17.268 P10 6.319 P90 30.675 | dưới giá 84.1%
+SONG SONG không trục độ bền: tâm 17.690 P10 6.743 P90 29.736 | dưới giá 85.3%
+SONG SONG lưới vòng 1 (n27) + wpct: tâm 18.783 P10 7.018 P50 18.883 P90 31.032
+Độ nhạy r (tâm SAU CK): b1.0_-100 17.757 (+12.2%) | b1.0_-50 16.741 (+5.7%) | b1.0_+0 15.832 (+0.0%) | b1.0_+50 15.016 (-5.2%) | b1.0_+100 14.277 (-9.8%) | b0.5_-100 16.741 (+5.7%) | b0.5_-50 16.274 (+2.8%) | b0.5_+0 15.832 (+0.0%) | b0.5_+50 15.413 (-2.6%) | b0.5_+100 15.016 (-5.2%)
+Gordon g4% (trước CK, LNST 2026E 229,5 ước lượng): có lãi TG 27.478 | không lãi TG 11.736

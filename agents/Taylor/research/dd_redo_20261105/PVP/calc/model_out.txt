@@ -1,0 +1,6 @@
+r=0.1350 r_fso=0.1000 center_pre=22249
+scenarios_pre {"xau": 15275, "coso": 25686, "tot": 30533}
+r_sens_pre {"beta0.5_-100bp": 22452, "beta0.5_-50bp": 22350, "beta0.5_+50bp": 22149, "beta0.5_+100bp": 22050, "beta1.0_-100bp": 22659, "beta1.0_-50bp": 22452, "beta1.0_+50bp": 22050, "beta1.0_+100bp": 21856, "base": 22249}
+parts_by_scn {"xau": {"net_cash_after_div": 1016.2, "fso": 623.9, "tankers": 1005.3, "drydock": -232.9, "corp": -220.7, "ships_new": -607.8}, "coso": {"net_cash_after_div": 1016.2, "fso": 760.7, "tankers": 1340.5, "drydock": -232.9, "corp": -220.7, "ships_new": 0.0}, "tot": {"net_cash_after_div": 1016.2, "fso": 760.7, "tankers": 1843.1, "drydock": -232.9, "corp": -220.7, "ships_new": 0.0}}
+aux {"vt_ebitda_9t": 421.084, "vt_ebitda_9t_annual": 561.4453333333333, "fso_y1_excess": 177.17900000000003, "ship_exp_ty": 2025.9119999999998, "floor_pre_capex_ps": 14888.532089135815}
+grid wq pre: {"10": 13799, "25": 15909, "50": 23476, "75": 27104, "90": 28776}

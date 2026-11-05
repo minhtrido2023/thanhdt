@@ -1,0 +1,11 @@
+# LOCK upstream md5 — SIP r2
+95d8fe38f5c17c3f723d6c175ffac49b  _common_g2r2/ddr2.py
+89b5306ea5c456f2f9adbdeec335277b  _common_g2r2/px_g2r2_20261104.csv
+5a8903052f95d9b093d6e62b182c7f89  _common_g2r2/px_g2r2.sql
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+81a87069f3f895a3a93d62d85b8fb5f0  _common_g2/ddg2.py
+13dac039539fb91fc8f7256c03a71e5d  ../../../../../deposit_rate_vn.py
+f9605983ad3b66b47ed80179bcad81da  ../../../../../cctg_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  ../../../../../data/deposit_rate_vn_events.csv
+fc06e3a866142684d87a43b34e0f17d2  ../../../../../data/cctg_rate_vn_events.csv
+027b1a60ecb0ec7f56108c5f52ee03d0  SIP/calc/model_sip_r2.py

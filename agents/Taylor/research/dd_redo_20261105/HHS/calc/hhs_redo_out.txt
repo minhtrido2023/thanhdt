@@ -1,0 +1,24 @@
+== HHS redo | gia 9,550 (2026-11-04) | r 13.50% (neo 13,5% @ 7.40% cctg_12m(2026-11-02))
+CRV GTHL 15,818 - thang du PPA sau thue 8,083 = CRV gia goc 7,735; phan khac 678; I.14 gia so 1,329 (thang du 0)
+  TIEU_CUC p=0.3: bien backlog 30.0%, thang du HTK cu 15%, o to 25x5, CK holding 35% -> 8,814
+  CO_SO p=0.5: bien backlog 33.5%, thang du HTK cu 40%, o to 35x6, CK holding 25% -> 10,963
+  TICH_CUC p=0.2: bien backlog 36.0%, thang du HTK cu 55%, o to 50x8, CK holding 15% -> 13,201
+  KY VONG truoc CK thanh khoan: 10,766
+  Do nhay CK quan tri (WARNING, KHONG vao base): gov_5 10,228 (-538) | gov_10 9,689 (-1,077) | gov_15 9,151 (-1,615)
+  Do nhay I.14 (base NPV 0): i14_s-15 10,661 (-105) | i14_s40 11,047 (+281)
+  Thang du BDSDT CRV (khong vao tam, can duoi, CK holding co so): +726 d/cp
+Do nhay r theo lai huy dong:
+  b0.5_-100bp: r 13.00% -> 10,790 (+24; +0.2%)
+  b0.5_-50bp: r 13.25% -> 10,778 (+12; +0.1%)
+  b0.5_+50bp: r 13.75% -> 10,754 (-12; -0.1%)
+  b0.5_+100bp: r 14.00% -> 10,742 (-24; -0.2%)
+  b1.0_-100bp: r 12.50% -> 10,815 (+49; +0.5%)
+  b1.0_-50bp: r 13.00% -> 10,790 (+24; +0.2%)
+  b1.0_+50bp: r 14.00% -> 10,742 (-24; -0.2%)
+  b1.0_+100bp: r 14.50% -> 10,719 (-47; -0.4%)
+Luoi n=45: truoc CK P10 8,538 P50 10,771 P90 13,201
+Thanh khoan: ADV trung vi 250 phien 16.2 ty | sigma 2.60% | CK @5 ty 1.44% (Y0,5 0.72%; Y1,5 2.16%; 1 ty 0.65%; 10 ty 2.04%) | phien thoat 5 ty @10/15/20% 3.1/2.1/1.5 | Amihud 7.63e-04 | free float 36.6%
+SAU CK: tam 10,611 | P10 8,415 P25 9,214 P50 10,615 P75 11,644 P90 13,010
+Gia 9,550: vs tam -10.0% | vs P10 +13.5% | vs P90 -26.6% | NHAN TRONG vùng
+Cau noi: cu tai lap 9,959 (ban cu ghi 9,950) -> r 13,5% 9,925 (-34) -> I.14 NPV0 9,689 (-236) -> bo CK quan tri 10,766 (+1,077) -> sau CK thanh khoan 10,611 (-155); lech +6.6%
+SUMMARY.json written

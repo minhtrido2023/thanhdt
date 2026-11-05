@@ -1,0 +1,39 @@
+r = 13.50% (dep 7.40% [cctg_12m(2026-11-02)]); gia 12,750 (2026-11-04); VCSH me 12,159.1 (12,119 d/cp) = truc tiep 5,958.6 + qua con 6,200.5
+LUOI r2: n=108 | tam truoc 13,857 sau 13,768 | P10/P50/P90 sau 12,559/13,726/14,983 | min sau 11,942 | % trong so duoi gia 19.1% | gia/tam -7.4% => TRONG vung
+Gia tri tai tham so trung tam (m 33,5%, s_old 40%, hold 15% = trung binh truc, r 13.5%): 13,865 truoc / 13,775 sau CK; P/B ngam dinh gia 1.05x
+SONG SONG r1_hold_10_20_30 (tam 20%): n=81 | tam truoc 13,467 sau 13,380 | P10/P50/P90 sau 12,559/13,387/14,205 | min sau 11,942 | % trong so duoi gia 20.3% | gia/tam -4.7% => TRONG vung
+SONG SONG hold_0 (khong CK holding): n=27 | tam truoc 15,028 sau 14,931 | P10/P50/P90 sau 14,274/14,940/15,597 | min sau 14,127 | % trong so duoi gia 0.0% | gia/tam -14.6% => DUOI vung (<P10)
+SONG SONG s_old_theo_bien_lich_su {40;55;70}: n=108 | tam truoc 14,442 sau 14,349 | P10/P50/P90 sau 13,083/14,308/15,644 | min sau 12,446 | % trong so duoi gia 5.9% | gia/tam -11.1% => DUOI vung (<P10)
+SONG SONG quy_dat_moi_-10%: n=108 | tam truoc 13,710 sau 13,622 | P10/P50/P90 sau 12,421/13,580/14,829 | min sau 11,809 | % trong so duoi gia 23.8% | gia/tam -6.4% => TRONG vung
+SONG SONG quy_dat_moi_+10%: n=108 | tam truoc 14,004 sau 13,914 | P10/P50/P90 sau 12,697/13,872/15,137 | min sau 12,075 | % trong so duoi gia 14.1% | gia/tam -8.4% => TRONG vung
+SONG SONG CK_quan_tri_5%: n=108 | tam truoc 13,164 sau 13,080 | P10/P50/P90 sau 11,931/13,040/14,234 | min sau 11,345 | % trong so duoi gia 40.2% | gia/tam -2.5% => TRONG vung
+SONG SONG CK_quan_tri_10%: n=108 | tam truoc 12,471 sau 12,391 | P10/P50/P90 sau 11,303/12,354/13,485 | min sau 10,748 | % trong so duoi gia 64.5% | gia/tam +2.9% => TRONG vung
+SONG SONG CK_quan_tri_15%: n=108 | tam truoc 11,779 sau 11,703 | P10/P50/P90 sau 10,675/11,667/12,736 | min sau 10,150 | % trong so duoi gia 89.8% | gia/tam +8.9% => TREN vung (>P90)
+SONG SONG stress_mat_100%_tien_gui_SGTL_678: n=108 | tam truoc 13,181 sau 13,096 | P10/P50/P90 sau 11,887/13,054/14,311 | min sau 11,270 | % trong so duoi gia 40.2% | gia/tam -2.6% => TRONG vung
+Cross-check P/B-ROE (g 3%, LN chuan hoa 727 = EPS 725 [UL v2]): A co lai ROE 6.0% => 3,442; B khong lai (lai TG sau thue nam hoa 278) ROE 4.9% + tien me 2,960 => 4,600
+Do nhay lai huy dong (tam truoc CK): b0.5_d-100bp 13,892 (+0.2%); b0.5_d-50bp 13,874 (+0.1%); b0.5_d50bp 13,840 (-0.1%); b0.5_d100bp 13,824 (-0.2%); b1.0_d-100bp 13,927 (+0.5%); b1.0_d-50bp 13,892 (+0.2%); b1.0_d50bp 13,824 (-0.2%); b1.0_d100bp 13,790 (-0.5%)
+adv250: ADV trung vi 87.13 ty/phien (2025-11-03..2026-11-04, 0 phien KL=0), sigma 2.69%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.01%/0.03%/0.04%; Q/ADV 0.0% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.02%/0.04%/0.06%; Q/ADV 0.0% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.03%/0.06%/0.09%; Q/ADV 0.0% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 0.14%/0.29%/0.43%; Q/ADV 1.1% trong vung hieu chinh (<=10%); 0.1-0.1 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 0.32%/0.64%/0.97%; Q/ADV 5.7% trong vung hieu chinh (<=10%); 0.3-0.6 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 0.46%/0.91%/1.37%; Q/ADV 11.5% NGOAI vung hieu chinh (<=10%); 0.6-1.1 phien @20-10%
+adv60: ADV trung vi 53.20 ty/phien (2026-08-10..2026-11-04, 0 phien KL=0), sigma 2.39%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.02%/0.03%/0.05%; Q/ADV 0.0% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.02%/0.05%/0.07%; Q/ADV 0.0% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.03%/0.07%/0.10%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 0.16%/0.33%/0.49%; Q/ADV 1.9% trong vung hieu chinh (<=10%); 0.1-0.2 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 0.37%/0.73%/1.10%; Q/ADV 9.4% trong vung hieu chinh (<=10%); 0.5-0.9 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 0.52%/1.04%/1.55%; Q/ADV 18.8% NGOAI vung hieu chinh (<=10%); 0.9-1.9 phien @20-10%
+Tam sau CK theo co (ADV250): 10tr 13,853, 20tr 13,852, 40tr 13,849, 1,000tr 13,817, 5,000tr 13,768, 10,000tr 13,731
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+LOCK 13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+LOCK 409582a3d2dd624aebc94d00e9988d1a  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_TCH_20261031/calc/notes_read.md
+LOCK 0029a4434c6ebdc85142bea70bc5e0f0  TCH/SUMMARY_r1.json
+LOCK 0038a43a28ef5658777d2faab99464d5  TCH/calc/model_r2.py
+LOCK 74fb44444ac20d28ffeafc657821b116  _common/bq_px_4ma_20261104.csv
+LOCK ced2dcc1ba3d5fbc7d691ea00732920d  _common/liq.py
+LOCK c48da959c789ba976dc1f653bb9e09b2  _common_020021/r2lib.py
+LOCK 4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+SUMMARY: tam sau 13,768 | P10/50/90 12,559/13,726/14,983 | TRONG vung | vs r1 +2.7% | vs cu +8.8%

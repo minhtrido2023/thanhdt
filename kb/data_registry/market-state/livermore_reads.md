@@ -35,3 +35,37 @@ last_update: 2026-10-25 (thêm luật REPORT_BLOCK, nhánh feat/livermore-report
     - INVALIDATION: đóng <1690 trong 5 phiên với vol ≥700M, hoặc bất kỳ phiên đóng <1677.
 - result: RESULT|2026-10-21|UP|0.56|HOLD
 - outcome:
+
+### LVR-STK-2026-11-05-FPT  (đọc SỐNG theo MÃ — vai mới: giữ cửa quyết bán FPT, user 05/11/2026)
+- as_of: 2026-11-05 · close_asof: 52900 · created: 2026-11-05T22:40:00+07:00 · trigger: USER-ASSIGNED (không bị khoảng cách 20 phiên của VNINDEX)
+- due: H20 2026-12-03 (lịch giao dịch) · cửa sổ chạm 25 phiên đến 2026-12-10
+- classification: 20 MARKDOWN (mơ hồ, có dấu dừng sớm) / 60 MARKDOWN (rõ) / 250 MARKDOWN (rõ); đỉnh 97.480 (19/01), đáy 49.550 (03/11)
+- forecast:
+    - H20_DIR: DOWN
+    - H20_P_UP: 0.45
+    - LEVEL: 58700 HOLD (không đóng cửa > 58.700 trong 20 phiên)
+    - INVALIDATION: đóng > 56.000 với vol ≥1,5× v20 và giữ 2 phiên
+    - P_TOUCH_PLUS10: 0.27 (high ≥ 58.190 trong 25 phiên)
+    - P_TOUCH_MINUS10: 0.30 (low ≤ 47.610 trong 25 phiên)
+    - SELL_VIEW_AT_PLUS10: SELL mặc định (cung 56,0–58,7k); HOLD chỉ khi test lại 49,55–51k giữ <0,7× v20 VÀ đóng >58.700 vol ≥1,5× v20
+- note: agent nhận ra mã FPT; không có thông tin sau as-of (cutoff 06/2026 < cửa sổ dữ liệu). Không đọc DT5G. Nghi giá điều chỉnh ~18/09.
+- outcome:
+
+### LVR-STK-2026-11-05-NNC
+- as_of: 2026-11-05 · close_asof: 47300 · created: 2026-11-05T22:40:00+07:00 · trigger: USER-ASSIGNED
+- due: H20 2026-12-03 · cửa sổ chạm 25 phiên đến 2026-12-10
+- classification: 250 markdown muộn → chuyển tích luỹ (mơ hồ) / 60 tích luỹ→markup sớm (khá rõ) / 20 range tích luỹ lại 43.850–49.950 (mơ hồ, hơi tích cực). Tape mỏng: độ tin THẤP-TB.
+- forecast:
+    - H20_DIR: UP
+    - H20_P_UP: 0.55
+    - LEVEL: 43850 HOLD (không đóng cửa < 43.850 trong 20 phiên)
+    - INVALIDATION: đóng < 43.850 với vol ≥ v20; hoặc bị từ chối lần 2 ở 49,5–50k vol tăng, đóng đáy ngày
+    - P_TOUCH_PLUS10: 0.30 (high ≥ 52.030 trong 25 phiên)
+    - P_TOUCH_MINUS10: 0.25 (low ≤ 42.570 trong 25 phiên)
+    - SELL_VIEW_AT_PLUS10: SELL mặc định (52.030 giữa kệ cung 50–54,6k); HOLD chỉ khi đóng >52.700 vol ≥2× v20 thân nến trên 1/3 và pullback giữ 50.000 vol cạn
+- outcome:
+
+### LVR-BATTERY-2026-11-05 (thử ẩn danh 100 chuỗi cổ phiếu, PREREG md5 trong thư mục)
+- artifact: agents/Mike/research/livermore_stock_battery_20261105/ (PREREG.md, cases/, SEALED_truth.json, livermore_results.csv, score.py, scored.txt)
+- kết quả: 55/100 hit (UP 21/40, DOWN 34/60), Brier 0,2507; base rate tăng 47%; B1 luôn UP 47, B2 mom20 50, B3 mom60 48. P(≥55|đồng xu)=0,184; P(≥55|base)=0,067.
+- PREREG: KHÔNG ĐẠT (Brier 0,2507 ≥ 0,25 — trượt 0,0007; hit hơn mọi baseline 5 điểm nhưng không khác đồng xu có ý nghĩa). Không RECOGNIZED nào. ACTION_IF_UP10 trùng hướng H20 (không thêm thông tin).

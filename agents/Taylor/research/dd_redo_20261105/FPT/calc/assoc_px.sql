@@ -1,0 +1,1 @@
+SELECT t.ticker, t.time, t.Close, t.Price, t.Volume, t.OShares FROM `lithe-record-440915-m9.tav2_bq.ticker` AS t WHERE t.ticker IN ('FOX','FRT') AND t.time BETWEEN '2026-10-28' AND '2026-11-04' ORDER BY t.ticker, t.time

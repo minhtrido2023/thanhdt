@@ -1,0 +1,46 @@
+{
+ "ticker": "MVC",
+ "asof_price_date": "2026-11-04",
+ "price": 13800.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+ },
+ "center_pre_liq": 16482,
+ "center_post_liq": 15082,
+ "p10_post": 11941,
+ "p50_post": 14424,
+ "p90_post": 20989,
+ "p10_pre": 13049,
+ "p90_pre": 22937,
+ "liq_disc_5bn": 0.08494479252418027,
+ "px_vs_center_post": -0.08500055780732352,
+ "px_vs_p10_post": 0.15572088744702328,
+ "px_vs_p90_post": -0.3425117686295023,
+ "grid_desc": "Luoi co trong so n=2187: trang thai bien (0,20/0,45/0,35 - Bobby) x chi phi Tan Lap 0,85/1,0/1,15 x REL 0,88/0,91/0,95 x duong gia 70-30/50-50/30-70 x san luong nam thuong 3 muc x han GP Tan Lap 2035/W/2045 x anh xa ADMIN 3 muc; trong so o = xac suat trang thai x deu; r co dinh 13.50%; V_NNC giai dong thoi trong tung o. Ban SAU = x (1 - CK thanh khoan 5 ty, Y=1,0).",
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 14000,
+  "center": 15100,
+  "high": 16500,
+  "dd_date": "2026-11-03",
+  "rev": 8,
+  "zone_def": "P25-P75 sau CK thanh khoan (ban cu)",
+  "source_file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md"
+ },
+ "center_change_pct": -0.001193615399204262,
+ "change_reason": "Tam truoc CK = r9 (r 13,5% khong doi). CK thanh khoan 5 ty doi theo ADV 250 phien toi 04/11 (cu 8,4% @ ADV 0,45 ty toi 03/11). Vung cu = P25-P75 luoi 'ky vong tung o' sau CK; moi = P10-P90 luoi co trang thai la truc (rong hon).",
+ "warnings": [
+  "Phap ly/quan tri (WARNING): so huu cheo MVC 44,07% NNC <-> NNC 10,3% MVC",
+  "Mo moi ~1.500 ty von: giay phep/tien do chua chac (base NPV0 theo so sach, luat 03/11)",
+  "Vay ngan han lon; no rong du kien ~1.070 ty cuoi 2028 (r8, lai suat gia dinh 7%)",
+  "Thanh khoan rat thap (ADV trung vi < 0,5 ty/phien) - rui ro thuc thi lon nhat trong 3 ma"
+ ],
+ "open_issues": [
+  "Bien chu ky mang da Tan Lap CHUA KIEM (khong co bo phan rieng): 25%/30% cho tam thap hon",
+  "Free float 30,2% uoc tu 4 co dong lon (BCTN 2025)",
+  "Xac suat 3 trang thai la nhan dinh cua Bobby"
+ ]
+}

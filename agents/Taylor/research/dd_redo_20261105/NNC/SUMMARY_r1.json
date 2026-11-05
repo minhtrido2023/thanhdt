@@ -1,0 +1,47 @@
+{
+ "ticker": "NNC",
+ "asof_price_date": "2026-11-04",
+ "price": 46900.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+ },
+ "center_pre_liq": 60702,
+ "center_post_liq": 58497,
+ "p10_post": 44917,
+ "p50_post": 56395,
+ "p90_post": 85649,
+ "p10_pre": 46610,
+ "p90_pre": 88878,
+ "liq_disc_5bn": 0.03632771556437639,
+ "px_vs_center_post": -0.19824714074751515,
+ "px_vs_p10_post": 0.04414692524746622,
+ "px_vs_p90_post": -0.45241902488769936,
+ "grid_desc": "Luoi co trong so n=243: trang thai bien (STRUCTURAL 0,20 / ADMIN_GATED 0,45 / CYCLICAL 0,35 - Bobby) x K chi phi 0,87/0,97/1,07 x san luong nam thuong 3 muc x duong gia g2031/real 70-30/50-50/30-70 x anh xa ADMIN perm05/ramp/full; trong so o = xac suat trang thai x deu; r co dinh 13.50%. Phan vi co trong so. Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 55000,
+  "center": 58500,
+  "high": 66900,
+  "dd_date": "2026-11-03",
+  "rev": 4,
+  "zone_def": "P25-P75 sau CK thanh khoan (ban cu)",
+  "source_file": "agents/Taylor/research/dd_NNC_20261030/investor_report_v3/NNC_DD_investor_report_20261103.md"
+ },
+ "center_change_pct": -5.420316570325934e-05,
+ "change_reason": "Tam sau CK giu nguyen ban 03/11 (lai huy dong 12T hieu dung khong doi 7,40% -> r 13,5%; ADV 250 phien 2,10 ty nhu cu). Vung DOI DINH NGHIA: cu = P25-P75 cua luoi 'ky vong tung o' (trong so trang thai co dinh trong moi o, nen phan tan bi nen); moi = P10-P90 cua luoi co trang thai bien la mot TRUC => rong hon nhieu (P10 44,9k vs P10 cu sau CK 50,4k). Nhan doi tu 'RE (duoi P10)' sang 'TRONG vung' (gia sat P10) chu yeu do dinh nghia luoi, khong do co ban.",
+ "warnings": [
+  "Phap ly/quan tri (WARNING, khong loai): so huu cheo MVC 44,07% NNC <-> NNC 10,3% MVC (co the bi buoc thoai, can y kien phap ly)",
+  "Ben lien quan NHC: 61% phai thu; 16% phan tang doanh thu Q3",
+  "Truy thu/phat hanh chinh nho (0,63 ty 2024; 0,04 ty 2025); truy thu Nui Nho da du phong",
+  "Bien da o dinh 15 nam (GPM Q3/2026 57,9%) - rui ro chu ky chiem uu the"
+ ],
+ "open_issues": [
+  "Thoi han hop dong cho thue Nui Nho chua xac minh (-2,0k den -3,4k/cp)",
+  "Tra truoc dai han CNBP 59,2 ty chua ro ban chat (+2,1k/cp neu la tien thue da tra)",
+  "Tam Lap 1 khu II chua co giay phep/tru luong cong bo (base = von da chi, NPV 0)",
+  "Xac suat 3 trang thai bien la nhan dinh cua Bobby, khong phai tan suat do duoc"
+ ]
+}

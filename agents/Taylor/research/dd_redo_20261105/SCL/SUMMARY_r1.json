@@ -1,0 +1,58 @@
+{
+ "ticker": "SCL",
+ "asof_price_date": "2026-11-04",
+ "price": 30000.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 7.4,
+  "date": "2026-11-03",
+  "current_rate": 7.4,
+  "current_source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 23933,
+ "center_post_liq": 22855,
+ "p10_post": 17615,
+ "p50_post": 23386,
+ "p90_post": 27119,
+ "p10_pre": 18445,
+ "p90_pre": 28397,
+ "liq_discount_ref": 0.045,
+ "liq_ref_size_ty": 5.0,
+ "adv120_median_ty": 2.28,
+ "px_vs_center": 0.3126,
+ "px_vs_p10": 0.7031,
+ "px_vs_p90": 0.1062,
+ "grid_desc": "3 nhánh chế độ ngành (CYCLICAL/ADMIN_GATED/STRUCTURAL 50/30/20, Bobby VLXD nhẹ 29/10) × DT {TTM, 2026E} × biên ròng chuẩn hoá {TB 2020–TTM, TB 2023–TTM, lệch biên gộp} × g {3,4,5%} × ROE {15,20%}; trọng số đều trong nhánh; số CUM-quyền (38,84tr cp) vì giá 04/11 còn quyền (n=108)",
+ "label": "TRÊN vùng (>P90)",
+ "zone_old": {
+  "low": 18600,
+  "center": 21400,
+  "high": 23900,
+  "dd_date": "2026-10-29 (r3 03/11)",
+  "basis": "SAU quyền, sau CK 5 tỷ"
+ },
+ "center_new_vs_old": -0.0003,
+ "change_reason": "Không đổi (<1%) so với r3 03/11 cùng cơ sở: r3 đã dựng theo khung 03/11 (r 13,5% @7,40%, dự án Phả Lại/Vĩnh Tân giá vốn NPV 0, CK thanh khoản 5 tỷ). Lãi huy động 04/11 = 7,40% (không đổi), thanh khoản cập nhật tới 04/11 (4,50% vs 4,55%). Khác ở cách BÁO: chuẩn P10/P90 (r3 báo vùng P25–P75 18.600–23.900 sau quyền) và so giá cum với giá trị cum.",
+ "warnings": [
+  "Pha loãng liên tục: 17,3tr cp (2023) → 44,84tr sau quyền 100:15,4453 @12.500 (ĐKCC 10/11/2026); ESOP 0,92tr cp @10.000; vay 26 tỷ từ cổ đông lớn lãi 10%",
+  "Khách hàng tập trung: hệ sinh thái một tập đoàn BĐS = 58,5% phải thu KH",
+  "CFO 9T chỉ 9,9 tỷ vs LNST 94,4; nợ ròng 321 tỷ (1,4× EBITDA)",
+  "Biên ròng TTM 12,7% là đỉnh 7 năm"
+ ],
+ "open_issues": [
+  "Không có cơ cấu DT theo mảng, backlog, công suất từng dây chuyền, hợp đồng tro",
+  "Phả Lại: chưa có giá/sản lượng/hợp đồng đầu ra ⇒ chỉ độ nhạy IRR (15% ⇒ +650 đ/cp sau quyền)",
+  "Quy đổi biên 1,0/0,5/0,0 theo nhánh là thiết kế của nhóm nghiên cứu (chỉ trọng số có nguồn)",
+  "Chưa quét tin sau 29/10; r3 chưa qua fundamental-skeptic vòng sau SKEPTIC_R2"
+ ],
+ "source_calc": "calc/model_scl_out.json",
+ "post_rights": {
+  "terp": 27659,
+  "center_post_liq": 21394,
+  "p10_post": 16855,
+  "p90_post": 25087,
+  "terp_vs_center": 0.2928,
+  "label_terp": "TRÊN vùng (>P90)"
+ },
+ "price_basis": "CUM-quyền (ĐKCC 10/11/2026)"
+}

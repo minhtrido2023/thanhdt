@@ -1,0 +1,281 @@
+{
+ "ticker": "DGC",
+ "round": 2,
+ "job": "Taylor_20261105_020016",
+ "asof_price_date": "2026-11-04",
+ "price": 33450.0,
+ "n_outcomes": 810,
+ "center_pre": 45088,
+ "center_post": 44767,
+ "center_param_pre": 40806,
+ "center_param_post": 40515,
+ "p10_pre": 32752,
+ "p50_pre": 44953,
+ "p90_pre": 57511,
+ "p10_out": 32518,
+ "p25_out": 37507,
+ "p50_out": 44633,
+ "p75_out": 51570,
+ "p90_out": 57101,
+ "min_out": 23462,
+ "max_out": 70079,
+ "pct_weight_below_price": 0.12208333333333332,
+ "label": "TRONG vùng",
+ "px_vs_center_post": -0.25279781982263716,
+ "parallel": {
+  "legal_axis": {
+   "desc": "CO truc phap ly: haircut tien rong 3/9/29% (w 0,2/0,5/0,3, r12) — loai khoi base theo luat user 02/11 (vu an chi WARNING)",
+   "n_outcomes": 2430,
+   "center_post": 41837,
+   "p10_out": 29355,
+   "p50_out": 41761,
+   "p90_out": 54552,
+   "pct_weight_below_price": 0.21204166666666666,
+   "label": "TRONG vùng"
+  },
+  "ore_closed": {
+   "desc": "khai truong dung vinh vien (w mo lai = 0)",
+   "n_outcomes": 405,
+   "center_post": 37953,
+   "p10_out": 29771,
+   "p50_out": 37513,
+   "p90_out": 45756,
+   "pct_weight_below_price": 0.24416666666666667,
+   "label": "TRONG vùng"
+  },
+  "ore_closed_legal": {
+   "desc": "khai truong dung + CO truc phap ly (canh xau cua ca hai truc lien quan vu an)",
+   "n_outcomes": 1215,
+   "center_post": 35023,
+   "p10_out": 26360,
+   "p50_out": 34889,
+   "p90_out": 43599,
+   "pct_weight_below_price": 0.4165833333333333,
+   "label": "TRONG vùng"
+  }
+ },
+ "center_pre_liq": 45088,
+ "center_post_liq": 44767,
+ "p10_post": 32518,
+ "p25_post": 37507,
+ "p50_post": 44633,
+ "p75_post": 51570,
+ "p90_post": 57101,
+ "liq_disc_5ty": 0.007123534794358433,
+ "grid_n": 810,
+ "grid_desc": "ket cuc = kich ban EBIT (xau/co so/tot 0,3/0,5/0,2 [UL]) x khai truong (dung/mo lai 2028, 0,5/0,5 [UL]) x du phong moi truong (mot lan/huu han 4 quy/lap vinh vien 100 ty/quy, 1/3 moi nhanh [UL], la chan thue 0 [UL]) x Nghi Son quanh so sach (-500/0/+500 ty, 0,25/0,5/0,25 [UL]) x he so EBIT loi 0,8..1,2 (deu) x lai huy dong 12T -50/0/+50bp (0,25/0,5/0,25 [UL]); n=810; tham so trung tam = co so, khai truong dung, huu han 4 quy, NS so sach, m=1, Δr=0",
+ "ck_ref_size": {
+  "q_vnd": 5000000000.0,
+  "adv": "250 phien",
+  "disc": 0.007123534794358433,
+  "in_calib": true,
+  "disc_adv60": 0.01112273157067355
+ },
+ "ck_real_sleeve": {
+  "10tr": {
+   "disc_adv250": 0.0003185741608054089,
+   "disc_adv60": 0.0004974236777501814,
+   "q_over_adv250": 0.00011527430009623675,
+   "in_calib": false
+  },
+  "20tr": {
+   "disc_adv250": 0.00045053189883263647,
+   "disc_adv60": 0.0007034633113198105,
+   "q_over_adv250": 0.0002305486001924735,
+   "in_calib": false
+  },
+  "40tr": {
+   "disc_adv250": 0.0006371483216108178,
+   "disc_adv60": 0.0009948473555003627,
+   "q_over_adv250": 0.000461097200384947,
+   "in_calib": false
+  }
+ },
+ "liquidity": {
+  "last_price": 33450.0,
+  "last_date": "2026-11-04",
+  "w250": {
+   "window": "2025-11-03..2026-11-04",
+   "adv_med": 86749605000.0,
+   "sigma_d": 0.029671827857119994,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.057637150048118375,
+     "disc": 0.007123534794358433,
+     "in_calib": true,
+     "days_at_15pct": 0.3842476669874558
+    },
+    "10tr": {
+     "q_over_adv": 0.00011527430009623675,
+     "disc": 0.0003185741608054089,
+     "in_calib": false,
+     "days_at_15pct": 0.0007684953339749116
+    },
+    "20tr": {
+     "q_over_adv": 0.0002305486001924735,
+     "disc": 0.00045053189883263647,
+     "in_calib": false,
+     "days_at_15pct": 0.0015369906679498233
+    },
+    "40tr": {
+     "q_over_adv": 0.000461097200384947,
+     "disc": 0.0006371483216108178,
+     "in_calib": false,
+     "days_at_15pct": 0.0030739813358996466
+    }
+   }
+  },
+  "w60": {
+   "window": "2026-08-10..2026-11-04",
+   "adv_med": 18318005000.0,
+   "sigma_d": 0.021289503871011604,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.2729554883296516,
+     "disc": 0.01112273157067355,
+     "in_calib": false,
+     "days_at_15pct": 1.8197032555310109
+    },
+    "10tr": {
+     "q_over_adv": 0.0005459109766593033,
+     "disc": 0.0004974236777501814,
+     "in_calib": false,
+     "days_at_15pct": 0.0036394065110620217
+    },
+    "20tr": {
+     "q_over_adv": 0.0010918219533186065,
+     "disc": 0.0007034633113198105,
+     "in_calib": true,
+     "days_at_15pct": 0.007278813022124043
+    },
+    "40tr": {
+     "q_over_adv": 0.002183643906637213,
+     "disc": 0.0009948473555003627,
+     "in_calib": true,
+     "days_at_15pct": 0.014557626044248087
+    }
+   }
+  },
+  "d_ref": 0.007123534794358433
+ },
+ "axes_included": [
+  "kich ban EBIT 2027-28",
+  "khai truong 25/19B (len)",
+  "du phong moi truong lap (xuong)",
+  "Nghi Son von 2.400 vs 2.900 (hai chieu)",
+  "he so EBIT loi (hai chieu)",
+  "lai huy dong (hai chieu)"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "phap ly (phat/dinh chi/haircut tien rong)",
+   "reason": "luat user 02/11: vu an chi WARNING, khong bake vao base; bao SONG SONG ban CO truc (parallel.legal_axis, ore_closed_legal)"
+  },
+  {
+   "axis": "NPV doc lap Nghi Son -3.245/+2.524/+6.781 d/cp (r11)",
+   "reason": "dau vao [UL] (gia san pham, WC 15%) — ERRATA r11: chi la do nhay, khong uoc tinh"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "du phong phai tra 200 ty",
+   "effect_dong_per_share": -511,
+   "basis": "nghia vu da ghi so",
+   "source": "BCTC HN Q3/2026 p06"
+  },
+  {
+   "item": "quy khen thuong phuc loi 592,8",
+   "effect_dong_per_share": -1514,
+   "basis": "nghia vu da ghi so (ma 323)",
+   "source": "BCTC HN Q3/2026 p06"
+  },
+  {
+   "item": "Nghi Son XDCB 1.408,8 theo gia von (NPV 0)",
+   "effect_dong_per_share": 3599,
+   "basis": "so sach; khong tru khoan nao o tham so trung tam",
+   "source": "BCTC HN Q3/2026 note 11 p30"
+  }
+ ],
+ "center_vs_p50_note_model": "Phan phoi tron cua 2 nhanh khai truong (tam dung 38225 / mo lai 51950 truoc CK, moi nhanh w 0,5): P90 do nhanh mo lai quyet dinh, P10 do nhanh dung + lap vinh vien.",
+ "r": 0.135,
+ "r_sens_pre": {
+  "beta1.0_-100bp": 47531,
+  "beta1.0_-50bp": 46232,
+  "beta1.0_+50bp": 43998,
+  "beta1.0_+100bp": 43031,
+  "base": 45088
+ },
+ "scenarios_pre": {
+  "xau|dung|mot_lan": 35212,
+  "xau|dung|huu_han_4q": 34297,
+  "xau|dung|vinh_vien": 27516,
+  "xau|molai|mot_lan": 48919,
+  "xau|molai|huu_han_4q": 48004,
+  "xau|molai|vinh_vien": 41223,
+  "coso|dung|mot_lan": 41721,
+  "coso|dung|huu_han_4q": 40806,
+  "coso|dung|vinh_vien": 34026,
+  "coso|molai|mot_lan": 55428,
+  "coso|molai|huu_han_4q": 54513,
+  "coso|molai|vinh_vien": 47733,
+  "tot|dung|mot_lan": 48265,
+  "tot|dung|huu_han_4q": 47350,
+  "tot|dung|vinh_vien": 40570,
+  "tot|molai|mot_lan": 61972,
+  "tot|molai|huu_han_4q": 61057,
+  "tot|molai|vinh_vien": 54277
+ },
+ "gordon_roe_xcheck": {
+  "roe_incl_interest": 0.12922438344079934,
+  "gordon_incl_ps": 32531.418077811453,
+  "roe_ex_interest_on_op_equity": 0.21653205029580577,
+  "gordon_ex_ps": 44551.08459128692,
+  "note": "LN 9T/2026 nam hoa (day chu ky, khai truong dung, du phong 200) => kiem cheo muc san, khong phai uoc tinh"
+ },
+ "free_float": 0.6901,
+ "free_float_src": "1 - co dong lon 30/09 (1 nguon bao chi)",
+ "change_reason": "Vong 2: tach du phong lap + Nghi Son thanh truc doi xung, them truc lai huy dong, phan vi muc ket cuc; bao song song truc phap ly",
+ "warnings": [
+  "Vu an moi truong/khai thac/ke toan: CT HDQT cu Dao Huu Huyen (18,38%) bi tam giam 17/03/2026; khoi to them TGD Luu Bach Dat, TV HDQT Nguyen Quoc Trung, PTGD Phung Trong Tu, GD mo KT25 Trinh Quoc Khanh (07/2026). Phap nhan: chua thay quyet dinh khoi to phap nhan (quet 29/10 + WebSearch 05/11). Dieu 76 BLHS cho phep truy cuu phap nhan voi toi 227/235",
+  "Y kien NGOAI TRU BCTC kiem toan 2025: 950,9 ty ton kho chua du bang chung + noi dung vu an (VietnamFinance 06/10/2026) — chua dong",
+  "HOSE han che giao dich (chi phien chieu) tu 26/05/2026 do cham nop BCTC kiem toan; canh bao tu 30/06; cat margin Q4/2026 — chua thay go",
+  "Du phong moi truong 200 ty (2 quy): mot lan hay lap CHUA phan dinh; TKV chi BVMT ~1.000+ ty/nam (tien le chi thuong xuyen co ton tai — ERRATA r11)",
+  "Du phong moi truong KHONG duoc tru thue khi trich (TT48/2019) — chi phi thue hieu dung co the cao hon",
+  "PAT (con): CT HDQT mien nhiem sau khoi to (28/07); TSB doi lanh dao 05-06/10",
+  "Tap trung vi the ZaloPay 10.000 cp"
+ ],
+ "open_issues": [
+  "Von Nghi Son 2.400/2.900 chua co van ban goc",
+  "Trong so mo lai khai truong va trong so du phong lap la [UL]",
+  "EBIT 2027-28 nen r12 chua cap nhat luu huynh/P4 sau 28/10",
+  "LCTT lech 48,23 ty",
+  "Room ngoai"
+ ],
+ "new_data_obs": [
+  "Quet WebSearch 05/11/2026 09:00 ICT: khong thay tin khoi to/xu phat moi thang 10-11/2026 (ket qua moi nhat ~08/2026); quet tin 01-29/10 (legal_and_news_scan_20261029.md): khong co su kien moi",
+  "NQ HDQT 34 (15/10/2026) Nghi Son: them H3PO4/PCl3/PCl5, chay thu Q4/2026, thuong mai Q1/2027, NQ KHONG ghi von — giu truc -500/0/+500"
+ ],
+ "fear_buy_25": "Thuoc nhom (a) scandal + (b)/(d); §2 tieu chi #2 (NN chi phoi >50%) KHONG dat (tu nhan) => KHONG du dieu kien sleeve fear-buy theo §2; ho so §6 cu (AMBIGUOUS) — khong danh gia lai o day",
+ "r_sens_post": {
+  "beta1.0_-100bp": 47192,
+  "beta1.0_-50bp": 45903,
+  "beta1.0_+50bp": 43685,
+  "beta1.0_+100bp": 42724,
+  "base": 44767
+ },
+ "center_vs_p50_note": "tam (ky vong trong so luoi, sau CK) 44767 vs P50 ket cuc 44633 vs gia tri tai tham so trung tam 40515. Phan phoi tron cua 2 nhanh khai truong (tam dung 38225 / mo lai 51950 truoc CK, moi nhanh w 0,5): P90 do nhanh mo lai quyet dinh, P10 do nhanh dung + lap vinh vien.",
+ "r1": {
+  "center_post": 47168,
+  "p10_post": 34557,
+  "p90_post": 58796,
+  "label": "DƯỚI vùng"
+ },
+ "delta_center_vs_r1_pct": -0.050903154681139706,
+ "zone_old": {
+  "low": 33514,
+  "center": null,
+  "high": 38832,
+  "dd_date": "2026-10-30",
+  "center_kind": null
+ }
+}

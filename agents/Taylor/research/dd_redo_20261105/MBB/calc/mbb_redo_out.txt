@@ -1,0 +1,27 @@
+== MBB redo | gia 19,250 (2026-11-04) | BVPS 30/09 15,594 | P/B 1.23x | P/E TTM 5.96x
+r = 13.50% (neo 13,5% @ 7.40% cctg_12m(2026-11-02); asof 7.40% cctg_12m(2026-11-02))
+  XAU w=0.35: LNTT 2026 39,018 (99% KH) | VCSH me cuoi 2026 163,667 | RI 17,092 d/cp (P/B ngu y 1.10x; TV 6%)
+  CO_SO w=0.45: LNTT 2026 42,518 (108% KH) | VCSH me cuoi 2026 166,397 | RI 24,114 d/cp (P/B ngu y 1.55x; TV 25%)
+  TOT w=0.2: LNTT 2026 45,018 (114% KH) | VCSH me cuoi 2026 168,347 | RI 33,527 d/cp (P/B ngu y 2.15x; TV 41%)
+  do nhay trong so w_xau_045 (0.45, 0.35, 0.2): 22,837
+  do nhay trong so w_tot_035 (0.25, 0.4, 0.35): 25,653
+  KY VONG (0,35/0,45/0,20) truoc CK thanh khoan: 23,539
+Do nhay (lai huy dong doi, r = 13,5% + beta*d):
+  b0.5_-100bp: r 13.00% -> 25,704 (+2,165 d/cp; +9.2%)
+  b0.5_-50bp: r 13.25% -> 24,576 (+1,037 d/cp; +4.4%)
+  b0.5_+50bp: r 13.75% -> 22,581 (-958 d/cp; -4.1%)
+  b0.5_+100bp: r 14.00% -> 21,694 (-1,845 d/cp; -7.8%)
+  b1.0_-100bp: r 12.50% -> 28,281 (+4,742 d/cp; +20.1%)
+  b1.0_-50bp: r 13.00% -> 25,704 (+2,165 d/cp; +9.2%)
+  b1.0_+50bp: r 14.00% -> 21,694 (-1,845 d/cp; -7.8%)
+  b1.0_+100bp: r 14.50% -> 20,223 (-3,316 d/cp; -14.1%)
+Luoi n=45: truoc CK P10 14,484 P50 23,259 P90 36,196
+Thanh khoan: ADV trung vi 250 phien 353.7 ty | sigma ngay 1.62% | CK @5 ty Y1 0.192% (1 ty 0.086%; 10 ty 0.272%) | so phien thoat 5 ty @10/20% 0.14/0.07 | Amihud 2.16e-05/ty
+SAU CK: tam 23,494 | P10 14,456 P25 16,986 P50 23,214 P75 29,721 P90 36,126
+Gia 19,250: vs tam -18.1% | vs P10 +33.2% | vs P90 -46.7% | NHAN: TRONG vùng
+  MBV do nhay - gop 3.500 mat trang: ky vong 23,043 (-496 d/cp)
+  MBV do nhay - gop 5.000 mat trang: ky vong 22,831 (-708 d/cp)
+  MBV do nhay - phai thu ban no 11.248 mat 30%: ky vong 23,061 (-478 d/cp)
+  MBV do nhay - bu lo luy ke 2024 15.688 (can tren tho): ky vong 21,318 (-2,221 d/cp)
+Cau noi: tam cu (blend RI/comps/PB) 22,000 -> RI thuan @13,4% (ngay 04/11) 23,944 -> @13,5% 23,539 -> sau CK 23,494; lech tam +6.8%
+SUMMARY.json written

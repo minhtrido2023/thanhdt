@@ -1,0 +1,24 @@
+{
+ "grid_desc": "8 trục độc lập: thị trường đất (tỷ/ha+năm bán hết; 20/50/30) × tỷ/ha ×0,75/1/1,25 × g 2/3/4% × lỗ tín dụng không bảo đảm 0/10/30% (0,60/0,25/0,15) × NCI con 8,5/20/31% × thu hồi chi phí đã chi 100/60% (0,75/0,25) × thuế tương lai ×0,8/1/1,2 × KTPL 7,25/9,04%; phân vị wpct mức kết cục",
+ "label_note": "Nhãn TRONG vùng không đổi so vòng 1, không do đổi định nghĩa vùng (cả hai vòng đều P10–P90). Vòng 2 P10 cao hơn (43.784 vs 34.501) vì tách các rủi ro thành trục độc lập: vòng 1 gói mọi cú xấu vào một kịch bản (tương quan hoàn toàn); bản song song lưới vòng 1 + wpct cho P10 35.041 — nhãn vẫn TRONG.",
+ "center_vs_p50_note": "Tâm (kỳ vọng lưới) 54.230 > P50 53.086 (lệch phải do nhánh đất tốt + tỷ/ha ×1,25); tham số trung tâm (đất cơ sở, ×1, g3, tín dụng 0%, NCI 20%, thu hồi 100%, thuế ×1, KTPL 9,04%) 55.421 cao hơn tâm vì tín dụng/thu hồi trung tâm ở cận sổ sách còn lưới có xác suất lỗ. P10 do nhánh đất XẤU quyết định (95% trọng số quanh P10); P90 do riêng nhánh đất TỐT (w 0,20).",
+ "change_reason": "Tâm sau CK 54.230 vs vòng 1 53.175 (+2,0%). Lưới đổi từ 3 kịch bản bó (n=27) sang 8 trục độc lập (n=2.916): lỗ tín dụng/NCI/thu hồi/thuế không còn dồn hết vào nhánh xấu ⇒ P10 34.501 → 43.784, P90 73.949 → 68.713 (phân phối hẹp lại); tâm tăng nhẹ vì trục KTPL thêm mức 7,25% và g/NCI đối xứng. Lưới vòng 1 tính lại bằng wpct chuẩn: tâm 53.265, P10 35.041, P90 73.949 (song song). Nhãn không đổi.",
+ "warnings": [
+  "Tín dụng phi ngân hàng 6.016 tỷ = 116% VCSH mẹ: cho CTCK vay 4.223 (68,93% không TS bảo đảm bên vay, bên vay không nêu tên; hai cách đọc TM4b) + TP DN 1.792 (T&T 1.000,7; GTHL chưa xác định) — TM4a/4b BCTC HN Q3/2026 (nay là TRỤC lưới, không chỉ WARNING)",
+  "Tạm ứng 635,6 tỷ cho thành viên HĐQT/BGĐ/BKS/quản lý chủ chốt (TM40; KT25 635,2), đứng yên ≥2 năm, mục đích 'tìm hiểu và mua đất' — bên liên quan; bản song song mất trọn p0,15: tâm 53.842",
+  "Lệch phân loại tạm ứng trong chính BCTC: BCĐ/TM7 dài hạn vs TM40 'phải thu ngắn hạn khác'",
+  "Vay NH tín chấp 4.374 tỷ (HM 1.700 tỷ 'bổ sung vốn lưu động') song song cho vay CTCK 4.223 — cấu trúc vay-cho-vay có thể có (TM23, TM4b)",
+  "Cổ tức 2025 = 111% LNST riêng + hoàn nhập quỹ ĐTPT ~329 tỷ (ĐHĐCĐ 2026); kế hoạch 2026 tối thiểu 10% ⇒ lợi suất 10,3% quá khứ khó lặp",
+  "Chủ tịch chuyển 3,7tr cp cho người thân (06/2026); miễn nhiệm 1 PTGĐ (21/05/2026) và 1 TV BKS (21/04/2026) — dữ liệu nhân sự, không phải xử phạt",
+  "Chưa thấy tin xử phạt/khởi tố SIP: WebSearch 05/11/2026 (doanhnhan.baophapluat.vn, dnse.com.vn, vneconomy.vn — kết quả tới 07/2026); WebSearch không phải CBTT sàn ⇒ 'không thấy' ≠ không có. Chưa thấy NQ HĐQT/ĐHĐCĐ mới sau 01/11."
+ ],
+ "open_issues": [
+  "G14: BCTC từng công ty con ⇒ NCI hiệu dụng (nay là trục 8,5/20/31%)",
+  "G16: tiền thuê đất hằng năm trả Nhà nước trên đất đã cho thuê lại — chưa định lượng, ngoài lưới cả hai chiều",
+  "G1/G2: danh tính CTCK đi vay, TSĐB; trái phiếu T&T 1.000,7 / Phước Sơn 200",
+  "G3/G12: giá thuê thực thu/ha và diện tích cho thuê 9T/2026",
+  "Xác suất các trục [UL]; giả định các trục độc lập (tín dụng và thị trường đất thực tế có thể cùng xấu theo chu kỳ BĐS ⇒ bản lưới vòng 1 là giới hạn tương quan hoàn toàn)",
+  "Q3/2026 HN chưa soát xét; CBTT sàn chưa quét"
+ ],
+ "fearbuy_sleeve_eligible": "KHÔNG — DD trung dung, không phải ca sợ hãi/khủng hoảng §2/§2.5 (giá không trong trạng thái fear; không có sự kiện xấu đã lượng hoá cần định giá lại); áp nhãn tham chiếu, không phải tín hiệu sleeve fear-buy"
+}

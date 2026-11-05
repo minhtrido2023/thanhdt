@@ -1,0 +1,59 @@
+{
+ "ticker": "TCH",
+ "asof_price_date": "2026-11-04",
+ "price": 12750.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.074,
+  "date": "2026-11-03",
+  "source": "effective_deposit_rate = max(Big-4 12M 6,8%, CCTG 12M 7,4% ngay 02/11/2026); r neo 13,5%"
+ },
+ "dep_now": {
+  "rate": 0.07400000000000001,
+  "source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 13488.440605236512,
+ "center_post_liq": 13401.498269381542,
+ "p10_post": 12559.079846812301,
+ "p50_post": 13387.434828010792,
+ "p90_post": 14204.985641794494,
+ "p10_pre": 12640.556985869629,
+ "p50_pre": 13474.285927168314,
+ "p90_pre": 14297.140608922726,
+ "liq_discount_ref": 0.006445692159642017,
+ "liq_ref_position_bn_vnd": 5,
+ "adv_med_bn_vnd": 87.134737,
+ "grid_n": 81,
+ "grid_desc": "4 bien x 3 diem doi xung quanh co so, trong so 1/4-1/2-1/4 moi bien (tich), n=81: bien rong sau thue backlog {30; 33,5; 36}% x thang du sau thue HTK DAT CU (NC-II con lai, Green River, H2) {25; 40; 55}% x chiet khau holding phan qua cty con {30; 20; 10}% x r {12,5; 13,5; 14,5}%. Quy dat moi 150 To Hieu + I.14 = NPV 0 o moi diem. Chiet khau thanh khoan 5 ty ap dong loat.",
+ "label": "TRONG vung",
+ "px_vs_center": -0.048613838265384346,
+ "px_vs_p10": 0.015201762829476495,
+ "px_vs_p90": -0.1024278150280965,
+ "zone_old": {
+  "low": 10150,
+  "center": 12650,
+  "high": 15050,
+  "dd_date": "2026-10-31",
+  "center_kind": "expected_weighted"
+ },
+ "center_change_vs_old": 0.05940697781672277,
+ "change_reason": "Tam sau CK 13.401 vs cu 12.650 (+5,9%, <10%): (+) bo chiet khau quan tri 5/10/15% khoi kich ban (luat: phap ly/quan tri = WARNING) ~+1.340 d; (+) kich ban xau thang du 15% -> 25% de luoi doi xung; (-) quy dat moi 150 To Hieu + I.14 (3.006 ty) chuyen ve NPV 0 thay vi huong thang du 40%; (-) r 12,85% -> 13,5% (nho, PV ngan); (-) CK thanh khoan 0,6%. Gia 11.850 -> 12.750 (+7,6%).",
+ "warnings": [
+  "Quan tri/tuan thu TRUNG BINH: QD 1020/QD-XPHC 03/04/2026 Thue Hai Phong 20,21 ty (khai sai TNDN); QD 1357/QD-XPHC 05/12/2024 UBCKNN 295 tr (CBTT, ben lien quan)",
+  "Nhom kiem soat (ong Do Huu Ha + HH Finance) 35,99% = 71,2% phieu DHDCD 2026; Truong BKS kiem KTT cong ty con; TGD chon kiem toan",
+  "BCTC 01/04-30/09/2026 CHUA soat xet",
+  "CRV (68,02%) free float ~3%: tien tu NC-II ve TCH qua co tuc CRV",
+  "Chiet khau quan tri NEU thi truong ap 10% => tam ~12.060 (do nhay, khong trong base)"
+ ],
+ "open_issues": [
+  "BCTC soat xet 6T FY26 (han ~30/11/2026): LN me 6T 663,1 lech >5% => sua",
+  "Chi phi xay dung con lai cho phan da ban khong cong bo (NMTT 5.600)",
+  "Danh tinh nhom uy quyen 7,37% CRV",
+  "Gia ban/bien quy dat moi 150 To Hieu, I.14 chua co so lieu doc lap => giu NPV 0",
+  "Khong tai lai src: Q2FY26 (quy lich 7-9/2026) da doc 31/10; khong co BCTC moi hon tinh den 05/11"
+ ],
+ "sources": {
+  "model": "calc/model.py -> calc/model_out.json/txt",
+  "liq": "_common/liq.py + _common/bq_px_4ma_20261104.csv"
+ }
+}

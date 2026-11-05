@@ -1,0 +1,28 @@
+NNC r2 | dep 7.40% -> r 13.50% | tam tham so co tre 60,702 / KHONG tre 61,407 (CIP delay -458)
+  TRUOC CK tam 59,760 | P10 31,358 P50 54,910 P90 97,179 | min 21,816 max 148,984 (n 3888)
+   [luoi vong-1 truc, muc ket cuc, khong tre] tam 63,098 | P10 34,978 P50 58,766 P90 100,651 | min 21,841 max 148,984 (n 648)
+   [bo truc cap] tam 61,328 | P10 32,263 P50 56,941 P90 98,915 | min 21,816 max 148,984 (n 1944)
+   [bo truc thue] tam 61,520 | P10 33,227 P50 56,590 P90 98,886 | min 21,841 max 148,984 (n 1296)
+   STRUCTURAL  tam 87,847 | P10 32,925 P50 93,045 P90 132,713 | min 21,816 max 148,984 (n 1296)
+   ADMIN_GATED tam 55,332 | P10 31,247 P50 54,881 P90 79,715 | min 21,816 max 116,550 (n 1296)
+   CYCLICAL    tam 49,403 | P10 30,540 P50 50,350 P90 65,973 | min 21,816 max 84,117 (n 1296)
+   w_STRUCT 0.10: tam 56,249 P10 31,147 P50 53,510 P90 85,523
+   w_STRUCT 0.15: tam 58,004 P10 31,147 P50 53,969 P90 93,271
+   w_STRUCT 0.20: tam 59,760 P10 31,358 P50 54,910 P90 97,179
+   w_STRUCT 0.30: tam 63,271 P10 31,439 P50 56,246 P90 106,025
+   co tre GP ky vong (Bobby F6) CA CIP Tam Lap + mo MVC           60,702 (-705)
+   chi tre CIP Tam Lap 1 khu II                                   60,950 (-458)
+   chi tre mo moi MVC                                             61,160 (-248)
+   tran SL 1,40                                                   58,072 (-3,335)
+   ADMIN perm05                                                   67,133 (+5,726)
+   ADMIN full                                                     60,518 (-889)
+   bo thue Nui Nho                                                58,005 (-3,402)
+   thue Nui Nho toi 2030 (xap xi PV)                              59,360 (-2,047)
+   (+) tra truoc CNBP 59,2 la tien thue da tra (CHUA XAC MINH)    63,533 (+2,126)
+   (+) doi thu het GP tu 2034                                     66,472 (+5,065)
+   STRESS duong gia danh nghia phang                              49,015 (-12,392)
+  CK ref 5 ty: ADV250 2.10 ty -> 3.63% (Q/ADV 2.4x) | ADV60 1.39 ty -> 4.46% | sleeve {'10tr': {'adv250': 0.0016246248293844549, 'adv60': 0.0019937075732557423}, '40tr': {'adv250': 0.0032492496587689097, 'adv60': 0.003987415146511485}}
+  SAU CK tam 57,589 | P10 30,219 P50 52,916 P90 93,649 | min 21,023 max 143,571 (n 3888)
+  gia 46,900 (2026-11-04): vs tam -18.6% | vs P10 +55.2% | TRONG vùng | trong so duoi gia 37.5% | luat4 (gia<=0,85 tam) True
+  audit skeptic 1.944 (co tre, sau CK): P10 33,028 P50 55,951 P90 96,315 duoi gia 30.4%
+  Gordon ROE khoa 33,250 / +LN tai chinh 40,480 | ROE ham y tam 24.0%

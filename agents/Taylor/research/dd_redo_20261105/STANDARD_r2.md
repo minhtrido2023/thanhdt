@@ -1,0 +1,15 @@
+# CHUẨN CHUNG DD REDO — vòng 2 (Mike, 05/11/2026) — áp cho MỌI mã
+Rút từ 3 phản biện fundamental-skeptic vòng 1 (NNC, DRI, MVC: cả 3 REFUTED ở mức viết/lưới, nhãn không đảo). Các lỗi dưới đây gần như chắc chắn có ở mã khác — TỰ rà từng mã.
+
+1. P10/P50/P90 ở MỨC KẾT CỤC: mỗi ô lưới phải được tách ra các kết cục (trọng số ô × xác suất kịch bản giá/kết cục bên trong ô), rồi phân vị có trọng số bằng _shared/wpct.py (mid-block CDF; dùng hàm này, không tự viết). Phân vị của "kỳ vọng có điều kiện mỗi ô" làm nén phân tán ⇒ CẤM. Báo n kết cục, % trọng số nằm dưới giá, min kết cục.
+2. LƯỚI ĐỐI XỨNG, không chọn trục theo chiều: mọi trục trọng yếu mà REPORT/sector read/phản biện cũ nêu phải nằm trong lưới ở CẢ HAI chiều; cấm giữ trục chỉ lệch lên mà loại trục chỉ lệch xuống (hoặc ngược lại) với lý do 'chỉ một chiều'. Loại một trục thì phải nêu cơ sở và báo song song bản CÓ trục.
+3. NPV=0 / luật 03/11: cấm viết 'ghi theo giá vốn, NPV 0' nếu mô hình còn trừ bất kỳ khoản nào (chi phí trễ giấy phép, haircut khoản vay, haircut tiền nước ngoài...). Mỗi khoản lệch khỏi sổ sách/NPV0 trong BASE phải có dòng 'cơ sở dữ liệu' + nguồn; chỉ là nhận định (kể cả Bobby) không đủ ⇒ chuyển khỏi base sang độ nhạy/kịch bản có xác suất. Khai TẤT CẢ tham số [UL]/giả định tự đặt (FCF %, trọng số đường giá, hệ số haircut…) ở §7 và grid_desc.
+4. Định nghĩa 3 con số tách bạch và ghi rõ: tâm (expected_weighted của lưới) vs P50 vs giá trị tại tham số trung tâm. Nêu khi P90/P10 do riêng một nhánh trọng số nhỏ quyết định (ví dụ trung vị nhánh STRUCTURAL).
+5. WARNING pháp lý/quản trị ĐẦY ĐỦ: đọc mọi SKEPTIC*.md/REPORT cũ của mã (dd_<MÃ>_*/) và mang theo MỌI cờ chưa đóng (truy thu, giao dịch bên liên quan, vụ án của công ty mẹ/pháp nhân liên quan, nghị quyết ĐHĐCĐ nâng ngưỡng, sở hữu chéo…); ghi nguồn + ngày tra cho câu 'chưa thấy xử phạt/khởi tố'; nghị quyết HĐQT/ĐHĐCĐ mới là DỮ LIỆU quan sát được, phải đưa vào mô hình hoặc nêu lý do không.
+6. Thanh khoản: báo CK ở cỡ tham chiếu VÀ ở cỡ sleeve thật (10–40 triệu đ; NAV SpaceX ≈ 0,94 tỷ), và cả ADV 250 phiên lẫn 60 phiên; nêu khi cỡ tham chiếu ngoài vùng hiệu chỉnh của luật căn bậc hai. Nhãn rẻ/đắt theo giá trị sau CK ở cỡ tham chiếu đã chọn, nêu cỡ.
+7. Khi nhãn đổi chỉ vì đổi định nghĩa vùng (P25–P75 → P10–P90), nói thẳng bên cạnh nhãn.
+8. §8 có mốc đổi nhận định HAI chiều + HARD ABANDON (+ tranche nếu cỡ vị thế lớn). Ghi rõ nếu mã KHÔNG đủ điều kiện sleeve fear-buy §2.5.
+9. LOCK md5: liệt kê ĐỦ mọi file upstream engine/dữ liệu mà script thực thi hoặc đọc.
+10. Cross-check Gordon/ROE: báo cả hai biến thể (có/không lãi tiền gửi) nếu có.
+11. SUMMARY.json thêm: p10_out/p50_out/p90_out (mức kết cục, sau CK), pct_weight_below_price, n_outcomes, axes_included[], axes_excluded[{axis,reason}], base_adjustments[{item,effect_dong_per_share,basis,source}], ck_ref_size, ck_real_sleeve, center_vs_p50_note. Giữ trường cũ (p10_post... = bản mức kết cục mới).
+12. Ghi bản vòng 2 thành REPORT_r2.md + SUMMARY.json mới (backup bản cũ thành SUMMARY_r1.json) trong dd_redo_20261105/<MÃ>/; calc/ chạy lại 2 lần ra trùng byte. KHÔNG chạy fundamental-skeptic (Mike chạy).

@@ -1,0 +1,4 @@
+e0bba9b8748c6d2891e92c3fa6d7dcd0  ../../../dri_val_supply_adj_r4_20261027/model.py
+75c6677e1e4a95e31aabcc37257ec5fc  ../../../dd_DRI_20261027/r5/calc/data/fred_cpiaucsl_20261103.csv
+38938b2a1114d8b82984b638df47213b  ../../../dd_DRI_20261027/r5/calc/data/macro_usdvnd_snapshot_20261103.csv
+20000b0b878b526d4a2c5eab76aea16b  ../../../dd_DRI_20261027/r5/calc/data/rubber_monthly_snapshot_20261103.csv

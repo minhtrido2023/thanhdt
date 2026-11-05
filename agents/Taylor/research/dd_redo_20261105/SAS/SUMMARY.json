@@ -1,0 +1,267 @@
+{
+ "ticker": "SAS",
+ "asof_price_date": "2026-11-04",
+ "price": 34700.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.074,
+  "date": "2026-11-03",
+  "source": "effective_deposit_rate = max(Big-4 12M 6,8%, CCTG 12M 7,4% ngay 02/11/2026); r neo 13,5%"
+ },
+ "dep_now": {
+  "rate": 0.07400000000000001,
+  "source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 33052.727805050716,
+ "center_post_liq": 31066.46330601581,
+ "p10_post": 23751.14153355409,
+ "p50_post": 30806.141252745492,
+ "p90_post": 38021.58126617538,
+ "p10_pre": 25269.693831411463,
+ "p50_pre": 32775.76180851485,
+ "p90_pre": 40452.527985866865,
+ "liq_discount_ref": 0.060093814669402,
+ "liq_ref_position_bn_vnd": 5,
+ "adv_med_bn_vnd": 0.590423,
+ "grid_n": 135,
+ "grid_desc": "4 truc, n=135 ket cuc tat dinh: tac dong Long Thanh len LN van hanh tu 2028 Delta {-55;-40;-25;-10;+5}% (0,1/0,2/0,4/0,2/0,1) [UL; bien duoi ~ mat toan bo mang gan khach quoc te ~57% DT Q3] x N0 {-10%;0;+10%} quanh 518,4 (1/4-1/2-1/4) x r {R-1;R;R+1}% x g {2;3;4}% (moi truc 1/4-1/2-1/4). 2027 = nua tac dong [UL]. Tien thua 654,1 + dau tu DH so sach 253,8 + phai thu DH khac so sach 242,0 co dinh; LN x 0,883 (EPS/LNST 2025). Phan vi = wpct tren 135 o; tam = ky vong luoi. CK thanh khoan 5 ty ADV250 ap dong loat.",
+ "label": "TRONG vung",
+ "px_vs_center": 0.11696010125750567,
+ "px_vs_p10": 0.46098241008660845,
+ "px_vs_p90": -0.08736041888742574,
+ "zone_old": {
+  "low": null,
+  "center": 32600,
+  "high": null,
+  "dd_date": "2026-10-26",
+  "center_kind": "expected_weighted"
+ },
+ "center_change_vs_old": -0.047041002882950655,
+ "change_reason": "Vong 1 -10,5% vs zone cu 32.600 (CK thanh khoan + cau truc BCTC goc + r). Vong 2 them phai thu DH 242 (+1.813 d truoc CK) va truc g (loi Gordon => nang tam).",
+ "warnings": [
+  "Mat bang ACV giao truc tiep khong dau thau (KL TTCP 2017); lo dat chua hoan tat thu tuc; truy thu tien thue dat 2015-2024 'hang chuc ty' hach toan Q4/2025 [vietstock] — rui ro truy thu them",
+  "Giao dich ben lien quan nhom IPP (IPPG 24,98%/ACFC 14,89%/DAFC 4,92%/DAT 1,71% = 46,5%) vua co dong vua doi tac; lich su phai thu LD Nha Viet ~292 ty trich lap ~251 ty",
+  "Free float ~4,4% (ACV 49,07% + IPP 46,50%) — rang buoc thuc thi; Chu tich noi tu van hanh mien thue 'khong the keo dai', doi tac moi chua cong bo dieu khoan",
+  "Ke hoach chuyen HOSE + co the phat hanh them (chua co lich)",
+  "Nhan su: HDQT bo nhiem TGD moi Du Kim Thang 03/08/2026, TGD cu Nguyen Van Hung Cuong ve ACV [cafef 04/08/2026]",
+  "'Khong thay vu viec hinh su/khoi to lien quan SASCO': nguon = DD 26/10/2026 (anninhthudo, thuonghieucongluan, vietstock) + web search 05/11/2026 (cafef, dnse, baophapluat) — khong co ket qua moi; khong thay NQ HDQT 10-11/2026 ve Long Thanh"
+ ],
+ "open_issues": [
+  "Thuyet minh V.5b phai thu DH khac 242,0 (ky quy ACV?) — r2 ghi so sach, can doc",
+  "Khoan bu DFS Q4/2025 chua co so",
+  "Ben tra co tuc dau tu 195,0 9T",
+  "Ket qua thau Long Thanh + lo trinh chuyen bay chinh thuc",
+  "HTK 68,9 -> 204,3 chua trich lap",
+  "Thieu sector read dich vu hang khong",
+  "BQ EPS = 0 moi quy SAS (cot hong)"
+ ],
+ "sources": {
+  "model": "calc/model_r2.py -> calc/model_r2_out.json/txt",
+  "lock": "calc/LOCK_r2_md5.txt",
+  "liq": "_common/liq.py + _common/bq_px_4ma_20261104.csv (via _common_020021/r2lib.py)",
+  "pct": "_shared/wpct.py"
+ },
+ "round": "r2",
+ "job": "Taylor_20261105_020021",
+ "p10_out": 23751.14153355409,
+ "p50_out": 30806.141252745492,
+ "p90_out": 38021.58126617538,
+ "pct_weight_below_price": 0.7359375000000001,
+ "n_outcomes": 135,
+ "min_outcome_post": 19055.713183745764,
+ "adv60_med_bn_vnd": 0.7833096,
+ "ck_ref_size": {
+  "q_bn": 5,
+  "adv250": {
+   "q_bn": 5.0,
+   "disc": 0.060093814669402,
+   "disc_Y05": 0.030046907334701,
+   "disc_Y15": 0.090140722004103,
+   "q_over_adv": 8.468504783858352,
+   "in_calib": false,
+   "days_at10": 84.68504783858353,
+   "days_at20": 42.342523919291764
+  },
+  "adv60": {
+   "q_bn": 5.0,
+   "disc": 0.046178233196932136,
+   "disc_Y05": 0.023089116598466068,
+   "disc_Y15": 0.06926734979539821,
+   "q_over_adv": 6.383172119938272,
+   "in_calib": false,
+   "days_at10": 63.83172119938272,
+   "days_at20": 31.91586059969136
+  }
+ },
+ "ck_real_sleeve": {
+  "0.01": {
+   "adv250": {
+    "q_bn": 0.01,
+    "disc": 0.002687477092561139,
+    "disc_Y05": 0.0013437385462805695,
+    "disc_Y15": 0.004031215638841708,
+    "q_over_adv": 0.016937009567716706,
+    "in_calib": true,
+    "days_at10": 0.16937009567716704,
+    "days_at20": 0.08468504783858352
+   },
+   "adv60": {
+    "q_bn": 0.01,
+    "disc": 0.0020651533701835536,
+    "disc_Y05": 0.0010325766850917768,
+    "disc_Y15": 0.003097730055275331,
+    "q_over_adv": 0.012766344239876545,
+    "in_calib": true,
+    "days_at10": 0.12766344239876545,
+    "days_at20": 0.06383172119938273
+   }
+  },
+  "0.02": {
+   "adv250": {
+    "q_bn": 0.02,
+    "disc": 0.0038006665528669764,
+    "disc_Y05": 0.0019003332764334882,
+    "disc_Y15": 0.005700999829300464,
+    "q_over_adv": 0.03387401913543341,
+    "in_calib": true,
+    "days_at10": 0.3387401913543341,
+    "days_at20": 0.16937009567716704
+   },
+   "adv60": {
+    "q_bn": 0.02,
+    "disc": 0.0029205679044940866,
+    "disc_Y05": 0.0014602839522470433,
+    "disc_Y15": 0.00438085185674113,
+    "q_over_adv": 0.02553268847975309,
+    "in_calib": true,
+    "days_at10": 0.2553268847975309,
+    "days_at20": 0.12766344239876545
+   }
+  },
+  "0.04": {
+   "adv250": {
+    "q_bn": 0.04,
+    "disc": 0.005374954185122278,
+    "disc_Y05": 0.002687477092561139,
+    "disc_Y15": 0.008062431277683416,
+    "q_over_adv": 0.06774803827086683,
+    "in_calib": true,
+    "days_at10": 0.6774803827086682,
+    "days_at20": 0.3387401913543341
+   },
+   "adv60": {
+    "q_bn": 0.04,
+    "disc": 0.004130306740367107,
+    "disc_Y05": 0.0020651533701835536,
+    "disc_Y15": 0.006195460110550662,
+    "q_over_adv": 0.05106537695950618,
+    "in_calib": true,
+    "days_at10": 0.5106537695950618,
+    "days_at20": 0.2553268847975309
+   }
+  }
+ },
+ "label_note": "Nhan theo co 5 ty/ADV250 (CK ~6%, Q/ADV ~850% — NGOAI xa vung hieu chinh, con so CK chi mang tinh quy uoc). O co sleeve 10-40 tr (CK <=0,6%) xem label_sleeve40 trong model_r2_out.json. Dinh nghia vung P10-P90 khong doi.",
+ "center_change_vs_r1": 0.06522408933618196,
+ "axes_included": [
+  "Delta Long Thanh 2 chieu quanh -25%",
+  "N0 +-10%",
+  "r +-100bp",
+  "g 2/3/4% (MOI r2)"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "truy thu tien thue dat them (sau 2015-2024 da hach toan Q4/2025)",
+   "reason": "khong co du lieu so tien/quyet dinh moi; WARNING"
+  },
+  {
+   "axis": "pha loang khi phat hanh/chuyen HOSE",
+   "reason": "chua co gia/ty le; phat hanh theo gia thi truong ~ NPV 0; WARNING"
+  },
+  {
+   "axis": "trich lap HTK 204,3 / phai thu DH 242 khong thu hoi",
+   "reason": "chua doc thuyet minh; khong co du lieu suy giam => ghi so sach; song song bo phai thu DH duoc bao"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "Delta Long Thanh tam -25% tu 2028 (2027 = -12,5%)",
+   "effect_dong_per_share": null,
+   "basis": "lo trinh Cuc HK chuyen chuyen quoc te sang Long Thanh 28/3/2027-25/3/2028; DT mien thue+phong cho ~57% DT Q3 gan khach quoc te; DO LON tam = nhan dinh [UL] — da la truc xac suat 2 chieu",
+   "source": "dd_SAS_20261026 §2-3"
+  },
+  {
+   "item": "phai thu DH khac 242,0 ghi theo so (MOI r2, vong 1 loai)",
+   "effect_dong_per_share": 1813.2645298656419,
+   "basis": "BCTC ma 215; khong co du lieu suy giam",
+   "source": "src/Q3_2026_tonghop_kemgiaitrinh.pdf in tr.1-2"
+  },
+  {
+   "item": "tru phai tra NLD 141,2 + quy KTPL 99,7 + thue 50,2 khoi tien",
+   "effect_dong_per_share": -2181.0381109610025,
+   "basis": "BCTC ma 315/323/314",
+   "source": "BCTC in tr.3-4"
+  },
+  {
+   "item": "LN x 0,883 (trich quy khong thuoc co dong)",
+   "effect_dong_per_share": null,
+   "basis": "EPS 2025 4.602 / (LNST 695,6 / 133,45 tr cp)",
+   "source": "DHDCD 2026 (vietnambiz 25/06/2026) + BQ"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong trong so luoi (Gordon loi => phan phoi lech phai nhe, tam > P50); P50 = trung vi ket cuc; gia tri tai tham so trung tam (Delta -25, g 3) thap hon tam vi Gordon loi theo g. Khong nhanh trong so nho nao quyet dinh P10/P90.",
+ "change_vs_r1": "(1) +phai thu DH 242 theo so; (2) +truc g 2/3/4%; (3) tam = ky vong luoi (trung voi 3 kich ban ve Delta trung binh -25%).",
+ "parallel": {
+  "bo_phai_thu_DH (=cach r1)": {
+   "n": 135,
+   "center_pre": 31239.463275185077,
+   "center_post": 29362.164758754516,
+   "p10_pre": 23456.42930154582,
+   "p50_pre": 30962.497278649207,
+   "p90_pre": 38639.26345600122,
+   "p10_post": 22046.842986292795,
+   "p50_post": 29101.842705484196,
+   "p90_post": 36317.28271891408,
+   "pct_w_below_px": 0.8437500000000002,
+   "min_post": 17351.414636484467,
+   "max_post": 48558.16761446912,
+   "disc": 0.060093814669402
+  },
+  "bo_truc_g (g=3% co dinh)": {
+   "n": 45,
+   "center_pre": 32951.02671807842,
+   "center_post": 30970.873825315703,
+   "p10_pre": 25269.693831411463,
+   "p50_pre": 32808.96131955467,
+   "p90_pre": 40359.388081288234,
+   "p10_post": 23751.14153355409,
+   "p50_post": 30837.345678521775,
+   "p90_post": 37934.038493760825,
+   "pct_w_below_px": 0.7437500000000001,
+   "min_post": 19848.88266675537,
+   "max_post": 46164.09540455561,
+   "disc": 0.060093814669402
+  },
+  "r1_tai_lap (bo phai thu DH + bo truc g)": {
+   "n": 45,
+   "center_pre": 31137.762188212782,
+   "center_post": 29266.57527805441,
+   "p10_pre": 23456.42930154582,
+   "p50_pre": 30995.69678968903,
+   "p90_pre": 38546.12355142259,
+   "p10_post": 22046.842986292795,
+   "p50_post": 29133.04713126048,
+   "p90_post": 36229.73994649953,
+   "pct_w_below_px": 0.8562499999999998,
+   "min_post": 18144.584119494073,
+   "max_post": 44459.79685729431,
+   "disc": 0.060093814669402
+  }
+ },
+ "crosscheck": {
+  "A_co_thu_nhap_TC_khong_cong_tien": 37149.96735291811,
+  "B_khong_thu_nhap_TC_cong_tien_va_tai_san": 33111.95087616892,
+  "ROE_co_TC": 0.38294894432976273,
+  "ROE_van_hanh_tru_tien_TS": 0.7118336997112896
+ }
+}

@@ -1,0 +1,27 @@
+== HPG VONG 2 | gia 21,700 (2026-11-04) | BVPS 17,624 | r 13.50% | TLSH 100% = 1,174 d/cp
+Luoi chinh (sau CK 5 ty): n=675 | tam 16,286 | P10 8,942 P25 12,033 P50 16,343 P75 19,574 P90 23,520 | %duoi gia 83.6% | min 5,846 max 33,645
+Truoc CK: n=675 | tam 16,310 | P10 8,955 P25 12,051 P50 16,368 P75 19,604 P90 23,555 | %duoi gia 83.6% | min 5,855 max 33,695
+Song song co_truc_r_pm1pp: n=2025 | tam 16,400 | P10 8,960 P25 12,021 P50 16,265 P75 19,735 P90 24,219 | %duoi gia 82.9% | min 5,237 max 39,457
+Song song khong_truc_slope: n=225 | tam 16,205 | P10 9,000 P25 12,077 P50 16,560 P75 19,460 P90 23,149 | %duoi gia 86.1% | min 6,557 max 29,472
+Song song khong_truc_tlsh: n=135 | tam 16,479 | P10 9,237 P25 12,126 P50 16,551 P75 19,788 P90 23,759 | %duoi gia 82.8% | min 7,019 max 33,352
+Doi chieu: luoi vong 1 tinh lai bang wpct: n=45 | tam 16,398 | P10 9,261 P25 12,290 P50 16,706 P75 19,680 P90 23,577 | %duoi gia 85.0% | min 7,729 max 29,179
+Gia tri tai tham so trung tam (TRUNG_LAP, mult 1, dg 0, slope 0, TLSH NPV0) sau CK: 16,706
+Nhom kich ban quanh P10: {'XAU': 1.0} | quanh P90: {'TOT': 0.626, 'TRUNG_LAP': 0.374}
+Thanh khoan: ADV250 602.1 ty, ADV60 371.2 ty | CK 5 ty 0.150% (ADV60 0.177%) | sleeve 10tr 0.0067% 40tr 0.0134%
+  Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 0.830% -> trong vung; 10tr 0.002% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.007% -> DUOI vung (CK that ~ nua spread, chua do); 5 ty / ADV60 = 1.35%
+NHAN: TRONG vùng (vung P10-P90 muc ket cuc, CK o co 5 ty)
+r ma tam luoi sau CK = gia: 11.32%
+Doi chieu r theo beta (CAPM ban cu rf 6,75% + beta x ERP 5,55%; KHONG phai luat hien hanh): beta0.84 r 11.41% -> tam 21,388 | beta0.93 r 11.91% -> tam 19,848 | beta1.0 r 12.30% -> tam 18,816
+Gordon P/B (BVPS 30/09): ROE_2027_TRUNG_LAP_g0.04 24,995 | ROE_2027_TRUNG_LAP_g0.05 25,862 | ROE_9T26_x4/3_g0.04 24,496 | ROE_9T26_x4/3_g0.05 25,305
+LOCK c6c7233a6589db20724d02e6f810879b HPG/calc/hpg_r2.py
+LOCK b9bcfeb5bd22e1782b6243d46f38c29c HPG/calc/hpg_redo.py
+LOCK 89e390381402790204264c5c2ae1254a _common_014125/common.py
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 820180d3042303876d46a5a3bcd9bfbd ../../../../kb/dd_price_zones.json
+SUMMARY.json (r2) written

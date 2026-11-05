@@ -1,0 +1,33 @@
+Net cash 3,281.3 ty (11,398 d/cp); von luu dong rong 837.2; thu nhap TC rong sau thue nam hoa 168.4
+r = 13.50% (dep 7.40% [cctg_12m(2026-11-02)]); gia 22,650 (2026-11-04)
+LUOI r2: n=45 | tam truoc 23,837 sau 23,617 | P10/P50/P90 sau 18,386/23,669/28,278 | min sau 16,690 | % trong so duoi gia 37.5% | gia/tam -4.1% => TRONG vung
+Gia tri tai tham so trung tam (LNST 800, 10 nam, r 13.5%): 23,888 truoc CK / 23,669 sau CK
+SONG SONG khong_von_luu_dong (=ban r1): n=45 | tam truoc 23,002 sau 22,791 | P10/P50/P90 sau 17,594/22,856/27,529 | min sau 15,714 | % trong so duoi gia 45.0% | gia/tam -0.6% => TRONG vung
+SONG SONG them_nhanh_15_nam (8/10/12/15 = .2/.4/.2/.2): n=60 | tam truoc 24,203 sau 23,981 | P10/P50/P90 sau 18,621/23,853/29,210 | min sau 16,690 | % trong so duoi gia 36.0% | gia/tam -5.5% => TRONG vung
+Cross-check Gordon g=0 VO HAN (can tren, bo qua thoi han PPA): A co lai tien gui 800/r = 20,585; B (800-168)/r + net cash = 27,649; ROE co lai 15.6%, ROE van hanh (tru tien) 34.3%
+Do nhay lai huy dong (tam truoc CK): b0.5_d-100bp 24,097 (+1.1%); b0.5_d-50bp 23,961 (+0.5%); b0.5_d50bp 23,696 (-0.6%); b0.5_d100bp 23,567 (-1.1%); b1.0_d-100bp 24,377 (+2.3%); b1.0_d-50bp 24,097 (+1.1%); b1.0_d50bp 23,567 (-1.1%); b1.0_d100bp 23,314 (-2.2%)
+adv250: ADV trung vi 17.99 ty/phien (2025-11-03..2026-11-04, 0 phien KL=0), sigma 1.74%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.02%/0.04%/0.06%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.03%/0.06%/0.09%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.04%/0.08%/0.12%; Q/ADV 0.2% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 0.21%/0.41%/0.62%; Q/ADV 5.6% trong vung hieu chinh (<=10%); 0.3-0.6 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 0.46%/0.92%/1.38%; Q/ADV 27.8% NGOAI vung hieu chinh (<=10%); 1.4-2.8 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 0.65%/1.30%/1.95%; Q/ADV 55.6% NGOAI vung hieu chinh (<=10%); 2.8-5.6 phien @20-10%
+adv60: ADV trung vi 12.70 ty/phien (2026-08-10..2026-11-04, 0 phien KL=0), sigma 1.37%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.02%/0.04%/0.06%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.03%/0.05%/0.08%; Q/ADV 0.2% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.04%/0.08%/0.11%; Q/ADV 0.3% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 0.19%/0.38%/0.57%; Q/ADV 7.9% trong vung hieu chinh (<=10%); 0.4-0.8 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 0.43%/0.86%/1.29%; Q/ADV 39.4% NGOAI vung hieu chinh (<=10%); 2.0-3.9 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 0.61%/1.21%/1.82%; Q/ADV 78.7% NGOAI vung hieu chinh (<=10%); 3.9-7.9 phien @20-10%
+Tam sau CK theo co (ADV250): 10tr 23,827, 20tr 23,823, 40tr 23,817, 1,000tr 23,739, 5,000tr 23,617, 10,000tr 23,527
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+LOCK 13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+LOCK c876b6a6b0aad66a7a07840789e93c43  NT2/SUMMARY_r1.json
+LOCK 9c8f76f2c56e6aa315ffa17126ff0ea0  NT2/calc/model_r2.py
+LOCK 4c062f81088ddbbb6df780146a2fe50e  NT2/src/Q3_2026_hopnhat_va_giaitrinh.pdf
+LOCK 74fb44444ac20d28ffeafc657821b116  _common/bq_px_4ma_20261104.csv
+LOCK ced2dcc1ba3d5fbc7d691ea00732920d  _common/liq.py
+LOCK c48da959c789ba976dc1f653bb9e09b2  _common_020021/r2lib.py
+LOCK 4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+SUMMARY: tam sau 23,617 | P10/50/90 18,386/23,669/28,278 | TRONG vung | vs r1 +4.4% | vs cu -7.0%

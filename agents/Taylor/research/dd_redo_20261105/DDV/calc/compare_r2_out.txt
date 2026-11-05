@@ -1,0 +1,24 @@
+price: 15200.0
+asof_price_date: 2026-11-04
+n_outcomes: 270
+center_pre: 13302
+center_post: 13109
+center_param_post: 14421
+p10_out: 10115
+p25_out: 11114
+p50_out: 12823
+p75_out: 15014
+p90_out: 16270
+min_out: 7748
+max_out: 19270
+pct_weight_below_price: 0.7686875
+px_vs_center_post: 0.159508734457243
+label: TRONG vùng
+liq_disc_5ty: 0.014467880399034443
+delta_center_vs_r1_pct: -0.013916052354445596
+r1: {"center_post": 13294, "p10_post": 10259, "p90_post": 16374, "label": "TRONG vùng"}
+w250 2025-11-03..2026-11-04 ADV 13.03 ty sigma 0.0234 | 5000tr: CK 1.447% Q/ADV 38.3782% calib=False phien@15% 2.56 | 10tr: CK 0.065% Q/ADV 0.0768% calib=False phien@15% 0.01 | 20tr: CK 0.092% Q/ADV 0.1535% calib=True phien@15% 0.01 | 40tr: CK 0.129% Q/ADV 0.3070% calib=True phien@15% 0.02
+w60 2026-08-10..2026-11-04 ADV 6.30 ty sigma 0.0227 | 5000tr: CK 2.021% Q/ADV 79.4177% calib=False phien@15% 5.29 | 10tr: CK 0.090% Q/ADV 0.1588% calib=True phien@15% 0.01 | 20tr: CK 0.128% Q/ADV 0.3177% calib=True phien@15% 0.02 | 40tr: CK 0.181% Q/ADV 0.6353% calib=True phien@15% 0.04
+parallel nc_bctc: {"desc": "tien rong BCTC 1.108 (KHONG chuan hoa von luu dong)", "n_outcomes": 270, "center_post": 14721, "p10_out": 11727, "p50_out": 14435, "p90_out": 17881, "pct_weight_below_price": 0.57725, "label": "TRONG vùng"}
+parallel mid_incl_interest: {"desc": "LN giua chu ky GOM lai tien gui (dieu 10; tinh doi voi tien rong — chi kiem cheo)", "n_outcomes": 270, "center_post": 15581, "p10_out": 11921, "p50_out": 15241, "p90_out": 19420, "pct_weight_below_price": 0.495875, "label": "TRONG vùng"}
+r_sens_post: {"beta1.0_-100bp": 13973, "beta1.0_-50bp": 13515, "beta1.0_+50bp": 12723, "beta1.0_+100bp": 12380, "base": 13110}

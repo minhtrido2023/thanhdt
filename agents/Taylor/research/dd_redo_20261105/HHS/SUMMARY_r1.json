@@ -1,0 +1,103 @@
+{
+ "ticker": "HHS",
+ "asof_price_date": "2026-11-04",
+ "price": 9550.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "2026-11-03",
+  "source": "cctg_12m(2026-11-02)",
+  "asof_rate": 0.07400000000000001,
+  "rule": "r = 13,5% + beta x (dep - dep_neo), beta = 1 (gia dinh)"
+ },
+ "center_pre_liq": 10766,
+ "center_post_liq": 10611,
+ "p10_post": 8415,
+ "p50_post": 10615,
+ "p90_post": 13010,
+ "p25_post": 9214,
+ "p75_post": 11644,
+ "p10_pre": 8538,
+ "p50_pre": 10771,
+ "p90_pre": 13201,
+ "liq_disc_5ty": 0.014429563180450019,
+ "px_vs_center_post": -0.0999516283237245,
+ "px_vs_p10_post": 0.1348693999877173,
+ "px_vs_p90_post": -0.26597466605636255,
+ "grid_desc": "Luoi co trong so n=45: kich ban TIEU CUC/CO SO/TICH CUC (w 0,30/0,50/0,20) x dich thang du HTK CRV cu -15/-7,5/0/+7,5/+15 pp x dich CK holding -5/0/+5 pp (deu); r co dinh 13,50%; NAV: CRV gia goc + backlog NC-II x PV1 + thang du HTK cu x PV4 (I.14 gia so, NPV 0); khong CK quan tri (WARNING). Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
+ "grid_n": 45,
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 7600,
+  "center": 9950,
+  "high": 13000,
+  "dd_date": "2026-11-01",
+  "center_kind": "expected_weighted"
+ },
+ "center_change_vs_old": 0.06643216080402015,
+ "sens_r": {
+  "b0.5_-100bp": {
+   "r": 0.13,
+   "value": 10790,
+   "dv": 24,
+   "pct": 0.002237381240288272
+  },
+  "b0.5_-50bp": {
+   "r": 0.1325,
+   "value": 10778,
+   "dv": 12,
+   "pct": 0.0011130166196109403
+  },
+  "b0.5_+50bp": {
+   "r": 0.1375,
+   "value": 10754,
+   "dv": -12,
+   "pct": -0.0011018134050853057
+  },
+  "b0.5_+100bp": {
+   "r": 0.14,
+   "value": 10742,
+   "dv": -24,
+   "pct": -0.0021925661955763953
+  },
+  "b1.0_-100bp": {
+   "r": 0.125,
+   "value": 10815,
+   "dv": 49,
+   "pct": 0.004520744796769227
+  },
+  "b1.0_-50bp": {
+   "r": 0.13,
+   "value": 10790,
+   "dv": 24,
+   "pct": 0.002237381240288272
+  },
+  "b1.0_+50bp": {
+   "r": 0.14,
+   "value": 10742,
+   "dv": -24,
+   "pct": -0.0021925661955763953
+  },
+  "b1.0_+100bp": {
+   "r": 0.14500000000000002,
+   "value": 10719,
+   "dv": -47,
+   "pct": -0.004341449626118932
+  }
+ },
+ "change_reason": "Bo CK quan tri 15/10/5% khoi base (phap ly/quan tri chi WARNING) +1,077; I.14 theo gia so NPV 0 -236; r 12,85->13,5% -34; CK thanh khoan -155 (ADV 16.2 ty). Kich ban giu ban 01/11 (khong co BCTC moi).",
+ "warnings": [
+  "Quan tri (WARNING trung binh): thuong vu HHS Capital nguoi ban khong neu ten, khong dinh gia doc lap, TCH duoc bieu quyet; ky quy 28,4 ty cho ca nhan",
+  "KL 08/KL-TTTP 26/02/2026 (Thanh tra HP) NOXH Pruksa (HHS 90,17%): ra soat dieu chinh gia ban; 2 ket luan thanh tra dang mo nhom CRV/Pruksa",
+  "TCH (me) co 2 QD xu phat that (UBCKNN 12/2024; thue 20,21 ty 04/2026); HHS chua thay QD 2023-26",
+  "Q3/2026 chua soat xet; soat xet 6T ha LNST me -34% so ban tu lap",
+  "CK quan tri neu ap 10%: -1,077 d/cp (chi do nhay)"
+ ],
+ "open_issues": [
+  "I.14 1.329 ty gia dinh nam trong HTK CRV con lai 7.338,8 (tham so DD TCH)",
+  "CK holding 25% co so la uoc luong (co so: CRV chua tra co tuc tien ve HHS 9T/26)",
+  "Danh tinh nguoi ban HHS Capital (G4/G11)",
+  "Thang du BDSDT CRV chua vao tam",
+  "Chua quet tin moi 01-04/11/2026"
+ ]
+}

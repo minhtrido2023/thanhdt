@@ -1,0 +1,106 @@
+{
+ "ticker": "PVP",
+ "r": 0.135,
+ "r_fso": 0.1,
+ "center_pre": 22248.90686014125,
+ "grid_vals": [
+  12819.491419157453,
+  14124.976303184789,
+  15275.183249464375,
+  16288.58144001908,
+  17181.443281917498,
+  22411.993396502654,
+  24152.63990853909,
+  25686.249170245213,
+  27037.446757651483,
+  28227.92921351604,
+  26031.374536071686,
+  28424.763490121797,
+  30533.476224967704,
+  32391.37290765133,
+  34028.28628446509
+ ],
+ "grid_wts": [
+  0.08,
+  0.08,
+  0.08,
+  0.08,
+  0.08,
+  0.09,
+  0.09,
+  0.09,
+  0.09,
+  0.09,
+  0.03,
+  0.03,
+  0.03,
+  0.03,
+  0.03
+ ],
+ "grid_desc": "3 kich ban cuoc (xau/co so/tot, w 0,40/0,45/0,15; EBITDA doi tau 300/400/550) x tuoi doi con lai doi tau hien huu 5 diem 4-8 nam (deu); n=15; trong so o = w_kb/5",
+ "r_sens_pre": {
+  "beta0.5_-100bp": 22452,
+  "beta0.5_-50bp": 22350,
+  "beta0.5_+50bp": 22149,
+  "beta0.5_+100bp": 22050,
+  "beta1.0_-100bp": 22659,
+  "beta1.0_-50bp": 22452,
+  "beta1.0_+50bp": 22050,
+  "beta1.0_+100bp": 21856,
+  "base": 22249
+ },
+ "scenarios_pre": {
+  "xau": 15275,
+  "coso": 25686,
+  "tot": 30533
+ },
+ "parts_by_scn": {
+  "xau": {
+   "net_cash_after_div": 1016.2,
+   "fso": 623.9,
+   "tankers": 1005.3,
+   "drydock": -232.9,
+   "corp": -220.7,
+   "ships_new": -607.8
+  },
+  "coso": {
+   "net_cash_after_div": 1016.2,
+   "fso": 760.7,
+   "tankers": 1340.5,
+   "drydock": -232.9,
+   "corp": -220.7,
+   "ships_new": 0.0
+  },
+  "tot": {
+   "net_cash_after_div": 1016.2,
+   "fso": 760.7,
+   "tankers": 1843.1,
+   "drydock": -232.9,
+   "corp": -220.7,
+   "ships_new": 0.0
+  }
+ },
+ "aux": {
+  "vt_ebitda_9t": 421.084,
+  "vt_ebitda_9t_annual": 561.4453333333333,
+  "fso_y1_excess": 177.17900000000003,
+  "ship_exp_ty": 2025.9119999999998,
+  "floor_pre_capex_ps": 14888.532089135815
+ },
+ "free_float": 0.2842,
+ "free_float_src": "1 - PVTrans 64,92% - Le Ngoc Anh 6,66% [H1 p28]",
+ "change_reason": "Mua tau: co so NPV=0 (cu: -10% o co so, -30% xau; nay -30% chi o xau co co so du lieu); doi tau hien huu = DCF nien kim r 13,5% theo tuoi doi (cu: EV/EBITDA 3-4x); FSO chiet khau gan lai huy dong (10,0%); co tam ky vong (cu: dai PB trung vi - SOTP khong tam); co chiet khau thanh khoan",
+ "warnings": [
+  "Mua tau 116 tr USD (1,55x von hoa) da duyet DHDCD, chua ky; DHDCD bat thuong gia han 2 lan (<=30/11/2026), van kien chua cong bo",
+  "Ben lien quan 63,3% DT 6T (PVTrans, BSR); GD lien quan \"theo thuc te phat sinh\" khong tran (NQ 16/HDQT)",
+  "Doi GD/PGD 06-09/2026",
+  "Free float ~28%"
+ ],
+ "open_issues": [
+  "177 ty cam ket FSO nam 1 vuot run-rate chua hoa giai",
+  "Ty trong TC/chuyen/pool va dao han hop dong tau khong co trong BCTC",
+  "Tuoi tau chi tu bao chi",
+  "Room ngoai chua kiem",
+  "EBITDA doi tau theo kich ban la uoc luong"
+ ]
+}

@@ -1,0 +1,14 @@
+e50ec02c194db54d39e43672c867e15f mike/agents/Taylor/research/dd_redo_20261105/DDV/calc/model_r2_out.json
+c6de17ba62919418803ebb51a338c95a mike/agents/Taylor/research/dd_redo_20261105/DDV/calc/model_r2.py
+24943cb1a1d35d91bee6ca1fab9d7202 mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common.py
+95da3038b3710b57e66747acfcd95722 mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common_r2.py
+b19cf859afaaee092924d8a706d10c67 mike/agents/Taylor/research/dd_redo_20261105/_common_014127/compare_r2.py
+c64ac0755af0994244487184b1eabf3e mike/agents/Taylor/research/dd_redo_20261105/_common_014127/bq_px_liq_20261104.csv
+4597bc083f0d64d8873141b12fbfb3a6 mike/agents/Taylor/research/dd_redo_20261105/_shared/wpct.py
+13dac039539fb91fc8f7256c03a71e5d deposit_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4 data/deposit_rate_vn_events.csv
+3a69ce4b7259927e765cf26e3e97ccdf mike/agents/Taylor/research/dd_redo_20261105/DDV/calc/model.py
+6b504e226be3c465c7efe6fdc71be3f5 mike/agents/Taylor/research/dd_redo_20261105/DDV/calc/bq_hist_out.csv
+73ed59cb189fb9655457b0e276c1b2bf mike/agents/Taylor/research/dd_DDV_20261026/src/en_p1.txt
+47191904b1140ff267f969fd7aa1642a mike/agents/Taylor/research/dd_DDV_20261026/REPORT.md
+97d5cf162532ec12238c356e7d0b9c36 mike/agents/Taylor/research/dd_DDV_reweight_20261028/REPORT.md

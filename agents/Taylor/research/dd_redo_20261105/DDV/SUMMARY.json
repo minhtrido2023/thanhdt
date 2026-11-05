@@ -1,0 +1,254 @@
+{
+ "ticker": "DDV",
+ "round": 2,
+ "job": "Taylor_20261105_020016",
+ "asof_price_date": "2026-11-04",
+ "price": 15200.0,
+ "n_outcomes": 270,
+ "center_pre": 13302,
+ "center_post": 13109,
+ "center_param_pre": 14632,
+ "center_param_post": 14421,
+ "p10_pre": 10264,
+ "p50_pre": 13012,
+ "p90_pre": 16509,
+ "p10_out": 10115,
+ "p25_out": 11114,
+ "p50_out": 12823,
+ "p75_out": 15014,
+ "p90_out": 16270,
+ "min_out": 7748,
+ "max_out": 19270,
+ "pct_weight_below_price": 0.7686875,
+ "label": "TRONG vùng",
+ "px_vs_center_post": 0.159508734457243,
+ "parallel": {
+  "nc_bctc": {
+   "desc": "tien rong BCTC 1.108 (KHONG chuan hoa von luu dong)",
+   "n_outcomes": 270,
+   "center_post": 14721,
+   "p10_out": 11727,
+   "p50_out": 14435,
+   "p90_out": 17881,
+   "pct_weight_below_price": 0.57725,
+   "label": "TRONG vùng"
+  },
+  "mid_incl_interest": {
+   "desc": "LN giua chu ky GOM lai tien gui (dieu 10; tinh doi voi tien rong — chi kiem cheo)",
+   "n_outcomes": 270,
+   "center_post": 15581,
+   "p10_out": 11921,
+   "p50_out": 15241,
+   "p90_out": 19420,
+   "pct_weight_below_price": 0.495875,
+   "label": "TRONG vùng"
+  }
+ },
+ "center_pre_liq": 13302,
+ "center_post_liq": 13109,
+ "p10_post": 10115,
+ "p25_post": 11114,
+ "p50_post": 12823,
+ "p75_post": 15014,
+ "p90_post": 16270,
+ "liq_disc_5ty": 0.014467880399034443,
+ "grid_n": 270,
+ "grid_desc": "ket cuc = kich ban duong S/DAP 2027 (xau/co so/tot 0,45/0,40/0,15 [UL, doc mu Bobby]; LN 2027 -185/+107/+373; he so giua chu ky 0,8/1,0/1,1 [UL]) x he so LN giua chu ky 0,8..1,2 (deu) x lai huy dong -50/0/+50bp (0,25/0,5/0,25 [UL]) x LN loi Q4/2026 sau thue -60/-4,4(=Q3 that)/+40 ty (0,25/0,5/0,25 [UL]) x phai thu Liven 217 ty thu du/mat 100% (0,9/0,1 [UL]); n=270; tham so trung tam = co so, m=1, Δr=0, Q4 nhu Q3, Liven thu du",
+ "ck_ref_size": {
+  "q_vnd": 5000000000.0,
+  "adv": "250 phien",
+  "disc": 0.014467880399034443,
+  "in_calib": false,
+  "disc_adv60": 0.02021032264052235
+ },
+ "ck_real_sleeve": {
+  "10tr": {
+   "disc_adv250": 0.0006470232812515559,
+   "disc_adv60": 0.0009038331054282203,
+   "q_over_adv250": 0.0007675639509721904,
+   "in_calib": false
+  },
+  "20tr": {
+   "disc_adv250": 0.000915029099517092,
+   "disc_adv60": 0.0012782130358183806,
+   "q_over_adv250": 0.0015351279019443808,
+   "in_calib": true
+  },
+  "40tr": {
+   "disc_adv250": 0.0012940465625031119,
+   "disc_adv60": 0.0018076662108564407,
+   "q_over_adv250": 0.0030702558038887616,
+   "in_calib": true
+  }
+ },
+ "liquidity": {
+  "last_price": 15200.0,
+  "last_date": "2026-11-04",
+  "w250": {
+   "window": "2025-11-03..2026-11-04",
+   "adv_med": 13028230400.0,
+   "sigma_d": 0.023354072437705837,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.38378197548609516,
+     "disc": 0.014467880399034443,
+     "in_calib": false,
+     "days_at_15pct": 2.5585465032406347
+    },
+    "10tr": {
+     "q_over_adv": 0.0007675639509721904,
+     "disc": 0.0006470232812515559,
+     "in_calib": false,
+     "days_at_15pct": 0.005117093006481269
+    },
+    "20tr": {
+     "q_over_adv": 0.0015351279019443808,
+     "disc": 0.000915029099517092,
+     "in_calib": true,
+     "days_at_15pct": 0.010234186012962538
+    },
+    "40tr": {
+     "q_over_adv": 0.0030702558038887616,
+     "disc": 0.0012940465625031119,
+     "in_calib": true,
+     "days_at_15pct": 0.020468372025925077
+    }
+   }
+  },
+  "w60": {
+   "window": "2026-08-10..2026-11-04",
+   "adv_med": 6295825000.0,
+   "sigma_d": 0.022678512654976352,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.7941770935500907,
+     "disc": 0.02021032264052235,
+     "in_calib": false,
+     "days_at_15pct": 5.294513957000605
+    },
+    "10tr": {
+     "q_over_adv": 0.0015883541871001814,
+     "disc": 0.0009038331054282203,
+     "in_calib": true,
+     "days_at_15pct": 0.01058902791400121
+    },
+    "20tr": {
+     "q_over_adv": 0.003176708374200363,
+     "disc": 0.0012782130358183806,
+     "in_calib": true,
+     "days_at_15pct": 0.02117805582800242
+    },
+    "40tr": {
+     "q_over_adv": 0.006353416748400726,
+     "disc": 0.0018076662108564407,
+     "in_calib": true,
+     "days_at_15pct": 0.04235611165600484
+    }
+   }
+  },
+  "d_ref": 0.014467880399034443
+ },
+ "axes_included": [
+  "duong S/DAP 2027 (hai chieu)",
+  "LN giua chu ky (hai chieu)",
+  "lai huy dong (hai chieu)",
+  "LN loi Q4/2026 (hai chieu, quanh Q3 that; gom rui ro trich lap ton kho NVL 617)",
+  "Liven 217 (xuong — rui ro tin dung, khong co chieu len)"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "giai doan bai thach cao / dinh chi Dinh Vu",
+   "reason": "khong co du lieu bien do/xac suat; WARNING + HARD ABANDON #6"
+  },
+  {
+   "axis": "gia chuyen giao apatit (Vinachem)",
+   "reason": "khong co du lieu gia chuyen giao; WARNING"
+  },
+  {
+   "axis": "von luu dong khong dao (tien rong BCTC)",
+   "reason": "base chuan hoa VLD co co so BCTC; bao SONG SONG parallel.nc_bctc"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "chuan hoa von luu dong: tien rong 1.108 -> 869,1 (tru phai tra tang 449 - phai thu tang 210,1 trong Q3)",
+   "effect_dong_per_share": -1635,
+   "basis": "DCF loi gia dinh VLD binh thuong; phan tai tro VLD bat thuong trong Q3 la tien phai tra (khong cua co dong)",
+   "source": "BCTC Q3/2026 rieng (en_p1.txt), DD 26/10 §4"
+  },
+  {
+   "item": "tru lai tien gui sau thue khoi LN giua chu ky (55,6 ty/nam)",
+   "effect_dong_per_share": null,
+   "basis": "tranh tinh doi voi tien rong cong rieng",
+   "source": "BCTC Q3 lai tien gui 22,15"
+  }
+ ],
+ "center_vs_p50_note_model": "Nhanh xau w 0,45 [UL] keo tam xuong; khong co nhanh trong so nho nao quyet dinh rieng P10/P90 (Liven mat w 0,1 chi day duoi P10 ~-1.485 d/cp).",
+ "r": 0.135,
+ "r_sens_pre": {
+  "beta1.0_-100bp": 14178,
+  "beta1.0_-50bp": 13713,
+  "beta1.0_+50bp": 12910,
+  "beta1.0_+100bp": 12562,
+  "base": 13302
+ },
+ "scenarios_pre": {
+  "xau": 11285,
+  "coso": 14632,
+  "tot": 16855
+ },
+ "gordon_roe_xcheck": {
+  "mid_np_excl_interest": 167.259276284173,
+  "mid_np_incl_interest": 222.85657592316218,
+  "npm_cycle": 0.04051937744057494,
+  "roe_cycle_excl": 0.12433917079842519,
+  "roe_cycle_incl": 0.10064490525562163,
+  "eq_book_approx": 2214.285714285714,
+  "note": "VCSH xap xi tu ty le Liven/VCSH 9,8%; ROE excl tinh tren VCSH tru tien rong chuan hoa"
+ },
+ "free_float": 0.36,
+ "free_float_src": "1 - Vinachem 64,0% (BCTC Q3/2026)",
+ "change_reason": "Vong 2: them Q4/2026 (vong 1 bo sot), truc Liven co xac suat, truc r, phan vi muc ket cuc; bao song song tien rong BCTC + LN gom lai tien gui",
+ "warnings": [
+  "Vinachem 64%: gia chuyen giao apatit (Apatit Viet Nam, cung tap doan) — ben lien quan; thoai von chua thuc hien",
+  "Phai thu Liven Nutrients PTE 217 ty (9,8% VCSH) mot khach; khach tung tra truoc — chua thu tai 30/09",
+  "Phai tra 326,3 ty mot nha cung cap moi (Tuong Nguyen) — tap trung doi tac",
+  "Bai thach cao / moi truong Dinh Vu — nut that cong suat; nha may tung trong nhom 12 du an thua lo nganh Cong Thuong (lich su)",
+  "20/04/2026: 2 lanh dao tu nhiem cho Vinachem phan cong",
+  "Ton kho NVL 617,3 ty mua gia S cao, chua trich lap giam gia",
+  "UPCOM, free float 36%"
+ ],
+ "open_issues": [
+  "Duong S 2027 / do doc bien 2,44 (2 diem hieu chuan)",
+  "NH3 khong co chuoi BQ",
+  "VCSH dung xap xi trong kiem cheo ROE",
+  "Room ngoai",
+  "BCTC Q4/2026"
+ ],
+ "new_data_obs": [
+  "WebSearch 05/11/2026 09:00 ICT: khong thay NQ HDQT/DHDCD moi hay tin xu phat/khoi to DDV (ket qua tra ve nham DVP — khong lien quan). DD 26/10: chua tra truc tiep UBCKNN/HNX"
+ ],
+ "fear_buy_25": "§2.5: NON (DD 26/10, giu 28/10 \"NON nghieng xau di\"): #3 leader chi phi YEU, #4 PB 1,17 > 1, \"day chua toi\" dinh => KHONG du dieu kien sleeve fear-buy",
+ "r_sens_post": {
+  "beta1.0_-100bp": 13973,
+  "beta1.0_-50bp": 13515,
+  "beta1.0_+50bp": 12723,
+  "beta1.0_+100bp": 12380,
+  "base": 13110
+ },
+ "center_vs_p50_note": "tam (ky vong trong so luoi, sau CK) 13109 vs P50 ket cuc 12823 vs gia tri tai tham so trung tam 14421. Nhanh xau w 0,45 [UL] keo tam xuong; khong co nhanh trong so nho nao quyet dinh rieng P10/P90 (Liven mat w 0,1 chi day duoi P10 ~-1.485 d/cp).",
+ "r1": {
+  "center_post": 13294,
+  "p10_post": 10259,
+  "p90_post": 16374,
+  "label": "TRONG vùng"
+ },
+ "delta_center_vs_r1_pct": -0.013916052354445596,
+ "zone_old": {
+  "low": 12300,
+  "center": 14500,
+  "high": 17300,
+  "dd_date": "2026-10-28",
+  "center_kind": "expected_weighted"
+ }
+}

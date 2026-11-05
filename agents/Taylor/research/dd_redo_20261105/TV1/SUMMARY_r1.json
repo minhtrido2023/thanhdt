@@ -1,0 +1,50 @@
+{
+ "ticker": "TV1",
+ "asof_price_date": "2026-11-04",
+ "price": 19600.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 7.4,
+  "date": "2026-11-03",
+  "current_rate": 7.4,
+  "current_source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 17033,
+ "center_post_liq": 16348,
+ "p10_post": 8366,
+ "p50_post": 15706,
+ "p90_post": 24571,
+ "p10_pre": 8716,
+ "p90_pre": 25600,
+ "liq_discount_ref": 0.0402,
+ "liq_ref_size_ty": 5.0,
+ "adv120_median_ty": 0.63,
+ "px_vs_center": 0.1989,
+ "px_vs_p10": 1.3429,
+ "px_vs_p90": -0.2023,
+ "grid_desc": "5 kịch bản giá ròng PPA Sông Bung 5 từ 2027 (949/600/520/440/340 đ/kWh, xác suất 0,05/0,25/0,30/0,20/0,20 [UL]) × 4 kịch bản tư vấn (biên 5/8/11/14%, xác suất 0,20/0,30/0,40/0,10) × sản lượng {175; 187,5; 200} GWh đều (n=60)",
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 11400,
+  "center": 18100,
+  "high": 24200,
+  "dd_date": "2026-11-02",
+  "basis": "rev5 blind: tâm kỳ vọng Ke 12,85%, vùng = P20–P80, chưa CK thanh khoản"
+ },
+ "center_new_vs_old": -0.0968,
+ "change_reason": "Tâm sau CK 16.348 vs cũ rev5 18.100 (−9,7%, <10%). Hai nguyên nhân: Ke 12,85% → r 13,5% neo lãi huy động (−1.083 đ/cp, −6,0%: tái lập tâm cũ 18.116 → 17.033) và CK thanh khoản 4,02% @5 tỷ (−685). Định nghĩa vùng đổi từ P20–P80 sang P10–P90 (rộng hơn).",
+ "warnings": [
+  "Vụ án (ngoài tâm, đ/cp ở r 13,5%): cấm thầu EVN 3 năm DT tư vấn −50% ≈ −8.194; 5 năm ≈ −12.983; buộc nộp 20/50/100 tỷ ≈ −660/−1.650/−3.301",
+  "Truy thu bậc giá SB5 2022–26 nếu áp hồi tố đủ (bậc 243,66 dự thảo HĐ 2018) ≈ −17.397 đ/cp — chưa có văn bản, xác suất thấp, ngoài tâm",
+  "Giá PPA SB5 từ 2027 KHÔNG xác định bằng văn bản (lời lãnh đạo qua KBSV 500–600; dự thảo 2018 243,66) — trục chính của định giá",
+  "Thanh khoản rất thấp: ADV trung vị 0,63 tỷ; vị thế 5 tỷ cần 80/40 phiên ở 10%/20% ADV — mô hình căn bậc hai (4,0%) có thể đánh giá thấp chi phí thoát; quy mô thực tế ≤1 tỷ (16/8 phiên, CK 2,0%)",
+  "Cổ đông: EVN 54,34%; Lê Minh Hà 9,84% đồng thời là bên cho vay (lãi vay cá nhân phải trả 64,3 tỷ)"
+ ],
+ "open_issues": [
+  "Phụ lục PPA mới / CBTT giá SB5 chưa có — chờ ĐHĐCĐ 2027 hoặc BCTC FY2026",
+  "Điện mặt trời nổi 46 MWp (~800 tỷ) chưa đầu tư, vướng thủ tục ⇒ base NPV=0 (không cộng/không trừ)",
+  "Ke dùng chung cho FCFE thuỷ điện có thời hạn (thuê đất tới 08/2059) — skill cho phép lãi khớp kỳ hạn; giữ r 13,5% để nhất quán liên mã",
+  "Chưa quét tin vụ án sau 02/11"
+ ],
+ "source_calc": "calc/model_tv1_out.json"
+}

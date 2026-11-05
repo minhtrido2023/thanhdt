@@ -1,0 +1,21 @@
+{
+ "grid_desc": "6 trục: chế độ ngành CYCLICAL/ADMIN_GATED/STRUCTURAL (0,5/0,3/0,2, Bobby) × DT TTM/2026E × biên chuẩn hoá 3 cách × g 3/4/5% × ROE 15/20% × lỗ phải thu tập trung 0/20/50% (0,75/0,20/0,05); giá trị CUM-quyền; phân vị wpct mức kết cục",
+ "label_note": "TRÊN vùng (>P90) giữ nguyên so vòng 1; không do đổi định nghĩa vùng (vòng 1 đã P10–P90). So r3 03/11 (vùng P25–P75 sau quyền) nhãn cũng là TRÊN. 98,4% trọng số kết cục dưới giá; chỉ kết cục max 30.509 (STRUCTURAL+ROE20%+g5%) chạm giá.",
+ "center_vs_p50_note": "Tâm (kỳ vọng) 22.769 < P50 23.312: phân phối lệch trái do nhánh CYCLICAL (w 0,5) dồn đuôi dưới; tham số trung tâm (ADMIN_GATED, TTM, norm 2023–TTM, g4%, ROE 17,5%, phải thu 0%) 22.360. P10 do riêng nhánh CYCLICAL; P90 do nhánh STRUCTURAL (82% trọng số quanh P90, w nhánh 0,2).",
+ "change_reason": "Tâm CUM sau CK 22.769 vs vòng 1 22.855 (−0,4%): thêm trục lỗ phải thu tập trung (kỳ vọng −0,4%). Phân vị đổi sang wpct: P10 17.615 → 17.348, P90 27.119 → 27.119. Song song: CÓ IRR Phả Lại tâm 22.769/P90 27.672; nhánh đối xứng (TROUGH) tâm 21.648; khung nợ mệnh giá 21.584 — nhãn TRÊN ở mọi bản.",
+ "warnings": [
+  "Pha loãng: 17,3tr cp (2023) → 44,84tr sau quyền 100:15,4453 @12.500 (ĐKCC 10/11/2026; đăng ký mua 17/11–08/12/2026 theo báo chí — cần đối chiếu CBTT); ESOP 0,92tr @10.000",
+  "Vay 26 tỷ từ cổ đông lớn lãi 10% (bên liên quan)",
+  "Khách hàng tập trung: hệ sinh thái một tập đoàn BĐS = 58,5% phải thu KH (nay là TRỤC lưới)",
+  "CFO 9T 9,9 tỷ vs LNST 94,4; nợ ròng 321 tỷ (1,4× EBITDA); biên ròng TTM 12,7% đỉnh 7 năm",
+  "Chưa thấy tin xử phạt/khởi tố SCL: WebSearch 05/11/2026 (doanhnhan.baophapluat.vn, cafef.vn — tin chào bán 6tr cp); kết quả xử phạt chỉ thuộc công ty khác cùng họ Sông Đà; WebSearch ≠ CBTT sàn. NQ phát hành quyền đã nằm trong mô hình (cơ sở sau quyền)."
+ ],
+ "open_issues": [
+  "Không có cơ cấu DT theo mảng, backlog, công suất từng dây chuyền",
+  "Phả Lại: chưa có giá/sản lượng/hợp đồng đầu ra ⇒ ngoài lưới chính (NPV0), song song IRR 10/13,5/17%",
+  "Mức quay về TB biên 1,0/0,5/0,0 theo nhánh là thiết kế nhóm nghiên cứu; trọng số lỗ phải thu [UL]",
+  "Báo chí nêu hai lịch chuyển nhượng quyền khác nhau (17/11–03/12 vs ĐKCC 10/11) — đối chiếu CBTT",
+  "P/E công thức cần E năm sau, mô hình dùng TTM/2026E (lệch ~−4%, thận trọng — SKEPTIC_R2)"
+ ],
+ "fearbuy_sleeve_eligible": "KHÔNG — giá TRÊN vùng, không phải trạng thái sợ hãi; DD trung dung"
+}

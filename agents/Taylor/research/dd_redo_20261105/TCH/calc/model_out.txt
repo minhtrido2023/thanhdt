@@ -1,0 +1,12 @@
+r = 13.50% (dep hieu dung 7.40% [cctg_12m(2026-11-02)] vs neo 7.40% 2026-11-03 (CCTG 12M 02/11/2026; Big-4 12M 6,8%)); gia 12,750 (2026-11-04)
+HTK con lai sau backlog, TRU quy dat moi (NPV 0): {k: round(v,1) for k,v in rest_old.items()} = {'me': 2780.667425925927, 'crv': 6010.078148148147, 'khac': 339.9249722222218}; quy dat moi {'me': 1677.51, 'crv': 1328.75}
+xau     p=0.25 m=30.0% s_old=25% hold=30%: 12,060 -> sau CK thanh khoan 11,983
+co so   p=0.50 m=33.5% s_old=40% hold=20%: 13,474 -> sau CK thanh khoan 13,387
+tot     p=0.25 m=36.0% s_old=55% hold=10%: 14,945 -> sau CK thanh khoan 14,848
+TAM (ky vong trong so) truoc CK 13,488 | CK thanh khoan 0.64% (5 ty, Y=1) | sau 13,401 | gia/tam -4.9%
+LUOI n=81 (m x s_old x hold x r±100bp, trong so 1/4-1/2-1/4 moi bien): truoc P10 12,641, P50 13,474, P90 14,297 | sau P10 12,559, P50 13,387, P90 14,205
+Gia 12,750: vs tam -4.9%, vs P10 +1.5%, vs P90 -10.2% => TRONG vung
+Do nhay lai huy dong (tam truoc CK): b0.5_d-100bp: r 13.00% -> 13,522 (+34 d, +0.2%); b0.5_d-50bp: r 13.25% -> 13,505 (+17 d, +0.1%); b0.5_d50bp: r 13.75% -> 13,472 (-17 d, -0.1%); b0.5_d100bp: r 14.00% -> 13,455 (-33 d, -0.2%); b1.0_d-100bp: r 12.50% -> 13,556 (+68 d, +0.5%); b1.0_d-50bp: r 13.00% -> 13,522 (+34 d, +0.2%); b1.0_d50bp: r 14.00% -> 13,455 (-33 d, -0.2%); b1.0_d100bp: r 14.50% -> 13,423 (-65 d, -0.5%)
+Do nhay CK quan tri (WARNING, KHONG trong base), tam sau CK: gov5 12,731, gov10 12,061, gov15 11,391
+Do nhay thang du quy dat moi (base 0): s_new-10 13,258, s_new10 13,545, s_new25 13,760
+Thanh khoan: ADV trung vi 87.1 ty/phien (2025-11-03..2026-11-04), sigma 2.69%; CK 1/5/10 ty = 0.3%/0.6%/0.9%; 5 ty can 0.3-0.6 phien @20-10%

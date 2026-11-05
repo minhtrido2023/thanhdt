@@ -1,0 +1,27 @@
+== FPT VONG 2 | gia 53,900 (2026-11-04, con quyen co tuc 1.000d chot 30/11) | r 13.50%
+FRT 46,54% thi gia 04/11 11,984 ty (6,355 d/cp); vong 1 tru 20% = -1,271 d/cp -> vong 2 base = thi gia
+Luoi chinh (sau CK 5 ty): n=540 | tam 54,203 | P10 32,389 P25 39,897 P50 55,182 P75 66,124 P90 74,557 | %duoi gia 47.5% | min 25,463 max 94,261
+Truoc CK: n=540 | tam 54,305 | P10 32,449 P25 39,972 P50 55,285 P75 66,247 P90 74,697 | %duoi gia 46.9% | min 25,510 max 94,437
+Song song co_truc_r_pm1pp: n=1620 | tam 54,384 | P10 32,289 P25 39,766 P50 55,163 P75 66,377 P90 75,477 | %duoi gia 47.5% | min 24,935 max 103,459
+Song song khong_truc_frt_d: n=180 | tam 54,203 | P10 32,300 P25 39,903 P50 55,081 P75 66,065 P90 74,546 | %duoi gia 47.3% | min 26,731 max 92,992
+Song song khong_truc_oth: n=135 | tam 53,615 | P10 31,622 P25 39,022 P50 54,968 P75 65,422 P90 73,503 | %duoi gia 49.2% | min 26,760 max 91,666
+Doi chieu: luoi vong 1 (FRT -20%, khong truc oth) tinh lai bang wpct: n=45 | tam 52,346 | P10 30,520 P25 37,882 P50 53,699 P75 63,906 P90 72,235 | %duoi gia 50.0% | min 26,760 max 89,128
+Gia tri tai tham so trung tam (CO_SO, dconv 0, dg 0, FRT thi gia, lien ket khac theo so) sau CK: 58,579
+Nhom kich ban quanh P10: {'XAU': 1.0} | quanh P90: {'CO_SO': 0.314, 'TOT': 0.686}
+Thanh khoan: ADV250 566.1 ty, ADV60 346.0 ty | CK 5 ty 0.187% (ADV60 0.214%) | sleeve 10tr 0.0083% 40tr 0.0167%
+  Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 0.883% -> trong vung; 10tr 0.002% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.007% -> DUOI vung (CK that ~ nua spread, chua do); 5 ty / ADV60 = 1.45%
+NHAN: TRONG vùng (vung P10-P90 muc ket cuc, CK o co 5 ty)
+Gordon (conv co so 0,75; truoc CK): A_khong_lai_tg_g0.04 52,205 | B_co_lai_tg_g0.04 49,029 | A_khong_lai_tg_g0.05 55,954 | B_co_lai_tg_g0.05 53,203
+LOCK e6d0ac32e6f6374afcf2c9cd2e8bba21 FPT/calc/fpt_r2.py
+LOCK 7fb57f0d6fbf4085b8f04bcf0c8c7011 FPT/calc/fpt_redo.py
+LOCK 33772a6e33add436e5732eb65929eb1f FPT/calc/assoc_px_20261104.csv
+LOCK 89e390381402790204264c5c2ae1254a _common_014125/common.py
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 820180d3042303876d46a5a3bcd9bfbd ../../../../kb/dd_price_zones.json
+SUMMARY.json (r2) written

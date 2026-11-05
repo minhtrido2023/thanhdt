@@ -1,0 +1,35 @@
+DRI r2 | r 13.50% | mid 1.924/2.221/2.432 | doi chung r1 keep 15,860 forced 11,924
+  wood NQ15 41.05 tr/ha (cu 20.87) | tien dau gia 1.975 ha ~81.1 ty VND
+   cau noi diem TB L27: +bo haircut Dakruco                                       16,134
+   cau noi diem TB L27: +bo giu 15% tien Lao                                      16,537
+   cau noi diem TB L27: +wood_ha = gia khoi diem NQ15                             17,044
+   cau noi diem TB L27: +doc NQ15-NPV0 (lich thanh ly 1.975 ha 2027-30)           14,924
+   cau noi diem TB L27: (nhanh) NQ15-KINH TE (tai canh kinh te engine m7)         13,952
+   cau noi diem TB L27: (doi chieu) bi buoc lich engine 3.949 ha 2029-36          13,414
+  TRUOC CK tam 14,379 | P10 12,250 P50 14,525 P90 16,475 | min 9,935 | duoi gia 31.5% (n 36)
+  SAU CK   tam 14,092 | P10 12,006 P50 14,235 P90 16,146 | min 9,737 | duoi gia 35.2% (n 36)
+   nhanh NQ15_NPV0  tam 14,288 | P10 12,140 P50 14,378 P90 16,280 | min 11,088 | duoi gia 30.0% (n 18)
+   nhanh NQ15_ECON  tam 13,307 | P10 10,789 P50 13,440 P90 15,610 | min 9,737 | duoi gia 56.2% (n 18)
+   [song song: ban cu giu L27 + bi buoc engine, base da sua] tam 15,577 | P10 12,548 P50 15,852 P90 18,582 | min 9,408 | duoi gia 17.8% (n 36)
+   [chi NQ15-NPV0] tam 14,288 | P10 12,140 P50 14,378 P90 16,280 | min 11,088 | duoi gia 30.0% (n 18)
+   w nhanh KINH TE 0.0: tam 14,288 | P10 12,140 P50 14,378 P90 16,280 | min 11,088 | duoi gia 30.0% (n 18)
+   w nhanh KINH TE 0.1: tam 14,190 | P10 12,100 P50 14,310 P90 16,203 | min 9,737 | duoi gia 32.6% (n 36)
+   w nhanh KINH TE 0.3: tam 13,994 | P10 11,905 P50 14,142 P90 16,099 | min 9,737 | duoi gia 37.9% (n 36)
+   w nhanh KINH TE 0.5: tam 13,798 | P10 11,292 P50 14,058 P90 15,987 | min 9,737 | duoi gia 43.1% (n 36)
+   wp PEAK 0.0: tam 14,532 | P10 12,409 P50 14,803 P90 16,412 | min 10,834 | duoi gia 22.5% (n 18)
+   wp PEAK 0.5: tam 14,165 | P10 12,061 P50 14,267 P90 16,224 | min 9,737 | duoi gia 33.1% (n 36)
+   wp PEAK 1.0: tam 13,799 | P10 11,443 P50 14,170 P90 15,987 | min 9,737 | duoi gia 43.8% (n 18)
+   (-) haircut 50% khoan vay Dakruco 40 ty (cu)       tam sau CK   13,824 (-268)
+   (-) giu 15% tien Lao (cu)                          tam sau CK   13,697 (-395)
+   (-) ca hai (cau hinh cu)                           tam sau CK   13,429 (-663)
+   (-) khoan vay Dakruco mat trang 40 ty              tam sau CK   13,557 (-536)
+   wood_ha cu 20,87 tr/ha                             tam sau CK   13,301 (-791)
+   FCF/LN loi 80% (base 90% [UL])                     tam sau CK   13,219 (-873)
+   FCF/LN loi 100% (base 90% [UL])                    tam sau CK   14,965 (+873)
+   dep -100bp: r 12.50% -> 14,455 (+2.6%)
+   dep -50bp: r 13.00% -> 14,270 (+1.3%)
+   dep +50bp: r 14.00% -> 13,921 (-1.2%)
+   dep +100bp: r 14.50% -> 13,755 (-2.4%)
+  CK 5 ty 2.00% (ADV250 8.33 ty, Q/ADV 0.60x) | ADV60 13.82 ty -> 1.55% | sleeve {"10tr": {"adv250": 0.0008931431575357847, "adv60": 0.0006933315331877975}, "40tr": {"adv250": 0.0017862863150715693, "adv60": 0.001386663066375595}}
+  gia 13,500 (2026-11-04): vs tam -4.2% | vs P10 +12.4% | vs P90 -16.4% | TRONG vùng | luat4 False
+  files doc: ../../../dd_DRI_20261027/r5/calc/data/macro_usdvnd_snapshot_20261103.csv ../../../dd_DRI_20261027/r5/calc/data/rubber_monthly_snapshot_20261103.csv ../../../dri_val_supply_adj_20261027/data/dri_peers_fin.csv ../../../dri_val_supply_adj_r3_20261027/model.py

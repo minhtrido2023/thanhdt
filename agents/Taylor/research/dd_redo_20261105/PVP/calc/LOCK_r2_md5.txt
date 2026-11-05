@@ -1,0 +1,14 @@
+c7b2bf794ca4a8f523b962a942addbaa mike/agents/Taylor/research/dd_redo_20261105/PVP/calc/model_r2_out.json
+b3bd80f351d3778ab567e68325368d8a mike/agents/Taylor/research/dd_redo_20261105/PVP/calc/model_r2.py
+24943cb1a1d35d91bee6ca1fab9d7202 mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common.py
+95da3038b3710b57e66747acfcd95722 mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common_r2.py
+b19cf859afaaee092924d8a706d10c67 mike/agents/Taylor/research/dd_redo_20261105/_common_014127/compare_r2.py
+c64ac0755af0994244487184b1eabf3e mike/agents/Taylor/research/dd_redo_20261105/_common_014127/bq_px_liq_20261104.csv
+4597bc083f0d64d8873141b12fbfb3a6 mike/agents/Taylor/research/dd_redo_20261105/_shared/wpct.py
+13dac039539fb91fc8f7256c03a71e5d deposit_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4 data/deposit_rate_vn_events.csv
+4e89831fad57543af5990bc2e8c33658 mike/agents/Taylor/research/dd_redo_20261105/PVP/calc/model.py
+e8ad25db9be4976f48ba850ef5aa8b0b mike/agents/Taylor/research/dd_PVP_20261029/src/bctc_q3_2026.pdf
+32ccb1b72338073669228fc644fbf304 mike/agents/Taylor/research/dd_PVP_20261029/src/bctc_banien_2026_kiemtoan.pdf
+0373e073c6bb5ffc2728eb2551f5e170 mike/agents/Taylor/research/dd_PVP_20261029/src/agm2026_nq_bienban.pdf
+6d64839e3356a34e2a17ea3fd4000ba4 mike/agents/Taylor/research/dd_PVP_20261029/REPORT.md

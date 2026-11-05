@@ -1,0 +1,25 @@
+== MBB VONG 2 | gia 19,250 (2026-11-04) | r 13.50%
+Luoi chinh (sau CK 5 ty): n=180 | tam 23,804 | P10 14,444 P25 16,799 P50 22,765 P75 29,044 P90 35,860 | %duoi gia 32.3% | min 11,194 max 51,815
+Truoc CK: n=180 | tam 23,850 | P10 14,472 P25 16,832 P50 22,809 P75 29,100 P90 35,929 | %duoi gia 32.1% | min 11,215 max 51,915
+Song song co_truc_r_pm1pp: n=540 | tam 24,154 | P10 14,147 P25 16,906 P50 22,704 P75 29,307 P90 36,748 | %duoi gia 34.9% | min 10,227 max 67,512
+Song song khong_truc_mbv: n=45 | tam 24,082 | P10 14,456 P25 16,986 P50 23,214 P75 29,721 P90 36,126 | %duoi gia 30.0% | min 12,381 max 50,760
+Gia tri tai tham so trung tam (CO_SO, droe 0, dg 0, MBV NPV0) sau CK: 24,068
+Nhom kich ban quanh P10: {'CO_SO': 0.125, 'XAU': 0.875} | quanh P90: {'CO_SO': 0.535, 'TOT': 0.465}
+Thanh khoan: ADV250 353.7 ty, ADV60 210.5 ty | CK 5 ty 0.192% (ADV60 0.192%) | sleeve 10tr 0.0086% 40tr 0.0172%
+  Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 1.414% -> trong vung; 10tr 0.003% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.011% -> DUOI vung (CK that ~ nua spread, chua do); 5 ty / ADV60 = 2.38%
+NHAN: TRONG vùng (vung P10-P90 muc ket cuc, CK o co 5 ty)
+Gordon P/B (BVPS 30/09): ROE_TTM_g0.06 30,624 | ROE_TTM_g0.07 32,936 | ROE_T_coso_g0.06 20,793 | ROE_T_coso_g0.07 21,592 | ROE TTM 20.7%
+RI trong so (truoc CK, tham so trung tam) o Ke 14,5% / 15%: 20,223 / 18,933 (doi chieu skeptic 31/10: ~20,5k @15%; R1 ghi 18,7k)
+LNTT Q4/26 ngu y (PPOP-DP): XAU 8,500, CO_SO 12,000, TOT 14,500
+LOCK e918d858b4355d3a116a82ec20baeab2 MBB/calc/mbb_r2.py
+LOCK fb64e1e03e19437faa85905978380234 MBB/calc/mbb_redo.py
+LOCK 89e390381402790204264c5c2ae1254a _common_014125/common.py
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK 820180d3042303876d46a5a3bcd9bfbd ../../../../kb/dd_price_zones.json
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+SUMMARY.json (r2) written
