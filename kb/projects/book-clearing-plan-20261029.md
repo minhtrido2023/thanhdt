@@ -32,3 +32,6 @@ Nhánh `session/clearing-shadow-20261029` @ `eb786f0fe` (4 file: park_holdings.p
 
 ## Kết quả shadow cron 30/10→04/11 (kiểm 05/11 16:3x ICT)
 5 phiên cron 20:45 × 2 account: 10/10 file `status=SHADOW`, `reconcile_ok=true`, **0 cơ hội chuyển nhãn**, 0 lỗi. (2 file ERROR 10-30 là lần chạy tay 29/10 08:37 khi plan chưa có — không phải cron.) Code GĐ1 ĐÃ merge từ 29/10 (`6939d704b`), không còn nhánh/worktree. Shadow cron giữ nguyên (T0, rẻ). GĐ3 (bật thật) CHƯA code (`apply_book_transfers.py` chưa tồn tại) — 0 cơ hội trong 5 phiên nên chưa có cơ sở bật; chỉ làm khi user yêu cầu + quant/arch-review.
+
+## GĐ3 DUYỆT + gỡ cron shadow (user 05/11/2026 16:34 ICT, `decided_by: user`)
+User duyệt GĐ3 và yêu cầu gỡ cron shadow. Cron `clear_books_daily.sh` ĐÃ GỠ (backup `state/crontab_backups/crontab.before-clearbooks-removal-20261105.txt`; script giữ trên đĩa). Dispatch build GĐ3: Taylor_20261105_093502 (opus/high, nhánh `session/clearing-g3-20261105`, cờ APPLY mặc định TẮT). Bước kế: arch-review + quant-skeptic (đường tiền) → Mike merge → bật cờ + wire chuỗi plan (cron/chuỗi plan 20:45 thay shadow). CHƯA bật gì trong production cho tới khi review APPROVED.
