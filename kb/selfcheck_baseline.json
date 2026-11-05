@@ -194,6 +194,26 @@
       "escalated_utc": "2026-11-04T22:54:41Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "mike/bin/book_clearing_g3_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-11-05T22:56:21Z",
+      "status": "TIMEOUT",
+      "auto": true,
+      "topic": "selfcheck-red: mike/bin/book_clearing_g3_selfcheck.py",
+      "escalated_utc": "2026-11-05T22:56:21Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
+    },
+    "rule_a_ref_guard_selfcheck.py": {
+      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
+      "since": "2026-11-05T22:56:21Z",
+      "status": "FAIL",
+      "auto": true,
+      "topic": "selfcheck-red: rule_a_ref_guard_selfcheck.py",
+      "escalated_utc": "2026-11-05T22:56:21Z",
+      "ack_pending": false,
+      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
   }
 }
