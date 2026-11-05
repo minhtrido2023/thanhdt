@@ -34,3 +34,8 @@
 - [2026-11-05T01:55:10Z] [dd-redo 05/11] XONG job Taylor_20261105_014127 DGC/DDV/PVP/PVT -> research/dd_redo_20261105/ (SUMMARY_job014127.md); CHO Mike chay fundamental-skeptic; DGC nhan phu thuoc trong so mo lai khai truong 0,5 (uoc luong)
 - [2026-11-05T01:57:27Z] [dd-redo 05/11] XONG job Taylor_20261105_014133 (TCH NT2 SAS SZL) o research/dd_redo_20261105/; CHO Mike chay fundamental-skeptic; chua sua dd_price_zones
 - [2026-11-05T01:57:46Z] [dd-redo 05/11] XONG job Taylor_20261105_014125 (MBB FPT HPG HHS, dd_redo_20261105/TONGHOP_Taylor_20261105_014125.md); CHỜ Mike skeptic; mở: luật r đồng nhất vs β riêng (HPG)
+- [2026-11-05T02:00:24Z] ĐANG DỞ: DD redo VÒNG 2 MBB FPT HPG HHS job Taylor_20261105_020013 | NEXT: đọc STANDARD_r2.md, làm MBB→FPT→HPG→HHS
+- [2026-11-05T02:00:26Z] ĐANG DỞ: DD redo VÒNG 2 DGC DDV PVP PVT job Taylor_20261105_020016 → dd_redo_20261105/<MÃ>/REPORT_r2.md | NEXT: đọc STANDARD_r2, lần lượt DGC→DDV→PVP→PVT
+- [2026-11-05T02:00:29Z] ĐANG DỞ: DD redo r2 SIP SCL TV1 TV2 job Taylor_20261105_020018 | NEXT: đọc STANDARD_r2, làm SIP→SCL→TV1→TV2
+- [2026-11-05T02:00:31Z] ĐANG DỞ: DD redo vòng2 NT2 SAS SZL TCH job Taylor_20261105_020021 → dd_redo_20261105/<MÃ>/REPORT_r2.md | NEXT: đọc STANDARD_r2, làm lần lượt
+- [2026-11-05T02:00:34Z] ĐANG DỞ: DD redo VÒNG 2 NNC DRI MVC job Taylor_20261105_020023 | NEXT: đọc STANDARD_r2 + E_CORRECTIONS, NNC→DRI→MVC
