@@ -277,6 +277,20 @@ def part_a(M, r):
         sb.close()
 
 
+def hypo_bal(M, on):
+    """Test MÁY MÓC chuỗi 2 transfer (B16/M3/M4/E10/R2): GĐ3 phương án A đã bỏ BAL khỏi phạm vi, nên
+    giả lập 'đích thứ 2' bằng cách tạm mở BAL trong bản module đang test. KHÔNG phải hành vi production
+    (production: TO_BOOKS=('LAG',) — xem part_r3)."""
+    BCm, CBm = M["book_clearing"], M["clear_books"]
+    hypo_bal.active = bool(on)
+    if on:
+        hypo_bal.saved = (BCm.TO_BOOKS, BCm.SKIPPED_TO_BOOKS, CBm.TO_BOOKS)
+        BCm.TO_BOOKS = CBm.TO_BOOKS = ("LAG", "BAL")
+        BCm.SKIPPED_TO_BOOKS = {}
+    else:
+        BCm.TO_BOOKS, BCm.SKIPPED_TO_BOOKS, CBm.TO_BOOKS = hypo_bal.saved
+
+
 def part_m(M, r):
     sb, rc, rep = cleared(M)
     try:
@@ -468,6 +482,7 @@ def part_b(M, r):
 
     paused("B15_target_gate_fail_paused", None, gates=GATE_NO)
 
+    hypo_bal(M, True)
     # B16 hai sổ đích hợp lệ lúc lập plan (PARK 300 → LAG 200 + BAL 100); sáng hôm sau sổ PARK chỉ
     # còn 250 ⇒ transfer LAG áp, transfer BAL (prefix CỘNG DỒN 300 > 250) phải PAUSE.
     sb = SB(boot=[("VPB", "PARK", 200, 22154, "2026-07-02"), ("VPB", "PARK", 100, 20556, "2026-08-11"),
@@ -527,6 +542,8 @@ def part_b(M, r):
             and {o["id"]: o["qty"] for o in rv["orders"]}["SELL-VPB-PARK-01"] == 300)
     finally:
         sb.close()
+
+    hypo_bal(M, False)
 
     # B17 main(): plan không có transfer ⇒ rc0 (tầng stdlib)
     sb = SB()
@@ -690,12 +707,13 @@ def _sh_sandbox(mut=None):
             src = src.replace(mut[1], mut[2])
         open(os.path.join(bn, fn), "w").write(src)
     open(os.path.join(bn, "apply_book_transfers.py"), "w").write(
-        "import os, sys\nprint('stub apply')\nsys.exit(int(os.environ.get('STUB_APPLY_RC', '0')))\n")
-    for fn in ("notify_thread.sh", "append_event.sh", "ops_autofix.sh"):
-        open(os.path.join(bn, fn), "w").write(f'#!/bin/bash\necho "{fn} $*" >> "{root}/calls.log"\n')
+        "import os, sys\nprint('stub apply')\nrc = int(os.environ.get('STUB_APPLY_RC', '0'))\n"
+        "if rc == 3:\n    print('⛔ XFER-x: PAUSE (khôi phục lệnh gốc) — LY-DO-THAT-123')\nsys.exit(rc)\n")
+    for fn in ("notify_thread.sh", "append_event.sh", "ops_autofix.sh"):   # in ra STDOUT như bản thật (append_event: "appended ...")
+        open(os.path.join(bn, fn), "w").write(f'#!/bin/bash\necho "{fn} $*" >> "{root}/calls.log"\necho "STDOUT-LEAK-{fn}"\n')
         os.chmod(os.path.join(bn, fn), 0o755)
     open(os.path.join(root, "bot_execute.py"), "w").write(
-        f"import sys\nopen({root!r} + '/bot_ran.txt', 'a').write(' '.join(sys.argv[1:]) + '\\n')\n")
+        f"import sys\nprint('BOT-LINE')\nopen({root!r} + '/bot_ran.txt', 'a').write(' '.join(sys.argv[1:]) + '\\n')\n")
     return root
 
 
@@ -723,6 +741,9 @@ def part_sh(r, mut=None):
         ("rc2_no_transfers_flag_off_runs", 2, None, True, 0),
         ("rc1_import_err_empty_list_runs", 1, [], True, 0),
         ("rc2_all_applied_runs", 2, [X("APPLIED"), X("PAUSED")], True, 0),
+        ("rc2_status_missing_closed", 2, [{"id": "x"}], False, 2),
+        ("rc2_status_none_closed", 2, [{"id": "x", "status": None}], False, 2),
+        ("rc2_transfers_not_list_closed", 2, "garbage", False, 2),
     ]
     for name, arc, xfers, bot_runs, want_rc in cases:
         root = _sh_sandbox(mut)
@@ -732,6 +753,10 @@ def part_sh(r, mut=None):
             cp = subprocess.run(["bash", os.path.join(root, "mike", "bin", "run_bot.sh"), "--account", "ACC",
                                  "--date", PD], capture_output=True, text=True, env=env, timeout=60)
             r[f"SH_run_bot_{name}"] = _ran(root) == bot_runs and cp.returncode == want_rc
+            if arc == 3:   # thông báo PAUSE phải mang LÝ DO THẬT (đuôi dòng PAUSE của apply), không phải đường dẫn log
+                calls = open(os.path.join(root, "calls.log")).read()
+                notif = [ln for ln in calls.splitlines() if ln.startswith("notify_thread.sh") and "TẠM DỪNG" in ln]
+                r["SH_run_bot_rc3_notice_has_real_reason"] = bool(notif) and "LY-DO-THAT-123" in notif[0]
             if xfers is None and arc == 2:   # cảnh báo + bus, không im lặng
                 calls = open(os.path.join(root, "calls.log")).read()
                 r["SH_run_bot_warn_when_apply_fails_no_transfers"] = "book-transfer-apply-warn" in calls
@@ -747,18 +772,165 @@ def part_sh(r, mut=None):
             _sh_plan(root, xfers)
             hb = open(os.path.join(root, "mike", "bin", "bot_heartbeat.sh"), encoding="utf-8").read()
             m = re.search(r"^_restart_bot\(\) \{\n.*?\n\}\n", hb, re.S | re.M)
+            # như bot_heartbeat.sh:218 — NEWPID="$(_restart_bot)" HỨNG stdout ⇒ không được có byte lạ
             script = (f'set -uo pipefail; ROOT={root}/mike; WC_ROOT={root}; ACCOUNT=ACC; PLAN_DATE={PD}\n'
-                      f'sleep() {{ :; }}\n{m.group(0)}\n_restart_bot >/dev/null 2>&1; echo done')
-            subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=60,
-                           env=dict(os.environ, STUB_APPLY_RC=str(arc), TZ="Asia/Ho_Chi_Minh"))
+                      f'sleep() {{ :; }}\n{m.group(0)}\nNEWPID="$(_restart_bot)"; printf "CAPTURED=[%s]" "$NEWPID"')
+            cp = subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=60,
+                                env=dict(os.environ, STUB_APPLY_RC=str(arc), TZ="Asia/Ho_Chi_Minh"))
+            cap = re.search(r"CAPTURED=\[(.*)\]", cp.stdout, re.S)
+            cap = cap.group(1) if cap else "<no capture>"
+            # fail-closed ⇒ RỖNG; ok ⇒ rỗng hoặc chỉ PID (chữ số)
+            r[f"SH_{name}_stdout_clean"] = (cap == "" if not bot_runs else re.fullmatch(r"\d*", cap.strip()) is not None)
             t_end = time.time() + 4
             while bot_runs and not _ran(root) and time.time() < t_end:
                 time.sleep(0.1)
             if not bot_runs:
                 time.sleep(0.5)
             r[f"SH_{name}"] = _ran(root) == bot_runs
+            if bot_runs:   # log autoheal giữ cả output apply lẫn bot (>> chứ không >)
+                import glob
+                lg = glob.glob(os.path.join(root, "mike", "logs", "run_bot_ACC_autoheal_*.log"))
+                txt = open(lg[0], encoding="utf-8").read() if lg else ""
+                t_end = time.time() + 3
+                while "BOT-LINE" not in txt and lg and time.time() < t_end:
+                    time.sleep(0.1)
+                    txt = open(lg[0], encoding="utf-8").read()
+                r[f"SH_{name}_log_keeps_apply_output"] = "stub apply" in txt and "BOT-LINE" in txt
         finally:
             shutil.rmtree(root, ignore_errors=True)
+
+
+def part_r3(M, r):
+    """Vòng 3 (user chọn phương án A, 05/11): chỉ PARK→LAG · approval chuỗi · corp-action timeout · jidx=None."""
+    import time
+    BCm, AB = M["book_clearing"], M["apply_book_transfers"]
+
+    # ── T1 BAL không bao giờ là đích ────────────────────────────────────────────────────
+    def bal_plan():
+        pl = base_plan(200)
+        pl["orders"][1].update(qty=200, book="BAL", play_type="BAL", id="BUY-VPB-BAL-01", ref_price=23500.0)
+        return pl
+    r["T1a_to_books_is_lag_only"] = tuple(BCm.TO_BOOKS) == ("LAG",) and BCm.SKIPPED_TO_BOOKS.get("BAL") == "bal_stoploss_basis"
+    sb = SB()
+    try:
+        sb.write_plan(bal_plan())
+        rc, rep = cb_apply(M, sb)
+        r["T1b_clear_books_skips_bal_with_reason"] = (
+            rc == 0 and unchanged(sb, bal_plan()) and not rep["opportunities"]
+            and any(b.get("to_book") == "BAL" and b["reason"] == "bal_stoploss_basis" for b in rep["blocked"]))
+    finally:
+        sb.close()
+    # lớp 2: apply_opportunities từ chối đích BAL dù caller đưa vào
+    sb = SB()
+    try:
+        sb.write_plan(bal_plan())
+        pl = sb.read_plan()
+        _, xs, sk = BCm.apply_opportunities(pl, [{
+            "ticker": "VPB", "to_book": "BAL", "transfer_qty": 200, "buy_order_ids": ["BUY-VPB-BAL-01"],
+            "park_sell_order_ids": ["SELL-VPB-PARK-01"], "ref_price_buy": 23500.0}], LABEL, PD, "t")
+        r["T1c_apply_opportunities_refuses_bal"] = (not xs and len(sk) == 1 and sk[0]["reason"] == "bal_stoploss_basis")
+    finally:
+        sb.close()
+    # lớp 3: plan có transfer đích BAL (viết tay/phiên bản cũ) ⇒ apply_book_transfers PAUSE + KHÔI PHỤC, không ghi journal
+    hypo_bal(M, True)
+    sb = SB()
+    try:
+        sb.write_plan(bal_plan())
+        cb_apply(M, sb)
+        built = len(sb.read_plan().get("book_transfers") or []) == 1
+    finally:
+        hypo_bal(M, False)
+    try:
+        rc, _, log = ab_run(M, sb)
+        pl = sb.read_plan()
+        r["T1d_apply_never_transfers_to_bal"] = (built and rc == 3 and n_xfer_rows(sb) == 0
+                                                 and pl["book_transfers"][0]["status"] == "PAUSED"
+                                                 and orders_qty(pl).get("SELL-VPB-PARK-01") == 200
+                                                 and orders_qty(pl).get("BUY-VPB-BAL-01") == 200)
+    finally:
+        sb.close()
+
+    # ── T2 approval: chuỗi 'None'/'null' + orders=[] ; requires_user_approval='true' ────────
+    r["T2a_approval_problem_units"] = (
+        BCm.approval_problem({"requires_user_approval": True, "approved_by": "None"})
+        and BCm.approval_problem({"requires_user_approval": True, "approved_by": "null"})
+        and BCm.approval_problem({"requires_user_approval": "true", "approved_by": None})
+        and BCm.approval_problem({"requires_user_approval": "True"})
+        and BCm.approval_problem({"requires_user_approval": True, "approved_by": "  "})
+        and BCm.approval_problem({"requires_user_approval": "false", "approved_by": None}) is None
+        and BCm.approval_problem({"requires_user_approval": True, "approved_by": "user"}) is None)
+    fn = real_approval_fn()
+    for tag, edit, applied in (("approved_by_None_str", {"approved_by": "None"}, False),
+                               ("approved_by_null_str", {"approved_by": "null"}, False),
+                               ("requires_true_str_unapproved", {"requires_user_approval": "true", "approved_by": None}, False),
+                               ("requires_true_str_approved", {"requires_user_approval": "true", "approved_by": "user"}, True)):
+        sb = SB()
+        try:
+            sb.write_plan(plan_only_pair())
+            cb_apply(M, sb)
+            pl = sb.read_plan()
+            pl.update(edit)
+            sb.write_plan(pl)
+            raw = open(sb.plan_path(), "rb").read()
+            rc, _, _ = ab_run(M, sb, approve=False, approval_fn=fn)
+            ok = (rc == 0 and (n_xfer_rows(sb) == 1) == applied
+                  and (applied or open(sb.plan_path(), "rb").read() == raw))
+            r[f"T2b_empty_orders_{tag}_{'applied' if applied else 'not_applied'}"] = ok
+        finally:
+            sb.close()
+
+    # ── T3 corp-action: BQ chậm ⇒ chặn trong ≤ trần, không treo ─────────────────────────
+    slow = (lambda tickers, since=None, until=None, codes=None: (time.sleep(4), [])[1])
+    t0 = time.time()
+    why = BCm.corp_action_problem("VPB", ASOF, PD, slow, timeout_s=0.3)
+    r["T3a_corp_action_timeout_blocks"] = bool(why) and "quá" in why and time.time() - t0 < 2.0
+    r["T3b_corp_action_timeout_default_le_30"] = 0 < BCm.CORP_ACTION_TIMEOUT_S <= 30
+    saved_to = BCm.CORP_ACTION_TIMEOUT_S
+    BCm.CORP_ACTION_TIMEOUT_S = 0.3
+    sb, rc0, _ = cleared(M)
+    try:
+        t0 = time.time()
+        rc, _, log = ab_run(M, sb, events=slow)
+        pl = sb.read_plan()
+        r["T3c_apply_slow_bq_pauses_and_restores"] = (
+            rc == 3 and time.time() - t0 < 2.5 and n_xfer_rows(sb) == 0
+            and pl["book_transfers"][0]["status"] == "PAUSED"
+            and orders_qty(pl) == {k: v for k, v in ORIG_QTY.items()})
+        import fcntl   # flock đã nhả sau khi chạy xong
+        fd = os.open(os.path.join(sb.pl, f".apply_book_transfers_{LABEL}.lock"), os.O_WRONLY | os.O_CREAT, 0o644)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            r["T3d_flock_released_after_timeout"] = True
+        except OSError:
+            r["T3d_flock_released_after_timeout"] = False
+        finally:
+            os.close(fd)
+    finally:
+        BCm.CORP_ACTION_TIMEOUT_S = saved_to
+        sb.close()
+
+    # ── T4 emergency_pause_all khi journal đọc không được SAU khi dòng đã ghi: không ghi đôi journal ──
+    sb, _, _ = cleared(M)
+    try:
+        pre = sb.read_plan()
+        pre["approved_by"] = "user"
+        sb.write_plan(pre)
+        pre_raw = open(sb.plan_path(), "rb").read()
+        rc, _, _ = ab_run(M, sb)
+        wrote = rc == 0 and n_xfer_rows(sb) == 1
+        open(sb.plan_path(), "wb").write(pre_raw)       # giả lập chết sau journal, trước khi lưu plan
+        saved_ji = AB.journal_index
+        AB.journal_index = lambda *a, **k: (_ for _ in ()).throw(OSError("journal unreadable"))
+        try:
+            AB._late_imports()
+            AB.emergency_pause_all(sb.plan_path(), "boom", LABEL, PD, sb.ex)
+        finally:
+            AB.journal_index = saved_ji
+        st = sb.read_plan()["book_transfers"][0]["status"]
+        rc2, _, _ = ab_run(M, sb)
+        r["T4_jidx_none_no_double_journal_row"] = (wrote and st == "PAUSED" and rc2 in (0, 3) and n_xfer_rows(sb) == 1)
+    finally:
+        sb.close()
 
 
 def unchanged(sb, base):
@@ -804,6 +976,7 @@ def part_r2(M, r):
     finally:
         sb.close()
 
+    hypo_bal(M, True)
     # ── R2 (item 2) signal_holds + FAIL_OPEN + parity + tích hợp ─────────────────────────
     def bal_plan():
         pl = base_plan(200)
@@ -855,6 +1028,8 @@ def part_r2(M, r):
                                            and (ok_r or any(n in why_r for n in BCm.GATE_STEPS)))
     finally:
         sbi.close()
+
+    hypo_bal(M, False)
 
     # ── R3 (item 3) corp-action trong (asof, plan_date] ─────────────────────────────────
     calls = []
@@ -967,6 +1142,7 @@ def part_r2(M, r):
 
     # ── item 6 PAUSE khôi phục: chuỗi 2 transfer, pause transfer ĐẦU (còn lại giữ phần của nó) ──
     # (B5/B7/B8/B16 đã phủ 1 transfer + chuỗi PAUSE sau; ở đây PAUSE trước, sau còn PLANNED)
+    hypo_bal(M, True)
     pl = base_plan(300)
     sbx = SB(boot=[("VPB", "PARK", 200, 22154, "2026-07-02"), ("VPB", "PARK", 100, 20556, "2026-08-11"),
                    ("FPT", "LAG", 500, 100000, "2026-09-15")])
@@ -988,6 +1164,7 @@ def part_r2(M, r):
             and q.get("SELL-VPB-PARK-01") == 200)         # bán PARK 300 − Δ(BAL)=100 còn lại
     finally:
         sbx.close()
+        hypo_bal(M, False)
 
     # ── item 8 flock + item 4 import muộn ───────────────────────────────────────────────
     import fcntl
@@ -1102,12 +1279,25 @@ MUTANTS = {
     "Q2_approved_ok": ("clear_books", "if mode == APPLY and _approved(plan):", "if False:"),
     "Q3_gates_ignored": ("clear_books", "ok, why = gates_fn(trial, xs[0], excluded)", "ok, why = True, ''"),
     "Q4_no_revert_first": ("clear_books", "base, reverted = BC.revert_clearing(plan)", "base, reverted = plan, []"),
+    "T1_to_books_has_bal": ("book_clearing", 'TO_BOOKS = ("LAG",)\n', 'TO_BOOKS = ("LAG", "BAL")\n'),
+    "T2_analyze_no_bal_skip_record": ("clear_books", "            if park_sells and sk_bk in b_by:", "            if False and sk_bk in b_by:"),
+    "T3_apply_opps_no_to_book_guard": ("book_clearing", "        if op.get(\"to_book\") not in TO_BOOKS:", "        if False:"),
+    "T4_approval_str_None_ok": ("book_clearing", 'if ap.lower() in ("none", "null", "nil", "nan"):', "if False:"),
+    "T5_requires_str_ignored": ("book_clearing", 'req = req.strip().lower() not in ("", "false", "no", "0", "none")', "req = False"),
+    "T6_corp_action_no_timeout": ("book_clearing", "th.join(lim)", "th.join()"),
     "G1_merge_no_revert": ("merge_park_orders", "p, _cleared = BC.revert_clearing(p)", "_cleared = []"),
 }
 SH_MUTANTS = {
     "S1_gate_always_closed": ("book_transfers_gate.sh", 'if [ "$pend" != "0" ]; then', "if true; then"),
     "S2_gate_never_closed": ("book_transfers_gate.sh", 'return "$rc"', "return 0"),
     "S3_heartbeat_skips_gate": ("bot_heartbeat.sh", 'book_transfers_gate "$ACCOUNT" "$PLAN_DATE" "$rlog" || return 0', ":"),
+    "S5_gate_tee_to_stdout": ("book_transfers_gate.sh", 'tee -a "$log" <"$out" >&2', 'tee -a "$log" <"$out"'),
+    "S6_gate_append_event_stdout": ("book_transfers_gate.sh", '\\"pending_transfers\\":$pend,\\"log\\":\\"$log\\"}" >/dev/null 2>&1 || true', '\\"pending_transfers\\":$pend,\\"log\\":\\"$log\\"}" 2>/dev/null || true'),
+    "S7_gate_notify_stdout": ("book_transfers_gate.sh", '(log: $log)" "$tid" >/dev/null 2>&1 || true', '(log: $log)" "$tid" 2>/dev/null || true'),
+    "S8_heartbeat_truncates_log": ("bot_heartbeat.sh", '>> "$rlog" 2>&1 < /dev/null', '> "$rlog" 2>&1 < /dev/null'),
+    "S9_pause_notice_prints_log_path": ("book_transfers_gate.sh", 'Lý do: ${why:-không trích được từ output apply — xem log} (log: $log)', 'Lý do: $log (log: $log)'),
+    "S10_missing_status_not_pending": ("book_transfers_gate.sh", 'print(sum(1 for x in xs if not (isinstance(x, dict) and x.get("status") in ("APPLIED", "PAUSED"))))', 'print(sum(1 for x in xs if isinstance(x, dict) and x.get("status") == "PLANNED"))'),
+    "S11_nonlist_not_pending": ("book_transfers_gate.sh", 'elif not isinstance(xs, list):\n    print(1)', 'elif not isinstance(xs, list):\n    print(0)'),
     "S4_run_bot_skips_gate": ("run_bot.sh", 'book_transfers_gate "$ACCOUNT" "$PLAN_DATE" "$LOG" || _xrc=$?', "_xrc=0"),
 }
 PF_MUTANTS = {
@@ -1121,11 +1311,13 @@ PF_MUTANTS = {
 def all_parts(M, pf_mut=None):
     r = {}
     PF_MUT[0] = pf_mut
-    for fn in (part_a, part_m, part_b, part_r2):
+    for fn in (part_a, part_m, part_b, part_r2, part_r3):
         try:
             fn(M, r)
         except Exception as e:
             r[f"{fn.__name__}_CRASH:{type(e).__name__}:{str(e)[:80]}"] = False
+        if getattr(hypo_bal, "active", False):   # part crash giữa chừng ⇒ không để rò patch sang part sau
+            hypo_bal(M, False)
     try:
         part_c(M, r, pf_mut)
     except Exception as e:

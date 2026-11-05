@@ -294,8 +294,13 @@ def run(account, date, plan_path, plan, exec_dir, deps, check_only=False, bot_st
 def emergency_pause_all(plan_path, reason, account, date, exec_dir):
     """Lỗi bất ngờ giữa chừng: transfer chưa APPLIED/PAUSED ⇒ nếu journal ĐÃ có dòng cùng id + cùng
     nội dung (chết sau khi ghi journal, trước khi lưu plan) ⇒ đánh dấu APPLIED (journal là sự thật,
-    lệnh liên kết giữ nguyên); còn lại ⇒ PAUSE. Không đọc được journal ⇒ PAUSE tất cả (chiều an
-    toàn: không đặt lệnh liên kết) — lúc đó sổ có thể đã chuyển mà lệnh không chạy, báo to."""
+    lệnh liên kết giữ nguyên); còn lại ⇒ PAUSE. PAUSE = KHÔI PHỤC lệnh GỐC (mua/bán qty gốc) rồi bot
+    đặt lệnh như bình thường — KHÔNG phải "không đặt lệnh". Không đọc được journal (jidx=None) ⇒ PAUSE
+    tất cả; nếu lúc đó dòng BOOK_TRANSFER ĐÃ ghi hợp lệ (chết sau journal, trước khi lưu plan + journal
+    không đọc nổi) thì sổ ĐÃ chuyển mà lệnh gốc được khôi phục ⇒ có thể lệch nhãn PARK/LAG của m cp (tổng
+    vị thế mã KHÔNG đổi, vì chuyển nhãn không chạm broker). Đây là khe hẹp CÒN LẠI, chưa loại bỏ; được
+    giảm nhẹ vì (1) lỗi đọc journal ở đây hiếm, (2) log + bus ghi nguyên văn lý do, (3) sổ lô replay lại
+    từ journal ở lần chạy sau nên lệch chỉ ở nhãn, tự lộ ở reconcile. Báo to cho người."""
     _late_imports()
     with open(plan_path, encoding="utf-8") as f:
         plan = json.load(f)

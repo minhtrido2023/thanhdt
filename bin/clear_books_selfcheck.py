@@ -107,8 +107,10 @@ def scenarios(mod):
 
     a5 = an(mod, [O("S", "VPB", "sell", 300, "PARK"), O("BL", "VPB", "buy", 200, "LAG"),
                   O("BB", "VPB", "buy", 200, "BAL")], H(PARK_VPB + [lot("VPB", "PARK", 100, "2026-08-20")]))
-    r["A5_two_target_books"] = ([(x["to_book"], x["transfer_qty"]) for x in a5["opportunities"]]
-                                == [("LAG", 200), ("BAL", 100)])
+    # GĐ3 phương án A: chỉ LAG; PARK→BAL bỏ qua có lý do bal_stoploss_basis (stop-loss BAL đo trên avg_cost broker cấp mã)
+    r["A5_only_lag_target_bal_skipped"] = (
+        [(x["to_book"], x["transfer_qty"]) for x in a5["opportunities"]] == [("LAG", 200)]
+        and any(b.get("to_book") == "BAL" and b["reason"] == "bal_stoploss_basis" for b in a5["blocked"]))
 
     r1 = an(mod, [O("S", "ABC", "sell", 300, "LAG"), O("B", "ABC", "buy", 200, "LAG")],
             H([lot("ABC", "LAG", 300, "2026-09-01")]))
@@ -144,7 +146,7 @@ def scenarios(mod):
                    O("BB", "VPB", "buy", 200, "BAL")], H([lot("VPB", "PARK", 300, "2026-07-02")]))
     r["P_avail_decremented_across_books"] = (sum(x["transfer_qty"] for x in rc_["opportunities"]) <= 300
                                              and [(x["to_book"], x["transfer_qty"]) for x in rc_["opportunities"]]
-                                             == [("LAG", 200), ("BAL", 100)])
+                                             == [("LAG", 200)])   # BAL không còn là đích (phương án A)
     # (d) cửa sổ lookback của missed: lô LAG mua 2026-09-01 (ngoài 5 phiên) không tính
     rd = an(mod, [O("S", "VPB", "sell", 200, "PARK")], H(PARK_VPB + [lot("VPB", "LAG", 300, "2026-09-01")]))
     r["P_missed_outside_lookback_ignored"] = not rd["missed"]
@@ -225,7 +227,7 @@ MUTANTS = {
     "C8_t2_no_prefix": ("            if _sessions(l[\"entry_date\"], plan_date, count_fn) < 2:\n                break",
                         "            if _sessions(l[\"entry_date\"], plan_date, count_fn) < 2:\n                continue"),
     "C9_no_cap_by_park_sell": ("min(buy_qty, rem_buy, avail)", "min(buy_qty, avail)"),
-    "C10_no_avail_decrement": ("            rem_buy -= m\n            avail -= m\n", "            rem_buy -= m\n"),
+    # C10 (không trừ avail giữa các sổ đích) đã gỡ: GĐ3 phương án A chỉ còn 1 đích (LAG) ⇒ không quan sát được.
     "C11_missed_no_lookback": ("<= missed_lookback]", "<= 10**9]"),
     "C12_no_asof_gap_check": ("        if gap != 1:", "        if False:"),
     "C13_no_asof_mismatch_check": ("        elif plan_asof and asof != plan_asof:", "        elif False:"),

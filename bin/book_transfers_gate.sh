@@ -31,28 +31,30 @@ else:
 }
 
 book_transfers_gate() {
-  local acct="$1" date="$2" log="$3" rc=0 out pend plan tid="trading_daily"
+  local acct="$1" date="$2" log="$3" rc=0 out pend plan why tid="trading_daily"
   plan="$WC_ROOT/data/trade_plans/plan_${acct}_${date}.json"
   out="$(mktemp)"
   python3 "$ROOT/bin/apply_book_transfers.py" --account "$acct" --date "$date" >"$out" 2>&1 || rc=$?
   tee -a "$log" <"$out" >&2
+  # lý do THẬT của PAUSE = đuôi sau "PAUSE (khôi phục lệnh gốc) — " trong chính output apply (§29: trích bằng chứng đang cầm)
+  why="$(grep -h 'PAUSE (khôi phục lệnh gốc)' "$out" | sed 's/^.*PAUSE (khôi phục lệnh gốc) — //' | head -3 | tr '\n' ';' | cut -c1-600)"
   rm -f "$out"
   if [ "$rc" -eq 0 ]; then
     return 0
   fi
   if [ "$rc" -eq 3 ]; then
-    "$ROOT/bin/notify_thread.sh" "⛔ **Chuyển nhãn sổ bị TẠM DỪNG** — account **$acct** ($date): lệnh gốc của mã đó đã được KHÔI PHỤC trong plan (không chuyển nhãn, không đoán); các lệnh khác chạy bình thường. Lý do: $log" "$tid" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "⛔ **Chuyển nhãn sổ bị TẠM DỪNG** — account **$acct** ($date): lệnh gốc của mã đó đã được KHÔI PHỤC trong plan (không chuyển nhãn, không đoán); các lệnh khác chạy bình thường. Lý do: ${why:-không trích được từ output apply — xem log} (log: $log)" "$tid" >/dev/null 2>&1 || true
     return 0
   fi
   pend="$(_bt_pending_count "$plan")"
   if [ "$pend" != "0" ]; then
-    "$ROOT/bin/notify_thread.sh" "❌ **apply_book_transfers lỗi nặng (rc=$rc)** — account **$acct** ($date): plan còn $pend chuyển nhãn chưa xử lý ⇒ KHÔNG chạy bot cho account này (lệnh đã giảm theo chuyển nhãn mà không chuyển/khôi phục được). Log: $log" "$tid" 2>/dev/null || true
+    "$ROOT/bin/notify_thread.sh" "❌ **apply_book_transfers lỗi nặng (rc=$rc)** — account **$acct** ($date): plan còn $pend chuyển nhãn chưa xử lý ⇒ KHÔNG chạy bot cho account này (lệnh đã giảm theo chuyển nhãn mà không chuyển/khôi phục được). Log: $log" "$tid" >/dev/null 2>&1 || true
     "$ROOT/bin/append_event.sh" Mafee error "book-transfer-fatal" \
-      "{\"account\":\"$acct\",\"plan_date\":\"$date\",\"rc\":$rc,\"pending_transfers\":$pend,\"log\":\"$log\"}" 2>/dev/null || true
+      "{\"account\":\"$acct\",\"plan_date\":\"$date\",\"rc\":$rc,\"pending_transfers\":$pend,\"log\":\"$log\"}" >/dev/null 2>&1 || true
     return "$rc"
   fi
-  "$ROOT/bin/notify_thread.sh" "⚠️ apply_book_transfers rc=$rc nhưng plan $acct $date KHÔNG có chuyển nhãn chờ ⇒ bot vẫn chạy (không ảnh hưởng lệnh). Log: $log" "$tid" 2>/dev/null || true
+  "$ROOT/bin/notify_thread.sh" "⚠️ apply_book_transfers rc=$rc nhưng plan $acct $date KHÔNG có chuyển nhãn chờ ⇒ bot vẫn chạy (không ảnh hưởng lệnh). Log: $log" "$tid" >/dev/null 2>&1 || true
   "$ROOT/bin/append_event.sh" Mafee error "book-transfer-apply-warn" \
-    "{\"account\":\"$acct\",\"plan_date\":\"$date\",\"rc\":$rc,\"pending_transfers\":0,\"log\":\"$log\"}" 2>/dev/null || true
+    "{\"account\":\"$acct\",\"plan_date\":\"$date\",\"rc\":$rc,\"pending_transfers\":0,\"log\":\"$log\"}" >/dev/null 2>&1 || true
   return 0
 }

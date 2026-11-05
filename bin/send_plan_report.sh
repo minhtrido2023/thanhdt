@@ -1270,9 +1270,11 @@ try:
                        f"mua {_chg(_x.get('buy_orders'))}; bán {_chg(_x.get('sell_orders'))}; "
                        f"tiết kiệm ước tính ~{int(_x.get('saving_est_vnd') or 0):,}đ (so với 2 lệnh riêng)"
                        + (f" [{_x.get('status')}]" if _x.get("status") not in (None, "PLANNED") else ""))
-        INFO.append("ℹ️ Chuyển nhãn: lô LAG/BAL mới tính ngày vào sổ = ngày chuyển (đồng hồ T+25/T+45 "
-                    "bắt đầu lại); giá vốn sổ đích = giá tham chiếu lệnh mua. Không chuyển được ⇒ bot "
-                    "TẠM DỪNG các lệnh liên kết của mã đó (không đoán) và báo bus.")
+        INFO.append("ℹ️ Chuyển nhãn PARK→LAG: lô LAG mới tính ngày vào sổ = ngày chuyển (đồng hồ T+25 "
+                    "bắt đầu lại); giá vốn sổ lô = giá tham chiếu lệnh mua. Stop-loss không áp cho LAG và "
+                    "giá vốn trung bình (avg_cost) của broker KHÔNG đổi (broker không biết sổ). Không "
+                    "chuyển được ⇒ KHÔI PHỤC lệnh gốc của mã đó (mua/bán đủ như khi không có clearing) rồi "
+                    "bot đặt lệnh như bình thường, và báo bus.")
 except Exception as _e:
     WARN.append(f"⚠️ Không render được khối book_transfers ({type(_e).__name__}: {_e}) — đọc thẳng "
                 f"`book_transfers` trong file plan trước khi duyệt.")

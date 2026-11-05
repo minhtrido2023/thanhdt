@@ -16,6 +16,11 @@ HỢP ĐỒNG DỮ LIỆU — mỗi phần tử `plan["book_transfers"]`:
   status        PLANNED | APPLIED | PAUSED   (apply_book_transfers cập nhật)
 Mỗi lệnh bị giảm mang `book_clearing = {"transfer_id", "orig_qty"}` ⇒ hoàn tác không cần đoán.
 
+PHẠM VI ĐÍCH = CHỈ LAG (TO_BOOKS). KHÔNG chuyển PARK→BAL: stop-loss của BAL đo trên `avg_cost` broker
+cấp MÃ (không cấp sổ), mà chuyển nhãn không dịch avg_cost (broker không biết sổ) ⇒ lô PARK đổi nhãn
+sang BAL sẽ bị stop-loss BAL đo trên giá vốn sai cơ sở. LAG không áp stop-loss nên an toàn. Cặp PARK→BAL
+trong plan được bỏ qua và ghi vào `blocked` với lý do `bal_stoploss_basis`.
+
 Bất biến bảo toàn: Σ thay đổi vị thế mỗi mã KHÔNG đổi (mua −m, bán PARK −m). Bội lô: lệnh còn lại
 giữ bội 100, phần lẻ của lệnh bán gốc (full-exit lẻ) được giữ nguyên (đã hợp lệ trước clearing).
 """
@@ -29,7 +34,9 @@ import sys
 _HERE = os.path.dirname(os.path.abspath(__file__))
 LOT = 100
 FROM_BOOK = "PARK"
-TO_BOOKS = ("LAG", "BAL")
+TO_BOOKS = ("LAG",)
+# Sổ đích BỊ LOẠI có chủ đích (user chọn phương án A, 05/11): cặp PARK→BAL luôn bị bỏ qua, lý do dưới.
+SKIPPED_TO_BOOKS = {"BAL": "bal_stoploss_basis"}
 KNOB_PATH = os.path.join(os.path.dirname(_HERE), "config", "book_clearing.json")
 ST_PLANNED, ST_APPLIED, ST_PAUSED = "PLANNED", "APPLIED", "PAUSED"
 
@@ -131,6 +138,10 @@ def apply_opportunities(plan, opps, account, plan_date, created_at):
     for op in opps:
         m = int(op["transfer_qty"])
         if m <= 0:
+            continue
+        if op.get("to_book") not in TO_BOOKS:   # phòng thủ lớp 2: đích ngoài phạm vi (BAL...) không bao giờ ghi
+            skipped.append({"ticker": op["ticker"],
+                            "reason": SKIPPED_TO_BOOKS.get(op.get("to_book"), "to_book_out_of_scope")})
             continue
         buys = [by_id.get(i) for i in op["buy_order_ids"]]
         sells = [by_id.get(i) for i in op["park_sell_order_ids"]]
@@ -339,11 +350,16 @@ GATE_STEPS = ("filter_excluded_tickers", "filter_signal_holds", "filter_dd_flag_
               "filter_lag_rating_orders", "filter_lag_governance_orders")
 
 
-def corp_action_problem(ticker, asof, plan_date, events_fn=None):
+CORP_ACTION_TIMEOUT_S = 30   # trần thời gian đọc BQ ở đường apply (đang giữ flock) — quá ⇒ chặn chuyển, fail-closed
+
+
+def corp_action_problem(ticker, asof, plan_date, events_fn=None, timeout_s=None):
     """Chuyển nhãn một mã có sự kiện giá (ex-date cổ tức/phát hành) trong (asof, plan_date] ⇒ khung
     giá/KL của lệnh mua (lập lúc asof, cum-quyền) và lô sổ (ghi theo ngày thực thi, ex-quyền) lệch
     nhau ⇒ chặn (chưa có cách chuyển nhãn đúng qua ex-date). Lỗi đọc nguồn ⇒ CHẶN (fail-closed).
     `events_fn(tickers, since, until)`; mặc định corp_action_lib.pricing_events (gồm `announced`).
+    Đọc nguồn chạy trong thread daemon, quá `timeout_s` (mặc định CORP_ACTION_TIMEOUT_S=30s) ⇒ CHẶN
+    (PAUSE/khôi phục lệnh gốc ở caller) — không treo đường apply khi đang giữ flock.
     Trả lý do hoặc None."""
     if not asof:
         return "không biết asof (plan thiếu park_trim_proposal.asof/signal_date) ⇒ không kiểm được corp-action"
@@ -354,7 +370,23 @@ def corp_action_problem(ticker, asof, plan_date, events_fn=None):
                 sys.path.insert(0, wc)
             import corp_action_lib as _cal
             events_fn = _cal.pricing_events
-        ev = list(events_fn([ticker], since=str(asof), until=str(plan_date)) or [])
+        import threading
+        box = {}
+
+        def _call():
+            try:
+                box["ev"] = list(events_fn([ticker], since=str(asof), until=str(plan_date)) or [])
+            except BaseException as e:   # noqa: BLE001 — chuyển lỗi về thread gọi
+                box["err"] = e
+        lim = CORP_ACTION_TIMEOUT_S if timeout_s is None else timeout_s
+        th = threading.Thread(target=_call, daemon=True)
+        th.start()
+        th.join(lim)
+        if th.is_alive():
+            return f"đọc corp-action {ticker} quá {lim}s (BQ chậm) ⇒ chặn chuyển (fail-closed)"
+        if "err" in box:
+            raise box["err"]
+        ev = box["ev"]
     except Exception as e:
         return f"không đọc được corp-action {ticker} ({type(e).__name__}: {e}) ⇒ chặn chuyển (fail-closed)"
     ev = [e for e in ev if isinstance(e, dict) and e.get("ticker", ticker) == ticker]

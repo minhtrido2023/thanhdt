@@ -52,7 +52,7 @@ _restart_bot() {
   book_transfers_gate "$ACCOUNT" "$PLAN_DATE" "$rlog" || return 0
   ( cd "$WC_ROOT" && setsid env TZ=Asia/Ho_Chi_Minh python3 -u bot_execute.py \
       --account "$ACCOUNT" --date "$PLAN_DATE" --auto-otp \
-      > "$rlog" 2>&1 < /dev/null & )
+      >> "$rlog" 2>&1 < /dev/null & )
   sleep 5
   pgrep -f "bot_execute.py --account $ACCOUNT --date $PLAN_DATE" | head -1 || true
 }

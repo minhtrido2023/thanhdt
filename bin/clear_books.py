@@ -147,7 +147,7 @@ def analyze(plan, holdings, plan_date, banned, count_fn, missed_lookback=5, r=No
         # (b) roll — mọi cặp bán A / mua B cùng mã TRỪ cặp PARK→LAG/BAL của (a). Chỉ báo.
         for a_bk, a_os in sorted(s_by.items()):
             for b_bk, b_os in sorted(b_by.items()):
-                if a_bk == FROM_BOOK and b_bk in TO_BOOKS:
+                if a_bk == FROM_BOOK and (b_bk in TO_BOOKS or b_bk in BC.SKIPPED_TO_BOOKS):
                     continue
                 rolls.append({"ticker": tk, "sell_book": a_bk, "buy_book": b_bk,
                               "sell_qty": sum(int(o["qty"]) for o in a_os),
@@ -188,6 +188,9 @@ def analyze(plan, holdings, plan_date, banned, count_fn, missed_lookback=5, r=No
                              f"{sum(l['qty'] for l in recent)}cp từ {first_buy}; lệnh mua đã khớp "
                              f"⇒ không còn chuyển nhãn được, plan vẫn bán {park_sell_qty}cp {FROM_BOOK}")})
 
+        for sk_bk, sk_why in BC.SKIPPED_TO_BOOKS.items():   # PARK→BAL: bỏ qua có lý do (docstring book_clearing)
+            if park_sells and sk_bk in b_by:
+                blocked.append({"ticker": tk, "to_book": sk_bk, "reason": sk_why})
         if not to_bk:
             continue
         # (a) cơ hội — qua các cổng chặn từng mã
