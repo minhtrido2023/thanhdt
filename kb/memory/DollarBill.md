@@ -1,8 +1,6 @@
 # Working memory — DollarBill
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của DollarBill.
 
-- [2026-10-30T12:07:14Z] [2026-10-30 19:xx ICT] Plan SpaceX 11-02 XONG HOLD ALL 0 lenh (MCH ALREADY_HELD); cho user duyet truoc 08:45 02/11; job DollarBill_20261030_120558
-- [2026-10-30T12:07:35Z] [2026-10-30 19:xx ICT] Plan ZaloPay 11-02 XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 02/11 (job DollarBill_20261030_120556)
 - [2026-11-01T12:05:33Z] [2026-11-01 19:xx ICT] Plan ZaloPay 11-02 (vong CN) XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 02/11 (job DollarBill_20261101_120459)
 - [2026-11-01T12:05:41Z] [2026-11-01 19:xx ICT] Plan SpaceX 11-02 (vong CN toi) XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 02/11 (job DollarBill_20261101_120500)
 - [2026-11-02T12:12:39Z] [2026-11-02 19:xx ICT] Plan SpaceX 11-03 XONG: BUY TCH 4100cp LO<=11.850 (BAL), egg>=18,6tr; chờ duyệt trước 08:45 03/11 (job DollarBill_20261102_121030)
