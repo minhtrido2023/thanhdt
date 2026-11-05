@@ -1950,3 +1950,19 @@
 
 ## Archived 2026-11-04 (keep=12 days=0 require_done=False)
 - [2026-11-03T16:19:13Z] [dd-DRI r5 03/11] XONG job Taylor_20261103_160959 commit 620e32216: tam sau CK 15.543, gia 13.400 HOP LY sat P25, luat -15% khong dat; CHUA email; SCL r3 job song song dang sua dd_price_zones.json (chua commit)
+
+## Archived 2026-11-05 (keep=12 days=0 require_done=False)
+- [2026-11-04T01:30:15Z] ĐANG DỞ: crisis-DD HT1 ngày6 job Taylor_20261104_013004 | NEXT: đọc dossier, tin mới, dd-note
+- [2026-11-04T01:30:15Z] ĐANG DỞ: crisis-DD DRI ngày3 job Taylor_20261104_013001 | NEXT: đọc DOSSIER, tìm tin mới, dd-note
+- [2026-11-04T01:33:14Z] [crisis-dd DRI 04/11] XONG ngày3 (không cờ, GIỮ) — mới: NQ 22/10 nâng ngưỡng duyệt GD bên liên quan 10→30% (theo dõi R6); chờ SXKD T10 ~10/11
+- [2026-11-04T01:33:20Z] [crisis-dd HT1 04/11] XONG ngay6 (khong co, GIU) — con: BCTC goc, ngay 7 tong ket
+- [2026-11-04T15:54:57Z] ĐANG DỞ: DD DCM job Taylor_20261104_155446 — research/dd_DCM_20261104/ | NEXT: đọc skill+template, render BCTC Q3/26
+- [2026-11-04T16:16:14Z] [dd-DCM 04/11] XONG job Taylor_20261104_155446: tam 28.072 (sau CK TK 28.072), gia 33.000 DAT (>P90 31.901); CHUA skeptic, CHUA commit, CHUA investor report/price_zones
+- [2026-11-04T16:32:57Z] [dd-DCM r2 04/11] XONG job Taylor_20261104_162755: tam 27.021 (r1 28.072), gia 33.000 DAT (co dieu kien bien: 220 NGHIENG DAT, >=233 HOP LY); REPORT_r2.md; CHUA skeptic r2, CHUA commit, CHUA email
+- [2026-11-04T16:48:51Z] [dd-DCM investor 04/11] XONG job Taylor_20261104_164310: PDF 9tr ở research/dd_DCM_20261104/investor_report/; dry-run email OK, CHƯA gửi; CHƯA ghi dd_price_zones.json (cần skeptic xác nhận)
+
+## Archived 2026-11-05 (keep=12 days=0 require_done=False)
+- [2026-11-04T17:01:34Z] ĐANG DỞ: DD DCM r4 (hợp đồng khí PM3 CAA) job Taylor_20261104_170125 — research/dd_DCM_20261104/ | NEXT: đọc egm2025 txt KEY CONTENTS, model_r2.py, REPORT_r3.md
+
+## Archived 2026-11-05 (keep=12 days=0 require_done=False)
+- [2026-11-04T17:09:05Z] [C1 te-crosscheck 05/11] XONG job Taylor_20261104_170501: branch feat/te-crosscheck-20261105 (worktree wt-te-crosscheck-20261105), CHỜ arch-review rồi merge; đề xuất TE làm tầng CPI chờ user duyệt
