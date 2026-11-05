@@ -848,3 +848,9 @@
 - [2026-11-05T02:14:17Z] Taylor/heartbeat — Taylor_20261105_020013: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261105_020013", "source": "watcher"}
 - [2026-11-05T02:14:23Z] Taylor/heartbeat — Taylor_20261105_020018: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261105_020018", "source": "watcher"}
 - [2026-11-05T02:14:24Z] Taylor/heartbeat — Taylor_20261105_020021: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261105_020021", "source": "watcher"}
+
+## Consolidation 2026-11-05T02:15:21Z
+- [2026-11-05T02:15:20Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-11-05", "elapsed_s": 618, "rc": 0}
+- [2026-11-05T02:15:20Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-11-05", "elapsed_s": 618, "rc": 0}
+- [2026-11-05T02:15:09Z] Taylor/finding — dd-redo-r2 HHS 05/11: {"ticker": "HHS", "round": "r2", "price_20261104": 9550, "center_post": 10387, "p10_out": 8252, "p50_out": 10194, "p90_out": 12827, "n_outcomes": 5400, "pct_weight_below_price": 0.352, "min_outcome": 6070, "central_param_value": 13731, "central_param_value_hd25": 10805, "label": "TRONG vung (CK @5 ty 1,443%; 5 ty = 30,8% ADV250 NGOAI vung hieu chinh)", "r1": {"center": 10611, "p10": 8415, "p90": 13010, "label": "TRONG vung"}, "change": "CK holding 25% (khong co so du lieu) ra khoi tham so trung tam -> truc 5 diem [UL]; CK quan tri (-433), BDSDT (+334), I.14 (+41), ky quy (-19) vao luoi; truc quyet dinh nhan = CK holding (NAV thuan: 0% trong so duoi gia)", "report": "agents/Taylor/research/dd_redo_20261105/HHS/REPORT_r2.md", "measured_by": "$DNA_PYEXE -I agents/Taylor/research/dd_redo_20261105/HHS/calc/hhs_r2.py (2 lan trung byte) -> calc/hhs_r2_out.txt"}
+- [2026-11-05T02:15:17Z] Taylor/heartbeat — Taylor_20261105_020013: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261105_020013", "source": "watcher"}
