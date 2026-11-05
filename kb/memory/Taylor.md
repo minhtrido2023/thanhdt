@@ -33,3 +33,4 @@
 - [2026-11-05T01:54:38Z] ĐANG DỞ: DD redo job Taylor_20261105_014125 — MBB, FPT, HPG XONG; NEXT: HHS rồi bảng tổng hợp + bus
 - [2026-11-05T01:55:10Z] [dd-redo 05/11] XONG job Taylor_20261105_014127 DGC/DDV/PVP/PVT -> research/dd_redo_20261105/ (SUMMARY_job014127.md); CHO Mike chay fundamental-skeptic; DGC nhan phu thuoc trong so mo lai khai truong 0,5 (uoc luong)
 - [2026-11-05T01:57:27Z] [dd-redo 05/11] XONG job Taylor_20261105_014133 (TCH NT2 SAS SZL) o research/dd_redo_20261105/; CHO Mike chay fundamental-skeptic; chua sua dd_price_zones
+- [2026-11-05T01:57:46Z] [dd-redo 05/11] XONG job Taylor_20261105_014125 (MBB FPT HPG HHS, dd_redo_20261105/TONGHOP_Taylor_20261105_014125.md); CHỜ Mike skeptic; mở: luật r đồng nhất vs β riêng (HPG)
