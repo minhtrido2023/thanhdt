@@ -1,8 +1,8 @@
-# Fleet status — 2026-11-05T12:11:28 UTC
+# Fleet status — 2026-11-05T12:11:41 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | working | 2026-11-05T12:11:22Z | 0 |  |
+| DollarBill | DollarBill | child | working | 2026-11-05T12:11:35Z | 0 |  |
 | DollarBill_1830358 | dollarbill-ca | child | busy | 2026-11-05T12:10:01Z | 1 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/DollarBill |
 | Mike | mike-dd | child | busy | 2026-11-05T12:10:01Z | 1 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Taylor | Taylor | child | working | 2026-11-05T12:00:58Z | 10 |  |
@@ -19,5 +19,5 @@
 | Winston | Winston | child | dead | 2026-11-04T17:08:20Z | 1143 |  |
 | claude-62 | claude-62 | external | dead | 2026-11-03T13:20:01Z | 2811 | interactive · cwd=/home/trido/.claude |
 | workingclaude-44 | workingclaude-44 | child | dead | 2026-11-04T01:21:14Z | 2090 |  |
-| workingclaude-99 | workingclaude-99 | child | dead | 2026-11-04T05:46:30Z | 1824 |  |
+| workingclaude-99 | workingclaude-99 | child | dead | 2026-11-04T05:46:30Z | 1825 |  |
 | workingclaude-cb | workingclaude-cb | child | dead | 2026-11-05T01:22:53Z | 648 |  |
