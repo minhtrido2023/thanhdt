@@ -315,17 +315,23 @@ def run(dry_run=False):
     elif unav:
         res["status"] = "partial"   # một nhánh không kiểm được, nhánh kia sạch
     res["n_alerts"] = n_alert
+    snap_err = res.get("cpi_snapshot_error")
+    if snap_err and res["status"] == "ok":
+        res["status"] = "partial"   # đối chiếu sạch nhưng KHÔNG ghi được snapshot ⇒ Tier 1.4 sẽ stale sau 14 ngày
     if res["status"] == "unavailable":
         msg = (f"🔴 TE cross-check {res['at']}: KHÔNG kiểm được — {res['unavailable']}. "
                f"Tuần này chưa có đối chiếu TE (không điền số cũ).")
     elif res["status"] == "alert":
         msg = format_alert(res)
-    elif res["status"] == "partial":
+    elif res["status"] == "partial" and unav:
         k = unav[0]
         msg = (f"🔴 TE cross-check {res['at']}: nhánh {k} KHÔNG kiểm được — {res[f'{k}_unavailable']}. "
                f"Nhánh còn lại sạch. Không điền số cũ.")
     else:
         msg = None
+    if snap_err:
+        extra = f"🔴 TE cross-check {res['at']}: GHI snapshot CPI THẤT BẠI — {snap_err}. Tier 1.4 (cpi_vn) sẽ tự TẮT khi snapshot cũ >14 ngày."
+        msg = f"{msg}\n{extra}" if msg else extra
     if dry_run:
         print(json.dumps(res, indent=1, ensure_ascii=False))
         print("[dry-run] không ghi log, không notify;", "sẽ gửi:\n" + msg if msg else "không có gì để gửi")
@@ -348,6 +354,9 @@ def main():
     if not a.dry_run and res.get("notified") is False:   # có tin cần gửi mà gửi hỏng ⇒ không im lặng
         print("LỖI: có tin TE cross-check cần gửi nhưng notify thất bại", file=sys.stderr)
         return 3
+    if not a.dry_run and res.get("cpi_snapshot_error"):  # snapshot không ghi được ⇒ không im lặng
+        print(f"LỖI: ghi snapshot CPI thất bại: {res['cpi_snapshot_error']}", file=sys.stderr)
+        return 4
     return 0
 
 

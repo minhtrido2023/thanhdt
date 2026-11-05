@@ -19,7 +19,7 @@ def snap(path, rows, snapshot_at="2026-11-04T18:00:00Z", hdr="month,te_cpi_yoy_p
 
 def load(path, name, env):
     for k in ("TE_CPI_CSV", "TE_CPI_FAKE_NOW", "FIINPRO_CPI_CSV"): os.environ.pop(k, None)
-    os.environ.update(env)
+    os.environ.update(env); os.environ["TE_CPI_SELFCHECK"] = "1"
     sp = importlib.util.spec_from_file_location(name, path); m = importlib.util.module_from_spec(sp)
     err = io.StringIO()
     with contextlib.redirect_stderr(err): sp.loader.exec_module(m)
@@ -78,6 +78,24 @@ same_as_old("rong", {"TE_CPI_CSV": emp}, lambda: snap(emp, []))
 snap(te, base, snapshot_at="2026-10-22T01:00:00Z")
 N, _ = load(NEWP, "n_b14", {**E_, "TE_CPI_CSV": te, "TE_CPI_FAKE_NOW": "2026-11-05T00:00:00Z"}); ok(N.te_state().startswith("ON"), "13d23h => van ON")
 N, _ = load(NEWP, "n_b15", {**E_, "TE_CPI_CSV": te, "TE_CPI_FAKE_NOW": "2026-11-06T02:00:00Z"}); ok(N.te_state().startswith("OFF"), ">14d => OFF")
+
+# 3b) guard gia tri + snapshot tuong lai => TE OFF (giong old), kem canh bao
+for tag, v in (("v50", "50"), ("vm30", "-30"), ("vnan", "nan"), ("vinf", "inf")):
+    g = os.path.join(tmp, tag + ".csv")
+    snap(g, base[:2] + [("2026-06", v, None)])
+    N, e = load(NEWP, "n_" + tag, {**E_, "TE_CPI_CSV": g}); dn, w = run(N, END)
+    ok(N.te_state().startswith("OFF") and not dn.is_te.any(), f"guard gia tri {v} => TE OFF")
+    if True:
+        ok(("ngoài" in N.te_state()) or ("không phải số" in N.te_state()), f"guard gia tri {v}: te_state noi ly do")
+fut = os.path.join(tmp, "fut.csv"); snap(fut, base, snapshot_at="2026-11-08T00:00:00Z")
+N, e = load(NEWP, "n_fut", {**E_, "TE_CPI_CSV": fut}); dn, w = run(N, END)
+ok(N.te_state().startswith("OFF") and "TƯƠNG LAI" in N.te_state() and not dn.is_te.any(), "snapshot_at tuong lai (+3d) => TE OFF + canh bao")
+snap(fut, base, snapshot_at="2026-11-05T12:00:00Z")
+N, _ = load(NEWP, "n_fut2", {**E_, "TE_CPI_CSV": fut}); ok(N.te_state().startswith("ON"), "snapshot_at +11h (<1d) => van ON")
+N, _ = load(NEWP, "n_nofake", {"FIINPRO_CPI_CSV": fiin, "TE_CPI_CSV": fut, "TE_CPI_FAKE_NOW": "2020-01-01T00:00:00Z"})
+os.environ.pop("TE_CPI_SELFCHECK"); import importlib as _il
+sp_ = importlib.util.spec_from_file_location("n_nofake2", NEWP); M_ = importlib.util.module_from_spec(sp_); sp_.loader.exec_module(M_)
+ok(abs((M_._utcnow() - pd.Timestamp.now(tz="UTC")).total_seconds()) < 5, "TE_CPI_FAKE_NOW bi bo qua khi khong co co TE_CPI_SELFCHECK")
 
 # 4) revision: dong snapshot_at moi nhat thang
 snap(te, [("2026-09", 5.08, "2026-10-01T00:00:00Z"), ("2026-09", 5.30, "2026-11-04T18:00:00Z"), ("2026-10", 5.09, "2026-11-04T18:00:00Z")])

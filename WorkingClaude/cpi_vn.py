@@ -112,6 +112,7 @@ Documented Tier-2 proxy anchors (YoY %, headline CPI vs same month prior year):
 import sys
 import os
 
+import numpy as np
 import pandas as pd
 
 # TIER 1 — REAL headline CPI YoY (%) from NSO chart-embed (slug "cpi"), fetched 2026-07-06.
@@ -223,12 +224,14 @@ TE_CPI_CSV = os.environ.get(
 TE_STALE_DAYS = 14          # cron weekly (Mon 08:05 ICT) + 1 tuần dung sai
 TE_FIIN_EPS = 0.30          # = CPI_FIIN_EPS của te_macro_crosscheck.py
 TE_NSO_EPS = 0.05           # = CPI_NSO_EPS
+TE_VAL_MIN, TE_VAL_MAX = -5.0, 40.0   # CPI YoY hợp lý (%); ngoài khoảng/NaN/inf ⇒ TE OFF
+TE_FUTURE_TOL_DAYS = 1      # snapshot_at tương lai quá ngưỡng này ⇒ TE OFF
 _TE_CPI = None
 _TE_STATE = "chưa nạp"      # chuỗi mô tả tầng TE đang dùng / lý do bị tắt (để in ra)
 
 
 def _utcnow():
-    fake = os.environ.get("TE_CPI_FAKE_NOW")          # chỉ cho selfcheck
+    fake = os.environ.get("TE_CPI_FAKE_NOW") if os.environ.get("TE_CPI_SELFCHECK") == "1" else None  # chỉ cho selfcheck
     return pd.Timestamp(fake, tz="UTC") if fake else pd.Timestamp.now(tz="UTC")
 
 
@@ -240,16 +243,26 @@ def te_cpi_series():
         return _TE_CPI
     _TE_CPI = pd.Series(dtype=float)
     try:
-        f = pd.read_csv(TE_CPI_CSV)
+        f = pd.read_csv(TE_CPI_CSV, dtype={"te_cpi_yoy_pct": str}, keep_default_na=False)
         need = {"month", "te_cpi_yoy_pct", "snapshot_at"}
         if not need <= set(f.columns):
             raise ValueError(f"thiếu cột {sorted(need - set(f.columns))}")
         f["snapshot_at"] = pd.to_datetime(f["snapshot_at"], utc=True)
         f["v"] = pd.to_numeric(f["te_cpi_yoy_pct"], errors="coerce")
+        _nan = f[f["v"].isna() & f["te_cpi_yoy_pct"].notna() & (f["te_cpi_yoy_pct"].astype(str).str.strip() != "")]
+        if len(_nan):
+            raise ValueError(f"{len(_nan)} dòng giá trị không phải số hữu hạn/NaN (vd tháng {_nan.iloc[0]['month']}: {_nan.iloc[0]['te_cpi_yoy_pct']!r})")
         f = f.dropna(subset=["v"]).sort_values("snapshot_at", kind="stable")
         if f.empty:
             raise ValueError("snapshot rỗng")
+        _bad = f[~np.isfinite(f["v"]) | (f["v"] < TE_VAL_MIN) | (f["v"] > TE_VAL_MAX)]
+        if len(_bad):
+            r0 = _bad.iloc[0]
+            raise ValueError(f"{len(_bad)} dòng giá trị ngoài [{TE_VAL_MIN},{TE_VAL_MAX}] hoặc không hữu hạn "
+                             f"(vd tháng {r0['month']}: {r0['v']})")
         age = _utcnow() - f["snapshot_at"].max()
+        if age < -pd.Timedelta(days=TE_FUTURE_TOL_DAYS):
+            raise ValueError(f"snapshot_at ở TƯƠNG LAI ({f['snapshot_at'].max():%Y-%m-%d %H:%M}Z, tuổi {age}) -- đồng hồ/ghi sai")
         if age > pd.Timedelta(days=TE_STALE_DAYS):
             raise ValueError(f"snapshot cũ {age.days} ngày (> {TE_STALE_DAYS}) -- te_macro_crosscheck không còn chạy?")
         last = f.groupby("month")["v"].last()                      # bản mới nhất mỗi tháng (revision ghi đè)
