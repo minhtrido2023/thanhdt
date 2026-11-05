@@ -1966,3 +1966,6 @@
 
 ## Archived 2026-11-05 (keep=12 days=0 require_done=False)
 - [2026-11-04T17:09:05Z] [C1 te-crosscheck 05/11] XONG job Taylor_20261104_170501: branch feat/te-crosscheck-20261105 (worktree wt-te-crosscheck-20261105), CHỜ arch-review rồi merge; đề xuất TE làm tầng CPI chờ user duyệt
+
+## Archived 2026-11-05 (keep=12 days=0 require_done=False)
+- [2026-11-04T17:11:29Z] [dd-DCM r4 05/11] XONG job Taylor_20261104_170125: giả thuyết user NỬA ĐÚNG (giá đổi qua SĐBS12 Nam Du 10,39 cố định, không qua PM3); tâm 27.021->23.644, giá 33.000 ĐẮT mọi lưới; CHƯA skeptic, CHƯA commit, investor PDF lỗi thời
