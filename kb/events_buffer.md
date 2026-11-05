@@ -878,3 +878,46 @@
 
 ## Consolidation 2026-11-05T06:30:53Z
 - [2026-11-05T06:30:43Z] Wags/finding — wags-fix: coord-2026-11-05: {"root_cause": "Câu Mike/retro-pattern-recurring-dd-multi-round-assumption-unlocked (mở 04/11 17:31Z, đã relay) vẫn CHỜ USER A/B/C — re-verify 06:3xZ: bus_question_audit còn pending, không có answer/quyết định user. Không phải bug checker.", "fix": "Không đổi code (đúng: cần quyết định user). Sửa 2 required_change của arch-review 01:22Z: (1) lệnh đóng đúng = close_bus_question.py \"Mike/retro-pattern-recurring-dd-multi-round-assumption-unlocked\" --resolution \"<A/B/C+tóm tắt>\" --evidence \"<commit SKILL.md hoặc lý do C>\" --decided-by-user; (2) ghi chú phối hợp: agents/Taylor/research/macro_snapshot_asof_20261105/DD_SKILL_PROPOSAL.md cũng sửa ~/.claude/skills/due-diligence/SKILL.md ⇒ nếu A/B, áp 1 lần gộp (assumption-lock+md5 = bước 0, macro step sau khi lấy BCTC gốc). Cả 2 đã ghi vào kb/memory/Wags.md.", "verify": "bus_question_audit --json: topic còn pending age 0d; grep bus: không event answer; SKILL.md mtime 2026-11-03 22:28 (chưa ai sửa).", "commit": "none (kb/memory/Wags.md do remember-mechanism, không commit riêng)", "files_changed": ["kb/memory/Wags.md"], "resumed_from": "Wags_20261105_054511", "checker_expectation": "checker sẽ còn báo tới khi user trả lời — đúng, không phải bug"}
+
+## Consolidation 2026-11-05T10:07:02Z
+- [2026-11-05T09:35:17Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "bắt đầu: đọc plan GĐ3"}
+- [2026-11-05T09:36:04Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:37:04Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:38:04Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:39:04Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:39:51Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "đã đọc park_holdings/clear_books/merge/preflight/run_bot; đang thiết kế apply"}
+- [2026-11-05T09:40:04Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:41:05Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:42:05Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:43:05Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:43:22Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "book_clearing.py lõi xong; đang viết apply_book_transfers.py"}
+- [2026-11-05T09:44:05Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:45:05Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:46:06Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:46:08Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "apply_book_transfers.py + clear_books --apply viết xong, selfcheck GĐ1 vẫn PASS; tiếp merge/preflight/send_plan_report/run_bot"}
+- [2026-11-05T09:47:06Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:48:06Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:48:51Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "merge revert + preflight BOOK_XFER_MISMATCH xong (selfcheck cũ PASS); đang send_plan_report"}
+- [2026-11-05T09:49:06Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:50:07Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:50:39Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "send_plan_report + run_bot wire xong; bắt đầu selfcheck GĐ3 + mutant"}
+- [2026-11-05T09:51:07Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:52:07Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:53:07Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:53:32Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "selfcheck GĐ3 viết xong, chạy lần đầu"}
+- [2026-11-05T09:54:07Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:55:07Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:56:07Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:56:44Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "selfcheck GĐ3 PASS (cây thật + mutant). Tiếp: §23 quét rộng env -u TZ / NY + byte-compare park_holdings"}
+- [2026-11-05T09:57:08Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:57:59Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "attempt2: code+selfcheck có sẵn ở worktree, đang rà R7 + quét §23"}
+- [2026-11-05T09:58:08Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T09:59:08Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T10:00:09Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T10:01:09Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T10:02:09Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T10:03:09Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T10:04:09Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T10:04:33Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "in_progress", "note": "§23: 37 selfcheck .py PASS ở env -u TZ + TZ=America/New_York; còn .sh + byte-compare park_holdings"}
+- [2026-11-05T10:05:09Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20261105_093502", "source": "watcher"}
+- [2026-11-05T10:06:10Z] Taylor/heartbeat — Taylor_20261105_093502: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20261105_093502", "source": "watcher"}

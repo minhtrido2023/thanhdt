@@ -55,3 +55,6 @@
 - [2026-11-05T02:14:14Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020021 (NT2 SAS SZL TCH, TABLE_Taylor_20261105_020021.md); SZL đổi DƯỚI vùng; CHỜ Mike skeptic; chưa sửa dd_price_zones
 - [2026-11-05T02:15:35Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020013 (MBB FPT HPG HHS, TONGHOP_r2_Taylor_20261105_020013.md); CHỜ Mike skeptic; mở: r vs β (HPG), CK holding [UL] (HHS)
 - [2026-11-05T02:15:50Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020018 (SIP/SCL/TV1/TV2 REPORT_r2+SUMMARY, TABLE_r2_*); CHỜ Mike skeptic; TV2 tâm −15,7% (CMC+độ bền), nhãn không đảo
+- [2026-11-05T09:35:17Z] ĐANG DỞ: GĐ3 clearing PARK<->LAG/BAL job Taylor_20261105_093502 (worktree session/clearing-g3-20261105) | NEXT: đọc kb/projects/book-clearing-plan-20261029.md, dựng worktree
+- [2026-11-05T09:43:22Z] ĐANG DỞ job Taylor_20261105_093502 GĐ3 clearing: worktree /home/trido/thanhdt/WorkingClaude/wt-clearing-g3-20261105 (nhánh session/clearing-g3-20261105); xong config/book_clearing.json + bin/book_clearing.py | NEXT apply_book_transfers.py, clear_books --apply, merge revert, preflight, send_plan_report, run_bot, selfcheck
+- [2026-11-05T09:56:44Z] ĐANG DỞ job Taylor_20261105_093502 GĐ3: code+selfcheck book_clearing_g3_selfcheck PASS ở worktree wt-clearing-g3-20261105 | NEXT §23 quét rộng 2 TZ, byte-compare park_holdings, commit, bus finding
