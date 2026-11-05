@@ -11,3 +11,4 @@
 - [2026-11-03T12:12:22Z] [2026-11-03 19:xx ICT] Plan SpaceX 11-04 XONG: SELL TV1 2200cp, 0 mua; chờ duyệt trước 08:45 04/11 (job DollarBill_20261103_121026)
 - [2026-11-04T18:29:40Z] [2026-11-05 01:3x ICT] Plan 05/11 DỰNG LẠI cả 2 acct: bỏ DCM (user), chỉ SELL TV1 (SpaceX 1800/ZaloPay 700); 0 thay thế; chờ duyệt lại trước 08:45 (job DollarBill_20261104_182729)
 - [2026-11-05T12:11:14Z] [2026-11-05 19:xx ICT] Plan SpaceX 11-06 XONG: SELL TV1 400cp LO 20.600, 0 mua; cho duyet truoc 08:45 06/11; cron 21:00 gui report (job DollarBill_20261105_120929)
+- [2026-11-05T12:11:29Z] [2026-11-05 19:xx ICT] Plan ZaloPay 11-06 XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 06/11 (job DollarBill_20261105_120927)

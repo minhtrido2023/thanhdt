@@ -1049,3 +1049,7 @@
 - [2026-11-05T12:10:28Z] DollarBill/heartbeat — DollarBill_20261105_120927: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261105_120927", "source": "watcher"}
 - [2026-11-05T12:10:30Z] DollarBill/heartbeat — DollarBill_20261105_120929: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261105_120929", "source": "watcher"}
 - [2026-11-05T12:11:14Z] DollarBill/decision — plan-2026-11-06-SpaceX: {"account": "SpaceX", "plan_date": "2026-11-06", "orders": "SELL TV1 400cp LO 20600 (DNSE live), 0 mua", "why": "DCM user bo 05/11; PHP/PVT/TV2 FLAG_NO_ACK; TCH loai; LAG T+2 vao 09/11", "egg_transfer": "0 (tong mua = 0)", "dt5g": "NEUTRAL", "measured_by": "filter_lag_entry_window.py + lag_plan_calendar_check OK + compute_park_trim NO_TRIM"}
+
+## Consolidation 2026-11-05T12:11:39Z
+- [2026-11-05T12:11:28Z] DollarBill/heartbeat — DollarBill_20261105_120927: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261105_120927", "source": "watcher"}
+- [2026-11-05T12:11:29Z] DollarBill/decision — plan-2026-11-06-ZaloPay: {"account": "ZaloPay", "plan_date": "2026-11-06", "decision": "HOLD ALL 0 lenh", "why": "DCM user bo; PHP/PVT/TV2 DD FLAG_NO_ACK; TCH loai FLOOR_FAIL; TV1 da ban het", "egg_transfer": "khong can"}
