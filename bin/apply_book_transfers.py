@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Áp `plan["book_transfers"]` (GĐ3 clearing PARK→LAG/BAL) — chạy TRƯỚC bot_execute, KHÔNG sửa executor.
+"""Áp `plan["book_transfers"]` (GĐ3 clearing PARK→LAG) — chạy TRƯỚC bot_execute, KHÔNG sửa executor.
 
 Thiết kế: `kb/projects/book-clearing-plan-20261029.md`; lõi dùng chung: `book_clearing.py`.
 Mỗi transfer PLANNED, lần lượt:
@@ -136,7 +136,7 @@ def schema_problems(x, account, date):
     if x.get("plan_date") != date:
         p.append(f"plan_date={x.get('plan_date')!r} ≠ ngày chạy {date}")
     if x.get("from_book") != BC.FROM_BOOK or x.get("to_book") not in BC.TO_BOOKS:
-        p.append(f"sổ {x.get('from_book')}→{x.get('to_book')} ngoài phạm vi GĐ3 (PARK→LAG/BAL)")
+        p.append(f"sổ {x.get('from_book')}→{x.get('to_book')} ngoài phạm vi GĐ3 (chỉ PARK→LAG)")
     want = f"XFER-{account}-{date}-{x.get('ticker')}-{x.get('from_book')}-{x.get('to_book')}"
     if x.get("id") != want:
         p.append(f"id={x.get('id')!r} ≠ {want}")

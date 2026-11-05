@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lõi THUẦN của GĐ3 clearing PARK→LAG/BAL — sửa plan + kiểm ràng buộc, KHÔNG I/O broker.
+"""Lõi THUẦN của GĐ3 clearing PARK→LAG — sửa plan + kiểm ràng buộc, KHÔNG I/O broker.
 
 Thiết kế: `kb/projects/book-clearing-plan-20261029.md`. Ba writer dùng chung module này để cùng một
 định nghĩa "plan đã clearing" (một nguồn, không chép logic):
@@ -8,7 +8,7 @@ Thiết kế: `kb/projects/book-clearing-plan-20261029.md`. Ba writer dùng chun
   · `merge_park_orders.py`     — dựng lại vùng PARK ⇒ HOÀN TÁC clearing trước (đầu vào đã đổi)
 
 HỢP ĐỒNG DỮ LIỆU — mỗi phần tử `plan["book_transfers"]`:
-  id            XFER-<acct>-<plan_date>-<TK>-PARK-<LAG|BAL> (idempotent, = parent_id dòng journal)
+  id            XFER-<acct>-<plan_date>-<TK>-PARK-LAG (idempotent, = parent_id dòng journal)
   account, plan_date, ticker, from_book="PARK", to_book, qty (=m, >0), ref_price (giá lệnh MUA)
   buy_orders / sell_orders  [{id, orig_qty, qty_after}]  — lệnh đã bị giảm (qty_after=0 ⇒ đã gỡ
                 khỏi orders[], bản gốc nằm ở `removed_orders`)

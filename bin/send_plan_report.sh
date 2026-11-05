@@ -1253,7 +1253,7 @@ def _lk_info_line(exit_caps):
     return ("ℹ️ CP chờ niêm yết bổ sung, CHƯA bán được (không cần duyệt gì, tự bán khi giao "
             "dịch được): " + "; ".join(parts) + ".")
 
-# ── GĐ3 clearing PARK→LAG/BAL (clear_books.py --apply): CHUYỂN NHÃN sổ, không đặt lệnh ─────────
+# ── GĐ3 clearing PARK→LAG (clear_books.py --apply): CHUYỂN NHÃN sổ, không đặt lệnh ─────────
 # Người duyệt phải thấy lệnh mua/bán ĐÃ bị giảm vì sao, và thấy rằng duyệt plan = duyệt chuyển nhãn
 # (apply_book_transfers.py thực hiện trước bot 09:05). Lỗi render ⇒ WARN, không chặn (fail-open).
 try:

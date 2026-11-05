@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clearing giữa các sổ (PARK → LAG/BAL) — SHADOW (GĐ1, mặc định) + APPLY-TO-PLAN (GĐ3, sau knob).
+"""Clearing giữa các sổ (PARK → LAG; GĐ3 chỉ LAG, BAL bị loại) — SHADOW (GĐ1, mặc định) + APPLY-TO-PLAN (GĐ3, sau knob).
 
 GĐ3 (05/11/2026, user duyệt): `--apply` + knob `mike/config/book_clearing.json` `apply_to_plan=true`
 (CẢ HAI, fail-closed: thiếu một ⇒ SHADOW) ⇒ ghi `plan["book_transfers"]` + giảm qty lệnh mua đích /
@@ -461,7 +461,7 @@ def live_accounts():
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Clearing PARK→LAG/BAL — SHADOW / APPLY-TO-PLAN (knob)")
+    ap = argparse.ArgumentParser(description="Clearing PARK→LAG — SHADOW / APPLY-TO-PLAN (knob)")
     ap.add_argument("--plan-date", required=True)
     ap.add_argument("--account", action="append", help="mặc định: mọi account live enabled")
     ap.add_argument("--asof", default=None, help="ngày sổ lô/broker (mặc định park_trim_proposal.asof)")

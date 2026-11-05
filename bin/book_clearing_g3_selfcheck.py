@@ -909,6 +909,24 @@ def part_r3(M, r):
         BCm.CORP_ACTION_TIMEOUT_S = saved_to
         sb.close()
 
+    # ── T3e thread corp-action phải là DAEMON: BQ treo không được giữ process thoát muộn (mutant T7).
+    #    Kiểm trực tiếp cờ daemon của thread mà bản (thật/mutant) đang test tạo ra — subprocess sẽ nạp file đĩa
+    #    chứ không nạp bản mutant nên không bắt được. ──
+    import threading as _th
+    _made, _OrigThread = [], _th.Thread
+
+    class _RecThread(_OrigThread):
+        def __init__(self, *a, **k):
+            super().__init__(*a, **k)
+            _made.append(self)
+    _th.Thread = _RecThread
+    try:
+        BCm.corp_action_problem("VPB", "2026-11-01", "2026-11-05",
+                                events_fn=lambda *a, **k: time.sleep(1.2), timeout_s=0.3)
+    finally:
+        _th.Thread = _OrigThread
+    r["T3e_corp_action_thread_is_daemon"] = bool(_made) and all(t.daemon for t in _made)
+
     # ── T4 emergency_pause_all khi journal đọc không được SAU khi dòng đã ghi: không ghi đôi journal ──
     sb, _, _ = cleared(M)
     try:
@@ -1285,6 +1303,7 @@ MUTANTS = {
     "T4_approval_str_None_ok": ("book_clearing", 'if ap.lower() in ("none", "null", "nil", "nan"):', "if False:"),
     "T5_requires_str_ignored": ("book_clearing", 'req = req.strip().lower() not in ("", "false", "no", "0", "none")', "req = False"),
     "T6_corp_action_no_timeout": ("book_clearing", "th.join(lim)", "th.join()"),
+    "T7_corp_action_thread_not_daemon": ("book_clearing", "daemon=True)", "daemon=False)"),
     "G1_merge_no_revert": ("merge_park_orders", "p, _cleared = BC.revert_clearing(p)", "_cleared = []"),
 }
 SH_MUTANTS = {
