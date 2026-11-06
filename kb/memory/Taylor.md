@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-05T02:14:14Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020021 (NT2 SAS SZL TCH, TABLE_Taylor_20261105_020021.md); SZL đổi DƯỚI vùng; CHỜ Mike skeptic; chưa sửa dd_price_zones
 - [2026-11-05T02:15:35Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020013 (MBB FPT HPG HHS, TONGHOP_r2_Taylor_20261105_020013.md); CHỜ Mike skeptic; mở: r vs β (HPG), CK holding [UL] (HHS)
 - [2026-11-05T02:15:50Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020018 (SIP/SCL/TV1/TV2 REPORT_r2+SUMMARY, TABLE_r2_*); CHỜ Mike skeptic; TV2 tâm −15,7% (CMC+độ bền), nhãn không đảo
 - [2026-11-05T09:35:17Z] ĐANG DỞ: GĐ3 clearing PARK<->LAG/BAL job Taylor_20261105_093502 (worktree session/clearing-g3-20261105) | NEXT: đọc kb/projects/book-clearing-plan-20261029.md, dựng worktree
@@ -26,3 +25,4 @@
 - [2026-11-05T17:20:36Z] [ta-model-5pct 06/11] XONG job Taylor_20261105_171103 NO-GO (research/ta_model_5pct_20261106); CHỜ Mike quant-skeptic
 - [2026-11-06T01:30:15Z] ĐANG DỞ: crisis-DD DRI ngày5 job Taylor_20261106_013001 | NEXT: đọc DOSSIER, tin mới, dd-note
 - [2026-11-06T01:31:23Z] [crisis-dd HT1 06/11] FINAL NOISE ghi xong (notes/final.json), GIỮ, đề xuất đóng hồ sơ; user quyết
+- [2026-11-06T01:33:20Z] [crisis-dd DRI 06/11] XONG ngày5 (không cờ, GIỮ) — mới: NQ25 Dakruco soi GCN đầu tư Lào của DRI; Dakmoruco lệch vốn 79+48,1 tỷ; chờ SXKD T10 ~10/11

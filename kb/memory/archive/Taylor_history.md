@@ -2035,3 +2035,6 @@
 
 ## Archived 2026-11-06 (keep=12 days=0 require_done=False)
 - [2026-11-05T02:13:50Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020023 NNC/DRI/MVC (TABLE_r2_Taylor_20261105_020023.md); CHỜ Mike skeptic vòng 2 + legal-vn Đ195/ngưỡng GD BLQ DRI
+
+## Archived 2026-11-06 (keep=12 days=0 require_done=False)
+- [2026-11-05T02:14:14Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020021 (NT2 SAS SZL TCH, TABLE_Taylor_20261105_020021.md); SZL đổi DƯỚI vùng; CHỜ Mike skeptic; chưa sửa dd_price_zones
