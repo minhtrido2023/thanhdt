@@ -833,3 +833,6 @@
 - [2026-11-06T10:38:12Z] Wags/heartbeat — Wags_20261106_093002: {"status": "still_running", "elapsed_min": 68, "job_id": "Wags_20261106_093002", "source": "watcher"}
 - [2026-11-06T10:39:12Z] Wags/heartbeat — Wags_20261106_093002: {"status": "still_running", "elapsed_min": 69, "job_id": "Wags_20261106_093002", "source": "watcher"}
 - [2026-11-06T10:31:22Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54746}
+
+## Consolidation 2026-11-06T11:07:02Z
+- [2026-11-06T10:55:00Z] Wags/finding — selfcheck-red-sweep-2026-11-06 report_v2 canonical rerun TZ=keep: {"head": "b0e6ed016", "rc": 0, "dur_s": 1466, "last": "✅ PASS report_v2_selfcheck (0 lỗi)", "log": "/tmp/rv2_canon_keep.log"}
