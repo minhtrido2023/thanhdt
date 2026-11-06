@@ -215,7 +215,13 @@ check("thứ tự cascade: rating → governance → lever",
 
 # --- 8. Không nhân bản nguồn: hàm phải DÙNG LẠI gate tầng tín hiệu ---
 _pl_src = open(os.path.join(WORKDIR, "trading_bot", "plan.py"), encoding="utf-8").read()
-_fn = _pl_src.split("def filter_lag_governance_orders")[1].split("\n# ──")[0]
+# Cắt ĐÚNG thân hàm bằng ast (không theo dấu phân cách "# ──"): cổng cờ DD (8cb89c7da, 2026-11-02)
+# chèn hằng số module-level DD_FLAG_* = frozenset(...) ngay SAU hàm mà không có dấu phân cách, nên
+# cách cắt cũ nuốt cả chúng vào "thân hàm" ⇒ đỏ giả (sweep 11-06).
+import ast as _ast
+_fn_node = next(n for n in _ast.walk(_ast.parse(_pl_src))
+                if isinstance(n, _ast.FunctionDef) and n.name == "filter_lag_governance_orders")
+_fn = _ast.get_source_segment(_pl_src, _fn_node)
 # Chỉ xét THÂN HÀM (sau docstring) — docstring CÓ quyền nhắc IVS vì nó kể lại ca sự cố 07-23;
 # điều phải cấm là một danh sách mã khai LẠI trong code (nguồn thứ hai sẽ trôi lệch âm thầm).
 _body = _fn.split('"""')[2] if _fn.count('"""') >= 2 else _fn

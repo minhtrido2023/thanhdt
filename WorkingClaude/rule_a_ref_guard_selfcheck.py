@@ -282,6 +282,7 @@ print("\nH. HỒI QUY trên plan LIVE thật — cổng mới KHÔNG được ch
 import glob                                                              # noqa: E402
 from trading_bot.config import PLAN_DIR                                  # noqa: E402
 n_plan = n_buy = n_rule_a = n_guard_ran = 0
+rule_a_real = []                      # (plan, ticker, block_khi_lệch, pass_khi_khớp)
 for path in sorted(glob.glob(os.path.join(PLAN_DIR, "plan_*.json"))):
     base = os.path.basename(path)[len("plan_"):-len(".json")]
     acct, _, pdate = base.rpartition("_")
@@ -296,16 +297,27 @@ for path in sorted(glob.glob(os.path.join(PLAN_DIR, "plan_*.json"))):
         if o.side != "buy":
             continue
         n_buy += 1
-        if rule_a_in_force(o):
-            n_rule_a += 1
         # Cổng chỉ được ĐỘNG tới lệnh luật A: mọi lệnh khác phải trả None kể cả khi feed hỏng.
         e = mk_exec([o], FakeClient())
+        if rule_a_in_force(o):
+            n_rule_a += 1
+            _anc = float(o.ceiling_anchor_price)
+            rule_a_real.append((base, o.ticker,
+                                e._rule_a_ref_guard(o, qref(_anc * 1.15, "HOSE")) is not None,
+                                e._rule_a_ref_guard(o, qref(_anc, "HOSE")) is None))
         if not rule_a_in_force(o) and e._rule_a_ref_guard(o, qref(1000.0)) is not None:
             n_guard_ran += 1
 check(f"H1 nạp {n_plan} plan thật, {n_buy} lệnh mua — 0 lệnh NGOÀI luật A bị cổng động tới",
       n_guard_ran == 0, f"lệnh luật A trong kho plan hiện tại: {n_rule_a}")
-check("H2 kho plan hiện tại chưa có lệnh luật A nào ⇒ hành vi LIVE hôm nay KHÔNG đổi",
-      n_rule_a == 0, "đúng như commit 2db6d37 tuyên bố (chưa áp cho plan thật nào)")
+# H2 cũ ("kho plan chưa có lệnh luật A nào") là ảnh chụp đúng NGÀY commit 2db6d37 (2026-08-15) — sai
+# có chủ đích từ plan 2026-11-06: lệnh DISCRETIONARY FPT/NNC (user duyệt 05/11, kb/projects/
+# disc-fpt-nnc-approval-20261105.md) mang ceiling_rule=A. Thay bằng bất biến KHÔNG phụ thuộc ngày:
+# mọi lệnh luật A THẬT (nếu có) thì cổng ĐỘNG tới — chặn khi tham chiếu sống lệch +15%, cho qua khi
+# khớp anchor. Kho rỗng ⇒ H2 trống-đúng, H1 vẫn giữ nửa "không động tới lệnh ngoài luật A".
+_bad = [r for r in rule_a_real if not (r[2] and r[3])]
+check(f"H2 {n_rule_a} lệnh luật A thật: cổng chặn khi ref sống lệch +15% VÀ cho qua khi khớp anchor",
+      not _bad, f"lệch: {_bad[:4]}" if _bad else
+      ", ".join(f"{r[0]}:{r[1]}" for r in rule_a_real[:6]) or "kho plan chưa có lệnh luật A")
 
 print(f"\n{'='*78}")
 if FAIL:

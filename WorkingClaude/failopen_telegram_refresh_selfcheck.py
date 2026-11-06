@@ -75,11 +75,15 @@ def t1_notify_failopen_reaches_telegram():
 
 def t1b_all_three_gates_wired_two_sided():
     new, old = src("bot_execute.py"), src("bot_execute.py", OLD_REF)
-    for gate in ("signal_holds", "LAG rating 8L≤3", "LAG quản trị (BANNED/forensic)"):
+    # cổng thứ 4 "cờ DD" thêm có chủ đích ở 8cb89c7da (2026-11-02, cổng cờ DD tầng lệnh) — cùng khuôn
+    # fail-open báo Telegram. Đếm call-site = đúng số cổng đã khai: thêm cổng mà không khai ở đây vẫn đỏ.
+    gates = ("signal_holds", "cờ DD (mã có cờ ⇒ loại)", "LAG rating 8L≤3",
+             "LAG quản trị (BANNED/forensic)")
+    for gate in gates:
         ok(f'_notify_failopen(p["label"], "{gate}"' in new,
            f"#1 cổng {gate!r} CHƯA wire vào _notify_failopen")
-    ok(new.count("_notify_failopen(p[") == 3, f"#1 phải đúng 3 call-site, đếm được "
-                                              f"{new.count('_notify_failopen(p[')}")
+    ok(new.count("_notify_failopen(p[") == len(gates),
+       f"#1 phải đúng {len(gates)} call-site, đếm được {new.count('_notify_failopen(p[')}")
     # 2 CHIỀU: bản CŨ chỉ `print`, KHÔNG có helper nào
     ok("_notify_failopen" not in old, "#1 bản CŨ không lẽ đã có helper?")
     for needle in ("⚠⚠ signal_holds gate KHÔNG CHẠY ĐƯỢC",
