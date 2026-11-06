@@ -35,7 +35,9 @@ def cut(a, b):
 
 
 A_PKL, B_PKL = "# [pipeline-1d] làm mới data/earnings_surprise_data.pkl", '_run_pipeline "[pipeline-2] golive_recommend_v23"'
-A_PNJ, B_PNJ = "# --- PNJ BCTC Q3 review-trigger watch", '[ "$WARNED" -gt 0 ] && echo "NOTE:'
+# Khối PNJ kết thúc ở header khối KẾ TIẾP (`\n# --- `), không ở dòng NOTE: từ 43a14d27a (05/11) khối
+# macro_indicator chen giữa, cắt tới NOTE thì kéo cả nó (gọi script ngoài sandbox, WARNED+1) ⇒ đỏ giả.
+A_PNJ, B_PNJ = "# --- PNJ BCTC Q3 review-trigger watch", "\n# --- "
 PKL, PNJ = cut(A_PKL, B_PKL), cut(A_PNJ, B_PNJ)
 check("0a trích được khối [pipeline-1d]", PKL is not None)
 check("0b trích được khối PNJ watch", PNJ is not None)

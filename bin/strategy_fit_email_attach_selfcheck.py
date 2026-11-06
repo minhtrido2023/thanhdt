@@ -575,7 +575,10 @@ def part_eod(td0: Path):
           "-mmin" not in fn and code.count("_strategy_fit_attach_args") == 2 and code.count("strategy_fit_dashboard.py") == 1,
           (code.count("_strategy_fit_attach_args"), code.count("strategy_fit_dashboard.py")))
     hold = code[code.index('elif [ "$N_ORDERS_TODAY" = "0" ]; then'):code.index('elif [ ! -f "$STATE_FILE" ]; then')]
-    full = code[code.index("# Case 4") if "# Case 4" in code else code.index('REPORT="$(python3 - "$PLAN_FILE"'):]
+    # Nhánh 4 = mọi thứ SAU `fi` đóng nhánh 3 (`code` đã bỏ dòng comment nên "# Case 4" không bao giờ
+    # có ở đây; còn mốc `REPORT="$(python3 …` thì từ c27804f61 31/10 nằm SAU _nav_section — chụp NAV
+    # đã dời lên TRƯỚC khối REPORT có chủ đích).
+    full = code[code.index("\nfi\n", code.index('elif [ ! -f "$STATE_FILE" ]; then')):]
     check("D8c thứ tự trong MỖI nhánh có chụp NAV: _nav_section (chụp NAV của account) đứng TRƯỚC _deliver_eod (sinh trang + gửi)",
           0 <= hold.find("_nav_section\n") < hold.find("_deliver_eod ") and 0 <= full.find("\n_nav_section\n") < full.find("\n_deliver_eod "),
           (hold.find("_nav_section\n"), hold.find("_deliver_eod "), full.find("\n_nav_section\n"), full.find("\n_deliver_eod ")))
