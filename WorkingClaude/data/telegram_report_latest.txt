@@ -1,5 +1,5 @@
-🛰️ V2.3 (DT5G) REPORT — 2026-11-05
-Sent: 2026-11-05 19:35 (next session T+1 entry)
+🛰️ V2.3 (DT5G) REPORT — 2026-11-06
+Sent: 2026-11-06 19:35 (next session T+1 entry)
 Market regime (DT5G): 🟡 NEUTRAL (state=3)
 Strategy: V2.3 = BAL | LAG static (always-on, no ensemble switch) + allocator + CAPIT v2
 BAL: max=12 · 10%/pos (book) · hold 45d · stop -20% · Fin/RE cap 4 · 8L≥4 half-size in BEAR/CRISIS
@@ -11,31 +11,31 @@ Guards: SV_TIGHT Fresh-Q · overheat P3 · AVOID_exbull (momentum chặn ở sta
 
 Ticker  Tier   R     Close   Sc  FA   RSI  Days
 --------------------------------------------------
-TCH     RE_BAC 4    13,000  141   D  0.73    3d
+TCH     RE_BAC 4    13,500  146   D  0.78    4d
 
 R = 8L rating 1-5 (1=cao nhất, ≤3=đầu tư) · Days = ngày từ Q-report (Fresh-Q ≤60)
 📋 BOOK B — LAG (PEAD always-on, 50% NAV target) (12 entries)
 
 Ticker  Tier     W% Status              
 ------------------------------------------
-BSR     LAG_HI   10 UPCOMING T+2 phiên tới
-CSV     LAG_LO    8 UPCOMING T+2 phiên tới
-GAS     LAG_LO    8 UPCOMING T+2 phiên tới
-GVR     LAG_HI   10 UPCOMING T+2 phiên tới
-HTN     LAG_HI   10 UPCOMING T+2 phiên tới
-MSB     LAG_LO    8 UPCOMING T+2 phiên tới
-MZG     LAG_HI   10 UPCOMING T+2 phiên tới
-YEG     LAG_LO    8 UPCOMING T+2 phiên tới
+BSR     LAG_HI   10 UPCOMING T+1 phiên tới
+CSV     LAG_LO    8 UPCOMING T+1 phiên tới
+GAS     LAG_LO    8 UPCOMING T+1 phiên tới
+GVR     LAG_HI   10 UPCOMING T+1 phiên tới
+HTN     LAG_HI   10 UPCOMING T+1 phiên tới
+MSB     LAG_LO    8 UPCOMING T+1 phiên tới
+MZG     LAG_HI   10 UPCOMING T+1 phiên tới
+YEG     LAG_LO    8 UPCOMING T+1 phiên tới
 DCM     LAG_LO    8 WINDOW_PASSED 2026-11-05
 PHP     LAG_LO    8 WINDOW_PASSED 2026-11-05
 PVT     LAG_LO    8 WINDOW_PASSED 2026-11-05
 TV2     LAG_LO    8 WINDOW_PASSED 2026-11-04
 
 UPCOMING = vào lệnh phiên tới (T+5 sau release) · WINDOW_PASSED = cửa sổ entry đã qua, đối chiếu vị thế thực · W% trên vốn book LAG
-🧯 CAPIT v2: breadth oversold 4.4% &lt; gate 30% — dormant
+🧯 CAPIT v2: breadth oversold 5.2% &lt; gate 30% — dormant
 📊 Universe distribution
-  BA-core: 0 mã | Compounder/info: 15 mã
-  Wait/Pass/Avoid: 178 mã
+  BA-core: 0 mã | Compounder/info: 11 mã
+  Wait/Pass/Avoid: 179 mã
 💡 Execution checklist (T+1 next session)
   • Vốn: BAL 50% / LAG 50% NAV (rebal CHỈ khi lệch &gt;10pp)
   • BAL: 1 pos × 10% book · stop -20% · hold 45d
@@ -43,12 +43,12 @@ UPCOMING = vào lệnh phiên tới (T+5 sau release) · WINDOW_PASSED = cửa s
   • Cash dư cả 2 book → 70% E1VFVN30
 🛰️ MARKET-STATE ENGINE — DT5G (gated live)
 
-As of:   2026-11-05
+As of:   2026-11-06
 Source:  DT5G + macro overlay
 
 🔄 DT5G transitions từ 2026-04-01
 
-Số ngày: 151   |   transitions: 0
+Số ngày: 152   |   transitions: 0
   (không có transition — state ổn định)
 
 📊 V2.4 GO-LIVE paper-trade
