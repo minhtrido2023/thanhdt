@@ -133,7 +133,9 @@ for f in "${FILES[@]}"; do
     # R10 (2026-10-31, job Taylor_20261031_064246): đo tay oshares_dcf R10 170s wall một mình, 230s khi 4 tiến trình
     # nặng song song (TZ=UTC --bq, 44/44 mutant
     # chết, rc=0; R9 đã 150s+) — 240 sát trần ⇒ 480 (2,8× số đo một mình, 2,1× số đo song song).
-    *oshares_dcf_selfcheck.py) t=480 ;;
+    # Sweep 2026-11-06 (job Taylor_20261106_093005): R11/R12 them C21-C23 + M47-M59 ⇒ đo tay 545s một mình
+    # (57/57 mutant chết, rc=0) — 480 thành TIMEOUT giả ⇒ 1100 (~2x), khớp slow_files selfcheck_baseline.json.
+    *oshares_dcf_selfcheck.py) t=1100 ;;
     # cùng đợt: fa_ratings_ticker_gate 95s (ALL ENVIRONMENTS OK, chạy 3 TZ) — rc=124 giả.
     *fa_ratings_ticker_gate_selfcheck.sh) t=240 ;;
   esac

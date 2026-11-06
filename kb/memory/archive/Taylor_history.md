@@ -2047,3 +2047,6 @@
 
 ## Archived 2026-11-06 (keep=12 days=0 require_done=False)
 - [2026-11-05T09:35:17Z] ĐANG DỞ: GĐ3 clearing PARK<->LAG/BAL job Taylor_20261105_093502 (worktree session/clearing-g3-20261105) | NEXT: đọc kb/projects/book-clearing-plan-20261029.md, dựng worktree
+
+## Archived 2026-11-06 (keep=12 days=0 require_done=False)
+- [2026-11-05T09:43:22Z] ĐANG DỞ job Taylor_20261105_093502 GĐ3 clearing: worktree /home/trido/thanhdt/WorkingClaude/wt-clearing-g3-20261105 (nhánh session/clearing-g3-20261105); xong config/book_clearing.json + bin/book_clearing.py | NEXT apply_book_transfers.py, clear_books --apply, merge revert, preflight, send_plan_report, run_bot, selfcheck
