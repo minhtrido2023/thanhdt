@@ -840,6 +840,20 @@ class Executor:
             return None
         return v if v > 0 else None
 
+    @staticmethod
+    def _hard_sell_floor(o):
+        """Sàn giá BÁN tuyệt đối (VND) của lệnh (`hard_sell_floor_vnd`, §24), hoặc None.
+
+        Đối xứng `_hard_buy_ceiling`: chỉ side="sell"; giá trị rác (không parse được, ≤0) → None
+        = hành vi cũ. Sinh bởi auto_exit_inject nhánh DISCRETIONARY (chốt lời TARGET)."""
+        if o.side != "sell":
+            return None
+        try:
+            v = float(getattr(o, "hard_sell_floor_vnd", None) or 0)
+        except (TypeError, ValueError):
+            return None
+        return v if v > 0 else None
+
     def _rule_a_ref_guard(self, o, q):
         """Cổng FAIL-SAFE ngay TRƯỚC khi đặt lệnh mua luật A → None nếu được phép đặt.
 
@@ -916,6 +930,9 @@ class Executor:
                 floor_cap = max(floor_cap, q.floor)
             if extreme and q.floor:
                 floor_cap = q.floor          # EXTREME sell-to-floor: bỏ trần −3%, đuổi xuống sàn
+            hard_floor = self._hard_sell_floor(o)
+            if hard_floor:
+                floor_cap = max(floor_cap, hard_floor)   # §24: kể cả EXTREME không đuổi dưới sàn này
             if cross:
                 desired = q.bid if q.bid else last - self.cfg["chase_ticks"] * tick
             else:   # passive sell: nằm ở ask chờ nhịp hồi chạm tới
@@ -924,6 +941,9 @@ class Executor:
             px = round_price(px, o.ticker, ex, "up")
             if q.ceiling:
                 px = min(px, q.ceiling)
+            if hard_floor and px < hard_floor:
+                # trần phiên < sàn tuyệt đối → không có giá hợp lệ ≥ sàn. KHÔNG đặt lệnh.
+                return None
         return px if px and px > 0 else None
 
     @staticmethod
@@ -2053,6 +2073,11 @@ class Executor:
                     self._journal("HARD_CEILING_BLOCK", o, price=hard, note=(
                         f"giá thấp nhất đặt được (sàn {q.floor:,.0f}) > trần {hard:,.0f}đ "
                         f"— KHÔNG đặt lệnh mua, thử lại chu kỳ sau"))
+                hard_floor = self._hard_sell_floor(o)
+                if hard_floor:
+                    self._journal("HARD_FLOOR_BLOCK", o, price=hard_floor, note=(
+                        f"giá cao nhất đặt được (trần {q.ceiling or 0:,.0f}) < sàn bán {hard_floor:,.0f}đ "
+                        f"— KHÔNG đặt lệnh bán, thử lại chu kỳ sau"))
                 continue
             qty = self._child_qty(o, ps, q, px, now)
             if qty <= 0:
@@ -2243,6 +2268,11 @@ class Executor:
                 self._journal("HARD_CEILING_SKIP_ATC", o,
                               price=self._hard_buy_ceiling(o),
                               note="lệnh có trần giá tuyệt đối — ATC không đặt được giá, bỏ quét ATC")
+                continue
+            if self._hard_sell_floor(o):
+                # Đối xứng trần mua: ATC khớp giá đóng cửa, không đảm bảo ≥ sàn bán tuyệt đối.
+                self._journal("HARD_FLOOR_SKIP_ATC", o, price=self._hard_sell_floor(o),
+                              note="lệnh có sàn giá bán tuyệt đối — ATC không đặt được giá, bỏ quét ATC")
                 continue
             c = self._open_child(ps)
             _still_open_qty = 0
