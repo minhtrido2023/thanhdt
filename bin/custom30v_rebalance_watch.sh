@@ -18,6 +18,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=/dev/null
 [ -f "$ROOT/../wc_env.sh" ] && . "$ROOT/../wc_env.sh" >/dev/null 2>&1
 TRADING_DAILY_THREAD="trading_daily"
+BQ_BIN="${MIKE_C30V_WATCH_BQ:-bq}"   # chỉ selfcheck đổi (PATH bị prepend sdk thật nên stub PATH vô tác dụng)
 TODAY="$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)"
 STATE="$ROOT/state/custom30v_rebalance_streak.json"
 mkdir -p "$ROOT/state"
@@ -51,7 +52,7 @@ print(max(candidates).isoformat())
 # `-z`, rồi so `"to select…" < "2026-08-05"` sai (lexical "t" > "2") ⇒ nhánh "Healthy, im lặng".
 # Watchdog money-path báo KHỎE khi thực ra nó mù. Vì vậy: giữ nguyên output (cả 2 kênh), kiểm rc,
 # và bắt buộc MAX_REBAL khớp ĐÚNG dạng ngày trước khi đem đi so sánh.
-BQ_OUT="$(bq query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --quiet \
+BQ_OUT="$("$BQ_BIN" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --quiet \
   'SELECT MAX(rebal_date) FROM tav2_bq.custom30v_8l' 2>&1)"
 BQ_RC=$?
 MAX_REBAL="$(printf '%s\n' "$BQ_OUT" | tail -1)"
@@ -61,7 +62,32 @@ if [ "$BQ_RC" -ne 0 ] || ! printf '%s' "$MAX_REBAL" | grep -qE '^[0-9]{4}-[0-9]{
   exit 1
 fi
 
+# --- Chống cảnh báo giả do LỆCH 1 PHIÊN (sửa 2026-11-06) -----------------------------------
+# Writer (custom30_history.py) lấy ngày rebalance từ lịch VNINDEX trong BQ: rebal_date = phiên
+# giao dịch ĐẦU TIÊN >= ngày 5 (call nó D). BQ nhận phiên D lúc ~17:20 ICT, SAU writer 15:30 của
+# chính ngày D ⇒ bảng chỉ có thể nhích sang D ở lượt writer của phiên KẾ SAU D. Vì vậy chỉ được
+# đòi MAX_REBAL >= D khi TODAY > D. Trước đây watch đòi ngay trong ngày D ⇒ WARN giả mỗi quý
+# (05/11/2026: streak=1; mỗi quý còn nguy cơ RED giả nếu D rơi thứ Sáu trước cuối tuần dài).
+# D chưa có trong lịch BQ (query rỗng) ⇒ writer cũng chưa thể thấy ⇒ chưa đến hạn.
+# Chỉ áp dụng khi BẢNG ĐANG CŨ (đã vào nhánh `<`), nên không che lỗi thật: tới phiên kế sau D
+# mà bảng vẫn cũ thì WARN/RED như cũ.
 if [ "$MAX_REBAL" \< "$EXPECTED_TRIGGER" ]; then
+  if [ -n "${MIKE_C30V_WATCH_FIRST_TDAY:-}" ]; then   # chỉ cho selfcheck
+    FIRST_TDAY="$MIKE_C30V_WATCH_FIRST_TDAY"
+  else
+    CAL_OUT="$("$BQ_BIN" query --use_legacy_sql=false --project_id=lithe-record-440915-m9 --format=csv --quiet \
+      "SELECT MIN(t.time) FROM tav2_bq.ticker AS t WHERE t.ticker='VNINDEX' AND t.time >= DATE '$EXPECTED_TRIGGER'" 2>&1)"
+    CAL_RC=$?
+    FIRST_TDAY="$(printf '%s\n' "$CAL_OUT" | tail -1)"
+    if [ "$CAL_RC" -ne 0 ]; then
+      _notify "🔴 **custom30v_rebalance_watch ($TODAY)** — không đọc được lịch VNINDEX từ tav2_bq.ticker (bq rc=$CAL_RC). Output thật của bq: $(printf '%s' "$CAL_OUT" | tr '\n' ' ' | cut -c1-400)"
+      exit 1
+    fi
+  fi
+  # Rỗng/null (header "f0_" hoặc dòng trống) = D chưa có trong lịch ⇒ chưa đến hạn.
+  if ! printf '%s' "$FIRST_TDAY" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' || ! [ "$TODAY" \> "$FIRST_TDAY" ]; then
+    exit 0
+  fi
   STREAK="$(python3 -c "
 import json
 p = '$STATE'
