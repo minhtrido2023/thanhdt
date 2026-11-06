@@ -63,6 +63,11 @@ MUTANTS = {
                              "if disc_stop_alerts and not dry_run:", "if disc_stop_alerts:"),
     "M15_fifo_prefix_gate_off": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
                                  "if gate or n < DISC_T2_SESSIONS:", "if n < DISC_T2_SESSIONS:"),
+    "M16_alert_before_plan_write": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
+                                    '        _add_blocked(None, DISC_BOOK, f"nhánh DISC lỗi: {exc!r}")\n',
+                                    '        _add_blocked(None, DISC_BOOK, f"nhánh DISC lỗi: {exc!r}")\n'
+                                    '    if disc_stop_alerts and not dry_run:\n'
+                                    '        _send_disc_stop_alert(account, plan_date, disc_stop_alerts)\n'),
     "M11_lot_qty_unchecked": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
                               'if lot["qty"] > pos["qty"]:', "if False:"),
 }
@@ -192,6 +197,13 @@ def run(signal, plan_date, positions, rules_doc, lots=None, lots_ok=True, lots_b
 
     def _fake_run(cmd, *a, **kw):
         calls["subprocess"].append(cmd)
+        if "notify_thread.sh" in str(cmd[0]) and "CẮT LỖ" in str(cmd[1]):
+            # arch-review vòng 2: alert STOP phải gửi SAU khi plan nằm trên đĩa (không báo "đã chèn SELL" cho plan chưa ghi)
+            try:
+                with open(os.path.join(plan_dir, f"plan_{ACCOUNT}_{plan_date}.json"), encoding="utf-8") as _pf:
+                    calls.setdefault("plan_has_stop_at_notify", []).append("AUTOEXIT-DISC-STOP" in _pf.read())
+            except OSError:
+                calls.setdefault("plan_has_stop_at_notify", []).append(False)
         return subprocess.CompletedProcess(cmd, 0, "", "")
     aei.subprocess.run = _fake_run
     try:
@@ -404,6 +416,8 @@ def test_injector():
     n_notify = [c for c in r["calls"]["subprocess"] if "notify_thread.sh" in c[0] and "CẮT LỖ" in c[1]]
     check("I14b STOP ⇒ notify trading_daily đúng 1 lần qua 2 lượt (dedup sau gửi OK)",
           len(n_notify) == 1 and n_notify[0][2] == "trading_daily", str(len(n_notify)))
+    check("I14c alert STOP gửi SAU khi plan đã ghi (SELL-…-DISC-STOP đã nằm trên đĩa lúc notify)",
+          r["calls"].get("plan_has_stop_at_notify") == [True], str(r["calls"].get("plan_has_stop_at_notify")))
 
 
 class _Q:

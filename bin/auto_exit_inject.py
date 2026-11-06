@@ -590,7 +590,7 @@ def _disc_candidates(account, plan, plan_date, signal_date, positions, add_block
     (`avg_cost`) bằng giá đóng (`marketPrice` snapshot tối signal_date), đếm phiên từ `entry_date` khai báo, rồi
     chèn ĐỀ XUẤT SELL (book DISCRETIONARY_SPECIAL) khi TARGET/STOP/TIME bắn. Trả list cảnh báo STOP để notify.
     FAIL-SAFE từng mã (§29): thiếu snapshot/giá/sổ lô, sổ lô ≠ broker, ngày vào lệch khai báo, plan đang có
-    BUY cùng mã ⇒ KHÔNG chèn, ghi `blocked`. `lots_fn()` gọi LƯỜI (park_holdings chạm broker) — chỉ khi có trigger."""
+    BUY cùng mã ⇒ KHÔNG chèn, ghi `blocked`. `lots_fn()` gọi LƯỜI (park_holdings chạm broker) — nay gọi cho MỌI vị thế DISC đang giữ (sổ lô dựng trước trigger, chỉ đọc)."""
     entries, errs = _load_disc_rules(account)
     for tk, reason in errs:
         add_blocked(tk, DISC_BOOK, reason)
