@@ -805,9 +805,9 @@ _SER = {"cctg_6m": [((_today_ict - timedelta(days=10)).isoformat(), 7.5),
 
 def _run_trend_main(state_path, discord, bus_rc):
     """One main() run against `state_path`; returns (exit_code, discord_calls, bus_calls)."""
-    calls = {"d": 0, "b": 0}
+    calls = {"d": 0, "b": 0, "other": []}
     saved = (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, trend.subprocess.run,
-             sys.argv)
+             trend._liquidity_line, sys.argv)
 
     def _fake_discord(msg):
         if msg.startswith("⚠️ XU HƯỚNG HẠ"):
@@ -815,17 +815,26 @@ def _run_trend_main(state_path, discord, bus_rc):
         return discord
 
     def _fake_run(cmd, **kw):
-        calls["b"] += 1
-        return _types.SimpleNamespace(returncode=bus_rc)
+        # `trend.subprocess` LÀ module subprocess dùng chung cả tiến trình ⇒ mọi subprocess.run khác
+        # (vd google-auth/BQ trong dna_report) cũng vào đây. Chỉ lời gọi append_event.sh là kênh bus.
+        if isinstance(cmd, (list, tuple)) and cmd and str(cmd[0]).endswith("append_event.sh"):
+            calls["b"] += 1
+            return _types.SimpleNamespace(returncode=bus_rc)
+        calls["other"].append(cmd)
+        return _types.SimpleNamespace(returncode=0, stdout="", stderr="")
 
+    # _liquidity_line (246e38553, 2026-11-05): dòng DISPLAY gọi BQ THẬT qua dna_report — stub cho kín
+    # (test này kiểm state 2 kênh, không kiểm dòng hiển thị; BQ sống làm B11ma đếm sai bus_calls=2).
     trend.STATE_PATH, trend._load_series = state_path, lambda: _SER
+    trend._liquidity_line = lambda: "- Thanh khoản VN: (stub selfcheck)"
     trend._send_trading_daily, trend.subprocess.run, sys.argv = _fake_discord, _fake_run, ["x"]
     try:
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             rc = trend.main()
     finally:
         (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, trend.subprocess.run,
-         sys.argv) = saved
+         trend._liquidity_line, sys.argv) = saved
+    assert not calls["other"], f"main() gọi subprocess ngoài append_event.sh: {calls['other'][:3]}"
     return rc, calls["d"], calls["b"]
 
 
@@ -876,8 +885,12 @@ try:
     died = False
     try:
         # _run_trend_main swaps subprocess.run for its fake, so drive main() directly here
-        _sv = (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, sys.argv)
+        _sv = (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, trend._liquidity_line,
+               sys.argv)
         trend.STATE_PATH, trend._load_series = _sp, lambda: _SER
+        # stub dòng DISPLAY BQ (xem _run_trend_main): không stub thì lời gọi subprocess của google-auth
+        # trong dna_report cũng bị _kill_run giết — chết TRƯỚC Discord, sai kịch bản B11mi/j.
+        trend._liquidity_line = lambda: "- Thanh khoản VN: (stub selfcheck)"
         trend._send_trading_daily, sys.argv = (lambda m: "sent"), ["x"]
         try:
             with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
@@ -885,7 +898,8 @@ try:
         except _Killed:
             died = True
         finally:
-            trend.STATE_PATH, trend._load_series, trend._send_trading_daily, sys.argv = _sv
+            (trend.STATE_PATH, trend._load_series, trend._send_trading_daily, trend._liquidity_line,
+             sys.argv) = _sv
     finally:
         trend.subprocess.run = _saved_run
     st4 = json.load(open(_sp)).get("cctg_6m", {}) if os.path.exists(_sp) else {}

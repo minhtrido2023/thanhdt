@@ -184,6 +184,12 @@ def build_sandbox(tmp: Path) -> dict:
     # `python3 $ROOT/bin/rights_issue_alert.py --send`; thiếu file trong sandbox ⇒ rc=2 ⇒ 🟡 RIGHTS
     # ALERT WARN giả ⇒ S1/S3 đỏ (selfcheck-red 2026-10-22). Stub rc=0 = "chạy ổn, không có quyền mua".
     w(root / "bin" / "rights_issue_alert.py", DT5G_WATCH_STUB)
+    # [macro_indicator] kiểm tươi series hằng ngày (mike 43a14d27a, 2026-11-05): script gọi
+    # `python3 bin/macro_indicator_freshness.py` (cwd $ROOT); thiếu file ⇒ rc=2 ⇒ 🟡 MACRO_INDICATOR
+    # WARN giả ⇒ S1/S3 đỏ (selfcheck-red 2026-11-04, cùng khuôn rights_issue_alert ở trên). Hợp đồng
+    # "tươi" của script = rc=0 VÀ có dòng `^OK   macro_indicator` (thiếu dòng đó cũng là WARN).
+    w(root / "bin" / "macro_indicator_freshness.py",
+      "#!/usr/bin/env python3\nprint('OK   macro_indicator (stub selfcheck)')\n")
 
     (workdir / "trading_bot" / "__init__.py").write_text("")
     (workdir / "trading_bot" / "vn_market.py").write_text(

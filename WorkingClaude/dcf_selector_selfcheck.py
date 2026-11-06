@@ -75,6 +75,13 @@ def _extract_assign(target):
 
 
 _dcfv = _load("dcf_valuation")
+# custom_basket.build_pit ép số CP QUÝ ngay trước khi dựng dcf_at (R9/việc 4, chọn (a)) — exec riêng
+# dcf_at ở đây KHÔNG đi qua dòng đó, nên phải tái lập đúng bối cảnh thật. Thiếu nó, từ cutover
+# OSHARES_SOURCE_DEFAULT fin->live (67b83cf94, 2026-10-31) dcf_at chạy live (price_date=d) còn chân
+# production gọi không price_date (= số quý) ⇒ so 2 hợp đồng khác nhau (TPC 2025-11-05 lệch, sweep 11-06).
+assert "_dcfv.pin_oshares_source_fin(__file__)" in _CB_SRC, \
+    "custom_basket.py không còn ép số CP quý trong nhánh DCF — cập nhật selfcheck theo hợp đồng mới"
+_dcfv.pin_oshares_source_fin(__file__)
 _FIN = _dcfv._load_financials()
 _PX_MAP = {}                                         # (ticker, Timestamp) -> Price, filled per sample
 _DCF_NS = {"pd": pd, "np": np, "_dcfv": _dcfv, "_fin": _FIN, "_px_map": _PX_MAP,
