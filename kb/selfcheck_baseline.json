@@ -26,7 +26,9 @@
       "mike/bin/sunday_plan_round_selfcheck.sh": 1500,
       "mike/bin/livermore_selfcheck.py": 900,
       "_comment_20261031": "Weekly ops audit 2026-10-31 (job Mike_20261030_211230): deposit_fallback_direction đo tay 173s ALL PASS — TIMEOUT 150s ở runner này là ĐỎ GIẢ từ 2026-10-14 (run_selfchecks.sh đã có t=360 từ 10-17, bảng này chưa đồng bộ). Trần ~2x đo.",
-      "deposit_fallback_direction_selfcheck.py": 360
+      "deposit_fallback_direction_selfcheck.py": 360,
+      "_comment_20261106": "Selfcheck-red sweep 2026-11-06 (job Taylor_20261106_093005): oshares_dcf do tay 545s mot minh (env -u TZ, DNA_PYEXE, HEAD 6d372c6f7) va 549s khi 8 tien trinh song song, rc=0, 57/57 mutant chet - R11/R12 (3ad1406ef, e052526b9, 7ed4cd86c) them C21-C23 + M47-M59 nen 170s (10-31) -> 545s. TIMEOUT 150s la DO GIA tu 10-31. Tran ~2x do; run_selfchecks.sh dong bo cung so.",
+      "oshares_dcf_selfcheck.py": 1100
     },
     "manual_only": {
       "mike/bin/orb_pt_appendonly_selfcheck.py": "Tự khai chỉ-chạy-TAY (docstring): mỗi lần gọi vnstock THẬT 4 lần. Weekly/daily baseline BỎ QUA để không đập vendor bên thứ ba mỗi đêm (bus Mike/selfcheck-baseline-checker-no-tier-orb-vnstock-daily, phương án A, 2026-10-05)."
