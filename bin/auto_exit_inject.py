@@ -19,6 +19,9 @@ Cơ chế (mirror `discretionary_accumulation_inject.py` / `merge_park_orders.py
   - IDEMPOTENT: dedup theo (ticker, book, side=sell) đã có trong orders[]; nhắc CAPIT T+55 dedup
     qua field `reminder_55_sent_at` ghi thẳng vào `data/capit_episode.json` (gửi MỘT LẦN/episode).
   - Từ chối chạy GIỮA phiên (chỉ PRE/CLOSED) — vị thế/KL broker giữa phiên chưa chốt.
+  - Nhánh DISCRETIONARY (user chốt 06/11/2026 14:19, job Taylor_20261106_072056): vị thế khai ở
+    `data/discretionary_exit_rules.json` ⇒ ĐỀ XUẤT SELL khi đóng ≥ +target / ≤ −stop so giá vốn
+    broker hoặc đủ max_sessions phiên; −stop báo user qua notify (user xác nhận khi duyệt plan).
 
 Nguồn số exit: `auto_exit_rules.py` (đọc trước khi sửa số ở đây — cùng hằng số dùng bởi
 `portfolio_status.py` để hiển thị cảnh báo, tránh 2 bản chép tay lệch nhau).
@@ -30,6 +33,7 @@ import argparse
 import dataclasses
 import datetime as dt
 import json
+import math
 import os
 import subprocess
 import sys
@@ -359,7 +363,7 @@ def _send_block_alert(account, blocked_notes, capped_notes, locked_notes=None):
         msg = (f"ℹ️ auto-exit {account}: CP quyền mua khoá chờ niêm yết (đã khai, không cần duyệt gì — "
                f"tự bán phiên đầu tiên broker cho bán):\n" + "\n".join(lines))
     else:
-        msg = (f"🚨 auto-exit {account}: {len(lines)} mã bị CHẶN/CẮT (LAG/BAL/CAPIT), KHÔNG tự chèn "
+        msg = (f"🚨 auto-exit {account}: {len(lines)} mã bị CHẶN/CẮT (LAG/BAL/CAPIT/DISC), KHÔNG tự chèn "
                f"đủ lệnh — kiểm plan trước khi duyệt:\n" + "\n".join(lines))
     # §29 vòng 4 (arch-review): state dedup PHẢI ghi SAU khi xác nhận gửi Discord thành công
     # (mirror vendor_mismatch_alert.sh) — bản cũ ghi state TRƯỚC + `check=False` bỏ qua
@@ -495,6 +499,253 @@ def _inject_sell(plan, positions, tk, qty, ref_price, book, play_type, note, ord
     injected.append((tk, book, detail))
     print(f"  [inject] SELL {tk} qty={used_qty} book={book} ({full_note})")
     return True
+
+
+# ---- DISCRETIONARY_SPECIAL: ngưỡng cứng per-vị thế (user chốt 06/11/2026 14:19 ICT, decided_by: user) ----
+# Nguồn luật: mike/kb/projects/disc-fpt-nnc-approval-20261105.md mục "CẬP NHẬT 06/11 14:19". Vị thế + ngưỡng
+# khai ở DATA (`DISC_RULES_PATH`), so sánh ở `auto_exit_rules.disc_exit_triggers` — KHÔNG hardcode mã.
+DISC_BOOK = "DISCRETIONARY_SPECIAL"
+DISC_RULES_PATH = os.path.join(WC_ROOT, "data", "discretionary_exit_rules.json")
+DISC_ALERT_STATE_PATH = os.path.join(WC_ROOT, "data", "auto_exit_disc_alert_state.json")
+DISC_T2_SESSIONS = 2   # CP mua phiên D bán được từ phiên CHIỀU D+2 (executor WAIT_T2_SETTLEMENT giữ phiên sáng)
+
+
+def _load_disc_rules(account):
+    """(entries hợp lệ của `account`, [lỗi]). Thiếu file ⇒ ([], []) — không khai vị thế nào. JSON hỏng /
+    entry sai kiểu ⇒ lỗi trả ra để caller đưa vào `blocked` (§29), KHÔNG đoán ngưỡng mặc định."""
+    if not os.path.exists(DISC_RULES_PATH):
+        return [], []
+    try:
+        with open(DISC_RULES_PATH, encoding="utf-8") as f:
+            doc = json.load(f)
+        raw = doc["positions"]
+        if not isinstance(raw, list):
+            raise TypeError("positions không phải list")
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        return [], [(None, f"không đọc được {DISC_RULES_PATH}: {exc!r}")]
+    out, errs, seen = [], [], set()
+    for e in raw:
+        if not isinstance(e, dict) or e.get("account") != account:
+            continue
+        tk = e.get("ticker")
+        try:
+            if not isinstance(tk, str) or not tk:
+                raise ValueError(f"ticker={tk!r}")
+            if (e.get("book") or DISC_BOOK) != DISC_BOOK:
+                raise ValueError(f"book={e.get('book')!r} ≠ {DISC_BOOK}")
+            dt.date.fromisoformat(e["entry_date"])
+            for k in ("target_pct", "stop_pct"):
+                v = e[k]
+                if isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 < v < 1:
+                    raise ValueError(f"{k}={v!r} ngoài (0,1)")
+            ms = e["max_sessions"]
+            if isinstance(ms, bool) or not isinstance(ms, int) or ms <= 0:
+                raise ValueError(f"max_sessions={ms!r}")
+            fp = e.get("target_sell_floor_pct", e["target_pct"])
+            if fp is not None and (isinstance(fp, bool) or not isinstance(fp, (int, float)) or not -1 < fp < 1):
+                raise ValueError(f"target_sell_floor_pct={fp!r}")
+        except (KeyError, TypeError, ValueError) as exc:
+            errs.append((tk if isinstance(tk, str) else None, f"khai báo exit DISCRETIONARY lỗi: {exc!r}"))
+            continue
+        if tk in seen:
+            errs.append((tk, f"{tk} khai TRÙNG cho {account} trong {os.path.basename(DISC_RULES_PATH)}"))
+            out = [x for x in out if x["ticker"] != tk]
+            continue
+        seen.add(tk)
+        out.append(e)
+    dup = {t for t, _ in errs if t}
+    return [x for x in out if x["ticker"] not in dup], errs
+
+
+def _disc_settled_split(lot, plan_date):
+    """Phần lô DISC bán được trong phiên `plan_date` theo T+2: prefix (thứ tự trừ FIFO của sổ, như `_due_lots`)
+    các lô có count_trading_days(entry, plan_date) ≥ DISC_T2_SESSIONS. Trả
+    `(qty_bán_được, qty_chưa_về, afternoon_only, lỗi)` — afternoon_only ⇔ có lô về ĐÚNG phiên plan_date
+    (chỉ bán được từ phiên chiều). Không dựng được từng lô ⇒ lỗi (caller chặn, §29)."""
+    lots = lot.get("lots")
+    if not isinstance(lots, list) or not lots:
+        return 0, 0, False, "sổ lô DISC thiếu danh sách TỪNG LÔ — không xác định được lô đã về T+2"
+    pd_ = dt.date.fromisoformat(plan_date)
+    ok_qty, pending, afternoon, gate = 0, 0, False, False
+    for l in lots:
+        q = int(l.get("qty") or 0)
+        try:
+            n = count_trading_days(dt.date.fromisoformat(l.get("entry_date")), pd_)
+        except (TypeError, ValueError):
+            return 0, 0, False, f"entry_date lô lỗi ({l.get('entry_date')!r})"
+        if n is None:
+            return 0, 0, False, "không tính được số phiên (trading_bot.vn_market import lỗi)"
+        if gate or n < DISC_T2_SESSIONS:
+            gate = True
+            pending += q
+            continue
+        ok_qty += q
+        afternoon = afternoon or n == DISC_T2_SESSIONS
+    return ok_qty, pending, afternoon, None
+
+
+def _disc_candidates(account, plan, plan_date, signal_date, positions, add_blocked, capped_notes,
+                     injected, skipped_existing, lots_fn):
+    """Nhánh DISCRETIONARY: với mỗi vị thế khai ở `DISC_RULES_PATH` cho `account`, đo pnl so GIÁ VỐN BROKER
+    (`avg_cost`) bằng giá đóng (`marketPrice` snapshot tối signal_date), đếm phiên từ `entry_date` khai báo, rồi
+    chèn ĐỀ XUẤT SELL (book DISCRETIONARY_SPECIAL) khi TARGET/STOP/TIME bắn. Trả list cảnh báo STOP để notify.
+    FAIL-SAFE từng mã (§29): thiếu snapshot/giá/sổ lô, sổ lô ≠ broker, ngày vào lệch khai báo, plan đang có
+    BUY cùng mã ⇒ KHÔNG chèn, ghi `blocked`. `lots_fn()` gọi LƯỜI (park_holdings chạm broker) — chỉ khi có trigger."""
+    entries, errs = _load_disc_rules(account)
+    for tk, reason in errs:
+        add_blocked(tk, DISC_BOOK, reason)
+    stop_alerts = []
+    disc = None
+    for e in entries:
+        tk = e["ticker"]
+        if positions is None:
+            add_blocked(tk, DISC_BOOK, "chưa có snapshot vị thế broker (dnse_raw) của ngày tín hiệu — không đo được ngưỡng")
+            continue
+        pos = positions.get(tk)
+        if not pos or pos.get("qty", 0) <= 0:
+            print(f"  [DISC] {tk}: broker không còn nắm giữ — bỏ qua (đã thoát / chưa khớp)")
+            continue
+        avg_cost, mp = pos.get("avg_cost"), pos.get("marketPrice")
+        if not avg_cost or avg_cost <= 0 or not mp or mp <= 0:
+            add_blocked(tk, DISC_BOOK, f"thiếu giá vốn/giá đóng broker hợp lệ (avg_cost={avg_cost}, marketPrice={mp}) "
+                                       f"— không đo được ±{e['target_pct']:.0%}/−{e['stop_pct']:.0%}")
+            continue
+        pnl = mp / avg_cost - 1.0
+        sessions = count_trading_days(dt.date.fromisoformat(e["entry_date"]), dt.date.fromisoformat(signal_date))
+        if sessions is None:
+            add_blocked(tk, DISC_BOOK, "không tính được số phiên giữ (trading_bot.vn_market import lỗi)")
+            continue
+        trig = rules.disc_exit_triggers(pnl, sessions, e["target_pct"], e["stop_pct"], e["max_sessions"])
+        print(f"  [DISC] {tk}: pnl {pnl:+.2%} (đóng {mp:,.0f} / vốn broker {avg_cost:,.0f}), phiên {sessions}/"
+              f"{e['max_sessions']} ⇒ trigger={trig or '—'}")
+        if not trig:
+            continue
+        primary = trig[0]
+        alert = {"ticker": tk, "pnl_pct": pnl, "avg_cost": avg_cost, "close": mp, "triggers": trig,
+                 "injected_qty": 0, "why_not": None}
+        if "STOP" in trig:
+            stop_alerts.append(alert)
+
+        def _block(reason):
+            add_blocked(tk, DISC_BOOK, reason)
+            alert["why_not"] = reason
+
+        if _already_has_sell(plan, tk, DISC_BOOK):
+            print(f"  [skip] {tk}: đã có sell {DISC_BOOK} trong plan")
+            skipped_existing.append((tk, DISC_BOOK))
+            alert["why_not"] = "plan đã có sẵn lệnh SELL DISCRETIONARY cho mã này"
+            continue
+        if any(o.get("ticker") == tk and o.get("side") == "buy" for o in plan.get("orders", [])):
+            _block(f"trigger {'/'.join(trig)} bắn nhưng plan đang có lệnh MUA {tk} cùng ngày — xung đột, "
+                   f"KHÔNG chèn SELL; người duyệt gỡ lệnh mua hoặc tự thêm lệnh bán")
+            continue
+        if disc is None:
+            disc = lots_fn()
+        d_lots, d_ok, d_reason, d_blocked = disc
+        if not d_ok:
+            _block(f"sổ lô book {DISC_BOOK} không dựng được (lỗi kết cấu): {d_reason}")
+            continue
+        if tk in d_blocked:
+            _block(d_blocked[tk])
+            continue
+        lot = d_lots.get(tk)
+        if not lot:
+            _block(f"broker giữ {int(pos['qty'])}cp nhưng sổ lô KHÔNG có lô {tk} book {DISC_BOOK} — không xác định phần thuộc sleeve")
+            continue
+        if lot["qty"] > pos["qty"]:
+            _block(f"qty sổ lô DISC ({lot['qty']}) > qty broker ({int(pos['qty'])}) — hai nguồn lệch nhau")
+            continue
+        if lot.get("entry_date") != e["entry_date"]:
+            _block(f"ngày vào sổ lô ({lot.get('entry_date')}) ≠ entry_date khai báo ({e['entry_date']}) — "
+                   f"khai báo cũ/vị thế mới? sửa {os.path.basename(DISC_RULES_PATH)} trước khi đếm phiên")
+            continue
+        qty, pending, afternoon, err = _disc_settled_split(lot, plan_date)
+        if err:
+            _block(err)
+            continue
+        if qty <= 0:
+            alert["why_not"] = (f"{pending}cp chưa về T+2 tới phiên {plan_date} — đề xuất lại ở plan kế tiếp")
+            print(f"  [DISC-T2] {tk}: {alert['why_not']}")
+            continue
+        others = sum(int(o.get("qty") or 0) for o in plan.get("orders", [])
+                     if o.get("ticker") == tk and o.get("side") == "sell")
+        if others + qty > pos["qty"]:
+            used = max(int(pos["qty"]) - others, 0)
+            capped_notes.append({"ticker": tk, "book": DISC_BOOK, "desired_qty": qty, "capped_qty": used,
+                                 "reason": f"Σ SELL {tk} trong plan ({others}+{qty}) > broker {int(pos['qty'])}cp"})
+            qty = used
+            if qty <= 0:
+                alert["why_not"] = "hết chỗ: lệnh SELL book khác đã chiếm toàn bộ vị thế broker"
+                continue
+        why = {"TARGET": f"CHỐT LỜI: đóng {mp:,.0f} ≥ +{e['target_pct']:.0%} giá vốn broker {avg_cost:,.0f} ({pnl:+.2%})",
+               "STOP": f"⚠️ CẮT LỖ — ĐỀ XUẤT, user XÁC NHẬN khi duyệt plan (không tự bán): đóng {mp:,.0f} ≤ "
+                       f"−{e['stop_pct']:.0%} giá vốn broker {avg_cost:,.0f} ({pnl:+.2%})",
+               "TIME": f"HẾT HẠN GIỮ: {sessions} phiên ≥ {e['max_sessions']} kể từ {e['entry_date']}"}
+        note = (f"AUTO-EXIT DISCRETIONARY {'+'.join(trig)} — " + "; ".join(why[t] for t in trig)
+                + f" — ngưỡng cứng user 06/11 14:19 ({os.path.basename(DISC_RULES_PATH)})")
+        if pending:
+            note += f" — bán {qty}cp đã về T+2, {pending}cp chưa về giữ lại (đề xuất lại phiên sau)"
+        if afternoon:
+            note += " — lô về T+2 đúng phiên này: chỉ bán được từ phiên CHIỀU"
+        if e.get("thin_liquidity"):
+            note += (" — ⚠️ thanh khoản mỏng: executor chia lệnh theo ADV20 (pacing DISCRETIONARY_SPECIAL), "
+                     "CHO PHÉP khớp một phần; phần chưa khớp đề xuất lại plan kế tiếp nếu trigger còn hiệu lực")
+        o = _make_order(f"SELL-{tk}-AUTOEXIT-DISC-{primary}", tk, qty, mp, DISC_BOOK,
+                        "DISCRETIONARY_AUTO_EXIT", note)
+        floor_pct = e.get("target_sell_floor_pct", e["target_pct"])
+        if primary == "TARGET" and "TIME" not in trig and floor_pct is not None:
+            o["hard_sell_floor_vnd"] = float(math.ceil(round(avg_cost * (1 + floor_pct), 6)))   # round: 51000×1.1=56100.000000000007
+        o["disc_exit"] = {"triggers": trig, "pnl_pct": round(pnl, 6), "avg_cost_broker": avg_cost,
+                          "close": mp, "sessions_held": sessions, "entry_date": e["entry_date"],
+                          "requires_user_confirm": "STOP" in trig, "earliest_session":
+                          "AFTERNOON" if afternoon else "MORNING", "partial_fill_ok": bool(e.get("thin_liquidity")),
+                          "rule_ref": e.get("approval_ref")}
+        plan["orders"].append(o)
+        injected.append((tk, DISC_BOOK, f"{'+'.join(trig)} pnl={pnl:+.2%} phiên={sessions}"))
+        alert["injected_qty"] = qty
+        print(f"  [inject] SELL {tk} qty={qty} book={DISC_BOOK} ({note})")
+    return stop_alerts
+
+
+def _send_disc_stop_alert(account, plan_date, stop_alerts):
+    """Báo user khi vị thế DISCRETIONARY chạm −stop (trigger ĐỀ XUẤT, user xác nhận) qua `notify_thread.sh
+    trading_daily` (kênh sẵn có). Dedup theo (account, ticker, plan_date) — chạy lại cùng tối không spam;
+    state ghi SAU khi gửi thành công (mirror `_send_block_alert` vòng 4). Guard test-mode §5b."""
+    if not stop_alerts:
+        return
+    lines = []
+    for a in stop_alerts:
+        tail = (f"đã chèn ĐỀ XUẤT SELL {a['injected_qty']}cp vào plan {plan_date} — XÁC NHẬN khi duyệt plan"
+                if a["injected_qty"] else f"CHƯA chèn lệnh: {a['why_not']}")
+        lines.append(f"🔻 {a['ticker']}: {a['pnl_pct']:+.2%} (đóng {a['close']:,.0f} / vốn broker "
+                     f"{a['avg_cost']:,.0f}) — {tail}")
+    msg = f"🔻 DISCRETIONARY {account}: chạm ngưỡng CẮT LỖ (trigger đề xuất, không tự bán):\n" + "\n".join(lines)
+    if os.environ.get("AUTO_EXIT_TEST_MODE") == "1" or os.environ.get("PYTEST_CURRENT_TEST"):
+        print(f"  [TEST-MODE] bỏ qua notify DISC stop thật: {msg}")
+        return
+    try:
+        with open(DISC_ALERT_STATE_PATH, encoding="utf-8") as f:
+            state = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        state = {}
+    # Khoá KHÔNG gồm qty: lượt 2 cùng tối thấy SELL đã chèn (injected_qty=0, "plan đã có sẵn") vẫn là cùng sự kiện.
+    keys = [f"{account}|{a['ticker']}|{plan_date}" for a in stop_alerts]
+    if all(k in state for k in keys):
+        print("  [DISC] cảnh báo cắt lỗ đã gửi cho plan này — không gửi lại")
+        return
+    try:
+        proc = subprocess.run([os.path.join(WC_ROOT, "mike", "bin", "notify_thread.sh"), msg,
+                               "trading_daily"], capture_output=True, text=True)
+    except OSError as exc:
+        print(f"  [WARN] notify DISC stop lỗi (OSError, KHÔNG ghi dedup): {exc}")
+        return
+    if proc.returncode != 0:
+        print(f"  [WARN] notify_thread.sh THẤT BẠI rc={proc.returncode} (KHÔNG ghi dedup). Lỗi thật: "
+              f"{(proc.stderr or proc.stdout or '').strip()}")
+        return
+    now = now_ict().isoformat(timespec="seconds")
+    state.update({k: now for k in keys})
+    _atomic_write_json(DISC_ALERT_STATE_PATH, state)
 
 
 def process_account(account, plan_date, signal_date, dry_run):
@@ -724,6 +975,13 @@ def process_account(account, plan_date, signal_date, dry_run):
                 _send_capit_reminder(ep, sessions_held)
                 ep["reminder_55_sent_at"] = now_iso
                 capit_episode._save(capit_episode.LEDGER_PATH, ledger)
+
+    # ---- DISCRETIONARY_SPECIAL: ngưỡng cứng TARGET/STOP/TIME khai ở DISC_RULES_PATH (user 06/11 14:19) ----
+    disc_stop_alerts = _disc_candidates(
+        account, plan, plan_date, signal_date, _pos_raw, _add_blocked, capped_notes, injected,
+        skipped_existing, lambda: book_lot_snapshot(account, DISC_BOOK, asof=signal_date))
+    if disc_stop_alerts and not dry_run:
+        _send_disc_stop_alert(account, plan_date, disc_stop_alerts)
 
     # §29: mọi exit bị CHẶN hoặc CẮT phải hiện ra cho người, không chỉ nằm trong log stdout —
     # KHÔNG ĐƯỢC in "không có candidate" khi thực ra có candidate bị chặn/cắt (arch-review vòng 2
