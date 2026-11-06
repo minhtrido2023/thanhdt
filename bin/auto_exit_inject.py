@@ -541,7 +541,7 @@ def _load_disc_rules(account):
             ms = e["max_sessions"]
             if isinstance(ms, bool) or not isinstance(ms, int) or ms <= 0:
                 raise ValueError(f"max_sessions={ms!r}")
-            fp = e.get("target_sell_floor_pct", e["target_pct"])
+            fp = e.get("target_sell_floor_pct")
             if fp is not None and (isinstance(fp, bool) or not isinstance(fp, (int, float)) or not -1 < fp < 1):
                 raise ValueError(f"target_sell_floor_pct={fp!r}")
         except (KeyError, TypeError, ValueError) as exc:
@@ -605,6 +605,30 @@ def _disc_candidates(account, plan, plan_date, signal_date, positions, add_block
         if not pos or pos.get("qty", 0) <= 0:
             print(f"  [DISC] {tk}: broker không còn nắm giữ — bỏ qua (đã thoát / chưa khớp)")
             continue
+        # Vòng 2 (arch-review): sổ lô DISC dựng TRƯỚC khi tính trigger. Giá vốn broker là bình quân theo MÃ
+        # (trộn mọi book) — chỉ dùng được khi broker giữ ĐÚNG phần lô DISC; còn lại là ca sai-im-lặng.
+        if disc is None:
+            disc = lots_fn()
+        d_lots, d_ok, d_reason, d_blocked = disc
+        if not d_ok:
+            add_blocked(tk, DISC_BOOK, f"sổ lô book {DISC_BOOK} không dựng được (lỗi kết cấu): {d_reason}")
+            continue
+        if tk in d_blocked:
+            add_blocked(tk, DISC_BOOK, d_blocked[tk])
+            continue
+        lot = d_lots.get(tk)
+        if not lot or int(lot.get("qty") or 0) <= 0:
+            print(f"  [DISC] {tk}: sổ lô không còn lô {DISC_BOOK} (đã thoát; broker giữ {int(pos['qty'])}cp là book khác) — bỏ qua")
+            continue
+        if lot["qty"] > pos["qty"]:
+            add_blocked(tk, DISC_BOOK, f"qty sổ lô DISC ({lot['qty']}) > qty broker ({int(pos['qty'])}) — hai nguồn lệch nhau")
+            continue
+        if lot["qty"] != pos["qty"]:
+            # Sổ lô không có giá/lô → không dựng được giá vốn riêng của DISC; chặn (an toàn hơn đoán).
+            add_blocked(tk, DISC_BOOK, f"giá vốn broker là bình quân trộn book: broker giữ {int(pos['qty'])}cp, "
+                                       f"chỉ {lot['qty']}cp thuộc {DISC_BOOK} — KHÔNG đo ±ngưỡng trên avg_cost trộn; "
+                                       f"người duyệt tự đo từ giá vốn lô DISC")
+            continue
         avg_cost, mp = pos.get("avg_cost"), pos.get("marketPrice")
         if not avg_cost or avg_cost <= 0 or not mp or mp <= 0:
             add_blocked(tk, DISC_BOOK, f"thiếu giá vốn/giá đóng broker hợp lệ (avg_cost={avg_cost}, marketPrice={mp}) "
@@ -638,22 +662,6 @@ def _disc_candidates(account, plan, plan_date, signal_date, positions, add_block
         if any(o.get("ticker") == tk and o.get("side") == "buy" for o in plan.get("orders", [])):
             _block(f"trigger {'/'.join(trig)} bắn nhưng plan đang có lệnh MUA {tk} cùng ngày — xung đột, "
                    f"KHÔNG chèn SELL; người duyệt gỡ lệnh mua hoặc tự thêm lệnh bán")
-            continue
-        if disc is None:
-            disc = lots_fn()
-        d_lots, d_ok, d_reason, d_blocked = disc
-        if not d_ok:
-            _block(f"sổ lô book {DISC_BOOK} không dựng được (lỗi kết cấu): {d_reason}")
-            continue
-        if tk in d_blocked:
-            _block(d_blocked[tk])
-            continue
-        lot = d_lots.get(tk)
-        if not lot:
-            _block(f"broker giữ {int(pos['qty'])}cp nhưng sổ lô KHÔNG có lô {tk} book {DISC_BOOK} — không xác định phần thuộc sleeve")
-            continue
-        if lot["qty"] > pos["qty"]:
-            _block(f"qty sổ lô DISC ({lot['qty']}) > qty broker ({int(pos['qty'])}) — hai nguồn lệch nhau")
             continue
         if lot.get("entry_date") != e["entry_date"]:
             _block(f"ngày vào sổ lô ({lot.get('entry_date')}) ≠ entry_date khai báo ({e['entry_date']}) — "
@@ -692,7 +700,7 @@ def _disc_candidates(account, plan, plan_date, signal_date, positions, add_block
                      "CHO PHÉP khớp một phần; phần chưa khớp đề xuất lại plan kế tiếp nếu trigger còn hiệu lực")
         o = _make_order(f"SELL-{tk}-AUTOEXIT-DISC-{primary}", tk, qty, mp, DISC_BOOK,
                         "DISCRETIONARY_AUTO_EXIT", note)
-        floor_pct = e.get("target_sell_floor_pct", e["target_pct"])
+        floor_pct = e.get("target_sell_floor_pct")   # mặc định TẮT: sàn là chính sách user CHƯA duyệt
         if primary == "TARGET" and "TIME" not in trig and floor_pct is not None:
             o["hard_sell_floor_vnd"] = float(math.ceil(round(avg_cost * (1 + floor_pct), 6)))   # round: 51000×1.1=56100.000000000007
         o["disc_exit"] = {"triggers": trig, "pnl_pct": round(pnl, 6), "avg_cost_broker": avg_cost,
@@ -977,11 +985,14 @@ def process_account(account, plan_date, signal_date, dry_run):
                 capit_episode._save(capit_episode.LEDGER_PATH, ledger)
 
     # ---- DISCRETIONARY_SPECIAL: ngưỡng cứng TARGET/STOP/TIME khai ở DISC_RULES_PATH (user 06/11 14:19) ----
-    disc_stop_alerts = _disc_candidates(
-        account, plan, plan_date, signal_date, _pos_raw, _add_blocked, capped_notes, injected,
-        skipped_existing, lambda: book_lot_snapshot(account, DISC_BOOK, asof=signal_date))
-    if disc_stop_alerts and not dry_run:
-        _send_disc_stop_alert(account, plan_date, disc_stop_alerts)
+    # Lỗi nhánh DISC KHÔNG được chặn LAG/BAL/CAPIT ghi plan ⇒ bọc, ghi blocked. Alert STOP gửi SAU khi ghi plan.
+    disc_stop_alerts = []
+    try:
+        disc_stop_alerts = _disc_candidates(
+            account, plan, plan_date, signal_date, _pos_raw, _add_blocked, capped_notes, injected,
+            skipped_existing, lambda: book_lot_snapshot(account, DISC_BOOK, asof=signal_date))
+    except Exception as exc:
+        _add_blocked(None, DISC_BOOK, f"nhánh DISC lỗi: {exc!r}")
 
     # §29: mọi exit bị CHẶN hoặc CẮT phải hiện ra cho người, không chỉ nằm trong log stdout —
     # KHÔNG ĐƯỢC in "không có candidate" khi thực ra có candidate bị chặn/cắt (arch-review vòng 2
@@ -1031,6 +1042,9 @@ def process_account(account, plan_date, signal_date, dry_run):
               f"sell trong plan (không chèn lại) — {skipped_existing}")
     else:
         print(f"[auto-exit] {account} {plan_date}: không có candidate tới mốc exit.")
+    # Alert STOP DISC gửi SAU khi plan đã ghi (không báo "đã chèn SELL" cho plan chưa nằm trên đĩa).
+    if disc_stop_alerts and not dry_run:
+        _send_disc_stop_alert(account, plan_date, disc_stop_alerts)
     if not dry_run and not (blocked_notes or capped_notes or locked_notes):
         _prune_block_alert_state(account)
     return 0

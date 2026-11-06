@@ -55,6 +55,14 @@ MUTANTS = {
                              "            if False:\n                # Đối xứng"),
     "M10_no_floor_field": (os.path.join(WC_ROOT, "trading_bot", "plan.py"), "trading_bot.plan",
                            "    hard_sell_floor_vnd: float = None\n", ""),
+    "M12_mixed_avg_unchecked": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
+                                'if lot["qty"] != pos["qty"]:', "if False:"),
+    "M13_exited_not_skipped": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
+                               'if not lot or int(lot.get("qty") or 0) <= 0:', "if False:"),
+    "M14_dry_run_notifies": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
+                             "if disc_stop_alerts and not dry_run:", "if disc_stop_alerts:"),
+    "M15_fifo_prefix_gate_off": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
+                                 "if gate or n < DISC_T2_SESSIONS:", "if n < DISC_T2_SESSIONS:"),
     "M11_lot_qty_unchecked": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
                               'if lot["qty"] > pos["qty"]:', "if False:"),
 }
@@ -126,7 +134,8 @@ def rule_entry(tk="FPT", entry="2026-11-06", **kw):
 
 
 def run(signal, plan_date, positions, rules_doc, lots=None, lots_ok=True, lots_blocked=None,
-        orders=None, approved_by=None, dry_run=False, raw_rules=None, repeat=1):
+        orders=None, approved_by=None, dry_run=False, raw_rules=None, repeat=1, disc_raises=False,
+        book_lots=None):
     """process_account THẬT trên sandbox. positions: {tk:(qty,cost,mp[,sellable])} hoặc None (không ghi
     dnse_raw). lots: {tk: [(qty, entry_date), ...]} cho sổ lô DISC (mock book_lot_snapshot).
     Trả (rc, plan, disc_sells, notes_entries, stdout_calls)."""
@@ -155,15 +164,20 @@ def run(signal, plan_date, positions, rules_doc, lots=None, lots_ok=True, lots_b
     json.dump({"episodes": []}, open(led, "w"))
     lot_map = {tk: {"qty": sum(q for q, _ in ls), "entry_date": min(d for _, d in ls),
                     "lots": [{"qty": q, "entry_date": d} for q, d in ls]} for tk, ls in (lots or {}).items()}
-    calls = {"disc_snapshot": 0, "subprocess": []}
+    calls = {"disc_snapshot": 0, "subprocess": [], "alert_state_written": False}
 
     def fake_snapshot(account, book, asof=None, **kw):
         if book == "DISCRETIONARY_SPECIAL":
             calls["disc_snapshot"] += 1
+            if disc_raises:
+                raise RuntimeError("selfcheck: DISC nổ")
             if not lots_ok:
                 return {}, False, "selfcheck: lỗi kết cấu", {}
             return dict(lot_map), True, None, dict(lots_blocked or {})
-        return {}, True, None, {}
+        bl = (book_lots or {}).get(book) or {}
+        return ({tk: {"qty": sum(q for q, _ in ls), "entry_date": min(d for _, d in ls),
+                      "lots": [{"qty": q, "entry_date": d} for q, d in ls]} for tk, ls in bl.items()},
+                True, None, {})
     orig = dict(EXEC_DIR=ps.EXEC_DIR, PLAN_DIR=aei.PLAN_DIR, acct=aei.account_no_for, snap=aei.book_lot_snapshot,
                 rp=aei.DISC_RULES_PATH, ap=aei.DISC_ALERT_STATE_PATH, bp=aei.BLOCK_ALERT_STATE_PATH,
                 led=aei.capit_episode.LEDGER_PATH, sp=aei.subprocess.run, rh=aei.rights_hold.holds_for)
@@ -197,6 +211,7 @@ def run(signal, plan_date, positions, rules_doc, lots=None, lots_ok=True, lots_b
         aei.DISC_RULES_PATH, aei.DISC_ALERT_STATE_PATH = orig["rp"], orig["ap"]
         aei.BLOCK_ALERT_STATE_PATH, aei.capit_episode.LEDGER_PATH = orig["bp"], orig["led"]
         aei.subprocess.run, aei.rights_hold.holds_for = orig["sp"], orig["rh"]
+        calls["alert_state_written"] = os.path.exists(os.path.join(td, "disc_alert.json"))
         shutil.rmtree(td, ignore_errors=True)
     sells = [o for o in out["orders"] if o.get("book") == "DISCRETIONARY_SPECIAL" and o["side"] == "sell"]
     blocked = [b for n in out.get("auto_exit_inject_notes") or [] for b in n.get("blocked") or []]
@@ -234,8 +249,12 @@ def test_injector():
     pdate = next_trading_day(sig)
     S, P = sig.isoformat(), pdate.isoformat()
     lots_ok = {"FPT": [(300, E), (500, E)]}
+    s_d_h = sig
 
     r = run(S, P, {"FPT": (800, 51000, 56100)}, [rule_entry()], lots=lots_ok)
+    check("I1f sàn MẶC ĐỊNH TẮT ⇒ plan SELL KHÔNG có hard_sell_floor_vnd (chính sách chưa duyệt)",
+          len(r["sells"]) == 1 and not r["sells"][0].get("hard_sell_floor_vnd"), str(r["sells"])[:200])
+    r = run(S, P, {"FPT": (800, 51000, 56100)}, [rule_entry(target_sell_floor_pct=0.10)], lots=lots_ok)
     o = r["sells"][0] if r["sells"] else {}
     check("I1 TARGET đúng +10,00% ⇒ chèn 1 SELL qty broker 800, book DISC", len(r["sells"]) == 1 and o.get("qty") == 800
           and o.get("play_type") == "DISCRETIONARY_AUTO_EXIT", str(r["sells"])[:200])
@@ -249,7 +268,7 @@ def test_injector():
     check("I1e TARGET không tự notify (chỉ STOP notify)", not r["calls"]["subprocess"])
 
     r = run(S, P, {"FPT": (800, 51000, 56099)}, [rule_entry()], lots=lots_ok)
-    check("I2 +9,998% ⇒ không chèn, không gọi sổ lô", not r["sells"] and r["calls"]["disc_snapshot"] == 0)
+    check("I2 +9,998% ⇒ không chèn", not r["sells"])
 
     r = run(S, P, {"FPT": (800, 51000, 45900)}, [rule_entry()], lots=lots_ok)
     o = r["sells"][0] if r["sells"] else {}
@@ -317,9 +336,35 @@ def test_injector():
     r = run(S, P, {"FPT": (800, 51000, 56100)}, [rule_entry(entry="2026-11-05")], lots=lots_ok)
     check("I10 entry_date khai ≠ sổ lô ⇒ không chèn + blocked", not r["sells"] and any("entry_date" in b["reason"] for b in r["blocked"]))
     r = run(S, P, {"FPT": (700, 51000, 56100)}, [rule_entry()], lots=lots_ok)
-    check("I11 sổ lô 800 > broker 700 ⇒ không chèn + blocked", not r["sells"] and r["blocked"])
+    check("I11 sổ lô 800 > broker 700 ⇒ không chèn + blocked 'hai nguồn lệch'",
+          not r["sells"] and any("hai nguồn lệch" in b["reason"] for b in r["blocked"]))
     r = run(S, P, {"FPT": (1000, 51000, 56100)}, [rule_entry()], lots=lots_ok)
-    check("I11b mã lẫn book (broker 1000, DISC 800) ⇒ chỉ bán 800", r["sells"] and r["sells"][0]["qty"] == 800)
+    check("I11b mã lẫn book (broker 1000, DISC 800) ⇒ KHÔNG bán + blocked 'bình quân trộn book'",
+          not r["sells"] and any("bình quân trộn book" in b["reason"] for b in r["blocked"]), str(r["blocked"])[:200])
+    # Ca A: DISC đã thoát hết, mã được book khác mua lại (broker giữ 500cp, giá vốn tụt −12%) ⇒ KHÔNG CẮT LỖ giả
+    os.environ["AUTO_EXIT_TEST_MODE"] = "0"
+    try:
+        r = run(S, P, {"FPT": (500, 60000, 52000)}, [rule_entry()], lots={})
+    finally:
+        os.environ["AUTO_EXIT_TEST_MODE"] = "1"
+    check("I11d ca A: DISC đã thoát + mã book khác ⇒ không SELL, không blocked, không alert STOP",
+          not r["sells"] and not r["blocked"] and not r["calls"]["subprocess"], str(r["blocked"])[:200])
+    # Ca B: DISC 800@51.000 + BAL 800@60.000 ⇒ avg broker 55.500, đóng 56.200 (DISC thật +10,2%, avg trộn +1,26%)
+    r = run(S, P, {"FPT": (1600, 55500, 56200)}, [rule_entry()], lots={"FPT": [(800, E)]})
+    check("I11e ca B: mixed-book, DISC +10,2% thật ⇒ KHÔNG trượt im lặng: blocked (không sell trên avg trộn)",
+          not r["sells"] and any("bình quân trộn book" in b["reason"] for b in r["blocked"]), str(r["blocked"])[:200])
+    # H: lô chưa về đứng TRƯỚC lô đã về ⇒ chỉ bán prefix (không bán lô đã về ra khỏi thứ tự FIFO)
+    pv3h = prev_session(s_d_h, 3).isoformat()
+    r = run(S, P, {"FPT": (300, 51000, 56100)}, [rule_entry(entry=pv3h)], lots={"FPT": [(100, S), (200, pv3h)]})
+    check("I8d lô chưa về TRƯỚC lô đã về (FIFO) ⇒ không bán gì (chỉ bán prefix đã về)", not r["sells"])
+    # DISC ném lỗi ⇒ LAG vẫn vào plan, blocked có dòng lỗi
+    old_lag = "2026-08-03"
+    r = run(S, P, {"FPT": (800, 51000, 56100), "VPB": (500, 20000, 20000)}, [rule_entry()], lots=lots_ok,
+            disc_raises=True, book_lots={"LAG": {"VPB": [(500, old_lag)]}})
+    check("I15 DISC ném lỗi ⇒ lệnh LAG vẫn vào plan + blocked 'nhánh DISC lỗi'",
+          any(o["ticker"] == "VPB" and o["side"] == "sell" for o in r["plan"]["orders"])
+          and any("nhánh DISC lỗi" in b["reason"] for b in r["blocked"]) and r["rc"] == 0,
+          str([o["ticker"] for o in r["plan"]["orders"]]) + str(r["blocked"])[:150])
     r = run(S, P, {"FPT": (800, 51000, 56100)}, [rule_entry()], lots=lots_ok,
             orders=[{"id": "P", "ticker": "FPT", "side": "sell", "qty": 300, "ref_price": 1, "book": "PARK"}])
     check("I11c Σ SELL cross-book > broker ⇒ cap 500 + capped note", r["sells"] and r["sells"][0]["qty"] == 500 and r["capped"])
@@ -341,6 +386,13 @@ def test_injector():
 
     r = run(S, P, {"FPT": (800, 51000, 45900)}, [rule_entry()], lots=lots_ok, dry_run=True)
     check("I13 dry-run ⇒ không ghi plan, không notify", not r["sells"] and not r["calls"]["subprocess"])
+    os.environ["AUTO_EXIT_TEST_MODE"] = "0"
+    try:
+        r = run(S, P, {"FPT": (800, 51000, 45900)}, [rule_entry()], lots=lots_ok, dry_run=True)
+    finally:
+        os.environ["AUTO_EXIT_TEST_MODE"] = "1"
+    check("I13b dry-run + AUTO_EXIT_TEST_MODE=0 ⇒ KHÔNG notify, KHÔNG ghi state dedup",
+          not r["calls"]["subprocess"] and not r["calls"]["alert_state_written"])
     # notify STOP: test-mode guard ⇒ KHÔNG subprocess; tắt guard ⇒ gọi notify_thread.sh trading_daily
     r = run(S, P, {"FPT": (800, 51000, 45900)}, [rule_entry()], lots=lots_ok)
     check("I14 STOP dưới AUTO_EXIT_TEST_MODE ⇒ không gọi kênh thật", not r["calls"]["subprocess"])
