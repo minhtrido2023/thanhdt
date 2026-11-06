@@ -72,3 +72,28 @@ def capit_should_remind(sessions_held):
     """True ⇔ episode CAPIT đang trong cửa sổ nhắc trước (55 ≤ sessions_held < 60)."""
     return (sessions_held is not None
             and CAPIT_REMINDER_SESSIONS <= sessions_held < CAPIT_EXIT_SESSIONS)
+
+
+# ---- DISCRETIONARY_SPECIAL: ngưỡng cứng per-vị thế (user chốt 06/11/2026 14:19 ICT, decided_by: user;
+# mike/kb/projects/disc-fpt-nnc-approval-20261105.md mục "CẬP NHẬT 06/11 14:19"). Ngưỡng KHÔNG
+# hardcode ở đây — mỗi vị thế khai trong `data/discretionary_exit_rules.json` (target_pct/stop_pct/
+# max_sessions); module này chỉ so sánh. Cả 3 chỉ là ĐỀ XUẤT SELL vào plan nháp (user duyệt plan).
+DISC_EPS = 1e-9   # cùng lý do BAL_STOP_LOSS: 56100/51000-1 = 0.10000000000000009, 45900/51000-1 = -0.09999999999999998
+DISC_TRIGGERS = ("TARGET", "STOP", "TIME")
+
+
+def disc_exit_triggers(pnl_pct, sessions_held, target_pct, stop_pct, max_sessions):
+    """Danh sách trigger bắn, theo thứ tự ưu tiên DISC_TRIGGERS:
+      TARGET ⇔ pnl_pct ≥ +target_pct (đúng +10,00% là BẮN) · STOP ⇔ pnl_pct ≤ −stop_pct (đúng −10,00% là
+      BẮN) · TIME ⇔ sessions_held ≥ max_sessions (`count_trading_days(entry, signal)` — phiên thứ N sau
+      ngày vào; FPT/NNC vào 06/11 ⇒ phiên thứ 25 = 11/12/2026).
+    pnl_pct = marketPrice/avg_cost − 1 (giá vốn broker). None ⇒ trigger tương ứng KHÔNG bắn (caller fail-safe)."""
+    out = []
+    if pnl_pct is not None:
+        if pnl_pct >= target_pct - DISC_EPS:
+            out.append("TARGET")
+        if pnl_pct <= -stop_pct + DISC_EPS:
+            out.append("STOP")
+    if sessions_held is not None and sessions_held >= max_sessions:
+        out.append("TIME")
+    return out

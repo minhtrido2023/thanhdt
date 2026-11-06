@@ -80,6 +80,12 @@ class PlannedOrder:
     ceiling_anchor_price: float = None
     ceiling_anchor_date: str = None
     ceiling_tau: float = None
+    # ── SÀN GIÁ BÁN TUYỆT ĐỐI (VND) — §24, đối xứng `hard_no_chase_ceiling_vnd` ──────────────
+    # Chỉ có hiệu lực với side="sell". Executor._limit_price() lấy max(sàn đuổi %, sàn này); nếu
+    # ngay cả giá TRẦN phiên cũng < sàn này thì KHÔNG đặt lệnh (trả None); `_atc_sweep` bỏ qua lệnh
+    # có sàn (ATC không đặt được giá). Sinh bởi `auto_exit_inject.py` nhánh DISCRETIONARY (TARGET
+    # chốt lời: không bán dưới giá vốn × (1+target)). Default None = hành vi cũ.
+    hard_sell_floor_vnd: float = None
 
     @property
     def value(self):
