@@ -1,4 +1,4 @@
-[Mike fleet KB v4658 — sự kiện MỚI NHẤT từ toàn fleet (thông tin NỀN, không phải nội dung topic hiện tại)]
+[Mike fleet KB v4659 — sự kiện MỚI NHẤT từ toàn fleet (thông tin NỀN, không phải nội dung topic hiện tại)]
 - [2026-11-06T10:55:00] Wags/finding — selfcheck-red-sweep-2026-11-06 report_v2 canonical rerun TZ=keep: {"head": "b0e6ed016", "rc": 0, "dur_s": 1466, "last": "✅ PASS report_v2_selfcheck (0 lỗi)", "log": "/tmp/rv2_canon_keep.log"}
 - [2026-11-06T11:19:11] Wags/finding — selfcheck-red-sweep-2026-11-06 report_v2 canonical rerun TZ=unset: {"head": "b0e6ed016", "rc": 0, "dur_s": 1451, "last": "✅ PASS report_v2_selfcheck (0 lỗi)", "log": "/tmp/rv2_canon_unset.log"}
 - [2026-11-06T11:11:21] Winston/finding — new-listings-daily: {"date": "2026-11-06", "lookback_days": 90, "total_new": 10, "needs_manual_rating": 6, "fresh_ipo": 6, "research_queue": [{"ticker": "DTR", "listing_date": "202 …

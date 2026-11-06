@@ -858,3 +858,6 @@
 ## Consolidation 2026-11-06T13:07:02Z
 - [2026-11-06T12:14:33Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-11-06", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-11-06.md"}
 - [2026-11-06T12:18:34Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-11-06", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-11-06.md"}
+
+## Consolidation 2026-11-06T18:07:01Z
+- [2026-11-06T17:30:48Z] Mike/question — daily-retro-draft-failed-2026-11-06: {"reason": "draft rong hoac sai dinh dang (thieu header RETRO) — nghi Mike tra lac de (sau 2 lan thu), rc=1", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/daily_retro_draft_20261106_173030_a2.log", "rejected_glob": "state/retro_rejected_2026-11-06_a*.md"}
