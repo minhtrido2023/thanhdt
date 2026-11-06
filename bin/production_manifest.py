@@ -158,6 +158,10 @@ ROOT_TIER = {
     "unit:ccdb-mike.service": T2, "unit:paseo.service": T2,
     "unit:mike.slice": T2, "unit:mike-jobs.slice": T2,  # trần RAM systemd cho fleet/dispatch (2026-10-20)
     "arch_noise_gate.py": T2,  # digest + lọc nhiễu topic Architecture (thêm 2026-10-23)
+    # Work-Tree dashboard (2026-11-01, 695aaae03/b6572ea8b): cây việc fleet chỉ-đọc + sổ cái công việc;
+    # không đọc/ghi plan, lệnh, NAV ⇒ T2 như daily_decision_topic.py (thêm 2026-11-06, sweep selfcheck-red).
+    "work_tree_build.py": T2,
+    "unit:mike-work-tree.service": T2, "unit:mike-work-tree-tunnel.service": T2,
     "pkill": T0,  # dừng bot giờ trưa — không có file
 }
 # dispatch.sh = bàn giao việc cho 1 agent. Bao đóng CỦA dispatch.sh (consolidate.sh -> kb_nightly.sh

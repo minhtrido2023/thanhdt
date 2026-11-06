@@ -1511,6 +1511,9 @@ SANDBOX_FILES = ("nav_period_returns.py", "nav_unit_ledger.py", "account_cash_fl
                  "report_delivery_gate.py", "wc_paths.py", "cash_identity.py", "dnse_fee_rates.py",
                  "corp_actions.py", "rights_subscription.py",   # N1: cash_identity đọc sổ khai báo quyền mua
                  "manual_actions.py")   # cash_identity đọc sổ lệnh tay đã khai
+# Package con mà cổng import (`report_delivery_gate._check_period_returns` → report_v2.artifact_lint,
+# từ 659fe5753 31/10) — thiếu thì cổng ModuleNotFoundError trong sandbox, không phải lỗi production.
+SANDBOX_PKG_FILES = ("report_v2/__init__.py", "report_v2/artifact_lint.py", "report_v2/vocab.py")
 
 
 def part_f_sandbox(tmp):
@@ -1522,6 +1525,9 @@ def part_f_sandbox(tmp):
     (wc / "wc_env.sh").write_text("", encoding="utf-8")
     (wc / "mike" / "MIKE.md").write_text("sandbox\n", encoding="utf-8")
     for name in SANDBOX_FILES:
+        shutil.copy2(BIN / name, wc / "mike" / "bin" / name)
+    (wc / "mike" / "bin" / "report_v2").mkdir()
+    for name in SANDBOX_PKG_FILES:
         shutil.copy2(BIN / name, wc / "mike" / "bin" / name)
     for account in PUBLISHED:
         shutil.copy2(FIXTURE / f"nav_history_{account}.csv", wc / "data" / "execution_logs")

@@ -74,6 +74,11 @@ def _write(path: str, text: str, mode: int = 0o644) -> None:
 def _stub_bin(bin_dir: str, tag: str, evidence: str, notify_log: str) -> None:
     """3 script con mà gate gọi ra ngoài — mỗi bản tự khai TÊN CÂY đã chạy nó."""
     shutil.copy2(os.path.join(REAL_BIN, "wc_paths.py"), os.path.join(bin_dir, "wc_paths.py"))
+    # Cổng tỉ suất import package `report_v2` cạnh gate (659fe5753, 31/10) — module THẬT, chỉ đọc
+    # chuỗi báo cáo; thiếu thì gate ModuleNotFoundError trong sandbox (đỏ giả, không phải production).
+    os.makedirs(os.path.join(bin_dir, "report_v2"))
+    for name in ("__init__.py", "artifact_lint.py", "vocab.py"):
+        shutil.copy2(os.path.join(REAL_BIN, "report_v2", name), os.path.join(bin_dir, "report_v2", name))
     _write(os.path.join(bin_dir, "report_return_gate.py"),
            "import sys\n"
            f"open({evidence!r}, 'a').write('gate:{tag}\\n')\n"

@@ -101,6 +101,7 @@
     "mike/agents/Taylor/research/bal_neutral_gate_20260909/analyze.py": 1,
     "mike/agents/Taylor/research/bal_neutral_gate_20260909/gate_engine.py": 5,
     "mike/agents/Taylor/research/c30v_position_replay_20260927/replay.py": 1,
+    "mike/agents/Taylor/research/capit_flag_gate_20261103/pt_v23_capitflag_exp_.py": 5,
     "mike/agents/Taylor/research/ccs_phase0_Taylor_20260905_135003/ccs_probe_engine.py": 5,
     "mike/agents/Taylor/research/ccs_phase0_earnings_quality/r3_t1floor_20260906/engine_t1.py": 5,
     "mike/agents/Taylor/research/ccs_phase2_Taylor_20260906_153255/ccs_p2_engine.py": 5,
