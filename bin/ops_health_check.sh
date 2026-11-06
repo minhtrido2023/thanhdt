@@ -898,7 +898,13 @@ if _approved_but_open:
       f"Kết quả đóng tự động: {_tail or '(im lặng)'}")
 
 if pending_q:
-    W(f"Có {len(pending_q)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {pending_q}")
+    # Dedupe theo Agent/topic: 1 câu bị đăng lại (vd retro_escalate repost ngày tái diễn)
+    # là MỘT câu hỏi, không phải N — đếm thô thổi phồng số mỗi ngày (arch-review
+    # coord-2026-11-06). Chỉ đổi phần HIỂN THỊ; pending_q giữ nguyên cho logic bên dưới.
+    _pq_uniq = list(dict.fromkeys(pending_q))
+    _pq_rep = {k: pending_q.count(k) for k in _pq_uniq if pending_q.count(k) > 1}
+    W(f"Có {len(_pq_uniq)} câu hỏi (question) trong 48h qua CHƯA thấy answer tương ứng: {_pq_uniq}"
+      + (f" (đăng lặp: {_pq_rep})" if _pq_rep else ""))
     # Câu hỏi TỔNG khai `rollup_of` mà không đóng được: nói rõ CON NÀO chưa khớp. Không có
     # dòng này thì fail-closed đúng nhưng câm — người đăng escalation không phân biệt được
     # "con thật sự chưa ai quyết" với "gõ sai tên con / sai agent / con đóng bằng hậu-tố
