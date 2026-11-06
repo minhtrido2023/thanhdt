@@ -23,3 +23,11 @@ Nguyên văn 22:17: "1. Size 5% Nav. 2. Target 10% so với giá vốn. Trước
 - User DUYỆT cho Livermore giữ cửa quyết bán FPT/NNC (dù bài thử 100 chuỗi trượt PREREG 0,0007 — xem `agents/Mike/research/livermore_stock_battery_20261105/REPORT.md`). Bán vẫn đi qua plan + user duyệt.
 - User DUYỆT 2 plan 06/11 rev2 (SpaceX: SELL TV1 400 + BUY FPT 800/NNC 900; ZaloPay: BUY FPT 500/NNC 600). approved_by ghi qua approve_plan_simple.sh (chuỗi mang "00:0x ICT" = 00:09 ICT).
 - User yêu cầu thêm: model kỹ thuật định lượng bổ trợ Livermore (thanh khoản cao; mua → bán được từ chiều T+2; chốt +5% / cắt lỗ −5%).
+
+## CẬP NHẬT 06/11/2026 14:19 ICT (`decided_by: user`) — SUPERSEDES mục "Exit = Livermore quyết"
+- User: "2 case mua đợt này sẽ theo ngưỡng cứng đã set để bán. Không cần tham khảo ý kiến Livermore." ⇒ BỎ cửa Livermore cho FPT/NNC. Ngưỡng cứng (đo so GIÁ VỐN broker, mỗi account):
+  · **+10% ⇒ BÁN** (chốt lời) · **−10% ⇒ lên plan đề xuất SELL, user xác nhận (duyệt plan)** rồi vào quy trình cutloss/thực thi · **đủ 25 phiên giao dịch kể từ ngày vào (06/11) ⇒ thoái** (phiên thứ 25 = 11/12/2026 theo lịch GD).
+  · Mọi lệnh bán đi qua plan + user duyệt (không tự bán). Bán được từ CHIỀU T+2 sau ngày khớp (FPT vào 06/11 ⇒ chiều 10/11).
+- Livermore đọc sống FPT/NNC (LVR-STK-*) vẫn ghi sổ để chấm thụ động, KHÔNG dính quyết định. Model TA ±5% đóng NO-GO (user duyệt đóng 06/11): `kb/projects/ta-model-5pct-20261106.md`.
+- Fill 06/11 (state exec, giá lệnh con, ước lượng): FPT SpaceX 800/800 ~51.160, ZaloPay 500/500 ~51.180 (đủ); NNC SpaceX 100/900 ~46.900, ZaloPay 100/600 ~46.850 (khớp một phần, còn chạy). Vào thấp hơn giá tham chiếu 52.900 ~3%.
+- Monitor/exit injector: dispatch Taylor 06/11 (xem working memory) — chưa chạy cho tới khi merge + arch-review.

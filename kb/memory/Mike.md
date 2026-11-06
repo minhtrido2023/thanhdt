@@ -22,3 +22,4 @@ Mã có cờ loại khỏi candidate (không PARK, có CAPIT); DD base = sổ s�
 ## Mốc
 nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore ~19/11; commodity 11-25; BĐS 11-26; LAG 12-15; crontab báo cáo quý trước 31/12; measurement audit ~12-27. Wakeup MISS 05/11 = 0/8.
 
+- [2026-11-06T07:21:04Z] 06/11 14:25: user ĐÓNG model TA; FPT/NNC thoát theo ngưỡng cứng (+10% bán, −10% đề xuất→user xác nhận, 25 phiên=12/11→11/12 thoái), BỎ Livermore khỏi quyết bán. Fill 06/11: FPT đủ cả 2 acct (~51.170), NNC khớp từng phần (100/900, 100/600). Dispatch Taylor_20261106_072056 (exit injector DISCRETIONARY trên auto_exit_inject, worktree, chưa merge) -> arch-reviewer -> merge -> cron. Cuối phiên 06/11 kiểm lại fill NNC.

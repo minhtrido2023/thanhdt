@@ -2038,3 +2038,9 @@
 
 ## Archived 2026-11-06 (keep=12 days=0 require_done=False)
 - [2026-11-05T02:14:14Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020021 (NT2 SAS SZL TCH, TABLE_Taylor_20261105_020021.md); SZL đổi DƯỚI vùng; CHỜ Mike skeptic; chưa sửa dd_price_zones
+
+## Archived 2026-11-06 (keep=12 days=0 require_done=False)
+- [2026-11-05T02:15:35Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020013 (MBB FPT HPG HHS, TONGHOP_r2_Taylor_20261105_020013.md); CHỜ Mike skeptic; mở: r vs β (HPG), CK holding [UL] (HHS)
+
+## Archived 2026-11-06 (keep=12 days=0 require_done=False)
+- [2026-11-05T02:15:50Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020018 (SIP/SCL/TV1/TV2 REPORT_r2+SUMMARY, TABLE_r2_*); CHỜ Mike skeptic; TV2 tâm −15,7% (CMC+độ bền), nhãn không đảo
