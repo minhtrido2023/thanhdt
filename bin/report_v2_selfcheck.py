@@ -22,6 +22,20 @@ import subprocess
 import sys
 import tempfile
 
+# Interpreter = ĐÚNG cái production dùng: eod_trading_report.sh:170 và prompt check_report_cadence.sh gọi
+# `python3 bin/report_v2/build.py`; render.build_pdf + kiểm font của artifact_lint cần pymupdf, mà venv
+# $DNA_PYEXE (runner selfcheck_weekly_baseline_check.sh) KHÔNG có ⇒ mọi bản dựng rc=1 "No module named
+# 'pymupdf'" + TIMEOUT: đỏ GIẢ do interpreter, không phải production hỏng (sweep 06/11). Thiếu pymupdf
+# ⇒ exec lại MỘT lần bằng `python3` trên PATH (cờ env chặn vòng lặp); cả hai đều thiếu ⇒ FAIL nói thật.
+try:
+    import pymupdf  # noqa: F401,E402
+except ImportError:
+    if os.environ.get("REPORT_V2_SC_REEXEC") != "1" and shutil.which("python3"):
+        os.environ["REPORT_V2_SC_REEXEC"] = "1"
+        os.execvp("python3", ["python3", os.path.abspath(__file__)] + sys.argv[1:])
+    raise SystemExit(f"report_v2_selfcheck: FAIL — thiếu pymupdf ở {sys.executable} (và python3 trên PATH): "
+                     "không dựng được PDF như production")
+
 BIN = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BIN)
 from report_v2 import artifact_lint as al  # noqa: E402
@@ -404,7 +418,7 @@ def main():
     a = ap.parse_args()
     tmp = a.keep or tempfile.mkdtemp(prefix="report_v2_sc_")
     os.makedirs(tmp, exist_ok=True)
-    print(f"report_v2_selfcheck: period={a.period} TZ={os.environ.get('TZ', '<unset>')} tmp={tmp}")
+    print(f"report_v2_selfcheck: period={a.period} TZ={os.environ.get('TZ', '<unset>')} tmp={tmp} py={sys.executable}")
     narrative_cases()
     data_null_cases()
     write_order_case(tmp)
