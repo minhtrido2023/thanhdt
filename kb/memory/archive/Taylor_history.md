@@ -2044,3 +2044,6 @@
 
 ## Archived 2026-11-06 (keep=12 days=0 require_done=False)
 - [2026-11-05T02:15:50Z] [dd-redo r2 05/11] XONG job Taylor_20261105_020018 (SIP/SCL/TV1/TV2 REPORT_r2+SUMMARY, TABLE_r2_*); CHỜ Mike skeptic; TV2 tâm −15,7% (CMC+độ bền), nhãn không đảo
+
+## Archived 2026-11-06 (keep=12 days=0 require_done=False)
+- [2026-11-05T09:35:17Z] ĐANG DỞ: GĐ3 clearing PARK<->LAG/BAL job Taylor_20261105_093502 (worktree session/clearing-g3-20261105) | NEXT: đọc kb/projects/book-clearing-plan-20261029.md, dựng worktree

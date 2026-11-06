@@ -31,3 +31,4 @@ Nguyên văn 22:17: "1. Size 5% Nav. 2. Target 10% so với giá vốn. Trước
 - Livermore đọc sống FPT/NNC (LVR-STK-*) vẫn ghi sổ để chấm thụ động, KHÔNG dính quyết định. Model TA ±5% đóng NO-GO (user duyệt đóng 06/11): `kb/projects/ta-model-5pct-20261106.md`.
 - Fill 06/11 (state exec, giá lệnh con, ước lượng): FPT SpaceX 800/800 ~51.160, ZaloPay 500/500 ~51.180 (đủ); NNC SpaceX 100/900 ~46.900, ZaloPay 100/600 ~46.850 (khớp một phần, còn chạy). Vào thấp hơn giá tham chiếu 52.900 ~3%.
 - Monitor/exit injector: dispatch Taylor 06/11 (xem working memory) — chưa chạy cho tới khi merge + arch-review.
+- 06/11 14:45: arch-review vòng 1 injector DISC = NEEDS_CHANGES (giá vốn broker trộn book ⇒ TARGET trượt im lặng/STOP giả; sàn bán `target_sell_floor_pct` là chính sách user CHƯA duyệt ⇒ đặt null; DISC lỗi kéo mất lệnh LAG/BAL/CAPIT). Vòng 2 Taylor (sonnet) áp required_change; chưa merge/cron. Hỏi user: TIME bán ở plan 12/12 (phiên 26) hay 11/12?
