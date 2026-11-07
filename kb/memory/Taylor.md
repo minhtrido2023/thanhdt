@@ -34,3 +34,4 @@
 - [2026-11-07T13:06:34Z] [dd-5f TCH 07/11] XONG job Taylor_20261107_130208: NONE/LOCATION làm mới, model không đổi (chặt-3c 13.611–13.815), nhãn TRONG; CHỜ Mike skeptic + duyệt dòng moat_tags
 - [2026-11-07T13:07:29Z] [dd-5f HPG 07/11] XONG job Taylor_20261107_130203: NARROW làm mới, không bền; chặt-3c tâm 16.286->15.956-16.986, nhãn TRONG->TRÊN (nhạy peer set); CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags
 - [2026-11-07T13:07:49Z] [dd-5f HHS 07/11] XONG job Taylor_20261107_130213: NONE/LOCATION làm mới; chặt-3c chỉ I.14 đối xứng, tâm 10.387->10.346, nhãn TRONG; CHỜ Mike skeptic + duyệt dòng moat_tags (entry L vs VHM H)
+- [2026-11-07T13:07:56Z] [dd-5f MBB 07/11] XONG job Taylor_20261107_130206: NARROW làm mới, không bền; chặt-3c tâm 23.804->20.459 (RONIC=Ke -3.636), nhãn TRONG giữ; CHỜ Mike skeptic + duyệt quy ước (peer trung vị 23 NH, N5)
