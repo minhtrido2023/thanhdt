@@ -167,3 +167,6 @@
 
 ## Archived 2026-11-05 (keep=12 days=0 require_done=False)
 - [2026-11-04T18:27:43Z] 05/11 01:30: user rút BUY DCM khỏi plan 05/11; đã dispatch DollarBill_20261104_182729 (opus/medium) làm lại plan 2 account (flag-exception: BAL không có cơ sở loại mã có cờ + còn vùng mua thì được mua, phải ghi notes). Chờ kết quả → user duyệt lại plan trước 09:00.
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T07:21:04Z] 06/11 14:25: user ĐÓNG model TA; FPT/NNC thoát theo ngưỡng cứng (+10% bán, −10% đề xuất→user xác nhận, 25 phiên=12/11→11/12 thoái), BỎ Livermore khỏi quyết bán. Fill 06/11: FPT đủ cả 2 acct (~51.170), NNC khớp từng phần (100/900, 100/600). Dispatch Taylor_20261106_072056 (exit injector DISCRETIONARY trên auto_exit_inject, worktree, chưa merge) -> arch-reviewer -> merge -> cron. Cuối phiên 06/11 kiểm lại fill NNC.
