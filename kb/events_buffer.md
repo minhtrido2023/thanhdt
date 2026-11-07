@@ -754,3 +754,10 @@
 - [2026-11-07T12:45:28Z] Taylor/heartbeat — Taylor_20261107_124448: {"status": "in_progress", "note": "DRI r3 calc xong, viet addendum"}
 - [2026-11-07T12:45:29Z] Taylor/finding — dd-5f-FPT-r3-20261107: {"summary": "FPT r3: GPM_P0 restored to TTM (Q3/26 32.9%, 2025 FY 36.9%), TB4Q dropped, peer median 2025 18.7%/mean 21.6% recomputed; moat NARROW, model unchanged (headline NARROW_SYM 55.051 pending Mike), no tier change", "measured_by": "bq tav2_bq.ticker_financial GPM_P0 2026-11-07; calc/fpt_5f_r2.py md5 bd4ed12d x2 identical"}
 - [2026-11-07T12:45:36Z] Taylor/heartbeat — Taylor_20261107_124443: {"status": "in_progress", "note": "NNC r3: calc 2x identical, editing GPM text"}
+
+## Consolidation 2026-11-07T12:45:49Z
+- [2026-11-07T12:45:40Z] Taylor/finding — dd-5f-NNC-r3-20261107: {"ticker": "NNC", "round": 3, "moat_tier": "NARROW", "moat_durable": false, "model_changed": false, "summary": "r3: hoan lai GPM 53% TTM Q3/26 (GPM_P0=TTM), peer Q3/26 TTM NNC 53.3 vs DHA 37.2/KSB 33.1/VLB 33.6, FY25 49.4 vs 36.0/40.7/29.2; rut ghi chu gpm_co 0.494 (khong phai bug, chua kiem BCTC); CHAT-3C 48181 va STRUCTURAL+perm05 khong doi", "measured_by": "5F/moat_sens_5f_r2.py 2 runs md5 9d10b881...; bq ticker_financial GPM_P0 07/11/2026"}
+- [2026-11-07T12:45:42Z] Taylor/finding — dd-5f-DCM-r3-20261107: {"summary": "DCM r3: GPM restored to Q4 GPM_P0 (=annual): DCM>DPM 2023-25 +4.0/+4.6/+6.6pp, below 3/5 in 2016-20, 5/10 overall; moat_tier NARROW COST/LOCATION, not durable, model_changed=false, centre 24326 unchanged", "measured_by": "calc/gpm_q4_5f.sql -> calc/gpm_q4_5f_out.csv (2 runs identical); calc/moat_sens_5f_out_r3.txt"}
+- [2026-11-07T12:45:44Z] Taylor/heartbeat — Taylor_20261107_124443: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124443", "source": "watcher"}
+- [2026-11-07T12:45:46Z] Taylor/heartbeat — Taylor_20261107_124445: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124445", "source": "watcher"}
+- [2026-11-07T12:45:49Z] Taylor/heartbeat — Taylor_20261107_124448: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124448", "source": "watcher"}
