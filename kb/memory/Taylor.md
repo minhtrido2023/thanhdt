@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-05T17:11:13Z] ĐANG DỞ: TA model ±5% job Taylor_20261105_171103 → agents/Taylor/research/ta_model_5pct_20261106/ | NEXT: tra NO-GO, data_registry universe_pit, lấy data, backtest
 - [2026-11-05T17:20:36Z] [ta-model-5pct 06/11] XONG job Taylor_20261105_171103 NO-GO (research/ta_model_5pct_20261106); CHỜ Mike quant-skeptic
 - [2026-11-06T01:30:15Z] ĐANG DỞ: crisis-DD DRI ngày5 job Taylor_20261106_013001 | NEXT: đọc DOSSIER, tin mới, dd-note
 - [2026-11-06T01:31:23Z] [crisis-dd HT1 06/11] FINAL NOISE ghi xong (notes/final.json), GIỮ, đề xuất đóng hồ sơ; user quyết
@@ -26,3 +25,4 @@
 - [2026-11-07T12:09:12Z] [dd-5f NNC 07/11] XONG job Taylor_20261107_120556 NARROW, model không đổi; CHỜ Mike skeptic + quyết đọc NARROW chặt (tâm 50.822)
 - [2026-11-07T12:09:29Z] [dd-5f FPT 07/11] XONG ADDENDUM_5F (NARROW tái dùng; cap RONIC_T<=Ke, tâm 54.203->51.525, nhãn giữ); CHỜ Mike skeptic + quyết zones
 - [2026-11-07T12:09:45Z] [dd-5f DCM 07/11] XONG job Taylor_20261107_120603: NARROW COST/LOCATION, không bền, model không đổi; CHỜ Mike fundamental-skeptic + duyệt dòng moat_tags
+- [2026-11-07T12:10:08Z] [dd-5f TV1 07/11] XONG job Taylor_20261107_120558: NARROW tai dung; de xuat terminal tu van fade ve 6% => tam -13,2%, nhan TRONG->TREN (mong manh); CHO Mike quyet + skeptic

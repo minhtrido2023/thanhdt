@@ -656,3 +656,6 @@
 ## Consolidation 2026-11-07T12:10:05Z
 - [2026-11-07T12:09:59Z] Taylor/heartbeat — Taylor_20261107_120558: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_120558", "source": "watcher"}
 - [2026-11-07T12:10:02Z] Taylor/heartbeat — Taylor_20261107_120601: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_120601", "source": "watcher"}
+
+## Consolidation 2026-11-07T12:10:25Z
+- [2026-11-07T12:10:08Z] Taylor/finding — dd-5f-TV1-20261107: {"summary": "TV1 moat NARROW REGULATORY/AFFILIATION (tai dung tag 2026-06-05), KHONG ben (ROE_Min5Y/ROIC_Min5Y < Ke 13,5%; vu an = dong ho cat hao). model_changed=true: r2 terminal tu van ngam thuong WIDE (giu bien 5-14% vinh vien); NARROW (fade 2031-32 ve 6% nganh, RONIC=Ke) => tam 15379->13347 (-13,2%), P10 4693->5810, P50 15532->14101, P90 24544->19063, nhan TRONG->TREN vung (gia 19600 > P90 chi 2,8%; m_T>=8% ve TRONG). Mike quyet; chua ghi dd_price_zones, chua sua REPORT_r2", "files": ["agents/Taylor/research/dd_redo_20261105/TV1/ADDENDUM_5F.md", "agents/Taylor/research/dd_redo_20261105/TV1/SUMMARY_5F.json"], "measured_by": "$DNA_PYEXE -I calc/moat_5f_tv1.py (moat_5f_tv1_out.json, moat_5f_tv1_mT_sens.txt); bq tav2_bq.ticker_financial TV1-4 2016-26"}

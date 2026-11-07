@@ -2059,3 +2059,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-05T12:00:49Z] [clearing GĐ3 r2 05/11] XONG commit db490ba1d; CHỜ Mike re-review; manifest md chưa tái sinh (nợ master)
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-05T17:11:13Z] ĐANG DỞ: TA model ±5% job Taylor_20261105_171103 → agents/Taylor/research/ta_model_5pct_20261106/ | NEXT: tra NO-GO, data_registry universe_pit, lấy data, backtest
