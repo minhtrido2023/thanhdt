@@ -2083,3 +2083,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-06T07:45:30Z] [disc-exit r2 06/11] XONG job Taylor_20261106_074239: outer 0a93c22e4 + mike 1f6660397; CHỜ Mike re-review; chưa merge/cron; mixed-book=block, floor tắt
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T10:12:31Z] [sc-red sweep 06/11] XONG 8/8 CLOSED (6d372c6f7 + mike cdcafe795), không treo
