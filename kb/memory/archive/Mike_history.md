@@ -170,3 +170,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-06T07:21:04Z] 06/11 14:25: user ĐÓNG model TA; FPT/NNC thoát theo ngưỡng cứng (+10% bán, −10% đề xuất→user xác nhận, 25 phiên=12/11→11/12 thoái), BỎ Livermore khỏi quyết bán. Fill 06/11: FPT đủ cả 2 acct (~51.170), NNC khớp từng phần (100/900, 100/600). Dispatch Taylor_20261106_072056 (exit injector DISCRETIONARY trên auto_exit_inject, worktree, chưa merge) -> arch-reviewer -> merge -> cron. Cuối phiên 06/11 kiểm lại fill NNC.
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T07:42:41Z] 06/11 14:45: injector DISC arch NEEDS_CHANGES -> vòng 2 Taylor (sonnet) trên nhánh session/disc-exit-20261106; xong thì re-review (1 arch-reviewer giới hạn diff r2) -> merge -> cron. Hỏi user: TIME bán 12/12 (phiên 26) hay 11/12? Finding ngoài phạm vi: plan đã duyệt ⇒ auto_exit_inject REFUSE hết, STOP không ai được báo.

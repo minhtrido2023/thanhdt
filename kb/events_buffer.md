@@ -867,3 +867,31 @@
 ## Consolidation 2026-11-07T13:08:10Z
 - [2026-11-07T13:07:56Z] Taylor/finding — dd-5f-MBB-20261107: {"ticker": "MBB", "moat_tier": "NARROW", "moat_type": "COST/REGULATORY", "reused": false, "moat_durable": false, "model_changed": true, "status": "chat-3c song song, quy uoc cho Mike/user duyet; REPORT_r2/SUMMARY/dd_price_zones KHONG sua", "old": {"center": 23804, "p10": 14444, "p50": 22765, "p90": 35860, "label": "TRONG"}, "new_headline_NARROW": {"center": 20459, "p10": 14417, "p50": 20364, "p90": 27723, "pct_below": 0.443, "label": "TRONG"}, "delta_center_pct": -0.141, "decomposition": {"ronic_eq_ke": -3636, "roe_fade_to_ind_14.98pct": 290}, "peer_range_center": [19010, 26463], "sensitivity_center": {"WIDE": 23804, "NARROW": 20459, "NONE": 17638}, "label_note": "TRONG o moi tier; peer nhom lon trung vi => DUOI ranh gioi (P10 19.410 vs gia 19.250)", "why_not_durable": "ROE_Min10Y 12.02% < Ke (2015-17), luc thu 6 (MBV, tran lai hanh chinh, Basel III), CASA mon 36.8->32.8%", "files": "agents/Taylor/research/dd_redo_20261105/MBB/ADDENDUM_5F.md, SUMMARY_5F.json, calc_5f/", "measured_by": "$DNA_PYEXE -I calc_5f/mbb_5f.py > calc_5f/mbb_5f_out.txt (CUR tai lap dung 23.804/14.444/22.765/35.860); calc_5f/peer_roe_bq_20261107.csv"}
 - [2026-11-07T13:08:08Z] Taylor/heartbeat — Taylor_20261107_130206: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261107_130206", "source": "watcher"}
+
+## Consolidation 2026-11-07T13:18:02Z
+- [2026-11-07T13:16:36Z] Taylor/heartbeat — Taylor_20261107_131620: {"status": "in_progress", "note": "doc addendum r1 + hpg_5f.py"}
+- [2026-11-07T13:16:42Z] Taylor/heartbeat — Taylor_20261107_131625: {"status": "in_progress", "note": "HHS fix: backup r1, doc calc"}
+- [2026-11-07T13:16:46Z] Taylor/heartbeat — Taylor_20261107_131623: {"status": "in_progress", "note": "MBB 5F fix: backup r1, query peer PGB/VBB/PVB"}
+- [2026-11-07T13:16:48Z] Taylor/heartbeat — Taylor_20261107_131633: {"status": "in_progress", "note": "doc DDV REPORT_r2 + moat_tags"}
+- [2026-11-07T13:16:52Z] Taylor/heartbeat — Taylor_20261107_131635: {"status": "in_progress", "note": "doc REPORT_r2 NT2 + model_r2"}
+- [2026-11-07T13:16:56Z] Taylor/heartbeat — Taylor_20261107_131640: {"status": "in_progress", "note": "doc REPORT_r2 PVT + moat_tags"}
+- [2026-11-07T13:16:57Z] Taylor/heartbeat — Taylor_20261107_131643: {"status": "in_progress", "note": "doc file TV2 + moat_tags"}
+- [2026-11-07T13:17:05Z] Taylor/heartbeat — Taylor_20261107_131638: {"status": "in_progress", "note": "PVP: không có audit 5F cũ -> làm đầy đủ; đọc model"}
+- [2026-11-07T13:17:21Z] Taylor/heartbeat — Taylor_20261107_131620: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131620", "source": "watcher"}
+- [2026-11-07T13:17:24Z] Taylor/heartbeat — Taylor_20261107_131623: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131623", "source": "watcher"}
+- [2026-11-07T13:17:24Z] Taylor/heartbeat — Taylor_20261107_131620: {"status": "in_progress", "note": "da lay ROE nam Q4 peer 2016-25, viet hpg_5f_r2.py"}
+- [2026-11-07T13:17:25Z] Taylor/heartbeat — Taylor_20261107_131628: {"status": "in_progress", "note": "TCH fix: doc xong addendum, dang chay bien the backlog nganh"}
+- [2026-11-07T13:17:25Z] Taylor/heartbeat — Taylor_20261107_131625: {"status": "in_progress", "note": "HHS fix: khop 8393/9012/9700, doc ROIC + moat_tags"}
+- [2026-11-07T13:17:26Z] Taylor/heartbeat — Taylor_20261107_131643: {"status": "in_progress", "note": "doc model r2, chua co audit 5F TV2 => lam moi"}
+- [2026-11-07T13:17:26Z] Taylor/heartbeat — Taylor_20261107_131625: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131625", "source": "watcher"}
+- [2026-11-07T13:17:29Z] Taylor/heartbeat — Taylor_20261107_131628: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131628", "source": "watcher"}
+- [2026-11-07T13:17:31Z] Taylor/heartbeat — Taylor_20261107_131630: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131630", "source": "watcher"}
+- [2026-11-07T13:17:34Z] Taylor/heartbeat — Taylor_20261107_131633: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131633", "source": "watcher"}
+- [2026-11-07T13:17:36Z] Taylor/heartbeat — Taylor_20261107_131635: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131635", "source": "watcher"}
+- [2026-11-07T13:17:39Z] Taylor/heartbeat — Taylor_20261107_131638: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131638", "source": "watcher"}
+- [2026-11-07T13:17:39Z] Taylor/heartbeat — Taylor_20261107_131635: {"status": "in_progress", "note": "BQ ROIC/NP history NT2+peer xong, dang kiem LNST 800 vs TB chu ky"}
+- [2026-11-07T13:17:41Z] Taylor/heartbeat — Taylor_20261107_131640: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131640", "source": "watcher"}
+- [2026-11-07T13:17:43Z] Taylor/heartbeat — Taylor_20261107_131640: {"status": "in_progress", "note": "PVT chua co 5F -> lam moi; query BQ ROIC/GPM peer"}
+- [2026-11-07T13:17:44Z] Taylor/heartbeat — Taylor_20261107_131643: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_131643", "source": "watcher"}
+- [2026-11-07T13:17:51Z] Taylor/finding — dd-5f-SIP-fix-20261107: {"note": "SIP 5F r2: NONE annuity sua 48.159->48.812 (P10 38.464,P90 63.324,57,0% duoi gia); bo ROIC_Min10Y artifact; margin doi xung; bo so peer GPM; caveat manh BDS (chat-3c bo re 48.082); GPM2021 Q3=Q4 + 12ty/ha can kiem chung; NARROW/chat-3c 49.253 khong doi, nhan TRONG", "measured_by": "5F/sip_moat_sens_out.txt md5 1eeb8b1998d895a539f72d4a0c14b657 (2 runs, env -u TZ)"}
+- [2026-11-07T13:17:58Z] Taylor/heartbeat — Taylor_20261107_131623: {"status": "in_progress", "note": "MBB calc r2 done 2x byte-identical; editing addendum"}
