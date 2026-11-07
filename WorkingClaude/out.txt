@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/DRI/calc_5f/moat_sens_5f.py", line 18, in <module>
+    for r in csv.DictReader(builtins.open('gpm_peers_bq.csv')): d.setdefault(r['yr'], {})[r['ticker']] = float(r['gpm']) if r['gpm'] else None
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'gpm_peers_bq.csv'
