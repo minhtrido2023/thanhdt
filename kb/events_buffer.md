@@ -766,3 +766,7 @@
 - [2026-11-07T12:45:51Z] Taylor/heartbeat — Taylor_20261107_124450: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124450", "source": "watcher"}
 - [2026-11-07T12:45:54Z] Taylor/heartbeat — Taylor_20261107_124453: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124453", "source": "watcher"}
 - [2026-11-07T12:45:56Z] Taylor/heartbeat — Taylor_20261107_124455: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124455", "source": "watcher"}
+
+## Consolidation 2026-11-07T12:46:09Z
+- [2026-11-07T12:45:58Z] Taylor/finding — dd-5f-DRI-r3-20261107: {"moat_tier": "NARROW", "model_changed": false, "gpm_fix": "GPM_P0 Q4 (TTM) dung thang, gap median 11,70pp (r2 12,06)", "NONE_tight": {"centre": 10883, "label": "TREN"}, "NONE_half": 12488, "current": 14092, "peer_range": "10840-12054", "measured_by": "agents/Taylor/research/dd_redo_20261105/DRI/calc_5f/moat_sens_5f_out.txt (2 lan md5 b8792326)"}
+- [2026-11-07T12:45:59Z] Taylor/heartbeat — Taylor_20261107_124458: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124458", "source": "watcher"}
