@@ -2056,3 +2056,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-05T10:28:27Z] [clearing GĐ3 05/11] XONG build job Taylor_20261105_093502 commit 9acbe593e nhánh session/clearing-g3-20261105 (wt-clearing-g3-20261105); CHỜ Mike arch-review + quant-skeptic; cờ apply_to_plan=false, cron chưa cài
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-05T12:00:49Z] [clearing GĐ3 r2 05/11] XONG commit db490ba1d; CHỜ Mike re-review; manifest md chưa tái sinh (nợ master)
