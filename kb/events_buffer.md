@@ -688,3 +688,49 @@
 
 ## Consolidation 2026-11-07T12:27:38Z
 - [2026-11-07T12:27:26Z] Taylor/finding — dd-5f-DRI-r2-20261107: {"moat_tier": "NARROW", "model_changed": false, "consistent_3c": false, "GPM_TTM": "DRI 37.5% vs peer 25.4% (+12.06pp)", "tight_3c": {"NONE": "10784 TRÊN 98%", "NONE_half": "12438 TRONG 78.8%", "current": "14092 TRONG 35.2%"}, "peer_range_NONE": "10751-12180", "WIDE": "+873 = +196 econ-branch +677 moat", "measured_by": "research/dd_redo_20261105/DRI/calc_5f/moat_sens_5f.py (2 runs md5 91f50f05)", "files": "ADDENDUM_5F.md, SUMMARY_5F.json"}
+
+## Consolidation 2026-11-07T12:36:28Z
+- [2026-11-07T12:31:43Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "in_progress", "note": "đọc DD DGC hiện hành + moat_tags"}
+- [2026-11-07T12:31:48Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "in_progress", "note": "đọc file SAS + moat_tags"}
+- [2026-11-07T12:31:52Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "in_progress", "note": "reading SZL report + model; moat tag 2026-06-05 NARROW LOCATION -> reuse"}
+- [2026-11-07T12:32:06Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "in_progress", "note": "đọc REPORT_r2 SCL + tìm audit 5F cũ"}
+- [2026-11-07T12:32:07Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "in_progress", "note": "doc REPORT_r2 MVC + NNC addendum"}
+- [2026-11-07T12:32:18Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "in_progress", "note": "tái dùng tag NARROW 2026-06-05; kiểm kênh RONIC=20% và biên trong model_r2"}
+- [2026-11-07T12:32:21Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "in_progress", "note": "BQ ROIC/GPM SAS+peer"}
+- [2026-11-07T12:32:26Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "in_progress", "note": "BQ ROIC/GPM SZL + peers"}
+- [2026-11-07T12:32:27Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "in_progress", "note": "đọc model r2 SCL; chưa có audit 5F => làm đầy đủ"}
+- [2026-11-07T12:32:32Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_123131", "source": "watcher"}
+- [2026-11-07T12:32:34Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_123133", "source": "watcher"}
+- [2026-11-07T12:32:37Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_123136", "source": "watcher"}
+- [2026-11-07T12:32:40Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_123139", "source": "watcher"}
+- [2026-11-07T12:32:42Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_123141", "source": "watcher"}
+- [2026-11-07T12:32:42Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "in_progress", "note": "BQ ROIC/GPM MVC+peer; khong co tag moat MVC => 5F day du"}
+- [2026-11-07T12:33:19Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "in_progress", "note": "BQ SCL ROIC/ROE xong; đang lấy peer VLXD"}
+- [2026-11-07T12:33:30Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "in_progress", "note": "viet calc 5F SAS"}
+- [2026-11-07T12:33:32Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261107_123131", "source": "watcher"}
+- [2026-11-07T12:33:35Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261107_123133", "source": "watcher"}
+- [2026-11-07T12:33:37Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261107_123136", "source": "watcher"}
+- [2026-11-07T12:33:40Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261107_123139", "source": "watcher"}
+- [2026-11-07T12:33:41Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "in_progress", "note": "viet 5F/moat_sens_5f.py tren luoi khoa MVC"}
+- [2026-11-07T12:33:42Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261107_123141", "source": "watcher"}
+- [2026-11-07T12:33:48Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "in_progress", "note": "peer GPM done; building strict-3c sensitivity script"}
+- [2026-11-07T12:34:16Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "in_progress", "note": "GPM TTM DGC vs peer xong; viết calc_5f/moat_sens_5f.py"}
+- [2026-11-07T12:34:26Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "in_progress", "note": "kiem kenh bien NPM vs GPM"}
+- [2026-11-07T12:34:32Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "in_progress", "note": "peer NPM xong; viết calc 5F SCL"}
+- [2026-11-07T12:34:32Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261107_123131", "source": "watcher"}
+- [2026-11-07T12:34:35Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261107_123133", "source": "watcher"}
+- [2026-11-07T12:34:37Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261107_123136", "source": "watcher"}
+- [2026-11-07T12:34:40Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261107_123139", "source": "watcher"}
+- [2026-11-07T12:34:41Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "in_progress", "note": "calc_5f xong (chặt-3c tâm 39.634); viết ADDENDUM"}
+- [2026-11-07T12:34:42Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261107_123141", "source": "watcher"}
+- [2026-11-07T12:34:42Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "in_progress", "note": "strict-3c computed; boundary checks"}
+- [2026-11-07T12:34:53Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "in_progress", "note": "sens xong (CHAT-3C 13.010), dang viet ADDENDUM_5F"}
+- [2026-11-07T12:35:16Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "in_progress", "note": "viet ADDENDUM_5F SAS"}
+- [2026-11-07T12:35:32Z] Taylor/heartbeat — Taylor_20261107_123131: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_123131", "source": "watcher"}
+- [2026-11-07T12:35:35Z] Taylor/heartbeat — Taylor_20261107_123133: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_123133", "source": "watcher"}
+- [2026-11-07T12:35:37Z] Taylor/heartbeat — Taylor_20261107_123136: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_123136", "source": "watcher"}
+- [2026-11-07T12:35:40Z] Taylor/heartbeat — Taylor_20261107_123139: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_123139", "source": "watcher"}
+- [2026-11-07T12:35:42Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_123141", "source": "watcher"}
+- [2026-11-07T12:36:07Z] Taylor/finding — dd-5f-DGC-20261107: {"summary": "DGC NARROW COST/LOCATION (tai dung tag 2026-06-05), moat khong ben (ROIC5Y<Ke 2018-20, ROIC_Min10Y 4,4%, khai truong 25 dung). model_changed=false nhung model_r2 LECH 3c (RONIC 20%>Ke + bien mo-lai ~28% vs nganh 19,47%). Ban chat-3c (cho Mike/user duyet): tam 44767->39634 (-11,5%; RONIC -1739, bien -3710), P10 32518->32277, P50 44633->39631, P90 57101->46514, nhan TRONG->TRONG (sat P10; ranh gioi DUOI voi peer rong). Peer range 35368-41309.", "files": ["agents/Taylor/research/dd_redo_20261105/DGC/ADDENDUM_5F.md", "agents/Taylor/research/dd_redo_20261105/DGC/SUMMARY_5F.json"], "measured_by": "DGC/calc_5f/moat_sens_5f.py -> moat_sens_5f_out.json (2 lan trung md5 b6b83ed1, assert pin r2 44767); calc_5f/ttm.py (BQ ticker_financial TTM)"}
+- [2026-11-07T12:36:17Z] Taylor/finding — dd-5f-SZL-20261107: {"summary": "SZL NARROW/LOCATION tái dùng (asof 2026-06-05), không bền ((i) ROIC_Min5Y 10,2% < Ke 13,5%, (iii) quỹ đất ~92% + mốc 2053). model_changed=true: REPORT_r2 ngầm RONIC=∞ + biên TTM 39,0% > TB chu kỳ SZL 33,6%. Bản chặt-3c (chờ Mike duyệt quy ước): tâm 32.391 -> 24.423 (-24,6%), P10/P50/P90 22.499/24.341/26.477, nhãn DƯỚI -> TRÊN (40tr: ranh giới, P90 27.522 vs giá 27.650). Miễn g<=2% khỏi tái đầu tư: 26.981 TRONG.", "ticker": "SZL", "moat_tier": "NARROW", "model_changed": true, "center_old": 32391, "center_new": 24423, "label_old": "DUOI", "label_new": "TREN (chờ duyệt)", "files": ["agents/Taylor/research/dd_redo_20261105/SZL/ADDENDUM_5F.md", "agents/Taylor/research/dd_redo_20261105/SZL/SUMMARY_5F.json"], "measured_by": "agents/Taylor/research/dd_redo_20261105/SZL/5F/szl_moat_sens.py -> 5F/szl_moat_sens_out.json; 5F/szl_5f_stats_out.txt"}
+- [2026-11-07T12:36:24Z] Taylor/finding — dd-5f-MVC-20261107: {"summary": "MVC moat NONE (own ops; NARROW/LOCATION look-through NNC 44%), khong ben ((i) truot ca 2 phia: ROIC5Y 4.5%, ROIC10Y 3.8%, ROE<Ke 8/9 nam; (iii) han GP Tan Lap chua kiem chung, BOT het). model_changed=false (REPORT_r2 giu nguyen) nhung KHONG nhat quan 3c: STRUCTURAL 0.20 + perm05 0.15. Headline BAN CHAT-3C (cho Mike/user duyet, cung quy uoc NNC r2): tam 15276->13010 (-14.8%), P10 9857->9795, P50 13748->12931, P90 23516->16473, duoi gia 50.6%->63.3%; nhan TRONG->TRONG; luat4 khong dat ca hai", "moat_tier": "NONE", "model_changed": false, "files": ["agents/Taylor/research/dd_redo_20261105/MVC/ADDENDUM_5F.md", "agents/Taylor/research/dd_redo_20261105/MVC/SUMMARY_5F.json"], "proposed_moat_tag": "MVC,NONE,LOCATION,M,...,2026-11-07,5f_full_dd_redo,N", "measured_by": "MVC/5F/moat_sens_5f.py (2 runs md5 79fcc69f00663e749525bf979cda1d2e) tren calc/grid_mvc_redo_r2.csv + bq ticker_financial 07/11/2026"}

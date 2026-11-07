@@ -14,9 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-06T01:31:23Z] [crisis-dd HT1 06/11] FINAL NOISE ghi xong (notes/final.json), GIỮ, đề xuất đóng hồ sơ; user quyết
-- [2026-11-06T01:33:20Z] [crisis-dd DRI 06/11] XONG ngày5 (không cờ, GIỮ) — mới: NQ25 Dakruco soi GCN đầu tư Lào của DRI; Dakmoruco lệch vốn 79+48,1 tỷ; chờ SXKD T10 ~10/11
-- [2026-11-06T07:21:05Z] ĐANG DỞ job Taylor_20261106_072056: nhánh DISCRETIONARY auto_exit (FPT/NNC ±10%/25 phiên) | NEXT: worktree, code, selfcheck
 - [2026-11-06T07:33:39Z] [disc-exit 06/11] XONG job Taylor_20261106_072056: outer ead44c734 + mike 984d998d4 (nhánh session/disc-exit-20261106); CHỜ Mike arch-review; merge repo ngoài trước; chưa latch phần dư TARGET
 - [2026-11-06T07:45:30Z] [disc-exit r2 06/11] XONG job Taylor_20261106_074239: outer 0a93c22e4 + mike 1f6660397; CHỜ Mike re-review; chưa merge/cron; mixed-book=block, floor tắt
 - [2026-11-06T10:12:31Z] [sc-red sweep 06/11] XONG 8/8 CLOSED (6d372c6f7 + mike cdcafe795), không treo
@@ -26,3 +23,6 @@
 - [2026-11-07T12:10:08Z] [dd-5f TV1 07/11] XONG job Taylor_20261107_120558: NARROW tai dung; de xuat terminal tu van fade ve 6% => tam -13,2%, nhan TRONG->TREN (mong manh); CHO Mike quyet + skeptic
 - [2026-11-07T12:10:30Z] [dd-5f DRI 07/11] XONG job Taylor_20261107_120601: NARROW tái dùng, model không đổi; CHỜ Mike skeptic + quyết dòng moat_tags đề xuất
 - [2026-11-07T12:26:51Z] [dd-5f FPT r2 07/11] XONG job Taylor_20261107_122439: headline NARROW_SYM 55.051 (quy ước chờ Mike), downside 52.238; CHỜ Mike skeptic/quyết zones
+- [2026-11-07T12:36:07Z] [dd-5f DGC 07/11] XONG job Taylor_20261107_123131: NARROW tái dùng, model lệch 3c; chặt-3c tâm 44.767->39.634, nhãn TRONG (ranh giới DƯỚI); CHỜ Mike skeptic + quyết quy ước
+- [2026-11-07T12:36:17Z] [dd-5f SZL 07/11] XONG job Taylor_20261107_123133: NARROW tái dùng; chặt-3c tâm 32.391->24.423, nhãn DƯỚI->TRÊN (40tr ranh giới); CHỜ Mike skeptic + duyệt quy ước (TB chu kỳ riêng SZL, RONIC=Ke cả g lạm phát)
+- [2026-11-07T12:36:24Z] [dd-5f MVC 07/11] XONG job Taylor_20261107_123139: NONE (look-through NNC NARROW), CHAT-3C tam 15.276->13.010, nhan TRONG giu; CHO Mike skeptic + quyet quy uoc chat (chung NNC r2)

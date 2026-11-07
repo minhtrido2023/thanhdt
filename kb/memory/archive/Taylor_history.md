@@ -2068,3 +2068,12 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-06T01:30:15Z] ĐANG DỞ: crisis-DD DRI ngày5 job Taylor_20261106_013001 | NEXT: đọc DOSSIER, tin mới, dd-note
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T01:31:23Z] [crisis-dd HT1 06/11] FINAL NOISE ghi xong (notes/final.json), GIỮ, đề xuất đóng hồ sơ; user quyết
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T01:33:20Z] [crisis-dd DRI 06/11] XONG ngày5 (không cờ, GIỮ) — mới: NQ25 Dakruco soi GCN đầu tư Lào của DRI; Dakmoruco lệch vốn 79+48,1 tỷ; chờ SXKD T10 ~10/11
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T07:21:05Z] ĐANG DỞ job Taylor_20261106_072056: nhánh DISCRETIONARY auto_exit (FPT/NNC ±10%/25 phiên) | NEXT: worktree, code, selfcheck
