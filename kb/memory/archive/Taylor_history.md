@@ -2077,3 +2077,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-06T07:21:05Z] ĐANG DỞ job Taylor_20261106_072056: nhánh DISCRETIONARY auto_exit (FPT/NNC ±10%/25 phiên) | NEXT: worktree, code, selfcheck
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T07:33:39Z] [disc-exit 06/11] XONG job Taylor_20261106_072056: outer ead44c734 + mike 984d998d4 (nhánh session/disc-exit-20261106); CHỜ Mike arch-review; merge repo ngoài trước; chưa latch phần dư TARGET
