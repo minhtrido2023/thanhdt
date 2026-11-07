@@ -746,3 +746,11 @@
 ## Consolidation 2026-11-07T12:37:53Z
 - [2026-11-07T12:37:34Z] Taylor/finding — dd-5f-SCL-20261107: {"summary": "SCL 5F làm mới: moat NONE (ROIC5Y 8,4%/ROIC10Y 5,6%/ROIC_Min5Y -1,2% < Ke 13,5%; ứng viên COST/LOCATION tro chưa chứng minh), moat_durable=false; model_changed=true (REPORT_r2 ngầm thưởng: ROE 15/20%>Ke + STRUCTURAL giữ biên đỉnh). Headline chặt-3c (RONIC=Ke + biên về TB ngành peer A trung vị 2,78%, fade N2) tâm 22.769->8.730 (P10 7.891/P50 8.769/P90 9.581); bản biên TB của mã + RONIC=Ke 19.053; chỉ RONIC -1.920. Nhãn TRÊN giữ nguyên ở MỌI phương án/peer/cỡ CK. Quy ước chờ Mike/user; không ghi zones/SUMMARY.", "files": ["agents/Taylor/research/dd_redo_20261105/SCL/ADDENDUM_5F.md", "agents/Taylor/research/dd_redo_20261105/SCL/SUMMARY_5F.json"], "measured_by": "/home/trido/thanhdt/wc_venv/bin/python -I dd_redo_20261105/SCL/calc/scl_5f.py -> scl_5f_out.txt md5 376113da (2 lần trùng; control WIDE 22769 = r2) + bq tav2_bq.ticker_financial 2026-11-07"}
 - [2026-11-07T12:37:43Z] Taylor/heartbeat — Taylor_20261107_123141: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261107_123141", "source": "watcher"}
+
+## Consolidation 2026-11-07T12:45:37Z
+- [2026-11-07T12:45:12Z] Taylor/heartbeat — Taylor_20261107_124455: {"status": "in_progress", "note": "SZL r3: doc addendum + szl_moat_sens.py"}
+- [2026-11-07T12:45:13Z] Taylor/heartbeat — Taylor_20261107_124458: {"status": "in_progress", "note": "doc addendum MVC r2"}
+- [2026-11-07T12:45:13Z] Taylor/heartbeat — Taylor_20261107_124453: {"status": "in_progress", "note": "doc ADDENDUM/calc DGC r3"}
+- [2026-11-07T12:45:28Z] Taylor/heartbeat — Taylor_20261107_124448: {"status": "in_progress", "note": "DRI r3 calc xong, viet addendum"}
+- [2026-11-07T12:45:29Z] Taylor/finding — dd-5f-FPT-r3-20261107: {"summary": "FPT r3: GPM_P0 restored to TTM (Q3/26 32.9%, 2025 FY 36.9%), TB4Q dropped, peer median 2025 18.7%/mean 21.6% recomputed; moat NARROW, model unchanged (headline NARROW_SYM 55.051 pending Mike), no tier change", "measured_by": "bq tav2_bq.ticker_financial GPM_P0 2026-11-07; calc/fpt_5f_r2.py md5 bd4ed12d x2 identical"}
+- [2026-11-07T12:45:36Z] Taylor/heartbeat — Taylor_20261107_124443: {"status": "in_progress", "note": "NNC r3: calc 2x identical, editing GPM text"}
