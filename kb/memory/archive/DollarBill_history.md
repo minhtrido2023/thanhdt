@@ -349,3 +349,7 @@
 ## Archived 2026-11-05 (keep=6 days=5 require_done=True)
 - [2026-10-30T12:07:14Z] [2026-10-30 19:xx ICT] Plan SpaceX 11-02 XONG HOLD ALL 0 lenh (MCH ALREADY_HELD); cho user duyet truoc 08:45 02/11; job DollarBill_20261030_120558
 - [2026-10-30T12:07:35Z] [2026-10-30 19:xx ICT] Plan ZaloPay 11-02 XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 02/11 (job DollarBill_20261030_120556)
+
+## Archived 2026-11-07 (keep=6 days=5 require_done=True)
+- [2026-11-01T12:05:33Z] [2026-11-01 19:xx ICT] Plan ZaloPay 11-02 (vong CN) XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 02/11 (job DollarBill_20261101_120459)
+- [2026-11-01T12:05:41Z] [2026-11-01 19:xx ICT] Plan SpaceX 11-02 (vong CN toi) XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 02/11 (job DollarBill_20261101_120500)
