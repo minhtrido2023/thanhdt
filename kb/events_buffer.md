@@ -921,3 +921,13 @@
 
 ## Consolidation 2026-11-07T13:19:41Z
 - [2026-11-07T13:19:39Z] Taylor/heartbeat — Taylor_20261107_131638: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261107_131638", "source": "watcher"}
+
+## Consolidation 2026-11-07T17:20:54Z
+- [2026-11-07T17:20:23Z] Taylor/heartbeat — Taylor_20261107_172001: {"status": "in_progress", "note": "resume HPG 5F fix: ADDENDUM da sua, verify calc r2 + sua SUMMARY_5F.json"}
+- [2026-11-07T17:20:25Z] Taylor/heartbeat — Taylor_20261107_172007: {"status": "in_progress", "note": "resume: doc 5F/ddv_moat_sens out, viet ADDENDUM"}
+- [2026-11-07T17:20:34Z] Taylor/heartbeat — Taylor_20261107_172013: {"status": "in_progress", "note": "resume PVT 5F: doc calc_5f + model_r2"}
+- [2026-11-07T17:20:39Z] Taylor/heartbeat — Taylor_20261107_172009: {"status": "in_progress", "note": "resume: model_5f.py da co output; do lai BQ ROIC/EBITM NT2+peer de viet ADDENDUM"}
+- [2026-11-07T17:20:39Z] Taylor/finding — dd-5f-HHS-fix-20261107: {"ticker": "HHS", "summary": "r1 lech -0,4% RUT; chat-3c KHOANG tam 8.393(A pv4)-9.012(B pv2,5)-9.700(C pv2,5 tru KH tra truoc 3.099) vs 10.387 (-19,2..-6,6%), % duoi gia 35,2%->50,8-79,8%, nhan TRONG x3 giu; ROIC hong 2 phia (doi xung artifact, ket luan khong ben dua (iii)); GOV_AX E=-4,0% nam trong tam (brief ghi -3,75: do lai 0.2*5+0.15*10+0.1*15=4,0); I.14 doi xung bat buoc luat 20; tier note IDC/NTC ROIC_Min5Y 6,3/4,0% van NARROW, DTD 13,3%/SZL 10,2% (khong phai 4-6%), NONE=NARROW ve gia tri; CHO Mike chon quy uoc A/B/C + skeptic", "files": ["research/dd_redo_20261105/HHS/ADDENDUM_5F.md", "research/dd_redo_20261105/HHS/SUMMARY_5F.json"], "measured_by": "5F/moat_fix_r2.py -> moat_fix_r2_out.txt md5 f9dd1286 (2 lan trung byte 08/11)"}
+- [2026-11-07T17:20:42Z] Taylor/finding — dd-5f-MBB-fix-20261107: {"summary": "MBB 5F r2: NARROW không bền, model_changed; chặt-3c tâm 23.804->17.677-18.394 (26 NH trung vị 12,97%..Ke), P10 12.112 P90 24.434, 64,3% dưới giá, giá +8,9% trên tâm, nhãn TRONG giữ; NONE sửa cộng ΔROE (P10 15.109->12.871<WIDE); evidence gaps + ROE_Min10Y vendor note ghi; quy ước chờ Mike duyệt", "files": ["agents/Taylor/research/dd_redo_20261105/MBB/ADDENDUM_5F.md", "agents/Taylor/research/dd_redo_20261105/MBB/SUMMARY_5F.json"], "out_md5": "2fa0a17b0c116fd74802483272ef8218 (2 lần trùng byte)", "measured_by": "$DNA_PYEXE -I MBB/calc_5f/mbb_5f.py (x2) -> calc_5f/mbb_5f_out.txt"}
+- [2026-11-07T17:20:47Z] Taylor/heartbeat — Taylor_20261107_172014: {"status": "in_progress", "note": "resume TV2 3c: script moat_5f_tv2.py co, thieu CSV BQ -> query lai"}
+- [2026-11-07T17:20:48Z] Taylor/heartbeat — Taylor_20261107_172011: {"status": "in_progress", "note": "PVP resume: calc/5f da co tu phien truoc; lay so ROIC/peer + viet ADDENDUM"}

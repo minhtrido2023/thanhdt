@@ -36,3 +36,5 @@
 - [2026-11-07T13:07:49Z] [dd-5f HHS 07/11] XONG job Taylor_20261107_130213: NONE/LOCATION làm mới; chặt-3c chỉ I.14 đối xứng, tâm 10.387->10.346, nhãn TRONG; CHỜ Mike skeptic + duyệt dòng moat_tags (entry L vs VHM H)
 - [2026-11-07T13:07:56Z] [dd-5f MBB 07/11] XONG job Taylor_20261107_130206: NARROW làm mới, không bền; chặt-3c tâm 23.804->20.459 (RONIC=Ke -3.636), nhãn TRONG giữ; CHỜ Mike skeptic + duyệt quy ước (peer trung vị 23 NH, N5)
 - [2026-11-07T13:18:40Z] [dd-5f TCH fix 07/11] XONG job Taylor_20261107_131628: biên backlog→ngành, chặt-3c đầy đủ 13.122–13.407 (−2,6…−4,7%), nhãn TRONG; CHỜ Mike duyệt quy ước
+- [2026-11-07T17:20:39Z] [dd-5f HHS fix 08/11] XONG job Taylor_20261107_172005: chặt-3c KHOẢNG tâm 8.393–9.700 (A/B/C quy ước chiết khấu giá gốc HTK), nhãn TRONG; CHỜ Mike chọn A/B/C + skeptic; đề nghị rà TCH v2 cùng lỗi
+- [2026-11-07T17:20:42Z] [dd-5f MBB fix 07/11] XONG job Taylor_20261107_172003: chặt-3c tâm 17.677-18.394, nhãn TRONG; CHỜ Mike skeptic + duyệt quy ước
