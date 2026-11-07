@@ -2065,3 +2065,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-05T17:20:36Z] [ta-model-5pct 06/11] XONG job Taylor_20261105_171103 NO-GO (research/ta_model_5pct_20261106); CHỜ Mike quant-skeptic
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T01:30:15Z] ĐANG DỞ: crisis-DD DRI ngày5 job Taylor_20261106_013001 | NEXT: đọc DOSSIER, tin mới, dd-note

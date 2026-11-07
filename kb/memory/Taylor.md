@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-06T01:30:15Z] ĐANG DỞ: crisis-DD DRI ngày5 job Taylor_20261106_013001 | NEXT: đọc DOSSIER, tin mới, dd-note
 - [2026-11-06T01:31:23Z] [crisis-dd HT1 06/11] FINAL NOISE ghi xong (notes/final.json), GIỮ, đề xuất đóng hồ sơ; user quyết
 - [2026-11-06T01:33:20Z] [crisis-dd DRI 06/11] XONG ngày5 (không cờ, GIỮ) — mới: NQ25 Dakruco soi GCN đầu tư Lào của DRI; Dakmoruco lệch vốn 79+48,1 tỷ; chờ SXKD T10 ~10/11
 - [2026-11-06T07:21:05Z] ĐANG DỞ job Taylor_20261106_072056: nhánh DISCRETIONARY auto_exit (FPT/NNC ±10%/25 phiên) | NEXT: worktree, code, selfcheck
@@ -26,3 +25,4 @@
 - [2026-11-07T12:09:45Z] [dd-5f DCM 07/11] XONG job Taylor_20261107_120603: NARROW COST/LOCATION, không bền, model không đổi; CHỜ Mike fundamental-skeptic + duyệt dòng moat_tags
 - [2026-11-07T12:10:08Z] [dd-5f TV1 07/11] XONG job Taylor_20261107_120558: NARROW tai dung; de xuat terminal tu van fade ve 6% => tam -13,2%, nhan TRONG->TREN (mong manh); CHO Mike quyet + skeptic
 - [2026-11-07T12:10:30Z] [dd-5f DRI 07/11] XONG job Taylor_20261107_120601: NARROW tái dùng, model không đổi; CHỜ Mike skeptic + quyết dòng moat_tags đề xuất
+- [2026-11-07T12:26:51Z] [dd-5f FPT r2 07/11] XONG job Taylor_20261107_122439: headline NARROW_SYM 55.051 (quy ước chờ Mike), downside 52.238; CHỜ Mike skeptic/quyết zones
