@@ -2062,3 +2062,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-05T17:11:13Z] ĐANG DỞ: TA model ±5% job Taylor_20261105_171103 → agents/Taylor/research/ta_model_5pct_20261106/ | NEXT: tra NO-GO, data_registry universe_pit, lấy data, backtest
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-05T17:20:36Z] [ta-model-5pct 06/11] XONG job Taylor_20261105_171103 NO-GO (research/ta_model_5pct_20261106); CHỜ Mike quant-skeptic
