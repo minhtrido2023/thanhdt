@@ -222,6 +222,12 @@ def d_sbw(cfg, warns):
     return out
 
 
+# Câu hỏi bus do CHÍNH hạ tầng tự sinh (checker Wags / selfcheck / retro-draft) — Wags/Mike xử lý, KHÔNG phải
+# việc "chờ user quyết". Giữ đồng bộ với bin/daily_decision_topic.py (NOISE_TOPIC_RE).
+AUTO_NOISE_RE = re.compile(r"^(selfcheck-red|wake|wags-fix-not-confirmed|wags-autofix-review-needed|"
+                           r"wags-arch-review-round2-unresolved|daily-retro-draft-failed)")
+
+
 def d_busq(cfg, warns):
     if not os.path.exists(cfg.audit):
         warns.append("thiếu bus_question_audit.py")
@@ -234,10 +240,14 @@ def d_busq(cfg, warns):
         warns.append("bus_question_audit lỗi: %s" % e)
         return []
     out = []
+    seen = set()
     for q in data.get("pending", []):
         ag, tp = q.get("agent") or "?", q.get("topic") or "?"
+        if (ag, tp) in seen:  # cùng agent/topic đăng lặp (retro_escalate) = 1 câu, không phải 2
+            continue
+        seen.add((ag, tp))
         ts = (q.get("ts") or "")[:10] or None
-        auto = tp.startswith("selfcheck-red") or tp.startswith("wake")
+        auto = bool(AUTO_NOISE_RE.match(tp))
         low = tp.lower()
         br = ("Portfolio/Rủi ro & gate" if any(k in low for k in ("plan-", "nav", "gate")) and not auto
               else "Operation/Sự cố & retro")

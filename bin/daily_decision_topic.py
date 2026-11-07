@@ -117,14 +117,36 @@ def work_tree_section(now, root=None):
         nums = [int(c[k]) for k in ("need_user", "overdue", "recent", "inbox")]
     except Exception:
         return None
+    # Độ tươi: cây phải (a) build hôm nay và (b) đã được xác minh với thực tế hôm nay — nếu không, nói thẳng thay vì
+    # trình số như thật (ca 2026-11-07: cây hiện việc đã xong là "chờ quyết").
+    day = f"{now:%Y-%m-%d}"
+    try:
+        built = str(json.load(open(os.path.join(root, "state", "work_tree", "merged.json"), encoding="utf-8"))
+                    .get("generated_at", ""))[:10]
+    except Exception:
+        built = ""
+    ver = os.path.exists(os.path.join(root, "state", "work_tree", f"verified_{day}"))
+    fresh = "" if (built == day and ver) else (
+        f" ⚠️ **chưa xác nhận tươi** ({'build cũ ' + built if built != day else 'chưa xác minh với thực tế hôm nay'})")
     return (f"🌳 **Cây việc**: chờ anh quyết **{nums[0]}** · quá hạn **{nums[1]}** · mới 7 ngày **{nums[2]}** · "
-            f"anh đã gửi chờ xử lý **{nums[3]}** → {base.rstrip('/')}/?k={urllib.parse.quote(token, safe='')}")
+            f"anh đã gửi chờ xử lý **{nums[3]}**{fresh} → {base.rstrip('/')}/?k={urllib.parse.quote(token, safe='')}")
+
+
+# Câu hỏi bus do hạ tầng tự sinh — không phải việc "chờ user quyết". Giữ đồng bộ với work_tree_build.AUTO_NOISE_RE.
+NOISE_TOPIC_RE = re.compile(r"^(selfcheck-red|wake|wags-fix-not-confirmed|wags-autofix-review-needed|"
+                            r"wags-arch-review-round2-unresolved|daily-retro-draft-failed)")
 
 
 def build(now):
     pend = pending_questions()
-    noise = [p for p in pend if p["topic"].startswith("selfcheck-red")]
-    real = [p for p in pend if p not in noise]
+    noise = [p for p in pend if NOISE_TOPIC_RE.match(p["topic"])]
+    real, _seen = [], set()
+    for p in pend:  # bỏ nhiễu + gộp câu đăng lặp cùng agent/topic
+        k = (p["agent"], p["topic"])
+        if p in noise or k in _seen:
+            continue
+        _seen.add(k)
+        real.append(p)
     real.sort(key=lambda p: (-p["age_days"], p["topic"]))
     det = question_details(real)
     lines = [f"**Việc cần anh quyết — {now:%d.%m.%Y}**", ""]
@@ -157,7 +179,7 @@ def build(now):
     if not real:
         lines.append("Không có câu nào đang mở.")
     lines.append("")
-    lines.append(f"**C. Nhiễu tự động**: {len(noise)} câu `selfcheck-red` đang mở (Wags xử lý, không cần anh quyết).")
+    lines.append(f"**C. Nhiễu tự động**: {len(noise)} câu hạ tầng tự sinh (`selfcheck-red`, `wags-*`, `daily-retro-draft-failed`) đang mở — Wags/Mike xử lý, không cần anh quyết.")
     lines.append("")
     lines.append(funnel_section())
     lines.append("")
