@@ -39,3 +39,5 @@
 - [2026-11-07T17:20:39Z] [dd-5f HHS fix 08/11] XONG job Taylor_20261107_172005: chặt-3c KHOẢNG tâm 8.393–9.700 (A/B/C quy ước chiết khấu giá gốc HTK), nhãn TRONG; CHỜ Mike chọn A/B/C + skeptic; đề nghị rà TCH v2 cùng lỗi
 - [2026-11-07T17:20:42Z] [dd-5f MBB fix 07/11] XONG job Taylor_20261107_172003: chặt-3c tâm 17.677-18.394, nhãn TRONG; CHỜ Mike skeptic + duyệt quy ước
 - [2026-11-07T17:21:15Z] [dd-5f HPG fix r2 08/11] XONG job Taylor_20261107_172001: neo ROE nam peer 8,91-9,80%, chat-3c tam 12.580-13.705, TREN (hoa von neo 14,07%); CHO Mike duyet quy uoc neo + phat DQ2
+- [2026-11-07T17:22:33Z] [dd-5f DDV 07/11] XONG job Taylor_20261107_172007: NONE làm mới; chặt-3c tâm 13.109->11.187-11.937, nhãn TRONG->TRÊN (nhạy peer: đủ 7 peer giữ TRONG); CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags
+- [2026-11-07T17:22:52Z] [dd-5f PVT 07/11] XONG job Taylor_20261107_172013: NONE làm mới; chặt-3c tâm 17.675->16.492 (peer 14.791-16.829), TRONG->TRÊN mong manh; CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags
