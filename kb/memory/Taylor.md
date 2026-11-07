@@ -27,3 +27,4 @@
 - [2026-11-07T12:37:34Z] [dd-5f SCL 07/11] XONG job Taylor_20261107_123141: NONE làm mới, headline chặt-3c 22.769->8.730 (bản TB-của-mã 19.053), nhãn TRÊN giữ; CHỜ Mike skeptic + chọn neo TB ngành vs TB mã
 - [2026-11-07T12:48:42Z] [dd-5f DGC r3 07/11] XONG job Taylor_20261107_124453: headline khoang 37.916-39.306 (CAP vs doi xung), nhan TRONG; CHO Mike skeptic + chon quy uoc
 - [2026-11-07T12:49:02Z] [dd-5f SZL r3 07/11] XONG job Taylor_20261107_124455: sua RONIC=Ke huu han, chat-3c 24.868, 5 ty TREN mong manh/40tr TRONG; CHO Mike skeptic + duyet quy uoc (TB rieng SZL, cua so bien)
+- [2026-11-07T12:49:33Z] [dd-5f MVC r3 07/11] XONG job Taylor_20261107_124458: tier de xuat NARROW(khong ben)/LOCATION, so dinh gia khong doi (CHAT-3C 13.010, TRONG); CHO Mike skeptic + quyet tier/quy uoc
