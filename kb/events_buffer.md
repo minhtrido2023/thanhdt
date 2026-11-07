@@ -611,3 +611,17 @@
 
 ## Consolidation 2026-11-07T11:07:02Z
 - [2026-11-07T10:31:15Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54746}
+
+## Consolidation 2026-11-07T12:07:01Z
+- [2026-11-07T11:15:51Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12991}
+- [2026-11-07T12:06:11Z] Taylor/heartbeat — Taylor_20261107_120553: {"status": "in_progress", "note": "doc REPORT_r2 + moat_tags (FPT asof 2026-06-05, reuse)"}
+- [2026-11-07T12:06:16Z] Taylor/heartbeat — Taylor_20261107_120558: {"status": "in_progress", "note": "doc skill 3c, moat_tags TV1 asof 2026-06-05 (<12m => tai dung), doc REPORT_r2"}
+- [2026-11-07T12:06:17Z] Taylor/heartbeat — Taylor_20261107_120556: {"status": "in_progress", "note": "doc REPORT_r2 + moat tag NNC (asof 2026-06-05 <12m => reuse)"}
+- [2026-11-07T12:06:18Z] Taylor/heartbeat — Taylor_20261107_120601: {"status": "in_progress", "note": "doc skill/5F/REPORT DRI"}
+- [2026-11-07T12:06:28Z] Taylor/heartbeat — Taylor_20261107_120603: {"status": "in_progress", "note": "tra moat_tags (DCM chua co) + doc REPORT_r5"}
+- [2026-11-07T12:06:47Z] Taylor/heartbeat — Taylor_20261107_120601: {"status": "in_progress", "note": "lay so ROIC/GPM DRI vs peer"}
+- [2026-11-07T12:06:51Z] Taylor/heartbeat — Taylor_20261107_120556: {"status": "in_progress", "note": "engine r5/r4: DCF huu han 2027-2043, 3 trang thai bien = moat da ngam; lay ROIC BQ"}
+- [2026-11-07T12:06:52Z] Taylor/heartbeat — Taylor_20261107_120603: {"status": "in_progress", "note": "model = perpetuity bien TB chu ky, RONIC=r; dang lay ROIC/GPM DCM vs DPM tu BQ"}
+- [2026-11-07T12:06:54Z] Taylor/heartbeat — Taylor_20261107_120553: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_120553", "source": "watcher"}
+- [2026-11-07T12:06:57Z] Taylor/heartbeat — Taylor_20261107_120556: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_120556", "source": "watcher"}
+- [2026-11-07T12:06:59Z] Taylor/heartbeat — Taylor_20261107_120558: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_120558", "source": "watcher"}
