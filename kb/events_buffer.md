@@ -770,3 +770,9 @@
 ## Consolidation 2026-11-07T12:46:09Z
 - [2026-11-07T12:45:58Z] Taylor/finding — dd-5f-DRI-r3-20261107: {"moat_tier": "NARROW", "model_changed": false, "gpm_fix": "GPM_P0 Q4 (TTM) dung thang, gap median 11,70pp (r2 12,06)", "NONE_tight": {"centre": 10883, "label": "TREN"}, "NONE_half": 12488, "current": 14092, "peer_range": "10840-12054", "measured_by": "agents/Taylor/research/dd_redo_20261105/DRI/calc_5f/moat_sens_5f_out.txt (2 lan md5 b8792326)"}
 - [2026-11-07T12:45:59Z] Taylor/heartbeat — Taylor_20261107_124458: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_124458", "source": "watcher"}
+
+## Consolidation 2026-11-07T12:46:37Z
+- [2026-11-07T12:46:19Z] Taylor/heartbeat — Taylor_20261107_124458: {"status": "in_progress", "note": "kiem V_NNC chat + BQ GPM Q4/ROIC v1"}
+- [2026-11-07T12:46:24Z] Taylor/heartbeat — Taylor_20261107_124455: {"status": "in_progress", "note": "SZL r3: backup r2 xong, sua val() RONIC=Ke"}
+- [2026-11-07T12:46:26Z] Taylor/finding — dd-5f-TV1-r3-20261107: {"summary": "TV1 r3: NARROW giữ, không bền; neo peer EBITM_P0 TTM Q4 trung vị 6,71%/TB 7,35% (r2 sai 6,0/6,77); tâm 15.379→13.804 (-10,2%) / 14.218 (-7,5%) CK5 tỷ; nhãn RANH GIỚI (1/6 ô TRÊN, P90 19.599 vs giá 19.600)", "measured_by": "calc/moat_5f_tv1_r3.py x2 md5 trùng -> calc/moat_5f_tv1_r3_out.json; bq ticker_financial TV1-4 dòng Q4"}
+- [2026-11-07T12:46:35Z] Taylor/heartbeat — Taylor_20261107_124453: {"status": "in_progress", "note": "ttm.py r3 xong (GPM_P0 Q4 thang), dang chay moat_sens cap mot chieu"}
