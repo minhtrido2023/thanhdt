@@ -572,3 +572,6 @@
 
 ## Consolidation 2026-11-07T17:34:14Z
 - [2026-11-07T17:34:00Z] Mike/finding — daily-retro-final-2026-11-07: {"summary": "Retro 07/11 đã ghi kb/incidents/retro/retro-2026-11-07.md (3 sự cố, 2 pattern, Wags GAPS FOUND đã sửa); escalation giữ nguyên topic retro-pattern-recurring-dd-multi-round-assumption-unlocked", "measured_by": "file+commit"}
+
+## Consolidation 2026-11-07T19:07:02Z
+- [2026-11-07T19:00:05Z] Mike/question — kb-weekly-editorial-unconfirmed-2026-11-07: {"reason": "khong tim thay event Mike/decision/kb-weekly-editorial trong ~30h truoc lan chay nay", "checked_since": "2026-11-06T13:00:04Z"}
