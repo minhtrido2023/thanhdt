@@ -652,3 +652,7 @@
 
 ## Consolidation 2026-11-07T12:09:50Z
 - [2026-11-07T12:09:40Z] Taylor/finding — dd-5f-DCM-20261107: {"ticker": "DCM", "moat_tier": "NARROW", "moat_type": "COST/LOCATION", "moat_durable": false, "reused": false, "model_changed": false, "centre": 24326, "sensitivity": {"WIDE_220": 27330, "WIDE_277": 31534, "NARROW": 24314, "NONE_fade2035": 23056, "NONE_fade_now": 20850}, "label": "khong doi - tren vung gia tri moi kich ban @33000", "risk1": "gia/khoi luong khi sau 2027/2032 do PVN/PV GAS quyet", "evidence": "ROE TB 2016-20 9.8% < Ke 13.5%; ROE_Min5Y 10.8%; ROIC_Min5Y 6.3%", "files": "agents/Taylor/research/dd_DCM_20261104/ADDENDUM_5F.md, SUMMARY_5F.json", "moat_tag_row": "de xuat trong ADDENDUM §5, chua ghi", "measured_by": "calc/moat_sens_5f.py -> calc/moat_sens_5f_out.txt; bq tav2_bq.ticker_financial DCM/DPM Q4 2014-2025"}
+
+## Consolidation 2026-11-07T12:10:05Z
+- [2026-11-07T12:09:59Z] Taylor/heartbeat — Taylor_20261107_120558: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_120558", "source": "watcher"}
+- [2026-11-07T12:10:02Z] Taylor/heartbeat — Taylor_20261107_120601: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261107_120601", "source": "watcher"}
