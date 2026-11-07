@@ -2080,3 +2080,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-06T07:33:39Z] [disc-exit 06/11] XONG job Taylor_20261106_072056: outer ead44c734 + mike 984d998d4 (nhánh session/disc-exit-20261106); CHỜ Mike arch-review; merge repo ngoài trước; chưa latch phần dư TARGET
+
+## Archived 2026-11-07 (keep=12 days=0 require_done=False)
+- [2026-11-06T07:45:30Z] [disc-exit r2 06/11] XONG job Taylor_20261106_074239: outer 0a93c22e4 + mike 1f6660397; CHỜ Mike re-review; chưa merge/cron; mixed-book=block, floor tắt
