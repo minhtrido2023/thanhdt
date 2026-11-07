@@ -1,0 +1,61 @@
+{
+ "fleet_cyc_proxy": 345.6899123809524,
+ "w_mean_ebitda": 382.5,
+ "k": 0.9037644768129475,
+ "CUR": {
+  "center_post": 22366,
+  "p10_out": 12702,
+  "p50_out": 22377,
+  "p90_out": 32834,
+  "pct_weight_below_price": 0.30600000000000005,
+  "label": "TRONG vùng"
+ },
+ "A_ebitda_cycle": {
+  "center_post": 21217,
+  "p10_out": 11796,
+  "p50_out": 21303,
+  "p90_out": 31428,
+  "pct_weight_below_price": 0.332,
+  "label": "TRONG vùng"
+ },
+ "B_npv0": {
+  "center_post": 23802,
+  "p10_out": 19638,
+  "p50_out": 23506,
+  "p90_out": 27955,
+  "pct_weight_below_price": 0.030000000000000002,
+  "label": "DƯỚI vùng"
+ },
+ "AB": {
+  "center_post": 22653,
+  "p10_out": 18917,
+  "p50_out": 22444,
+  "p90_out": 26471,
+  "pct_weight_below_price": 0.04,
+  "label": "DƯỚI vùng"
+ },
+ "WIDE_hyp": {
+  "center_post": 26194,
+  "p10_out": 18022,
+  "p50_out": 26105,
+  "p90_out": 36688,
+  "pct_weight_below_price": 0.14650000000000002,
+  "label": "TRONG vùng"
+ },
+ "A_sleeve40": {
+  "center_post": 21611,
+  "p10_out": 12016,
+  "p50_out": 21699,
+  "p90_out": 32012,
+  "pct_weight_below_price": 0.332,
+  "label": "TRONG vùng"
+ },
+ "CUR_sleeve40": {
+  "center_post": 22782,
+  "p10_out": 12937,
+  "p50_out": 22793,
+  "p90_out": 33444,
+  "pct_weight_below_price": 0.29800000000000004,
+  "label": "TRONG vùng"
+ }
+}

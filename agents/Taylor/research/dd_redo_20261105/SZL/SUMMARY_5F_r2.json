@@ -1,0 +1,141 @@
+{
+ "ticker": "SZL",
+ "job": "Taylor_20261107_123133",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION",
+ "risk1": "quỹ đất KCN Long Thành ~92% lấp đầy + thời hạn 2053; tăng trưởng phụ thuộc Long Phước (XDCB 407 tỷ) chưa có hợp đồng",
+ "reused": true,
+ "source_asof": "2026-06-05 (data/moat_tags.csv, src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i": false,
+  "ii": true,
+  "iii": false,
+  "roic": {
+   "ROIC_Min5Y": 0.102,
+   "ROIC5Y": 0.137,
+   "ROIC3Y": 0.138,
+   "ROIC10Y": 0.126,
+   "ROIC_Min10Y": 0.08,
+   "ke": 0.135
+  },
+  "roe": {
+   "ROE_Trailing": 0.243,
+   "ROE_Min5Y": 0.167
+  }
+ },
+ "model_changed": true,
+ "model_changed_note": "mô hình hiện hành (REPORT_r2) KHÔNG nhất quán 3c: RONIC ngầm ∞ (g không tái đầu tư) + biên TTM 39,0% > TB chu kỳ SZL 33,6%; headline = BẢN CHẶT-3C, quy ước chờ Mike/user duyệt; REPORT/SUMMARY cũ không sửa",
+ "convention_pending": [
+  "TB chu kỳ dùng của riêng SZL (peer KCN GPM khác định nghĩa: trung vị 49,1%/TB 46,0%)",
+  "RONIC=Ke áp cả phần g ~ lạm phát (miễn g<=2% => tâm 26.981 TRONG)"
+ ],
+ "old": {
+  "center": 32391,
+  "p10": 28966,
+  "p50": 32162,
+  "p90": 36075,
+  "pct_w_below_px": 0.0344,
+  "label_5bn": "DUOI vung (<P10)",
+  "label_sleeve40": "DUOI",
+  "p90_sleeve40": 37499
+ },
+ "new": {
+  "center": 24423,
+  "p10": 22499,
+  "p50": 24341,
+  "p90": 26477,
+  "pct_w_below_px": 0.9695,
+  "label_5bn": "TREN vung (>P90)",
+  "label_sleeve40": "TREN",
+  "p90_sleeve40": 27522
+ },
+ "decomposition": {
+  "total": -7968,
+  "margin_then_ronic": [
+   -4079,
+   -3889
+  ],
+  "ronic_then_margin": [
+   -4813,
+   -3155
+  ]
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 33691,
+   "p10": 29810,
+   "p50": 33484,
+   "p90": 38379,
+   "pct_w_below_px": 0.0109,
+   "label_5bn": "DUOI vung (<P10)",
+   "label_sleeve40": "DUOI",
+   "p90_sleeve40": 39894
+  },
+  "NARROW_current": {
+   "center": 32391,
+   "p10": 28966,
+   "p50": 32162,
+   "p90": 36075,
+   "pct_w_below_px": 0.0344,
+   "label_5bn": "DUOI vung (<P10)",
+   "label_sleeve40": "DUOI",
+   "p90_sleeve40": 37499
+  },
+  "NARROW_strict3c": {
+   "center": 24423,
+   "p10": 22499,
+   "p50": 24341,
+   "p90": 26477,
+   "pct_w_below_px": 0.9695,
+   "label_5bn": "TREN vung (>P90)",
+   "label_sleeve40": "TREN",
+   "p90_sleeve40": 27522
+  },
+  "NARROW_strict_gfree2": {
+   "center": 26981,
+   "p10": 24726,
+   "p50": 26705,
+   "p90": 29593,
+   "pct_w_below_px": 0.6668,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p90_sleeve40": 30761
+  },
+  "R_only": {
+   "center": 27578,
+   "p10": 25197,
+   "p50": 27476,
+   "p90": 30120,
+   "pct_w_below_px": 0.5477,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p90_sleeve40": 31309
+  },
+  "M_only": {
+   "center": 28312,
+   "p10": 25545,
+   "p50": 28127,
+   "p90": 31295,
+   "pct_w_below_px": 0.4207,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p90_sleeve40": 32530
+  },
+  "NONE": {
+   "center": 24156,
+   "p10": 22279,
+   "p50": 24134,
+   "p90": 26033,
+   "pct_w_below_px": 0.9906,
+   "label_5bn": "TREN vung (>P90)",
+   "label_sleeve40": "TREN",
+   "p90_sleeve40": 27060
+  }
+ },
+ "label_note": "chặt-3c: TRÊN ở 5 tỷ; ở 40 tr TRÊN nhưng RANH GIỚI (P90 27.522 vs giá 27.650)",
+ "price": 27650,
+ "price_date": "2026-11-04",
+ "proposed_moat_tag_row": "SZL,NARROW,LOCATION,M,\"Sonadezi Long Thanh IP beside Long Thanh airport = scarce-land LOCATION; NOT durable: (i) ROIC_Min5Y 10.2% / ROIC10Y 12.6% / ROIC_Min10Y 8.0% < Ke 13.5% (ROIC5Y 13.7% ~Ke; ROE 24% flattered by prepaid-lease float), (iii) land bank ~92% leased + term to 2053 (unverified). #1 risk: growth hinges on Long Phuoc CIP 407bn with no lease contracts; GPM TTM 39.0% > own cycle 33.6% = cycle/mix not moat; State land-rent accrual 44.3bn unsettled\",2026-11-07,5f_reuse_quickcheck,Y",
+ "measured_by": "5F/szl_moat_sens.py -> 5F/szl_moat_sens_out.json (md5 out.txt 6634a9ed); 5F/szl_5f_stats.py -> 5F/szl_5f_stats_out.txt; BQ ticker_financial 07/11/2026"
+}

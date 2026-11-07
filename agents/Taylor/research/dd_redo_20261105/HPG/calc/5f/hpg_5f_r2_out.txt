@@ -1,0 +1,35 @@
+r 13.50% | d_ref 5ty 0.1499%
+ROE nam quan sat (Q4 ROE_Trailing) TB 2016-25 / trung vi: {'HSG': (0.1566, 0.0829, 10), 'NKG': (0.1563, 0.0526, 10), 'VGS': (0.1205, 0.1165, 10), 'SMC': (0.0578, 0.1242, 10), 'TLH': (0.051, 0.0289, 10), 'TVN': (0.0461, 0.0582, 10), 'GDA': (0.0793, nan, 3)}
+NEO peer(6, bo GDA): trung vi-cua-TB 0.0891 | TB-cua-TB 0.0980 | trung vi-cua-trung vi 0.0705 | TB co GDA(3 nam) 0.0954
+HPG: TB ROE nam 2016-25 0.2143 | TB 2022-25 0.0964 | ROE5Y vendor x thue 0.1536
+  XAU: ROE_T (CUR) 7.85%
+  TRUNG_LAP: ROE_T (CUR) 11.84%
+  TOT: ROE_T (CUR) 14.25%
+CUR     -    hien hanh r2                           tam 16,286 P10 8,942 P50 16,343 P90 23,520 | gia/P90-1 -7.7% | nhan 5ty TRONG vùng / 10tr TRONG vùng / 40tr TRONG vùng
+SYM     -    chi RONIC=Ke                           tam 16,016 P10 8,942 P50 16,343 P90 22,321 | gia/P90-1 -2.8% | nhan 5ty TRONG vùng / 10tr TRONG vùng / 40tr TRONG vùng
+NONE    -    spread fade 5 nam                      tam 17,656 P10 13,625 P50 17,789 P90 21,204 | gia/P90-1 +2.3% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.0705 REV neo peer trung vi-cua-trung vi     tam 10,228 P10 8,516 P50 10,297 P90 11,871 | gia/P90-1 +82.8% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.0790 REV neo 7.9%                           tam 11,298 P10 9,416 P50 11,381 P90 13,097 | gia/P90-1 +65.7% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.0891 REV neo peer trung vi-cua-TB           tam 12,580 P10 10,576 P50 12,655 P90 14,512 | gia/P90-1 +49.5% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.0950 REV neo 9.5%                           tam 13,320 P10 11,257 P50 13,399 P90 15,318 | gia/P90-1 +41.7% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.0954 REV neo peer TB co GDA                 tam 13,367 P10 11,301 P50 13,447 P90 15,369 | gia/P90-1 +41.2% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.0964 REV neo HPG TB 2022-25                 tam 13,492 P10 11,417 P50 13,574 P90 15,505 | gia/P90-1 +40.0% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.0980 REV neo peer TB-cua-TB                 tam 13,705 P10 11,601 P50 13,791 P90 15,737 | gia/P90-1 +37.9% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.1159 REV neo 11.6% (r1 vendor TB)           tam 15,962 P10 13,560 P50 16,056 P90 18,241 | gia/P90-1 +19.0% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.1240 REV neo 12.4% (r1 vendor trung vi)     tam 16,986 P10 14,448 P50 17,090 P90 19,395 | gia/P90-1 +11.9% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.1350 REV neo 13.5% = Ke                     tam 18,376 P10 15,654 P50 18,490 P90 20,916 | gia/P90-1 +3.7% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REV   0.1536 REV neo HPG ROE5Y x thue 15.36%        tam 20,732 P10 17,703 P50 20,856 P90 23,492 | gia/P90-1 -7.6% | nhan 5ty TRONG vùng / 10tr TRONG vùng / 40tr TRONG vùng
+REV   0.2143 REV neo HPG TB 2016-25                 tam 28,404 P10 24,415 P50 28,504 P90 32,074 | gia/P90-1 -32.3% | nhan 5ty DƯỚI vùng / 10tr DƯỚI vùng / 40tr DƯỚI vùng
+REVF  0.0705 REVF neo peer trung vi-cua-trung vi    tam 18,376 P10 15,654 P50 18,490 P90 20,916 | gia/P90-1 +3.7% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REVF  0.0891 REVF neo peer trung vi-cua-TB          tam 18,376 P10 15,654 P50 18,490 P90 20,916 | gia/P90-1 +3.7% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REVF  0.0980 REVF neo peer TB-cua-TB                tam 18,376 P10 15,654 P50 18,490 P90 20,916 | gia/P90-1 +3.7% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REVD  0.0705 REVD neo peer trung vi-cua-trung vi    tam 10,838 P10 9,127 P50 10,907 P90 12,481 | gia/P90-1 +73.9% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REVD  0.0891 REVD neo peer trung vi-cua-TB          tam 13,014 P10 11,010 P50 13,089 P90 14,946 | gia/P90-1 +45.2% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+REVD  0.0980 REVD neo peer TB-cua-TB                tam 14,055 P10 11,951 P50 14,141 P90 16,087 | gia/P90-1 +34.9% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng / 40tr TRÊN vùng
+NEO HOA VON nhan TREN->TRONG (P90 = gia 21,700, 5ty): 14.0672%
+LOCK 66dab91f2cbe9cd42176e9ad18126315 HPG/calc/5f/hpg_5f_r2.py
+LOCK ccdd54c6106774a33bf28aadbe028c88 HPG/calc/5f/peer_roe_q4_2016_2025.csv
+LOCK c6c7233a6589db20724d02e6f810879b HPG/calc/hpg_r2.py
+LOCK 89e390381402790204264c5c2ae1254a _common_014125/common.py
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv

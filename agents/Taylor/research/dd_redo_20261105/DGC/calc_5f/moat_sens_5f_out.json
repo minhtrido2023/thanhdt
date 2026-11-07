@@ -1,0 +1,274 @@
+{
+ "ke": 0.135,
+ "px": 33450.0,
+ "d_ref": 0.007123534794358433,
+ "dgc_gpm_ttm_mean_2017_25": 0.30654715910864566,
+ "ind_gpm": {
+  "median_CSV_DDV_LAS_HVT": 0.1917233285294767,
+  "mean_CSV_DDV_LAS_HVT": 0.198512740651526,
+  "median_+VAF": 0.2112184492327438,
+  "median_+BFC_SFG": 0.15560605077708212,
+  "median_+DPM_DCM": 0.2035583005183656,
+  "CSV_only": 0.2719916999438549
+ },
+ "gpm_model_term": {
+  "xau": 0.15005476451259583,
+  "coso": 0.17505051579283207,
+  "tot": 0.18995754107439541
+ },
+ "gpm_model_term_molai": {
+  "xau": 0.2717536813922356,
+  "coso": 0.2813995533340423,
+  "tot": 0.282259553258261
+ },
+ "ind_gpm_r2_method_median": 0.19469782870632454,
+ "dgc_years_above_core_median_2017_25": 8,
+ "variants": {
+  "current": {
+   "center": 44767,
+   "p10": 32518,
+   "p50": 44633,
+   "p90": 57101,
+   "below": 0.122,
+   "label": "TRONG vùng"
+  },
+  "ronic_ke_only": {
+   "center": 43028,
+   "p10": 31762,
+   "p50": 42981,
+   "p90": 54622,
+   "below": 0.148,
+   "label": "TRONG vùng"
+  },
+  "margin_only_median": {
+   "center": 40698,
+   "p10": 33179,
+   "p50": 40646,
+   "p90": 47800,
+   "below": 0.105,
+   "label": "TRONG vùng"
+  },
+  "strict3c_half": {
+   "center": 41167,
+   "p10": 32658,
+   "p50": 41168,
+   "p90": 49936,
+   "below": 0.122,
+   "label": "TRONG vùng"
+  },
+  "strict3c_median_CSV_DDV_LAS_HVT": {
+   "center": 39306,
+   "p10": 32005,
+   "p50": 39337,
+   "p90": 46111,
+   "below": 0.149,
+   "label": "TRONG vùng"
+  },
+  "strict3c_mean_CSV_DDV_LAS_HVT": {
+   "center": 40054,
+   "p10": 32626,
+   "p50": 40042,
+   "p90": 47009,
+   "below": 0.123,
+   "label": "TRONG vùng"
+  },
+  "strict3c_median_+VAF": {
+   "center": 41456,
+   "p10": 33855,
+   "p50": 41432,
+   "p90": 48606,
+   "below": 0.085,
+   "label": "DƯỚI vùng"
+  },
+  "strict3c_median_+BFC_SFG": {
+   "center": 35323,
+   "p10": 28361,
+   "p50": 35566,
+   "p90": 41434,
+   "below": 0.335,
+   "label": "TRONG vùng"
+  },
+  "strict3c_median_+DPM_DCM": {
+   "center": 40611,
+   "p10": 33103,
+   "p50": 40547,
+   "p90": 47637,
+   "below": 0.107,
+   "label": "TRONG vùng"
+  },
+  "strict3c_CSV_only": {
+   "center": 48157,
+   "p10": 39669,
+   "p50": 48010,
+   "p90": 56797,
+   "below": 0.006,
+   "label": "DƯỚI vùng"
+  },
+  "wide_ul_ronic25": {
+   "center": 45489,
+   "p10": 32949,
+   "p50": 45467,
+   "p90": 58196,
+   "below": 0.111,
+   "label": "TRONG vùng"
+  },
+  "cap_r2median": {
+   "center": 38377,
+   "p10": 30635,
+   "p50": 38468,
+   "p90": 46092,
+   "below": 0.209,
+   "label": "TRONG vùng"
+  },
+  "strict3c_r2median": {
+   "center": 39634,
+   "p10": 32277,
+   "p50": 39631,
+   "p90": 46514,
+   "below": 0.136,
+   "label": "TRONG vùng"
+  },
+  "cap_median_CSV_DDV_LAS_HVT": {
+   "center": 38213,
+   "p10": 30574,
+   "p50": 38280,
+   "p90": 45700,
+   "below": 0.217,
+   "label": "TRONG vùng"
+  },
+  "cap_mean_CSV_DDV_LAS_HVT": {
+   "center": 38588,
+   "p10": 30727,
+   "p50": 38678,
+   "p90": 46458,
+   "below": 0.204,
+   "label": "TRONG vùng"
+  },
+  "cap_median_+VAF": {
+   "center": 39288,
+   "p10": 30994,
+   "p50": 39440,
+   "p90": 47505,
+   "below": 0.186,
+   "label": "TRONG vùng"
+  },
+  "cap_median_+BFC_SFG": {
+   "center": 35242,
+   "p10": 28326,
+   "p50": 35442,
+   "p90": 41434,
+   "below": 0.345,
+   "label": "TRONG vùng"
+  },
+  "cap_median_+DPM_DCM": {
+   "center": 38866,
+   "p10": 30809,
+   "p50": 39047,
+   "p90": 46991,
+   "below": 0.195,
+   "label": "TRONG vùng"
+  },
+  "cap_CSV_only": {
+   "center": 42458,
+   "p10": 31762,
+   "p50": 42276,
+   "p90": 54006,
+   "below": 0.15,
+   "label": "TRONG vùng"
+  },
+  "cap_median_ke2728": {
+   "center": 37916,
+   "p10": 30400,
+   "p50": 37983,
+   "p90": 45315,
+   "below": 0.226,
+   "label": "TRONG vùng"
+  },
+  "strict3c_median_ke2728": {
+   "center": 39008,
+   "p10": 31749,
+   "p50": 39075,
+   "p90": 45756,
+   "below": 0.157,
+   "label": "TRONG vùng"
+  }
+ },
+ "strict3c_sleeve": {
+  "10tr": {
+   "center": 39575,
+   "p10": 32224,
+   "p50": 39606,
+   "p90": 46427,
+   "below": 0.144,
+   "label": "TRONG vùng"
+  },
+  "20tr": {
+   "center": 39570,
+   "p10": 32220,
+   "p50": 39601,
+   "p90": 46421,
+   "below": 0.144,
+   "label": "TRONG vùng"
+  },
+  "40tr": {
+   "center": 39562,
+   "p10": 32214,
+   "p50": 39594,
+   "p90": 46412,
+   "below": 0.144,
+   "label": "TRONG vùng"
+  }
+ },
+ "cap_ke2728_sleeve": {
+  "10tr": {
+   "center": 38176,
+   "p10": 30609,
+   "p50": 38243,
+   "p90": 45626,
+   "below": 0.216,
+   "label": "TRONG vùng"
+  },
+  "20tr": {
+   "center": 38171,
+   "p10": 30605,
+   "p50": 38238,
+   "p90": 45620,
+   "below": 0.216,
+   "label": "TRONG vùng"
+  },
+  "40tr": {
+   "center": 38163,
+   "p10": 30599,
+   "p50": 38231,
+   "p90": 45611,
+   "below": 0.216,
+   "label": "TRONG vùng"
+  }
+ },
+ "current_sleeve": {
+  "10tr": {
+   "center": 45074,
+   "p10": 32741,
+   "p50": 44939,
+   "p90": 57493,
+   "below": 0.115,
+   "label": "TRONG vùng"
+  },
+  "20tr": {
+   "center": 45068,
+   "p10": 32737,
+   "p50": 44933,
+   "p90": 57485,
+   "below": 0.117,
+   "label": "TRONG vùng"
+  },
+  "40tr": {
+   "center": 45059,
+   "p10": 32731,
+   "p50": 44924,
+   "p90": 57475,
+   "below": 0.117,
+   "label": "TRONG vùng"
+  }
+ }
+}

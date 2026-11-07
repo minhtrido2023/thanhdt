@@ -1,0 +1,384 @@
+{
+ "ticker": "DGC",
+ "job": "Taylor_20261107_124453",
+ "round": 3,
+ "prev": "SUMMARY_5F_r2.json",
+ "moat_tier": "NARROW",
+ "moat_type": "COST/LOCATION",
+ "risk1": "Nguon quang tu chu (tuoi mo chua kiem chung; khai truong 25 dung da mo hinh hoa qua truc quang 0,5) — chinh la co che hao",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (5f_validated_compet)",
+ "moat_durable": false,
+ "durable_basis": "(i) chua kiem chung + tru luong chua kiem chung; KHONG dung khai truong dung (da trong truc quang 0,5 -> tranh dem hai lan)",
+ "durable_checks": {
+  "i": "CHUA KIEM CHUNG: thuan ROIC_Min5Y 17,7%, ROIC10Y 21,4%, ROIC_Trailing>=22,8% (89-93% Q4 2018-20); nguoc ROIC_Min10Y 4,4%, ROIC5Y 10,8-13,4%<Ke 2018-20 mau thuan ROIC_Trailing + cua so phu DT quy gay 2017Q4-2018Q2 (276/164/126 ty)",
+  "ii": "DAT: quang apatit tu khai + P4 quy mo",
+  "iii": "chua loai tru: tuoi mo Field-25 chua kiem chung; han ngach xuat P4 TQ dao duoc"
+ },
+ "model_changed": false,
+ "model_consistent_with_3c": false,
+ "model_moat_channels": [
+  "RONIC 20% > Ke 13,5% (terminal VA 2027-28)",
+  "GPM terminal rieng giu vinh vien (nhanh mo lai 27,2-28,2% vs nganh 19,17%)"
+ ],
+ "headline_strict3c_pending_approval": {
+  "old": {
+   "center": 44767,
+   "p10": 32518,
+   "p50": 44633,
+   "p90": 57101,
+   "below": 0.122,
+   "label": "TRONG vùng"
+  },
+  "range": {
+   "low_cap_ke2728": {
+    "center": 37916,
+    "p10": 30400,
+    "p50": 37983,
+    "p90": 45315,
+    "below": 0.226,
+    "label": "TRONG vùng"
+   },
+   "high_symmetric": {
+    "center": 39306,
+    "p10": 32005,
+    "p50": 39337,
+    "p90": 46111,
+    "below": 0.149,
+    "label": "TRONG vùng"
+   }
+  },
+  "headline": "KHOANG tam ~37.900-39.300 (CAP+2027-28 Ke 37.916 ... doi xung 39.306); nhan TRONG; dau duoi = ban chat dung chu",
+  "delta_center": {
+   "cap_ke2728": -6851,
+   "symmetric": -5461
+  },
+  "split": {
+   "ronic_only": -1739,
+   "margin_only_symmetric": -4069
+  },
+  "label_note": "moi ban CAP TRONG, P10 duoi gia 5-15%; khong sat ranh gioi. Bo framing r2 'sat P10/ranh gioi DUOI'",
+  "symmetric_note": "fade doi xung nang nhanh dung (EBIT terminal xau 713->1.055 ty @19,17%; 1.080 @19,47%) = thuong kich ban mat hao",
+  "r2_reproduction": {
+   "cap_r2median_19_47": {
+    "center": 38377,
+    "p10": 30635,
+    "p50": 38468,
+    "p90": 46092,
+    "below": 0.209,
+    "label": "TRONG vùng"
+   },
+   "symmetric_r2median_19_47": {
+    "center": 39634,
+    "p10": 32277,
+    "p50": 39631,
+    "p90": 46514,
+    "below": 0.136,
+    "label": "TRONG vùng"
+   }
+  },
+  "status": "quy uoc cho Mike/user duyet; KHONG ghi SUMMARY/dd_price_zones"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "desc": "[UL minh hoa] RONIC 25%",
+   "center": 45489,
+   "p10": 32949,
+   "p50": 45467,
+   "p90": 58196,
+   "below": 0.111,
+   "label": "TRONG vùng"
+  },
+  "current": {
+   "center": 44767,
+   "p10": 32518,
+   "p50": 44633,
+   "p90": 57101,
+   "below": 0.122,
+   "label": "TRONG vùng"
+  },
+  "NARROW": {
+   "desc": "RONIC=Ke + nua gap bien (doi xung)",
+   "center": 41167,
+   "p10": 32658,
+   "p50": 41168,
+   "p90": 49936,
+   "below": 0.122,
+   "label": "TRONG vùng"
+  },
+  "NONE": {
+   "desc": "CAP mot chieu min(rieng,nganh) + RONIC=Ke + 2027-28 theo Ke, trung vi 4 peer",
+   "center": 37916,
+   "p10": 30400,
+   "p50": 37983,
+   "p90": 45315,
+   "below": 0.226,
+   "label": "TRONG vùng"
+  },
+  "variants_all": {
+   "current": {
+    "center": 44767,
+    "p10": 32518,
+    "p50": 44633,
+    "p90": 57101,
+    "below": 0.122,
+    "label": "TRONG vùng"
+   },
+   "ronic_ke_only": {
+    "center": 43028,
+    "p10": 31762,
+    "p50": 42981,
+    "p90": 54622,
+    "below": 0.148,
+    "label": "TRONG vùng"
+   },
+   "margin_only_median": {
+    "center": 40698,
+    "p10": 33179,
+    "p50": 40646,
+    "p90": 47800,
+    "below": 0.105,
+    "label": "TRONG vùng"
+   },
+   "strict3c_half": {
+    "center": 41167,
+    "p10": 32658,
+    "p50": 41168,
+    "p90": 49936,
+    "below": 0.122,
+    "label": "TRONG vùng"
+   },
+   "strict3c_median_CSV_DDV_LAS_HVT": {
+    "center": 39306,
+    "p10": 32005,
+    "p50": 39337,
+    "p90": 46111,
+    "below": 0.149,
+    "label": "TRONG vùng"
+   },
+   "strict3c_mean_CSV_DDV_LAS_HVT": {
+    "center": 40054,
+    "p10": 32626,
+    "p50": 40042,
+    "p90": 47009,
+    "below": 0.123,
+    "label": "TRONG vùng"
+   },
+   "strict3c_median_+VAF": {
+    "center": 41456,
+    "p10": 33855,
+    "p50": 41432,
+    "p90": 48606,
+    "below": 0.085,
+    "label": "DƯỚI vùng"
+   },
+   "strict3c_median_+BFC_SFG": {
+    "center": 35323,
+    "p10": 28361,
+    "p50": 35566,
+    "p90": 41434,
+    "below": 0.335,
+    "label": "TRONG vùng"
+   },
+   "strict3c_median_+DPM_DCM": {
+    "center": 40611,
+    "p10": 33103,
+    "p50": 40547,
+    "p90": 47637,
+    "below": 0.107,
+    "label": "TRONG vùng"
+   },
+   "strict3c_CSV_only": {
+    "center": 48157,
+    "p10": 39669,
+    "p50": 48010,
+    "p90": 56797,
+    "below": 0.006,
+    "label": "DƯỚI vùng"
+   },
+   "wide_ul_ronic25": {
+    "center": 45489,
+    "p10": 32949,
+    "p50": 45467,
+    "p90": 58196,
+    "below": 0.111,
+    "label": "TRONG vùng"
+   },
+   "cap_r2median": {
+    "center": 38377,
+    "p10": 30635,
+    "p50": 38468,
+    "p90": 46092,
+    "below": 0.209,
+    "label": "TRONG vùng"
+   },
+   "strict3c_r2median": {
+    "center": 39634,
+    "p10": 32277,
+    "p50": 39631,
+    "p90": 46514,
+    "below": 0.136,
+    "label": "TRONG vùng"
+   },
+   "cap_median_CSV_DDV_LAS_HVT": {
+    "center": 38213,
+    "p10": 30574,
+    "p50": 38280,
+    "p90": 45700,
+    "below": 0.217,
+    "label": "TRONG vùng"
+   },
+   "cap_mean_CSV_DDV_LAS_HVT": {
+    "center": 38588,
+    "p10": 30727,
+    "p50": 38678,
+    "p90": 46458,
+    "below": 0.204,
+    "label": "TRONG vùng"
+   },
+   "cap_median_+VAF": {
+    "center": 39288,
+    "p10": 30994,
+    "p50": 39440,
+    "p90": 47505,
+    "below": 0.186,
+    "label": "TRONG vùng"
+   },
+   "cap_median_+BFC_SFG": {
+    "center": 35242,
+    "p10": 28326,
+    "p50": 35442,
+    "p90": 41434,
+    "below": 0.345,
+    "label": "TRONG vùng"
+   },
+   "cap_median_+DPM_DCM": {
+    "center": 38866,
+    "p10": 30809,
+    "p50": 39047,
+    "p90": 46991,
+    "below": 0.195,
+    "label": "TRONG vùng"
+   },
+   "cap_CSV_only": {
+    "center": 42458,
+    "p10": 31762,
+    "p50": 42276,
+    "p90": 54006,
+    "below": 0.15,
+    "label": "TRONG vùng"
+   },
+   "cap_median_ke2728": {
+    "center": 37916,
+    "p10": 30400,
+    "p50": 37983,
+    "p90": 45315,
+    "below": 0.226,
+    "label": "TRONG vùng"
+   },
+   "strict3c_median_ke2728": {
+    "center": 39008,
+    "p10": 31749,
+    "p50": 39075,
+    "p90": 45756,
+    "below": 0.157,
+    "label": "TRONG vùng"
+   }
+  },
+  "sleeve_cap_ke2728": {
+   "10tr": {
+    "center": 38176,
+    "p10": 30609,
+    "p50": 38243,
+    "p90": 45626,
+    "below": 0.216,
+    "label": "TRONG vùng"
+   },
+   "20tr": {
+    "center": 38171,
+    "p10": 30605,
+    "p50": 38238,
+    "p90": 45620,
+    "below": 0.216,
+    "label": "TRONG vùng"
+   },
+   "40tr": {
+    "center": 38163,
+    "p10": 30599,
+    "p50": 38231,
+    "p90": 45611,
+    "below": 0.216,
+    "label": "TRONG vùng"
+   }
+  },
+  "sleeve_symmetric": {
+   "10tr": {
+    "center": 39575,
+    "p10": 32224,
+    "p50": 39606,
+    "p90": 46427,
+    "below": 0.144,
+    "label": "TRONG vùng"
+   },
+   "20tr": {
+    "center": 39570,
+    "p10": 32220,
+    "p50": 39601,
+    "p90": 46421,
+    "below": 0.144,
+    "label": "TRONG vùng"
+   },
+   "40tr": {
+    "center": 39562,
+    "p10": 32214,
+    "p50": 39594,
+    "p90": 46412,
+    "below": 0.144,
+    "label": "TRONG vùng"
+   }
+  },
+  "sleeve_current": {
+   "10tr": {
+    "center": 45074,
+    "p10": 32741,
+    "p50": 44939,
+    "p90": 57493,
+    "below": 0.115,
+    "label": "TRONG vùng"
+   },
+   "20tr": {
+    "center": 45068,
+    "p10": 32737,
+    "p50": 44933,
+    "p90": 57485,
+    "below": 0.117,
+    "label": "TRONG vùng"
+   },
+   "40tr": {
+    "center": 45059,
+    "p10": 32731,
+    "p50": 44924,
+    "p90": 57475,
+    "below": 0.117,
+    "label": "TRONG vùng"
+   }
+  }
+ },
+ "industry_gpm_ttm_2017_25": {
+  "median_CSV_DDV_LAS_HVT": 0.1917233285294767,
+  "mean_CSV_DDV_LAS_HVT": 0.198512740651526,
+  "median_+VAF": 0.2112184492327438,
+  "median_+BFC_SFG": 0.15560605077708212,
+  "median_+DPM_DCM": 0.2035583005183656,
+  "CSV_only": 0.2719916999438549
+ },
+ "industry_gpm_r2_method_median_WRONG": 0.19469782870632454,
+ "dgc_gpm_ttm_2017_25": 0.30654715910864566,
+ "dgc_years_above_core_median": 8,
+ "dgc_gpm": "TTM GPM 21,9% (2026Q3); bien quy Q3/26 20,5% (BCTC); TTM Q3/25 33,4%, quy Q3/25 31,1% (BCTC, theo Mike 07/11)",
+ "gpm_method": "GPM_P0/EBITM_P0 la TTM (dinh chinh Mike 07/11 19:50): dung thang dong Q4 moi nam; khong TB4Q, khong tinh lai tu chuoi GPM_Pi",
+ "peers_note": "CSV/DDV/LAS/HVT hoa chat/phan lan noi dia, KHONG phai doi thu P4 truc tiep (TQ, khong co du lieu); loai PAT (con hop nhat)",
+ "proposed_moat_tag_row": "DGC,NARROW,COST/LOCATION,M,\"Commodity P4/H3PO4 price-taker vs China; cost edge from captive apatite (TTM GPM Q4-rows 2017-25 30.65% vs domestic chem peer median 19.17%, above 8/9 yrs); TTM GPM 21.9%; quarterly margin Q3/26 20.5% (BCTC) ~ industry while on purchased ore; ROIC_Min10Y 4.4%/ROIC5Y<Ke 2018-20 conflict ROIC_Trailing (data break 2017Q4-18Q2) -> unverified; reserve life + 56% P4 share unverified => not durable (rule 3c: RONIC=Ke, margin capped at industry); Mine-25 halt modelled via ore axis; legal case = WARNING\",2026-11-07,5f_quickcheck_reuse_20260605,Y",
+ "measured_by": "calc_5f/moat_sens_5f.py -> moat_sens_5f_out.json (md5 b7eb8dac, 2 lan trung); calc_5f/ttm.py -> ttm_out.txt (md5 6e62c0f3); calc_5f/dgc_roic_bq.csv (bq ticker_financial)"
+}

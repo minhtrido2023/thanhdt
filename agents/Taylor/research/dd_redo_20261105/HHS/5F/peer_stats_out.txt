@@ -1,0 +1,23 @@
+DEV gpm mean-of-means 37.7 median 37.9 n=14 {'VHM': '39.2/min26.0', 'NLG': '40.1/min28.3', 'KDH': '46.8/min14.7', 'DXG': '54.1/min45.9', 'PDR': '55.3/min24.0', 'DIG': '27.3/min18.1', 'HDG': '48.3/min29.6', 'HDC': '33.2/min17.9', 'NTL': '33.3/min-35.9', 'CEO': '31.3/min14.0', 'SCR': '16.2/min-33.5', 'NVL': '39.4/min0.9', 'KHG': '26.7/min8.4', 'AGG': '36.6/min15.5'}
+DEV roe_tr mean-of-means 13.1 median 12.7 n=13 {'VHM': '29.1/min16.4', 'NLG': '12.4/min6.0', 'KDH': '10.0/min4.6', 'DXG': '12.7/min-1.6', 'PDR': '14.3/min1.5', 'HDG': '20.6/min5.9', 'HDC': '14.9/min3.0', 'NTL': '16.3/min1.0', 'CEO': '8.7/min-2.9', 'SCR': '3.4/min0.1', 'NVL': '8.4/min-11.8', 'KHG': '5.1/min1.1', 'AGG': '14.9/min5.4'}
+AUTO gpm mean-of-means 6.6 median 6.5 n=3 {'HAX': '5.7/min2.9', 'SVC': '6.5/min5.6', 'TMT': '7.6/min-3.2'}
+AUTO roe_tr mean-of-means 7.4 median 14.1 n=3 {'HAX': '19.1/min2.7', 'SVC': '14.1/min1.6', 'TMT': '-11.1/min-185.9'}
+TCH gpm mean-of-means 29.9 median 29.9 n=1 {'TCH': '29.9/min19.0'}
+TCH roe_tr mean-of-means 8.8 median 8.8 n=1 {'TCH': '8.8/min3.1'}
+VHM 2026Q3 ROIC5Y 14.0 ROIC_Min5Y 8.1 ROIC10Y 14.8
+NLG 2026Q3 ROIC5Y 4.0 ROIC_Min5Y -0.5 ROIC10Y 7.9
+KDH 2026Q3 ROIC5Y 7.1 ROIC_Min5Y 4.9 ROIC10Y 9.1
+DXG 2026Q3 ROIC5Y 5.9 ROIC_Min5Y 3.4 ROIC10Y 11.7
+PDR 2026Q3 ROIC5Y 7.0 ROIC_Min5Y 1.0 ROIC10Y 10.7
+DIG 2026Q3 ROIC5Y 3.0 ROIC_Min5Y 0.4 ROIC10Y 4.1
+HDG 2026Q3 ROIC5Y 12.6 ROIC_Min5Y 9.3 ROIC10Y 13.3
+HDC 2026Q3 ROIC5Y 7.9 ROIC_Min5Y -0.2 ROIC10Y 8.2
+NTL 2026Q3 ROIC5Y 22.9 ROIC_Min5Y -2.4 ROIC10Y 19.3
+CEO 2026Q3 ROIC5Y 3.7 ROIC_Min5Y -1.3 ROIC10Y 6.5
+SCR 2026Q3 ROIC5Y -0.9 ROIC_Min5Y -5.6 ROIC10Y 0.4
+NVL 2026Q3 ROIC5Y 0.8 ROIC_Min5Y -1.7 ROIC10Y 2.6
+KHG 2026Q3 ROIC5Y 2.6 ROIC_Min5Y -2.0 ROIC10Y 2.4
+AGG 2026Q3 ROIC5Y 6.6 ROIC_Min5Y 3.0 ROIC10Y 8.8
+HAX 2026Q3 ROIC5Y 7.0 ROIC_Min5Y -0.1 ROIC10Y 6.2
+SVC 2026Q3 ROIC5Y 4.8 ROIC_Min5Y 1.6 ROIC10Y 4.7
+TMT 2026Q3 ROIC5Y -0.6 ROIC_Min5Y -32.1 ROIC10Y 1.0

@@ -1,0 +1,11 @@
+WIDE|cap=None      tam 54,203 P10 32,389 P50 55,182 P90 74,557 | tt 58,579 | %duoi 47.5% | TRONG vùng
+WIDE|cap=0.255     tam 51,902 P10 32,389 P50 54,477 P90 68,258 | tt 56,958 | %duoi 48.3% | TRONG vùng
+WIDE|cap=0.177     tam 50,067 P10 32,389 P50 52,051 P90 64,677 | tt 54,510 | %duoi 55.8% | TRONG vùng
+ONEWAY|cap=None    tam 51,525 P10 32,389 P50 54,908 P90 68,242 | tt 57,110 | %duoi 47.7% | TRONG vùng
+ONEWAY|cap=0.255   tam 49,224 P10 32,389 P50 53,977 P90 60,616 | tt 55,489 | %duoi 49.5% | TRONG vùng
+ONEWAY|cap=0.177   tam 47,389 P10 32,389 P50 51,547 P90 56,436 | tt 53,040 | %duoi 67.9% | TRONG vùng
+SYM|cap=None       tam 55,051 P10 42,312 P50 56,446 P90 68,242 | tt 57,110 | %duoi 38.5% | TRONG vùng
+SYM|cap=0.255      tam 52,749 P10 42,312 P50 55,239 P90 61,067 | tt 55,489 | %duoi 39.9% | TRONG vùng
+SYM|cap=0.177      tam 50,915 P10 42,312 P50 52,870 P90 56,997 | tt 53,040 | %duoi 58.5% | TRONG vùng
+RONIC explicit ngam dinh g1/(1-conv): {'XAU': 0.05, 'CO_SO': 0.36, 'TOT': 0.933}
+Gia 53,900; CK 0.1866%

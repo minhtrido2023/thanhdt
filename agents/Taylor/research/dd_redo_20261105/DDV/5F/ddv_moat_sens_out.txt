@@ -1,0 +1,18 @@
+r=0.1350 px=15200.0 (2026-11-04) d_ref=1.4468% DDV NPM cycle=4.0519% peer med=4.8145% mean=6.4248% exUrea med=3.4961% exUrea mean=3.8314%
+  BFC NPM2015-25=2.8002% years=10
+  DCM NPM2015-25=13.2570% years=11
+  DDV NPM2015-25=4.0519% years=11
+  DGC NPM2015-25=25.4862% years=11
+  DPM NPM2015-25=12.5597% years=11
+  LAS NPM2015-25=3.4961% years=11
+  NFC NPM2015-25=4.8145% years=11
+  SFG NPM2015-25=2.4608% years=11
+  VAF NPM2015-25=5.5853% years=11
+CURRENT_r2 (RONIC 20%, bien DDV) {"centre": 13109, "p10": 10115, "p50": 12823, "p90": 16270, "pct_below": 0.769, "label": "TRONG vùng", "centre_param": 14421, "label_sleeve40": "TRONG vùng"}
+R_only (RONIC=Ke, bien DDV) {"centre": 12430, "p10": 9612, "p50": 12221, "p90": 15417, "pct_below": 0.893, "label": "TRONG vùng", "centre_param": 13691, "label_sleeve40": "TRONG vùng"}
+CHAT3C_med (RONIC=Ke, bien peer trung vi) {"centre": 14136, "p10": 10872, "p50": 13835, "p90": 17519, "pct_below": 0.648, "label": "TRONG vùng", "centre_param": 15533, "label_sleeve40": "TRONG vùng"}
+CHAT3C_mean (RONIC=Ke, bien peer TB) {"centre": 17738, "p10": 13517, "p50": 17267, "p90": 22133, "pct_below": 0.25, "label": "TRONG vùng", "centre_param": 19424, "label_sleeve40": "TRONG vùng"}
+CHAT3C_exUrea_med (RONIC=Ke, peer bo DPM/DCM) {"centre": 11187, "p10": 8669, "p50": 11111, "p90": 13847, "pct_below": 0.976, "label": "TRÊN vùng", "centre_param": 12348, "label_sleeve40": "TRÊN vùng"}
+CHAT3C_exUrea_mean (RONIC=Ke, peer bo DPM/DCM, TB) {"centre": 11937, "p10": 9237, "p50": 11788, "p90": 14814, "pct_below": 0.938, "label": "TRÊN vùng", "centre_param": 13158, "label_sleeve40": "TRÊN vùng"}
+M_only_med (RONIC 20%, bien peer trung vi) {"centre": 14974, "p10": 11477, "p50": 14623, "p90": 18657, "pct_below": 0.568, "label": "TRONG vùng", "centre_param": 16434, "label_sleeve40": "TRONG vùng"}
+WIDE_hypo (RONIC 25%) {"centre": 13390, "p10": 10313, "p50": 13065, "p90": 16646, "pct_below": 0.745, "label": "TRONG vùng", "centre_param": 14724, "label_sleeve40": "TRONG vùng"}

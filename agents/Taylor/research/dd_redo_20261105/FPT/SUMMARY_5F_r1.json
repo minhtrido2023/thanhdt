@@ -1,0 +1,87 @@
+{
+ "ticker": "FPT",
+ "job": "Taylor_20261107_120553",
+ "asof": "2026-11-07",
+ "moat_tier": "NARROW",
+ "moat_type": "SWITCHING/COST/SCALE",
+ "risk1": "GenAI coding agents commoditize IT labor-arbitrage (per-man-month) model; Q3/26 JPY ~+15% vs H1 +22.6%, overseas DX Q3 +3.8% = partially materialising",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_multi_cycle_excess": "partial: ROE_Min10Y 20.2%, ROIC5Y 17.7% > Ke 13.5% but ROIC_Min5Y 13.7% ~ Ke and series incl. FTEL",
+  "ii_named_mechanism": "pass: Japan switching cost + delivery scale",
+  "iii_no_moat_clock": "fail: GenAI substitution"
+ },
+ "model_changed": true,
+ "change": "terminal RONIC capped at Ke: conv_T = min(conv, 1 - gT/Ke) (CO_SO 0.75->0.704, TOT 0.85->0.704; XAU unchanged, RONIC 5% < Ke). Current model implied RONIC_T 16%/26.7% = WIDE reward, inconsistent with NARROW tag",
+ "old": {
+  "center": 54203,
+  "p10": 32389,
+  "p50": 55182,
+  "p90": 74557,
+  "central": 58579,
+  "label": "TRONG vùng",
+  "pct_below_px": 0.4752
+ },
+ "new": {
+  "center": 51525,
+  "p10": 32389,
+  "p50": 54908,
+  "p90": 68242,
+  "central": 57110,
+  "label": "TRONG vùng",
+  "pct_below_px": 0.4767
+ },
+ "label_changed": false,
+ "price": 53900,
+ "sensitivity": {
+  "WIDE": {
+   "center": 54203,
+   "p10": 32389,
+   "p50": 55182,
+   "p90": 74557,
+   "central": 58579,
+   "label": "TRONG vùng",
+   "pct_below_px": 0.4752
+  },
+  "NARROW": {
+   "center": 51525,
+   "p10": 32389,
+   "p50": 54908,
+   "p90": 68242,
+   "central": 57110,
+   "label": "TRONG vùng",
+   "pct_below_px": 0.4767
+  },
+  "NARROW_SYM": {
+   "center": 55051,
+   "p10": 42312,
+   "p50": 56446,
+   "p90": 68242,
+   "central": 57110,
+   "label": "TRONG vùng",
+   "pct_below_px": 0.3852
+  },
+  "NONE": {
+   "center": 45517,
+   "p10": 32389,
+   "p50": 49023,
+   "p90": 53360,
+   "central": 50550,
+   "label": "TRÊN vùng",
+   "pct_below_px": 0.9408
+  }
+ },
+ "value_basis": "post liquidity discount @5 ty (0.187%), r 13.5%, 540-outcome grid wpct, price 53,900 (2026-11-04)",
+ "proposed_moat_tag_row": null,
+ "proposed_moat_tag_note": "no new row needed (asof 2026-06-05 < 12m, tier unchanged); optional risk1 append in ADDENDUM_5F.md §6",
+ "not_done": [
+  "dd_price_zones.json not written",
+  "REPORT_r2/SUMMARY.json not modified",
+  "fundamental-skeptic not run (Mike)"
+ ],
+ "pit_note": "non-point-in-time; live DD only, not for backtest",
+ "measured_by": "$DNA_PYEXE -I calc/fpt_5f.py > calc/fpt_5f_out.txt; bq query tav2_bq.ticker_financial 2026-11-07"
+}

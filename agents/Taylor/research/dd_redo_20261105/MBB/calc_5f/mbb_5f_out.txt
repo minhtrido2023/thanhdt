@@ -1,0 +1,22 @@
+== MBB 5F/3c | gia 19,250 (2026-11-04) | r 13.50% | CK 5 ty 0.1924% | 40tr 0.01721%
+TB chu ky nganh ROE10Y (bo MBB): all_ex_NVB_med 12.97% | all_ex_NVB_mean 13.04% | all_mean 12.19% | r1set23_med 14.98% | large_med 18.94% | large_mean 17.75%
+MBB: ROE5Y 22.69% ROE10Y 19.83% ROE_Min5Y 20.67% ROE_Min10Y 12.02% ROIC5Y(BQ) 0.0
+CUR                          tam  23,804 P10  14,444 P50  22,765 P90  35,860 %duoi 32.3% | TRONG vùng | 40tr P10/P90 14,470/35,923 TRONG vùng | trung tam 24,068
+R                            tam  20,169 P10  14,444 P50  20,076 P90  26,122 %duoi 46.2% | TRONG vùng | 40tr P10/P90 14,470/26,167 TRONG vùng | trung tam 20,929
+M_all_ex_NVB_med             tam  18,514 P10  12,112 P50  17,580 P90  27,240 %duoi 61.2% | TRONG vùng | 40tr P10/P90 12,133/27,288 TRONG vùng | trung tam 17,957
+NARROW_all_ex_NVB_med        tam  17,677 P10  12,112 P50  17,580 P90  24,434 %duoi 64.3% | TRONG vùng | 40tr P10/P90 12,133/24,477 TRONG vùng | trung tam 17,957
+M_all_ex_NVB_mean            tam  18,645 P10  12,192 P50  17,676 P90  27,439 %duoi 59.4% | TRONG vùng | 40tr P10/P90 12,213/27,487 TRONG vùng | trung tam 18,056
+NARROW_all_ex_NVB_mean       tam  17,773 P10  12,192 P50  17,676 P90  24,550 %duoi 63.4% | TRONG vùng | 40tr P10/P90 12,213/24,594 TRONG vùng | trung tam 18,056
+M_r1set23_med                tam  22,658 P10  14,417 P50  21,999 P90  33,505 %duoi 41.2% | TRONG vùng | 40tr P10/P90 14,442/33,563 TRONG vùng | trung tam 22,449
+NARROW_r1set23_med           tam  20,459 P10  14,417 P50  20,364 P90  27,723 %duoi 44.3% | TRONG vùng | 40tr P10/P90 14,442/27,771 TRONG vùng | trung tam 20,802
+M_large_med                  tam  33,278 P10  21,717 P50  31,866 P90  47,370 %duoi  5.1% | DƯỚI vùng | 40tr P10/P90 21,755/47,453 DƯỚI vùng | trung tam 33,463
+NARROW_large_med             tam  26,463 P10  19,410 P50  26,405 P90  35,258 %duoi  8.6% | DƯỚI vùng | 40tr P10/P90 19,444/35,320 DƯỚI vùng | trung tam 26,942
+M_large_mean                 tam  29,848 P10  19,118 P50  28,863 P90  43,068 %duoi 11.4% | TRONG vùng | 40tr P10/P90 19,151/43,144 TRONG vùng | trung tam 30,001
+NARROW_large_mean            tam  24,582 P10  17,844 P50  24,499 P90  32,899 %duoi 23.4% | TRONG vùng | 40tr P10/P90 17,875/32,957 TRONG vùng | trung tam 25,019
+NARROW_N10_all_ex_NVB_med    tam  18,565 P10  11,930 P50  18,284 P90  27,022 %duoi 61.9% | TRONG vùng | 40tr P10/P90 11,951/27,070 TRONG vùng | trung tam 18,676
+NONE                         tam  17,809 P10  12,871 P50  17,805 P90  23,639 %duoi 64.3% | TRONG vùng | 40tr P10/P90 12,893/23,680 TRONG vùng | trung tam 18,187
+NONE_N5                      tam  18,394 P10  12,706 P50  18,297 P90  25,301 %duoi 62.3% | TRONG vùng | 40tr P10/P90 12,728/25,345 TRONG vùng | trung tam 18,690
+NARROW_fadeKe_all_ex_NVB_med tam  18,394 P10  12,706 P50  18,297 P90  25,301 %duoi 62.3% | TRONG vùng | 40tr P10/P90 12,728/25,345 TRONG vùng | trung tam 18,690
+LOCK da9c33228aeab612b462640ab0d45f2a MBB/calc_5f/mbb_5f.py
+LOCK f3365346e0199a778061ebfc232f1421 MBB/calc_5f/peer_roe_bq_20261107.csv
+LOCK e918d858b4355d3a116a82ec20baeab2 MBB/calc/mbb_r2.py

@@ -1,0 +1,90 @@
+{
+ "ticker": "TV1",
+ "job": "Taylor_20261107_120558",
+ "asof": "2026-11-07",
+ "moat_tier": "NARROW",
+ "moat_type": "REGULATORY/AFFILIATION",
+ "risk1": "Quản trị/vụ án EVNNPT-PC1 làm mất quan hệ EVN (cấm thầu 3 năm p0,35 ≈ −8.194 đ/cp) — đồng hồ cắt hào đúng cơ chế hào",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_excess_multi_cycle": "FAIL: ROE_Min5Y 0,3–10,4%, ROIC_Min5Y 6,7–11,5% < Ke 13,5% (BQ 2021–26); biên tư vấn −19%..+11% 2022–9T26",
+  "ii_named_mechanism": "PARTIAL: incumbency 500kV + quan hệ EVN",
+  "iii_no_moat_clock": "FAIL: vụ án/cấm thầu nhắm đúng cơ chế"
+ },
+ "model_finding": "r2 terminal DCF tư vấn giữ biên kịch bản vĩnh viễn (RONIC ngầm 6,5/10,4/14,4/18,3%) = thưởng WIDE ngầm, mâu thuẫn NARROW",
+ "model_changed": true,
+ "model_change_scope": "CHỈ terminal DCF tư vấn: biên giữ 2027–30, fade 2031–32 về 6% (trung vị EBITM TV2–4 2016–26), RONIC=Ke; thuỷ điện/tiền ròng/lưới/xác suất/CK giữ nguyên r2",
+ "old": {
+  "center_post": 15379,
+  "p10": 4693,
+  "p50": 15532,
+  "p90": 24544,
+  "label": "TRONG vùng",
+  "pct_below": 0.713
+ },
+ "new": {
+  "center_post": 13347,
+  "p10": 5810,
+  "p50": 14101,
+  "p90": 19063,
+  "label": "TRÊN vùng (>P90)",
+  "pct_below": 0.924
+ },
+ "center_delta_pct": -0.1321,
+ "sensitivity": {
+  "WIDE": {
+   "center_post": 15379,
+   "p10": 4693,
+   "p50": 15532,
+   "p90": 24544,
+   "label": "TRONG vùng",
+   "pct_below": 0.713
+  },
+  "NARROW": {
+   "center_post": 13347,
+   "p10": 5810,
+   "p50": 14101,
+   "p90": 19063,
+   "label": "TRÊN vùng (>P90)",
+   "pct_below": 0.924
+  },
+  "NONE": {
+   "center_post": 12249,
+   "p10": 6022,
+   "p50": 12674,
+   "p90": 17537,
+   "label": "TRÊN vùng (>P90)",
+   "pct_below": 0.951
+  },
+  "NONE_own_cycle": {
+   "center_post": 7832,
+   "p10": 0,
+   "p50": 7969,
+   "p90": 12859,
+   "label": "TRÊN vùng (>P90)",
+   "pct_below": 0.956
+  }
+ },
+ "narrow_terminal_margin_sens": {
+  "4%": 12072,
+  "6%": 13347,
+  "8%": 14641,
+  "9.2%": 15427,
+  "11%": 16619,
+  "label_flip_mT_estimate": "~6,7% (ước lượng, nội suy P90)"
+ },
+ "label_fragility": "giá 19.600 cao hơn P90 NARROW 19.063 chỉ 2,8%; m_T>=8% ⇒ TRONG",
+ "proposed_moat_tag_row": null,
+ "proposed_moat_tag_note": "không cần dòng mới (<12 tháng, tier không đổi); kỳ audit 06/2027 bổ sung số đo vào risk1",
+ "decision_owner": "Mike",
+ "not_done": [
+  "dd_price_zones",
+  "REPORT_r2/SUMMARY.json sửa",
+  "fundamental-skeptic",
+  "email"
+ ],
+ "measured_by": "$DNA_PYEXE -I calc/moat_5f_tv1.py -> calc/moat_5f_tv1_out.json; calc/moat_5f_tv1_mT_sens.txt; bq ticker_financial TV1-4 2016-26"
+}

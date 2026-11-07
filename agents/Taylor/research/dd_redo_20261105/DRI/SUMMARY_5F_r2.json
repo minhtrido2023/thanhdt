@@ -1,0 +1,128 @@
+{
+ "ticker": "DRI",
+ "job": "Taylor_20261107_122446",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION/COST",
+ "risk1": "Gia cao su (price-taker), da qua dinh (LNST me Q3/26 -33% YoY); risk2 = dong ho dat (NQ15 thanh ly 1.975 ha ~24% dien tich cao 2027-30, to nhuong Lao mo hinh toi 2054, rung bao ton)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_cyclical)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_excess_through_cycle": false,
+  "ii_named_mechanism": "partial (dat to nhuong + gia thanh thap; chi phia chi phi)",
+  "iii_no_clock": false
+ },
+ "evidence": {
+  "years_dri_above_peer_median": "9/9",
+  "roe_2018_2022": [
+   0.06,
+   0.046,
+   0.034,
+   0.1,
+   0.097
+  ],
+  "roe_min5y": 0.107,
+  "roe5y": 0.158,
+  "roic_min10y": 0.065,
+  "ke": 0.135,
+  "roic_trailing_note": "ROIC_Trailing Q4 2021-25 = 76-143% => self-calc khong tin cay, khong dung",
+  "gpm_dri_ttm_2017_25": 0.3748,
+  "gpm_peer_median_ttm_2017_25": 0.2542,
+  "gap_pp": {
+   "DPR_only": 6.97,
+   "mean_+TRC": 12.06,
+   "mean_DPR_PHR_GVR": 11.48,
+   "median_+TRC": 12.18,
+   "median_DPR_PHR_GVR": 12.06
+  },
+  "gpm_method": "TTM co trong so doanh thu 4 quy tai dong Q4 (GPM_Pi*Revenue_Pi); GVR thieu 2017-18",
+  "roic5y": 0.195,
+  "roic_min5y": 0.168,
+  "roe_mid_cycle_model": {
+   "lnst_mid_ty": 151.9,
+   "roe_Q2": 0.189,
+   "roe_Q3": 0.207,
+   "gpm_model": 0.361,
+   "note": "skeptic neu LNST mid 163,6 ty (spec khac, khong tai hien)"
+  }
+ },
+ "model_changed": false,
+ "model_note": "r2 SUA r1: mo hinh hien hanh KHONG nhat quan 3c theo chu (Cref 30,22 toi 2054, GPM mo hinh ~36,1% vs peer ~25,4%, ROE mid ~19-21%>Ke). Gia tri hien hanh khong doi; ban chat-3c song song, cho Mike/user duyet (ngoai le a vs chat b). Moc to nhuong 2054 = END engine, van ban chua cong khai => can kiem chung.",
+ "current": {
+  "centre": 14092,
+  "p10": 12006,
+  "p50": 14235,
+  "p90": 16146,
+  "pct_below_price": 0.353,
+  "label": "TRONG vùng"
+ },
+ "sensitivity": {
+  "NARROW_current": {
+   "centre": 14092,
+   "p10": 12006,
+   "p50": 14235,
+   "p90": 16146,
+   "pct_below_price": 0.353,
+   "label": "TRONG vùng"
+  },
+  "NONE_half": {
+   "centre": 12438,
+   "p10": 10391,
+   "p50": 12705,
+   "p90": 14430,
+   "pct_below_price": 0.787,
+   "label": "TRONG vùng",
+   "cref": 33.12
+  },
+  "NONE_tight": {
+   "centre": 10784,
+   "p10": 8798,
+   "p50": 11055,
+   "p90": 12844,
+   "pct_below_price": 0.98,
+   "label": "TRÊN vùng (>P90)",
+   "cref": 36.02,
+   "peer_range_centre": [
+    10751,
+    12180
+   ]
+  },
+  "NONE_symmetric": {
+   "centre": 11091,
+   "p10": 8854,
+   "p50": 11215,
+   "p90": 13014,
+   "pct_below_price": 0.975,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "NONE_DPR_only": {
+   "centre": 12180,
+   "p10": 10142,
+   "p50": 12424,
+   "p90": 14119,
+   "pct_below_price": 0.797,
+   "label": "TRONG vùng"
+  },
+  "WIDE": {
+   "centre": 14965,
+   "p10": 12817,
+   "p50": 15055,
+   "p90": 16957,
+   "pct_below_price": 0.175,
+   "label": "TRONG vùng",
+   "n_outcomes": 18,
+   "delta_econ_branch_only": 196,
+   "delta_moat_real": 677,
+   "param": "tai canh NPV=+0,25xPV capex [UL]"
+  }
+ },
+ "price": 13500,
+ "price_date": "2026-11-04",
+ "proposed_moat_tag_row": "DRI,NARROW,LOCATION/COST,L,\"Commodity price-taker; cost edge real (GPM TTM 2017-25 37.5% vs peer median 25.4%, 9/9 yrs) but ROE<Ke 2018-22, ROE_Min5Y 10.7%<Ke 13.5%, ROIC_Min10Y 6.5% => not durable (rule 3c: margin to industry mean); post-peak (Q3-26 NP -33% YoY); land clock: NQ15 liquidates 1,975 ha (~24% tapped) 2027-30, Laos concession end 2054 unverified; Dakruco related-party governance risk\",2026-11-07,5f_quickcheck_reuse_20260605,N",
+ "measured_by": "calc_5f/moat_sens_5f.py ($DNA_PYEXE -B, 2 lan md5 out 91f50f054e92baa4c803087fc9b53150) + calc_5f/ttm_bq.csv (BQ ticker_financial)",
+ "non_pit_note": "5F/LLM-knowledge non-point-in-time: chi DD song, cam backtest",
+ "round": 2,
+ "consistent_with_3c": false,
+ "pending_decision": "Mike/user: (a) ngoai le 3c voi bang chung gia thanh peer, hoac (b) ap chat-3c NONE_half/NONE"
+}

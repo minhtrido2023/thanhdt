@@ -1,0 +1,251 @@
+{
+ "ticker": "HHS",
+ "job": "Taylor_20261107_130213 + fix Taylor_20261107_131625",
+ "asof": "2026-11-07",
+ "moat_tier": "NONE",
+ "moat_type": "LOCATION",
+ "risk1": "Thuc hien thang du quy dat CRV con lai (bien 24-47% theo kich ban) + dong tien len HHS qua 2 tang holding (CK holding quyet dinh nhan)",
+ "reused": false,
+ "source_asof": null,
+ "source_note": "khong co dong moat_tags HHS/CRV/TCH; REPORT/kb hhs-dd-20261101 khong co muc 5F => lam moi",
+ "moat_durable": false,
+ "durability": {
+  "i_excess_return": "false (yeu) - chuoi ROIC HHS hong ca 2 phia: ROIC_Min5Y 0,0 2017-22 cung ROIC5Y 330%; holding song bang thu nhap lien ket => ROIC~2% vs ROE 6-8%; ket luan khong ben dua vao (iii)",
+  "ii_named_barrier": "weak (land bank at historical cost, not replicable)",
+  "iii_no_clock": false
+ },
+ "model_consistency": "KHONG nhat quan 3c: crv() de gia goc HTK cu 6.009,8 ty khong chiet khau (chi thang du s x pv4) + bien ~TB peer 37,7% (peer ROIC5Y trung vi 6,2%<Ke) = kenh RONIC>Ke ngam; them I.14 ky vong +6,25%. r1 'gan nhat quan, -0,4%, khong trong yeu' RUT LAI",
+ "model_changed": true,
+ "model_changed_note": "Headline = KHOANG chat-3c A pv4 / B pv2,5 / C pv2,5 tru KH tra truoc 3.099; quy uoc A/B/C cho Mike/user duyet; I.14 doi xung bat buoc (luat 20); GOV_AX E=-4,0% nam trong tam (khong chi WARNING); REPORT_r2/SUMMARY.json khong sua; nhan TRONG giu",
+ "old": {
+  "centre": 10387,
+  "p10": 8252,
+  "p50": 10194,
+  "p90": 12827,
+  "pct_below_px": 0.352,
+  "label": "TRONG vung"
+ },
+ "new": {
+  "headline_range_centre": [
+   8393,
+   9700
+  ],
+  "A_pv4": {
+   "centre": 8393,
+   "p10": 6635,
+   "p50": 8238,
+   "p90": 10377,
+   "pct_below_px": 0.798,
+   "label": "TRONG vùng",
+   "label_10tr": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "B_pv2_5": {
+   "centre": 9012,
+   "p10": 7142,
+   "p50": 8845,
+   "p90": 11123,
+   "pct_below_px": 0.667,
+   "label": "TRONG vùng",
+   "label_10tr": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "C_pv2_5_minus_prepay": {
+   "centre": 9700,
+   "p10": 7696,
+   "p50": 9527,
+   "p90": 11967,
+   "pct_below_px": 0.508,
+   "label": "TRONG vùng",
+   "label_10tr": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "A_plus_incl_I14_cost": {
+   "centre": 7961,
+   "p10": 6277,
+   "p50": 7824,
+   "p90": 9848,
+   "pct_below_px": 0.868,
+   "label": "TRONG vùng",
+   "label_10tr": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "delta_centre_vs_old": [
+   -1994,
+   -687
+  ],
+  "delta_pct": [
+   -0.192,
+   -0.066
+  ],
+  "label": "TRONG vung (moi bien the, 5 ty/10tr/40tr)",
+  "decomposition": "von HTK khong chiet khau -646..-1.953; I.14 doi xung -41; bien 0"
+ },
+ "price": 9550,
+ "price_date": "2026-11-04",
+ "sensitivity": {
+  "WIDE": {
+   "A": {
+    "centre": 9695,
+    "p10": 7690,
+    "p50": 9520,
+    "p90": 11961,
+    "pct_below_px": 0.511,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "B": {
+    "centre": 10315,
+    "p10": 8200,
+    "p50": 10121,
+    "p90": 12708,
+    "pct_below_px": 0.365,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "C": {
+    "centre": 11003,
+    "p10": 8758,
+    "p50": 10794,
+    "p90": 13584,
+    "pct_below_px": 0.234,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   }
+  },
+  "NARROW": {
+   "A": {
+    "centre": 8887,
+    "p10": 7036,
+    "p50": 8724,
+    "p90": 10970,
+    "pct_below_px": 0.694,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "B": {
+    "centre": 9506,
+    "p10": 7545,
+    "p50": 9329,
+    "p90": 11732,
+    "pct_below_px": 0.553,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "C": {
+    "centre": 10194,
+    "p10": 8094,
+    "p50": 10008,
+    "p90": 12581,
+    "pct_below_px": 0.391,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   }
+  },
+  "NONE": {
+   "A": {
+    "centre": 8393,
+    "p10": 6635,
+    "p50": 8238,
+    "p90": 10377,
+    "pct_below_px": 0.798,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "B": {
+    "centre": 9012,
+    "p10": 7142,
+    "p50": 8845,
+    "p90": 11123,
+    "pct_below_px": 0.667,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "C": {
+    "centre": 9700,
+    "p10": 7696,
+    "p50": 9527,
+    "p90": 11967,
+    "pct_below_px": 0.508,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   }
+  },
+  "NONE_floor_TCH": {
+   "A": {
+    "centre": 8046,
+    "p10": 6393,
+    "p50": 7890,
+    "p90": 9919,
+    "pct_below_px": 0.859,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "B": {
+    "centre": 8666,
+    "p10": 6894,
+    "p50": 8504,
+    "p90": 10681,
+    "pct_below_px": 0.744,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   },
+   "C": {
+    "centre": 9354,
+    "p10": 7448,
+    "p50": 9186,
+    "p90": 11524,
+    "pct_below_px": 0.592,
+    "label": "TRONG vùng",
+    "label_10tr": "TRONG vùng",
+    "label_40tr": "TRONG vùng"
+   }
+  },
+  "label_sensitive": false,
+  "note": "quy uoc chiet khau von A<->C 1.307 d/cp > chon peer 346-347 ~ bien do moat NONE<->WIDE 1.302-1.303"
+ },
+ "proposed_moat_tag_row": "HHS,NONE,LOCATION,L,\"Holding (51.15% CRV Hai Phong residential + Dongfeng truck dealer, non-exclusive). Never earned above Ke: ROE_Trailing 2.9-8.0% 2016-24 (2025 22.1% = 3,488bn one-off recognition of accumulated land value on CRV consolidation), ROIC5Y 0.3-2.6% 2019-26, ROIC series broken both ways (ROIC_Min5Y 0.0 alongside ROIC5Y 330%; holding earns via associates so ROIC~2% vs ROE 6-8%) - durability verdict rests on depleting land bank. CRV not in BQ (verify); proxy TCH ROIC5Y 5.6-12.6%, ROE avg 8.8%. Only edge = land bank at historical cost (NC-II ex-PPA GPM 52.2%) - self-depleting ~4y, new I.14 land bought at market. #1 risk: realising remaining CRV land-bank surplus + cash upstreaming through 2-tier holding (holding discount axis decides label); CRV control via 7.53% proxy votes; 390bn CRV loan due 2026-11-18\",2026-11-07,5f_full_dd_redo,N",
+ "measured_by": "5F/moat_fix_r2.py -> 5F/moat_fix_r2_out.txt (md5 f9dd1286, 2 lan trung byte) + moat_fix_r2_out.json (md5 21385620); r1: 5F/moat_sens_5f_out.txt (2ce48bf4); BQ ticker_financial 2025Q4 IDC/NTC/SZL/DTD 2026-11-07",
+ "backtest_allowed": false,
+ "revision": "r2 sau skeptic; ban truoc SUMMARY_5F_r1.json",
+ "r1_strict_withdrawn": {
+  "centre": 10346,
+  "p10": 8218,
+  "p50": 10152,
+  "p90": 12769,
+  "pct_below_px": 0.36
+ },
+ "gov_axis": {
+  "E_gov": -0.04,
+  "in_centre": true,
+  "centre_A_gov0": 8743,
+  "centre_B_gov0": 9388,
+  "centre_C_gov0": 10104
+ },
+ "peer_location_tier_check": {
+  "ROIC_Min5Y_2025Q4": {
+   "IDC": 0.063,
+   "NTC": 0.04,
+   "SZL": 0.102,
+   "DTD": 0.133
+  },
+  "ROIC5Y_2025Q4": {
+   "IDC": 0.206,
+   "NTC": 0.127,
+   "SZL": 0.137,
+   "DTD": 0.227
+  },
+  "note": "IDC/NTC NARROW du ROIC_Min5Y<Ke => thang tier khong thong nhat theo (i); voi HHS NONE hay NARROW khong doi gia tri theo 3c; Mike ra IDC/NTC"
+ }
+}

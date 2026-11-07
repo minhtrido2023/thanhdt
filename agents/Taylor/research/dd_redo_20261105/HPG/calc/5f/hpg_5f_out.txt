@@ -1,0 +1,17 @@
+r 13.50% | d_ref 5ty 0.1499% | sleeve {'10tr': 6.705803178811635e-05, '40tr': 0.0001341160635762327} | peer ROE10Y trung vi 0.124 TB 0.1159 | HPG ROE5Y x thue 0.1536
+  XAU: ROE_T (CUR) 7.85%
+  TRUNG_LAP: ROE_T (CUR) 11.84%
+  TOT: ROE_T (CUR) 14.25%
+CUR   tam 16,286 P10 8,942 P50 16,343 P90 23,520 | %duoi gia 83.6% | nhan 5ty TRONG vùng / 10tr TRONG vùng (P90 23,553) / 40tr TRONG vùng
+SYM   tam 16,016 P10 8,942 P50 16,343 P90 22,321 | %duoi gia 86.7% | nhan 5ty TRONG vùng / 10tr TRONG vùng (P90 22,353) / 40tr TRONG vùng
+CAPm  tam 15,112 P10 8,942 P50 16,343 P90 19,395 | %duoi gia 100.0% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng (P90 19,423) / 40tr TRÊN vùng
+CAPa  tam 14,614 P10 8,942 P50 15,945 P90 18,235 | %duoi gia 100.0% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng (P90 18,261) / 40tr TRÊN vùng
+REVm  tam 16,986 P10 14,448 P50 17,090 P90 19,395 | %duoi gia 100.0% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng (P90 19,423) / 40tr TRÊN vùng
+REVa  tam 15,956 P10 13,556 P50 16,051 P90 18,235 | %duoi gia 100.0% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng (P90 18,261) / 40tr TRÊN vùng
+WIDE  tam 22,133 P10 18,331 P50 22,257 P90 25,154 | %duoi gia 41.2% | nhan 5ty TRONG vùng / 10tr TRONG vùng (P90 25,191) / 40tr TRONG vùng
+NONE  tam 17,656 P10 13,625 P50 17,789 P90 21,204 | %duoi gia 91.2% | nhan 5ty TRÊN vùng / 10tr TRÊN vùng (P90 21,235) / 40tr TRÊN vùng
+LOCK 83bb4eeb6ffbb4f704f453078bde414b HPG/calc/5f/hpg_5f.py
+LOCK c6c7233a6589db20724d02e6f810879b HPG/calc/hpg_r2.py
+LOCK 89e390381402790204264c5c2ae1254a _common_014125/common.py
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv

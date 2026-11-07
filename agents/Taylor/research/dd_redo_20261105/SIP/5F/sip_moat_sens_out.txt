@@ -1,0 +1,11 @@
+GPM SIP Q4(=năm) 2019:0.1396, 2020:0.1356, 2021:0.1636, 2022:0.1493, 2023:0.1394, 2024:0.1404, 2025:0.1563 | TB 2019-25 0.1463 | TTM Q3/26 0.1547
+DT TTM 9286.1 tỷ | ΔLN gộp vượt TB 78.2 tỷ/năm = 7.0% LN gộp lõi (ex-đất) 1115.3
+PE lõi g3%: RONIC ROE5Y 8.562 | RONIC=Ke 7.407 (-13.5%)
+WIDE_ROE5Y_hien_hanh: tâm 54.230 P10 43.784 P50 53.086 P90 68.713 dưới giá 33.0% nhãn TRONG vùng | sleeve 40tr tâm 54.810 P10 44.252 P90 69.447 TRONG vùng
+WIDE_ROIC5Y: tâm 51.698 P10 41.351 P50 50.569 P90 66.205 dưới giá 42.7% nhãn TRONG vùng | sleeve 40tr tâm 52.250 P10 41.793 P90 66.912 TRONG vùng
+chi_R_RONIC_Ke: tâm 50.841 P10 40.483 P50 49.751 P90 65.354 dưới giá 46.3% nhãn TRONG vùng | sleeve 40tr tâm 51.384 P10 40.916 P90 66.053 TRONG vùng
+chi_M_bien_TB_chu_ky: tâm 52.390 P10 41.942 P50 51.262 P90 66.891 dưới giá 39.9% nhãn TRONG vùng | sleeve 40tr tâm 52.951 P10 42.390 P90 67.607 TRONG vùng
+CHAT_3C_NARROW: tâm 49.253 P10 38.904 P50 48.119 P90 63.762 dưới giá 54.5% nhãn TRONG vùng | sleeve 40tr tâm 49.780 P10 39.320 P90 64.444 TRONG vùng
+CHAT_3C_bo_re: tâm 48.082 P10 37.722 P50 46.949 P90 62.602 dưới giá 59.6% nhãn TRONG vùng | sleeve 40tr tâm 48.596 P10 38.126 P90 63.271 TRONG vùng
+NONE_chat_3c_30nam: tâm 48.812 P10 38.464 P50 47.696 P90 63.324 dưới giá 57.0% nhãn TRONG vùng | sleeve 40tr tâm 49.333 P10 38.876 P90 64.002 TRONG vùng
+Độ nhạy r chặt-3c: b1.0_-100 51.731 | b1.0_-50 50.451 | b1.0_+0 49.253 | b1.0_+50 48.130 | b1.0_+100 47.075

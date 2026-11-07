@@ -1,0 +1,17 @@
+NARROW         tam  14,092 (+0; +0.0%) P10  12,006 P50  14,235 P90  16,146 duoi gia 35.2% nhan TRONG vùng
+NONE_half      tam  12,438 (-1,654; -11.7%) P10  10,391 P50  12,705 P90  14,430 duoi gia 78.8% nhan TRONG vùng Cref 33.12
+NONE           tam  10,784 (-3,308; -23.5%) P10   8,798 P50  11,055 P90  12,844 duoi gia 98.0% nhan TRÊN vùng (>P90) Cref 36.02
+NONE_sym       tam  11,091 (-3,001; -21.3%) P10   8,854 P50  11,215 P90  13,014 duoi gia 97.5% nhan TRÊN vùng (>P90) Cref 36.02
+NONE_mean      tam  10,944 (-3,149; -22.3%) P10   8,952 P50  11,204 P90  13,002 duoi gia 98.0% nhan TRÊN vùng (>P90) Cref 35.74
+NONE_medTRC    tam  10,751 (-3,341; -23.7%) P10   8,766 P50  11,025 P90  12,811 duoi gia 98.0% nhan TRÊN vùng (>P90) Cref 36.08
+NONE_meanTRC   tam  10,785 (-3,307; -23.5%) P10   8,799 P50  11,056 P90  12,845 duoi gia 98.0% nhan TRÊN vùng (>P90) Cref 36.02
+NONE_DPR       tam  12,180 (-1,912; -13.6%) P10  10,142 P50  12,424 P90  14,119 duoi gia 79.8% nhan TRONG vùng Cref 33.57
+WIDE_econ_only tam  14,288 (+196; +1.4%) P10  12,140 P50  14,378 P90  16,280 duoi gia 30.0% nhan TRONG vùng
+WIDE           tam  14,965 (+873; +6.2%) P10  12,817 P50  15,055 P90  16,957 duoi gia 17.5% nhan TRONG vùng
+DRI GPM TTM 2017-25 0.3748
+  gap median_DPR_PHR_GVR    12.06pp peer 0.2542 nam DRI>peer 9/9
+  gap mean_DPR_PHR_GVR      11.48pp peer 0.2600 nam DRI>peer 9/9
+  gap median_+TRC           12.18pp peer 0.2530 nam DRI>peer 9/9
+  gap mean_+TRC             12.06pp peer 0.2542 nam DRI>peer 9/9
+  gap DPR_only               6.97pp peer 0.3051 nam DRI>peer 9/9
+Cref 30.22 price TB 48.06 | roe_mid {"lnst_mid_ty": 151.8549928471977, "k": 0.3, "gpm_model": 0.36142660746782207, "equity_2026Q2_ty": 805.5147254809998, "equity_2026Q3_ty": 735.204269569, "roe_2026Q2": 0.18851920150375898, "roe_2026Q3": 0.20654802907526626}

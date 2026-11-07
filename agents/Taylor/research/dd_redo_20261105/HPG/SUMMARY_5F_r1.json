@@ -1,0 +1,23 @@
+{
+ "ticker": "HPG", "job": "Taylor_20261107_130203", "asof": "2026-11-07",
+ "moat_tier": "NARROW", "moat_type": "COST/SCALE",
+ "risk1": "Bien dua vao bao ho AD co thoi han truoc thep TQ du cung (QD 1917 27,83% hieu luc 28/07/2026) trong khi von DQ2 tap trung; uu dai thue DQ2 chua ro (CV 377)",
+ "reused": false, "source_asof": null, "source_note": "moat_tags.csv khong co HPG; DD 31/10 va kb/projects/hpg-dd-20261031.md khong co muc 5F => lam moi day du",
+ "moat_durable": false,
+ "durability_tests": {"i_multi_cycle_excess": "FAIL: ROIC_Min5Y 5,7% / ROIC5Y 11,0% / ROIC10Y 13,0% / ROIC_Min10Y 5,7% <= Ke 13,5%; ROE 2022-25 8,4/6,8/10,9/12,4%; ROE5Y 16,9% ROE10Y 21,9% ROE_Min5Y 6,9% (BQ ROIC chat luong thap, can kiem chung)", "ii_mechanism": "PASS: quy mo + tich hop BF-BOF + cang Dung Quat; GPM cao nhat nhom 10/11 nam 2015-25", "iii_no_clock": "FAIL: bao ho AD co thoi han, uu dai thue DQ2 chua ro, CBAM"},
+ "model_changed": true, "model_change_status": "quy uoc CHAT-3C cho Mike/user duyet; KHONG sua REPORT_r2/SUMMARY.json/dd_price_zones",
+ "model_inconsistencies": ["terminal g_RI = g khi ROE_T > r (nhanh TOT 14,25%) = RONIC>Ke ngam", "ROE_T nhanh TOT 14,25% > TB chu ky nganh peer (trung vi 12,4% / TB 11,6%)"],
+ "old": {"center": 16286, "p10": 8942, "p50": 16343, "p90": 23520, "pct_below_px": 0.836, "label": "TRONG vung"},
+ "new_strict3c_peer_median": {"center": 16986, "p10": 14448, "p50": 17090, "p90": 19395, "pct_below_px": 1.0, "label": "TREN vung"},
+ "new_strict3c_peer_mean": {"center": 15956, "p10": 13556, "p50": 16051, "p90": 18235, "pct_below_px": 1.0, "label": "TREN vung"},
+ "decomposition": {"ronic_only_SYM": {"center": 16016, "p90": 22321, "label": "TRONG vung"}, "margin_revert_effect_center_vs_SYM": 970},
+ "label_same_at_sizes": ["5ty", "10tr", "40tr"],
+ "sensitivity": {"WIDE": {"center": 22133, "p10": 18331, "p90": 25154, "label": "TRONG vung", "rule": "ROE_T>=ROE5Y HPG x thue 20% (15,36%), g_RI=g"},
+                 "NARROW": {"center_range": [15956, 16986], "p90_range": [18235, 19395], "label": "TREN vung", "rule": "CHAT-3C REV"},
+                 "NONE": {"center": 17656, "p10": 13625, "p90": 21204, "label": "TREN vung (ranh gioi, P90 thap hon gia 2,3%)", "rule": "spread fade ve 0 trong 5 nam, hai chieu"}},
+ "peer_note": "peer noi dia KHONG cung mo hinh (ton ma/thuong mai/EAF); khong co BF-BOF niem yet; POM loai (ROE phi ly); nhan nhay theo peer set/neo (neo ROE5Y HPG => gan WIDE, TRONG)",
+ "price": 21700, "price_date": "2026-11-04", "r": 0.135,
+ "proposed_moat_tag_row": "HPG,NARROW,COST/SCALE,L,\"Integrated BF-BOF scale/cost leader (GPM top of listed VN steel 10/11 yrs 2015-25, 10y avg 19.2% vs peer median 5.7%) BUT absolute excess return not multi-cycle (ROIC_Min5Y 5.7%, ROIC10Y 13.0% <= Ke 13.5%; ROE 2022-25 6.8-12.4%); #1 risk: margin leans on time-limited AD protection vs Chinese HRC oversupply (QD 1917 27.83% eff 2026-07-28) while DQ2 capex concentrated; DQ2 tax incentive unresolved (CV 377)\",2026-11-07,5f,N",
+ "measured_by": "calc/5f/hpg_5f.py -> calc/5f/hpg_5f_out.txt (md5 05a17d88396c6de06e284ab11045feff, 2 lan trung byte); BQ tav2_bq.ticker_financial dong Q4 2015-2025 + 2026Q3",
+ "non_point_in_time": true
+}

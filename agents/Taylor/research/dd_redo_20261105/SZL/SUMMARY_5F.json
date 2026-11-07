@@ -1,0 +1,231 @@
+{
+ "ticker": "SZL",
+ "job": "Taylor_20261107_124455",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION",
+ "risk1": "quỹ đất KCN Long Thành ~92% lấp đầy + thời hạn 2053; tăng trưởng phụ thuộc Long Phước (XDCB 407 tỷ) chưa có hợp đồng",
+ "reused": true,
+ "source_asof": "2026-06-05 (data/moat_tags.csv, src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i": false,
+  "ii": true,
+  "iii": false,
+  "roic": {
+   "ROIC_Min5Y": 0.102,
+   "ROIC5Y": 0.137,
+   "ROIC3Y": 0.138,
+   "ROIC10Y": 0.126,
+   "ROIC_Min10Y": 0.08,
+   "ke": 0.135
+  },
+  "roe": {
+   "ROE_Trailing": 0.243,
+   "ROE_Min5Y": 0.167,
+   "ROE_core_REPORT_r2_s3": 0.339
+  },
+  "roe_note": "ROE loi cao do mau so nho (khach thue tai tro qua tien tra truoc 762+157 ty); co phan SZC/SZB + XDCB dinh gia rieng trong SOTP => khong tinh sieu ngach (dem hai lan); ROIC moi la phep thu (i)",
+  "roic_trailing_note": "ROIC_Trailing 89,8%/_v1 61,7% khong dung, nghi artifact vendor - CHUA KIEM",
+  "iii_note": "92% lap day / ~26 ha tu tag 06/2026, khong BCTC - can kiem chung; 2053 can kiem chung giay phep"
+ },
+ "model_changed": true,
+ "model_changed_note": "REPORT_r2 KHONG nhat quan 3c: RONIC ngam vo cung + bien TTM 39,0% > TB chu ky SZL 33,6%; r3 sua cong thuc RONIC=Ke (tang truong NPV 0: cf0/r vinh vien, annuity khong tang truong 27n; r2 nhan (1-g/r) vao annuity 27n = NPV am, dem hai lan dong ho 2053). Headline = chat-3c, quy uoc cho Mike/user duyet; REPORT/SUMMARY cu khong sua",
+ "convention_pending": [
+  "TB chu ky dung cua rieng SZL (peer KCN GPM khac dinh nghia: trung vi 49,1%/TB 46,0%); tach GPM theo mang CON MO (BCTC scan, khong co so mang trong thu muc)",
+  "RONIC=Ke ap ca phan g ~ lam phat (mien g<=2% => tam 26.977 TRONG)",
+  "cua so bien chu ky: 2017-25 => TREN (mong manh), 2021-25 => TRONG o 5 ty"
+ ],
+ "old": {
+  "center": 32391,
+  "p10": 28966,
+  "p50": 32162,
+  "p90": 36075,
+  "pct_w_below_px": 0.0344,
+  "label_5bn": "DUOI vung (<P10)",
+  "label_sleeve40": "DUOI",
+  "p90_sleeve40": 37499
+ },
+ "new": {
+  "center": 24868,
+  "p10": 23011,
+  "p50": 24724,
+  "p90": 27099,
+  "pct_w_below_px": 0.9531,
+  "label_5bn": "TREN vung (>P90)",
+  "label_sleeve40": "TRONG",
+  "p10_sleeve40": 23919,
+  "p90_sleeve40": 28168
+ },
+ "decomposition": {
+  "total": -7523,
+  "margin_then_ronic": [
+   -4079,
+   -3444
+  ],
+  "ronic_then_margin": [
+   -4262,
+   -3261
+  ]
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 33691,
+   "p10": 29810,
+   "p50": 33484,
+   "p90": 38379,
+   "pct_w_below_px": 0.0109,
+   "label_5bn": "DUOI vung (<P10)",
+   "label_sleeve40": "DUOI",
+   "p10_sleeve40": 30987,
+   "p90_sleeve40": 39894
+  },
+  "NARROW_current": {
+   "center": 32391,
+   "p10": 28966,
+   "p50": 32162,
+   "p90": 36075,
+   "pct_w_below_px": 0.0344,
+   "label_5bn": "DUOI vung (<P10)",
+   "label_sleeve40": "DUOI",
+   "p10_sleeve40": 30110,
+   "p90_sleeve40": 37499
+  },
+  "NARROW_strict3c": {
+   "center": 24868,
+   "p10": 23011,
+   "p50": 24724,
+   "p90": 27099,
+   "pct_w_below_px": 0.9531,
+   "label_5bn": "TREN vung (>P90)",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 23919,
+   "p90_sleeve40": 28168
+  },
+  "NARROW_strict_gfree2": {
+   "center": 26977,
+   "p10": 24768,
+   "p50": 26704,
+   "p90": 29471,
+   "pct_w_below_px": 0.6797,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 25746,
+   "p90_sleeve40": 30634
+  },
+  "R_only": {
+   "center": 28129,
+   "p10": 25831,
+   "p50": 27950,
+   "p90": 30889,
+   "pct_w_below_px": 0.4094,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 26850,
+   "p90_sleeve40": 32109
+  },
+  "M_only": {
+   "center": 28312,
+   "p10": 25545,
+   "p50": 28127,
+   "p90": 31295,
+   "pct_w_below_px": 0.4207,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 26553,
+   "p90_sleeve40": 32530
+  },
+  "NONE": {
+   "center": 24750,
+   "p10": 22627,
+   "p50": 24724,
+   "p90": 26902,
+   "pct_w_below_px": 0.9688,
+   "label_5bn": "TREN vung (>P90)",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 23521,
+   "p90_sleeve40": 27964
+  }
+ },
+ "label_note": "chat-3c r3: 5 ty TREN nhung MONG MANH theo cua so bien (P90 27.099 vs gia 27.650; cua so 2021-25 => TRONG); 40 tr TRONG o moi cua so (r2 ghi TREN-ranh gioi do loi cong thuc)",
+ "price": 27650,
+ "price_date": "2026-11-04",
+ "proposed_moat_tag_row": "SZL,NARROW,LOCATION,M,\"Sonadezi Long Thanh IP beside new Long Thanh airport (= premium catalyst, unquantified) = scarce-land LOCATION; NOT durable: (i) ROIC_Min5Y 10.2% / ROIC10Y 12.6% / ROIC_Min10Y 8.0% < Ke 13.5% (ROIC5Y 13.7% ~Ke; core ROE 33.9% flattered by prepaid-lease float), (iii) land bank ~92% leased / ~26ha left (from 06/2026 tag, unverified) + term to 2053 (unverified). #1 risk: growth hinges on Long Phuoc CIP 407bn with no lease contracts; GPM TTM 39.0% > own cycle 33.6% = cycle/mix not moat; State land-rent accrual 44.3bn unsettled\",2026-11-07,5f_reuse_quickcheck,Y",
+ "measured_by": "5F/szl_moat_sens.py -> 5F/szl_moat_sens_out.txt (md5 3b3ab52d) / out.json (md5 e5275d71), chay 2 lan trung byte; 5F/szl_5f_stats.py -> 5F/szl_5f_stats_out.txt; BQ ticker_financial 07/11/2026",
+ "round": 3,
+ "prev": "SUMMARY_5F_r2.json",
+ "margin_window_sensitivity": {
+  "quytac0711_Q4_2017_25": {
+   "center": 24973,
+   "p10": 23101,
+   "p50": 24827,
+   "p90": 27220,
+   "pct_w_below_px": 0.9531,
+   "label_5bn": "TREN vung (>P90)",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 24013,
+   "p90_sleeve40": 28295,
+   "gpm_ttm": 0.3877,
+   "gpm_cyc": 0.3353,
+   "n0_cyc": 106.7
+  },
+  "quytac0711_Q4_2021_25": {
+   "center": 25911,
+   "p10": 23913,
+   "p50": 25756,
+   "p90": 28311,
+   "pct_w_below_px": 0.85,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 24857,
+   "p90_sleeve40": 29429,
+   "gpm_ttm": 0.3877,
+   "gpm_cyc": 0.3509,
+   "n0_cyc": 114.0
+  },
+  "r2_TBnam_2017_25": {
+   "center": 24868,
+   "p10": 23011,
+   "p50": 24724,
+   "p90": 27099,
+   "pct_w_below_px": 0.9531,
+   "label_5bn": "TREN vung (>P90)",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 23919,
+   "p90_sleeve40": 28168,
+   "gpm_ttm": 0.3904,
+   "gpm_cyc": 0.3363,
+   "n0_cyc": 105.9
+  },
+  "r2_TBnam_2021_25": {
+   "center": 25555,
+   "p10": 23605,
+   "p50": 25403,
+   "p90": 27897,
+   "pct_w_below_px": 0.8844,
+   "label_5bn": "TRONG vung",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 24537,
+   "p90_sleeve40": 28998,
+   "gpm_ttm": 0.3904,
+   "gpm_cyc": 0.3477,
+   "n0_cyc": 111.2
+  },
+  "r2_trongsoDT_2017_25": {
+   "center": 24997,
+   "p10": 23123,
+   "p50": 24851,
+   "p90": 27249,
+   "pct_w_below_px": 0.9531,
+   "label_5bn": "TREN vung (>P90)",
+   "label_sleeve40": "TRONG",
+   "p10_sleeve40": 24035,
+   "p90_sleeve40": 28324,
+   "gpm_ttm": 0.3904,
+   "gpm_cyc": 0.3384,
+   "n0_cyc": 106.9
+  }
+ },
+ "margin_series_note": "GPM nam (cach r2) 30,5%(2017)->37,1%(2025)->39,0% TTM tang gan deu; brief neu 34,85% cho 2021-25, do lai 34,77%",
+ "gpm_rule_0711_note": "Dau vao headline giu 39,0%/33,6% theo chi dao Mike; script stats cu tinh TB trong so DT cua chuoi GPM_P0 (gia dinh quy - SAI mo ta). Theo quy tac 07/11 (TTM=GPM_P0 2026Q3 38,77%, nam=Q4): tam 24.973, nhan khong doi",
+ "upside_catalyst": "san bay Long Thanh = premium catalyst (tag 06/2026), chua luong hoa trong base"
+}

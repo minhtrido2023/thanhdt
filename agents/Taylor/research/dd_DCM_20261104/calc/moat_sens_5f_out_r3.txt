@@ -1,0 +1,12 @@
+k_per_usd 73.56
+equity_ty 11883
+opcap_ty 4344
+roic_op_at_179 0.221
+spread_roic_eq_ke 131.9
+proxy_avg_2021_25 277.2
+NARROW_base_179 24314
+WIDE_220 27330
+WIDE_2021_25_avg 31534
+WIDE_260 30272
+NONE_fade_now 20850
+NONE_fade_from_2035 22886

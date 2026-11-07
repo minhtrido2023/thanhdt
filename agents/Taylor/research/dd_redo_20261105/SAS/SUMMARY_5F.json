@@ -1,0 +1,257 @@
+{
+ "ticker": "SAS",
+ "job": "Taylor_20261107_125216",
+ "revision": "r2 (r1: SUMMARY_5F_r1.json, job Taylor_20261107_123136)",
+ "asof": "2026-11-07",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION/REGULATORY",
+ "risk1": "Long Thanh: intl flights move 2027-03-28..2028-03-25 per CAAV schedule; earlier ACV proposal sooner (winter 2026) - official decision UNVERIFIED (dd_SAS_20261026/REPORT.md:71-74), both versions fall 2027-28; ~57% Q3 revenue tied to intl pax [UL]; LT concession likely tendered; TSN space ACV-granted without tender (TTCP 2017)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv:38 (src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_multi_cycle_excess": "INCONCLUSIVE: vendor ROIC unreliable (2016Q1 ROIC5Y -1.97%, ROE5Y -8.6% while quarterly NPM 11-17%; ROIC_Trailing 100.7% 2019Q4, 223% 2026Q3; tag calls Min5Y COVID-SCARRED). Raw vendor: ROIC3Y 23.5%, ROIC5Y 15.3%, ROIC10Y 13.1%, ROIC_Min3Y 11.2%, Min5Y=Min10Y -2.5%; ROE5Y 20.5%, ROE_Min3Y 19.2%; operating ROE 71.2% (REPORT_r2 s3)",
+  "ii_named_mechanism": "pass: ACV-granted TSN location concession",
+  "iii_no_moat_clock": "fail: Long Thanh migration 2027-28 (both schedule versions) + tender"
+ },
+ "moat_durable_basis": "(iii) moat clock + NARROW tag (SKILL 3c), not (i)",
+ "model_changed": true,
+ "change": "Current r2 implicitly WIDE: Gordon E/(r-g) without reinvestment (RONIC=inf all g) + N0 (operating NPM 16.67%, fin income excluded) held forever. Strict-3c headline: RONIC=Ke symmetric (V=E/r) + operating NPM to industry cycle 14.36% (incl. fin) minus f=2pp => 12.36%; adj -133.9bn/yr (-25.8% N0), half 2027, full 2028+. r1 (17,438) wrong: compared operating N0 to 9M NPM incl. 6.46pp fin income. Convention pending Mike/user approval; SUMMARY/zones not written.",
+ "f_basis": {
+  "head_pp": 2.0,
+  "range_pp": [
+   1.0,
+   3.0
+  ],
+  "proxy_9m25_pp": 1.99,
+  "fy2025_pp": 4.78,
+  "fy2025_note": "Q4/25 fin rev 139.8bn [web] may contain one-offs",
+  "per_year_2017_25": "cần kiểm chứng (no per-year fin income in BQ/folder)"
+ },
+ "gpm": {
+  "SAS_GPM_P0_26Q3": 68.17,
+  "AST_GPM_P0_26Q3": 64.16,
+  "SAS_9M26_BCTC": 66.7,
+  "industry_cycle_SAS_AST_2017_25": 54.01,
+  "note": "GPM_P0 is TTM; Q4 row used directly"
+ },
+ "old": {
+  "center": 31066,
+  "p10": 23751,
+  "p50": 30806,
+  "p90": 38022,
+  "pct_below_px": 0.7359,
+  "label": "TRONG vung",
+  "label_sleeve40": "TRONG vung",
+  "p90_sleeve40": 40235
+ },
+ "new": {
+  "center": 22002,
+  "p10": 17949,
+  "p50": 21965,
+  "p90": 25977,
+  "pct_below_px": 1.0,
+  "label": "TREN vung (>P90)",
+  "label_sleeve40": "TREN vung (>P90)",
+  "p90_sleeve40": 27489,
+  "convention": "quy ước chờ Mike/user duyệt",
+  "range_by_f": {
+   "f1": {
+    "center": 23026,
+    "p10": 18695,
+    "p50": 22986,
+    "p90": 27446,
+    "pct_below_px": 1.0,
+    "label": "TREN vung (>P90)",
+    "label_sleeve40": "TREN vung (>P90)",
+    "p90_sleeve40": 29044
+   },
+   "f3": {
+    "center": 20978,
+    "p10": 17124,
+    "p50": 20944,
+    "p90": 24944,
+    "pct_below_px": 1.0,
+    "label": "TREN vung (>P90)",
+    "label_sleeve40": "TREN vung (>P90)",
+    "p90_sleeve40": 26396
+   }
+  }
+ },
+ "label_changed": true,
+ "price": 34700.0,
+ "decomposition": {
+  "ronic_only": -4657,
+  "margin_only_f2": -5611,
+  "total": -9065,
+  "margin_only_by_f": {
+   "0.0": -3003,
+   "1.0": -4307,
+   "2.0": -5611,
+   "3.0": -6914,
+   "4.78": -9235
+  },
+  "note": "interaction => parts not additive"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 31066,
+   "p10": 23751,
+   "p50": 30806,
+   "p90": 38022,
+   "pct_below_px": 0.7359,
+   "label": "TRONG vung",
+   "label_sleeve40": "TRONG vung",
+   "p90_sleeve40": 40235
+  },
+  "NARROW": {
+   "center": 22002,
+   "p10": 17949,
+   "p50": 21965,
+   "p90": 25977,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 27489
+  },
+  "NONE": {
+   "center": 21681,
+   "p10": 17656,
+   "p50": 21644,
+   "p90": 25604,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 27095
+  },
+  "f=0.0": {
+   "center": 24050,
+   "p10": 19325,
+   "p50": 24008,
+   "p90": 28916,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 30599
+  },
+  "f=1.0": {
+   "center": 23026,
+   "p10": 18695,
+   "p50": 22986,
+   "p90": 27446,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 29044
+  },
+  "f=2.0": {
+   "center": 22002,
+   "p10": 17949,
+   "p50": 21965,
+   "p90": 25977,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 27489
+  },
+  "f=3.0": {
+   "center": 20978,
+   "p10": 17124,
+   "p50": 20944,
+   "p90": 24944,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 26396
+  },
+  "f=4.78": {
+   "center": 19154,
+   "p10": 15661,
+   "p50": 19126,
+   "p90": 22540,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 23852
+  },
+  "RONIC_only": {
+   "center": 26410,
+   "p10": 20776,
+   "p50": 26361,
+   "p90": 31892,
+   "pct_below_px": 0.9688,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 33749
+  },
+  "margin_only_f2": {
+   "center": 25456,
+   "p10": 20107,
+   "p50": 25309,
+   "p90": 31127,
+   "pct_below_px": 0.9781,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 32940
+  },
+  "margin_only_f0": {
+   "center": 28063,
+   "p10": 21839,
+   "p50": 27880,
+   "p90": 34346,
+   "pct_below_px": 0.9125,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TRONG vung",
+   "p90_sleeve40": 36346
+  },
+  "channel_c_lower_cut": {
+   "center": 23162,
+   "p10": 18779,
+   "p50": 23122,
+   "p90": 27642,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 29251
+  },
+  "channel_a_upper_cut": {
+   "center": 16012,
+   "p10": 13385,
+   "p50": 15993,
+   "p90": 18756,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 19848
+  },
+  "AST_current_gpm": {
+   "center": 24331,
+   "p10": 19498,
+   "p50": 24288,
+   "p90": 29319,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)",
+   "p90_sleeve40": 31025
+  },
+  "headline_delta0": {
+   "center": 26224,
+   "p10": 23788,
+   "p50": 26176,
+   "p90": 28563,
+   "pct_below_px": 1.0
+  }
+ },
+ "label_boundary": {
+  "headline": false,
+  "headline_p90_gap_to_px": "+33.6% ref / +26.2% sleeve40",
+  "ronic_only_sleeve40": "BOUNDARY: P90 33,749 vs px 34,700 (2.8%)",
+  "margin_only_f0_sleeve40": "TRONG (P90 36,346)",
+  "margin_only_f1_sleeve40": "BOUNDARY (P90 34,624)"
+ },
+ "proposed_moat_tag_row": "SAS,NARROW,LOCATION/REGULATORY,M,\"TSN concession (ACV-granted, no tender; ACV 49.07% landlord+shareholder). NOT durable via moat clock: intl flights move to Long Thanh 2027-28 (official schedule unverified, both versions 2027-28), LT space likely tendered. Excess return INCONCLUSIVE: vendor ROIC unreliable (ROIC5Y -2%/ROE5Y -9% in 2016Q1 at 11-17% NPM; ROIC_Trailing 101-223%); operating ROE ~71%. Operating NPM 9M/26 16.7% vs cycle 11.4-13.4% ex-fin-income (14.36% incl. fin minus f 1-3pp; SAS+AST)\",2026-11-07,5f_recheck_dd,Y",
+ "proposed_row_required": false,
+ "measured_by": "$DNA_PYEXE -I -B calc/sas_5f.py -> calc/sas_5f_out.txt md5 ad71809401264afcfb44972f7802507f, sas_5f_out.json md5 e8de5f71a1bc19046e240f3d788ced72 (2 runs identical); BQ tav2_bq.ticker_financial 2026-11-07",
+ "non_point_in_time": true
+}

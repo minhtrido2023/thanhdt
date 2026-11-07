@@ -1,0 +1,166 @@
+{
+ "ke": 0.135,
+ "px": 33450.0,
+ "d_ref": 0.007123534794358433,
+ "dgc_gpm_ttm_mean_2017_25": 0.28950052290204015,
+ "ind_gpm": {
+  "median_CSV_DDV_LAS_HVT": 0.19469782870632454,
+  "mean_CSV_DDV_LAS_HVT": 0.19615888936759301,
+  "median_+VAF": 0.20897783654945734,
+  "median_+BFC_SFG": 0.15601615604298544,
+  "median_+DPM_DCM": 0.2098893488722032,
+  "CSV_only": 0.2740608522760939
+ },
+ "gpm_model_term": {
+  "xau": 0.15005476451259583,
+  "coso": 0.17505051579283207,
+  "tot": 0.18995754107439541
+ },
+ "gpm_model_term_molai": {
+  "xau": 0.2717536813922356,
+  "coso": 0.2813995533340423,
+  "tot": 0.282259553258261
+ },
+ "variants": {
+  "current": {
+   "center": 44767,
+   "p10": 32518,
+   "p50": 44633,
+   "p90": 57101,
+   "below": 0.122,
+   "label": "TRONG vùng"
+  },
+  "ronic_ke_only": {
+   "center": 43028,
+   "p10": 31762,
+   "p50": 42981,
+   "p90": 54622,
+   "below": 0.148,
+   "label": "TRONG vùng"
+  },
+  "margin_only_median": {
+   "center": 41057,
+   "p10": 33509,
+   "p50": 41046,
+   "p90": 48196,
+   "below": 0.096,
+   "label": "DƯỚI vùng"
+  },
+  "strict3c_half": {
+   "center": 41331,
+   "p10": 32783,
+   "p50": 41335,
+   "p90": 50141,
+   "below": 0.117,
+   "label": "TRONG vùng"
+  },
+  "strict3c_median_CSV_DDV_LAS_HVT": {
+   "center": 39634,
+   "p10": 32277,
+   "p50": 39631,
+   "p90": 46514,
+   "below": 0.136,
+   "label": "TRONG vùng"
+  },
+  "strict3c_mean_CSV_DDV_LAS_HVT": {
+   "center": 39795,
+   "p10": 32411,
+   "p50": 39767,
+   "p90": 46700,
+   "below": 0.131,
+   "label": "TRONG vùng"
+  },
+  "strict3c_median_+VAF": {
+   "center": 41208,
+   "p10": 33644,
+   "p50": 41184,
+   "p90": 48323,
+   "below": 0.092,
+   "label": "DƯỚI vùng"
+  },
+  "strict3c_median_+BFC_SFG": {
+   "center": 35368,
+   "p10": 28397,
+   "p50": 35619,
+   "p90": 41486,
+   "below": 0.328,
+   "label": "TRONG vùng"
+  },
+  "strict3c_median_+DPM_DCM": {
+   "center": 41309,
+   "p10": 33735,
+   "p50": 41294,
+   "p90": 48438,
+   "below": 0.088,
+   "label": "DƯỚI vùng"
+  },
+  "strict3c_CSV_only": {
+   "center": 48386,
+   "p10": 39859,
+   "p50": 48231,
+   "p90": 57086,
+   "below": 0.006,
+   "label": "DƯỚI vùng"
+  },
+  "wide_ul_ronic25": {
+   "center": 45489,
+   "p10": 32949,
+   "p50": 45467,
+   "p90": 58196,
+   "below": 0.111,
+   "label": "TRONG vùng"
+  }
+ },
+ "strict3c_sleeve": {
+  "10tr": {
+   "center": 39905,
+   "p10": 32498,
+   "p50": 39903,
+   "p90": 46833,
+   "below": 0.129,
+   "label": "TRONG vùng"
+  },
+  "20tr": {
+   "center": 39900,
+   "p10": 32494,
+   "p50": 39897,
+   "p90": 46827,
+   "below": 0.129,
+   "label": "TRONG vùng"
+  },
+  "40tr": {
+   "center": 39893,
+   "p10": 32488,
+   "p50": 39890,
+   "p90": 46818,
+   "below": 0.129,
+   "label": "TRONG vùng"
+  }
+ },
+ "current_sleeve": {
+  "10tr": {
+   "center": 45074,
+   "p10": 32741,
+   "p50": 44939,
+   "p90": 57493,
+   "below": 0.115,
+   "label": "TRONG vùng"
+  },
+  "20tr": {
+   "center": 45068,
+   "p10": 32737,
+   "p50": 44933,
+   "p90": 57485,
+   "below": 0.117,
+   "label": "TRONG vùng"
+  },
+  "40tr": {
+   "center": 45059,
+   "p10": 32731,
+   "p50": 44924,
+   "p90": 57475,
+   "below": 0.117,
+   "label": "TRONG vùng"
+  }
+ }
+}

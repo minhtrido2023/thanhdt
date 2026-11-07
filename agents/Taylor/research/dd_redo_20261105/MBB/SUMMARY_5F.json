@@ -1,0 +1,199 @@
+{
+ "ticker": "MBB",
+ "job": "Taylor_20261107_130206; r2 fix Taylor_20261107_131623",
+ "asof": "2026-11-07",
+ "price": 19250.0,
+ "price_date": "2026-11-04",
+ "r": 0.135,
+ "moat_tier": "NARROW",
+ "moat_type": "COST/REGULATORY",
+ "risk1": "CASA erosion/marginal funding cost (KKH/TG KH 36.8->32.8% 9M26, CCTG 11.18%) + state-imposed rescue (compulsory MBV transfer, admin rate caps, Basel III) taxing excess ROE; NPL group-2 +42% QoQ Q3/26",
+ "reused": false,
+ "source_asof": null,
+ "source_note": "no prior 5F: data/moat_tags.csv has no MBB; REPORT_r2 / dd_MBB_20261031 / kb/projects/mbb-dd-20261031.md have no 5F section",
+ "moat_durable": false,
+ "durability_checks": {
+  "i_excess_multi_cycle": "FAIL at 10Y (ROE_Min10Y 12.02% < Ke 13.5%; 2015-17 ROE 11.5-12.8%); PASS at 5Y (ROE_Min5Y 20.67%)",
+  "ii_mechanism": "low-cost funding CASA + licence (nameable, eroding)",
+  "iii_clock": "FAIL: 6th force active (MBV, admin rate caps, Basel III)"
+ },
+ "roic_note": "BQ ROIC* = 0 for all banks (not computed) -> ROE vs Ke used",
+ "implicit_moat_in_current_model": "terminal RI grows at g_T 6-8% with ROE_T 14-18% > Ke (RONIC>Ke); NPV0 rule only one-sided",
+ "model_changed": true,
+ "model_change_status": "strict-3c version computed in parallel; quy uoc cho Mike/user duyet; REPORT_r2/SUMMARY.json/dd_price_zones NOT modified",
+ "old": {
+  "center": 23804,
+  "p10": 14444,
+  "p50": 22765,
+  "p90": 35860,
+  "pct_below": 0.323,
+  "label_5ty": "TRONG vùng",
+  "label_40tr": "TRONG vùng"
+ },
+ "new_headline_NARROW": {
+  "center": 17677,
+  "p10": 12112,
+  "p50": 17580,
+  "p90": 24434,
+  "pct_below": 0.643,
+  "label_5ty": "TRONG vùng",
+  "label_40tr": "TRONG vùng"
+ },
+ "headline_params": {
+  "RONIC": "Ke (g_RI=0 all cells)",
+  "ROE_ind": [
+   0.1297,
+   0.135
+  ],
+  "ROE_ind_basis": "median ROE10Y of 26 listed banks in BQ ticker_financial 2026Q3 ex MBB, ex NVB (12.97%; mean 13.04%) .. Ke 13.5%; median falls in gap SSB 11.49%/SHB 14.45% -> report range",
+  "fade_N": 5,
+  "droe_applied_to_target": true
+ },
+ "decomposition": {
+  "ronic_only": -3636,
+  "roe_fade_on_top": -2492
+ },
+ "peer_range_center": [
+  17677,
+  26463
+ ],
+ "peer_variants": {
+  "NARROW_all_ex_NVB_mean": {
+   "center": 17773,
+   "p10": 12192,
+   "p50": 17676,
+   "p90": 24550,
+   "pct_below": 0.634,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NARROW_r1set23_med": {
+   "center": 20459,
+   "p10": 14417,
+   "p50": 20364,
+   "p90": 27723,
+   "pct_below": 0.443,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NARROW_large_mean": {
+   "center": 24582,
+   "p10": 17844,
+   "p50": 24499,
+   "p90": 32899,
+   "pct_below": 0.234,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NARROW_large_med": {
+   "center": 26463,
+   "p10": 19410,
+   "p50": 26405,
+   "p90": 35258,
+   "pct_below": 0.086,
+   "label_5ty": "DƯỚI vùng",
+   "label_40tr": "DƯỚI vùng"
+  },
+  "NARROW_N10_all_ex_NVB_med": {
+   "center": 18565,
+   "p10": 11930,
+   "p50": 18284,
+   "p90": 27022,
+   "pct_below": 0.619,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "R": {
+   "center": 20169,
+   "p10": 14444,
+   "p50": 20076,
+   "p90": 26122,
+   "pct_below": 0.462,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "M_all_ex_NVB_med": {
+   "center": 18514,
+   "p10": 12112,
+   "p50": 17580,
+   "p90": 27240,
+   "pct_below": 0.612,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NONE_N5": {
+   "center": 18394,
+   "p10": 12706,
+   "p50": 18297,
+   "p90": 25301,
+   "pct_below": 0.623,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  }
+ },
+ "industry_roe10y": {
+  "all_ex_NVB_med": 0.12969037210499995,
+  "all_ex_NVB_mean": 0.13040887597673556,
+  "all_mean": 0.1219127456614861,
+  "r1set23_med": 0.14981801679,
+  "large_med": 0.1894370677649999,
+  "large_mean": 0.17752862570272726
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 23804,
+   "p10": 14444,
+   "p50": 22765,
+   "p90": 35860,
+   "pct_below": 0.323,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NARROW": {
+   "center": 17677,
+   "p10": 12112,
+   "p50": 17580,
+   "p90": 24434,
+   "pct_below": 0.643,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NONE": {
+   "center": 17809,
+   "p10": 12871,
+   "p50": 17805,
+   "p90": 23639,
+   "pct_below": 0.643,
+   "label_5ty": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  }
+ },
+ "label_change": "none (TRONG -> TRONG); exception: peer=large-bank median -> DUOI boundary (P10 19,410 vs price 19,250)",
+ "proposed_moat_tag_row": "MBB,NARROW,COST/REGULATORY,M,\"Low-cost funding (CASA 37.8% 2025 vs sector ~20%, CIR 26%) via military/Viettel ecosystem + licence = real edge; ROE_Min5Y 20.7% but ROE_Min10Y 12.0% < Ke (2015-17 11.5-12.8%) and only +0.9pp ROE10Y vs large-bank peers, sector median ROE10Y 12.97% < Ke; #1 risk: CASA erosion (KKH/TG 36.8->32.8% 9M26, CCTG 11%) + state-imposed rescue (compulsory MBV/OceanBank transfer, admin rate caps, Basel III) taxing excess ROE, NPL group-2 +42% QoQ Q3/26\",2026-11-07,5f,N",
+ "measured_by": "$DNA_PYEXE -I calc_5f/mbb_5f.py > calc_5f/mbb_5f_out.txt (run 2x byte-identical md5 2fa0a17b0c116fd74802483272ef8218); calc_5f/peer_roe_bq_20261107.csv (BQ ticker_financial 2026Q3, 28 banks)",
+ "live_only_non_pit": true,
+ "r2_changes": [
+  "peer set 23->26 (+PGB 5.40%, VBB 8.14%, PVB 4.68% ROE10Y; ex MBB/NVB; BVH insurer excluded): median ROE10Y 14.98% -> 12.97%, mean 13.04%; distribution gap SSB 11.49% -> SHB 14.45%",
+  "NONE target = Ke + dROE (r1 omitted dROE -> P10 NONE 15,109 > WIDE 14,444, withdrawn)",
+  "headline = range: NARROW target median 12.97% (17,677) .. target Ke 13.5% (18,394)",
+  "evidence gaps flagged: NIM/CASA/CIR single WEB point, NPL/coverage not peer-compared multi-year; BQ ticker_financial has no bank-specific columns",
+  "ROE_Min10Y 12.02% vendor definition != min quarterly ROE_Trailing (2016Q4 11.54%, 2017Q1 11.90%, 2016Q2 11.01%)"
+ ],
+ "new_headline_NARROW_fadeKe": {
+  "center": 18394,
+  "p10": 12706,
+  "p50": 18297,
+  "p90": 25301,
+  "pct_below": 0.623,
+  "label_5ty": "TRONG vùng",
+  "label_40tr": "TRONG vùng"
+ },
+ "headline_range_center": [
+  17677,
+  18394
+ ],
+ "price_vs_center": 0.089,
+ "sensitivity_note": "NONE r2 = RONIC=Ke + ROE->Ke+dROE N2; r1 NONE (17,638/15,109/17,550/19,983) withdrawn",
+ "evidence_gaps": "NIM/CASA/CIR: single WEB/BCTN point each, no multi-year peer series; NPL/group-2/coverage not peer-compared multi-year; BQ has no bank columns -> can kiem chung (BCTC)",
+ "roe_min10y_note": "ROE_Min10Y 12.02% is vendor-defined; min quarterly ROE_Trailing in window 2016Q4=11.54%, 2017Q1=11.90%; 2015-18 low 2016Q2=11.01%"
+}

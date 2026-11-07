@@ -1,0 +1,26 @@
+r 0.1350 | giá 19.600 | CK 4.02% | biên ngành 7% | biên TB riêng TV1 1.3%
+RONIC ngầm r2 (m·0,64/0,49): C_bien5 6.5% C_thap 10.4% C_giua 14.4% C_cao 18.3%
+WIDE_ngam  tâm 15.379 P10 4.693 P50 15.532 P90 24.544 | dưới giá 71.3% | TRONG vùng | tư vấn kỳ vọng 7.382 (C_bien5:836 C_thap:5.105 C_giua:9.893 C_cao:17.258) | có cấm thầu: tâm 12.981 P10 1.431
+RONIC_ONLY tâm 15.757 P10 6.079 P50 16.247 P90 23.871 | dưới giá 73.1% | TRONG vùng | tư vấn kỳ vọng 7.833 (C_bien5:2.749 C_thap:6.064 C_giua:9.802 C_cao:15.435) | có cấm thầu: tâm 13.344 P10 2.353
+NARROW     tâm 13.804 P10 6.230 P50 14.546 P90 19.599 | dưới giá 90.0% | TRÊN vùng (>P90) | tư vấn kỳ vọng 5.720 (C_bien5:3.803 C_thap:5.269 C_giua:6.453 C_cao:7.976) | có cấm thầu: tâm 11.426 P10 770
+NARROW_MEAN tâm 14.218 P10 6.609 P50 14.954 P90 20.083 | dưới giá 88.1% | TRONG vùng | tư vấn kỳ vọng 6.183 (C_bien5:4.198 C_thap:5.664 C_giua:6.953 C_cao:8.630) | có cấm thầu: tâm 11.835 P10 1.252
+NONE       tâm 12.921 P10 6.697 P50 13.529 P90 18.261 | dưới giá 94.2% | TRÊN vùng (>P90) | tư vấn kỳ vọng 4.730 (C_bien5:4.346 C_thap:4.860 C_giua:4.843 C_cao:4.655) | có cấm thầu: tâm 10.590 P10 93
+NONE_own   tâm 7.832 P10 0 P50 7.969 P90 12.859 | dưới giá 95.6% | TRÊN vùng (>P90) | tư vấn kỳ vọng -1.116 (C_bien5:-723 C_thap:-208 C_giua:-1.430 C_cao:-3.372) | có cấm thầu: tâm 5.919 P10 0
+CELL WIDE_ngam|CK5ty          CK 4.02% tâm 15.379 P10 4.693 P50 15.532 P90 24.544 | dưới giá 71.3% | TRONG vùng
+CELL WIDE_ngam|CK1ty          CK 1.98% tâm 15.705 P10 4.793 P50 15.861 P90 25.065 | dưới giá 71.1% | TRONG vùng
+CELL WIDE_ngam|CKsleeve       CK 0.66% tâm 15.916 P10 4.857 P50 16.074 P90 25.402 | dưới giá 69.3% | TRONG vùng
+CELL RONIC_ONLY|CK5ty         CK 4.02% tâm 15.757 P10 6.079 P50 16.247 P90 23.871 | dưới giá 73.1% | TRONG vùng
+CELL RONIC_ONLY|CK1ty         CK 1.98% tâm 16.091 P10 6.208 P50 16.592 P90 24.377 | dưới giá 69.3% | TRONG vùng
+CELL RONIC_ONLY|CKsleeve      CK 0.66% tâm 16.307 P10 6.292 P50 16.815 P90 24.705 | dưới giá 68.1% | TRONG vùng
+CELL NARROW|CK5ty             CK 4.02% tâm 13.804 P10 6.230 P50 14.546 P90 19.599 | dưới giá 90.0% | TRÊN vùng (>P90)
+CELL NARROW|CK1ty             CK 1.98% tâm 14.097 P10 6.362 P50 14.854 P90 20.015 | dưới giá 88.6% | TRONG vùng
+CELL NARROW|CKsleeve          CK 0.66% tâm 14.287 P10 6.448 P50 15.054 P90 20.284 | dưới giá 87.8% | TRONG vùng
+CELL NARROW_MEAN|CK5ty        CK 4.02% tâm 14.218 P10 6.609 P50 14.954 P90 20.083 | dưới giá 88.1% | TRONG vùng
+CELL NARROW_MEAN|CK1ty        CK 1.98% tâm 14.520 P10 6.749 P50 15.271 P90 20.509 | dưới giá 86.1% | TRONG vùng
+CELL NARROW_MEAN|CKsleeve     CK 0.66% tâm 14.715 P10 6.840 P50 15.476 P90 20.785 | dưới giá 83.0% | TRONG vùng
+CELL NONE|CK5ty               CK 4.02% tâm 12.921 P10 6.697 P50 13.529 P90 18.261 | dưới giá 94.2% | TRÊN vùng (>P90)
+CELL NONE|CK1ty               CK 1.98% tâm 13.195 P10 6.839 P50 13.816 P90 18.648 | dưới giá 93.6% | TRÊN vùng (>P90)
+CELL NONE|CKsleeve            CK 0.66% tâm 13.372 P10 6.931 P50 14.002 P90 18.899 | dưới giá 93.3% | TRÊN vùng (>P90)
+CELL NONE_own|CK5ty           CK 4.02% tâm 7.832 P10 0 P50 7.969 P90 12.859 | dưới giá 95.6% | TRÊN vùng (>P90)
+CELL NONE_own|CK1ty           CK 1.98% tâm 7.999 P10 0 P50 8.138 P90 13.132 | dưới giá 95.6% | TRÊN vùng (>P90)
+CELL NONE_own|CKsleeve        CK 0.66% tâm 8.106 P10 0 P50 8.247 P90 13.308 | dưới giá 95.6% | TRÊN vùng (>P90)

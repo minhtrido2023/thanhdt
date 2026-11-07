@@ -1,0 +1,89 @@
+{
+ "ticker": "SCL",
+ "job": "Taylor_20261107_123141",
+ "asof": "2026-11-07",
+ "moat_tier": "NONE",
+ "moat_type": "NONE",
+ "moat_type_note": "ứng viên COST/LOCATION (tiếp cận tro sát nhà máy) chưa chứng minh",
+ "risk1": "biên ròng TTM 12,7% đỉnh 7 năm trong ngành không có quyền định giá; khách BĐS tập trung (58,5% phải thu) chậm trả hoặc tái đấu giá tro ⇒ biên về chu kỳ (TB 2020–TTM 8,3%)",
+ "reused": false,
+ "reuse_reason": "không có dòng SCL trong data/moat_tags.csv, không có audit 5F trong REPORT/SKEPTIC/kb/projects",
+ "source_asof": "2026-11-07 (làm mới; BQ ticker_financial 2026Q3; sector read Bobby 2026-10-29)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i": "FAIL ROIC3Y 11,7/ROIC5Y 8,4/ROIC10Y 5,6/ROIC_Min5Y -1,2% < Ke 13,5%; ROE TTM 24,4 ROE5Y 13,8 ROE_Min5Y 8,2",
+  "ii": "WEAK (GPM TTM 36,8% vs peer A trung vị 13,3% nhưng mòn 63->37%)",
+  "iii": "FAIL (tái đấu giá tro ~3 năm; giảm nhiệt điện than)"
+ },
+ "model_changed": true,
+ "model_change_status": "quy ước chờ Mike/user duyệt; không ghi dd_price_zones/SUMMARY",
+ "implicit_moat_in_current_model": "ROE 15/20% > Ke (bội số 7,72/8,42 vs 1/r 7,41) + STRUCTURAL giữ biên đỉnh TTM mãi mãi + CYCLICAL về TB của chính mã > TB ngành",
+ "old": {
+  "center": 22769,
+  "p10": 17348,
+  "p50": 23312,
+  "p90": 27119,
+  "pct_below": 0.9842,
+  "label": "TRÊN vùng (>P90)"
+ },
+ "new_headline_NONE_strict3c": {
+  "center": 8730,
+  "p10": 7891,
+  "p50": 8769,
+  "p90": 9581,
+  "pct_below": 1.0,
+  "label": "TRÊN vùng (>P90)"
+ },
+ "new_alt_own_cycle_RONIC_Ke": {
+  "center": 19053,
+  "p10": 15495,
+  "p50": 18208,
+  "p90": 23759,
+  "pct_below": 1.0,
+  "label": "TRÊN vùng (>P90)"
+ },
+ "decomposition": {
+  "ronic_only": -1920,
+  "margin_only_N5_Amedian": -11504
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 22769,
+   "p10": 17348,
+   "p50": 23312,
+   "p90": 27119,
+   "pct_below": 0.9842,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "NARROW": {
+   "center": 10685,
+   "p10": 9217,
+   "p50": 10893,
+   "p90": 12019,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "center_range_peer": [
+    9180,
+    11200
+   ]
+  },
+  "NONE": {
+   "center": 8730,
+   "p10": 7891,
+   "p50": 8769,
+   "p90": 9581,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "center_range_peer": [
+    6935,
+    9343
+   ]
+  }
+ },
+ "label_old": "TRÊN vùng (>P90)",
+ "label_new": "TRÊN vùng (>P90) ở mọi phương án/peer/cỡ CK/CUM+TERP — không ranh giới",
+ "peer_caveat": "peer nội địa (VGC,CVT,VIT,VHL,TCR; +xi măng HT1,BTS,HOM,VCX), không phải đối thủ AAC trực tiếp; biên peer ⇒ ROE ngầm ~6,4% < Ke (không so sánh được giữa mảng)",
+ "proposed_moat_tag_row": "SCL,NONE,NONE,L,\"ROIC never > Ke through cycle (ROIC5Y 8.4%, ROIC10Y 5.6%, ROIC_Min5Y -1.2% vs Ke 13.5%); TTM ROE 24% = peak-margin year (NPM 12.7% vs 2020-TTM avg 8.3%); GPM premium vs domestic VLXD peers eroding (63%->37% 2020->TTM); AAC fragmented, tuynel not banned; fly-ash input via ~3y power-plant auctions (re-auction clock); 58.5% trade AR one RE group\",2026-11-07,5f,N",
+ "source_calc": "calc/scl_5f_out.json (md5 txt 376113da60228dfaa6c90d3989b39073)",
+ "non_point_in_time": true
+}

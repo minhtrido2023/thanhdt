@@ -1,0 +1,100 @@
+{
+ "ticker": "SIP",
+ "asof": "2026-11-07",
+ "job": "Taylor_20261107_130211",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION/REGULATORY",
+ "risk1": "toc do & gia thuc thu 937 ha (72% Phuoc Dong B ve tinh; 2025 chi 28,6 ha vs KH 45); kenh dien nuoc captive phu thuoc bieu gia EVN/mua dien truc tiep",
+ "reused": false,
+ "source_asof": null,
+ "source_note": "khong co dong moat_tags.csv, DD 01/11 khong co 5F => lam moi day du",
+ "moat_durable": false,
+ "durability": {
+  "i": "FAIL mixed: ROIC_Min5Y 11.0%, ROIC3Y 12.3% < Ke 13.5%; ROIC5Y 15.7%, ROIC10Y 15.9% > Ke; ROE 26.9-27.9% float-inflated",
+  "ii": "PASS LOCATION+REGULATORY captive utility",
+  "iii": "FAIL finite land bank ~22y, licence terms unverified"
+ },
+ "model_changed": true,
+ "convention_pending": "Mike/user: TB chu ky rieng SIP (peer KCN GPM khac dinh nghia); RONIC=Ke ca g lam phat",
+ "channels": {
+  "R": "RONIC=ROE5Y 29.7% -> Ke (PE loi g3% 8.562->7.407)",
+  "M": "GPM TTM 15.47% -> TB 2019-25 14.63%: -78.2 ty LN gop/nam (-7.0%)"
+ },
+ "old": {
+  "centre": 54230,
+  "p10": 43784,
+  "p50": 53086,
+  "p90": 68713,
+  "pct_below": 0.33,
+  "label": "TRONG vùng",
+  "sleeve40_label": "TRONG vùng"
+ },
+ "new": {
+  "centre": 49253,
+  "p10": 38904,
+  "p50": 48119,
+  "p90": 63762,
+  "pct_below": 0.545,
+  "label": "TRONG vùng",
+  "sleeve40_label": "TRONG vùng"
+ },
+ "label_changed": false,
+ "sensitivity": {
+  "WIDE": {
+   "centre": 54230,
+   "p10": 43784,
+   "p50": 53086,
+   "p90": 68713,
+   "pct_below": 0.33,
+   "label": "TRONG vùng",
+   "sleeve40_label": "TRONG vùng"
+  },
+  "WIDE_ROIC5Y": {
+   "centre": 51698,
+   "p10": 41351,
+   "p50": 50569,
+   "p90": 66205,
+   "pct_below": 0.427,
+   "label": "TRONG vùng",
+   "sleeve40_label": "TRONG vùng"
+  },
+  "NARROW": {
+   "centre": 49253,
+   "p10": 38904,
+   "p50": 48119,
+   "p90": 63762,
+   "pct_below": 0.545,
+   "label": "TRONG vùng",
+   "sleeve40_label": "TRONG vùng"
+  },
+  "NONE": {
+   "centre": 48159,
+   "p10": 37820,
+   "p50": 47047,
+   "p90": 62682,
+   "pct_below": 0.594,
+   "label": "TRONG vùng",
+   "sleeve40_label": "TRONG vùng"
+  },
+  "only_R": {
+   "centre": 50841,
+   "p10": 40483,
+   "p50": 49751,
+   "p90": 65354,
+   "pct_below": 0.463,
+   "label": "TRONG vùng",
+   "sleeve40_label": "TRONG vùng"
+  },
+  "only_M": {
+   "centre": 52390,
+   "p10": 41942,
+   "p50": 51262,
+   "p90": 66891,
+   "pct_below": 0.399,
+   "label": "TRONG vùng",
+   "sleeve40_label": "TRONG vùng"
+  }
+ },
+ "proposed_moat_tag_row": "SIP,NARROW,LOCATION/REGULATORY,M,\"5 IPs (937ha unleased, 72% at satellite Phuoc Dong B, 2025 leased only 28.6ha vs plan 45) + captive in-IP power/water resale (82% rev, 8.7% GPM, EVN-tariff-bound); NOT durable: (i) ROIC_Min5Y 11.0% / ROIC3Y 12.3% < Ke 13.5% (ROIC5Y 15.7%; ROE 27-30% flattered by 15tn prepaid-lease float + deposits), (iii) finite land bank ~22yr, IP/power-retail licence terms unverified, direct-power-purchase policy risk. #1 risk: lease pace & realised price on Phuoc Dong B. WARNING: 6.0tn unsecured lending to securities cos/bonds (116% equity), 635.6bn advances to insiders\",2026-11-07,5f,N",
+ "measured_by": "SIP/5F/sip_moat_sens.py -> 5F/sip_moat_sens_out.json (md5 txt f37443ca8b262fd69d3771755bc0e2e6, 2 runs incl env -u TZ)"
+}

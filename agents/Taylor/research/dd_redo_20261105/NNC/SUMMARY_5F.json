@@ -1,0 +1,131 @@
+{
+ "ticker": "NNC",
+ "job": "Taylor_20261107_124443",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION",
+ "risk1": "Dong ho giay phep/Nha nuoc tren mo don le Mui Tau (~94% DT, GP toi 2043, truy thu da cham mo loi, co E12)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_validated_compet)",
+ "durability_checks": {
+  "i_supernormal_multi_cycle": false,
+  "ii_named_barrier": true,
+  "iii_no_clock": false,
+  "evidence": "BQ ticker_financial 07/11/2026: ROIC_Min5Y 0.0130 (lone FY2022 print, contradicts ROE 11.9% same yr = vendor artifact suspect); ROIC5Y 0.1653; ROIC10Y 0.2961; ROIC_Min10Y 0.0130; ROE_Trailing 2021-24 0.130/0.119/0.101/0.155; GP Mui Tau 2043. (iii) alone => not durable",
+  "i_note": "fails on Min5Y; weakened by artifact suspicion; two-sided evidence"
+ },
+ "moat_durable": false,
+ "model_changed": false,
+ "model_review": "DCF huu han 2027-2043 khong TV; CIP NPV0 (RONIC=Ke); CYCLICAL ve GPM chu ky 34.3%; VI PHAM 3c: STRUCTURAL w0.20 + ADMIN perm05 w0.15 (3 muc ADMIN moi 1/3, perm05 dem trung kenh per docstring r5) = 35% giu bien tren TB chu ky toi 2043 => ban CHAT-3C",
+ "sensitivity": {
+  "WIDE": {
+   "centre": 84655,
+   "p10": 31729,
+   "p50": 89665,
+   "p90": 127891,
+   "below_px": 0.25,
+   "rule4": true
+  },
+  "NARROW_current": {
+   "centre": 57589,
+   "p10": 30219,
+   "p50": 52916,
+   "p90": 93649,
+   "below_px": 0.3748,
+   "rule4": true
+  },
+  "drop_perm05_keep_STRUCT": {
+   "centre": 55476,
+   "p10": 30015,
+   "p50": 51012,
+   "p90": 89665,
+   "below_px": 0.3994,
+   "rule4": true
+  },
+  "CHAT_3C": {
+   "centre": 48181,
+   "p10": 29431,
+   "p50": 48891,
+   "p90": 64272,
+   "below_px": 0.4368,
+   "rule4": false
+  },
+  "CHAT_3C_global_renorm": {
+   "centre": 48078,
+   "p10": 29431,
+   "p50": 48801,
+   "p90": 64196,
+   "below_px": 0.4398,
+   "rule4": false
+  },
+  "NARROW_r1_strict_dropSTRUCT_only": {
+   "centre": 50822,
+   "p10": 30015,
+   "p50": 50616,
+   "p90": 69773,
+   "below_px": 0.406,
+   "rule4": false
+  },
+  "NONE": {
+   "centre": 47608,
+   "p10": 29431,
+   "p50": 48521,
+   "p90": 63576,
+   "below_px": 0.4537,
+   "rule4": false
+  }
+ },
+ "label_by_moat": {
+  "WIDE": "TRONG vung, luat4 dat",
+  "NARROW_current": "TRONG vung, luat4 dat",
+  "drop_perm05_keep_STRUCT": "TRONG vung, luat4 dat",
+  "CHAT_3C": "TRONG vung, luat4 KHONG dat",
+  "CHAT_3C_global_renorm": "TRONG vung, luat4 KHONG dat",
+  "NARROW_r1_strict_dropSTRUCT_only": "TRONG vung, luat4 KHONG dat",
+  "NONE": "TRONG vung, luat4 KHONG dat"
+ },
+ "proposed_moat_tag_row": "NNC,NARROW,LOCATION,M,\"Single-asset Mui Tau (~94% rev, license to 2043) = finite clock; NOT durable: (i) fails on ROIC_Min5Y but (iii) alone suffices; ROE 10-13% in 2021-23 license-gap yrs; State is top supplier (back-charges ~42bn, now touching Mui Tau core, flag E12 open); GPM 53% TTM Q3/26 = cycle peak not moat; ROIC_Min5Y 1.3% is a lone FY2022 print (ROIC5Y 16.5%, ROIC10Y 29.6%, contradicts ROE 11.9% same yr = vendor artifact suspect); 17/04/2026 auction win unverified (possible clock extension); MVC may go to 51% (related-party); very thin liquidity\",2026-11-07,5f_reuse_quickcheck,Y",
+ "measured_by": "5F/moat_sens_5f_r2.py 2 runs identical (md5 out 9d10b8811850fe59d6d30bb0b5e4533e) on calc/grid_nnc_redo_r2.csv; bq ticker_financial NNC/DHA/KSB/VLB GPM_P0 2024Q3-2026Q3 07/11/2026",
+ "caveat": "5F non-point-in-time: chi DD song, cam backtest",
+ "round": 3,
+ "supersedes": "SUMMARY_5F_r2.json",
+ "model_changed_note": "REPORT_r2 model untouched; r1 'consistent with 3c' RETRACTED (STRUCTURAL 0.20 + perm05 0.15 = 35%); r3 only reverts GPM TTM wording/peer figures - tier, durable, CHAT_3C numbers unchanged",
+ "headline": "CHAT_3C (cho Mike/user duyet quy uoc)",
+ "new": {
+  "centre": 48181,
+  "p10": 29431,
+  "p50": 48891,
+  "p90": 64272,
+  "below_px": 0.4368,
+  "label": "TRONG vung",
+  "rule4": false,
+  "decomposition": "all margin (RONIC=Ke already); drop STRUCTURAL -7295, drop perm05 -2113, sequential"
+ },
+ "old": {
+  "centre": 57589,
+  "p10": 30219,
+  "p50": 52916,
+  "p90": 93649,
+  "label": "TRONG vung"
+ },
+ "peer_gpm": {
+  "basis": "BQ GPM_P0 is TTM (4 trailing quarters); Q4 row = FY GPM, used directly (Mike correction 07/11 19:50)",
+  "NNC_Q3_26_TTM": 0.533,
+  "Q3_26_TTM": {
+   "NNC": 0.533,
+   "DHA": 0.372,
+   "KSB": 0.331,
+   "VLB": 0.336
+  },
+  "FY2025_Q4row": {
+   "NNC": 0.494,
+   "DHA": 0.36,
+   "KSB": 0.407,
+   "VLB": 0.292
+  },
+  "peers": "domestic same-cluster, none excluded",
+  "dropped": "r2 9T/2026 revenue-weighted avg of overlapping TTMs (51.6/37.2/34.9/31.9) - not a margin",
+  "argument_removed": "STRUCTURAL is industry state not NNC-specific"
+ },
+ "out_of_scope_note": "RETRACTED r3: model_r4.py:46 gpm_co 2025=0.494 = GPM_P0 Q4/25 row = TTM = FY2025 GPM -> not a bug; 42.8% was avg of overlapping TTMs. Not independently checked vs BCTC (chua kiem)."
+}

@@ -1,0 +1,85 @@
+{
+ "ticker": "DRI",
+ "job": "Taylor_20261107_120601",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION/COST",
+ "risk1": "Gia cao su (price-taker), da qua dinh (LNST me Q3/26 -33% YoY); risk2 = dong ho dat (NQ15 thanh ly 1.975 ha ~24% dien tich cao 2027-30, to nhuong Lao mo hinh toi 2054, rung bao ton)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_cyclical)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_excess_through_cycle": false,
+  "ii_named_mechanism": "partial (dat to nhuong + gia thanh thap; chi phia chi phi)",
+  "iii_no_clock": false
+ },
+ "evidence": {
+  "gpm_dri_2017_25": 0.3691,
+  "gpm_peer_median_2017_25": 0.2522,
+  "years_dri_above_peer_median": "9/9",
+  "roe_2018_2022": [
+   0.06,
+   0.046,
+   0.034,
+   0.1,
+   0.097
+  ],
+  "roe_min5y": 0.107,
+  "roe5y": 0.158,
+  "roic_min10y": 0.065,
+  "ke": 0.135,
+  "roic_trailing_note": "ROIC_Trailing Q4 2021-25 = 76-143% => self-calc khong tin cay, khong dung"
+ },
+ "model_changed": false,
+ "model_note": "Moat NARROW da ngam trong mo hinh r2 (Cref hieu chinh tu LN 2025 DRI, mid TB chu ky RSS3 thuc, tai canh NPV0 => RONIC=Ke, L0 khong gia tri sau 2054) - nhat quan, khong thuong, khong dem hai lan",
+ "current": {
+  "centre": 14092,
+  "p10": 12006,
+  "p50": 14235,
+  "p90": 16146,
+  "pct_below_price": 0.353,
+  "label": "TRONG vùng"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "centre": 14965,
+   "p10": 12817,
+   "p50": 15055,
+   "p90": 16957,
+   "pct_below_price": 0.175,
+   "param": "tai canh NPV = +0,25 x PV capex [UL minh hoa], bo nhanh KINH TE",
+   "label": "TRONG vùng"
+  },
+  "NARROW": {
+   "centre": 14092,
+   "p10": 12006,
+   "p50": 14235,
+   "p90": 16146,
+   "pct_below_price": 0.353,
+   "label": "TRONG vùng"
+  },
+  "NONE_half": {
+   "centre": 12489,
+   "p10": 10440,
+   "p50": 12760,
+   "p90": 14492,
+   "pct_below_price": 0.787,
+   "param": "Cref +1/2 chenh GPM",
+   "label": "TRONG vùng"
+  },
+  "NONE": {
+   "centre": 10885,
+   "p10": 8896,
+   "p50": 11150,
+   "p90": 12944,
+   "pct_below_price": 0.98,
+   "param": "Cref 30,22->35,84 tr/t (xoa chenh GPM 11,7pp)",
+   "label": "TRÊN vùng"
+  }
+ },
+ "price": 13500,
+ "price_date": "2026-11-04",
+ "proposed_moat_tag_row": "DRI,NARROW,LOCATION/COST,M,\"Commodity price-taker; cost edge real (GPM 2017-25 avg 36.9% vs peer median 25.2%, 9/9 yrs) but ROE<Ke 2018-22 (3.4-10%), ROE_Min5Y 10.7%<Ke 13.5% => not durable; post-peak (Q3-26 NP -33% YoY); land clock: NQ15 liquidates 1,975 ha (~24% tapped) 2027-30, Laos concession modelled to 2054, part in conservation-forest zoning; Dakruco related-party governance risk\",2026-11-07,5f_quickcheck_reuse_20260605,Y",
+ "measured_by": "calc_5f/moat_sens_5f.py ($DNA_PYEXE -B, md5 out 7a7522c6efb6c87763f61bb798a3a7c1) + BQ ticker_financial ROE_Trailing/GPM_P0 Q4 rows + ROE_Min5Y/ROIC_Min10Y latest",
+ "non_pit_note": "5F/LLM-knowledge non-point-in-time: chi DD song, cam backtest"
+}

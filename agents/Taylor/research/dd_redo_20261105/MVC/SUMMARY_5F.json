@@ -1,0 +1,350 @@
+{
+ "ticker": "MVC",
+ "job": "Taylor_20261107_124458",
+ "moat_tier": "NARROW",
+ "moat_tier_note": "r3 de xuat NARROW (khong ben)/LOCATION thay NONE r2: ROIC_Trailing_v1 >Ke 16/16 quy 2022Q4-26Q3, ROE >=Ke 2025-26, GPM TTM Q3/26 ngang peer, moi peer cum da (NNC/DHA/VLB) NARROW/LOCATION; NONE+LOCATION tu mau thuan. Phuong an thay: NONE kem \"can kiem chung bien da rieng Tan Lap\". He qua moat_5f.py: NONE => NONE_CAP=3 + NONE_DUR_FACTOR -0.50; NARROW trung tinh. Dinh gia KHONG phu thuoc NONE/NARROW.",
+ "moat_type": "LOCATION",
+ "risk1": "Nha nuoc/giay phep: han GP Tan Lap chua kiem chung + GP 2 mo moi (1.500 ty) chua cap, no rong tang truoc doanh thu",
+ "reused": false,
+ "source_asof": null,
+ "source": "lam moi: data/moat_tags.csv khong co MVC; kb/projects/mvc-dd-20261103.md va REPORT r2-r8 khong co 5F",
+ "durability_checks": {
+  "i_supernormal_multi_cycle": "contradictory",
+  "ii_named_barrier": "partial",
+  "iii_no_clock": false,
+  "durable_false_by": "iii alone (nhu NNC)",
+  "evidence": "BQ ticker_financial 07/11/2026: ROIC_Trailing_v1 Q4 2021-25 + 2026Q3 = 0.053/0.153/0.194/0.181/0.235/0.384; v1 >Ke 16/16 quy tu 2022Q4; ROIC5Y 0.0453, ROIC_Min5Y 0.0143, ROIC10Y 0.0384, ROIC_Min10Y 0.0040; ROIC5Y mau thuan ca hai chuoi quy (TB Q4 2021-25 v1 0.163, tu tinh 0.234) => nghi artifact doi xung; ROE_Trailing Q4 2017-25 0.097/0.133/0.089/0.065/-0.036/0.049/0.061/0.071/0.136, 2026Q3 0.207 (<Ke 8/9 nam); ROE khong sach lam trong tai o holding (NNC 43-44%, NHC 30%, CIP 438 ty)"
+ },
+ "moat_durable": false,
+ "model_changed": false,
+ "model_review": "Tan Lap DCF huu han khong TV; mo moi/dat/cum CN/mua NNC NPV0 (RONIC=Ke); truc bien TL {25,30,~NNC 34}% TB 29.7% ~ trung vi peer 29.1% (r3, Q4 GPM_P0); VI PHAM 3c: STRUCTURAL 0.20 + ADMIN perm05 0.15 = 35% giu bien tren TB chu ky (ca Tan Lap lan NNC nhin xuyen) => BAN CHAT-3C; V_NNC giai dong thoi theo nhanh => CHAT-3C MVC cung quy uoc CHAT-3C NNC r2 48.181; con mo: CYCLICAL NNC ve GPM rieng NNC 34.3% (chua do)",
+ "headline": "CHAT_3C (cho Mike/user duyet quy uoc, cung quyet dinh NNC r2)",
+ "old": {
+  "centre": 15276,
+  "p10": 9857,
+  "p50": 13748,
+  "p90": 23516,
+  "below_px": 0.5057,
+  "label": "TRONG vung",
+  "rule4": false
+ },
+ "new": {
+  "centre": 13010,
+  "p10": 9795,
+  "p50": 12931,
+  "p90": 16473,
+  "below_px": 0.6331,
+  "rule4": false,
+  "label": "TRONG vung",
+  "decomposition": "100% bien (RONIC=Ke san co); tuan tu: bo perm05 -524, bo STRUCTURAL -1742; tong -2266 (-14.8%)"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "5ty": {
+    "centre": 21721,
+    "p10": 10308,
+    "p50": 22265,
+    "p90": 32320,
+    "below_px": 0.2352,
+    "rule4": true,
+    "label": "TRONG"
+   },
+   "1ty": {
+    "centre": 22835,
+    "p10": 10837,
+    "p50": 23408,
+    "p90": 33979,
+    "below_px": 0.2278,
+    "rule4": true,
+    "label": "TRONG"
+   },
+   "40tr_label": "TRONG",
+   "10tr_label": "TRONG"
+  },
+  "NONE": {
+   "5ty": {
+    "centre": 12855,
+    "p10": 9790,
+    "p50": 12781,
+    "p90": 16164,
+    "below_px": 0.6671,
+    "rule4": false,
+    "label": "TRONG"
+   },
+   "1ty": {
+    "centre": 13515,
+    "p10": 10293,
+    "p50": 13437,
+    "p90": 16993,
+    "below_px": 0.5501,
+    "rule4": false,
+    "label": "TRONG"
+   },
+   "40tr_label": "TRONG",
+   "10tr_label": "TRONG"
+  },
+  "other": {
+   "WIDE": {
+    "5ty": {
+     "centre": 21721,
+     "p10": 10308,
+     "p50": 22265,
+     "p90": 32320,
+     "below_px": 0.2352,
+     "rule4": true,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 22835,
+     "p10": 10837,
+     "p50": 23408,
+     "p90": 33979,
+     "below_px": 0.2278,
+     "rule4": true,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "NARROW_current": {
+    "5ty": {
+     "centre": 15276,
+     "p10": 9857,
+     "p50": 13748,
+     "p90": 23516,
+     "below_px": 0.5057,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 16060,
+     "p10": 10363,
+     "p50": 14453,
+     "p90": 24723,
+     "below_px": 0.4297,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "KB_drop_perm05_keep_STRUCT": {
+    "5ty": {
+     "centre": 14752,
+     "p10": 9857,
+     "p50": 13384,
+     "p90": 22282,
+     "below_px": 0.5535,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 15509,
+     "p10": 10362,
+     "p50": 14071,
+     "p90": 23425,
+     "below_px": 0.4684,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "KB_CHAT_3C": {
+    "5ty": {
+     "centre": 13010,
+     "p10": 9795,
+     "p50": 12931,
+     "p90": 16473,
+     "below_px": 0.6331,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 13678,
+     "p10": 10298,
+     "p50": 13595,
+     "p90": 17318,
+     "below_px": 0.5286,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "CHAT_3C_global_renorm": {
+    "5ty": {
+     "centre": 12982,
+     "p10": 9795,
+     "p50": 12914,
+     "p90": 16401,
+     "below_px": 0.6392,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 13649,
+     "p10": 10298,
+     "p50": 13576,
+     "p90": 17243,
+     "below_px": 0.5324,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "KB_CHAT_3C_tl_peer_median_0.30": {
+    "5ty": {
+     "centre": 13076,
+     "p10": 9791,
+     "p50": 12992,
+     "p90": 16459,
+     "below_px": 0.5865,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 13747,
+     "p10": 10294,
+     "p50": 13659,
+     "p90": 17304,
+     "below_px": 0.5083,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "KB_CHAT_3C_tl_peer_mean_0.30_nnc": {
+    "5ty": {
+     "centre": 13271,
+     "p10": 9856,
+     "p50": 13200,
+     "p90": 16857,
+     "below_px": 0.5753,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 13952,
+     "p10": 10361,
+     "p50": 13878,
+     "p90": 17722,
+     "below_px": 0.4916,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "KB_CHAT_3C_tl_0.25_floor": {
+    "5ty": {
+     "centre": 12489,
+     "p10": 9750,
+     "p50": 12454,
+     "p90": 15540,
+     "below_px": 0.7486,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 13130,
+     "p10": 10250,
+     "p50": 13093,
+     "p90": 16337,
+     "below_px": 0.6026,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   },
+   "NONE": {
+    "5ty": {
+     "centre": 12855,
+     "p10": 9790,
+     "p50": 12781,
+     "p90": 16164,
+     "below_px": 0.6671,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "1ty": {
+     "centre": 13515,
+     "p10": 10293,
+     "p50": 13437,
+     "p90": 16993,
+     "below_px": 0.5501,
+     "rule4": false,
+     "label": "TRONG"
+    },
+    "40tr_label": "TRONG",
+    "10tr_label": "TRONG"
+   }
+  },
+  "current": {
+   "5ty": {
+    "centre": 15276,
+    "p10": 9857,
+    "p50": 13748,
+    "p90": 23516,
+    "below_px": 0.5057,
+    "rule4": false,
+    "label": "TRONG"
+   },
+   "1ty": {
+    "centre": 16060,
+    "p10": 10363,
+    "p50": 14453,
+    "p90": 24723,
+    "below_px": 0.4297,
+    "rule4": false,
+    "label": "TRONG"
+   },
+   "40tr_label": "TRONG",
+   "10tr_label": "TRONG"
+  },
+  "note": "khoa \"current\" = hien hanh REPORT_r2 (r2 ghi nham la \"NARROW\"); anh xa NARROW khong ben theo 3c = NONE/CYCLICAL hoac CHAT_3C"
+ },
+ "peer_gpm": {
+  "basis": "GPM_P0 dong Q4 (= GPM nam; BQ GPM_P0 la TTM), cua so CHUNG 2017-2025, 9 nam/ma",
+  "MVC_2017_25": 0.1612,
+  "KSB": 0.4356,
+  "DHA": 0.2908,
+  "VLB": 0.2453,
+  "NNC": 0.3493,
+  "peer_mean": 0.3239,
+  "peer_median": 0.2908,
+  "peer_mean_ex_KSB": 0.2681,
+  "ttm_2026Q3": {
+   "DHA": 0.372,
+   "KSB": 0.331,
+   "MVC": 0.3521,
+   "NNC": 0.533,
+   "VLB": 0.3362
+  },
+  "ttm_peer_mean": 0.3464,
+  "ttm_peer_median": 0.3362,
+  "peers": "noi dia cung cum da DNB; KSB co mang KCN, khong loai; khoang tam chat 12489-13271",
+  "r2_retracted": "r2 coi GPM_P0 la quy + trong so DT; so 9T/2026 r2 sai cach tinh"
+ },
+ "price": 13800,
+ "price_date": "2026-11-04",
+ "proposed_moat_tag_row": "MVC,NARROW,LOCATION,M,\"Stone quarry (Tan Lap) + 44.07% NNC holding (~36% of value, NARROW/LOCATION look-through); NOT durable: (iii) alone suffices - Tan Lap license end unverified, BOT ended 10/2024, NNC Mui Tau license 2043, 2 new quarries (1,500bn plan) license pending 2028 with rising net debt; (i) ROIC sources contradict: ROIC_Trailing_v1 >13.5% Ke 16/16 qtrs 2022Q4-2026Q3 (15.3-38.4%) vs ROIC5Y 4.5%/ROIC_Min5Y 1.4% = artifact suspect both sides; ROE_Trailing <Ke 8/9 yrs 2017-25 but holding ROE diluted by non-op assets (NNC/NHC/CIP 438bn); GPM annual (Q4 TTM) 2017-25 avg 16.1% vs peer median 29.1% (mixed brick/fuel/BOT, no segments) but TTM Q3/26 35.2% in line with peers; brick halted 08/2025; related-party cross-holding with NNC; very thin liquidity\",2026-11-07,5f_full_dd_redo,N",
+ "measured_by": "5F/moat_sens_5f.py (2 runs md5 79fcc69f00663e749525bf979cda1d2e = r2) on calc/grid_mvc_redo_r2.csv; 5F/gpm_q4_r3.py on 5F/bq_q_r3.csv (bq ticker_financial 07/11/2026, 2 runs md5 96007d3b22a88c3217ae00a19cfd9397); 5F/vnnc_check_5f.py (2 runs md5 29b58b2b0442d90c52269aea7380e0ac)",
+ "caveat": "5F non-point-in-time: chi DD song, cam backtest; chua qua fundamental-skeptic",
+ "round": 3,
+ "supersedes": "ADDENDUM_5F_r2.md / SUMMARY_5F_r2.json (job Taylor_20261107_123139)",
+ "vnnc_consistency": {
+  "nnc_r2_chat3c_post_ck": 48181,
+  "nnc_r2_chat3c_pre_ck": 49997,
+  "mvc_chat3c_vnnc_param": 53695,
+  "mvc_current_vnnc_param": 62923,
+  "gap": 0.074,
+  "note": "phan lon chenh = tham so trung tam vs ky vong luoi (cot hien hanh +5.3%); keo V_NNC ve 49.997 => tam MVC chat -100..-360 d/cp (uoc luong tuyen tinh, do doc 966/10k), nhan TRONG khong doi; khong chay lai luoi"
+ },
+ "nnc_stake_reconcile": "44.07% = 9.659.170 cp Q3/26 [HN-Q3 V.12]; BCTN 2025 EN 43.55% = 9.545.270 cp 31/12/2025 (txt:421-422); chenh = mua them 113.900 cp 6,01 ty 9T/26",
+ "hoa_lu_icd": "cong ty con 100% (EN AR txt:425), khong phai ben lien quan ngoai",
+ "model_changed_note": "engine/REPORT_r2 khong sua; headline CHAT_3C chi la tai trong so luoi khoa; so dinh gia khong doi so voi r2"
+}

@@ -1,6 +1,8 @@
 test_20_TMG_dead_liquidity (__main__.Integration.test_20_TMG_dead_liquidity) ... /home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/google/auth/_default.py:113: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
   warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
-[cpi_vn] CPI COVERAGE GAP: 4 month(s) 2026-09..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+[cpi_vn] CPI COVERAGE GAP: 2 month(s) 2026-11..2026-12 have NO real source. Tier 1 (live NSO) ends 2026-06; Tier 1.4 (TE snapshot) ends 2026-10; Tier 1.5 (FiinPro snapshot 2026-09-14, trial ended 2026-09-28 -> FROZEN) ends 2026-08. Those months are Tier 2's forward-fill of its last anchor, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.
+!!!!! [dcf_valuation] DCF_OSHARES_SOURCE=live TMG: Price 64000 lap lai tu 2026-07-17 den 2026-07-21 -> khoa khung tu 2026-07-17 !!!!!
+DCF_OSHARES_SOURCE=live TMG: Price 64000 lap lai tu 2026-07-17 den 2026-07-21 -> khoa khung tu 2026-07-17
 ok
 test_21_IVS_thin_and_inflated_surprise (__main__.Integration.test_21_IVS_thin_and_inflated_surprise) ... ok
 test_22_TRC_thin_but_in_universe (__main__.Integration.test_22_TRC_thin_but_in_universe) ... ok
@@ -79,6 +81,6 @@ test_73_div_growth_banking_is_na (__main__.YieldFloor.test_73_div_growth_banking
 Ngân hàng đủ điều kiện stable + div3>0 vẫn bị ép về N/A (giống yield_floor_note). ... ok
 
 ----------------------------------------------------------------------
-Ran 49 tests in 72.427s
+Ran 49 tests in 88.184s
 
 OK

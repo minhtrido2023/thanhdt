@@ -1,0 +1,161 @@
+{
+ "ticker": "TV1",
+ "job": "Taylor_20261107_124450",
+ "asof": "2026-11-07",
+ "moat_tier": "NARROW",
+ "moat_type": "REGULATORY/AFFILIATION",
+ "risk1": "Quản trị/vụ án EVNNPT-PC1 (WARNING) có thể làm mất quan hệ EVN (cấm thầu 3 năm p0,35 ≈ −8.194 đ/cp, giảm trừ pháp lý riêng giữ như nhau mọi chế độ moat, không đếm hai lần)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_excess_multi_cycle": "FAIL ở mảng tư vấn; hợp nhất (dòng Q4): ROIC5Y 16,0% (2024Q4)→20,7% (2025Q4) > Ke 13,5% (thuỷ điện 949 sắp hạ giá); ROIC_Min5Y 6,7→8,1→11,5% < Ke; ROE_Min5Y 0,28%→0,36%→10,37% (2025Q4) < Ke; peer 2025Q4 ROIC5Y 7,8/6,8/7,4% < Ke; biên tư vấn −19%..+11% 2022–9T26. BQ GPM/EBITM/NPM_P0 là TTM (dòng Q4 = cả năm). Bất thường chuỗi TV1 EBITM_P0 0,110(2022Q3)→0,302(2022Q4)→0,143(2023Q1): cần kiểm chứng",
+  "ii_named_mechanism": "PARTIAL: incumbency 500kV + quan hệ EVN",
+  "iii_no_moat_clock": "FAIL: vụ án/cấm thầu nhắm đúng cơ chế"
+ },
+ "model_finding": "r2-hiện-hành giữ biên kịch bản vĩnh viễn (RONIC ngầm 6,5/10,4/14,4/18,3%). Tách: RONIC=Ke riêng lẻ tâm 15.379→15.757 (+2,5%); phần giảm đến từ mỏ neo biên về trung vị peer TTM 6,71%: 15.757→13.804",
+ "model_changed": true,
+ "model_change_scope": "CHỈ terminal DCF tư vấn: biên giữ 2027–30, fade 2031–32 về biên peer EBITM_P0 TTM dòng Q4 2016–2025 (30 năm-mã; trung vị 6,71% / trung bình 7,35%), RONIC=Ke; phần khác giữ nguyên r2",
+ "old": {
+  "center_post": 15379,
+  "p10": 4693,
+  "p50": 15532,
+  "p90": 24544,
+  "label": "TRONG vùng",
+  "pct_below": 0.713
+ },
+ "new": {
+  "center_post": 13804.278768865219,
+  "p10": 6230.205097332577,
+  "p50": 14545.747805205474,
+  "p90": 19599.337376104933,
+  "pct_below": 0.9003888888888888,
+  "label": "RANH GIỚI (1/6 ô TRÊN, hụt 1 đ: P90 19.599 vs giá 19.600)",
+  "note": "số = NARROW trung vị 6,71%, CK 5 tỷ",
+  "cell_label": "TRÊN vùng (>P90)"
+ },
+ "center_delta_pct": -0.1024,
+ "sensitivity": {
+  "WIDE_ngam": {
+   "center_post": 15378.808965759785,
+   "p10": 4693.082074995031,
+   "p50": 15531.500947299815,
+   "p90": 24544.003728119056,
+   "pct_below": 0.7127222222222223,
+   "label": "TRONG vùng"
+  },
+  "RONIC_ONLY": {
+   "center_post": 15756.684427992233,
+   "p10": 6079.14977861176,
+   "p50": 16247.257664526429,
+   "p90": 23870.598249875366,
+   "pct_below": 0.7308333333333332,
+   "label": "TRONG vùng"
+  },
+  "NARROW": {
+   "center_post": 13804.278768865219,
+   "p10": 6230.205097332577,
+   "p50": 14545.747805205474,
+   "p90": 19599.337376104933,
+   "pct_below": 0.9003888888888888,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "NARROW_MEAN": {
+   "center_post": 14218.405817164019,
+   "p10": 6608.8520386837345,
+   "p50": 14953.503694483074,
+   "p90": 20082.860498535225,
+   "pct_below": 0.8806944444444444,
+   "label": "TRONG vùng"
+  },
+  "NONE": {
+   "center_post": 12920.828497588138,
+   "p10": 6697.185802727275,
+   "p50": 13528.79799162387,
+   "p90": 18260.801374391744,
+   "pct_below": 0.9422222222222221,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "NONE_own": {
+   "center_post": 7832.40684977614,
+   "p10": 0.0,
+   "p50": 7968.6092283586595,
+   "p90": 12858.943995180254,
+   "pct_below": 0.9564999999999999,
+   "label": "TRÊN vùng (>P90)"
+  }
+ },
+ "narrow_terminal_margin_sens": {
+  "4%": 12072,
+  "6%": 13347,
+  "8%": 14641,
+  "9.2%": 15427,
+  "11%": 16619,
+  "label_flip_mT_estimate": "~6,7% (ước lượng, nội suy P90)"
+ },
+ "label_fragility": "điểm lật m_T ≈ 6,66% (ước lượng, nội suy P90) ≈ trung vị peer 6,71%; 1/6 ô TRÊN, hụt 1 đ; giá–P90 −0,0%…+5,7%",
+ "proposed_moat_tag_row": null,
+ "proposed_moat_tag_note": "không cần dòng mới (<12 tháng, tier không đổi); kỳ audit 06/2027 bổ sung số đo vào risk1",
+ "decision_owner": "Mike",
+ "not_done": [
+  "dd_price_zones",
+  "REPORT_r2/SUMMARY.json sửa",
+  "fundamental-skeptic",
+  "email"
+ ],
+ "measured_by": "$DNA_PYEXE -I calc/moat_5f_tv1_r3.py x2 (md5 json 79a45283…, txt 441e1031… trùng) -> calc/moat_5f_tv1_r3_out.{json,txt}; bq ticker_financial TV1-4 Q4 2016-25 (peer median 6,714%/mean 7,348%, python statistics)",
+ "round": 3,
+ "prev": "SUMMARY_5F_r2.json",
+ "peer_note": "3 PECC nội địa; EBITM peer gồm overhead/EPC (TV2), trung bình nhạy outlier TV2 2017 26,7%; m TV1 đã bỏ ~8 tỷ overhead thuỷ điện; không loại mã nào; chưa đo độ nhạy theo cách chọn peer",
+ "center_delta_pct_mean_anchor": -0.0755,
+ "label_matrix": {
+  "NARROW|CK5ty": {
+   "center_post": 13804.278768865219,
+   "p90": 19599.337376104933,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "NARROW|CK1ty": {
+   "center_post": 14097.201652191487,
+   "p90": 20015.229760750313,
+   "label": "TRONG vùng"
+  },
+  "NARROW|CKsleeve": {
+   "center_post": 14286.785324713295,
+   "p90": 20284.4009663577,
+   "label": "TRONG vùng"
+  },
+  "NARROW_MEAN|CK5ty": {
+   "center_post": 14218.405817164019,
+   "p90": 20082.860498535225,
+   "label": "TRONG vùng"
+  },
+  "NARROW_MEAN|CK1ty": {
+   "center_post": 14520.116359091087,
+   "p90": 20509.013106807546,
+   "label": "TRONG vùng"
+  },
+  "NARROW_MEAN|CKsleeve": {
+   "center_post": 14715.387523731948,
+   "p90": 20784.824868639163,
+   "label": "TRONG vùng"
+  }
+ },
+ "ronic_only": {
+  "center_post": 15756.684427992233,
+  "p10": 6079.14977861176,
+  "p50": 16247.257664526429,
+  "p90": 23870.598249875366,
+  "pct_below": 0.7308333333333332,
+  "label": "TRONG vùng"
+ },
+ "report_threshold_proposal": "nếu NARROW được duyệt: ngưỡng 'TRÊN vùng' REPORT_r2.md:104 đổi sang P90 NARROW (19.599 trung vị / 20.083 trung bình, CK 5 tỷ) — chỉ đề xuất",
+ "peer_anchor": {
+  "basis": "EBITM_P0 TTM dòng Q4, TV2/TV3/TV4 2016–2025",
+  "n": 30,
+  "median": 0.06714,
+  "mean": 0.07348,
+  "r2_wrong_basis": "TB-4-quý chồng lấn 6,0%/6,77% (đã bỏ)"
+ },
+ "gpm_correction": "r3: GPM/EBITM_P0 = TTM; hoàn lại câu 'một quý'/'TB-4-quý'; neo peer từ dòng Q4"
+}

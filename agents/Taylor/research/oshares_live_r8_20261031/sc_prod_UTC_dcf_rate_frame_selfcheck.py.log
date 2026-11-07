@@ -9,7 +9,7 @@ PASS (b2) domestic_v2 r = 12,25% hằng, g_T ≤ 5,5% r={0.1225} g_T max=0.055
 PASS (c) DGC r7 21407/32925/41779/29817 (21407, 32925, 41779, 29817)
 PASS [1a] v2 + env DCF_TERMINAL_MODE=cpi_gdp_full ⇒ ép cap_rf (g_T như mặc định, r 12,25) + kêu stderr term_mode=cap_rf g_T=0.0550
 PASS [1b] v2 + term_mode='cpi_gdp_full' tường minh ⇒ ValueError ValueError: term_mode 'cpi_gdp_full' not allowed under DCF_RATE_FRAME=domestic_v2 (only 'c
-PASS [1c] legacy vẫn tôn trọng DCF_TERMINAL_MODE (ép chỉ áp cho v2) g_T=0.0966
+PASS [1c] legacy vẫn tôn trọng DCF_TERMINAL_MODE (ép chỉ áp cho v2) g_T=0.0972
 PASS [2a] DCF_RATE_FRAME='domestic' (gõ sai) ⇒ rc 0, KHÔNG NOT_COMPUTED, trùng byte legacy, kêu stderr rc=0 md5=4c0cf6e6ee6b267937c793c7dfda9a44 stderr="!!!!! [dcf_valuation] DCF_RATE_FRAME='domestic' KHONG HOP LE (chi nhan ('legacy', 'domestic_v2')) -> FALLBACK "
 PASS [2b] DCF_RATE_FRAME rỗng/space ⇒ mặc định nguồn sự thật 
 PASS [2k] hằng RATE_FRAME_DEFAULT gõ sai ⇒ fallback legacy + kêu stderr (không im lặng) !!!!! [dcf_valuation] RATE_FRAME_DEFAULT='domestic-v2' KHONG HOP LE (chi nhan ('legacy', 'domestic_v2')) -> FA
@@ -30,11 +30,11 @@ PASS [M2l] gỡ quét trading_bot/*.py ⇒ [2l] đỏ
 PASS [M2n] bỏ regex python (dùng regex shell cho .py) ⇒ [2n] đỏ 
 INFO ops_health trên cây PROD hiện tại (trước merge dcf_valuation): warn=0 ['✅ DCF_RATE_FRAME: nguồn sự thật dcf_valuation.py = domestic_v2 (rollback = đổi 1 từ về legacy); không launcher/cron nào ghi đè.']
 PASS [3a0] đối chứng dương: regex quét bắt được gán shell/crontab + python env (không thì [3a] rỗng nghĩa) 
-PASS [3a] không launcher/cron/wc_env.sh/script production nào gán DCF_RATE_FRAME/DCF_TERMINAL_MODE quét 1605 file + crontab; hits=[]
+PASS [3a] không launcher/cron/wc_env.sh/script production nào gán DCF_RATE_FRAME/DCF_TERMINAL_MODE quét 1646 file + crontab; hits=[]
 PASS [3b] mọi kiểu khởi chạy thấy CÙNG frame = domestic_v2, không cảnh báo {"cron env -i + python3 hệ thống": ["domestic_v2", false], "cron env -i + venv": ["domestic_v2", false], "cron env -i, TZ=Pacific/Kiritimati": ["domestic_v2", false], "env phiên này (venv)": ["domestic_v2", false], "source wc_env.sh (DNA_PYEXE)": ["domestic_v2", false]}
 PASS [4a] earning_power cap_rf legacy == production (cùng float) 0.07400000000000001 vs 0.07400000000000001
 PASS [4b] earning_power cap_rf v2 == min(cpi+gdp, 5,5%) (không phải 5,75) 0.055
-PASS [4c] earning_power mode≠cap_rf: legacy vẫn chạy (cpi_gdp_full), v2 ⇒ ValueError (không đổi riêng r) legacy=0.09663948333333333 v2="ValueError: term_mode 'cpi_gdp_full' khong hop le duoi DCF_R"
+PASS [4c] earning_power mode≠cap_rf: legacy vẫn chạy (cpi_gdp_full), v2 ⇒ ValueError (không đổi riêng r) legacy=0.09720114999999999 v2="ValueError: term_mode 'cpi_gdp_full' khong hop le duoi DCF_R"
 PASS [5] CLI r dưới v2 kèm khoảng Ke 12,5–13,5% (β1,1); legacy không đổi ['[domestic_v2: diem mo hinh beta1 = rf 6.75 + ERP 5.5; ERP KHONG ben 5,22-6,15 => Ke KHOANG 12.5-13.5% o beta 1,1 — doc theo khoang, khong theo diem]']
 PASS [5b] dcf_earning_power CLI: mỗi dòng r= dưới v2 kèm khoảng Ke (2 basis); legacy không đổi (2, 2, 'r, NOT a print. FIX = refresh NSO_CPI_YOY_REAL from the GSO monthly release; refreshing the FiinPro file is impossible.\n')
 PASS [M1] gỡ ép cap_rf qua env ⇒ [1a] đỏ 

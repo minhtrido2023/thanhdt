@@ -1,0 +1,7 @@
+DT chuan hoa 7,137; bien EBIT ngam dinh mo hinh 11.06%; peer median 9.65% mean 9.22%; NT2 TB 12.0%
+LNST tam chat-3c (median) = 719
+LNST tam chat-3c (mean) = 695
+BASE_r2: n=45 | tam truoc 23,837 sau 23,617 | P10/P50/P90 sau 18,386/23,669/28,278 | min sau 16,690 | % trong so duoi gia 37.5% | gia/tam -4.1% => TRONG vung | sleeve 0.01:23,827, 0.02:23,823, 0.04:23,817, 1:23,739, 5:23,617, 10:23,527
+CHAT3C_EBIT_median: n=45 | tam truoc 22,356 sau 22,151 | P10/P50/P90 sau 16,846/22,194/26,970 | min sau 15,425 | % trong so duoi gia 57.5% | gia/tam +2.3% => TRONG vung | sleeve 0.01:22,347, 0.02:22,343, 0.04:22,338, 1:22,265, 5:22,151, 10:22,066
+CHAT3C_EBIT_mean: n=45 | tam truoc 21,902 sau 21,701 | P10/P50/P90 sau 16,373/21,741/26,568 | min sau 15,036 | % trong so duoi gia 67.5% | gia/tam +4.4% => TRONG vung | sleeve 0.01:21,893, 0.02:21,889, 0.04:21,884, 1:21,812, 5:21,701, 10:21,617
+WIDE_TV_RONIC_eq_Ke: n=45 | tam truoc 28,528 sau 28,266 | P10/P50/P90 sau 21,012/28,207/34,981 | min sau 18,544 | % trong so duoi gia 10.0% | gia/tam -19.9% => TRONG vung | sleeve 0.01:28,517, 0.02:28,512, 0.04:28,505, 1:28,411, 5:28,266, 10:28,158

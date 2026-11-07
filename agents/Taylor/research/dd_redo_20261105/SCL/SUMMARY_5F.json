@@ -1,0 +1,189 @@
+{
+ "ticker": "SCL",
+ "job": "Taylor_20261107_125218",
+ "revision": "r2 (r1 = SUMMARY_5F_r1.json, job Taylor_20261107_123141)",
+ "asof": "2026-11-07",
+ "moat_tier": "NONE",
+ "moat_type": "NONE",
+ "moat_type_note": "ứng viên COST/LOCATION (tro sát nhà máy, bán kính 150–300 km) chưa chứng minh thành ROIC>Ke nhiều chu kỳ",
+ "risk1": "biên ròng TTM 12,7% đỉnh 7 năm trong ngành không có quyền định giá; khách BĐS tập trung (58,5% phải thu) chậm trả hoặc tái đấu giá tro ⇒ biên về chu kỳ (TB 2020–TTM 8,3%)",
+ "reused": false,
+ "reuse_reason": "không có dòng SCL trong data/moat_tags.csv, không có audit 5F trong REPORT/SKEPTIC/kb/projects",
+ "source_asof": "2026-11-07 (làm mới; BQ ticker_financial 2026Q3; sector read Bobby 2026-10-29)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i": "FAIL — ROIC5Y 8,4 / ROIC10Y 5,6 / ROIC3Y 11,7% < Ke 13,5%; ROE năm TB 2020–25 13,8% ≈ Ke, thấp nhất 8,6% (2022). Phía thuận: ROIC TTM ước tính ~15,7% (NOPAT ~134/IC ~855; ~20% bỏ XDCB 205,5) > Ke nhưng là 1 năm đỉnh biên; cột ROIC_xY chỉ cập nhật theo năm. ROIC_Min5Y −1,2% KHÔNG dùng (nghi artifact, cần kiểm chứng)",
+  "ii": "WEAK — GPM TTM 38,7% ≈ 2,4× trung vị peer 16,0% (TB 17,3%); GPM năm 62,8→32,2% (2020→2024) rồi hồi 38,7% TTM; HĐ đấu giá tro ~3 năm ngắn hơn nhượng quyền của GMD/BWE/HTI/NTC (NARROW)",
+  "iii": "FAIL — tái đấu giá tro ~3 năm; giảm nhiệt điện than"
+ },
+ "gpm_fix": {
+  "note": "GPM_P0 BQ là TTM ⇒ GPM năm = Q4; lỗi ở calc/scl_r3_core.py:41 (TB 4 TTM chồng lấn)",
+  "gm_gap_orig": 0.0036,
+  "gm_gap_fixed": 0.0327,
+  "norm_GM_gap_npm": "12,44% → 10,11%",
+  "fixed_core": "calc/scl_r3_core_5Ffix.py (bản sao, chỉ dòng :41; ghi model_r3_5Ffix_out.*)",
+  "report_r2_impact": {
+   "center": "22769 → 21813 (−4,2%)",
+   "p90": "27119 → 26672",
+   "label": "không đổi (TRÊN)"
+  },
+  "status": "việc của REPORT_r2 — chờ Mike"
+ },
+ "model_changed": true,
+ "model_change_status": "quy ước chờ Mike/user duyệt; không ghi dd_price_zones/SUMMARY.json/REPORT_r2",
+ "implicit_moat_in_current_model": "ROE 15/20% > Ke (bội số 7,72/8,42 vs 1/r 7,41) + STRUCTURAL giữ biên đỉnh TTM mãi mãi + CYCLICAL về TB của chính mã (ROE ngầm 16,0–19,1% > Ke)",
+ "old": {
+  "center": 22769,
+  "p10": 17348,
+  "p50": 23312,
+  "p90": 27119,
+  "pct_below": 0.9842,
+  "label": "TRÊN vùng (>P90)"
+ },
+ "wide_gpm_fixed": {
+  "center": 21813,
+  "p10": 17348,
+  "p50": 21445,
+  "p90": 26672,
+  "pct_below": 0.9842,
+  "label": "TRÊN vùng (>P90)"
+ },
+ "new_headline_NONE_ROEtoKe_N2": {
+  "center": 14183,
+  "p10": 13487,
+  "p50": 14124,
+  "p90": 14761,
+  "pct_below": 1.0,
+  "label": "TRÊN vùng (>P90)"
+ },
+ "headline_note": "NONE = ROE→Ke (E đích = Ke × VCSH mẹ 531,6 = 71,8 tỷ ≈ sổ sách 13.688 đ/cp), fade N2; khoảng N0–N5 12.986–15.117. Δ −37,7% vs REPORT_r2, −35,0% vs WIDE sửa. r1 headline 8.730 (−61,7%) rút lại: ép ROE ~6,4% < Ke vĩnh viễn, vi phạm đối xứng",
+ "bounds": {
+  "lower_peerA_median_N2": {
+   "center": 8580,
+   "p10": 7891,
+   "p50": 8590,
+   "p90": 9225,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "upper_own_cycle_RONIC_Ke": {
+   "center": 17705,
+   "p10": 15495,
+   "p50": 17935,
+   "p90": 19595,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)"
+  }
+ },
+ "roe_to_ke": {
+  "N0": {
+   "center": 12986,
+   "p10": 12805,
+   "p50": 13072,
+   "p90": 13072,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "N2": {
+   "center": 14183,
+   "p10": 13487,
+   "p50": 14124,
+   "p90": 14761,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "N5": {
+   "center": 15117,
+   "p10": 13813,
+   "p50": 15040,
+   "p90": 16221,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)"
+  }
+ },
+ "decomposition": {
+  "wide_fix_to_headline": -7630,
+  "ronic_only_vs_wide_fix": -1840,
+  "gpm_fix_vs_r2": -956
+ },
+ "skeptic_reconcile": {
+  "match_exact": [
+   "WIDE_fix 21813 (P90 26672)",
+   "RONIC_Ke 19973",
+   "own_cycle 17705 (P90 19595)",
+   "NONE-peer 8580",
+   "NARROW N5 10418",
+   "ROE→Ke N0 12986",
+   "ROE GM-gap 19,1%"
+  ],
+  "mismatch": {
+   "ROEKe_N2": "14183 vs skeptic 14333 (P10 13487 khớp; P90 14761 vs 15062)",
+   "ROEKe_N5": "15117 vs 15384",
+   "cause": "phần vượt E-đích = skeptic ÷1,125 cả N2/N5 ⇒ khác quy ước chiết khấu/trọng số fade; giữ quy ước r1 (năm 1 chiết khấu 1 kỳ). ≤1,8%, không đổi nhãn — Mike chốt"
+  }
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 21813,
+   "p10": 17348,
+   "p50": 21445,
+   "p90": 26672,
+   "pct_below": 0.9842,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "NARROW": {
+   "center": 10418,
+   "p10": 9217,
+   "p50": 10256,
+   "p90": 11623,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "center_range_peer": [
+    8913,
+    10933
+   ]
+  },
+  "NONE": {
+   "center": 14183,
+   "p10": 13487,
+   "p50": 14124,
+   "p90": 14761,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "center_range_N0_N5": [
+    12986,
+    15117
+   ],
+   "bounds_peer_vs_own": [
+    8580,
+    17705
+   ]
+  }
+ },
+ "label_old": "TRÊN vùng (>P90)",
+ "label_new": "TRÊN vùng (>P90) ở mọi phương án/peer/cỡ CK/CUM+TERP — không ranh giới (P90 cao nhất lõi sửa 26.672 < giá ~30.000)",
+ "peer_gpm_latest": {
+  "VGC": 0.307,
+  "VHL": 0.1759,
+  "VIT": 0.1597,
+  "TCR": 0.1203,
+  "CVT_2026Q2": 0.1027,
+  "median": 0.1597,
+  "mean": 0.1731
+ },
+ "scl_gpm_annual_Q4": {
+  "2020": 0.6281,
+  "2021": 0.5342,
+  "2022": 0.4895,
+  "2023": 0.3542,
+  "2024": 0.3218,
+  "2025": 0.3533,
+  "TTM_2026Q3": 0.3867
+ },
+ "peer_caveat": "peer VLXD nội địa (VGC,CVT,VIT,VHL,TCR; +xi măng HT1,BTS,HOM,VCX), không phải đối thủ AAC trực tiếp; biên ròng peer ⇒ ROE ngầm ~6,4% < Ke (chỉ dùng làm cận dưới)",
+ "proposed_moat_tag_row": "SCL,NONE,NONE,L,\"ROIC5Y 8.4% / ROIC10Y 5.6% < Ke 13.5% (ROIC_Min5Y -1.2% suspect artifact, unverified); ROIC5Y < Ke despite TTM ROIC ~16% (est.) at peak margin; TTM ROE 24% = peak year, 2020-25 avg ROE ~13.8% = Ke; GPM 63%->32% (2020->2024), recovered to 39% TTM, ~2.4x domestic peer median 16%; AAC fragmented, tuynel not banned; fly-ash via ~3y power-plant auctions (re-auction clock, far shorter than concessions/licences behind GMD/BWE/HTI/NTC NARROW); 58.5% trade AR one RE group\",2026-11-07,5f,N",
+ "proposed_moat_tag_src": "5f (không 5f_validated)",
+ "source_calc": "calc/scl_5f_out.json (md5 txt b2659c1a67ad9ff8769398835d03bef7, json 94e3353bb8b408d9f2ffdafad9cb8104; chạy 2 lần trùng byte)",
+ "measured_by": "$DNA_PYEXE -I calc/scl_5f.py ; bq query tav2_bq.ticker_financial SCL/VGC/VHL/VIT/TCR/CVT 2026-11-07",
+ "non_point_in_time": true
+}

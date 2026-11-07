@@ -1,0 +1,149 @@
+{
+ "ticker": "SAS",
+ "job": "Taylor_20261107_123136",
+ "asof": "2026-11-07",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION/REGULATORY",
+ "risk1": "Long Thanh: intl flights move 2027-03-28..2028-03-25 (~57% Q3 revenue tied to intl pax); LT concession likely tendered; TSN space ACV-granted without tender (TTCP 2017)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_multi_cycle_excess": "FAIL on ROIC: ROIC5Y 2016-19 5.0/7.5/9.6/10.9% < Ke 13.5%; ROIC10Y 13.1%; ROIC_Min3Y 11.2%; ROIC_Min5Y=Min10Y -2.5%; pro: ROIC3Y 23.5%, ROIC5Y 15.3%; ROE5Y 20.5%, ROE_Min3Y 19.2%, ROE_Min5Y 2.0% (BQ 2026Q3)",
+  "ii_named_mechanism": "pass: ACV-granted TSN location concession",
+  "iii_no_moat_clock": "fail: Long Thanh migration 2027-28 + tender"
+ },
+ "model_changed": true,
+ "change": "Current r2 implicitly WIDE: Gordon E/(r-g) with no reinvestment (RONIC=inf on all g) + peak 9M/26 margin held forever (NPM 23.1% vs cycle 14.36% SAS+AST ex-2020-21). Strict-3c headline: RONIC=Ke symmetric (V=E/r) + NPM to industry cycle (-272.5bn/yr, half 2027, full 2028+). Convention pending Mike/user approval; SUMMARY/zones not written.",
+ "old": {
+  "center": 31066,
+  "p10": 23751,
+  "p50": 30806,
+  "p90": 38022,
+  "pct_below_px": 0.7359,
+  "label": "TRONG vung",
+  "label_sleeve40": "TRONG vung"
+ },
+ "new": {
+  "center": 17438,
+  "p10": 14438,
+  "p50": 17414,
+  "p90": 20490,
+  "pct_below_px": 1.0,
+  "label": "TREN vung (>P90)",
+  "label_sleeve40": "TREN vung (>P90)",
+  "convention": "quy ước chờ Mike/user duyệt"
+ },
+ "label_changed": true,
+ "price": 34700,
+ "decomposition": {
+  "ronic_only": -4656,
+  "margin_only": -11419,
+  "total": -13628,
+  "note": "interaction => parts not additive"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 31066,
+   "p10": 23751,
+   "p50": 30806,
+   "p90": 38022,
+   "pct_below_px": 0.7359,
+   "label": "TRONG vung",
+   "label_sleeve40": "TRONG vung"
+  },
+  "NARROW": {
+   "center": 17438,
+   "p10": 14438,
+   "p50": 17414,
+   "p90": 20490,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "NONE": {
+   "center": 16785,
+   "p10": 13875,
+   "p50": 16761,
+   "p90": 19766,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "RONIC_only": {
+   "center": 26410,
+   "p10": 20776,
+   "p50": 26361,
+   "p90": 31892,
+   "pct_below_px": 0.9688,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "margin_only": {
+   "center": 19647,
+   "p10": 15992,
+   "p50": 19488,
+   "p90": 23662,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "channel_c_lower_cut": {
+   "center": 22898,
+   "p10": 18617,
+   "p50": 22859,
+   "p90": 27263,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "channel_a_upper_cut": {
+   "center": 15182,
+   "p10": 12732,
+   "p50": 15165,
+   "p90": 17634,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "target_SAS_npm": {
+   "center": 17604,
+   "p10": 14557,
+   "p50": 17580,
+   "p90": 20689,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "target_AST_npm": {
+   "center": 17031,
+   "p10": 14149,
+   "p50": 17008,
+   "p90": 20003,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "AST_current_gpm": {
+   "center": 24283,
+   "p10": 19468,
+   "p50": 24239,
+   "p90": 29249,
+   "pct_below_px": 1.0,
+   "label": "TREN vung (>P90)",
+   "label_sleeve40": "TREN vung (>P90)"
+  },
+  "headline_delta0": {
+   "center_post": 20202,
+   "p10_post": 17783,
+   "p50_post": 20171,
+   "p90_post": 22559
+  }
+ },
+ "label_boundary": false,
+ "proposed_moat_tag_row": "SAS,NARROW,LOCATION/REGULATORY,M,\"TSN concession (ACV-granted, no tender; ACV 49.07% landlord+shareholder). NOT durable: ROIC5Y 2016-19 5.0-10.9% < Ke, ROIC10Y 13.1% ~Ke, ROIC_Min3Y 11.2%, Min5Y -2.5%; ROE5Y 20.5%. #1 risk dated: intl flights move to Long Thanh 2027-03..2028-03, LT space likely tendered; peak NPM 9M/26 23.1% vs cycle 14.4% (SAS+AST)\",2026-11-07,5f_recheck_dd,Y",
+ "proposed_row_required": false,
+ "measured_by": "$DNA_PYEXE -I -B calc/sas_5f.py -> calc/sas_5f_out.txt md5 17298bd9340aa97580140bb9fa668f04; BQ tav2_bq.ticker_financial 2026-11-07",
+ "non_point_in_time": true
+}

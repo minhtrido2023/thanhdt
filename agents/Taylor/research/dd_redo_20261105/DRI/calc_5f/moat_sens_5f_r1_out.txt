@@ -1,0 +1,5 @@
+NARROW     tam  14,092 (+0; +0.0%) P10  12,006 P50  14,235 P90  16,146 duoi gia 35.2% nhan TRONG vùng
+NONE_half  tam  12,489 (-1,603; -11.4%) P10  10,440 P50  12,760 P90  14,492 duoi gia 78.8% nhan TRONG vùng
+NONE       tam  10,885 (-3,207; -22.8%) P10   8,896 P50  11,150 P90  12,944 duoi gia 98.0% nhan TRÊN vùng (>P90)
+WIDE       tam  14,965 (+873; +6.2%) P10  12,817 P50  15,055 P90  16,957 duoi gia 17.5% nhan TRONG vùng
+GAP GPM 0.369-0.252=0.117 | Cref 30.22 -> NONE 35.84 tr/t | price TB 48.06 | PV capex tai canh (TB,L27) 2,764 d/cp

@@ -1,0 +1,65 @@
+{
+ "ticker": "NNC",
+ "job": "Taylor_20261107_120556",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION",
+ "risk1": "Dong ho giay phep/Nha nuoc tren mo don le Mui Tau (~94% DT, GP toi 2043, truy thu da cham mo loi, co E12)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_validated_compet)",
+ "durability_checks": {
+  "i_supernormal_multi_cycle": false,
+  "ii_named_barrier": true,
+  "iii_no_clock": false,
+  "evidence": "BQ ticker_financial 07/11/2026: ROIC_Min5Y 0.013 (2026Q3); ROE_Trailing 2021-24 0.130/0.119/0.101/0.155 vs Ke 0.135; GP Mui Tau 2043"
+ },
+ "moat_durable": false,
+ "model_changed": false,
+ "model_review": "DCF huu han 2027-2043 khong TV; CIP o so sach (RONIC=Ke); CYCLICAL ve GPM chu ky 34.3%; STRUCTURAL w0.20 giu bien dinh = trang thai nganh (Bobby), khong dem hai lan; NARROW chat = Mike quyet",
+ "current": {
+  "centre": 57589,
+  "p10": 30219,
+  "p50": 52916,
+  "p90": 93649,
+  "label": "TRONG vung"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "centre": 84655,
+   "p10": 31729,
+   "p50": 89665,
+   "p90": 127891,
+   "below_px": 0.25
+  },
+  "NARROW_current": {
+   "centre": 57589,
+   "p10": 30219,
+   "p50": 52916,
+   "p90": 93649,
+   "below_px": 0.3748
+  },
+  "NARROW_strict": {
+   "centre": 50822,
+   "p10": 30015,
+   "p50": 50616,
+   "p90": 69773,
+   "below_px": 0.406
+  },
+  "NONE": {
+   "centre": 47608,
+   "p10": 29431,
+   "p50": 48521,
+   "p90": 63576,
+   "below_px": 0.4537
+  }
+ },
+ "label_by_moat": {
+  "WIDE": "TRONG vung, luat4 dat",
+  "NARROW_current": "TRONG vung, luat4 dat",
+  "NARROW_strict": "TRONG vung, luat4 KHONG dat",
+  "NONE": "TRONG vung, luat4 KHONG dat"
+ },
+ "proposed_moat_tag_row": "NNC,NARROW,LOCATION,M,\"Single-asset Mui Tau (~94% rev, license to 2043) = finite clock; NOT durable: ROIC_Min5Y 1.3% (2026Q3) < Ke 13.5%, ROE 10-13% in 2021-23 license-gap yrs; State is top supplier (back-charges ~42bn, now touching Mui Tau core, flag E12 open); GPM 53% TTM Q3/26 = cycle peak not moat; 17/04/2026 auction win unverified (possible clock extension); MVC may go to 51% (related-party); very thin liquidity\",2026-11-07,5f_reuse_quickcheck,Y",
+ "measured_by": "5F/moat_sens_5f.py tren calc/grid_nnc_redo_r2.csv (md5 output f69f37e7...) + bq ticker_financial NNC/KSB/DHA/VLB 07/11/2026",
+ "caveat": "5F non-point-in-time: chi DD song, cam backtest"
+}

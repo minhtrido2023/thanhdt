@@ -1,0 +1,141 @@
+{
+ "ticker": "FPT",
+ "job": "Taylor_20261107_122439",
+ "asof": "2026-11-07",
+ "moat_tier": "NARROW",
+ "moat_type": "SWITCHING/COST/SCALE",
+ "risk1": "GenAI coding agents commoditize IT labor-arbitrage (per-man-month) model; Q3/26 JPY ~+15% vs H1 +22.6%, overseas DX Q3 +3.8% = partially materialising; ROIC_Min10Y 6.75%, ROIC5Y 2018-19 11.8-12.3% < Ke, GPM quarter Q3/26 32.9% (-1.8pp q/q)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_validated_compet)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_multi_cycle_excess": "FAIL on ROIC, pass on ROE only: ROIC5Y 2018Q4 11.8% / 2019Q4 12.3% < Ke 13.5%; ROIC10Y 15.9%; ROIC_Min5Y 13.7% ~ Ke; ROIC_Min10Y 6.75% (BQ 2026Q3); ROE_Min10Y 20.2%, ROE TTM 25.5%; series incl. FTEL",
+  "ii_named_mechanism": "pass: Japan switching cost + delivery scale",
+  "iii_no_moat_clock": "fail: GenAI substitution"
+ },
+ "model_changed": true,
+ "change": "Headline per rule 3c = NARROW_SYM (RONIC_T=Ke symmetric: CO_SO/TOT conv_T 0.704, XAU 0.40->0.778). One-way cap (r1) demoted to sensitivity. Explicit-5y RONIC (CO_SO 36%, TOT 93%) kept as r2, no external basis -> cap sensitivity only. Convention pending Mike approval.",
+ "old": {
+  "center": 54203,
+  "p10": 32389,
+  "p50": 55182,
+  "p90": 74557,
+  "central": 58579,
+  "label": "TRONG vùng",
+  "pct_below_px": 0.4752
+ },
+ "new": {
+  "convention": "quy ước chờ Mike duyệt",
+  "center": 55051,
+  "p10": 42312,
+  "p50": 56446,
+  "p90": 68242,
+  "central": 57110,
+  "label": "TRONG vùng",
+  "pct_below_px": 0.3852
+ },
+ "label_changed": false,
+ "price": 53900,
+ "sensitivity": {
+  "WIDE": {
+   "center": 54203,
+   "p10": 32389,
+   "p50": 55182,
+   "p90": 74557,
+   "central": 58579,
+   "label": "TRONG vùng",
+   "pct_below_px": 0.4752
+  },
+  "NONE": {
+   "center": 45517,
+   "p10": 32389,
+   "p50": 49023,
+   "p90": 53360,
+   "central": 50550,
+   "label": "TRÊN vùng",
+   "pct_below_px": 0.9408
+  },
+  "ONE_WAY_r1": {
+   "center": 51525,
+   "p10": 32389,
+   "p50": 54908,
+   "p90": 68242,
+   "central": 57110,
+   "label": "TRONG vùng",
+   "pct_below_px": 0.4767
+  },
+  "NARROW_SYM_headline": {
+   "center": 55051,
+   "p10": 42312,
+   "p50": 56446,
+   "p90": 68242,
+   "central": 57110,
+   "label": "TRONG vùng",
+   "pct_below_px": 0.3852
+  }
+ },
+ "value_basis": "post liquidity discount @5 ty (0.187%), r 13.5%, 540-outcome grid wpct, price 53,900 (2026-11-04)",
+ "proposed_moat_tag_row": null,
+ "proposed_moat_tag_note": "no new row; optional risk1 append in ADDENDUM_5F.md s6",
+ "not_done": [
+  "dd_price_zones.json not written",
+  "REPORT_r2/SUMMARY.json not modified",
+  "fundamental-skeptic not run (Mike)"
+ ],
+ "pit_note": "non-point-in-time; live DD only, not for backtest",
+ "measured_by": "$DNA_PYEXE -I calc/fpt_5f_r2.py (md5 out bd4ed12d, 2 runs identical); calc/fpt_5f_r2_xau.py (md5 88bb0ede); bq tav2_bq.ticker_financial 2026-11-07",
+ "revision": "r2 (sau fundamental-skeptic cum 1); ban cu: SUMMARY_5F_r1.json",
+ "downside_xau_below_ke": {
+  "center": 52238,
+  "p10": 34507,
+  "p50": 56446,
+  "p90": 68242,
+  "pct_below_px": 0.385,
+  "label": "TRONG vùng",
+  "note": "SYM for CO_SO/TOT, XAU terminal conv kept 0.40 (RONIC 5% < Ke)"
+ },
+ "decomposition": {
+  "remove_wide_reward_CO_SO_TOT": -2678,
+  "raise_XAU_to_Ke": 3526,
+  "net_vs_wide": 848
+ },
+ "sensitivity_explicit_ronic_cap": {
+  "cap_ROE_TTM_25.5%": {
+   "WIDE": 51902,
+   "ONE_WAY": 49224,
+   "SYM": 52749
+  },
+  "cap_ROIC5Y_17.7%": {
+   "WIDE": 50067,
+   "ONE_WAY": 47389,
+   "SYM": 50915
+  },
+  "all_labels": "TRONG vùng",
+  "implied_explicit_ronic": {
+   "XAU": 0.05,
+   "CO_SO": 0.36,
+   "TOT": 0.933
+  }
+ },
+ "gpm_ttm_fix": {
+  "method": "simple mean GPM_P0..P3 (not revenue-weighted)",
+  "FPT_2026Q3": {
+   "quarter": 0.329,
+   "tb4q": 0.351
+  },
+  "FPT_2026Q2": {
+   "quarter": 0.347,
+   "tb4q": 0.362
+  },
+  "peers_tb4q": {
+   "CMG_Q3": 0.183,
+   "ITD_Q3": 0.278,
+   "ELC_Q2": 0.193,
+   "CMT": null
+  },
+  "peer_median": 0.193,
+  "peer_mean": 0.218,
+  "peer_scope": "ALL DOMESTIC -> weak evidence for export moat"
+ }
+}

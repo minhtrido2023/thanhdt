@@ -1,0 +1,6 @@
+WIDE       tam 54,203 P10 32,389 P50 55,182 P90 74,557 | trung tam 58,579 | XAU 35,402 CO_SO 58,579 TOT 73,503 | %duoi gia 47.5% | TRONG vùng
+NARROW     tam 51,525 P10 32,389 P50 54,908 P90 68,242 | trung tam 57,110 | XAU 35,402 CO_SO 57,110 TOT 67,693 | %duoi gia 47.7% | TRONG vùng
+NARROW_SYM tam 55,051 P10 42,312 P50 56,446 P90 68,242 | trung tam 57,110 | XAU 43,497 CO_SO 57,110 TOT 67,693 | %duoi gia 38.5% | TRONG vùng
+NONE       tam 45,517 P10 32,389 P50 49,023 P90 53,360 | trung tam 50,550 | XAU 35,402 CO_SO 50,550 TOT 52,409 | %duoi gia 94.1% | TRÊN vùng
+RONIC terminal ngam dinh (conv, g_T, Ke 13.50%): {'XAU': 0.05, 'CO_SO': 0.16, 'TOT': 0.2667} | conv_T tai RONIC=Ke: {'XAU': 0.7778, 'CO_SO': 0.7037, 'TOT': 0.7037}
+Gia 53,900; CK thanh khoan 5 ty 0.1866%
