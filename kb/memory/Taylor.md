@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-05T09:56:44Z] ĐANG DỞ job Taylor_20261105_093502 GĐ3: code+selfcheck book_clearing_g3_selfcheck PASS ở worktree wt-clearing-g3-20261105 | NEXT §23 quét rộng 2 TZ, byte-compare park_holdings, commit, bus finding
-- [2026-11-05T10:28:27Z] [clearing GĐ3 05/11] XONG build job Taylor_20261105_093502 commit 9acbe593e nhánh session/clearing-g3-20261105 (wt-clearing-g3-20261105); CHỜ Mike arch-review + quant-skeptic; cờ apply_to_plan=false, cron chưa cài
 - [2026-11-05T12:00:49Z] [clearing GĐ3 r2 05/11] XONG commit db490ba1d; CHỜ Mike re-review; manifest md chưa tái sinh (nợ master)
 - [2026-11-05T17:11:13Z] ĐANG DỞ: TA model ±5% job Taylor_20261105_171103 → agents/Taylor/research/ta_model_5pct_20261106/ | NEXT: tra NO-GO, data_registry universe_pit, lấy data, backtest
 - [2026-11-05T17:20:36Z] [ta-model-5pct 06/11] XONG job Taylor_20261105_171103 NO-GO (research/ta_model_5pct_20261106); CHỜ Mike quant-skeptic
@@ -26,3 +24,5 @@
 - [2026-11-06T07:33:39Z] [disc-exit 06/11] XONG job Taylor_20261106_072056: outer ead44c734 + mike 984d998d4 (nhánh session/disc-exit-20261106); CHỜ Mike arch-review; merge repo ngoài trước; chưa latch phần dư TARGET
 - [2026-11-06T07:45:30Z] [disc-exit r2 06/11] XONG job Taylor_20261106_074239: outer 0a93c22e4 + mike 1f6660397; CHỜ Mike re-review; chưa merge/cron; mixed-book=block, floor tắt
 - [2026-11-06T10:12:31Z] [sc-red sweep 06/11] XONG 8/8 CLOSED (6d372c6f7 + mike cdcafe795), không treo
+- [2026-11-07T12:09:12Z] [dd-5f NNC 07/11] XONG job Taylor_20261107_120556 NARROW, model không đổi; CHỜ Mike skeptic + quyết đọc NARROW chặt (tâm 50.822)
+- [2026-11-07T12:09:29Z] [dd-5f FPT 07/11] XONG ADDENDUM_5F (NARROW tái dùng; cap RONIC_T<=Ke, tâm 54.203->51.525, nhãn giữ); CHỜ Mike skeptic + quyết zones
