@@ -662,3 +662,16 @@
 
 ## Consolidation 2026-11-07T12:10:48Z
 - [2026-11-07T12:10:30Z] Taylor/finding — dd-5f-DRI-20261107: {"summary": "DRI 5F: NARROW LOCATION/COST (tái dùng moat_tags 2026-06-05), moat không bền, model_changed=false, tâm 14.092 giữ nguyên; độ nhạy NONE −3.207 (−22,8%, TRÊN vùng) / NONE½ −1.603 / WIDE[UL] +873", "moat_tier": "NARROW", "moat_type": "LOCATION/COST", "reused": true, "source_asof": "2026-06-05", "moat_durable": false, "model_changed": false, "centre_post": 14092, "sensitivity_centre": {"WIDE": 14965, "NARROW": 14092, "NONE_half": 12489, "NONE": 10885}, "evidence": {"gpm_dri_2017_25": 0.369, "gpm_peer_median": 0.252, "roe_2018_22_range": "3.4-10.0%", "roe_min5y": 0.107, "ke": 0.135}, "files": ["agents/Taylor/research/dd_redo_20261105/DRI/ADDENDUM_5F.md", "agents/Taylor/research/dd_redo_20261105/DRI/SUMMARY_5F.json"], "measured_by": "agents/Taylor/research/dd_redo_20261105/DRI/calc_5f/moat_sens_5f.py ($DNA_PYEXE -B; out md5 7a7522c6) + BQ tav2_bq.ticker_financial ROE_Trailing/GPM_P0 Q4"}
+
+## Consolidation 2026-11-07T12:26:35Z
+- [2026-11-07T12:24:51Z] Taylor/heartbeat — Taylor_20261107_122439: {"status": "in_progress", "note": "FPT 5F r2: doc addendum+calc"}
+- [2026-11-07T12:25:06Z] Taylor/heartbeat — Taylor_20261107_122448: {"status": "in_progress", "note": "DCM 5F r2: đo GPM TB4Q, DHB, ROIC10Y"}
+- [2026-11-07T12:25:22Z] Taylor/heartbeat — Taylor_20261107_122446: {"status": "in_progress", "note": "DRI r2: doc brief+addendum, co TTM GPM BQ, dang doc engine"}
+- [2026-11-07T12:25:23Z] Taylor/heartbeat — Taylor_20261107_122443: {"status": "in_progress", "note": "TV1 r2: lay BQ peer mean/median, viet calc r2 4 o"}
+- [2026-11-07T12:25:40Z] Taylor/heartbeat — Taylor_20261107_122439: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_122439", "source": "watcher"}
+- [2026-11-07T12:25:42Z] Taylor/heartbeat — Taylor_20261107_122441: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_122441", "source": "watcher"}
+- [2026-11-07T12:25:44Z] Taylor/heartbeat — Taylor_20261107_122443: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_122443", "source": "watcher"}
+- [2026-11-07T12:25:47Z] Taylor/heartbeat — Taylor_20261107_122446: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_122446", "source": "watcher"}
+- [2026-11-07T12:25:49Z] Taylor/heartbeat — Taylor_20261107_122448: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261107_122448", "source": "watcher"}
+- [2026-11-07T12:26:22Z] Taylor/finding — dd-5f-DCM-r2-20261107: {"summary": "DCM r2: NARROW COST/LOCATION giu, entry M->L, model_changed=false; GPM TB4Q DCM<DPM 8/10y (khong con noi vuot); them DHB, ROIC10Y 11.6%, PSC 2047; stress can duoi fade2035 23056->22886 (^-(t-2))", "measured_by": "calc/moat_sens_5f_out_r2.txt; calc/gpm_4q_5f_out.csv; SUMMARY_5F.json"}
+- [2026-11-07T12:26:30Z] Taylor/finding — dd-5f-TV1-r2-20261107: {"moat_tier": "NARROW", "model_changed": true, "center": "15379->13347 (trung vi 6,0%) / 13843 (trung binh 6,77%) = -13,2%/-10,0%", "label": "ranh gioi/khong xac dinh (2/6 o TREN; lat o m_T~6,7%)", "source_of_change": "RONIC=Ke rieng +2,5% (15757); toan bo giam tu neo bien 6%", "measured_by": "calc/moat_5f_tv1_r2.py x2 md5 trung; agents/Taylor/research/dd_redo_20261105/TV1/ADDENDUM_5F.md"}
