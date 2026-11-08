@@ -58,9 +58,21 @@ else
   # dòng RED không có lý do, và người đọc không phân biệt được "plan xấu" với "checker hỏng".
   _PF_ERR="$(mktemp)"
   PLAN_INFO=$(python3 - "$PLAN_FILE" 2>"$_PF_ERR" <<'PY'
-import json, sys
+import json, os, sys
 d = json.load(open(sys.argv[1]))
 approved  = d.get("approved_by") or d.get("approved_by_user")
+# Khớp cổng bot (trading_bot/plan.py approval_block_reason, cq-2026-11-08): approved_by là
+# placeholder (auto/pending/agent/tên agent...) = CHƯA duyệt. Lấy danh sách từ nguồn duy nhất
+# APPROVAL_PLACEHOLDERS; import lỗi ⇒ fallback tuple tối thiểu (không bao giờ nới lỏng hơn bot).
+try:
+    sys.path.insert(0, os.environ.get("WORKDIR_8L", "/home/trido/thanhdt/WorkingClaude"))
+    from trading_bot.plan import APPROVAL_PLACEHOLDERS as _PH
+except Exception:
+    _PH = ("", "none", "null", "nil", "nan", "false", "0", "pending", "tbd", "auto", "agent",
+           "bot", "system", "mike", "dollarbill", "taylor", "mafee", "winston", "wags",
+           "spyros", "wendy")
+if isinstance(approved, str) and approved.strip().lower() in _PH:
+    approved = None
 mafee_ok  = d.get("mafee_authorized", False)
 mode      = d.get("mode", "?")
 n_orders  = len(d.get("orders", []))
