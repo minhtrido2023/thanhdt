@@ -330,6 +330,24 @@ def filter_signal_holds(plan, asof=None):
     return plan, blocked
 
 
+def _pos_float(v):
+    """Parse dương-an-toàn (giống Executor._hard_buy_ceiling/_hard_sell_floor): rác/≤0/NaN → None,
+    KHÔNG BAO GIỜ raise (một plan hỏng không được làm sập vòng lặp account)."""
+    try:
+        f = float(v or 0)
+    except (TypeError, ValueError):
+        return None
+    return f if f > 0 else None  # NaN > 0 là False → None
+
+
+def _strict_bool(v):
+    """Boolean chặt: chỉ True/'true'/1/'1'/'yes' (không phân biệt hoa/thường) → True.
+    Chuỗi 'false'/'0'/rác → False (bool('false') là True — bẫy)."""
+    if isinstance(v, str):
+        return v.strip().lower() in ("true", "1", "yes")
+    return v is True or (isinstance(v, int) and not isinstance(v, bool) and v == 1)
+
+
 def net_offsetting_orders(plan):
     """Gộp các lệnh NGƯỢC CHIỀU cùng mã trong CÙNG 1 plan thành 1 lệnh NET gửi broker.
 
@@ -378,7 +396,13 @@ def net_offsetting_orders(plan):
             continue
         group = by_ticker[o.ticker]
         buys = [g for g in group if (g.side or "").lower() == "buy"]
-        sells = [g for g in group if (g.side or "").lower() == "sell"]
+        all_sells = [g for g in group if (g.side or "").lower() == "sell"]
+        # POLICY (cq-2026-11-08 r2 #2): leg SELL có hard_sell_floor (chốt lời DISC) KHÔNG gộp
+        # chung với SELL không floor — gộp sẽ gán sàn của leg này lên lệnh thoát của leg kia
+        # (vd LAG SELL 1000 bị chặn bởi floor 12000 của DISC). Leg có floor đi qua như lệnh
+        # riêng; chỉ SELL không floor mới net với BUY.
+        floor_sells = [g for g in all_sells if _pos_float(getattr(g, "hard_sell_floor_vnd", None))]
+        sells = [g for g in all_sells if g not in floor_sells]
         if not (buys and sells):
             # một chiều (hoặc side lạ) → giữ nguyên toàn bộ group, đúng thứ tự xuất hiện
             for g in group:
@@ -388,6 +412,8 @@ def net_offsetting_orders(plan):
 
         for g in group:
             handled.add(id(g))
+        new_orders.extend(floor_sells)  # đi qua nguyên vẹn, không netting
+        group = buys + sells
         tb = sum(g.qty for g in buys)
         ts = sum(g.qty for g in sells)
         net = tb - ts
@@ -415,24 +441,20 @@ def net_offsetting_orders(plan):
                 f"ngược chiều cùng mã trong plan: [{legs_desc}]. Chuyển nội bộ {internal:,}cp "
                 f"giữa book @giá thị trường (0 phí/spread); chỉ {qty:,}cp chạm broker.")
         # Cổng cứng §24 + cash_only phải SỐNG SÓT qua netting (cq-2026-11-08 #1): chỉ lấy từ
-        # leg CÙNG chiều với NET; nhiều leg ⇒ lấy giá trị CHẶT HƠN (BUY: min trần, SELL: max sàn).
+        # leg CÙNG chiều với NET. BUY nhiều leg ⇒ trần CHẶT HƠN (min). SELL: leg có floor đã
+        # được loại khỏi netting ở trên nên NET SELL không mang floor. Parse dương-an-toàn.
         # Provenance trần (rule/anchor/tau) đi kèm đúng leg cho ra trần đã chọn.
         guard = {}
         if side == "buy":
-            cl = [g for g in dom if (getattr(g, "hard_no_chase_ceiling_vnd", None) or 0) > 0]
+            cl = [g for g in dom if _pos_float(getattr(g, "hard_no_chase_ceiling_vnd", None))]
             if cl:
-                c = min(cl, key=lambda g: g.hard_no_chase_ceiling_vnd)
-                guard.update(hard_no_chase_ceiling_vnd=c.hard_no_chase_ceiling_vnd,
+                c = min(cl, key=lambda g: _pos_float(g.hard_no_chase_ceiling_vnd))
+                guard.update(hard_no_chase_ceiling_vnd=_pos_float(c.hard_no_chase_ceiling_vnd),
                              ceiling_rule=c.ceiling_rule,
                              ceiling_anchor_price=c.ceiling_anchor_price,
                              ceiling_anchor_date=c.ceiling_anchor_date,
                              ceiling_tau=c.ceiling_tau)
-        else:
-            fl = [g.hard_sell_floor_vnd for g in dom
-                  if (getattr(g, "hard_sell_floor_vnd", None) or 0) > 0]
-            if fl:
-                guard["hard_sell_floor_vnd"] = max(fl)
-        guard["cash_only"] = any(bool(getattr(g, "cash_only", False)) for g in dom)
+        guard["cash_only"] = any(_strict_bool(getattr(g, "cash_only", False)) for g in dom)
         net_order = PlannedOrder(
             id=f"NET-{o.ticker}-{side.upper()}",
             ticker=o.ticker, side=side, qty=qty, ref_price=lead.ref_price,

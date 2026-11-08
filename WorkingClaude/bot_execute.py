@@ -466,6 +466,13 @@ def main():
                          "minh (§20: không mặc định 'user'; placeholder như auto/agent bị từ chối)")
     args = ap.parse_args()
 
+    # Kiểm --accept-gdkhq-by NGAY sau parse (cq-2026-11-08 r2): trước khối --send-otp/--auto-otp,
+    # để đầu vào sai không gửi OTP rồi mới ap.error.
+    if args.accept_gdkhq_shadow:
+        why = gdkhq_accepted_by_error(args.accept_gdkhq_by)
+        if why:
+            ap.error(why)
+
     if args.probe:
         b = get_quote_source(args.broker).connect()
         q = b.get_quote(args.probe)
@@ -523,9 +530,6 @@ def main():
     plan_date = args.date or today_ict().strftime("%Y-%m-%d")
 
     if args.accept_gdkhq_shadow:
-        why = gdkhq_accepted_by_error(args.accept_gdkhq_by)
-        if why:
-            ap.error(why)
         acceptance = accept_gdkhq_shadow(
             args.accept_gdkhq_shadow, args.accept_gdkhq_by,
             path=GDKHQ_ACCEPTANCE_STATE, rollout_path=GDKHQ_ROLLOUT_STATE)

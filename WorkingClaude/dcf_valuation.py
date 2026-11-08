@@ -1028,6 +1028,9 @@ def latest_price(ticker, asof=None):
     return latest_price_session(ticker, asof)[0]
 
 
+MAX_PRICE_AGE_DAYS = 400  # giá cũ hơn ngần này ngày lịch (so với asof/hôm nay ICT) ⇒ coi như không có
+
+
 def latest_price_session(ticker, asof=None):
     """(price, price_date) — như latest_price, kèm phiên `price` thuộc về (ISO). price_date=None khi
     rơi về `Close` (giá ĐÃ điều chỉnh ngược theo sự kiện về sau ⇒ không thuộc khung của phiên đó)."""
@@ -1054,6 +1057,12 @@ def latest_price_session(ticker, asof=None):
             if i == len(tries) - 1:
                 raise
     if len(df) == 0:
+        return None, None
+    # cq-2026-11-08 r2: giá quá cũ (mã ngừng giao dịch/hủy niêm yết) ⇒ (None, None), không trả
+    # giá cổ như giá hiện hành.
+    ref = (pd.to_datetime(asof) if asof is not None
+           else pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").tz_localize(None)).normalize()
+    if (ref - pd.Timestamp(df.time.iloc[0]).normalize()).days > MAX_PRICE_AGE_DAYS:
         return None, None
     p = df.Price.iloc[0]
     if pd.notna(p):
