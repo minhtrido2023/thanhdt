@@ -2128,3 +2128,6 @@
 
 ## Archived 2026-11-08 (keep=12 days=0 require_done=False)
 - [2026-11-07T17:22:33Z] [dd-5f DDV 07/11] XONG job Taylor_20261107_172007: NONE làm mới; chặt-3c tâm 13.109->11.187-11.937, nhãn TRONG->TRÊN (nhạy peer: đủ 7 peer giữ TRONG); CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags
+
+## Archived 2026-11-08 (keep=12 days=0 require_done=False)
+- [2026-11-07T17:22:52Z] [dd-5f PVT 07/11] XONG job Taylor_20261107_172013: NONE làm mới; chặt-3c tâm 17.675->16.492 (peer 14.791-16.829), TRONG->TRÊN mong manh; CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags
