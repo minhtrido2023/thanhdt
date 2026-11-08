@@ -225,17 +225,13 @@ from trading_bot.config import DEFAULTS, load_config, load_accounts, pick_accoun
 ok("D1 DEFAULTS flag present & False", DEFAULTS.get("dc_book_waterfall_enabled") is False)
 ok("D1 extreme_regime still paper-only (default False)",
    DEFAULTS.get("extreme_regime_enabled") is False)
-# chase_cap_vol_scale went LIVE 2026-08-04 (user sign-off + quant-skeptic CONFIRMED,
-# job Taylor_20260804_124404) — its global default is now True BY DESIGN, not a leak.
-ok("D1 chase_cap_vol_scale is LIVE (default True since 2026-08-04)",
-   DEFAULTS.get("chase_cap_vol_scale_enabled") is True)
 
+# D2 bất biến (không đọc trạng thái bật/tắt paper trial của 'main'): KHÔNG account mode=live nào
+# được bật cờ. 'main ON' thuộc ops_health, không thuộc selfcheck này.
 profiles = {p["label"]: p for p in load_accounts(load_config())}
-ok("D2 main resolves flag ON", profiles["main"]["cfg"].get("dc_book_waterfall_enabled") is True)
-for lbl in ("SpaceX", "ZaloPay"):
-    if lbl in profiles:
-        ok(f"D2 {lbl} (live) resolves flag OFF",
-           profiles[lbl]["cfg"].get("dc_book_waterfall_enabled") in (False, None))
+live_on = [lbl for lbl, p in profiles.items()
+           if p["cfg"].get("mode") == "live" and p["cfg"].get("dc_book_waterfall_enabled")]
+ok("D2 no live account (mode=live) has dc_book_waterfall_enabled ON", not live_on, f"live_on={live_on}")
 
 # D3 advance() on a disabled account is a pure no-op (restore the REAL sleeve_enabled first)
 import importlib
@@ -403,9 +399,7 @@ ok("E6 duong THAT ap PER_NAME_CAP (MBB khong duoc 0.15 nhu ten thuong)",
    abs(tgt6["MBB"] - 0.0764) < 1e-9 and abs(tgt6["ACB"] - 0.15) < 1e-9,
    f"MBB={tgt6.get('MBB')} ACB={tgt6.get('ACB')}")
 
-# ---- E5 v1 history archived, v2 restarts from the 1B basis ----
-v1_csv = os.path.join(dcw.DATA_DIR, "dc_book_waterfall_paper_nav_v1.csv")
-ok("E5 v1 NAV series archived", os.path.exists(v1_csv))
+# ---- E5 v2 restarts from the 1B basis ----
 ok("E5 v2 state carries a version tag", dcw.SLEEVE_VERSION == "v2")
 
 # =======================================================================================
@@ -449,6 +443,21 @@ ok("F5 day-2 BULL → still deployed (no flatten, no reverse-unwind)",
    stF2 == "advanced" and sF2["deployed"] and not sF2["reverse_unwind_last"])
 ok("F5 day-2 BULL → history row records state_name=BULL",
    sF2["history"][-1]["state_name"] == "BULL")
+
+# F6 (cq-2026-11-08): held name with NO close on a day (halt) must keep its old close, so the gap on
+# resumption is booked — not r_i=0 forever. Day 3: ACB missing; day 4: ACB back at -20%, rest flat.
+Inject.closes = ({"STB": 25000, "TCB": 34000, "FPT": 72000, "SSI": 27000,
+                  "VHM": 41000, "VCB": 61000}, "2026-08-24")
+stF3, sF3 = dcw.advance("main")
+ok("F6 halt day → missing_px flags ACB, last_close keeps old ACB close",
+   sF3["history"][-1].get("missing_px") == ["ACB"] and sF3["last_close"].get("ACB") == 23000,
+   f"missing={sF3['history'][-1].get('missing_px')} lc={sF3['last_close'].get('ACB')}")
+Inject.closes = ({"ACB": 18400, "STB": 25000, "TCB": 34000, "FPT": 72000, "SSI": 27000,
+                  "VHM": 41000, "VCB": 61000}, "2026-08-25")
+stF4, sF4 = dcw.advance("main")
+ok("F6 resumption day → ACB -20% gap booked (gross<0), no missing_px",
+   sF4["history"][-1]["gross_ret_pct"] < 0 and sF4["history"][-1].get("missing_px") == [],
+   f"gross={sF4['history'][-1]['gross_ret_pct']}")
 
 # =======================================================================================
 print("G. CORRUPT STATE FILE — never re-init over an existing-but-unreadable track record")

@@ -455,6 +455,18 @@ def load_ratings():
     return out
 
 
+def double_confirm_set(df, ratings):
+    """Double-confirm = sector-lens status BUY ∧ 8L rating ≤2 → {ticker: buy_mode}.
+    Nguồn DUY NHẤT của luật này (converge_report / dc_book_waterfall_paper / newdeals_daily_report
+    cùng gọi); mỗi caller tự giữ fail-mode riêng ({} vs None) quanh lời gọi."""
+    out = {}
+    for _, row in df[df["status"] == "BUY"].iterrows():
+        rt = ratings.get(row["ticker"])
+        if rt is not None and int(rt) <= 2:
+            out[str(row["ticker"])] = row["buy_mode"] or "ACCUMULATE"
+    return out
+
+
 STATUS_EMO = {"BUY": "🟢", "ARMED": "🔵", "WATCH": "👀",
               "RICH_WAIT": "🟡", "EXCLUDED": "⛔", "STALE": "⚠️"}
 

@@ -93,11 +93,7 @@ def build_message():
     # Reuse the sector-lens set already computed above (r["df"] + ratings) so we don't run
     # compute_status() twice; degrades to a ⚠️ line, never raises.
     from converge_report import generate_section as converge_section
-    live_dc = {}
-    for _, row in r["df"][r["df"]["status"] == "BUY"].iterrows():
-        rt = ratings.get(row["ticker"])
-        if rt is not None and int(rt) <= 2:
-            live_dc[row["ticker"]] = row["buy_mode"] or "ACCUMULATE"
+    live_dc = slm.double_confirm_set(r["df"], ratings)
     converge_md = converge_section(as_of_date=today, live_set=live_dc)
     # Literal emoji markers converge_report.py itself uses for its live-vs-seed diff
     # (see "🟢 ENTER"/"🔴 EXIT" in converge_report.generate_section) — not the bare

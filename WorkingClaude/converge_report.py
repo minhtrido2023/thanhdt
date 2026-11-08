@@ -53,14 +53,7 @@ def _live_double_confirm():
     try:
         import sector_lens_monitor as slm
         r = slm.compute_status()
-        ratings = slm.load_ratings()
-        df = r["df"]
-        out = {}
-        for _, row in df[df["status"] == "BUY"].iterrows():
-            rt = ratings.get(row["ticker"])
-            if rt is not None and int(rt) <= 2:
-                out[row["ticker"]] = row["buy_mode"] or "ACCUMULATE"
-        return out
+        return slm.double_confirm_set(r["df"], slm.load_ratings())
     except Exception:
         return {}
 

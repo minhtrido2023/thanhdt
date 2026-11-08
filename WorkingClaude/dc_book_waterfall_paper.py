@@ -390,18 +390,11 @@ def load_trigger(status_file=STATUS_FILE):
 
 def load_double_confirm():
     """Live double-confirm set {ticker: buy_mode}. None on any failure (→ fail-safe hold).
-    Identical selection to converge_report._live_double_confirm (8L≤2 ∧ sector-lens BUY)."""
+    Selection = sector_lens_monitor.double_confirm_set (8L≤2 ∧ sector-lens BUY)."""
     try:
         import sector_lens_monitor as slm
         r = slm.compute_status()
-        ratings = slm.load_ratings()
-        df = r["df"]
-        out = {}
-        for _, row in df[df["status"] == "BUY"].iterrows():
-            rt = ratings.get(row["ticker"])
-            if rt is not None and int(rt) <= 2:
-                out[str(row["ticker"])] = row["buy_mode"] or "ACCUMULATE"
-        return out
+        return slm.double_confirm_set(r["df"], slm.load_ratings())
     except Exception:
         return None
 
@@ -676,7 +669,15 @@ def advance(account=ACCOUNT_DEFAULT):
                       and any(o["side"] == "sell" for o in orders))
 
     # ---- 4) record new sleeve state ----
+    # tên đang nắm mà hôm nay không có giá (tạm ngừng / thiếu cache): GIỮ close cũ để ngày có giá
+    # lại ghi nhận đủ khoảng lệch (r_i = c1/c0-1), thay vì c0=None → r_i=0 vĩnh viễn. Gắn cờ
+    # `missing_px` vào dòng history (không im lặng).
     new_close = {t: closes[t] for t in target_w if t in closes}
+    missing_px = sorted(t for t in target_w if t not in closes and prev_close.get(t))
+    for t in missing_px:
+        new_close[t] = prev_close[t]
+    if missing_px:
+        print(f"  missing_px: {missing_px} không có giá {data_date} → giữ close cũ (r_i=0 hôm nay)")
 
     # on a HOLD/fail-safe session the membership was not refreshed → carry the stored set forward
     dc_names = detail.get("dc_names", st.get("dc_names", []))
@@ -706,6 +707,7 @@ def advance(account=ACCOUNT_DEFAULT):
         "cum_pnl_pct": round((nav / st["meta"]["nav_basis_vnd"] - 1.0) * 100, 4),
         "reverse_unwind": reverse_unwind,
         "fail_safe": fail_safe_hold,
+        "missing_px": missing_px,
         "custom30v_rebal": rebal_date,
         "note": reason,
         "orders": orders,

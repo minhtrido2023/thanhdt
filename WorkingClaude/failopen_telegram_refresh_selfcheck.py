@@ -90,7 +90,7 @@ def t1b_all_three_gates_wired_two_sided():
                    "⚠⚠ LAG gate rating KHÔNG CHẠY ĐƯỢC",
                    "⚠⚠ LAG gate quản trị KHÔNG ĐẦY ĐỦ"):
         ok(needle in old, f"#1 bản CŨ phải có dòng print {needle!r} (tiền đề A/B)")
-        ok(needle not in new or "_notify_failopen" in new,
+        ok(needle not in new,
            f"#1 bản MỚI vẫn còn print-only cho {needle!r}")
 
 
