@@ -28,3 +28,4 @@
 - [2026-11-08T15:47:35Z] [dd-redo r3 DDV 08/11] XONG job Taylor_20261108_153738: tam 13.109->15.911 (P10 13.315/P90 18.573) TRONG, gia 15.200; TREN chi khi DT=TB21-25 hoac tien von hoa; CHO Mike skeptic cuoi + ghi so
 - [2026-11-08T15:48:03Z] [dd-redo r3 PVT 08/11] XONG job Taylor_20261108_153736: tam 17.675->18.841 (P10 13.903/P90 24.207) TRONG @20.550; np27 1.500 (khong 1.450 skeptic); CHO Mike skeptic cuoi + ghi dd_price_zones
 - [2026-11-08T15:48:09Z] [dd-redo r3 DRI 08/11] XONG job Taylor_20261108_153743: tam 14.092->15.257 (P10 12.908/P90 17.549) TRONG sat canh duoi @13.100 (co sleeve that: DUOI); CHO Mike skeptic cuoi + ghi so
+- [2026-11-08T16:49:12Z] [dd-redo r3 MBB 08/11] XONG job Taylor_20261108_164331: tam 23.804->21.069 (P10 14.729/P90 27.577) TRONG @19.250, 38,6% duoi gia; nhan 4 dinh chinh; CHO Mike skeptic cuoi + ghi so
