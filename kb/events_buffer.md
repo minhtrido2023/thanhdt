@@ -589,3 +589,7 @@
 - [2026-11-08T02:43:25Z] Taylor/heartbeat — Taylor_20261108_024225: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_024225", "source": "watcher"}
 - [2026-11-08T02:43:26Z] Taylor/finding — dd-5f-NT2-fix-20261108: {"summary": "NT2 addendum fixed in place: ROIC FY2025 values (5Y 11.7%, 10Y 12.0%, Min5Y -0.6%) vs WACC; NONE-vs-NARROW rationale; ROE 34.3% artifact symmetry; gas cost 1 source; entry=L vs entry-barrier note; GSA 2036 unverified (no Phu luc 13 in Q3 PDF). Model unchanged: centre 23617, TRONG", "measured_by": "BQ ticker_financial NT2 2026-11-08; calc/model_5f.py + model_5f_ebitda.py rerun 2x byte-identical == saved out"}
 - [2026-11-08T02:43:27Z] Taylor/heartbeat — Taylor_20261108_024226: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_024226", "source": "watcher"}
+
+## Consolidation 2026-11-08T02:43:53Z
+- [2026-11-08T02:43:39Z] Taylor/finding — dd-5f-TV2-fix-20261108: {"headline": "NONE range 16,329-19,201 center Ke-anchor 17,807 (P90 20,296); anchor 12.16% -> 16,329; TV2 own ROE 2022-25 5.29% -> 8,740; label TREN at every anchor", "fixes": "7 text fixes (window sensitivity, no star on 19,201, ROE_T 2026Q3 16.3%>Ke, ROIC removed, EBITM peer claim, (ii) unverified, TV1 EBITM chain flagged)", "measured_by": "calc/moat_5f_tv2_fix.py -> calc/moat_5f_tv2_fix_out.json, 2 runs md5 identical"}
+- [2026-11-08T02:43:50Z] Taylor/heartbeat — Taylor_20261108_024219: {"status": "in_progress", "note": "chay calc r2 (DHB + noint), dang viet addendum"}
