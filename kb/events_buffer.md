@@ -596,3 +596,11 @@
 
 ## Consolidation 2026-11-08T02:44:16Z
 - [2026-11-08T02:43:57Z] Taylor/finding — dd-5f-PVT-fix-20261108: {"result": "PVT fix 08/11: headline la DAI chat-3c ex-PVP..ex-PVP+VTO tam 14.443-16.829, nhan TREN (dau tren ranh gioi P90 -0.6%, dau duoi chac P90 -14.8%); VTO them (ROE10Y 8.19%): trung vi 11.62%, ex-PVP 10.19%; NONE giu; ROIC so WACC; nhan TREN phu thuoc quy uoc neo ROE (ROE=Ke 18381 -> TRONG) cho Mike/user; bo truc mua tau +86d (double-count canh bao)", "measured_by": "PVT/calc_5f/pvt_5f.py chay 2 lan trung byte -> pvt_5f_out.txt; vto_roe_bq.csv"}
+
+## Consolidation 2026-11-08T02:45:55Z
+- [2026-11-08T02:44:19Z] Taylor/heartbeat — Taylor_20261108_024219: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_024219", "source": "watcher"}
+- [2026-11-08T02:44:21Z] Taylor/heartbeat — Taylor_20261108_024220: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_024220", "source": "watcher"}
+- [2026-11-08T02:45:07Z] Taylor/heartbeat — Taylor_20261108_024219: {"status": "in_progress", "note": "addendum r2 xong, dang viet SUMMARY_5F"}
+- [2026-11-08T02:45:19Z] Taylor/heartbeat — Taylor_20261108_024219: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261108_024219", "source": "watcher"}
+- [2026-11-08T02:45:21Z] Taylor/heartbeat — Taylor_20261108_024220: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261108_024220", "source": "watcher"}
+- [2026-11-08T02:45:38Z] Taylor/finding — dd-5f-DDV-fix-20261108: {"ticker": "DDV", "moat": "NONE", "headline": "CHAT-3C RONIC=Ke + peer phot-phat LAS/NFC (NPM 4.16%)", "centre_int": 12662, "centre_noint": 14923, "p90_int": 15731, "p90_vs_px_int": 0.0349, "label": "TRONG sat canh tren (5ty+40tr); r1 nhan TREN rut lai", "band_with_DHB_centre": [10091, 13448], "core_centre_range": [12430, 13448], "decomp": {"ronic_to_ke": -679, "margin_DDV_to_LASNFC": 232, "drop_INT": 2261}, "dhb_npm_measured": 0.0071, "note": "DHB do lai +0.71% (skeptic ghi -0.16%), trung vi LAS/NFC/DHB 3.50%; exUrea5 ha xuong do nhay; cho Mike duyet quy uoc peer + co so int/noint", "files": ["DDV/ADDENDUM_5F.md", "DDV/SUMMARY_5F.json", "DDV/5F/ddv_moat_sens_r2.py"], "measured_by": "5F/ddv_moat_sens_r2.py -> 5F/ddv_moat_sens_r2_out.json md5 914f2a72ff6dcf84aa06b9bdb82fe90c (2 lan cmp trung byte)"}
