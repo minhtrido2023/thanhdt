@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-07T13:07:56Z] [dd-5f MBB 07/11] XONG job Taylor_20261107_130206: NARROW làm mới, không bền; chặt-3c tâm 23.804->20.459 (RONIC=Ke -3.636), nhãn TRONG giữ; CHỜ Mike skeptic + duyệt quy ước (peer trung vị 23 NH, N5)
 - [2026-11-07T13:18:40Z] [dd-5f TCH fix 07/11] XONG job Taylor_20261107_131628: biên backlog→ngành, chặt-3c đầy đủ 13.122–13.407 (−2,6…−4,7%), nhãn TRONG; CHỜ Mike duyệt quy ước
 - [2026-11-07T17:20:39Z] [dd-5f HHS fix 08/11] XONG job Taylor_20261107_172005: chặt-3c KHOẢNG tâm 8.393–9.700 (A/B/C quy ước chiết khấu giá gốc HTK), nhãn TRONG; CHỜ Mike chọn A/B/C + skeptic; đề nghị rà TCH v2 cùng lỗi
 - [2026-11-07T17:20:42Z] [dd-5f MBB fix 07/11] XONG job Taylor_20261107_172003: chặt-3c tâm 17.677-18.394, nhãn TRONG; CHỜ Mike skeptic + duyệt quy ước
@@ -26,3 +25,4 @@
 - [2026-11-07T17:24:34Z] [dd-5f PVP 08/11] XONG job Taylor_20261107_172011: NONE làm mới; chặt-3c đối xứng 22.653 DƯỚI (ranh giới) vs CAP 20.356 TRONG; CHỜ Mike skeptic + chọn quy ước
 - [2026-11-08T02:45:38Z] [dd-5f DDV fix 08/11] XONG job Taylor_20261108_024219: headline LAS/NFC RONIC=Ke tâm 12.662(int)–14.923(noint), TRONG sát cạnh trên, rút TRÊN r1; CHỜ Mike duyệt quy ước peer/int
 - [2026-11-08T02:49:53Z] [dd-5f PVP fix 08/11] XONG job Taylor_20261108_024220: headline A+CAP 20.356 TRONG (doi xung DUOI rut); CHO Mike duyet + dong moat_tags
+- [2026-11-08T05:20:46Z] [cq-2026-11-08 hardcore] commit 7a86ee0f8 nhánh fix/cq-hardcore-20261108 (chưa merge); CHỜ Mike arch-review + merge, rồi chạy tz_anchor_gate --update-baseline trading_bot/plan.py
