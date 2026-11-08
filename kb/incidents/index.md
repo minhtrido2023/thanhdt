@@ -226,6 +226,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-11-08 | [RETRO — 2026-11-08: 4 sự cố (vòng CN thiếu lớp park; anomaly-flags-stale tái diễn lần 4 cuối tuần; wakeup MISS 1/6; cq hard-boundary đã fix), 2 pattern (job done ≠ deliverable; lịch ngày-lịch vs ngày-phiên, đã escalate). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-08.md) | logged |
 | 2026-11-07 | [RETRO — 2026-11-07: 3 sự cố (báo cáo tuần chặn do cột Price VNINDEX 02/11 sai; OAuth headless chết; bài học GPM_P0 sai vào brief), 2 pattern (A chốt sớm trên giả định chưa khoá, tái diễn 6 ngày, đã escalate; B job done ≠ artifact). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-07.md) | logged |
 | 2026-11-05 | [RETRO — 2026-11-05: 4 near-miss (DD redo 19 mã sửa 2 vòng; clearing GĐ3 review 3 vòng; lệnh đóng câu hỏi thiếu tham số; script thiếu --dry-run), 1 pattern (A chốt sớm trên chuẩn chưa khoá, tái diễn 5 ngày; đã escalate). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-05.md) | logged |
 | 2026-11-04 | [RETRO — 2026-11-04: 1 near-miss (DD DCM sửa 5 vòng/ngày), 1 pattern (A chốt sớm trên giả định chưa khoá, tái diễn 4 ngày; đã escalate). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-04.md) | logged |
