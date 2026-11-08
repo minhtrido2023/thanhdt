@@ -2224,6 +2224,194 @@
    "recorded_at": "2026-11-05T00:50:00+07:00",
    "supersedes": "DCM@2026-11-04#1",
    "correction_reason": "Hợp đồng khí 3918 (dự thảo sửa đổi số 12: Nam Du–U Minh giá cố định 10,39 USD/MMBtu +2,25%/năm, bao tiêu 90% đến 24/4/2032) thay đường giá khí; phản biện vòng 3 sửa điều kiện đảo nhãn, cách đọc cơ cấu khí nhất quán, năm 2028 và thêm độ nhạy 2035+; tâm 27.021 → 24.326."
+  },
+  {
+   "ticker": "TV2",
+   "dd_date": "2026-11-01",
+   "rev": 2,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 7702,
+   "center": 17491,
+   "center_kind": "expected_weighted",
+   "center_desc": "trung bình trọng số lưới 324 kết cục (headline B); sau chiết khấu thanh khoản 2,52% @5 tỷ",
+   "zone_high": 30677,
+   "center_range": null,
+   "price_ref": 27400,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng (mong manh): giá 27.400 cao hơn tâm 17.491 +56,7%; 84,1% trọng số kết cục dưới giá; bản chặt (C) và 2 biến thể trần P/E ra TRÊN vùng. Luật sổ (giá < tâm −15%): KHÔNG đạt",
+   "skeptic_status": "r3 (08/11): fundamental-skeptic lần cuối CONFIRMED (medium-high; chạy lại calc trùng byte, 6/6 đính chính áp đúng; chỉ còn lỗi văn bản, đã sửa trước khi ghi sổ)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/TV2/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/TV2/REPORT_r3.md",
+     "quote": "| **Tâm** (kỳ vọng lưới) | **17.491** | 15.832 |",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/TV2/REPORT_r3.md",
+     "quote": "| **P10 / P90 kết cục** | **7.702 / 30.677** | 2.726 / 30.675 |",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/TV2/REPORT_r3.md",
+     "quote": "- Giá **27.400** (đóng cửa 06/11, BQ) cao hơn tâm **56,7%**.",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/TV2/calc_r3/LOCK_r3_md5.txt",
+   "assumptions_md5": "94e22037ab06ab5f31b60f6be468b497",
+   "notes": "Vùng = P10–P90 kết cục (lưới 324), CK 2,52% @5 tỷ (ngoài vùng hiệu chỉnh √); cỡ sleeve 40tr: tâm 17.857. Headline B = bỏ sàn P/E 0 + sập neo 64,3 tỷ; biến thể song song A 17.268 · C 16.470 (P90 26.734 < giá ⇒ TRÊN). r 13,5% neo huy động 12T 7,40%. Nhãn mong manh: đứng nhờ nhánh P/E 8,6–9,6x với moat NONE. Tin pháp lý chưa tra lại sau 05/11. Skeptic: tâm so r2 +1.659 do bỏ sàn P/E 0 (cơ sở: tỷ lệ chi trả 0,88–1,27).",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-01",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-08T21:45:00+07:00",
+   "supersedes": "TV2@2026-11-01#1",
+   "correction_reason": "Vòng 3 áp đính chính fundamental-skeptic 08/11: bỏ sàn P/E=0 khi ROE<g (cơ sở cổ tức ≥100% LN), neo nhánh sập ở mức đáy quan sát 64,3 tỷ; tâm 20.700 → 17.491; P10 17.100 → 7.702 (đổi định nghĩa vùng sang P10–P90 kết cục)."
+  },
+  {
+   "ticker": "HPG",
+   "dd_date": "2026-10-31",
+   "rev": 4,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 13316,
+   "center": 21338,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 135 kết cục (XẤU/TRUNG LẬP/TỐT 0,25/0,50/0,25 × hệ số LN × dịch g × dốc LN), sau CK 5 tỷ",
+   "zone_high": 28993,
+   "center_range": null,
+   "price_ref": 21200,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng, giá ≈ tâm (−0,6%); 46,7% trọng số dưới giá; xấp xỉ hợp lý. Luật sổ (giá < tâm −15%): KHÔNG đạt",
+   "skeptic_status": "r3 (08/11): fundamental-skeptic lần cuối CONFIRMED (medium; dựng lại RI độc lập ra XẤU 13.937/TRUNG LẬP 21.981/TỐT 27.478 trùng file; artifact stale đã sửa trước khi ghi sổ)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/HPG/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/HPG/REPORT_r3.md",
+     "quote": "| Tâm (kỳ vọng lưới, sau CK 5 tỷ) | 16.286 | **21.338** |",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/HPG/REPORT_r3.md",
+     "quote": "| P10 / P50 / P90 (mức kết cục) | 8.942 / 16.343 / 23.520 | **13.316 / 21.759 / 28.993** |",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/HPG/REPORT_r3.md",
+     "quote": "| Giá tham chiếu | 21.700 (04/11) | **21.200 (đóng cửa 06/11, BQ `tav2_bq.ticker`)** |",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/HPG/calc_r3/LOCK_md5.txt",
+   "assumptions_md5": "d8d50aa86daa018f5277c947a6189032",
+   "notes": "Vùng = P10–P90 kết cục (lưới 135), CK @5 tỷ. Sửa lỗi lõi: vốn giữ lại sinh lời 0% ⇒ XDCB sinh lời = r (luật 20) + phần còn lại lãi huy động sau thuế; g_RI=0 mọi nhánh (moat NARROW không bền, không cộng). LƯU Ý skeptic: XDCB/DQ2 bị đếm hai lần ở nhánh TỐT ⇒ khoảng tâm 20.673 (bản J) – 21.338 (headline); cam kết 19.472 là số 30/6 (~−200 đ/cp); ETR 2030–34 giữ hiện hành chưa chắc. Cộng dồn các lưu ý ≈ −0,9…−1,0k ⇒ tâm ~20,4k, nhãn không đổi. r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-08T21:45:00+07:00",
+   "supersedes": "HPG@2026-10-31#3",
+   "correction_reason": "Vòng 3 áp đính chính skeptic 08/11: sửa vốn giữ lại sinh lời 0% (ROE terminal 11,8% < r) bằng XDCB=r + lãi huy động sau thuế; bỏ thuế 20% từ 2030 (chưa có nguồn) và thưởng moat g_RI; tâm 20.200 (blend) → 21.338 (kỳ vọng lưới); tâm đổi +5,6%."
+  },
+  {
+   "ticker": "SCL",
+   "dd_date": "2026-10-29",
+   "rev": 4,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 18295,
+   "center": 22791,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 108 kết cục (CYCLICAL/STRUCTURAL/ADMIN_GATED), sau CK 5 tỷ",
+   "zone_high": 27803,
+   "center_range": null,
+   "price_ref": 29400,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRÊN vùng (>P90): giá cum-quyền 29.400 (TERP 27.139) cao hơn tâm +29,0% ở cỡ 5 tỷ, +24,3% ở cỡ sleeve 40tr; sát ranh giới ở cỡ sleeve (giá/P90 +1,9%). Luật sổ: KHÔNG đạt",
+   "skeptic_status": "r3 (08/11): fundamental-skeptic lần cuối CONFIRMED (medium; chạy lại trùng byte, S0 22.769 / S1 21.813 tái lập; nhãn TRÊN vững mọi biến thể và cả hai cỡ CK)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/SCL/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/SCL/REPORT_r3.md",
+     "quote": "| Cùng mô hình, CK 5 tỷ (4,45%, ngoại suy) | 22.791 | 18.295 | 22.357 | 27.803 | 29.400 | 96,7% | TRÊN |",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high",
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/SCL/calc_r3/LOCK_r3_md5.txt",
+   "assumptions_md5": "4bf98b2b99de47d7c71b623b1e2dd751",
+   "notes": "Ghi sổ ở cỡ tham chiếu 5 tỷ (CK 4,45%, ngoại suy ngoài vùng √) để cùng quy ước các mã khác. Cỡ sleeve 40tr (CK 0,84%): tâm 23.652 · P10 18.986 · P50 23.202 · P90 28.854, 91,7% dưới giá, TRÊN (sát ranh giới). Lõi đã sửa GPM_P0=TTM (S1 21.813), bội số áp E1. Giá cum-quyền ĐKCC 10/11; TERP 27.139 vẫn > P90. Chưa kiểm: thuyết minh chi phí đi vay vốn hoá; bỏ phần cộng lại lãi dự án ⇒ tâm 21.901/P90 27.150 (từ skeptic, chưa chạy lại). Lịch quyền từ NQ 1363, chưa đối chiếu CBTT sàn.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-26",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "recorded_at": "2026-11-08T21:45:00+07:00",
+   "supersedes": "SCL@2026-10-29#3",
+   "correction_reason": "Vòng 3 áp đính chính skeptic 08/11: headline sang lõi sửa GPM (22.769 → 21.813), bội số E1, báo cả hai cỡ CK; tâm 21.400 (cơ sở sau quyền) → 22.791 (cơ sở cum-quyền, CK 5 tỷ); vùng đổi sang P10–P90 kết cục."
+  },
+  {
+   "ticker": "TV1",
+   "dd_date": "2026-11-02",
+   "rev": 6,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 8823,
+   "center": 16740,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 540 kết cục (PPA × tư vấn × thời điểm), sau CK 4,21% @5 tỷ",
+   "zone_high": 25179,
+   "center_range": null,
+   "price_ref": 20400,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng: giá 20.400 cao hơn tâm 16.740 +21,9%; 74,6% trọng số dưới giá. Luật sổ (giá < tâm −15%): KHÔNG đạt. TV1 đang trong plan SELL ⇒ định giá không neo vào quyết định bán",
+   "skeptic_status": "r3 (08/11): fundamental-skeptic lần cuối CONFIRMED (medium; chạy lại trùng md5, 6/6 đính chính áp đúng; artifact 5F stale đã đồng bộ trước khi ghi sổ)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/TV1/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/TV1/REPORT_r3.md",
+     "quote": "| **Tâm** (kỳ vọng lưới) | **16.740** | 15.379 |",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/TV1/REPORT_r3.md",
+     "quote": "| **P10 / P90 kết cục** | **8.823 / 25.179** (min 3.012, max 43.218; n = 540) | 4.693 / 24.544 |",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/TV1/REPORT_r3.md",
+     "quote": "| Giá tham chiếu | **20.400** (đóng cửa 06/11) | 19.600 (04/11) |",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/TV1/calc/LOCK_r3_md5.txt",
+   "assumptions_md5": "7be84d352611e28e83a051209ede3a8e",
+   "notes": "Vùng = P10–P90 kết cục (lưới 540), CK 4,21% @5 tỷ (ngoài vùng √). Truy thu chỉ trong nhánh PPA 340 (đã nhất quán), truy thu 2022–26 ra khỏi base. Lưu ý skeptic: P(PPA ≤440)=0,40 [UL] là nguồn chính của chênh giá/tâm; giá ngụ ý PPA 547–623 vs mức duy nhất có văn bản 340; quỹ KTPL mô hình 20%×LN có thể trừ thiếu ở nhánh PPA thấp (tâm hơi cao); trọng số truy thu hơi thận trọng (~−46 đ). WARNING: VnExpress 02/07 — TV1 trong '13 công ty liên quan'. Nhóm (a) scandal cá nhân ⇒ §2 (không đủ điều kiện).",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "recorded_at": "2026-11-08T21:45:00+07:00",
+   "supersedes": "TV1@2026-11-02#5",
+   "correction_reason": "Vòng 3 áp đính chính skeptic 08/11: nhánh truy thu chỉ trong PPA 340 và ra khỏi base; tâm 18.100 (INTRINSIC_v2, vùng P20–P80) → 16.740; vùng đổi sang P10–P90 kết cục."
   }
  ],
  "center_kinds": [
