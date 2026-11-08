@@ -2125,3 +2125,6 @@
 
 ## Archived 2026-11-08 (keep=12 days=0 require_done=False)
 - [2026-11-07T17:21:15Z] [dd-5f HPG fix r2 08/11] XONG job Taylor_20261107_172001: neo ROE nam peer 8,91-9,80%, chat-3c tam 12.580-13.705, TREN (hoa von neo 14,07%); CHO Mike duyet quy uoc neo + phat DQ2
+
+## Archived 2026-11-08 (keep=12 days=0 require_done=False)
+- [2026-11-07T17:22:33Z] [dd-5f DDV 07/11] XONG job Taylor_20261107_172007: NONE làm mới; chặt-3c tâm 13.109->11.187-11.937, nhãn TRONG->TRÊN (nhạy peer: đủ 7 peer giữ TRONG); CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags

@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-07T17:22:33Z] [dd-5f DDV 07/11] XONG job Taylor_20261107_172007: NONE làm mới; chặt-3c tâm 13.109->11.187-11.937, nhãn TRONG->TRÊN (nhạy peer: đủ 7 peer giữ TRONG); CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags
 - [2026-11-07T17:22:52Z] [dd-5f PVT 07/11] XONG job Taylor_20261107_172013: NONE làm mới; chặt-3c tâm 17.675->16.492 (peer 14.791-16.829), TRONG->TRÊN mong manh; CHỜ Mike skeptic + duyệt quy ước/dòng moat_tags
 - [2026-11-07T17:23:23Z] [dd-5f TV2 08/11] XONG job Taylor_20261107_172014: NONE làm mới; chặt-3c tâm 15.832->19.201 (17.157–19.201), nhãn TRONG->TRÊN; CHỜ Mike skeptic + duyệt quy ước + dòng moat_tags (entry L vs TV1 M)
 - [2026-11-07T17:23:53Z] [dd-5f NT2 07/11] XONG job Taylor_20261107_172009: NONE làm mới, model không đổi (EBITDA 13,2% < ngành); cận dưới cơ sở EBIT 21.701–23.035 TRONG; CHỜ Mike skeptic + chọn cơ sở so biên
@@ -26,3 +25,4 @@
 - [2026-11-08T14:27:23Z] [dd-redo r3 TV2 08/11] XONG job Taylor_20261108_142016: tâm 15.832->17.491 (P10 7.702/P90 30.677), TRONG mong manh (C/trần P/E ra TRÊN); CHỜ Mike skeptic cuối + ghi sổ
 - [2026-11-08T14:27:24Z] [dd-redo r3 TV1 08/11] XONG job Taylor_20261108_142024: tâm 16.740 P10 8.823 P90 25.179 TRONG (bỏ truy thu khỏi base; bác đ.5a KTPL); CHỜ Mike phản biện cuối + ghi dd_price_zones
 - [2026-11-08T14:27:26Z] [dd-redo r3 SCL 08/11] XONG job Taylor_20261108_142022: tâm 23.652 P10 18.986 P90 28.854 vs giá 29.400 ⇒ TRÊN sát ranh giới (+1,9%); CHỜ Mike skeptic cuối + ghi dd_price_zones
+- [2026-11-08T14:27:47Z] [dd-redo r3 DCM 08/11] XONG job Taylor_20261108_142018: r6 tâm 24.822 P10 20.827 P90 28.808, TRÊN vùng @32.100; C2 skeptic sai 1 phần (237–249 còn chứa policy); CHỜ Mike skeptic cuối + ghi sổ
