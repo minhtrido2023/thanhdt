@@ -676,3 +676,10 @@
 
 ## Consolidation 2026-11-08T11:07:02Z
 - [2026-11-08T10:31:18Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54746}
+
+## Consolidation 2026-11-08T12:06:25Z
+- [2026-11-08T12:05:50Z] DollarBill/heartbeat — DollarBill_20261108_120539: {"status": "in_progress", "note": "bắt đầu plan ZaloPay 11-09"}
+- [2026-11-08T12:05:52Z] DollarBill/heartbeat — DollarBill_20261108_120541: {"status": "in_progress", "note": "bat dau plan SpaceX 11-09"}
+- [2026-11-08T12:06:15Z] DollarBill/decision — plan-ZaloPay-2026-11-09: {"orders": "BUY LAG BSR1200/CSV1100/GAS300/MSB1500", "egg_transfer_tr": 67.2, "approval": "pending, truoc 08:45 09/11", "round": "Sunday"}
+- [2026-11-08T11:15:56Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12991}
+- [2026-11-08T12:02:07Z] Winston/error — anomaly-flags-stale: {"consumer": "golive_recommend_v23", "date": "2026-11-08", "generated_at": "2026-11-06T05:45:15Z", "reason": "lần ghi cuối 2026-11-06 (ICT) ≠ ngày giao dịch 2026-11-08"}
