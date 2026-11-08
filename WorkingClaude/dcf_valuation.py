@@ -381,7 +381,7 @@ def discount_rate(asof, erp=ERP):
     return _RATE_CACHE[key]
 
 
-_CPI_DF = None
+_CPI_DF = None       # {end "YYYY-MM-01": cpi df} — None/{} = chưa build (selfcheck reset bằng None)
 _TG_CACHE = {}
 
 
@@ -394,12 +394,19 @@ def terminal_growth(asof, years=CPI_TERMINAL_YEARS, with_frac=False):
     this is 0% (all proxy). Return (val, frac_real) when with_frac=True; a plain float otherwise so the
     fair_value() Gordon math is unchanged."""
     global _CPI_DF
-    a = pd.to_datetime(asof)
+    a = (pd.to_datetime(asof) if asof is not None
+         else pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").tz_localize(None).normalize())
     key = (a.year, a.month)
     if key not in _TG_CACHE:
-        if _CPI_DF is None:
-            _CPI_DF = _cpi.cpi_monthly_df(end="2026-12-01")
-        cpi = _CPI_DF
+        # cq-2026-11-08 #4: end = đầu tháng của asof (không hardcode 2026-12-01) — sau 12/2026
+        # cửa sổ 5 năm không được lặng lẽ mất các tháng mới nhất, và cpi_coverage() cảnh báo
+        # đúng khoảng trống tới asof. Giá trị ≤ end không phụ thuộc end (interpolate giữa anchor).
+        end = a.replace(day=1).strftime("%Y-%m-01")
+        if not isinstance(_CPI_DF, dict):
+            _CPI_DF = {}
+        if end not in _CPI_DF:
+            _CPI_DF[end] = _cpi.cpi_monthly_df(end=end)
+        cpi = _CPI_DF[end]
         w = cpi[(cpi.time <= a) & (cpi.time > a - pd.Timedelta(days=365 * years))]
         val = 0.035 if len(w) == 0 else float(w.cpi_yoy.mean()) / 100.0
         frac = float(w.is_real_nso.mean()) if len(w) else 0.0
@@ -1021,22 +1028,41 @@ def latest_price(ticker, asof=None):
     return latest_price_session(ticker, asof)[0]
 
 
+MAX_PRICE_AGE_DAYS = 400  # giá cũ hơn ngần này ngày lịch (so với asof/hôm nay ICT) ⇒ coi như không có
+
+
 def latest_price_session(ticker, asof=None):
     """(price, price_date) — như latest_price, kèm phiên `price` thuộc về (ISO). price_date=None khi
     rơi về `Close` (giá ĐÃ điều chỉnh ngược theo sự kiện về sau ⇒ không thuộc khung của phiên đó)."""
     import duckdb
     c = duckdb.connect(":memory:")
     a = "" if asof is None else f"AND time <= DATE '{pd.to_datetime(asof).date()}'"
-    yr = "2*" if asof is None else str(pd.to_datetime(asof).year)
-    try:
-        df = c.execute(
-            f"SELECT time, Price, Close FROM read_parquet('{WORKDIR}/data/bq_cache/ticker/{yr}.parquet') "
-            f"WHERE ticker = '{ticker}' {a} ORDER BY time DESC LIMIT 1").df()
-    except Exception:
-        df = c.execute(
-            f"SELECT time, Price, Close FROM read_parquet('{WORKDIR}/data/bq_cache/ticker/2*.parquet') "
-            f"WHERE ticker = '{ticker}' {a} ORDER BY time DESC LIMIT 1").df()
+    base = f"{WORKDIR}/data/bq_cache/ticker"
+    # cq-2026-11-08 #5: như price_session_for — đọc CẢ {yr-1} và {yr}, để asof đầu tháng 1 (nghỉ
+    # Tết dương / mã tạm ngừng đầu năm) vẫn thấy giá cuối năm trước thay vì (None, None).
+    # Thiếu file năm trước ⇒ chỉ {yr}; vẫn lỗi ⇒ 2*.parquet (hành vi cũ).
+    if asof is None:
+        tries = [f"'{base}/2*.parquet'"]
+    else:
+        y = pd.to_datetime(asof).year
+        tries = [f"'{base}/{y - 1}.parquet', '{base}/{y}.parquet'", f"'{base}/{y}.parquet'",
+                 f"'{base}/2*.parquet'"]
+    for i, src in enumerate(tries):
+        try:
+            df = c.execute(
+                f"SELECT time, Price, Close FROM read_parquet([{src}]) "
+                f"WHERE ticker = '{ticker}' {a} ORDER BY time DESC LIMIT 1").df()
+            break
+        except Exception:                                          # noqa: BLE001 — file năm thiếu
+            if i == len(tries) - 1:
+                raise
     if len(df) == 0:
+        return None, None
+    # cq-2026-11-08 r2: giá quá cũ (mã ngừng giao dịch/hủy niêm yết) ⇒ (None, None), không trả
+    # giá cổ như giá hiện hành.
+    ref = (pd.to_datetime(asof) if asof is not None
+           else pd.Timestamp.now(tz="Asia/Ho_Chi_Minh").tz_localize(None)).normalize()
+    if (ref - pd.Timestamp(df.time.iloc[0]).normalize()).days > MAX_PRICE_AGE_DAYS:
         return None, None
     p = df.Price.iloc[0]
     if pd.notna(p):
