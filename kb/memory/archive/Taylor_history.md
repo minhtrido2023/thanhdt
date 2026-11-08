@@ -2137,3 +2137,6 @@
 
 ## Archived 2026-11-08 (keep=12 days=0 require_done=False)
 - [2026-11-07T17:23:53Z] [dd-5f NT2 07/11] XONG job Taylor_20261107_172009: NONE làm mới, model không đổi (EBITDA 13,2% < ngành); cận dưới cơ sở EBIT 21.701–23.035 TRONG; CHỜ Mike skeptic + chọn cơ sở so biên
+
+## Archived 2026-11-08 (keep=12 days=0 require_done=False)
+- [2026-11-07T17:24:34Z] [dd-5f PVP 08/11] XONG job Taylor_20261107_172011: NONE làm mới; chặt-3c đối xứng 22.653 DƯỚI (ranh giới) vs CAP 20.356 TRONG; CHỜ Mike skeptic + chọn quy ước

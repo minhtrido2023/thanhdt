@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-07T17:24:34Z] [dd-5f PVP 08/11] XONG job Taylor_20261107_172011: NONE làm mới; chặt-3c đối xứng 22.653 DƯỚI (ranh giới) vs CAP 20.356 TRONG; CHỜ Mike skeptic + chọn quy ước
 - [2026-11-08T02:45:38Z] [dd-5f DDV fix 08/11] XONG job Taylor_20261108_024219: headline LAS/NFC RONIC=Ke tâm 12.662(int)–14.923(noint), TRONG sát cạnh trên, rút TRÊN r1; CHỜ Mike duyệt quy ước peer/int
 - [2026-11-08T02:49:53Z] [dd-5f PVP fix 08/11] XONG job Taylor_20261108_024220: headline A+CAP 20.356 TRONG (doi xung DUOI rut); CHO Mike duyet + dong moat_tags
 - [2026-11-08T05:20:46Z] [cq-2026-11-08 hardcore] commit 7a86ee0f8 nhánh fix/cq-hardcore-20261108 (chưa merge); CHỜ Mike arch-review + merge, rồi chạy tz_anchor_gate --update-baseline trading_bot/plan.py
@@ -26,3 +25,4 @@
 - [2026-11-08T14:29:19Z] [dd-redo r3 HPG 08/11] XONG job Taylor_20261108_142020: tam 21.338 (P10 13.316/P90 28.993) TRONG, gia 21.200 ~tam; CHO skeptic cuoi + Mike ghi so; open: 19.529 skeptic khong tai lap
 - [2026-11-08T15:45:22Z] [dd-redo r3 NT2 08/11] XONG job Taylor_20261108_153742: tam 23.617->24.003 (P10 18.301/P90 29.619) TRONG @22.200; CHO Mike phan bien cuoi + ghi so; open: lich su tra truoc dai tu (truc FCF +-150 UL)
 - [2026-11-08T15:45:50Z] [dd-redo r3 SAS 08/11] XONG job Taylor_20261108_153740: tam 31.658 P10 25.083 P90 38.043 TRONG @34.200 (+1,9% vs r2); CHO Mike phan bien cuoi + ghi dd_price_zones; mo: ben tra co tuc dau tu (V.2c/V.27)
+- [2026-11-08T15:47:35Z] [dd-redo r3 DDV 08/11] XONG job Taylor_20261108_153738: tam 13.109->15.911 (P10 13.315/P90 18.573) TRONG, gia 15.200; TREN chi khi DT=TB21-25 hoac tien von hoa; CHO Mike skeptic cuoi + ghi so
