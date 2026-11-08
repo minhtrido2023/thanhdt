@@ -34,6 +34,7 @@ if hasattr(sys.stdout, "reconfigure"):  # console Windows cp1252 → utf-8
 
 from trading_bot.config import load_config, load_accounts, pick_accounts, EXEC_DIR
 from trading_bot.brokers import make_broker, get_quote_source, get_dnse_client
+from trading_bot.plan import APPROVAL_PLACEHOLDERS
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
                               filter_lag_governance_orders, filter_signal_holds,
@@ -401,6 +402,22 @@ def _otp_flow_lock(cred_file):
             fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 
+def gdkhq_accepted_by_error(accepted_by):
+    """Lý do từ chối `--accept-gdkhq-by`, hoặc None nếu hợp lệ (cq-2026-11-08 #3, §20).
+
+    Không truyền ⇒ từ chối (trước đây default 'user' = bịa bản ghi "user duyệt" trên đường tiền
+    thật). Rỗng/placeholder (APPROVAL_PLACEHOLDERS: auto/agent/pending/tên agent…) ⇒ từ chối.
+    'user' chỉ hợp lệ khi được GÕ tường minh.
+    """
+    if accepted_by is None:
+        return ("--accept-gdkhq-shadow bắt buộc --accept-gdkhq-by <người nghiệm thu thật> "
+                "(không còn mặc định 'user' — coding_guidelines §20)")
+    if str(accepted_by).strip().lower() in APPROVAL_PLACEHOLDERS:
+        return (f"--accept-gdkhq-by={accepted_by!r} là rỗng/placeholder, không phải người "
+                "nghiệm thu thật — từ chối ghi nghiệm thu")
+    return None
+
+
 def parse_otp(items):
     """["main=123456","acc2=654321"] hoặc ["123456"] → (dict label→otp, otp chung)."""
     per, common = {}, None
@@ -444,8 +461,9 @@ def main():
                     help="sau shadow PASS, ghi marker shadow PASS chờ nghiệm thu (chưa bật live)")
     ap.add_argument("--accept-gdkhq-shadow", default=None, metavar="YYYY-MM-DD",
                     help="nghiệm thu trace shadow PASS và bật live D1-D3 (không cần broker)")
-    ap.add_argument("--accept-gdkhq-by", default="user",
-                    help="người nghiệm thu cho --accept-gdkhq-shadow")
+    ap.add_argument("--accept-gdkhq-by", default=None,
+                    help="người nghiệm thu cho --accept-gdkhq-shadow — BẮT BUỘC, ghi tường "
+                         "minh (§20: không mặc định 'user'; placeholder như auto/agent bị từ chối)")
     args = ap.parse_args()
 
     if args.probe:
@@ -505,6 +523,9 @@ def main():
     plan_date = args.date or today_ict().strftime("%Y-%m-%d")
 
     if args.accept_gdkhq_shadow:
+        why = gdkhq_accepted_by_error(args.accept_gdkhq_by)
+        if why:
+            ap.error(why)
         acceptance = accept_gdkhq_shadow(
             args.accept_gdkhq_shadow, args.accept_gdkhq_by,
             path=GDKHQ_ACCEPTANCE_STATE, rollout_path=GDKHQ_ROLLOUT_STATE)

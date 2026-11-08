@@ -12,6 +12,7 @@ import json
 import os
 import time
 import sys
+from zoneinfo import ZoneInfo
 
 from .config import PLAN_DIR
 from .no_chase_ceiling import resolve_buy_ceiling
@@ -119,7 +120,7 @@ class TradePlan:
     def save(self):
         os.makedirs(PLAN_DIR, exist_ok=True)
         d = dataclasses.asdict(self)
-        d["created_at"] = d["created_at"] or dt.datetime.now().isoformat(timespec="seconds")
+        d["created_at"] = d["created_at"] or dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).isoformat(timespec="seconds")
         with open(self.path(), "w", encoding="utf-8") as f:
             json.dump(d, f, indent=2, ensure_ascii=False)
         return self.path()
@@ -413,6 +414,25 @@ def net_offsetting_orders(plan):
         note = (f"NET {side.upper()} {qty:,}cp (dư của book {lead.book or '?'}) ← gộp các lệnh "
                 f"ngược chiều cùng mã trong plan: [{legs_desc}]. Chuyển nội bộ {internal:,}cp "
                 f"giữa book @giá thị trường (0 phí/spread); chỉ {qty:,}cp chạm broker.")
+        # Cổng cứng §24 + cash_only phải SỐNG SÓT qua netting (cq-2026-11-08 #1): chỉ lấy từ
+        # leg CÙNG chiều với NET; nhiều leg ⇒ lấy giá trị CHẶT HƠN (BUY: min trần, SELL: max sàn).
+        # Provenance trần (rule/anchor/tau) đi kèm đúng leg cho ra trần đã chọn.
+        guard = {}
+        if side == "buy":
+            cl = [g for g in dom if (getattr(g, "hard_no_chase_ceiling_vnd", None) or 0) > 0]
+            if cl:
+                c = min(cl, key=lambda g: g.hard_no_chase_ceiling_vnd)
+                guard.update(hard_no_chase_ceiling_vnd=c.hard_no_chase_ceiling_vnd,
+                             ceiling_rule=c.ceiling_rule,
+                             ceiling_anchor_price=c.ceiling_anchor_price,
+                             ceiling_anchor_date=c.ceiling_anchor_date,
+                             ceiling_tau=c.ceiling_tau)
+        else:
+            fl = [g.hard_sell_floor_vnd for g in dom
+                  if (getattr(g, "hard_sell_floor_vnd", None) or 0) > 0]
+            if fl:
+                guard["hard_sell_floor_vnd"] = max(fl)
+        guard["cash_only"] = any(bool(getattr(g, "cash_only", False)) for g in dom)
         net_order = PlannedOrder(
             id=f"NET-{o.ticker}-{side.upper()}",
             ticker=o.ticker, side=side, qty=qty, ref_price=lead.ref_price,
@@ -424,6 +444,7 @@ def net_offsetting_orders(plan):
             dcf_override_reason=(lead.dcf_override_reason if side == "buy" else ""),
             dd_check=(lead.dd_check if side == "buy" else None),
             dd_override_reason=(lead.dd_override_reason if side == "buy" else ""),
+            **guard,
         )
         new_orders.append(net_order)
         rec["action"] = "NETTED"
@@ -2241,7 +2262,9 @@ def approval_block_reason(plan):
         approved = approved.strip()
         # Plan LLM-authored có thể ghi null dạng CHUỖI ("None"/"null"/"nil"/"nan")
         # — vẫn là chưa duyệt, không để chuỗi truthy lọt qua gate.
-        if approved.lower() in ("none", "null", "nil", "nan"):
+        # cq-2026-11-08 #2: dùng chung APPROVAL_PLACEHOLDERS ("auto"/"pending"/"agent"/tên
+        # agent…) — chuỗi placeholder KHÔNG phải bằng chứng user duyệt.
+        if approved.lower() in APPROVAL_PLACEHOLDERS:
             approved = ""
     if approved:
         return None
