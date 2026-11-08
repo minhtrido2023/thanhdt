@@ -18,3 +18,5 @@ dd-flag-rules-20261102 (mã cờ loại khỏi candidate; DD base = sổ sách/N
 Sáng 09/11: kiểm run 20:40 injector DISC, fill NNC/FPT/TV1; nav-loss-brake 11-09; DT CRISIS ~11/10; Livermore H20 03/12; commodity 11-25; BĐS 11-26; LAG 12-15; audit đo lường ~12-27.
 Bài học 07/11: không ghi "bài học" vào brief/skill khi chưa verify với bigquery_dictionary.json; pilot 1 mã trước fan-out ≥5.
 
+- [2026-11-08T02:36:01Z] 08/11 09:45 DD-5F status: 20 mã đều có ADDENDUM_5F. Jobs _1316xx/_1316xx hit usage_limited đêm qua NHƯNG artifact đã ghi (HPG/MBB/HHS fix có *_r1 backup + số mới; cụm4 DDV/NT2/PVP/PVT/TV2 addendum 17:22-17:24Z). Việc kế: skeptic cụm4 (5 Agent song song, ≤350 từ), fix, rồi báo bảng cụm3+4 + tổng kết 20 mã. Chờ user: chặt-3c; Winston sửa dictionary.
+- [2026-11-08T02:42:37Z] 08/11 09:45 cụm4 skeptic xong: NT2/PVT/TV2 CONFIRMED (sửa văn bản), DDV/PVP REFUTED (DDV peer cắt một chiều -> nhãn TRONG ~12,4–13,4k; PVP headline phải là CAP 20.356 TRONG). Fix jobs Taylor_20261108_024219 DDV, _024220 PVP, _024223 NT2, _024225 PVT, _024226 TV2 (brief /tmp/dd5f/fix5_*.txt). Sau: claim, Mike đọc, báo user bảng cụm 3+4 + tổng kết 20 mã.
