@@ -1,6 +1,6 @@
 # Kế hoạch nghiên cứu — tái thẩm định custom30V sau lỗi đo lường 2026-09-27
 
-> Trạng thái: **ĐỀ XUẤT, chờ user duyệt** (soạn 2026-09-27 16:5x ICT, Mike).
+> Trạng thái: **ĐÃ THỰC HIỆN XONG — user chốt Q3 27/09 + pin dải 2 số 28/09 (xem §8–10)**. Bản gốc "ĐỀ XUẤT, chờ user duyệt" soạn 2026-09-27 16:5x ICT, Mike.
 > Phạm vi: PAPER-ONLY. Không đổi `trading_rules.json`, không đổi rail, không đặt lệnh cho tới khi
 > quant-skeptic CONFIRMED + user ký từng bước.
 
