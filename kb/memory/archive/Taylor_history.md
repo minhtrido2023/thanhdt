@@ -2134,3 +2134,6 @@
 
 ## Archived 2026-11-08 (keep=12 days=0 require_done=False)
 - [2026-11-07T17:23:23Z] [dd-5f TV2 08/11] XONG job Taylor_20261107_172014: NONE làm mới; chặt-3c tâm 15.832->19.201 (17.157–19.201), nhãn TRONG->TRÊN; CHỜ Mike skeptic + duyệt quy ước + dòng moat_tags (entry L vs TV1 M)
+
+## Archived 2026-11-08 (keep=12 days=0 require_done=False)
+- [2026-11-07T17:23:53Z] [dd-5f NT2 07/11] XONG job Taylor_20261107_172009: NONE làm mới, model không đổi (EBITDA 13,2% < ngành); cận dưới cơ sở EBIT 21.701–23.035 TRONG; CHỜ Mike skeptic + chọn cơ sở so biên
