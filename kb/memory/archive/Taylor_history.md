@@ -2113,3 +2113,6 @@
 
 ## Archived 2026-11-08 (keep=12 days=0 require_done=False)
 - [2026-11-07T13:07:56Z] [dd-5f MBB 07/11] XONG job Taylor_20261107_130206: NARROW làm mới, không bền; chặt-3c tâm 23.804->20.459 (RONIC=Ke -3.636), nhãn TRONG giữ; CHỜ Mike skeptic + duyệt quy ước (peer trung vị 23 NH, N5)
+
+## Archived 2026-11-08 (keep=12 days=0 require_done=False)
+- [2026-11-07T13:18:40Z] [dd-5f TCH fix 07/11] XONG job Taylor_20261107_131628: biên backlog→ngành, chặt-3c đầy đủ 13.122–13.407 (−2,6…−4,7%), nhãn TRONG; CHỜ Mike duyệt quy ước
