@@ -593,3 +593,6 @@
 ## Consolidation 2026-11-08T02:43:53Z
 - [2026-11-08T02:43:39Z] Taylor/finding — dd-5f-TV2-fix-20261108: {"headline": "NONE range 16,329-19,201 center Ke-anchor 17,807 (P90 20,296); anchor 12.16% -> 16,329; TV2 own ROE 2022-25 5.29% -> 8,740; label TREN at every anchor", "fixes": "7 text fixes (window sensitivity, no star on 19,201, ROE_T 2026Q3 16.3%>Ke, ROIC removed, EBITM peer claim, (ii) unverified, TV1 EBITM chain flagged)", "measured_by": "calc/moat_5f_tv2_fix.py -> calc/moat_5f_tv2_fix_out.json, 2 runs md5 identical"}
 - [2026-11-08T02:43:50Z] Taylor/heartbeat — Taylor_20261108_024219: {"status": "in_progress", "note": "chay calc r2 (DHB + noint), dang viet addendum"}
+
+## Consolidation 2026-11-08T02:44:16Z
+- [2026-11-08T02:43:57Z] Taylor/finding — dd-5f-PVT-fix-20261108: {"result": "PVT fix 08/11: headline la DAI chat-3c ex-PVP..ex-PVP+VTO tam 14.443-16.829, nhan TREN (dau tren ranh gioi P90 -0.6%, dau duoi chac P90 -14.8%); VTO them (ROE10Y 8.19%): trung vi 11.62%, ex-PVP 10.19%; NONE giu; ROIC so WACC; nhan TREN phu thuoc quy uoc neo ROE (ROE=Ke 18381 -> TRONG) cho Mike/user; bo truc mua tau +86d (double-count canh bao)", "measured_by": "PVT/calc_5f/pvt_5f.py chay 2 lan trung byte -> pvt_5f_out.txt; vto_roe_bq.csv"}
