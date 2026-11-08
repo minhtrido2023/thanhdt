@@ -57,7 +57,7 @@ else
   # stderr KHÔNG bị nuốt (arch-review coord-2026-08-07): khối này crash ⇒ PLAN_INFO rỗng ⇒
   # dòng RED không có lý do, và người đọc không phân biệt được "plan xấu" với "checker hỏng".
   _PF_ERR="$(mktemp)"
-  PLAN_INFO=$(WORKDIR="$WORKDIR" python3 - "$PLAN_FILE" 2>"$_PF_ERR" <<'PY'
+  PLAN_INFO=$(python3 - "$PLAN_FILE" 2>"$_PF_ERR" <<'PY'
 import json, os, sys
 d = json.load(open(sys.argv[1]))
 approved  = d.get("approved_by") or d.get("approved_by_user")
@@ -65,7 +65,7 @@ approved  = d.get("approved_by") or d.get("approved_by_user")
 # placeholder (auto/pending/agent/tên agent...) = CHƯA duyệt. Lấy danh sách từ nguồn duy nhất
 # APPROVAL_PLACEHOLDERS; import lỗi ⇒ fallback tuple tối thiểu (không bao giờ nới lỏng hơn bot).
 try:
-    sys.path.insert(0, os.environ.get("WORKDIR", "/home/trido/thanhdt/WorkingClaude"))
+    sys.path.insert(0, os.environ.get("WORKDIR_8L", "/home/trido/thanhdt/WorkingClaude"))
     from trading_bot.plan import APPROVAL_PLACEHOLDERS as _PH
 except Exception:
     _PH = ("", "none", "null", "nil", "nan", "false", "0", "pending", "tbd", "auto", "agent",
