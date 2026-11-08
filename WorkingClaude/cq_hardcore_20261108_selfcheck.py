@@ -155,9 +155,13 @@ for extra in ([], ["--accept-gdkhq-by", "auto"]):
           rc == 2 and not called, (rc, called))
 sent = []
 be.get_dnse_client = lambda *a, **k: sent.append(a)             # nếu chạm tới ⇒ đã đi qua khối OTP
-for flag in ("--send-otp", "--auto-otp"):
+# --send-otp nhận LABEL, --auto-otp là store_true (KHÔNG nhận đối số): đối số lạ làm argparse
+# thoát exit 2 trước khi tới code cần kiểm ⇒ test vô nghĩa (arch-review r2, điểm 1).
+for flag_args in (["--send-otp", "SpaceX"], ["--auto-otp"]):
+    del sent[:]                                                # reset giữa 2 ca, tránh sót ca trước
     sys.argv = ["bot_execute.py", "--accept-gdkhq-shadow", "2026-11-06",
-                "--accept-gdkhq-by", "auto", flag, "SpaceX"]
+                "--accept-gdkhq-by", "auto"] + flag_args
+    flag = flag_args[0]
     rc = None
     try:
         be.main()
