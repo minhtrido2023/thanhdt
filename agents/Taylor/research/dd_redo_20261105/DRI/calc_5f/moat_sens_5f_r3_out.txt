@@ -1,0 +1,8 @@
+base_r3                tam  15,257 (+0; +0.0%) P10  12,908 P50  15,293 P90  17,549 duoi gia 12.5% TRONG vùng
+NONE_half              tam  13,640 (-1,618; -10.6%) P10  11,481 P50  13,631 P90  15,757 duoi gia 39.1% TRONG vùng Cref 33.03
+NONE                   tam  12,022 (-3,235; -21.2%) P10   9,742 P50  12,099 P90  14,050 duoi gia 74.2% TRONG vùng Cref 35.84
+NONE_mean_DPR_PHR_GVR  tam  12,245 (-3,012; -19.7%) P10   9,956 P50  12,309 P90  14,286 duoi gia 71.1% TRONG vùng Cref 35.46
+NONE_median_+TRC       tam  11,978 (-3,279; -21.5%) P10   9,700 P50  12,058 P90  14,004 duoi gia 77.3% TRONG vùng Cref 35.92
+NONE_mean_+TRC         tam  12,187 (-3,070; -20.1%) P10   9,901 P50  12,255 P90  14,224 duoi gia 71.1% TRONG vùng Cref 35.56
+NONE_DPR_only          tam  13,202 (-2,055; -13.5%) P10  11,016 P50  13,199 P90  15,296 duoi gia 41.4% TRONG vùng Cref 33.79
+gap pp: median_DPR_PHR_GVR 11.70 mean_DPR_PHR_GVR 10.89 median_+TRC 11.85 mean_+TRC 11.10 DPR_only 7.43 | Cref 30.22 price TB 48.06 | gia 13,100

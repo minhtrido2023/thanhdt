@@ -1,271 +1,538 @@
 {
  "ticker": "SCL",
- "round": 2,
- "job": "Taylor_20261105_020018",
- "asof_price_date": "2026-11-04",
- "price": 30000.0,
+ "round": 3,
+ "job": "Taylor_20261108_142022",
+ "asof_price_date": "2026-11-06",
+ "price": 29400.0,
+ "price_basis": "CUM-quyền (ĐKCC 10/11/2026; GDKHQ 09/11)",
+ "terp": 27139,
  "r": 0.135,
  "r_anchor": {
   "rate": 7.4,
-  "date": "2026-11-03",
   "current_rate": 7.4,
-  "current_source": "cctg_12m(2026-11-02)"
+  "current_source": "cctg_12m(2026-11-02)",
+  "formula": "r = 13,5% + 1,0×(lãi huy động 12T hiệu dụng − 7,40%)"
  },
- "center_pre_liq": 23842,
- "center_post_liq": 22769,
- "p10_post": 17348,
- "p50_post": 23312,
- "p90_post": 27119,
- "p10_pre": 18166,
- "p90_pre": 28397,
- "p10_out": 17348,
- "p50_out": 23312,
- "p90_out": 27119,
- "min_out": 15270,
- "max_out": 30509,
- "pct_weight_below_price": 0.9842,
- "n_outcomes": 324,
- "center_param_post": 22360,
- "liq_discount_ref": 0.045,
- "liq_ref_size_ty": 5.0,
+ "center_pre_liq": 23853,
+ "center_post_liq": 23652,
+ "p10_post": 18986,
+ "p50_post": 23202,
+ "p90_post": 28854,
+ "p10_out": 18986,
+ "p50_out": 23202,
+ "p90_out": 28854,
+ "min_out": 17044,
+ "max_out": 33261,
+ "pct_weight_below_price": 0.9167,
+ "n_outcomes": 108,
+ "center_param_post": 24146,
+ "label": "TRÊN vùng (>P90)",
+ "label_note": "TRÊN vùng (>P90) ở cỡ sleeve 40 triệu (CK 0.84%) — SÁT RANH GIỚI: giá cao hơn P90 chỉ +1.9%. Ở cỡ 5 tỷ (CK 4.45%, ngoại suy) cũng TRÊN, giá/P90 +5.7%. Nhãn không đổi so r2; định nghĩa vùng P10–P90 không đổi qua r1–r3. TERP so giá trị sau quyền: TRÊN ở cả hai cỡ.",
+ "ck_headline": "sleeve 40 triệu đ (ADV120)",
  "ck_ref_size": {
   "size_ty": 5.0,
-  "discount_adv120": 0.045,
-  "discount_adv250": 0.0588,
-  "discount_adv60": 0.0367,
-  "pct_adv120": 2.189,
-  "in_sqrt_calibration_zone": false
+  "discount_adv120": 0.0445,
+  "discount_adv250": 0.0578,
+  "discount_adv60": 0.0381,
+  "pct_adv120": 2.128,
+  "in_sqrt_calibration_zone": false,
+  "center_post": 22791,
+  "p10": 18295,
+  "p50": 22357,
+  "p90": 27803,
+  "pct_below": 0.9667,
+  "label": "TRÊN vùng (>P90)"
  },
  "ck_real_sleeve": {
   "10tr": 0.0067,
   "20tr": 0.0074,
-  "40tr": 0.0085
+  "40tr": 0.0084
  },
- "adv250_median_ty": 1.26,
- "adv120_median_ty": 2.28,
- "adv60_median_ty": 3.63,
- "px_vs_center": 0.3176,
- "px_vs_p10": 0.7293,
- "px_vs_p90": 0.1062,
- "grid_desc": "6 trục: chế độ ngành CYCLICAL/ADMIN_GATED/STRUCTURAL (0,5/0,3/0,2, Bobby) × DT TTM/2026E × biên chuẩn hoá 3 cách × g 3/4/5% × ROE 15/20% × lỗ phải thu tập trung 0/20/50% (0,75/0,20/0,05); giá trị CUM-quyền; phân vị wpct mức kết cục (n=324)",
- "label": "TRÊN vùng (>P90)",
- "label_note": "TRÊN vùng (>P90) giữ nguyên so vòng 1; không do đổi định nghĩa vùng (vòng 1 đã P10–P90). So r3 03/11 (vùng P25–P75 sau quyền) nhãn cũng là TRÊN. 98,4% trọng số kết cục dưới giá; chỉ kết cục max 30.509 (STRUCTURAL+ROE20%+g5%) chạm giá.",
- "center_vs_p50_note": "Tâm (kỳ vọng) 22.769 < P50 23.312: phân phối lệch trái do nhánh CYCLICAL (w 0,5) dồn đuôi dưới; tham số trung tâm (ADMIN_GATED, TTM, norm 2023–TTM, g4%, ROE 17,5%, phải thu 0%) 22.360. P10 do riêng nhánh CYCLICAL; P90 do nhánh STRUCTURAL (82% trọng số quanh P90, w nhánh 0,2).",
- "axes_included": [
+ "adv250_median_ty": 1.32,
+ "adv120_median_ty": 2.35,
+ "adv60_median_ty": 3.35,
+ "px_vs_center": 0.243,
+ "px_vs_p10": 0.5485,
+ "px_vs_p90": 0.0189,
+ "grid_desc": "5 trục: chế độ ngành CYCLICAL/ADMIN_GATED/STRUCTURAL (0,5/0,3/0,2, Bobby; mức quay về TB 1/0,5/0 [UL]) × DT TTM/2026E × biên chuẩn hoá 3 cách (lõi sửa GPM) × g 3/4/5% × ROE 15/20%; bội số áp E1=E0×(1+g); giá trị CUM-quyền; CK sleeve 40tr; phân vị wpct mức kết cục (n=108)",
+ "center_vs_p50_note": "Tâm (kỳ vọng) 23652 > P50 23202: đuôi phải do nhánh STRUCTURAL (max 33261); tham số trung tâm (ADMIN_GATED, TTM, norm 2023–TTM, g4%, ROE 17,5%) 24146. P10 do riêng nhánh CYCLICAL {'CYCLICAL': 1.0}; quanh P90 {'ADMIN_GATED': 0.375, 'STRUCTURAL': 0.625}.",
+ "assumptions": [
   {
-   "axis": "branch",
-   "values": [
-    [
-     "CYCLICAL",
-     "CYCLICAL",
-     0.5
-    ],
-    [
-     "ADMIN_GATED",
-     "ADMIN_GATED",
-     0.3
-    ],
-    [
-     "STRUCTURAL",
-     "STRUCTURAL",
-     0.2
-    ]
-   ],
-   "basis": "chế độ ngành CYCLICAL/ADMIN_GATED/STRUCTURAL 0,5/0,3/0,2 (Bobby sector read VLXD nhẹ 29/10, đọc mù); mức quay về TB biên 100/50/0% là THIẾT KẾ nhóm nghiên cứu [UL]"
+   "item": "r = 13,5%",
+   "basis": "13,5% + 1,0×(7,40% − 7,40%); lãi huy động 12T hiệu dụng 06/11 = 7,40% (cctg_12m 02/11/2026, deposit_rate_vn.py)"
   },
   {
-   "axis": "rev",
-   "values": [
-    [
-     "TTM",
-     "TTM",
-     0.5
-    ],
-    [
-     "2026E",
-     "2026E",
-     0.5
-    ]
-   ],
-   "basis": "DT TTM vs 2026E (Q4 = Q3, ước lượng), đều"
+   "item": "Trọng số chế độ ngành 0,5/0,3/0,2",
+   "basis": "sector read VLXD nhẹ của Bobby 29/10 (đọc mù) — nhận định, không phải dữ liệu"
   },
   {
-   "axis": "norm",
-   "values": [
-    [
-     "2020-TTM",
-     "2020-TTM",
-     0.3333333333333333
-    ],
-    [
-     "2023-TTM",
-     "2023-TTM",
-     0.3333333333333333
-    ],
-    [
-     "GM-gap",
-     "GM-gap",
-     0.3333333333333333
-    ]
-   ],
-   "basis": "biên ròng chuẩn hoá: TB 2020–TTM / TB 2023–TTM / lệch biên gộp, đều"
+   "item": "Mức quay về TB biên 1,0/0,5/0,0 theo nhánh",
+   "basis": "[UL] thiết kế nhóm nghiên cứu"
   },
   {
-   "axis": "g",
-   "values": [
-    [
-     "g3%",
-     0.03,
-     0.3333333333333333
-    ],
-    [
-     "g4%",
-     0.04,
-     0.3333333333333333
-    ],
-    [
-     "g5%",
-     0.05,
-     0.3333333333333333
-    ]
-   ],
-   "basis": "g 3/4/5% (ước lượng), đều — hai chiều"
+   "item": "Biên ròng chuẩn hoá (TB 2020–TTM / 2023–TTM / lệch biên gộp)",
+   "basis": "BQ ticker_financial Revenue_P0/NP_P0 (fin_bq_scl.csv); GPM năm = Q4 của GPM_P0 TTM (bigquery_dictionary.json)"
   },
   {
-   "axis": "roe",
-   "values": [
-    [
-     "roe15%",
-     0.15,
-     0.5
-    ],
-    [
-     "roe20%",
-     0.2,
-     0.5
-    ]
-   ],
-   "basis": "ROE dài hạn 15/20% (ước lượng), đều — hai chiều"
+   "item": "g 3/4/5%, ROE dài hạn 15/20%",
+   "basis": "ước lượng, hai chiều đều"
   },
   {
-   "axis": "recv",
-   "values": [
-    [
-     "0%",
-     0.0,
-     0.75
-    ],
-    [
-     "20%",
-     0.2,
-     0.2
-    ],
-    [
-     "50%",
-     0.5,
-     0.05
-    ]
-   ],
-   "basis": "lỗ trên phải thu tập trung 1 tập đoàn BĐS (58,5% × 116,0 = 67,9 tỷ, sau thuế ×0,8): 0% = sổ sách (chưa dự phòng; kiểm toán 2025 chấp nhận toàn phần) p0,75; 20% p0,20; 50% p0,05 [UL]. Không có phía trên sổ sách ⇒ trục một phía là CẬN SỔ SÁCH"
+   "item": "Bội số áp E1 = E0×(1+g)",
+   "basis": "(1−g/ROE)/(r−g) = P/E kỳ tới (Gordon V0 = D1/(r−g)); E0 = TTM tới 30/09/2026"
+  },
+  {
+   "item": "Phải thu Vincons 67,892 tỷ theo sổ sách",
+   "basis": "BCTC HN Q3/2026 V.3 (đọc PDF scan bằng fitz render): 67.892.070.164 / 115.969.828.921 = 58,54%; dự phòng 0 cho khoản này; lỗ [UL] chỉ ở độ nhạy"
+  },
+  {
+   "item": "Dự án dở dang Phả Lại + Vĩnh Hảo GĐ2 = giá vốn − nợ tài trợ = 0; cộng lại lãi vay nợ dự án vào E (lãi P&L thực 4,96%)",
+   "basis": "BCTC HN Q3/2026 V.9: Phả Lại 177,999 + 12,652 tỷ, tách tro GĐ2 14,817 tỷ; chi phí đi vay Q3 5,167 tỷ / nợ 416,5 tỷ ×4"
+  },
+  {
+   "item": "CK thanh khoản headline ở sleeve 40 triệu",
+   "basis": "phương pháp đăng ký trước (½ spread Corwin–Schultz 120 phiên + σ√(Q/ADV120)); 5 tỷ = 213% ADV120 ngoài vùng √ ⇒ chỉ song song"
+  },
+  {
+   "item": "Số cp cum 38.836.815; sau quyền 44.836.815; 75 tỷ tiền thu",
+   "basis": "BCĐKT 30/09 vốn góp 388,368 tỷ; NQ 1363/NQ-HĐQT 26/10/2026 (6,0tr cp @12.500, 100:15,4453, ĐKCC 10/11)"
   }
+ ],
+ "headline_vs_alternatives": {
+  "headline_E1_ck40tr": {
+   "center_pre": 23853,
+   "center_post": 23652,
+   "p10": 18986,
+   "p50": 23202,
+   "p90": 28854,
+   "pct_below": 0.9167,
+   "n": 108,
+   "min_post": 17044,
+   "max_post": 33261
+  },
+  "E0_instead_of_E1[ck40tr]": {
+   "center_pre": 22932,
+   "center_post": 22738,
+   "p10": 18204,
+   "p50": 22350,
+   "p90": 27713,
+   "pct_below": 0.9667,
+   "n": 108,
+   "min_post": 16548,
+   "max_post": 31677
+  },
+  "E0_instead_of_E1[ck5ty]": {
+   "center_pre": 22932,
+   "center_post": 21910,
+   "p10": 17541,
+   "p50": 21536,
+   "p90": 26704,
+   "pct_below": 0.9833,
+   "n": 108,
+   "min_post": 15945,
+   "max_post": 30524
+  },
+  "with_recv_axis_UL[ck40tr]": {
+   "center_pre": 23763,
+   "center_post": 23562,
+   "p10": 18915,
+   "p50": 23200,
+   "p90": 28822,
+   "pct_below": 0.9225,
+   "n": 324,
+   "min_post": 16351,
+   "max_post": 33261
+  },
+  "with_recv_axis_UL[ck5ty]": {
+   "center_pre": 23763,
+   "center_post": 22704,
+   "p10": 18226,
+   "p50": 22355,
+   "p90": 27772,
+   "pct_below": 0.9667,
+   "n": 324,
+   "min_post": 15756,
+   "max_post": 32050
+  },
+  "with_phalai_irr[ck40tr]": {
+   "center_pre": 23853,
+   "center_post": 23652,
+   "p10": 18901,
+   "p50": 23303,
+   "p90": 28902,
+   "pct_below": 0.9104,
+   "n": 324,
+   "min_post": 15304,
+   "max_post": 35002
+  },
+  "with_phalai_irr[ck5ty]": {
+   "center_pre": 23853,
+   "center_post": 22791,
+   "p10": 18213,
+   "p50": 22454,
+   "p90": 27849,
+   "pct_below": 0.95,
+   "n": 324,
+   "min_post": 14747,
+   "max_post": 33727
+  },
+  "symmetric_trough[ck40tr]": {
+   "center_pre": 22313,
+   "center_post": 22125,
+   "p10": 17408,
+   "p50": 21856,
+   "p90": 28146,
+   "pct_below": 0.9444,
+   "n": 144,
+   "min_post": 12934,
+   "max_post": 33261
+  },
+  "symmetric_trough[ck5ty]": {
+   "center_pre": 22313,
+   "center_post": 21319,
+   "p10": 16774,
+   "p50": 21060,
+   "p90": 27121,
+   "pct_below": 0.9778,
+   "n": 144,
+   "min_post": 12463,
+   "max_post": 32050
+  },
+  "par_debt[ck40tr]": {
+   "center_pre": 22683,
+   "center_post": 22492,
+   "p10": 17866,
+   "p50": 22124,
+   "p90": 27717,
+   "pct_below": 0.9667,
+   "n": 108,
+   "min_post": 15763,
+   "max_post": 32283
+  },
+  "par_debt[ck5ty]": {
+   "center_pre": 22683,
+   "center_post": 21673,
+   "p10": 17216,
+   "p50": 21319,
+   "p90": 26708,
+   "pct_below": 0.9833,
+   "n": 108,
+   "min_post": 15189,
+   "max_post": 31108
+  },
+  "trough_plus_par[ck40tr]": {
+   "center_pre": 21143,
+   "center_post": 20964,
+   "p10": 16166,
+   "p50": 20683,
+   "p90": 26893,
+   "pct_below": 0.9778,
+   "n": 144,
+   "min_post": 11653,
+   "max_post": 32283
+  },
+  "trough_plus_par[ck5ty]": {
+   "center_pre": 21143,
+   "center_post": 20201,
+   "p10": 15577,
+   "p50": 19930,
+   "p90": 25914,
+   "pct_below": 0.9889,
+   "n": 144,
+   "min_post": 11229,
+   "max_post": 31108
+  }
+ },
+ "headline_choice_reason": "E1: công thức P/E nội tại đòi E kỳ tới — E0 là sai quy ước, không phải thận trọng có cơ sở. CK 40tr: cỡ 5 tỷ ngoài vùng hiệu chỉnh luật √ (213% ADV) nên 4,45% là ngoại suy, không có cơ sở dữ liệu ⇒ song song. Phải thu: không có dữ liệu cho xác suất lỗ ⇒ độ nhạy. Các biến thể đối xứng (TROUGH, nợ mệnh giá) không vào headline vì sector read không có lớp TROUGH và nợ mệnh giá là khung cận dưới — báo song song, nhãn TRÊN ở mọi bản.",
+ "implied_by_price": {
+  "E0_normalized_ty": 136.4,
+  "vs": {
+   "E_ttm_with_cip_addback_ty": 125.9,
+   "np_ttm_ty": 117.7,
+   "np_2020_2025_ty": {
+    "2020": 24.85,
+    "2021": 20.4,
+    "2022": 15.78,
+    "2023": 45.27,
+    "2024": 26.57,
+    "2025": 64.3
+   }
+  },
+  "r_implied_if_ttm_margin_permanent": 0.1277,
+  "deposit_rate_implied_pct": 6.67,
+  "note": "Giá 29.400 ngụ ý LN chuẩn hoá ~136 tỷ/năm vĩnh viễn (g4%, ROE 17,5%, r 13,5%) — cao hơn TTM 117,7 và gấp ~4× TB 2020–25, hoặc biên TTM đỉnh 7 năm giữ vĩnh viễn kèm r 12,77% (lãi huy động ~6,67%). Skeptic nêu 140,6 tỷ / r 11,1% ở quy ước E0 + CK 5 tỷ; chênh do quy ước, cùng hướng. Phản chứng: CFO 9T 9,9 tỷ vs LNST 94,4 tỷ."
+ },
+ "bridge_r2_to_r3": [
+  {
+   "step": "S0_r2_headline",
+   "center_post": 22769,
+   "p10": 17348,
+   "p50": 23312,
+   "p90": 27119,
+   "delta": null,
+   "reason": "r2 headline (lõi gốc GPM_P0 lấy TB 4 số TTM chồng lấn) — đối chứng tái lập 22.769"
+  },
+  {
+   "step": "S1_gpm_fix",
+   "center_post": 21813,
+   "p10": 17348,
+   "p50": 21445,
+   "p90": 26672,
+   "delta": -956,
+   "reason": "GPM_P0 BQ là TTM (bigquery_dictionary.json) ⇒ GPM năm = Q4 — đối chứng 21.813 / P90 26.672 khớp skeptic"
+  },
+  {
+   "step": "S2_px_0611",
+   "center_post": 21824,
+   "p10": 17357,
+   "p50": 21456,
+   "p90": 26685,
+   "delta": 11,
+   "reason": "giá+ADV tới 06/11 (ADV120 2,28→2,35 tỷ; CK 5 tỷ 4,50%→4,45%)"
+  },
+  {
+   "step": "S2b_recv_amt_bctc",
+   "center_post": 21824,
+   "p10": 17357,
+   "p50": 21456,
+   "p90": 26685,
+   "delta": 0,
+   "reason": "phải thu Vincons lấy đúng số BCTC 67,892 tỷ thay 116,0×58,5% (lệch 0,01 tỷ) — 0 đ/cp"
+  },
+  {
+   "step": "S3_no_recv_axis",
+   "center_post": 21910,
+   "p10": 17541,
+   "p50": 21536,
+   "p90": 26704,
+   "delta": 87,
+   "reason": "trục lỗ phải thu [UL] ra khỏi base → độ nhạy (không có cơ sở dữ liệu cho xác suất lỗ; BCTC: dự phòng 0, kiểm toán 2025 chấp nhận toàn phần)"
+  },
+  {
+   "step": "S4_E1",
+   "center_post": 22791,
+   "p10": 18295,
+   "p50": 22357,
+   "p90": 27803,
+   "delta": 881,
+   "reason": "bội số (1−g/ROE)/(r−g) là P/E kỳ tới ⇒ áp lên E1 = E0×(1+g); E0 = TTM tới 30/09/2026"
+  },
+  {
+   "step": "S5_ck_sleeve40",
+   "center_post": 23652,
+   "p10": 18986,
+   "p50": 23202,
+   "p90": 28854,
+   "delta": 861,
+   "reason": "CK ở cỡ sleeve thật 40 triệu (1,7% ADV120, trong vùng √) thay 5 tỷ (213% ADV120, ngoài vùng ⇒ ngoại suy)"
+  }
+ ],
+ "corrections_check": [
+  {
+   "id": "1 GPM_P0=TTM",
+   "verdict": "ĐÚNG — áp",
+   "evidence": "bigquery_dictionary.json GPM_P0 'TTM tại quý'; S1 tái lập 21.813/P90 26.672 trùng skeptic"
+  },
+  {
+   "id": "2a E0→E1",
+   "verdict": "ĐÚNG — áp vào headline",
+   "evidence": "S4−S3 = 881 đ/cp (skeptic ~880)"
+  },
+  {
+   "id": "2b CK 5 tỷ vs sleeve",
+   "verdict": "ĐÚNG — headline sleeve 40tr, 5 tỷ song song",
+   "evidence": "S5−S4 = 861 đ/cp (skeptic ~840; ADV cập nhật 06/11)"
+  },
+  {
+   "id": "2c trục phải thu [UL]",
+   "verdict": "ĐÚNG — ra độ nhạy",
+   "evidence": "S3−S2b = 87 đ/cp (skeptic ~90)"
+  },
+  {
+   "id": "2 gộp P90 ~28.800",
+   "verdict": "ĐÚNG",
+   "evidence": "P90 28854"
+  },
+  {
+   "id": "2 IRR Phả Lại P90 ~29.350",
+   "verdict": "KHÔNG tái lập được số — giữ số của tôi",
+   "evidence": "cùng headline + trục IRR 10/13,5/17% (0,25/0,5/0,25): P90 28902 (< giá); khoản IRR cộng Phả Lại 262,9×(IRR/r−1) không nhân (1+g); skeptic có thể nhân E1/khác trọng số — không đổi nhãn"
+  },
+  {
+   "id": "2 TROUGH + nợ mệnh giá kéo tâm ~1.100–1.200",
+   "verdict": "ĐÚNG hướng; độ lớn theo khung r3",
+   "evidence": "TROUGH -1528, nợ mệnh giá -1160, gộp -2688 đ/cp"
+  },
+  {
+   "id": "3 câu 'không sát ranh giới' 5F §5",
+   "verdict": "ĐÚNG — đã sửa trong ADDENDUM_5F.md",
+   "evidence": "giá/P90 headline +1.9%"
+  },
+  {
+   "id": "4 cùng cơ sở cum/TERP; lịch quyền",
+   "verdict": "ĐÚNG — đã làm; lịch xác nhận",
+   "evidence": "NQ 1363/NQ-HĐQT 26/10/2026 (bản gốc PDF công ty): ĐKCC 10/11, chuyển nhượng quyền 17/11–03/12, đăng ký+nộp tiền 17/11–08/12 — hai mốc báo chí là hai hạn khác nhau, không mâu thuẫn; NQ không có cổ phiếu thưởng"
+  },
+  {
+   "id": "5 BCĐKT từ PDF scan",
+   "verdict": "ĐÃ KIỂM bằng fitz render + đọc ảnh",
+   "evidence": "trang 1–2, 17, 19 BCTC HN Q3/2026: VCSH 533,638 (CĐKKS 2,022), vay NH 259,737 + DH 156,724, tiền 95,103, phải thu KH 115,970, Vincons 67,892, XDCB 206,627 — khớp hằng số lõi; LCTT (CFO 9,9) chưa đọc lại ở r3"
+  }
+ ],
+ "axes_included": [
+  "branch",
+  "rev",
+  "norm",
+  "g",
+  "roe"
  ],
  "axes_excluded": [
   {
-   "axis": "IRR dự án Phả Lại (lên 17% / xuống 10%)",
-   "reason": "luật 03/11: dự án mới = giá vốn/NPV 0 khi không có giá/sản lượng/hợp đồng đầu ra kiểm được (lên) và không có số công suất vùng (xuống) — loại CẢ HAI chiều; báo song song bản CÓ trục 10/13,5/17% (0,25/0,5/0,25 [UL])"
+   "axis": "lỗ phải thu Vincons 0/20/50% [UL]",
+   "reason": "không có cơ sở dữ liệu cho xác suất lỗ (dự phòng 0, kiểm toán chấp nhận) ⇒ độ nhạy; song song with_recv_axis_UL"
   },
   {
-   "axis": "nhánh suy giảm cấu trúc (biên dưới TB chu kỳ, gương của STRUCTURAL)",
-   "reason": "sector read Bobby không có lớp này; TB 2020–TTM (biên thấp nhất) đã là cận dưới của trục norm. Báo song song bản đối xứng hoá: thêm TROUGH (quay về TB rồi vượt xuống 50% khoảng cách) trọng số 0,2 lấy đều từ 3 nhánh"
+   "axis": "IRR Phả Lại 10/13,5/17%",
+   "reason": "luật 03/11 NPV 0 — loại cả hai chiều; song song with_phalai_irr"
   },
   {
-   "axis": "khung nợ theo mệnh giá toàn bộ",
-   "reason": "khung mô hình (không phải trục kết cục) — r3 dùng làm cận dưới; báo song song"
+   "axis": "nhánh TROUGH",
+   "reason": "sector read không có lớp; song song symmetric_trough"
   },
   {
-   "axis": "pha loãng/ESOP tương lai, vay cổ đông lớn 26 tỷ @10%",
+   "axis": "khung nợ theo mệnh giá",
+   "reason": "khung cận dưới; song song par_debt / trough_plus_par"
+  },
+  {
+   "axis": "pha loãng ESOP tương lai, vay cổ đông lớn 26 tỷ @10%",
    "reason": "quản trị ⇒ WARNING"
   }
  ],
  "base_adjustments": [
   {
-   "item": "Phả Lại + Vĩnh Tân GĐ2 (XDCB 205,5 tỷ)",
-   "effect_dong_per_share": 0.0,
-   "basis": "giá vốn − nợ tài trợ = 0 ròng (luật NPV=0)",
-   "source": "BCTC HN Q3/2026 XDCB; LCTT capex 9T 198,1 vs CFO 9,9"
+   "item": "Phả Lại + tách tro GĐ2 (XDCB 205,5 tỷ)",
+   "effect_dong_per_share": 0,
+   "basis": "giá vốn − nợ tài trợ = 0 (NPV 0)",
+   "source": "BCTC HN Q3/2026 V.9"
   },
   {
-   "item": "cộng lại lãi vay của nợ tài trợ dự án vào E (lãi P&L thực 4,96%)",
-   "effect_dong_per_share": 1697.9830100216107,
-   "basis": "không vừa trừ nợ theo mệnh giá vừa trừ lãi qua P/E; lãi P&L thực = 5,167×4/416,5 (SKEPTIC_R2); hiệu ứng = kỳ vọng lưới r3 (scl_r3_core.eff, đ/cp cum)",
-   "source": "KQKD Q3/2026 mã 24"
+   "item": "cộng lại lãi vay nợ tài trợ dự án vào E (4,96%)",
+   "effect_dong_per_share": "~+1.700 đ/cp cum (kỳ vọng lưới lõi r3, trước E1)",
+   "basis": "không vừa trừ nợ theo mệnh giá vừa trừ lãi qua P/E",
+   "source": "KQKD Q3/2026 mã 24; BCĐKT vay 416,5 tỷ"
   }
  ],
- "parallel": {
-  "with_phalai_irr": {
-   "center_post": 22769,
-   "p10_post": 17348,
-   "p50_post": 23100,
-   "p90_post": 27672,
-   "pct_weight_below_price": 0.9817
+ "post_rights": {
+  "terp": 27139,
+  "ck40tr": {
+   "center_post": 22146,
+   "p10": 18104,
+   "p90": 26651,
+   "label": "TRÊN vùng (>P90)",
+   "p50": 21756
   },
-  "symmetric_branches_trough": {
-   "center_post": 21648,
-   "p10_post": 15987,
-   "p50_post": 22516,
-   "p90_post": 26942,
-   "pct_weight_below_price": 0.9894
+  "ck5ty": {
+   "center_post": 21339,
+   "p90": 25681,
+   "label": "TRÊN vùng (>P90)"
+  }
+ },
+ "sens_r": {
+  "b1.0_-100": {
+   "r": 0.125,
+   "center_post": 26470,
+   "pct": 0.1191
   },
-  "par_debt_framework": {
-   "center_post": 21584,
-   "p10_post": 16232,
-   "p50_post": 22058,
-   "p90_post": 25983,
-   "pct_weight_below_price": 1.0
+  "b1.0_-50": {
+   "r": 0.13,
+   "center_post": 24981,
+   "pct": 0.0562
+  },
+  "b1.0_+0": {
+   "r": 0.135,
+   "center_post": 23652,
+   "pct": 0.0
+  },
+  "b1.0_+50": {
+   "r": 0.14,
+   "center_post": 22459,
+   "pct": -0.0505
+  },
+  "b1.0_+100": {
+   "r": 0.14500000000000002,
+   "center_post": 21380,
+   "pct": -0.0961
+  },
+  "b0.5_-100": {
+   "r": 0.13,
+   "center_post": 24981,
+   "pct": 0.0562
+  },
+  "b0.5_-50": {
+   "r": 0.1325,
+   "center_post": 24298,
+   "pct": 0.0273
+  },
+  "b0.5_+0": {
+   "r": 0.135,
+   "center_post": 23652,
+   "pct": 0.0
+  },
+  "b0.5_+50": {
+   "r": 0.1375,
+   "center_post": 23040,
+   "pct": -0.0259
+  },
+  "b0.5_+100": {
+   "r": 0.14,
+   "center_post": 22459,
+   "pct": -0.0505
   }
  },
  "gordon": {
   "g": 0.04,
-  "roe_ttm": 0.22143791339233887,
-  "value": 26143.221595607967,
-  "note": "không có biến thể 'không lãi tiền gửi': tiền 95,1 tỷ, nợ ròng 321,4; thu nhập TC không đáng kể"
+  "roe_ttm": 0.2214,
+  "value_E1_pre_ck": 27189,
+  "note": "một biến thể (không có lãi tiền gửi đáng kể: tiền 95,1 vs nợ 416,5)"
  },
- "zone_old": {
-  "round": 1,
-  "center_post_liq": 22855,
-  "p10_post": 17615,
-  "p50_post": 23386,
-  "p90_post": 27119,
-  "label": "TRÊN vùng (>P90)",
-  "grid": "3 nhánh chế độ ngành (CYCLICAL/ADMIN_GATED/STRUCTURAL 50/30/20, Bobby VLXD nhẹ 29/10) × DT {TTM, 2026E} × biên ròng chuẩn hoá {TB 2020–TTM, TB 2023–TTM, lệch biên gộp} × g {3,4,5%} × ROE {15,20%}; trọng số đều trong nhánh; số CUM-quyền (38,84tr cp) vì giá 04/11 còn quyền (n=108)"
- },
- "center_new_vs_old": -0.0038,
- "change_reason": "Tâm CUM sau CK 22.769 vs vòng 1 22.855 (−0,4%): thêm trục lỗ phải thu tập trung (kỳ vọng −0,4%). Phân vị đổi sang wpct: P10 17.615 → 17.348, P90 27.119 → 27.119. Song song: CÓ IRR Phả Lại tâm 22.769/P90 27.672; nhánh đối xứng (TROUGH) tâm 21.648; khung nợ mệnh giá 21.584 — nhãn TRÊN ở mọi bản.",
  "warnings": [
-  "Pha loãng: 17,3tr cp (2023) → 44,84tr sau quyền 100:15,4453 @12.500 (ĐKCC 10/11/2026; đăng ký mua 17/11–08/12/2026 theo báo chí — cần đối chiếu CBTT); ESOP 0,92tr @10.000",
+  "Pha loãng: 17,3tr cp (2023) → 44,84tr sau quyền 100:15,4453 @12.500 (ĐKCC 10/11/2026, GDKHQ 09/11; NQ 1363); ESOP 0,92tr @10.000",
   "Vay 26 tỷ từ cổ đông lớn lãi 10% (bên liên quan)",
-  "Khách hàng tập trung: hệ sinh thái một tập đoàn BĐS = 58,5% phải thu KH (nay là TRỤC lưới)",
-  "CFO 9T 9,9 tỷ vs LNST 94,4; nợ ròng 321 tỷ (1,4× EBITDA); biên ròng TTM 12,7% đỉnh 7 năm",
-  "Chưa thấy tin xử phạt/khởi tố SCL: WebSearch 05/11/2026 (doanhnhan.baophapluat.vn, cafef.vn — tin chào bán 6tr cp); kết quả xử phạt chỉ thuộc công ty khác cùng họ Sông Đà; WebSearch ≠ CBTT sàn. NQ phát hành quyền đã nằm trong mô hình (cơ sở sau quyền)."
+  "Phải thu tập trung: Vincons 67,89 tỷ = 58,5% phải thu KH (BCTC V.3), chưa dự phòng",
+  "CFO 9T 9,9 tỷ vs LNST 94,4; nợ ròng 321 tỷ; biên ròng TTM 12,7% đỉnh 7 năm",
+  "Chưa thấy tin xử phạt/khởi tố SCL: WebSearch 05/11/2026 và 08/11/2026 (stockbiz, cafef, baophapluat) — WebSearch ≠ CBTT sàn"
  ],
  "open_issues": [
   "Không có cơ cấu DT theo mảng, backlog, công suất từng dây chuyền",
-  "Phả Lại: chưa có giá/sản lượng/hợp đồng đầu ra ⇒ ngoài lưới chính (NPV0), song song IRR 10/13,5/17%",
-  "Mức quay về TB biên 1,0/0,5/0,0 theo nhánh là thiết kế nhóm nghiên cứu; trọng số lỗ phải thu [UL]",
-  "Báo chí nêu hai lịch chuyển nhượng quyền khác nhau (17/11–03/12 vs ĐKCC 10/11) — đối chiếu CBTT",
-  "P/E công thức cần E năm sau, mô hình dùng TTM/2026E (lệch ~−4%, thận trọng — SKEPTIC_R2)"
+  "Phả Lại: chưa có giá/sản lượng/hợp đồng đầu ra ⇒ NPV 0",
+  "Trọng số chế độ ngành và mức quay về TB là nhận định/[UL]",
+  "Số IRR P90 29.350 của skeptic chưa tái lập (tôi 28.902)",
+  "LCTT Q3 (CFO 9,9) chưa đọc lại từ PDF ở r3",
+  "Thuyết minh chi phí đi vay vốn hoá chưa đọc; 'nợ tài trợ dự án = giá vốn' trái dữ liệu (nợ 330→417 vs XDCB 11→207, tiền 188→95)",
+  "Chênh độ lớn TROUGH+nợ mệnh giá (−2.688) so skeptic (~−1.150) chưa giải thích hết"
  ],
- "fearbuy_sleeve_eligible": "KHÔNG — giá TRÊN vùng, không phải trạng thái sợ hãi; DD trung dung",
- "source_calc": "calc/model_scl_r2_out.json",
- "lock": "calc/LOCK_r2_md5.txt",
- "price_basis": "CUM-quyền (ĐKCC 10/11/2026)",
- "post_rights": {
-  "terp": 27659,
-  "center_post_liq": 21319,
-  "p10_post": 16624,
-  "p50_post": 21790,
-  "p90_post": 25087,
-  "terp_vs_center": 0.2974,
-  "label_terp": "TRÊN vùng (>P90)"
- }
+ "fearbuy_sleeve_eligible": "KHÔNG — giá TRÊN vùng, không phải trạng thái sợ hãi",
+ "change_vs_r2": {
+  "center": 883,
+  "center_pct": 0.0388,
+  "label_changed": false
+ },
+ "source_calc": "SCL/calc_r3/model_scl_r3.py → model_scl_r3_out.json/.txt (chạy 2 lần trùng byte); make_summary_r3.py",
+ "lock": "SCL/calc_r3/LOCK_r3_md5.txt",
+ "ck_ref_size_line": "Ở cỡ tham chiếu 5 tỷ (CK 4,45%, ngoại suy ngoài vùng hiệu chỉnh √): tâm 22.791 · P10 18.295 · P50 22.357 · P90 27.803 · 96,7% trọng số dưới giá · nhãn TRÊN vùng. Headline (23.652) ở cỡ sleeve 40 triệu.",
+ "sensitivity_project_interest_addback": {
+  "in_headline": true,
+  "rate": "4,96% = chi phí lãi Q3 5,167 tỷ ×4 / nợ cuối kỳ 416,5 tỷ (lãi P&L trung bình)",
+  "caveats": [
+   "thuyết minh chi phí đi vay vốn hoá chưa đọc",
+   "giả định 'nợ tài trợ dự án = giá vốn dự án' trái dữ liệu: nợ 330→417 tỷ vs XDCB 11→207 tỷ, tiền 188→95 tỷ"
+  ],
+  "without_addback": {
+   "center": 21901,
+   "p90": 27150,
+   "source": "skeptic độc lập, chưa chạy lại trong calc_r3",
+   "label": "TRÊN vùng (>P90)"
+  }
+ },
+ "corrections_text_20261108": "Văn bản r3 đã sửa: dòng 5 tỷ tường minh; câu nhãn/định nghĩa vùng; chênh độ lớn TROUGH+nợ mệnh giá chưa giải thích hết (−2.688 vs ~−1.150); 'tăng ba vòng' → 'đổi'; thêm P50 sau quyền 21.756 (từ calc_r3/model_scl_r3_out.json); độ nhạy lãi dự án. Không đổi mô hình/số."
 }

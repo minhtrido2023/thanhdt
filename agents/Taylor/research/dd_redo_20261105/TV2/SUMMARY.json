@@ -1,167 +1,259 @@
 {
  "ticker": "TV2",
- "round": 2,
- "job": "Taylor_20261105_020018",
- "asof_price_date": "2026-11-04",
+ "round": 3,
+ "job": "Taylor_20261108_142016",
+ "asof_price_date": "2026-11-06",
  "price": 27400.0,
  "r": 0.135,
- "r_anchor": {
-  "rate": 7.4,
-  "date": "2026-11-03",
-  "current_rate": 7.4,
-  "current_source": "cctg_12m(2026-11-02)"
- },
- "center_pre_liq": 16242,
- "center_post_liq": 15832,
- "p10_post": 2726,
- "p50_post": 15843,
- "p90_post": 30675,
- "p10_pre": 2797,
+ "r_anchor": 0.135,
+ "center_pre_liq": 17942,
+ "center_post_liq": 17491,
+ "p10_post": 7702,
+ "p50_post": 16019,
+ "p90_post": 30677,
+ "p10_out": 7702,
+ "p50_out": 16019,
+ "p90_out": 30677,
+ "p10_pre": 7901,
  "p90_pre": 31468,
- "p10_out": 2726,
- "p50_out": 15843,
- "p90_out": 30675,
- "min_out": 0,
- "max_out": 44938,
+ "min_out": 2769,
+ "max_out": 44940,
  "pct_weight_below_price": 0.841,
  "n_outcomes": 324,
- "center_param_post": 18883,
+ "center_param_post": 18981,
  "liq_discount_ref": 0.0252,
  "liq_ref_size_ty": 5.0,
  "ck_ref_size": {
   "size_ty": 5.0,
   "discount_adv120": 0.0252,
-  "discount_adv250": 0.0189,
-  "discount_adv60": 0.0278,
+  "discount_adv250": 0.0186,
+  "discount_adv60": 0.0276,
   "pct_adv120": 1.554,
   "in_sqrt_calibration_zone": false
  },
  "ck_real_sleeve": {
-  "10tr": 0.0038,
-  "20tr": 0.0042,
-  "40tr": 0.0048
+  "10tr": 0.0037,
+  "20tr": 0.0041,
+  "40tr": 0.0047
  },
- "adv250_median_ty": 6.25,
+ "center_real_sleeve_40tr": 17857,
+ "adv250_median_ty": 6.38,
  "adv120_median_ty": 3.22,
- "adv60_median_ty": 2.59,
- "px_vs_center": 0.7306,
- "px_vs_p10": 9.0502,
- "px_vs_p90": -0.1068,
- "grid_desc": "5 trục: LNST bền 2027–28 kịch bản 250/177,5/110 tỷ (0,25/0,5/0,25) × LNST ×0,9/1/1,1 × g 3/4/5% × mất phơi nhiễm CMC 0/15/30/50% sau thuế (0,45/0,30/0,15/0,10) × độ bền LN sau 2028 sập 70%/bền/+30% (0,25/0,5/0,25); P/E nội tại sàn 0, vốn chủ sàn 0; phân vị wpct mức kết cục (n=324)",
+ "adv60_median_ty": 2.61,
+ "px_vs_center": 0.567,
+ "px_vs_p10": 2.557,
+ "px_vs_p90": -0.107,
+ "pct_below_price_of_center": 0.362,
+ "grid_desc": "5 trục: LNST bền 2027–28 kịch bản 250/177,5/110 tỷ (0,25/0,5/0,25) × ×0,9/1/1,1 × g 3/4/5% × mất phơi nhiễm CMC 855,012 tỷ 0/15/30/50% sau thuế (0,45/0,30/0,15/0,10) × độ bền LN sau 2028: sập về MỨC đáy quan sát 64,3 tỷ (TB LNST TTM 2023Q1–25Q3) / bền / +30% (0,25/0,5/0,25); P/E nội tại (1−g/ROE)/(r−g) khi ROE ≥ r, = 1/r (trả hết) khi ROE < r; vốn chủ sàn 0; phân vị wpct mức kết cục (n=324)",
  "label": "TRONG vùng",
- "label_note": "TRONG vùng giữ nguyên so vòng 1 — NHƯNG nhãn này có được CHỈ vì định nghĩa vùng P10–P90 (điều 7): theo định nghĩa v3 01/11 (vùng = dải kịch bản cơ sở 17.100–25.300) và theo phản biện 01/11, giá 27.400 nằm TRÊN vùng; 84,1% trọng số kết cục dưới giá, giá cao hơn tâm 73% và cao hơn P75 (23.133) 18%; P90 30.675 do riêng nhánh tích cực (84% trọng số quanh P90, w 0,25).",
- "center_vs_p50_note": "Tâm (kỳ vọng) 15.832 ≈ P50 15.843; tham số trung tâm (177,5 | g4 | CMC 0% | bền) 18.883 cao hơn tâm 19% vì tham số trung tâm đặt CMC ở sổ sách và độ bền 'bền', còn lưới có xác suất mất CMC và sập LN. P10 do nhánh tiêu cực (70% quanh P10); P90 do nhánh tích cực.",
- "axes_included": [
+ "label_note": "TRONG vùng (giá 27.400 < P90 30.677, -10,7%) — MONG MANH: P90 do nhánh tích cực (84% trọng số quanh P90, w 0,25); 84,1% trọng số kết cục dưới giá; giá > P75 (23.134). Hai biến thể song song ra TRÊN vùng: C (P/E 1/r mọi nhánh, P90 26.734) và trần P/E 7,45x (P90 26.888). Điều 7: theo định nghĩa vùng v3 01/11 (17.100–25.300) giá TRÊN vùng.",
+ "center_vs_p50_note": "Tâm 17491 > P50 16019 (lệch phải do nhánh tích cực/+30%); tham số trung tâm (177,5|g4|CMC0|bền) 18981. P10 do nhánh tiêu cực + sập (sập 85% quanh P10); P90 do nhánh tích cực.",
+ "assumptions": [
   {
-   "axis": "scen",
-   "values": [
-    [
-     "tich_cuc",
-     250.0,
-     0.25
-    ],
-    [
-     "co_so",
-     177.5,
-     0.5
-    ],
-    [
-     "tieu_cuc",
-     110.0,
-     0.25
-    ]
-   ],
-   "basis": "LNST bền 2027–28: 250 (lặp 2019–21, LNST 256–272 BQ) / 177,5 (4 HĐ EPC đúng tiến độ) / 110 (vượt chi phí, lãi float giảm) — trọng số 25/50/25 [UL] (DD v3 01/11)"
+   "item": "r = 13,5% + 1,0×(CCTG 12T hiệu dụng − 7,40%)",
+   "value": 0.135,
+   "basis": "luật 03/11; hiện hành 7.4% (cctg_12m(2026-11-02))"
   },
   {
-   "axis": "mult",
-   "values": [
-    [
-     "x0.9",
-     0.9,
-     0.3333333333333333
-    ],
-    [
-     "x1",
-     1.0,
-     0.3333333333333333
-    ],
-    [
-     "x1.1",
-     1.1,
-     0.3333333333333333
-    ]
-   ],
-   "basis": "LNST ×0,9/1/1,1 trong kịch bản, đều — hai chiều"
+   "item": "VCSH mẹ 1.330,8 tỷ; N 67,526 triệu cp",
+   "value": null,
+   "basis": "BCTC HN Q3/2026 (BVPS 19.708)"
   },
   {
-   "axis": "gg",
-   "values": [
-    [
-     "g3",
-     0.03,
-     0.3333333333333333
-    ],
-    [
-     "g4",
-     0.04,
-     0.3333333333333333
-    ],
-    [
-     "g5",
-     0.05,
-     0.3333333333333333
-    ]
-   ],
-   "basis": "g 3/4/5% (ước lượng), đều — hai chiều"
+   "item": "Phơi nhiễm CMC 855,012 tỷ = phải thu 666,374 + đầu tư LK ghi sổ 188,638",
+   "value": 855.012,
+   "basis": "BCTC HN Q3/2026 TM32.c tr.36/38 & TM2a tr.16/38 — đọc lại bằng PyMuPDF render 08/11; TM3 tr.18/38 ghi 657,327 (lệch 9,0 tỷ chưa giải); không dự phòng"
   },
   {
-   "axis": "cmc",
-   "values": [
-    [
-     "0%",
-     0.0,
-     0.45
-    ],
-    [
-     "15%",
-     0.15,
-     0.3
-    ],
-    [
-     "30%",
-     0.3,
-     0.15
-    ],
-    [
-     "50%",
-     0.5,
-     0.1
-    ]
-   ],
-   "basis": "mất trên phơi nhiễm CMC 854,97 tỷ (phải thu 666,4 + đầu tư 188,6; BCTC Q3 tr.25, 43), sau thuế: 0% = sổ sách (chưa dự phòng) p0,45 · 15% p0,30 · 30% p0,15 · 50% p0,10 [UL]; cơ sở chiều xuống: phải thu 666 không dự phòng, thu tiền Q3 ≈ 0, Tân Thuận GĐ3 chưa COD. Không có phía trên sổ sách ⇒ trục một phía là CẬN SỔ SÁCH"
+   "item": "P/E = 1/r khi ROE < r (trả hết LN)",
+   "value": 7.41,
+   "basis": "tỷ lệ chi trả DY/EY 2022Q4–25Q3 0.88–1.27 (BQ ticker_financial); phải trả cổ tức 67,97 tỷ 30/09/2026 (TM14)"
   },
   {
-   "axis": "persist",
-   "values": [
-    [
-     "sap70%",
-     0.3,
-     0.25
-    ],
-    [
-     "ben",
-     1.0,
-     0.5
-    ],
-    [
-     "+30%",
-     1.3,
-     0.25
-    ]
-   ],
-   "basis": "độ bền LN sau 2028: sập 70% p0,25 (base rate: LNST 214–272 tỷ 2017–21 → pha đáy 2022–25, SKEPTIC CAO-1) · bền p0,50 · +30% p0,25 (HĐ EPC mới nối tiếp) [UL] — hai chiều"
+   "item": "Nhánh sập neo mức 64,3 tỷ",
+   "value": 64.3,
+   "basis": "TB LNST TTM 2023Q1–25Q3 (BQ), min 53.0 max 74.6"
+  },
+  {
+   "item": "Kịch bản LNST 250/177,5/110, trọng số 25/50/25",
+   "value": null,
+   "basis": "[UL] DD v3 01/11 (không có dữ liệu mới); độ nhạy 30/50/20 & 20/50/30"
+  },
+  {
+   "item": "Xác suất CMC 0/15/30/50% = 0,45/0,30/0,15/0,10",
+   "value": null,
+   "basis": "[UL]; cơ sở chiều xuống: không dự phòng, thu tiền Q3≈0, Tân Thuận GĐ3 chưa COD"
+  },
+  {
+   "item": "Độ bền sau 2028 sập/bền/+30% = 0,25/0,5/0,25",
+   "value": null,
+   "basis": "[UL]; base rate đỉnh 2017–21 → đáy 2022–25 (SKEPTIC CAO-1)"
+  },
+  {
+   "item": "g 3/4/5%",
+   "value": null,
+   "basis": "ước lượng, đều"
+  },
+  {
+   "item": "CK thanh khoản @5 tỷ",
+   "value": 0.0252,
+   "basis": "nửa spread CS 120 phiên + σ√(Q/ADV120), Y=1; ngoài vùng hiệu chỉnh √ (Q/ADV 155%)"
+  },
+  {
+   "item": "Không thưởng moat",
+   "value": null,
+   "basis": "5F 07–08/11: moat NONE; user 08/11 10:50 — moat chỉ cộng khi bền, không trừ"
   }
+ ],
+ "headline_vs_alternatives": {
+  "headline": "B = r2 + Đ1 (P/E 1/r khi ROE<r) + Đ2 (sập neo mức đáy 64,3)",
+  "why": "Đ1 và Đ2 đều có dòng cơ sở dữ liệu (chi trả 2022Q4–25Q3; đáy LNST TTM 2023–25). C (P/E 1/r mọi nhánh = RONIC=r) là bản chặt-3c mà user 08/11 chỉ cho làm độ nhạy (moat NONE ⇒ không thưởng, không trừ — nhưng giữ mô hình cơ sở). Trần P/E thị trường 2017–21 không vào base: P/E thị trường pha đỉnh đã chiết khấu kỳ vọng LN sập, mô hình đã có trục độ bền ⇒ áp trần là đếm hai lần; báo song song.",
+  "A_payout_only": {
+   "center": 17269,
+   "p10": 6319,
+   "p50": 16019,
+   "p90": 30677,
+   "pct_below": 0.841
+  },
+  "C_pe_1_over_r_all": {
+   "center": 16470,
+   "p10": 7702,
+   "p50": 15981,
+   "p90": 26734,
+   "pct_below": 0.911,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "cap_pe_745": {
+   "center": 16523,
+   "p10": 7702,
+   "p50": 16019,
+   "p90": 26888,
+   "pct_below": 0.911
+  },
+  "cap_pe_peak_median_709": {
+   "center": 15791,
+   "p10": 7448,
+   "p50": 15198,
+   "p90": 25578,
+   "pct_below": 0.932
+  },
+  "trough_53": {
+   "center": 17256,
+   "p10": 6822,
+   "p50": 16019,
+   "p90": 30677,
+   "pct_below": 0.841
+  },
+  "trough_74_6": {
+   "center": 17704,
+   "p10": 8533,
+   "p50": 16019,
+   "p90": 30677,
+   "pct_below": 0.841
+  },
+  "w_30_50_20": {
+   "center": 18284,
+   "p10": 7758,
+   "p50": 17083,
+   "p90": 32146,
+   "pct_below": 0.814
+  },
+  "w_20_50_30": {
+   "center": 16697,
+   "p10": 7678,
+   "p50": 15602,
+   "p90": 29180,
+   "pct_below": 0.868
+  },
+  "no_persist_axis": {
+   "center": 18664,
+   "p10": 10282,
+   "p50": 17500,
+   "p90": 29738,
+   "pct_below": 0.853
+  },
+  "sens_r": {
+   "b1.0_-100": 19440,
+   "b1.0_-50": 18410,
+   "b1.0_+0": 17491,
+   "b1.0_+50": 16673,
+   "b1.0_+100": 15927,
+   "b0.5_-100": 18410,
+   "b0.5_-50": 17934,
+   "b0.5_+0": 17491,
+   "b0.5_+50": 17072,
+   "b0.5_+100": 16673
+  }
+ },
+ "implied_by_price": {
+  "np_perpetual_ty": 233.5,
+  "roe": 0.175,
+  "pe": 8.13,
+  "float_interest_part_ty": 102.8,
+  "np_with_expected_cmc_loss_ty": 242.6,
+  "np_if_pe_1_over_r_ty": 256.2,
+  "note": "Giá 27.400 cần LNST ~234–256 tỷ VĨNH VIỄN (g 4%, ROE 17,5–19,3%), ~44% là lãi float trên tiền khách ứng, CMC không mất đồng nào (243 nếu tính mất CMC kỳ vọng). Đối chiếu: LNST TTM 2026Q3 211,1; đỉnh TTM 2017–21 317,8; TB đáy 2023–25 64,3."
+ },
+ "bridge_r2_to_r3": [
+  {
+   "step": "r2 control (giá 04/11, CK 04/11)",
+   "center": 15832,
+   "p10": 2726,
+   "p90": 30675
+  },
+  {
+   "step": "giá/CK cửa sổ tới 06/11",
+   "center": 15833,
+   "p10": 2726,
+   "p90": 30677
+  },
+  {
+   "step": "CMC đầu tư 188,6→188,638 (PDF)",
+   "center": 15833,
+   "p10": 2726,
+   "p90": 30677
+  },
+  {
+   "step": "Đ1 P/E=1/r khi ROE<r (A)",
+   "center": 17269,
+   "p10": 6319,
+   "p90": 30677
+  },
+  {
+   "step": "Đ2 sập neo mức đáy TB 2023Q1–25Q3 (B, headline)",
+   "center": 17491,
+   "p10": 7702,
+   "p90": 30677
+  }
+ ],
+ "bridge_history": [
+  {
+   "round": "v3 01/11",
+   "center": 20700,
+   "note": "tâm vùng cơ sở 21.000 (dải 17.100–25.300); kỳ vọng 25/50/25 = 20.700; P/E gán tay 7–9x neo P/E thị trường pha đỉnh 7,45x; chưa CK"
+  },
+  {
+   "round": "r1 05/11",
+   "center": 18784,
+   "note": "P/E nội tại từ r 13,5% và ROE (tiêu cực 5,43x thay 7–8x ⇒ nhánh tiêu cực 11.000→7.665) + CK 2,52% (−486)"
+  },
+  {
+   "round": "r2 05/11",
+   "center": 15832,
+   "note": "CMC thành trục độc lập mọi kịch bản (kỳ vọng mất 14% ⇒ ≈−1.418) + trục độ bền sập 70% (tỷ lệ) với sàn P/E 0 khi ROE<g"
+  },
+  {
+   "round": "r3 08/11",
+   "center": 17491,
+   "note": "bỏ sàn P/E 0 (Đ1, +1.436) + sập neo mức đáy quan sát (Đ2, +221); giá/CK 06/11 & CMC 188,638 ~0"
+  }
+ ],
+ "axes_included": [
+  "kịch bản LNST bền 2027–28",
+  "hệ số LNST",
+  "g",
+  "mất phơi nhiễm CMC",
+  "độ bền LN sau 2028 (sập neo mức đáy/bền/+30%)"
  ],
  "axes_excluded": [
   {
@@ -179,67 +271,86 @@
  ],
  "base_adjustments": [
   {
-   "item": "không có điều chỉnh khỏi sổ sách trong cơ sở",
+   "item": "không có điều chỉnh khỏi sổ sách ở tham số trung tâm",
    "effect_dong_per_share": 0.0,
    "basis": "CMC theo sổ (0%) ở tham số trung tâm; mọi lệch nằm ở trục có xác suất",
    "source": "BCTC HN Q3/2026"
+  },
+  {
+   "item": "P/E 1/r khi ROE<r (thay sàn 0)",
+   "effect_dong_per_share": 1436,
+   "basis": "chi trả ~100% LN 2022Q4–25Q3",
+   "source": "BQ ticker_financial DY/EPS; BCTC Q3 TM14"
+  },
+  {
+   "item": "nhánh sập neo mức đáy 64,3 tỷ",
+   "effect_dong_per_share": 221,
+   "basis": "TB LNST TTM 2023Q1–25Q3",
+   "source": "BQ ticker_financial"
   }
  ],
- "parallel": {
-  "payout_when_roe_below_r": {
-   "center_post": 17268,
-   "p10_post": 6319,
-   "p50_post": 16018,
-   "p90_post": 30675,
-   "pct_weight_below_price": 0.841
+ "data_checks": {
+  "payout_2022Q4_2025Q3": {
+   "2022Q4": 0.881,
+   "2023Q1": 0.939,
+   "2023Q2": 0.996,
+   "2023Q3": 0.905,
+   "2023Q4": 1.274,
+   "2024Q1": 1.208,
+   "2024Q2": 1.209,
+   "2024Q3": 1.16,
+   "2024Q4": 1.044,
+   "2025Q1": 0.996,
+   "2025Q2": 0.939,
+   "2025Q3": 1.028
   },
-  "w_30_50_20": {
-   "center_post": 16750,
-   "p10_post": 2895,
-   "p50_post": 16469,
-   "p90_post": 32144,
-   "pct_weight_below_price": 0.8137
+  "trough_mean": 64.298315879,
+  "trough_min": 53.014462106,
+  "trough_max": 74.58868962,
+  "trough_quarters": [
+   "2023Q1",
+   "2023Q2",
+   "2023Q3",
+   "2023Q4",
+   "2024Q1",
+   "2024Q2",
+   "2024Q3",
+   "2024Q4",
+   "2025Q1",
+   "2025Q2",
+   "2025Q3"
+  ],
+  "pe_peak_2017Q3_2021Q4_median": 7.08697592678305,
+  "pe_peak_mean": 6.98748291004874,
+  "np_ttm_peak_2017_21": 317.838993209,
+  "min_price_since_2022": 18300.0,
+  "pb_median_2023_25": {
+   "2023": 1.5436771880479294,
+   "2024": 1.8173061967964563,
+   "2025": 1.8620526310036936
   },
-  "w_20_50_30": {
-   "center_post": 14915,
-   "p10_post": 2632,
-   "p50_post": 14474,
-   "p90_post": 29179,
-   "pct_weight_below_price": 0.8682
-  },
-  "no_persist_axis": {
-   "center_post": 17690,
-   "p10_post": 6743,
-   "p50_post": 17402,
-   "p90_post": 29736,
-   "pct_weight_below_price": 0.8528
-  },
-  "r1_grid_wpct": {
-   "center_post": 18783,
-   "p10_post": 7018,
-   "p50_post": 18883,
-   "p90_post": 31032,
-   "pct_weight_below_price": 0.8333
-  }
+  "up_branch_max_np": 357.5,
+  "up_branch_vs_peak_note": "nhánh +30% cao nhất 357.5 tỷ vs đỉnh TTM 2017–21 317.8 tỷ danh nghĩa; đỉnh ×1,04^8 (2021→2029) = 435.0 ⇒ trong dải, không cần neo trên"
  },
  "gordon": {
   "g": 0.04,
   "np2026e": 229.5,
   "with_interest": 27477.500736149337,
-  "without_interest": 11736.234096454158,
-  "note": "LNST 2026E ước lượng; 'không lãi TG' trừ 44% (tỷ trọng TC trong LNTT 9T)"
+  "without_interest_r2_formula": 11736.234096454158,
+  "without_interest_payout": 14098.23880861589
  },
  "zone_old": {
-  "round": 1,
-  "center_post_liq": 18784,
-  "p10_post": 6967,
-  "p50_post": 18883,
-  "p90_post": 31157,
+  "round": 2,
+  "center_post_liq": 15832,
+  "p10_post": 2726,
+  "p50_post": 15843,
+  "p90_post": 30675,
   "label": "TRONG vùng",
-  "grid": "3 kịch bản LNST bền 2027–28 (tích cực 250 / cơ sở 177,5 / tiêu cực 110 tỷ + one-off CMC −80; trọng số 25/50/25, ước lượng) × LNST ×{0,9;1;1,1} × g {3;4;5}% trong P/E nội tại (1−g/ROE)/(r−g), đều trong kịch bản (n=27)"
+  "price": 27400.0,
+  "asof": "2026-11-04"
  },
- "center_new_vs_old": -0.1571,
- "change_reason": "Tâm sau CK 15.832 vs vòng 1 18.784 (−15,7%, >10%). Nguyên nhân: (1) CMC tách thành trục độc lập 0/15/30/50% áp cho MỌI kịch bản (vòng 1: −80 tỷ chỉ ở nhánh tiêu cực) — kỳ vọng mất 14,0% phơi nhiễm ×0,8 thay vì 0,25×80 tỷ; (2) thêm trục độ bền LN sau 2028 hai chiều (base rate sập ~70% sau đỉnh 2017–21, SKEPTIC CAO-1) — ở ROE thấp P/E nội tại nhỏ nên chiều xuống lớn hơn chiều lên. Song song: không trục độ bền 17.690; chính sách trả hết khi ROE<r 17.268; lưới vòng 1 + wpct 18.783. Nhãn không đổi (TRONG, xem label_note).",
+ "center_new_vs_old": 0.105,
+ "change_reason": "Áp đính chính skeptic 08/11 có cơ sở dữ liệu: Đ1 bỏ sàn P/E 0 (P10 artifact 2.726 → 6.319) và Đ2 neo nhánh sập ở mức đáy quan sát (P10 → 7.702). Tâm 15.832 → 17.491 (+10,5%). Nhãn giữ TRONG (mong manh). Đính chính 3 (trần P/E 7,45x) không vào base — báo song song (ra TRÊN vùng).",
  "warnings": [
   "Vụ án EVNNPT/PC1: cựu Chủ tịch Nguyễn Chơn Hùng + KTT Bùi Thị Ngọc Lý khởi tố (CBTT 21/05/2026; VKSND tối cao phê chuẩn — thanhtra.com.vn); HĐQT mới, Chủ tịch Phạm Liên Hải từ 30/06/2026 (nhadautu.vn); pháp nhân chưa bị khởi tố; soát xét H1 UHY có đoạn nhấn mạnh",
   "Họp báo Bộ Công an 02/07/2026 nêu 13 pháp nhân vi phạm gồm 'các công ty tư vấn xây dựng điện' (không nêu tên) — chưa xác định TV2 có trong danh sách (SKEPTIC TB-3); làn sóng khởi tố PECC1/PECC3 cùng kỳ",
@@ -250,12 +361,21 @@
   "Tra tin 05/11/2026 (WebSearch: doanhnhan.baophapluat.vn, nhadautu.vn, vietnamfinance.vn, thanhtra.com.vn): không thấy khởi tố pháp nhân/kết luận mới sau 01/11; WebSearch ≠ CBTT sàn"
  ],
  "open_issues": [
-  "Giá trị HĐ EPC không công bố ⇒ không tính được tỷ lệ ứng/giá trị HĐ, lãi gộp còn lại",
-  "Xác suất CMC, độ bền LN, trọng số 25/50/25 [UL]; độ nhạy trọng số 30/50/20 ⇒ tâm 16.750, 20/50/30 ⇒ 14.915",
-  "Chính sách cổ tức khi ROE<r (sàn P/E 0 vs trả hết) đổi P10 2.726 ↔ 6.319",
-  "Danh sách 13 pháp nhân (họp báo 02/07) chưa có"
+  "Lệch số dư phải thu CMC TM3 657,327 vs TM32.c 666,374 (9,0 tỷ) chưa giải",
+  "Giá trị HĐ EPC không công bố",
+  "Xác suất CMC/độ bền/trọng số [UL]",
+  "Danh sách 13 pháp nhân (họp báo 02/07) chưa có",
+  "Lá chắn thuế 20% trên khoản mất CMC (model:85) chưa có cơ sở khấu trừ, đẩy giá trị lên ~350 đ/cp (kế thừa r2)",
+ "P10 7.702 ứng P/B 0,39 — vẫn dưới P/B thấp nhất quan sát (0,92, năm 2022; dữ liệu pxhist_tv2.csv chỉ từ 2017) do đuôi CMC mất 50% + sập"
  ],
- "fearbuy_sleeve_eligible": "KHÔNG — giá cao hơn tâm 73%, không phải trạng thái sợ hãi; vụ án chưa kết luận",
- "source_calc": "calc/model_tv2_r2_out.json",
- "lock": "calc/LOCK_r2_md5.txt"
+ "fearbuy_sleeve_eligible": "KHÔNG — giá cao hơn tâm 57%, không phải trạng thái sợ hãi; vụ án chưa kết luận",
+ "hard_abandon": [
+  "khởi tố pháp nhân TV2",
+  "TV2 có tên trong 13 pháp nhân",
+  "CMC trích lập > 30% phơi nhiễm",
+  "kiểm toán FY2026 ngoại trừ"
+ ],
+ "source_calc": "calc_r3/model_tv2_r3_out.json",
+ "lock": "calc_r3/LOCK_r3_md5.txt",
+ "report": "REPORT_r3.md"
 }

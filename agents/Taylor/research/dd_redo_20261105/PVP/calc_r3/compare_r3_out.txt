@@ -1,0 +1,24 @@
+px 18000 (2026-11-06) d_ref5ty=0.0198 adv250=8.272 ty adv60=21.575 ty
+HEADLINE {"n_outcomes": 270, "center_pre": 23566, "center_post": 23099, "center_param_post": 25066, "p10_out": 13799, "p25_out": 20465, "p50_out": 23982, "p75_out": 26628, "p90_out": 30338, "min_out": 9559, "max_out": 33620, "pct_weight_below_price": 0.2049, "label": "TRONG vùng"}
+sleeve40 {"p10_out": 14053, "p90_out": 30897, "center_post": 23525, "label": "TRONG vùng"}
+r2@newpx {"center_post": 22366, "p10_out": 12702, "p90_out": 32834, "label": "TRONG vùng", "pct_below": 0.298}
+bridge {"step": "r2_SUMMARY (CK ADV den 04/11)", "center_post": 22366, "delta": null, "why": "ban r2 da cong bo"}
+bridge {"step": "r2_control", "center_post": 22370, "delta": 4, "why": "cau hinh r2 tai lap center_pre trung (22.822,73) — chi doi CK sang ADV 250 phien den 06/11"}
+bridge {"step": "d1_trong_so_doi_xung", "center_post": 24781, "delta": 2411, "why": "dinh chinh 1: trong so cuoc 0,40/0,45/0,15 -> 0,275/0,45/0,275 (muc 400 da duoi 561 nam hoa; lech xuong la nhan dinh)"}
+bridge {"step": "d2_cat_npv_+30_nhanh_tot", "center_post": 23202, "delta": -1579, "why": "dinh chinh 2: cat +30% NPV tau moi o nhanh tot (khong IRR kiem duoc); giu -30% o xau (IRR 7,67% < 11%)"}
+bridge {"step": "d3_fso_chiet_khau_Ke", "center_post": 22749, "delta": -453, "why": "dinh chinh 3: FSO chiet khau 10% -> r=13,5% (spread khong nguon; phu luc gia han chua ky)"}
+bridge {"step": "d4_vld_khac_+37", "center_post": 23099, "delta": 350, "why": "dinh chinh 4: + VLD khac 37,0 ty (CDKT Q3 tr.1-2, da kiem)"}
+bridge {"step": "r_06_11", "center_post": 23099, "delta": 0, "why": "r 06/11 = 13,5% (dep 12T hieu dung 06/11 = 03/11 = 7,40%) — khong doi"}
+par bobby_asym: c=21405 p10=12600 p50=22285 p90=27837 below=0.298 TRONG vùng
+par ship_pm30_sym: c=24678 p10=13799 p50=23982 p90=36375 below=0.2049 TRONG vùng
+par ship_npv0: c=24678 p10=20474 p50=23982 p90=30338 below=0.0 DƯỚI vùng
+par ship_m30_uncond: c=18935 p10=13087 p50=18276 p90=25507 below=0.475 TRONG vùng
+par fso_r10: c=23552 p10=14238 p50=24439 p90=30786 below=0.1928 TRONG vùng
+par fso_excess_always: c=23738 p10=14393 p50=25066 p90=31326 below=0.1953 TRONG vùng
+par fso_excess_never: c=22460 p10=13123 p50=23788 p90=30050 below=0.2145 TRONG vùng
+par fso_no_gt5y: c=22489 p10=13200 p50=23363 p90=29727 below=0.221 TRONG vùng
+par nwc_excluded: c=22749 p10=13449 p50=23633 p90=29988 below=0.2162 TRONG vùng
+par fivef_A_ebitda_x0904: c=21858 p10=12718 p50=22749 p90=28503 below=0.2283 TRONG vùng
+par scrap_plus_1musd: c=23216 p10=13886 p50=24108 p90=30441 below=0.2049 TRONG vùng
+implied {"ebitda_scale_k": 0.6054, "ebitda_levels_at_k": {"xau": 181.6, "coso": 242.1, "tot": 333.0}, "ebitda_flat_all_scn": 250.5, "ebitda_flat_vs_561_run_rate": 0.446, "ship_npv_uncond": -0.3489, "note": "Gia 18000 = tam r3 khi: (a) EBITDA doi tau phang moi kich ban ~250 ty/nam (= 45% muc 561 nam hoa 9T/26), hoac (b) muc 300/400/550 x 0.605, hoac (c) NPV tau moi vo dieu kien -35% (giu con lai r3)"}
+unit_scrap_per_1musd 117

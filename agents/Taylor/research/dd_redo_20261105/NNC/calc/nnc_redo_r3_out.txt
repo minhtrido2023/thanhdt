@@ -1,0 +1,39 @@
+NNC r3 | dep 7.40% (cctg_12m(2026-11-02)) -> r 13.50% | tai lap r2: tam tham so 61,407, luoi 59,760 (OK)
+  tran (k/m3): VR0: branch 260.6, 1.40 236.1, 1.05 260.6 | VR1: branch 249.7, 1.40 236.1, 1.05 260.6 | VR2: branch 242.9, 1.40 236.1, 1.05 260.6
+  tam tham so khong tre 64,260 / co tre 63,554
+  TRUOC CK tam 63,591 | P10 31,524 P50 61,461 P90 98,948 | min 21,816 max 148,984 (n 5832)
+   STRUCTURAL  tam 87,847 | P10 32,925 P50 93,045 P90 132,713 | min 21,816 max 148,984 (n 1944)
+   ADMIN_GATED tam 59,701 | P10 31,524 P50 60,928 P90 83,495 | min 21,816 max 116,550 (n 1944)
+   CYCLICAL    tam 54,732 | P10 31,524 P50 57,026 P90 73,007 | min 21,816 max 84,117 (n 1944)
+   tran 1.05    tam 66,012 | P10 32,925 P50 65,814 P90 100,279 | min 21,816 max 148,984 (n 1944)
+   tran branch  tam 63,966 | P10 32,925 P50 61,922 P90 98,948 | min 21,816 max 148,984 (n 1944)
+   tran 1.40    tam 60,796 | P10 31,524 P50 56,882 P90 98,570 | min 21,816 max 148,984 (n 1944)
+  BRIDGE truoc CK: r2_rebuild 59,760 -> D1_infl_cap 62,381 -> D2_cap_axis_3 63,591
+   ALT rent_only_2043     tam 65,363 | P10 35,041 P50 63,504 P90 102,432 | min 21,841 max 148,984 (n 1944)
+   ALT D4_sym_elastic     tam 64,382 | P10 35,533 P50 61,461 P90 98,948 | min 21,816 max 148,984 (n 5832)
+   ALT D5_xau_nostack     tam 64,486 | P10 35,815 P50 61,461 P90 98,948 | min 21,816 max 148,984 (n 5832)
+   ALT no_D1_cap_axis_3   tam 60,940 | P10 31,524 P50 56,441 P90 98,915 | min 21,816 max 148,984 (n 5832)
+   ALT cyc_100            tam 54,732 | P10 31,524 P50 57,026 P90 73,007 | min 21,816 max 84,117 (n 1944)
+   w_STRUCT 0.10: tam 60,559 P10 31,524 P50 59,928 P90 87,858
+   w_STRUCT 0.20: tam 63,591 P10 31,524 P50 61,461 P90 98,948
+   w_STRUCT 0.30: tam 66,623 P10 32,524 P50 63,014 P90 106,025
+   co tre GP ky vong (Bobby F6) CIP Tam Lap + mo MVC              63,554 (-705)
+   tran SL 1,40                                                   61,004 (-3,256)
+   ADMIN perm05                                                   69,221 (+4,962)
+   ADMIN full                                                     63,423 (-837)
+   bo thue Nui Nho                                                60,858 (-3,402)
+   (+) tra truoc CNBP 59,2 la tien thue da tra (CHUA XAC MINH)    66,386 (+2,126)
+   (+) doi thu het GP tu 2034                                     68,627 (+4,367)
+   STRESS duong gia danh nghia phang                              58,065 (-6,195)
+   (-) tru nguoi mua tra truoc 5,03 ty mot chieu                  64,030 (-229)
+   (+) VLD doi xung: phai thu BQ AR_P0 24,44 - tra truoc 5,03     65,145 (+886)
+  CK ref 5 ty: ADV250 2.08 ty -> 3.65% (Q/ADV 2.4x) | ADV60 1.39 ty -> 4.46% | sleeve 10tr 0.16% 40tr 0.33%
+  SAU CK tam 61,273 | P10 30,375 P50 59,221 P90 95,341 | min 21,020 max 143,552 (n 5832)
+   ALT sau CK rent_only_2043     tam 62,980 | P10 33,764 P50 61,189 P90 98,698 | min 21,045 max 143,552 (n 1944)
+   ALT sau CK D4_sym_elastic     tam 62,035 | P10 34,238 P50 59,221 P90 95,341 | min 21,020 max 143,552 (n 5832)
+   ALT sau CK D5_xau_nostack     tam 62,135 | P10 34,509 P50 59,221 P90 95,341 | min 21,020 max 143,552 (n 5832)
+   ALT sau CK no_D1_cap_axis_3   tam 58,718 | P10 30,375 P50 54,384 P90 95,309 | min 21,020 max 143,552 (n 5832)
+   ALT sau CK cyc_100            tam 52,737 | P10 30,375 P50 54,947 P90 70,345 | min 21,020 max 81,051 (n 1944)
+  BRIDGE sau CK: r2_rebuild 57,581 | D1_infl_cap 60,106 | D2_cap_axis_3 61,273 | r2_pin_post_at_r2_ck 57,589
+  gia 47,200 (2026-11-06): vs tam -23.0% | vs P10 +55.4% | vs P90 -50.5% | TRONG vùng | trong so duoi gia 28.2% (r2 o gia moi 38.1%) | luat4 True
+  Gordon ROE khoa 33,250 / +LN tai chinh 40,480 | ROE ham y tam 25.3% | ROE ham y GIA 20.2% | 100% CYC sau CK 52,737 (+11.7% vs gia)

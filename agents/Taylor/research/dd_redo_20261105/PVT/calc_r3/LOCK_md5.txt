@@ -1,0 +1,31 @@
+# LOCK r3 PVT (job Taylor_20261108_153736) — chot TRUOC khi so voi gia; model chay 2 lan trung byte (run1.md5 = run2.md5)
+## outputs model (chua doc gia)
+80a2fd774770b01f0535dfce74aca73d  pvt_r3_out.json
+23f5090fa729bfbc2a40d60d3f58e43c  pvt_r3_out.txt
+58d046161075a2c806cb8419aed04b82  grid_pvt_r3.csv
+## upstream (pvt_r3.py doc/thuc thi + pvt_r3_compare.py se doc)
+LOCK e7b5d0f74872531d1bace756954d640a PVT/calc_r3/pvt_r3.py
+LOCK 5f07cb59fc4cfb43b5ff875fba642803 PVT/calc_r3/assumptions_r3.json
+LOCK 55699184d771d8968c47ae6d4fe2b232 PVT/calc_r3/px_pvt_r3.sql
+LOCK 280db7b38ec3892b55900e2ee29b2761 PVT/calc_r3/px_pvt_r3_20261106.csv
+LOCK d3ef0068208517bef95931fcdb6845c1 PVT/calc/model.py
+LOCK e22dd93f48ed3ea170e734d46fb6f971 PVT/calc/bq_hist_out.csv
+LOCK b26af7aced9871061173a06da49ae152 PVT/calc/model_r2_out.json
+LOCK 24943cb1a1d35d91bee6ca1fab9d7202 _common_014127/common.py
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK e1143333facb5ffa2289ea5353e39619 ../dd_PVT_20261029/src/q3_pvt_hopnhat_text.txt
+LOCK 6e56205eedcb6f83772f4bb0147c6fcf ../dd_PVT_20261029/REPORT.md
+LOCK 42a0c7a302e7b3e347be8fa0c331ac64 TOP5B_CORRECTIONS_20261108.md
+LOCK bf37f53ba652850301f152badd7d7831 STANDARD_r2.md
+## sau khoa (doc gia) — compare chay 2 lan trung byte (cmp1.md5 = cmp2.md5)
+POST 3fc523a126cf8d48871dcca41041b941  calc_r3/pvt_r3_compare.py
+POST dde46e220866405c57f4ae2516b2df3f  calc_r3/compare_r3_out.txt
+POST 6b80a3db85d8178543fb50167ff1c48e  SUMMARY.json
+POST 3f7a28117ee8f55b9e55026a6677308b  SUMMARY_r2.json
+POST 60bbe9816740460bf1304ccbad9a8207  REPORT_r3.md
+POST c4df78ec01b99aa439c4f8e9ba12f20d  ADDENDUM_5F.md
+POST 8f6f4f34bd545024de4043e4e32d8272  SUMMARY_5F.json

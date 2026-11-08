@@ -1,0 +1,14 @@
+{
+ "ticker": "DCM",
+ "round": "r2 (= DCM r5, 05/11/2026)",
+ "note": "dựng lại từ calc/model_r5_out.json (LOCK_r5_md5.txt); trước r6 chưa có SUMMARY chuẩn trong dd_redo",
+ "price": 33000,
+ "asof_price_date": "2026-11-04",
+ "center_pre_liq": 24326,
+ "center_post_liq": 24326,
+ "p10_post": 20522,
+ "p50_post": 24095,
+ "p90_post": 27708,
+ "p_kind": "phân vị của KỲ VỌNG từng ô (0,8 CYC + 0,2 STRUCT) — bị skeptic 08/11 bác (STANDARD_r2 điều 1)",
+ "label": "TRÊN vùng (>P90)"
+}

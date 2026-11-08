@@ -1,0 +1,8 @@
+neo Ke_13.5: 13.5000%
+neo TV3_TV4_2022_25_median: 12.1620%
+neo TV2_own_2022_25_median: 5.2915%
+neo TV3_TV4_2012_25_median: 14.7614%
+NONE Ke_13.5                    tâm  17,807 P10  14,761 P50  17,808 P90  20,296 dưới giá 100.0% TRÊN vùng (>P90) | 40tr tâm 18,181 P90 20,722 TRÊN vùng (>P90)
+NONE TV3_TV4_2022_25_median     tâm  16,329 P10  13,283 P50  16,330 P90  18,818 dưới giá 100.0% TRÊN vùng (>P90) | 40tr tâm 16,672 P90 19,213 TRÊN vùng (>P90)
+NONE TV2_own_2022_25_median     tâm   8,740 P10   5,693 P50   8,740 P90  11,228 dưới giá 100.0% TRÊN vùng (>P90) | 40tr tâm 8,923 P90 11,464 TRÊN vùng (>P90)
+NONE TV3_TV4_2012_25_median     tâm  19,201 P10  16,154 P50  19,201 P90  21,689 dưới giá 100.0% TRÊN vùng (>P90) | 40tr tâm 19,603 P90 22,144 TRÊN vùng (>P90)

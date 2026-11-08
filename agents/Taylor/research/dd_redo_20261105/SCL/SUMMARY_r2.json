@@ -1,0 +1,271 @@
+{
+ "ticker": "SCL",
+ "round": 2,
+ "job": "Taylor_20261105_020018",
+ "asof_price_date": "2026-11-04",
+ "price": 30000.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 7.4,
+  "date": "2026-11-03",
+  "current_rate": 7.4,
+  "current_source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 23842,
+ "center_post_liq": 22769,
+ "p10_post": 17348,
+ "p50_post": 23312,
+ "p90_post": 27119,
+ "p10_pre": 18166,
+ "p90_pre": 28397,
+ "p10_out": 17348,
+ "p50_out": 23312,
+ "p90_out": 27119,
+ "min_out": 15270,
+ "max_out": 30509,
+ "pct_weight_below_price": 0.9842,
+ "n_outcomes": 324,
+ "center_param_post": 22360,
+ "liq_discount_ref": 0.045,
+ "liq_ref_size_ty": 5.0,
+ "ck_ref_size": {
+  "size_ty": 5.0,
+  "discount_adv120": 0.045,
+  "discount_adv250": 0.0588,
+  "discount_adv60": 0.0367,
+  "pct_adv120": 2.189,
+  "in_sqrt_calibration_zone": false
+ },
+ "ck_real_sleeve": {
+  "10tr": 0.0067,
+  "20tr": 0.0074,
+  "40tr": 0.0085
+ },
+ "adv250_median_ty": 1.26,
+ "adv120_median_ty": 2.28,
+ "adv60_median_ty": 3.63,
+ "px_vs_center": 0.3176,
+ "px_vs_p10": 0.7293,
+ "px_vs_p90": 0.1062,
+ "grid_desc": "6 trục: chế độ ngành CYCLICAL/ADMIN_GATED/STRUCTURAL (0,5/0,3/0,2, Bobby) × DT TTM/2026E × biên chuẩn hoá 3 cách × g 3/4/5% × ROE 15/20% × lỗ phải thu tập trung 0/20/50% (0,75/0,20/0,05); giá trị CUM-quyền; phân vị wpct mức kết cục (n=324)",
+ "label": "TRÊN vùng (>P90)",
+ "label_note": "TRÊN vùng (>P90) giữ nguyên so vòng 1; không do đổi định nghĩa vùng (vòng 1 đã P10–P90). So r3 03/11 (vùng P25–P75 sau quyền) nhãn cũng là TRÊN. 98,4% trọng số kết cục dưới giá; chỉ kết cục max 30.509 (STRUCTURAL+ROE20%+g5%) chạm giá.",
+ "center_vs_p50_note": "Tâm (kỳ vọng) 22.769 < P50 23.312: phân phối lệch trái do nhánh CYCLICAL (w 0,5) dồn đuôi dưới; tham số trung tâm (ADMIN_GATED, TTM, norm 2023–TTM, g4%, ROE 17,5%, phải thu 0%) 22.360. P10 do riêng nhánh CYCLICAL; P90 do nhánh STRUCTURAL (82% trọng số quanh P90, w nhánh 0,2).",
+ "axes_included": [
+  {
+   "axis": "branch",
+   "values": [
+    [
+     "CYCLICAL",
+     "CYCLICAL",
+     0.5
+    ],
+    [
+     "ADMIN_GATED",
+     "ADMIN_GATED",
+     0.3
+    ],
+    [
+     "STRUCTURAL",
+     "STRUCTURAL",
+     0.2
+    ]
+   ],
+   "basis": "chế độ ngành CYCLICAL/ADMIN_GATED/STRUCTURAL 0,5/0,3/0,2 (Bobby sector read VLXD nhẹ 29/10, đọc mù); mức quay về TB biên 100/50/0% là THIẾT KẾ nhóm nghiên cứu [UL]"
+  },
+  {
+   "axis": "rev",
+   "values": [
+    [
+     "TTM",
+     "TTM",
+     0.5
+    ],
+    [
+     "2026E",
+     "2026E",
+     0.5
+    ]
+   ],
+   "basis": "DT TTM vs 2026E (Q4 = Q3, ước lượng), đều"
+  },
+  {
+   "axis": "norm",
+   "values": [
+    [
+     "2020-TTM",
+     "2020-TTM",
+     0.3333333333333333
+    ],
+    [
+     "2023-TTM",
+     "2023-TTM",
+     0.3333333333333333
+    ],
+    [
+     "GM-gap",
+     "GM-gap",
+     0.3333333333333333
+    ]
+   ],
+   "basis": "biên ròng chuẩn hoá: TB 2020–TTM / TB 2023–TTM / lệch biên gộp, đều"
+  },
+  {
+   "axis": "g",
+   "values": [
+    [
+     "g3%",
+     0.03,
+     0.3333333333333333
+    ],
+    [
+     "g4%",
+     0.04,
+     0.3333333333333333
+    ],
+    [
+     "g5%",
+     0.05,
+     0.3333333333333333
+    ]
+   ],
+   "basis": "g 3/4/5% (ước lượng), đều — hai chiều"
+  },
+  {
+   "axis": "roe",
+   "values": [
+    [
+     "roe15%",
+     0.15,
+     0.5
+    ],
+    [
+     "roe20%",
+     0.2,
+     0.5
+    ]
+   ],
+   "basis": "ROE dài hạn 15/20% (ước lượng), đều — hai chiều"
+  },
+  {
+   "axis": "recv",
+   "values": [
+    [
+     "0%",
+     0.0,
+     0.75
+    ],
+    [
+     "20%",
+     0.2,
+     0.2
+    ],
+    [
+     "50%",
+     0.5,
+     0.05
+    ]
+   ],
+   "basis": "lỗ trên phải thu tập trung 1 tập đoàn BĐS (58,5% × 116,0 = 67,9 tỷ, sau thuế ×0,8): 0% = sổ sách (chưa dự phòng; kiểm toán 2025 chấp nhận toàn phần) p0,75; 20% p0,20; 50% p0,05 [UL]. Không có phía trên sổ sách ⇒ trục một phía là CẬN SỔ SÁCH"
+  }
+ ],
+ "axes_excluded": [
+  {
+   "axis": "IRR dự án Phả Lại (lên 17% / xuống 10%)",
+   "reason": "luật 03/11: dự án mới = giá vốn/NPV 0 khi không có giá/sản lượng/hợp đồng đầu ra kiểm được (lên) và không có số công suất vùng (xuống) — loại CẢ HAI chiều; báo song song bản CÓ trục 10/13,5/17% (0,25/0,5/0,25 [UL])"
+  },
+  {
+   "axis": "nhánh suy giảm cấu trúc (biên dưới TB chu kỳ, gương của STRUCTURAL)",
+   "reason": "sector read Bobby không có lớp này; TB 2020–TTM (biên thấp nhất) đã là cận dưới của trục norm. Báo song song bản đối xứng hoá: thêm TROUGH (quay về TB rồi vượt xuống 50% khoảng cách) trọng số 0,2 lấy đều từ 3 nhánh"
+  },
+  {
+   "axis": "khung nợ theo mệnh giá toàn bộ",
+   "reason": "khung mô hình (không phải trục kết cục) — r3 dùng làm cận dưới; báo song song"
+  },
+  {
+   "axis": "pha loãng/ESOP tương lai, vay cổ đông lớn 26 tỷ @10%",
+   "reason": "quản trị ⇒ WARNING"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "Phả Lại + Vĩnh Tân GĐ2 (XDCB 205,5 tỷ)",
+   "effect_dong_per_share": 0.0,
+   "basis": "giá vốn − nợ tài trợ = 0 ròng (luật NPV=0)",
+   "source": "BCTC HN Q3/2026 XDCB; LCTT capex 9T 198,1 vs CFO 9,9"
+  },
+  {
+   "item": "cộng lại lãi vay của nợ tài trợ dự án vào E (lãi P&L thực 4,96%)",
+   "effect_dong_per_share": 1697.9830100216107,
+   "basis": "không vừa trừ nợ theo mệnh giá vừa trừ lãi qua P/E; lãi P&L thực = 5,167×4/416,5 (SKEPTIC_R2); hiệu ứng = kỳ vọng lưới r3 (scl_r3_core.eff, đ/cp cum)",
+   "source": "KQKD Q3/2026 mã 24"
+  }
+ ],
+ "parallel": {
+  "with_phalai_irr": {
+   "center_post": 22769,
+   "p10_post": 17348,
+   "p50_post": 23100,
+   "p90_post": 27672,
+   "pct_weight_below_price": 0.9817
+  },
+  "symmetric_branches_trough": {
+   "center_post": 21648,
+   "p10_post": 15987,
+   "p50_post": 22516,
+   "p90_post": 26942,
+   "pct_weight_below_price": 0.9894
+  },
+  "par_debt_framework": {
+   "center_post": 21584,
+   "p10_post": 16232,
+   "p50_post": 22058,
+   "p90_post": 25983,
+   "pct_weight_below_price": 1.0
+  }
+ },
+ "gordon": {
+  "g": 0.04,
+  "roe_ttm": 0.22143791339233887,
+  "value": 26143.221595607967,
+  "note": "không có biến thể 'không lãi tiền gửi': tiền 95,1 tỷ, nợ ròng 321,4; thu nhập TC không đáng kể"
+ },
+ "zone_old": {
+  "round": 1,
+  "center_post_liq": 22855,
+  "p10_post": 17615,
+  "p50_post": 23386,
+  "p90_post": 27119,
+  "label": "TRÊN vùng (>P90)",
+  "grid": "3 nhánh chế độ ngành (CYCLICAL/ADMIN_GATED/STRUCTURAL 50/30/20, Bobby VLXD nhẹ 29/10) × DT {TTM, 2026E} × biên ròng chuẩn hoá {TB 2020–TTM, TB 2023–TTM, lệch biên gộp} × g {3,4,5%} × ROE {15,20%}; trọng số đều trong nhánh; số CUM-quyền (38,84tr cp) vì giá 04/11 còn quyền (n=108)"
+ },
+ "center_new_vs_old": -0.0038,
+ "change_reason": "Tâm CUM sau CK 22.769 vs vòng 1 22.855 (−0,4%): thêm trục lỗ phải thu tập trung (kỳ vọng −0,4%). Phân vị đổi sang wpct: P10 17.615 → 17.348, P90 27.119 → 27.119. Song song: CÓ IRR Phả Lại tâm 22.769/P90 27.672; nhánh đối xứng (TROUGH) tâm 21.648; khung nợ mệnh giá 21.584 — nhãn TRÊN ở mọi bản.",
+ "warnings": [
+  "Pha loãng: 17,3tr cp (2023) → 44,84tr sau quyền 100:15,4453 @12.500 (ĐKCC 10/11/2026; đăng ký mua 17/11–08/12/2026 theo báo chí — cần đối chiếu CBTT); ESOP 0,92tr @10.000",
+  "Vay 26 tỷ từ cổ đông lớn lãi 10% (bên liên quan)",
+  "Khách hàng tập trung: hệ sinh thái một tập đoàn BĐS = 58,5% phải thu KH (nay là TRỤC lưới)",
+  "CFO 9T 9,9 tỷ vs LNST 94,4; nợ ròng 321 tỷ (1,4× EBITDA); biên ròng TTM 12,7% đỉnh 7 năm",
+  "Chưa thấy tin xử phạt/khởi tố SCL: WebSearch 05/11/2026 (doanhnhan.baophapluat.vn, cafef.vn — tin chào bán 6tr cp); kết quả xử phạt chỉ thuộc công ty khác cùng họ Sông Đà; WebSearch ≠ CBTT sàn. NQ phát hành quyền đã nằm trong mô hình (cơ sở sau quyền)."
+ ],
+ "open_issues": [
+  "Không có cơ cấu DT theo mảng, backlog, công suất từng dây chuyền",
+  "Phả Lại: chưa có giá/sản lượng/hợp đồng đầu ra ⇒ ngoài lưới chính (NPV0), song song IRR 10/13,5/17%",
+  "Mức quay về TB biên 1,0/0,5/0,0 theo nhánh là thiết kế nhóm nghiên cứu; trọng số lỗ phải thu [UL]",
+  "Báo chí nêu hai lịch chuyển nhượng quyền khác nhau (17/11–03/12 vs ĐKCC 10/11) — đối chiếu CBTT",
+  "P/E công thức cần E năm sau, mô hình dùng TTM/2026E (lệch ~−4%, thận trọng — SKEPTIC_R2)"
+ ],
+ "fearbuy_sleeve_eligible": "KHÔNG — giá TRÊN vùng, không phải trạng thái sợ hãi; DD trung dung",
+ "source_calc": "calc/model_scl_r2_out.json",
+ "lock": "calc/LOCK_r2_md5.txt",
+ "price_basis": "CUM-quyền (ĐKCC 10/11/2026)",
+ "post_rights": {
+  "terp": 27659,
+  "center_post_liq": 21319,
+  "p10_post": 16624,
+  "p50_post": 21790,
+  "p90_post": 25087,
+  "terp_vs_center": 0.2974,
+  "label_terp": "TRÊN vùng (>P90)"
+ }
+}

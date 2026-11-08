@@ -1,0 +1,4 @@
+SUMMARY r3: tam 31,658 | P10/50/90 25,083/31,402/38,043 | TRONG vung | gia 34,200 gia/tam +8.0% | duoi gia 73.0% | vs r2 +1.9% | vs cu -2.9%
+Co sleeve 40 tr: CK 0.53% (Q/ADV250 6.6%, trong vung) => tam 33,474, P10/P90 26,521/40,225, gia/tam +2.2%, TRONG vung
+crosscheck {'A_co_thu_nhap_TC_khong_cong_tien_va_dau_tu': 39501, 'B_khong_thu_nhap_TC_cong_tien_va_tai_san': 33355, 'fin_income_after_tax_annual_bn': 240.1, 'note': 'truoc CK; A von hoa ca lai tien gui + co tuc vinh vien g 3% (khong dung); B = cach base'}
+r3 vs r2 +1.9%: gia 06/11 (+27), N0 co tuc mien thue (-1,716), VLD nhat quan (+1,335), XDCB+BDSDT (+1,059), trich KTPL 9T (-445), khop ngay Q4/26 (+332). So vung cu 26/10 (32.600): -2.9%.

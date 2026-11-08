@@ -112,5 +112,13 @@
   "land_price_12ty_ha": "~13.000d/cp ~27% gia tri (uoc luong theo brief), gia thuc hien [bao] chua kiem, can kiem chung",
   "peer_gpm": "bo so peer KCN 49.1/46.0 (nguon SZL coi GPM_P0 la quy)"
  },
- "fix_note": "NONE annuity (1-(1+r)^-N)/r: tam 48.159->48.812; moat sai ~5.400d/cp (WIDE->NONE)"
+ "fix_note": "NONE annuity (1-(1+r)^-N)/r: tam 48.159->48.812; moat sai ~5.400d/cp (WIDE->NONE)",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 54230,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

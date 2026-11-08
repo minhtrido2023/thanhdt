@@ -1,0 +1,44 @@
+== HPG VONG 3 | gia 21,200 (2026-11-06, BQ) | r 13.50% (dep 12T 7.40% cctg_12m(2026-11-02); neo 7.40%) | dep sau thue 5.92%
+CONTROL r2 tai lap (04/11): n=675 | tam 16,286 | P10 8,942 P25 12,033 P50 16,343 P75 19,574 P90 23,520 | %duoi gia 83.6% | min 5,846 max 33,645
+BRIDGE 0 r2 (gia 04/11): tam 16,286 (-0 luy ke) P10 8,942 P90 23,520
+BRIDGE 1 gia+thanh khoan 06/11, roll: tam 16,297 (+11 luy ke) P10 8,948 P90 23,536
+BRIDGE 2 C1 von giu lai: COMMIT+XDCB = r, con lai tien gui sau thue: tam 21,606 (+5,320 luy ke) P10 12,689 P90 30,893
+BRIDGE 3 C3 bo thuong moat ngam (g_RI=0 moi nhanh): tam 20,454 (+4,168 luy ke) P10 12,689 P90 27,481
+BRIDGE 4 C4 TLSH ve so sach trong base: tam 20,648 (+4,362 luy ke) P10 12,924 P90 28,006
+BRIDGE 5 C2 thue 20% tu 2035 (lich uu dai DQ1) thay 2030: tam 21,338 (+5,052 luy ke) P10 13,316 P90 28,993
+HEADLINE r3 (sau CK 5 ty): n=135 | tam 21,338 | P10 13,316 P25 16,759 P50 21,759 P75 25,533 P90 28,993 | %duoi gia 46.7% | min 10,770 max 35,403
+Truoc CK: n=135 | tam 21,370 | P10 13,336 P25 16,785 P50 21,792 P75 25,571 P90 29,037 | %duoi gia 46.7% | min 10,786 max 35,456
+Gia tri tai tham so trung tam sau CK: 21,948
+  XAU: gia tri 13,937 (r2-style 9,775) | ROE_T sau thue 20%: r3 10.36% vs r2 7.85% | ROE_T ETR 12% r3 11.10%
+  TRUNG_LAP: gia tri 21,981 (r2-style 16,743) | ROE_T sau thue 20%: r3 14.33% vs r2 11.84% | ROE_T ETR 12% r3 15.45%
+  TOT: gia tri 27,478 (r2-style 22,230) | ROE_T sau thue 20%: r3 16.66% vs r2 14.25% | ROE_T ETR 12% r3 18.01%
+SONG SONG A_skeptic_san_dep_6pct_moi_von_giu_lai: n=135 | tam 18,693 | P10 10,713 P25 14,106 P50 19,103 P75 22,865 P90 26,340 | %duoi gia 65.6% | min 8,202 max 32,714
+SONG SONG B_capex_r_thue_2030_(chi C1+C3+C4): n=135 | tam 20,648 | P10 12,924 P25 16,246 P50 21,051 P75 24,689 P90 28,006 | %duoi gia 52.2% | min 10,475 max 34,172
+SONG SONG C_capex_r_thue_12pct_vinh_vien: n=135 | tam 22,119 | P10 13,759 P25 17,340 P50 22,561 P75 26,489 P90 30,110 | %duoi gia 43.9% | min 11,105 max 36,796
+SONG SONG D_capex_r_thue2035_gRI_r2: n=135 | tam 22,530 | P10 13,316 P25 16,759 P50 22,274 P75 27,109 P90 32,115 | %duoi gia 46.1% | min 10,770 max 43,455
+SONG SONG E_capex_r_thue2035_truc_TLSH_r2: n=675 | tam 21,144 | P10 13,070 P25 16,613 P50 21,524 P75 25,217 P90 28,420 | %duoi gia 48.2% | min 9,598 max 35,696
+SONG SONG F_von_giu_lai_0pct_(r2)_thue2035: n=135 | tam 16,911 | P10 9,634 P25 12,648 P50 17,264 P75 20,643 P90 23,914 | %duoi gia 80.6% | min 7,319 max 29,907
+SONG SONG G_dep_6pct_thue2030_gRI_r2_TLSH_r2 (tai lap skeptic san): n=675 | tam 18,430 | P10 10,049 P25 13,474 P50 18,144 P75 22,523 P90 27,213 | %duoi gia 70.6% | min 6,734 max 38,269
+SONG SONG H_skcapex_thue2030_gRI_r2_TLSH_r2 (tai lap skeptic capex): n=675 | tam 20,599 | P10 11,586 P25 15,262 P50 20,444 P75 25,134 P90 29,896 | %duoi gia 56.0% | min 7,955 max 41,264
+SONG SONG J_TOT_chi_tien_gui (chong dem trung capex o nhanh TOT): n=135 | tam 20,673 | P10 13,316 P25 16,759 P50 20,827 P75 24,098 P90 27,256 | %duoi gia 50.0% | min 10,770 max 32,714
+SONG SONG I_skcapex_khung_r3 (XDCB trong BV0 khong sinh loi): n=135 | tam 20,456 | P10 12,202 P25 15,911 P50 20,925 P75 24,717 P90 28,185 | %duoi gia 53.3% | min 9,423 max 34,599
+SONG SONG co_truc_r_pm1pp: n=405 | tam 21,403 | P10 13,219 P25 16,755 P50 21,756 P75 25,569 P90 29,573 | %duoi gia 47.4% | min 10,064 max 38,707
+Do nhay r (tam): {'-100bp': 23213, '-50bp': 22239, '+50bp': 20501, '+100bp': 19722}
+GIA NGU Y: r 13.58% | von giu lai sinh loi y (khung r2) 12.59% (khung r3, moi von giu lai) 13.68% | he so duong LN 0.993 -> ROE_T TRUNG_LAP sau thue 14.27%
+LOCK fa33d2374ad9375aef7bffdf2fceee6c HPG/calc_r3/hpg_r3.py
+LOCK 02c6cd84793e4f7c0de610d0c8426def HPG/calc_r3/px_hpg_r3.sql
+LOCK 03f82a271cf409843a6b063e8a564c2d HPG/calc_r3/px_hpg_r3_20261106.csv
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK c6c7233a6589db20724d02e6f810879b HPG/calc/hpg_r2.py
+LOCK b9bcfeb5bd22e1782b6243d46f38c29c HPG/calc/hpg_redo.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 6b8818e28c6279aa5612565464e0f6e2 HPG/calc_r3/summary_r3_extra.json
+LOCK 6ca98c5d2b663dace408b37f13fd8d02 TOP5_CORRECTIONS_20261108.md
+LOCK b6e133b21bb8cec7e65d561891dafcfc SKEPTIC_TOP5_20261108.md
+LOCK bf37f53ba652850301f152badd7d7831 STANDARD_r2.md
+NHAN: TRONG vùng | gia 21,200 vs tam 21,338 (-0.6%) | SUMMARY.json (r3) written

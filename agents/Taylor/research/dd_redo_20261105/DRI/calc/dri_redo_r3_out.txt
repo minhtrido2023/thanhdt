@@ -1,0 +1,52 @@
+DRI r3 | r 13.50% (lai 12T 7.40% cctg_12m(2026-11-02)) | mid 1.924/2.221/2.432 | wht 0.0816 | LAK 1.1404 -> go 41.05 tr/ha
+  doi chung r2: tam 14,092 | P10 12,006 P50 14,235 P90 16,146 | min 9,737 | duoi gia 35.2% (n 36) | skeptic q toan vuon (CK 04/11): q0.85:14,855 q0.7:15,502 q0.5:16,617
+  TRUOC CK tam 15,568 | P10 13,172 P50 15,605 P90 17,907 | min 11,476 | duoi gia 7.8% (n 54)
+  SAU CK 5 ty tam 15,257 | P10 12,908 P50 15,293 P90 17,549 | min 11,247 | duoi gia 12.5% (n 54)
+  SAU CK sleeve 10tr tam 15,554 | P10 13,160 P50 15,591 P90 17,891 | min 11,466 | duoi gia 10.9% (n 54)
+  SAU CK sleeve 40tr tam 15,541 | P10 13,148 P50 15,577 P90 17,875 | min 11,455 | duoi gia 10.9% (n 54)
+   q khoi 0.70: tam 15,909 | P10 13,492 P50 15,942 P90 18,128 | min 12,088 | duoi gia 3.1% (n 18)
+   q khoi 0.85: tam 15,257 | P10 12,918 P50 15,312 P90 17,372 | min 11,667 | duoi gia 12.5% (n 18)
+   q khoi 1.00: tam 14,605 | P10 12,354 P50 14,682 P90 16,616 | min 11,247 | duoi gia 21.9% (n 18)
+   cau noi r2 cong bo (CK 04/11)                        14,092 (+0)
+   cau noi CK cap nhat du lieu 06/11                    14,092 (-0)
+   cau noi (1) bo nhanh KINH TE 0,20 -> NPV0 1,0        14,288 (+196)
+   cau noi (2) truc q khoi {0,7/0,85/1}                 14,923 (+635)
+   cau noi (3) wht 10% -> 10%x(1-KTPL-TAU)              15,181 (+258)
+   cau noi (4) wp PEAK 0,6 -> 0,5 = r3                  15,257 (+76)
+   [song song] skeptic: q toan vuon cu (dien tich A0/q)             tam 15,207 | P10 12,912 P50 15,264 P90 17,331 | min 11,247 | duoi gia 12.5% (n 54)
+   [song song] q=1 (khong truc mat do, nhu r2)                      tam 14,605 | P10 12,354 P50 14,682 P90 16,616 | min 11,247 | duoi gia 21.9% (n 18)
+   [song song] q khoi 0,5 co dinh                                   tam 16,779 | P10 14,219 P50 16,829 P90 19,136 | min 12,650 | duoi gia 3.1% (n 18)
+   [song song] nhanh KINH TE 0.1 (q=1 o nhanh KINH TE)              tam 15,093 | P10 12,828 P50 15,254 P90 17,463 | min 9,873 | duoi gia 15.0% (n 72)
+   [song song] nhanh KINH TE 0.2 (q=1 o nhanh KINH TE)              tam 14,928 | P10 12,437 P50 15,072 P90 17,302 | min 9,873 | duoi gia 17.5% (n 72)
+   [song song] nhanh KINH TE 0.3 (q=1 o nhanh KINH TE)              tam 14,763 | P10 12,154 P50 14,804 P90 17,081 | min 9,873 | duoi gia 20.0% (n 72)
+   [song song] chi nhanh KINH TE 1,0 (tai canh pha gia tri 100%)    tam 13,611 | P10 10,980 P50 13,695 P90 15,941 | min 9,873 | duoi gia 37.5% (n 18)
+   [song song] ban cu giu vuon L27 (bo qua NQ15) 0,8 + bi buoc 0,2  tam 15,938 | P10 12,861 P50 16,160 P90 18,983 | min 9,541 | duoi gia 12.5% (n 36)
+   wht 10% phang (r2)                            tam sau CK   14,997 (-260)
+   wht 7.04% (quan sat 2025)                     tam sau CK   15,416 (+159)
+   wht 8.30% (quan sat 2024)                     tam sau CK   15,237 (-20)
+   (-) haircut 50% khoan vay Dakruco 40 ty       tam sau CK   14,989 (-268)
+   (-) khoan vay Dakruco mat trang               tam sau CK   14,722 (-536)
+   (-) giu 15% tien Lao                          tam sau CK   14,862 (-395)
+   gia go LAK -10%                               tam sau CK   15,093 (-164)
+   gia go LAK +10%                               tam sau CK   15,421 (+164)
+   gia go cu 20,87 tr/ha                         tam sau CK   14,450 (-807)
+   wp PEAK 0.4                                   tam sau CK   15,334 (+76)
+   wp PEAK 0.6                                   tam sau CK   15,181 (-76)
+   wp PEAK 0.0                                   tam sau CK   15,639 (+382)
+   wp PEAK 1.0                                   tam sau CK   14,876 (-382)
+   FCF/LN loi 80% (base 90% [UL])                tam sau CK   14,321 (-936)
+   FCF/LN loi 100% (base 90% [UL])               tam sau CK   16,193 (+936)
+   lai huy dong -100bp (r 12.50%)                tam sau CK   15,635 (+377)
+   lai huy dong -50bp (r 13.00%)                 tam sau CK   15,443 (+186)
+   lai huy dong +50bp (r 14.00%)                 tam sau CK   15,077 (-180)
+   lai huy dong +100bp (r 14.50%)                tam sau CK   14,902 (-355)
+   CK Y 0,5                                      tam sau CK   15,413 (+156)
+   CK Y 1,5                                      tam sau CK   15,102 (-156)
+   gia ngu y 13,100: trong so nhanh KINH TE = khong dat trong khoang
+   gia ngu y 13,100: q khoi co dinh = khong dat trong khoang
+   gia ngu y 13,100: wp PEAK = khong dat trong khoang
+   gia ngu y 13,100: FCF/LN loi = 0.6696
+   gia ngu y 13,100: lai huy dong 12T = 0.1469
+  CK 5 ty 2.00% (ADV250 8.33 ty, Q/ADV 0.60x) | ADV60 13.82 ty -> 1.55% | sleeve {"10tr": {"adv250": 0.0008937060421998188, "adv60": 0.0006937684907839341}, "40tr": {"adv250": 0.0017874120843996376, "adv60": 0.0013875369815678682}}
+  gia 13,100 (2026-11-06): vs tam -14.1% | vs P10 +1.5% | vs P90 -25.4% | TRONG vùng | luat4 (<= 12,969) False
+  files doc: ../../../dd_DRI_20261027/r5/calc/data/macro_usdvnd_snapshot_20261103.csv ../../../dd_DRI_20261027/r5/calc/data/rubber_monthly_snapshot_20261103.csv ../../../dri_val_supply_adj_20261027/data/dri_peers_fin.csv ../../../dri_val_supply_adj_r3_20261027/model.py

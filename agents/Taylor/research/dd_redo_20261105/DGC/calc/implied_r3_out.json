@@ -1,0 +1,8 @@
+{
+ "price": 33000.0,
+ "ebit_mult_for_center_eq_price": 0.6055,
+ "center_if_prov_permanent_certain": 36718,
+ "center_if_xau_certain": 35005,
+ "center_if_xau_and_permanent": 30215,
+ "note": "tam headline o r=13,5%, khai truong dung, NS so sach binh quan; he so EBIT ap len Q4/26, 2027, 2028 va terminal"
+}

@@ -161,7 +161,7 @@
   }
  },
  "label_old": "TRÊN vùng (>P90)",
- "label_new": "TRÊN vùng (>P90) ở mọi phương án/peer/cỡ CK/CUM+TERP — không ranh giới (P90 cao nhất lõi sửa 26.672 < giá ~30.000)",
+ "label_new": "TRÊN vùng (>P90) ở mọi phương án/peer/cỡ CK/CUM+TERP — không ranh giới (P90 cao nhất lõi sửa 26.672 < giá ~30.000) [r3: TRÊN nhưng SÁT ranh giới ở khung r3 — P90 28.854 vs giá 29.400]",
  "peer_gpm_latest": {
   "VGC": 0.307,
   "VHL": 0.1759,
@@ -185,5 +185,17 @@
  "proposed_moat_tag_src": "5f (không 5f_validated)",
  "source_calc": "calc/scl_5f_out.json (md5 txt b2659c1a67ad9ff8769398835d03bef7, json 94e3353bb8b408d9f2ffdafad9cb8104; chạy 2 lần trùng byte)",
  "measured_by": "$DNA_PYEXE -I calc/scl_5f.py ; bq query tav2_bq.ticker_financial SCL/VGC/VHL/VIT/TCR/CVT 2026-11-07",
- "non_point_in_time": true
+ "non_point_in_time": true,
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 22769,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ },
+ "r3_headline_sync_20261108": {
+  "note": "Headline mô hình cơ sở hiện hành = REPORT_r3.md (lõi sửa GPM + E1 + CK sleeve 40tr): tâm 23.652 / P10 18.986 / P50 23.202 / P90 28.854; cỡ 5 tỷ: 22.791 / 18.295 / 22.357 / 27.803. Giá 06/11 29.400 ⇒ TRÊN, sát ranh giới (+1,9% so P90). 22.769 (r2) và 21.813 (WIDE sửa GPM, khung r2) là lịch sử/đối chứng; trường 'old', 'wide_gpm_fixed', 'headline_centre_report_of_record' phản ánh khung r2 và giữ nguyên.",
+  "source": "SUMMARY.json (r3)"
+ }
 }

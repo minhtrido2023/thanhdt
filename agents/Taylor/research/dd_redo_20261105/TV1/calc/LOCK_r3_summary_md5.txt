@@ -1,0 +1,4 @@
+# LOCK upstream md5 — TV1 r3 SUMMARY (make_summary_r3.py đọc)
+a7a7d888587c98a828623372240dd08c  calc/make_summary_r3.py
+4cf86a96cfbdacc24c595e739a2cd5d4  calc/model_tv1_r3_out.json
+008df8842b8eb7d2e8d7db45d1960acc  SUMMARY_r2.json

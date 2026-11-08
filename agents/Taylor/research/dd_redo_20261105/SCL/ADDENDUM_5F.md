@@ -1,3 +1,7 @@
+> **[r3 08/11/2026]** Headline mô hình cơ sở nay = **REPORT_r3.md: tâm 23.652 / P10 18.986 / P90 28.854** (lõi sửa GPM + E1 + CK sleeve 40tr; giá 06/11 29.400 ⇒ TRÊN, sát ranh giới). Số 22.769 bên dưới là lịch sử.
+
+> **QUY ƯỚC CUỐI (user chốt 08/11/2026 10:50 ICT):** KHÔNG áp luật 3c chặt. Moat chỉ được THÊM vào định giá khi bền; NARROW/NONE = không thưởng nhưng KHÔNG trừ. **Headline = mô hình cơ sở hiện hành (tâm 22.769 theo báo cáo gốc; lỗi GPM lan vào lõi calc làm WIDE đúng ≈21.813 — việc của REPORT_r2, chờ Mike)**; mọi 'bản chặt-3c / headline mới / chờ duyệt' bên dưới chỉ còn là **độ nhạy rủi ro** ('nếu về trung bình ngành'), KHÔNG phải kết luận định giá. Các sửa lỗi dữ liệu/công thức/peer trong tài liệu này vẫn có hiệu lực. Không mã nào trong 20 mã có moat bền ⇒ không thêm tham số moat.
+
 # ADDENDUM 5F — SCL · r2 07/11/2026 · job `Taylor_20261107_125218` (r1: `ADDENDUM_5F_r1.md`, job `_123141`)
 
 > Bổ sung bước 3c cho `REPORT_r2.md` (05/11). DD **không làm lại**; mọi phần khác của REPORT_r2 giữ nguyên.
@@ -64,7 +68,7 @@
 - Đối chiếu skeptic: khớp đến đồng ở WIDE 21.813 (P90 26.672), RONIC 19.973, own-cycle 17.705 (P90 19.595), NONE-peer 8.580, NARROW 10.418, N0 12.986. **Lệch** ở ROE→Ke N2 14.183 vs 14.333 (P10 khớp 13.487; P90 14.761 vs 15.062) và N5 15.117 vs 15.384 — phần vượt E-đích của tôi = skeptic ÷1,125 ở cả N2 lẫn N5 ⇒ khác quy ước chiết khấu/trọng số fade (tôi giữ quy ước r1 mà skeptic đã tái lập đúng ở 8.580). Chênh ≤1,8%, **không ảnh hưởng nhãn**; Mike chốt quy ước.
 
 ## 5. Thay đổi so với báo cáo hiện hành
-**Có đổi giá trị, KHÔNG đổi nhãn:** TRÊN vùng (>P90) ở MỌI phương án, mọi peer set, cả cỡ 5 tỷ lẫn sleeve 10–40 triệu, cả CUM lẫn TERP. Không sát ranh giới: P90 cao nhất (lõi sửa) **26.672** < giá ~30.000 (kể cả lõi gốc 27.119).
+**Có đổi giá trị, KHÔNG đổi nhãn:** TRÊN vùng (>P90) ở MỌI phương án, mọi peer set, cả cỡ 5 tỷ lẫn sleeve 10–40 triệu, cả CUM lẫn TERP. ~~Không sát ranh giới~~ **[Đính chính r3 08/11/2026]** Câu cũ chỉ đúng ở CK 5 tỷ + bội số áp E0 (P90 26.672 < giá ~30.000). Ở quy ước r3 (E1, CK sleeve 40tr, trục phải thu ra độ nhạy) P90 = **28.854** vs giá 06/11 29.400 (+1,9%) ⇒ **SÁT ranh giới**, nhãn vẫn TRÊN. Xem REPORT_r3.md.
 
 | | Tâm | P10 | P50 | P90 |
 |---|---|---|---|---|

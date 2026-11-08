@@ -1,0 +1,46 @@
+SAS r3 | gia 34,200 (2026-11-06) | r 13.50% (dep 7.40% cctg_12m(2026-11-02)) | CK 5 ty 5.93%
+N0: r2 518.4 -> r3 479.7 (LNTT 638.03 - TC rong 188.28) x 0,8 x 4/3; bien the co tuc bao chi 135,8: 482.2; kiem: mien thue suy tu thue hien hanh = 147.4 (vs co tuc 135,8)
+Tien rong: r2 654.1 -> r3 843.4 (chi tru KTPL 99.7 + co tuc phai tra 2.06); gop du VLD rong 1075.5
+XDCB+BDSDT 150.3 (1,126 d/cp); trich KTPL LN 9T 63.1 (-473 d/cp); khop ngay: +Q4/26 105.9 ty, chiet khau 55 ngay
+BRIDGE (tam sau CK 5 ty):
+  S0_r2_tai_lap_gia_0411       tam  31,066 | P10/P50/P90 23,751/30,806/38,022 | duoi gia 73.6% | TRONG vung
+  S1_gia_ADV_0611              tam  31,094 (+27) | P10/P50/P90 23,772/30,833/38,055 | duoi gia 73.3% | TRONG vung
+  S2_N0_co_tuc_mien_thue       tam  29,377 (-1,716) | P10/P50/P90 22,602/29,136/35,819 | duoi gia 83.8% | TRONG vung
+  S3_VLD_nhat_quan             tam  30,712 (+1,335) | P10/P50/P90 23,937/30,471/37,153 | duoi gia 74.2% | TRONG vung
+  S4_XDCB_BDSDT_theo_so        tam  31,771 (+1,059) | P10/P50/P90 24,996/31,530/38,213 | duoi gia 72.7% | TRONG vung
+  S5_trich_KTPL_LN_9T          tam  31,326 (-445) | P10/P50/P90 24,551/31,085/37,768 | duoi gia 73.3% | TRONG vung
+  S6_khop_ngay_dinh_gia        tam  31,658 (+332) | P10/P50/P90 25,083/31,402/38,043 | duoi gia 73.0% | TRONG vung
+HEADLINE (CK 5 ty): n=135 | tam truoc 33,652 sau 31,658 | P10/P50/P90 sau 25,083/31,402/38,043 | min sau 20,656 | % trong so duoi gia 73.0% | gia/tam +8.0% => TRONG vung
+Gia tri tai tham so trung tam (Delta -25%, N0 479.7, r 13.5%, g 3%): 33,460 truoc / 31,477 sau CK
+SONG SONG A1_skeptic_diem_S2_S4_khong_S5_S6: n=135 | tam truoc 33,773 sau 31,771 | P10/P50/P90 sau 24,996/31,530/38,213 | min sau 20,647 | % trong so duoi gia 72.7% | gia/tam +7.6% => TRONG vung
+SONG SONG A2_gop_du_VLD_rong: n=135 | tam truoc 35,391 sau 33,293 | P10/P50/P90 sau 26,718/33,037/39,678 | min sau 22,291 | % trong so duoi gia 58.3% | gia/tam +2.7% => TRONG vung
+SONG SONG A3_khong_trich_KTPL_9T: n=135 | tam truoc 34,125 sau 32,103 | P10/P50/P90 sau 25,527/31,847/38,488 | min sau 21,100 | % trong so duoi gia 71.7% | gia/tam +6.5% => TRONG vung
+SONG SONG A4_khong_khop_ngay: n=135 | tam truoc 33,300 sau 31,326 | P10/P50/P90 sau 24,551/31,085/37,768 | min sau 20,202 | % trong so duoi gia 73.3% | gia/tam +9.2% => TRONG vung
+SONG SONG A5_N0_co_tuc_bao_chi_135_8: n=135 | tam truoc 33,772 sau 31,770 | P10/P50/P90 sau 25,161/31,513/38,188 | min sau 20,711 | % trong so duoi gia 73.0% | gia/tam +7.6% => TRONG vung
+SONG SONG A6_bo_phai_thu_DH: n=135 | tam truoc 31,839 sau 29,952 | P10/P50/P90 sau 23,377/29,696/36,337 | min sau 18,950 | % trong so duoi gia 81.1% | gia/tam +14.2% => TRONG vung
+SONG SONG A7_bo_truc_g: n=45 | tam truoc 33,560 sau 31,571 | P10/P50/P90 sau 25,083/31,439/37,943 | min sau 21,375 | % trong so duoi gia 74.4% | gia/tam +8.3% => TRONG vung
+SONG SONG A8_von_hoa_co_tuc_dau_tu_71ty_nam: n=135 | tam truoc 35,239 sau 33,151 | P10/P50/P90 sau 26,573/32,949/39,789 | min sau 21,914 | % trong so duoi gia 58.6% | gia/tam +3.2% => TRONG vung
+SONG SONG A8_von_hoa_co_tuc_dau_tu_100ty_nam: n=135 | tam truoc 36,664 sau 34,491 | P10/P50/P90 sau 27,952/34,267/41,232 | min sau 23,159 | % trong so duoi gia 48.1% | gia/tam -0.8% => TRONG vung
+SONG SONG A8_von_hoa_co_tuc_dau_tu_140ty_nam: n=135 | tam truoc 38,630 sau 36,340 | P10/P50/P90 sau 29,801/36,086/43,153 | min sau 24,875 | % trong so duoi gia 36.2% | gia/tam -5.9% => TRONG vung
+GIA NGU Y (tam sau CK 5 ty = 34,200): tam Delta Long Thanh -15.3% (base -25%); hoac r 12.38%; hoac co tuc dau tu von hoa 94 ty/nam (thay so sach 253,8); hoac N0 536 ty
+Do nhay lai huy dong (tam sau CK 5 ty): b0.5_d-100bp 32,720 (+3.4%); b0.5_d-50bp 32,175 (+1.6%); b0.5_d50bp 31,165 (-1.6%); b0.5_d100bp 30,695 (-3.0%); b1.0_d-100bp 33,897 (+7.1%); b1.0_d-50bp 32,720 (+3.4%); b1.0_d50bp 30,695 (-3.0%); b1.0_d100bp 29,818 (-5.8%)
+adv250: ADV trung vi 0.61 ty/phien (2025-11-05..2026-11-06, 0 phien KL=0), sigma 2.07%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.13%/0.27%/0.40%; Q/ADV 1.6% trong vung hieu chinh (<=10%); 0.1-0.2 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.19%/0.37%/0.56%; Q/ADV 3.3% trong vung hieu chinh (<=10%); 0.2-0.3 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.27%/0.53%/0.80%; Q/ADV 6.6% trong vung hieu chinh (<=10%); 0.3-0.7 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 1.33%/2.65%/3.98%; Q/ADV 164.6% NGOAI vung hieu chinh (<=10%); 8.2-16.5 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 2.96%/5.93%/8.89%; Q/ADV 823.1% NGOAI vung hieu chinh (<=10%); 41.2-82.3 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 4.19%/8.38%/12.57%; Q/ADV 1646.2% NGOAI vung hieu chinh (<=10%); 82.3-164.6 phien @20-10%
+adv60: ADV trung vi 0.78 ty/phien (2026-08-12..2026-11-06, 0 phien KL=0), sigma 1.82%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.10%/0.21%/0.31%; Q/ADV 1.3% trong vung hieu chinh (<=10%); 0.1-0.1 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.15%/0.29%/0.44%; Q/ADV 2.5% trong vung hieu chinh (<=10%); 0.1-0.3 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.21%/0.41%/0.62%; Q/ADV 5.1% trong vung hieu chinh (<=10%); 0.3-0.5 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 1.03%/2.05%/3.08%; Q/ADV 127.4% NGOAI vung hieu chinh (<=10%); 6.4-12.7 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 2.29%/4.59%/6.88%; Q/ADV 637.1% NGOAI vung hieu chinh (<=10%); 31.9-63.7 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 3.24%/6.49%/9.73%; Q/ADV 1274.2% NGOAI vung hieu chinh (<=10%); 63.7-127.4 phien @20-10%
+Co      10 tr (CK 0.27%, Q/ADV250 1.6%): tam 33,563 | P10/P90 26,592/40,332 | gia/tam +1.9% | duoi gia 58.1% | TRONG vung
+Co      20 tr (CK 0.37%, Q/ADV250 3.3%): tam 33,526 | P10/P90 26,563/40,288 | gia/tam +2.0% | duoi gia 58.1% | TRONG vung
+Co      40 tr (CK 0.53%, Q/ADV250 6.6%): tam 33,474 | P10/P90 26,521/40,225 | gia/tam +2.2% | duoi gia 58.1% | TRONG vung
+Co   1,000 tr (CK 2.65%, Q/ADV250 164.6%): tam 32,760 | P10/P90 25,956/39,368 | gia/tam +4.4% | duoi gia 59.8% | TRONG vung
+Co   5,000 tr (CK 5.93%, Q/ADV250 823.1%): tam 31,658 | P10/P90 25,083/38,043 | gia/tam +8.0% | duoi gia 73.0% | TRONG vung
+Co  10,000 tr (CK 8.38%, Q/ADV250 1646.2%): tam 30,832 | P10/P90 24,428/37,050 | gia/tam +10.9% | duoi gia 74.8% | TRONG vung

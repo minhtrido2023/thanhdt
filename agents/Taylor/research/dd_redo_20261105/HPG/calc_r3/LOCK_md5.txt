@@ -1,0 +1,24 @@
+# LOCK r3 HPG (job Taylor_20261108_142020) — chay 2 lan trung byte
+## outputs
+72b260132c7e0d7996b12a9e11200d8f  hpg_r3_out.txt
+2d1678f1482aa367b529fadef58531cc  hpg_r3_out.json
+b1c8c9ee83152330b4742df12b872f09  grid_hpg_r3.csv
+68ae20b634e5e7b94412a61d57c61cd6  ../SUMMARY.json
+## upstream (hpg_r3.py doc/thuc thi)
+LOCK 8fbf24506eb5d6da4e15ad049f4f3643 HPG/calc_r3/hpg_r3.py
+LOCK 02c6cd84793e4f7c0de610d0c8426def HPG/calc_r3/px_hpg_r3.sql
+LOCK 03f82a271cf409843a6b063e8a564c2d HPG/calc_r3/px_hpg_r3_20261106.csv
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK c6c7233a6589db20724d02e6f810879b HPG/calc/hpg_r2.py
+LOCK b9bcfeb5bd22e1782b6243d46f38c29c HPG/calc/hpg_redo.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 5d78410454e689b3120691352d9e48cf HPG/calc_r3/summary_r3_extra.json
+LOCK 6ca98c5d2b663dace408b37f13fd8d02 TOP5_CORRECTIONS_20261108.md
+LOCK b6e133b21bb8cec7e65d561891dafcfc SKEPTIC_TOP5_20261108.md
+LOCK bf37f53ba652850301f152badd7d7831 STANDARD_r2.md
+# 08/11 sua van ban (chu thich/artifact), KHONG doi so: md5 SUMMARY.json, hpg_r3.py, summary_r3_extra.json cap nhat; outputs hpg_r3_out.* / grid khong doi

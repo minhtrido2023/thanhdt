@@ -1,23 +1,259 @@
 {
- "ticker": "HPG", "job": "Taylor_20261107_130203", "asof": "2026-11-07",
- "moat_tier": "NARROW", "moat_type": "COST/SCALE",
- "risk1": "Bien dua vao bao ho AD co thoi han truoc thep TQ du cung (QD 1917 27,83% hieu luc 28/07/2026) trong khi von DQ2 tap trung; uu dai thue DQ2 chua ro (CV 377)",
- "reused": false, "source_asof": null, "source_note": "moat_tags.csv khong co HPG; DD 31/10 va kb/projects/hpg-dd-20261031.md khong co muc 5F => lam moi day du",
+ "ticker": "HPG",
+ "job": "Taylor_20261107_130203 (r2 fix: Taylor_20261107_131620 -> resume Taylor_20261107_172001)",
+ "asof": "2026-11-07",
+ "moat_tier": "NARROW",
+ "moat_type": "COST/SCALE",
+ "risk1": "Bien dua vao bao ho AD co thoi han truoc thep TQ du cung (QD 1917 chong lan tranh 27,83% hieu luc 28/07/2026 - CHI THAY TREN BAO, chua mo ban goc moit.gov.vn (GAPS2); chi phu HRC be rong 1.880-2.300mm) trong khi von DQ2 tap trung; uu dai thue DQ2 chua ro (CV 377)",
+ "reused": false,
+ "source_asof": null,
+ "source_note": "moat_tags.csv khong co HPG; DD 31/10 va kb/projects/hpg-dd-20261031.md khong co muc 5F => lam moi day du",
  "moat_durable": false,
- "durability_tests": {"i_multi_cycle_excess": "FAIL: ROIC_Min5Y 5,7% / ROIC5Y 11,0% / ROIC10Y 13,0% / ROIC_Min10Y 5,7% <= Ke 13,5%; ROE 2022-25 8,4/6,8/10,9/12,4%; ROE5Y 16,9% ROE10Y 21,9% ROE_Min5Y 6,9% (BQ ROIC chat luong thap, can kiem chung)", "ii_mechanism": "PASS: quy mo + tich hop BF-BOF + cang Dung Quat; GPM cao nhat nhom 10/11 nam 2015-25", "iii_no_clock": "FAIL: bao ho AD co thoi han, uu dai thue DQ2 chua ro, CBAM"},
- "model_changed": true, "model_change_status": "quy uoc CHAT-3C cho Mike/user duyet; KHONG sua REPORT_r2/SUMMARY.json/dd_price_zones",
- "model_inconsistencies": ["terminal g_RI = g khi ROE_T > r (nhanh TOT 14,25%) = RONIC>Ke ngam", "ROE_T nhanh TOT 14,25% > TB chu ky nganh peer (trung vi 12,4% / TB 11,6%)"],
- "old": {"center": 16286, "p10": 8942, "p50": 16343, "p90": 23520, "pct_below_px": 0.836, "label": "TRONG vung"},
- "new_strict3c_peer_median": {"center": 16986, "p10": 14448, "p50": 17090, "p90": 19395, "pct_below_px": 1.0, "label": "TREN vung"},
- "new_strict3c_peer_mean": {"center": 15956, "p10": 13556, "p50": 16051, "p90": 18235, "pct_below_px": 1.0, "label": "TREN vung"},
- "decomposition": {"ronic_only_SYM": {"center": 16016, "p90": 22321, "label": "TRONG vung"}, "margin_revert_effect_center_vs_SYM": 970},
- "label_same_at_sizes": ["5ty", "10tr", "40tr"],
- "sensitivity": {"WIDE": {"center": 22133, "p10": 18331, "p90": 25154, "label": "TRONG vung", "rule": "ROE_T>=ROE5Y HPG x thue 20% (15,36%), g_RI=g"},
-                 "NARROW": {"center_range": [15956, 16986], "p90_range": [18235, 19395], "label": "TREN vung", "rule": "CHAT-3C REV"},
-                 "NONE": {"center": 17656, "p10": 13625, "p90": 21204, "label": "TREN vung (ranh gioi, P90 thap hon gia 2,3%)", "rule": "spread fade ve 0 trong 5 nam, hai chieu"}},
- "peer_note": "peer noi dia KHONG cung mo hinh (ton ma/thuong mai/EAF); khong co BF-BOF niem yet; POM loai (ROE phi ly); nhan nhay theo peer set/neo (neo ROE5Y HPG => gan WIDE, TRONG)",
- "price": 21700, "price_date": "2026-11-04", "r": 0.135,
- "proposed_moat_tag_row": "HPG,NARROW,COST/SCALE,L,\"Integrated BF-BOF scale/cost leader (GPM top of listed VN steel 10/11 yrs 2015-25, 10y avg 19.2% vs peer median 5.7%) BUT absolute excess return not multi-cycle (ROIC_Min5Y 5.7%, ROIC10Y 13.0% <= Ke 13.5%; ROE 2022-25 6.8-12.4%); #1 risk: margin leans on time-limited AD protection vs Chinese HRC oversupply (QD 1917 27.83% eff 2026-07-28) while DQ2 capex concentrated; DQ2 tax incentive unresolved (CV 377)\",2026-11-07,5f,N",
- "measured_by": "calc/5f/hpg_5f.py -> calc/5f/hpg_5f_out.txt (md5 05a17d88396c6de06e284ab11045feff, 2 lan trung byte); BQ tav2_bq.ticker_financial dong Q4 2015-2025 + 2026Q3",
- "non_point_in_time": true
+ "durability_tests": {
+  "i_multi_cycle_excess": "FAIL: ROIC_Min5Y 5,7% / ROIC5Y 11,0% / ROIC10Y 13,0% / ROIC_Min10Y 5,7% <= Ke 13,5%; ROE 2022-25 8,4/6,8/10,9/12,4%; ROE5Y 16,9% ROE10Y 21,9% ROE_Min5Y 6,9% (BQ ROIC chat luong thap, can kiem chung); ROE/ROIC 2022-25 bi von DQ2 XDCB do dang keo thap (Q3/26 XDCB 16.113 ty ~10,8% VCSH; ROE 2025 bo XDCB ~13,9% uoc luong) - ket luan FAIL khong doi (ROIC_Min5Y 5,7%)",
+  "ii_mechanism": "PASS: quy mo + tich hop BF-BOF + cang Dung Quat; GPM cao nhat nhom 10/11 nam 2015-25",
+  "iii_no_clock": "FAIL: bao ho AD co thoi han, uu dai thue DQ2 chua ro, CBAM"
+ },
+ "model_changed": true,
+ "model_change_status": "quy uoc CHAT-3C cho Mike/user duyet; KHONG sua REPORT_r2/SUMMARY.json/dd_price_zones",
+ "model_inconsistencies": [
+  "terminal g_RI = g khi ROE_T > r (nhanh TOT 14,25%) = RONIC>Ke ngam",
+  "ROE_T nhanh TOT 14,25% > moi neo TB chu ky nganh dung tu ROE nam quan sat (7,05-9,80%)"
+ ],
+ "old": {
+  "center": 16286,
+  "p10": 8942,
+  "p50": 16343,
+  "p90": 23520,
+  "pct_below_px": 0.836,
+  "label": "TRONG vung",
+  "price_over_p90_minus1": -0.077
+ },
+ "decomposition": {
+  "ronic_only_SYM": {
+   "center": 16016,
+   "p90": 22321,
+   "label": "TRONG vung"
+  },
+  "roe_revert_effect_center_SYM_to_REV0.098": -2311
+ },
+ "label_same_at_sizes": [
+  "5ty",
+  "10tr",
+  "40tr"
+ ],
+ "sensitivity": {
+  "WIDE": {
+   "center": 22133,
+   "p10": 18331,
+   "p90": 25154,
+   "label": "TRONG vung",
+   "rule": "ROE_T>=ROE5Y HPG x thue 20% (15,36%), g_RI=g"
+  },
+  "NARROW_strict3c": {
+   "center_range": [
+    12580,
+    13705
+   ],
+   "p90_range": [
+    14512,
+    15737
+   ],
+   "label": "TREN vung",
+   "rule": "REV neo 8,91-9,80%, RONIC=Ke"
+  },
+  "NARROW_no_DQ2_penalty_a_REVF": {
+   "center": 18376,
+   "p10": 15654,
+   "p90": 20916,
+   "label": "TREN vung (gia > P90 3,7%)",
+   "rule": "chenh (neo-Ke) san 0: moi von terminal sinh loi = Ke"
+  },
+  "NARROW_no_DQ2_penalty_b_REVD": {
+   "center_range": [
+    13014,
+    14055
+   ],
+   "p90_range": [
+    14946,
+    16087
+   ],
+   "label": "TREN vung",
+   "rule": "chi XDCB 16.113 ty sinh loi = Ke, phan con lai theo neo"
+  },
+  "NONE": {
+   "center": 17656,
+   "p10": 13625,
+   "p90": 21204,
+   "label": "TREN vung (gia > P90 2,3%)",
+   "rule": "spread fade ve 0 trong 5 nam, hai chieu"
+  }
+ },
+ "peer_note": "peer noi dia KHONG cung mo hinh (ton ma/thuong mai/EAF); khong co BF-BOF niem yet; nhan theo neo: moi neo nganh quan sat (7-10%) => TREN bien rong; chi neo vao lich su chinh HPG (ROE5Y 15,36% / TB 2016-25 21,43%) moi TRONG/DUOI - tuc coi uu the HPG la ben, trai ket luan 'khong ben'",
+ "price": 21700,
+ "price_date": "2026-11-04",
+ "r": 0.135,
+ "proposed_moat_tag_row": "HPG,NARROW,COST/SCALE,L,\"Integrated BF-BOF scale/cost leader (GPM top of listed VN steel 10/11 yrs 2015-25, 10y avg 19.2% vs peer median 5.7%) BUT absolute excess return not multi-cycle (ROIC_Min5Y 5.7%, ROIC10Y 13.0% <= Ke 13.5%; ROE 2022-25 6.8-12.4%, partly depressed by DQ2 CWIP); #1 risk: margin leans on time-limited AD protection vs Chinese HRC oversupply (anti-circumvention QD 1917 27.83% eff 2026-07-28 - press-reported only, moit.gov.vn original not yet opened, covers HRC width 1880-2300mm only) while DQ2 capex concentrated; DQ2 tax incentive unresolved (CV 377)\",2026-11-07,5f,N",
+ "measured_by": "calc/5f/hpg_5f_r2.py -> calc/5f/hpg_5f_r2_out.txt md5 a99b6a20fd72fdf904aedb64996d2553 + hpg_5f_r2_out.json md5 47f9d293d5d9cec4a335630c3abe42ad (chay lai 2 lan trung byte, $DNA_PYEXE -I); peer_roe_q4_2016_2025.csv md5 ccdd54c6106774a33bf28aadbe028c88 (BQ tav2_bq.ticker_financial ROE_Trailing dong Q4 2016-2025)",
+ "non_point_in_time": true,
+ "prev_version": "SUMMARY_5F_r1.json",
+ "peer_anchor": {
+  "method": "ROE nam = ROE_Trailing dong Q4 2016-2025 (10 nam), calc/5f/peer_roe_q4_2016_2025.csv; KHONG dung truong vendor ROE10Y (SMC ROE10Y 11,2% vs TB nam 5,8%; GDA ROE10Y 15,9% vs 3 nam 7,0-9,0%)",
+  "peer_mean_10y": {
+   "HSG": 0.1566,
+   "NKG": 0.1563,
+   "VGS": 0.1205,
+   "SMC": 0.0578,
+   "TLH": 0.051,
+   "TVN": 0.0461
+  },
+  "excluded": {
+   "GDA": "chi 3 nam (TB 7,93%); tinh vao thi neo 9,54%",
+   "POM": "ROE phi ly"
+  },
+  "median_of_means": 0.0891,
+  "mean_of_means": 0.098,
+  "median_of_medians": 0.0705
+ },
+ "strict3c_tax_note": "Che do REV thay thang ROE_T bang ROE sau thue THUC cua peer, KHONG ap thue terminal 20% (TAXF) nhu CUR/SYM; cau r1 'giu thue 20% terminal' sai, da rut",
+ "new_strict3c_anchor_median_of_means": {
+  "anchor": 0.0891,
+  "center": 12580,
+  "p10": 10576,
+  "p50": 12655,
+  "p90": 14512,
+  "price_over_p90_minus1": 0.495,
+  "label": "TREN vung"
+ },
+ "new_strict3c_anchor_mean_of_means": {
+  "anchor": 0.098,
+  "center": 13705,
+  "p10": 11601,
+  "p50": 13791,
+  "p90": 15737,
+  "price_over_p90_minus1": 0.379,
+  "label": "TREN vung"
+ },
+ "retracted_r1": {
+  "strict3c_vendor_anchor_12.4_11.6": {
+   "center": [
+    16986,
+    15962
+   ],
+   "p90": [
+    19395,
+    18241
+   ]
+  },
+  "claim_not_boundary_case": "rut - mau thuan voi neo ROE5Y HPG cho TRONG"
+ },
+ "anchor_axis": {
+  "note": "nhan PHU THUOC HOAN TOAN vao neo terminal; doi TREN->TRONG khi neo > 14,0672% (> Ke)",
+  "rows": [
+   [
+    0.0705,
+    10228,
+    11871,
+    "TREN"
+   ],
+   [
+    0.079,
+    11298,
+    13097,
+    "TREN"
+   ],
+   [
+    0.0891,
+    12580,
+    14512,
+    "TREN"
+   ],
+   [
+    0.095,
+    13320,
+    15318,
+    "TREN"
+   ],
+   [
+    0.0954,
+    13367,
+    15369,
+    "TREN"
+   ],
+   [
+    0.0964,
+    13492,
+    15505,
+    "TREN"
+   ],
+   [
+    0.098,
+    13705,
+    15737,
+    "TREN"
+   ],
+   [
+    0.1159,
+    15962,
+    18241,
+    "TREN"
+   ],
+   [
+    0.124,
+    16986,
+    19395,
+    "TREN"
+   ],
+   [
+    0.135,
+    18376,
+    20916,
+    "TREN"
+   ],
+   [
+    0.1536,
+    20732,
+    23492,
+    "TRONG"
+   ],
+   [
+    0.2143,
+    28404,
+    32074,
+    "DUOI"
+   ]
+  ],
+  "cols": [
+   "anchor",
+   "center",
+   "p90",
+   "label"
+  ],
+  "breakeven_anchor": 0.140672,
+  "skeptic_crosscheck": {
+   "9.5%": [
+    13320,
+    "skeptic 13371"
+   ],
+   "7.9%": [
+    11298,
+    "skeptic 11336"
+   ],
+   "13.5%": [
+    18376,
+    "khop"
+   ]
+  }
+ },
+ "monotonicity_note": "KHONG don dieu: NONE 17.656 > NARROW chat 12.580-13.705 vi NARROW chat ghim ROE<Ke vinh vien tren TOAN BO VCSH, ke ca von DQ2 trong so sach - trai tinh than luat 20 (base = so sach/NPV 0). Bien the (a) REVF tam 18.376 >= NONE khoi phuc thu tu. Moi bien the nhan van TREN",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 21338,
+  "headline_centre_basis": "dong bo r3 08/11 (REPORT_r3.md): tam 21.338, P10 13.316, P50 21.759, P90 28.993, nhan TRONG vung; 16.286 la tam r2 cu",
+  "r3_sync_note": "Moi so tam/P10/P90 khac trong file nay (old 16.286, 18.376, 17.656, 22.133, 12.580-13.705...) tinh tren mo hinh r2 (von giu lai 0%) - chi la do nhay tuong doi quanh r2, KHONG phai tam hien hanh",
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

@@ -1,0 +1,38 @@
+r=0.1350 px=15200.0 (2026-11-04) d_ref=1.4468% DDV NPM cycle=4.0519% INT_AT_NORM=55.6 ty (1.01% DT)
+  BFC NPM=2.8002% years=10 (2016-2025)
+  DCM NPM=13.2570% years=11 (2015-2025)
+  DDV NPM=4.0519% years=11 (2015-2025)
+  DGC NPM=25.4862% years=11 (2015-2025)
+  DHB NPM=0.7074% years=8 (2018-2025)
+  DPM NPM=12.5597% years=11 (2015-2025)
+  LAS NPM=3.4961% years=11 (2015-2025)
+  NFC NPM=4.8145% years=11 (2015-2025)
+  SFG NPM=2.4608% years=11 (2015-2025)
+  VAF NPM=5.5853% years=11 (2015-2025)
+  phos2_LAS_NFC_med=4.1553%
+  phos2_LAS_NFC_mean=4.1553%
+  phos3_LAS_NFC_DHB_med=3.4961%
+  phos3_LAS_NFC_DHB_mean=3.0060%
+  exUrea5_LAS_NFC_BFC_SFG_VAF_med=3.4961%
+  exUrea5_LAS_NFC_BFC_SFG_VAF_mean=3.8314%
+  all7_med=4.8145%
+  all7_mean=6.4248%
+CURRENT_r2 (RONIC 20%, bien DDV) {"centre": 13109, "p10": 10115, "p50": 12823, "p90": 16270, "pct_below": 0.769, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0704, "centre_param": 14421}
+R_only (RONIC=Ke, bien DDV) {"centre": 12430, "p10": 9612, "p50": 12221, "p90": 15417, "pct_below": 0.893, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0143, "centre_param": 13691}
+WIDE_hypo (RONIC 25%) {"centre": 13390, "p10": 10313, "p50": 13065, "p90": 16646, "pct_below": 0.745, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0951, "centre_param": 14724}
+CHAT3C_phos2_LAS_NFC_med_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 12662, "p10": 9785, "p50": 12422, "p90": 15731, "pct_below": 0.852, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0349, "centre_param": 13941, "npm_": 0.041552956047475456, "sub_int": true}
+CHAT3C_phos2_LAS_NFC_med_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 14923, "p10": 11417, "p50": 14632, "p90": 18542, "pct_below": 0.569, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.2199, "centre_param": 16383, "npm_": 0.041552956047475456, "sub_int": false}
+CHAT3C_phos2_LAS_NFC_mean_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 12662, "p10": 9785, "p50": 12422, "p90": 15731, "pct_below": 0.852, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0349, "centre_param": 13941, "npm_": 0.041552956047475456, "sub_int": true}
+CHAT3C_phos2_LAS_NFC_mean_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 14923, "p10": 11417, "p50": 14632, "p90": 18542, "pct_below": 0.569, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.2199, "centre_param": 16383, "npm_": 0.041552956047475456, "sub_int": false}
+CHAT3C_phos3_LAS_NFC_DHB_med_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 11187, "p10": 8669, "p50": 11111, "p90": 13847, "pct_below": 0.976, "label": "TRÊN vùng", "label_sleeve40": "TRÊN vùng", "p90_vs_px": -0.089, "centre_param": 12348, "npm_": 0.03496132444755086, "sub_int": true}
+CHAT3C_phos3_LAS_NFC_DHB_med_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 13448, "p10": 10369, "p50": 13118, "p90": 16618, "pct_below": 0.729, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0933, "centre_param": 14791, "npm_": 0.03496132444755086, "sub_int": false}
+CHAT3C_phos3_LAS_NFC_DHB_mean_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 10091, "p10": 7804, "p50": 10047, "p90": 12430, "pct_below": 1.0, "label": "TRÊN vùng", "label_sleeve40": "TRÊN vùng", "p90_vs_px": -0.1822, "centre_param": 11164, "npm_": 0.03006005368436324, "sub_int": true}
+CHAT3C_phos3_LAS_NFC_DHB_mean_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 12352, "p10": 9554, "p50": 12151, "p90": 15311, "pct_below": 0.893, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0073, "centre_param": 13606, "npm_": 0.03006005368436324, "sub_int": false}
+CHAT3C_exUrea5_LAS_NFC_BFC_SFG_VAF_med_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 11187, "p10": 8669, "p50": 11111, "p90": 13847, "pct_below": 0.976, "label": "TRÊN vùng", "label_sleeve40": "TRÊN vùng", "p90_vs_px": -0.089, "centre_param": 12348, "npm_": 0.03496132444755086, "sub_int": true}
+CHAT3C_exUrea5_LAS_NFC_BFC_SFG_VAF_med_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 13448, "p10": 10369, "p50": 13118, "p90": 16618, "pct_below": 0.729, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.0933, "centre_param": 14791, "npm_": 0.03496132444755086, "sub_int": false}
+CHAT3C_exUrea5_LAS_NFC_BFC_SFG_VAF_mean_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 11937, "p10": 9237, "p50": 11788, "p90": 14814, "pct_below": 0.938, "label": "TRÊN vùng", "label_sleeve40": "TRÊN vùng", "p90_vs_px": -0.0254, "centre_param": 13158, "npm_": 0.03831378831437214, "sub_int": true}
+CHAT3C_exUrea5_LAS_NFC_BFC_SFG_VAF_mean_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 14198, "p10": 10915, "p50": 13898, "p90": 17602, "pct_below": 0.63, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.158, "centre_param": 15601, "npm_": 0.03831378831437214, "sub_int": false}
+CHAT3C_all7_med_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 14136, "p10": 10872, "p50": 13835, "p90": 17519, "pct_below": 0.648, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.1526, "centre_param": 15533, "npm_": 0.04814458764740005, "sub_int": true}
+CHAT3C_all7_med_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 16397, "p10": 12500, "p50": 16016, "p90": 20396, "pct_below": 0.364, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.3418, "centre_param": 17976, "npm_": 0.04814458764740005, "sub_int": false}
+CHAT3C_all7_mean_int (RONIC=Ke, tru INT_AT_NORM) {"centre": 17738, "p10": 13517, "p50": 17267, "p90": 22133, "pct_below": 0.25, "label": "TRONG vùng", "label_sleeve40": "TRONG vùng", "p90_vs_px": 0.4561, "centre_param": 19424, "npm_": 0.06424800951897257, "sub_int": true}
+CHAT3C_all7_mean_noint (RONIC=Ke, khong tru INT_AT_NORM) {"centre": 19999, "p10": 15173, "p50": 19600, "p90": 24976, "pct_below": 0.101, "label": "TRONG vùng", "label_sleeve40": "DƯỚI vùng", "p90_vs_px": 0.6432, "centre_param": 21866, "npm_": 0.06424800951897257, "sub_int": false}

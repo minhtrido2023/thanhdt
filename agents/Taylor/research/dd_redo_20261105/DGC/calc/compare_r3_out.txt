@@ -1,0 +1,32 @@
+price: 33000.0
+asof_price_date: 2026-11-06
+n_outcomes: 405
+center_pre: 41825
+center_post: 41522
+center_param_post: 43410
+p10_out: 32931
+p25_out: 36970
+p50_out: 41087
+p75_out: 46408
+p90_out: 49929
+min_out: 25782
+max_out: 59113
+pct_weight_below_price: 0.10208333333333333
+px_vs_center_post: -0.20524059534704497
+label: TRONG vùng
+liq_disc_5ty: 0.00724700220209937
+delta_center_vs_r2_pct: -0.07248642973618957
+r2: {"center_post": 44767, "p10_out": 32518, "p50_out": 44633, "p90_out": 57101, "label": "TRONG vùng", "price": 33450.0, "asof_price_date": "2026-11-04", "pct_weight_below_price": 0.12208333333333332}
+w250 2025-11-05..2026-11-06 ADV 83.83 ty sigma 0.0297 | 5000tr: CK 0.725% Q/ADV 5.9642% calib=True | 10tr: CK 0.032% Q/ADV 0.0119% calib=False | 20tr: CK 0.046% Q/ADV 0.0239% calib=False | 40tr: CK 0.065% Q/ADV 0.0477% calib=False
+w60 2026-08-12..2026-11-06 ADV 17.73 ty sigma 0.0212 | 5000tr: CK 1.126% Q/ADV 28.2007% calib=False | 10tr: CK 0.050% Q/ADV 0.0564% calib=False | 20tr: CK 0.071% Q/ADV 0.1128% calib=True | 40tr: CK 0.101% Q/ADV 0.2256% calib=True
+alt ore_w0.10: {"desc": "mo lai khai truong w=0,10", "n_outcomes": 810, "center_post": 42768, "p10_out": 33267, "p50_out": 42100, "p90_out": 53030, "pct_weight_below_price": 0.09187500000000001, "label": "DƯỚI vùng"}
+alt ore_w0.25: {"desc": "mo lai khai truong w=0,25", "n_outcomes": 810, "center_post": 44637, "p10_out": 33983, "p50_out": 44163, "p90_out": 56573, "pct_weight_below_price": 0.07656249999999998, "label": "DƯỚI vùng"}
+alt ore_w0.50: {"desc": "mo lai khai truong w=0,50 (= r2)", "n_outcomes": 810, "center_post": 47753, "p10_out": 35794, "p50_out": 47722, "p90_out": 59765, "pct_weight_below_price": 0.05104166666666667, "label": "DƯỚI vùng"}
+alt r4_fix: {"desc": "nen bien r4 16,5/17,5% (khong co dong co so) + bo chong lan du phong (dinh chinh 1 nguyen ban)", "n_outcomes": 405, "center_post": 39100, "p10_out": 32655, "p50_out": 38971, "p90_out": 46167, "pct_weight_below_price": 0.11875, "label": "TRONG vùng"}
+alt r4_nofix: {"desc": "nen bien r4 + du phong chong lan nhu r2 (doi chieu)", "n_outcomes": 405, "center_post": 37078, "p10_out": 28946, "p50_out": 36838, "p90_out": 44601, "pct_weight_below_price": 0.2520833333333333, "label": "TRONG vùng"}
+alt shield20: {"desc": "la chan thue du phong 20% (TT48: tru khi chi that) [UL]", "n_outcomes": 405, "center_post": 42092, "p10_out": 34075, "p50_out": 41600, "p90_out": 50226, "pct_weight_below_price": 0.06250000000000001, "label": "DƯỚI vùng"}
+alt ronic20: {"desc": "RONIC 20% (thuong moat — trai luat 3c, chi doi chieu)", "n_outcomes": 405, "center_post": 43456, "p10_out": 34432, "p50_out": 42969, "p90_out": 52434, "pct_weight_below_price": 0.0625, "label": "DƯỚI vùng"}
+alt w_scn_r2: {"desc": "trong so kich ban 0,3/0,5/0,2 cua r2", "n_outcomes": 405, "center_post": 40867, "p10_out": 32486, "p50_out": 40474, "p90_out": 49003, "pct_weight_below_price": 0.11708333333333333, "label": "TRONG vùng"}
+alt legal_axis: {"desc": "CO truc phap ly: haircut tien rong 3/9/29% (w 0,2/0,5/0,3) — ngoai base (vu an chi WARNING)", "n_outcomes": 1215, "center_post": 38592, "p10_out": 29596, "p50_out": 38455, "p90_out": 47657, "pct_weight_below_price": 0.21927083333333333, "label": "TRONG vùng"}
+single_post: {"c1": 2022, "c2": 649, "c3": -2046, "c5_R2": 4791, "c6_shield20": 570, "c4_w0": -6813, "c4_w0.1": -5450}
+r_sens_post: {"beta1.0_-100bp": 42990, "beta1.0_-50bp": 42221, "beta1.0_+50bp": 40848, "beta1.0_+100bp": 40234, "base": 41522}

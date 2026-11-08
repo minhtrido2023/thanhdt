@@ -1,56 +1,65 @@
 {
  "ticker": "TV1",
- "round": 2,
- "job": "Taylor_20261105_020018",
- "asof_price_date": "2026-11-04",
- "price": 19600.0,
+ "round": 3,
+ "job": "Taylor_20261108_142024",
+ "asof_price_date": "2026-11-06",
+ "price": 20400.0,
  "r": 0.135,
  "r_anchor": {
-  "rate": 7.4,
-  "date": "2026-11-03",
-  "current_rate": 7.4,
-  "current_source": "cctg_12m(2026-11-02)"
+  "r": 0.135,
+  "anchor": {
+   "rate": 7.4,
+   "date": "2026-11-03",
+   "source": "cctg_12m(2026-11-02)"
+  },
+  "current": {
+   "rate": 7.4,
+   "date": "2026-11-06",
+   "source": "cctg_12m(2026-11-02)",
+   "big4": 6.8,
+   "cctg": 7.4
+  }
  },
- "center_pre_liq": 16023,
- "center_post_liq": 15379,
- "p10_post": 4693,
- "p50_post": 15532,
- "p90_post": 24544,
- "p10_pre": 4890,
- "p90_pre": 25572,
- "p10_out": 4693,
- "p50_out": 15532,
- "p90_out": 24544,
- "min_out": 0,
- "max_out": 43306,
- "pct_weight_below_price": 0.7127,
- "n_outcomes": 720,
- "center_param_post": 19165,
- "liq_discount_ref": 0.0402,
+ "center_pre_liq": 17477,
+ "center_post_liq": 16740,
+ "p10_post": 8823,
+ "p50_post": 16150,
+ "p90_post": 25179,
+ "p10_out": 8823,
+ "p50_out": 16150,
+ "p90_out": 25179,
+ "p25_out": 12293,
+ "p75_out": 20435,
+ "min_out": 3012,
+ "max_out": 43218,
+ "pct_weight_below_price": 0.7455,
+ "n_outcomes": 540,
+ "w_floor_zero": 0,
+ "center_param_post": 19126,
+ "label": "TRONG vùng",
+ "label_note": "Nhãn không đổi so r2 (TRONG); định nghĩa vùng P10–P90 không đổi. Giá cao hơn tâm +21.9%. 74.6% trọng số kết cục dưới giá. Ngưỡng: DƯỚI khi giá < 8.823 ; TRÊN khi giá > 25.179.",
+ "pct_price_vs_center": 0.2186,
+ "pct_center_below_price": 0.1794,
+ "liq_discount_ref": 0.0421,
  "liq_ref_size_ty": 5.0,
  "ck_ref_size": {
   "size_ty": 5.0,
-  "discount_adv120": 0.0402,
-  "discount_adv250": 0.0359,
-  "discount_adv60": 0.0469,
+  "discount_adv120": 0.0421,
+  "discount_adv250": 0.0373,
+  "discount_adv60": 0.0491,
   "pct_adv120": 7.974,
   "in_sqrt_calibration_zone": false
  },
  "ck_real_sleeve": {
-  "10tr": 0.005,
-  "20tr": 0.0057,
+  "10tr": 0.0049,
+  "20tr": 0.0056,
   "40tr": 0.0066
  },
- "adv250_median_ty": 0.8,
+ "adv250_median_ty": 0.82,
  "adv120_median_ty": 0.63,
  "adv60_median_ty": 0.45,
- "px_vs_center": 0.2745,
- "px_vs_p10": 3.1764,
- "px_vs_p90": -0.2014,
- "grid_desc": "5 trục: giá PPA SB5 2027+ 949/600/520/440/340 (0,05/0,25/0,30/0,20/0,20) × biên tư vấn 5/8/11/14% (0,20/0,30/0,40/0,10) × sản lượng 175/187,5/200 GWh (đều) × thời điểm áp bậc thấp: truy thu hồi tố 2022–26 / đúng 2027 / lùi 1 năm / lùi 2 năm (0,10/0,70/0,15/0,05) × vốn lưu động tư vấn 45/49/53% ΔDT (đều); sàn vốn chủ 0; phân vị wpct mức kết cục (n=720)",
- "label": "TRONG vùng",
- "label_note": "TRONG vùng giữ nguyên so vòng 1; không do đổi định nghĩa vùng (vòng 1 đã P10–P90). So rev5 02/11 (vùng P20–P80 11.400–24.200) giá 19.600 cũng TRONG. 71,3% trọng số kết cục dưới giá — 'TRONG vùng' ở đây là vùng rất rộng (P10 4.693 – P90 24.544), giá cao hơn tâm 27%.",
- "center_vs_p50_note": "Tâm (kỳ vọng) 15.379 ≈ P50 15.532; tham số trung tâm (PPA 520, tư vấn giữa 11%, Q187,5, đúng 2027, VLĐ 49%) 19.165 — cao hơn tâm 25% vì 520 và biên 11% đều ở trên kỳ vọng xác suất (PPA kỳ vọng 509; tư vấn có 50% xác suất biên ≤8%) và tâm gồm 10% truy thu. P10 do nhánh PPA 340 (63% trọng số quanh P10) + truy thu (31%); P90 do PPA 600/520 với tư vấn cao. 5,5% trọng số chạm sàn 0 (truy thu + PPA thấp + biên 5%).",
+ "grid_desc": "5 trục: giá PPA SB5 2027+ 949/600/520/440/340 (0,05/0,25/0,30/0,20/0,20) × biên tư vấn 5/8/11/14% (0,20/0,30/0,40/0,10) × sản lượng 175/187,5/200 GWh (đều) × thời điểm áp bậc thấp đúng 2027 / lùi 1 / lùi 2 năm (0,80/0,15/0,05) × VLĐ tư vấn 45/49/53% ΔDT (đều); KHÔNG truy thu hồi tố trong base (r3); sàn vốn chủ 0; wpct mức kết cục (n=540); r 13,5%; KTPL 20%",
+ "center_vs_p50_note": "Tâm 16.740 > P50 16.150 (đuôi phải PPA 949/600 + tư vấn 14%); tham số trung tâm (520|11%|187,5|2027|49%) 19.126 cao hơn tâm vì 520 > PPA kỳ vọng 509 và 50% xác suất biên tư vấn ≤ 8%. P10 do PPA 340 (55% trọng số quanh P10) + 440 (32%) với tư vấn 5–8%; P90 do PPA 520 (43%) với tư vấn 14% (63%). Không kết cục nào chạm sàn 0 (r2: 5,5% — toàn bộ do nhánh truy thu).",
  "axes_included": [
   {
    "axis": "ppa",
@@ -81,7 +90,7 @@
      0.2
     ]
    ],
-   "basis": "giá ròng SB5 2027+ 949/600/520/440/340, xác suất 0,05/0,25/0,30/0,20/0,20 [UL] (áp cơ học theo SKEPTIC_BLIND B1; 340 = bậc 2018 có văn bản)"
+   "basis": "giá ròng SB5 2027+ 949/600/520/440/340, xác suất 0,05/0,25/0,30/0,20/0,20 [UL] (SKEPTIC_BLIND B1); 340 = bậc DỰ THẢO HĐ sửa đổi 05/2018 (EVN NQ 286/NQ-HĐTV 06/08/2018 + Cục ĐTĐL 1374/ĐTĐL-GP 24/08/2018 chấp thuận; chưa thấy bản ký) — mức duy nhất có văn bản; 500–600 = lời lãnh đạo qua KBSV 17/04/2026, chưa kiểm bản gốc"
   },
   {
    "axis": "consult",
@@ -107,7 +116,7 @@
      0.1
     ]
    ],
-   "basis": "biên tư vấn 5/8/11/14%, xác suất 0,20/0,30/0,40/0,10 [UL] (SKEPTIC_BLIND B3 thêm kịch bản quay về 5%)"
+   "basis": "biên tư vấn 5/8/11/14%, xác suất 0,20/0,30/0,40/0,10 [UL] (SKEPTIC_BLIND B3)"
   },
   {
    "axis": "q",
@@ -134,14 +143,9 @@
    "axis": "timing",
    "values": [
     [
-     "retro",
-     "retro",
-     0.1
-    ],
-    [
      "2027",
      "base",
-     0.7
+     0.8
     ],
     [
      "delay1",
@@ -154,7 +158,7 @@
      0.05
     ]
    ],
-   "basis": "thời điểm áp bậc giá thấp: truy thu hồi tố 2022–26 p0,10 [UL] (≈−17.400 đ/cp; chưa có văn bản đòi) · đúng 2027 p0,70 (lãnh đạo nêu 'từ 2027', KBSV — chưa kiểm bản gốc) · lùi 1 năm p0,15 · lùi 2 năm p0,05 [UL] (phụ lục 05 chưa thấy ký) — hai chiều"
+   "basis": "thời điểm áp bậc thấp: đúng 2027 p0,80 (lời lãnh đạo 'từ 2027', KBSV — chưa kiểm bản gốc) · lùi 1 năm p0,15 · lùi 2 năm p0,05 [UL] (cơ sở dữ liệu cho chiều lùi: mốc 01/01/2022 của dự thảo 2018 đã trôi ≥5 năm, giá ròng thực 2021–25 ≈ 870–950). Truy thu hồi tố RA KHỎI base (r3) → S1/S2"
   },
   {
    "axis": "wc",
@@ -180,8 +184,12 @@
  ],
  "axes_excluded": [
   {
+   "axis": "truy thu bậc giá 2022–26 áp hồi tố (r2 có, p0,10 nhân chéo độc lập)",
+   "reason": "r3 (TOP5_CORRECTIONS §TV1 đ.1–3, đã kiểm): không có văn bản đòi; EVN trả ~949 suốt 2022–25 (BCTC kiểm toán); HĐ 05/2018 là dự thảo được chấp thuận, chưa thấy bản ký; blind + core v2 đều xếp 'không vào tâm' ⇒ khoản lệch khỏi sổ không có cơ sở dữ liệu ⇒ độ nhạy S1/S2 (nhất quán: chỉ trong nhánh 340)"
+  },
+  {
    "axis": "cấm thầu EVN / khởi tố pháp nhân (vụ án 500kV mạch 3)",
-   "reason": "vụ án ⇒ WARNING (luật user 27/09: vụ án ngoài tâm); báo song song bản CÓ trục: cấm 3 năm DT tư vấn −50% p0,35 (P(tiêu cực) M5 trong REPORT 02/11, SKEPTIC2 B1)"
+   "reason": "vụ án ⇒ WARNING (luật user 27/09); báo song song S4: cấm 3 năm DT tư vấn −50% p0,35"
   },
   {
    "axis": "buộc nộp tiền 20/50/100 tỷ",
@@ -189,16 +197,16 @@
   },
   {
    "axis": "điện mặt trời nổi 46 MWp",
-   "reason": "chưa đầu tư (vướng thủ tục) ⇒ NPV=0 theo luật 03/11, không có số giá/sản lượng cho cả hai chiều"
+   "reason": "chưa đầu tư ⇒ NPV=0 (luật 03/11), không có số cho cả hai chiều"
   },
   {
    "axis": "tỷ lệ KTPL",
-   "reason": "đo được trên chính TV1 (30,1/150,2 = 20%) — tham số, không phải bất định lớn"
+   "reason": "đo 3 năm (r3): FY2023 30,93/75,64 = 40,9% · FY2024 17,24/87,50 = 19,7% · FY2025 30,10/150,20 = 20,0%; quỹ trích theo THÁNG LƯƠNG (1,5 tháng — BCTC FY25 TM18c), không theo % LN ⇒ khi LN giảm, % có xu hướng TĂNG. Giữ 20%; độ nhạy 10/15/25% ở S5"
   }
  ],
  "base_adjustments": [
   {
-   "item": "tiền ròng điều chỉnh (−cổ tức phải trả −lãi vay cá nhân phải trả −quỹ KTPL −KTPL sẽ trích +LNST Q4 sau KTPL)",
+   "item": "tiền ròng điều chỉnh (−cổ tức phải trả −lãi vay cá nhân phải trả −quỹ KTPL mã 323 −KTPL sẽ trích 9T +LNST Q4 sau KTPL)",
    "effect_dong_per_share": -2411.735413188085,
    "basis": "nợ phải trả trên sổ + KTPL 20% đo được; LNST Q4 50 tỷ là ước lượng [UL]",
    "source": "BCTC HN Q3/2026 BCĐ (mã 323 = 40,708 tỷ); tv1_v2_core §C"
@@ -206,66 +214,381 @@
   {
    "item": "quỹ KTPL 20% trên dòng tiền thuỷ điện + tư vấn",
    "effect_dong_per_share": null,
-   "basis": "đo 30,1/150,2 LNST 2025",
-   "source": "BCTC 2025 / H1 tr.30"
+   "basis": "đo 3 năm 40,9%/19,7%/20,0% (FY23/24/25); quỹ theo tháng lương",
+   "source": "BCTC FY2025 TM17-18; H1/2026 TM22"
+  },
+  {
+   "item": "truy thu bậc giá 2022–26",
+   "effect_dong_per_share": 0.0,
+   "basis": "RA KHỎI BASE r3 — không có văn bản đòi; HĐ 05/2018 là dự thảo",
+   "source": "TOP5_CORRECTIONS_20261108 §TV1; README tv1_sb5_ppa_price_20261013 dòng 17–31"
   }
  ],
- "parallel": {
-  "no_timing_axis": {
-   "center_post": 16348,
-   "p10_post": 8420,
-   "p50_post": 15875,
-   "p90_post": 24562,
-   "pct_weight_below_price": 0.7083
+ "assumptions": [
+  {
+   "item": "r = 13,5% + 1,0×(lãi huy động 12T hiệu dụng − 7,40%)",
+   "value": 0.135,
+   "basis": "deposit_rate_vn.effective_deposit_rate(2026-11-06) = 7,40% (cctg_12m 02/11) ⇒ r 13,50%"
   },
-  "r1_axes_only": {
-   "center_post": 16348,
-   "p10_post": 8454,
-   "p50_post": 15759,
-   "p90_post": 24676,
-   "pct_weight_below_price": 0.7217
+  {
+   "item": "giá tham chiếu",
+   "value": 20400.0,
+   "basis": "đóng cửa 06/11/2026 tav2_bq.ticker (Price=Close=20.400; r3data/px_tv1_20261106.csv)"
   },
-  "with_ban_axis": {
-   "center_post": 12981,
-   "p10_post": 1431,
-   "p50_post": 12899,
-   "p90_post": 22806,
-   "pct_weight_below_price": 0.7942
+  {
+   "item": "phân bố giá PPA ròng 2027+",
+   "value": "949/600/520/440/340 @0,05/0,25/0,30/0,20/0,20 (kỳ vọng 509)",
+   "basis": "SKEPTIC_BLIND B1 [UL]; 340 = dự thảo HĐ 05/2018 được EVN NQ 286 + Cục ĐTĐL 1374 chấp thuận (chưa thấy bản ký); 500–600 = lời lãnh đạo qua KBSV 17/04/2026 (chưa kiểm bản gốc)"
+  },
+  {
+   "item": "thời điểm hạ bậc",
+   "value": "2027 0,80 / lùi 1 năm 0,15 / lùi 2 năm 0,05",
+   "basis": "lãnh đạo 'từ 2027'; chiều lùi có dữ liệu: mốc 2022 của dự thảo 2018 đã trôi ≥5 năm; [UL] xác suất"
+  },
+  {
+   "item": "truy thu hồi tố 2022–26",
+   "value": "KHÔNG trong base",
+   "basis": "không có văn bản đòi; EVN trả ~949 suốt 2022–25 đã kiểm toán; HĐ 2018 là dự thảo; → S1/S2"
+  },
+  {
+   "item": "biên tư vấn",
+   "value": "5/8/11/14% @0,20/0,30/0,40/0,10",
+   "basis": "SKEPTIC_BLIND B3 [UL]; lịch sử (đo lại đúng cách r3): 2022 2–4%, 2023 4–7%, 2024 4–6%, 2025 8–10%, 9T26 11–17%"
+  },
+  {
+   "item": "sản lượng",
+   "value": "175/187,5/200 GWh đều",
+   "basis": "BQ dài hạn 181–187 (2015–25 BQ 187)"
+  },
+  {
+   "item": "KTPL",
+   "value": 0.2,
+   "basis": "đo FY23/24/25 = 40,9%/19,7%/20,0%; quỹ trích theo tháng lương (BCTC FY25 TM18c) ⇒ không có cơ sở hạ xuống 10–15%"
+  },
+  {
+   "item": "VLĐ tư vấn",
+   "value": "45/49/53% ΔDT",
+   "basis": "đo 45–53% (SKEPTIC_BLIND N2)"
+  },
+  {
+   "item": "tiền ròng điều chỉnh",
+   "value": -2412,
+   "basis": "nợ trên sổ Q3/2026 + KTPL đo được; LNST Q4 50 tỷ [UL]"
+  },
+  {
+   "item": "CK thanh khoản",
+   "value": 0.0421,
+   "basis": "nửa spread CS + σ√(Q/ADV120) @5 tỷ — ngoài vùng hiệu chỉnh √ (797% ADV)"
   }
+ ],
+ "headline_vs_alternatives": [
+  {
+   "variant": "HEADLINE r3: không truy thu, timing 0,80/0,15/0,05",
+   "center": 16740,
+   "p10": 8823,
+   "p50": 16150,
+   "p90": 25179,
+   "pct_weight_below_price": 0.7455,
+   "note": "mô hình cơ sở sau đính chính"
+  },
+  {
+   "variant": "S1 truy thu nhất quán chỉ trong nhánh 340, P(truy thu|340)=0,10",
+   "center": 16525,
+   "p10": 8388,
+   "p50": 16119,
+   "p90": 25176,
+   "pct_weight_below_price": 0.7465,
+   "note": "skeptic phương án 1; P chung 0,02"
+  },
+  {
+   "variant": "S1k = S1 với timing nhánh khác 0,70/0,15/0,05 chuẩn hoá (khớp skeptic 16.570)",
+   "center": 16571,
+   "p10": 8414,
+   "p50": 16158,
+   "p90": 25238,
+   "pct_weight_below_price": 0.7442,
+   "note": "đối chiếu số skeptic"
+  },
+  {
+   "variant": "S2 truy thu P chung 0,10 dồn vào nhánh 340 (P|340=0,50)",
+   "center": 15661,
+   "p10": 3496,
+   "p50": 16021,
+   "p90": 25161,
+   "pct_weight_below_price": 0.7502,
+   "note": "skeptic phương án 2 (15.734 / P10 3.522)"
+  },
+  {
+   "variant": "S2k = S2 với timing skeptic",
+   "center": 15702,
+   "p10": 3515,
+   "p50": 16026,
+   "p90": 25225,
+   "pct_weight_below_price": 0.7481,
+   "note": "đối chiếu"
+  },
+  {
+   "variant": "S3 r2 cơ học (truy thu nhân chéo độc lập) trên dữ liệu 06/11",
+   "center": 15347,
+   "p10": 4684,
+   "p50": 15500,
+   "p90": 24494,
+   "pct_weight_below_price": 0.7684,
+   "note": "đã bác: kết cục tự mâu thuẫn (PPA 949/600 + truy thu bậc 340)"
+  },
+  {
+   "variant": "S0 không trục thời điểm",
+   "center": 16315,
+   "p10": 8403,
+   "p50": 15843,
+   "p90": 24512,
+   "pct_weight_below_price": 0.7661,
+   "note": ""
+  },
+  {
+   "variant": "S4 có cấm thầu EVN 3 năm −50% p0,35",
+   "center": 14159,
+   "p10": 5013,
+   "p50": 13525,
+   "p90": 23250,
+   "pct_weight_below_price": 0.8183,
+   "note": "vụ án — WARNING, ngoài tâm"
+  },
+  {
+   "variant": "KTPL 10/15/25%",
+   "center": {
+    "10%": 19256,
+    "15%": 17998,
+    "20%": 16740,
+    "25%": 15483
+   },
+   "note": "10–15% không có cơ sở dữ liệu (đo ≥ 19,7%)"
+  },
+  {
+   "variant": "độ nhạy r ±50/±100bp β1",
+   "center": {
+    "b1.0_-100": 18398,
+    "b1.0_-50": 17528,
+    "b1.0_+0": 16740,
+    "b1.0_+50": 16022,
+    "b1.0_+100": 15362
+   }
+  }
+ ],
+ "implied_by_price": {
+  "price": 20400.0,
+  "ppa_flat_at_consult_expect": 623,
+  "ppa_flat_at_consult_11pct": 547,
+  "ppa_flat_at_consult_14pct": 335,
+  "ppa_expect_grid": 509,
+  "note": "Giá 20.400 ngụ ý giá PPA ròng phẳng 2027+ ≈ 623 đ/kWh (tư vấn ở kỳ vọng) hoặc ≈ 547 (tư vấn 11% vĩnh viễn) — trên dải lãnh đạo 500–600 (tư vấn kỳ vọng) và xa mức văn bản duy nhất 340; hoặc tư vấn 14% vĩnh viễn với PPA ≈ 335. Không có truy thu, không cấm thầu."
  },
+ "bridge_r2_to_r3": [
+  {
+   "step": "r2 (giá 19.600 @04/11, CK 4,02%)",
+   "center": 15379,
+   "p10": 4693,
+   "p90": 24544,
+   "why": "bản r2"
+  },
+  {
+   "step": "dữ liệu giá 06/11 (CK @5 tỷ 4,02% → 4.21%), giữ cơ chế r2",
+   "center": 15347,
+   "p10": 4684,
+   "p90": 24494,
+   "why": "cửa sổ thanh khoản mới (σ, spread); r không đổi 13,5%"
+  },
+  {
+   "step": "bỏ truy thu khỏi base, trọng số 0,10 → 'đúng 2027'",
+   "center": 16740,
+   "p10": 8823,
+   "p90": 25179,
+   "why": "TOP5_CORRECTIONS §TV1 đ.1–3 đã kiểm: nhân chéo độc lập tự mâu thuẫn; không có văn bản đòi; HĐ 2018 là dự thảo ⇒ sang S1/S2"
+  },
+  {
+   "step": "KTPL: giữ 20% (KHÔNG áp độ nhạy 15/10% vào base)",
+   "center": 16740,
+   "why": "đo FY23/24/25 = 40,9/19,7/20,0% ⇒ đ.5 bác phần 'hạ KTPL'; đ.5 phần biên lịch sử: đúng (core sai 2022–23) nhưng không đổi lưới"
+  }
+ ],
+ "corrections_check": [
+  {
+   "n": 1,
+   "verdict": "ĐÚNG",
+   "evidence": "S1k 16.571/P10 8.414; S2k 15.702/P10 3.515 (skeptic 16.570/8.420; 15.734/3.522 — lệch do CK 4,21% vs 4,02%)"
+  },
+  {
+   "n": 2,
+   "verdict": "ĐÚNG",
+   "evidence": "không có văn bản đòi truy thu; core v2 dòng [N1] 'KHÔNG vào tâm'; r2 đưa vào không có thông tin mới"
+  },
+  {
+   "n": 3,
+   "verdict": "ĐÚNG — r2 §1 'đã ký' SAI",
+   "evidence": "README tv1_sb5_ppa_price_20261013 dòng 17–31: 'Hợp đồng sửa đổi, bổ sung số 05' là DỰ THẢO được EVN NQ 286 + Cục ĐTĐL 1374 chấp thuận; 'phụ lục 05 hoặc không ký như dự thảo, hoặc mốc hạ bậc đã lùi'; phụ lục PPA hiện hành KHÔNG TÌM THẤY; LEGAL_PPA_20261102 dòng 6–7 'cần văn bản gốc'"
+  },
+  {
+   "n": 4,
+   "verdict": "ĐÚNG",
+   "evidence": "dd_TV1_20261102/REPORT.md §7: VnExpress 02/07/2026 '13 công ty bị xác định có liên quan' gồm TV1; 'EVNNPT và nhà thầu đều có sai phạm' — thêm vào WARNING r3"
+  },
+  {
+   "n": 5,
+   "verdict": "MỘT PHẦN: KTPL — SAI hướng; biên lịch sử — ĐÚNG",
+   "evidence": "KTPL FY23/24/25 = 40,9/19,7/20,0% (BCTC FY25 TM17-18, H1/26 TM22), trích theo tháng lương ⇒ 15/10% không có cơ sở, giữ 20%, báo độ nhạy. Biên: EBITM_P0 là TTM (dictionary 08/11) ⇒ core 2022 −19%…−17% sai, đúng +2%…+4%; 2023 +4…+7%; 2024–25 không đổi"
+  },
+  {
+   "n": 6,
+   "verdict": "ĐÚNG",
+   "evidence": "TV1 là scandal cá nhân (nhóm a) ⇒ §2; giá ngụ ý calc 547–623 (skeptic 558–631)"
+  }
+ ],
+ "warnings_added": [
+  "VnExpress 02/07/2026: TV1 trong '13 công ty bị xác định có liên quan'; 'EVNNPT và nhà thầu đều có sai phạm' (nguồn REPORT 02/11 §7)",
+  "Thiên lệch xác nhận: TV1 đang trong plan SELL — định giá r3 KHÔNG neo vào quyết định bán; r3 tâm TĂNG (15.379→16.740) dù đi ngược chiều plan"
+ ],
+ "sleeve_eligibility": "Không đủ điều kiện fear-buy theo calculated_fear_state_backstop §2 (nhóm (a) scandal cá nhân — r2 dẫn nhầm §2.5): giá > tâm, vụ án chưa kết luận",
  "gordon": {
   "g": 0.03,
   "with_interest": 36722.83682874392,
   "without_interest": 37197.57652112962,
-  "note": "LNST 2025 sau KTPL; lãi TG 5% × 198,6 (ước lượng); bỏ qua hạ bậc PPA ⇒ chỉ đối chiếu"
+  "note": "LNST 2025 sau KTPL; lãi TG 5% × 198,6 (ước lượng); chưa trừ hạ bậc PPA ⇒ chỉ đối chiếu"
  },
- "zone_old": {
-  "round": 1,
-  "center_post_liq": 16348,
-  "p10_post": 8366,
-  "p50_post": 15706,
-  "p90_post": 24571,
-  "label": "TRONG vùng",
-  "grid": "5 kịch bản giá ròng PPA Sông Bung 5 từ 2027 (949/600/520/440/340 đ/kWh, xác suất 0,05/0,25/0,30/0,20/0,20 [UL]) × 4 kịch bản tư vấn (biên 5/8/11/14%, xác suất 0,20/0,30/0,40/0,10) × sản lượng {175; 187,5; 200} GWh đều (n=60)"
+ "sens_r": {
+  "b1.0_-100": {
+   "r": 0.125,
+   "post": 18397.654453062503,
+   "pct": 0.0989942434050941
+  },
+  "b1.0_-50": {
+   "r": 0.13,
+   "post": 17528.478733101965,
+   "pct": 0.047073542579826544
+  },
+  "b1.0_+0": {
+   "r": 0.135,
+   "post": 16740.446606944643,
+   "pct": 0.0
+  },
+  "b1.0_+50": {
+   "r": 0.14,
+   "post": 16021.61560469998,
+   "pct": -0.04293977449481312
+  },
+  "b1.0_+100": {
+   "r": 0.14500000000000002,
+   "post": 15362.414172188901,
+   "pct": -0.08231754308060546
+  },
+  "b0.5_-100": {
+   "r": 0.13,
+   "post": 17528.478733101965,
+   "pct": 0.047073542579826544
+  },
+  "b0.5_-50": {
+   "r": 0.1325,
+   "post": 17125.129885305294,
+   "pct": 0.022979272142062745
+  },
+  "b0.5_+0": {
+   "r": 0.135,
+   "post": 16740.446606944643,
+   "pct": 0.0
+  },
+  "b0.5_+50": {
+   "r": 0.1375,
+   "post": 16373.02702749919,
+   "pct": -0.02194801537092983
+  },
+  "b0.5_+100": {
+   "r": 0.14,
+   "post": 16021.61560469998,
+   "pct": -0.04293977449481312
+  }
  },
- "center_new_vs_old": -0.0593,
- "change_reason": "Tâm sau CK 15.379 vs vòng 1 16.348 (−5,9%): thêm trục thời điểm hai chiều (truy thu hồi tố p0,10 ≈ −17.397 đ/cp, lùi hạ bậc 1–2 năm p0,20) — kỳ vọng ròng âm; P10 8.366 → 4.693 (truy thu kéo đuôi dưới), P90 24.571 → 24.544. Bản không trục thời điểm: tâm 16.348, P10 8.420 (song song). Nhãn không đổi.",
- "warnings": [
-  "Vụ án EVNNPT/PC1: Chủ tịch HĐQT Nguyễn Hữu Chỉnh + phó phòng TCKT khởi tố, tạm giam (05/2026; nhadautu.vn, baolaocai.vn); pháp nhân: công ty chỉ nói 'chưa nhận thông tin/kết luận chính thức' (H1 TM33) — không phải 'chưa bị khởi tố'. Song song CÓ cấm thầu 3 năm −50% p0,35: tâm 12.981, P10 1.431",
-  "Cấm thầu/nộp tiền (đ/cp ở r 13,5%): cấm 3 năm −50% ≈ −8.194; 5 năm ≈ −12.983; nộp 20/50/100 tỷ ≈ −660/−1.650/−3.301 (vòng 1)",
-  "Big4 cả 4 hãng từ chối kiểm toán FY2026 (vietnamfinance 01/07/2026) — ĐÃ ĐÓNG: ký An Việt 18/08 (REPORT 02/11 §); rủi ro chất lượng kiểm toán còn (mốc M4 ~31/03/2027)",
-  "Truy thu bậc giá SB5 2022–26 (≈657 tỷ trước thuế) nay là nhánh lưới p0,10 [UL] — tranh chấp hợp đồng, chưa có văn bản đòi",
-  "Giá PPA SB5 từ 2027 không có văn bản (lãnh đạo 500–600 qua KBSV, chưa kiểm bản gốc; bậc 2018 243,66+O&M ≈ 340)",
-  "Cổ đông: EVN 54,34%; Lê Minh Hà 9,84% đồng thời bên cho vay (lãi vay cá nhân phải trả 64,3 tỷ); không trả cổ tức tiền FY2016–22",
-  "Tra tin 05/11/2026 (WebSearch): không thấy khởi tố/kết luận mới liên quan TV1 sau 02/11. Kết quả 'NQ ĐHĐCĐ bất thường 2/11 bán đấu giá SB5' là 02/11/2020 (vietnamfinance 07/11/2020; en.evn.com.vn) — 6 lần rao bán 2019–06/2021 đều bất thành; không phải dữ liệu mới"
- ],
- "open_issues": [
-  "Phụ lục PPA SB5 / CBTT giá 2027+ — chờ ĐHĐCĐ 2027 hoặc BCTC FY2026",
-  "Xác suất PPA, tư vấn, thời điểm [UL]; KBSV 500–600 chưa kiểm bản gốc",
-  "Điện mặt trời nổi 46 MWp: NPV 0 (chưa đầu tư)",
-  "Gordon dùng LNST 2025 (không có TTM trong lõi) — chỉ đối chiếu"
- ],
- "fearbuy_sleeve_eligible": "KHÔNG đủ điều kiện §2.5 ở trạng thái hiện tại: giá cao hơn tâm 27% (không có biên an toàn), vụ án chưa kết luận; nếu xét sau này phải mang trigger HARD ABANDON §3 và trần size 2–4% NAV (SKEPTIC_BLIND N7)",
- "source_calc": "calc/model_tv1_r2_out.json",
- "lock": "calc/LOCK_r2_md5.txt"
+ "ktpl_hist": {
+  "FY2023": {
+   "ktpl": 30.9336595,
+   "np": 75.64,
+   "src": "BCTC HN FY2025 kiểm toán TM18a (trích quỹ 2024 48,93 − ĐTPT 18,0); LNST 2023 = Σ NP_P0 BQ ticker_financial",
+   "pct": 0.4089590097831835
+  },
+  "FY2024": {
+   "ktpl": 17.24,
+   "np": 87.497357693,
+   "src": "BCTC HN FY2025 TM17/18a/18c (16,91 KTPL + 0,33 quản lý); LNST 2024 kiểm toán 87,50",
+   "pct": 0.19703452143651695
+  },
+  "FY2025": {
+   "ktpl": 30.1,
+   "np": 150.19777131,
+   "src": "BCTC HN H1/2026 TM22 tr.30",
+   "pct": 0.20040244097813703
+  }
+ },
+ "margin_hist_check": {
+  "2022": {
+   "ebit_core": 119.22886355543582,
+   "ebit_ttm_q4": 194.4482901353643,
+   "margin_core": [
+    -0.1914830476742182,
+    -0.16916155390572138
+   ],
+   "margin_fix": [
+    0.018393197535003993,
+    0.04071469130350082
+   ]
+  },
+  "2023": {
+   "ebit_core": 112.11063287428445,
+   "ebit_ttm_q4": 133.43554939130004,
+   "margin_core": [
+    -0.02216310695603068,
+    0.002940415398257854
+   ],
+   "margin_fix": [
+    0.04475320785499904,
+    0.06985673020928757
+   ]
+  },
+  "2024": {
+   "ebit_core": 139.80346198017986,
+   "ebit_ttm_q4": 140.42873052530314,
+   "margin_core": [
+    0.039126686622642855,
+    0.06223297964696986
+   ],
+   "margin_fix": [
+    0.040932641400456986,
+    0.06403893442478399
+   ]
+  },
+  "2025": {
+   "ebit_core": 202.77753141373918,
+   "ebit_ttm_q4": 201.81183470433902,
+   "margin_core": [
+    0.08438703383944292,
+    0.10228340095518908
+   ],
+   "margin_fix": [
+    0.08222672598520625,
+    0.10012309310095241
+   ]
+  }
+ },
+ "change_vs_r2": {
+  "center": 1361,
+  "center_pct": 0.0885,
+  "p10": 4130,
+  "p90": 635,
+  "label_r2": "TRONG vùng",
+  "label_r3": "TRONG vùng"
+ },
+ "files": {
+  "report": "REPORT_r3.md",
+  "calc": "calc/model_tv1_r3.py",
+  "out": "calc/model_tv1_r3_out.json|txt",
+  "lock": "calc/LOCK_r3_md5.txt",
+  "summary_prev": "SUMMARY_r2.json"
+ }
 }

@@ -247,5 +247,13 @@
    "DTD": 0.227
   },
   "note": "IDC/NTC NARROW du ROIC_Min5Y<Ke => thang tier khong thong nhat theo (i); voi HHS NONE hay NARROW khong doi gia tri theo 3c; Mike ra IDC/NTC"
+ },
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 10387,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
  }
 }

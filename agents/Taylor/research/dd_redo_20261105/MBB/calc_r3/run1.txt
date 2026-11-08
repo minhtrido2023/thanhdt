@@ -1,0 +1,48 @@
+== MBB VONG 3 | gia 19,250 (2026-11-06, BQ) | r 13.50% (dep 12T 7.40% cctg_12m(2026-11-02); neo 7.40% cctg_12m(2026-11-02))
+CK 5 ty: r2 0.1924% | r3 0.1913% (ADV250 349.1 ty, ADV60 210.5 ty, CK ADV60 0.1947%)
+CONTROL r2 tai lap (04/11): n=180 | tam 23,804 | P10 14,444 P25 16,799 P50 22,765 P75 29,044 P90 35,860 | %duoi gia 32.3% | min 11,194 max 51,815
+BRIDGE 0 r2 (gia 04/11): tam 23,804 (buoc +0) P10 14,444 P90 35,860 %duoi 32.3% n=180
+BRIDGE 1 gia+thanh khoan 06/11, chiet khau tu 06/11: tam 23,821 (buoc +17) P10 14,454 P90 35,886 %duoi 32.3% n=180
+BRIDGE 2 D1 g_RI terminal = 0 moi nhanh (bo thuong moat ngam): tam 20,183 (buoc -3,638) P10 14,454 P90 26,140 %duoi 46.2% n=180
+BRIDGE 3 D2 trong so kich ban doi xung 0,275/0,45/0,275: tam 20,826 (buoc +643) P10 14,559 P90 27,488 %duoi 40.6% n=180
+BRIDGE 4 D3 truc MBV doi xung +-3.500 (diem 15.688 -> co HARD ABANDON): tam 21,069 (buoc +243) P10 14,776 P90 27,488 %duoi 38.6% n=135
+BRIDGE 5 bo truc dg (vo tac dung sau D1; chi doi n): tam 21,069 (buoc +0) P10 14,729 P90 27,577 %duoi 38.6% n=45
+HEADLINE r3 (sau CK 5 ty): n=45 | tam 21,069 | P10 14,729 P25 17,116 P50 20,903 P75 24,687 P90 27,577 | %duoi gia 38.6% | min 12,124 max 31,615
+Truoc CK: n=45 | tam 21,109 | P10 14,757 P25 17,149 P50 20,943 P75 24,734 P90 27,630 | %duoi gia 38.6% | min 12,148 max 31,676
+Gia tri tai tham so trung tam (CO_SO, droe 0, MBV 0) sau CK: 20,944
+  XAU: r3 16,676 | r2-style 17,104 (truoc CK)
+  CO_SO: r3 20,984 | r2-style 24,131 (truoc CK)
+  TOT: r3 25,343 | r2-style 33,550 (truoc CK)
+Nhom kich ban quanh P10/P90: {'p10_scen_mix_pm5pct': {'XAU': 1.0}, 'p90_scen_mix_pm5pct': {'CO_SO': 0.29, 'TOT': 0.71}}
+SONG SONG A_RONIC_gt_Ke_(g_RI_r2)_trong_so+MBV_doi_xung: n=135 | tam 25,317 | P10 14,776 P25 17,498 P50 23,831 P75 31,016 P90 37,049 | %duoi gia 26.2% | min 12,124 max 51,851
+SONG SONG B_chi_D1_(trong_so_r2,MBV_r2): n=60 | tam 20,183 | P10 14,325 P25 16,544 P50 20,090 P75 23,366 P90 26,366 | %duoi gia 46.2% | min 11,202 max 31,615
+SONG SONG C_D1+D2_MBV_r2_(giu_diem_15.688): n=60 | tam 20,826 | P10 14,598 P25 16,760 P50 20,706 P75 23,905 P90 27,349 | %duoi gia 40.6% | min 11,202 max 31,615
+SONG SONG D_D1+D3_trong_so_r2: n=45 | tam 20,419 | P10 14,407 P25 16,586 P50 20,479 P75 23,558 P90 26,547 | %duoi gia 44.2% | min 12,124 max 31,615
+SONG SONG E_co_truc_phai_thu_MBV_(mat_30%_p=0,20): n=90 | tam 20,983 | P10 14,580 P25 17,048 P50 20,867 P75 24,529 P90 27,493 | %duoi gia 38.9% | min 11,869 max 31,615
+SONG SONG F_ROE_T_-2pp: n=45 | tam 18,742 | P10 12,617 P25 14,931 P50 18,610 P75 22,235 P90 25,050 | %duoi gia 58.6% | min 10,153 max 28,917
+SONG SONG G_ROE_T_+2pp: n=45 | tam 23,396 | P10 16,840 P25 19,301 P50 23,179 P75 27,138 P90 30,104 | %duoi gia 25.5% | min 14,096 max 34,313
+SONG SONG H_khong_truc_MBV_(NPV0): n=15 | tam 21,069 | P10 14,883 P25 17,224 P50 20,944 P75 24,733 P90 27,606 | %duoi gia 40.0% | min 12,389 max 30,971
+SONG SONG co_truc_r_pm1pp: n=135 | tam 21,145 | P10 14,781 P25 17,330 P50 20,863 P75 24,629 P90 28,126 | %duoi gia 39.1% | min 11,077 max 34,810
+Do nhay r (tam): {'-100bp': 23191, '-50bp': 22087, '+50bp': 20126, '+100bp': 19252}
+Co HARD ABANDON: CO_SO + bu lo luy ke MBV 15.688 sau CK = 18,969
+GIA NGU Y: Ke 14.50% | ROE_T dich -1.56pp (CO_SO ROE_T 14.44%) | dich ca duong ROE 27-29+T -1.05pp (CO_SO ROE_T 14.95%)
+Gordon P/B (BVPS 30/09): ROE_TTM_g0.06 30,624 | ROE_TTM_g0.07 32,936 | ROE_T_coso_g0.06 20,793 | ROE_T_coso_g0.07 21,592 | ROE_TTM_g0 23,944 | ROE_T_coso_g0 18,482 | ROE TTM 20.7%
+LNTT Q4/26 ngu y (PPOP-DP): XAU 8,500, CO_SO 12,000, TOT 14,500 | Q4/25 that 11.129 (mbb_calc.py:106)
+LOCK f5ad8f9ed0b3761de289f918e17ba679 MBB/calc_r3/mbb_r3.py
+LOCK c94272e5c4a132db4d22dc5c77379ae3 MBB/calc_r3/px_mbb_r3.sql
+LOCK 606e2f65e2648e3fd6ae4e1cf29c8c0a MBB/calc_r3/px_mbb_r3_20261106.csv
+LOCK b664ec37b7728c5ccaa06b0a77d7d76c _common_014125/r2common.py
+LOCK 442f39a3d556f43f75fa5f3f5519c2e9 _common_014125/bq_px_liq_20261104.csv
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK e918d858b4355d3a116a82ec20baeab2 MBB/calc/mbb_r2.py
+LOCK fb64e1e03e19437faa85905978380234 MBB/calc/mbb_redo.py
+LOCK ced532e72ae2d0b28db7c73d2f92b69f ../dd_MBB_20261031/calc/mbb_calc.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 3b6c133994a1e9fa09752f1a75f77f65 MBB/calc_r3/summary_r3_extra.json
+LOCK 517b35d2fce9dbb0b094a0352d976828 TOP5C_CORRECTIONS_20261108.md
+LOCK bf37f53ba652850301f152badd7d7831 STANDARD_r2.md
+LOCK caad35fd788dbcdc41bc1d96c1d99335 ../../../../kb/data_registry/market-state/sector_read_ngan_hang_20261031.md
+NHAN: TRONG vùng | gia 19,250 vs tam 21,069 (-8.6%) | SUMMARY.json (r3) written

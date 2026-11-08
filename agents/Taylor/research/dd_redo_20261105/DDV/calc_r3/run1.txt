@@ -1,0 +1,243 @@
+{
+"ctrl": {
+"n": 270,
+"center_pre": 13302,
+"center_post": 13109,
+"p10": 10115,
+"p25": 11114,
+"p50": 12823,
+"p75": 15014,
+"p90": 16270,
+"min": 7748,
+"max": 19270,
+"below": 0.7687,
+"label": "TRONG vùng"
+},
+"ctrl_eq": 0.0,
+"H": {
+"n": 405,
+"center_pre": 16149,
+"center_post": 15911,
+"p10": 13315,
+"p25": 14471,
+"p50": 15919,
+"p75": 17291,
+"p90": 18573,
+"min": 11308,
+"max": 22143,
+"below": 0.3791,
+"label": "TRONG vùng"
+},
+"H40": {
+"center_post": 16128,
+"p10": 13496,
+"p90": 18826,
+"label": "TRONG vùng"
+},
+"cp_post": 16454,
+"d_ref": 0.014725342035162675,
+"bridge": [
+{
+"step": "0 r2 (gia+CK 04/11)",
+"center": 13109,
+"delta": 0,
+"p10": 10115,
+"p90": 16270,
+"below": 0.7687
+},
+{
+"step": "1 gia+CK 06/11 (r 13,5% khong doi)",
+"center": 13106,
+"delta": -3,
+"p10": 10113,
+"p90": 16265,
+"below": 0.7687
+},
+{
+"step": "2 C1 tien rong = so BCTC 1.108 (bo chuan hoa VLD mot chan)",
+"center": 14717,
+"delta": 1611,
+"p10": 11724,
+"p90": 17876,
+"below": 0.5773
+},
+{
+"step": "3 C2 bo he so giua chu ky 0,8/1,0/1,1 theo kich ban",
+"center": 15320,
+"delta": 603,
+"p10": 13025,
+"p90": 17631,
+"below": 0.4751
+},
+{
+"step": "4 C3 RONIC = Ke (moat NONE)",
+"center": 14589,
+"delta": -731,
+"p10": 12458,
+"p90": 16755,
+"below": 0.652
+},
+{
+"step": "5 C4 Liven ghi theo so (xac suat mat sang do nhay)",
+"center": 14736,
+"delta": 147,
+"p10": 12590,
+"p90": 16777,
+"below": 0.6275
+},
+{
+"step": "6 C7 truc Q4 doi xung +-50 quanh Q3 that",
+"center": 14754,
+"delta": 18,
+"p10": 12612,
+"p90": 16800,
+"below": 0.6256
+},
+{
+"step": "7 C6 DT chuan hoa 5.500 -> 5.652 (FY2025 BQ)",
+"center": 15025,
+"delta": 271,
+"p10": 12852,
+"p90": 17133,
+"below": 0.5519
+},
+{
+"step": "8 C5 khoan tru lai gui: truc 70,9/35,4/0 thay 55,6 co dinh",
+"center": 15911,
+"delta": 886,
+"p10": 13315,
+"p90": 18573,
+"below": 0.3791
+}
+],
+"alt": {
+"nc_r2_one_leg_vs_3006": [
+14300,
+11704,
+16962,
+"TRONG vùng",
+-1611
+],
+"nc_one_leg_vs_0101": [
+15556,
+12960,
+18219,
+"TRONG vùng",
+-355
+],
+"nc_full_leg_vs_0101": [
+16706,
+14110,
+19368,
+"TRONG vùng",
+795
+],
+"int_full_current": [
+14353,
+12257,
+16306,
+"TRONG vùng",
+-1558
+],
+"int_r2_55_6": [
+15025,
+12852,
+17133,
+"TRONG vùng",
+-886
+],
+"int_zero": [
+17469,
+15007,
+19979,
+"TRONG vùng",
+1558
+],
+"rev_avg2125": [
+12452,
+10194,
+14768,
+"TRÊN vùng",
+-3459
+],
+"rev_ltm": [
+17254,
+14526,
+20087,
+"TRONG vùng",
+1343
+],
+"rev_5500_r2": [
+15640,
+13083,
+18266,
+"TRONG vùng",
+-271
+],
+"scn_w_sym": [
+16336,
+13627,
+19017,
+"TRONG vùng",
+425
+],
+"midcoef_bobby": [
+15273,
+12012,
+18783,
+"TRONG vùng",
+-638
+],
+"ronic_20": [
+16749,
+13948,
+19607,
+"TRONG vùng",
+838
+],
+"liven_p10": [
+15765,
+13163,
+18487,
+"TRONG vùng",
+-146
+],
+"xcheck_cash_capitalized": [
+11555,
+8533,
+14653,
+"TRÊN vùng",
+-4356
+],
+"pess_r2_choices": [
+13106,
+10113,
+16265,
+"TRONG vùng",
+-2805
+]
+},
+"r_sens": {
+"-100bp": 16684,
+"-50bp": 16282,
+"+50bp": 15567,
+"+100bp": 15247
+},
+"implied": {
+"scale_on_rev": 0.9293031047579967,
+"implied_npm_x_rev_ty": 212.82483497640573,
+"implied_mid_np_after_int_mid_ty": 177.38483497640573,
+"base_mid_np_ty": 193.57552129412957,
+"implied_rev_at_npm_cycle": 5252.421148092198,
+"r_implied": 0.14576860775423983,
+"r_implied_dep12": 0.08476860775423983
+},
+"gx": {
+"mid_np_excl_int_mid": 193.57552129412957,
+"mid_np_incl": 229.01552129412957,
+"roe_excl_on_eq_minus_nc": 0.17594575649348265,
+"roe_incl_on_eq": 0.10371140353868744,
+"eq_book": 2208.2,
+"nc": 1108.0
+}
+}

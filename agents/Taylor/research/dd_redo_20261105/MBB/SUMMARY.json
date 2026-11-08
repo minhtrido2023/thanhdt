@@ -1,30 +1,32 @@
 {
  "ticker": "MBB",
- "asof_price_date": "2026-11-04",
+ "asof_price_date": "2026-11-06",
  "price": 19250.0,
  "r": 0.135,
  "r_anchor": {
+  "r": 0.135,
   "rate": 0.07400000000000001,
-  "date": "2026-11-03",
   "source": "cctg_12m(2026-11-02)",
-  "asof_rate": 0.07400000000000001,
-  "rule": "r = 13,5% + beta x (dep - dep_neo), beta = 1 (gia dinh)"
+  "date": "2026-11-03",
+  "dep_asof": 0.07400000000000001,
+  "dep_asof_source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
  },
- "center_pre_liq": 23850,
- "center_post_liq": 23804,
- "p10_post": 14444,
- "p50_post": 22765,
- "p90_post": 35860,
- "p25_post": 16799,
- "p75_post": 29044,
- "p10_pre": 14472,
- "p50_pre": 22809,
- "p90_pre": 35929,
- "liq_disc_5ty": 0.0019235843815025287,
- "px_vs_center_post": -0.19132600944236922,
- "px_vs_p10_post": 0.33271734625559635,
- "px_vs_p90_post": -0.4631938519274701,
- "grid_desc": "Luoi co trong so n=45: kich ban XAU/CO SO/TOT (w 0,35/0,45/0,20) x dich ROE 2027-29+terminal -3/-1,5/0/+1,5/+3 pp x dich g terminal -1/0/+1 pp (deu); r co dinh 13,50%; RI 3 giai doan, BV0 = VCSH me cuoi 2026 theo kich ban; terminal: ROE_T < r => RI khong tang (von moi NPV 0). Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
+ "center_pre_liq": 21109,
+ "center_post_liq": 21069,
+ "p10_post": 14729,
+ "p50_post": 20903,
+ "p90_post": 27577,
+ "p25_post": 17116,
+ "p75_post": 24687,
+ "p10_pre": 14757,
+ "p50_pre": 20943,
+ "p90_pre": 27630,
+ "liq_disc_5ty": 0.0019125213933730257,
+ "px_vs_center_post": -0.08632460159206634,
+ "px_vs_p10_post": 0.30697841664284264,
+ "px_vs_p90_post": -0.3019502280058368,
+ "grid_desc": "Luoi n=60: kich ban XAU/CO_SO/TOT (0,275/0,45/0,275 [UL], doi xung) x dich ROE 2027-29+T -3..+3pp (5 diem deu) x MBV -3.500/0/+3.500 (0,25/0,50/0,25 [UL]). RI, BV0 = VCSH me 30/09 + LN Q4/26 kich ban; g_RI terminal = 0 moi nhanh (von moi sau 2029 sinh loi = Ke, moat NARROW khong ben); truc g_T bo vi vo tac dung. Sau CK 5 ty Y=1.",
  "grid_n": 45,
  "label": "TRONG vùng",
  "zone_old": {
@@ -33,56 +35,12 @@
   "high": 26000,
   "dd_date": "2026-10-31"
  },
- "center_change_vs_old": 0.06790909090909092,
+ "center_change_vs_old": -2735,
  "sens_r": {
-  "b0.5_-100bp": {
-   "r": 0.13,
-   "value": 25704,
-   "dv": 2165,
-   "pct": 0.0919643869496991
-  },
-  "b0.5_-50bp": {
-   "r": 0.1325,
-   "value": 24576,
-   "dv": 1037,
-   "pct": 0.04406804759920746
-  },
-  "b0.5_+50bp": {
-   "r": 0.1375,
-   "value": 22581,
-   "dv": -958,
-   "pct": -0.0406835197822345
-  },
-  "b0.5_+100bp": {
-   "r": 0.14,
-   "value": 21694,
-   "dv": -1845,
-   "pct": -0.07835956475158334
-  },
-  "b1.0_-100bp": {
-   "r": 0.125,
-   "value": 28281,
-   "dv": 4742,
-   "pct": 0.2014493360464067
-  },
-  "b1.0_-50bp": {
-   "r": 0.13,
-   "value": 25704,
-   "dv": 2165,
-   "pct": 0.0919643869496991
-  },
-  "b1.0_+50bp": {
-   "r": 0.14,
-   "value": 21694,
-   "dv": -1845,
-   "pct": -0.07835956475158334
-  },
-  "b1.0_+100bp": {
-   "r": 0.14500000000000002,
-   "value": 20223,
-   "dv": -3316,
-   "pct": -0.14085534062349525
-  }
+  "-100bp": 23191,
+  "-50bp": 22087,
+  "+50bp": 20126,
+  "+100bp": 19252
  },
  "change_reason": "Tam cu 22.000 = blend 0,5 RI @Ke 13,4% + 0,25 hoi quy comps + 0,25 P/B lich su; khung moi: tam = ky vong RI thuan @ r 13,5% (comps chi la doi chieu). Kich ban/gia dinh giu nguyen ban 31/10 (khong co BCTC moi sau Q3). Lech +6.8% chu yeu do bo 2 chan comps/P/B lich su (thap hon RI), r 13,4->13,5% chi -405 d/cp. Vung cu 18,000-26,000 la tham chieu tu chon; moi = P10-P90 luoi n=45 (14,456-36,126) rong hon vi luoi gom truc dich ROE +-3pp x g +-1pp.",
  "warnings": [
@@ -97,21 +55,22 @@
   "Khong quet tin moi 01-04/11/2026",
   "Ty le free float 60% la uoc luong tu so huu 2024-25 thu cap"
  ],
- "round": "r2",
- "job": "Taylor_20261105_020013",
- "p10_out": 14444,
- "p50_out": 22765,
- "p90_out": 35860,
- "pct_weight_below_price": 0.32349999999999995,
- "n_outcomes": 180,
- "min_outcome": 11194,
- "central_param_value_post": 24068,
+ "round": "r3",
+ "job": "Taylor_20261108_164331",
+ "p10_out": 14729,
+ "p50_out": 20903,
+ "p90_out": 27577,
+ "pct_weight_below_price": 0.38625000000000004,
+ "n_outcomes": 45,
+ "min_outcome": 12124,
+ "central_param_value_post": 20944,
  "ck_ref_size": {
   "size_vnd": 5000000000.0,
-  "disc_adv250": 0.0019235843815025287,
-  "disc_adv60": 0.0019218216262165278,
-  "adv250": 353701494300.0,
-  "adv60": 210494637500.0
+  "disc_adv250": 0.0019125213933730257,
+  "disc_adv60": 0.001947171647789644,
+  "adv250": 349125824025.0,
+  "adv60": 210494637500.0,
+  "part_adv250": 0.014321484278521783
  },
  "ck_real_sleeve": {
   "sizes_vnd": [
@@ -119,46 +78,128 @@
    40000000.0
   ],
   "disc_adv250": {
-   "10tr": 8.602530874993087e-05,
-   "40tr": 0.00017205061749986174
+   "10tr": 8.553055688009402e-05,
+   "40tr": 0.00017106111376018803
   },
-  "nav_spacex_ref": 940000000.0,
-  "note": "Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 1.414% -> trong vung; 10tr 0.003% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.011% -> DUOI vung (CK that ~ nua spread, chua do); 5 ty / ADV60 = 2.38%"
+  "note": "sleeve 10-40tr << 0,1% ADV250, DUOI vung hieu chinh luat can bac hai (CK that ~ nua spread, chua do)"
  },
  "parallel_versions": {
-  "co_truc_r_pm1pp": {
-   "n": 540,
-   "center": 24154,
-   "p10": 14147,
-   "p25": 16906,
-   "p50": 22704,
-   "p75": 29307,
-   "p90": 36748,
-   "pct_below_px": 0.34875,
-   "min": 10227,
-   "max": 67512
+  "A_RONIC_gt_Ke_(g_RI_r2)_trong_so+MBV_doi_xung": {
+   "n": 135,
+   "center": 25317,
+   "p10": 14776,
+   "p25": 17498,
+   "p50": 23831,
+   "p75": 31016,
+   "p90": 37049,
+   "pct_below_px": 0.2624999999999999,
+   "min": 12124,
+   "max": 51851
   },
-  "khong_truc_mbv": {
+  "B_chi_D1_(trong_so_r2,MBV_r2)": {
+   "n": 60,
+   "center": 20183,
+   "p10": 14325,
+   "p25": 16544,
+   "p50": 20090,
+   "p75": 23366,
+   "p90": 26366,
+   "pct_below_px": 0.46249999999999986,
+   "min": 11202,
+   "max": 31615
+  },
+  "C_D1+D2_MBV_r2_(giu_diem_15.688)": {
+   "n": 60,
+   "center": 20826,
+   "p10": 14598,
+   "p25": 16760,
+   "p50": 20706,
+   "p75": 23905,
+   "p90": 27349,
+   "pct_below_px": 0.40625000000000006,
+   "min": 11202,
+   "max": 31615
+  },
+  "D_D1+D3_trong_so_r2": {
    "n": 45,
-   "center": 24082,
-   "p10": 14456,
-   "p25": 16986,
-   "p50": 23214,
-   "p75": 29721,
-   "p90": 36126,
-   "pct_below_px": 0.30000000000000004,
-   "min": 12381,
-   "max": 50760
+   "center": 20419,
+   "p10": 14407,
+   "p25": 16586,
+   "p50": 20479,
+   "p75": 23558,
+   "p90": 26547,
+   "pct_below_px": 0.4425,
+   "min": 12124,
+   "max": 31615
+  },
+  "E_co_truc_phai_thu_MBV_(mat_30%_p=0,20)": {
+   "n": 90,
+   "center": 20983,
+   "p10": 14580,
+   "p25": 17048,
+   "p50": 20867,
+   "p75": 24529,
+   "p90": 27493,
+   "pct_below_px": 0.3889999999999999,
+   "min": 11869,
+   "max": 31615
+  },
+  "F_ROE_T_-2pp": {
+   "n": 45,
+   "center": 18742,
+   "p10": 12617,
+   "p25": 14931,
+   "p50": 18610,
+   "p75": 22235,
+   "p90": 25050,
+   "pct_below_px": 0.5862500000000002,
+   "min": 10153,
+   "max": 28917
+  },
+  "G_ROE_T_+2pp": {
+   "n": 45,
+   "center": 23396,
+   "p10": 16840,
+   "p25": 19301,
+   "p50": 23179,
+   "p75": 27138,
+   "p90": 30104,
+   "pct_below_px": 0.25500000000000006,
+   "min": 14096,
+   "max": 34313
+  },
+  "H_khong_truc_MBV_(NPV0)": {
+   "n": 15,
+   "center": 21069,
+   "p10": 14883,
+   "p25": 17224,
+   "p50": 20944,
+   "p75": 24733,
+   "p90": 27606,
+   "pct_below_px": 0.39999999999999997,
+   "min": 12389,
+   "max": 30971
+  },
+  "co_truc_r_pm1pp": {
+   "n": 135,
+   "center": 21145,
+   "p10": 14781,
+   "p25": 17330,
+   "p50": 20863,
+   "p75": 24629,
+   "p90": 28126,
+   "pct_below_px": 0.3909375,
+   "min": 11077,
+   "max": 34810
   }
  },
  "drivers": {
   "p10_scen_mix_pm5pct": {
-   "CO_SO": 0.125,
-   "XAU": 0.875
+   "XAU": 1.0
   },
   "p90_scen_mix_pm5pct": {
-   "CO_SO": 0.535,
-   "TOT": 0.465
+   "CO_SO": 0.29,
+   "TOT": 0.71
   }
  },
  "zone_old_r1": {
@@ -168,27 +209,44 @@
   "label": "TRONG vùng"
  },
  "axes_included": [
-  "kich ban XAU/CO_SO/TOT (0,35/0,45/0,20)",
+  "kich ban XAU/CO_SO/TOT (0,275/0,45/0,275, doi xung)",
   "dich ROE 2027-29+T -3..+3pp (5 diem deu)",
-  "dich g_T -1/0/+1pp (deu)",
-  "MBV: -3.500 (loi ich uu dai, len) / 0 (NPV0) / +3.500 (mat trang gop) / +15.688 (bu lo luy ke 2024) trong so 0,15/0,50/0,25/0,10 [UL]"
+  "MBV -3.500/0/+3.500 (0,25/0,50/0,25) [UL]"
  ],
  "axes_excluded": [
   {
-   "axis": "r (Ke)",
-   "reason": "luat 03/11: r neo lai huy dong 12T, khong phai bien bat dinh cua cong ty; bao song song co truc r +-1pp (parallel_versions.co_truc_r_pm1pp)"
+   "axis": "g_T -1/0/+1pp",
+   "reason": "vo tac dung sau D1 (g_RI terminal = 0 moi nhanh); song song A (RONIC>Ke) giu truc nay"
   },
   {
-   "axis": "uu dai MBV (tran tin dung 35%/nam x4, room ngoai 49%)",
-   "reason": "nam trong diem -3.500 cua truc MBV (len) va truc droe; khong co du lieu tach rieng"
+   "axis": "r (Ke) +-1pp",
+   "reason": "luat 03/11: r neo lai huy dong 12T; bao song song co_truc_r_pm1pp + sens_r"
+  },
+  {
+   "axis": "MBV bu lo luy ke 15.688",
+   "reason": "khong co van ban nghia vu (skeptic D3) => co HARD ABANDON, gia tri o hard_abandon_flag_value; song song C giu diem nay"
+  },
+  {
+   "axis": "phai thu ban no MBV 11.248",
+   "reason": "so sach, khong co du lieu suy giam; truc chi lech xuong (khong the thu > so sach) => song song E co truc, bao canh headline"
+  },
+  {
+   "axis": "uu dai MBV (tran tin dung, room ngoai 49%)",
+   "reason": "nam trong diem -3.500 cua truc MBV va truc droe; khong co du lieu tach rieng"
   }
  ],
  "base_adjustments": [
   {
    "item": "MBV o base",
    "effect_dong_per_share": 0,
-   "basis": "NPV 0 (so sach): BCTC HN-Q3 tr.2 chua gop von MBV tai 30/09",
+   "basis": "NPV 0 (so sach): HN-Q3 tr.2 chua gop von MBV tai 30/09",
    "source": "HN-Q3 PDF p9"
+  },
+  {
+   "item": "Phai thu ban no MBV 11.248",
+   "effect_dong_per_share": 0,
+   "basis": "so sach",
+   "source": "BCTN25"
   }
  ],
  "center_vs_p50_note": "tam = ky vong luoi 23,804; P50 22,765; gia tri tai tham so trung tam 24,068. Truc MBV lech xuong (diem 15.688) keo tam xuong 278 d/cp so ban khong truc MBV.",
@@ -196,24 +254,32 @@
   "ROE_TTM_g0.06": 30624,
   "ROE_TTM_g0.07": 32936,
   "ROE_T_coso_g0.06": 20793,
-  "ROE_T_coso_g0.07": 21592
+  "ROE_T_coso_g0.07": 21592,
+  "ROE_TTM_g0": 23944,
+  "ROE_T_coso_g0": 18482
  },
  "ri_at_ke_145_15": {
   "0.145": 20223,
   "0.15": 18933
  },
  "lock_md5": {
-  "MBB/calc/mbb_r2.py": "e918d858b4355d3a116a82ec20baeab2",
-  "MBB/calc/mbb_redo.py": "fb64e1e03e19437faa85905978380234",
-  "_common_014125/common.py": "89e390381402790204264c5c2ae1254a",
+  "MBB/calc_r3/mbb_r3.py": "f5ad8f9ed0b3761de289f918e17ba679",
+  "MBB/calc_r3/px_mbb_r3.sql": "c94272e5c4a132db4d22dc5c77379ae3",
+  "MBB/calc_r3/px_mbb_r3_20261106.csv": "606e2f65e2648e3fd6ae4e1cf29c8c0a",
   "_common_014125/r2common.py": "b664ec37b7728c5ccaa06b0a77d7d76c",
   "_common_014125/bq_px_liq_20261104.csv": "442f39a3d556f43f75fa5f3f5519c2e9",
   "_shared/wpct.py": "4597bc083f0d64d8873141b12fbfb3a6",
+  "MBB/calc/mbb_r2.py": "e918d858b4355d3a116a82ec20baeab2",
+  "MBB/calc/mbb_redo.py": "fb64e1e03e19437faa85905978380234",
+  "../dd_MBB_20261031/calc/mbb_calc.py": "ced532e72ae2d0b28db7c73d2f92b69f",
   "../../../../../deposit_rate_vn.py": "13dac039539fb91fc8f7256c03a71e5d",
-  "../../../../kb/dd_price_zones.json": "820180d3042303876d46a5a3bcd9bfbd",
   "../../../../../cctg_rate_vn.py": "f9605983ad3b66b47ed80179bcad81da",
   "../../../../../data/deposit_rate_vn_events.csv": "1bb3c27280abc1dbd014af7eecf8b3d4",
-  "../../../../../data/cctg_rate_vn_events.csv": "fc06e3a866142684d87a43b34e0f17d2"
+  "../../../../../data/cctg_rate_vn_events.csv": "fc06e3a866142684d87a43b34e0f17d2",
+  "MBB/calc_r3/summary_r3_extra.json": "3b6c133994a1e9fa09752f1a75f77f65",
+  "TOP5C_CORRECTIONS_20261108.md": "517b35d2fce9dbb0b094a0352d976828",
+  "STANDARD_r2.md": "bf37f53ba652850301f152badd7d7831",
+  "../../../../kb/data_registry/market-state/sector_read_ngan_hang_20261031.md": "caad35fd788dbcdc41bc1d96c1d99335"
  },
  "warnings_r2_added": [
   "Uu dai MBV (tran tang truong tin dung, room ngoai 49% theo ND 69/2025) [WEB] - chua kiem",
@@ -223,5 +289,257 @@
   "Nghi quyet DHDCD/HDQT goc ve phat hanh 2026 chua doc (tach 15%+10% chi tu WEB)",
   "Lo phai sinh -1.066 (swap) la suy luan"
  ],
- "fear_buy_eligible_2_5": false
+ "fear_buy_eligible_2_5": false,
+ "price_date": "2026-11-06",
+ "price_source": "BQ tav2_bq.ticker Price (px_mbb_r3_20261106.csv)",
+ "r_implied_center_eq_px": 0.14501211658462826,
+ "bridge_r2_to_r3": [
+  {
+   "step": "0 r2 (gia 04/11)",
+   "center": 23804,
+   "delta": 0,
+   "p10": 14444,
+   "p90": 35860,
+   "pct_below_px": 0.3235,
+   "n": 180
+  },
+  {
+   "step": "1 gia+thanh khoan 06/11, chiet khau tu 06/11",
+   "center": 23821,
+   "delta": 17,
+   "p10": 14454,
+   "p90": 35886,
+   "pct_below_px": 0.3235,
+   "n": 180
+  },
+  {
+   "step": "2 D1 g_RI terminal = 0 moi nhanh (bo thuong moat ngam)",
+   "center": 20183,
+   "delta": -3638,
+   "p10": 14454,
+   "p90": 26140,
+   "pct_below_px": 0.4625,
+   "n": 180
+  },
+  {
+   "step": "3 D2 trong so kich ban doi xung 0,275/0,45/0,275",
+   "center": 20826,
+   "delta": 643,
+   "p10": 14559,
+   "p90": 27488,
+   "pct_below_px": 0.4062,
+   "n": 180
+  },
+  {
+   "step": "4 D3 truc MBV doi xung +-3.500 (diem 15.688 -> co HARD ABANDON)",
+   "center": 21069,
+   "delta": 243,
+   "p10": 14776,
+   "p90": 27488,
+   "pct_below_px": 0.3862,
+   "n": 135
+  },
+  {
+   "step": "5 bo truc dg (vo tac dung sau D1; chi doi n)",
+   "center": 21069,
+   "delta": 0,
+   "p10": 14729,
+   "p90": 27577,
+   "pct_below_px": 0.3863,
+   "n": 45
+  }
+ ],
+ "control_r2_reproduced": {
+  "n": 180,
+  "center": 23804,
+  "p10": 14444,
+  "p25": 16799,
+  "p50": 22765,
+  "p75": 29044,
+  "p90": 35860,
+  "pct_below_px": 0.32349999999999995,
+  "min": 11194,
+  "max": 51815
+ },
+ "implied_by_price": {
+  "ke": 0.14501211658462826,
+  "roeT_shift_pp": -1.5633287331925052,
+  "roeT_co_so": 0.14436671266807494,
+  "roe_path_and_T_shift_pp": -1.0497327943250048,
+  "roeT_co_so_all": 0.14950267205674994
+ },
+ "hard_abandon_flag_value": 18969,
+ "q4_pbt_implied": {
+  "XAU": 8500,
+  "CO_SO": 12000,
+  "TOT": 14500
+ },
+ "zone_r2": {
+  "center": 23804,
+  "p10": 14444,
+  "p90": 35860,
+  "label": "TRONG vùng",
+  "price": 19250.0,
+  "date": "2026-11-04",
+  "pct_below": 0.32349999999999995
+ },
+ "headline_vs_alternatives": [
+  {
+   "name": "HEADLINE r3",
+   "center": 21069,
+   "p10": 14729,
+   "p50": 20903,
+   "p90": 27577,
+   "pct_below_px": 0.38625000000000004,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "A_RONIC_gt_Ke_(g_RI_r2)_trong_so+MBV_doi_xung",
+   "center": 25317,
+   "p10": 14776,
+   "p50": 23831,
+   "p90": 37049,
+   "pct_below_px": 0.2624999999999999,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "B_chi_D1_(trong_so_r2,MBV_r2)",
+   "center": 20183,
+   "p10": 14325,
+   "p50": 20090,
+   "p90": 26366,
+   "pct_below_px": 0.46249999999999986,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "C_D1+D2_MBV_r2_(giu_diem_15.688)",
+   "center": 20826,
+   "p10": 14598,
+   "p50": 20706,
+   "p90": 27349,
+   "pct_below_px": 0.40625000000000006,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "D_D1+D3_trong_so_r2",
+   "center": 20419,
+   "p10": 14407,
+   "p50": 20479,
+   "p90": 26547,
+   "pct_below_px": 0.4425,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "E_co_truc_phai_thu_MBV_(mat_30%_p=0,20)",
+   "center": 20983,
+   "p10": 14580,
+   "p50": 20867,
+   "p90": 27493,
+   "pct_below_px": 0.3889999999999999,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "F_ROE_T_-2pp",
+   "center": 18742,
+   "p10": 12617,
+   "p50": 18610,
+   "p90": 25050,
+   "pct_below_px": 0.5862500000000002,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "G_ROE_T_+2pp",
+   "center": 23396,
+   "p10": 16840,
+   "p50": 23179,
+   "p90": 30104,
+   "pct_below_px": 0.25500000000000006,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "H_khong_truc_MBV_(NPV0)",
+   "center": 21069,
+   "p10": 14883,
+   "p50": 20944,
+   "p90": 27606,
+   "pct_below_px": 0.39999999999999997,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "co_truc_r_pm1pp",
+   "center": 21145,
+   "p10": 14781,
+   "p50": 20863,
+   "p90": 28126,
+   "pct_below_px": 0.3909375,
+   "label": "TRONG vùng"
+  }
+ ],
+ "assumptions": [
+  {
+   "item": "r (Ke)",
+   "value": "13,5% + 1,0 x (lai huy dong 12T hieu dung 06/11 - 7,40% @03/11)",
+   "basis": "luat skill due-diligence (user 03/11); deposit_rate_vn.effective_deposit_rate"
+  },
+  {
+   "item": "Gia tham chieu",
+   "value": "dong cua 06/11/2026 BQ tav2_bq.ticker",
+   "basis": "px_mbb_r3_20261106.csv (px_mbb_r3.sql)"
+  },
+  {
+   "item": "BV0",
+   "value": "VCSH hop nhat 164.141,608 - CDKKS 7.124,845 ty (30/09/2026)",
+   "basis": "BCTC HN-Q3/2026 p3-4"
+  },
+  {
+   "item": "So CP",
+   "value": "10.068,75 trieu",
+   "basis": "VDL 100.687,5 ty, HN-Q3 tr.36"
+  },
+  {
+   "item": "LN Q4/26 (PPOP-DP) 8.500/12.000/14.500",
+   "value": "XAU/CO_SO/TOT",
+   "basis": "[UL] kich ban 31/10 (qua skeptic CONFIRMED 31/10); doi chieu Q4/25 that LNTT 11.129 (mbb_calc.py:106)"
+  },
+  {
+   "item": "Duong ROE 2027-29 va ROE_T 14/16/18%",
+   "value": "XAU/CO_SO/TOT",
+   "basis": "[UL] ROE_T thap hon ROE 10 nam MBB 19,8% (da chua STRUCTURAL: Basel III/TT14, mbb_calc.py:133), cao hon trung vi nganh 13,0% (ADDENDUM_5F peer BQ)"
+  },
+  {
+   "item": "g_RI terminal = 0 moi nhanh",
+   "value": "von moi sau 2029 sinh loi = Ke (RONIC = Ke)",
+   "basis": "ADDENDUM_5F: moat NARROW khong ben; quy uoc user 08/11 'moat chi cong khi ben, khong tru' => khong thuong RONIC>Ke, nhung KHONG ep ROE_T ve nganh"
+  },
+  {
+   "item": "Trong so kich ban 0,275/0,45/0,275",
+   "value": "doi xung",
+   "basis": "[UL] Bobby ADMIN 0,45/CYCLICAL 0,35/STRUCTURAL 0,20 la loai che do, khong phai xau/tot; STRUCTURAL am va da nam trong ROE_T moi nhanh => TOT khong muon 0,20 cua STRUCTURAL, XAU khong nhan 0,35 rieng; doi xung la mac dinh khong thong tin"
+  },
+  {
+   "item": "Truc MBV -3.500/0/+3.500 @0,25/0,50/0,25",
+   "value": "doi xung quanh so sach (NPV0)",
+   "basis": "[UL] QD gop 3.500 01/10/2026 [WEB thu cap]; -3.500 = loi ich uu dai (room tin dung/room ngoai), +3.500 = mat trang phan gop. Diem 15.688 (lo luy ke 2024 [WEB]) khong co van ban nghia vu => co HARD ABANDON, khong vao luoi"
+  },
+  {
+   "item": "Phai thu ban no MBV 11.248 (31/12/25, BCTN25)",
+   "value": "so sach trong base",
+   "basis": "khong co du lieu suy giam; song song E mat 30% p=0,20 [UL]; so du 30/09/26 chua kiem"
+  },
+  {
+   "item": "Payout tien 30%, thue 20%, CDKKS 2,5%",
+   "value": "giu r2",
+   "basis": "[UL] ban 31/10"
+  },
+  {
+   "item": "CK thanh khoan",
+   "value": "luat can bac hai sigma*sqrt(Q/ADV250), Q=5 ty",
+   "basis": "STANDARD_r2 muc 6; Q/ADV250 ~1,4% trong vung hieu chinh"
+  }
+ ],
+ "warnings_r3_added": [
+  "NPL/no nhom 2/ty le bao phu Q3/26 CHUA tu kiem (BQ khong co cot; chua doc anh BCTC HN-Q3) — ghi 'chua kiem'",
+  "So du phai thu ban no MBV tai 30/09/26 chua kiem (so 11.248 la 31/12/25)",
+  "Phap ly sau 05/11 chua quet lai"
+ ]
 }

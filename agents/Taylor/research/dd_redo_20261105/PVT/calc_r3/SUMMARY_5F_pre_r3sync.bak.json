@@ -1,0 +1,228 @@
+{
+ "ticker": "PVT",
+ "job": "Taylor_20261108_024225",
+ "moat_tier": "NONE",
+ "moat_type": "NONE",
+ "risk1": "Freight-cycle trough coinciding with forced IMO fleet-replacement capex bought near ship-price peak; ROIC can revert to Min10Y 2.5%",
+ "reused": false,
+ "source_asof": "2026-11-07 (lam moi; moat_tags.csv chua co PVT; DD 29/10 khong co 5F)",
+ "moat_durable": false,
+ "durability_evidence": {
+  "Ke": 0.135,
+  "ROIC5Y": 0.1003,
+  "ROIC_Min5Y": 0.0943,
+  "ROIC10Y": 0.0905,
+  "ROIC_Min10Y": 0.0254,
+  "ROE_med_2015_25": 0.1315,
+  "ROE_Min5Y": 0.1241,
+  "ROE_TTM_Q3_26": 0.1577,
+  "GPM_med": 0.15,
+  "peers_roe_med": {
+   "GSP": 0.1251,
+   "PJT": 0.1219,
+   "PVP": 0.1162,
+   "VIP": 0.0675,
+   "VTO_ROE10Y_Q4_2025": 0.0819,
+   "VTO_ROE5Y_med_Q4_2015_25": 0.0764,
+   "VTO_ROE5Y_Q4_2025": 0.0847
+  },
+  "ROIC_note": "ROIC_xY dong Q3/26 = FY2025; so voi WACC ~9.5-10% (D/E~0.9) ~ ROIC5Y 10.0% => khong spread duong; khong so Ke"
+ },
+ "model_changed": true,
+ "model_change_status": "quy uoc chat-3c + neo ROE CHO Mike/user duyet; khong ghi dd_price_zones/SUMMARY",
+ "old": {
+  "center_post": 17675,
+  "p10_out": 12533,
+  "p50_out": 17425,
+  "p90_out": 23135,
+  "pct_weight_below_price": 0.7825,
+  "label": "TRONG vùng",
+  "label_40tr": "TRONG vùng"
+ },
+ "new_range_by_peer_choice": [
+  13942,
+  16829
+ ],
+ "decomposition": {
+  "ronic_ke_only": 302,
+  "anchor_only": -1964,
+  "combined": -1183
+ },
+ "label_note": "TRONG->TREN phu thuoc quy uoc neo ROE (SKILL 3c ghi BIEN ve TB nganh; GPM PVT 15% da o trung vi peer, chenh ROE den tu don bay VIP D/E 0.1): doc dung chu \"bien\" hoac ROE=Ke 18381 => TRONG. CHO Mike/user chot",
+ "sensitivity": {
+  "WIDE": {
+   "center_post": 21782,
+   "p10_out": 15643,
+   "p50_out": 21667,
+   "p90_out": 28048,
+   "pct_weight_below_price": 0.46249999999999997,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NARROW_current": {
+   "center_post": 17675,
+   "p10_out": 12533,
+   "p50_out": 17425,
+   "p90_out": 23135,
+   "pct_weight_below_price": 0.7825,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NONE_strict3c_peer_med": {
+   "center_post": 16492,
+   "p10_out": 12636,
+   "p50_out": 16299,
+   "p90_out": 20401,
+   "pct_weight_below_price": 0.9399999999999998,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "NONE_strict3c_peer_mean": {
+   "center_post": 15132,
+   "p10_out": 11523,
+   "p50_out": 15002,
+   "p90_out": 18740,
+   "pct_weight_below_price": 0.98,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "NONE_strict3c_exPVP_med": {
+   "center_post": 16829,
+   "p10_out": 12912,
+   "p50_out": 16593,
+   "p90_out": 20865,
+   "pct_weight_below_price": 0.9075,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "NONE_strict3c_exPVP_mean": {
+   "center_post": 14791,
+   "p10_out": 11244,
+   "p50_out": 14664,
+   "p90_out": 18324,
+   "pct_weight_below_price": 0.995,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "ROE_eq_Ke": {
+   "center_post": 18381,
+   "p10_out": 13721,
+   "p50_out": 17926,
+   "p90_out": 22469,
+   "pct_weight_below_price": 0.7949999999999999,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "RONIC_ke_only": {
+   "center_post": 17977,
+   "p10_out": 13852,
+   "p50_out": 17719,
+   "p90_out": 22298,
+   "pct_weight_below_price": 0.7825,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "peer_med_plusVTO": {
+   "center_post": 16155,
+   "p10_out": 12360,
+   "p50_out": 16005,
+   "p90_out": 19989,
+   "pct_weight_below_price": 0.9499999999999998,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "peer_med_exPVP_plusVTO": {
+   "center_post": 14443,
+   "p10_out": 10982,
+   "p50_out": 14299,
+   "p90_out": 17898,
+   "pct_weight_below_price": 0.995,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "peer_mean_plusVTO": {
+   "center_post": 14517,
+   "p10_out": 11037,
+   "p50_out": 14377,
+   "p90_out": 17989,
+   "pct_weight_below_price": 0.995,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "peer_mean_exPVP_plusVTO": {
+   "center_post": 14108,
+   "p10_out": 10734,
+   "p50_out": 13949,
+   "p90_out": 17489,
+   "pct_weight_below_price": 1.0,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "VTO_lo_med_exPVP": {
+   "center_post": 14112,
+   "p10_out": 10738,
+   "p50_out": 13954,
+   "p90_out": 17495,
+   "pct_weight_below_price": 1.0,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "VTO_hi_med_exPVP": {
+   "center_post": 14610,
+   "p10_out": 11106,
+   "p50_out": 14476,
+   "p90_out": 18102,
+   "pct_weight_below_price": 0.995,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  }
+ },
+ "price": 21000,
+ "proposed_moat_tag_row": "PVT,NONE,NONE,L,\"Tanker freight-cycle commodity: ROIC5Y 10.0%/Min5Y 9.4%/Min10Y 2.5% ~ WACC 9.5-10% (no positive spread) despite best-in-domestic-peers; PVN captive (22.4% rev 9T/26) gives volume not price; IMO CII/EEXI on ~17.7y fleet forces replacement capex near ship-price peak\",2026-11-07,5f_dd_taylor,N",
+ "measured_by": "calc_5f/pvt_5f.py (2 lan chay trung byte) -> calc_5f/pvt_5f_out.txt; calc_5f/peer_5f_bq.csv; calc_5f/vto_roe_bq.csv (bq ticker_financial VTO)",
+ "fix_round": "r2 sau skeptic; r1 = SUMMARY_5F_r1.json",
+ "new_headline_r1_with_PVP": {
+  "center_post": 16492,
+  "p10_out": 12636,
+  "p50_out": 16299,
+  "p90_out": 20401,
+  "pct_weight_below_price": 0.9399999999999998,
+  "label": "TRÊN vùng",
+  "label_40tr": "TRÊN vùng"
+ },
+ "new_headline": {
+  "note": "DAI: dau tren = ex-PVP (PVP la cong ty con hop nhat); dau duoi = ex-PVP + VTO. Nhan TREN (dau tren ranh gioi P90 -0.6%; dau duoi chac P90 -14.8%)",
+  "upper_exPVP": {
+   "center_post": 16829,
+   "p10_out": 12912,
+   "p50_out": 16593,
+   "p90_out": 20865,
+   "pct_weight_below_price": 0.9075,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "lower_exPVP_VTO": {
+   "center_post": 14443,
+   "p10_out": 10982,
+   "p50_out": 14299,
+   "p90_out": 17898,
+   "pct_weight_below_price": 0.995,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "center_range": [
+   14443,
+   16829
+  ]
+ },
+ "vto_note": "r1 loai VTO vi thieu ROE_Trailing la SAI (BQ co ROE5Y/10Y 7.6-8.5%); loai VTO nghieng LAC QUAN; neo VTO co so ROE10Y Q4/2025 8.19% (TB 5/10 nam, khong cung co so voi trung vi ROE_Trailing peer khac)",
+ "double_count_warning": "Truc mua tau r2 (REPORT_r2:63) da tru NPV -4.5%x0.5; bo truc: CUR 17675->17761 (+86d). Kenh doi tau cu gia goc/ROE so sach giam khi thay tau dinh gia chong mot phan => khong cong du; phan chong chua tach",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 17675,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
+}

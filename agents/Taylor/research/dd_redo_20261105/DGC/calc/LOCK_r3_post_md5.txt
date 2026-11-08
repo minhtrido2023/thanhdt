@@ -1,0 +1,8 @@
+989134dafb9592c1e3587f8c1bc76a24  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/implied_r3.py
+0d3462f8f312f11f898596924d1eac6f  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/implied_r3_out.json
+85d902607a5810e4ffa81440cf9a4668  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/make_summary_r3.py
+42fc85c5b52df2f01b0c3449f33f8dcc  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/summary_r3_core.json
+70b350fa97558e3c8aa7832aabe4d8cf  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/compare_r3_out.txt
+a86b591616edafd9c25e01801d4eb3be  mike/agents/Taylor/research/dd_redo_20261105/DGC/SUMMARY.json
+03e06d92f8256ab5723eeb72b33fce38  mike/agents/Taylor/research/dd_redo_20261105/DGC/SUMMARY_r2.json
+d076b8ac64e2d09961877a1dc573a988  mike/agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3.md

@@ -1,0 +1,252 @@
+{
+ "ticker": "TV2",
+ "asof": "2026-11-07",
+ "job": "Taylor_20261107_172014",
+ "moat_tier": "NONE",
+ "moat_type": "REGULATORY/AFFILIATION",
+ "risk1": "Không có HĐ EPC thay thế sau 2028 ⇒ ROE kẹt ~4–7% < Ke như 2022–25 (ROE_Trailing 2026Q3 16,3% > Ke nhờ lãi tài chính 44% LNTT, không nhờ EPC); WARNING pháp lý kênh EVN ngoài lưới",
+ "reused": false,
+ "source_asof": null,
+ "source_note": "moat_tags.csv không có TV2; kb tv2-dd-20261028/20261101 không có audit 5F ⇒ làm mới",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_multi_cycle": false,
+  "ii_named_mechanism": "unverified (depends on 2 items needing verification: EVN revenue share, market share)",
+  "iii_no_clock": false
+ },
+ "model_changed": true,
+ "convention_pending_approval": true,
+ "old": {
+  "center": 15832,
+  "p10": 2726,
+  "p50": 15843,
+  "p90": 30675,
+  "pct_below": 0.841,
+  "label": "TRONG vùng",
+  "label_sleeve40tr": "TRONG vùng",
+  "note": "r2 control (superseded by r3: centre 17491, P10 7702, P90 30677)"
+ },
+ "new_headline": {
+  "variant": "NONE_anchor_Ke13.5",
+  "center": 17807,
+  "p10": 14761,
+  "p50": 17808,
+  "p90": 20296,
+  "pct_below": 1.0,
+  "label": "TRÊN vùng (>P90)",
+  "label_sleeve40tr": "TRÊN vùng (>P90)",
+  "note": "headline = range ~16.3k-19.2k; center on Ke anchor; upper end 19,201 not headline"
+ },
+ "new_range_center": [
+  16329,
+  19201
+ ],
+ "decomposition": {
+  "ronic_eq_ke": 416,
+  "industry_anchor_vs_ronic_only": {
+   "Ke_13.5": 1559,
+   "TV3_TV4_2022_25": 81,
+   "TV3_TV4_2012_25": 2952,
+   "TV2_own_2022_25": -7508
+  }
+ },
+ "anchors": {
+  "TV3_TV4_roe_q4_2012_25": {
+   "median": 0.1476,
+   "mean": 0.1415
+  },
+  "TV1_TV3_TV4": {
+   "median": 0.1382,
+   "mean": 0.1295
+  },
+  "TV2_own": {
+   "median": 0.2279
+  },
+  "TV3_TV4_roe_q4_2022_25": {
+   "n": 8,
+   "median": 0.1216,
+   "mean": 0.1243
+  },
+  "TV2_own_2022_25": {
+   "median": 0.0529
+  },
+  "Ke": 0.135
+ },
+ "variants": {
+  "control_r2": {
+   "center": 15832,
+   "p10": 2726,
+   "p50": 15843,
+   "p90": 30675,
+   "pct_below": 0.841,
+   "label": "TRONG vùng",
+   "label_sleeve40tr": "TRONG vùng"
+  },
+  "ronic_only": {
+   "center": 16248,
+   "p10": 6319,
+   "p50": 15980,
+   "p90": 26733,
+   "pct_below": 0.9115,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE_TV3_TV4_median": {
+   "center": 19201,
+   "p10": 16154,
+   "p50": 19201,
+   "p90": 21689,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NARROW_TV3_TV4_median": {
+   "center": 18278,
+   "p10": 14240,
+   "p50": 17985,
+   "p90": 22672,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE_TV3_TV4_mean": {
+   "center": 18528,
+   "p10": 15481,
+   "p50": 18528,
+   "p90": 21017,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NARROW_TV3_TV4_mean": {
+   "center": 17815,
+   "p10": 13777,
+   "p50": 17522,
+   "p90": 22210,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE_TV1_TV3_TV4_median": {
+   "center": 18165,
+   "p10": 15118,
+   "p50": 18165,
+   "p90": 20654,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NARROW_TV1_TV3_TV4_median": {
+   "center": 17566,
+   "p10": 13528,
+   "p50": 17272,
+   "p90": 21960,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE_TV1_TV3_TV4_mean": {
+   "center": 17200,
+   "p10": 14153,
+   "p50": 17200,
+   "p90": 19688,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NARROW_TV1_TV3_TV4_mean": {
+   "center": 16902,
+   "p10": 12864,
+   "p50": 16609,
+   "p90": 21297,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NARROW_TV3_TV4_median_persist_on_anchor": {
+   "center": 17157,
+   "p10": 7032,
+   "p50": 18581,
+   "p90": 24806,
+   "pct_below": 0.9562,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE_Ke13.5": {
+   "center": 17807,
+   "p10": 14761,
+   "p50": 17808,
+   "p90": 20296,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE_TV3_TV4_2022_25_median": {
+   "center": 16329,
+   "p10": 13283,
+   "p50": 16330,
+   "p90": 18818,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE_TV2_own_2022_25_median": {
+   "center": 8740,
+   "p10": 5693,
+   "p50": 8740,
+   "p90": 11228,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  }
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 27046,
+   "p10": 22659,
+   "p50": 26983,
+   "p90": 31945,
+   "pct_below": 0.5635,
+   "label": "TRONG vùng",
+   "label_sleeve40tr": "TRONG vùng"
+  },
+  "NARROW": {
+   "center": 18278,
+   "p10": 14240,
+   "p50": 17985,
+   "p90": 22672,
+   "pct_below": 1.0,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  },
+  "NONE": {
+   "center_range": [
+    16329,
+    19201
+   ],
+   "center_Ke": 17807,
+   "p10": 13283,
+   "p90": 21689,
+   "label": "TRÊN vùng (>P90)",
+   "label_sleeve40tr": "TRÊN vùng (>P90)"
+  }
+ },
+ "proposed_moat_tag_row": "TV2,NONE,REGULATORY/AFFILIATION,L,\"PECC2 = design consultancy + EPC; ROE 21-50% 2016-21 was FIT renewables policy window (clock already run), ROE Q4 4.0-7.4% 2022-25 < Ke 13.5% but ROE_Trailing 2026Q3 16.3% > Ke on financial income 44% of PBT; ROE_Min5Y 3.9% (2025Q4); GPM gap vs TV3/TV4 is EPC mix (EBITM 2025 3.9% vs 2.6%/4.2%); EVN buyer-concentration UNVERIFIED (revenue share not checked); CMC receivable 657-666 bn; LIVE scandal (ex-chair indicted, WARNING only)\",2026-11-07,5f_dd_taylor_3c,N",
+ "measured_by": "calc/moat_5f_tv2_fix.py -> calc/moat_5f_tv2_fix_out.json (md5 json 8e42f383.., txt 0c65c361.., 2 runs identical); calc/moat_5f_tv2_out.json; BQ calc/bq_moat_tv1234_20261107.csv",
+ "fix_job": "Taylor_20261108_024226",
+ "notes": [
+  "entry TV2=L vs TV1=M: Mike to reconcile (note only)",
+  "TV1 EBITM_P0 2022Q3->Q4->2023Q1 = 11.0%->30.2%->14.3% abnormal for TTM: needs verification"
+ ],
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 17491,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "headline_p10_report_of_record": 7702,
+  "headline_p90_report_of_record": 30677,
+  "headline_source": "REPORT_r3.md (r3 08/11); 15832/2726/30675 = r2 control, superseded"
+ }
+}

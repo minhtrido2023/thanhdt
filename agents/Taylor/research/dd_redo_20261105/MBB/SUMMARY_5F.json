@@ -18,7 +18,7 @@
   "iii_clock": "FAIL: 6th force active (MBV, admin rate caps, Basel III)"
  },
  "roic_note": "BQ ROIC* = 0 for all banks (not computed) -> ROE vs Ke used",
- "implicit_moat_in_current_model": "terminal RI grows at g_T 6-8% with ROE_T 14-18% > Ke (RONIC>Ke); NPV0 rule only one-sided",
+ "implicit_moat_in_current_model": "REMOVED in DD r3 (08/11): g_RI terminal = 0 all cells",
  "model_changed": true,
  "model_change_status": "strict-3c version computed in parallel; quy uoc cho Mike/user duyet; REPORT_r2/SUMMARY.json/dd_price_zones NOT modified",
  "old": {
@@ -195,5 +195,30 @@
  "price_vs_center": 0.089,
  "sensitivity_note": "NONE r2 = RONIC=Ke + ROE->Ke+dROE N2; r1 NONE (17,638/15,109/17,550/19,983) withdrawn",
  "evidence_gaps": "NIM/CASA/CIR: single WEB/BCTN point each, no multi-year peer series; NPL/group-2/coverage not peer-compared multi-year; BQ has no bank columns -> can kiem chung (BCTC)",
- "roe_min10y_note": "ROE_Min10Y 12.02% is vendor-defined; min quarterly ROE_Trailing in window 2016Q4=11.54%, 2017Q1=11.90%; 2015-18 low 2016Q2=11.01%"
+ "roe_min10y_note": "ROE_Min10Y 12.02% is vendor-defined; min quarterly ROE_Trailing in window 2016Q4=11.54%, 2017Q1=11.90%; 2015-18 low 2016Q2=11.01%",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 21069,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "dd_r3_sync": "08/11: tâm hiện hành r3 = 21069 (REPORT_r3.md); các center khác trong file là r2"
+ },
+ "dd_r3_sync": {
+  "job": "Taylor_20261108_164331",
+  "date": "2026-11-08",
+  "report": "REPORT_r3.md",
+  "price": 19250.0,
+  "price_date": "2026-11-06",
+  "headline": {
+   "center": 21069,
+   "p10": 14729,
+   "p50": 20903,
+   "p90": 27577,
+   "pct_below": 0.3863,
+   "label_5ty": "TRONG vùng"
+  },
+  "note": "headline r3 = RONIC=Ke (g_RI=0) + trong so/MBV doi xung; implicit_moat_in_current_model da go; ban M/NARROW/NONE trong file nay do tren base r2, chua chay lai tren r3"
+ }
 }

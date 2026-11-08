@@ -1,0 +1,93 @@
+{
+ "alt_4y": {
+  "basis": "skeptic: nut 4 nam (khi can 2030, khong co PL13) trong so 0,2; phan con lai x0,8",
+  "yrs": [
+   4,
+   5,
+   8,
+   10,
+   12,
+   15
+  ],
+  "yrs_weights": [
+   0.2,
+   0.08,
+   0.16,
+   0.32,
+   0.16,
+   0.08
+  ]
+ },
+ "alt_da_up": {
+  "basis": "khau hao 115 - capex ~5 ; gia dinh dai tu on dinh (tien mat = phan bo)",
+  "fcf_shift": 110
+ },
+ "asof_price_date": "2026-11-06",
+ "fcf_adj": [
+  -150,
+  0,
+  150
+ ],
+ "fcf_basis": "dinh chinh #4: FCF = LNST + (khau hao - capex) - (chi dai tu tien mat - phan bo tra truoc). Co so du lieu (calc_r3/fin_nt2_r3.csv, CF_OA_P0+CF_Invest_P0-NP_P0): FCF-LNST 2022-24 TB ~433/nam (498,5/358,7/441,3) so khau hao lich su ~550/nam (556 truoc khi het khau hao) => phan du ~-110/nam => nut -150 CO co so du lieu (khong phai [UL] thuan). Chieu len (+110) chi khi khau hao 115-153 (BCTC H1/26 76,5 x2; skeptic 115) - capex 2,5 (9T/26) ... 10,6 (2016) ty/nam (BQ CF_Invest_P0) va dai tu on dinh (bien the D, 25.975). Lich su tra truoc 2015-25 KHONG co trong BQ (chua kiem); chi phi tra truoc 262,9 (ma 271). Truc doi xung +-150 tam 0 (base FCF = LNST giu nguyen); +-150 ty/nam = +-2.772 d/cp (he so nien kim 10 nam 5,320 @13,5%).",
+ "fcf_weights": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "liq_ref_bn": 5,
+ "np_basis": "giu r2 [UL] tam 800; co so du lieu r3 (dinh chinh #5): bien LNST TB/trung vi 2015-25 = 10,39%/10,20% x DT chuan hoa 7.137 = 742/728; bien 9T/26 11,6% (906/7.803) => 829 (BQ ticker_financial NP_P0/Revenue_P0, calc_r3/fin_nt2_r3.csv)",
+ "np_levels": [
+  450,
+  625,
+  800,
+  975,
+  1150
+ ],
+ "np_weights": [
+  0.1,
+  0.2,
+  0.4,
+  0.2,
+  0.1
+ ],
+ "nwc_basis": "dinh chinh #2: AR/DT TTM on dinh 37-49% 2022Q1-2026Q3 (BQ AR_P0, calc_r3/ar_nt2_r3.csv) => NWC ty le voi DT; dong LNST chuan hoa theo DT 7.137 nen NWC phai cung chuan hoa.",
+ "nwc_norm_rule": "NWC chuan hoa = 837,2 x 7.137 / 10.404 (DT nam hoa 9T/26); phan du giai phong t=1 nam (vong quay phai thu ~5 thang); phan chuan hoa thu hoi cuoi thoi han",
+ "nwc_now": 837.172,
+ "nwc_release_t": 1,
+ "price_csv": "calc_r3/px_nt2_r3_20261106.csv",
+ "r_offsets": [
+  -0.01,
+  0.0,
+  0.01
+ ],
+ "r_rule": "13,5% + 1,0 x (lai huy dong 12T hieu dung - 7,40%)",
+ "r_weights": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "rev_9m26_annualized": 10404,
+ "rev_norm": 7137.187,
+ "rev_ttm_2026q3": 10325,
+ "sleeve_bn": [
+  0.01,
+  0.02,
+  0.04
+ ],
+ "terminal_value": 0,
+ "yrs": [
+  5,
+  8,
+  10,
+  12,
+  15
+ ],
+ "yrs_basis": "dinh chinh #1: chieu GIAM: khi mo hien huu can ~2030 [WEB-2], PPA goc 2011-2020 trang thai sau 2020 chua xac minh (dd_blind_NT2_20261026/CYCLE_BLOCK.md muc D); chieu TANG: GSA 25 nam ky 2010 (~2035) [WEB-3], PL13 bo sung Hai Thach-Moc Tinh 2026-2039 [WEB-2] (cho DHCD; NQ HDQT 08/07/2026 lay y kien). Doi xung quanh 10.",
+ "yrs_weights": [
+  0.1,
+  0.2,
+  0.4,
+  0.2,
+  0.1
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "asof_price": "2026-11-06",
+ "price_expected": 47200.0,
+ "cap_axis": ["1.05", "branch", "1.40"],
+ "cust_adv_bn": 5.03,
+ "ar_bq_bn": 24.444,
+ "notes": {
+  "D1_infl_cap": "Tran chu ky = bien TB chu ky 34,3% (GPM NNC 2012-25, BQ) tren chi phi mo hinh; chi phi +3%/nam danh nghia => tran giu bien phai tang 3%/nam danh nghia tren MOI duong gia. Nguon: dd_MVC r6 model_r6.py:43-47, SKEPTIC_R4_20261103.md:3 (bien ~26% tren g2031 tu 2030).",
+  "D2_cap_axis": "Muc SL 1,05 = san luong 2024 (FPTS; REPORT.md:78) -> tran 260,6k; doi xung voi SL 1,40 (236,1k) quanh tran theo SL nhanh. Co so gia: DT thanh pham kiem toan 2024 257,44 ty / 1,05 tr m3 = 245,2k (KT25 7.1) x 1,03^2 = 260,1k. FPTS ghi gia mo 202,6k (lech 21%, SKEPTIC_20261031 E3) - ghi chu, khong dung.",
+  "rent_axis": "Thue Nui Nho {2043/2030/khong} deu [UL] (thoi han chua xac minh, KT25 9.1); ban 'chi 2043' bao song song.",
+  "cust_adv": "Nguoi mua tra truoc 5,03 ty (skeptic, BCTC Q3) = von luu dong van hanh; mo hinh r1-r3 KHONG tinh VLD (thue TNDN phai nop cung khong tru; REPORT_v2_20261031 §3). Tru mot chieu ma bo phai thu (BQ AR_P0 Q3/26 = 24,44 ty) la lech => do nhay hai chieu, khong vao base.",
+  "bs_items_verified": "BQ ticker_financial 2026Q3: Cash_P0 25,4746 ty, StDebt 5,000, LtDebt 69,890 = khop n_cash. 322,44 HTM / 22,37 / 16,78 / 5,89 / 4,50: doi chieu doc lap PASS (SKEPTIC_20261031.md:18, BCTC Q3 tr.1-3 V19a V21); CHUA kiem lai PDF trong phien nay.",
+  "r": "r = 13,5% + 1,0 x (dep_12T_hieu_dung - 7,40%); dep = deposit_rate_vn.effective_deposit_rate(2026-11-06)."
+ }
+}

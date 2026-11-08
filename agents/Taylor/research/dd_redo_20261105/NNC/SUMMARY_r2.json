@@ -1,0 +1,143 @@
+{
+ "ticker": "NNC",
+ "round": 2,
+ "job": "Taylor_20261105_020023",
+ "asof_price_date": "2026-11-04",
+ "price": 46900.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+ },
+ "center_pre_liq": 59760,
+ "center_post_liq": 57589,
+ "p10_post": 30219,
+ "p50_post": 52916,
+ "p90_post": 93649,
+ "p10_pre": 31358,
+ "p90_pre": 97179,
+ "p10_out": 30219,
+ "p50_out": 52916,
+ "p90_out": 93649,
+ "min_out": 21023,
+ "pct_weight_below_price": 0.37476851851851856,
+ "n_outcomes": 3888,
+ "n_cells": 486,
+ "liq_disc_5bn": 0.03632771556437639,
+ "ck_ref_size": {
+  "size_vnd": 5000000000.0,
+  "Y": 1.0,
+  "disc_adv250": 0.03632771556437639,
+  "disc_adv60": 0.044580656610559814,
+  "q_over_adv250": 2.384677929214365,
+  "note": "5 ty = quy uoc fleet; Q/ADV250 2,4x nam trong vung hieu chinh luat can bac hai"
+ },
+ "ck_real_sleeve": {
+  "10tr": {
+   "adv250": 0.0016246248293844549,
+   "adv60": 0.0019937075732557423
+  },
+  "40tr": {
+   "adv250": 0.0032492496587689097,
+   "adv60": 0.003987415146511485
+  }
+ },
+ "px_vs_center_post": -0.18560617146397862,
+ "px_vs_p10_post": 0.5520173509908797,
+ "px_vs_p90_post": -0.49919264562946697,
+ "label": "TRONG vùng",
+ "label_note": "Nhan TRONG vung giu nhu vong 1; vung rong hon do chuyen sang MUC KET CUC (khong doi co ban). Luat 4 (gia <= 0,85 x tam): DAT.",
+ "center_vs_p50_note": "tam = ky vong trong so luoi 59,760 (truoc CK) ; gia tri tai tham so trung tam (khong tre) 61,407 ; P50 ket cuc 54,910. Phan phoi lech phai: P90 97,179 nam trong nhanh STRUCTURAL (trong so 0,20; trung vi nhanh 93,045); nhay w_STRUCT 0,15 -> P90 93,271, 0,10 -> 85,523.",
+ "axes_included": [
+  "trang thai bien STRUCTURAL/ADMIN_GATED/CYCLICAL 0,20/0,45/0,35 (Bobby)",
+  "K chi phi 0,87/0,97/1,07",
+  "san luong nam thuong 3 muc",
+  "anh xa ADMIN perm05/ramp/full",
+  "tran chu ky branch/SL 1,40 (DUA LAI vong 2)",
+  "thue Nui Nho toi 2043/2030/khong (deu, [UL]) (MOI vong 2)",
+  "ket cuc ben trong o: 4 kich ban W0 25/50/20/5 x 2 duong gia PW0 50/50"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "r (lai huy dong)",
+   "reason": "co dinh r(04/11)=13,5%; bao do nhay +-50/100bp rieng"
+  },
+  {
+   "axis": "(+) tra truoc CNBP 59,2 ty la tien thue da tra",
+   "reason": "ban chat chua xac minh; do nhay +2,126"
+  },
+  {
+   "axis": "(+) doi thu het GP tu 2034",
+   "reason": "chua co du lieu GP doi thu; do nhay +5,065; doi xung voi STRESS duong gia phang -12,392 cung loai"
+  },
+  {
+   "axis": "tre GP ky vong (Bobby F6)",
+   "reason": "chi la nhan dinh -> ra khoi base (luat 3); do nhay -705"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "CIP Tam Lap 1 khu II 83,5 ty",
+   "effect_dong_per_share": 0,
+   "basis": "so sach (NPV 0 that, KHONG tru chi phi tre)",
+   "source": "BCTC rieng Q3/2026 XDCB do dang"
+  },
+  {
+   "item": "Doi xung BCDKT: ky quy PHMT 4,57 + DTA 4,31",
+   "effect_dong_per_share": 424,
+   "basis": "so sach (so do: tornado r6 nnc_model_r6_out.json)",
+   "source": "Q3 V9, V19a tr.2"
+  },
+  {
+   "item": "Thu nhap cho thue Nui Nho",
+   "effect_dong_per_share": 3402,
+   "basis": "KHONG con trong base: truc 3 muc (2043/2030/khong); thoi han chua xac minh, nhieu kha nang ben lien quan NHC",
+   "source": "KT25 7.1-7.2; KT25 9.1 cam ket: Khong co"
+  }
+ ],
+ "gordon": {
+  "roe_lock_ps": 33250,
+  "roe_lock": 0.1467059126573269,
+  "roe_fin_ps": 40480,
+  "roe_fin": 0.17208194767625526,
+  "roe_implied_center": 0.23975353654827689
+ },
+ "grid_desc": "Luoi MUC KET CUC n=3888 (486 o x 8 ket cuc). Truc: trang thai bien 0,20/0,45/0,35 x K 3 x SL 3 x ADMIN 3 x tran 2 x thue Nui Nho 3; trong so o = xac suat trang thai x deu; ket cuc = W0[kich ban] x PW0[duong]. r 13,5%. Base KHONG tru tre GP. Phan vi _shared/wpct.py. Sau CK = x(1 - CK 5 ty Y1 ADV250).",
+ "zone_old": {
+  "low": 55000,
+  "center": 58500,
+  "high": 66900,
+  "dd_date": "2026-11-03",
+  "rev": 4,
+  "zone_def": "P25-P75 sau CK thanh khoan (ban cu)",
+  "source_file": "agents/Taylor/research/dd_NNC_20261030/investor_report_v3/NNC_DD_investor_report_20261103.md"
+ },
+ "r1": {
+  "center_post": 58497,
+  "p10": 44917,
+  "p50": 56395,
+  "p90": 85649,
+  "label": "TRONG vùng"
+ },
+ "center_change_pct": -0.01557529831656701,
+ "change_reason": "Vong 2: (a) phan vi o MUC KET CUC (vong 1 la phan vi cua ky vong tung o -> nen phan tan; P10 44,9k->30,2k); (b) dua truc tran SL 1,40 va truc thue Nui Nho vao luoi (-); (c) bo tre GP khoi base (+705 truoc CK). Tam sau CK 58.497 -> 57,589. Nhan khong doi (TRONG vung) nhung 'sat can duoi' la ao anh: 37.5% trong so duoi gia.",
+ "warnings": [
+  "So huu cheo MVC 44,07% NNC (Simplize ghi 43,55% - lech nguon, chua doi soat) <-> NNC 10,3% MVC; uy quyen DHDCD MVC 2026 mua NNC len 51% (gia/doi tac chua biet, giao dich ben lien quan); neu MVC >=51% Luat DN D195 co the buoc NNC thoai 10,3% MVC -> CAN legal-vn xac minh",
+  "Truy thu TAI NGUYEN cham mo loi Mui Tau: du phong tien cap quyen 0,84 ty (Q3 V19a) sau CQKTKS 1,735 ty (KT25 7.8) - co E12 SKEPTIC_20261031 CHUA DONG",
+  "Tong truy thu Nui Nho ~42 ty (du phong 15,58 + 5,95 + da nop 20,43 nam 2026) ~ 1.900 d/cp - KHONG nho",
+  "Ben lien quan NHC (giam doc NNC = Chu tich NHC): 61% phai thu; DT dich vu 2025 18,92 ty ~ DT tu NHC 18,41 ty -> thu nhap cho thue Nui Nho nhieu kha nang la tu ben lien quan",
+  "Dinh huong dua tien giu lai vao BDS; co tuc tien 2025 ~15% LNST",
+  "Bien o dinh 15 nam (GPM Q3/26 57,9%) - rui ro chu ky chiem uu the",
+  "Tra cuu 'xu phat/khoi to NNC 2026': WebSearch 05/11/2026 khong thay; nguon cong bo: financialreports.eu (CBTT NNC), BCTC Q3/2026. Co CBTT 17/04/2026 trung dau gia quyen khai thac khoang san (UBND TP.HCM) - CHUA doi chieu voi Tam Lap 1 khu II"
+ ],
+ "open_issues": [
+  "Thoi han + ban chat hop dong cho thue Nui Nho (nay la truc luoi)",
+  "Tra truoc dai han CNBP 59,2 ty (+2,1k neu la tien thue)",
+  "CBTT 17/04/2026 trung dau gia quyen khai thac: mo nao, gia, han -> co the dong cot 'Tam Lap 1 khu II chua GP'",
+  "Xac suat 3 trang thai bien la nhan dinh Bobby",
+  "Ty le MVC so huu NNC 44,07% vs 43,55%",
+  "Mo hinh MVC nhung trong NNC la MVC r6 (khac MVC r9 dung o DD MVC)"
+ ],
+ "fear_buy_2_5": "KHONG du dieu kien sleeve fear-buy §2.5 (khong co su kien so hai/khung hoang; day la DD dinh gia thuong)"
+}

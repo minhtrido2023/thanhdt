@@ -1,0 +1,318 @@
+{
+ "ticker": "SZL",
+ "asof_price_date": "2026-11-04",
+ "price": 27650.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.074,
+  "date": "2026-11-03",
+  "source": "effective_deposit_rate = max(Big-4 12M 6,8%, CCTG 12M 7,4% ngay 02/11/2026); r neo 13,5%"
+ },
+ "dep_now": {
+  "rate": 0.07400000000000001,
+  "source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 33795.53137392885,
+ "center_post_liq": 32391.288133798425,
+ "p10_post": 28966.327659489056,
+ "p50_post": 32161.61970286228,
+ "p90_post": 36075.154527694605,
+ "p10_pre": 30222.09030897744,
+ "p50_pre": 33555.90624289849,
+ "p90_pre": 37639.10257671697,
+ "liq_discount_ref": 0.041551151381324626,
+ "liq_ref_position_bn_vnd": 5,
+ "adv_med_bn_vnd": 0.4612775,
+ "grid_n": 270,
+ "grid_desc": "5 truc, n=270 ket cuc tat dinh: LN loi N0 {-12;-6;0;+6;+12}% quanh 131,1 (0,1/0,2/0,4/0,2/0,1) [UL] x g {2;3;4}% x r {R-1;R;R+1}% x ty le LN phi tien mat {20;10;0}% [UL; can tren 17% = DT chua thuc hien 762,2/27 nam x 0,8] (moi truc 1/4-1/2-1/4) x thoi han dong tien loi {27 nam (den 2053: TM17 NQ DHDCD 76/2020 phan bo LN den 2053); vinh vien (gia han) } (3/4-1/4) [UL trong so]. Co dinh: SZC/SZB thi gia 04/11 - thue TNDN 20% lai von; chua niem yet so sach; XDCB 407,0 gia von (NPV 0; TM8: CCN Long Phuoc 344,7, nha xuong cho thue 39,2, TDC Tam An 14,2, Chau Duc 6,1...); no rong 205,5 (sau co tuc phai tra); tru ky quy 157,4 + trich thue dat bo sung 44,3 (TM16-17). Phan vi wpct tren 270 o; tam = ky vong luoi. CK thanh khoan 5 ty ADV250 ap dong loat.",
+ "label": "DUOI vung (<P10)",
+ "px_vs_center": -0.14637541162962175,
+ "px_vs_p10": -0.04544337393966613,
+ "px_vs_p90": -0.233544516662477,
+ "zone_old": {
+  "low": null,
+  "center": 27200,
+  "high": null,
+  "dd_date": "2026-10-26",
+  "center_kind": "expected_weighted"
+ },
+ "center_change_vs_old": 0.19085618138964788,
+ "change_reason": "Vong 1 +9,9% vs zone cu 27.200. Vong 2: +XDCB 407 theo gia von (+8.445 d/cp truoc CK) — sua loi NPV0; -no khac theo so 201,7 (-4.185 d); -truc thoi han 27 nam (trong so 3/4). Tam tang manh, nhan doi TRONG -> DUOI vung.",
+ "warnings": [
+  "SNZ (me 52,7%): Truong BKS bi khoi to, tam giam (CBTT ~27-28/05/2026; nhadautu, vneconomy) — ca nhan o cong ty me; chua cham phap nhan/tai san SZL",
+  "Luan chuyen tien trong he sinh thai Sonadezi (ABS); so huu cheo (SZL nam SZC/SZB; SNZ nam SZL); tra truoc nguoi ban NH 14,2 -> 72,6 chua doc doi tuong; tra truoc DH cho du an Sonadezi Binh Thuan",
+  "Dong Nai: sai pham quan ly xang dau/dat dai (bao chi 2026) — SZL co mang xang dau, chua bi neu ten",
+  "Free float < 25%; ADV 0,46 ty — rang buoc thuc thi",
+  "'Chua thay khoi to/xu phat cham phap nhan SZL': nguon = DD 26/10/2026 (nhadautu, vneconomy, doanhnghiephoinhap) + web search 05/11/2026 (baophapluat, diendandoanhnghiep) — khong co ket qua moi; khong thay NQ HDQT/DHDCD moi"
+ ],
+ "open_issues": [
+  "Moc 2053 lay tu NQ DHDCD 76/2020 phan bo LN (TM17) — chua doi chieu giay phep thue dat",
+  "Chi phi tra truoc DH 280,9 (tien thue dat Chau Duc 147,3, Tan Duc 69,9...) khong cong (tai san van hanh, da phan bo vao chi phi trong N0)",
+  "Phai tra DH khac 152,0 = LN giu lai phan bo 5,85/nam den 2053 (phi tien mat, nam trong truc nc)",
+  "Tach XDCB Long Phuoc vs khac; tong muc 920 + tien do (bao chi: hoat dong cuoi 2026)",
+  "Doi tuong tra truoc nguoi ban 72,6",
+  "Chua doc LCTT/thuyet minh",
+  "BQ OShares/BVPS restate (bay oshares)"
+ ],
+ "sources": {
+  "model": "calc/model_r2.py -> calc/model_r2_out.json/txt",
+  "lock": "calc/LOCK_r2_md5.txt",
+  "liq": "_common/liq.py + _common/bq_px_4ma_20261104.csv (via _common_020021/r2lib.py)",
+  "pct": "_shared/wpct.py"
+ },
+ "round": "r2",
+ "job": "Taylor_20261105_020021",
+ "p10_out": 28966.327659489056,
+ "p50_out": 32161.61970286228,
+ "p90_out": 36075.154527694605,
+ "pct_weight_below_price": 0.034375,
+ "n_outcomes": 270,
+ "min_outcome_post": 25174.59030859089,
+ "adv60_med_bn_vnd": 0.60918665,
+ "ck_ref_size": {
+  "q_bn": 5,
+  "adv250": {
+   "q_bn": 5.0,
+   "disc": 0.041551151381324626,
+   "disc_Y05": 0.020775575690662313,
+   "disc_Y15": 0.06232672707198694,
+   "q_over_adv": 10.839462145888321,
+   "in_calib": false,
+   "days_at10": 108.39462145888321,
+   "days_at20": 54.197310729441604
+  },
+  "adv60": {
+   "q_bn": 5.0,
+   "disc": 0.03510208038087561,
+   "disc_Y05": 0.017551040190437805,
+   "disc_Y15": 0.052653120571313404,
+   "q_over_adv": 8.207665089180795,
+   "in_calib": false,
+   "days_at10": 82.07665089180796,
+   "days_at20": 41.03832544590398
+  }
+ },
+ "ck_real_sleeve": {
+  "0.01": {
+   "adv250": {
+    "q_bn": 0.01,
+    "disc": 0.0018582239806405232,
+    "disc_Y05": 0.0009291119903202616,
+    "disc_Y15": 0.002787335970960785,
+    "q_over_adv": 0.021678924291776643,
+    "in_calib": true,
+    "days_at10": 0.2167892429177664,
+    "days_at20": 0.1083946214588832
+   },
+   "adv60": {
+    "q_bn": 0.01,
+    "disc": 0.0015698127576659914,
+    "disc_Y05": 0.0007849063788329957,
+    "disc_Y15": 0.002354719136498987,
+    "q_over_adv": 0.01641533017836159,
+    "in_calib": true,
+    "days_at10": 0.1641533017836159,
+    "days_at20": 0.08207665089180795
+   }
+  },
+  "0.02": {
+   "adv250": {
+    "q_bn": 0.02,
+    "disc": 0.0026279255553487476,
+    "disc_Y05": 0.0013139627776743738,
+    "disc_Y15": 0.003941888333023121,
+    "q_over_adv": 0.043357848583553286,
+    "in_calib": true,
+    "days_at10": 0.4335784858355328,
+    "days_at20": 0.2167892429177664
+   },
+   "adv60": {
+    "q_bn": 0.02,
+    "disc": 0.002220050492277554,
+    "disc_Y05": 0.001110025246138777,
+    "disc_Y15": 0.0033300757384163307,
+    "q_over_adv": 0.03283066035672318,
+    "in_calib": true,
+    "days_at10": 0.3283066035672318,
+    "days_at20": 0.1641533017836159
+   }
+  },
+  "0.04": {
+   "adv250": {
+    "q_bn": 0.04,
+    "disc": 0.0037164479612810464,
+    "disc_Y05": 0.0018582239806405232,
+    "disc_Y15": 0.00557467194192157,
+    "q_over_adv": 0.08671569716710657,
+    "in_calib": true,
+    "days_at10": 0.8671569716710656,
+    "days_at20": 0.4335784858355328
+   },
+   "adv60": {
+    "q_bn": 0.04,
+    "disc": 0.003139625515331983,
+    "disc_Y05": 0.0015698127576659914,
+    "disc_Y15": 0.004709438272997974,
+    "q_over_adv": 0.06566132071344637,
+    "in_calib": true,
+    "days_at10": 0.6566132071344636,
+    "days_at20": 0.3283066035672318
+   }
+  }
+ },
+ "label_note": "Nhan theo co 5 ty/ADV250 (CK ~4,2%, Q/ADV >1.000% — NGOAI xa vung hieu chinh). Nhan DOI so vong 1 (TRONG -> DUOI) do sua loi NPV0 XDCB, KHONG do doi dinh nghia vung (van P10-P90). O co sleeve 40 tr xem label_sleeve40.",
+ "center_change_vs_r1": 0.08332246695052992,
+ "axes_included": [
+  "LN loi +-12%",
+  "g 2/3/4%",
+  "r +-100bp",
+  "LN phi tien mat 0/10/20%",
+  "thoi han dong tien 27 nam (den 2053, co so TM17) / vinh vien (MOI r2)"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "chiet khau holdco tren co phan SZC/SZB",
+   "reason": "khong co du lieu (SZC thanh khoan ~7,8 ty/phien); bao song song 10%/25%"
+  },
+  {
+   "axis": "thanh tra tap doan SNZ lan sang SZL",
+   "reason": "chua co quyet dinh/ket luan neu ten SZL; WARNING"
+  },
+  {
+   "axis": "Long Phuoc NPV != 0 (doi von/cho thue cao)",
+   "reason": "luat du an moi 03/11: NPV 0 den khi co hop dong thue/doi von co so"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "tru ky quy ky cuoc NH+DH 157,4 + trich bo sung chi phi thue dat KCN Long Thanh 44,3 (MOI r2; vong 1 bo sot no theo so)",
+   "effect_dong_per_share": -4183.282711276054,
+   "basis": "TM17 nhan ky quy (doi tuong khac 10,1 + BLQ 0,2 + DH 147,0); TM16 trich thue dat 44,3 (khong doi tu 01/01)",
+   "source": "src/Q3_2026_hopnhat.pdf tr.20-23 (anh trang PDF 24/27)"
+  },
+  {
+   "item": "XDCB 407,0 cong theo gia von (MOI r2; vong 1 bo => NPV thuc -407)",
+   "effect_dong_per_share": 8444.946784016825,
+   "basis": "BCTC ma 242/TM8a: CCN Long Phuoc 344,7 + nha xuong 39,2 + TDC Tam An 14,2 + Chau Duc 6,1 + khac; phai tra nguoi ban chi 16,7 => khong co no xay dung lon doi ung; luat du an moi 03/11",
+   "source": "src/Q3_2026_hopnhat.pdf BS in tr.2"
+  },
+  {
+   "item": "thue TNDN 20% tren lai von chua thuc hien SZC/SZB",
+   "effect_dong_per_share": -842.1021368574428,
+   "basis": "gia so BCTC (ma 260 + co cau ABS 30/03/2026) + thue suat 20%",
+   "source": "BCTC + dd_SZL_20261026/src/abs_szl_260330.txt"
+  },
+  {
+   "item": "LN phi tien mat tam 10% N0",
+   "effect_dong_per_share": null,
+   "basis": "DT chua thuc hien ma 319+337 = 762,2 / thoi han con lai (27 nam, UOC LUONG) => can tren 17%; tam 10% = [UL], da la truc 0/10/20",
+   "source": "BCTC in tr.3"
+  },
+  {
+   "item": "co tuc phai tra 70,4 cong vao no",
+   "effect_dong_per_share": -1459.7852748001385,
+   "basis": "BCTC ma 313, chi 07/10/2026",
+   "source": "BCTC"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong luoi; P50 = trung vi ket cuc; gia tri tai tham so trung tam bao 2 nhanh thoi han (27 nam/vinh vien). Nhanh vinh vien (trong so 0,25) keo P90 len; khong nhanh trong so nho nao quyet dinh P10.",
+ "change_vs_r1": "(1) +XDCB 407 (+8.445 d truoc CK); (2) -ky quy + trich thue dat 201,7 (-4.185 d); (3) +truc thoi han 27 nam/vinh vien 3/4-1/4 (-); (3) tam = ky vong luoi. NHAN DOI do sua loi NPV0, khong do doi dinh nghia vung.",
+ "parallel": {
+  "bo_XDCB (=cach r1, NPV thuc -407)": {
+   "n": 270,
+   "center_pre": 25350.58458991202,
+   "center_post": 24297.23861201151,
+   "p10_pre": 21777.143524960615,
+   "p50_pre": 25110.959458881665,
+   "p90_pre": 29194.15579270015,
+   "p10_post": 20872.278137702146,
+   "p50_post": 24067.570181075367,
+   "p90_post": 27981.10500590769,
+   "pct_w_below_px": 0.8625000000000002,
+   "min_post": 17080.540786803977,
+   "max_post": 37393.16445223294,
+   "disc": 0.041551151381324626
+  },
+  "chi_vinh_vien (bo truc thoi han)": {
+   "n": 135,
+   "center_pre": 35151.834162166226,
+   "center_post": 33691.23497956284,
+   "p10_pre": 31102.150057066905,
+   "p50_pre": 34935.45234820385,
+   "p90_pre": 40042.35229900731,
+   "p10_post": 29809.819911761046,
+   "p50_post": 33483.84407910858,
+   "p90_post": 38378.54645696692,
+   "pct_w_below_px": 0.0109375,
+   "min_post": 25822.014220931935,
+   "max_post": 45487.21397401985,
+   "disc": 0.041551151381324626
+  },
+  "bo_no_khac (ky quy + thue dat)": {
+   "n": 270,
+   "center_pre": 37978.814085204904,
+   "center_post": 36400.75063186737,
+   "p10_pre": 34405.373020253486,
+   "p50_pre": 37739.18895417454,
+   "p90_pre": 41822.38528799302,
+   "p10_post": 32975.790157557996,
+   "p50_post": 36171.082200931225,
+   "p90_post": 40084.617025763546,
+   "pct_w_below_px": 0.0,
+   "min_post": 29184.05280665983,
+   "max_post": 49496.67647208879,
+   "disc": 0.041551151381324626
+  },
+  "r1_tai_lap (bo XDCB + bo no khac + vinh vien)": {
+   "n": 135,
+   "center_pre": 30890.170089425457,
+   "center_post": 29606.647955844874,
+   "p10_pre": 26840.485984326133,
+   "p50_pre": 30673.788275463074,
+   "p90_pre": 35780.68822626654,
+   "p10_post": 25725.232888043076,
+   "p50_post": 29399.257055390608,
+   "p90_post": 34293.95943324896,
+   "pct_w_below_px": 0.2953125,
+   "min_post": 21737.427197213965,
+   "max_post": 41402.626950301885,
+   "disc": 0.041551151381324626
+  },
+  "holdco_10%": {
+   "n": 270,
+   "center_pre": 32867.80546881831,
+   "center_post": 31502.11030821151,
+   "p10_pre": 29294.364403866908,
+   "p50_pre": 32628.18033778796,
+   "p90_pre": 36711.37667160644,
+   "p10_post": 28077.14983390215,
+   "p50_post": 31272.44187727537,
+   "p90_post": 35185.9767021077,
+   "pct_w_below_px": 0.08906250000000002,
+   "min_post": 24285.412483003976,
+   "max_post": 44598.03614843294,
+   "disc": 0.041551151381324626
+  },
+  "holdco_25%": {
+   "n": 270,
+   "center_pre": 31476.216611152515,
+   "center_post": 30168.34356983115,
+   "p10_pre": 27902.775546201105,
+   "p50_pre": 31236.59148012216,
+   "p90_pre": 35326.989692122996,
+   "p10_post": 26743.38309552178,
+   "p50_post": 29938.675138895007,
+   "p90_post": 33859.1125955791,
+   "pct_w_below_px": 0.20468750000000002,
+   "min_post": 22951.645744623613,
+   "max_post": 43264.269410052584,
+   "disc": 0.041551151381324626
+  }
+ },
+ "crosscheck": {
+  "A_LNST_gom_co_tuc_vinh_vien_tru_no": 31436.563560395778,
+  "B_loi_vinh_vien_cong_co_phan_thi_gia": 34935.45234820385,
+  "ROE_co_TC": 0.22544858369676588,
+  "ROE_loi_tru_dau_tu_XDCB": 0.33940965659825884
+ }
+}

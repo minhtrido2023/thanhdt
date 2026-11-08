@@ -1,0 +1,269 @@
+{
+ "ticker": "HPG",
+ "asof_price_date": "2026-11-04",
+ "price": 21700.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "2026-11-03",
+  "source": "cctg_12m(2026-11-02)",
+  "asof_rate": 0.07400000000000001,
+  "rule": "r = 13,5% + beta x (dep - dep_neo), beta = 1 (gia dinh)"
+ },
+ "center_pre_liq": 16310,
+ "center_post_liq": 16286,
+ "p10_post": 8942,
+ "p50_post": 16343,
+ "p90_post": 23520,
+ "p25_post": 12033,
+ "p75_post": 19574,
+ "p10_pre": 8955,
+ "p50_pre": 16368,
+ "p90_pre": 23555,
+ "liq_disc_5ty": 0.0014994631751556998,
+ "px_vs_center_post": 0.3324486668075255,
+ "px_vs_p10_post": 1.4267507568062658,
+ "px_vs_p90_post": -0.07736547522750237,
+ "grid_desc": "Luoi co trong so n=45: kich ban XAU/TRUNG LAP/TOT (w 0,25/0,50/0,25) x he so duong LNST 2026Q4-2029 (~LN/tan) 0,8/0,9/1,0/1,1/1,2 x dich g terminal -1/0/+1 pp (deu); r co dinh 13,50%; RI, BV0 = VCSH me 30/09, ROE terminal suy ra nhat quan voi thue 20%; terminal: ROE_T < r => RI khong tang (von moi NPV 0). Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
+ "grid_n": 45,
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 18000,
+  "center": 20200,
+  "high": 22500,
+  "dd_date": "2026-10-31",
+  "center_kind": "blend",
+  "expected_weighted_old": 19221
+ },
+ "center_change_vs_old": -0.19123762376237619,
+ "sens_r": {
+  "b0.5_-100bp": {
+   "r": 0.13,
+   "value": 17287,
+   "dv": 926,
+   "pct": 0.05659271247433795
+  },
+  "b0.5_-50bp": {
+   "r": 0.1325,
+   "value": 16813,
+   "dv": 452,
+   "pct": 0.02760306235772081
+  },
+  "b0.5_+50bp": {
+   "r": 0.1375,
+   "value": 15931,
+   "dv": -431,
+   "pct": -0.026315951105485347
+  },
+  "b0.5_+100bp": {
+   "r": 0.14,
+   "value": 15520,
+   "dv": -842,
+   "pct": -0.051434605518643095
+  },
+  "b1.0_-100bp": {
+   "r": 0.125,
+   "value": 18311,
+   "dv": 1950,
+   "pct": 0.11918664616632957
+  },
+  "b1.0_-50bp": {
+   "r": 0.13,
+   "value": 17287,
+   "dv": 926,
+   "pct": 0.05659271247433795
+  },
+  "b1.0_+50bp": {
+   "r": 0.14,
+   "value": 15520,
+   "dv": -842,
+   "pct": -0.051434605518643095
+  },
+  "b1.0_+100bp": {
+   "r": 0.14500000000000002,
+   "value": 14792,
+   "dv": -1569,
+   "pct": -0.09591966927265339
+  }
+ },
+ "r_implied_center_eq_px": 0.11272613631302028,
+ "change_reason": "LECH >10%: nguyen nhan chinh la r: Ke cu 11.83% (rf chuan hoa 6,75% + beta do 0,915 x ERP 5,55%) -> r 13,5% theo luat 03/11 (-4,143 d/cp neu giu terminal cu); terminal NPV0 (ROE_T < r => RI khong tang) +1,076; bo chan EV/EBITDA 5x khoi tam (tam cu blend 20,200 vs RI cu 19,221); day gia tri 30/09 -> 2026-11-04 +207. Duong LN/kich ban giu nguyen v3 31/10 (khong co BCTC moi).",
+ "warnings": [
+  "Quan tri/ben lien quan (WARNING nang): he Dai Quang Minh-TLSH 3 lop phoi nhiem (co phan TLSH 9.915, 26,55% BDS HP, lien danh BT); lai thoai von BDS 4.929 ty ben mua khong cong bo",
+  "Uu dai thue: thoi han khong cong bo; DQ2 chua co ket luan du an moi/mo rong (thue terminal 20% da dua vao)",
+  "Tien gui cam co 8.294 ty; AD HRC Trung Quoc dang ra soat (QD 1902)",
+  "Khong tim thay khoi to/xu phat 2025-26 (khong tim thay != sach)"
+ ],
+ "open_issues": [
+  "Luat r 13,5% dong nhat moi ma; beta do HPG 0,84-0,93 (ban cu) khong dung - neu ap beta vao r thi gia tri cao hon",
+  "EBITDA slide lech 361 ty chua giai thich",
+  "Free float ~64,5% la uoc luong (chi tru nhom TDL)",
+  "Chua quet tin moi 31/10-04/11/2026"
+ ],
+ "round": "r2",
+ "job": "Taylor_20261105_020013",
+ "p10_out": 8942,
+ "p50_out": 16343,
+ "p90_out": 23520,
+ "pct_weight_below_price": 0.8364444444444444,
+ "n_outcomes": 675,
+ "min_outcome": 5846,
+ "central_param_value_post": 16706,
+ "ck_ref_size": {
+  "size_vnd": 5000000000.0,
+  "disc_adv250": 0.0014994631751556998,
+  "disc_adv60": 0.0017718497204554883,
+  "adv250": 602118760000.0,
+  "adv60": 371181795000.0
+ },
+ "ck_real_sleeve": {
+  "sizes_vnd": [
+   10000000.0,
+   40000000.0
+  ],
+  "disc_adv250": {
+   "10tr": 6.705803178811635e-05,
+   "40tr": 0.0001341160635762327
+  },
+  "nav_spacex_ref": 940000000.0,
+  "note": "Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 0.830% -> trong vung; 10tr 0.002% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.007% -> DUOI vung (CK that ~ nua spread, chua do); 5 ty / ADV60 = 1.35%"
+ },
+ "parallel_versions": {
+  "co_truc_r_pm1pp": {
+   "n": 2025,
+   "center": 16400,
+   "p10": 8960,
+   "p25": 12021,
+   "p50": 16265,
+   "p75": 19735,
+   "p90": 24219,
+   "pct_below_px": 0.8290833333333335,
+   "min": 5237,
+   "max": 39457
+  },
+  "khong_truc_slope": {
+   "n": 225,
+   "center": 16205,
+   "p10": 9000,
+   "p25": 12077,
+   "p50": 16560,
+   "p75": 19460,
+   "p90": 23149,
+   "pct_below_px": 0.8613333333333333,
+   "min": 6557,
+   "max": 29472
+  },
+  "khong_truc_tlsh": {
+   "n": 135,
+   "center": 16479,
+   "p10": 9237,
+   "p25": 12126,
+   "p50": 16551,
+   "p75": 19788,
+   "p90": 23759,
+   "pct_below_px": 0.8277777777777778,
+   "min": 7019,
+   "max": 33352
+  }
+ },
+ "drivers": {
+  "p10_scen_mix_pm5pct": {
+   "XAU": 1.0
+  },
+  "p90_scen_mix_pm5pct": {
+   "TOT": 0.626,
+   "TRUNG_LAP": 0.374
+  }
+ },
+ "zone_old_r1": {
+  "center": 16337,
+  "p10": 9261,
+  "p90": 23577,
+  "label": "TRONG vùng"
+ },
+ "axes_included": [
+  "kich ban XAU/TRUNG_LAP/TOT (0,25/0,50/0,25)",
+  "he so duong LN 0,8..1,2 (5 diem deu)",
+  "dich g terminal -1/0/+1pp (deu)",
+  "doc LN 2028-29 -5/0/+5%/nam (deu) [UL; SKEPTIC N2]",
+  "TLSH ty le mat gia tri -25/0/25/50/100% (0,10/0,50/0,20/0,12/0,08) [UL]"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "r / beta rieng ma",
+   "reason": "luat 03/11 r 13,5% dong nhat; ban song song co_truc_r_pm1pp + doi chieu beta 0,84/0,93/1,0 (cau hoi mo cho Mike/user)"
+  },
+  {
+   "axis": "26,55% BDS HP con lai + lien danh BT song Hong",
+   "reason": "khong co so lieu de luong hoa (nghia vu gop von/bao lanh chua thuyet minh); WARNING"
+  },
+  {
+   "axis": "EV/EBITDA 5x",
+   "reason": "doi chieu, khong vao tam (khong co comp)"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "TLSH o base",
+   "effect_dong_per_share": 0,
+   "basis": "so sach (NPV 0); lech nam o truc tlsh",
+   "source": "HN-Q3; GAPS2"
+  },
+  {
+   "item": "Du an dang dau tu (XDCB 16.113, cam ket ~19.472, DQ2)",
+   "effect_dong_per_share": 0,
+   "basis": "BV0 theo gia so, capex tuong lai khong tru (NPV 0)",
+   "source": "HN-Q3"
+  },
+  {
+   "item": "Thue terminal 20% (TAXF 0,80/0,88)",
+   "effect_dong_per_share": null,
+   "basis": "het uu dai thue: Luat thue TNDN 20%; ETR hien hanh ~12%; thoi han uu dai chua cong bo",
+   "source": "dd_HPG_20261031 GAPS §2/§7"
+  }
+ ],
+ "r_implied_center_eq_px_r2": 0.11320097986122368,
+ "r_by_beta_crosscheck": {
+  "beta0.84": {
+   "r": 0.11412,
+   "center": 21388
+  },
+  "beta0.93": {
+   "r": 0.119115,
+   "center": 19848
+  },
+  "beta1.0": {
+   "r": 0.123,
+   "center": 18816
+  }
+ },
+ "gordon_crosscheck": {
+  "ROE_2027_TRUNG_LAP_g0.04": 24995,
+  "ROE_2027_TRUNG_LAP_g0.05": 25862,
+  "ROE_9T26_x4/3_g0.04": 24496,
+  "ROE_9T26_x4/3_g0.05": 25305
+ },
+ "lock_md5": {
+  "HPG/calc/hpg_r2.py": "c6c7233a6589db20724d02e6f810879b",
+  "HPG/calc/hpg_redo.py": "b9bcfeb5bd22e1782b6243d46f38c29c",
+  "_common_014125/common.py": "89e390381402790204264c5c2ae1254a",
+  "_common_014125/r2common.py": "b664ec37b7728c5ccaa06b0a77d7d76c",
+  "_common_014125/bq_px_liq_20261104.csv": "442f39a3d556f43f75fa5f3f5519c2e9",
+  "_shared/wpct.py": "4597bc083f0d64d8873141b12fbfb3a6",
+  "../../../../../deposit_rate_vn.py": "13dac039539fb91fc8f7256c03a71e5d",
+  "../../../../../cctg_rate_vn.py": "f9605983ad3b66b47ed80179bcad81da",
+  "../../../../../data/deposit_rate_vn_events.csv": "1bb3c27280abc1dbd014af7eecf8b3d4",
+  "../../../../../data/cctg_rate_vn_events.csv": "fc06e3a866142684d87a43b34e0f17d2",
+  "../../../../kb/dd_price_zones.json": "820180d3042303876d46a5a3bcd9bfbd"
+ },
+ "warnings_r2_added": [
+  "QD 244/QD-XPHC 11/05/2022 phat 125 trieu (thieu TV HDQT doc lap) - lich su",
+  "Giao dich noi bo: Tran Vu Minh mua 33,3 trieu + dang ky 50 trieu cp 07/10-05/11/2026; TV doc lap Dang Ngoc Khanh dang ky ban 100 nghin cp 04/11-03/12",
+  "Thu lao HDQT 2024 244,7 / 2025 83,2 / 6T26 207,7 ty",
+  "Co tuc '15%' nam 2025 hay KH 2026 chua doi chieu TM28",
+  "Phong ve thuong mai: QD 1917/QD-BCT chong lan tranh 27,83% hieu luc 28/07/2026; vu AD ton ma My/EU/Uc/Dai Loan chua ra",
+  "Thue DQ2: CV 377/TCT-CS (30/01/2024) du an moi hay mo rong - chua co ket qua; thuyet minh thue KT25 chua doc"
+ ],
+ "fear_buy_eligible_2_5": false,
+ "center_vs_p50_note": "tam = ky vong luoi 16,286; P50 16,343; gia tri tai tham so trung tam 16,706"
+}

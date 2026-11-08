@@ -1,0 +1,107 @@
+{
+ "ticker": "NT2",
+ "job": "Taylor_20261108_024223",
+ "resume_of": [
+  "Taylor_20261107_131635",
+  "Taylor_20261107_140012"
+ ],
+ "moat_tier": "NONE",
+ "moat_type": "CONTRACT/LOCATION",
+ "risk1": "Single buyer EVN/NSMO allocates Qc annually (2024 NP 83bn) + PPA ~10/2036 / GSA 12/2036 clock (1 source, verify)",
+ "reused": false,
+ "reuse_reason": "no NT2 row in data/moat_tags.csv, no kb/projects/nt2-dd-*.md, DD 2026-10-26 has no 5F section",
+ "source_asof": "2026-11-07",
+ "moat_durable": false,
+ "durability_tests": {
+  "i_multicycle_excess": "FAIL: ROIC5Y 11.7%, ROIC10Y 12.0%, ROIC_Min5Y -0.6%, ROIC_Min10Y -0.6% (FY2025 values; row 2026Q3) vs WACC 13.5% (=Ke, no debt); ROE5Y 14%, ROE_Min5Y 2%",
+  "ii_named_barrier": "contract PPA/GSA + location, not firm-owned",
+  "iii_no_clock": "FAIL: PPA/GSA end 2036"
+ },
+ "model_changed": false,
+ "model_check": {
+  "ronic_channel": "none (no reinvestment, TV=0)",
+  "ebit_margin_implied": 0.1106,
+  "ebitda_margin_implied": 0.132,
+  "peer_ebitda_median_mean_6": [
+   0.202,
+   0.171
+  ],
+  "peer_ebitda_range_by_set": [
+   0.195,
+   0.218
+  ],
+  "nt2_own_ebitda_avg": 0.201,
+  "verdict": "consistent with 3c on EBITDA basis; EBIT basis double-counts depreciation (NT2 D&A 556->153 from end-2025)"
+ },
+ "current": {
+  "center": 24003,
+  "p10": 18301,
+  "p50": 24075,
+  "p90": 29619,
+  "label": "TRONG vung",
+  "source": "REPORT_r3.md / SUMMARY.json r3 (job Taylor_20261108_153742)"
+ },
+ "lower_bound_ebit_basis": {
+  "center_median6": 22151,
+  "p10": 16846,
+  "p50": 22194,
+  "p90": 26970,
+  "center_range_by_peer_set": [
+   21701,
+   23035
+  ],
+  "label": "TRONG vung",
+  "status": "sensitivity only; basis choice pending Mike/user"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center": 28266,
+   "p10": 21012,
+   "p90": 34981,
+   "label": "TRONG vung"
+  },
+  "NARROW": {
+   "center": 24003,
+   "center_note": "mo hinh co so hien hanh r3 (REPORT_r3.md); 23617 la tam r2 cu (doi chung)",
+   "center_r2_reference": 23617,
+   "label": "TRONG vung"
+  },
+  "NONE": {
+   "center": 24003,
+   "center_note": "mo hinh co so hien hanh r3 (REPORT_r3.md); 23617 la tam r2 cu (doi chung)",
+   "center_r2_reference": 23617,
+   "label": "TRONG vung",
+   "ebit_basis_center": [
+    21701,
+    23035
+   ]
+  }
+ },
+ "proposed_moat_tag_row": "NT2,NONE,CONTRACT/LOCATION,L,\"Single-plant gas IPP: single buyer EVN sets annual Qc (2024 full-year NP 83bn), single gas supplier PV Gas, PPA ~10/2036 + GSA 12/2036 clock (1 source, verify), domestic gas declining from ~2031; ROIC5Y 11.7%/ROIC_Min5Y -0.6% vs WACC 13.5% - no multi-cycle excess return\",2026-11-07,5f_dd_taylor,N",
+ "measured_by": "calc/model_5f.py->model_5f_out.txt; calc/model_5f_peer.py->model_5f_peer_out.txt; calc/model_5f_ebitda.py->model_5f_ebitda_out.txt; bq tav2_bq.ticker_financial 2026-11-08 (ROIC5Y/Min5Y/10Y/Min10Y, EBITM_P0, EBITDA_P0 Q4 rows)",
+ "why_none_not_narrow": "QTP NARROW ROIC_Min5Y 12.5%, HTI (finite concession) NARROW ROIC_Min5Y 9.9%, NT2 -0.6% fails (i) under any denominator; NARROW and NONE give same value (TV=0)",
+ "entry_note": "entry=L per moat_5f.py:33 (industry structural attractiveness); entry-barrier reading would be MEDIUM; moat_tags entry column ambiguous (QTP=H vs HTI/TLG=L) - pending Mike/user",
+ "claims_needing_verification": [
+  "GSA to 2036 (no GSA/Phu luc 13 text in Q3 PDF in src/ - 30 pages scanned)",
+  "gas cost ~1,940 d/kWh single source (substack 13/10)"
+ ],
+ "roe_operating_34_3_note": "artifact of fully depreciated assets (REPORT_r2.md:42); mirror of ROIC 12% depressed by cash/receivables",
+ "fix_of": "Taylor_20261107_172009",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 24003,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "headline_centre_basis": "dong bo r3 08/11 (REPORT_r3.md): tam 24.003, P10 18.301, P50 24.075, P90 29.619, nhan TRONG vung @22.200 (06/11); 23.617 la tam r2 cu",
+  "r3_sync_note": "Moi so tam/P10/P90 khac trong file nay (23.617, 22.151, 21.701-23.035, 24.594, WIDE 28.266...) tinh tren mo hinh r2 (thoi han 8/10/12, NWC 837 cuoi han, gia 22.650) - chi la do nhay tuong doi quanh r2, KHONG phai tam hien hanh"
+ },
+ "current_r2": {
+  "center": 23617,
+  "p10": 18386,
+  "p50": 23669,
+  "p90": 28278,
+  "label": "TRONG vung"
+ }
+}

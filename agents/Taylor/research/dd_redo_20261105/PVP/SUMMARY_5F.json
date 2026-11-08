@@ -1,0 +1,171 @@
+{
+ "ticker": "PVP",
+ "job": "Taylor_20261107_172011",
+ "fix_job": "Taylor_20261108_024220",
+ "prev_version": "SUMMARY_5F_r1.json",
+ "asof": "2026-11-08",
+ "moat_tier": "NONE",
+ "moat_type": "NONE",
+ "risk1": "Tai dau tu dinh chu ky: mua tau 116 tr USD (~1,55x von hoa) IRR 7,67% < hurdle 11% < Ke 13,5%; khach chinh la cong ty me dinh gia cuoc (ben lien quan 63,3% DT 6T = 865,4/1.367,3; 3 ben neu ten 849,7 = 62,1%)",
+ "reused": false,
+ "source_asof": null,
+ "source_note": "khong co audit 5F cu (moat_tags.csv khong co PVP; DD 29/10 khong co 5F) => lam moi",
+ "moat_durable": false,
+ "durable_tests": {
+  "i_excess_multi_cycle": false,
+  "ii_named_barrier": false,
+  "iii_no_clock": false
+ },
+ "evidence": {
+  "ROIC5Y": 8.8,
+  "ROIC_Min5Y": 3.5,
+  "ROIC10Y": 7.7,
+  "ROIC_Min10Y": 3.5,
+  "ROE5Y": 11.9,
+  "ROE_Min5Y": 10.6,
+  "Ke": 13.5,
+  "peer_ROIC5Y_median": 8.2,
+  "peer_ROIC5Y_mean": 8.0,
+  "GPM_2025": 12.1,
+  "GPM_avg_2016_25": 14.3,
+  "peer_GPM_2025_median": 14.7,
+  "peer_GPM_2025_mean": 15.2
+ },
+ "model_changed": true,
+ "model_change_status": "quy uoc cho Mike/user duyet; SUMMARY.json/REPORT_r2 KHONG sua",
+ "model_deviations": [
+  "EBITDA doi tau TB luoi 382,5 > TB chu ky proxy 345,7 (k=0,904)",
+  "NPV tau moi -30/0/+30% (ky vong -7,5%) thay vi 0",
+  "proxy chu ky 431 = EBITDA TONG cong ty: (a) doi tau trong cua so co the nho hon (Era ~2023, Pride ~cuoi 2024 - suy luan tu hao mon luy ke) => A phat qua; (b) FSO on dinh nam ca tu lan mau => A phat thieu; do lon rong chua do; can tren bo A = CAP rieng 21.505 (van TRONG)"
+ ],
+ "old": {
+  "center_post": 22366,
+  "p10_out": 12702,
+  "p50_out": 22377,
+  "p90_out": 32834,
+  "pct_weight_below_price": 0.30600000000000005,
+  "label": "TRONG vùng"
+ },
+ "new_headline_strict3c_A_CAP": {
+  "center_post": 20356,
+  "p10_out": 11796,
+  "p50_out": 21303,
+  "p90_out": 26471,
+  "pct_weight_below_price": 0.332,
+  "label": "TRONG vùng"
+ },
+ "CAP_only_upside_cut": {
+  "center_post": 21505,
+  "p10_out": 12702,
+  "p50_out": 22377,
+  "p90_out": 27955,
+  "pct_weight_below_price": 0.30600000000000005,
+  "label": "TRONG vùng"
+ },
+ "rejected_symmetric_A_B": {
+  "center_post": 22653,
+  "p10_out": 18917,
+  "p50_out": 22444,
+  "p90_out": 26471,
+  "pct_weight_below_price": 0.04,
+  "label": "DƯỚI vùng",
+  "why_rejected": "xoa nhanh -30% NPV tau co co so quan sat (IRR 7,67% < hurdle 11% DHCD p44) => NONE dang gia hon r2 (+287 tam, P10 +6.215) = dao nguoc 3c; 3c chi go phan thuong"
+ },
+ "label_change": "KHONG doi: TRONG giu o headline A+CAP (va CAP rieng 21.505). Nhan DUOI chi ton tai o quy uoc doi xung (da loai), bien 2,7% (gia 18.400 < P10 18.917)",
+ "delta_center_decomposition": {
+  "ebitda_to_cycle": -1149,
+  "npv_upside_cut": -861,
+  "total_A_CAP": -2010,
+  "rejected_symmetric": {
+   "npv_symmetric_zero": 1436,
+   "total": 287
+  }
+ },
+ "sleeve40": {
+  "A_CAP_headline": {
+   "center_post": 20734,
+   "p10_out": 12016,
+   "p50_out": 21699,
+   "p90_out": 26962,
+   "pct_weight_below_price": 0.332,
+   "label": "TRONG vùng"
+  },
+  "cur": {
+   "center_post": 22782,
+   "p10_out": 12937,
+   "p50_out": 22793,
+   "p90_out": 33444,
+   "pct_weight_below_price": 0.29800000000000004,
+   "label": "TRONG vùng"
+  },
+  "rejected_symmetric": {
+   "center_post": 23073,
+   "p10_out": 19268,
+   "p50_out": 22861,
+   "p90_out": 26962,
+   "pct_weight_below_price": 0.04,
+   "label": "DƯỚI vùng"
+  }
+ },
+ "sensitivity": {
+  "WIDE": {
+   "center_post": 26194,
+   "p10_out": 18022,
+   "p50_out": 26105,
+   "p90_out": 36688,
+   "pct_weight_below_price": 0.14650000000000002,
+   "label": "TRONG vùng"
+  },
+  "CUR_r2": {
+   "center_post": 22366,
+   "p10_out": 12702,
+   "p50_out": 22377,
+   "p90_out": 32834,
+   "pct_weight_below_price": 0.30600000000000005,
+   "label": "TRONG vùng"
+  },
+  "A_only": {
+   "center_post": 21217,
+   "p10_out": 11796,
+   "p50_out": 21303,
+   "p90_out": 31428,
+   "pct_weight_below_price": 0.332,
+   "label": "TRONG vùng"
+  },
+  "CAP_only": {
+   "center_post": 21505,
+   "p10_out": 12702,
+   "p50_out": 22377,
+   "p90_out": 27955,
+   "pct_weight_below_price": 0.30600000000000005,
+   "label": "TRONG vùng"
+  },
+  "NONE_A_CAP_headline": {
+   "center_post": 20356,
+   "p10_out": 11796,
+   "p50_out": 21303,
+   "p90_out": 26471,
+   "pct_weight_below_price": 0.332,
+   "label": "TRONG vùng"
+  },
+  "rejected_symmetric_A_B": {
+   "center_post": 22653,
+   "p10_out": 18917,
+   "p50_out": 22444,
+   "p90_out": 26471,
+   "pct_weight_below_price": 0.04,
+   "label": "DƯỚI vùng"
+  }
+ },
+ "r2_tier_note": "r2 khong phai NARROW ngam: NARROW cung khong duoc thuong (= NONE theo 3c); r2 chi la mo hinh co 2 kenh thuong lech 3c",
+ "proposed_moat_tag_row": "PVP,NONE,NONE,L,\"Tanker/FSO price-taker (ROIC5Y 8.8%/Min5Y 3.5% < Ke 13.5%, ~peer median 8.2%); 63% revenue related-party (PVTrans/BSR) with parent-set FSO rate stepping down 2027/2031; #1 risk = buying 116m USD of tankers at freight peak with project IRR 7.67% < own 11% hurdle\",2026-11-08,5f,N",
+ "measured_by": "calc/5f/addendum_5f.py + calc/5f/addendum_5f_ext.py ($DNA_PYEXE -I, chay lai 2 lan trung byte 08/11: md5 acefdadfa3a318f6c4491ff31159d8c6 / 33a2a1c836f688bcd05570988f137351); BQ tav2_bq.ticker_financial 08/11/2026; ty trong ben lien quan: dd_PVP_20261029/REPORT.md (H1 p38)",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 22366,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
+}

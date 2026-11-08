@@ -346,5 +346,13 @@
  },
  "nnc_stake_reconcile": "44.07% = 9.659.170 cp Q3/26 [HN-Q3 V.12]; BCTN 2025 EN 43.55% = 9.545.270 cp 31/12/2025 (txt:421-422); chenh = mua them 113.900 cp 6,01 ty 9T/26",
  "hoa_lu_icd": "cong ty con 100% (EN AR txt:425), khong phai ben lien quan ngoai",
- "model_changed_note": "engine/REPORT_r2 khong sua; headline CHAT_3C chi la tai trong so luoi khoa; so dinh gia khong doi so voi r2"
+ "model_changed_note": "engine/REPORT_r2 khong sua; headline CHAT_3C chi la tai trong so luoi khoa; so dinh gia khong doi so voi r2",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 15276,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

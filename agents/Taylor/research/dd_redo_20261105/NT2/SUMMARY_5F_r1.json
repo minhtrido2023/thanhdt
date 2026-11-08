@@ -1,0 +1,15 @@
+{
+ "ticker": "NT2", "job": "Taylor_20261107_172009", "resume_of": ["Taylor_20261107_131635", "Taylor_20261107_140012"],
+ "moat_tier": "NONE", "moat_type": "CONTRACT/LOCATION",
+ "risk1": "Single buyer EVN/NSMO allocates Qc annually (2024 NP 83bn) + PPA ~10/2036 / GSA 12/2036 clock (1 source, verify)",
+ "reused": false, "reuse_reason": "no NT2 row in data/moat_tags.csv, no kb/projects/nt2-dd-*.md, DD 2026-10-26 has no 5F section",
+ "source_asof": "2026-11-07", "moat_durable": false,
+ "durability_tests": {"i_multicycle_excess": "FAIL: ROIC5Y 12%, ROIC10Y 12%, ROIC_Min5Y -1%, ROIC_Min10Y -1% vs Ke 13.5%; ROE5Y 14%, ROE_Min5Y 2%", "ii_named_barrier": "contract PPA/GSA + location, not firm-owned", "iii_no_clock": "FAIL: PPA/GSA end 2036"},
+ "model_changed": false,
+ "model_check": {"ronic_channel": "none (no reinvestment, TV=0)", "ebit_margin_implied": 0.1106, "ebitda_margin_implied": 0.132, "peer_ebitda_median_mean_6": [0.202, 0.171], "peer_ebitda_range_by_set": [0.195, 0.218], "nt2_own_ebitda_avg": 0.201, "verdict": "consistent with 3c on EBITDA basis; EBIT basis double-counts depreciation (NT2 D&A 556->153 from end-2025)"},
+ "current": {"center": 23617, "p10": 18386, "p50": 23669, "p90": 28278, "label": "TRONG vung"},
+ "lower_bound_ebit_basis": {"center_median6": 22151, "p10": 16846, "p50": 22194, "p90": 26970, "center_range_by_peer_set": [21701, 23035], "label": "TRONG vung", "status": "sensitivity only; basis choice pending Mike/user"},
+ "sensitivity": {"WIDE": {"center": 28266, "p10": 21012, "p90": 34981, "label": "TRONG vung"}, "NARROW": {"center": 23617, "label": "TRONG vung"}, "NONE": {"center": 23617, "label": "TRONG vung", "ebit_basis_center": [21701, 23035]}},
+ "proposed_moat_tag_row": "NT2,NONE,CONTRACT/LOCATION,L,\"Single-plant gas IPP: single buyer EVN sets annual Qc (2024 full-year NP 83bn), single gas supplier PV Gas, PPA ~10/2036 + GSA 12/2036 clock (1 source, verify), domestic gas declining from ~2031; ROIC5Y 12%/ROIC_Min5Y -1% vs Ke 13.5% - no multi-cycle excess return\",2026-11-07,5f_dd_taylor,N",
+ "measured_by": "calc/model_5f.py->model_5f_out.txt; calc/model_5f_peer.py->model_5f_peer_out.txt; calc/model_5f_ebitda.py->model_5f_ebitda_out.txt; bq tav2_bq.ticker_financial 2026-11-08 (ROIC5Y/Min5Y/10Y/Min10Y, EBITM_P0, EBITDA_P0 Q4 rows)"
+}

@@ -1,0 +1,19 @@
+{
+ "ticker": "PVT", "round": 3, "job": "Taylor_20261108_153736",
+ "note": "File gia dinh KHOA truoc khi doc gia (LOCK_md5.txt). pvt_r3.py doc file nay; doi o day = doi md5.",
+ "assumptions": [
+  {"key": "scn_w", "value": {"xau": 0.275, "coso": 0.45, "tot": 0.275}, "basis": "doi xung quanh co so; trong so lech xuong r2 0,35/0,45/0,20 chi la nhan dinh Bobby (CYCLICAL 0,55, BIMCO 2027) -> do nhay 'bobby_asym' (dinh chinh 1, TOP5B_CORRECTIONS_20261108.md muc PVT)", "type": "UL-doi-xung"},
+  {"key": "scn_mid", "value": {"xau": 0.9, "coso": 1.0, "tot": 1.1}, "basis": "he so ROE theo kich ban doi xung; r2 0,85/1,0/1,1 lech xuong chong len trung vi ca chu ky 2015-25 (da gom day 2015-17) = dem chu ky 2 lan -> do nhay (dinh chinh 1)", "type": "UL-doi-xung"},
+  {"key": "np27", "value": {"xau": 1250.0, "coso": 1500.0, "tot": 1750.0}, "basis": "co so = LNST me Q3/2026 375,1 ty x4 = 1.500 (quy gan nhat, thap nhat 2026; BQ ticker_financial NP_P0 2026Q3 = BCTC HN Q3 375,13); +-250 doi xung nhu r2. Skeptic de xuat 1.450: lech -50 khong co co so du lieu -> do nhay 'np27_skeptic_1450'", "type": "du-lieu + UL bien do"},
+  {"key": "roe_mid", "value": "median ROE_Trailing Q4 2015-2025 (BQ, model.py)", "basis": "bq_hist_out.csv, 11 nam ca chu ky", "type": "du-lieu"},
+  {"key": "mults", "value": [0.8, 0.9, 1.0, 1.1, 1.2], "basis": "truc ROE giua chu ky deu, doi xung (r2 giu nguyen)", "type": "UL-doi-xung"},
+  {"key": "g", "value": 0.03, "basis": "g danh nghia dai han (r1-r2 giu nguyen) — uoc luong", "type": "UL"},
+  {"key": "r_axis", "value": [[-0.005, 0.25], [0.0, 0.5], [0.005, 0.25]], "basis": "r = 13,5% + 1,0 x (dep12T hieu dung 06/11 7,40% - 7,40%) = 13,5%; truc +-50bp doi xung (common_r2)", "type": "luat + UL-doi-xung"},
+  {"key": "ship_buy", "value": {"mua_phan_con_lai": 0.5, "khong": 0.5}, "basis": "capex 2026 con lai 3.445 - 979,6 = 2.465 ty (DHDCD 2026; TM12); 0,5/0,5 [UL]", "type": "du-lieu + UL"},
+  {"key": "ship_npv", "value": {"xau": -0.3, "coso": 0.0, "tot": 0.3}, "basis": "NPV +-30% theo kich ban cuoc [UL]; voi trong so doi xung, ky vong = 0 (dung luat NPV0)", "type": "UL-doi-xung"},
+  {"key": "nci", "value": 0.196, "basis": "LNST CDKKS 309,5 / LNST HN 1.581,8 9T/2026 (BCTC HN Q3)", "type": "du-lieu"},
+  {"key": "eq_parent", "value": 9855.6, "basis": "VCSH 12.862.928.406.161 - CDKKS 3.007.359.354.829 = 9.855,569 ty (text BCTC HN Q3 dong 933/1005; da kiem 08/11 tu text, KHONG tu PDF)", "type": "du-lieu"},
+  {"key": "net_interest_9t", "value": {"lai_tien_gui_cho_vay": 250.953803131, "chi_phi_lai_vay": 345.641490397}, "basis": "text BCTC HN Q3 dong 4249 (TM DT tai chinh 9T/26) va 1171 (KQKD 'Trong do: chi phi lai vay' 9T/26)", "type": "du-lieu (chi dung cho kiem cheo)"},
+  {"key": "net_debt", "value": 619.3, "basis": "vay NH 1.420,8 + DH 5.543,7 - tien 2.060,2 - HTM 4.285,0 (REPORT 29/10 §4); chi dung cho kiem cheo lai rong", "type": "du-lieu"}
+ ]
+}

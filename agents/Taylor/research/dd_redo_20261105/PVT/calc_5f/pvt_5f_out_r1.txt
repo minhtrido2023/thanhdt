@@ -1,0 +1,152 @@
+{
+ "r": 0.135,
+ "peers_roe_med_2015_25": {
+  "GSP": 0.1251,
+  "PJT": 0.1219,
+  "PVP": 0.1162,
+  "VIP": 0.0675
+ },
+ "anchors": {
+  "own": 0.1315,
+  "peer_med": 0.1191,
+  "peer_mean": 0.1077,
+  "peer_med_exPVP": 0.1219,
+  "peer_mean_exPVP": 0.1048,
+  "ttm_q3_26": 0.1577,
+  "ke": "r"
+ },
+ "liq": {
+  "d5ty": 0.0067071400472102525,
+  "d10tr": 0.0002999524216034655,
+  "d40tr": 0.000599904843206931
+ },
+ "price": 21000.0,
+ "variants": {
+  "CUR": {
+   "anchor": "own",
+   "ronic": "roe",
+   "center_post": 17675,
+   "center_param_post": 18493,
+   "p10_out": 12533,
+   "p50_out": 17425,
+   "p90_out": 23135,
+   "pct_weight_below_price": 0.7825,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng",
+   "p90_40tr": 23277,
+   "center_40tr": 17783
+  },
+  "SYM": {
+   "anchor": "own",
+   "ronic": "ke",
+   "center_post": 17977,
+   "center_param_post": 18629,
+   "p10_out": 13852,
+   "p50_out": 17719,
+   "p90_out": 22298,
+   "pct_weight_below_price": 0.7825,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng",
+   "p90_40tr": 22435,
+   "center_40tr": 18088
+  },
+  "REVm": {
+   "anchor": "peer_med",
+   "ronic": "ke",
+   "center_post": 16492,
+   "center_param_post": 17095,
+   "p10_out": 12636,
+   "p50_out": 16299,
+   "p90_out": 20401,
+   "pct_weight_below_price": 0.9399999999999998,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng",
+   "p90_40tr": 20526,
+   "center_40tr": 16593
+  },
+  "REVa": {
+   "anchor": "peer_mean",
+   "ronic": "ke",
+   "center_post": 15132,
+   "center_param_post": 15690,
+   "p10_out": 11523,
+   "p50_out": 15002,
+   "p90_out": 18740,
+   "pct_weight_below_price": 0.98,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng",
+   "p90_40tr": 18855,
+   "center_40tr": 15225
+  },
+  "REVm_exPVP": {
+   "anchor": "peer_med_exPVP",
+   "ronic": "ke",
+   "center_post": 16829,
+   "center_param_post": 17443,
+   "p10_out": 12912,
+   "p50_out": 16593,
+   "p90_out": 20865,
+   "pct_weight_below_price": 0.9075,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng",
+   "p90_40tr": 20993,
+   "center_40tr": 16933
+  },
+  "REVa_exPVP": {
+   "anchor": "peer_mean_exPVP",
+   "ronic": "ke",
+   "center_post": 14791,
+   "center_param_post": 15338,
+   "p10_out": 11244,
+   "p50_out": 14664,
+   "p90_out": 18324,
+   "pct_weight_below_price": 0.995,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng",
+   "p90_40tr": 18436,
+   "center_40tr": 14882
+  },
+  "REV_only_m_RONICroe": {
+   "anchor": "peer_med",
+   "ronic": "roe",
+   "center_post": 15711,
+   "center_param_post": 16469,
+   "p10_out": 10946,
+   "p50_out": 15475,
+   "p90_out": 20787,
+   "pct_weight_below_price": 0.9125,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng",
+   "p90_40tr": 20915,
+   "center_40tr": 15808
+  },
+  "ROE_eq_Ke": {
+   "anchor": "ke",
+   "ronic": "ke",
+   "center_post": 18381,
+   "center_param_post": 19059,
+   "p10_out": 13721,
+   "p50_out": 17926,
+   "p90_out": 22469,
+   "pct_weight_below_price": 0.7949999999999999,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng",
+   "p90_40tr": 22607,
+   "center_40tr": 18494
+  },
+  "WIDE": {
+   "anchor": "ttm_q3_26",
+   "ronic": "wide",
+   "center_post": 21782,
+   "center_param_post": 22729,
+   "p10_out": 15643,
+   "p50_out": 21667,
+   "p90_out": 28048,
+   "pct_weight_below_price": 0.46249999999999997,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng",
+   "p90_40tr": 28221,
+   "center_40tr": 21916
+  }
+ }
+}

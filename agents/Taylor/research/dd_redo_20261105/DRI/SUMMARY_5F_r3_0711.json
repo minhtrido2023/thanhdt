@@ -1,0 +1,137 @@
+{
+ "ticker": "DRI",
+ "job": "Taylor_20261107_124448",
+ "moat_tier": "NARROW",
+ "moat_type": "LOCATION/COST",
+ "risk1": "Gia cao su (price-taker), da qua dinh (LNST me Q3/26 -33% YoY); risk2 = dong ho dat (NQ15 thanh ly 1.975 ha ~24% dien tich cao 2027-30, to nhuong Lao mo hinh toi 2054, rung bao ton)",
+ "reused": true,
+ "source_asof": "2026-06-05",
+ "source": "data/moat_tags.csv (src 5f_cyclical)",
+ "moat_durable": false,
+ "durable_checks": {
+  "i_excess_through_cycle": false,
+  "ii_named_mechanism": "partial (dat to nhuong + gia thanh thap; chi phia chi phi)",
+  "iii_no_clock": false
+ },
+ "evidence": {
+  "years_dri_above_peer_median": "9/9",
+  "roe_2018_2022": [
+   0.06,
+   0.046,
+   0.034,
+   0.1,
+   0.097
+  ],
+  "roe_min5y": 0.107,
+  "roe5y": 0.158,
+  "roic_min10y": 0.065,
+  "ke": 0.135,
+  "roic_trailing_note": "ROIC_Trailing Q4 2021-25 = 76-143% => self-calc khong tin cay, khong dung",
+  "gap_pp": {
+   "median_DPR_PHR_GVR": 11.7,
+   "mean_DPR_PHR_GVR": 10.89,
+   "median_+TRC": 11.85,
+   "mean_+TRC": 11.1,
+   "DPR_only": 7.43
+  },
+  "gpm_method": "BQ ticker_financial GPM_P0 tai dong Q4 (=TTM 4 quy = ca nam) dung thang; gap = TB 2017-25 cua (DRI - trung vi peer cung nam); GVR thieu 2017. Khong tinh lai TTM trong so (r2 bo).",
+  "roic5y": 0.195,
+  "roic_min5y": 0.168,
+  "roe_mid_cycle_model": {
+   "lnst_mid_ty": 151.9,
+   "roe_Q2": 0.189,
+   "roe_Q3": 0.207,
+   "gpm_model": 0.361,
+   "note": "skeptic neu LNST mid 163,6 ty (spec khac, khong tai hien)"
+  },
+  "gpm_dri_annual_2017_25": 0.3693,
+  "gpm_peer_median_annual_2017_25": 0.2524
+ },
+ "model_changed": false,
+ "model_note": "r2 SUA r1: mo hinh hien hanh KHONG nhat quan 3c theo chu (Cref 30,22 toi 2054, GPM mo hinh ~36,1% vs peer ~25,2%, ROE mid ~19-21%>Ke). Gia tri hien hanh khong doi; ban chat-3c song song, cho Mike/user duyet (ngoai le a vs chat b). Moc to nhuong 2054 = END engine, van ban chua cong khai => can kiem chung.",
+ "current": {
+  "centre": 14092,
+  "p10": 12006,
+  "p50": 14235,
+  "p90": 16146,
+  "pct_below_price": 0.353,
+  "label": "TRONG vùng"
+ },
+ "sensitivity": {
+  "NARROW_current": {
+   "centre": 14092,
+   "p10": 12006,
+   "p50": 14235,
+   "p90": 16146,
+   "pct_below_price": 0.353,
+   "label": "TRONG vùng"
+  },
+  "NONE_half": {
+   "centre": 12488,
+   "p10": 10439,
+   "p50": 12759,
+   "p90": 14491,
+   "pct_below_price": 0.788,
+   "label": "TRONG vùng",
+   "cref": 33.03
+  },
+  "NONE_tight": {
+   "centre": 10883,
+   "p10": 8894,
+   "p50": 11148,
+   "p90": 12942,
+   "pct_below_price": 0.98,
+   "label": "TRÊN vùng (>P90)",
+   "cref": 35.84,
+   "peer_range_centre": [
+    10840,
+    12054
+   ]
+  },
+  "NONE_symmetric": {
+   "centre": 11188,
+   "p10": 8957,
+   "p50": 11318,
+   "p90": 13113,
+   "pct_below_price": 0.975,
+   "label": "TRÊN vùng (>P90)"
+  },
+  "NONE_DPR_only": {
+   "centre": 12054,
+   "p10": 10021,
+   "p50": 12287,
+   "p90": 13966,
+   "pct_below_price": 0.838,
+   "label": "TRONG vùng"
+  },
+  "WIDE": {
+   "centre": 14965,
+   "p10": 12817,
+   "p50": 15055,
+   "p90": 16957,
+   "pct_below_price": 0.175,
+   "label": "TRONG vùng",
+   "n_outcomes": 18,
+   "delta_econ_branch_only": 196,
+   "delta_moat_real": 677,
+   "param": "tai canh NPV=+0,25xPV capex [UL]"
+  }
+ },
+ "price": 13500,
+ "price_date": "2026-11-04",
+ "proposed_moat_tag_row": "DRI,NARROW,LOCATION/COST,L,\"Commodity price-taker; cost edge real (annual GPM [BQ GPM_P0 Q4=TTM] 2017-25 36.9% vs peer median 25.2%, 9/9 yrs) but ROE<Ke 2018-22, ROE_Min5Y 10.7%<Ke 13.5%, ROIC_Min10Y 6.5% => not durable (rule 3c: margin to industry mean); post-peak (Q3-26 NP -33% YoY); land clock: NQ15 liquidates 1,975 ha (~24% tapped) 2027-30, Laos concession end 2054 unverified; Dakruco related-party governance risk\",2026-11-07,5f_quickcheck_reuse_20260605,N",
+ "measured_by": "calc_5f/moat_sens_5f.py ($DNA_PYEXE -B, 2 lan md5 out b8792326b887ed6334aac03c9a4e54ca) + calc_5f/ttm_bq.csv (BQ ticker_financial GPM_P0 Q4)",
+ "non_pit_note": "5F/LLM-knowledge non-point-in-time: chi DD song, cam backtest",
+ "round": 3,
+ "consistent_with_3c": false,
+ "pending_decision": "Mike/user: (a) ngoai le 3c voi bang chung gia thanh peer, hoac (b) ap chat-3c NONE_half/NONE",
+ "r3_note": "r3: hoan GPM ve GPM_P0 Q4 (la TTM=ca nam) dung thang, bo 'TTM trong so tu tinh' cua r2; gap median 11,70pp (r2 12,06). Ket luan moat_tier/durable/consistent_with_3c khong doi.",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 14092,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
+}

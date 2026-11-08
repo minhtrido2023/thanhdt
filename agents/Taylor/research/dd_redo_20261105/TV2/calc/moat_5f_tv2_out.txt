@@ -1,0 +1,15 @@
+TV2 3c | giá 27,400 | r 0.1350 | CK ref 2.52% | VCSH 1330.8 tỷ | ROE terminal kỳ vọng r2 (E×persist TB) 12.09%
+neo ROE Q4 2012–25 TV3_TV4: n 28 trung vị 14.76% TB 14.15%
+neo ROE Q4 2012–25 TV1_TV3_TV4: n 42 trung vị 13.82% TB 12.95%
+neo ROE Q4 2012–25 TV2_own: n 14 trung vị 22.79% TB 24.04%
+control_r2                                   tâm  15,832 P10   2,726 P50  15,843 P90  30,675 dưới giá 84.1% TRONG vùng | sleeve40tr tâm 16,165 P90 31,319 TRONG vùng
+ronic_only                                   tâm  16,248 P10   6,319 P50  15,980 P90  26,733 dưới giá 91.1% TRÊN vùng (>P90) | sleeve40tr tâm 16,589 P90 27,294 TRÊN vùng (>P90)
+NONE_TV3_TV4_median                          tâm  19,201 P10  16,154 P50  19,201 P90  21,689 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 19,603 P90 22,144 TRÊN vùng (>P90)
+NARROW_TV3_TV4_median                        tâm  18,278 P10  14,240 P50  17,985 P90  22,672 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 18,662 P90 23,148 TRÊN vùng (>P90)
+NONE_TV3_TV4_mean                            tâm  18,528 P10  15,481 P50  18,528 P90  21,017 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 18,916 P90 21,457 TRÊN vùng (>P90)
+NARROW_TV3_TV4_mean                          tâm  17,815 P10  13,777 P50  17,522 P90  22,210 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 18,189 P90 22,676 TRÊN vùng (>P90)
+NONE_TV1_TV3_TV4_median                      tâm  18,165 P10  15,118 P50  18,165 P90  20,654 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 18,546 P90 21,087 TRÊN vùng (>P90)
+NARROW_TV1_TV3_TV4_median                    tâm  17,566 P10  13,528 P50  17,272 P90  21,960 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 17,934 P90 22,421 TRÊN vùng (>P90)
+NONE_TV1_TV3_TV4_mean                        tâm  17,200 P10  14,153 P50  17,200 P90  19,688 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 17,560 P90 20,101 TRÊN vùng (>P90)
+NARROW_TV1_TV3_TV4_mean                      tâm  16,902 P10  12,864 P50  16,609 P90  21,297 dưới giá 100.0% TRÊN vùng (>P90) | sleeve40tr tâm 17,257 P90 21,743 TRÊN vùng (>P90)
+NARROW_TV3_TV4_median_persist_on_anchor      tâm  17,157 P10   7,032 P50  18,581 P90  24,806 dưới giá 95.6% TRÊN vùng (>P90) | sleeve40tr tâm 17,517 P90 25,327 TRÊN vùng (>P90)

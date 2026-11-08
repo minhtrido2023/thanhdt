@@ -1,3 +1,7 @@
+> **QUY ƯỚC CUỐI (user chốt 08/11/2026 10:50 ICT):** KHÔNG áp luật 3c chặt. Moat chỉ được THÊM vào định giá khi bền; NARROW/NONE = không thưởng nhưng KHÔNG trừ. **Headline = mô hình cơ sở hiện hành (đồng bộ r3 08/11: tâm 31.658, P10 25.083, P50 31.402, P90 38.043, nhãn TRONG vùng ở cỡ CK tham chiếu 5 tỷ, giá 34.200 ngày 06/11, theo `REPORT_r3.md`; cỡ sleeve 40 tr: tâm 33.474, TRONG; 31.066 là tâm r2 cũ, chỉ còn là mốc so sánh)**; mọi 'bản chặt-3c / headline mới / chờ duyệt' bên dưới chỉ còn là **độ nhạy rủi ro** ('nếu về trung bình ngành'), KHÔNG phải kết luận định giá. Các sửa lỗi dữ liệu/công thức/peer trong tài liệu này vẫn có hiệu lực. Không mã nào trong 20 mã có moat bền ⇒ không thêm tham số moat.
+>
+> **Ghi chú đồng bộ r3 (08/11):** mọi con số tâm/P10/P90 trong tài liệu bên dưới (WIDE 31.066, các bản chặt-3c 22.002 / 20.978–23.026, chỉ-RONIC 26.410, 'headline' chặt-3c P90 25.977, giá 34.700…) được tính trên mô hình r2 (N0 518,4, giá 04/11) và chỉ là độ nhạy tương đối ('nếu về trung bình ngành') quanh mô hình r2, KHÔNG phải tâm hiện hành. Chữ 'headline' trong các bảng/đoạn dưới = headline của quy ước chặt-3c đã bị user bác 08/11. Tâm hiện hành là r3 = 31.658.
+
 # ADDENDUM 5F — SAS (SASCO) · 07/11/2026 · r2 · job `Taylor_20261107_125216`
 
 > Bổ sung bước 3c cho `REPORT_r2.md` (05/11). **Không làm lại DD**; mọi phần khác của REPORT_r2 giữ nguyên. Không sửa REPORT/SUMMARY cũ, không ghi `dd_price_zones`.
@@ -37,7 +41,7 @@
 ⇒ **moat_durable = false**, đứng nhờ **(iii)** và tag NARROW (SKILL bước 3c: có đồng hồ cắt hào ⇒ không thưởng), **không** nhờ (i). Theo luật 3c: RONIC = Ke và biên về **TB chu kỳ ngành**.
 
 ## 3. Moat trong mô hình — mô hình hiện hành đang **ngầm thưởng kiểu WIDE** ⇒ không nhất quán
-`model_r2.py` dùng TV = E₂₀₂₈/(r−g), g {2;3;4}%, **không trích tái đầu tư** ⇒ RONIC ngầm = ∞ > Ke ở mọi ô g. Mô hình giữ N0 = **518,4 tỷ/năm mãi mãi** (chỉ trừ Δ Long Thành). N0 = (LN 9T 539,5 − (DT TC 195,0 − CP TC 6,7)×0,8)×4/3 ⇒ đã **LOẠI thu nhập tài chính** (tiền/đầu tư cộng riêng theo sổ) ⇒ **biên vận hành N0 = 16,67%** (NPM 9T gồm TC là 23,12%; chênh 6,46pp = thu nhập TC sau thuế). **BẢN CHẶT-3C** chạy song song:
+`model_r2.py` dùng TV = E₂₀₂₈/(r−g), g {2;3;4}%, **không trích tái đầu tư** ⇒ RONIC ngầm = ∞ > Ke ở mọi ô g. Mô hình r2 giữ N0 = **518,4 tỷ/năm mãi mãi** (chỉ trừ Δ Long Thành); **mô hình hiện hành r3 dùng N0 = 479,7** = (LNTT 638,03 − TC ròng 188,28)×0,8×4/3 (cổ tức miễn thuế, đính chính 1 của r3). Công thức r2: (LN 9T 539,5 − (DT TC 195,0 − CP TC 6,7)×0,8)×4/3 ⇒ đã **LOẠI thu nhập tài chính** (tiền/đầu tư cộng riêng theo sổ) ⇒ biên vận hành N0 r2 = **16,67%** (r3: 479,7/3.111 = **15,42%**; NPM 9T gồm TC là 23,12%; chênh 6,46pp = thu nhập TC sau thuế). Mọi con số 16,67% / −133,9 tỷ / −25,8% N0 trong tài liệu này là **trên N0 r2**; trên N0 r3 mức cắt tới biên 12,36% xấp xỉ 3.111×(12,36%−15,42%) ≈ −95 tỷ/năm (tính nhanh bằng tay, KHÔNG chạy lại mô hình). Bản chặt-3C chỉ là độ nhạy. **BẢN CHẶT-3C** chạy song song:
 - **RONIC = Ke, ĐỐI XỨNG mọi ô g**: V = E(1−g/Ke)/(r−g) = E/r. Quy ước năm 1 giữ nguyên r2 (E₂₀₂₇/(1+r), TV tại t=1 chiết khấu thêm (1+r)). (cơ sở: moat NARROW LOCATION/REGULATORY, (iii) trượt)
 - **Biên về TB chu kỳ ngành — so cùng cơ sở VẬN HÀNH**: NPM chu kỳ gộp SAS+AST, có trọng số DT, 2017–19 + 2022–25 (bỏ 2020–21 COVID) = **14,36%** (SAS 14,52% · AST 13,96%) — số này **GỒM thu nhập TC lịch sử** ⇒ mục tiêu vận hành = **14,36% − f**. Điều chỉnh LN = 3.111 × ((14,36% − f) − 16,67%); nửa vào 2027, đủ từ 2028.
 - **f (thu nhập TC sau thuế / DT, pp)**: không có chuỗi DT TC từng năm 2017–19, 2022–25 trong BQ (không có cột) hay thư mục (chỉ có BCTC H1 và Q3/2026) ⇒ *cần kiểm chứng* từng năm từ BCTC. Mốc đo được: **9T/25 = 0,8×58,2/2.339 = 1,99pp** (cận trên, chưa trừ CP TC); cả năm 2025 = 0,8×(58,2+139,8)/3.316 = 4,78pp (Q4/25 139,8 [web] có thể gồm khoản một lần); 9T/26 = 6,46pp (đỉnh, cổ tức đầu tư dồn). **Headline f = 2pp** (mốc 9T/25, kỳ không đỉnh gần nhất), **khoảng 1–3pp**; 4,78pp báo như đuôi.
@@ -45,13 +49,13 @@
 - **Kênh truyền dẫn GPM** (không phụ thuộc f vì cùng là số vận hành): GPM ngành SAS+AST 2017–25 (dòng Q4 GPM_P0, trọng số DT) = 54,0% vs 9T/26 66,7%. (a) SG&A cố định ⇒ −60,9% N0 (**cận trên mức cắt**, thổi phồng vì SG&A/DT tăng cùng GPM); (c) SG&A co giãn ⇒ −19,0% N0 (**cận dưới**). Headline kênh NPM (f=2) = −133,9 tỷ/năm (**−25,8% N0**), nằm trong khoảng (a)–(c).
 - **Không đếm hai lần**: base không có khoản trừ pháp lý (chỉ WARNING); ép biên neo vào AST + NPM chu kỳ, không neo vào vụ việc. Δ Long Thành (sản lượng) và biên có thể chồng nhau ⇒ báo thêm bản Δ=0 làm cận trên.
 
-## 4. Kết quả & độ nhạy (sau CK thanh khoản 5 tỷ 6,01%; r 13,5%; 135 kết cục; giá 34.700)
+## 4. Kết quả & độ nhạy (sau CK thanh khoản 5 tỷ 6,01%; r 13,5%; 135 kết cục; giá 34.700 ngày 04/11 — mô hình r2, độ nhạy)
 | Phương án | Tâm | P10 | P50 | P90 | % dưới giá | Nhãn 5 tỷ | Sleeve 40 tr (CK 0,54%): tâm · P90 · nhãn |
 |---|---|---|---|---|---|---|---|
 | **WIDE** (= REPORT_r2) | 31.066 | 23.751 | 30.806 | 38.022 | 73,6% | TRONG | 32.875 · 40.235 · TRONG |
 | Chỉ RONIC=Ke (giữ biên) | 26.410 | 20.776 | 26.361 | 31.892 | 96,9% | TRÊN | 27.947 · **33.749** · TRÊN — **ranh giới** (cách giá 2,8%) |
 | Chỉ biên (f=2, giữ RONIC ∞) | 25.456 | 20.107 | 25.309 | 31.127 | 97,8% | TRÊN | 26.938 · 32.940 · TRÊN (cách 5,3%) |
-| **HEADLINE chặt-3C (RONIC=Ke + NPM ngành − f 2pp)** *(quy ước chờ Mike/user duyệt)* | **22.002** | **17.949** | **21.965** | **25.977** | 100% | **TRÊN** | 23.283 · 27.489 · TRÊN |
+| **Bản chặt-3C (RONIC=Ke + NPM ngành − f 2pp) — KHÔNG phải headline** *(độ nhạy rủi ro trên mô hình r2 — user KHÔNG áp 3c chặt, 08/11)* | **22.002** | **17.949** | **21.965** | **25.977** | 100% | **TRÊN** | 23.283 · 27.489 · TRÊN |
 | — f = 1pp | 23.026 | 18.695 | 22.986 | 27.446 | 100% | TRÊN | 24.367 · 29.044 · TRÊN |
 | — f = 3pp | 20.978 | 17.124 | 20.944 | 24.944 | 100% | TRÊN | 22.199 · 26.396 · TRÊN |
 | — f = 0 (coi NPM chu kỳ là thuần vận hành) | 24.050 | 19.325 | 24.008 | 28.916 | 100% | TRÊN | 25.451 · 30.599 · TRÊN |
@@ -68,7 +72,7 @@
 **Ranh giới**: headline P90 25.977 cách giá 33,6% (sleeve 27.489, cách 26,2%) ⇒ **không sát ranh giới** ở mọi f 0–4,78pp. Các nhánh **một kênh** thì sát hơn: chỉ-RONIC cỡ sleeve 40 tr P90 33.749 (cách 2,8%) = **ranh giới**; chỉ-biên với f=0 ở cỡ sleeve còn **TRONG** (P90 36.346), f=1 sleeve P90 34.624 (ranh giới). Kết luận TRÊN vùng chỉ chắc khi áp **cả hai** kênh như luật 3c.
 
 ## 5. Thay đổi so với báo cáo hiện hành
-**Có đổi giá trị và đổi nhãn nếu duyệt quy ước chặt-3C.** Tâm 31.066 → **22.002 (−29,2%)**, khoảng **20.978–23.026** theo f 3–1pp; P10 23.751 → 17.949; P50 30.806 → 21.965; P90 38.022 → 25.977. Nhãn **TRONG → TRÊN vùng** (cả 5 tỷ và sleeve 40 tr), giá cao hơn tâm 58%. r1 (17.438, −44%) **sai** vì so biên vận hành của N0 với NPM 9T gồm thu nhập TC ⇒ ép biên vận hành xuống 7,9% < chu kỳ. Đây là **quy ước chờ Mike/user duyệt**, chưa ghi SUMMARY/zones. Điểm yếu: (1) f chưa đo từng năm từ BCTC; (2) nếu biên đỉnh 2025–26 là **cấu trúc** (cơ cấu hàng miễn thuế, phòng chờ) thì kênh biên phạt quá tay ⇒ đọc bản "chỉ RONIC" (26.410; sleeve ranh giới). Cần thuyết minh GVHB/SG&A + DT TC từng năm.
+**KHÔNG đổi giá trị/nhãn hiện hành** (user không áp 3c chặt, 08/11 10:50 ICT; tâm hiện hành r3 31.658, TRONG vùng). Dưới đây chỉ là độ nhạy 'nếu về trung bình ngành' trên mô hình r2: Tâm 31.066 → **22.002 (−29,2%)**, khoảng **20.978–23.026** theo f 3–1pp; P10 23.751 → 17.949; P50 30.806 → 21.965; P90 38.022 → 25.977. Nhãn **TRONG → TRÊN vùng** (cả 5 tỷ và sleeve 40 tr), giá cao hơn tâm 58%. r1 (17.438, −44%) **sai** vì so biên vận hành của N0 với NPM 9T gồm thu nhập TC ⇒ ép biên vận hành xuống 7,9% < chu kỳ. Quy ước này **đã bị user bác (08/11)**; không ghi SUMMARY/zones. Điểm yếu: (1) f chưa đo từng năm từ BCTC; (2) nếu biên đỉnh 2025–26 là **cấu trúc** (cơ cấu hàng miễn thuế, phòng chờ) thì kênh biên phạt quá tay ⇒ đọc bản "chỉ RONIC" (26.410; sleeve ranh giới). Cần thuyết minh GVHB/SG&A + DT TC từng năm.
 
 ## 6. Đề xuất `data/moat_tags.csv`
 Tag 05/06 còn hiệu lực (<12 tháng), tier không đổi ⇒ **không bắt buộc thêm dòng mới**. Nếu muốn ghi lại lần kiểm này (human-curated; `entry`=M = mức hấp dẫn cấu trúc NGÀNH: khách bị giữ chân nhưng chủ nhà ACV quyền lực, ngành bị điều tiết; `moat_upgrade` giữ Y như dòng cũ, không có chủ ý đổi):

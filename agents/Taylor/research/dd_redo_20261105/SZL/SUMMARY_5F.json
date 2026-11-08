@@ -227,5 +227,13 @@
  },
  "margin_series_note": "GPM nam (cach r2) 30,5%(2017)->37,1%(2025)->39,0% TTM tang gan deu; brief neu 34,85% cho 2021-25, do lai 34,77%",
  "gpm_rule_0711_note": "Dau vao headline giu 39,0%/33,6% theo chi dao Mike; script stats cu tinh TB trong so DT cua chuoi GPM_P0 (gia dinh quy - SAI mo ta). Theo quy tac 07/11 (TTM=GPM_P0 2026Q3 38,77%, nam=Q4): tam 24.973, nhan khong doi",
- "upside_catalyst": "san bay Long Thanh = premium catalyst (tag 06/2026), chua luong hoa trong base"
+ "upside_catalyst": "san bay Long Thanh = premium catalyst (tag 06/2026), chua luong hoa trong base",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 32391,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

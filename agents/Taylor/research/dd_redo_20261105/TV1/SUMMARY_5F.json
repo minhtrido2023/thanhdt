@@ -10,7 +10,7 @@
  "source": "data/moat_tags.csv (src 5f_validated_compet)",
  "moat_durable": false,
  "durable_checks": {
-  "i_excess_multi_cycle": "FAIL ở mảng tư vấn; hợp nhất (dòng Q4): ROIC5Y 16,0% (2024Q4)→20,7% (2025Q4) > Ke 13,5% (thuỷ điện 949 sắp hạ giá); ROIC_Min5Y 6,7→8,1→11,5% < Ke; ROE_Min5Y 0,28%→0,36%→10,37% (2025Q4) < Ke; peer 2025Q4 ROIC5Y 7,8/6,8/7,4% < Ke; biên tư vấn −19%..+11% 2022–9T26. BQ GPM/EBITM/NPM_P0 là TTM (dòng Q4 = cả năm). Bất thường chuỗi TV1 EBITM_P0 0,110(2022Q3)→0,302(2022Q4)→0,143(2023Q1): cần kiểm chứng",
+  "i_excess_multi_cycle": "FAIL ở mảng tư vấn; hợp nhất (dòng Q4): ROIC5Y 16,0% (2024Q4)→20,7% (2025Q4) > Ke 13,5% (thuỷ điện 949 sắp hạ giá); ROIC_Min5Y 6,7→8,1→11,5% < Ke; ROE_Min5Y 0,28%→0,36%→10,37% (2025Q4) < Ke; peer 2025Q4 ROIC5Y 7,8/6,8/7,4% < Ke; biên tư vấn +2%..+17% 2022–9T26 (số cũ −19%..−17% 2022 và −2..0% 2023 đã bị REPORT_r3 §1-5b bác: nhân DT quý với EBITM_P0 TTM). BQ GPM/EBITM/NPM_P0 là TTM (dòng Q4 = cả năm). Bất thường chuỗi TV1 EBITM_P0 0,110(2022Q3)→0,302(2022Q4)→0,143(2023Q1): cần kiểm chứng",
   "ii_named_mechanism": "PARTIAL: incumbency 500kV + quan hệ EVN",
   "iii_no_moat_clock": "FAIL: vụ án/cấm thầu nhắm đúng cơ chế"
  },
@@ -18,12 +18,13 @@
  "model_changed": true,
  "model_change_scope": "CHỈ terminal DCF tư vấn: biên giữ 2027–30, fade 2031–32 về biên peer EBITM_P0 TTM dòng Q4 2016–2025 (30 năm-mã; trung vị 6,71% / trung bình 7,35%), RONIC=Ke; phần khác giữ nguyên r2",
  "old": {
-  "center_post": 15379,
-  "p10": 4693,
-  "p50": 15532,
-  "p90": 24544,
+  "center_post": 16740,
+  "p10": 8823,
+  "p50": 16150,
+  "p90": 25179,
   "label": "TRONG vùng",
-  "pct_below": 0.713
+  "pct_below": 0.746,
+  "note": "đồng bộ REPORT_r3 (giá 06/11 20.400, CK 4,21%); cơ chế truy thu r2 đã bị bác. Số r2 cũ 15.379/4.693/15.532/24.544/0,713 chỉ còn là đối chiếu lịch sử; các khối sensitivity/label_matrix bên dưới vẫn là kết quả r2 (giá 19.600, CK 4,02%) và KHÔNG tính lại"
  },
  "new": {
   "center_post": 13804.278768865219,
@@ -157,5 +158,13 @@
   "mean": 0.07348,
   "r2_wrong_basis": "TB-4-quý chồng lấn 6,0%/6,77% (đã bỏ)"
  },
- "gpm_correction": "r3: GPM/EBITM_P0 = TTM; hoàn lại câu 'một quý'/'TB-4-quý'; neo peer từ dòng Q4"
+ "gpm_correction": "r3: GPM/EBITM_P0 = TTM; hoàn lại câu 'một quý'/'TB-4-quý'; neo peer từ dòng Q4",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 16740,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

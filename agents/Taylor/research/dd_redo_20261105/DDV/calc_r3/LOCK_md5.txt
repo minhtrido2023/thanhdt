@@ -1,0 +1,37 @@
+# LOCK r3 DDV — PHAN 1: dau vao + gia dinh, chot TRUOC khi chay/so gia (2026-11-08 22:43:23 ICT)
+0e62e59d6175ef01d6329a44737d7520  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/assumptions_r3.json
+9772d35b64117d2d8ab2bc294fba844d  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/model_r3.py
+3a69ce4b7259927e765cf26e3e97ccdf  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc/model.py
+c6de17ba62919418803ebb51a338c95a  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc/model_r2.py
+6b504e226be3c465c7efe6fdc71be3f5  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc/bq_hist_out.csv
+ce6c9a2e1a917627044c8749ab3f170e  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/px_ddv_r3.sql
+aec440d99cc8e41a1df601b7b574987a  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/px_ddv_r3_20261106.csv
+def922eb7c2b2869d2f23d284241f7e2  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/bq_cash_hist.sql
+67d3f1ad4d2e703151319bb40dad0f72  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/bq_cash_hist_out.csv
+24943cb1a1d35d91bee6ca1fab9d7202  mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common.py
+95da3038b3710b57e66747acfcd95722  mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common_r2.py
+c64ac0755af0994244487184b1eabf3e  mike/agents/Taylor/research/dd_redo_20261105/_common_014127/bq_px_liq_20261104.csv
+4597bc083f0d64d8873141b12fbfb3a6  mike/agents/Taylor/research/dd_redo_20261105/_shared/wpct.py
+13dac039539fb91fc8f7256c03a71e5d  deposit_rate_vn.py
+f9605983ad3b66b47ed80179bcad81da  cctg_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  data/deposit_rate_vn_events.csv
+fc06e3a866142684d87a43b34e0f17d2  data/cctg_rate_vn_events.csv
+73ed59cb189fb9655457b0e276c1b2bf  mike/agents/Taylor/research/dd_DDV_20261026/src/en_p1.txt
+ad3f247e62d32efc0bcf7429e812c1bc  mike/agents/Taylor/research/dd_DDV_20261026/src/vnd.txt
+47191904b1140ff267f969fd7aa1642a  mike/agents/Taylor/research/dd_DDV_20261026/REPORT.md
+97d5cf162532ec12238c356e7d0b9c36  mike/agents/Taylor/research/dd_DDV_reweight_20261028/REPORT.md
+42a0c7a302e7b3e347be8fa0c331ac64  mike/agents/Taylor/research/dd_redo_20261105/TOP5B_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  mike/agents/Taylor/research/dd_redo_20261105/STANDARD_r2.md
+# PHAN 1b (2026-11-08 22:44:21 ICT): model_r3.py sua SAU lan chay 1 — CHI them 1 bien the kiem cheo 'xcheck_cash_capitalized' (dieu 10) + tham so addint (mac dinh 0); assumptions_r3.json KHONG doi (md5 nhu tren) => headline khong doi
+0432190ecbb23aa0783f47bd0e3190c0  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/model_r3.py
+# PHAN 2 (2026-11-08 22:44:31 ICT): dau ra, chay 2 lan cmp trung byte (model_r3_out.json + stdout)
+d452a7dee93eac03f1cdf08c7f6714be  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/model_r3_out.json
+eeee072ded0755b471a9143fc61ad130  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/run1.txt
+eeee072ded0755b471a9143fc61ad130  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/run2.txt
+# PHAN 3 (2026-11-08 22:47:23 ICT): SUMMARY (make_summary_r3.py chay 2 lan md5 trung) + dong bo 5F + REPORT
+e161ccbe20efc8d9b27d296f1d44f44b  mike/agents/Taylor/research/dd_redo_20261105/DDV/calc_r3/make_summary_r3.py
+0256d593c62a733107985fdd456190e3  mike/agents/Taylor/research/dd_redo_20261105/DDV/SUMMARY.json
+a490b61bf2cea4e9ce3b977c2f39b5d1  mike/agents/Taylor/research/dd_redo_20261105/DDV/SUMMARY_r2.json
+e27f3131027c043ba8d6f23291dd20f0  mike/agents/Taylor/research/dd_redo_20261105/DDV/REPORT_r3.md
+a9376acd090c94b772cac704e096649f  mike/agents/Taylor/research/dd_redo_20261105/DDV/ADDENDUM_5F.md
+d52ad14f6455bbcfe9b11798e7d1b4b4  mike/agents/Taylor/research/dd_redo_20261105/DDV/SUMMARY_5F.json

@@ -1,106 +1,142 @@
 {
  "ticker": "DRI",
- "round": 2,
- "job": "Taylor_20261105_020023",
- "asof_price_date": "2026-11-04",
- "price": 13500.0,
+ "round": 3,
+ "job": "Taylor_20261108_153743",
+ "asof_price_date": "2026-11-06",
+ "price": 13100.0,
+ "price_date": "2026-11-06",
  "r": 0.135,
  "r_anchor": {
   "rate": 0.07400000000000001,
   "date": "cctg_12m(2026-11-02)",
-  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+  "asof": "2026-11-06",
+  "rule": "r = 13,5% + 1,0 x (lai huy dong 12T hieu dung - 7,40%) = 13,50%"
  },
- "center_pre_liq": 14379,
- "center_post_liq": 14092,
- "p10_post": 12006,
- "p50_post": 14235,
- "p90_post": 16146,
- "p10_pre": 12250,
- "p90_pre": 16475,
- "p10_out": 12006,
- "p50_out": 14235,
- "p90_out": 16146,
- "min_out": 9737,
- "pct_weight_below_price": 0.35250000000000004,
- "n_outcomes": 36,
- "n_cells": 18,
- "liq_disc_5bn": 0.01997128813888818,
+ "center_pre_liq": 15568,
+ "center_post_liq": 15257,
+ "p10_post": 12908,
+ "p50_post": 15293,
+ "p90_post": 17549,
+ "p10_pre": 13172,
+ "p90_pre": 17907,
+ "p10_out": 12908,
+ "p50_out": 15293,
+ "p90_out": 17549,
+ "min_out": 11247,
+ "max_out": 19296,
+ "pct_weight_below_price": 0.125,
+ "n_outcomes": 54,
+ "n_cells": 27,
+ "liq_disc_5bn": 0.019983874622610902,
  "ck_ref_size": {
   "size_vnd": 5000000000.0,
   "Y": 1.0,
-  "disc_adv250": 0.01997128813888818,
-  "disc_adv60": 0.015503364391520665,
+  "disc_adv250": 0.019983874622610902,
+  "disc_adv60": 0.01551313506040313,
   "q_over_adv250": 0.60056054158934,
-  "note": "5 ty = quy uoc fleet (~65x vi the that 75 tr da dong); Q/ADV250 0,6x trong vung hieu chinh"
+  "adv250_ty": 8.3255553,
+  "adv60_ty": 13.81571785,
+  "window": "2025-11-05..2026-11-06",
+  "note": "HEADLINE o co tham chieu 5 ty (quy uoc fleet); Q/ADV250 0,60x trong vung hieu chinh luat can bac hai"
  },
  "ck_real_sleeve": {
   "10tr": {
-   "adv250": 0.0008931431575357847,
-   "adv60": 0.0006933315331877975
+   "adv250": 0.0008937060421998188,
+   "adv60": 0.0006937684907839341
   },
   "40tr": {
-   "adv250": 0.0017862863150715693,
-   "adv60": 0.001386663066375595
+   "adv250": 0.0017874120843996376,
+   "adv60": 0.0013875369815678682
   }
  },
- "px_vs_center_post": -0.04201388924906313,
- "px_vs_p10_post": 0.12445432727824879,
- "px_vs_p90_post": -0.16388059343928985,
+ "real_sleeve_headline": {
+  "10tr": {
+   "center": 15554,
+   "p10": 13160,
+   "p50": 15591,
+   "p90": 17891,
+   "pct_weight_below_price": 0.1094
+  },
+  "40tr": {
+   "center": 15541,
+   "p10": 13148,
+   "p50": 15577,
+   "p90": 17875,
+   "pct_weight_below_price": 0.1094
+  }
+ },
+ "px_vs_center_post": -0.14139065425708264,
+ "px_vs_p10_post": 0.014842034857175834,
+ "px_vs_p90_post": -0.2535209471080424,
  "label": "TRONG vùng",
- "label_note": "TRONG vung nhu vong 1. Vung so voi so muc gia cu doi chu yeu do DINH NGHIA (P25-P75 luoi base -> P10-P90 muc ket cuc). Luat 4 (gia <= 0,85 x tam): KHONG dat.",
- "center_vs_p50_note": "tam = ky vong luoi 14,379 truoc CK; gia tri tai tham so trung tam (mid TB, L27, 0,8 NPV0 + 0,2 kinh te) 14,730; P50 ket cuc 14,525. Duoi P10 do nhanh KINH TE (0,20) quyet dinh mot phan (min 9,737 sau CK).",
+ "label_note": "TRONG vung nhu r2 nhung sat CANH DUOI: gia 13,100 chi cao hon P10 12,908 +1.5%; 12.5% trong so ket cuc duoi gia. O co sleeve that 10-40 tr (CK 0,09-0,18%) P10 13,160/13,148 > gia => DUOI vung (sat ranh gioi); nhan chinh theo co 5 ty. Luat 4 (gia <= 0,85 x tam = 12,969): KHONG dat (cach +1.0%).",
+ "center_vs_p50_note": "tam = ky vong luoi 15,568 truoc CK / 15,257 sau CK; P50 ket cuc 15,293 sau CK; gia tri tai tham so trung tam (mid TB, L27, q 0,85, wp 0,5) 15,946 truoc CK (cao hon tam vi L22 va mid P25 keo xuong manh hon L32/P75 keo len). Duoi P10 (sau CK <12.908; 8 ket cuc, 10,9% trong so) gom toan mid P25: L22 x PEAK (q 1/0,85/0,7), L22 x MID (q 1/0,85), L27 x PEAK (q 1/0,85), L32 x PEAK q 1; P25 x L27 x PEAK x q0,7 va P25 x L22 x MID x q0,7 KHONG nam duoi P10 - khong con nhanh trong so nho nao (nhu KINH TE 0,20 r2) chi phoi duoi.",
  "axes_included": [
-  "doc NQ15: NPV0 0,80 / KINH TE (tai canh kinh te engine m7) 0,20 [trong so nhan dinh UL]",
   "mid RSS3 thuc 2014-01..2026-09 P25/TB/P75 (.25/.5/.25)",
   "doi cao L 22/27/32 (.25/.5/.25) [gia dinh, khong co dinh muc nguon]",
-  "ket cuc trong o: duong gia PEAK/MID wp 0,6/0,4 [UL]"
+  "mat do q khoi thanh ly 1.975,23 ha 0,7/0,85/1 (.25/.5/.25) [UL do lon; huong = BCTN25 tr.44]",
+  "ket cuc trong o: duong gia PEAK/MID wp 0,5/0,5"
  ],
  "axes_excluded": [
   {
    "axis": "r",
-   "reason": "co dinh 13,5%; do nhay +-50/100bp rieng"
+   "reason": "co dinh 13,5% theo luat 21; do nhay +-50/100bp rieng"
+  },
+  {
+   "axis": "nhanh NQ15-KINH TE (tai canh pha gia tri)",
+   "reason": "nhan dinh khong du lieu (luat 20) -> do nhay: w 0,1/0,2/0,3 -> 15,093/14,928/14,763; 1,0 -> 13,611"
   },
   {
    "axis": "ban cu giu vuon toi L27 (bo qua NQ15)",
-   "reason": "NQ HDQT 15 Dieu 4 la du lieu quan sat; bao song song tam 15,577 sau CK"
+   "reason": "NQ HDQT 15 Dieu 4 la du lieu; song song 15,938"
   },
   {
-   "axis": "wp PEAK",
-   "reason": "khai [UL]; nhay wp 0 -> 14,532, 0,5 -> 14,165, 1 -> 13,799"
+   "axis": "wht",
+   "reason": "co dinh 8,16% co co so; 10% -> 14,997, 7,04% -> 15,416; tach nguon (tu skeptic, da chay lai, khong doi headline): 8,16% ap ca cho tien dau gia go + capex du khong tru KTPL/TAU nen phai 10% -> tam 15.224 (-33), P10 12.874, nhan khong doi"
   },
   {
    "axis": "FCF = 90% LN loi",
-   "reason": "[UL]; 80% 13,219 / 100% 14,965"
+   "reason": "[UL]; 80% 14,321 / 100% 16,193 (doi xung +-936)"
   },
   {
    "axis": "haircut khoan vay Dakruco / tien Lao",
    "reason": "khong co co so du lieu -> WARNING + do nhay"
+  },
+  {
+   "axis": "ty gia LAK cho tien dau gia",
+   "reason": "co dinh 1,1404 (BCTC Q3); +-10% -> +-164"
   }
  ],
  "base_adjustments": [
   {
    "item": "Khoan vay Dakruco 40 ty",
    "effect_dong_per_share": 0,
-   "basis": "so sach day du (dang tra dung han 80->40 ty H1, lai ~9%, TSDB 6 tr cp DRI)",
-   "source": "BCTC HN Q3/2026; vong 1 cat 50% (-268 sau CK) -> do nhay"
+   "basis": "so sach day du (80->40 ty H1, lai ~9%, TSDB 6 tr cp DRI); WARNING tien le gia han",
+   "source": "BCTC HN Q3/2026"
   },
   {
    "item": "Tien tai Lao ~197 ty",
    "effect_dong_per_share": 0,
-   "basis": "so sach; vong 1 giu lai 15% la DOAN -> do nhay (-395)",
+   "basis": "so sach",
    "source": "BCTC HN Q3/2026"
   },
   {
-   "item": "Thue chuyen LN Lao wht 10% + quy du phong TC Lao TAU + KTPL",
-   "effect_dong_per_share": null,
-   "basis": "giu nhu engine r4: TAU/KTPL tu BCTC; wht 10% = gia dinh engine, CHUA dan nguon luat thue Lao",
-   "source": "r3/model.py dong 26-28"
+   "item": "Thue chuyen LN Lao (wht)",
+   "effect_dong_per_share": 260,
+   "basis": "Thue co tuc Lao 10% (Luat thue thu nhap Lao 67/NA 2019 - Wendy, nguon thu cap; Hiep dinh VN-Lao 1996 Dieu 10 tran 10% DA XAC MINH van ban; dri_val_supply_adj_r2_20261027/REPORT.md:106) - SUMMARY r2 ghi 'chua dan nguon' la SAI. Nhung engine tru wht tren TOAN bo FCF trong khi KTPL va quy du phong TC Lao (TAU) da tru rieng, khong chuyen ve -> co so chiu thue = 1-KTPL-TAU. 10% x (1-0,106-0,078) = 8,16%, nam trong dai quan sat 7,0% (2025) / 8,3% (2024) (r3/model.py WHT_OBS). Do nhay: 10% phang (r2), 7,04% (quan sat thap).",
+   "source": "dri_val_supply_adj_r2_20261027/REPORT.md:106; r3/model.py WHT_OBS; BCTC3 hn_29"
   },
   {
-   "item": "Gia go thanh ly",
-   "effect_dong_per_share": 791,
-   "basis": "gia khoi diem NQ15 36 tr LAK/ha = 41.05 tr VND/ha thay uoc 20,87 tu ~54 ha; ap cho MOI ha thanh ly",
-   "source": "NQ HDQT 15 Dieu 4 (04/11/2026)"
+   "item": "Gia go thanh ly NQ15",
+   "effect_dong_per_share": 807,
+   "basis": "gia khoi diem 36 tr LAK/ha x 1,1404 = 41,05 tr VND/ha; ap moi ha thanh ly",
+   "source": "NQ HDQT 15 Dieu 4 (04/11/2026); ty gia BCTC HN Q3/2026 hn_01"
+  },
+  {
+   "item": "Mat do q khoi thanh ly",
+   "effect_dong_per_share": 652,
+   "basis": "BCTN 2025 tr.44: khoi thanh ly 'thanh ly som do khong dam bao mat do khai thac' (trich dri_val_supply_adj_r4_20261027/REPORT.md:194) = du lieu dinh tinh: nang suat/ha khoi < trung binh vuon; q=1 la CAN TREN. Do lon khong cong bo -> muc 0,7/0,85/1 la [UL], de nghi skeptic (dinh chinh 2). Cach mo hinh (KHAC skeptic): q chi ap cho KHOI 1.975,23 ha, tong dien tich cao giu dung A0 = 13.800/1,69 = 8.166 ha (BCTN25 tr.46), phan con lai nang suat bu de 2026 = 13.800 t. Ban skeptic (q cho TOAN vuon cu, dien tich A0/q) cho dien tich that 9.607 ha @q0,85 > tong cao su 8.592,3 ha (BCTN25 tr.20) -> mau thuan du lieu, chi bao song song.",
+   "source": "BCTN 2025 tr.44 (trich dri_val_supply_adj_r4_20261027/REPORT.md:194)"
   },
   {
    "item": "XDCB do dang 72,71 ty",
@@ -109,7 +145,268 @@
    "source": "BCTC HN Q3 ma 252"
   }
  ],
- "grid_desc": "Luoi MUC KET CUC n=36 (18 o x 2 duong gia). Doc NQ15 (NPV0 0,80 / KINH TE 0,20) x mid 3 x L 3; ket cuc PEAK 0,6/MID 0,4. r 13,5%. Base: khoan vay Dakruco, tien Lao theo so sach; thanh ly 1.975,23 ha 2027-30 gia khoi diem NQ15; tai canh NPV0. Phan vi _shared/wpct.py. Sau CK = x(1 - CK 5 ty).",
+ "assumptions": [
+  {
+   "item": "r",
+   "value": 0.135,
+   "basis": "deposit_rate_vn.effective_deposit_rate(2026-11-06) = 7.40% (cctg_12m(2026-11-02)) => 13,50%"
+  },
+  {
+   "item": "gia tham chieu",
+   "value": 13100.0,
+   "basis": "dong cua 06/11/2026 tav2_bq.ticker (Close=Price=13.100; calc/r3data/px_dri_20261106.csv, sql px_dri_r3.sql)"
+  },
+  {
+   "item": "doc NQ15",
+   "value": "NPV0 1,0",
+   "basis": "Luat 20 + STANDARD_r2 dieu 3: tai canh dot 1 (NQ15 Dieu 3) = du an moi NPV0. Trong so 0,20 nhanh KINH TE r2 la nhan dinh [UL] khong co du lieu -> ra khoi base, sang do nhay (dinh chinh 1 skeptic 08/11, CHAP NHAN)."
+  },
+  {
+   "item": "mat do q khoi",
+   "value": {
+    "values": [
+     0.7,
+     0.85,
+     1.0
+    ],
+    "weights": [
+     0.25,
+     0.5,
+     0.25
+    ]
+   },
+   "basis": "BCTN 2025 tr.44: khoi thanh ly 'thanh ly som do khong dam bao mat do khai thac' (trich dri_val_supply_adj_r4_20261027/REPORT.md:194) = du lieu dinh tinh: nang suat/ha khoi < trung binh vuon; q=1 la CAN TREN. Do lon khong cong bo -> muc 0,7/0,85/1 la [UL], de nghi skeptic (dinh chinh 2). Cach mo hinh (KHAC skeptic): q chi ap cho KHOI 1.975,23 ha, tong dien tich cao giu dung A0 = 13.800/1,69 = 8.166 ha (BCTN25 tr.46), phan con lai nang suat bu de 2026 = 13.800 t. Ban skeptic (q cho TOAN vuon cu, dien tich A0/q) cho dien tich that 9.607 ha @q0,85 > tong cao su 8.592,3 ha (BCTN25 tr.20) -> mau thuan du lieu, chi bao song song."
+  },
+  {
+   "item": "wht",
+   "value": 0.08158528808576876,
+   "basis": "Thue co tuc Lao 10% (Luat thue thu nhap Lao 67/NA 2019 - Wendy, nguon thu cap; Hiep dinh VN-Lao 1996 Dieu 10 tran 10% DA XAC MINH van ban; dri_val_supply_adj_r2_20261027/REPORT.md:106) - SUMMARY r2 ghi 'chua dan nguon' la SAI. Nhung engine tru wht tren TOAN bo FCF trong khi KTPL va quy du phong TC Lao (TAU) da tru rieng, khong chuyen ve -> co so chiu thue = 1-KTPL-TAU. 10% x (1-0,106-0,078) = 8,16%, nam trong dai quan sat 7,0% (2025) / 8,3% (2024) (r3/model.py WHT_OBS). Do nhay: 10% phang (r2), 7,04% (quan sat thap)."
+  },
+  {
+   "item": "wp PEAK",
+   "value": 0.5,
+   "basis": "0,6/0,4 r2 = Bobby CYCLICAL_PEAK (r3 PREREG.md:47) = nhan dinh -> ra khoi base theo quy tac chung 08/11; 0,5/0,5 trung tinh. Do nhay 0,4/0,6."
+  },
+  {
+   "item": "mid RSS3",
+   "value": {
+    "P25": 1.9240295836419403,
+    "P75": 2.4317423458518475,
+    "TB": 2.221145558470198
+   },
+   "basis": "RSS3 thuc USD2025/kg 2014-01..2026-09 (snapshot 03/11), P25/TB/P75 .25/.5/.25 (skeptic R4 doi xung)"
+  },
+  {
+   "item": "doi cao L",
+   "value": [
+    22,
+    27,
+    32
+   ],
+   "basis": "gia dinh, khong co dinh muc nguon; .25/.5/.25"
+  },
+  {
+   "item": "FCF/LN loi",
+   "value": 0.9,
+   "basis": "[UL] engine r3; do nhay doi xung 80/100%"
+  },
+  {
+   "item": "LAK/VND",
+   "value": 1.1403808872163301,
+   "basis": "BCTC HN Q3/2026 hn_01, ty gia CDKT 30/09/2026 in 'VND/LAK: 0,8769' (do lon = LAK/VND) -> 1 LAK = 1,1404 VND (dd_DRI_20261027/extract_q3_bctc.md:9,221). LAK yeu ~6% trong 9T (0,8252 -> 0,8769) -> do nhay +-10%."
+  },
+  {
+   "item": "CK",
+   "value": 0.019983874622610902,
+   "basis": "luat can bac hai Y=1,0, 5 ty, ADV250 trung vi Price x Volume, sigma log-return Close 250 phien"
+  },
+  {
+   "item": "LOCK",
+   "value": "calc/LOCK_r3_md5.txt",
+   "basis": "assumptions_r3.json + script + upstream md5 chot TRUOC lan chay dau (so gia)"
+  }
+ ],
+ "headline_vs_alternatives": [
+  {
+   "variant": "HEADLINE r3 (NPV0, q khoi .7/.85/1, wht 8,16%, wp 0,5)",
+   "center": 15257,
+   "p10": 12908,
+   "p50": 15293,
+   "p90": 17549,
+   "pct_weight_below_price": 0.125,
+   "n": 54,
+   "note": "mo hinh co so sau dinh chinh"
+  },
+  {
+   "variant": "skeptic: q toan vuon cu (dien tich A0/q)",
+   "center": 15207,
+   "p10": 12912,
+   "p50": 15264,
+   "p90": 17331,
+   "pct_weight_below_price": 0.125,
+   "n": 54,
+   "note": "cach mo hinh cua skeptic; vi pham tong dien tich 8.592 ha"
+  },
+  {
+   "variant": "q=1 (khong truc mat do)",
+   "center": 14605,
+   "p10": 12354,
+   "p50": 14682,
+   "p90": 16616,
+   "pct_weight_below_price": 0.2188,
+   "n": 18,
+   "note": "nhu r2 ve mat do"
+  },
+  {
+   "variant": "q khoi 0,5",
+   "center": 16779,
+   "p10": 14219,
+   "p50": 16829,
+   "p90": 19136,
+   "pct_weight_below_price": 0.0312,
+   "n": 18,
+   "note": "duoi trong so de nghi"
+  },
+  {
+   "variant": "nhanh KINH TE 0,2 (nhu r2)",
+   "center": 14928,
+   "p10": 12437,
+   "p50": 15072,
+   "p90": 17302,
+   "pct_weight_below_price": 0.175,
+   "n": 72,
+   "note": "trong so r2 [UL]"
+  },
+  {
+   "variant": "chi nhanh KINH TE 1,0",
+   "center": 13611,
+   "p10": 10980,
+   "p50": 13695,
+   "p90": 15941,
+   "pct_weight_below_price": 0.375,
+   "n": 18,
+   "note": "tai canh pha gia tri 100%"
+  },
+  {
+   "variant": "ban cu giu vuon L27 0,8 + bi buoc 0,2",
+   "center": 15938,
+   "p10": 12861,
+   "p50": 16160,
+   "p90": 18983,
+   "pct_weight_below_price": 0.125,
+   "n": 36,
+   "note": "bo qua NQ15"
+  },
+  {
+   "variant": "moat NONE_half (bien ve 1/2 gap nganh)",
+   "center": 13640,
+   "p10": 11481,
+   "p50": 13631,
+   "p90": 15757,
+   "pct_weight_below_price": 0.3906,
+   "n": 54,
+   "note": "do nhay rui ro, KHONG headline (quy uoc 08/11)"
+  },
+  {
+   "variant": "moat NONE (bien ve trung vi nganh 11,70pp)",
+   "center": 12022,
+   "p10": 9742,
+   "p50": 12099,
+   "p90": 14050,
+   "pct_weight_below_price": 0.7422,
+   "n": 54,
+   "note": "do nhay rui ro, KHONG headline (quy uoc 08/11)"
+  }
+ ],
+ "implied_by_price": {
+  "price": 13100.0,
+  "FCF_over_core_NI": 0.6695516646037403,
+  "deposit_rate_12m": 0.14694638053786352,
+  "r_implied": 0.20794638053786352,
+  "econ_branch_weight": null,
+  "q_block": null,
+  "wp_peak": null,
+  "note": "Gia 13.100 ngu y (mot tham so, cac truc khac = headline): FCF/LN loi 67% (base 90%), hoac lai huy dong 12T 14.7% (r 20.8%). KHONG dat duoc bang rieng trong so nhanh KINH TE (100% -> 13,611), q khoi (q=1 -> 14,605) hay wp (1,0 -> 14,876). Bien ve trung vi nganh (moat NONE) cho 12,022 < gia => gia hop voi gia thiet loi the gia thanh DRI mat ~3/4."
+ },
+ "bridge_r2_to_r3": [
+  {
+   "step": "r2 cong bo (CK 04/11)",
+   "center_post": 14092,
+   "delta": 0,
+   "why": "ban r2 (gia 13.500 @04/11)"
+  },
+  {
+   "step": "CK cap nhat du lieu 06/11",
+   "center_post": 14092,
+   "delta": 0,
+   "why": "cua so thanh khoan 25/11/2025..06/11/2026: CK 5 ty 1,997% -> 2,00%; r khong doi 13,5%"
+  },
+  {
+   "step": "(1) bo nhanh KINH TE 0,20 -> NPV0 1,0",
+   "center_post": 14288,
+   "delta": 196,
+   "why": "dinh chinh 1 skeptic (CHAP NHAN): trong so 0,20 la nhan dinh [UL], luat 20 + STANDARD_r2 dieu 3 => tai canh NPV0; nhanh KINH TE sang do nhay"
+  },
+  {
+   "step": "(2) truc q khoi {0,7/0,85/1}",
+   "center_post": 14923,
+   "delta": 635,
+   "why": "dinh chinh 2 (CHAP NHAN huong, SUA cach mo hinh): BCTN25 tr.44 khoi thanh ly vi khong dam bao mat do => q<1; q CHI cho khoi, tong dien tich giu A0 (ban skeptic q toan vuon vi pham tong dien tich 8.592 ha)"
+  },
+  {
+   "step": "(3) wht 10% -> 10%x(1-KTPL-TAU)",
+   "center_post": 15181,
+   "delta": 258,
+   "why": "dinh chinh 3 (CHAP NHAN MOT PHAN): nguon luat 10% CO (Wendy Luat 67/NA + DTA 1996 Dieu 10) => SUMMARY r2 \"chua dan nguon\" sai; nhung co so chiu thue = 1-KTPL-TAU => 8,16%, trong dai quan sat 7,0-8,3%"
+  },
+  {
+   "step": "(4) wp PEAK 0,6 -> 0,5 = r3",
+   "center_post": 15257,
+   "delta": 76,
+   "why": "dinh chinh 4 (CHAP NHAN): wp 0,6 = Bobby CYCLICAL_PEAK (nhan dinh) => 0,5 trung tinh; 0,6 sang do nhay"
+  }
+ ],
+ "corrections_check": [
+  {
+   "n": 1,
+   "verdict": "CHAP NHAN",
+   "effect": 196
+  },
+  {
+   "n": 2,
+   "verdict": "CHAP NHAN huong; sua cach mo hinh (q chi cho khoi)",
+   "effect": 635,
+   "skeptic_repro": {
+    "0.5": 16617.474103330343,
+    "0.7": 15502.067480858012,
+    "0.85": 14854.66427198156,
+    "note": "skeptic 14.902/15.519/16.348 @q .85/.7/.5; tai lap 14.855/15.502/16.617 - KHONG trung (lech -47/-17/+269), spec luoi cua skeptic khong ro"
+   }
+  },
+  {
+   "n": 3,
+   "verdict": "CHAP NHAN MOT PHAN (nguon luat co; co so chiu thue sai)",
+   "effect": 258
+  },
+  {
+   "n": 4,
+   "verdict": "CHAP NHAN",
+   "effect": 76
+  },
+  {
+   "n": 5,
+   "verdict": "CHAP NHAN: gia 06/11 13.100; price_date dien; FX LAK dan nguon BCTC Q3 hn_01 (0,8769 LAK/VND)"
+  },
+  {
+   "n": 6,
+   "verdict": "CHAP NHAN: them WARNING"
+  },
+  {
+   "n": 7,
+   "verdict": "CHAP NHAN: ghi ro thien lech xac nhan"
+  }
+ ],
+ "grid_desc": "Luoi MUC KET CUC n=54 (27 o x 2 duong gia): doc NQ15-NPV0 x mid 3 x L 3 x q khoi 3; ket cuc PEAK 0,5/MID 0,5. r 13,5%. Base: khoan vay Dakruco, tien Lao theo so sach; thanh ly 1.975,23 ha 2027-30 gia khoi diem NQ15; tai canh NPV0; wht 10%x(1-KTPL-TAU). Phan vi _shared/wpct.py. Sau CK = x(1 - CK 5 ty 2,00%).",
  "zone_old": {
   "low": 13300,
   "center": 14360,
@@ -126,28 +423,59 @@
   "p90": 17422,
   "label": "TRONG vùng"
  },
- "center_change_pct": -0.018658610952211108,
- "change_reason": "Tam sau CK 14.329 -> 14,092. Cau noi diem (TB, L27, truoc CK): base cu 15.860 -> bo haircut Dakruco 16,134 -> bo giu 15% tien Lao 16,537 -> gia go NQ15 17,044 -> doc NQ15 thanh ly 1.975 ha 2027-30 14,924. Hai sua base (+) bi NQ15 (-) bu tru; phan vi o muc ket cuc.",
+ "r2": {
+  "center_post": 14092,
+  "p10": 12006,
+  "p50": 14235,
+  "p90": 16146,
+  "label": "TRONG vùng",
+  "price": 13500.0,
+  "pct_below": 0.35250000000000004
+ },
+ "center_change_vs_r2": 0.08268731817297614,
+ "center_change_pct": 0.06248117602322978,
+ "center_change_note": "center_change_pct = so voi tam so muc gia cu (14.360, dd_price_zones rev 2); center_change_vs_r2 = so voi tam r2 14.092",
+ "change_reason": "Tam sau CK r2 14.092 -> r3 15,257 (+1,165): bo nhanh KINH TE +196; mat do q khoi +635; wht co so chiu thue +258; wp 0,5 +76; CK du lieu 06/11 -0. Gia tham chieu 13.500 -> 13.100.",
  "warnings": [
   "Vu an Dakruco (co dong ~45%, ma DRG): 2 cuu TGD bi khoi to, 5 bi can bi truy to 02/2025 -> rui ro di cu sang DRI qua ben lien quan",
   "DHDCD 22/10/2026 nang nguong giao dich ben lien quan can DHDCD duyet tu 10% -> 30% tong tai san, CUNG NGAY To trinh 40 (Dakruwood) - doi chieu LDN D167 k2, ND155 D293 k4b (can legal-vn)",
   "NQ HDQT 15: nghien cuu mua Dakruwood tu Dakruco (HDQT xet 12/2026) - giao dich ben lien quan",
   "Dau gia 1.975,23 ha mot lo, gia co dinh 4 nam, khong cam ben lien quan mua -> theo doi DANH TINH ben trung (Dakruco/Dakruwood = ben lien quan)",
-  "Cho Dakruco vay con 40 ty (TSDB 6 tr cp DRI) - dang tra dung han; mat trang = -536 sau CK",
   "Tien gui Quy TDND Cao su DL 70 ty + gop 3 ty (soat xet chua xac dinh gia tri thu hoi khoan gop)",
   "~197 ty tai Lao khong thuyet minh nguyen te/lai suat/ky han; van ban to nhuong chua cong khai; mot phan dat thuoc quy hoach rung bao ton",
   "Lien he framework §3 HARD ABANDON #4 (giao dich ben lien quan chuyen gia tri ra co dong lon)",
   "Tra cuu 'khoi to/xu phat DRI 2026': WebSearch 05/11/2026 khong thay vu moi lien quan DRI; tim thay bai Bao Thanh tra ve khoi to lanh dao Dakruco (cu)",
-  "Ngoai redo (Mike xu ly): broker openQuantity DRI = 0 o ca 2 account"
+  "Ngoai redo (Mike xu ly): broker openQuantity DRI = 0 o ca 2 account",
+  "Cho Dakruco vay con 40 ty (TSDB 6 tr cp DRI) - base theo so sach; da tung GIA HAN (xem duoi), khong viet 'tra dung han'",
+  "Tien le: DRI da GIA HAN khoan vay 40 ty cho cong ty me Dakruco (Thoi bao Tai chinh, thoibaotaichinhvietnam.vn ...-158125.html; trich data/intraday_watch/crisis_dd/DRI_2026-11-02/notes/daily_day4_taylor.md:42) - mau thuan cach viet 'dang tra dung han' cua r2; mat trang -536, haircut 50% -268 (do nhay)",
+  "Giay nhuong dat 2016 (01616/KD/DDT4) CHUA xac minh (SKEPTIC_R4_20261103 muc 4)",
+  "Rui ro cung chieu (wrong-way): tai san dam bao khoan vay Dakruco 40 ty la 6 trieu cp chinh DRI -> neu Dakruco/DRI gap kho thi gia cp DRI giam dung luc can thu hoi no; do nhay haircut/mat trang chua phan anh tuong quan nay nen co the danh gia thap ton that",
+  "Thien lech xac nhan: DRI da BAN HET 02/11. r2 chi ap thong tin moi (NQ15) theo chieu giam va bo qua bang chung mat do co san; r3 khong neo vao quyet dinh ban - dinh gia doc lap, ket qua tam > gia ban",
+  "LAK yeu ~6% trong 9T/2026 (0,8252 -> 0,8769 LAK/VND); gia khoi diem dau gia co dinh bang LAK 4 nam -> rui ro ty gia (+-10% = +-164 d/cp)"
  ],
  "open_issues": [
   "Hop dong to nhuong 01616/KD/DDT4 chua xac minh",
   "Doi cao L 22/27/32 la gia dinh",
-  "Trong so nhanh KINH TE 0,20 vs luat 20 (NPV0) - nhan dinh",
-  "wht 10% thue chuyen LN Lao chua dan nguon",
+  "Do lon mat do khoi thanh ly (q) chua co so do - chi co huong (BCTN25 tr.44)",
+  "Nguon luat Lao 67/NA la nguon thu cap (Wendy); co so chiu thue wht that (LN chuyen ve) chua tach duoc tu BCTC",
+  "wht 8,16% engine (model.py:90-91) ap ca cho tien dau gia go va phan capex du (khong tru KTPL/TAU nen phai giu 10%): tu skeptic, da chay lai -> tam 15.224 (-33), P10 12.874, nhan khong doi; KHONG doi headline, ghi la do nhay",
+  "Do lon q khoi thanh ly la gia dinh [UL] chua co so do nhung dong gop lon nhat cau noi (+635)",
+  "Base giu Cref rieng cua DRI toi 2054; rui ro bien LN ve muc nganh (moat NONE, tam 12.022) la kenh lon nhat headline khong tinh",
+  "Vi the da ban het 02/11: dinh gia khong duoc neo vao quyet dinh ban",
+  "So skeptic q (14.902/15.519/16.348) chua tai lap dung - tai lap 14.855/15.502/16.617",
   "Gia trung dau gia thuc (>= khoi diem) va danh tinh ben mua",
   "SXKD T10 (~10/11)",
   "HOSE Q4/2026"
  ],
- "fear_buy_2_5": "Ho so crisis-DD DRI dang mo (ngay 4 GIU); muc gia nay KHONG thoa luat 4 (gia <= 0,85 x tam) -> khong du dieu kien vao them theo §2.5 o gia 04/11"
+ "fear_buy_2_5": "Ho so crisis-DD DRI: da ban het 02/11. O gia 06/11 13.100: luat 4 can gia <= 12,969 -> KHONG dat (cach +1.0%) => KHONG du dieu kien §2.5. Ghi chu: nguong nay sat gia, nhung moat NONE (bien ve nganh) cho tam < gia => khong co bien an toan neu loi the gia thanh khong ben.",
+ "files": {
+  "calc": "calc/dri_redo_r3.py",
+  "out": "calc/dri_redo_r3_out.txt",
+  "json": "calc/dri_redo_r3_out.json",
+  "grid": "calc/grid_dri_redo_r3.csv",
+  "assumptions": "calc/assumptions_r3.json",
+  "lock": "calc/LOCK_r3_md5.txt",
+  "moat": "calc_5f/moat_sens_5f_r3_out.txt",
+  "report": "REPORT_r3.md"
+ }
 }

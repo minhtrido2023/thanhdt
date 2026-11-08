@@ -1,0 +1,288 @@
+{
+ "ticker": "DDV",
+ "job": "Taylor_20261108_024219",
+ "asof": "2026-11-08",
+ "moat_tier": "NONE",
+ "moat_type": "NONE",
+ "risk1": "price-taker spread DAP-(S+NH3+apatit), apatit qua ben lien quan Vinachem; bai thach cao Dinh Vu chan cong suat",
+ "reused": false,
+ "source_asof": null,
+ "moat_durable": false,
+ "durability": {
+  "i_roic": {
+   "ROIC_Min5Y": 0.022,
+   "ROIC5Y": 0.144,
+   "ROIC10Y": 0.083,
+   "ROIC_Min10Y": -0.1,
+   "ROE5Y": 0.162,
+   "ROE_Min5Y": 0.04,
+   "Ke": 0.135,
+   "pass": false,
+   "vs": "WACC~Ke=r 13.5% (DDV tien rong duong)"
+  },
+  "ii_barrier": false,
+  "iii_no_clock": false
+ },
+ "model_changed": true,
+ "model_change_note": "r2 lech luat 3c chu yeu o kenh RONIC 20%>Ke (bien DDV 4.05% ~ bien phot-phat LAS/NFC 4.16%). Ban CHAT-3C = DO NHAY r2 (KHONG phai headline; headline = r3 15.911) = RONIC=Ke doi xung + NPM peer phot-phat LAS/NFC; 2 co so: int (van tru INT_AT_NORM, bao thu) / noint (khong tru, vi NPM peer da gom thu nhap TC cua peer). r1 rut nhan TREN (peer cat mot chieu + tru INT tren NPM peer). Quy uoc cho Mike/user duyet, KHONG ghi SUMMARY/zones",
+ "old": {
+  "centre": 13109,
+  "p10": 10115,
+  "p50": 12823,
+  "p90": 16270,
+  "pct_below": 0.769,
+  "label": "TRONG"
+ },
+ "new": {
+  "strict3c_phos2_LAS_NFC_int": {
+   "npm_": 0.041552956047475456,
+   "sub_int": true,
+   "centre": 12662,
+   "p10": 9785,
+   "p50": 12422,
+   "p90": 15731,
+   "pct_below": 0.852,
+   "p90_vs_px": 0.0349,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  },
+  "strict3c_phos2_LAS_NFC_noint": {
+   "npm_": 0.041552956047475456,
+   "sub_int": false,
+   "centre": 14923,
+   "p10": 11417,
+   "p50": 14632,
+   "p90": 18542,
+   "pct_below": 0.569,
+   "p90_vs_px": 0.2199,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  },
+  "label": "TRONG (sat canh tren; P90 15.731 = gia +3.5% o co so int)",
+  "label_sleeve40": "TRONG",
+  "centre_core_range": [
+   12430,
+   13448
+  ],
+  "centre_strict3c_range": [
+   12662,
+   14923
+  ]
+ },
+ "decomposition_vs_old": {
+  "ronic_to_ke": -679,
+  "margin_DDV_to_LAS_NFC_int": 232,
+  "drop_INT_subtraction": 2261
+ },
+ "peer_alt": {
+  "exUrea5_med_int": {
+   "npm_": 0.03496132444755086,
+   "sub_int": true,
+   "centre": 11187,
+   "p10": 8669,
+   "p50": 11111,
+   "p90": 13847,
+   "pct_below": 0.976,
+   "p90_vs_px": -0.089,
+   "label": "TRÊN vùng",
+   "label_sleeve40": "TRÊN vùng"
+  },
+  "exUrea5_mean_int": {
+   "npm_": 0.03831378831437214,
+   "sub_int": true,
+   "centre": 11937,
+   "p10": 9237,
+   "p50": 11788,
+   "p90": 14814,
+   "pct_below": 0.938,
+   "p90_vs_px": -0.0254,
+   "label": "TRÊN vùng",
+   "label_sleeve40": "TRÊN vùng"
+  },
+  "exUrea5_med_noint": {
+   "npm_": 0.03496132444755086,
+   "sub_int": false,
+   "centre": 13448,
+   "p10": 10369,
+   "p50": 13118,
+   "p90": 16618,
+   "pct_below": 0.729,
+   "p90_vs_px": 0.0933,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  },
+  "exUrea5_mean_noint": {
+   "npm_": 0.03831378831437214,
+   "sub_int": false,
+   "centre": 14198,
+   "p10": 10915,
+   "p50": 13898,
+   "p90": 17602,
+   "pct_below": 0.63,
+   "p90_vs_px": 0.158,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  },
+  "all7_med_int": {
+   "npm_": 0.04814458764740005,
+   "sub_int": true,
+   "centre": 14136,
+   "p10": 10872,
+   "p50": 13835,
+   "p90": 17519,
+   "pct_below": 0.648,
+   "p90_vs_px": 0.1526,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  },
+  "all7_mean_int": {
+   "npm_": 0.06424800951897257,
+   "sub_int": true,
+   "centre": 17738,
+   "p10": 13517,
+   "p50": 17267,
+   "p90": 22133,
+   "pct_below": 0.25,
+   "p90_vs_px": 0.4561,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  },
+  "R_only": {
+   "centre": 12430,
+   "p10": 9612,
+   "p50": 12221,
+   "p90": 15417,
+   "pct_below": 0.893,
+   "p90_vs_px": 0.0143,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  }
+ },
+ "sensitivity": {
+  "WIDE": {
+   "assumption": "RONIC 25%, bien DDV",
+   "centre": 13390,
+   "p90": 16646,
+   "label": "TRONG"
+  },
+  "NARROW": {
+   "assumption": "RONIC 20%, bien DDV (= r2)",
+   "centre": 13109,
+   "p90": 16270,
+   "label": "TRONG"
+  },
+  "NONE": {
+   "assumption": "chat-3C peer LAS/NFC, int..noint",
+   "centre": [
+    12662,
+    14923
+   ],
+   "p90": [
+    15731,
+    18542
+   ],
+   "label": "TRONG"
+  }
+ },
+ "price": 15200,
+ "price_date": "2026-11-04",
+ "liq_cost_ref_5ty": 0.014468,
+ "proposed_moat_tag_row": "DDV,NONE,NONE,L,\"Price-taker spread DAP-(S+NH3+apatite): ~80% COGS inputs, S 100% imported, apatite from related-party Apatit VN (Vinachem transfer price); ROIC10Y 8.3%/ROIC_Min5Y 2.2% < WACC 13.5%; GPM 2015-25 avg 10.6% below phosphate peers (LAS 17.7/NFC 16.6); gypsum-stack (Dinh Vu) caps capacity; 28% DAP share not a cost moat\",2026-11-07,5f,N",
+ "measured_by": "5F/ddv_moat_sens_r2.py -> 5F/ddv_moat_sens_r2_out.json (md5 914f2a72ff6dcf84aa06b9bdb82fe90c, 2 lan cmp trung byte); calc5f/peer_r2.sql -> calc5f/peer_r2_out.csv",
+ "revision": "r2 (sua sau skeptic; r1 = SUMMARY_5F_r1.json, job Taylor_20261107_172007)",
+ "band_with_DHB": {
+  "med_int": {
+   "npm_": 0.03496132444755086,
+   "sub_int": true,
+   "centre": 11187,
+   "p10": 8669,
+   "p50": 11111,
+   "p90": 13847,
+   "pct_below": 0.976,
+   "p90_vs_px": -0.089,
+   "label": "TRÊN vùng",
+   "label_sleeve40": "TRÊN vùng"
+  },
+  "med_noint": {
+   "npm_": 0.03496132444755086,
+   "sub_int": false,
+   "centre": 13448,
+   "p10": 10369,
+   "p50": 13118,
+   "p90": 16618,
+   "pct_below": 0.729,
+   "p90_vs_px": 0.0933,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  },
+  "mean_int": {
+   "npm_": 0.03006005368436324,
+   "sub_int": true,
+   "centre": 10091,
+   "p10": 7804,
+   "p50": 10047,
+   "p90": 12430,
+   "pct_below": 1.0,
+   "p90_vs_px": -0.1822,
+   "label": "TRÊN vùng",
+   "label_sleeve40": "TRÊN vùng"
+  },
+  "mean_noint": {
+   "npm_": 0.03006005368436324,
+   "sub_int": false,
+   "centre": 12352,
+   "p10": 9554,
+   "p50": 12151,
+   "p90": 15311,
+   "pct_below": 0.893,
+   "p90_vs_px": 0.0073,
+   "label": "TRONG vùng",
+   "label_sleeve40": "TRONG vùng"
+  }
+ },
+ "peer_npm": {
+  "LAS": 0.03496,
+  "NFC": 0.04814,
+  "DHB": 0.00707,
+  "BFC": 0.028,
+  "SFG": 0.02461,
+  "VAF": 0.05585,
+  "DPM": 0.1256,
+  "DCM": 0.13257,
+  "DDV": 0.04052
+ },
+ "peer_npm_note": "NP/DT gop cac nam du 4 quy 2015-25 (BQ ticker_financial, NP_P0/Revenue_P0 quy). DHB 2018-25 = +0.71% (gom 2023Q4 lai bat thuong 1.649 ty; bo quy do -4.44%) — skeptic ghi -0.16%, do lai khac; DHB theo hieu biet la ure-than (can kiem chung) => chi vao dai",
+ "int_at_norm": {
+  "ty": 55.6,
+  "pct_rev": 0.0101
+ },
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 15911,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "headline_centre_basis": "dong bo r3 08/11 (REPORT_r3.md): tam 15.911, P10 13.315, P50 15.919, P90 18.573, nhan TRONG vung, gia 15.200 (06/11), CK 5 ty 1,47%; 13.109 la tam r2 cu",
+  "r3_sync_note": "Moi so tam/P10/P90 khac trong file nay (old 13.109, strict3c LAS/NFC 12.662-14.923, band_with_DHB, peer_alt, sensitivity WIDE/NARROW/NONE) tinh tren mo hinh r2 - chi la do nhay tuong doi quanh r2, KHONG phai tam hien hanh. Khoa new.headline_phos2_* doi ten thanh new.strict3c_phos2_* (r3) vi khong phai headline. r3 base da co RONIC=Ke (TOP5B #3)."
+ },
+ "headline_r3": {
+  "centre": 15911,
+  "p10": 13315,
+  "p50": 15919,
+  "p90": 18573,
+  "pct_below": 0.3791,
+  "label": "TRONG vùng",
+  "price": 15200,
+  "price_date": "2026-11-06",
+  "ck_5ty": 0.014725,
+  "sleeve40": {
+   "centre": 16128,
+   "p10": 13496,
+   "p90": 18826,
+   "label": "TRONG vùng"
+  },
+  "source": "SUMMARY.json round 3 / REPORT_r3.md"
+ },
+ "model_change_note_r3": "r3 (TOP5B 08/11) dua RONIC=Ke vao base => kenh thuong moat ngam cua r2 da bo khoi headline; bien chu ky rieng DDV 4,05% giu (≈ LAS/NFC 4,16%)."
+}

@@ -15,3 +15,4 @@ e430be2363c19983d8d83120a3743e98  dd_redo_20261105/common.py
 4597bc083f0d64d8873141b12fbfb3a6  dd_redo_20261105/_shared/wpct.py
 adcfd34d718d70c34cd92fa6ac69f00b  dd_redo_20261105/bq_liq_nnc_mvc_dri_20261104.csv
 d847ff75edef21df2246498604ff58f0  calc/summary_r2.py
+# dinh chinh r3 (08/11): duong dan dung = dd_redo_20261105/NNC/calc/summary_r2.py (md5 d847ff75edef21df2246498604ff58f0 khop)

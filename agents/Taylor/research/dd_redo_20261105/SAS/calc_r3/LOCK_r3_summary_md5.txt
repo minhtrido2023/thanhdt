@@ -1,0 +1,6 @@
+cb2989cc5e902f27ce1be7ddad02731c  SAS/calc_r3/make_summary_r3.py
+edf650e363db19607a2b491f57cb1d0f  SAS/calc_r3/make_summary_r3_out.txt
+1c245cc4bfbbd1daa2732ae9707e8d89  SAS/calc_r3/model_sas_r3_out.json
+b321b12a1abc69b6581ebc4c97caa33f  SAS/calc_r3/model_sas_r3_out.txt
+2cb511bc5a3ded144cf2e933e5f1d5a0  SAS/SUMMARY.json
+ecc6f991a2e6f0f2aefca10a57dbe418  SAS/SUMMARY_r2.json

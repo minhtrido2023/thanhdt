@@ -1,0 +1,29 @@
+675413d6a93559f6c55b0dd2cfd009ea  NT2/calc_r3/assumptions_r3.json
+# ^ md5 sau sua text-only fcf_basis 08/11 (so lieu/tham so khong doi; md5 luc chot 22:41 ICT = f7eedadd5be4218c83c92a1d0e740750)
+a54d0c435a0f75b2a1a7b0d5b8f90dd0  NT2/calc_r3/model_r3.py
+a376ae429613f97ccf95bf1731ec86c7  NT2/calc_r3/px_nt2_r3_20261106.csv
+51a41d1b74a6ca9c5022147f2b5c3f9c  NT2/calc_r3/px_nt2_r3.sql
+c664014486a4a253080f47d4d9ce6868  NT2/calc_r3/fin_nt2_r3.csv
+138ee1447c4487054af534d6aed3a483  NT2/calc_r3/fin_nt2_r3.sql
+834e5a498f96273c5de6a90cd7951553  NT2/calc_r3/ar_nt2_r3.csv
+8a17b75818eb8fc25255140ab34b1998  NT2/calc_r3/ar_nt2_r3.sql
+f85afeb0df531f804878c551b34b495a  NT2/SUMMARY_r2.json
+4c062f81088ddbbb6df780146a2fe50e  NT2/src/Q3_2026_hopnhat_va_giaitrinh.pdf
+9c8f76f2c56e6aa315ffa17126ff0ea0  NT2/calc/model_r2.py
+c48da959c789ba976dc1f653bb9e09b2  _common_020021/r2lib.py
+ced2dcc1ba3d5fbc7d691ea00732920d  _common/liq.py
+74fb44444ac20d28ffeafc657821b116  _common/bq_px_4ma_20261104.csv
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+42a0c7a302e7b3e347be8fa0c331ac64  TOP5B_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  STANDARD_r2.md
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+# chot 2026-11-08 22:41:26 ICT TRUOC khi chay model_r3/so gia
+f9605983ad3b66b47ed80179bcad81da  /home/trido/thanhdt/WorkingClaude/cctg_rate_vn.py  (them sau chot: nguon lai CCTG 12M dat r)
+fc06e3a866142684d87a43b34e0f17d2  /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_events.csv  (them sau chot: dong 2026-11-02 = 7,40%)
+# post-run (chi trinh bay, khong doi so model; tao sau LOCK):
+b25a6ba9a9e259a7793445c4711a28a6  NT2/calc_r3/make_summary_r3.py
+e571d842b42394df4db024012d67927d  NT2/SUMMARY.json
+510e112e074286bca4f7ff5e861a94cc  NT2/REPORT_r3.md
+bcb23136054cb4ee656108862893c233  NT2/ADDENDUM_5F.md
+7c692f71646458f25219f46e1cb0a408  NT2/SUMMARY_5F.json

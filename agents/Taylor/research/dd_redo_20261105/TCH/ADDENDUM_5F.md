@@ -1,3 +1,5 @@
+> **QUY ƯỚC CUỐI (user chốt 08/11/2026 10:50 ICT):** KHÔNG áp luật 3c chặt. Moat chỉ được THÊM vào định giá khi bền; NARROW/NONE = không thưởng nhưng KHÔNG trừ. **Headline = mô hình cơ sở hiện hành (tâm 13.768 theo báo cáo gốc)**; mọi 'bản chặt-3c / headline mới / chờ duyệt' bên dưới chỉ còn là **độ nhạy rủi ro** ('nếu về trung bình ngành'), KHÔNG phải kết luận định giá. Các sửa lỗi dữ liệu/công thức/peer trong tài liệu này vẫn có hiệu lực. Không mã nào trong 20 mã có moat bền ⇒ không thêm tham số moat.
+
 # ADDENDUM 5F (bước 3c) — TCH · job `Taylor_20261107_130208`, sửa vòng 2 `Taylor_20261107_131628` · 07/11/2026 (bản trước: `ADDENDUM_5F_r1.md`)
 
 > Bổ sung cho `REPORT_r2.md` (05/11), KHÔNG thay. Mọi phần khác giữ nguyên. Số mới: `calc/model_5f.py` → `calc/model_5f_out.txt/json`

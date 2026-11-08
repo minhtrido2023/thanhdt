@@ -1,0 +1,279 @@
+{
+ "ticker": "DGC",
+ "round": 3,
+ "job": "Taylor_20261108_164329",
+ "asof_price_date": "2026-11-06",
+ "price": 33000.0,
+ "price_src": "BQ tav2_bq.ticker Price 2026-11-06 (r3data/px_dgc_r3.sql)",
+ "n_outcomes": 405,
+ "center_pre": 41825,
+ "center_post": 41522,
+ "center_param_pre": 43727,
+ "center_param_post": 43410,
+ "p10_pre": 33171,
+ "p50_pre": 41387,
+ "p90_pre": 50293,
+ "p10_out": 32931,
+ "p25_out": 36970,
+ "p50_out": 41087,
+ "p75_out": 46408,
+ "p90_out": 49929,
+ "min_out": 25782,
+ "max_out": 59113,
+ "pct_weight_below_price": 0.10208333333333333,
+ "label": "TRONG vùng",
+ "px_vs_center_post": -0.20524059534704497,
+ "headline_vs_alternatives": {
+  "ore_w0.10": {
+   "desc": "mo lai khai truong w=0,10",
+   "n_outcomes": 810,
+   "center_post": 42768,
+   "p10_out": 33267,
+   "p50_out": 42100,
+   "p90_out": 53030,
+   "pct_weight_below_price": 0.09187500000000001,
+   "label": "DƯỚI vùng"
+  },
+  "ore_w0.25": {
+   "desc": "mo lai khai truong w=0,25",
+   "n_outcomes": 810,
+   "center_post": 44637,
+   "p10_out": 33983,
+   "p50_out": 44163,
+   "p90_out": 56573,
+   "pct_weight_below_price": 0.07656249999999998,
+   "label": "DƯỚI vùng"
+  },
+  "ore_w0.50": {
+   "desc": "mo lai khai truong w=0,50 (= r2)",
+   "n_outcomes": 810,
+   "center_post": 47753,
+   "p10_out": 35794,
+   "p50_out": 47722,
+   "p90_out": 59765,
+   "pct_weight_below_price": 0.05104166666666667,
+   "label": "DƯỚI vùng"
+  },
+  "r4_fix": {
+   "desc": "nen bien r4 16,5/17,5% (khong co dong co so) + bo chong lan du phong (dinh chinh 1 nguyen ban)",
+   "n_outcomes": 405,
+   "center_post": 39100,
+   "p10_out": 32655,
+   "p50_out": 38971,
+   "p90_out": 46167,
+   "pct_weight_below_price": 0.11875,
+   "label": "TRONG vùng"
+  },
+  "r4_nofix": {
+   "desc": "nen bien r4 + du phong chong lan nhu r2 (doi chieu)",
+   "n_outcomes": 405,
+   "center_post": 37078,
+   "p10_out": 28946,
+   "p50_out": 36838,
+   "p90_out": 44601,
+   "pct_weight_below_price": 0.2520833333333333,
+   "label": "TRONG vùng"
+  },
+  "shield20": {
+   "desc": "la chan thue du phong 20% (TT48: tru khi chi that) [UL]",
+   "n_outcomes": 405,
+   "center_post": 42092,
+   "p10_out": 34075,
+   "p50_out": 41600,
+   "p90_out": 50226,
+   "pct_weight_below_price": 0.06250000000000001,
+   "label": "DƯỚI vùng"
+  },
+  "ronic20": {
+   "desc": "RONIC 20% (thuong moat — trai luat 3c, chi doi chieu)",
+   "n_outcomes": 405,
+   "center_post": 43456,
+   "p10_out": 34432,
+   "p50_out": 42969,
+   "p90_out": 52434,
+   "pct_weight_below_price": 0.0625,
+   "label": "DƯỚI vùng"
+  },
+  "w_scn_r2": {
+   "desc": "trong so kich ban 0,3/0,5/0,2 cua r2",
+   "n_outcomes": 405,
+   "center_post": 40867,
+   "p10_out": 32486,
+   "p50_out": 40474,
+   "p90_out": 49003,
+   "pct_weight_below_price": 0.11708333333333333,
+   "label": "TRONG vùng"
+  },
+  "legal_axis": {
+   "desc": "CO truc phap ly: haircut tien rong 3/9/29% (w 0,2/0,5/0,3) — ngoai base (vu an chi WARNING)",
+   "n_outcomes": 1215,
+   "center_post": 38592,
+   "p10_out": 29596,
+   "p50_out": 38455,
+   "p90_out": 47657,
+   "pct_weight_below_price": 0.21927083333333333,
+   "label": "TRONG vùng"
+  }
+ },
+ "bridge_pre": [
+  {
+   "step": "r2 (tai lap)",
+   "center_pre": 45087.86479245552,
+   "delta": null
+  },
+  {
+   "step": "c1 bo chong lan du phong tren nen r4",
+   "center_pre": 47124.421373499485,
+   "delta": 2036.5565810439657
+  },
+  {
+   "step": "c2 trong so 0,25/0,5/0,25",
+   "center_pre": 47777.85655276057,
+   "delta": 653.4351792610832
+  },
+  {
+   "step": "c3 RONIC = Ke",
+   "center_pre": 45661.46773577641,
+   "delta": -2116.3888169841593
+  },
+  {
+   "step": "c5 nen bien R2 (thay r4+fix; R2 khong chong lan)",
+   "center_pre": 48101.157330077745,
+   "delta": 2439.689594301337
+  },
+  {
+   "step": "c4 mo lai khai truong w 0,5 -> 0",
+   "center_pre": 41824.68590377276,
+   "delta": -6276.471426304983
+  }
+ ],
+ "single_correction_post": {
+  "c1": 2022,
+  "c2": 649,
+  "c3": -2046,
+  "c5_R2": 4791,
+  "c6_shield20": 570,
+  "c4_w0": -6813,
+  "c4_w0.1": -5450
+ },
+ "r_sens_post": {
+  "beta1.0_-100bp": 42990,
+  "beta1.0_-50bp": 42221,
+  "beta1.0_+50bp": 40848,
+  "beta1.0_+100bp": 40234,
+  "base": 41522
+ },
+ "ck_ref_size": {
+  "q_vnd": 5000000000.0,
+  "adv": "250 phien",
+  "disc": 0.00724700220209937,
+  "in_calib": true,
+  "disc_adv60": 0.011262359266486919,
+  "in_calib_adv60": false
+ },
+ "ck_real_sleeve": {
+  "10tr": {
+   "disc_adv250": 0.0003240957911396972,
+   "disc_adv60": 0.0005036680181377883,
+   "q_over_adv250": 0.00011928384365943747,
+   "in_calib": false
+  },
+  "20tr": {
+   "disc_adv250": 0.00045834066333779773,
+   "disc_adv60": 0.0007122941421840383,
+   "q_over_adv250": 0.00023856768731887493,
+   "in_calib": false
+  },
+  "40tr": {
+   "disc_adv250": 0.0006481915822793944,
+   "disc_adv60": 0.0010073360362755767,
+   "q_over_adv250": 0.00047713537463774986,
+   "in_calib": false
+  }
+ },
+ "liquidity": {
+  "last_price": 33000.0,
+  "last_date": "2026-11-06",
+  "w250": {
+   "window": "2025-11-05..2026-11-06",
+   "adv_med": 83833650000.0,
+   "sigma_d": 0.029674443194745877,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.05964192182971873,
+     "disc": 0.00724700220209937,
+     "in_calib": true,
+     "days_at_15pct": 0.3976128121981249
+    },
+    "10tr": {
+     "q_over_adv": 0.00011928384365943747,
+     "disc": 0.0003240957911396972,
+     "in_calib": false,
+     "days_at_15pct": 0.0007952256243962498
+    },
+    "20tr": {
+     "q_over_adv": 0.00023856768731887493,
+     "disc": 0.00045834066333779773,
+     "in_calib": false,
+     "days_at_15pct": 0.0015904512487924995
+    },
+    "40tr": {
+     "q_over_adv": 0.00047713537463774986,
+     "disc": 0.0006481915822793944,
+     "in_calib": false,
+     "days_at_15pct": 0.003180902497584999
+    }
+   }
+  },
+  "w60": {
+   "window": "2026-08-12..2026-11-06",
+   "adv_med": 17730080000.0,
+   "sigma_d": 0.02120800038158111,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.28200662377157915,
+     "disc": 0.011262359266486919,
+     "in_calib": false,
+     "days_at_15pct": 1.8800441584771943
+    },
+    "10tr": {
+     "q_over_adv": 0.0005640132475431583,
+     "disc": 0.0005036680181377883,
+     "in_calib": false,
+     "days_at_15pct": 0.0037600883169543885
+    },
+    "20tr": {
+     "q_over_adv": 0.0011280264950863166,
+     "disc": 0.0007122941421840383,
+     "in_calib": true,
+     "days_at_15pct": 0.007520176633908777
+    },
+    "40tr": {
+     "q_over_adv": 0.0022560529901726333,
+     "disc": 0.0010073360362755767,
+     "in_calib": true,
+     "days_at_15pct": 0.015040353267817554
+    }
+   }
+  }
+ },
+ "p10_post": 32931,
+ "p50_post": 41087,
+ "p90_post": 49929,
+ "center_post_liq": 41522,
+ "liq_disc_5ty": 0.00724700220209937,
+ "grid_n": 405,
+ "grid_desc": "ket cuc = kich ban EBIT (xau/co so/tot 0,25/0,5/0,25) tren nen bien R2 x khai truong DUNG (w mo lai 0 o base) x du phong moi truong (mot lan/huu han 4 quy/vinh vien 100 ty/quy, 1/3 [UL], la chan thue 0 [UL]) x Nghi Son -500/0/+500 (0,25/0,5/0,25 [UL]) x he so EBIT 0,8..1,2 (deu) x lai huy dong -50/0/+50bp (0,25/0,5/0,25 [UL]); RONIC=Ke; n=405; tham so trung tam = co so, huu han 4 quy, NS so sach, m=1, Δr=0",
+ "model_r3_out_md5": "ba91265ff8014116f6e4b9179a73d0fa",
+ "r2": {
+  "center_post": 44767,
+  "p10_out": 32518,
+  "p50_out": 44633,
+  "p90_out": 57101,
+  "label": "TRONG vùng",
+  "price": 33450.0,
+  "asof_price_date": "2026-11-04",
+  "pct_weight_below_price": 0.12208333333333332
+ },
+ "delta_center_vs_r2_pct": -0.07248642973618957
+}

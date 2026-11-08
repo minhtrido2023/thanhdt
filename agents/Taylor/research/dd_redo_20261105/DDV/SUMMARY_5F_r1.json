@@ -1,0 +1,18 @@
+{
+ "ticker": "DDV", "job": "Taylor_20261107_172007", "asof": "2026-11-07",
+ "moat_tier": "NONE", "moat_type": "NONE",
+ "risk1": "price-taker spread DAP-(S+NH3+apatit), apatit qua ben lien quan Vinachem; bai thach cao Dinh Vu chan cong suat",
+ "reused": false, "source_asof": null, "moat_durable": false,
+ "durability": {"i_roic": {"ROIC_Min5Y": 0.022, "ROIC5Y": 0.144, "ROIC10Y": 0.083, "ROIC_Min10Y": -0.100, "ROE5Y": 0.162, "ROE_Min5Y": 0.040, "Ke": 0.135, "pass": false}, "ii_barrier": false, "iii_no_clock": false},
+ "model_changed": true,
+ "model_change_note": "r2 lech luat 3c: RONIC 20%>Ke va NPM giua chu ky rieng DDV 4.05%; headline CHAT-3C (RONIC=Ke doi xung + NPM TB nganh peer bo ure) — quy uoc cho Mike/user duyet, KHONG ghi SUMMARY/zones",
+ "old": {"centre": 13109, "p10": 10115, "p50": 12823, "p90": 16270, "pct_below": 0.769, "label": "TRONG"},
+ "new": {"exUrea_median": {"npm": 0.0350, "centre": 11187, "p10": 8669, "p50": 11111, "p90": 13847, "pct_below": 0.976, "label": "TREN", "label_sleeve40": "TREN"},
+         "exUrea_mean": {"npm": 0.0383, "centre": 11937, "p10": 9237, "p50": 11788, "p90": 14814, "pct_below": 0.938, "label": "TREN (ranh gioi, gia +2.6% tren P90)", "label_sleeve40": "TREN"}},
+ "decomposition_vs_old": {"ronic_to_ke": -679, "margin_to_peer_exUrea_median": -1243, "margin_to_peer_exUrea_mean": -493},
+ "peer_alt": {"all7_median": {"npm": 0.0481, "centre": 14136, "p90": 17519, "label": "TRONG"}, "all7_mean": {"npm": 0.0642, "centre": 17738, "p90": 22133, "label": "TRONG"}, "R_only": {"centre": 12430, "p90": 15417, "label": "TRONG (ranh gioi)"}},
+ "sensitivity": {"WIDE": {"assumption": "RONIC 25%, bien DDV", "centre": 13390, "p90": 16646, "label": "TRONG"}, "NARROW": {"assumption": "RONIC 20%, bien DDV (= r2)", "centre": 13109, "p90": 16270, "label": "TRONG"}, "NONE": {"assumption": "chat-3C peer bo ure", "centre": [11187, 11937], "p90": [13847, 14814], "label": "TREN"}},
+ "price": 15200, "price_date": "2026-11-04", "liq_cost_ref_5ty": 0.014468,
+ "proposed_moat_tag_row": "DDV,NONE,NONE,L,\"Price-taker spread DAP-(S+NH3+apatite): ~80% COGS inputs, S 100% imported, apatite from related-party Apatit VN (Vinachem transfer price); ROIC10Y 8.3%/ROIC_Min5Y 2.2% < Ke 13.5%; GPM 2015-25 avg 10.6% below phosphate peers (LAS 17.7/NFC 16.6); gypsum-stack (Dinh Vu) caps capacity; 28% DAP share not a cost moat\",2026-11-07,5f,N",
+ "measured_by": "5F/ddv_moat_sens.py -> 5F/ddv_moat_sens_out.json (rerun 2026-11-08 cmp trung byte); calc5f/peer_out.csv"
+}

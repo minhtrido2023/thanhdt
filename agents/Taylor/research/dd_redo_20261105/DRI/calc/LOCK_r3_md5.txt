@@ -1,0 +1,34 @@
+# LOCK md5 DRI r3 — chot TRUOC khi chay/so gia (08/11/2026, job Taylor_20261108_153743)
+e6a86891ccb46cc731a47f17e3c8e539  dd_redo_20261105/DRI/calc/assumptions_r3.json
+fad15d86ed1bb8ed8b97bb73805f41bf  dd_redo_20261105/DRI/calc/dri_redo_r3.py
+e0bba9b8748c6d2891e92c3fa6d7dcd0  dri_val_supply_adj_r4_20261027/model.py
+b68f3311e32df525dad9529ff5dfc94d  dri_val_supply_adj_r3_20261027/model.py
+43d6e6d0d6509cbcdcd75bb6872d3e76  dri_val_supply_adj_20261027/data/dri_peers_fin.csv
+75c6677e1e4a95e31aabcc37257ec5fc  dd_DRI_20261027/r5/calc/data/fred_cpiaucsl_20261103.csv
+38938b2a1114d8b82984b638df47213b  dd_DRI_20261027/r5/calc/data/macro_usdvnd_snapshot_20261103.csv
+20000b0b878b526d4a2c5eab76aea16b  dd_DRI_20261027/r5/calc/data/rubber_monthly_snapshot_20261103.csv
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+f9605983ad3b66b47ed80179bcad81da  /home/trido/thanhdt/WorkingClaude/cctg_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+fc06e3a866142684d87a43b34e0f17d2  /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_events.csv
+e430be2363c19983d8d83120a3743e98  dd_redo_20261105/common.py
+4597bc083f0d64d8873141b12fbfb3a6  dd_redo_20261105/_shared/wpct.py
+adcfd34d718d70c34cd92fa6ac69f00b  dd_redo_20261105/bq_liq_nnc_mvc_dri_20261104.csv
+d9d72d4a89f68ff5ff45ddd5b4891d4e  dd_redo_20261105/DRI/calc/r3data/px_dri_20261106.csv
+ee968050b251159f7bf25f8371e98774  dd_redo_20261105/DRI/calc/r3data/px_dri_r3.sql
+42a0c7a302e7b3e347be8fa0c331ac64  dd_redo_20261105/TOP5B_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  dd_redo_20261105/STANDARD_r2.md
+# --- sau lan chay 1 (assumptions_r3.json KHONG doi md5 e6a86891...): script v2 chi them 2 dong bao cao (alt 'chi nhanh KINH TE 1,0', khoang giai lai huy dong 0,06-0,30) — khong doi gia dinh/headline
+89eb0871234cc59d668642e8814b29d8  DRI/calc/dri_redo_r3.py
+e6a86891ccb46cc731a47f17e3c8e539  DRI/calc/assumptions_r3.json
+# --- output sau chay (2 lan trung byte) + file dan xuat
+6c55c8ed972236a85fe94f568fb46900  dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt
+09e2c313fdc5f925a230f62ff1a46325  dd_redo_20261105/DRI/calc/dri_redo_r3_out.json
+77f5434dfe36bbe867771022f4d57213  dd_redo_20261105/DRI/calc/grid_dri_redo_r3.csv
+8a364a4c9a0d9f1136ef7078d2185870  dd_redo_20261105/DRI/calc_5f/moat_sens_5f_r3.py
+9af83adf2e7a011bab30d9083ac702ae  dd_redo_20261105/DRI/calc_5f/moat_sens_5f_r3_out.txt
+154f9bce65f614bb22ad033f20d073d3  dd_redo_20261105/DRI/calc_5f/moat_sens_5f_r3_out.json
+652292b2efe66a3096521205f84939d6  dd_redo_20261105/DRI/calc_5f/ttm_bq.csv
+c1abcd14d6ddaf7f17857bcf39d24b0c  dd_redo_20261105/DRI/calc/make_summary_r3.py
+6e9de156869fe89614da157ad7de9f93  dd_redo_20261105/DRI/SUMMARY.json
+3443c3da61c98abfac1fd33772a3504d  dd_redo_20261105/DRI/SUMMARY_r2.json

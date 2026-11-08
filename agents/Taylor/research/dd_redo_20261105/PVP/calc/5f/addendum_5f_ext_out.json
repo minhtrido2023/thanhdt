@@ -1,0 +1,41 @@
+{
+ "ship_npv_cur": {
+  "xau": -0.3,
+  "coso": 0.0,
+  "tot": 0.3
+ },
+ "CAP_upside_cut": {
+  "center_post": 21505,
+  "p10_out": 12702,
+  "p50_out": 22377,
+  "p90_out": 27955,
+  "pct_weight_below_price": 0.30600000000000005,
+  "label": "TRONG vùng"
+ },
+ "A_CAP": {
+  "center_post": 20356,
+  "p10_out": 11796,
+  "p50_out": 21303,
+  "p90_out": 26471,
+  "pct_weight_below_price": 0.332,
+  "label": "TRONG vùng"
+ },
+ "AB_sleeve40": {
+  "center_post": 23073,
+  "p10_out": 19268,
+  "p50_out": 22861,
+  "p90_out": 26962,
+  "pct_weight_below_price": 0.04,
+  "label": "DƯỚI vùng"
+ },
+ "A_CAP_sleeve40": {
+  "center_post": 20734,
+  "p10_out": 12016,
+  "p50_out": 21699,
+  "p90_out": 26962,
+  "pct_weight_below_price": 0.332,
+  "label": "TRONG vùng"
+ },
+ "d_ref": 0.019992057673030278,
+ "d40": 0.0017881439986796785
+}

@@ -380,5 +380,13 @@
  "gpm_method": "GPM_P0/EBITM_P0 la TTM (dinh chinh Mike 07/11 19:50): dung thang dong Q4 moi nam; khong TB4Q, khong tinh lai tu chuoi GPM_Pi",
  "peers_note": "CSV/DDV/LAS/HVT hoa chat/phan lan noi dia, KHONG phai doi thu P4 truc tiep (TQ, khong co du lieu); loai PAT (con hop nhat)",
  "proposed_moat_tag_row": "DGC,NARROW,COST/LOCATION,M,\"Commodity P4/H3PO4 price-taker vs China; cost edge from captive apatite (TTM GPM Q4-rows 2017-25 30.65% vs domestic chem peer median 19.17%, above 8/9 yrs); TTM GPM 21.9%; quarterly margin Q3/26 20.5% (BCTC) ~ industry while on purchased ore; ROIC_Min10Y 4.4%/ROIC5Y<Ke 2018-20 conflict ROIC_Trailing (data break 2017Q4-18Q2) -> unverified; reserve life + 56% P4 share unverified => not durable (rule 3c: RONIC=Ke, margin capped at industry); Mine-25 halt modelled via ore axis; legal case = WARNING\",2026-11-07,5f_quickcheck_reuse_20260605,Y",
- "measured_by": "calc_5f/moat_sens_5f.py -> moat_sens_5f_out.json (md5 b7eb8dac, 2 lan trung); calc_5f/ttm.py -> ttm_out.txt (md5 6e62c0f3); calc_5f/dgc_roic_bq.csv (bq ticker_financial)"
+ "measured_by": "calc_5f/moat_sens_5f.py -> moat_sens_5f_out.json (md5 b7eb8dac, 2 lan trung); calc_5f/ttm.py -> ttm_out.txt (md5 6e62c0f3); calc_5f/dgc_roic_bq.csv (bq ticker_financial)",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 44767,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

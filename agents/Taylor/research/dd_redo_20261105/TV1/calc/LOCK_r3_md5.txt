@@ -1,0 +1,13 @@
+# LOCK upstream md5 — TV1 r3
+95d8fe38f5c17c3f723d6c175ffac49b  _common_g2r2/ddr2.py
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+81a87069f3f895a3a93d62d85b8fb5f0  _common_g2/ddg2.py
+ec4f9dcdc37266a97b9834415103c592  TV1/calc/r3data/px_tv1_20261106.csv
+f4d85be2e084a308fd514312bcf4dae6  TV1/calc/r3data/px_tv1_r3.sql
+a9d0d2a45ec22ad34768e53c35d086d3  TV1/calc/model_tv1_r3.py
+58c7a3501965e83322c8299d912ce7b9  TV1/calc/tv1_v2_core.py
+c80d3ca8f86e3c1ae7faf06c5ec5bbf4  TV1/calc/v2data/bq_tv1_quarterly_2022_2025.csv
+13dac039539fb91fc8f7256c03a71e5d  ../../../../../deposit_rate_vn.py
+f9605983ad3b66b47ed80179bcad81da  ../../../../../cctg_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  ../../../../../data/deposit_rate_vn_events.csv
+fc06e3a866142684d87a43b34e0f17d2  ../../../../../data/cctg_rate_vn_events.csv

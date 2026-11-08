@@ -1,0 +1,8 @@
+all6               median ebitm 9.65% lnst 719: n=45 | tam truoc 22,356 sau 22,151 | P10/P50/P90 sau 16,846/22,194/26,970 | min sau 15,425 | % trong so duoi gia 57.5% | gia/tam +2.3% => TRONG vung
+all6               mean   ebitm 9.22% lnst 695: n=45 | tam truoc 21,902 sau 21,701 | P10/P50/P90 sau 16,373/21,741/26,568 | min sau 15,036 | % trong so duoi gia 67.5% | gia/tam +4.4% => TRONG vung
+ex_BTP             median ebitm 10.00% lnst 739: n=45 | tam truoc 22,724 sau 22,515 | P10/P50/P90 sau 17,228/22,560/27,294 | min sau 15,739 | % trong so duoi gia 55.0% | gia/tam +0.6% => TRONG vung
+ex_BTP             mean   ebitm 9.98% lnst 738: n=45 | tam truoc 22,703 sau 22,494 | P10/P50/P90 sau 17,206/22,539/27,276 | min sau 15,721 | % trong so duoi gia 55.0% | gia/tam +0.7% => TRONG vung
+ex_BTP_PPC(than)   median ebitm 10.05% lnst 742: n=45 | tam truoc 22,776 sau 22,567 | P10/P50/P90 sau 17,283/22,612/27,340 | min sau 15,783 | % trong so duoi gia 55.0% | gia/tam +0.4% => TRONG vung
+ex_BTP_PPC(than)   mean   ebitm 10.50% lnst 768: n=45 | tam truoc 23,248 sau 23,035 | P10/P50/P90 sau 17,774/23,082/27,758 | min sau 16,187 | % trong so duoi gia 45.0% | gia/tam -1.7% => TRONG vung
+gas_POW_only       -      ebitm 9.30% lnst 699: n=45 | tam truoc 21,989 sau 21,787 | P10/P50/P90 sau 16,464/21,828/26,645 | min sau 15,111 | % trong so duoi gia 67.5% | gia/tam +4.0% => TRONG vung
+NT2_own_avg        -      ebitm 12.00% lnst 854: n=45 | tam truoc 24,822 sau 24,594 | P10/P50/P90 sau 19,412/24,650/29,148 | min sau 17,532 | % trong so duoi gia 30.0% | gia/tam -7.9% => TRONG vung

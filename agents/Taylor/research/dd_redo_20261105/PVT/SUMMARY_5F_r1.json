@@ -1,0 +1,134 @@
+{
+ "ticker": "PVT",
+ "job": "Taylor_20261107_172013",
+ "moat_tier": "NONE",
+ "moat_type": "NONE",
+ "risk1": "Freight-cycle trough coinciding with forced IMO fleet-replacement capex bought near ship-price peak; ROIC can revert to Min10Y 2.5%",
+ "reused": false,
+ "source_asof": "2026-11-07 (lam moi; moat_tags.csv chua co PVT; DD 29/10 khong co 5F)",
+ "moat_durable": false,
+ "durability_evidence": {
+  "Ke": 0.135,
+  "ROIC5Y": 0.1003,
+  "ROIC_Min5Y": 0.0943,
+  "ROIC10Y": 0.0905,
+  "ROIC_Min10Y": 0.0254,
+  "ROE_med_2015_25": 0.1315,
+  "ROE_Min5Y": 0.1241,
+  "ROE_TTM_Q3_26": 0.1577,
+  "GPM_med": 0.15,
+  "peers_roe_med": {
+   "GSP": 0.1251,
+   "PJT": 0.1219,
+   "PVP": 0.1162,
+   "VIP": 0.0675
+  }
+ },
+ "model_changed": true,
+ "model_change_status": "quy uoc chat-3c CHO Mike/user duyet; khong ghi dd_price_zones/SUMMARY",
+ "old": {
+  "center_post": 17675,
+  "p10_out": 12533,
+  "p50_out": 17425,
+  "p90_out": 23135,
+  "pct_weight_below_price": 0.7825,
+  "label": "TRONG vùng",
+  "label_40tr": "TRONG vùng"
+ },
+ "new_headline": {
+  "center_post": 16492,
+  "p10_out": 12636,
+  "p50_out": 16299,
+  "p90_out": 20401,
+  "pct_weight_below_price": 0.9399999999999998,
+  "label": "TRÊN vùng",
+  "label_40tr": "TRÊN vùng"
+ },
+ "new_range_by_peer_choice": [
+  14791,
+  16829
+ ],
+ "decomposition": {
+  "ronic_ke_only": 302,
+  "anchor_only": -1964,
+  "combined": -1183
+ },
+ "label_note": "TRONG->TREN; mong manh: P90 -2.9% duoi gia (trung vi), -0.6% ex-PVP = ranh gioi",
+ "sensitivity": {
+  "WIDE": {
+   "center_post": 21782,
+   "p10_out": 15643,
+   "p50_out": 21667,
+   "p90_out": 28048,
+   "pct_weight_below_price": 0.46249999999999997,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NARROW_current": {
+   "center_post": 17675,
+   "p10_out": 12533,
+   "p50_out": 17425,
+   "p90_out": 23135,
+   "pct_weight_below_price": 0.7825,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "NONE_strict3c_peer_med": {
+   "center_post": 16492,
+   "p10_out": 12636,
+   "p50_out": 16299,
+   "p90_out": 20401,
+   "pct_weight_below_price": 0.9399999999999998,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "NONE_strict3c_peer_mean": {
+   "center_post": 15132,
+   "p10_out": 11523,
+   "p50_out": 15002,
+   "p90_out": 18740,
+   "pct_weight_below_price": 0.98,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "NONE_strict3c_exPVP_med": {
+   "center_post": 16829,
+   "p10_out": 12912,
+   "p50_out": 16593,
+   "p90_out": 20865,
+   "pct_weight_below_price": 0.9075,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "NONE_strict3c_exPVP_mean": {
+   "center_post": 14791,
+   "p10_out": 11244,
+   "p50_out": 14664,
+   "p90_out": 18324,
+   "pct_weight_below_price": 0.995,
+   "label": "TRÊN vùng",
+   "label_40tr": "TRÊN vùng"
+  },
+  "ROE_eq_Ke": {
+   "center_post": 18381,
+   "p10_out": 13721,
+   "p50_out": 17926,
+   "p90_out": 22469,
+   "pct_weight_below_price": 0.7949999999999999,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  },
+  "RONIC_ke_only": {
+   "center_post": 17977,
+   "p10_out": 13852,
+   "p50_out": 17719,
+   "p90_out": 22298,
+   "pct_weight_below_price": 0.7825,
+   "label": "TRONG vùng",
+   "label_40tr": "TRONG vùng"
+  }
+ },
+ "price": 21000,
+ "proposed_moat_tag_row": "PVT,NONE,NONE,L,\"Tanker freight-cycle commodity: ROIC5Y 10.0%/Min5Y 9.4%/Min10Y 2.5% all < Ke 13.5% despite best-in-domestic-peers; PVN captive (22.4% rev 9T/26) gives volume not price; IMO CII/EEXI on ~17.7y fleet forces replacement capex near ship-price peak\",2026-11-07,5f_dd_taylor,N",
+ "measured_by": "calc_5f/pvt_5f.py -> calc_5f/pvt_5f_out.txt; calc_5f/peer_5f_bq.csv"
+}

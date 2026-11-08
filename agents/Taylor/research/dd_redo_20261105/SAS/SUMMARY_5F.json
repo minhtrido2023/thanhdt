@@ -1,7 +1,7 @@
 {
  "ticker": "SAS",
  "job": "Taylor_20261107_125216",
- "revision": "r2 (r1: SUMMARY_5F_r1.json, job Taylor_20261107_123136)",
+ "revision": "r2 (r1: SUMMARY_5F_r1.json, job Taylor_20261107_123136); r3-sync 08/11 (dong bo quy uoc cuoi user 08/11: headline = mo hinh co so r3 31.658)",
  "asof": "2026-11-07",
  "moat_tier": "NARROW",
  "moat_type": "LOCATION/REGULATORY",
@@ -16,8 +16,8 @@
   "iii_no_moat_clock": "fail: Long Thanh migration 2027-28 (both schedule versions) + tender"
  },
  "moat_durable_basis": "(iii) moat clock + NARROW tag (SKILL 3c), not (i)",
- "model_changed": true,
- "change": "Current r2 implicitly WIDE: Gordon E/(r-g) without reinvestment (RONIC=inf all g) + N0 (operating NPM 16.67%, fin income excluded) held forever. Strict-3c headline: RONIC=Ke symmetric (V=E/r) + operating NPM to industry cycle 14.36% (incl. fin) minus f=2pp => 12.36%; adj -133.9bn/yr (-25.8% N0), half 2027, full 2028+. r1 (17,438) wrong: compared operating N0 to 9M NPM incl. 6.46pp fin income. Convention pending Mike/user approval; SUMMARY/zones not written.",
+ "model_changed": false,
+ "change": "SENSITIVITY ONLY (r2 model, gia 34.700 ngay 04/11, N0 518,4): strict-3c = RONIC=Ke symmetric (V=E/r) + operating NPM to industry cycle 14.36% (incl. fin) minus f=2pp => 12.36%; adj -133.9bn/yr (-25.8% N0), half 2027, full 2028+. User 08/11 10:50 ICT: KHONG ap 3c chat -> day KHONG phai headline; mo hinh/nhan hien hanh khong doi (r3 tam 31.658 TRONG vung). r1 (17,438) wrong: compared operating N0 to 9M NPM incl. 6.46pp fin income.",
  "f_basis": {
   "head_pp": 2.0,
   "range_pp": [
@@ -47,40 +47,21 @@
   "p90_sleeve40": 40235
  },
  "new": {
-  "center": 22002,
-  "p10": 17949,
-  "p50": 21965,
-  "p90": 25977,
-  "pct_below_px": 1.0,
-  "label": "TREN vung (>P90)",
-  "label_sleeve40": "TREN vung (>P90)",
-  "p90_sleeve40": 27489,
-  "convention": "quy ước chờ Mike/user duyệt",
-  "range_by_f": {
-   "f1": {
-    "center": 23026,
-    "p10": 18695,
-    "p50": 22986,
-    "p90": 27446,
-    "pct_below_px": 1.0,
-    "label": "TREN vung (>P90)",
-    "label_sleeve40": "TREN vung (>P90)",
-    "p90_sleeve40": 29044
-   },
-   "f3": {
-    "center": 20978,
-    "p10": 17124,
-    "p50": 20944,
-    "p90": 24944,
-    "pct_below_px": 1.0,
-    "label": "TREN vung (>P90)",
-    "label_sleeve40": "TREN vung (>P90)",
-    "p90_sleeve40": 26396
-   }
-  }
+  "center": 31658,
+  "p10": 25083,
+  "p50": 31402,
+  "p90": 38043,
+  "pct_below_px": 0.7297,
+  "label": "TRONG vung",
+  "label_sleeve40": "TRONG vung",
+  "center_sleeve40": 33474,
+  "p10_sleeve40": 26521,
+  "p90_sleeve40": 40225,
+  "convention": "headline = mo hinh co so r3 (REPORT_r3.md / SUMMARY.json), user chot 08/11/2026 10:50 ICT; khong cho duyet",
+  "basis": "co CK tham chieu 5 ty (CK 5,93%), gia 34.200 dong cua 06/11, N0 479,7; sleeve 40 tr CK 0,53%"
  },
- "label_changed": true,
- "price": 34700.0,
+ "label_changed": false,
+ "price": 34200.0,
  "decomposition": {
   "ronic_only": -4657,
   "margin_only_f2": -5611,
@@ -244,14 +225,61 @@
   }
  },
  "label_boundary": {
-  "headline": false,
-  "headline_p90_gap_to_px": "+33.6% ref / +26.2% sleeve40",
+  "strict3c_variant": false,
+  "strict3c_p90_gap_to_px": "+33.6% ref / +26.2% sleeve40",
   "ronic_only_sleeve40": "BOUNDARY: P90 33,749 vs px 34,700 (2.8%)",
   "margin_only_f0_sleeve40": "TRONG (P90 36,346)",
-  "margin_only_f1_sleeve40": "BOUNDARY (P90 34,624)"
+  "margin_only_f1_sleeve40": "BOUNDARY (P90 34,624)",
+  "note": "tinh tren mo hinh r2 cho quy uoc chat-3c (da bi bac 08/11); khong phai headline hien hanh (r3 31.658 TRONG)"
  },
  "proposed_moat_tag_row": "SAS,NARROW,LOCATION/REGULATORY,M,\"TSN concession (ACV-granted, no tender; ACV 49.07% landlord+shareholder). NOT durable via moat clock: intl flights move to Long Thanh 2027-28 (official schedule unverified, both versions 2027-28), LT space likely tendered. Excess return INCONCLUSIVE: vendor ROIC unreliable (ROIC5Y -2%/ROE5Y -9% in 2016Q1 at 11-17% NPM; ROIC_Trailing 101-223%); operating ROE ~71%. Operating NPM 9M/26 16.7% vs cycle 11.4-13.4% ex-fin-income (14.36% incl. fin minus f 1-3pp; SAS+AST)\",2026-11-07,5f_recheck_dd,Y",
  "proposed_row_required": false,
  "measured_by": "$DNA_PYEXE -I -B calc/sas_5f.py -> calc/sas_5f_out.txt md5 ad71809401264afcfb44972f7802507f, sas_5f_out.json md5 e8de5f71a1bc19046e240f3d788ced72 (2 runs identical); BQ tav2_bq.ticker_financial 2026-11-07",
- "non_point_in_time": true
+ "non_point_in_time": true,
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 31658,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "headline_centre_basis": "dong bo r3 08/11 (REPORT_r3.md, SUMMARY.json): tam 31.658, P10 25.083, P50 31.402, P90 38.043, nhan TRONG vung o co CK tham chieu 5 ty, gia 34.200 (06/11); sleeve 40 tr tam 33.474 TRONG; 31.066 la tam r2 cu",
+  "r3_sync_note": "Moi so tam/P10/P90 khac trong file nay (old/WIDE 31.066, NARROW/chat-3c 22.002, 20.978-23.026, ronic_only 26.410...) tinh tren mo hinh r2 (N0 518,4, gia 34.700 ngay 04/11) - chi la do nhay tuong doi quanh r2, KHONG phai tam hien hanh"
+ },
+ "new_r2model_strict3c_sensitivity": {
+  "_note": "Do nhay 'neu ve trung binh nganh' tren mo hinh r2 (gia 34.700, N0 518,4) - KHONG phai headline, KHONG phai tam hien hanh; user bac 3c chat 08/11",
+  "center": 22002,
+  "p10": 17949,
+  "p50": 21965,
+  "p90": 25977,
+  "pct_below_px": 1.0,
+  "label": "TREN vung (>P90)",
+  "label_sleeve40": "TREN vung (>P90)",
+  "p90_sleeve40": 27489,
+  "convention": "chi la do nhay rui ro; user KHONG ap 3c chat (08/11 10:50 ICT)",
+  "range_by_f": {
+   "f1": {
+    "center": 23026,
+    "p10": 18695,
+    "p50": 22986,
+    "p90": 27446,
+    "pct_below_px": 1.0,
+    "label": "TREN vung (>P90)",
+    "label_sleeve40": "TREN vung (>P90)",
+    "p90_sleeve40": 29044
+   },
+   "f3": {
+    "center": 20978,
+    "p10": 17124,
+    "p50": 20944,
+    "p90": 24944,
+    "pct_below_px": 1.0,
+    "label": "TREN vung (>P90)",
+    "label_sleeve40": "TREN vung (>P90)",
+    "p90_sleeve40": 26396
+   }
+  }
+ },
+ "price_r2_sensitivity_basis": 34700.0,
+ "price_note": "price = 34.200 (dong cua 06/11, r3). Cac khoi old/sensitivity/new_r2model_strict3c_sensitivity tinh o gia 34.700 (04/11) tren mo hinh r2 - chi do nhay tuong doi."
 }

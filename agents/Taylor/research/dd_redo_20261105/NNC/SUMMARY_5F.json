@@ -127,5 +127,14 @@
   "dropped": "r2 9T/2026 revenue-weighted avg of overlapping TTMs (51.6/37.2/34.9/31.9) - not a margin",
   "argument_removed": "STRUCTURAL is industry state not NNC-specific"
  },
- "out_of_scope_note": "RETRACTED r3: model_r4.py:46 gpm_co 2025=0.494 = GPM_P0 Q4/25 row = TTM = FY2025 GPM -> not a bug; 42.8% was avg of overlapping TTMs. Not independently checked vs BCTC (chua kiem)."
+ "out_of_scope_note": "RETRACTED r3: model_r4.py:46 gpm_co 2025=0.494 = GPM_P0 Q4/25 row = TTM = FY2025 GPM -> not a bug; 42.8% was avg of overlapping TTMs. Not independently checked vs BCTC (chua kiem).",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 61273,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "dd_r3_sync": "08/11: tâm hiện hành r3 = 61273 (REPORT_r3.md); các center khác trong file là r2"
+ }
 }

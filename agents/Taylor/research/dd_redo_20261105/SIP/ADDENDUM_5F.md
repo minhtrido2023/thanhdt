@@ -1,3 +1,5 @@
+> **QUY ƯỚC CUỐI (user chốt 08/11/2026 10:50 ICT):** KHÔNG áp luật 3c chặt. Moat chỉ được THÊM vào định giá khi bền; NARROW/NONE = không thưởng nhưng KHÔNG trừ. **Headline = mô hình cơ sở hiện hành (tâm 54.230 theo báo cáo gốc)**; mọi 'bản chặt-3c / headline mới / chờ duyệt' bên dưới chỉ còn là **độ nhạy rủi ro** ('nếu về trung bình ngành'), KHÔNG phải kết luận định giá. Các sửa lỗi dữ liệu/công thức/peer trong tài liệu này vẫn có hiệu lực. Không mã nào trong 20 mã có moat bền ⇒ không thêm tham số moat.
+
 # SIP — ADDENDUM bước 3c: 5F tầng (b) + moat trong mô hình (07/11/2026, job Taylor_20261107_130211)
 
 Bổ sung cho `REPORT_r2.md` (05/11), không thay nó. **Kết luận: moat NARROW · LOCATION/REGULATORY, KHÔNG bền. Mô hình hiện hành KHÔNG nhất quán với luật 3c** (RONIC mảng vận hành = ROE5Y 29,7% > Ke, biên TTM giữ vĩnh viễn). Hiện hành: tâm **54.230** · P10 43.784 · P50 53.086 · P90 68.713 (sau CK 5 tỷ). **BẢN CHẶT-3C (headline, quy ước chờ Mike/user duyệt): tâm 49.253 (−9,2%) · P10 38.904 · P50 48.119 · P90 63.762; nhãn TRONG vùng giữ nguyên** (giá 49.000 ≈ tâm, −0,5%; không ở ranh giới P10/P90).

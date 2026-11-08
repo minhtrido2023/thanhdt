@@ -1,0 +1,53 @@
+{
+ "assumptions": [
+  {"item": "r = 13,50%", "basis": "13,5% + 1,0 x (lai huy dong 12T hieu dung 06/11 7,40% - neo 7,40%)", "source": "deposit_rate_vn.effective_deposit_rate (cctg_12m 2026-11-02)"},
+  {"item": "Gia tham chieu 21.200 (dong cua 06/11/2026)", "basis": "tav2_bq.ticker Price", "source": "calc_r3/px_hpg_r3.sql -> px_hpg_r3_20261106.csv"},
+  {"item": "BV0 = VCSH me 148.795,5 ty; 8.442,96 trieu cp", "basis": "BCTC hop nhat Q3/2026", "source": "HN-Q3 (dd_HPG_20261031/src)"},
+  {"item": "Duong LNST me Q4/26-2029 theo 3 kich ban (XAU/TRUNG LAP/TOT 0,25/0,50/0,25)", "basis": "giu nguyen v3 31/10 (neo run-rate 9T26; da qua skeptic 31/10)", "source": "dd_HPG_20261031/calc/hpg_valuation_v2.py"},
+  {"item": "Ty le chi tra 20%", "basis": "giu nguyen r2", "source": "hpg_r2.py PAYOUT"},
+  {"item": "XDCB 16.113 ty (trong BV0) sinh loi = r tu 30/09", "basis": "luat 20 (du an moi: base = so sach/NPV0); duong LN v3 neo run-rate khong gom loi ich XDCB", "source": "HN-Q3 XDCB; feedback-dd-new-project-base-book-value"},
+  {"item": "Cam ket von 19.472 ty (SO TAI 30/6/2026, notes_bs.md:73 TM41; KHONG phai HN-Q3 30/9), tai tro tu von giu lai, sinh loi = r khi giu lai. LUU Y: phan chi Q3 da chuyen vao XDCB 30/9 (16.113) nen dem trung ~-200 d/cp o muc r (uoc luong, chua chay lai; khong sua so)", "basis": "luat 20 NPV0", "source": "notes_bs.md:73 (TM41, so 30/6/2026)"},
+  {"item": "Von giu lai con lai sinh loi = lai huy dong 12T sau thue 5,92%", "basis": "7,40% x (1-20%); san dinh chinh #1 cua skeptic", "source": "deposit_rate_vn; TOP5_CORRECTIONS HPG #1"},
+  {"item": "Thue TNDN 20% cho phan thep tu 2035; 2030-34 giu ETR hien hanh (~12%)", "basis": "uu dai co thoi han theo luat (KKT: 10% 15 nam, mien 4, giam 50% 9 nam); DQ1 ~10% toi ~2034 (uoc luong); ETR thep do 6T/26 6,5%; ETR hop nhat 2025 14,3%", "source": "dd_HPG_20261031 GAPS §2 (nhadautu 24/09/2018; BN seg tr.55); MOC 2035 LA UOC LUONG"},
+  {"item": "g_RI terminal = 0 moi nhanh", "basis": "moat NARROW COST/SCALE khong ben (5F 07/11) => khong thuong tang truong co RONIC > r; quy uoc user 08/11", "source": "HPG/SUMMARY_5F.json"},
+  {"item": "Khoan TLSH 9.915 ty = so sach trong base", "basis": "khong co du lieu suy giam; truc lech xuong r2 la [UL] => song song E", "source": "HN-Q3; TOP5_CORRECTIONS HPG #4"},
+  {"item": "He so duong LN 0,8..1,2; dich g +-1pp; doc LN 2028-29 +-5%/nam (deu)", "basis": "[UL] giu nguyen r2", "source": "hpg_r2.py"},
+  {"item": "CK thanh khoan 5 ty = sigma x sqrt(Q/ADV250), Y=1", "basis": "luat can bac hai chung", "source": "_common_014125/common.py"}
+ ],
+ "corrections_check": [
+  {"n": 1, "verdict": "DUNG ve huong, SUA cach lam", "note": "Von giu lai 0% la loi that (ROE_T TRUNG LAP 11,84% < r). Nhung cach 'capex' cua skeptic (35.585 dau tien cua VON GIU LAI = r, XDCB 16.113 trong BV0 van 0%) lap lai chinh loi luat 20 voi XDCB da nam trong BV0. r3: XDCB trong BV0 = r, cam ket 19.472 tu von giu lai = r, phan con lai = tien gui sau thue. Tai lap skeptic: san 6% = 18.430 (skeptic 18.558, lech -128 do dep sau thue 5,92% vs 6,0% + gia 06/11); capex = 20.599 trong khung r2 (skeptic 19.529, KHONG tai lap duoc, lech +1.070 - cach doc phan bo capex co the khac)."},
+  {"n": 2, "verdict": "DUNG MOT PHAN", "note": "Moc 2030 khong co nguon => bo. Nhung 'ETR 12% vinh vien' trai luat (uu dai co thoi han) => khong lam headline. Headline moc 2035 theo khung luat + uoc luong DQ1 (GAPS §2); song song B (2030) va C (vinh vien). Doi 2030->2035: +690."},
+  {"n": 3, "verdict": "DUNG", "note": "g_RI=g o nhanh ROE_T>r la thuong moat ngam; moat NARROW khong ben => g_RI=0 moi nhanh. Tac dong o r3: -1.152 (lon hon -270 cua skeptic vi sau C1 ca TRUNG LAP cung co ROE_T > r)."},
+  {"n": 4, "verdict": "DUNG", "note": "Truc TLSH ky vong mat 16,5% [UL] khong co du lieu => base so sach (+194), truc r2 = song song E."},
+  {"n": 5, "verdict": "DA LAM", "note": "Quet tin 31/10-08/11/2026: khong thay xu phat/truy thu/khoi to/ket luan thanh tra; khong thay danh tinh ben mua 2 cong ty BDS (Do thi My Hao, KDT Xanh); khong thay ket luan thue DQ2 moi/mo rong (CV 377 chi co tom tat). QD 1917/QD-BCT: chi bao chi (SMM 30/07/2026 xac nhan so hieu, 27,83%, hieu luc 28/07/2026); khong mo duoc ban goc moit/trav; kho rong 1.880-2.300mm moi xac nhan cho QD tam thoi 612. QD 1902 ra soat AD: chua co ket qua."}
+ ],
+ "warnings": [
+  "Quan tri/ben lien quan (WARNING nang): he Dai Quang Minh-TLSH 3 lop phoi nhiem (co phan TLSH 9.915 ty so sach; mua 799,5 trieu cp TLSH 7.995 ty theo NQ HDQT 30/09/2026 => 25,13% VDL; 26,55% BDS Hoa Phat; lien danh do thi song Hong); lai thoai von BDS 4.929 ty, ben mua khong cong bo (tra 08/11/2026: van khong thay)",
+  "Uu dai thue: thoi han khong cong bo; DQ2 moi/mo rong chua co ket luan (CV 377/TCT-CS) - rui ro truy thu neu bi xep 'mo rong'; moc 2035 la uoc luong",
+  "Tien gui cam co 8.294 ty; AD HRC Trung Quoc dang ra soat hanh chinh (QD 1902, 27/07/2026) - chua co ket qua (tra 08/11/2026)",
+  "QD 1917/QD-BCT chong lan tranh 27,83%: chi nguon bao chi, ban goc chua mo duoc (tra 08/11/2026)",
+  "QD 244/QD-XPHC 11/05/2022 phat 125 trieu (thieu TV HDQT doc lap) - lich su",
+  "Giao dich noi bo: Tran Vu Minh mua 33,3 trieu + dang ky 50 trieu cp 07/10-05/11/2026; TV doc lap Dang Ngoc Khanh dang ky ban 100 nghin cp 04/11-03/12",
+  "Khong tim thay khoi to/xu phat 2025-26 (tra web 08/11/2026; khong tim thay != sach)"
+ ],
+ "axes_included": ["kich ban XAU/TRUNG_LAP/TOT (0,25/0,50/0,25)", "he so duong LN 0,8..1,2 (deu) [UL]", "dich g terminal -1/0/+1pp (deu) [UL]", "doc LN 2028-29 -5/0/+5%/nam (deu) [UL]"],
+ "axes_excluded": [
+  {"axis": "TLSH ty le mat gia tri", "reason": "khong co du lieu suy giam => so sach; truc r2 [UL] = song song E (-194)"},
+  {"axis": "r +-1pp", "reason": "luat r neo lai huy dong; song song co_truc_r_pm1pp"},
+  {"axis": "moc thue 20%", "reason": "headline 2035; song song B (2030) / C (khong bao gio)"},
+  {"axis": "26,55% BDS HP con lai + lien danh song Hong", "reason": "khong co so lieu luong hoa nghia vu gop von/bao lanh; WARNING"},
+  {"axis": "EV/EBITDA 5x", "reason": "doi chieu, khong vao tam"}
+ ],
+ "base_adjustments": [
+  {"item": "TLSH", "effect_dong_per_share": 0, "basis": "so sach (NPV0)", "source": "HN-Q3"},
+  {"item": "XDCB 16.113 + cam ket 19.472", "effect_dong_per_share": 0, "basis": "NPV0: sinh loi = r (khong con phat ngam)", "source": "HN-Q3; luat 20"},
+  {"item": "Thue 20% phan thep tu 2035", "effect_dong_per_share": null, "basis": "luat uu dai co thoi han; moc uoc luong", "source": "GAPS §2"}
+ ],
+ "fear_buy_eligible_2_5": false,
+ "open_issues": [
+  "Khong tai lap duoc 19.529 cua skeptic (bien the capex) - lech +1.070 voi cach doc cua Taylor (H); can skeptic neu ro cach phan bo capex",
+  "Nhanh TOT: duong LN 31-35 nghin ty tang dan co the da gom mot phan loi ich capex => song song J do rui ro dem trung",
+  "Moc het uu dai thue 2035 la uoc luong (nam doanh thu dau DQ1 chua kiem tu nguon goc)",
+  "Ban goc QD 1917/QD-BCT va ket qua QD 1902 chua mo duoc"
+ ]
+}

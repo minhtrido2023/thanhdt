@@ -1,0 +1,21 @@
+{
+ "_note": "Gia dinh KHOA cho DRI r3 (08/11/2026, job Taylor_20261108_153743). Chot + LOCK md5 TRUOC khi chay/so gia. dri_redo_r3.py doc file nay.",
+ "asof_price": "2026-11-06",
+ "branch_weights": {"NQ15_NPV0": 1.0},
+ "branch_basis": "Luat 20 + STANDARD_r2 dieu 3: tai canh dot 1 (NQ15 Dieu 3) = du an moi NPV0. Trong so 0,20 nhanh KINH TE r2 la nhan dinh [UL] khong co du lieu -> ra khoi base, sang do nhay (dinh chinh 1 skeptic 08/11, CHAP NHAN).",
+ "q_block": {"values": [0.70, 0.85, 1.00], "weights": [0.25, 0.50, 0.25]},
+ "q_basis": "BCTN 2025 tr.44: khoi thanh ly 'thanh ly som do khong dam bao mat do khai thac' (trich dri_val_supply_adj_r4_20261027/REPORT.md:194) = du lieu dinh tinh: nang suat/ha khoi < trung binh vuon; q=1 la CAN TREN. Do lon khong cong bo -> muc 0,7/0,85/1 la [UL], de nghi skeptic (dinh chinh 2). Cach mo hinh (KHAC skeptic): q chi ap cho KHOI 1.975,23 ha, tong dien tich cao giu dung A0 = 13.800/1,69 = 8.166 ha (BCTN25 tr.46), phan con lai nang suat bu de 2026 = 13.800 t. Ban skeptic (q cho TOAN vuon cu, dien tich A0/q) cho dien tich that 9.607 ha @q0,85 > tong cao su 8.592,3 ha (BCTN25 tr.20) -> mau thuan du lieu, chi bao song song.",
+ "wht": "0.10*(1-KTPL-TAU)",
+ "wht_basis": "Thue co tuc Lao 10% (Luat thue thu nhap Lao 67/NA 2019 - Wendy, nguon thu cap; Hiep dinh VN-Lao 1996 Dieu 10 tran 10% DA XAC MINH van ban; dri_val_supply_adj_r2_20261027/REPORT.md:106) - SUMMARY r2 ghi 'chua dan nguon' la SAI. Nhung engine tru wht tren TOAN bo FCF trong khi KTPL va quy du phong TC Lao (TAU) da tru rieng, khong chuyen ve -> co so chiu thue = 1-KTPL-TAU. 10% x (1-0,106-0,078) = 8,16%, nam trong dai quan sat 7,0% (2025) / 8,3% (2024) (r3/model.py WHT_OBS). Do nhay: 10% phang (r2), 7,04% (quan sat thap).",
+ "wp_peak": 0.5,
+ "wp_basis": "0,6/0,4 r2 = Bobby CYCLICAL_PEAK (r3 PREREG.md:47) = nhan dinh -> ra khoi base theo quy tac chung 08/11; 0,5/0,5 trung tinh. Do nhay 0,4/0,6.",
+ "mid_weights": {"P25": 0.25, "TB": 0.5, "P75": 0.25},
+ "L_weights": {"22": 0.25, "27": 0.5, "32": 0.25},
+ "reinv": 0.9,
+ "dakruco_loan_bn": 40.0, "lao_cash_hold": 0.0,
+ "lak_vnd": "1/0.8769",
+ "lak_basis": "BCTC HN Q3/2026 hn_01, ty gia CDKT 30/09/2026 in 'VND/LAK: 0,8769' (do lon = LAK/VND) -> 1 LAK = 1,1404 VND (dd_DRI_20261027/extract_q3_bctc.md:9,221). LAK yeu ~6% trong 9T (0,8252 -> 0,8769) -> do nhay +-10%.",
+ "wood_lak_per_ha_mn": 36.0,
+ "nq15_ha": 1975.23, "nq15_start": 2027, "nq15_window_years": 4,
+ "ck_ref_size_vnd": 5e9, "ck_Y": 1.0, "free_float": 0.55
+}

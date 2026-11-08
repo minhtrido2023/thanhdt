@@ -94,5 +94,13 @@
  "non_pit": true,
  "job_r2": "Taylor_20261107_122448",
  "job_r3": "Taylor_20261107_124445",
- "r3_change": "GPM restored to Q4 GPM_P0 (=annual) per Mike correction 07/11 19:50; DCM>DPM 2023-25 +4.0/+4.6/+6.6pp, below 3/5 in 2016-20 and 5/10 overall (not 8/10). moat_tier NARROW, moat_durable false, model_changed false: unchanged (durability fails on ROIC/ROE (i) and gas clock (iii), not on GPM)."
+ "r3_change": "GPM restored to Q4 GPM_P0 (=annual) per Mike correction 07/11 19:50; DCM>DPM 2023-25 +4.0/+4.6/+6.6pp, below 3/5 in 2016-20 and 5/10 overall (not 8/10). moat_tier NARROW, moat_durable false, model_changed false: unchanged (durability fails on ROIC/ROE (i) and gas clock (iii), not on GPM).",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 24326,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

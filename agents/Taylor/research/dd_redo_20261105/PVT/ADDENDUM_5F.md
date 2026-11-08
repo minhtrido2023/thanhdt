@@ -1,0 +1,73 @@
+> **QUY ƯỚC CUỐI (user chốt 08/11/2026 10:50 ICT):** KHÔNG áp luật 3c chặt. Moat chỉ được THÊM vào định giá khi bền; NARROW/NONE = không thưởng nhưng KHÔNG trừ. **Headline = mô hình cơ sở hiện hành (đồng bộ r3 08/11: tâm 18.841, P10 13.903, P50 18.830, P90 24.207, giá 06/11 20.550, nhãn TRONG vùng, 67,1% trọng số dưới giá, CK cỡ tham chiếu 5 tỷ 0,67% — theo `REPORT_r3.md`; 17.675 là tâm r2 cũ, chỉ còn là mốc so sánh)**; mọi 'bản chặt-3c / headline mới / chờ duyệt' bên dưới chỉ còn là **độ nhạy rủi ro** ('nếu về trung bình ngành'), KHÔNG phải kết luận định giá. Các sửa lỗi dữ liệu/công thức/peer trong tài liệu này vẫn có hiệu lực. Không mã nào trong 20 mã có moat bền ⇒ không thêm tham số moat.
+>
+> **Ghi chú đồng bộ r3 (08/11):** mọi con số tâm/P10/P90/% dưới giá trong các bảng bên dưới (CUR 17.675, RONIC=Ke 17.977, NONE 18.381, WIDE 21.782, chặt-3c 14.443–16.829, giá 21.000, 78,3%…) tính trên mô hình r2 (trọng số kịch bản 0,35/0,45/0,20, hệ số ROE 0,85/1/1,1, LN 2027 cơ sở 1.250, giá 04/11) — chỉ là độ nhạy tương đối quanh r2, KHÔNG phải tâm hiện hành. Tâm hiện hành là r3 = 18.841. Bản 'ROE bỏ lãi tiền gửi 10,97% / 14.219' nhắc ở đây đã bị bác ở r3 (kiểm chéo một chiều: lãi vay 345,6 > lãi gửi 251,0 /9T); bản đúng theo lãi RÒNG = ROE 13,98%, tâm 19.228 (chỉ kiểm chéo).
+
+# PVT — ADDENDUM bước 3c (5F + moat trong mô hình) — 07–08/11/2026, job `Taylor_20261107_172013` → **vòng sửa 08/11 `Taylor_20261108_024225`** (bản trước: `ADDENDUM_5F_r1.md`)
+
+> Bổ sung cho `REPORT_r2.md` (05/11). KHÔNG sửa REPORT/SUMMARY cũ. Số: `calc_5f/pvt_5f.py` → `calc_5f/pvt_5f_out.txt` (chạy 2 lần trùng byte; r1: `*_r1`; VTO: `calc_5f/vto_roe_bq.csv`) (import `calc/model.py`,
+> `calc/model_r2.py`, `_common_014127/common_r2.py` — không sửa); bằng chứng định lượng: `calc_5f/peer_5f_bq.csv` (BQ `ticker_financial`, Q4 2015–25 + Q3/26).
+> Chưa qua fundamental-skeptic. 5F dùng tri thức LLM ⇒ non-point-in-time, chỉ cho DD sống, KHÔNG đưa vào backtest.
+
+## 1. Vị thế & lợi thế cạnh tranh (5F)
+**Tái dùng hay làm mới:** LÀM MỚI — `data/moat_tags.csv` chưa có dòng PVT; `kb/projects/pvt-dd-20261029.md` + DD 29/10 không có audit 5F.
+**Loại hình DN:** vận tải biển dầu thô/sản phẩm/LPG + FSO/FPSO, chu kỳ cước, thâm dụng vốn; công ty con PVN (51%).
+
+| Lực | Đánh giá (bằng chứng) |
+|---|---|
+| Đối thủ hiện hữu | Cạnh tranh cước theo thị trường thế giới (BDTI/BCTI), sản phẩm đồng nhất. PVT lớn nhất nội địa, nhưng ROIC5Y peer nội địa chỉ 4,2–8,8% (GSP 8,2 · PJT 7,7 · PVP 8,8 · VIP 4,2) ⇒ ngành không có lợi nhuận siêu ngạch. |
+| Gia nhập mới | Rào vốn (tàu) + quy định cabotage nội địa (dành vận tải nội địa cho tàu treo cờ VN — **cần kiểm chứng** điều khoản/ngoại lệ) — rào có thật nhưng mỏng ở tuyến quốc tế. |
+| Quyền lực người mua | Bên PVN 22,4% DT 9T/26 (Q3 31,7%), phải thu đơn vị PVN 1.144,7 tỷ (+130%) [REPORT_r2 §5] ⇒ khách tập trung, mua theo giá thị trường/thương lượng; captive cho **khối lượng**, không cho **giá**. |
+| Quyền lực nhà cung cấp | Giá tàu cũ/đóng mới + nhiên liệu theo thế giới; capex 2026 ≤3.445 tỷ ở vùng đỉnh giá tàu cũ (Bobby mục 7). Không tự chủ đầu vào. |
+| Sản phẩm thay thế | Đường ống/xe bồn cho tuyến ngắn; dài hạn chuyển dịch năng lượng giảm khối lượng dầu — tốc độ: **cần kiểm chứng**. |
+| **Lực thứ 6 (đồng hồ cắt hào)** | IMO CII/EEXI + mục tiêu 2030/2050 trên đội tàu già ~17,7 năm (Bobby) ⇒ capex thay thế bắt buộc; hợp đồng bên PVN thương lượng lại được (không độc quyền pháp định — **cần kiểm chứng**). |
+
+**Ba điều kiện bền (cả hai phía bằng chứng, Ke = r = 13,5%):**
+| | PVT | Nhận xét |
+|---|---|---|
+| (i) ROIC (BQ, dòng Q3/26 = số **FY2025**: ROIC_xY chỉ cập nhật ở Q4) — so **WACC**, không so Ke | ROIC5Y **10,0%** · ROIC_Min5Y **9,4%** · ROIC10Y **9,05%** · ROIC_Min10Y **2,5%** | WACC ước ~9,5–10% (D/E ~0,9) **≈ ROIC5Y 10,0%** ⇒ ROIC ≈ chi phí vốn, **không có spread dương đáng kể** (Min5Y 9,4% và ROIC10Y 9,05% nằm dưới/sát, Min10Y 2,5% xa dưới). Phía thuận: ROIC5Y cao nhất nhóm peer nội địa (4,2–8,8%). ❌ không siêu ngạch (không phải vì "mọi cửa sổ < Ke" — đã bỏ phóng đại này) |
+| ROE riêng (không thay ROIC) | trung vị ROE_Trailing Q4 2015–25 **13,15%**, ROE_Min5Y 12,4%, TTM Q3/26 15,77% (đỉnh cước) | ≈ Ke, kể cả lãi tiền gửi; bỏ lãi gửi 10,97% (REPORT_r2 §4). **Kênh đội tàu cũ theo giá gốc:** ROE 13,15% tính trên VCSH sổ sách của đội tàu khấu hao thấp; thay tàu ở đỉnh giá làm VCSH sổ sách tăng ⇒ ROE sổ sách giảm (xem mục 2, cảnh báo đếm hai lần) |
+| GPM (BQ GPM_P0 là TTM; dòng Q4 = GPM cả năm) | trung vị 2015–25 **15%**, Q3/26 TTM 16% | Peer: GSP 8 · PJT 11 · PVP 14,5 · VIP 21 · VTO 17 ⇒ quanh trung vị, không vượt trội |
+| (ii) Cơ chế gọi tên | captive PVN + quy mô nội địa + cabotage (cần kiểm chứng) | có, nhưng cho khối lượng chứ không cho biên |
+| (iii) Đồng hồ | IMO/đội tàu già; PVN không bắt buộc | có |
+
+**Lưu ý nhãn "TRÊN" phụ thuộc quy ước neo ROE (SKILL 3c ghi "BIÊN" về TB ngành):** biên GPM PVT (15%) **đã ở trung vị peer** (GSP 8 · PJT 11 · PVP 14,5 · VIP 21 · VTO 17); chênh ROE PVT 13,15% vs peer đến từ **đòn bẩy** (VIP D/E 0,1 kéo trung vị xuống), không phải biên. Đọc đúng chữ "biên" (hoặc ROE=Ke, bản NONE thuần 18.381) ⇒ **TRONG**; neo ROE-ngành ⇒ **TRÊN**. **Chờ Mike/user chốt quy ước neo.**
+
+**Kết luận:** **moat_tier = NONE**, moat_type = NONE (lợi thế TƯƠNG ĐỐI captive PVN/quy mô — không ra lợi nhuận > Ke). **moat_durable = false.**
+**Rủi ro số 1:** cước tanker về đáy chu kỳ đúng lúc capex thay tàu bắt buộc (IMO, đội tàu ~17,7 năm) mua ở đỉnh giá tàu ⇒ ROIC lùi về Min10Y 2,5%.
+
+## 2. Moat trong mô hình
+- Mô hình r2: TV = ROE_mid × VCSH × (1+g)(1−g/RONIC)/(r−g), **RONIC = ROE** riêng PVT, ROE_mid = trung vị **riêng PVT 13,15%** giữ vĩnh viễn. Năm 1 / chiết khấu: Q4 ^0,125, LN 2027 ^0,75, TV ^1,25 — calc_5f chép nguyên (H: nhất quán).
+- **Không thưởng moat** (NONE): không có tham số moat cộng thêm. Nhưng KIỂM luật C: mô hình đang giữ ROE **riêng** (13,15%) trên TB chu kỳ ngành (trung vị peer 11,91%, trung bình 10,77%) tới vô hạn ⇒ **KHÔNG ghi "nhất quán"**.
+- Mô hình hiện hành KHÔNG ngầm WIDE: ROE_mid < Ke nên RONIC=ROE đang **phạt** tăng trưởng (giá trị âm của tái đầu tư), không thưởng; TTM 15,77% không vào terminal.
+- **Bản CHẶT-3C** (*độ nhạy rủi ro, KHÔNG phải headline — user đã chốt 08/11 headline = r3*): ROE giữa chu kỳ → TB chu kỳ NGÀNH (hệ số lưới 0,8–1,2 × kịch bản giữ nguyên), RONIC = Ke **đối xứng** mọi nhánh (gồm nhánh ROE < Ke ⇒ nâng). Trục r, mua tàu, CK thanh khoản giữ nguyên r2.
+- Peer (F): GSP (LPG, nhóm PV), PJT (vận tải xăng dầu Petrolimex — một phần đường thuỷ nội địa), PVP (tanker, **công ty con PVT hợp nhất ⇒ đưa vào peer là so vòng tròn ⇒ headline loại PVP**), VIP (tanker nhỏ), **VTO (tanker, peer sát nhất — THÊM ở vòng sửa)**, VIP (tanker nhỏ) — đều NỘI ĐỊA, không phải đối thủ quốc tế đúng nghĩa (peer quốc tế: cần kiểm chứng, không có trong BQ). Loại: VOS (hàng rời), HAH (container) — khác phân khúc. **VTO:** r1 loại với lý do "thiếu ROE_Trailing" là SAI — BQ không có ROE_Trailing các năm Q4 nhưng có ROE5Y/ROE10Y (7,6–8,5%: ROE5Y trung vị Q4 2015–25 7,64%, ROE5Y Q4/2025 8,47%, ROE10Y Q4/2025 8,19% = neo cơ sở; lưu ý đây là TB 5/10 năm, không cùng cơ sở trung vị ROE_Trailing các peer khác). Việc loại VTO **nghiêng LẠC QUAN** (VTO ROE thấp).
+- **Cảnh báo đếm hai lần với trục mua tàu (REPORT_r2:63):** r2 đã trừ NPV mua tàu ở đỉnh (−4,5% × xác suất 0,5) khỏi tâm — đo lại: bỏ trục mua tàu, bản CUR 17.675 → 17.761 (**+86đ**). Bản CHẶT-3C (ROE ngành thấp hơn) và kênh "thay tàu đỉnh giá làm ROE sổ sách giảm" **chồng một phần** lên cùng rủi ro đó ⇒ không cộng đủ −86đ + phần giảm ROE; phần chồng chưa tách được (chưa đo).
+
+## 3. Độ nhạy (sau CK 5 tỷ 0,67%; giá 04/11 21.000; nhãn 40 triệu trùng mọi dòng)
+| Bản | ROE neo | RONIC | Tâm | P10 / P50 / P90 | % dưới giá | Nhãn |
+|---|---|---|---|---|---|---|
+| WIDE (giả định moat sai chiều lên) | TTM 15,77% vĩnh viễn | ROE | 21.782 | 15.643 / 21.667 / 28.048 | 46,2% | TRONG |
+| **Hiện hành r2** | riêng 13,15% | ROE | **17.675** | 12.533 / 17.425 / 23.135 | 78,3% | TRONG |
+| Chỉ RONIC=Ke | riêng 13,15% | Ke | 17.977 | 13.852 / 17.719 / 22.298 | 78,3% | TRONG |
+| Chỉ ROE→trung vị peer | 11,91% | ROE | 15.711 | 10.946 / 15.475 / 20.787 | 91,3% | TRÊN (P90 −1,0%: ranh giới) |
+| **CHẶT-3C trung vị peer** | 11,91% | Ke | **16.492** | 12.636 / 16.299 / 20.401 | 94,0% | **TRÊN** (P90 −2,9%) |
+| CHẶT-3C trung bình peer | 10,77% | Ke | 15.132 | 11.523 / 15.002 / 18.740 | 98,0% | TRÊN |
+| CHẶT-3C trung vị peer ex-PVP | 12,19% | Ke | 16.829 | 12.912 / 16.593 / 20.865 | 90,8% | TRÊN — **ranh giới** (P90 −0,6%) |
+| CHẶT-3C trung bình peer ex-PVP | 10,48% | Ke | 14.791 | 11.244 / 14.664 / 18.324 | 99,5% | TRÊN |
+| CHẶT-3C trung vị peer **+VTO** (5 peer, gồm PVP) | 11,62% | Ke | 16.155 | 12.360 / 16.005 / 19.989 | 95,0% | TRÊN (P90 −4,8%) |
+| **CHẶT-3C trung vị peer ex-PVP +VTO** (headline, đầu dưới) | 10,19% | Ke | **14.443** | 10.982 / 14.299 / 17.898 | 99,5% | **TRÊN chắc** (P90 −14,8%) |
+| CHẶT-3C trung bình peer +VTO / ex-PVP +VTO | 10,25% / 9,91% | Ke | 14.517 / 14.108 | 11.037 / 14.377 / 17.989 · 10.734 / 13.949 / 17.489 | 99,5% / 100% | TRÊN |
+| VTO biên dưới (ROE5Y trung vị 7,64%) ex-PVP, trung vị | 9,91% | Ke | 14.112 | 10.738 / 13.954 / 17.495 | 100% | TRÊN |
+| VTO biên trên (ROE5Y Q4/25 8,47%) ex-PVP, trung vị | 10,33% | Ke | 14.610 | 11.106 / 14.476 / 18.102 | 99,5% | TRÊN |
+| NONE thuần (ROE = Ke) | 13,5% | Ke | 18.381 | 13.721 / 17.926 / 22.469 | 79,5% | TRONG |
+
+Tách phần chênh (trung vị peer): RONIC=Ke **+302** (+1,7%); neo ROE→ngành **−1.964**; gộp **−1.183 (−6,7%)**. Khoảng theo cách chọn peer (vòng sửa, thêm VTO): tâm **13.942–16.829**; **dải headline = ex-PVP … ex-PVP+VTO: tâm 14.443–16.829** (nhãn 40tr trùng mọi dòng).
+
+## 4. Thay đổi so với báo cáo hiện hành
+Theo đúng luật 3c (NONE ⇒ RONIC=Ke, ROE về TB chu kỳ ngành), **độ nhạy (không phải headline; headline = r3 18.841, TRONG vùng)** là DẢI (PVP bỏ vì là công ty con hợp nhất; VTO thêm vì là peer tanker sát nhất): tâm **17.675 → 14.443–16.829** (−4,8% … −18,3%), nhãn trong kịch bản độ nhạy này **TRONG → TRÊN vùng** (không áp cho headline): đầu trên ex-PVP (16.829; P10/P50/P90 12.912/16.593/20.865) P90 chỉ −0,6% = **ranh giới**; đầu dưới ex-PVP+VTO (14.443; 10.982/14.299/17.898) P90 −14,8% = **TRÊN chắc**. (Bản r1 gồm PVP: 16.492, P90 −2,9% — không còn là headline.) cùng chiều với hai bản song song TRÊN vùng sẵn có của REPORT_r2 (neo KH 5 năm 11.456, ROE bỏ lãi gửi 14.219). Toàn bộ chênh đến từ neo ROE riêng → ngành (phụ thuộc quy ước neo — xem mục 1; user đã chốt 08/11: không áp làm headline); RONIC=Ke tự nó **nâng** giá trị vì ROE < Ke. **Quy ước đã chốt (user 08/11): không áp luật 3c chặt cho headline; bản này chỉ là độ nhạy** — không ghi dd_price_zones/SUMMARY. Pháp lý (thay TGĐ, phải thu PVN, kiểm toán chưa có) giữ WARNING, không dùng ép ROE; không đếm hai lần.
+
+## 5. Đề xuất dòng `data/moat_tags.csv` (KHÔNG tự ghi)
+```
+PVT,NONE,NONE,L,"Tanker freight-cycle commodity: ROIC5Y 10.0%/Min5Y 9.4%/Min10Y 2.5% ~ WACC 9.5-10% (no positive spread) despite best-in-domestic-peers; PVN captive (22.4% rev 9T/26) gives volume not price; IMO CII/EEXI on ~17.7y fleet forces replacement capex near ship-price peak",2026-11-07,5f_dd_taylor,N
+```
+entry = L: ngành tanker chu kỳ, hàng hoá đồng nhất, thâm dụng vốn (moat_5f.py:33 = hấp dẫn cấu trúc NGÀNH). moat_upgrade = N.

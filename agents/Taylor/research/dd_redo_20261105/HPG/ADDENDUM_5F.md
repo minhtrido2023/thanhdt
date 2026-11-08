@@ -1,3 +1,7 @@
+> **QUY ƯỚC CUỐI (user chốt 08/11/2026 10:50 ICT):** KHÔNG áp luật 3c chặt. Moat chỉ được THÊM vào định giá khi bền; NARROW/NONE = không thưởng nhưng KHÔNG trừ. **Headline = mô hình cơ sở hiện hành (đồng bộ r3 08/11: tâm 21.338, P10 13.316, P50 21.759, P90 28.993, nhãn TRONG vùng, theo `REPORT_r3.md`; 16.286 là tâm r2 cũ, chỉ còn là mốc so sánh)**; mọi 'bản chặt-3c / headline mới / chờ duyệt' bên dưới chỉ còn là **độ nhạy rủi ro** ('nếu về trung bình ngành'), KHÔNG phải kết luận định giá. Các sửa lỗi dữ liệu/công thức/peer trong tài liệu này vẫn có hiệu lực. Không mã nào trong 20 mã có moat bền ⇒ không thêm tham số moat.
+>
+> **Ghi chú đồng bộ r3 (08/11):** mọi con số tâm/P10/P90 trong bảng bên dưới (CUR 16.286, REVF 18.376, NONE 17.656, WIDE 22.133, các bản chặt-3c…) được tính trên mô hình r2 (vốn giữ lại sinh lời 0%) và chỉ là độ nhạy tương đối ('nếu về trung bình ngành') quanh mô hình r2, KHÔNG phải tâm hiện hành. Tâm hiện hành là r3 = 21.338.
+
 # HPG — ADDENDUM 5F (bước 3c) · 07/11/2026 · job `Taylor_20261107_130203` · **vòng sửa r2** job `Taylor_20261107_131620` (bản trước: `ADDENDUM_5F_r1.md`)
 
 > Bổ sung cho `REPORT_r2.md` (05/11). Mọi phần khác của REPORT_r2 giữ nguyên. 5F dựa phần cấu trúc ngành trên kiến thức LLM, **không point-in-time ⇒ chỉ dùng cho DD sống, cấm đưa vào backtest**.

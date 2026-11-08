@@ -1,0 +1,32 @@
+SCL r3 giá 29.400 (2026-11-06, CUM) TERP 27.139 | r 0.1350 (cctg_12m(2026-11-02)) | n 108
+ĐỐI CHỨNG: S0 22769 (kỳ vọng 22769) S1 21813 P90 26672 (kỳ vọng 21813/26672) ok=True
+BRIDGE:
+  S0_r2_headline             tâm 22.769 P10 17.348 P50 23.312 P90 27.119 dưới-giá 98.4%
+  S1_gpm_fix                 tâm 21.813 P10 17.348 P50 21.445 P90 26.672 dưới-giá 98.4%
+  S2_px_0611                 tâm 21.824 P10 17.357 P50 21.456 P90 26.685 dưới-giá 98.3%
+  S2b_recv_amt_bctc          tâm 21.824 P10 17.357 P50 21.456 P90 26.685 dưới-giá 98.3%
+  S3_no_recv_axis            tâm 21.910 P10 17.541 P50 21.536 P90 26.704 dưới-giá 98.3%
+  S4_E1                      tâm 22.791 P10 18.295 P50 22.357 P90 27.803 dưới-giá 96.7%
+  S5_ck_sleeve40             tâm 23.652 P10 18.986 P50 23.202 P90 28.854 dưới-giá 91.7%
+HEADLINE (CK 40tr 0.84%): tâm trước CK 23.853 sau 23.652 | P10 18.986 P50 23.202 P90 28.854 | min 17.044 max 33.261 | dưới giá 91.7% | TRÊN vùng (>P90) | giá/tâm +24.3% giá/P90 +1.9%
+  tham số trung tâm sau CK 24.146 | nhánh quanh P10 {'CYCLICAL': 1.0} | quanh P90 {'ADMIN_GATED': 0.375, 'STRUCTURAL': 0.625}
+CK 5 tỷ (4.45%; ADV120 2.35 tỷ; Q/ADV 213%; vùng √ False): tâm 22.791 P10 18.295 P50 22.357 P90 27.803 dưới giá 96.7% | TRÊN vùng (>P90)
+  ADV250 1.32 → 5.78% | ADV60 3.35 → 3.81% | sleeve 10/20/40tr 0.67%/0.74%/0.84%
+SAU QUYỀN (TERP 27.139): CK40tr tâm 22.146 P10 18.104 P90 26.651 ⇒ TRÊN vùng (>P90) | CK5tỷ tâm 21.339 P90 25.681 ⇒ TRÊN vùng (>P90)
+SONG SONG:
+  E0_instead_of_E1[ck40tr]   tâm 22.738 P10 18.204 P50 22.350 P90 27.713 dưới-giá 96.7%
+  E0_instead_of_E1[ck5ty]    tâm 21.910 P10 17.541 P50 21.536 P90 26.704 dưới-giá 98.3%
+  with_recv_axis_UL[ck40tr]  tâm 23.562 P10 18.915 P50 23.200 P90 28.822 dưới-giá 92.2%
+  with_recv_axis_UL[ck5ty]   tâm 22.704 P10 18.226 P50 22.355 P90 27.772 dưới-giá 96.7%
+  with_phalai_irr[ck40tr]    tâm 23.652 P10 18.901 P50 23.303 P90 28.902 dưới-giá 91.0%
+  with_phalai_irr[ck5ty]     tâm 22.791 P10 18.213 P50 22.454 P90 27.849 dưới-giá 95.0%
+  symmetric_trough[ck40tr]   tâm 22.125 P10 17.408 P50 21.856 P90 28.146 dưới-giá 94.4%
+  symmetric_trough[ck5ty]    tâm 21.319 P10 16.774 P50 21.060 P90 27.121 dưới-giá 97.8%
+  par_debt[ck40tr]           tâm 22.492 P10 17.866 P50 22.124 P90 27.717 dưới-giá 96.7%
+  par_debt[ck5ty]            tâm 21.673 P10 17.216 P50 21.319 P90 26.708 dưới-giá 98.3%
+  trough_plus_par[ck40tr]    tâm 20.964 P10 16.166 P50 20.683 P90 26.893 dưới-giá 97.8%
+  trough_plus_par[ck5ty]     tâm 20.201 P10 15.577 P50 19.930 P90 25.914 dưới-giá 98.9%
+  skeptic_combo_check[ck40tr] tâm 23.652 P10 18.986 P50 23.202 P90 28.854 dưới-giá 91.7%
+Độ nhạy r (tâm, CK40tr): b1.0_-100 26.470 (+11.9%) | b1.0_-50 24.981 (+5.6%) | b1.0_+0 23.652 (+0.0%) | b1.0_+50 22.459 (-5.0%) | b1.0_+100 21.380 (-9.6%) | b0.5_-100 24.981 (+5.6%) | b0.5_-50 24.298 (+2.7%) | b0.5_+0 23.652 (+0.0%) | b0.5_+50 23.040 (-2.6%) | b0.5_+100 22.459 (-5.0%)
+GIÁ NGỤ Ý: E0 chuẩn hoá 136.4 tỷ/năm (TTM có cộng lãi dự án 125.9; NP TTM 117.7; NP 2020–25 25/20/16/45/27/64) | hoặc biên TTM vĩnh viễn + r 12.77% (lãi huy động ~6.67%)
+Gordon E1 g4% ROE TTM 22.1% ⇒ 27.189 (trước CK)

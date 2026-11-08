@@ -1,0 +1,21 @@
+TV2 r3 giá 27.400 (2026-11-06) | r 0.1350 | n kết cục 324 | CMC phơi nhiễm 855.012 tỷ
+KIỂM DỮ LIỆU: chi trả DY/EY 2022Q4–25Q3 0.88–1.27 | đáy LNST TTM 2023Q1–25Q3 TB 64.3 (min 53.0 max 74.6) | P/E thị trường 2017Q3–21Q4 trung vị 7.09 TB 6.99 | giá thấp nhất từ 2022 18.300 | P/B trung vị 2023/24/25 1.54/1.82/1.86
+BRIDGE: r2 control (giá 04/11, CK 04/11): 15.832 [P10 2.726, P90 30.675] → giá/CK cửa sổ tới 06/11: 15.833 [P10 2.726, P90 30.677] → CMC đầu tư 188,6→188,638 (PDF): 15.833 [P10 2.726, P90 30.677] → Đ1 P/E=1/r khi ROE<r (A): 17.269 [P10 6.319, P90 30.677] → Đ2 sập neo mức đáy TB 2023Q1–25Q3 (B, headline): 17.491 [P10 7.702, P90 30.677]
+HEADLINE (B) tâm TRƯỚC 17.942 SAU CK 17.491 | P50 16.019 | tham số trung tâm SAU 18.981
+Kết cục SAU CK p10 7.702 p25 10.009 p50 16.019 p75 23.134 p90 30.677 | min 2.769 max 44.940
+% trọng số dưới giá 84.1% | nhãn TRONG vùng | giá/tâm +56.7% | giá/P90 -10.7%
+Quanh P10 kịch bản {'co_so': 0.308, 'tich_cuc': 0.077, 'tieu_cuc': 0.615} độ bền {'ben': 0.154, 'sap_neo_day': 0.846} | quanh P90 kịch bản {'co_so': 0.159, 'tich_cuc': 0.841} độ bền {'+30%': 0.381, 'ben': 0.619}
+CK @5 tỷ 2.52% (ADV120 3.22 tỷ; Q/ADV 155%; vùng √ False) | ADV250 6.38 → 1.86% | ADV60 2.61 → 2.76% | sleeve 10/20/40tr 0.37%/0.41%/0.47% ⇒ tâm cỡ sleeve 17.857
+SONG SONG:
+  A_payout_only: tâm 17.269 P10 6.319 P50 16.019 P90 30.677 | dưới giá 84.1%
+  C_pe_1_over_r_all: tâm 16.470 P10 7.702 P50 15.981 P90 26.734 | dưới giá 91.1% | TRÊN vùng (>P90)
+  cap_pe_745: tâm 16.523 P10 7.702 P50 16.019 P90 26.888 | dưới giá 91.1%
+  cap_pe_peak_median: tâm 15.791 P10 7.448 P50 15.198 P90 25.578 | dưới giá 93.2%
+  trough_min: tâm 17.256 P10 6.822 P50 16.019 P90 30.677 | dưới giá 84.1%
+  trough_max: tâm 17.704 P10 8.533 P50 16.019 P90 30.677 | dưới giá 84.1%
+  w_30_50_20: tâm 18.284 P10 7.758 P50 17.083 P90 32.146 | dưới giá 81.4%
+  w_20_50_30: tâm 16.697 P10 7.678 P50 15.602 P90 29.180 | dưới giá 86.8%
+  no_persist_axis: tâm 18.664 P10 10.282 P50 17.500 P90 29.738 | dưới giá 85.3%
+Độ nhạy r (tâm SAU CK): b1.0_-100 19.440 (+11.1%) | b1.0_-50 18.410 (+5.3%) | b1.0_+0 17.491 (+0.0%) | b1.0_+50 16.673 (-4.7%) | b1.0_+100 15.927 (-8.9%) | b0.5_-100 18.410 (+5.3%) | b0.5_-50 17.934 (+2.5%) | b0.5_+0 17.491 (+0.0%) | b0.5_+50 17.072 (-2.4%) | b0.5_+100 16.673 (-4.7%)
+GIÁ NGỤ Ý (g4, CMC0, bền mãi): LNST 233.5 tỷ (ROE 17.5%, P/E 8.13; phần lãi float ~44% = 102.8) | kèm mất CMC kỳ vọng: 242.6 | nếu P/E=1/r: 256.2 (ROE 19.3%)
+Gordon g4% (trước CK, LNST 2026E 229,5 ước lượng): có lãi TG 27.478 | không lãi TG công thức r2 11.736 | không lãi TG + Đ1 (1/r) 14.098

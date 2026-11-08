@@ -1,0 +1,32 @@
+{
+ "assumptions": [
+  {"item": "r (Ke)", "value": "13,5% + 1,0 x (lai huy dong 12T hieu dung 06/11 - 7,40% @03/11)", "basis": "luat skill due-diligence (user 03/11); deposit_rate_vn.effective_deposit_rate"},
+  {"item": "Gia tham chieu", "value": "dong cua 06/11/2026 BQ tav2_bq.ticker", "basis": "px_mbb_r3_20261106.csv (px_mbb_r3.sql)"},
+  {"item": "BV0", "value": "VCSH hop nhat 164.141,608 - CDKKS 7.124,845 ty (30/09/2026)", "basis": "BCTC HN-Q3/2026 p3-4"},
+  {"item": "So CP", "value": "10.068,75 trieu", "basis": "VDL 100.687,5 ty, HN-Q3 tr.36"},
+  {"item": "LN Q4/26 (PPOP-DP) 8.500/12.000/14.500", "value": "XAU/CO_SO/TOT", "basis": "[UL] kich ban 31/10 (qua skeptic CONFIRMED 31/10); doi chieu Q4/25 that LNTT 11.129 (mbb_calc.py:106)"},
+  {"item": "Duong ROE 2027-29 va ROE_T 14/16/18%", "value": "XAU/CO_SO/TOT", "basis": "[UL] ROE_T thap hon ROE 10 nam MBB 19,8% (da chua STRUCTURAL: Basel III/TT14, mbb_calc.py:133), cao hon trung vi nganh 13,0% (ADDENDUM_5F peer BQ)"},
+  {"item": "g_RI terminal = 0 moi nhanh", "value": "von moi sau 2029 sinh loi = Ke (RONIC = Ke)", "basis": "ADDENDUM_5F: moat NARROW khong ben; quy uoc user 08/11 'moat chi cong khi ben, khong tru' => khong thuong RONIC>Ke, nhung KHONG ep ROE_T ve nganh"},
+  {"item": "Trong so kich ban 0,275/0,45/0,275", "value": "doi xung", "basis": "[UL] Bobby ADMIN 0,45/CYCLICAL 0,35/STRUCTURAL 0,20 la loai che do, khong phai xau/tot; STRUCTURAL am va da nam trong ROE_T moi nhanh => TOT khong muon 0,20 cua STRUCTURAL, XAU khong nhan 0,35 rieng; doi xung la mac dinh khong thong tin"},
+  {"item": "Truc MBV -3.500/0/+3.500 @0,25/0,50/0,25", "value": "doi xung quanh so sach (NPV0)", "basis": "[UL] QD gop 3.500 01/10/2026 [WEB thu cap]; -3.500 = loi ich uu dai (room tin dung/room ngoai), +3.500 = mat trang phan gop. Diem 15.688 (lo luy ke 2024 [WEB]) khong co van ban nghia vu => co HARD ABANDON, khong vao luoi"},
+  {"item": "Phai thu ban no MBV 11.248 (31/12/25, BCTN25)", "value": "so sach trong base", "basis": "khong co du lieu suy giam; song song E mat 30% p=0,20 [UL]; so du 30/09/26 chua kiem"},
+  {"item": "Payout tien 30%, thue 20%, CDKKS 2,5%", "value": "giu r2", "basis": "[UL] ban 31/10"},
+  {"item": "CK thanh khoan", "value": "luat can bac hai sigma*sqrt(Q/ADV250), Q=5 ty", "basis": "STANDARD_r2 muc 6; Q/ADV250 ~1,4% trong vung hieu chinh"}
+ ],
+ "axes_included": ["kich ban XAU/CO_SO/TOT (0,275/0,45/0,275, doi xung)", "dich ROE 2027-29+T -3..+3pp (5 diem deu)", "MBV -3.500/0/+3.500 (0,25/0,50/0,25) [UL]"],
+ "axes_excluded": [
+  {"axis": "g_T -1/0/+1pp", "reason": "vo tac dung sau D1 (g_RI terminal = 0 moi nhanh); song song A (RONIC>Ke) giu truc nay"},
+  {"axis": "r (Ke) +-1pp", "reason": "luat 03/11: r neo lai huy dong 12T; bao song song co_truc_r_pm1pp + sens_r"},
+  {"axis": "MBV bu lo luy ke 15.688", "reason": "khong co van ban nghia vu (skeptic D3) => co HARD ABANDON, gia tri o hard_abandon_flag_value; song song C giu diem nay"},
+  {"axis": "phai thu ban no MBV 11.248", "reason": "so sach, khong co du lieu suy giam; truc chi lech xuong (khong the thu > so sach) => song song E co truc, bao canh headline"},
+  {"axis": "uu dai MBV (tran tin dung, room ngoai 49%)", "reason": "nam trong diem -3.500 cua truc MBV va truc droe; khong co du lieu tach rieng"}
+ ],
+ "base_adjustments": [
+  {"item": "MBV o base", "effect_dong_per_share": 0, "basis": "NPV 0 (so sach): HN-Q3 tr.2 chua gop von MBV tai 30/09", "source": "HN-Q3 PDF p9"},
+  {"item": "Phai thu ban no MBV 11.248", "effect_dong_per_share": 0, "basis": "so sach", "source": "BCTN25"}
+ ],
+ "warnings_r3_added": ["NPL/no nhom 2/ty le bao phu Q3/26 CHUA tu kiem (BQ khong co cot; chua doc anh BCTC HN-Q3) — ghi 'chua kiem'",
+                       "So du phai thu ban no MBV tai 30/09/26 chua kiem (so 11.248 la 31/12/25)",
+                       "Phap ly sau 05/11 chua quet lai"],
+ "fear_buy_eligible_2_5": false
+}

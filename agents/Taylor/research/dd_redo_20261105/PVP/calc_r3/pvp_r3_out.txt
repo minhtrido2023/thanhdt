@@ -1,0 +1,22 @@
+r=0.1350 dep03/11=0.0740 dep06/11=0.0740 n=270 sum_w=1.000000
+control r2 center_pre 22822.73 (file 22822.73)
+bridge {"step": "r2_control", "center_pre": 22822.7, "delta_pre": null}
+bridge {"step": "d1_trong_so_doi_xung", "center_pre": 25283.1, "delta_pre": 2460.3}
+bridge {"step": "d2_cat_npv_+30_nhanh_tot", "center_pre": 23671.9, "delta_pre": -1611.2}
+bridge {"step": "d3_fso_chiet_khau_Ke", "center_pre": 23209.6, "delta_pre": -462.3}
+bridge {"step": "d4_vld_khac_+37", "center_pre": 23566.5, "delta_pre": 356.9}
+bridge {"step": "r_06_11", "center_pre": 23566.5, "delta_pre": 0.0}
+center_pre=23566.5 center_param_pre=25573.2
+branch {"scn_xau": 15695, "scn_coso": 24740, "scn_tot": 29519}
+parts_center_param {"net_cash_after_div": 1016.2, "nwc_other": 37.01, "fso": 711.95, "tankers": 1340.45, "drydock": -232.9, "corp": -220.7, "ships_new": 0.0, "scrap": 0.0}
+parallel bobby_asym: center_pre=21838.5
+parallel ship_pm30_sym: center_pre=25177.6
+parallel ship_npv0: center_pre=25177.6
+parallel ship_m30_uncond: center_pre=19318.8
+parallel fso_r10: center_pre=24028.8
+parallel fso_excess_always: center_pre=24218.2
+parallel fso_excess_never: center_pre=22914.7
+parallel fso_no_gt5y: center_pre=22943.9
+parallel nwc_excluded: center_pre=23209.6
+parallel fivef_A_ebitda_x0904: center_pre=22301.0
+parallel scrap_plus_1musd: center_pre=23685.8

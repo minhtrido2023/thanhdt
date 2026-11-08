@@ -1,0 +1,19 @@
+r=0.1350 dep03/11=0.0740 dep06/11=0.0740 control_r2=17794.16 (file 17794.16)
+center_pre=18968 center_param_pre=18958 n=90 ship_npv_expected_pre=0.00
+bridge r2 (tai lap): 17794
+bridge + trong so doi xung 0,275/0,45/0,275: 18335
+bridge + he so ROE doi xung 0,9/1/1,1: 18631
+bridge + np27 co so 1.500 (Q3x4) +-250 = r3: 18968
+parallel bobby_asym: 18127 | trong so 0,35/0,45/0,20 + he so ROE 0,85/1/1,1 (nhan dinh Bobby, r2) tren np27 r3
+parallel w_asym_only: 18507 | chi trong so lech xuong 0,35/0,45/0,20
+parallel mid_asym_only: 18670 | chi he so ROE lech xuong 0,85/1/1,1
+parallel np27_skeptic_1450: 18901 | np27 1.200/1.450/1.700 (de xuat skeptic)
+parallel np27_r2_1250_sym: 18631 | np27 r2 1.000/1.250/1.500 voi trong so/he so doi xung (skeptic 18.506)
+parallel w_sym_only_r2np: 18335 | skeptic kiem: chi doi xung trong so, con lai r2 (18.212)
+parallel mid_sym_only_r2np: 18171 | skeptic kiem: chi doi xung he so, con lai r2 (18.050)
+parallel ship_npv0: 18968 | NPV tau moi = 0 moi kich ban
+parallel plan_anchor: 12161 | neo ke hoach 5 nam NQ HDQT: LN me/nam 933 ty, ROE 9.46%
+parallel roe_ex_net_interest: 19358 | ROE bo lai RONG (lai gui 251,0 - lai vay 345,6 /9T => -81 ty/nam phan me, ROE 13.98%) va tru no rong phan me 619,3x(1-NCI)
+r_sens_pre {"-100bp": 20895, "-50bp": 19883, "+50bp": 18137, "+100bp": 17378}
+scenarios_pre {"xau|mua_phan_con_lai": 15312, "xau|khong": 16463, "coso|mua_phan_con_lai": 18958, "coso|khong": 18958, "tot|mua_phan_con_lai": 22611, "tot|khong": 21460}
+gordon {"roe_mid_incl": 0.1315, "roe_mid_ex_net_interest": 0.1398, "net_interest_parent_yr": -81.2042, "dep_only_parent_yr_r2": 215.218, "roe_ex_deposit_only_r2": 0.1097, "gordon_ps_incl": 18432.7862, "bvps": 19066.0455, "note": "lai rong am (chi phi lai vay > lai gui) => bo lai tien gui mot chieu (r2) keo ROE xuong sai chieu; bo lai RONG nang ROE nhung phai tru no rong"}

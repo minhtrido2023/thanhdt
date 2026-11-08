@@ -1,181 +1,612 @@
 {
  "ticker": "PVT",
- "round": 2,
- "job": "Taylor_20261105_020016",
- "asof_price_date": "2026-11-04",
- "price": 21000.0,
- "n_outcomes": 90,
- "center_pre": 17794,
- "center_post": 17675,
- "center_param_pre": 18618,
- "center_param_post": 18493,
- "p10_pre": 12618,
- "p50_pre": 17542,
- "p90_pre": 23291,
- "p10_out": 12533,
- "p25_out": 14645,
- "p50_out": 17425,
- "p75_out": 20624,
- "p90_out": 23135,
- "min_out": 9670,
- "max_out": 28070,
- "pct_weight_below_price": 0.7825,
- "label": "TRONG vùng",
- "px_vs_center_post": 0.18811881188118806,
- "parallel": {
-  "plan_anchor": {
-   "desc": "neo ke hoach 5 nam NQ HDQT: LN me/nam 2027-30 = 933 ty, ROE giua chu ky 9.46%",
-   "n_outcomes": 90,
-   "center_post": 11456,
-   "p10_out": 7414,
-   "p50_out": 11122,
-   "p90_out": 15496,
-   "pct_weight_below_price": 1.0,
-   "label": "TRÊN vùng"
-  },
-  "roe_ex_interest": {
-   "desc": "ROE giua chu ky BO lai tien gui hien tai (215 ty/nam phan me): 10.97%",
-   "n_outcomes": 90,
-   "center_post": 14219,
-   "p10_out": 9695,
-   "p50_out": 13955,
-   "p90_out": 19004,
-   "pct_weight_below_price": 0.9699999999999999,
-   "label": "TRÊN vùng"
-  },
-  "ship_npv0": {
-   "desc": "NPV tau moi = 0 o moi kich ban (nhu vong 1)",
-   "n_outcomes": 90,
-   "center_post": 17761,
-   "p10_out": 13133,
-   "p50_out": 17631,
-   "p90_out": 22878,
-   "pct_weight_below_price": 0.7975,
-   "label": "TRONG vùng"
-  }
+ "round": 3,
+ "job": "Taylor_20261108_153736",
+ "asof_price_date": "2026-11-06",
+ "price": 20550.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "dep_anchor_03_11": 0.07400000000000001,
+  "dep_asof_06_11": 0.07400000000000001,
+  "rule": "r = 13,5% + 1,0 x (dep12T hieu dung - 7,40%)"
  },
- "center_pre_liq": 17794,
- "center_post_liq": 17675,
- "p10_post": 12533,
- "p25_post": 14645,
- "p50_post": 17425,
- "p75_post": 20624,
- "p90_post": 23135,
- "liq_disc_5ty": 0.0067071400472102525,
+ "n_outcomes": 90,
+ "center_pre": 18968,
+ "center_post": 18841,
+ "center_param_post": 18830,
+ "p10_out": 13903,
+ "p25_out": 15961,
+ "p50_out": 18830,
+ "p75_out": 21705,
+ "p90_out": 24207,
+ "min_out": 10792,
+ "max_out": 28432,
+ "pct_weight_below_price": 0.6706,
+ "label": "TRONG vùng",
+ "center_pre_liq": 18968,
+ "center_post_liq": 18841,
+ "p10_post": 13903,
+ "p25_post": 15961,
+ "p50_post": 18830,
+ "p75_post": 21705,
+ "p90_post": 24207,
+ "p10_pre": 13997,
+ "liq_disc_5ty": 0.0067107028680423175,
  "grid_n": 90,
- "grid_desc": "ket cuc = kich ban LN me 2027 1.000/1.250/1.500 (0,35/0,45/0,20 [UL]; he so ROE theo kich ban 0,85/1,0/1,1 [UL]) x he so ROE giua chu ky 0,8..1,2 (deu; nen ROE_Trailing trung vi 2015-25 BQ) x lai huy dong -50/0/+50bp (0,25/0,5/0,25 [UL]) x mua tau phan capex 2026 con lai 2.465 ty / khong (0,5/0,5 [UL]) voi NPV -30/0/+30% theo kich ban [UL]; n=90; tham so trung tam = co so, m=1, Δr=0, khong mua",
+ "min_outcome": 10792,
+ "px_vs_center_post": 0.09070643808715029,
+ "px_vs_p10_post": 0.4780982521757895,
+ "px_vs_p90_post": -0.151072003965795,
+ "p50_pre": 18958,
+ "p90_pre": 24370,
+ "grid_desc": "ket cuc = kich ban LN me 2027 1.250/1.500/1.750 (w 0,275/0,45/0,275 doi xung; he so ROE theo kich ban 0,9/1,0/1,1) x he so ROE giua chu ky 0,8..1,2 (deu; nen trung vi ROE_Trailing Q4 2015-25 BQ 13,15%) x lai huy dong -50/0/+50bp (0,25/0,5/0,25) x mua tau phan capex 2026 con lai 2.465 ty / khong (0,5/0,5) voi NPV -30/0/+30% theo kich ban (ky vong 0); n=90; tham so trung tam = co so, m=1, dr=0, khong mua",
  "ck_ref_size": {
   "q_vnd": 5000000000.0,
   "adv": "250 phien",
-  "disc": 0.0067071400472102525,
+  "disc": 0.0067107028680423175,
   "in_calib": true,
-  "disc_adv60": 0.005132919774135522
+  "disc_adv60": 0.004973999024494259,
+  "q_over_adv250": 0.05285451791301716
  },
  "ck_real_sleeve": {
   "10tr": {
-   "disc_adv250": 0.0002999524216034655,
-   "disc_adv60": 0.00022955115076039788,
+   "disc_adv250": 0.0003001117557949085,
+   "disc_adv60": 0.00022244399877573606,
    "q_over_adv250": 0.00010570903582603432,
-   "in_calib": false
+   "in_calib": false,
+   "center_post": 18962
   },
   "20tr": {
-   "disc_adv250": 0.0004241967826982734,
-   "disc_adv60": 0.0003246343506637057,
+   "disc_adv250": 0.00042442211527276186,
+   "disc_adv60": 0.0003145833199371501,
    "q_over_adv250": 0.00021141807165206864,
-   "in_calib": false
+   "in_calib": false,
+   "center_post": 18960
   },
   "40tr": {
-   "disc_adv250": 0.000599904843206931,
-   "disc_adv60": 0.00045910230152079577,
+   "disc_adv250": 0.000600223511589817,
+   "disc_adv60": 0.00044488799755147213,
    "q_over_adv250": 0.0004228361433041373,
-   "in_calib": false
+   "in_calib": false,
+   "center_post": 18957
   }
  },
+ "ck_real_sleeve_note": "cỡ sleeve 10–40 tr: Q/ADV ~0,01–0,04% NGOÀI vùng hiệu chỉnh luật căn bậc hai (0,1–20%) ⇒ CK ≈ 0 (chỉ là cận trên), giá trị ≈ tâm trước CK",
  "liquidity": {
-  "last_price": 21000.0,
-  "last_date": "2026-11-04",
+  "px": 20550.0,
+  "pxd": "2026-11-06",
   "w250": {
-   "window": "2025-11-03..2026-11-04",
+   "window": "2025-11-05..2026-11-06",
+   "n": 250,
    "adv_med": 94599292500.0,
-   "sigma_d": 0.029174022707803785,
+   "sigma_d": 0.0291895198966394,
    "sizes": {
     "5000tr": {
      "q_over_adv": 0.05285451791301716,
-     "disc": 0.0067071400472102525,
+     "disc": 0.0067107028680423175,
      "in_calib": true,
      "days_at_15pct": 0.3523634527534477
     },
     "10tr": {
      "q_over_adv": 0.00010570903582603432,
-     "disc": 0.0002999524216034655,
+     "disc": 0.0003001117557949085,
      "in_calib": false,
      "days_at_15pct": 0.0007047269055068955
     },
     "20tr": {
      "q_over_adv": 0.00021141807165206864,
-     "disc": 0.0004241967826982734,
+     "disc": 0.00042442211527276186,
      "in_calib": false,
      "days_at_15pct": 0.001409453811013791
     },
     "40tr": {
      "q_over_adv": 0.0004228361433041373,
-     "disc": 0.000599904843206931,
+     "disc": 0.000600223511589817,
      "in_calib": false,
      "days_at_15pct": 0.002818907622027582
     }
    }
   },
   "w60": {
-   "window": "2026-08-10..2026-11-04",
-   "adv_med": 128757072500.0,
-   "sigma_d": 0.026047438489987636,
+   "window": "2026-08-12..2026-11-06",
+   "n": 60,
+   "adv_med": 127927950000.0,
+   "sigma_d": 0.025159581557884208,
    "sizes": {
     "5000tr": {
-     "q_over_adv": 0.03883281829042828,
-     "disc": 0.005132919774135522,
+     "q_over_adv": 0.039084500298801006,
+     "disc": 0.004973999024494259,
      "in_calib": true,
-     "days_at_15pct": 0.25888545526952184
+     "days_at_15pct": 0.26056333532534004
     },
     "10tr": {
-     "q_over_adv": 7.766563658085656e-05,
-     "disc": 0.00022955115076039788,
+     "q_over_adv": 7.816900059760201e-05,
+     "disc": 0.00022244399877573606,
      "in_calib": false,
-     "days_at_15pct": 0.0005177709105390438
+     "days_at_15pct": 0.0005211266706506801
     },
     "20tr": {
-     "q_over_adv": 0.00015533127316171312,
-     "disc": 0.0003246343506637057,
+     "q_over_adv": 0.00015633800119520402,
+     "disc": 0.0003145833199371501,
      "in_calib": false,
-     "days_at_15pct": 0.0010355418210780875
+     "days_at_15pct": 0.0010422533413013602
     },
     "40tr": {
-     "q_over_adv": 0.00031066254632342624,
-     "disc": 0.00045910230152079577,
+     "q_over_adv": 0.00031267600239040803,
+     "disc": 0.00044488799755147213,
      "in_calib": false,
-     "days_at_15pct": 0.002071083642156175
+     "days_at_15pct": 0.0020845066826027203
     }
    }
   },
-  "d_ref": 0.0067071400472102525
+  "d_ref": 0.0067107028680423175
+ },
+ "parallel": {
+  "bobby_asym": {
+   "desc": "trong so 0,35/0,45/0,20 + he so ROE 0,85/1/1,1 (nhan dinh Bobby, r2) tren np27 r3",
+   "n_outcomes": 90,
+   "center_post": 18005,
+   "p10_out": 12839,
+   "p25_out": 14963,
+   "p50_out": 17760,
+   "p75_out": 20970,
+   "p90_out": 23482,
+   "min_out": 9960,
+   "max_out": 28432,
+   "pct_weight_below_price": 0.7225,
+   "label": "TRONG vùng"
+  },
+  "w_asym_only": {
+   "desc": "chi trong so lech xuong 0,35/0,45/0,20",
+   "n_outcomes": 90,
+   "center_post": 18383,
+   "p10_out": 13768,
+   "p25_out": 15291,
+   "p50_out": 18148,
+   "p75_out": 20974,
+   "p90_out": 23482,
+   "min_out": 10792,
+   "max_out": 28432,
+   "pct_weight_below_price": 0.7137,
+   "label": "TRONG vùng"
+  },
+  "mid_asym_only": {
+   "desc": "chi he so ROE lech xuong 0,85/1/1,1",
+   "n_outcomes": 90,
+   "center_post": 18545,
+   "p10_out": 13451,
+   "p25_out": 15385,
+   "p50_out": 18124,
+   "p75_out": 21705,
+   "p90_out": 24207,
+   "min_out": 9960,
+   "max_out": 28432,
+   "pct_weight_below_price": 0.6775,
+   "label": "TRONG vùng"
+  },
+  "np27_skeptic_1450": {
+   "desc": "np27 1.200/1.450/1.700 (de xuat skeptic)",
+   "n_outcomes": 90,
+   "center_post": 18774,
+   "p10_out": 13840,
+   "p25_out": 15896,
+   "p50_out": 18763,
+   "p75_out": 21636,
+   "p90_out": 24136,
+   "min_out": 10733,
+   "max_out": 28360,
+   "pct_weight_below_price": 0.6706,
+   "label": "TRONG vùng"
+  },
+  "np27_r2_1250_sym": {
+   "desc": "np27 r2 1.000/1.250/1.500 voi trong so/he so doi xung (skeptic 18.506)",
+   "n_outcomes": 90,
+   "center_post": 18506,
+   "p10_out": 13591,
+   "p25_out": 15636,
+   "p50_out": 18493,
+   "p75_out": 21359,
+   "p90_out": 23852,
+   "min_out": 10495,
+   "max_out": 28070,
+   "pct_weight_below_price": 0.6706,
+   "label": "TRONG vùng"
+  },
+  "w_sym_only_r2np": {
+   "desc": "skeptic kiem: chi doi xung trong so, con lai r2 (18.212)",
+   "n_outcomes": 90,
+   "center_post": 18212,
+   "p10_out": 13140,
+   "p25_out": 15065,
+   "p50_out": 17789,
+   "p75_out": 21359,
+   "p90_out": 23852,
+   "min_out": 9670,
+   "max_out": 28070,
+   "pct_weight_below_price": 0.6775,
+   "label": "TRONG vùng"
+  },
+  "mid_sym_only_r2np": {
+   "desc": "skeptic kiem: chi doi xung he so, con lai r2 (18.050)",
+   "n_outcomes": 90,
+   "center_post": 18049,
+   "p10_out": 13455,
+   "p25_out": 14965,
+   "p50_out": 17806,
+   "p75_out": 20629,
+   "p90_out": 23135,
+   "min_out": 10495,
+   "max_out": 28070,
+   "pct_weight_below_price": 0.7137,
+   "label": "TRONG vùng"
+  },
+  "ship_npv0": {
+   "desc": "NPV tau moi = 0 moi kich ban",
+   "n_outcomes": 90,
+   "center_post": 18841,
+   "p10_out": 14414,
+   "p25_out": 16137,
+   "p50_out": 18830,
+   "p75_out": 21316,
+   "p90_out": 23668,
+   "min_out": 11935,
+   "max_out": 27290,
+   "pct_weight_below_price": 0.6775,
+   "label": "TRONG vùng"
+  },
+  "plan_anchor": {
+   "desc": "neo ke hoach 5 nam NQ HDQT: LN me/nam 933 ty, ROE 9.46%",
+   "n_outcomes": 90,
+   "center_post": 12079,
+   "p10_out": 8573,
+   "p25_out": 10069,
+   "p50_out": 12024,
+   "p75_out": 14283,
+   "p90_out": 15907,
+   "min_out": 6067,
+   "max_out": 19198,
+   "pct_weight_below_price": 1.0,
+   "label": "TRÊN vùng"
+  },
+  "roe_ex_net_interest": {
+   "desc": "ROE bo lai RONG (lai gui 251,0 - lai vay 345,6 /9T => -81 ty/nam phan me, ROE 13.98%) va tru no rong phan me 619,3x(1-NCI)",
+   "n_outcomes": 90,
+   "center_post": 19228,
+   "p10_out": 13990,
+   "p25_out": 16160,
+   "p50_out": 19215,
+   "p75_out": 22206,
+   "p90_out": 24925,
+   "min_out": 10769,
+   "max_out": 29328,
+   "pct_weight_below_price": 0.6431,
+   "label": "TRONG vùng"
+  }
+ },
+ "headline_vs_alternatives": [
+  {
+   "name": "HEADLINE r3",
+   "center_post": 18841,
+   "p10_out": 13903,
+   "p90_out": 24207,
+   "label": "TRONG vùng",
+   "pct_below": 0.6706
+  },
+  {
+   "name": "np27_skeptic_1450",
+   "desc": "np27 1.200/1.450/1.700 (de xuat skeptic)",
+   "center_post": 18774,
+   "p10_out": 13840,
+   "p90_out": 24136,
+   "label": "TRONG vùng",
+   "pct_below": 0.6706
+  },
+  {
+   "name": "np27_r2_1250_sym",
+   "desc": "np27 r2 1.000/1.250/1.500 voi trong so/he so doi xung (skeptic 18.506)",
+   "center_post": 18506,
+   "p10_out": 13591,
+   "p90_out": 23852,
+   "label": "TRONG vùng",
+   "pct_below": 0.6706
+  },
+  {
+   "name": "bobby_asym",
+   "desc": "trong so 0,35/0,45/0,20 + he so ROE 0,85/1/1,1 (nhan dinh Bobby, r2) tren np27 r3",
+   "center_post": 18005,
+   "p10_out": 12839,
+   "p90_out": 23482,
+   "label": "TRONG vùng",
+   "pct_below": 0.7225
+  },
+  {
+   "name": "w_asym_only",
+   "desc": "chi trong so lech xuong 0,35/0,45/0,20",
+   "center_post": 18383,
+   "p10_out": 13768,
+   "p90_out": 23482,
+   "label": "TRONG vùng",
+   "pct_below": 0.7137
+  },
+  {
+   "name": "mid_asym_only",
+   "desc": "chi he so ROE lech xuong 0,85/1/1,1",
+   "center_post": 18545,
+   "p10_out": 13451,
+   "p90_out": 24207,
+   "label": "TRONG vùng",
+   "pct_below": 0.6775
+  },
+  {
+   "name": "ship_npv0",
+   "desc": "NPV tau moi = 0 moi kich ban",
+   "center_post": 18841,
+   "p10_out": 14414,
+   "p90_out": 23668,
+   "label": "TRONG vùng",
+   "pct_below": 0.6775
+  },
+  {
+   "name": "roe_ex_net_interest",
+   "desc": "ROE bo lai RONG (lai gui 251,0 - lai vay 345,6 /9T => -81 ty/nam phan me, ROE 13.98%) va tru no rong phan me 619,3x(1-NCI)",
+   "center_post": 19228,
+   "p10_out": 13990,
+   "p90_out": 24925,
+   "label": "TRONG vùng",
+   "pct_below": 0.6431
+  },
+  {
+   "name": "plan_anchor",
+   "desc": "neo ke hoach 5 nam NQ HDQT: LN me/nam 933 ty, ROE 9.46%",
+   "center_post": 12079,
+   "p10_out": 8573,
+   "p90_out": 15907,
+   "label": "TRÊN vùng",
+   "pct_below": 1.0
+  },
+  {
+   "name": "r +-100bp",
+   "center_post": {
+    "-100bp": 20755,
+    "-50bp": 19750,
+    "+50bp": 18015,
+    "+100bp": 17262
+   }
+  }
+ ],
+ "bridge_r2_to_r3": [
+  {
+   "step": "r2 cong bo (gia 04/11 21.000, CK ADV den 04/11)",
+   "center_post": 17675,
+   "delta": 0,
+   "reason": "diem xuat phat; tai lap center_pre 17.794 trung (control)"
+  },
+  {
+   "step": "doi gia tham chieu 21.000 (04/11) -> 20.550 (06/11) + CK theo ADV den 06/11",
+   "center_post": 17675,
+   "delta": 0,
+   "reason": "dinh chinh 5; % trong so r2 duoi gia moi = 72.2% (skeptic 72,2%); CK 5 ty 0.6707% -> 0.6711%"
+  },
+  {
+   "step": "+ trong so doi xung 0,275/0,45/0,275",
+   "center_post": 18212,
+   "delta": 537,
+   "reason": "dinh chinh 1a: trong so 0,35/0,45/0,20 la nhan dinh Bobby, khong co du lieu -> doi xung; lech xuong sang do nhay"
+  },
+  {
+   "step": "+ he so ROE doi xung 0,9/1/1,1",
+   "center_post": 18506,
+   "delta": 294,
+   "reason": "dinh chinh 1b: he so ROE theo kich ban 0,85 dem chu ky 2 lan voi trung vi 2015-25 -> 0,9/1/1,1; NPV tau ky vong ve 0"
+  },
+  {
+   "step": "+ np27 co so 1.500 (Q3x4) +-250 = r3",
+   "center_post": 18841,
+   "delta": 335,
+   "reason": "dinh chinh 2 (ap mot phan): np27 co so = Q3 x4 = 1.500 (du lieu) thay 1.250; skeptic 1.450 -> do nhay (lech -50 khong co co so)"
+  }
+ ],
+ "implied_by_price": {
+  "roe_mid_for_center_eq_px": 0.14199433445633308,
+  "roe_mid_point_coso_eq_px": 0.1420767958828124,
+  "roe_mid_base": 0.1315125318282109,
+  "roe_median_2018_25": 0.14476690313769924,
+  "roe_hist_q4": {
+   "2015": 0.1075918967544499,
+   "2016": 0.1115214552267126,
+   "2017": 0.1116097290913928,
+   "2018": 0.1581966729622533,
+   "2019": 0.1509253012559815,
+   "2020": 0.1315125318282109,
+   "2021": 0.1278523315520047,
+   "2022": 0.1473923575417776,
+   "2023": 0.1421414487336209,
+   "2024": 0.1493469457473036,
+   "2025": 0.1202047377933819
+  },
+  "r_for_center_eq_px": 0.12597678387568811,
+  "dep12t_implied": 0.0649767838756881,
+  "note": "Gia 20550 = ROE giua chu ky 14.20% vinh vien tren luoi r3 (base 13.15% trung vi 2015-25; trung vi 2018-25 14.48%) hoac r 12.60% (lai huy dong 12T ngu y 6.50% vs 7,40%)."
+ },
+ "assumptions": [
+  {
+   "key": "scn_w",
+   "value": {
+    "xau": 0.275,
+    "coso": 0.45,
+    "tot": 0.275
+   },
+   "basis": "doi xung quanh co so; trong so lech xuong r2 0,35/0,45/0,20 chi la nhan dinh Bobby (CYCLICAL 0,55, BIMCO 2027) -> do nhay 'bobby_asym' (dinh chinh 1, TOP5B_CORRECTIONS_20261108.md muc PVT)",
+   "type": "UL-doi-xung"
+  },
+  {
+   "key": "scn_mid",
+   "value": {
+    "xau": 0.9,
+    "coso": 1.0,
+    "tot": 1.1
+   },
+   "basis": "he so ROE theo kich ban doi xung; r2 0,85/1,0/1,1 lech xuong chong len trung vi ca chu ky 2015-25 (da gom day 2015-17) = dem chu ky 2 lan -> do nhay (dinh chinh 1)",
+   "type": "UL-doi-xung"
+  },
+  {
+   "key": "np27",
+   "value": {
+    "xau": 1250.0,
+    "coso": 1500.0,
+    "tot": 1750.0
+   },
+   "basis": "co so = LNST me Q3/2026 375,1 ty x4 = 1.500 (quy gan nhat, thap nhat 2026; BQ ticker_financial NP_P0 2026Q3 = BCTC HN Q3 375,13); +-250 doi xung nhu r2. Skeptic de xuat 1.450: lech -50 khong co co so du lieu -> do nhay 'np27_skeptic_1450'",
+   "type": "du-lieu + UL bien do"
+  },
+  {
+   "key": "roe_mid",
+   "value": "median ROE_Trailing Q4 2015-2025 (BQ, model.py)",
+   "basis": "bq_hist_out.csv, 11 nam ca chu ky",
+   "type": "du-lieu"
+  },
+  {
+   "key": "mults",
+   "value": [
+    0.8,
+    0.9,
+    1.0,
+    1.1,
+    1.2
+   ],
+   "basis": "truc ROE giua chu ky deu, doi xung (r2 giu nguyen)",
+   "type": "UL-doi-xung"
+  },
+  {
+   "key": "g",
+   "value": 0.03,
+   "basis": "g danh nghia dai han (r1-r2 giu nguyen) — uoc luong",
+   "type": "UL"
+  },
+  {
+   "key": "r_axis",
+   "value": [
+    [
+     -0.005,
+     0.25
+    ],
+    [
+     0.0,
+     0.5
+    ],
+    [
+     0.005,
+     0.25
+    ]
+   ],
+   "basis": "r = 13,5% + 1,0 x (dep12T hieu dung 06/11 7,40% - 7,40%) = 13,5%; truc +-50bp doi xung (common_r2)",
+   "type": "luat + UL-doi-xung"
+  },
+  {
+   "key": "ship_buy",
+   "value": {
+    "mua_phan_con_lai": 0.5,
+    "khong": 0.5
+   },
+   "basis": "capex 2026 con lai 3.445 - 979,6 = 2.465 ty (DHDCD 2026; TM12); 0,5/0,5 [UL]",
+   "type": "du-lieu + UL"
+  },
+  {
+   "key": "ship_npv",
+   "value": {
+    "xau": -0.3,
+    "coso": 0.0,
+    "tot": 0.3
+   },
+   "basis": "NPV +-30% theo kich ban cuoc [UL]; voi trong so doi xung, ky vong = 0 (dung luat NPV0)",
+   "type": "UL-doi-xung"
+  },
+  {
+   "key": "nci",
+   "value": 0.196,
+   "basis": "LNST CDKKS 309,5 / LNST HN 1.581,8 9T/2026 (BCTC HN Q3)",
+   "type": "du-lieu"
+  },
+  {
+   "key": "eq_parent",
+   "value": 9855.6,
+   "basis": "VCSH 12.862.928.406.161 - CDKKS 3.007.359.354.829 = 9.855,569 ty (text BCTC HN Q3 dong 933/1005; da kiem 08/11 tu text, KHONG tu PDF)",
+   "type": "du-lieu"
+  },
+  {
+   "key": "net_interest_9t",
+   "value": {
+    "lai_tien_gui_cho_vay": 250.953803131,
+    "chi_phi_lai_vay": 345.641490397
+   },
+   "basis": "text BCTC HN Q3 dong 4249 (TM DT tai chinh 9T/26) va 1171 (KQKD 'Trong do: chi phi lai vay' 9T/26)",
+   "type": "du-lieu (chi dung cho kiem cheo)"
+  },
+  {
+   "key": "net_debt",
+   "value": 619.3,
+   "basis": "vay NH 1.420,8 + DH 5.543,7 - tien 2.060,2 - HTM 4.285,0 (REPORT 29/10 §4); chi dung cho kiem cheo lai rong",
+   "type": "du-lieu"
+  }
+ ],
+ "control_r2_reproduced": {
+  "center_pre": 17794.16131390457,
+  "file": 17794.16131390457,
+  "ok": true
+ },
+ "r_sens_pre": {
+  "-100bp": 20895,
+  "-50bp": 19883,
+  "+50bp": 18137,
+  "+100bp": 17378
+ },
+ "r_sens_post": {
+  "-100bp": 20755,
+  "-50bp": 19750,
+  "+50bp": 18015,
+  "+100bp": 17262
+ },
+ "scenarios_pre": {
+  "xau|mua_phan_con_lai": 15312,
+  "xau|khong": 16463,
+  "coso|mua_phan_con_lai": 18958,
+  "coso|khong": 18958,
+  "tot|mua_phan_con_lai": 22611,
+  "tot|khong": 21460
+ },
+ "gordon_roe_xcheck": {
+  "roe_mid_incl": 0.1315125318282109,
+  "roe_mid_ex_net_interest": 0.13975192472152248,
+  "net_interest_parent_yr": -81.2041605993216,
+  "dep_only_parent_yr_r2": 215.2179815651456,
+  "roe_ex_deposit_only_r2": 0.1096754055685062,
+  "gordon_ps_incl": 18432.78621221863,
+  "bvps": 19066.045516018607,
+  "note": "lai rong am (chi phi lai vay > lai gui) => bo lai tien gui mot chieu (r2) keo ROE xuong sai chieu; bo lai RONG nang ROE nhung phai tru no rong"
  },
  "axes_included": [
-  "LN 2027 / chu ky cuoc (hai chieu)",
+  "LN 2027 / chu ky cuoc (hai chieu, doi xung quanh Q3x4)",
   "ROE giua chu ky (hai chieu)",
   "lai huy dong (hai chieu)",
-  "mua tau o dinh (NPV doi xung theo cuoc)"
+  "mua tau o dinh (NPV doi xung, ky vong 0)"
  ],
  "axes_excluded": [
   {
-   "axis": "TT99 (ngung trich truoc sua chua lon) thien lech LN 2026",
-   "reason": "do lon chua xac dinh tu text BCTC; nen ROE lich su 2015-25 khong bi anh huong, LN 2027 kich ban [UL] — WARNING"
+   "axis": "nhan dinh Bobby lech xuong (trong so 0,35/0,45/0,20, he so ROE 0,85)",
+   "reason": "chi la nhan dinh, khong co du lieu; trung vi 2015-25 da gom day 2015-17 — bao song song bobby_asym"
+  },
+  {
+   "axis": "TT99 (ngung trich truoc sua chua lon) thien lech LN 2026 → np27",
+   "reason": "do lon chua xac dinh tu text BCTC (can BCTC nam 2026); cận dưới thấy được: hoàn nhập dự phòng 85,4 tỷ/9T phi tiền mặt; xem do nhay np27_skeptic_1450 / np27_r2_1250_sym (−67/−335 đ) — WARNING"
   },
   {
    "axis": "ke hoach 5 nam NQ HDQT (LN thap hon)",
-   "reason": "muc tieu ban dieu hanh thuong than trong (2026: KH 1.200 HN vs 9T thuc 1.581,8); khong thay ROE lich su 11 nam — bao SONG SONG parallel.plan_anchor"
+   "reason": "muc tieu ban dieu hanh than trong (KH 2026 LNST HN 1.200 vs 9T thuc 1.581,8); khong thay ROE lich su 11 nam — song song plan_anchor"
   },
   {
-   "axis": "phat hanh co phieu tai tro doi tau",
-   "reason": "NQ 5 nam neu \"phat hanh co phieu\" la mot nguon von, chua co dot cu the — WARNING"
+   "axis": "PVT Logistics (PDV) chao ban ~56,9 tr cp @10.000 cho co dong hien huu (~569,5 ty, Q4/2026–Q2/2027)",
+   "reason": "quyen mua theo ty le; neu PVT mua du = khong pha loang, chi la phan bo von (NPV0); neu khong mua = pha loang NCI o cong ty con nho — chua co du lieu PVT dang ky; WARNING"
   }
  ],
  "base_adjustments": [
@@ -186,84 +617,98 @@
    "source": "BCDKT Q3/2026"
   },
   {
-   "item": "tau moi NPV 0 tai tham so trung tam",
+   "item": "tau moi: NPV ky vong 0 (doi xung)",
    "effect_dong_per_share": 0,
-   "basis": "luat 03/11",
-   "source": "DHDCD 2026"
+   "basis": "luat 03/11 NPV0; r2 co -86 d/cp do trong so lech",
+   "source": "DHDCD 2026; TM12"
   }
  ],
- "center_vs_p50_note_model": "Lech nho; NPV tau +-30% chi o nhanh xau/tot va nua ket cuc mua — khong co nhanh trong so nho quyet dinh rieng P10/P90.",
- "r": 0.135,
- "r_sens_pre": {
-  "beta1.0_-100bp": 19611,
-  "beta1.0_-50bp": 18646,
-  "beta1.0_+50bp": 16982,
-  "beta1.0_+100bp": 16258,
-  "base": 17794
+ "center_vs_p50_note": "tâm (kỳ vọng trọng số lưới, sau CK 5 tỷ) 18841 vs P50 kết cục 18830 vs giá trị tại tham số trung tâm 18830. Lưới đối xứng ⇒ ba số sát nhau; không nhánh trọng số nhỏ nào quyết định riêng P10/P90 (P10 do xấu×m thấp×r+50bp, P90 do tốt×m cao×r−50bp).",
+ "center_change_vs_old": {
+  "vs_r2": 1166,
+  "vs_r2_pct": 0.06596888260254596
  },
- "scenarios_pre": {
-  "xau|mua_phan_con_lai": 13908,
-  "xau|khong": 15058,
-  "coso|mua_phan_con_lai": 18618,
-  "coso|khong": 18618,
-  "tot|mua_phan_con_lai": 22262,
-  "tot|khong": 21112
+ "center_change_vs_old_basis": "r2 center_post 17.675 (SUMMARY_r2.json) -> r3; cầu chi tiết bridge_r2_to_r3",
+ "change_reason": "Vòng 3: đối xứng trọng số kịch bản (0,275/0,45/0,275) và hệ số ROE (0,9/1/1,1) — lệch xuống của Bobby sang độ nhạy; LN mẹ 2027 cơ sở = Q3×4 1.500 (±250); kiểm chéo ROE theo lãi RÒNG thay lãi gửi một chiều; giá 06/11 20.550; warning PDV chào bán; provenance VCSH mẹ/lãi gửi kiểm từ text BCTC",
+ "r2": {
+  "center_post": 17675,
+  "p10_out": 12533,
+  "p50_out": 17425,
+  "p90_out": 23135,
+  "label": "TRONG vùng",
+  "price": 21000.0,
+  "pct_below_at_r2_price": 0.7825,
+  "pct_below_at_20550": 0.7225
  },
- "gordon_roe_xcheck": {
-  "roe_mid_incl_interest": 0.1315125318282109,
-  "roe_mid_ex_interest": 0.10967138567779895,
-  "gordon_pb_incl": 0.9667860174115324,
-  "gordon_pb_ex": 0.7587751016933233,
-  "gordon_ps_incl": 18432.78621221863,
-  "gordon_ps_ex": 14466.84062530655,
-  "bvps": 19066.045516018607,
-  "note": "PVT no rong (619) => lai tien gui va lai vay cung nam trong LN co dong; ban bo lai tien gui chi la kiem cheo, khong phai base"
+ "zone_r2": {
+  "low": 12533,
+  "center": 17675,
+  "high": 23135
  },
- "free_float": 0.49,
- "free_float_src": "1 - PVN 51% [TM22b]",
- "change_reason": "Vong 2: truc r, truc mua tau o dinh (NPV doi xung), phan vi muc ket cuc; song song neo ke hoach 5 nam va ROE bo lai tien gui",
- "warnings": [
-  "Thay TGD 2 lan trong 4 thang (Tran Ngoc Nguyen mien nhiem 01/07; Nguyen Thanh Binh tu 03/08/2026), ly do khong cong bo",
-  "Phai thu don vi PVN 1.144,7 ty (+130%); ben PVN 22,4% DT 9T (Q3 31,7%) — ben lien quan / von luu dong",
-  "TT99/2025 + TT43/2026: ngung trich truoc sua chua lon tu 01/01/2026 => bien 2026 thien lech tang, do lon chua xac dinh; \"dieu chinh khac\" LCTT 9T/25 155,7 ty chua giai thich",
-  "Y kien kiem toan 2025 / soat xet H1/2026: CHUA CO TRONG TAY (DD 29/10) — co ngoai tru/nhan manh hay khong: chua kiem",
-  "Phai thu cu lien quan Huynh Thi Huyen Nhu 73,1 ty da du phong 100%",
-  "Chu tich dang ky ban 200.000 cp roi khong ban (03-04/2026)",
-  "Capex/KH 0,52 => FCF hien tai cao hon muc ben; doi tau VN gia (~17,7 nam, Bobby)"
- ],
- "open_issues": [
-  "Y kien kiem toan 2025 / soat xet H1",
-  "Dinh luong TT99",
-  "TC/spot + dao han HD",
-  "So/ngay NQ ke hoach 5 nam",
-  "Room ngoai"
- ],
- "new_data_obs": [
-  "NQ HDQT ke hoach 2026-2030 (mekongasean 26/05/2026; so/ngay NQ chua xac dinh): LNST HN 6.500-7.000 ty 5 nam, me 3.100-3.400 (cong ty me rieng), co tuc 5-10%/nam, nguon von gom phat hanh co phieu => dua vao SONG SONG plan_anchor (LN me/nam 2027-30 933 ty)",
-  "DHDCD 2026: capex toi da 5 tau moi 3.445 ty; 9T moi tang nguyen gia phuong tien 979,6 => con lai 2.465 ty — dua vao truc mua tau",
-  "WebSearch 05/11/2026 09:00 ICT: khong thay NQ mua tau cu the thang 10-11/2026, khong thay khoi to/xu phat"
- ],
- "fear_buy_25": "Khong phai case fear-buy: khong khung hoang, LN dang o dinh; PB 1,10 > trung vi lich su 0,91 => KHONG du dieu kien §2.5 (#4 san tai san, \"day chua toi\")",
- "r_sens_post": {
-  "beta1.0_-100bp": 19479,
-  "beta1.0_-50bp": 18521,
-  "beta1.0_+50bp": 16868,
-  "beta1.0_+100bp": 16149,
-  "base": 17675
- },
- "center_vs_p50_note": "tam (ky vong trong so luoi, sau CK) 17675 vs P50 ket cuc 17425 vs gia tri tai tham so trung tam 18493. Lech nho; NPV tau +-30% chi o nhanh xau/tot va nua ket cuc mua — khong co nhanh trong so nho quyet dinh rieng P10/P90.",
- "r1": {
-  "center_post": 17751,
-  "p10_post": 13001,
-  "p90_post": 22965,
-  "label": "TRONG vùng"
- },
- "delta_center_vs_r1_pct": -0.0042814489324545235,
  "zone_old": {
   "low": 19400,
   "center": 20000,
   "high": 21200,
   "dd_date": "2026-10-29",
   "center_kind": "point"
- }
+ },
+ "free_float": 0.49,
+ "free_float_src": "1 - PVN 51% [TM22b]",
+ "fear_buy_25": "KHÔNG đủ điều kiện §2.5: không khủng hoảng, LN ở đỉnh chu kỳ (\"đáy chưa tới\"), drawdown từ đỉnh 52 tuần < ngưỡng T1 35%. Đính chính câu r2 \"P/B 1,10 > trung vị 0,91\": skeptic 29/10 §14.1 — cùng gốc (VCSH gồm NCI) P/B ≈ 0,86, giữa p25 0,82 và trung vị 0,91 ⇒ lý do P/B bị bỏ, kết luận NON không đổi.",
+ "new_data_obs": [
+  "NQ HDQT ke hoach 2026-2030 (mekongasean 26/05/2026; so/ngay NQ chua xac dinh): LNST HN 6.500-7.000 ty 5 nam, me 3.100-3.400 (cong ty me rieng), co tuc 5-10%/nam, nguon von gom phat hanh co phieu => dua vao SONG SONG plan_anchor (LN me/nam 2027-30 933 ty)",
+  "DHDCD 2026: capex toi da 5 tau moi 3.445 ty; 9T moi tang nguyen gia phuong tien 979,6 => con lai 2.465 ty — dua vao truc mua tau",
+  "WebSearch 05/11/2026 09:00 ICT: khong thay NQ mua tau cu the thang 10-11/2026, khong thay khoi to/xu phat"
+ ],
+ "fear_buy_eligible_2_5": false,
+ "warnings": [
+  "Thay TGD 2 lan trong 4 thang (Tran Ngoc Nguyen mien nhiem 01/07; Nguyen Thanh Binh tu 03/08/2026), ly do khong cong bo",
+  "Phai thu don vi PVN 1.144,7 ty (+130%); ben PVN 22,4% DT 9T (Q3 31,7%) — ben lien quan / von luu dong",
+  "TT99/2025 + TT43/2026: ngung trich truoc sua chua lon tu 01/01/2026 => bien 2026 thien lech tang, do lon chua xac dinh; \"dieu chinh khac\" LCTT 9T/25 155,7 ty chua giai thich",
+  "Phai thu cu lien quan Huynh Thi Huyen Nhu 73,1 ty da du phong 100%",
+  "Chu tich dang ky ban 200.000 cp roi khong ban (03-04/2026)",
+  "Capex/KH 0,52 => FCF hien tai cao hon muc ben; doi tau VN gia (~17,7 nam, Bobby)",
+  "PVT Logistics (PDV, công ty con) chào bán ~56,9 tr cp @10.000 cho cổ đông hiện hữu (~569,5 tỷ) đầu tư tàu tối đa 29 tr USD, Q4/2026–Q2/2027 (doanhnhan.baophapluat.vn, tra 08/11/2026); rủi ro mua tàu ở đỉnh + pha loãng NCI nếu PVT không mua đủ — r2 viết \"chưa có đợt cụ thể\" là SAI cho cấp công ty con; HOSE từng nhắc nhở PDV chậm công bố thương vụ mua tàu PVT Opal",
+  "Ý kiến kiểm toán BCTC 2025 / soát xét H1/2026: CHƯA KIỂM ĐƯỢC (WebSearch 08/11/2026 không ra văn bản ý kiến; text BCTC Q3 không có). Không định lượng được; nếu có ngoại trừ liên quan dry-dock/TT99 ⇒ np27 lệch như độ nhạy np27_r2_1250_sym (−335 đ/cp)"
+ ],
+ "open_issues": [
+  "Ý kiến kiểm toán 2025 / soát xét H1 (chưa kiểm, xem warning)",
+  "Định lượng TT99",
+  "TC/spot + đáo hạn HĐ",
+  "PVT có đăng ký mua quyền PDV không",
+  "Room ngoại"
+ ],
+ "corrections_check": [
+  {
+   "item": 1,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "tái lập skeptic: chỉ đối xứng trọng số 18212 (18.212), chỉ hệ số 18049 (18.050), cả hai 18506 (18.506); NPV tàu kỳ vọng 0.00 đ"
+  },
+  {
+   "item": 2,
+   "verdict": "ĐÚNG hướng — áp một phần",
+   "evidence": "skeptic 1.450 → 18774 (18.774 trùng); chọn 1.500 = Q3×4 (dữ liệu, đúng lý do r1 'biên như Q3'); −50 của skeptic không có cơ sở → độ nhạy (−67 đ)"
+  },
+  {
+   "item": 3,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "lãi gửi 251,0 < lãi vay 345,6 /9T ⇒ lãi ròng phần mẹ -81 tỷ/năm; ROE bỏ lãi ròng 13.98% (r2 một chiều 10,97%); bản sửa (trừ nợ ròng) 19228 — chỉ kiểm chéo, bỏ bản r2 khỏi §0"
+  },
+  {
+   "item": 4,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "warning PDV chào bán thêm; ý kiến kiểm toán 2025 đóng thành \"chưa kiểm\" có ghi rõ"
+  },
+  {
+   "item": 5,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "BQ 06/11 Price 20550; % trọng số r2 dưới 20.550 = 72.2%"
+  },
+  {
+   "item": 6,
+   "verdict": "ĐÚNG — đã kiểm (text, không phải PDF)",
+   "evidence": "VCSH 12.862.928.406.161 − CĐKKS 3.007.359.354.829 = 9.855,569 tỷ (text dòng 933/1005); lãi tiền gửi, cho vay 9T 250.953.803.131 (dòng 4249); lãi vay 345.641.490.397 (dòng 1171). PDF gốc không mở được (pymupdf không chạy vì không có file PDF local)"
+  }
+ ],
+ "lock_md5": "PVT/calc_r3/LOCK_md5.txt"
 }

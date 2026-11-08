@@ -1,0 +1,18 @@
+{
+ "ticker": "PVP", "round": 3, "job": "Taylor_20261108_164335",
+ "note": "File gia dinh KHOA truoc khi doc gia (LOCK_md5.txt). pvp_r3.py doc file nay; doi o day = doi md5. Hang so BCTC (tien, HTM, vay, co tuc, du phong, FSO, QLDN) lay tu ../calc/model.py (vong 1) — import, khong sua.",
+ "assumptions": [
+  {"key": "scn_w", "value": {"xau": 0.275, "coso": 0.45, "tot": 0.275}, "basis": "doi xung quanh co so (dinh chinh 1). Muc trung tam EBITDA 400 da thap hon 561 nam hoa 9T/26 (292,9+54,468+73,716=421,1 ty 9T [Q3 p10,p13-14]) => trong so lech xuong 0,40/0,45/0,15 (nhan dinh Bobby, khong du lieu) dem chu ky lan 2 -> do nhay 'bobby_asym'", "type": "UL-doi-xung"},
+  {"key": "ebitda", "value": {"xau": 300.0, "coso": 400.0, "tot": 550.0}, "basis": "giu r1-r2: tot ~ run-rate 9T nam hoa 561; co so/xau [UL]", "type": "du-lieu (tot) + UL"},
+  {"key": "lives", "value": [4, 5, 6, 7, 8], "basis": "tuoi doi con lai doi tau hien huu, deu (r1-r2)", "type": "UL-doi-xung"},
+  {"key": "r_axis", "value": [[-0.005, 0.25], [0.0, 0.5], [0.005, 0.25]], "basis": "r = 13,5% + 1,0 x (dep12T hieu dung 06/11 - dep 03/11) (luat dispatch); truc +-50bp doi xung (common_r2)", "type": "luat + UL-doi-xung"},
+  {"key": "fso_disc", "value": "r (=Ke, cung truc r)", "basis": "dinh chinh 3: spread 'huy dong + 2,6pp' = 10% khong co nguon; ben thue la cong ty me tung dieu chinh gia cuoc (BB 03/06/2025, H1 tr.31) va phu luc gia han CHUA KY => khong co co so ha chiet khau duoi Ke. 10% -> do nhay 'fso_r10'", "type": "luat"},
+  {"key": "fso_excess", "value": {"thanh_tien": 0.5, "khong": 0.5}, "basis": "177 ty cam ket nam 1 vuot run-rate Q3x4 (415,8 vs 238,6 [H1 p31/34, Q3 p13-14]) chua hoa giai; 0,5/0,5 [UL] (dinh chinh 5: giu truc; o 'luon thanh tien' chi la do nhay, khong phai tam)", "type": "UL"},
+  {"key": "ship_buy", "value": {"ca_hai": [0.5, 116.0], "chi_2": [0.35, 56.5], "khong": [0.15, 0.0]}, "basis": "xac suat [UL] DD 29/10 §4; gia tri trUSD theo NQ DHDCD 23/06/2026 (H1 tr.31: 56,5 + 59,5); chua ky thoa thuan nao (H1 tr.31)", "type": "du-lieu (gia tri) + UL (xac suat)"},
+  {"key": "vcb", "value": 26.04, "basis": "ty gia d/USD nghin (DD 29/10)", "type": "du-lieu"},
+  {"key": "ship_npv", "value": {"xau": -0.3, "coso": 0.0, "tot": 0.0}, "basis": "dinh chinh 2: cat +30% nhanh tot (khong IRR kiem duoc). Giu -30% o xau: co so IRR Aframax #2 7,67% < IRRmin 11% [AGM p44]; muc 30% kiem cheo: nien kim 20 nam IRR 7,67% chiet khau 13,5% => -32% (25 nam -42%) — nhung tai tro vay 70% lai thap hon Ke nen do lon thuc te khong xac dinh => [UL]. Bien the: NPV0 moi nhanh; -30% vo dieu kien; +-30% (r2)", "type": "du-lieu (dau) + UL (do lon, gan nhanh)"},
+  {"key": "nwc_other", "value": 37.01, "basis": "dinh chinh 4: TS ngan han ngoai tien/HTM = 2.317,940 - 718,158 - 1.015,871 = 583,910; no NH ngoai vay/co tuc/du phong = 1.024,314 - 134,947 - 109,526 - 232,937 = 546,903 => +37,007 ty (CDKT 30/09/2026, BCTC Q3 tr.1-2, da kiem tren anh scan 08/11)", "type": "du-lieu"},
+  {"key": "corp_years", "value": 10, "basis": "chi phi QLDN 9T nam hoa tru 10 nam (r1-r2)", "type": "UL"},
+  {"key": "tax_shield_frac", "value": 0.75, "basis": "EBITDA sau thue = EBITDA x (1 - 20% x 0,75) (r1-r2, la chan KH ~25% EBITDA)", "type": "UL"}
+ ]
+}

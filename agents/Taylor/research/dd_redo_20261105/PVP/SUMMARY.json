@@ -1,158 +1,308 @@
 {
  "ticker": "PVP",
- "round": 2,
- "job": "Taylor_20261105_020016",
- "asof_price_date": "2026-11-04",
- "price": 18400.0,
+ "round": 3,
+ "job": "Taylor_20261108_164335",
+ "asof_price_date": "2026-11-06",
+ "price": 18000.0,
  "n_outcomes": 270,
- "center_pre": 22823,
- "center_post": 22366,
- "center_param_pre": 25686,
- "center_param_post": 25173,
- "p10_pre": 12961,
- "p50_pre": 22834,
- "p90_pre": 33504,
- "p10_out": 12702,
- "p25_out": 16549,
- "p50_out": 22377,
- "p75_out": 26371,
- "p90_out": 32834,
- "min_out": 9643,
- "max_out": 42300,
- "pct_weight_below_price": 0.30600000000000005,
+ "center_pre": 23566,
+ "center_post": 23099,
+ "center_param_pre": 25573,
+ "center_param_post": 25066,
+ "p10_out": 13799,
+ "p25_out": 20465,
+ "p50_out": 23982,
+ "p75_out": 26628,
+ "p90_out": 30338,
+ "min_out": 9559,
+ "max_out": 33620,
+ "pct_weight_below_price": 0.2049,
  "label": "TRONG vùng",
- "px_vs_center_post": -0.1773227219887329,
+ "px_vs_center_post": -0.2207454868176112,
  "parallel": {
-  "r1_ship_downside_only": {
-   "desc": "NPV tau chi chieu xuong (xau -30%, co so/tot 0) nhu vong 1 — tach ket cuc mua",
+  "bobby_asym": {
+   "desc": "trong so cuoc lech xuong 0,40/0,45/0,15 (nhan dinh Bobby, r2), con lai r3",
    "n_outcomes": 270,
-   "center_post": 21505,
-   "p10_out": 12702,
-   "p50_out": 22377,
-   "p90_out": 27955,
-   "pct_weight_below_price": 0.30600000000000005,
+   "center_post": 21405,
+   "p10_out": 12600,
+   "p25_out": 16455,
+   "p50_out": 22285,
+   "p75_out": 26009,
+   "p90_out": 27837,
+   "min_out": 9559,
+   "max_out": 33620,
+   "pct_weight_below_price": 0.298,
+   "label": "TRONG vùng"
+  },
+  "ship_pm30_sym": {
+   "desc": "NPV tau moi +-30% doi xung theo cuoc (r2), trong so doi xung (skeptic: 24.060 truoc VLD/FSO-r)",
+   "n_outcomes": 270,
+   "center_post": 24678,
+   "p10_out": 13799,
+   "p25_out": 20465,
+   "p50_out": 23982,
+   "p75_out": 28411,
+   "p90_out": 36375,
+   "min_out": 9559,
+   "max_out": 42185,
+   "pct_weight_below_price": 0.2049,
+   "label": "TRONG vùng"
+  },
+  "ship_npv0": {
+   "desc": "NPV tau moi = 0 moi kich ban (luat 03/11 thuan)",
+   "n_outcomes": 270,
+   "center_post": 24678,
+   "p10_out": 20474,
+   "p25_out": 21865,
+   "p50_out": 23982,
+   "p75_out": 26628,
+   "p90_out": 30338,
+   "min_out": 18124,
+   "max_out": 33620,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "ship_m30_uncond": {
+   "desc": "NPV tau moi -30% VO DIEU KIEN (nhat quan khung chiet khau du an o Ke 13,5% voi IRR 7,67%: nien kim 20 nam -32%)",
+   "n_outcomes": 270,
+   "center_post": 18935,
+   "p10_out": 13087,
+   "p25_out": 15225,
+   "p50_out": 18276,
+   "p75_out": 22207,
+   "p90_out": 25507,
+   "min_out": 9559,
+   "max_out": 33620,
+   "pct_weight_below_price": 0.475,
+   "label": "TRONG vùng"
+  },
+  "fso_r10": {
+   "desc": "FSO chiet khau = lai huy dong + 2,6pp (10%, r1/r2) — khong nguon",
+   "n_outcomes": 270,
+   "center_post": 23552,
+   "p10_out": 14238,
+   "p25_out": 20900,
+   "p50_out": 24439,
+   "p75_out": 27100,
+   "p90_out": 30786,
+   "min_out": 9994,
+   "max_out": 34092,
+   "pct_weight_below_price": 0.1928,
+   "label": "TRONG vùng"
+  },
+  "fso_excess_always": {
+   "desc": "177 ty FSO nam 1 luon thanh tien (o luoi, KHONG phai tam)",
+   "n_outcomes": 270,
+   "center_post": 23738,
+   "p10_out": 14393,
+   "p25_out": 21305,
+   "p50_out": 25066,
+   "p75_out": 27557,
+   "p90_out": 31326,
+   "min_out": 9559,
+   "max_out": 33620,
+   "pct_weight_below_price": 0.1953,
+   "label": "TRONG vùng"
+  },
+  "fso_excess_never": {
+   "desc": "177 ty FSO nam 1 khong bao gio thanh tien",
+   "n_outcomes": 270,
+   "center_post": 22460,
+   "p10_out": 13123,
+   "p25_out": 19762,
+   "p50_out": 23788,
+   "p75_out": 26279,
+   "p90_out": 30050,
+   "min_out": 9559,
+   "max_out": 33620,
+   "pct_weight_below_price": 0.2145,
+   "label": "TRONG vùng"
+  },
+  "fso_no_gt5y": {
+   "desc": "phu luc gia han FSO den 2036 chua ky: bo dong tien \"sau nam 5\" (204,95 ty) [H1 tr.31]",
+   "n_outcomes": 270,
+   "center_post": 22489,
+   "p10_out": 13200,
+   "p25_out": 19874,
+   "p50_out": 23363,
+   "p75_out": 25998,
+   "p90_out": 29727,
+   "min_out": 8968,
+   "max_out": 32990,
+   "pct_weight_below_price": 0.221,
+   "label": "TRONG vùng"
+  },
+  "nwc_excluded": {
+   "desc": "bo VLD khac +37,0 (cach r2)",
+   "n_outcomes": 270,
+   "center_post": 22749,
+   "p10_out": 13449,
+   "p25_out": 20115,
+   "p50_out": 23633,
+   "p75_out": 26278,
+   "p90_out": 29988,
+   "min_out": 9209,
+   "max_out": 33270,
+   "pct_weight_below_price": 0.2162,
+   "label": "TRONG vùng"
+  },
+  "fivef_A_ebitda_x0904": {
+   "desc": "5F proxy chu ky: EBITDA x 0,904 (ADDENDUM_5F; proxy = EBITDA TONG cong ty, dau sai lech chua do)",
+   "n_outcomes": 270,
+   "center_post": 21858,
+   "p10_out": 12718,
+   "p25_out": 19566,
+   "p50_out": 22749,
+   "p75_out": 25185,
+   "p90_out": 28503,
+   "min_out": 8885,
+   "max_out": 31584,
+   "pct_weight_below_price": 0.2283,
+   "label": "TRONG vùng"
+  },
+  "scrap_plus_1musd": {
+   "desc": "don vi do nhay: +1 trUSD phe lieu (hoac -1 trUSD chi phi len da TT99 neu doi dau) thu cuoi doi tau hien huu",
+   "n_outcomes": 270,
+   "center_post": 23216,
+   "p10_out": 13886,
+   "p25_out": 20611,
+   "p50_out": 24108,
+   "p75_out": 26733,
+   "p90_out": 30441,
+   "min_out": 9705,
+   "max_out": 33712,
+   "pct_weight_below_price": 0.2049,
    "label": "TRONG vùng"
   }
  },
- "center_pre_liq": 22823,
- "center_post_liq": 22366,
- "p10_post": 12702,
- "p25_post": 16549,
- "p50_post": 22377,
- "p75_post": 26371,
- "p90_post": 32834,
- "liq_disc_5ty": 0.019992057673030278,
+ "p10_post": 13799,
+ "p25_post": 20465,
+ "p50_post": 23982,
+ "p75_post": 26628,
+ "p90_post": 30338,
+ "liq_disc_5ty": 0.01984292078214305,
  "grid_n": 270,
- "grid_desc": "ket cuc = kich ban cuoc (xau/co so/tot 0,40/0,45/0,15 [UL, Bobby]; EBITDA doi tau 300/400/550 [UL]; NPV tau moi -30%/0/+30% theo kich ban, bien do [UL]) x tuoi doi con lai doi tau 4..8 nam (deu) x lai huy dong -50/0/+50bp (0,25/0,5/0,25 [UL]; FSO chiet khau dich cung) x ket cuc mua tau ca hai 116 / chi #2 56,5 / khong 0 tr USD (0,50/0,35/0,15 [UL]) x 177 ty FSO nam 1 thanh tien/khong (0,5/0,5 [UL]); n=270; tham so trung tam = co so, 6 nam, Δr=0, mua ca hai, FSO thanh tien",
+ "grid_desc": "ket cuc = kich ban cuoc (xau/co so/tot 0,275/0,45/0,275 [UL doi xung]; EBITDA doi tau 300/400/550; NPV tau moi -30%/0/0 [dau: du lieu IRR; do lon UL]) x tuoi doi con lai 4..8 nam (deu) x lai huy dong -50/0/+50bp (0,25/0,5/0,25; FSO chiet khau = r) x mua tau ca hai 116 / chi #2 56,5 / khong 0 trUSD (0,50/0,35/0,15 [UL]) x 177 ty FSO nam 1 thanh tien/khong (0,5/0,5 [UL]); n=270; tham so trung tam = co so, 6 nam, dr=0, mua ca hai, FSO thanh tien",
  "ck_ref_size": {
   "q_vnd": 5000000000.0,
   "adv": "250 phien",
-  "disc": 0.019992057673030278,
+  "disc": 0.01984292078214305,
   "in_calib": false,
-  "disc_adv60": 0.014128081297332753
+  "disc_adv60": 0.013981413361133987
  },
  "ck_real_sleeve": {
   "10tr": {
-   "disc_adv250": 0.0008940719993398393,
-   "disc_adv60": 0.0006318270034495891,
-   "q_over_adv250": 0.0012334817520251457,
+   "disc_adv250": 0.0008874023948203031,
+   "disc_adv60": 0.0006252678139403883,
+   "q_over_adv250": 0.0012088580280866074,
    "in_calib": true
   },
   "20tr": {
-   "disc_adv250": 0.0012644087472044295,
-   "disc_adv60": 0.0008935383173519612,
-   "q_over_adv250": 0.0024669635040502915,
+   "disc_adv250": 0.0012549765020372365,
+   "disc_adv60": 0.000884262222589874,
+   "q_over_adv250": 0.002417716056173215,
    "in_calib": true
   },
   "40tr": {
-   "disc_adv250": 0.0017881439986796785,
-   "disc_adv60": 0.0012636540068991782,
-   "q_over_adv250": 0.004933927008100583,
+   "disc_adv250": 0.0017748047896406062,
+   "disc_adv60": 0.0012505356278807766,
+   "q_over_adv250": 0.00483543211234643,
    "in_calib": true
   }
  },
  "liquidity": {
-  "last_price": 18400.0,
-  "last_date": "2026-11-04",
+  "px": 18000.0,
+  "pxd": "2026-11-06",
   "w250": {
-   "window": "2025-11-03..2026-11-04",
-   "adv_med": 8107132500.0,
-   "sigma_d": 0.025456935917420872,
+   "window": "2025-11-05..2026-11-06",
+   "n": 250,
+   "adv_med": 8272270000.0,
+   "sigma_d": 0.02552307207584108,
    "sizes": {
     "5000tr": {
-     "q_over_adv": 0.6167408760125729,
-     "disc": 0.019992057673030278,
+     "q_over_adv": 0.6044290140433037,
+     "disc": 0.01984292078214305,
      "in_calib": false,
-     "days_at_15pct": 4.111605840083819
+     "days_at_15pct": 4.029526760288691
     },
     "10tr": {
-     "q_over_adv": 0.0012334817520251457,
-     "disc": 0.0008940719993398393,
+     "q_over_adv": 0.0012088580280866074,
+     "disc": 0.0008874023948203031,
      "in_calib": true,
-     "days_at_15pct": 0.008223211680167639
+     "days_at_15pct": 0.008059053520577383
     },
     "20tr": {
-     "q_over_adv": 0.0024669635040502915,
-     "disc": 0.0012644087472044295,
+     "q_over_adv": 0.002417716056173215,
+     "disc": 0.0012549765020372365,
      "in_calib": true,
-     "days_at_15pct": 0.016446423360335277
+     "days_at_15pct": 0.016118107041154767
     },
     "40tr": {
-     "q_over_adv": 0.004933927008100583,
-     "disc": 0.0017881439986796785,
+     "q_over_adv": 0.00483543211234643,
+     "disc": 0.0017748047896406062,
      "in_calib": true,
-     "days_at_15pct": 0.032892846720670554
+     "days_at_15pct": 0.03223621408230953
     }
    }
   },
   "w60": {
-   "window": "2026-08-10..2026-11-04",
+   "window": "2026-08-12..2026-11-06",
+   "n": 60,
    "adv_med": 21575225000.0,
-   "sigma_d": 0.029347820213044773,
+   "sigma_d": 0.029043151508781843,
    "sizes": {
     "5000tr": {
      "q_over_adv": 0.23174729348129625,
-     "disc": 0.014128081297332753,
+     "disc": 0.013981413361133987,
      "in_calib": false,
      "days_at_15pct": 1.5449819565419751
     },
     "10tr": {
      "q_over_adv": 0.0004634945869625925,
-     "disc": 0.0006318270034495891,
+     "disc": 0.0006252678139403883,
      "in_calib": false,
      "days_at_15pct": 0.0030899639130839503
     },
     "20tr": {
      "q_over_adv": 0.000926989173925185,
-     "disc": 0.0008935383173519612,
+     "disc": 0.000884262222589874,
      "in_calib": false,
      "days_at_15pct": 0.006179927826167901
     },
     "40tr": {
      "q_over_adv": 0.00185397834785037,
-     "disc": 0.0012636540068991782,
+     "disc": 0.0012505356278807766,
      "in_calib": true,
      "days_at_15pct": 0.012359855652335801
     }
    }
   },
-  "d_ref": 0.019992057673030278
+  "d_ref": 0.01984292078214305
  },
  "axes_included": [
-  "chu ky cuoc (hai chieu) + NPV tau moi doi xung theo chu ky",
+  "chu ky cuoc (hai chieu, trong so doi xung)",
   "tuoi doi doi tau (hai chieu)",
-  "lai huy dong (hai chieu)",
+  "lai huy dong (hai chieu; FSO cung truc)",
   "ket cuc mua tau (tach ky vong)",
-  "177 ty FSO nam 1 (xuong; vong 1 gan voi xau)"
+  "NPV tau moi -30% nhanh xau (chieu xuong co du lieu)",
+  "177 ty FSO nam 1 (0,5/0,5)"
  ],
  "axes_excluded": [
   {
-   "axis": "phat hanh co phieu tai tro tau (pha loang)",
-   "reason": "chua co van kien DHDCD bat thuong; khong co du lieu gia/so luong — WARNING + moc doi nhan dinh"
+   "axis": "NPV tau moi +30% nhanh tot",
+   "reason": "khong IRR/du lieu kiem duoc (dinh chinh 2) — bao song song ship_pm30_sym"
   },
   {
-   "axis": "NPV tau chi chieu xuong (ban vong 1)",
-   "reason": "bao SONG SONG parallel.r1_ship_downside_only"
+   "axis": "phat hanh co phieu tai tro tau (pha loang)",
+   "reason": "van kien DHDCD bat thuong chua cong bo; khong co gia/so luong — WARNING + moc"
+  },
+  {
+   "axis": "phu luc gia han FSO 2036 chua ky",
+   "reason": "hai ben da thong nhat (BB 03/06/2025), cong ty da ghi cam ket theo gia/thoi han moi; rui ro khong ky -> do nhay fso_no_gt5y + WARNING"
+  },
+  {
+   "axis": "phe lieu doi tau cu vs chi phi len da sau TT99",
+   "reason": "khong co du lieu LDT/chi phi; do nhay don vi +117 d/cp moi 1 trUSD (hai chieu)"
   }
  ],
  "base_adjustments": [
@@ -179,73 +329,380 @@
    "effect_dong_per_share": 0,
    "basis": "luat 03/11",
    "source": "[AGM p21]"
+  },
+  {
+   "item": "VLD khac (TS NH ngoai tien/HTM 583,9 - no NH ngoai vay/co tuc/du phong 546,9)",
+   "effect_dong_per_share": 357,
+   "basis": "so du CDKT 30/09/2026",
+   "source": "BCTC Q3/2026 tr.1-2 (ma 100-160, 310-323)"
+  },
+  {
+   "item": "NPV tau moi ky vong (-30% x w_xau 0,275)",
+   "effect_dong_per_share": -1612,
+   "basis": "IRR Aframax #2 7,67% < IRRmin 11%; do lon 30% [UL]",
+   "source": "[AGM p44]"
   }
  ],
  "center_vs_p50_note_model": "Phan phoi 2 dinh theo kich ban cuoc (tam nhanh xau 15800 / co so 24845 / tot 35483 truoc CK): P10 do nhanh xau (w 0,40) + mua ca hai quyet dinh; P90 do nhanh tot (w 0,15) + mua ca hai — nhanh trong so nho.",
  "r": 0.135,
- "r_sens_pre": {
-  "beta1.0_-100bp": 23234,
-  "beta1.0_-50bp": 23025,
-  "beta1.0_+50bp": 22622,
-  "beta1.0_+100bp": 22427,
-  "base": 22823
- },
- "scenarios_pre": {
-  "xau|ca_hai": 13716,
-  "xau|chi_2": 18199,
-  "xau|khong": 22455,
-  "coso|ca_hai": 25686,
-  "coso|chi_2": 25686,
-  "coso|khong": 25686,
-  "tot|ca_hai": 39272,
-  "tot|chi_2": 34790,
-  "tot|khong": 30533
- },
  "gordon_roe_xcheck": {
   "note": "Khong ap dung: SOTP dong tien (tien rong + FSO hop dong + nien kim doi tau), khong dung Gordon/ROE; lai tien gui 9T 57,4 = 16,5% LNTT (DD 29/10) — nam trong tien rong cong rieng, khong tinh doi"
  },
  "free_float": 0.2842,
  "free_float_src": "1 - PVTrans 64,92% - Le Ngoc Anh 6,66% [H1 p28]",
- "change_reason": "Vong 2: tach ket cuc mua tau, NPV tau doi xung theo cuoc, truc FSO 177 rieng, truc r, phan vi muc ket cuc",
+ "change_reason": "Vong 3: ap dinh chinh skeptic 1-4 (trong so doi xung, cat +30% NPV tau, FSO chiet khau Ke, + VLD 37 ty); 5-7 = do nhay/WARNING; CK theo ADV 06/11",
  "warnings": [
   "Mua tau 116 tr USD (~1,55x von hoa) da duyet DHDCD 23/06; DHDCD bat thuong gia han 2 lan (<=30/11/2026), van kien chua cong bo",
   "IRR du an Aframax #2 7,67% < IRRmin 11% cong ty tu dat [AGM p44]; NPV von CSH duong chi nho don bay vay 70%",
   "Ben lien quan 63,3% DT 6T (PVTrans, BSR, LPG VN); GD lien quan \"theo thuc te phat sinh\" khong tran (NQ 16/HDQT 18/08/2026)",
   "Doi GD (23/06) va PGD (12/08); free float ~28%",
-  "Chua thay khoi to/dieu tra (DD 29/10 + WebSearch 05/11); kiem toan ban nien chap nhan toan phan"
+  "Chua thay khoi to/dieu tra (DD 29/10 + WebSearch 05/11); kiem toan ban nien chap nhan toan phan",
+  "Phu luc gia han hop dong FSO Dai Hung Queen den 31/12/2036 CHUA KY (hop dong cu het 17/05/2026; BB 03/06/2025 da thong nhat gia+thoi han moi); doi tac la cong ty me PVTrans, tung dieu chinh gia cuoc [H1 tr.31]"
  ],
  "open_issues": [
   "177 ty cam ket FSO nam 1 chua hoa giai",
   "Co cau TC/chuyen/pool, dao han HD tau",
   "Tuoi tau chi tu bao chi",
   "Van kien DHDCD bat thuong (gia, cau truc von, phat hanh?)",
-  "Room ngoai"
+  "Room ngoai",
+  "Phe lieu doi tau cu (hien 0) vs chi phi len da sau TT99 chua trong EBITDA"
  ],
  "new_data_obs": [
   "NQ 22/NQ-TBD-HDQT 02/10 + NQ 23/NQ-TBD-HDQT 23/10: gia han DHDCD bat thuong toi <=30/11/2026, ly do hoan thien van kien (DD 29/10 [CB]) — da phan anh: xac suat mua giu 0,50/0,35/0,15",
   "WebSearch 05/11/2026 09:00 ICT: bai baophapluat 12/09/2026 (DKCC 28/09, du kien hop 23/10) — van kien chua cong bo; khong thay ket qua bieu quyet / hop dong mua tau"
  ],
  "fear_buy_25": "Khong phai case fear-buy: khong co khung hoang; PB/sàn tai san truoc capex ~14,9k < gia nhung luan diem la chu ky dinh cuoc (Bobby) => KHONG du dieu kien §2.5 (#1 \"day chua toi\": dang o dinh chu ky)",
- "r_sens_post": {
-  "beta1.0_-100bp": 22770,
-  "beta1.0_-50bp": 22565,
-  "beta1.0_+50bp": 22170,
-  "beta1.0_+100bp": 21979,
-  "base": 22367
- },
- "center_vs_p50_note": "tam (ky vong trong so luoi, sau CK) 22366 vs P50 ket cuc 22377 vs gia tri tai tham so trung tam 25173. Phan phoi 2 dinh theo kich ban cuoc (tam nhanh xau 15800 / co so 24845 / tot 35483 truoc CK): P10 do nhanh xau (w 0,40) + mua ca hai quyet dinh; P90 do nhanh tot (w 0,15) + mua ca hai — nhanh trong so nho.",
- "r1": {
-  "center_post": 21804,
-  "p10_post": 13523,
-  "p90_post": 28201,
-  "label": "TRONG vùng"
- },
- "delta_center_vs_r1_pct": 0.02577508713997423,
+ "center_vs_p50_note": "tam (ky vong luoi, sau CK) 23099 vs P50 ket cuc 23982 vs gia tri tai tham so trung tam 25066. Tam nhanh truoc CK: xau 15695 / co so 24740 / tot 29519; P10 do nhanh xau (w 0,275) + mua ca hai (NPV -30%) quyet dinh — mot nhanh UL.",
  "zone_old": {
   "low": 15500,
   "center": null,
   "high": 22400,
   "dd_date": "2026-10-29",
   "center_kind": null
+ },
+ "sleeve_40tr_view": {
+  "p10_out": 14053,
+  "p90_out": 30897,
+  "center_post": 23525,
+  "label": "TRONG vùng"
+ },
+ "assumptions": [
+  {
+   "key": "scn_w",
+   "value": {
+    "xau": 0.275,
+    "coso": 0.45,
+    "tot": 0.275
+   },
+   "basis": "doi xung quanh co so (dinh chinh 1). Muc trung tam EBITDA 400 da thap hon 561 nam hoa 9T/26 (292,9+54,468+73,716=421,1 ty 9T [Q3 p10,p13-14]) => trong so lech xuong 0,40/0,45/0,15 (nhan dinh Bobby, khong du lieu) dem chu ky lan 2 -> do nhay 'bobby_asym'",
+   "type": "UL-doi-xung"
+  },
+  {
+   "key": "ebitda",
+   "value": {
+    "xau": 300.0,
+    "coso": 400.0,
+    "tot": 550.0
+   },
+   "basis": "giu r1-r2: tot ~ run-rate 9T nam hoa 561; co so/xau [UL]",
+   "type": "du-lieu (tot) + UL"
+  },
+  {
+   "key": "lives",
+   "value": [
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "basis": "tuoi doi con lai doi tau hien huu, deu (r1-r2)",
+   "type": "UL-doi-xung"
+  },
+  {
+   "key": "r_axis",
+   "value": [
+    [
+     -0.005,
+     0.25
+    ],
+    [
+     0.0,
+     0.5
+    ],
+    [
+     0.005,
+     0.25
+    ]
+   ],
+   "basis": "r = 13,5% + 1,0 x (dep12T hieu dung 06/11 - dep 03/11) (luat dispatch); truc +-50bp doi xung (common_r2)",
+   "type": "luat + UL-doi-xung"
+  },
+  {
+   "key": "fso_disc",
+   "value": "r (=Ke, cung truc r)",
+   "basis": "dinh chinh 3: spread 'huy dong + 2,6pp' = 10% khong co nguon; ben thue la cong ty me tung dieu chinh gia cuoc (BB 03/06/2025, H1 tr.31) va phu luc gia han CHUA KY => khong co co so ha chiet khau duoi Ke. 10% -> do nhay 'fso_r10'",
+   "type": "luat"
+  },
+  {
+   "key": "fso_excess",
+   "value": {
+    "thanh_tien": 0.5,
+    "khong": 0.5
+   },
+   "basis": "177 ty cam ket nam 1 vuot run-rate Q3x4 (415,8 vs 238,6 [H1 p31/34, Q3 p13-14]) chua hoa giai; 0,5/0,5 [UL] (dinh chinh 5: giu truc; o 'luon thanh tien' chi la do nhay, khong phai tam)",
+   "type": "UL"
+  },
+  {
+   "key": "ship_buy",
+   "value": {
+    "ca_hai": [
+     0.5,
+     116.0
+    ],
+    "chi_2": [
+     0.35,
+     56.5
+    ],
+    "khong": [
+     0.15,
+     0.0
+    ]
+   },
+   "basis": "xac suat [UL] DD 29/10 §4; gia tri trUSD theo NQ DHDCD 23/06/2026 (H1 tr.31: 56,5 + 59,5); chua ky thoa thuan nao (H1 tr.31)",
+   "type": "du-lieu (gia tri) + UL (xac suat)"
+  },
+  {
+   "key": "vcb",
+   "value": 26.04,
+   "basis": "ty gia d/USD nghin (DD 29/10)",
+   "type": "du-lieu"
+  },
+  {
+   "key": "ship_npv",
+   "value": {
+    "xau": -0.3,
+    "coso": 0.0,
+    "tot": 0.0
+   },
+   "basis": "dinh chinh 2: cat +30% nhanh tot (khong IRR kiem duoc). Giu -30% o xau: co so IRR Aframax #2 7,67% < IRRmin 11% [AGM p44]; muc 30% kiem cheo: nien kim 20 nam IRR 7,67% chiet khau 13,5% => -32% (25 nam -42%) — nhung tai tro vay 70% lai thap hon Ke nen do lon thuc te khong xac dinh => [UL]. Bien the: NPV0 moi nhanh; -30% vo dieu kien; +-30% (r2)",
+   "type": "du-lieu (dau) + UL (do lon, gan nhanh)"
+  },
+  {
+   "key": "nwc_other",
+   "value": 37.01,
+   "basis": "dinh chinh 4: TS ngan han ngoai tien/HTM = 2.317,940 - 718,158 - 1.015,871 = 583,910; no NH ngoai vay/co tuc/du phong = 1.024,314 - 134,947 - 109,526 - 232,937 = 546,903 => +37,007 ty (CDKT 30/09/2026, BCTC Q3 tr.1-2, da kiem tren anh scan 08/11)",
+   "type": "du-lieu"
+  },
+  {
+   "key": "corp_years",
+   "value": 10,
+   "basis": "chi phi QLDN 9T nam hoa tru 10 nam (r1-r2)",
+   "type": "UL"
+  },
+  {
+   "key": "tax_shield_frac",
+   "value": 0.75,
+   "basis": "EBITDA sau thue = EBITDA x (1 - 20% x 0,75) (r1-r2, la chan KH ~25% EBITDA)",
+   "type": "UL"
+  }
+ ],
+ "headline_vs_alternatives": [
+  {
+   "variant": "HEADLINE r3",
+   "center_post": 23099,
+   "p10_out": 13799,
+   "p90_out": 30338,
+   "label": "TRONG vùng",
+   "pct_below": 0.2049
+  },
+  {
+   "variant": "bobby_asym",
+   "desc": "trong so cuoc lech xuong 0,40/0,45/0,15 (nhan dinh Bobby, r2), con lai r3",
+   "center_post": 21405,
+   "p10_out": 12600,
+   "p50_out": 22285,
+   "p90_out": 27837,
+   "label": "TRONG vùng",
+   "pct_below": 0.298
+  },
+  {
+   "variant": "ship_pm30_sym",
+   "desc": "NPV tau moi +-30% doi xung theo cuoc (r2), trong so doi xung (skeptic: 24.060 truoc VLD/FSO-r)",
+   "center_post": 24678,
+   "p10_out": 13799,
+   "p50_out": 23982,
+   "p90_out": 36375,
+   "label": "TRONG vùng",
+   "pct_below": 0.2049
+  },
+  {
+   "variant": "ship_npv0",
+   "desc": "NPV tau moi = 0 moi kich ban (luat 03/11 thuan)",
+   "center_post": 24678,
+   "p10_out": 20474,
+   "p50_out": 23982,
+   "p90_out": 30338,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "variant": "ship_m30_uncond",
+   "desc": "NPV tau moi -30% VO DIEU KIEN (nhat quan khung chiet khau du an o Ke 13,5% voi IRR 7,67%: nien kim 20 nam -32%)",
+   "center_post": 18935,
+   "p10_out": 13087,
+   "p50_out": 18276,
+   "p90_out": 25507,
+   "label": "TRONG vùng",
+   "pct_below": 0.475
+  },
+  {
+   "variant": "fso_r10",
+   "desc": "FSO chiet khau = lai huy dong + 2,6pp (10%, r1/r2) — khong nguon",
+   "center_post": 23552,
+   "p10_out": 14238,
+   "p50_out": 24439,
+   "p90_out": 30786,
+   "label": "TRONG vùng",
+   "pct_below": 0.1928
+  },
+  {
+   "variant": "fso_excess_always",
+   "desc": "177 ty FSO nam 1 luon thanh tien (o luoi, KHONG phai tam)",
+   "center_post": 23738,
+   "p10_out": 14393,
+   "p50_out": 25066,
+   "p90_out": 31326,
+   "label": "TRONG vùng",
+   "pct_below": 0.1953
+  },
+  {
+   "variant": "fso_excess_never",
+   "desc": "177 ty FSO nam 1 khong bao gio thanh tien",
+   "center_post": 22460,
+   "p10_out": 13123,
+   "p50_out": 23788,
+   "p90_out": 30050,
+   "label": "TRONG vùng",
+   "pct_below": 0.2145
+  },
+  {
+   "variant": "fso_no_gt5y",
+   "desc": "phu luc gia han FSO den 2036 chua ky: bo dong tien \"sau nam 5\" (204,95 ty) [H1 tr.31]",
+   "center_post": 22489,
+   "p10_out": 13200,
+   "p50_out": 23363,
+   "p90_out": 29727,
+   "label": "TRONG vùng",
+   "pct_below": 0.221
+  },
+  {
+   "variant": "nwc_excluded",
+   "desc": "bo VLD khac +37,0 (cach r2)",
+   "center_post": 22749,
+   "p10_out": 13449,
+   "p50_out": 23633,
+   "p90_out": 29988,
+   "label": "TRONG vùng",
+   "pct_below": 0.2162
+  },
+  {
+   "variant": "fivef_A_ebitda_x0904",
+   "desc": "5F proxy chu ky: EBITDA x 0,904 (ADDENDUM_5F; proxy = EBITDA TONG cong ty, dau sai lech chua do)",
+   "center_post": 21858,
+   "p10_out": 12718,
+   "p50_out": 22749,
+   "p90_out": 28503,
+   "label": "TRONG vùng",
+   "pct_below": 0.2283
+  },
+  {
+   "variant": "scrap_plus_1musd",
+   "desc": "don vi do nhay: +1 trUSD phe lieu (hoac -1 trUSD chi phi len da TT99 neu doi dau) thu cuoi doi tau hien huu",
+   "center_post": 23216,
+   "p10_out": 13886,
+   "p50_out": 24108,
+   "p90_out": 30441,
+   "label": "TRONG vùng",
+   "pct_below": 0.2049
+  }
+ ],
+ "implied_by_price": {
+  "ebitda_scale_k": 0.6054,
+  "ebitda_levels_at_k": {
+   "xau": 181.6,
+   "coso": 242.1,
+   "tot": 333.0
+  },
+  "ebitda_flat_all_scn": 250.5,
+  "ebitda_flat_vs_561_run_rate": 0.446,
+  "ship_npv_uncond": -0.3489,
+  "note": "Gia 18000 = tam r3 khi: (a) EBITDA doi tau phang moi kich ban ~250 ty/nam (= 45% muc 561 nam hoa 9T/26), hoac (b) muc 300/400/550 x 0.605, hoac (c) NPV tau moi vo dieu kien -35% (giu con lai r3)"
+ },
+ "bridge_r2_to_r3": [
+  {
+   "step": "r2_SUMMARY (CK ADV den 04/11)",
+   "center_post": 22366,
+   "delta": null,
+   "why": "ban r2 da cong bo"
+  },
+  {
+   "step": "r2_control",
+   "center_post": 22370,
+   "delta": 4,
+   "why": "cau hinh r2 tai lap center_pre trung (22.822,73) — chi doi CK sang ADV 250 phien den 06/11"
+  },
+  {
+   "step": "d1_trong_so_doi_xung",
+   "center_post": 24781,
+   "delta": 2411,
+   "why": "dinh chinh 1: trong so cuoc 0,40/0,45/0,15 -> 0,275/0,45/0,275 (muc 400 da duoi 561 nam hoa; lech xuong la nhan dinh)"
+  },
+  {
+   "step": "d2_cat_npv_+30_nhanh_tot",
+   "center_post": 23202,
+   "delta": -1579,
+   "why": "dinh chinh 2: cat +30% NPV tau moi o nhanh tot (khong IRR kiem duoc); giu -30% o xau (IRR 7,67% < 11%)"
+  },
+  {
+   "step": "d3_fso_chiet_khau_Ke",
+   "center_post": 22749,
+   "delta": -453,
+   "why": "dinh chinh 3: FSO chiet khau 10% -> r=13,5% (spread khong nguon; phu luc gia han chua ky)"
+  },
+  {
+   "step": "d4_vld_khac_+37",
+   "center_post": 23099,
+   "delta": 350,
+   "why": "dinh chinh 4: + VLD khac 37,0 ty (CDKT Q3 tr.1-2, da kiem)"
+  },
+  {
+   "step": "r_06_11",
+   "center_post": 23099,
+   "delta": 0,
+   "why": "r 06/11 = 13,5% (dep 12T hieu dung 06/11 = 03/11 = 7,40%) — khong doi"
+  }
+ ],
+ "r2_at_new_price": {
+  "center_post": 22366,
+  "p10_out": 12702,
+  "p90_out": 32834,
+  "label": "TRONG vùng",
+  "pct_below": 0.298
+ },
+ "branch_center_pre": {
+  "scn_xau": 15695,
+  "scn_coso": 24740,
+  "scn_tot": 29519
+ },
+ "parts_center_param": {
+  "net_cash_after_div": 1016.2,
+  "nwc_other": 37.01,
+  "fso": 711.95,
+  "tankers": 1340.45,
+  "drydock": -232.9,
+  "corp": -220.7,
+  "ships_new": 0.0,
+  "scrap": 0.0
  }
 }

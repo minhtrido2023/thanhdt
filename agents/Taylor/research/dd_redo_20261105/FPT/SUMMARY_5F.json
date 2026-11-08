@@ -153,5 +153,13 @@
   "peer_scope": "ALL DOMESTIC -> weak evidence for export moat",
   "measured_by": "bq query tav2_bq.ticker_financial GPM_P0 2026-11-07"
  },
- "r3_note": "r3: GPM restored to TTM meaning; no change to moat_tier/durable/model values"
+ "r3_note": "r3: GPM restored to TTM meaning; no change to moat_tier/durable/model values",
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 54203,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
 }

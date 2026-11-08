@@ -1,0 +1,35 @@
+Gia 22,200 (2026-11-06); r = 13.50% (dep 7.40% [cctg_12m(2026-11-02)]); net cash 3,281.3 (11,398 d/cp = 51% gia)
+NWC 837.2 -> chuan hoa 574.3 (x 7,137/10,404), giai phong 262.9 t=1; thu nhap TC rong sau thue 168.4
+CONTROL r2 (gia 04/11): n=45 | tam truoc 23,837 sau 23,617 | P10/P50/P90 sau 18,386/23,669/28,278 | min sau 16,690 | % trong so duoi gia 37.5% | gia/tam -4.1% => TRONG vung
+BRIDGE 0 r2 (gia+CK 04/11): tam 23,617 (d +0) P10/P50/P90 18,386/23,669/28,278 n=45
+BRIDGE 1 gia+CK 06/11 (22.200): tam 23,618 (d +0) P10/P50/P90 18,386/23,669/28,278 n=45
+BRIDGE 2 dinh chinh #1 truc thoi han 5/8/10/12/15 (.1/.2/.4/.2/.1): tam 23,475 (d -142) P10/P50/P90 18,088/23,498/28,470 n=75
+BRIDGE 3 dinh chinh #2 NWC chuan hoa theo DT 7.137 (giai phong t=1): tam 24,003 (d +528) P10/P50/P90 18,491/24,045/29,169 n=75
+BRIDGE 4 dinh chinh #4 truc FCF-LNST +-150 (.25/.5/.25) = HEADLINE r3: tam 24,003 (d +0) P10/P50/P90 18,301/24,075/29,619 n=225
+HEADLINE r3: n=225 | tam truoc 24,226 sau 24,003 | P10/P50/P90 sau 18,301/24,075/29,619 | min sau 14,624 | % trong so duoi gia 35.7% | gia/tam -7.5% => TRONG vung
+Gia tri tai tham so trung tam (LNST 800, 10 nam, r 13.5%, FCF=LNST): 24,435 truoc CK / 24,211 sau CK
+SONG SONG A_nut_4_nam_tr0.2 (skeptic): n=270 | tam truoc 23,353 sau 23,139 | P10/P50/P90 sau 17,956/22,788/28,941 | min sau 14,540 | % trong so duoi gia 46.0% | gia/tam -4.1% => TRONG vung
+SONG SONG B_khong_chuan_hoa_NWC (837 thu hoi cuoi han): n=225 | tam truoc 23,693 sau 23,475 | P10/P50/P90 sau 17,773/23,499/29,060 | min sau 14,294 | % trong so duoi gia 40.2% | gia/tam -5.4% => TRONG vung
+SONG SONG C_khong_truc_FCF: n=75 | tam truoc 24,226 sau 24,003 | P10/P50/P90 sau 18,491/24,045/29,169 | min sau 16,375 | % trong so duoi gia 32.5% | gia/tam -7.5% => TRONG vung
+SONG SONG D_FCF_base_+110 (khau hao-capex, dai tu on dinh): n=225 | tam truoc 26,216 sau 25,975 | P10/P50/P90 sau 20,215/25,918/31,778 | min sau 15,908 | % trong so duoi gia 19.6% | gia/tam -14.5% => TRONG vung
+SONG SONG E_LNST_neo_lich_su_735 (bien TB/trung vi x 7.137): n=225 | tam truoc 23,049 sau 22,838 | P10/P50/P90 sau 17,078/22,875/28,399 | min sau 13,716 | % trong so duoi gia 44.6% | gia/tam -2.8% => TRONG vung
+SONG SONG F_LNST_neo_9T26_829: n=225 | tam truoc 24,750 sau 24,523 | P10/P50/P90 sau 18,808/24,593/30,189 | min sau 14,963 | % trong so duoi gia 32.3% | gia/tam -9.5% => TRONG vung
+SONG SONG G_thoi_han_r2_8/10/12: n=135 | tam truoc 24,379 sau 24,155 | P10/P50/P90 sau 18,283/24,205/29,424 | min sau 14,818 | % trong so duoi gia 34.4% | gia/tam -8.1% => TRONG vung
+GIA NGU Y: LNST co dinh 10 nam 690 (NWC chuan hoa) / 720 (NWC 837 cuoi han); LNST 800 can ~7 nam; r ngu y o tham so trung tam 18.0%; net cash 11,398 d/cp = 51% gia
+Cross-check Gordon g=0 vo han (can tren): A 20,585; B 27,649; ROE co lai 15.6%, van hanh 34.3%
+Do nhay lai huy dong (tam sau CK): b0.5_d-100bp 24,261 (+1.1%); b0.5_d-50bp 24,131 (+0.5%); b0.5_d50bp 23,877 (-0.5%); b0.5_d100bp 23,754 (-1.0%); b1.0_d-100bp 24,528 (+2.2%); b1.0_d-50bp 24,261 (+1.1%); b1.0_d50bp 23,754 (-1.0%); b1.0_d100bp 23,513 (-2.0%)
+adv250: ADV trung vi 17.79 ty/phien (2025-11-05..2026-11-06, 0 phien KL=0), sigma 1.73%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.02%/0.04%/0.06%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.03%/0.06%/0.09%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.04%/0.08%/0.12%; Q/ADV 0.2% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 0.21%/0.41%/0.62%; Q/ADV 5.6% trong vung hieu chinh (<=10%); 0.3-0.6 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 0.46%/0.92%/1.38%; Q/ADV 28.1% NGOAI vung hieu chinh (<=10%); 1.4-2.8 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 0.65%/1.30%/1.95%; Q/ADV 56.2% NGOAI vung hieu chinh (<=10%); 2.8-5.6 phien @20-10%
+adv60: ADV trung vi 13.80 ty/phien (2026-08-12..2026-11-06, 0 phien KL=0), sigma 1.39%
+   Q=     10 tr: CK Y0,5/1/1,5 = 0.02%/0.04%/0.06%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     20 tr: CK Y0,5/1/1,5 = 0.03%/0.05%/0.08%; Q/ADV 0.1% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=     40 tr: CK Y0,5/1/1,5 = 0.04%/0.07%/0.11%; Q/ADV 0.3% trong vung hieu chinh (<=10%); 0.0-0.0 phien @20-10%
+   Q=  1,000 tr: CK Y0,5/1/1,5 = 0.19%/0.37%/0.56%; Q/ADV 7.2% trong vung hieu chinh (<=10%); 0.4-0.7 phien @20-10%
+   Q=  5,000 tr: CK Y0,5/1/1,5 = 0.42%/0.83%/1.25%; Q/ADV 36.2% NGOAI vung hieu chinh (<=10%); 1.8-3.6 phien @20-10%
+   Q= 10,000 tr: CK Y0,5/1/1,5 = 0.59%/1.18%/1.77%; Q/ADV 72.5% NGOAI vung hieu chinh (<=10%); 3.6-7.2 phien @20-10%
+Tam sau CK theo co (ADV250): 10tr 24,216, 20tr 24,211, 40tr 24,206, 1,000tr 24,126, 5,000tr 24,003, 10,000tr 23,911
