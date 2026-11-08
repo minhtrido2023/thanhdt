@@ -2800,6 +2800,50 @@
    "recorded_at": "2026-11-09T00:10:00+07:00",
    "supersedes": "PVP@2026-10-29#1",
    "correction_reason": "Vòng 3 áp đính chính skeptic 08/11: đối xứng trọng số cước, bỏ +30% NPV tàu nhánh tốt không dữ liệu, FSO chiết khấu = r, cộng VLĐ ròng; tâm r2 22.366 → 23.099. Entry đầu tiên của PVP có tâm số (entry 10-29 center null)."
+  },
+  {
+   "ticker": "DGC",
+   "dd_date": "2026-10-30",
+   "rev": 2,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 33272,
+   "center": 41849,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 810 kết cục (kịch bản 0,25/0,5/0,25 × mở lại khai trường w=0,5 không biên vĩnh viễn × …), sau CK 0,71% @5 tỷ",
+   "zone_high": 50227,
+   "center_range": null,
+   "price_ref": 33000,
+   "price_date": "2026-11-06",
+   "verdict_label": "DƯỚI vùng, MỎNG: giá 33.000 thấp hơn P10 33.272 chỉ 0,8% (272 đ/cp); 9,1% trọng số kết cục dưới giá; giá thấp hơn tâm 41.849 −21,1%. Luật sổ (giá < tâm −15%): ĐẠT nhưng DGC KHÔNG đủ điều kiện sleeve (§2 trụ #2 trượt: DN tư nhân ⇒ NON) và đang EXCLUDED ở ZaloPay. Nhãn lật về TRONG khi w mở lại = 0 (r3 41.522) hoặc nền biên r4; w=0,10 chỉ cách P10 6 đ/cp",
+   "skeptic_status": "r3b (09/11, cụm 3b): fundamental-skeptic lần cuối CONFIRMED (medium; tự cài cách B độc lập khớp 6 dòng w đến từng đồng, chạy lại trùng byte; 7 lỗi văn bản/LOCK 0 đ/cp ghi ở DGC/ERRATA_r3b_skeptic_final_20261109.md)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3b.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3b.md",
+     "quote": "tâm **41.849 đ/cp** (sau CK 5 tỷ), P10/P50/P90 kết cục **33.272 / 41.362 / 50.227**",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3b.md",
+     "quote": "giá đóng cửa 06/11 **33.000**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/DGC/calc_r3b/LOCK_r3b_md5.txt",
+   "assumptions_md5": "c36c81fde208b2c02d7846acf7ad112a",
+   "notes": "User duyệt cách B 09/11 00:49 ICT: giữ xác suất mở lại khai trường 0,5 [UL], chỉ bỏ biên tăng vĩnh viễn nhánh mở lại (phần lãi gộp 2028 +659 đ/cp giữ; biên vĩnh viễn bỏ = 11.883 đ/cp). CK 0,71% @5 tỷ; sleeve ADV60 1,8%. Đính chính r3 giữ nguyên: bỏ đếm đôi dự phòng, trọng số 0,25/0,5/0,25, RONIC=Ke, nền biên R2, thuế dự phòng. NHÃN PHỤ THUỘC w=0,5 [UL]. WARNING: khai trường 25 tạm dừng phục vụ điều tra (chạm tài sản lõi); ZaloPay giữ 10.000 cp = 330 triệu = 35,3% NAV (42,6% theo giá vốn 39.775) so trần sleeve 2–4% NAV — chưa có lộ trình chia đợt, REPORT_r3b §5 liệt kê lựa chọn; pháp lý sau 05/11 chưa quét độc lập; HTM 9.531 chưa đối PDF; LOCK thiếu module CCTG (r 13,5% đã kiểm). r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-27",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-09T01:15:00+07:00",
+   "supersedes": "DGC@2026-10-30#1",
+   "correction_reason": "Vòng 3b theo chỉ đạo user 09/11: cách B cho nhánh mở lại khai trường; tâm r3 41.522 (TRONG) → 41.849 (DƯỚI vùng, mỏng); tâm r2 44.767."
   }
  ],
  "center_kinds": [

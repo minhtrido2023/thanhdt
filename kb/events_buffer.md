@@ -950,3 +950,64 @@
 - [2026-11-08T17:56:22Z] Taylor/heartbeat — Taylor_20261108_175121: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261108_175121", "source": "watcher"}
 - [2026-11-08T17:56:22Z] Taylor/finding — dd-redo r3b DGC 09/11: cach B => tam 41.849 P10 33.272 DUOI vung @33.000: {"ticker": "DGC", "round": "3b", "center_post": 41849, "p10": 33272, "p50": 41362, "p90": 50227, "price": 33000, "price_date": "2026-11-06", "label": "DUOI vung (mong: gia < P10 0,8%)", "pct_weight_below_price": 0.091, "vs_r3": {"center": "41522 -> 41849 (+0,8%)", "p10": "32931 -> 33272", "label": "TRONG -> DUOI"}, "skeptic_match": "41.849/33.272 trung; dong w=0,10 = 41.587 (r3 ghi 42.768)", "flip_to_TRONG_if": ["w mo lai=0", "nen bien r4", "trong so kich ban r2", "truc phap ly"], "sleeve_size_label": "DUOI o 10/20/40tr ca ADV250 va ADV60", "position_ZaloPay": {"qty": 10000, "cost": 39775, "pct_nav_mkt": 0.353, "pct_nav_cost": 0.426, "nav_0611": 934551492, "broker_verified": "dnse_raw_2026-11-08"}, "exit_options": "A giu / B ~10% NAV 2 dot / C 4% 3 dot / D 2% 3 dot; max 1,8% ADV60, impact <0,3% — chua quyet, cho user", "fear_buy_25": "NON", "lock": "calc_r3b/LOCK_r3b_md5.txt 2026-11-09T00:54:10+0700", "files": ["DGC/REPORT_r3b.md", "DGC/SUMMARY.json (md5 180e03bf)", "DGC/SUMMARY_r3.json backup"], "measured_by": "$DNA_PYEXE -I calc_r3b/model_r3b.py && compare_r3b.py && make_summary_r3b.py (2 lan trung byte); compare_r3b_out.txt md5 627d8894"}
 - [2026-11-08T17:56:24Z] Taylor/heartbeat — Taylor_20261108_175123: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261108_175123", "source": "watcher"}
+
+## Consolidation 2026-11-08T18:07:02Z
+- [2026-11-08T18:01:43Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "in_progress", "note": "FPT r3: doc dinh chinh + calc r2"}
+- [2026-11-08T18:01:49Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "in_progress", "note": "SIP r3: doc dinh chinh + calc r2"}
+- [2026-11-08T18:01:52Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "in_progress", "note": "MVC r3: doc dinh chinh + r2 calc"}
+- [2026-11-08T18:01:55Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "in_progress", "note": "HHS r3: doc dinh chinh + hhs_r2.py"}
+- [2026-11-08T18:01:56Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "in_progress", "note": "TCH r3: doc r2 model + dinh chinh"}
+- [2026-11-08T18:02:29Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_180128", "source": "watcher"}
+- [2026-11-08T18:02:31Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_180130", "source": "watcher"}
+- [2026-11-08T18:02:33Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_180132", "source": "watcher"}
+- [2026-11-08T18:02:35Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_180134", "source": "watcher"}
+- [2026-11-08T18:02:37Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_180136", "source": "watcher"}
+- [2026-11-08T18:02:45Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "in_progress", "note": "MVC r3: kiem ICD Hoa Lu trong BCTC HN Q3"}
+- [2026-11-08T18:02:54Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "in_progress", "note": "SIP r3: kiem dinh chinh, PDF anh (khong text layer?)"}
+- [2026-11-08T18:03:29Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_180128", "source": "watcher"}
+- [2026-11-08T18:03:31Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_180130", "source": "watcher"}
+- [2026-11-08T18:03:32Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "in_progress", "note": "HHS r3: lay gia BQ 06/11, kiem dinh chinh 1-8"}
+- [2026-11-08T18:03:33Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_180132", "source": "watcher"}
+- [2026-11-08T18:03:35Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_180134", "source": "watcher"}
+- [2026-11-08T18:03:37Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_180136", "source": "watcher"}
+- [2026-11-08T18:03:37Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "in_progress", "note": "TCH r3: lay BQ gia 06/11 + fin; viet model"}
+- [2026-11-08T18:04:14Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "in_progress", "note": "MVC r3: ICD da doi soat (chi tien 2,92 ty dem doi), dung calc_r3"}
+- [2026-11-08T18:04:29Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261108_180128", "source": "watcher"}
+- [2026-11-08T18:04:31Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261108_180130", "source": "watcher"}
+- [2026-11-08T18:04:33Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261108_180132", "source": "watcher"}
+- [2026-11-08T18:04:35Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261108_180134", "source": "watcher"}
+- [2026-11-08T18:04:37Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261108_180136", "source": "watcher"}
+- [2026-11-08T18:05:02Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "in_progress", "note": "HHS r3: dinh chinh 1-7 da kiem (1,2 dung huong; so skeptic 10.752/9.684 khong tai lap, toi ra 10.344/9.319); dang viet assumptions+model"}
+- [2026-11-08T18:05:07Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "in_progress", "note": "FPT r3: LOCK prerun ghi, sap chay model"}
+- [2026-11-08T18:05:29Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261108_180128", "source": "watcher"}
+- [2026-11-08T18:05:31Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261108_180130", "source": "watcher"}
+- [2026-11-08T18:05:33Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261108_180132", "source": "watcher"}
+- [2026-11-08T18:05:34Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "in_progress", "note": "TCH r3: LOCK ghi xong, viet compare doc gia"}
+- [2026-11-08T18:05:35Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261108_180134", "source": "watcher"}
+- [2026-11-08T18:05:37Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261108_180136", "source": "watcher"}
+- [2026-11-08T18:06:29Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261108_180128", "source": "watcher"}
+- [2026-11-08T18:06:31Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261108_180130", "source": "watcher"}
+- [2026-11-08T18:06:33Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261108_180132", "source": "watcher"}
+- [2026-11-08T18:06:35Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261108_180134", "source": "watcher"}
+- [2026-11-08T18:06:36Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "in_progress", "note": "FPT r3: SUMMARY xong (tam 57.312 TRONG), viet REPORT_r3 + dong bo 5F"}
+- [2026-11-08T18:06:37Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261108_180136", "source": "watcher"}
+
+## Consolidation 2026-11-08T18:08:40Z
+- [2026-11-08T18:07:22Z] Taylor/heartbeat — Taylor_20261108_180625: {"status": "in_progress", "note": "doc r3b, xac minh LOCK md5 (ADDENDUM_5F/SUMMARY_5F khong trong LOCK nao), dung calc_r3c"}
+- [2026-11-08T18:07:25Z] Taylor/heartbeat — Taylor_20261108_180625: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261108_180625", "source": "watcher"}
+- [2026-11-08T18:07:30Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261108_180128", "source": "watcher"}
+- [2026-11-08T18:07:32Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261108_180130", "source": "watcher"}
+- [2026-11-08T18:07:34Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261108_180132", "source": "watcher"}
+- [2026-11-08T18:07:35Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261108_180134", "source": "watcher"}
+- [2026-11-08T18:07:37Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261108_180136", "source": "watcher"}
+- [2026-11-08T18:08:01Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "in_progress", "note": "TCH r3: so xong (tam 16.244 DUOI vung), dong bo 5F, viet REPORT_r3"}
+- [2026-11-08T18:08:21Z] Taylor/finding — dd-redo r3 FPT 09/11: tam 54.203->57.312 TRONG @50.800: {"ticker": "FPT", "round": "r3", "center": 57312, "p10": 45270, "p50": 58124, "p90": 68466, "price_0611": 50800, "label_5ty": "TRONG vung", "label_sleeve40tr": "TRONG vung (tam 57.410)", "pct_below_price": 0.27, "rule4": {"5ty": "KHONG dat (nguong 48.715)", "40tr": "KHONG dat (48.799)"}, "r2": {"center": 54203, "p10": 32389, "p90": 74557, "label": "TRONG vung"}, "bridge": {"D4_gia_0611": -370, "D1_trong_so_doi_xung": 2866, "D2_RONIC_T_Ke": -212, "D3_CDKKS": -617, "D7_CK_FTEL_base0": 1441}, "skeptic_point_reproduced": "55.871 / P10 42.388 / P90 68.466 o buoc 4 (= ban A giu CK FTEL)", "sensitivities": {"RONIC5y_cap_ROIC5Y_17.7": 52311, "RONIC5y_cap_Ke": 50652, "assoc_Q4_740": 56616, "tru_khach_ung_truoc": 56058}, "implied_by_price": {"r": 0.162, "ronic_phase_cap": 0.139, "w_xau_proportional": 0.693}, "corrections_rejected": "khong; D5/D6 giu do nhay", "fear_buy_2_5": false, "measured_by": "/home/trido/thanhdt/wc_venv/bin/python -I dd_redo_20261105/FPT/calc_r3/model_r3.py (run1=run2 md5 51b85a47; LOCK_r3_prerun.txt 2026-11-09T01:05:07+07:00); SUMMARY.json r3", "files": "agents/Taylor/research/dd_redo_20261105/FPT/{REPORT_r3.md,SUMMARY.json,SUMMARY_r2.json,calc_r3/}"}
+- [2026-11-08T18:08:25Z] Taylor/heartbeat — Taylor_20261108_180625: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261108_180625", "source": "watcher"}
+- [2026-11-08T18:08:27Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "in_progress", "note": "MVC r3: LOCK ghi, chay luoi day du 2 lan"}
+- [2026-11-08T18:08:27Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "in_progress", "note": "SIP r3 model chay 2 lan"}
+- [2026-11-08T18:08:30Z] Taylor/heartbeat — Taylor_20261108_180128: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261108_180128", "source": "watcher"}
+- [2026-11-08T18:08:30Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "in_progress", "note": "HHS r3: LOCK_md5 ghi 01:08 ICT truoc khi chay; chay hhs_r3.py 2 lan"}
+- [2026-11-08T18:08:32Z] Taylor/heartbeat — Taylor_20261108_180130: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261108_180130", "source": "watcher"}
+- [2026-11-08T18:08:34Z] Taylor/heartbeat — Taylor_20261108_180132: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261108_180132", "source": "watcher"}
+- [2026-11-08T18:08:36Z] Taylor/heartbeat — Taylor_20261108_180134: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261108_180134", "source": "watcher"}
+- [2026-11-08T18:08:38Z] Taylor/heartbeat — Taylor_20261108_180136: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261108_180136", "source": "watcher"}

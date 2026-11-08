@@ -35,3 +35,4 @@
 - [2026-11-08T16:51:22Z] [dd-redo r3 SZL 08/11] XONG job Taylor_20261108_164337: tam 32.391->29.257 (P10 26.209/P90 32.706) TRONG @27.700; mo: quy uoc RONIC (=Ke => 25.524); CHO Mike skeptic cuoi + ghi so
 - [2026-11-08T17:56:10Z] [dd-redo r3b SZL 09/11] XONG job Taylor_20261108_175123: A+B tam 29.257->24.529; 5 ty TREN, 40 tr TRONG sat canh tren (P90 28.133 @27.700); CHO Mike ghi so
 - [2026-11-08T17:56:22Z] [dd-redo r3b DGC 09/11] XONG job Taylor_20261108_175121: cach B tam 41.849 P10 33.272 DUOI @33.000 (mong -0,8%); exit ZaloPay 35,3% NAV trinh 4 lua chon; CHO Mike/user chon exit + ghi so
+- [2026-11-08T18:08:21Z] [dd-redo r3 FPT 09/11] XONG job Taylor_20261108_180128: tam 54.203->57.312 (P10 45.270/P90 68.466) TRONG @50.800, luat 4 khong dat; ban A giu CK FTEL 55.871; CHO Mike phan bien cuoi + ghi so
