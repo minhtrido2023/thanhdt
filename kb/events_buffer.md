@@ -926,3 +926,6 @@
 
 ## Consolidation 2026-11-08T17:34:22Z
 - [2026-11-08T17:33:54Z] Mike/heartbeat — Mike_20261108_173335: {"status": "in_progress", "note": "retro finalize: viết entry"}
+
+## Consolidation 2026-11-08T17:34:36Z
+- [2026-11-08T17:34:24Z] Mike/finding — retro-final-2026-11-08: {"summary": "Retro 08/11 logged: 4 sự cố, 2 pattern, Wags gaps fixed; escalation anomaly-flags-stale giữ nguyên", "entry": "kb/incidents/retro/retro-2026-11-08.md"}
