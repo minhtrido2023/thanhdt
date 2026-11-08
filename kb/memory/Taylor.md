@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-07T17:23:23Z] [dd-5f TV2 08/11] XONG job Taylor_20261107_172014: NONE làm mới; chặt-3c tâm 15.832->19.201 (17.157–19.201), nhãn TRONG->TRÊN; CHỜ Mike skeptic + duyệt quy ước + dòng moat_tags (entry L vs TV1 M)
 - [2026-11-07T17:23:53Z] [dd-5f NT2 07/11] XONG job Taylor_20261107_172009: NONE làm mới, model không đổi (EBITDA 13,2% < ngành); cận dưới cơ sở EBIT 21.701–23.035 TRONG; CHỜ Mike skeptic + chọn cơ sở so biên
 - [2026-11-07T17:24:34Z] [dd-5f PVP 08/11] XONG job Taylor_20261107_172011: NONE làm mới; chặt-3c đối xứng 22.653 DƯỚI (ranh giới) vs CAP 20.356 TRONG; CHỜ Mike skeptic + chọn quy ước
 - [2026-11-08T02:45:38Z] [dd-5f DDV fix 08/11] XONG job Taylor_20261108_024219: headline LAS/NFC RONIC=Ke tâm 12.662(int)–14.923(noint), TRONG sát cạnh trên, rút TRÊN r1; CHỜ Mike duyệt quy ước peer/int
@@ -26,3 +25,4 @@
 - [2026-11-08T14:27:26Z] [dd-redo r3 SCL 08/11] XONG job Taylor_20261108_142022: tâm 23.652 P10 18.986 P90 28.854 vs giá 29.400 ⇒ TRÊN sát ranh giới (+1,9%); CHỜ Mike skeptic cuối + ghi dd_price_zones
 - [2026-11-08T14:27:47Z] [dd-redo r3 DCM 08/11] XONG job Taylor_20261108_142018: r6 tâm 24.822 P10 20.827 P90 28.808, TRÊN vùng @32.100; C2 skeptic sai 1 phần (237–249 còn chứa policy); CHỜ Mike skeptic cuối + ghi sổ
 - [2026-11-08T14:29:19Z] [dd-redo r3 HPG 08/11] XONG job Taylor_20261108_142020: tam 21.338 (P10 13.316/P90 28.993) TRONG, gia 21.200 ~tam; CHO skeptic cuoi + Mike ghi so; open: 19.529 skeptic khong tai lap
+- [2026-11-08T15:45:22Z] [dd-redo r3 NT2 08/11] XONG job Taylor_20261108_153742: tam 23.617->24.003 (P10 18.301/P90 29.619) TRONG @22.200; CHO Mike phan bien cuoi + ghi so; open: lich su tra truoc dai tu (truc FCF +-150 UL)
