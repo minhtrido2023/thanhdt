@@ -17,6 +17,7 @@ Dùng: python3 bin/dd_price_zones_selfcheck.py [--ledger PATH]   (rc 0 = PASS)
 """
 import argparse
 import json
+import hashlib
 import os
 import re
 import sys
@@ -25,6 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC_ROOT = os.environ.get("MIKE_SRC_ROOT", "/home/trido/thanhdt/WorkingClaude/mike")
 NUM_FIELDS = ("zone_low", "center", "zone_high", "price_ref")
 CENTER_KINDS = ("expected_weighted", "base_scenario", "blend", "median", "zone_midpoint", "point")
+LOCK_REQUIRED_FROM = "2026-11-08"  # entry ghi từ ngày này BẮT BUỘC có assumptions_md5 (user chốt B, 08/11); cũ được miễn
 _TOK = re.compile(r"\d+(?:[.,]\d+)*")
 
 
@@ -99,10 +101,25 @@ def check(ledger_path, src_root=SRC_ROOT):
         cr = e.get("center_range")
         if cr is not None and (len(cr) != 2 or cr[0] != e.get("center") or cr[0] > cr[1]):
             errs.append(f"{tag}: center_range phải [center, hi] tăng dần")
+        errs += _lock_errs(tag, e, src_root)
         for fld in ("source_file",):
             if not os.path.exists(os.path.join(src_root, e[fld])):
                 errs.append(f"{tag}: source_file không tồn tại {e[fld]}")
     return d, errs
+
+
+def _lock_errs(tag, e, src_root):
+    """Khoá giả định: md5 nguồn phải khớp; entry mới (recorded_at ≥ LOCK_REQUIRED_FROM) bắt buộc có khoá."""
+    want = e.get("assumptions_md5")
+    if not want:
+        if str(e.get("recorded_at", ""))[:10] >= LOCK_REQUIRED_FROM:
+            return [f"{tag}: thiếu assumptions_md5 (entry ghi từ {LOCK_REQUIRED_FROM} bắt buộc khoá giả định)"]
+        return []
+    try:
+        got = hashlib.md5(open(os.path.join(src_root, e.get("assumptions_file") or e["source_file"]), "rb").read()).hexdigest()
+    except OSError as x:
+        return [f"{tag}: không đọc được nguồn khoá giả định: {x}"]
+    return [] if got == want else [f"{tag}: md5 nguồn lệch khoá giả định ({got[:8]}≠{want[:8]}) — nguồn bị sửa sau khi ghi sổ, thêm rev mới"]
 
 
 def _rev_errs(tag, e, rev, prior):
@@ -139,6 +156,18 @@ def _self_tests():
     r.append(("rev=3 nhảy cóc bị bắt", bool(_rev_errs("t", dict(base, rev=3, supersedes="AAA@2026-01-01#2", correction_reason="x"), 3, [r1]))))
     r.append(("rev=2 thiếu correction_reason bị bắt", bool(_rev_errs("t", dict(base, rev=2, supersedes="AAA@2026-01-01#1"), 2, [r1]))))
     r.append(("quote_numbers: token ≥1000 không bị ×1000", 9950000 not in quote_numbers("tâm 9.950") and 9950 in quote_numbers("tâm 9.950")))
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        open(os.path.join(td, "s.md"), "w").write("giả định A")
+        m = hashlib.md5(b"gi\xe1\xba\xa3 \xc4\x91\xe1\xbb\x8bnh A").hexdigest()
+        ok_e = {"ticker": "AAA", "source_file": "s.md", "assumptions_md5": m, "recorded_at": "2026-11-09T00:00:00+07:00"}
+        r.append(("khoá khớp → sạch", not _lock_errs("t", ok_e, td)))
+        r.append(("khoá lệch bị bắt", bool(_lock_errs("t", dict(ok_e, assumptions_md5="0" * 32), td))))
+        open(os.path.join(td, "s.md"), "w").write("giả định B")
+        r.append(("nguồn bị sửa sau ghi sổ bị bắt", bool(_lock_errs("t", ok_e, td))))
+        nolock = {k: v for k, v in ok_e.items() if k != "assumptions_md5"}
+        r.append(("entry mới thiếu khoá bị bắt", bool(_lock_errs("t", nolock, td))))
+        r.append(("entry cũ (trước 08/11) thiếu khoá được miễn", not _lock_errs("t", dict(nolock, recorded_at="2026-11-02T00:00:00+07:00"), td)))
     return r
 
 

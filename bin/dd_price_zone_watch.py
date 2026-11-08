@@ -89,6 +89,23 @@ def latest_entries(ledger, asof=None):
     return out
 
 
+def lock_mismatch(entry, root=None):
+    """Khoá giả định (user chốt B, 2026-11-08): entry có `assumptions_md5` mà md5 file nguồn hiện tại lệch
+    ⇒ trả lý do (None nếu khớp / không khai khoá). Lệch = nguồn DD bị sửa sau khi ghi sổ ⇒ cần rev mới."""
+    want = entry.get("assumptions_md5")
+    if not want:
+        return None
+    import hashlib
+    f = os.path.join(root or MIKE, entry.get("assumptions_file") or entry["source_file"])
+    try:
+        got = hashlib.md5(open(f, "rb").read()).hexdigest()
+    except OSError as x:
+        return f"không đọc được nguồn khoá giả định ({x.__class__.__name__}) ⇒ cần DD/ghi lại"
+    if got != want:
+        return f"md5 nguồn DD lệch khoá giả định ({got[:8]}≠{want[:8]}) ⇒ nguồn bị sửa sau khi ghi sổ, cần rev mới"
+    return None
+
+
 def alert_base(entry, basis=None):
     """Giá cơ sở của ngưỡng theo DD_ALERT_BASIS (None nếu sổ không có)."""
     return entry.get(basis or DD_ALERT_BASIS)
@@ -198,6 +215,9 @@ def evaluate(ledger, asof, prices, flags, newer_releases, state, thr=THRESHOLD_P
     basis = basis or DD_ALERT_BASIS
     for t, e in sorted(latest_entries(ledger, asof).items()):
         is_exp, why = expiry_of(e, asof, newer_releases)
+        lm = lock_mismatch(e)
+        if lm:
+            is_exp, why = True, lm
         if is_exp:
             expired.append({"ticker": t, "dd_date": e["dd_date"], "why": why, "flags": flags.get(t, [])})
             continue
