@@ -11,3 +11,4 @@
 - [2026-11-05T15:21:57Z] [2026-11-05 22:4x ICT] Plan 06/11 rev2 ca 2 acct: chen BUY DISC FPT/NNC (SpaceX 800/900, ZaloPay 500/600, tran RuleA 54.487/48.719, cash_only); gate DD+funding OK; cho user duyet truoc 08:45 06/11; Mike gui report. Sau fill: theo doi gia von/so phien/±10% -> Livermore (job DollarBill_20261105_151839)
 - [2026-11-06T12:11:14Z] [2026-11-06 19:xx ICT] Plan ZaloPay 11-09 XONG: BUY BSR1200/CSV1100/GAS300/MSB1500 (LAG), egg>=81.2tr; cho duyet truoc 08:45 09/11 (job DollarBill_20261106_120926)
 - [2026-11-06T12:11:39Z] [2026-11-06 19:xx ICT] Plan SpaceX 11-09 XONG: BUY LAG BSR/CSV/GAS/MSB 141,3tr, egg>=128,4tr; cho duyet truoc 08:45 09/11 (job DollarBill_20261106_120928)
+- [2026-11-08T12:06:38Z] [2026-11-08 19:xx ICT] Plan SpaceX 11-09 rev2 XONG (BUY BSR/CSV/GAS/MSB 141,3tr, egg>=100,1tr); chờ duyệt trước 08:45 09/11 (job DollarBill_20261108_120541)

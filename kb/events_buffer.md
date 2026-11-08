@@ -683,3 +683,7 @@
 - [2026-11-08T12:06:15Z] DollarBill/decision — plan-ZaloPay-2026-11-09: {"orders": "BUY LAG BSR1200/CSV1100/GAS300/MSB1500", "egg_transfer_tr": 67.2, "approval": "pending, truoc 08:45 09/11", "round": "Sunday"}
 - [2026-11-08T11:15:56Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12991}
 - [2026-11-08T12:02:07Z] Winston/error — anomaly-flags-stale: {"consumer": "golive_recommend_v23", "date": "2026-11-08", "generated_at": "2026-11-06T05:45:15Z", "reason": "lần ghi cuối 2026-11-06 (ICT) ≠ ngày giao dịch 2026-11-08"}
+
+## Consolidation 2026-11-08T12:06:52Z
+- [2026-11-08T12:06:38Z] DollarBill/decision — plan-2026-11-09-SpaceX: {"summary": "Plan SpaceX 09/11 rev2 (vòng CN tối): BUY LAG BSR1600 LAG_HI, CSV1500, GAS400, MSB2100 LAG_LO = 141,3tr gồm phí; chuyển egg>=100,1tr trước 09:05; DT5G NEUTRAL; chờ user duyệt trước 08:45"}
+- [2026-11-08T12:06:41Z] DollarBill/heartbeat — DollarBill_20261108_120541: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261108_120541", "source": "watcher"}
