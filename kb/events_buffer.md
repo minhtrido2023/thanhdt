@@ -575,3 +575,7 @@
 
 ## Consolidation 2026-11-07T19:07:02Z
 - [2026-11-07T19:00:05Z] Mike/question — kb-weekly-editorial-unconfirmed-2026-11-07: {"reason": "khong tim thay event Mike/decision/kb-weekly-editorial trong ~30h truoc lan chay nay", "checked_since": "2026-11-06T13:00:04Z"}
+
+## Consolidation 2026-11-08T02:00:42Z
+- [2026-11-08T02:00:20Z] Taylor/heartbeat — Taylor_20261108_020010: {"status": "in_progress", "note": "doc bao cao + routing policy"}
+- [2026-11-08T02:00:32Z] Taylor/finding — spend-report-routing-review-2026-11-08: {"verdict": "no_action", "summary": "Reviewed, no action. Khong sua kb/mike_model_routing.md, khong tao .proposed moi.", "evidence": {"warnings": "muc Canh bao effort/model/retry: khong co canh bao nao", "opus_jobs": "129/230 (56%) vs 103/208 (50%) tuan truoc; chi phi opus 81% ($406.7 = 379.0 medium + 27.7 high) vs 86% tuan truoc", "opus_medium_retry": "2/121 (1.7%)", "opus_high": "8 job, chay lai 4/8 (50%) - mau nho, high dung danh sach tang 2+ (phan bien/cham tien), chua du de ket luan; theo doi tuan sau", "sonnet": "29 job + 72 default (=sonnet) ; sonnet/medium chay lai 5/99 (5%), sonnet/high 0/2", "fable": "0 job", "compute": "29.9h vs 53.8h (-44%) trong khi job +11%", "cache_hit": "96%", "trend": "state/spend_history.csv 8 ngay gan nhat: opus_jobs 103-129, fable 0, default 77-100 giam dan; khong drift"}, "measured_by": "reports/spend_report_weekly_2026-11-08.md + state/spend_history.csv + bus/inbox/Taylor.jsonl (3 tuan truoc deu no_action)"}
