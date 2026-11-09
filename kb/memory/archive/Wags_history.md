@@ -449,3 +449,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-11-09 (keep=12 days=0 require_done=False)
 - [2026-10-15T05:46:24Z] [2026-10-15] Chốt: đóng question thì answer phải GIỮ ĐÚNG topic rollup; answer topic con (plan-t1-not-ready-*) không đóng câu tổng (checker match đúng topic).
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-10-16T09:36:44Z] [2026-10-16] selfcheck-red sweep#3: 2/3 CLOSED; OPEN snapshot_corp_action (public_datetime, DDL cần user — question selfcheck-red-sweep-2026-10-16-can-user). Sweep sau: còn OPEN ⇒ CẦN USER + post Architecture.
