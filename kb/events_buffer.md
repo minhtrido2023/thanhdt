@@ -932,3 +932,6 @@
 ## Consolidation 2026-11-09T08:35:58Z
 - [2026-11-09T08:35:27Z] Taylor/heartbeat — Taylor_20261109_083126: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261109_083126", "source": "watcher"}
 - [2026-11-09T08:35:39Z] Taylor/finding — dd-lagcand GAS r2 (ap errata skeptic) 09/11: {"ticker": "GAS", "round": "r2", "center_post_liq": 50146, "p10": 43327, "p90": 57840, "center_r1": 46488, "p10_r1": 39010, "p90_r1": 55150, "label": "TREN vung (tuong doi theo khung)", "price": 74100, "rule4_zone": "re<43300; hop ly 43300-57800; dat>57800", "assumptions_md5": "c02f04b50d650838b862f59824187de2", "model_out_md5": "d59c081cf9ba90f081f2fbf50ffd2c31", "steps_center": {"E1_XDCB": 48924, "E2_decline": 49886, "Q4_0231": 49775, "bao_tieu": 50506, "quy_KTPL": 50146}, "chua_kiem": ["TM du phong 343 (3300ty)", "ly do mien nhiem Chu tich/TGD", "ke hoach free-float", "chenh 540,7ty co tuc"], "measured_by": "python3 agents/Taylor/research/dd_lagcand_20261109/GAS/calc/model_r2.py (2 lan cung md5) ; calc/model_out_r2.txt"}
+
+## Consolidation 2026-11-09T11:07:02Z
+- [2026-11-09T10:31:21Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54779}
