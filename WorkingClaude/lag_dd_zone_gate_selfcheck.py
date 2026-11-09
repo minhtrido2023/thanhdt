@@ -29,16 +29,17 @@ def mk(specs, asof="2026-11-10"):
                      state_name="N", nav_basis={}, orders=os_, account="SELFCHECK")
 
 
-def E(t, center, d="2026-11-09", rev=1, lo=1, hi=None):
+def E(t, center, d="2026-11-09", rev=1, lo=1, hi=None, exp="2027-02-01"):
     return {"ticker": t, "dd_date": d, "rev": rev, "center": center, "zone_low": lo,
-            "zone_high": hi or center * 1.3}
+            "zone_high": hi or center * 1.3, "expires_on": exp}
 
 
 LEDGER = {"entries": [E("AAA", 10000), E("BBB", 10000, d="2026-11-20"), E("CCC", 10000),
-                      E("CCC", 12000, rev=2), E("LCK", 10000)]}
+                      E("CCC", 12000, rev=2), E("LCK", 10000),
+                      E("EXP", 10000, exp="2026-11-10"), E("FRM", 10000), E("ZHI", 10000, hi=9000)]}
 
 
-def fake_deps(lock_bad=()):
+def fake_deps(lock_bad=(), events=None, frame_block=()):
     def latest(ledger, asof=None):
         out = {}
         for e in ledger["entries"]:
@@ -49,11 +50,18 @@ def fake_deps(lock_bad=()):
             if t not in out or k >= (out[t]["dd_date"], out[t].get("rev", 1)):
                 out[t] = e
         return out
-    return lambda: (latest, (lambda e: "md5 lệch" if e["ticker"] in lock_bad else None), LEDGER)
+    def expiry_of(e, asof, newer):
+        return (asof >= dt.date.fromisoformat(e["expires_on"]), "quá hạn DD")
+
+    def frame(e, evs, asof):
+        return [], e["ticker"] in frame_block
+    ev = (lambda tk, en, a: {}) if events != "NONE" else (lambda tk, en, a: None)
+    return lambda: (latest, (lambda e: "md5 lệch" if e["ticker"] in lock_bad else None), LEDGER,
+                    expiry_of, ev, frame)
 
 
-def run(specs, lock_bad=(), deps=None):
-    pm._lag_dd_zone_deps = deps or fake_deps(lock_bad)
+def run(specs, lock_bad=(), deps=None, **kw):
+    pm._lag_dd_zone_deps = deps or fake_deps(lock_bad, **kw)
     return pm.filter_lag_dd_zone_orders(mk(specs))
 
 
@@ -76,13 +84,42 @@ def boom():
     raise OSError("sổ hỏng")
 p, b = run([("AAA", "LAG", "buy", 1), ("AAA", "BAL", "buy", 1)], deps=boom)
 check("sổ lỗi ⇒ FAIL-CLOSED: loại LAG buy, giữ book khác", len(p.orders) == 1 and p.orders[0].book == "BAL" and "fail-closed" in b[0]["reason"])
+p, b = run([("EXP", "LAG", "buy", 5000)]);              check("DD hết hạn (asof ≥ expires_on) ⇒ LOẠI", len(p.orders) == 0 and "quá hạn" in b[0]["reason"])
+p, b = run([("FRM", "LAG", "buy", 5000)], frame_block=("FRM",)); check("sự kiện quyền điều chỉnh giá sau DD ⇒ LOẠI", len(p.orders) == 0 and "hệ giá" in b[0]["reason"])
+p, b = run([("AAA", "LAG", "buy", 5000)], events="NONE"); check("không kiểm được corp-action ⇒ FAIL-CLOSED", len(p.orders) == 0 and "fail-closed" in b[0]["reason"])
+p, b = run([("ZHI", "LAG", "buy", 9500)]);              check("tâm 10000 nhưng đỉnh vùng 9000: giá 9500 ⇒ LOẠI (≤ min(tâm, đỉnh vùng))", len(p.orders) == 0)
+p, b = run([("ZHI", "LAG", "buy", 8900)]);              check("…giá 8900 ⇒ GIỮ", len(p.orders) == 1)
+p, b = run([("AAA", "LAG", "buy", 9000)]);              check("lệnh GIỮ bị ép trần cứng = tâm (10000)", p.orders[0].hard_no_chase_ceiling_vnd == 10000.0, p.orders[0].hard_no_chase_ceiling_vnd)
 pm._lag_dd_zone_deps = fake_deps()
 pl = mk([("AAA", "LAG", "buy", 11000)])
 pl.orders[0].hard_no_chase_ceiling_vnd = 9500.0
-p, b = pm.filter_lag_dd_zone_orders(pl);                check("giá = min(ref, trần) ⇒ trần 9500 ≤ tâm ⇒ GIỮ", len(p.orders) == 1)
+p, b = pm.filter_lag_dd_zone_orders(pl);                check("giá = min(ref, trần) ⇒ trần 9500 ≤ tâm ⇒ GIỮ, trần giữ 9500", len(p.orders) == 1 and p.orders[0].hard_no_chase_ceiling_vnd == 9500.0)
 pm.LAG_DD_ZONE_GATE_ENABLED = False
 p, b = pm.filter_lag_dd_zone_orders(mk([("ZZZ", "LAG", "buy", 1)])); check("công tắc OFF ⇒ no-op", len(p.orders) == 1 and not b)
 pm.LAG_DD_ZONE_GATE_ENABLED = True
+
+print("== đường nạp THẬT (importlib, mike root tạm) ==")
+import json, shutil, tempfile
+real_root = next(r for r in ("/home/trido/thanhdt/WorkingClaude/mike",) if os.path.isfile(r + "/bin/dd_price_zone_watch.py"))
+tmp = tempfile.mkdtemp()
+os.makedirs(tmp + "/bin"); os.makedirs(tmp + "/kb")
+shutil.copy(real_root + "/bin/dd_price_zone_watch.py", tmp + "/bin/")
+json.dump({"entries": [E("AAA", 10000)]}, open(tmp + "/kb/dd_price_zones.json", "w"))
+importlib_pm = __import__("importlib").reload(pm)
+os.environ["LAG_DD_ZONE_MIKE_ROOT"] = tmp
+before = sys.path[:]
+deps = pm._lag_dd_zone_deps()
+check("nạp thật: sys.path KHÔNG đổi sau _lag_dd_zone_deps", sys.path == before, [x for x in sys.path if x not in before])
+check("nạp thật: đọc đúng sổ tạm", deps[2]["entries"][0]["ticker"] == "AAA" and len(deps) == 6)
+e0 = deps[0](deps[2], dt.date(2026, 11, 10))["AAA"]
+check("nạp thật: latest_entries chạy", e0["center"] == 10000)
+check("nạp thật: lock_mismatch None khi entry không khai khoá", deps[1](e0) is None)
+pl = mk([("AAA", "LAG", "buy", 12000)])
+pm._lag_dd_zone_deps = importlib_pm._lag_dd_zone_deps
+p, b = pm.filter_lag_dd_zone_orders(pl)
+check("nạp thật end-to-end: giá > tâm ⇒ LOẠI, sys.path vẫn nguyên", len(p.orders) == 0 and sys.path == before)
+shutil.rmtree(tmp)
+os.environ.pop("LAG_DD_ZONE_MIKE_ROOT", None)
 
 print("== wiring (cấu trúc bot_execute) ==")
 src = open(os.path.join(CODE_ROOT, "bot_execute.py"), encoding="utf-8").read()
@@ -97,15 +134,19 @@ if "--live" in sys.argv:
     import importlib
     importlib.reload(pm)
     for acct in ("SpaceX", "ZaloPay"):
-        f = os.path.join("/home/trido/thanhdt/WorkingClaude/data/trade_plans", f"plan_{acct}_2026-11-10.json")
-        if not os.path.exists(f):
-            print("  (bỏ qua, không có", f, ")")
+        import glob
+        cands = sorted(glob.glob(f"/home/trido/thanhdt/WorkingClaude/data/trade_plans/plan_{acct}_2026-*.json"))
+        cands = [c for c in cands if ".bak" not in c]
+        if not cands:
+            check(f"{acct}: có plan để replay", False, "không thấy plan nào")
             continue
+        f = cands[-1]
+        print("  plan:", os.path.basename(f))
         import json
         raw = json.load(open(f, encoding="utf-8"))
         orders = [PlannedOrder(**{k: v for k, v in o.items() if k in PlannedOrder.__dataclass_fields__})
                   for o in raw["orders"]]
-        plan = TradePlan(plan_date="2026-11-10", signal_date="2026-11-09", strategy="x", strategy_version="x",
+        plan = TradePlan(plan_date=raw["plan_date"], signal_date=raw["signal_date"], strategy="x", strategy_version="x",
                          state=3, state_name="N", nav_basis={}, orders=orders, account=acct)
         nlag = sum(1 for o in orders if o.book.upper() == "LAG" and o.side == "buy")
         p, b = pm.filter_lag_dd_zone_orders(plan)

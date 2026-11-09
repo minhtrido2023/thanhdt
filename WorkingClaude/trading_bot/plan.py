@@ -1143,7 +1143,7 @@ LAG_DD_ZONE_GATE_ENABLED = True
 
 
 def _lag_dd_zone_deps():
-    """(latest_entries, lock_mismatch, ledger_dict) — DÙNG LẠI nguyên logic sổ DD của
+    """(latest_entries, lock_mismatch, ledger, expiry_of, corp_events, frame_check) — DÙNG LẠI nguyên logic sổ DD của
     mike/bin/dd_price_zone_watch.py (bản dd_date/rev mới nhất thắng; khoá assumptions_md5).
     Tách riêng để selfcheck monkeypatch. Sổ ở repo `mike/` (nested, không có trong worktree) ⇒ gốc mike
     lấy từ env LAG_DD_ZONE_MIKE_ROOT, rồi ../mike cạnh code, rồi canonical."""
@@ -1159,14 +1159,32 @@ def _lag_dd_zone_deps():
     spec = importlib.util.spec_from_file_location("_ddz_watch_for_gate",
                                                   os.path.join(root, "bin", "dd_price_zone_watch.py"))
     mod = importlib.util.module_from_spec(spec)
+    _saved_path = sys.path[:]       # module nạp thêm path ở import-time ⇒ khôi phục NGUYÊN danh sách
     sys.path.insert(0, os.path.join(root, "bin"))
     try:
         spec.loader.exec_module(mod)
     finally:
-        sys.path.pop(0)
+        sys.path[:] = _saved_path
     with open(os.path.join(root, "kb", "dd_price_zones.json"), encoding="utf-8") as f:
         ledger = json.load(f)
-    return mod.latest_entries, (lambda e: mod.lock_mismatch(e, root)), ledger
+    def _events(tickers, entries, asof_d):
+        _sp = sys.path[:]
+        sys.path.insert(0, os.path.join(root, "bin"))
+        try:
+            return mod.corp_events(tickers, entries, asof_d)
+        finally:
+            sys.path[:] = _sp
+
+    def _frame(entry, events, asof_d):
+        _sp = sys.path[:]
+        sys.path.insert(0, os.path.join(root, "bin"))
+        try:
+            return mod.frame_check(entry, events, asof_d)
+        finally:
+            sys.path[:] = _sp
+
+    return (mod.latest_entries, (lambda e: mod.lock_mismatch(e, root)), ledger,
+            mod.expiry_of, _events, _frame)
 
 
 def filter_lag_dd_zone_orders(plan, asof=None):
@@ -1178,8 +1196,9 @@ def filter_lag_dd_zone_orders(plan, asof=None):
       (3) tâm DD > 0 và giá mua ≤ tâm. "Trong vùng / dưới vùng VÀ dưới tâm" của user ⇒ giá ≤ tâm
           (dưới đáy vùng ⇒ đã dưới tâm; trong vùng nhưng trên tâm ⇒ LOẠI; trên vùng ⇒ LOẠI).
     Giá mua = min(ref_price, hard_no_chase_ceiling_vnd nếu có) — ref_price là giá tham chiếu của plan.
-    LƯU Ý đo được: không có trần giá thì executor còn được đuổi tới trần % so với ref ⇒ giá khớp thật có
-    thể cao hơn ref_price một chút; cổng này kiểm Ý ĐỊNH của plan, không kiểm giá khớp.
+    Lệnh được GIỮ bị ép hard_no_chase_ceiling_vnd = min(trần sẵn có, tâm, đỉnh vùng) ⇒ executor
+    không bao giờ khớp cao hơn tâm (arch-review F2). Cũng chặn khi DD quá hạn (expires_on), khoá md5 lệch,
+    hoặc có sự kiện quyền điều chỉnh giá sau dd_date / không kiểm được corp-action (fail-closed).
 
     FAIL-CLOSED hoàn toàn (khác filter_dd_flag_orders): không đọc được sổ/không import được ⇒ LOẠI mọi
     lệnh LAG buy kèm action="BLOCKED" (không mua là phía ít hại; user vừa nói edge LAG đang kém).
@@ -1199,9 +1218,14 @@ def filter_lag_dd_zone_orders(plan, asof=None):
     if not any(_lag_buy(o) for o in plan.orders):
         return plan, []
     asof_s = str(asof or plan.plan_date)[:10]
+    events, expiry_of, frame_check = None, None, None
     try:
-        latest_entries, lock_mismatch, ledger = _lag_dd_zone_deps()
-        entries = latest_entries(ledger, dt.date.fromisoformat(asof_s))
+        asof_d = dt.date.fromisoformat(asof_s)
+        latest_entries, lock_mismatch, ledger, expiry_of, corp_events, frame_check = _lag_dd_zone_deps()
+        entries = latest_entries(ledger, asof_d)
+        lag_t = sorted({(o.ticker or "").upper() for o in plan.orders if _lag_buy(o)})
+        events = corp_events(lag_t, {t: entries[t] for t in lag_t if t in entries}, asof_d) \
+            if any(t in entries for t in lag_t) else {}
         err = None
     except Exception as ex:                                  # fail-closed
         entries, err = {}, f"{type(ex).__name__}: {str(ex)[:160]}"
@@ -1215,7 +1239,7 @@ def filter_lag_dd_zone_orders(plan, asof=None):
                 if x and float(x) > 0]
         px = min(px_c) if px_c else None
         e = entries.get((o.ticker or "").upper())
-        center = None
+        center, cap = None, None
         if err:
             why = f"KHÔNG đọc được sổ DD ({err}) — fail-closed, không mua LAG khi không kiểm được"
         elif e is None:
@@ -1223,22 +1247,50 @@ def filter_lag_dd_zone_orders(plan, asof=None):
         else:
             lm = lock_mismatch(e)
             center = e.get("center")
+            zh = e.get("zone_high")
+            cap = min(center, zh) if (center and zh) else center   # "trong/dưới vùng VÀ dưới tâm"
+            exp_why = ""
+            try:
+                expd, exp_why = expiry_of(e, asof_d, None)
+                if not expd:
+                    exp_why = ""
+            except Exception as ex:                              # thiếu expires_on ⇒ không kiểm được
+                exp_why = f"không kiểm được hạn DD ({type(ex).__name__})"
+            fr_why = ""
+            if events is None:
+                fr_why = "không kiểm được sự kiện quyền sau DD (corp-action) — fail-closed"
+            else:
+                try:
+                    _n, blk = frame_check(e, events.get((o.ticker or "").upper()), asof_d)
+                    if blk:
+                        fr_why = "có sự kiện quyền điều chỉnh giá sau DD ⇒ tâm sổ ở hệ giá cũ, cần DD/điều chỉnh tâm"
+                except Exception as ex:
+                    fr_why = f"không kiểm được hệ giá ({type(ex).__name__}) — fail-closed"
             if lm:
                 why = f"DD {e['dd_date']} rev{e.get('rev', 1)}: {lm}"
+            elif exp_why:
+                why = f"DD {e['dd_date']}: {exp_why}"
+            elif fr_why:
+                why = f"DD {e['dd_date']}: {fr_why}"
             elif not center or center <= 0:
                 why = f"DD {e['dd_date']} không có tâm hợp lệ"
             elif px is None:
                 why = "lệnh không có giá tham chiếu — không kiểm được vị trí so với tâm"
-            elif px > center:
-                why = (f"giá {px:,.0f} > tâm DD {center:,.0f} (dd_date {e['dd_date']}, "
-                       f"vùng {e.get('zone_low')}–{e.get('zone_high')}) — luật 09/11: chỉ mua khi "
-                       f"giá ≤ tâm")
+            elif px > cap:
+                why = (f"giá {px:,.0f} > tâm DD {center:,.0f}"
+                       + (f" (đỉnh vùng {zh:,.0f})" if zh and zh < center else "")
+                       + f" (dd_date {e['dd_date']}, vùng {e.get('zone_low')}–{e.get('zone_high')}) "
+                         f"— luật 09/11: chỉ mua khi giá ≤ tâm")
             else:
                 why = None
         if why:
             out.append({"ticker": o.ticker, "order_id": o.id, "book": o.book, "action": "BLOCKED",
                         "qty_before": o.qty, "price": px, "center": center, "reason": why})
         else:
+            # Trần cứng = tâm: executor có thể đuổi giá tới +chase% so với ref ⇒ ép trần tuyệt đối
+            # (min với trần sẵn có) để GIÁ KHỚP không vượt tâm.
+            cur = getattr(o, "hard_no_chase_ceiling_vnd", None)
+            o.hard_no_chase_ceiling_vnd = float(min(cur, cap)) if cur and float(cur) > 0 else float(cap)
             keep.append(o)
     plan.orders = keep
     return plan, out
