@@ -2170,3 +2170,6 @@
 
 ## Archived 2026-11-09 (keep=12 days=0 require_done=False)
 - [2026-11-08T17:56:10Z] [dd-redo r3b SZL 09/11] XONG job Taylor_20261108_175123: A+B tam 29.257->24.529; 5 ty TREN, 40 tr TRONG sat canh tren (P90 28.133 @27.700); CHO Mike ghi so
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-11-08T17:56:22Z] [dd-redo r3b DGC 09/11] XONG job Taylor_20261108_175121: cach B tam 41.849 P10 33.272 DUOI @33.000 (mong -0,8%); exit ZaloPay 35,3% NAV trinh 4 lua chon; CHO Mike/user chon exit + ghi so
