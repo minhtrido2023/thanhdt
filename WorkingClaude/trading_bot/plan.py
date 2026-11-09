@@ -1132,6 +1132,118 @@ def filter_dd_flag_orders(plan, asof=None):
     return plan, out
 
 
+# ── CỔNG "MUA LAG PHẢI CÓ DD + GIÁ ≤ TÂM" — user chốt 2026-11-09 19:2x ICT (`decided_by: user`) ──
+# Nguyên văn: "Plan muốn đưa vào lệnh mua cần phải làm due diligence cho candidate trước. Nếu giá không
+# nằm trong, dưới vùng và dưới tâm thì không đưa vào danh sách mua. Hiện nay việc mua theo book lag đang
+# cho thấy performance không ổn định. Mua 2 candidate, cả 2 đều performance kém. Nên cần xét thêm điều
+# kiện này trước khi edge của lag book trở lại bình thường."
+# TẠM THỜI: tắt bằng đổi hằng số này (code có version control), KHÔNG bằng env/JSON. Điều kiện "edge LAG
+# trở lại bình thường" CHƯA được định nghĩa bằng số — xem kb/projects/lag-dd-zone-gate-20261109.md.
+LAG_DD_ZONE_GATE_ENABLED = True
+
+
+def _lag_dd_zone_deps():
+    """(latest_entries, lock_mismatch, ledger_dict) — DÙNG LẠI nguyên logic sổ DD của
+    mike/bin/dd_price_zone_watch.py (bản dd_date/rev mới nhất thắng; khoá assumptions_md5).
+    Tách riêng để selfcheck monkeypatch. Sổ ở repo `mike/` (nested, không có trong worktree) ⇒ gốc mike
+    lấy từ env LAG_DD_ZONE_MIKE_ROOT, rồi ../mike cạnh code, rồi canonical."""
+    import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
+    roots = [os.environ.get("LAG_DD_ZONE_MIKE_ROOT"),
+             os.path.join(here, "..", "mike"),
+             "/home/trido/thanhdt/WorkingClaude/mike"]
+    root = next((r for r in roots if r and os.path.isfile(
+        os.path.join(r, "bin", "dd_price_zone_watch.py"))), None)
+    if root is None:
+        raise FileNotFoundError("không thấy mike/bin/dd_price_zone_watch.py")
+    spec = importlib.util.spec_from_file_location("_ddz_watch_for_gate",
+                                                  os.path.join(root, "bin", "dd_price_zone_watch.py"))
+    mod = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, os.path.join(root, "bin"))
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        sys.path.pop(0)
+    with open(os.path.join(root, "kb", "dd_price_zones.json"), encoding="utf-8") as f:
+        ledger = json.load(f)
+    return mod.latest_entries, (lambda e: mod.lock_mismatch(e, root)), ledger
+
+
+def filter_lag_dd_zone_orders(plan, asof=None):
+    """CỔNG "LỆNH MUA LAG PHẢI CÓ DD VÀ GIÁ ≤ TÂM DD" — TẦNG ORDER (user 2026-11-09).
+
+    Với MỌI lệnh MUA book LAG (khớp tuyệt đối "LAG", upper), giữ lệnh CHỈ KHI:
+      (1) sổ `mike/kb/dd_price_zones.json` có DD của mã với dd_date ≤ asof (bản mới nhất thắng);
+      (2) khoá giả định `assumptions_md5` (nếu entry khai) còn khớp nguồn;
+      (3) tâm DD > 0 và giá mua ≤ tâm. "Trong vùng / dưới vùng VÀ dưới tâm" của user ⇒ giá ≤ tâm
+          (dưới đáy vùng ⇒ đã dưới tâm; trong vùng nhưng trên tâm ⇒ LOẠI; trên vùng ⇒ LOẠI).
+    Giá mua = min(ref_price, hard_no_chase_ceiling_vnd nếu có) — ref_price là giá tham chiếu của plan.
+    LƯU Ý đo được: không có trần giá thì executor còn được đuổi tới trần % so với ref ⇒ giá khớp thật có
+    thể cao hơn ref_price một chút; cổng này kiểm Ý ĐỊNH của plan, không kiểm giá khớp.
+
+    FAIL-CLOSED hoàn toàn (khác filter_dd_flag_orders): không đọc được sổ/không import được ⇒ LOẠI mọi
+    lệnh LAG buy kèm action="BLOCKED" (không mua là phía ít hại; user vừa nói edge LAG đang kém).
+    Chỉ side=buy, chỉ book LAG; lệnh BÁN không bao giờ bị chặn; book khác không đổi. Hằng số
+    LAG_DD_ZONE_GATE_ENABLED=False ⇒ no-op. Live-only: không đổi backtest/số pin R3.
+    Vị trí cascade (bot_execute.py): ngay SAU filter_dd_flag_orders, TRƯỚC net_offsetting_orders (cùng lý
+    do: netting gán nhãn chân lớn hơn ⇒ lệnh LAG trốn vào NET nhãn khác).
+    Trả (plan đã lọc, list dict {"ticker","order_id","book","action":"BLOCKED","qty_before","price",
+    "center","reason"}).
+    """
+    if not LAG_DD_ZONE_GATE_ENABLED:
+        return plan, []
+
+    def _lag_buy(o):
+        return (o.book or "").upper() == "LAG" and (o.side or "").lower() == "buy"
+
+    if not any(_lag_buy(o) for o in plan.orders):
+        return plan, []
+    asof_s = str(asof or plan.plan_date)[:10]
+    try:
+        latest_entries, lock_mismatch, ledger = _lag_dd_zone_deps()
+        entries = latest_entries(ledger, dt.date.fromisoformat(asof_s))
+        err = None
+    except Exception as ex:                                  # fail-closed
+        entries, err = {}, f"{type(ex).__name__}: {str(ex)[:160]}"
+
+    out, keep = [], []
+    for o in plan.orders:
+        if not _lag_buy(o):
+            keep.append(o)
+            continue
+        px_c = [float(x) for x in (o.ref_price, getattr(o, "hard_no_chase_ceiling_vnd", None))
+                if x and float(x) > 0]
+        px = min(px_c) if px_c else None
+        e = entries.get((o.ticker or "").upper())
+        center = None
+        if err:
+            why = f"KHÔNG đọc được sổ DD ({err}) — fail-closed, không mua LAG khi không kiểm được"
+        elif e is None:
+            why = f"chưa có DD trong sổ (dd_date ≤ {asof_s}) — luật 09/11: mua LAG phải làm DD trước"
+        else:
+            lm = lock_mismatch(e)
+            center = e.get("center")
+            if lm:
+                why = f"DD {e['dd_date']} rev{e.get('rev', 1)}: {lm}"
+            elif not center or center <= 0:
+                why = f"DD {e['dd_date']} không có tâm hợp lệ"
+            elif px is None:
+                why = "lệnh không có giá tham chiếu — không kiểm được vị trí so với tâm"
+            elif px > center:
+                why = (f"giá {px:,.0f} > tâm DD {center:,.0f} (dd_date {e['dd_date']}, "
+                       f"vùng {e.get('zone_low')}–{e.get('zone_high')}) — luật 09/11: chỉ mua khi "
+                       f"giá ≤ tâm")
+            else:
+                why = None
+        if why:
+            out.append({"ticker": o.ticker, "order_id": o.id, "book": o.book, "action": "BLOCKED",
+                        "qty_before": o.qty, "price": px, "center": center, "reason": why})
+        else:
+            keep.append(o)
+    plan.orders = keep
+    return plan, out
+
+
 # ── PHẠM VI USER DUYỆT cho đòn bẩy CAPIT (2026-08-03) — NGUỒN CHUẨN TẮC DUY NHẤT ──────────
 # Ghim ở ĐÂY, tầng thực thi, chứ không phải chỉ ở tầng sinh tín hiệu. Lý do (arch-reviewer
 # 2026-08-03, phát hiện F2): CẢ HAI file mà runtime đọc — `data/trading_rules.json` VÀ

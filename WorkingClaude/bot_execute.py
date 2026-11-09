@@ -38,7 +38,7 @@ from trading_bot.plan import APPROVAL_PLACEHOLDERS
 from trading_bot.plan import (load_plan, filter_excluded_tickers, net_offsetting_orders,
                               cap_capit_orders, cap_lag_orders, filter_lag_rating_orders,
                               filter_lag_governance_orders, filter_signal_holds,
-                              filter_dd_flag_orders,
+                              filter_dd_flag_orders, filter_lag_dd_zone_orders,
                               apply_capit_lever, lever_live_preflight, approval_block_reason)
 from trading_bot.plan_funding_gate import check_plan_funding
 from trading_bot.exdate_gate import apply_exdate_gate
@@ -277,7 +277,8 @@ def _notify_failopen(label, gate, reason):
         f"Lệnh VẪN ĐI RA theo plan. Cần người kiểm tra TRƯỚC khi tin kết quả phiên này.")
 
 
-def _notify_dd_flag_summary(label, plan_date, lines):
+def _notify_dd_flag_summary(label, plan_date, lines, title="cổng cờ DD",
+                            footer="Luật user 2026-11-02: mã có cờ ⇒ loại lệnh MUA mọi book (trừ DISCRETIONARY)."):
     """Cổng cờ DD đã BỎ/CẢNH BÁO lệnh ⇒ 1 tin tóm tắt / account (cùng khuôn _notify_failopen).
 
     stdout của run_bot chỉ nằm trong LOG; lệnh mua bị cổng loại phải đến được người (Trading
@@ -285,9 +286,8 @@ def _notify_dd_flag_summary(label, plan_date, lines):
     """
     try:
         _notify_trading_daily(
-            f"🚩 **{label} — cổng cờ DD phiên {plan_date}: {len(lines)} lệnh**\n"
-            + "\n".join(lines)
-            + "\nLuật user 2026-11-02: mã có cờ ⇒ loại lệnh MUA mọi book (trừ DISCRETIONARY).")
+            f"🚩 **{label} — {title} phiên {plan_date}: {len(lines)} lệnh**\n"
+            + "\n".join(lines) + "\n" + footer)
     except Exception:
         pass
 
@@ -606,6 +606,18 @@ def main():
                                  f"cờ {a['codes']}")
         if _dd_lines:
             _notify_dd_flag_summary(p["label"], plan_date, _dd_lines)
+        # CỔNG LAG: DD + giá ≤ tâm (user 2026-11-09, TẠM tới khi edge LAG bình thường lại). Fail-closed.
+        # ĐỨNG TRƯỚC netting vì cùng lý do cổng cờ DD ngay trên.
+        plan, lagzone_blocked = filter_lag_dd_zone_orders(plan)
+        _lz_lines = []
+        for a in lagzone_blocked:
+            print(f"[{p['label']}] ⛔ LAG DD-ZONE BỎ lệnh MUA {a['ticker']} ({a['qty_before']:,} cp) — "
+                  f"{a['reason']}")
+            _lz_lines.append(f"⛔ BỎ MUA LAG {a['ticker']} {a['qty_before']:,} cp — {a['reason']}")
+        if _lz_lines:
+            _notify_dd_flag_summary(p["label"], plan_date, _lz_lines, title="cổng LAG DD-vùng",
+                                    footer="Luật user 2026-11-09: mua LAG cần DD và giá ≤ tâm "
+                                           "(tạm, tới khi edge LAG bình thường lại).")
         # Netting lệnh NGƯỢC CHIỀU cùng mã trong cùng plan (vd SELL park + BUY LAG cùng VPB)
         # → 1 lệnh NET ra broker; phần bù trừ là chuyển nội bộ giữa book (0 phí/spread). ĐẶT
         # SAU filter_excluded, TRƯỚC các trần %ADV — CHỦ ĐÍCH: trần đo tác động THỊ TRƯỜNG, mà
