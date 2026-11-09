@@ -2844,6 +2844,232 @@
    "recorded_at": "2026-11-09T01:15:00+07:00",
    "supersedes": "DGC@2026-10-30#1",
    "correction_reason": "Vòng 3b theo chỉ đạo user 09/11: cách B cho nhánh mở lại khai trường; tâm r3 41.522 (TRONG) → 41.849 (DƯỚI vùng, mỏng); tâm r2 44.767."
+  },
+  {
+   "ticker": "FPT",
+   "dd_date": "2026-11-01",
+   "rev": 3,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 45270,
+   "center": 57312,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới kết cục (XẤU/CƠ SỞ/TỐT 0,275/0,45/0,275 × RONIC 5 năm × …), sau CK 0,19% @5 tỷ",
+   "zone_high": 68466,
+   "center_range": null,
+   "price_ref": 50800,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng: giá 50.800 thấp hơn tâm 57.312 −11,4%; 27,0% trọng số kết cục dưới giá (sleeve 40 tr 26,9%). Luật sổ (giá < tâm −15%): KHÔNG đạt (ngưỡng 48.715 ở 5 tỷ / 48.799 ở 40 tr; giá cao hơn ngưỡng 4,3%). §2.5 KHÔNG đủ điều kiện. Rev trước (54.800) của sổ cũ nhãn DƯỚI vùng — r3 đảo theo đính chính",
+   "skeptic_status": "r3 (09/11, cụm 3b): fundamental-skeptic lần cuối CONFIRMED (medium; chạy lại trùng byte, D1–D4 áp đúng, chênh 57.312 vs 55.872 hoàn toàn do bỏ CK FTEL [UL] theo luật user; lỗi metadata ghi ở FPT/ERRATA_final_skeptic_20261109.md)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/FPT/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/FPT/REPORT_r3.md",
+     "quote": "| **r3 headline (sau CK 5 tỷ)** | **57.312** | **45.270** | 58.124 | **68.466** | 50.800 | **TRONG vùng** | 27,0% |",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high",
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/FPT/calc_r3/LOCK_r3_prerun.txt",
+   "assumptions_md5": "6ae0cd58882657e6567a6def3709785a",
+   "notes": "Vùng = P10–P90 kết cục, CK 0,19% @5 tỷ. Đối xứng trọng số kịch bản 0,275/0,45/0,275 (+2.866), RONIC terminal = Ke 3 kịch bản, trừ NCI 1.165,8 tỷ (−617), FOX/FRT theo giá 06/11 (−370), CK FTEL base 0% ([UL] ra độ nhạy; bản có CK 55.871 song song). MONG MANH: RONIC 5 năm TỐT 93% với moat không bền — chặn ở Ke thì tâm 50.652 ≈ giá; lãi liên kết Q4/25 600 tỷ là ước lượng chưa kiểm (GAPS G10); chưa quét pháp lý sau 01/11 (FTEL/Bộ Công an chỉ WARNING). r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-01",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-09T01:15:00+07:00",
+   "supersedes": "FPT@2026-11-01#2",
+   "correction_reason": "Vòng 3 áp đính chính skeptic 09/11: đối xứng trọng số, RONIC=Ke, trừ NCI, FOX/FRT 06/11, CK FTEL [UL] về base 0%; tâm 54.203 → 57.312; entry sổ trước (rev2, tâm 54.800) thay thế."
+  },
+  {
+   "ticker": "HHS",
+   "dd_date": "2026-11-01",
+   "rev": 3,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 12422,
+   "center": 13969,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới kết cục NAV holding (HTK NC-II, BĐSĐT, ô tô, ký quỹ, …), CK holding 0%, sau CK @5 tỷ",
+   "zone_high": 15564,
+   "center_range": null,
+   "price_ref": 9990,
+   "price_date": "2026-11-06",
+   "verdict_label": "DƯỚI vùng (headline CK holding 0%): giá 9.990 thấp hơn P10 12.422 và thấp hơn tâm 13.969 −28,5%; 0,0% trọng số dưới giá. Luật sổ (giá < tâm −15%): ĐẠT (ngưỡng 11.874 ở 5 tỷ). NHƯNG HHS đang trong forensic_flags EXCLUDE ⇒ theo luật 02/11 bị loại khỏi candidate plan bất kể nhãn. BẢN SONG SONG CK holding [UL] 27%: tâm 10.761, P10 8.624, TRONG vùng (36,6% dưới giá), luật 4 KHÔNG đạt — USER PHÁN XỬ quy ước",
+   "skeptic_status": "r3 (09/11, cụm 3b): fundamental-skeptic lần cuối CONFIRMED (medium; tự dựng lại mô hình ra 13.969, #1+#2 làm tâm GIẢM chứ không đẩy lên; ~85% đoạn 10.193→13.969 là do CK holding base 0%; lỗi văn bản ghi ở HHS/ERRATA_final_skeptic_20261109.md)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/HHS/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/HHS/REPORT_r3.md",
+     "quote": "| **HEADLINE r3: CK holding 0% (luật user, tiền lệ DRI#1/PVT#1/TCH#1)** | **13.969** | **12.422** | 13.917 | **15.564** | **0,0%** |",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/HHS/REPORT_r3.md",
+     "quote": "% trọng số dưới 9.990",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/HHS/calc_r3/LOCK_md5.txt",
+   "assumptions_md5": "e6e67969fdd0ece0548f1fc73568f4b9",
+   "notes": "Nhãn DƯỚI dựa HOÀN TOÀN vào quy ước CK holding base 0% (+3.1–3.2k đ/cp): giá 9.990 ngụ ý CK holding ~33,5% (trong trục r2 0–45%). Thời giá gốc HTK NC-II nhất quán (y khai), s theo biên quan sát; GOV_AX ra độ nhạy; I.14 ±15% đối xứng; BĐSĐT base 100% theo PPA nhóm (trục 0/50/100: 13.492, nhãn giữ). Lỗi lẫn năm 'vay 390 tỷ đáo hạn 18/11/2026' đã sửa (vay đã trả, BQ Q3 nợ vay 0). CK 5 tỷ = 31% ADV250 (ngoài vùng hiệu chỉnh), tranche ≤3,2 tỷ. Chưa quét tin 01–08/11. CRV chưa trả cổ tức tiền. r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-01",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-09T01:15:00+07:00",
+   "supersedes": "HHS@2026-11-01#2",
+   "correction_reason": "Vòng 3 áp đính chính skeptic 09/11: sửa thời giá/biên NC-II, bỏ GOV_AX khỏi tâm, CK holding [UL] về base 0% (bản 27% song song); tâm r2 10.387 → 13.969 (headline) / 10.761 (bản CK 27%)."
+  },
+  {
+   "ticker": "SIP",
+   "dd_date": "2026-11-01",
+   "rev": 3,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 43257,
+   "center": 54466,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới kết cục (đất 25/50/25 × giá đất × thu hồi × …), sau CK 1,39% @5 tỷ",
+   "zone_high": 69818,
+   "center_range": null,
+   "price_ref": 50100,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng: giá 50.100 thấp hơn tâm 54.466 −8,0%; 35,4% trọng số kết cục dưới giá (sleeve 40 tr 33,8%). Luật sổ (giá < tâm −15%): KHÔNG đạt (ngưỡng 46.296). §2.5 KHÔNG đủ điều kiện",
+   "skeptic_status": "r3 (09/11, cụm 3b): fundamental-skeptic lần cuối CONFIRMED (medium; chạy lại trùng byte, LOCK 19/19, 9 đính chính áp đúng/độ nhạy; 1 lỗi số ở bản song song 'mất trọn tạm ứng' đếm đôi +393 đ/cp, không chạm headline — ghi ở SIP/ERRATA_final_skeptic_20261109.md)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/SIP/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/SIP/REPORT_r3.md",
+     "quote": "**Tâm 54.466 · P10 43.257 · P50 53.085 · P90 69.818**",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/SIP/REPORT_r3.md",
+     "quote": "Giá 06/11 **50.100**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/SIP/calc_r3/LOCK_md5.txt",
+   "assumptions_md5": "812cdaf60abe5f3c97f8432634b34088",
+   "notes": "Vùng = P10–P90 kết cục, CK 1,39% @5 tỷ (127% ADV120, ngoài vùng hiệu chỉnh); sleeve 40 tr CK 0,31%: tâm 55.062. RONIC=Ke (−3.389), trọng số đất 25/50/25 (+1.186), thu hồi 100% (+572), tài sản sổ sách vào (+1.616), KTPL (−563); khoản tạm ứng 643,7 tỷ đưa vào base ở mức PV ~31% giá sổ (+826 do Taylor thêm; bỏ ra tâm 53.640). SUMMARY.json cũ là bản r1 (53.175) — đã ghi r3. WARNING bên liên quan VRG (BCC 667, cổ phiếu Cao su VN, BKS/NTC, An Lộc 19,79%); quỹ đất 937,1 ha theo AR25 (đất cho thuê 9T26 chưa trừ); GPM 9T26 là đỉnh (−1.840 độ nhạy); số BCTC ngoài BQ chỉ truy về ảnh. r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-01",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-09T01:15:00+07:00",
+   "supersedes": "SIP@2026-11-01#2",
+   "correction_reason": "Vòng 3 áp đính chính skeptic 09/11: RONIC=Ke, đối xứng trọng số đất, thu hồi vào độ nhạy/100%, đưa tài sản sổ sách và tạm ứng, KTPL; tâm r2 54.230 → 54.466 (các đính chính gần triệt tiêu: RONIC −3.389, phần còn lại +3.638)."
+  },
+  {
+   "ticker": "MVC",
+   "dd_date": "2026-11-03",
+   "rev": 9,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 9940,
+   "center": 16241,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 157.464 kết cục (6.561 ô × 3 mức thuê × 8), sau CK 8,55% @5 tỷ",
+   "zone_high": 23471,
+   "center_range": null,
+   "price_ref": 13500,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng ở mọi cỡ lệnh: giá 13.500 thấp hơn tâm 16.241 −16,9%, cao hơn P10 35,8%; 30,5% trọng số kết cục dưới giá. Luật sổ (giá < tâm −15%): ĐẠT ở mọi cỡ (5 tỷ: ngưỡng 13.805, giá thấp hơn ngưỡng 2,2% — MỎNG; bản trục biên Tân Lập một chiều {25/30/~NNC} của r2: TRƯỢT 0,76%; sleeve 40 tr đạt ở mọi bản). §2.5 KHÔNG đủ điều kiện",
+   "skeptic_status": "r3 (09/11, cụm 3b): fundamental-skeptic lần cuối CONFIRMED (medium; chạy lại trùng byte, LOCK 24/24, file pin dd_MVC_20261103/dd_NNC_20261030 không bị sửa — D1 là monkeypatch runtime; lỗi văn bản ghi ở MVC/ERRATA_final_skeptic_20261109.md)",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/MVC/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/MVC/REPORT_r3.md",
+     "quote": "Tâm **16.241 đ/cp sau CK 5 tỷ**",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/MVC/REPORT_r3.md",
+     "quote": "**P10 9.940 · P50 15.359 · P90 23.471**",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/MVC/REPORT_r3.md",
+     "quote": "Giá đóng cửa 06/11/2026 (BQ) **13.500**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/MVC/calc_r3/LOCK_r3_md5.txt",
+   "assumptions_md5": "ce1c4a9c6f3c548a879154c85f3c378d",
+   "notes": "Vùng = P10–P90 kết cục (157.464 kết cục), CK 8,55% @5 tỷ (ngoại suy ~11,5× ADV; sleeve ≤ min(4% NAV, 20% ADV60) ≈ 38 tr/phiên). D1 trần chu kỳ theo lạm phát (+556) cho cả Tân Lập lẫn NNC, trần SL 1,05 (+158), trục thuê Núi Nhỏ (−161); V_NNC ngầm trước CK 63.369 vs NNC r3 63.591 (−0,3%). ICD 44,8 tỷ: Taylor bác −429 của skeptic có cơ sở (chỉ 2,923 tỷ trùng ⇒ −58). Trục biên Tân Lập đối xứng {30/~NNC/38}: mức 38% cao hơn biên đáy NNC 34,3% không có dữ liệu và quyết luật 4 ở 5 tỷ. Quét pháp lý sau 05/11 chưa làm; hỏi legal-vn về Điều 195 (MVC lên 51% NNC) trước khi mua thật. r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-03",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "recorded_at": "2026-11-09T01:15:00+07:00",
+   "supersedes": "MVC@2026-11-03#8",
+   "correction_reason": "Vòng 3 áp đính chính skeptic 09/11: vá lỗi trần chu kỳ đếm hai lần (như NNC), trục trần/thuê đồng bộ NNC r3, ICD, trục biên đối xứng; tâm r2 15.276 → 16.241."
+  },
+  {
+   "ticker": "SZL",
+   "dd_date": "2026-10-26",
+   "rev": 2,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 22936,
+   "center": 25165,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới kết cục (N0 × thời hạn × …), RONIC=Ke, KTPL trên lõi + cổ phần (khung bán), sau CK 4,12% @5 tỷ",
+   "zone_high": 27710,
+   "center_range": null,
+   "price_ref": 27700,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng, sát ranh TRÊN: giá 27.700 thấp hơn P90 27.710 chỉ 10 đ ở cỡ 5 tỷ (ngoài vùng hiệu chỉnh CK, Q/ADV250 1.084%); cỡ sleeve 40 tr (nhãn hành động) TRONG, P90 28.793 hơn giá 3,8%, 76,2% trọng số kết cục dưới giá; giá cao hơn tâm 10,1% (5 tỷ) / 5,9% (40 tr). Luật sổ (giá < tâm −15%): KHÔNG đạt. Chuyển sang TRÊN khi N0 > 131,0 (base 131,08)",
+   "skeptic_status": "r3c (09/11, cụm 3b): A (RONIC=Ke) skeptic cuối r3b xác nhận cài đúng; B cài sai khung ở r3b đã sửa ở r3c (khung BÁN, KTPL trên lãi vốn sau thuế) — r3c Mike kiểm cơ học (không skeptic vòng nữa, circuit-breaker): tâm/P90 hai cỡ nằm đúng khoảng skeptic độc lập dựng lại; lỗi văn bản ghi ở SZL/ERRATA_final_skeptic_20261109.md",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_r3c.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_r3c.md",
+     "quote": "| Tâm, cỡ 5 tỷ (CK 4,12%) | 24.529 | **25.165** (+635; +2,6%) | 25.241 |",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_r3c.md",
+     "quote": "| P10 / P50 / P90, 5 tỷ | 22.301 / 24.372 / 27.074 | **22.936 / 25.008 / 27.710** | 23.013 / 25.085 / 27.786 |",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_r3c.md",
+     "quote": "| Giá | 27.700 (06/11, BQ) | 27.700 | 27.700 |",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/SZL/calc_r3c/LOCK_r3c_prerun.txt",
+   "assumptions_md5": "d146dbe7dca9f77c499e4c3c3f6a4e54",
+   "notes": "Vùng = P10–P90 kết cục, CK 4,12% @5 tỷ; cỡ 40 tr CK 0,37% tâm 26.148 P10 23.833 P90 28.793. Theo chỉ đạo user 09/11: (A) RONIC=Ke (−3.733), (B) KTPL 11,2% (TM18) trừ nhất quán trên thu nhập cổ phần SZC/SZB theo khung BÁN; khung GIỮ (cổ tức miễn thuế TNDN) song song: 25.241; B 50%: 25.344. Bridge: r3 29.257 → A 25.524 → r3b 24.529 → r3c 25.165. Chưa tra văn bản miễn thuế cổ tức; KTPL 11,2% mới một năm; ~1/3 giá trị cố định (cổ phần SZC/SZB theo giá một ngày, XDCB) nên vùng hẹp do cấu trúc; chưa tra holdco SNZ làm comp; pháp lý SNZ/Đồng Nai sau 05/11 chưa tra. r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-23",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-09T01:15:00+07:00",
+   "supersedes": "SZL@2026-10-26#1",
+   "correction_reason": "Vòng 3b/3c theo chỉ đạo user 09/11: áp RONIC=Ke và KTPL cổ phần (khung BÁN); tâm r2 32.391 (DƯỚI vùng) → r3 29.257 (TRONG) → 25.165 (TRONG sát ranh TRÊN)."
   }
  ],
  "center_kinds": [
