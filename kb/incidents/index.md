@@ -226,6 +226,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-11-09 | [RETRO — 2026-11-09: 5 sự cố (plan khôi phục chưa duyệt ⇒ HOLD + 100 event gate lặp; báo cáo tuần chặn G2 do verify nguồn gián tiếp; wakeup MISS 1/4 = 25%, 3 ngày liền; lịch ngày-lịch vs ngày-phiên; OAuth hết hạn 06–07/11), 2 pattern (verify/cam kết ≠ deliverable; ngày-lịch vs ngày-phiên, đã escalate). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-09.md) | logged |
 | 2026-11-08 | [RETRO — 2026-11-08: 4 sự cố (vòng CN thiếu lớp park; anomaly-flags-stale tái diễn lần 4 cuối tuần; wakeup MISS 1/6; cq hard-boundary đã fix), 2 pattern (job done ≠ deliverable; lịch ngày-lịch vs ngày-phiên, đã escalate). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-08.md) | logged |
 | 2026-11-07 | [RETRO — 2026-11-07: 3 sự cố (báo cáo tuần chặn do cột Price VNINDEX 02/11 sai; OAuth headless chết; bài học GPM_P0 sai vào brief), 2 pattern (A chốt sớm trên giả định chưa khoá, tái diễn 6 ngày, đã escalate; B job done ≠ artifact). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-07.md) | logged |
 | 2026-11-06 | [RETRO — 2026-11-06 (VIẾT BÙ bởi Winston): cron 00:30 chết vì OAuth Mike hết hạn (chẩn đoán "lạc đề" sai — đã vá daily_retro.sh); 2 near-miss (coord-2026-11-06 arch 2 vòng; disc-exit 2 vòng), Pattern A chờ user](retro/retro-2026-11-06.md) | logged |
