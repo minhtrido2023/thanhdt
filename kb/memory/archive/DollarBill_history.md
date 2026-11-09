@@ -357,3 +357,7 @@
 ## Archived 2026-11-08 (keep=6 days=5 require_done=True)
 - [2026-11-02T12:12:39Z] [2026-11-02 19:xx ICT] Plan SpaceX 11-03 XONG: BUY TCH 4100cp LO<=11.850 (BAL), egg>=18,6tr; chờ duyệt trước 08:45 03/11 (job DollarBill_20261102_121030)
 - [2026-11-02T12:12:52Z] [2026-11-02 19:xx ICT] Plan ZaloPay 11-03 XONG: BUY TCH 2600cp LO 11.850 (BAL, FLOOR_FAIL flagged), egg>=0.6tr; cho duyet truoc 08:45 03/11 (job DollarBill_20261102_121028)
+
+## Archived 2026-11-09 (keep=6 days=5 require_done=True)
+- [2026-11-03T12:11:58Z] [2026-11-03 19:xx ICT] Plan ZaloPay 11-04 XONG: SELL TV1 1100cp (tiep tuc thoai), 0 mua; cho duyet truoc 08:45 04/11 (job DollarBill_20261103_121024)
+- [2026-11-03T12:12:22Z] [2026-11-03 19:xx ICT] Plan SpaceX 11-04 XONG: SELL TV1 2200cp, 0 mua; chờ duyệt trước 08:45 04/11 (job DollarBill_20261103_121026)
