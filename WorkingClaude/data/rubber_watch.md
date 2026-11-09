@@ -1,18 +1,17 @@
 # Cao su (RSS3) — theo dõi tuần
 
-_Cập nhật 2026-10-30 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunSirs-586 (spot TQ)_
+_Cập nhật 2026-11-06 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunSirs-586 (spot TQ)_
 
 ## Trạng thái: **🟢 INFO**
 
 ## Giá & xu hướng
-- **Mới nhất:** 2.80 USD/kg (2026-10-30)
-- **vs tuần trước (WoW):** +0.0% (vs 2026-10-23)
-- **4 tuần:** -0.4% (vs 2026-10-02)  ·  **3 tháng:** +0.7% (vs 2026-07-31)
-- **Biên 52 tuần:** 2.03–2.92 USD/kg (WB monthly ghép chuỗi ngày, phủ 349d) — giá nằm trong biên
+- **Mới nhất:** 2.69 USD/kg (2026-11-06)
+- **vs tuần trước (WoW):** -4.1% (vs 2026-10-30)
+- **4 tuần:** -6.7% (vs 2026-10-09)  ·  **3 tháng:** -0.3% (vs 2026-08-07)
+- **Biên 52 tuần:** 2.03–2.92 USD/kg (WB monthly ghép chuỗi ngày, phủ 356d) — giá nằm trong biên
 
 | Tuần (giá đóng) | RSS3 USD/kg |
 |---|---|
-| 2026-09-11 | 2.79 |
 | 2026-09-18 | 2.74 |
 | 2026-09-25 | 2.81 |
 | 2026-10-02 | 2.81 |
@@ -20,11 +19,13 @@ _Cập nhật 2026-10-30 · nguồn: regionalert (SGX SICOM RSS3, USD/kg) + SunS
 | 2026-10-16 | 2.88 |
 | 2026-10-23 | 2.80 |
 | 2026-10-30 | 2.80 |
+| 2026-11-06 | 2.69 |
 
 ## Xu thế dài hạn — TREND_BREAK (tầng ĐỘC LẬP, nhịp THÁNG)
 - **Trạng thái:** 🟢 TREND_OK (trên đường) — từ 2026-02
-- **Giá tháng:** 2.83 USD/kg · **MA200-eq (MA10 tháng):** 2.59 → **+9.1%** so với đường
-- Tháng dưới đường trong 2 kỳ gần nhất: 0/2 · chuỗi 247 tháng (World Bank Pink Sheet)
+- **Giá tháng:** 2.69 USD/kg · **MA200-eq (MA10 tháng):** 2.65 → **+1.4%** so với đường
+- Tháng dưới đường trong 2 kỳ gần nhất: 0/2 · chuỗi 248 tháng (World Bank Pink Sheet)
+- Tháng 2026-11 là ước lượng từ các phiên ngày thật (trạng thái KHÔNG phụ thuộc vào nó)
 - Cách đọc: **XÁC NHẬN CHẾ ĐỘ dài hạn, KHÔNG phải tín hiệu bán/dự báo.** P(giảm thêm ≥15%/6th sau tín hiệu) = 31% ≈ base 32%; rổ CP cao su fwd-12m sau tín hiệu +26.5% vs base +12.5%.
 - Độc lập với WATCH/ALERT ở trên (khác chân trời: 6–24 tháng vs 1 tuần; khác nhịp: ~1 lần/18.7 tháng vs hàng tuần).
 
