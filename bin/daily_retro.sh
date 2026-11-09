@@ -45,6 +45,9 @@ source "$ROOT/bin/usage_limit_phrases.sh"
 #      tầng mạng (đúng ca ops-autofix Winston_20260820_012008 bị dẫn sai hướng).
 # Cố ý KHÔNG gộp vào usage_limit_phrases.sh: file đó là hợp đồng dùng chung với dispatch.sh
 # (khớp ⇒ auto-resume). Lỗi mạng KHÔNG được kích auto-resume của dispatch.sh.
+# Lớp thứ TƯ: XÁC THỰC hết hạn (sự cố thật 2026-11-07 00:30 ICT: 'Failed to authenticate: OAuth
+# session expired' ⇒ retro 2026-11-06 mất, log lại gán 'nghi Mike trả lạc đề' — sai lớp, §29).
+API_AUTH_ERROR_RE='Failed to authenticate|OAuth session expired|could not be refreshed|invalid_grant|401 Unauthorized'
 API_TRANSPORT_ERROR_RE='Unable to connect to API|Self-signed certificate|Connection error|fetch failed|ECONNREFUSED|ECONNRESET|ETIMEDOUT|getaddrinfo|EAI_AGAIN'
 # Chờ giữa 2 lần thử khi gặp lỗi truyền tải (giây). Cron 00:30 không có deadline gấp.
 API_RETRY_BACKOFF_SEC="${DAILY_RETRO_API_BACKOFF_SEC:-180}"
@@ -276,7 +279,11 @@ for _attempt in 1 2; do
       sleep "$API_RETRY_BACKOFF_SEC"
     }
   else
-    [ "$_attempt" -lt 2 ] && log "Draft rỗng/sai định dạng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+    if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$API_AUTH_ERROR_RE"; then
+      [ "$_attempt" -lt 2 ] && log "Draft thất bại vì LỖI XÁC THỰC (OAuth hết hạn/không refresh được) — không phải lạc đề; retry lần cuối."
+    else
+      [ "$_attempt" -lt 2 ] && log "Draft rỗng/sai định dạng (không phải usage-limit) — nghi Mike trả nhầm task cũ; retry lần cuối với prompt sạch."
+    fi
   fi
 done
 log "Draft dispatch xong sau $_attempt lần thử (exit $rc1, log: $draft_log)"
@@ -303,6 +310,8 @@ if ! _draft_valid "$DRAFT_FILE"; then
   # đoán giữa "bug prompt" và "mạng chết" (xem chú thích API_TRANSPORT_ERROR_RE ở đầu file).
   if tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$API_TRANSPORT_ERROR_RE"; then
     _fail_cause="loi truyen tai API/mang (vd TLS bi proxy chen cert) — KHONG phai bug prompt/quoting"
+  elif tail -c 4000 "$draft_log" 2>/dev/null | grep -qiE "$API_AUTH_ERROR_RE"; then
+    _fail_cause="loi XAC THUC (OAuth het han/khong refresh duoc) — can login lai tai khoan Mike, KHONG phai lac de"
   else
     _fail_cause="draft rong hoac sai dinh dang (thieu header RETRO) — nghi Mike tra lac de"
   fi

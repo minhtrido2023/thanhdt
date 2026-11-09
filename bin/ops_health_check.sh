@@ -1563,7 +1563,7 @@ elif _retro_missing:
         _why9 = (f" (gồm HÔM QUA — logs/daily_retro.log CÓ dòng START cho {_yday9} ⇒ script ĐÃ "
                  "chạy nhưng không hoàn tất; nguyên nhân nằm TRONG chuỗi dispatch, đọc "
                  "logs/daily_retro_draft_*.log của đêm đó và phân lớp: usage-limit / lỗi truyền "
-                 "tải API / Mike trả lạc đề).")
+                 "tải API / lỗi xác thực OAuth / Mike trả lạc đề).")
     elif _started9 is False:
         _why9 = (f" (gồm HÔM QUA — logs/daily_retro.log KHÔNG có dòng START cho {_yday9} ⇒ cron "
                  "00:30 ICT KHÔNG hề chạy: máy tắt hoặc cron không fire, KHÔNG phải bug trong "
