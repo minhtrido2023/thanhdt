@@ -10,3 +10,5 @@
 - [2026-11-06T12:11:14Z] [2026-11-06 19:xx ICT] Plan ZaloPay 11-09 XONG: BUY BSR1200/CSV1100/GAS300/MSB1500 (LAG), egg>=81.2tr; cho duyet truoc 08:45 09/11 (job DollarBill_20261106_120926)
 - [2026-11-06T12:11:39Z] [2026-11-06 19:xx ICT] Plan SpaceX 11-09 XONG: BUY LAG BSR/CSV/GAS/MSB 141,3tr, egg>=128,4tr; cho duyet truoc 08:45 09/11 (job DollarBill_20261106_120928)
 - [2026-11-08T12:06:38Z] [2026-11-08 19:xx ICT] Plan SpaceX 11-09 rev2 XONG (BUY BSR/CSV/GAS/MSB 141,3tr, egg>=100,1tr); chờ duyệt trước 08:45 09/11 (job DollarBill_20261108_120541)
+- [2026-11-09T12:08:58Z] [2026-11-09 19:xx ICT] Plan SpaceX 11-10 XONG: BUY LAG BSR/CSV/GAS/MSB ngay 2/3 143,2tr, egg>=94,0tr; cho duyet truoc 08:45 10/11 (job DollarBill_20261109_120649)
+- [2026-11-09T12:09:02Z] [2026-11-09 19:xx ICT] Plan ZaloPay 11-10 XONG: BUY LAG residual ngay 2 BSR1200/CSV1100/GAS300/MSB1500 (102,45tr), egg>=66,4tr; cho duyet truoc 08:45 10/11 (job DollarBill_20261109_120648)
