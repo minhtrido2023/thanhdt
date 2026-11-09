@@ -28,6 +28,8 @@ last_update_17: 2026-10-31 (Bobby — SECTOR READ real-time BLIND ngành BĐS nh
 last_update_18: 2026-11-01 (Bobby — SECTOR READ real-time BLIND thị trường xe tải thương mại VN: CYCLICAL ~0,50 (muộn nhịp tăng: VAMA xe thương mại H1 +28% → 9T +17%, Q3 ước −3%..0%) / ADMIN_GATED ~0,30 (đầu tư công 2027, QĐ 43/2025 khí thải mốc 01/01/2027 HN/TP.HCM, NĐ 89/2026 niên hạn, LEZ HN, NĐ 168 quá tải; không có PVTM với xe TQ) / STRUCTURAL ~0,20 — ambiguous ~55/45; FORECAST F1-F11 tới 2027-06-30; chi tiết ở file con sector_read_xe_tai_thuong_mai_vn_20261101.md)
 last_update_19: 2026-11-01 (Bobby — SECTOR READ real-time BLIND KCN cho thuê đất & hạ tầng miền Nam: ADMIN_GATED ~0,40 / CYCLICAL ~0,40 / STRUCTURAL ~0,20, ambiguous ~55/45; giá thuê phẳng +1,5-1,7% YoY, xưởng xây sẵn hấp thụ −48%, TT 99/2025 đổi ghi nhận doanh thu từ 2026; file con sector_read_kcn_cho_thue_dat_20261101.md)
 last_update_19: 2026-11-01 (Bobby — SECTOR READ real-time BLIND nhóm CNTT VN 3 khối: (1a) xuất khẩu phần mềm STRUCTURAL ~0,45 / CYCLICAL ~0,45 / ADMIN ~0,10 ambiguous ~50/50; (1b) CĐS nội địa ADMIN_GATED ~0,60 (giải ngân KHCN-CĐS 41,18% tại 26/10); (2a) băng rộng cố định STRUCTURAL bão hoà ~0,55 clean; (2b) TTDL ADMIN_GATED ~0,45 (giá điện TT 60/2025) / STRUCTURAL ~0,40 ambiguous; (3) giáo dục tư ADMIN_GATED ~0,55 (NQ 217/2025 miễn HP công lập, dự thảo trần ĐH tự chủ 2,5x) ambiguous ~60/40; FORECAST F1-F15 tới 2027-09-30; chi tiết ở file con sector_read_cntt_vienthong_giaoduc_vn_20261101.md)
+last_update_20: 2026-11-09 (Bobby — SECTOR READ real-time BLIND ngành lọc hoá dầu nội địa VN: CYCLICAL ~0,55 (đỉnh crack do cú sốc cung Hormuz/XK vùng Vịnh; xăng đỉnh T7, diesel đỉnh T9, chỉ số crack TE 66→48; late-peak → early-decline) / ADMIN_GATED ~0,30 (thuế NK MFN 0% + BVMT 0 đ/l tới 31/12/2026, giá bán, lệnh chạy tối đa, E10) / STRUCTURAL ~0,15 — ambiguous ~60/40; cả 2 nhà máy TA năm 2027; FORECAST F1-F6 (BQ tự chấm) + D1-D11 tới 2028-12-31; chi tiết ở file con sector_read_loc_hoa_dau_20261109.md)
+last_update_20: 2026-11-09 (Bobby — SECTOR READ real-time BLIND hoá chất cơ bản VN xút–clo + axit: biên xút–clo CYCLICAL ~0,45 / STRUCTURAL ~0,35 / ADMIN_GATED ~0,20, ambiguous ~55/45; xút TQ đáy 3 năm (sunsirs 568 CNY/t, −30% YoY); axit = cú sốc lưu huỳnh tạm thời đang đảo chiều (clean ~0,85); FORECAST khoá 20/60/120 ngày + E1-E4; chi tiết ở file con sector_read_hoa_chat_xut_clo_20261109.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1729,6 +1731,42 @@ snippet lộ tóm tắt ĐHĐCĐ của 1 DN ICD niêm yết, KHÔNG dùng). Bả
 - **FORECAST khoá 03/11 (9 mục):** XK 2026 ≥+20% P=0,85; container VN 2026 ≥+10% P=0,60; CFI 05/27 <2.500 P=0,50; coal 03/27 <130 P=0,45; NĐ ICD
   ≤2027 P=0,45; Cần Giờ khởi công ≤06/27 P=0,55; lộ trình cấm tuynel có chế tài ≤2027 P=0,07; gạch ống Sở XD TP.HCM Q2/27 trong ±5% P=0,55;
   NQ 12/2026 còn hiệu lực 06/27 P=0,85. **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Lọc hoá dầu nội địa VN (nhà máy khoảng 6,5-7 tr t/năm, crack, tồn kho, thuế, E10, TA), as-of 09/11/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike (bước 3 skill due-diligence, kèm snapshot vĩ mô 09/11).** Bobby KHÔNG tra mã, giá cổ phiếu, BCTC của DN nào (kiểm
+toán blind ở mục 0 file con: mô tả ngành khớp đúng một nhà máy; chỉ dùng số VẬN HÀNH cấp nhà máy; snippet lộ 1 tiêu đề lợi nhuận cũ
+và link PDF CTCK, KHÔNG mở). Bản đầy đủ (cung/cầu, cơ chế giá import-parity + bảo hộ thuế, bảng crack đa proxy, lãi/lỗ tồn kho theo
+quý, 3 kịch bản, 21 mục DD, nguồn): **`sector_read_loc_hoa_dau_20261109.md`** (file con).
+- **Phân loại: `CYCLICAL` ~0,55 / `ADMIN_GATED` ~0,30 / `STRUCTURAL` ~0,15; `ambiguous` ~60/40.** Vị trí: cuối đỉnh → đầu pha giảm.
+  Crack xăng (RBOB−Brent) đỉnh T7 50 → 18,7 đầu T11; diesel (ULSD−Brent) đỉnh T9 101 → 84; chỉ số crack TE 66 (T9) → 48. IEA 10/2026:
+  biên châu Á bị ép bởi giá dầu giao tới + cước, gasoil căng H1/27 rồi nới H2/27. Nghi Sơn có lãi lần đầu (8T/26 khoảng 530 tr USD) =
+  bằng chứng 2026 là năm biên ngoại lệ. Trục 2: `EXTERNAL_CYCLE`.
+- Khối lượng: 2 nhà máy chạy khoảng 125%, vẫn nhập khoảng 40-45% nhu cầu; **cả hai TA năm 2027** (Nghi Sơn 48 ngày từ 10/08/2027;
+  Dung Quất TA6 chưa công bố tháng). Mở rộng Dung Quất khoảng 2029. Tồn kho: Brent cuối quý +71% / −30% / +34% ⇒ lãi/lỗ tồn kho lớn
+  ngang crack. Thuế NK MFN 0% (NĐ 72, NQ 43) và BVMT 0 đ/l tới 31/12/2026.
+- **FORECAST khoá 09/11:** Brent 31/12/2026 < 98,03 P=0,55; crack TE T3/2027 < 48,1 P=0,55; ULSD−Brent T9/2027 < 50 P=0,65; Dung Quất
+  2026 ≥ 8,0 tr t P=0,85 (≥ 8,3 P=0,45); TA6 bắt đầu trong 2027 P=0,80, trùng TA Nghi Sơn P=0,12; thuế NK MFN xăng vẫn 0% ngày
+  15/01/2027 P=0,50; nghị định xăng dầu mới ≤ 30/06/2027 P=0,45. **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (không phải episode VNINDEX) — Hoá chất cơ bản VN (xút–clo, axit sunfuric), as-of 09/11/2026 (Bobby, real-time BLIND)
+
+**Dispatch bởi Mike.** Bobby không tra mã, giá hay BCTC của DN nào. Kiểm toán blind ở mục 0 file con: gitStatus lộ tên thư mục DD theo mã, snippet
+tìm kiếm lộ tên chủ đầu tư dự án; tôi không mở các thư mục đó và không dùng KQKD. Bản đầy đủ: **`sector_read_hoa_chat_xut_clo_20261109.md`** (file con).
+- **(a) Xút TQ ở đáy 3 năm** (sunsirs 568 CNY/t, −30% YoY, sát giá vốn tiền mặt). Đây là đáy chu kỳ trên nền dư cung cấu trúc (TQ thêm khoảng
+  1,5 tr t/năm, PVC không có công suất mới). Độ tin cậy khoảng 0,7. P(>700 trước 31/03/27) = 0,10.
+- **(b) Biên xút–clo VN: `CYCLICAL` 0,45 / `STRUCTURAL` 0,35 / `ADMIN_GATED` 0,20, `ambiguous` ~55/45.** Cầu khối lượng tốt (CN +15%, alumina Q3
+  +9%). Giá neo import parity TQ (5-7 ngày tàu), VND mạnh lên 2,77%. Công suất nội địa khoảng 230 nghìn t có thể lên 430-500 nghìn t vào 2028-30
+  (Thanh Hoá, Đồng Nai di dời, Lâm Đồng), trong khi thiếu hụt khoảng 220 nghìn t thu hẹp. Ràng buộc clo: VN gần như chưa có PVC đi từ clo trong nước.
+  EVN giảm 2% từ 01/11/26. Hạn ngạch muối là đầu vào hành chính.
+- **(c) Axit sunfuric:** cú sốc lưu huỳnh tạm thời, đang đảo chiều (−52% từ đỉnh), clean khoảng 0,85.
+- **FORECAST khoá 09/11:** TB5 xút sunsirs (gốc 574,0): +20 ngày P(<gốc) = 0,62, +60 ngày 0,53, +120 ngày 0,46. PVC TE (gốc 5.131): 0,65 / 0,58 / 0,52.
+  Lưu huỳnh TE (gốc 5.271,75): +60 ngày 0,62, +120 ngày 0,65. E1 xút Nghi Sơn vận hành ≤31/03/27 P = 0,70. E2 EVN tăng giá ≤31/03/27 P = 0,20.
+  E3 AD xút ≤30/06/27 P = 0,05. E4 khởi công dây chuyền alumina ≥1 tr t ≤30/06/27 P = 0,25. **Không phải khuyến nghị mua/bán.**
 
 ---
 

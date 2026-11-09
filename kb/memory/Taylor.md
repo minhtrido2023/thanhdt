@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-08T16:50:32Z] [dd-redo r3 NNC 08/11] XONG job Taylor_20261108_164333: tam 57.589->61.273 (P10 30.375/P90 95.341) TRONG @47.200; CHO Mike skeptic cuoi + ghi so; open: cong thuc co gian doi xung skeptic (64.022) khong tai lap
 - [2026-11-08T16:50:46Z] [dd-redo r3 DGC 08/11] XONG job Taylor_20261108_164329: tam 44.767->41.522 (P10 32.931/P90 49.929) TRONG mong @33.000 (+0,2% tren P10); base w mo lai KT25=0, w>=0,1 => DUOI; CHO Mike skeptic cuoi + ghi so
 - [2026-11-08T16:51:22Z] [dd-redo r3 SZL 08/11] XONG job Taylor_20261108_164337: tam 32.391->29.257 (P10 26.209/P90 32.706) TRONG @27.700; mo: quy uoc RONIC (=Ke => 25.524); CHO Mike skeptic cuoi + ghi so
 - [2026-11-08T17:56:10Z] [dd-redo r3b SZL 09/11] XONG job Taylor_20261108_175123: A+B tam 29.257->24.529; 5 ty TREN, 40 tr TRONG sat canh tren (P90 28.133 @27.700); CHO Mike ghi so
@@ -26,3 +25,4 @@
 - [2026-11-08T18:12:15Z] [dd-redo r3 MVC 09/11] XONG job Taylor_20261108_180136: tam 15.276->16.241 (P10 9.940/P90 23.471) TRONG @13.500, luat4 DAT moi co (mong 5 ty; ban TL mot chieu truot); ICD skeptic -429 sai (chi -58); CHO Mike skeptic cuoi + ghi so
 - [2026-11-08T18:12:29Z] [dd-redo r3c SZL 09/11] XONG job Taylor_20261108_180625: sua khung KTPL co phan, tam 24.529->25.165 (40tr 26.148, P90 28.793) TRONG ca 2 co (5ty ranh gioi P90+10d); CHO Mike kiem co hoc + ghi so
 - [2026-11-09T00:38:03Z] [dd-redo r3b TCH 09/11] XONG job Taylor_20261109_003030 (vong cuoi): tam 16.244->15.864 (P10 14.563/P90 17.325) DUOI @13.500 ca 2 co; mong: g kiem toan 42,7% => TRONG; CHO Mike kiem co hoc + ghi so
+- [2026-11-09T07:46:34Z] [dd-lagcand BSR 09/11] XONG job Taylor_20261109_073600: tam 16.437 (P10 12.034/P90 22.286) TREN vung @26.250; KH 2026 dieu chinh ngu y Q4 lo; CHO Mike skeptic + ghi so

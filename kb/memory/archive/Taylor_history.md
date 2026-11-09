@@ -2158,3 +2158,6 @@
 - [2026-11-08T15:48:09Z] [dd-redo r3 DRI 08/11] XONG job Taylor_20261108_153743: tam 14.092->15.257 (P10 12.908/P90 17.549) TRONG sat canh duoi @13.100 (co sleeve that: DUOI); CHO Mike skeptic cuoi + ghi so
 - [2026-11-08T16:49:12Z] [dd-redo r3 MBB 08/11] XONG job Taylor_20261108_164331: tam 23.804->21.069 (P10 14.729/P90 27.577) TRONG @19.250, 38,6% duoi gia; nhan 4 dinh chinh; CHO Mike skeptic cuoi + ghi so
 - [2026-11-08T16:50:24Z] [dd-redo r3 PVP 08/11] XONG job Taylor_20261108_164335: tam 22.366->23.099 (P10 13.799/P90 30.338) TRONG @18.000; nhan phu thuoc NPV tau (NPV0 => DUOI); CHO Mike skeptic cuoi + ghi so
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-11-08T16:50:32Z] [dd-redo r3 NNC 08/11] XONG job Taylor_20261108_164333: tam 57.589->61.273 (P10 30.375/P90 95.341) TRONG @47.200; CHO Mike skeptic cuoi + ghi so; open: cong thuc co gian doi xung skeptic (64.022) khong tai lap
