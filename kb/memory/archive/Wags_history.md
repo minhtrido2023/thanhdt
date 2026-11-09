@@ -446,3 +446,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-11-03 (keep=6 days=5 require_done=True)
 - [2026-10-21T11:50:00Z] [2026-10-21] lag-plan-alert-consistency XONG TREN NHANH fix/lag-plan-alert-consistency-20261021 @9b313220e (wt_lag_alert_20261021) CHUA merge — cho Mike goi arch-reviewer (bat buoc: dong send_plan_report) roi merge truoc CN 25/10 19:00. Neu NEEDS_CHANGES: 1 luot sua. Bus finding wags-fix: lag-plan-alert-consistency.
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-10-15T05:46:24Z] [2026-10-15] Chốt: đóng question thì answer phải GIỮ ĐÚNG topic rollup; answer topic con (plan-t1-not-ready-*) không đóng câu tổng (checker match đúng topic).
