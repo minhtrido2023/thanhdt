@@ -2176,3 +2176,6 @@
 
 ## Archived 2026-11-09 (keep=12 days=0 require_done=False)
 - [2026-11-08T18:08:21Z] [dd-redo r3 FPT 09/11] XONG job Taylor_20261108_180128: tam 54.203->57.312 (P10 45.270/P90 68.466) TRONG @50.800, luat 4 khong dat; ban A giu CK FTEL 55.871; CHO Mike phan bien cuoi + ghi so
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-11-08T18:09:43Z] [dd-redo r3 TCH 09/11] XONG job Taylor_20261108_180134: tam 13.768->16.244 (P10 15.578/P90 16.950) DUOI vung @13.500 (nhan dao); ban CK holding 27% => TRONG; CHO Mike/user phan xu holding + skeptic cuoi + ghi so
