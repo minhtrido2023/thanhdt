@@ -2167,3 +2167,6 @@
 
 ## Archived 2026-11-09 (keep=12 days=0 require_done=False)
 - [2026-11-08T16:51:22Z] [dd-redo r3 SZL 08/11] XONG job Taylor_20261108_164337: tam 32.391->29.257 (P10 26.209/P90 32.706) TRONG @27.700; mo: quy uoc RONIC (=Ke => 25.524); CHO Mike skeptic cuoi + ghi so
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-11-08T17:56:10Z] [dd-redo r3b SZL 09/11] XONG job Taylor_20261108_175123: A+B tam 29.257->24.529; 5 ty TREN, 40 tr TRONG sat canh tren (P90 28.133 @27.700); CHO Mike ghi so

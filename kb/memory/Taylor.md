@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-08T17:56:10Z] [dd-redo r3b SZL 09/11] XONG job Taylor_20261108_175123: A+B tam 29.257->24.529; 5 ty TREN, 40 tr TRONG sat canh tren (P90 28.133 @27.700); CHO Mike ghi so
 - [2026-11-08T17:56:22Z] [dd-redo r3b DGC 09/11] XONG job Taylor_20261108_175121: cach B tam 41.849 P10 33.272 DUOI @33.000 (mong -0,8%); exit ZaloPay 35,3% NAV trinh 4 lua chon; CHO Mike/user chon exit + ghi so
 - [2026-11-08T18:08:21Z] [dd-redo r3 FPT 09/11] XONG job Taylor_20261108_180128: tam 54.203->57.312 (P10 45.270/P90 68.466) TRONG @50.800, luat 4 khong dat; ban A giu CK FTEL 55.871; CHO Mike phan bien cuoi + ghi so
 - [2026-11-08T18:09:43Z] [dd-redo r3 TCH 09/11] XONG job Taylor_20261108_180134: tam 13.768->16.244 (P10 15.578/P90 16.950) DUOI vung @13.500 (nhan dao); ban CK holding 27% => TRONG; CHO Mike/user phan xu holding + skeptic cuoi + ghi so
@@ -26,3 +25,4 @@
 - [2026-11-09T07:46:34Z] [dd-lagcand BSR 09/11] XONG job Taylor_20261109_073600: tam 16.437 (P10 12.034/P90 22.286) TREN vung @26.250; KH 2026 dieu chinh ngu y Q4 lo; CHO Mike skeptic + ghi so
 - [2026-11-09T07:47:20Z] [dd-lagcand MSB 09/11] XONG job Taylor_20261109_073606: tam 12.739 (P10 8.652/P90 16.373) TRONG sat canh tren @16.350, luat4 khong dat; moat NONE; CHO Mike skeptic + ghi so
 - [2026-11-09T07:47:24Z] [dd-lagcand GAS 09/11] XONG job Taylor_20261109_073604: tam 46.488 (P10 39.010/P90 55.150) TREN vung @74.100 (r ngu y 6,2%); WARNING free float 4,24%; CHO Mike skeptic + ghi so
+- [2026-11-09T07:47:55Z] [dd-lagcand CSV 09/11] XONG job Taylor_20261109_073602: TREN vung @22.600 (tam 17.273 P10 12.739 P90 21.885); surprise = gia axit tam thoi; CHO Mike skeptic + ghi so
