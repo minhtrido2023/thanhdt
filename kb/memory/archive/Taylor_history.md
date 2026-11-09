@@ -2161,3 +2161,9 @@
 
 ## Archived 2026-11-09 (keep=12 days=0 require_done=False)
 - [2026-11-08T16:50:32Z] [dd-redo r3 NNC 08/11] XONG job Taylor_20261108_164333: tam 57.589->61.273 (P10 30.375/P90 95.341) TRONG @47.200; CHO Mike skeptic cuoi + ghi so; open: cong thuc co gian doi xung skeptic (64.022) khong tai lap
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-11-08T16:50:46Z] [dd-redo r3 DGC 08/11] XONG job Taylor_20261108_164329: tam 44.767->41.522 (P10 32.931/P90 49.929) TRONG mong @33.000 (+0,2% tren P10); base w mo lai KT25=0, w>=0,1 => DUOI; CHO Mike skeptic cuoi + ghi so
+
+## Archived 2026-11-09 (keep=12 days=0 require_done=False)
+- [2026-11-08T16:51:22Z] [dd-redo r3 SZL 08/11] XONG job Taylor_20261108_164337: tam 32.391->29.257 (P10 26.209/P90 32.706) TRONG @27.700; mo: quy uoc RONIC (=Ke => 25.524); CHO Mike skeptic cuoi + ghi so
