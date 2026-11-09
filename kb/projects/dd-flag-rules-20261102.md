@@ -21,3 +21,6 @@ Nguyên văn chỉ đạo: cổng cờ KHÔNG áp cho book PARK (custom30V parki
 - Cài: hằng số `DD_FLAG_EXEMPT_PARK_BOOKS = {"PARK","CUSTOM30V_PARKING"}` cạnh `DD_FLAG_EXEMPT_PREFIX`/`DD_FLAG_EXEMPT_BOOKS` trong `trading_bot/plan.py`; khớp TUYỆT ĐỐI (upper), mọi account (khác PROBE chỉ `main`).
 - Nhãn đo từ `data/trade_plans/plan_{SpaceX,ZaloPay}_*.json`: BUY park = book `custom30V_parking` (NEUTRAL_park / PARK_ENTRY / không play_type) và book `PARK` (PARK_ADD); SELL park (`merge_park_orders.py`) = book `PARK`. Cổng chạy TRƯỚC netting ⇒ nhãn luôn là nhãn gốc, lệnh NET không đổi kết quả.
 - Rủi ro đã biết: miễn theo NHÃN book — plan tự ghi nhãn "PARK" cho lệnh không phải park thì lọt cổng (cùng bản chất miễn DISCRETIONARY*); chấp nhận theo chỉ đạo, selfcheck PARK-4 khoá khớp tuyệt đối.
+
+## Quy tắc 5 — 09/11/2026 19:2x ICT (`decided_by: user`): mua LAG cần DD + giá ≤ tâm (TẠM)
+Chi tiết + cài đặt: `kb/projects/lag-dd-zone-gate-20261109.md`. Điều kiện thoát chưa định nghĩa.
