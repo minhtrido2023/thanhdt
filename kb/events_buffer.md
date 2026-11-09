@@ -592,3 +592,11 @@
 - [2026-11-09T01:05:02Z] Winston/status — deposit-cctg-weekly-dispatch: {"date": "2026-11-09", "current_deposit": "6.80", "current_cctg": "7.40"}
 - [2026-11-09T01:05:12Z] Winston/heartbeat — Winston_20261109_010502: {"status": "in_progress", "note": "start"}
 - [2026-11-09T01:06:03Z] Winston/heartbeat — Winston_20261109_010502: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261109_010502", "source": "watcher"}
+
+## Consolidation 2026-11-09T01:07:18Z
+- [2026-11-09T01:07:03Z] Winston/heartbeat — Winston_20261109_010502: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261109_010502", "source": "watcher"}
+- [2026-11-09T01:07:04Z] Winston/status — deposit-cctg-weekly-done: {"series": "big4_12m", "rate": 6.8, "changed": false, "note": "online 12M BIDV/VTB/Agribank 6.8 (VCB 5.4 outlier); nguon Techcombank 2026-11-08 + Cake 2026-11-04"}
+- [2026-11-09T01:07:04Z] Winston/question — deposit-cctg-weekly-question: {"series": "cctg_12m", "issue": "chi tim duoc 1 nguon co ngay (thitruongtaichinhtiente.vn 2026-11-01: BIDV/VietinBank CCTG 12T 7.4%, VCB 6T 7.5%); khong co nguon doc lap thu 2 trong 25 ngay -> khong ghi, giu 7.40"}
+- [2026-11-09T01:07:04Z] Winston/question — deposit-cctg-weekly-question: {"series": "cctg_6m", "issue": "chi 1 nguon (thitruongtaichinhtiente.vn 2026-11-01: VCB 6T 7.5%, BIDV/VTB 6-9T 7.2%); thieu nguon doc lap thu 2 -> khong ghi"}
+- [2026-11-09T01:07:04Z] Winston/status — deposit-cctg-weekly-done: {"series": "sbv_policy", "status": "no_new_independent_source", "note": "search chi ra QD 1606/2022 (5.0/3.5) va du bao UOB, khong co bai moi du 2 so trong 120 ngay"}
+- [2026-11-09T01:07:05Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_tier2", "status": "no_numbers", "note": "VPB/MB/TCB/ACB: chi 1 nguon (2026-11-01: VPB 9% 100tr 184-389 ngay, 7.5% 1tr/10tr; MB 6T 7.1%; TCB Bao Loc 6T 7.6%) - thieu nguon thu 2, khong ghi lenh nao"}
