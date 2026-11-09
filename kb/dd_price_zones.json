@@ -3070,6 +3070,44 @@
    "recorded_at": "2026-11-09T01:15:00+07:00",
    "supersedes": "SZL@2026-10-26#1",
    "correction_reason": "Vòng 3b/3c theo chỉ đạo user 09/11: áp RONIC=Ke và KTPL cổ phần (khung BÁN); tâm r2 32.391 (DƯỚI vùng) → r3 29.257 (TRONG) → 25.165 (TRONG sát ranh TRÊN)."
+  },
+  {
+   "ticker": "TCH",
+   "dd_date": "2026-10-31",
+   "rev": 3,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 14563,
+   "center": 15864,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới kết cục (g × k × y dự án × …), CK holding 0%, sau CK 0,63% @5 tỷ",
+   "zone_high": 17325,
+   "center_range": null,
+   "price_ref": 13500,
+   "price_date": "2026-11-06",
+   "verdict_label": "DƯỚI vùng — NHÃN KHÔNG CHẮC: giá 13.500 thấp hơn P10 14.563 7,3% (cách P10 +7,9% theo chiều lên) và thấp hơn tâm 15.864 −14,9%; 0% trọng số dưới giá. Luật sổ (giá < tâm −15%): KHÔNG đạt ở 5 tỷ (ngưỡng 13.484, trượt 0,1%); đạt ở sleeve 40 tr (ngưỡng 13.562). Ba lựa chọn riêng lẻ có cơ sở đều đưa về TRONG: biên gộp kiểm toán 42,7% ⇒ 13.642 (44,5% dưới giá); y=4 mọi dự án ⇒ 13.435 (56,3%). TCH còn cờ FLOOR_FAIL ⇒ loại khỏi candidate bất kể nhãn",
+   "skeptic_status": "r3b (09/11, cụm 3b, vòng cuối): skeptic cuối r3 REFUTED hẹp ở chiết khấu giá vốn đất cũ — Taylor sửa r3b (nhất quán giá vốn+thặng dư pv(y), k đo từ TMĐT), Mike kiểm cơ học: chạy lại 2 lần trùng byte với LOCK, y=4 k=0 tái lập 13.435 của skeptic (không còn skeptic vòng — circuit-breaker); errata ở TCH/ERRATA_final_20261109.md",
+   "source_file": "agents/Taylor/research/dd_redo_20261105/TCH/REPORT_r3b.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_redo_20261105/TCH/REPORT_r3b.md",
+     "quote": "| **r3b HEADLINE, cỡ 5 tỷ** (CK 0,63%) | **15.864** | 14.563 | 15.795 | 17.325 | 13.500 | **DƯỚI vùng** | 0% |",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high",
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/TCH/calc_r3b/LOCK_md5.txt",
+   "assumptions_md5": "6556fb92dfa470eb1c16e1d53315b56b",
+   "notes": "Vùng = P10–P90 kết cục, CK 0,63% @5 tỷ; sleeve 40 tr: tâm 15.955, P10 14.647, P90 17.425. CK holding base 0% (độ lớn [UL], ra độ nhạy — user phán xử quy ước, cũng áp cho HHS), biên backlog/đất cũ nhất quán g=51,9% (6T FY26 chưa soát xét; 6T FY25 51,0% có soát xét; FY24/25 kiểm toán 42,7%). Tâm r3 cũ (16.244, chỉ chiết khấu thặng dư) song song. Vùng hẹp do cấu trúc (sổ sách ~74% tâm). FLOOR_FAIL: CF_OA_3Y −771,7 tỷ do mua đất; WARNING ngân hàng nhận 678,3 tỷ chưa xác minh (SCB/SGB hay Sacombank), phạt thuế/UBCK; 'không khởi tố' chưa tra lại. r 13,5% neo 7,40%.",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-09T01:15:00+07:00",
+   "supersedes": "TCH@2026-10-31#2",
+   "correction_reason": "Vòng 3b theo skeptic cuối: chiết khấu nhất quán giá vốn + thặng dư đất cũ, đo k từ TMĐT; tâm r2 13.768 → r3 16.244 → r3b 15.864; nhãn r2 TRONG → DƯỚI vùng (không chắc)."
   }
  ],
  "center_kinds": [
