@@ -1,0 +1,923 @@
+<link rel="stylesheet" href="/assets/vendors/custom/datatables/datatables.bundle.css">
+<script src="/js/jquery.dataTables.min.js"></script>
+<script src="/assets/vendors/custom/datatables/datatables.bundle.js"></script>
+<link href="/css/luutru.css" rel="stylesheet" />
+<link href="/css/style.bundle.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/js/all.min.js"></script>
+<style>
+
+    .custom_scrollY::-webkit-scrollbar {
+        display: block;
+        width: 5px;
+    }
+
+    .custom_scrollY::-webkit-scrollbar-button {
+        width: 10px;
+        height: 1px;
+    }
+
+    .custom_scrollY::-webkit-scrollbar-thumb {
+        background-color: #d9d9d9;
+        border-right: none;
+        border-left: none;
+        border-radius: 10px;
+    }
+
+    .custom_scrollY::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom_scrollY::-webkit-scrollbar-track-piece:end {
+        background: transparent;
+        margin-bottom: 15px;
+    }
+
+    #tableIR tr td {
+        font-size: 14px;
+        padding: 10px 5px;
+    }
+
+    .cus_border {
+        width: 20%;
+    }
+
+    .row_left {
+        padding-left: 0px;
+    }
+
+    .row_right {
+        padding-right: 0px;
+    }
+
+    #btnXemTDN {
+        border: none;
+        border-radius: 27px;
+        cursor: pointer;
+        height: 33px;
+        line-height: 33px;
+        outline: 0;
+        pointer-events: auto;
+        width: 90px;
+        color: #fff;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+    }
+
+    #content {
+        padding-top: 7px;
+    }
+
+    .formsearch_LUUTRU {
+        margin-top: 5%;
+    }
+
+    .modal {
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        overflow-y: auto;
+    }
+
+    .model-body tr td {
+        font-size: 14px
+    }
+
+    .modal .modal-content .modal-header .close {
+        color: #ffffff;
+    }
+
+    .modal .modal-content {
+        border-radius: 4px;
+        border: none;
+    }
+
+    .modal-header .close {
+        margin-left: auto;
+    }
+    /* The Close Button */
+    .close {
+        color: black;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<!-- begin:: Content -->
+<div id="loading"></div>
+
+<div class="main_info_home luu_tru_TDN row">
+
+    <div class="col-lg-8 row_left">
+
+        <div class="background_box Info_Archives">
+
+            <div class="content_head content_Archives" style="display:flex">
+                <span class="title_box period">K&#x1EF3; b&#xE1;o c&#xE1;o</span>
+
+            </div>
+            <div class="formsearch_LUUTRU " id="">
+                <label class="formsearch_inside col-form-label " id="lbl_kybc">T&#x1EEB; ng&#xE0;y</label>
+                <input class="form-item calendar-input  " id="datefromNDT" type="date" />
+                <label class="formsearch_inside col-form-label ">&#x110;&#x1EBF;n ng&#xE0;y</label>
+                <input class="form-item calendar-input  " id="datetoNDT" type="date" />
+
+                <button type="submit" class="btn btn-success btnSearch"
+                        id="btnXemTDN">
+                    Xem
+                </button>
+            </div>
+
+
+
+            <div style="padding-top:10px;">
+                <div class="custom_scrollY" style="max-height: 685px; overflow-y: auto; border-top: 1px dotted #ccc;">
+                    <table id="table3" cellspacing="0">
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                        <table id="table2" cellspacing="0" hidden>
+                        </table>
+                  
+
+                </div>
+
+            </div>
+
+    </div>
+
+
+    <div class="col-lg-4 row_right">
+
+        <!--Tin tức-->
+        <div class="background_box info_news_lt">
+            <div class="content_head">
+                <h4 class="title_box">Lo&#x1EA1;i t&#xE0;i li&#x1EC7;u</h4>
+            </div>
+
+            <div class="" id="loaitailieu">
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="tatca" type="checkbox"
+                               class="autocheck form-check-input Check_all" checked
+                               name="Checkbox[]">
+                    </span>
+                    <span class="time_news detail_box">T&#x1EA5;t c&#x1EA3;</span>
+
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="191,554" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">B&#xE1;o c&#xE1;o t&#xE0;i ch&#xED;nh</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="194,557" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">&#x110;i&#x1EC1;u l&#x1EC7; v&#xE0; quy ch&#x1EBF; qu&#x1EA3;n tr&#x1ECB; c&#xF4;ng ty</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="192,555" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">B&#x1EA3;n c&#xE1;o b&#x1EA1;ch/ B&#x1EA3;n th&#xF4;ng tin t&#xF3;m t&#x1EAF;t</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="190,553" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">B&#xE1;o c&#xE1;o th&#x1B0;&#x1EDD;ng ni&#xEA;n</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="197,560" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">B&#xE1;o c&#xE1;o t&#xEC;nh h&#xEC;nh qu&#x1EA3;n tr&#x1ECB;</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="196,559" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">T&#xE0;i li&#x1EC7;u &#x111;&#x1EA1;i h&#x1ED9;i &#x111;&#x1ED3;ng c&#x1ED5; &#x111;&#xF4;ng</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="195,558" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">Ngh&#x1ECB; quy&#x1EBF;t/ Quy&#x1EBF;t &#x111;&#x1ECB;nh &#x110;H&#x110;C&#x110;</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="193,556" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">Ngh&#x1ECB; quy&#x1EBF;t/ Quy&#x1EBF;t &#x111;&#x1ECB;nh H&#x110;QT</span>
+                </div>
+                <div class="info_news_Archives">
+                    <span class="type_Archives">
+                        <input value="199,506" name="Checkbox[]" type="checkbox"
+                               class="autocheck form-check-input check_con">
+                    </span>
+                    <span class="time_news detail_box">Tin kh&#xE1;c</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title text-uppercase modaltitle" style="font-size: 20px; font-weight: 700; color: #3e4044;">
+                    Nghị quyết HĐQT số 01-2023 ngày 31/01/2023 file rar
+                </h3>
+                <button type="button" class="close">
+                    <i class="fa-solid close-modal fa-xmark" style="color:black"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;max-height: 600px;">
+                <table id="extract_table" cellspacing="0">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body background_box">
+                <table id="extract_table" cellspacing="0">
+
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        /*var stock_code = window.location.href.split('?')[0].split('/')[4];*/
+        var stock_code = window.location.href.split('?')[0].split('/')[5] ?? window.location.href.split('?')[0].split('/')[4];
+        var stockcode = stock_code.toUpperCase();
+
+        /*ChienND 30/08/2022 Lấy ngôn ngữ qua link website*/
+        var lang;
+        if (window.location.href.includes("?culture=en-US"))
+            lang = "?culture=en-US";
+        else
+            lang = "";
+        //tin tức lưu trữ
+        var ThongTin = function () {
+            this.init = function () {
+                checkAll();
+                /*loadData();*/
+                loadData1();
+                loadTinLuuTru();
+                //searchNam();
+                searchLoaiTaiLieu();
+                searchLoaiTaiLieuMobile();
+
+            }
+            //check checkbox
+            function checkAll() {
+                $(".Check_all").click(function () {
+                    if ($(this).is(":checked")) {
+                        $('.check_con').prop('checked', false)
+                    } else {
+                        $('.check_con').prop('checked', false)
+                    }
+                });
+                $(".check_con").click(function () {
+                    if ($(this).is(":checked")) {
+                        $('.Check_all').prop('checked', false)
+                    } else {
+                        $('.Check_all').prop('checked', false)
+                    }
+                });
+            };
+            var renderColumns = [
+                {
+                    width: "20%",
+                    render: function (data, type, full) {
+                        if (full['URL'] == null) {
+                            return ``
+                        }
+                        return `${full['DatePub']}`;
+                    },
+                    class: "Archives_td_left detail_box"
+                },
+                {
+                    width: "1000px",
+                    render: function (data, type, full) {
+                        if (full['URL'] == null) {
+                            return ``
+                        }
+                        var extension = full['URL'].split(".").pop();
+                        if (extension == "rar" || extension == "zip")
+                            return `<a href="${setProtocol(full['URL'])}" style="color: #333;" target="_blank" class="FileRar" data-title = "${full['Title']}">${full['Title']}</a>`;
+                        return `<a href="${setProtocol(full['URL'])}" style="color: #333;" target="_blank">${full['Title']}</a>`;
+
+                    },
+                    class: "Archives_td_right"
+                },
+            ];
+
+            async function loadTinLuuTru() {
+
+                let dateStr = new Date(2019, 6, 30, 0, 0, 0);
+                let tinTuc_remove = [];
+                let tinTucNews = [];
+                let folderlang = lang;
+                if (folderlang != '?culture=en-US')
+                    folderlang = 86;
+                else folderlang = 506;
+                var datatintuc = [];
+
+
+                // tin CBTT
+                let data1 = await $.ajax({
+                    url: `https://gateway.fpts.com.vn/news/api/gateway/v1/mobile/list?folder=` + folderlang
+                        + "&code=" + stock_code
+                        + "&pageSize=20000&selectedPage=1&cbtt=1&newsType=2",
+                    method: 'GET',
+                    dataType: 'json'
+
+                });
+                //console.log(data1)
+                 data1.Data.Table1.forEach(item => {
+                    let datePub = converDate(item.DatePub);
+                    if (datePub > dateStr) {
+                        if (!item.FiscYear) {
+
+                            item.FiscYear = parseInt(converDatePubToYear(datePub));
+                        }
+
+                        tinTuc_remove.push(item);
+                    }
+                });
+
+
+
+                // Tin trước 30/6/2019
+                let data2 = await $.ajax({
+                    url: `https://gateway.fpts.com.vn/news/api/gateway/v1/mobile/list?folder=` + folderlang
+                        + "&code=" + stock_code
+                        + "&pageSize=20000&selectedPage=1&newsType=2",
+                    method: 'GET',
+                    dataType: 'json'
+
+                });
+                //console.log(data2)
+                tinTucNews = data2.Data.Table1;
+                tinTucNews.forEach(item => {
+                    let datePub = converDate(item.DatePub);
+                    if (datePub < dateStr) {
+
+                        if (item.FiscYear != null)
+                            item.FiscYear = parseInt(converDatePubToYear(datePub));
+                        tinTuc_remove.push(item);
+                    }
+                });
+
+                // So sánh 2 tin
+                let fromtdate = "1900-01-01";
+
+                let year1 = dateStr.getFullYear();
+                let month1 = String(dateStr.getMonth() + 1).padStart(2, '0');
+                let day1 = String(dateStr.getDate()).padStart(2, '0');
+                let todate = `${year1}-${month1}-${day1}`;
+
+                let data3 = await $.ajax({
+                    url: `https://gateway.fpts.com.vn/news/api/gateway/v1/mobile/list?folder=` + folderlang
+                        + "&code=" + stock_code
+                        + "&pageSize=1000&selectedPage=1&newsType=1"
+                        + "&from=" + fromtdate + "&to=" + todate,
+
+                    method: 'GET',
+                    dataType: 'json'
+
+                });
+                //console.log(data3)
+                let tinTucNews_all = data3.Data.Table1;
+                let tintuc_Compare = tinTucNews_all.filter(all =>
+                    !tinTucNews.some(ent => ent.SID === all.SID)
+                );
+
+                tintuc_Compare.forEach(item => {
+                    if (item.MFolder === 86) {
+                        item.FolderLuutru = 199;
+                        tinTuc_remove.push(item);
+                    }
+                    if (item.MFolder === 506) {
+                        item.FolderLuutru = 506;
+                        tinTuc_remove.push(item);
+                    }
+                });
+
+                // tin CBTT - tin khác bị thiếu từ gateway
+                let data4 = await $.ajax({
+                    url: `https://gateway.fpts.com.vn/news/api/gateway/v1/mobile/list?folder=` + folderlang
+                        + "&code=" + stock_code
+                        + "&pageSize=20000&selectedPage=1&cbtt=1&newsType=1",
+                    method: 'GET',
+                    dataType: 'json'
+
+                });
+
+                //console.log(data4)
+                let tinTucNews_all12 = data4.Data.Table1;
+                let tintuc_Compare12 = tinTucNews_all12.filter(all1 =>
+                    !tinTuc_remove.some(ent1 => ent1.SID === all1.SID)
+                );
+
+                tintuc_Compare12.forEach(item => {
+                    if (item.MFolder === 86) {
+                        item.FolderLuutru = 199;
+                        tinTuc_remove.push(item);
+                    }
+                    if (item.MFolder === 506) {
+                        item.FolderLuutru = 506;
+                        tinTuc_remove.push(item);
+                    }
+                });
+
+
+                let listLuutru = tinTuc_remove.sort((a, b) => {
+                    let datefirst = converDate(a.DatePub);
+                    let dateend = converDate(b.DatePub);
+                    return dateend - datefirst;
+                });
+                datatintuc = listLuutru;
+                return datatintuc;
+
+
+            }
+
+            async function loadData1() {
+
+                $('#loading').addClass('loading');
+                //var val = $("#namBaoCao").val();
+                var listChecked = [];
+                $("input[name*='Checkbox']:checked").map(function () {
+                    listChecked.push(this.value);
+                });
+
+
+                var date1 = $('#datefromNDT').val();
+                if (date1 == "") {
+                    var d = new Date();
+                    var day = ("0" + (d.getDate() + 1)).slice(-2);
+                    var month = ("0" + d.getMonth()).slice(-2);
+                    date1 = "2017" + "-" + "01" + "-" + "06";
+                    $("#datefromNDT").val(date1);
+                };
+                var date2 = $('#datetoNDT').val();
+                if (date2 == "") {
+                    var d = new Date();
+                    var day = ("0" + d.getDate()).slice(-2);
+                    var month = ("0" + (d.getMonth() + 1)).slice(-2);
+                    date2 = d.getFullYear() + "-" + month + "-" + day;
+                    $("#datetoNDT").val(date2);
+                };
+
+
+                var dulieu = [];
+
+                let data = await loadTinLuuTru();
+
+                for (var item of data) {
+                    var itemDate = converDate(item.DatePub)
+
+                    if (lang == "vi-VN" || lang == '') {
+                       // if (item.language == 1 || item.language == null) {
+                            if (itemDate >= new Date(date1) && itemDate <= new Date(date2)) {
+                                for (var i of listChecked) {
+                                    if (i.includes(item.FolderLuutru) == true || i == "tatca") {
+                                        dulieu.push(item);
+                                    }
+                                }
+                            }
+                        //}
+                    } else {
+                        //if (item.language == 2 || item.language == null) {
+                            if (itemDate >= new Date(date1) && itemDate <= new Date(date2)) {
+                                for (var i of listChecked) {
+                                    if (i.includes(item.FolderLuutru) == true || i == "tatca") {
+                                        dulieu.push(item);
+                                    }
+                                }
+                            }
+                       // }
+                    }
+                };
+
+
+                $('#table3').empty();
+                $('#table3').DataTable({
+                    ordering: false,
+                    dom: "lti",
+                    destroy: true,
+                    "ordering": false,
+                    searching: false,
+                    className: 'dt-body-right',
+                    "info": false,
+                    "lengthChange": false,
+                    pagingType: false,
+                    paging: false,
+                    data: dulieu,
+                    columns: renderColumns,
+                    language: {
+                        emptyTable: "Không có thông tin được đăng tải trong khoảng thời gian tìm kiếm!"
+
+                    },
+                    rowCallback: function (row, data, index) {
+                        if (data['URL'] == null) {
+                            $(row).hide();
+                        }
+                    },
+
+                });
+                $('#loading').removeClass('loading');
+                $("#table3 thead").hide();
+
+
+            }
+
+
+            //tìm kiếm theo loại tài liệu
+            var searchLoaiTaiLieu = function () {
+                $('body').on('change', '#loaitailieu', async function () {
+                    $('#loading').addClass('loading');
+                    var val = $("#namBaoCao").val();
+                    var listChecked = [];
+                    $("input[name*='Checkbox']:checked").map(function () {
+                        listChecked.push(this.value);
+                    });
+                    var cpnyId = $("#cpnyid").val();
+                    var date1 = $('#datefromNDT').val();
+                    if (date1 == "") {
+                        var d = new Date();
+                        var day = ("0" + (d.getDate() + 1)).slice(-2);
+                        var month = ("0" + d.getMonth()).slice(-2);
+                        date1 = "2017" + "-" + "06" + "-" + "01";
+                        $("#datefromNDT").val(date1);
+                    };
+                    var date2 = $('#datetoNDT').val();
+                    if (date2 == "") {
+                        var d = new Date();
+                        var day = ("0" + d.getDate()).slice(-2);
+                        var month = ("0" + (d.getMonth() + 1)).slice(-2);
+                        date2 = d.getFullYear() + "-" + month + "-" + day;
+                        $("#datetoNDT").val(date2);
+                    };
+
+                    var dulieu = [];
+                    let data = await loadTinLuuTru();
+
+
+                    for (const item of data) {
+                        var itemDate = converDate(item.DatePub)
+                        if (lang == "vi-VN" || lang == '') {
+                          //  if ((item.language == 1 || item.language == null)) {
+                                for (var i of listChecked) {
+                                    if ((i.includes(item.FolderLuutru) == true || i == "tatca") && (itemDate >= new Date(date1) && itemDate <= new Date(date2))) {
+                                        dulieu.push(item);
+                                    }
+                                }
+                          //  }
+                        } else {
+                           // if ((item.language == 2 || item.language == null)) {
+                                for (var i of listChecked) {
+                                    if ((i.includes(item.FolderLuutru) == true || i == "tatca") && (itemDate >= new Date(date1) && itemDate <= new Date(date2))) {
+                                        dulieu.push(item);
+                                    }
+                                }
+                           // }
+                        }
+
+
+                    };
+                    $('#table3').empty();
+                    $('#table3').DataTable({
+                        ordering: false,
+                        dom: "lti",
+                        destroy: true,
+                        "ordering": false,
+                        searching: false,
+                        className: 'dt-body-right',
+                        "info": false,
+                        "lengthChange": false,
+                        pagingType: false,
+                        paging: false,
+                        data: dulieu,
+                        columns: renderColumns,
+                        language: {
+                            emptyTable: "Không có thông tin được đăng tải trong khoảng thời gian tìm kiếm!"
+
+                        }
+                    });
+                    $('#loading').removeClass('loading');
+                    $("#table3 thead").hide();
+
+
+                });
+
+            };
+
+
+            var searchLoaiTaiLieuMobile = function () {
+                $('body').on('change', '#loaitailieuMobile', async function () {
+                    $('#loading').addClass('loading');
+                    var val = $("#namBaoCao").val();
+                    var listChecked = [];
+                    var e = document.getElementById("loaitailieuMobile");
+                    var value = e.value;
+                    listChecked.push(value);
+                    var cpnyId = $("#cpnyid").val();
+                    if (date1 == "") {
+                        var d = new Date();
+                        var day = ("0" + (d.getDate() + 1)).slice(-2);
+                        var month = ("0" + d.getMonth()).slice(-2);
+                        date1 = "2017" + "-" + "06" + "-" + "01";
+                        $("#datefromNDT").val(date1);
+                    };
+                    var date2 = $('#datetoNDT').val();
+                    if (date2 == "") {
+                        var d = new Date();
+                        var day = ("0" + d.getDate()).slice(-2);
+                        var month = ("0" + (d.getMonth() + 1)).slice(-2);
+                        date2 = d.getFullYear() + "-" + month + "-" + day;
+                        $("#datetoNDT").val(date2);
+                    };
+
+                    let data = await loadTinLuuTru();
+
+
+                    var dulieu = [];
+
+                    for (const item of data) {
+                        var itemDate = converDate(item.DatePub)
+                        if (lang == "vi-VN" || lang == '') {
+                            //if ((item.language == 1 || item.language == null)) {
+                                for (var i of listChecked) {
+                                    if ((i.includes(item.FolderLuutru) == true || i == "tatca") && (itemDate >= new Date(date1) && itemDate <= new Date(date2))) {
+                                        dulieu.push(item);
+                                    }
+                                }
+                            //}
+                        } else {
+                            //if ((item.language == 2 || item.language == null)) {
+                                for (var i of listChecked) {
+                                    if ((i.includes(item.FolderLuutru) == true || i == "tatca") && (itemDate >= new Date(date1) && itemDate <= new Date(date2))) {
+                                        dulieu.push(item);
+                                    }
+                                }
+                           // }
+                        }
+
+
+
+                    };
+
+                    $('#table3').empty();
+                    $('#table3').DataTable({
+                        ordering: false,
+                        dom: "lti",
+                        destroy: true,
+                        "ordering": false,
+                        searching: false,
+                        className: 'dt-body-right',
+                        "info": false,
+                        "lengthChange": false,
+                        pagingType: false,
+                        paging: false,
+                        data: dulieu,
+                        columns: renderColumns,
+                        language: {
+                            emptyTable: "Không có thông tin được đăng tải trong khoảng thời gian tìm kiếm!"
+
+                        }
+                    });
+                    $('#loading').removeClass('loading');
+                    $("#table3 thead").hide();
+
+
+
+
+
+                });
+            };
+
+
+            $('body').on('click', '#table3 tbody tr td a.FileRar', function (e) {
+                e.preventDefault()
+                getExtractFile(this.getAttribute("href"), $(this).data("title"))
+             })
+            function formatBytes(bytes, decimals = 2) {
+                //if (!+bytes) return '0 Bytes'
+
+                //const k = 1024
+                //const dm = decimals < 0 ? 0 : decimals
+                //const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'iB', 'ZB', 'YB']
+
+                //const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+                //return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+                return `${(bytes / (1024 * 1024)).toFixed(decimals)} MB`;
+            }
+            function getExtractFile(fileURL, title) {
+                //evt.target.preventDefault()
+                $('#loading').addClass('loading');
+                $.ajax({
+                    url: '/ThongTinDoanhNghiep/ExtractRarFile',
+                    method: 'GET',
+                    dataType: 'json',
+                    data: {
+                        fileURL: fileURL,
+                    },
+                    success: function (data) {
+                        $('#loading').removeClass('loading');
+                        $(".modaltitle").text(title)
+                        $('#myModal').addClass('show')
+                        $('#myModal').show()
+                        $('#extract_table').empty();
+                        $('#extract_table').DataTable({
+
+                            ordering: false,
+                            dom: "lti",
+                            destroy: true,
+                            "ordering": false,
+                            searching: false,
+                            className: 'dt-body-right',
+                            "info": false,
+                            "lengthChange": false,
+                            pagingType: false,
+                            pageLength: 250,
+                            data: data,
+                            columns: renderColumnsFile,
+                            language: {
+                                emptyTable: "Không có thông tin được đăng tải trong khoảng thời gian tìm kiếm!"
+
+                            }
+                        });
+                        $("#extract_table thead").show();
+
+                    }
+                })
+            }
+            $('body').on('click', '#btnXemTDN', function () {
+                if (new Date($('#datefromNDT').val()) > new Date($('#datetoNDT').val())) {
+                     toastr.error('Khoảng thời gian tìm kiếm không hợp lệ. Vui lòng điều chỉnh để tìm kiếm kết quả');
+                        return false;
+                 } else {
+                    loadData1();
+                 }
+
+             })
+            //thay đổi giao thức của link file theo giao thức của link trang hiện tại
+            //AnhDT : Setup theo môi trường để xem file
+            let flag = `false` =='true';
+            function setProtocol(url) {
+                //Cắt chuỗi thành 2 phần: [0] là protocol của chuỗi, [1] là phần còn lại của đường dẫn
+                var arr = url.split('://file.fpts.com.vn');
+                if (arr[0] == `https` || flag) {
+                    if (!flag) {
+                        if (arr[1].toLowerCase().endsWith('.pdf')) {
+                            return url;
+                        }
+                        return `https` + '://' + `file.fpts.com.vn` + arr[1];
+                    } else {
+                        return `https` + '://' + `file.fpts.com.vn` + arr[1];
+                    }
+
+                }
+                return url;
+            }
+            function converDate(dateString) {
+                try {
+
+                        let [day, month, year] = dateString.slice(0, 10).split('/')
+                        let convertedDate = new Date(+year, +month - 1, +day)
+                        convertedDate.setHours(convertedDate.getHours() + 7);
+                        return convertedDate;
+
+
+                }
+                catch (err) {
+                    console.log(err);
+                    return dateString;
+                }
+
+
+
+            }
+
+            function converDatePubToYear(dateStr) {
+                try {
+                    if (!dateStr) return null;
+
+                    // Nếu là Date object
+                    if (dateStr instanceof Date) {
+                        return dateStr.getFullYear();
+                    }
+
+                    // Nếu là number (timestamp)
+                    if (typeof dateStr === 'number') {
+                        return new Date(dateStr).getFullYear();
+                    }
+
+                    // Ép về string
+                    if (typeof dateStr !== 'string') {
+                        dateStr = dateStr.toString();
+                    }
+
+                    // Format: dd/MM/yyyy HH:mm
+                    const parts = dateStr.split(' ');
+                    if (!parts[0]) return null;
+
+                    const datePart = parts[0].split('/');
+                    if (datePart.length !== 3) return null;
+
+                    return parseInt(datePart[2], 10);
+
+                }
+                catch (err) {
+                    console.log(err);
+                    return dateStr;
+                }
+
+
+
+            }
+
+            var renderColumnsFile = [
+                {
+                    width: "80%",
+                    title: "Tệp tin",
+                    render: function (data, type, full) {
+                        return `<a href="${full['fileURL']}" style="color: #333; font-size:14px" class="detail_box" target="_blank">${full['fileName']}</a>`;
+                    },
+                    class: "Archives_td_left title_box"
+                },
+                {
+                    width: "20%",
+                    title: "Dung lượng",
+
+                    render: function (data, type, full) {
+                        return `<span class = "detail_box" style=" font-size:14px">${formatBytes(full['fileSize'])}</span>`;
+                    },
+                    class: "Archives_td_right title_box "
+                },
+                {
+                    width: "20%",
+                    title: "Xem",
+                    render: function (data, type, full) {
+                        return `<a href="${full['fileURL']}" style="color: #333; font-size:14px" class="detail_box" target="_blank"><i class="fa-regular fa-eye"></i></a>`;
+                    },
+                    class: "Archives_td_right title_box "
+                },
+            ];
+            $('.close').on('click', function () {
+                $('#myModal').hide()
+            })
+
+            $(document).on('click', function (evt) {
+                if ($(event.target).is("#myModal")) {
+                    $('#myModal').hide()
+                }
+            });
+
+        };
+
+
+         var thongTin = new ThongTin();
+         thongTin.init();
+    });
+</script>

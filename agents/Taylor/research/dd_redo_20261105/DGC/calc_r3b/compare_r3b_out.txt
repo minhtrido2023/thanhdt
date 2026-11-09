@@ -1,0 +1,36 @@
+price: 33000.0
+asof_price_date: 2026-11-06
+n_outcomes: 810
+center_pre: 42154
+center_post: 41849
+center_param_post: 43410
+p10_out: 33272
+p25_out: 37287
+p50_out: 41362
+p75_out: 46502
+p90_out: 50227
+min_out: 25782
+max_out: 59765
+pct_weight_below_price: 0.09114583333333336
+px_vs_center_post: -0.21145069177280218
+label: DƯỚI vùng
+delta_center_vs_r3_pct: 0.007875343191561024
+r3: {"center_post": 41522, "p10_out": 32931, "p50_out": 41087, "p90_out": 49929, "label": "TRONG vùng", "price": 33000.0, "pct_weight_below_price": 0.10208333333333333}
+w250 2025-11-05..2026-11-06 ADV 83.83 ty sigma 0.0297 | 5000tr: CK 0.725% Q/ADV 5.9642% calib=True | 10tr: CK 0.032% Q/ADV 0.0119% calib=False | 20tr: CK 0.046% Q/ADV 0.0239% calib=False | 40tr: CK 0.065% Q/ADV 0.0477% calib=False
+w60 2026-08-12..2026-11-06 ADV 17.73 ty sigma 0.0212 | 5000tr: CK 1.126% Q/ADV 28.2007% calib=False | 10tr: CK 0.050% Q/ADV 0.0564% calib=False | 20tr: CK 0.071% Q/ADV 0.1128% calib=True | 40tr: CK 0.101% Q/ADV 0.2256% calib=True
+alt ore_w0: {"desc": "mo lai khai truong w=0 (= headline r3)", "n_outcomes": 405, "center_post": 41522, "p10_out": 32931, "p50_out": 41087, "p90_out": 49929, "pct_weight_below_price": 0.10208333333333333, "label": "TRONG vùng"}
+alt ore_w0.10: {"desc": "mo lai w=0,10, bien vinh vien 0", "n_outcomes": 810, "center_post": 41587, "p10_out": 33006, "p50_out": 41228, "p90_out": 49941, "pct_weight_below_price": 0.09989583333333334, "label": "DƯỚI vùng"}
+alt ore_w0.25: {"desc": "mo lai w=0,25, bien vinh vien 0", "n_outcomes": 810, "center_post": 41685, "p10_out": 33170, "p50_out": 41260, "p90_out": 49982, "pct_weight_below_price": 0.09661458333333331, "label": "DƯỚI vùng"}
+alt ore_w0.75: {"desc": "mo lai w=0,75, bien vinh vien 0", "n_outcomes": 810, "center_post": 42012, "p10_out": 33428, "p50_out": 41617, "p90_out": 50509, "pct_weight_below_price": 0.08567708333333333, "label": "DƯỚI vùng"}
+alt ore_w1.0: {"desc": "mo lai chac chan (w=1), bien vinh vien 0", "n_outcomes": 405, "center_post": 42176, "p10_out": 33586, "p50_out": 41742, "p90_out": 50581, "pct_weight_below_price": 0.08020833333333334, "label": "DƯỚI vùng"}
+alt ore_w0.5_term: {"desc": "mo lai w=0,5 CO bien vinh vien 1.000 ty (= r3 dong w=0,50; thuong moat — doi chieu)", "n_outcomes": 810, "center_post": 47753, "p10_out": 35794, "p50_out": 47722, "p90_out": 59765, "pct_weight_below_price": 0.05104166666666667, "label": "DƯỚI vùng"}
+alt ore_w0.1_term: {"desc": "mo lai w=0,10 CO bien vinh vien (= r3 dong w=0,10, doi chieu)", "n_outcomes": 810, "center_post": 42768, "p10_out": 33267, "p50_out": 42100, "p90_out": 53030, "pct_weight_below_price": 0.09187500000000001, "label": "DƯỚI vùng"}
+alt ore_w0.25_term: {"desc": "mo lai w=0,25 CO bien vinh vien (= r3 dong w=0,25, doi chieu)", "n_outcomes": 810, "center_post": 44637, "p10_out": 33983, "p50_out": 44163, "p90_out": 56573, "pct_weight_below_price": 0.07656249999999998, "label": "DƯỚI vùng"}
+alt r4_fix: {"desc": "nen bien r4 + bo chong lan du phong", "n_outcomes": 810, "center_post": 39427, "p10_out": 32911, "p50_out": 39289, "p90_out": 46515, "pct_weight_below_price": 0.10364583333333334, "label": "TRONG vùng"}
+alt r4_nofix: {"desc": "nen bien r4 + du phong chong lan nhu r2 (doi chieu)", "n_outcomes": 810, "center_post": 37405, "p10_out": 29427, "p50_out": 37140, "p90_out": 44956, "pct_weight_below_price": 0.23854166666666665, "label": "TRONG vùng"}
+alt shield20: {"desc": "la chan thue du phong 20% [UL]", "n_outcomes": 810, "center_post": 42419, "p10_out": 34359, "p50_out": 42050, "p90_out": 50590, "pct_weight_below_price": 0.05677083333333334, "label": "DƯỚI vùng"}
+alt ronic20: {"desc": "RONIC 20% (thuong moat — doi chieu)", "n_outcomes": 810, "center_post": 43813, "p10_out": 34629, "p50_out": 43323, "p90_out": 52910, "pct_weight_below_price": 0.05677083333333334, "label": "DƯỚI vùng"}
+alt w_scn_r2: {"desc": "trong so kich ban 0,3/0,5/0,2 cua r2", "n_outcomes": 810, "center_post": 41194, "p10_out": 32767, "p50_out": 40731, "p90_out": 49556, "pct_weight_below_price": 0.10541666666666666, "label": "TRONG vùng"}
+alt legal_axis: {"desc": "CO truc phap ly haircut tien rong 3/9/29% (w 0,2/0,5/0,3) — ngoai base", "n_outcomes": 2430, "center_post": 38919, "p10_out": 29938, "p50_out": 38760, "p90_out": 47970, "pct_weight_below_price": 0.20494791666666667, "label": "TRONG vùng"}
+r_sens_post: {"-100bp": 43315, "-50bp": 42547, "+50bp": 41176, "+100bp": 40562}
+exit: {"position": {"account": "ZaloPay", "qty": 10000, "cost": 39775.0, "price": 33000.0, "mkt_value": 330000000.0, "nav_0611": 934551492.0, "pct_nav_mkt": 0.35311055926279555, "pct_nav_cost": 0.4256052271114452, "sleeve_cap": [0.02, 0.04], "unrealized_vnd": -67750000.0, "src": "dnse_raw_2026-11-08.jsonl (accountNo 0001743768, tradeQuantity 10000, costPrice 39775) + data/execution_logs/nav_history_ZaloPay.csv 2026-11-06"}, "options": [{"option": "A giu nguyen 10.000 cp (35,3% NAV) — vi pham tran sleeve, can user chap nhan ngoai le bang van ban", "keep_qty": 10000, "sell_qty": 0, "keep_pct_nav_mkt": 0.35311055926279555, "sell_value_vnd": 0.0, "q_over_adv60": 0.0, "impact_adv60_one_shot": 0.0, "per_tranche_q_over_adv60": 0.0, "tranches": 0, "realized_pnl_vnd_at_px": -0.0, "fee_tax_vnd": 0.0}, {"option": "B giam ve ~10% NAV (buoc dem, 2 dot)", "keep_qty": 2800, "sell_qty": 7200, "keep_pct_nav_mkt": 0.09887095659358275, "sell_value_vnd": 237600000.0, "q_over_adv60": 0.013400954761625441, "impact_adv60_one_shot": 0.0024550909935229645, "per_tranche_q_over_adv60": 0.006700477380812721, "tranches": 2, "realized_pnl_vnd_at_px": -48780000.0, "fee_tax_vnd": 468072.0}, {"option": "C giam ve tran sleeve 4% NAV, 3 dot", "keep_qty": 1100, "sell_qty": 8900, "keep_pct_nav_mkt": 0.03884216151890751, "sell_value_vnd": 293700000.0, "q_over_adv60": 0.01656506908034256, "impact_adv60_one_shot": 0.00272958327353713, "per_tranche_q_over_adv60": 0.00552168969344752, "tranches": 3, "realized_pnl_vnd_at_px": -60297500.0, "fee_tax_vnd": 578589.0}, {"option": "D giam ve san sleeve 2% NAV, 3 dot", "keep_qty": 500, "sell_qty": 9500, "keep_pct_nav_mkt": 0.017655527963139777, "sell_value_vnd": 313500000.0, "q_over_adv60": 0.01768181531047801, "impact_adv60_one_shot": 0.00282009116212818, "per_tranche_q_over_adv60": 0.005893938436826004, "tranches": 3, "realized_pnl_vnd_at_px": -64362500.0, "fee_tax_vnd": 617595.0}], "note": "Lenh HOSE han che giao dich chi phien chieu; dot = 1 phien chieu. Impact = sigma60*sqrt(Q/ADV60) (cung cong thuc CK). KHONG quyet thay user, KHONG dat lenh."}

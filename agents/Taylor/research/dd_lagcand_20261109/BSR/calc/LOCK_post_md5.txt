@@ -1,0 +1,6 @@
+fe13e53d7b9ceef84461a0d8942fd5d4  assumptions.json
+4d66a48f2fb464f8061eee06184f1d6c  model_bsr.py
+b5add9d590785bd860dfd831939dd011  make_summary.py
+bb7c71029b7fb91ea8e6e061ac0c6b22  model_out.json
+6da5a1739e17ad7db619222d411445eb  ../SUMMARY.json
+692686523f451db1c906ec5488cd5ba5  ../REPORT.md

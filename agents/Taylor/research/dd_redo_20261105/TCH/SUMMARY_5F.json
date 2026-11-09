@@ -180,5 +180,19 @@
   "headline": "mô hình cơ sở hiện hành",
   "headline_centre_report_of_record": 13768,
   "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
- }
+ },
+ "headline_r3": {
+  "centre": 16244,
+  "p10": 15578,
+  "p50": 16208,
+  "p90": 16950,
+  "price_2026_11_06": 13500.0,
+  "label": "DƯỚI vùng",
+  "pct_weight_below_price": 0.0,
+  "ck_5ty": 0.00631,
+  "source": "REPORT_r3.md / SUMMARY.json (job Taylor_20261108_180134)"
+ },
+ "headline_centre_basis": "dong bo r3 09/11: tam 16.244, P10 15.578, P50 16.208, P90 16.950, gia 06/11 13.500, nhan DUOI vung; 13.768 la tam r2 cu",
+ "r3_sync_note": "Moi so tam/P10/P90 khac trong file nay (current 13.768, strict3c 13.122-13.815, WIDE 14.495...) tinh tren mo hinh r2 (CK holding ky vong 15%, s_old 40%, gia 04/11) - chi la do nhay tuong doi. model_check \"s_old 40% <=> GPM ~40% da ngam NONE\" bi dinh chinh r3: r2 khong nhat quan (backlog g 51,9% vs dat cu g 40%); r3 neo ca hai 51,9% +-5pp. Moat NONE giu: quy dat moi NPV0 (RONIC=Ke). Ban ca hai ve bien nganh 40% = do nhay both_g40 tam 14.622.",
+ "current_status": "SUPERSEDED 09/11: tam r2; headline hien hanh = headline_r3"
 }

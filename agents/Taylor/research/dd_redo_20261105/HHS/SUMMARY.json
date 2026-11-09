@@ -1,32 +1,34 @@
 {
  "ticker": "HHS",
- "asof_price_date": "2026-11-04",
- "price": 9550.0,
+ "asof_price_date": "2026-11-06",
+ "price": 9990.0,
  "r": 0.135,
  "r_anchor": {
+  "r": 0.135,
   "rate": 0.07400000000000001,
-  "date": "2026-11-03",
   "source": "cctg_12m(2026-11-02)",
-  "asof_rate": 0.07400000000000001,
-  "rule": "r = 13,5% + beta x (dep - dep_neo), beta = 1 (gia dinh)"
+  "date": "2026-11-03",
+  "dep_asof": 0.07400000000000001,
+  "dep_asof_source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
  },
- "center_pre_liq": 10539,
- "center_post_liq": 10387,
- "p10_post": 8252,
- "p50_post": 10194,
- "p90_post": 12827,
- "p25_post": 9097,
- "p75_post": 11468,
- "p10_pre": 8373,
- "p50_pre": 10344,
- "p90_pre": 13015,
- "liq_disc_5ty": 0.014429563180450019,
- "px_vs_center_post": -0.08058935310656545,
- "px_vs_p10_post": 0.15733343159275748,
- "px_vs_p90_post": -0.2554633344316909,
- "grid_desc": "Luoi co trong so n=45: kich ban TIEU CUC/CO SO/TICH CUC (w 0,30/0,50/0,20) x dich thang du HTK CRV cu -15/-7,5/0/+7,5/+15 pp x dich CK holding -5/0/+5 pp (deu); r co dinh 13,50%; NAV: CRV gia goc + backlog NC-II x PV1 + thang du HTK cu x PV4 (I.14 gia so, NPV 0); khong CK quan tri (WARNING). Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
- "grid_n": 45,
- "label": "TRONG vùng",
+ "center_pre_liq": 14169,
+ "center_post_liq": 13969,
+ "p10_post": 12422,
+ "p50_post": 13917,
+ "p90_post": 15564,
+ "p25_post": 13140,
+ "p75_post": 14775,
+ "p10_pre": 12599,
+ "p50_pre": 14116,
+ "p90_pre": 15786,
+ "liq_disc_5ty": 0.014097179630599711,
+ "px_vs_center_post": -0.2848633022877961,
+ "px_vs_p10_post": -0.19575140062812924,
+ "px_vs_p90_post": -0.3581171804597275,
+ "grid_desc": "Luoi n=405: kich ban TIEU_CUC/CO_SO/TICH_CUC (0,25/0,50/0,25 [UL] doi xung; s = s_obs 0,7016 -0,15/0/+0,15) x ds -15..+15pp (5 diem deu) x y 2,5/3,25/4 nam (deu [UL]) x BDSDT 50/100/150% so (deu [UL]) x I.14 -15/0/+15% (0,25/0,50/0,25). CK holding 0, CK quan tri 0, ky quy 0 (do nhay). NAV: CRV gia goc - gia goc HTK cu x (1-pv(y)) + backlog NMTT x m x pv(1) + HTK cu x s x pv(y) + I.14 x pv(4) + BDSDT; x 51,15% + OTHER + o to. Sau CK 5 ty Y=1.",
+ "grid_n": 405,
+ "label": "DƯỚI vùng",
  "zone_old": {
   "low": 7600,
   "center": 9950,
@@ -34,7 +36,7 @@
   "dd_date": "2026-11-01",
   "center_kind": "expected_weighted"
  },
- "center_change_vs_old": 0.06643216080402015,
+ "center_change_vs_old": 3582,
  "sens_r": {
   "b0.5_-100bp": {
    "r": 0.13,
@@ -100,21 +102,23 @@
   "Thang du BDSDT CRV chua vao tam",
   "Chua quet tin moi 01-04/11/2026"
  ],
- "round": "r2",
- "job": "Taylor_20261105_020013",
- "p10_out": 8252,
- "p50_out": 10194,
- "p90_out": 12827,
- "pct_weight_below_price": 0.352475,
- "n_outcomes": 5400,
- "min_outcome": 6070,
- "central_param_value_post": 13731,
+ "round": "r3",
+ "job": "Taylor_20261108_180130",
+ "p10_out": 12422,
+ "p50_out": 13917,
+ "p90_out": 15564,
+ "pct_weight_below_price": 0.0,
+ "n_outcomes": 405,
+ "min_outcome": 10994,
+ "central_param_value_post": 13893,
  "ck_ref_size": {
   "size_vnd": 5000000000.0,
-  "disc_adv250": 0.014429563180450019,
-  "disc_adv60": 0.015351537305818033,
+  "disc_adv250": 0.014097179630599711,
+  "disc_adv60": 0.014549151830064418,
   "adv250": 16215262500.0,
-  "adv60": 8907985000.0
+  "adv60": 9499895000.0,
+  "part_adv250": 0.30835146825406,
+  "note": "5 ty = ~30% ADV250: TREN vung hieu chinh luat can bac hai => CK co the bi danh gia THAP"
  },
  "ck_real_sleeve": {
   "sizes_vnd": [
@@ -122,84 +126,155 @@
    40000000.0
   ],
   "disc_adv250": {
-   "10tr": 0.0006453096831422862,
-   "40tr": 0.0012906193662845723
+   "10tr": 0.0006304450389009266,
+   "40tr": 0.0012608900778018533
   },
-  "nav_spacex_ref": 940000000.0,
-  "note": "Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 30.835% -> TREN vung (luat can bac hai co the danh gia THAP CK); 10tr 0.062% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.247% -> trong vung; 5 ty / ADV60 = 56.13%"
+  "note": "10tr DUOI vung hieu chinh (CK that ~ nua spread, chua do); 40tr trong vung"
  },
  "parallel_versions": {
-  "co_truc_r_pm1pp": {
-   "n": 16200,
-   "center": 10388,
-   "p10": 8253,
-   "p25": 9096,
-   "p50": 10196,
-   "p75": 11470,
-   "p90": 12823,
-   "pct_below_px": 0.35144125,
-   "min": 6069,
-   "max": 16963
+  "co_CK_holding_r2 (0/15/25/35/45%, ky vong 27%)": {
+   "n": 2025,
+   "center": 10761,
+   "p10": 8624,
+   "p25": 9468,
+   "p50": 10559,
+   "p75": 11823,
+   "p90": 13207,
+   "pct_below_px": 0.3662,
+   "min": 6871,
+   "max": 17339
   },
-  "khong_truc_hd": {
-   "n": 1080,
-   "center": 13506,
-   "p10": 11823,
-   "p25": 12618,
-   "p50": 13509,
-   "p75": 14415,
-   "p90": 15181,
+  "co_CK_holding_va_quan_tri_r2": {
+   "n": 8100,
+   "center": 10331,
+   "p10": 8171,
+   "p25": 9028,
+   "p50": 10135,
+   "p75": 11422,
+   "p90": 12796,
+   "pct_below_px": 0.4669,
+   "min": 5841,
+   "max": 17339
+  },
+  "co_CK_holding_y4": {
+   "n": 675,
+   "center": 10220,
+   "p10": 8251,
+   "p25": 9060,
+   "p50": 10036,
+   "p75": 11222,
+   "p90": 12458,
+   "pct_below_px": 0.4831,
+   "min": 6871,
+   "max": 15569
+  },
+  "co_CK_holding_y2.5": {
+   "n": 675,
+   "center": 11319,
+   "p10": 9118,
+   "p25": 9995,
+   "p50": 11125,
+   "p75": 12417,
+   "p90": 13851,
+   "pct_below_px": 0.2462,
+   "min": 7553,
+   "max": 17339
+  },
+  "y_co_dinh_2.5": {
+   "n": 135,
+   "center": 14734,
+   "p10": 13358,
+   "p25": 13946,
+   "p50": 14712,
+   "p75": 15510,
+   "p90": 16147,
    "pct_below_px": 0.0,
-   "min": 9808,
-   "max": 16834
+   "min": 12233,
+   "max": 17339
   },
-  "khong_truc_gov": {
-   "n": 1350,
-   "center": 10820,
-   "p10": 8703,
-   "p25": 9543,
-   "p50": 10612,
-   "p75": 11890,
-   "p90": 13261,
-   "pct_below_px": 0.25494999999999995,
-   "min": 7142,
-   "max": 16834
+  "y_co_dinh_4.0": {
+   "n": 135,
+   "center": 13229,
+   "p10": 12018,
+   "p25": 12542,
+   "p50": 13193,
+   "p75": 13891,
+   "p90": 14476,
+   "pct_below_px": 0.0,
+   "min": 10994,
+   "max": 15569
   },
-  "khong_truc_bds": {
-   "n": 1800,
-   "center": 10053,
-   "p10": 8014,
-   "p25": 8805,
-   "p50": 9871,
-   "p75": 11086,
-   "p90": 12373,
-   "pct_below_px": 0.42647999999999997,
-   "min": 6070,
-   "max": 15880
+  "co_truc_CK_quan_tri_r2": {
+   "n": 1620,
+   "center": 13411,
+   "p10": 11682,
+   "p25": 12470,
+   "p50": 13381,
+   "p75": 14332,
+   "p90": 15165,
+   "pct_below_px": 0.0024,
+   "min": 9345,
+   "max": 17339
   },
-  "khong_truc_i14": {
-   "n": 1800,
-   "center": 10346,
-   "p10": 8225,
-   "p25": 9068,
-   "p50": 10152,
-   "p75": 11402,
-   "p90": 12745,
-   "pct_below_px": 0.36050499999999996,
-   "min": 6136,
-   "max": 16460
+  "trong_so_kich_ban_r2_0.30/0.50/0.20": {
+   "n": 405,
+   "center": 13859,
+   "p10": 12384,
+   "p25": 13019,
+   "p50": 13812,
+   "p75": 14635,
+   "p90": 15446,
+   "pct_below_px": 0.0,
+   "min": 10994,
+   "max": 17339
   },
-  "khong_truc_kq": {
-   "n": 2700,
-   "center": 10406,
-   "p10": 8275,
-   "p25": 9106,
-   "p50": 10218,
-   "p75": 11506,
-   "p90": 12840,
-   "pct_below_px": 0.350075,
-   "min": 6125,
-   "max": 16834
+  "lech_s_kich_ban_r2_-0.25/+0.15": {
+   "n": 405,
+   "center": 13853,
+   "p10": 12128,
+   "p25": 12930,
+   "p50": 13836,
+   "p75": 14757,
+   "p90": 15564,
+   "pct_below_px": 0.0,
+   "min": 10571,
+   "max": 17339
+  },
+  "BDSDT_r2_0/50/100": {
+   "n": 405,
+   "center": 13492,
+   "p10": 11945,
+   "p25": 12663,
+   "p50": 13441,
+   "p75": 14298,
+   "p90": 15087,
+   "pct_below_px": 0.0,
+   "min": 10517,
+   "max": 16862
+  },
+  "co_truc_ky_quy": {
+   "n": 810,
+   "center": 13950,
+   "p10": 12415,
+   "p25": 13110,
+   "p50": 13906,
+   "p75": 14757,
+   "p90": 15532,
+   "pct_below_px": 0.0,
+   "min": 10929,
+   "max": 17339
+  },
+  "co_truc_r_pm1pp": {
+   "n": 1215,
+   "center": 13972,
+   "p10": 12430,
+   "p25": 13117,
+   "p50": 13921,
+   "p75": 14787,
+   "p90": 15572,
+   "pct_below_px": 0.0,
+   "min": 10786,
+   "max": 17583
   }
  },
  "drivers": {
@@ -221,49 +296,57 @@
   "label": "TRONG vùng"
  },
  "axes_included": [
-  "kich ban TIEU_CUC/CO_SO/TICH_CUC (0,30/0,50/0,20)",
-  "dich thang du HTK CRV cu -15..+15pp (5 diem deu)",
-  "CK holding tuyet doi 0/15/25/35/45% (0,10/0,15/0,30/0,30/0,15) [UL] (vong 1: gan kich ban 35/25/15 +-5pp)",
-  "CK quan tri 0/5/10/15% (0,55/0,20/0,15/0,10) [UL]",
-  "thang du BDSDT CRV thuc hien 0/50/100% (deu) [UL]",
-  "thang du I.14 -15/0/+40% (0,25/0,50/0,25) [UL]",
-  "mat ky quy ca nhan 28,4 ty 0/100% (0,70/0,30) [UL]"
+  "kich ban 0,25/0,50/0,25 (s_obs -0,15/0/+0,15; m 30/33,5/36%; o to 25x5/35x6/50x8)",
+  "ds -15..+15pp",
+  "y 2,5/3,25/4",
+  "BDSDT 50/100/150%",
+  "I.14 -15/0/+15%"
  ],
  "axes_excluded": [
   {
+   "axis": "CK holding 0-45%",
+   "reason": "[UL] khong co du lieu do lon -> luat user ra song song (co_CK_holding_r2); dinh chinh #5"
+  },
+  {
+   "axis": "CK quan tri 0-15%",
+   "reason": "phap ly/quan tri chi WARNING -> do nhay; dinh chinh #3"
+  },
+  {
+   "axis": "mat ky quy 28,4 ty",
+   "reason": "khong co van ban no qua han -> do nhay; dinh chinh #4"
+  },
+  {
    "axis": "r",
-   "reason": "NAV gan nhu khong nhay r (PV 1-4 nam); ban song song co_truc_r_pm1pp"
-  },
-  {
-   "axis": "KL 08/KL-TTTP Pruksa dieu chinh gia ban; N01 tien SDD bo sung 7,87 ty",
-   "reason": "khong co so luong hoa Pruksa; N01 ~9 d/cp (7,87 x 51,15% / 432) khong trong yeu -> WARNING"
-  },
-  {
-   "axis": "dieu chinh soat xet LN Q3 (6T bi ha -34%)",
-   "reason": "anh huong qua NAV nho (LN da nam trong VCSH); WARNING + moc M1"
+   "reason": "NAV it nhay r; song song co_truc_r_pm1pp"
   }
  ],
  "base_adjustments": [
   {
-   "item": "CK holding o THAM SO TRUNG TAM",
-   "effect_dong_per_share": 0,
-   "basis": "vong 2: muc 25% khong co co so du lieu (chi la uoc luong) -> tham so trung tam = 0 (NAV thuan); CK holding chi o truc co xac suat; co so dinh tinh: CRV chua tra co tuc tien ve HHS 9T/2026, tien NC-II len HHS qua 2 tang",
-   "source": "Q3HN LCTT; vong 1 §6.1"
-  },
-  {
-   "item": "Thang du PPA CRV",
+   "item": "Gia goc HTK cu 6.009,8 ty chiet khau pv(y)",
    "effect_dong_per_share": null,
-   "basis": "CRV theo gia goc (GTHL - thang du PPA sau thue 8.083); thang du HTK cu theo bien NC-II quan sat 51,9-52,2% (base 40%)",
-   "source": "Q3HN TM thue hoan lai 2.020,76; DD TCH v2"
+   "basis": "von nam y nam (A1/A2)",
+   "source": "calc_r3/assumptions_r3.json A1-A2"
   },
   {
-   "item": "I.14 1.329 ty",
+   "item": "Thang du HTK cu s_obs 0,7016",
+   "effect_dong_per_share": null,
+   "basis": "bien gop NC-II quan sat 51,9-52,2%",
+   "source": "A3"
+  },
+  {
+   "item": "CK holding",
    "effect_dong_per_share": 0,
-   "basis": "gia so NPV 0 (chua mo ban)",
-   "source": "dd_HHS REPORT §5 TM18"
+   "basis": "base 0 (luat user)",
+   "source": "A7"
+  },
+  {
+   "item": "BDSDT theo so 100%",
+   "effect_dong_per_share": 0,
+   "basis": "so hop nhat (PPA)",
+   "source": "A11"
   }
  ],
- "gordon_crosscheck": "khong ap dung (NAV holding; khong co dong ROE on dinh)",
+ "gordon_crosscheck": "khong ap dung (NAV holding)",
  "lock_md5": {
   "HHS/calc/hhs_r2.py": "b386c537b1d288dcfba3a39e253bcbd0",
   "HHS/calc/hhs_redo.py": "ea4b14d14be090b7dcc602e772ce624e",
@@ -282,10 +365,395 @@
   "Uy quyen bieu quyet 7,37-7,53% CRV tu nhom co dong khong ten; nhom TCH kiem soat 89,35% bieu quyet CRV; so huu chong tang TCH-HHS-CRV",
   "TB 2124/TB-TTCP 11/10/2024 dat khoi de N01 CRV: tien SDD bo sung tam trich 7,87 ty",
   "Chi phi phat/truy thu thue 2025 = 2,44 ty khong neu QD",
-  "Vay 390 ty CRV (VietinBank) dao han 18/11/2026, the chap NC-II",
+  "Vay 390 ty CRV (VietinBank) — DA TRA 9T/2026, khong con no vay [dinh chinh r3; r2 ghi sai dao han 18/11/2026]",
   "Dai ly Dongfeng: khong co tu 'doc quyen', hop dong/thoi han chua co",
   "Du toan chi phi con lai giao can NC-II (3.099 da nhan tien) chua co"
  ],
  "fear_buy_eligible_2_5": false,
- "center_vs_p50_note": "tam = ky vong luoi 10,387; P50 10,194; gia tri tai tham so trung tam (NAV thuan, CK holding 0) 13,731; cung tham so CK holding 25% 10,805"
+ "center_vs_p50_note": "tam = ky vong luoi 13,969; P50 13,917; gia tri tai tham so trung tam (CO_SO, ds 0, y 3,25, BDSDT 100%, I.14 0) 13,893",
+ "price_date": "2026-11-06",
+ "price_source": "BQ tav2_bq.ticker Price (calc_r3/px_hhs_r3_20261106.csv)",
+ "label_sleeve_40tr": "DƯỚI vùng",
+ "sleeve_40tr": {
+  "n": 405,
+  "center": 14151,
+  "p10": 12583,
+  "p25": 13311,
+  "p50": 14099,
+  "p75": 14967,
+  "p90": 15766,
+  "pct_below_px": 0.0,
+  "min": 11137,
+  "max": 17565
+ },
+ "rule4": {
+  "ref_5ty": {
+   "threshold": 11873.953647135135,
+   "pass_": true
+  },
+  "sleeve_40tr": {
+   "threshold": 12028.550534376029,
+   "pass_": true
+  }
+ },
+ "assumptions": [
+  {
+   "id": "A1",
+   "item": "Gia goc HTK cu CRV 6.009,8 ty (7.338,8 - I.14 1.329) va thang du cung chiet khau pv(y)",
+   "value": "CRV_COST - 6.009,8*(1-pv(y)) + 6.009,8*s*pv(y)",
+   "basis": "Dinh chinh skeptic #1 (dung): r2 de gia goc o nam 0 + thang du o nam 4 => tien thu nam 4 ngam 2,06x gia goc; von nam y nam phai chiet khau (cung loi ADDENDUM_5F §2, 5F/moat_fix_r2_out.txt bien the A/B)",
+   "source": "calc/hhs_r2.py:33; 5F/moat_fix_r2.py"
+  },
+  {
+   "id": "A2",
+   "item": "y = so nam binh quan thu tien khoi HTK cu",
+   "value": "truc {2,5; 3,25; 4,0} deu 1/3; tam 3,25",
+   "basis": "[UL] Khong co lich ban/ban giao cho khoi 6.009,8. Can duoi 2,5: thap tang NC-II da du dieu kien kinh doanh (543 can) + nhip ban giao Q2/2026; can tren 4: HH1-HH4 2.494 can dang lam ham [SHS] va PV4 cua DD TCH v2 (REPORT TCH :269). Diem giua = trung diem khoang skeptic 2,5-4.",
+   "source": "dd_TCH_20261031/REPORT.md:96,249,269,377"
+  },
+  {
+   "id": "A3",
+   "item": "s co so = thang du sau thue tren gia goc theo bien gop NC-II quan sat",
+   "value": "s_obs = 0,8*(g-0,1)/(1-g), g = 52,05% (trung diem 51,9-52,2%) => 0,7016",
+   "basis": "Dinh chinh skeptic #2 (dung): s=40% r2 dat giua bien NC-II va quy dat moi mong (150 To Hieu) - nhung 150 To Hieu la HTK cua TCH me, khong nam trong khoi CRV; I.14 da tach NPV0 => khoi 6.009,8 chi con NC-II. Cao tang HH1-HH4 bien thap hon = nhan dinh, khong co so => ra do nhay (truc ds hai chieu). CPBH 10% DT, thue 20% theo cong thuc tch_valuation_v2.py:99-101.",
+   "source": "dd_HHS_20261101/SKEPTIC_20261101.md C7 (52,2%); dd_TCH_20261031/REPORT.md:7 (51,9%); dd_TCH_20261031/calc/tch_valuation_v2.py:99-101"
+  },
+  {
+   "id": "A4",
+   "item": "Lech s theo kich ban",
+   "value": "TIEU_CUC s_obs-0,15 / CO_SO s_obs / TICH_CUC s_obs+0,15",
+   "basis": "[UL] Luat doi xung (STANDARD_r2 dieu 2): r2 lech -0,25/+0,15 mot chieu; giu bien do +0,15 cua r2 o ca hai chieu. Ban song song lech r2 (-0,25/+0,15).",
+   "source": "calc/hhs_r2.py:22-24"
+  },
+  {
+   "id": "A5",
+   "item": "Truc ds lech them thang du",
+   "value": "-15/-7,5/0/+7,5/+15pp deu",
+   "basis": "[UL] giu nguyen r2 (doi xung)",
+   "source": "calc/hhs_r2.py:60"
+  },
+  {
+   "id": "A6",
+   "item": "Trong so kich ban",
+   "value": "0,25/0,50/0,25",
+   "basis": "Dinh chinh skeptic #6: 0,30/0,50/0,20 r2 la [UL] lech xuong; can cu lech xuong (doc nganh Bobby: Ha Noi suy, Hai Phong tre 2-4 quy) la nhan dinh => ra do nhay. Ban song song 0,30/0,50/0,20.",
+   "source": "calc/hhs_r2.py:22-24; dd_TCH_20261031/REPORT.md:316"
+  },
+  {
+   "id": "A7",
+   "item": "CK holding",
+   "value": "base 0% (headline); ban song song truc r2 0/15/25/35/45% (ky vong 27%)",
+   "basis": "Dinh chinh skeptic #5 + luat user (CK holding/quan tri [UL] ra do nhay, tien le DRI#1/PVT#1/TCH#1). Co so dinh tinh cho CK: CRV chua tra co tuc tien 9T/2026, 2 tang holding - khong co du lieu do lon.",
+   "source": "TOP5D_CORRECTIONS_20261108.md HHS #5; calc/hhs_r2.py:47"
+  },
+  {
+   "id": "A8",
+   "item": "CK quan tri",
+   "value": "base 0%; do nhay truc r2 0/5/10/15%",
+   "basis": "Dinh chinh skeptic #3 (dung): phap ly/quan tri chi WARNING; docstring r2 dong 4 da tu tuyen bo bo khoi base nhung truc van vao tam (-433).",
+   "source": "calc/hhs_r2.py:4,48,56-57"
+  },
+  {
+   "id": "A9",
+   "item": "Thang du I.14",
+   "value": "-15/0/+15% (0,25/0,50/0,25), ky vong 0 = NPV0",
+   "basis": "Dinh chinh skeptic #4 (dung): luat 20 du an moi base so sach/NPV0; r2 -15/0/+40 ky vong +6,25%.",
+   "source": "calc/hhs_r2.py:50"
+  },
+  {
+   "id": "A10",
+   "item": "Mat ky quy ca nhan 28,4 ty",
+   "value": "base 0 (theo so); do nhay -66 d/cp",
+   "basis": "Dinh chinh skeptic #4: khong co van ban no qua han/kien tung => khong co co so lech so; giu WARNING.",
+   "source": "dd_HHS_20261101/GAPS_FILL.md:108-113"
+  },
+  {
+   "id": "A11",
+   "item": "Thang du BDSDT CRV (PPA, sau thue 817 ty)",
+   "value": "base 100% (theo so hop nhat), truc 50/100/150% deu",
+   "basis": "Luat base = so sach: so hop nhat HHS mang BDSDT CRV theo gia tri hop ly PPA (2025); r2 ky vong 50% khong co du lieu => lech khoi so phai ra do nhay (skeptic #6, +348). Truc +-50pp doi xung [UL].",
+   "source": "calc/hhs_r2.py:45,49; Q3HN"
+  },
+  {
+   "id": "A12",
+   "item": "O to",
+   "value": "giu r2: LNST 25/35/50 ty x P/E 5/6/8 theo kich ban",
+   "basis": "Skeptic #6 chi la do nhay (+100-200: nhip EBIT 9T ~42, P/E<1/Ke); skeptic 01/11 C8 noi ngc lai (P/E peer 5,9x, nhip Q3 ~30). Hai chieu co du lieu doi nhau => giu, bao do nhay.",
+   "source": "calc/hhs_r2.py:22-24; dd_HHS_20261101/SKEPTIC_20261101.md C8"
+  },
+  {
+   "id": "A13",
+   "item": "r",
+   "value": "13,5% + 1,0 x (dep12T(06/11) - 7,40%) = 13,50%",
+   "basis": "Luat user; deposit_rate_vn.effective_deposit_rate('2026-11-06') = 7,40% cctg_12m(2026-11-02)",
+   "source": "/home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py"
+  },
+  {
+   "id": "A14",
+   "item": "Gia tham chieu + thanh khoan",
+   "value": "dong cua 06/11/2026 tu BQ tav2_bq.ticker (Price); ADV250/ADV60 median Price*Volume; CK = sigma_d*sqrt(Q/ADV), Y=1, cu 5 ty va 10/40 tr",
+   "basis": "Luat user + STANDARD_r2 dieu 6; cung cong thuc MBB r3",
+   "source": "calc_r3/px_hhs_r3.sql -> calc_r3/px_hhs_r3_20261106.csv"
+  },
+  {
+   "id": "A15",
+   "item": "Cac dau vao BCTC con lai (VCSH me, NCI, PPA 2.020,76, NMTT 3.099,2, HTK 7.338,8, I.14 1.329, OTHER, BDSDT)",
+   "value": "chep nguyen van calc/hhs_r2.py:12-20,45-46",
+   "basis": "BCTC goc Q3HN 30/09/2026; khong doi",
+   "source": "calc/hhs_r2.py"
+  },
+  {
+   "id": "A16",
+   "item": "Vay 390 ty CRV",
+   "value": "DA TRA trong 9T/2026 (khong con no vay)",
+   "basis": "Dinh chinh skeptic #7 (dung): BQ ticker_financial HHS 2025Q4 LtDebt 390 ty -> 2026Q3 StDebt 0, LtDebt 0; dd_HHS REPORT.md:21,190 'tra vay 390'. Khong anh huong NAV (da nam trong VCSH); sua van ban moi noi.",
+   "source": "BQ tav2_bq.ticker_financial truy van 09/11/2026; dd_HHS_20261101/REPORT.md:21,190"
+  }
+ ],
+ "headline_vs_alternatives": [
+  {
+   "name": "HEADLINE r3 (CK holding 0%)",
+   "center": 13969,
+   "p10": 12422,
+   "p50": 13917,
+   "p90": 15564,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "co_CK_holding_r2 (0/15/25/35/45%, ky vong 27%)",
+   "center": 10761,
+   "p10": 8624,
+   "p50": 10559,
+   "p90": 13207,
+   "pct_below_px": 0.3662,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "co_CK_holding_va_quan_tri_r2",
+   "center": 10331,
+   "p10": 8171,
+   "p50": 10135,
+   "p90": 12796,
+   "pct_below_px": 0.4669,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "co_CK_holding_y4",
+   "center": 10220,
+   "p10": 8251,
+   "p50": 10036,
+   "p90": 12458,
+   "pct_below_px": 0.4831,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "co_CK_holding_y2.5",
+   "center": 11319,
+   "p10": 9118,
+   "p50": 11125,
+   "p90": 13851,
+   "pct_below_px": 0.2462,
+   "label": "TRONG vùng"
+  },
+  {
+   "name": "y_co_dinh_2.5",
+   "center": 14734,
+   "p10": 13358,
+   "p50": 14712,
+   "p90": 16147,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "y_co_dinh_4.0",
+   "center": 13229,
+   "p10": 12018,
+   "p50": 13193,
+   "p90": 14476,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "co_truc_CK_quan_tri_r2",
+   "center": 13411,
+   "p10": 11682,
+   "p50": 13381,
+   "p90": 15165,
+   "pct_below_px": 0.0024,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "trong_so_kich_ban_r2_0.30/0.50/0.20",
+   "center": 13859,
+   "p10": 12384,
+   "p50": 13812,
+   "p90": 15446,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "lech_s_kich_ban_r2_-0.25/+0.15",
+   "center": 13853,
+   "p10": 12128,
+   "p50": 13836,
+   "p90": 15564,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "BDSDT_r2_0/50/100",
+   "center": 13492,
+   "p10": 11945,
+   "p50": 13441,
+   "p90": 15087,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "co_truc_ky_quy",
+   "center": 13950,
+   "p10": 12415,
+   "p50": 13906,
+   "p90": 15532,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  {
+   "name": "co_truc_r_pm1pp",
+   "center": 13972,
+   "p10": 12430,
+   "p50": 13921,
+   "p90": 15572,
+   "pct_below_px": 0.0,
+   "label": "DƯỚI vùng"
+  }
+ ],
+ "bridge_r2_to_r3": [
+  {
+   "step": "0 r2 (gia 9.550 04/11)",
+   "center": 10387,
+   "delta": 0,
+   "p10": 8252,
+   "p90": 12827,
+   "pct_below": 0.3525,
+   "n": 5400
+  },
+  {
+   "step": "1 gia+thanh khoan 06/11",
+   "center": 10391,
+   "delta": 4,
+   "p10": 8255,
+   "p90": 12831,
+   "pct_below": 0.4536,
+   "n": 5400
+  },
+  {
+   "step": "2 #1 gia goc HTK cu cung pv(y), y 2,5/3,25/4 (s r2)",
+   "center": 8850,
+   "delta": -1541,
+   "p10": 6927,
+   "p90": 11008,
+   "pct_below": 0.7766,
+   "n": 16200
+  },
+  {
+   "step": "3 #2 s = bien NC-II quan sat 0,70, lech kich ban doi xung +-0,15",
+   "center": 9933,
+   "delta": 1083,
+   "p10": 7844,
+   "p90": 12308,
+   "pct_below": 0.5582,
+   "n": 16200
+  },
+  {
+   "step": "4 #3 CK quan tri ra khoi tam (do nhay)",
+   "center": 10347,
+   "delta": 414,
+   "p10": 8287,
+   "p90": 12719,
+   "pct_below": 0.4638,
+   "n": 4050
+  },
+  {
+   "step": "5 #4 I.14 doi xung +-15%, ky quy ra do nhay",
+   "center": 10324,
+   "delta": -23,
+   "p10": 8281,
+   "p90": 12695,
+   "pct_below": 0.4663,
+   "n": 2025
+  },
+  {
+   "step": "6 #6 trong so kich ban doi xung 0,25/0,50/0,25",
+   "center": 10413,
+   "delta": 89,
+   "p10": 8342,
+   "p90": 12795,
+   "pct_below": 0.4452,
+   "n": 2025
+  },
+  {
+   "step": "7 BDSDT base theo so (truc 50/100/150%)",
+   "center": 10761,
+   "delta": 348,
+   "p10": 8624,
+   "p90": 13207,
+   "pct_below": 0.3662,
+   "n": 2025
+  },
+  {
+   "step": "8 #5 CK holding base 0% (HEADLINE)",
+   "center": 13969,
+   "delta": 3208,
+   "p10": 12422,
+   "p90": 15564,
+   "pct_below": 0.0,
+   "n": 405
+  }
+ ],
+ "control_r2_reproduced": {
+  "n": 5400,
+  "center": 10387,
+  "p10": 8252,
+  "p25": 9097,
+  "p50": 10194,
+  "p75": 11468,
+  "p90": 12827,
+  "pct_below_px": 0.3525,
+  "min": 6070,
+  "max": 16834
+ },
+ "implied_by_price": {
+  "holding_discount_fixed": 0.33488698511283077,
+  "y_headline": 8.724696095945976,
+  "y_with_holding_r2": 4.3544316479706335,
+  "s_shift_headline": null,
+  "s_shift_with_holding_r2": -0.22652231790582905,
+  "note": "nghiem de tam (sau CK 5 ty) = gia 06/11; None = khong co nghiem trong mien tim"
+ },
+ "sens_auto_dong_per_share": 230,
+ "lock_md5_file": "calc_r3/LOCK_md5.txt",
+ "zone_r2": {
+  "center": 10387,
+  "p10": 8252,
+  "p90": 12827,
+  "label": "TRONG vùng",
+  "price": 9550.0,
+  "date": "2026-11-04",
+  "pct_below": 0.352475
+ },
+ "warnings_r3": [
+  "Forensic: HHS dang trong forensic_flags exclude => theo luat 02/11 bi loai khoi candidate plan bat ke nhan dinh gia",
+  "LN Q3/2026 chua soat xet; 6T bi ha -34% khi soat xet — neu Q3 ha tuong tu ~ -90 d/cp (uoc luong skeptic, chua do)",
+  "Du toan chi phi con lai giao can NC-II (3.099 da nhan tien) chua co; HTK co the chua gom chi phi hoan thien => s_obs co the cao (MO)",
+  "Cao tang HH1-HH4 (2.494 can) bien co the thap hon thap tang — nhan dinh, nam trong truc ds/kich ban doi xung",
+  "HHS Capital premium 143,5 ty; uy quyen bieu quyet 7,37-7,53% CRV; so huu chong tang TCH-HHS-CRV (giu tu r2)",
+  "TB 2124/TB-TTCP N01 tien SDD bo sung 7,87 ty; KL 08/KL-TTTP Pruksa; phat/truy thu thue 2025 2,44 ty (giu tu r2)",
+  "Dai ly Dongfeng khong co tu 'doc quyen'; phai tra Dongfeng 364,01 ty"
+ ],
+ "provenance_fix_r3": "Vay 390 ty CRV VietinBank (dao han 18/11/2026) DA TRA trong 9T/2026 (BQ ticker_financial HHS 2025Q4 LtDebt 390 ty -> 2026Q3 vay 0; dd_HHS REPORT.md:21,190). r2 §9.10, ADDENDUM luc 6c, warnings_r2_added ghi 'dao han 18/11/2026' la loi lan nam — da sua.",
+ "warnings_r2_added_r3_corrected": "muc 'Vay 390 ty CRV (VietinBank) dao han 18/11/2026, the chap NC-II' -> DA TRA 9T/2026, khong con no vay",
+ "center_history": "v1 11.900 -> r1 ~10.611 (luoi r1 tinh lai) -> r2 10.387 -> 5F r2 chat-3c 8.393-9.700 -> r3 (file nay); dao dong chu yeu do quy uoc CK holding va pv gia goc",
+ "news_scan_0108_11": "chua quet tin 01-08/11 trong phien headless nay (khong co nguon tin tu dong) — MO, chi WARNING"
 }

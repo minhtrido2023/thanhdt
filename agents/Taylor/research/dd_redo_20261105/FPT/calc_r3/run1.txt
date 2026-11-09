@@ -1,0 +1,33 @@
+== FPT VONG 3 | gia 50,800 (2026-11-06, BQ) | r 13.50% (dep12T 7.40% cctg_12m(2026-11-02); neo 7.40%)
+FOX 06/11 18,148 ty (04/11 18,789) | FRT 06/11 11,817 ty (04/11 11,984)
+CK 5 ty: r2 0.1866% | r3 0.1881% (ADV250 564.8 ty; ADV60 346.0 ty, CK ADV60 0.2210%) | 40tr 0.0168% 10tr 0.0084%
+CONTROL r2 tai lap (04/11): n=540 | tam 54,203 | P10 32,389 P25 39,897 P50 55,182 P75 66,124 P90 74,557 | %duoi gia 47.5% | min 25,463 max 94,261
+BRIDGE 1 gia FPT/FOX/FRT + thanh khoan 06/11: tam 53,834 (-370) P10 32,060 P90 74,166 %duoi 41.9%
+BRIDGE 2 D1 trong so doi xung 0,275/0,45/0,275: tam 56,700 (+2,866) P10 33,418 P90 77,546 %duoi 34.4%
+BRIDGE 3 D2 RONIC terminal = Ke ca 3 kich ban: tam 56,488 (-212) P10 43,005 P90 69,084 %duoi 27.5%
+BRIDGE 4 D3 tru loi ich CDKKS 1.165,8 ty: tam 55,871 (-617) P10 42,388 P90 68,466 %duoi 27.9%
+BRIDGE 5 D7 CK FTEL [UL] -> base 0%: tam 57,312 (+1,441) P10 45,270 P90 68,466 %duoi 27.0%
+r2 o gia 06/11 (chi doi so sanh gia): %duoi gia 41.5%
+HEADLINE r3 (sau CK 5 ty): n=540 | tam 57,312 | P10 45,270 P25 49,369 P50 58,124 P75 63,328 P90 68,466 | %duoi gia 27.0% | min 40,048 max 74,358
+Truoc CK: n=540 | tam 57,420 | P10 45,355 P25 49,462 P50 58,234 P75 63,448 P90 68,596 | %duoi gia 26.8% | min 40,123 max 74,499
+Sleeve 40tr: n=540 | tam 57,410 | P10 45,347 P25 49,453 P50 58,224 P75 63,437 P90 68,584 | %duoi gia 26.9% | min 40,117 max 74,486
+Gia tri tai tham so trung tam sau CK 5 ty: 57,556
+  XAU: r3 45,521 | r2-style 35,142 (truoc CK)
+  CO_SO: r3 57,665 | r2-style 58,311 (truoc CK)
+  TOT: r3 66,773 | r2-style 73,212 (truoc CK)
+Nhom kich ban quanh P10/P90: {'p10_scen_mix_pm5pct': {'XAU': 1.0}, 'p90_scen_mix_pm5pct': {'TOT': 1.0}}
+SONG SONG A_giu_CK_FTEL_30/15/0: n=540 | tam 55,871 | P10 42,388 P25 46,487 P50 56,683 P75 63,223 P90 68,466 | %duoi gia 27.9% | min 37,166 max 74,358
+SONG SONG B_trong_so_r2_0,35/0,45/0,20: n=540 | tam 55,721 | P10 44,254 P25 47,794 P50 56,889 P75 61,614 P90 67,196 | %duoi gia 34.4% | min 40,048 max 74,358
+SONG SONG C_RONIC_terminal_r2_(>Ke): n=540 | tam 57,524 | P10 35,683 P25 45,407 P50 59,087 P75 68,327 P90 76,928 | %duoi gia 33.4% | min 27,419 max 93,197
+SONG SONG D_khong_tru_CDKKS: n=540 | tam 57,929 | P10 45,887 P25 49,986 P50 58,741 P75 63,945 P90 69,084 | %duoi gia 26.0% | min 40,665 max 74,975
+SONG SONG E_RONIC_5nam_chan_25,5%_(ROE_TTM): n=540 | tam 54,472 | P10 45,270 P25 49,369 P50 56,019 P75 58,531 P90 60,570 | %duoi gia 27.0% | min 40,048 max 63,587
+SONG SONG F_RONIC_5nam_chan_17,7%_(ROIC5Y): n=540 | tam 52,311 | P10 45,270 P25 49,369 P50 53,635 P75 55,391 P90 56,489 | %duoi gia 27.8% | min 40,048 max 59,237
+SONG SONG G_RONIC_5nam_chan_Ke: n=540 | tam 50,652 | P10 45,270 P25 48,663 P50 51,211 P75 53,277 P90 54,528 | %duoi gia 42.2% | min 40,048 max 57,276
+SONG SONG H_lai_LK_Q4/25_740: n=540 | tam 56,616 | P10 44,813 P25 48,852 P50 57,414 P75 62,558 P90 67,549 | %duoi gia 27.2% | min 39,647 max 73,375
+SONG SONG I_tru_tien_khach_ung_truoc_2.370: n=540 | tam 56,058 | P10 44,015 P25 48,114 P50 56,870 P75 62,074 P90 67,212 | %duoi gia 27.7% | min 38,793 max 73,104
+SONG SONG J_FOX/FRT_gia_04/11: n=540 | tam 57,739 | P10 45,691 P25 49,798 P50 58,562 P75 63,775 P90 68,891 | %duoi gia 26.1% | min 40,458 max 74,803
+SONG SONG co_truc_r_pm1pp: n=1620 | tam 57,426 | P10 45,048 P25 50,169 P50 58,120 P75 63,701 P90 68,808 | %duoi gia 26.8% | min 38,185 max 78,505
+Do nhay r (tam): {'-100bp': 60478, '-50bp': 58831, '+50bp': 55906, '+100bp': 54602}
+GIA NGU Y (headline): Ke 16.20% (dep12T ngu y 10.10%) | w XAU 0.550 (CO_SO 0,45, TOT phan con lai) | RONIC 5 nam chan 13.9% | ban A (giu CK FTEL): Ke 15.51%
+Gordon RONIC=Ke (truoc CK): A_khong_lai_tg_RONICKe_g0.04 50,852 | B_co_lai_tg_RONICKe_g0.04 47,471 | A_khong_lai_tg_RONICKe_g0.05 51,115 | B_co_lai_tg_RONICKe_g0.05 47,764
+model_r3_out.json written

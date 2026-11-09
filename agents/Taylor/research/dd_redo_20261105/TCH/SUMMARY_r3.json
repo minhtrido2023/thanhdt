@@ -1,0 +1,917 @@
+{
+ "ticker": "TCH",
+ "round": 3,
+ "job": "Taylor_20261108_180134",
+ "asof_price_date": "2026-11-06",
+ "price": 13500.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "dep_asof_06_11": {
+   "big4_rate_pct": 6.8,
+   "cctg_rate_pct": 7.4,
+   "last_update": "2026-11-03",
+   "rate": 0.07400000000000001,
+   "rate_pct": 7.4,
+   "rate_source": "cctg_12m(2026-11-02)"
+  },
+  "rule": "r = 13,5% + 1,0 x (dep12T hieu dung - 7,40%)"
+ },
+ "n_outcomes": 27,
+ "center_pre": 16347,
+ "center_post": 16244,
+ "p10_out": 15578,
+ "p25_out": 15884,
+ "p50_out": 16208,
+ "p75_out": 16601,
+ "p90_out": 16950,
+ "min_out": 15371,
+ "max_out": 17240,
+ "pct_weight_below_price": 0.0,
+ "label": "DƯỚI vùng",
+ "center_param_post": 16208,
+ "center_pre_liq": 16347,
+ "center_post_liq": 16244,
+ "p10_post": 15578,
+ "p25_post": 15884,
+ "p50_post": 16208,
+ "p75_post": 16601,
+ "p90_post": 16950,
+ "liq_disc_5ty": 0.006306898502943162,
+ "liq_discount_ref": 0.006306898502943162,
+ "grid_n": 27,
+ "min_outcome": 15371,
+ "px_vs_center_post": -0.16892391036690468,
+ "px_vs_p10_post": -0.133393246886635,
+ "px_vs_p90_post": -0.20353982300884954,
+ "p10_pre": 15677,
+ "p50_pre": 16311,
+ "p90_pre": 17057,
+ "grid_desc": "kết cục = biên gộp BĐS backlog g_bl × biên gộp đất cũ chưa bán g_old (mỗi trục 51,9% ±5pp, w 1/4-1/2-1/4, ĐỘC LẬP; m=0,8(g−0,1) trên DT trước VAT, s=0,8(g−0,1)/(1−g) trên giá vốn) × r 13,5% ±100bp (1/4-1/2-1/4); n=27 tất định. Cố định: VCSH mẹ 12.159,1 (12.119 đ/cp = 74% tâm trước CK) — KHÔNG có trục chất lượng tài sản; CK holding 0; quỹ đất mới NPV0. Tham số trung tâm = g 51,9% cả hai, r 13,5%.",
+ "label_note": "Nhãn theo cỡ 5 tỷ/ADV250 (CK 0.63%, Q/ADV 5.7%); sleeve 10–40 tr nhãn 10tr DƯỚI vùng, 20tr DƯỚI vùng, 40tr DƯỚI vùng. Định nghĩa vùng P10–P90 không đổi. Vùng HẸP do cấu trúc (sổ sách hằng số) — KHÔNG phải thước đo bất định đầy đủ.",
+ "ck_ref_size": {
+  "q_vnd": 5000000000.0,
+  "adv": "250 phien",
+  "disc": 0.006306898502943162,
+  "in_calib": true,
+  "disc_adv60": 0.00707337925117584,
+  "q_over_adv250": 0.05738239618488778,
+  "q_over_adv60": 0.08773665317130713
+ },
+ "ck_real_sleeve": {
+  "10tr": {
+   "disc_adv250": 0.00028205307559545133,
+   "disc_adv60": 0.00031633113672531476,
+   "q_over_adv250": 0.00011476479236977556,
+   "in_calib": false,
+   "n_outcomes": 27,
+   "center_pre": 16347,
+   "center_post": 16342,
+   "p10_out": 15673,
+   "p25_out": 15980,
+   "p50_out": 16306,
+   "p75_out": 16702,
+   "p90_out": 17053,
+   "min_out": 15464,
+   "max_out": 17344,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "20tr": {
+   "disc_adv250": 0.0003988832848161311,
+   "disc_adv60": 0.00044735978375783796,
+   "q_over_adv250": 0.00022952958473955112,
+   "in_calib": false,
+   "n_outcomes": 27,
+   "center_pre": 16347,
+   "center_post": 16340,
+   "p10_out": 15671,
+   "p25_out": 15978,
+   "p50_out": 16304,
+   "p75_out": 16700,
+   "p90_out": 17051,
+   "min_out": 15462,
+   "max_out": 17342,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "40tr": {
+   "disc_adv250": 0.0005641061511909027,
+   "disc_adv60": 0.0006326622734506295,
+   "q_over_adv250": 0.00045905916947910224,
+   "in_calib": false,
+   "n_outcomes": 27,
+   "center_pre": 16347,
+   "center_post": 16338,
+   "p10_out": 15668,
+   "p25_out": 15976,
+   "p50_out": 16301,
+   "p75_out": 16697,
+   "p90_out": 17048,
+   "min_out": 15459,
+   "max_out": 17339,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  }
+ },
+ "ck_real_sleeve_note": "cỡ sleeve 10–40 tr: Q/ADV <0,1% NGOÀI vùng hiệu chỉnh luật căn bậc hai ⇒ CK là cận trên, ≈0",
+ "liquidity": {
+  "px": 13500.0,
+  "pxd": "2026-11-06",
+  "px_5d_ago": 11850.0,
+  "px_5d_ago_date": "2026-10-30",
+  "w250": {
+   "window": "2025-11-05..2026-11-06",
+   "n": 250,
+   "n_zero_vol": 0,
+   "adv_med": 87134737000.0,
+   "sigma_d": 0.02632852334877296,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.05738239618488778,
+     "disc": 0.006306898502943162,
+     "in_calib": true,
+     "days_at_15pct": 0.38254930789925184
+    },
+    "10tr": {
+     "q_over_adv": 0.00011476479236977556,
+     "disc": 0.00028205307559545133,
+     "in_calib": false,
+     "days_at_15pct": 0.0007650986157985037
+    },
+    "20tr": {
+     "q_over_adv": 0.00022952958473955112,
+     "disc": 0.0003988832848161311,
+     "in_calib": false,
+     "days_at_15pct": 0.0015301972315970075
+    },
+    "40tr": {
+     "q_over_adv": 0.00045905916947910224,
+     "disc": 0.0005641061511909027,
+     "in_calib": false,
+     "days_at_15pct": 0.003060394463194015
+    }
+   }
+  },
+  "w60": {
+   "window": "2026-08-12..2026-11-06",
+   "n": 60,
+   "n_zero_vol": 0,
+   "adv_med": 56988725000.0,
+   "sigma_d": 0.023880114912369244,
+   "sizes": {
+    "5000tr": {
+     "q_over_adv": 0.08773665317130713,
+     "disc": 0.00707337925117584,
+     "in_calib": true,
+     "days_at_15pct": 0.5849110211420475
+    },
+    "10tr": {
+     "q_over_adv": 0.00017547330634261427,
+     "disc": 0.00031633113672531476,
+     "in_calib": false,
+     "days_at_15pct": 0.0011698220422840951
+    },
+    "20tr": {
+     "q_over_adv": 0.00035094661268522854,
+     "disc": 0.00044735978375783796,
+     "in_calib": false,
+     "days_at_15pct": 0.0023396440845681902
+    },
+    "40tr": {
+     "q_over_adv": 0.0007018932253704571,
+     "disc": 0.0006326622734506295,
+     "in_calib": false,
+     "days_at_15pct": 0.0046792881691363804
+    }
+   }
+  },
+  "d_ref": 0.006306898502943162
+ },
+ "parallel": {
+  "both_g40": {
+   "desc": "ca backlog va dat cu o g 40% (+-5pp) — chieu xuong, khong co du lieu",
+   "n_outcomes": 27,
+   "center_pre": 14714,
+   "center_post": 14622,
+   "p10_out": 14180,
+   "p25_out": 14393,
+   "p50_out": 14603,
+   "p75_out": 14834,
+   "p90_out": 15104,
+   "min_out": 14014,
+   "max_out": 15300,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "gov_10": {
+   "desc": "r3 + CK quan tri 10%",
+   "n_outcomes": 27,
+   "center_pre": 14712,
+   "center_post": 14619,
+   "p10_out": 14020,
+   "p25_out": 14296,
+   "p50_out": 14587,
+   "p75_out": 14941,
+   "p90_out": 15255,
+   "min_out": 13833,
+   "max_out": 15516,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "gov_15": {
+   "desc": "r3 + CK quan tri 15%",
+   "n_outcomes": 27,
+   "center_pre": 13895,
+   "center_post": 13807,
+   "p10_out": 13242,
+   "p25_out": 13501,
+   "p50_out": 13777,
+   "p75_out": 14111,
+   "p90_out": 14407,
+   "min_out": 13065,
+   "max_out": 14654,
+   "pct_weight_below_price": 0.25,
+   "label": "TRONG vùng"
+  },
+  "gov_5": {
+   "desc": "r3 + CK quan tri 5%",
+   "n_outcomes": 27,
+   "center_pre": 15529,
+   "center_post": 15432,
+   "p10_out": 14799,
+   "p25_out": 15090,
+   "p50_out": 15397,
+   "p75_out": 15771,
+   "p90_out": 16102,
+   "min_out": 14602,
+   "max_out": 16378,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "hold_0_10_20_30": {
+   "desc": "r3 + truc CK holding {0;10;20;30} deu (r2)",
+   "n_outcomes": 108,
+   "center_pre": 15055,
+   "center_post": 14960,
+   "p10_out": 13590,
+   "p25_out": 14116,
+   "p50_out": 14989,
+   "p75_out": 15816,
+   "p90_out": 16327,
+   "min_out": 12957,
+   "max_out": 17240,
+   "pct_weight_below_price": 0.0703,
+   "label": "DƯỚI vùng"
+  },
+  "hold_27": {
+   "desc": "r3 + CK holding 27% co dinh (tham chieu HHS)",
+   "n_outcomes": 27,
+   "center_pre": 14022,
+   "center_post": 13933,
+   "p10_out": 13375,
+   "p25_out": 13635,
+   "p50_out": 13903,
+   "p75_out": 14230,
+   "p90_out": 14523,
+   "min_out": 13198,
+   "max_out": 14771,
+   "pct_weight_below_price": 0.2031,
+   "label": "TRONG vùng"
+  },
+  "hold_r1_10_20_30": {
+   "desc": "r3 + CK holding {10;20;30} deu (r1, ky vong 20%)",
+   "n_outcomes": 81,
+   "center_pre": 14625,
+   "center_post": 14532,
+   "p10_out": 13500,
+   "p25_out": 13845,
+   "p50_out": 14501,
+   "p75_out": 15225,
+   "p90_out": 15521,
+   "min_out": 12957,
+   "max_out": 16325,
+   "pct_weight_below_price": 0.0938,
+   "label": "DƯỚI vùng"
+  },
+  "new_land_m10": {
+   "desc": "quy dat moi -10%",
+   "n_outcomes": 27,
+   "center_pre": 16192,
+   "center_post": 16090,
+   "p10_out": 15421,
+   "p25_out": 15728,
+   "p50_out": 16054,
+   "p75_out": 16449,
+   "p90_out": 16797,
+   "min_out": 15222,
+   "max_out": 17080,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "new_land_p10": {
+   "desc": "quy dat moi +10%",
+   "n_outcomes": 27,
+   "center_pre": 16502,
+   "center_post": 16398,
+   "p10_out": 15736,
+   "p25_out": 16040,
+   "p50_out": 16362,
+   "p75_out": 16753,
+   "p90_out": 17107,
+   "min_out": 15519,
+   "max_out": 17399,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "r2_s_40_keep": {
+   "desc": "r3 nhung giu s r2 {25;40;55} (khong nhat quan)",
+   "n_outcomes": 27,
+   "center_pre": 15038,
+   "center_post": 14943,
+   "p10_out": 14276,
+   "p25_out": 14576,
+   "p50_out": 14942,
+   "p75_out": 15285,
+   "p90_out": 15611,
+   "min_out": 14112,
+   "max_out": 15825,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "sgtl_loss_100": {
+   "desc": "stress mat 100% tien gui SGTL 678,3 (can duoi cuc doan)",
+   "n_outcomes": 27,
+   "center_pre": 15671,
+   "center_post": 15572,
+   "p10_out": 14906,
+   "p25_out": 15212,
+   "p50_out": 15536,
+   "p75_out": 15929,
+   "p90_out": 16278,
+   "min_out": 14699,
+   "max_out": 16568,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "share_khac_050": {
+   "desc": "so huu H1+khac 0,50",
+   "n_outcomes": 27,
+   "center_pre": 16300,
+   "center_post": 16197,
+   "p10_out": 15540,
+   "p25_out": 15843,
+   "p50_out": 16162,
+   "p75_out": 16549,
+   "p90_out": 16892,
+   "min_out": 15335,
+   "max_out": 17181,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "share_khac_100": {
+   "desc": "so huu H1+khac 1,00",
+   "n_outcomes": 27,
+   "center_pre": 16378,
+   "center_post": 16275,
+   "p10_out": 15604,
+   "p25_out": 15911,
+   "p50_out": 16238,
+   "p75_out": 16636,
+   "p90_out": 16988,
+   "min_out": 15394,
+   "max_out": 17279,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "skeptic_bl_g40": {
+   "desc": "skeptic: hold 0, s r2, backlog m=m(40%)",
+   "n_outcomes": 27,
+   "center_pre": 14696,
+   "center_post": 14604,
+   "p10_out": 13964,
+   "p25_out": 14186,
+   "p50_out": 14603,
+   "p75_out": 14993,
+   "p90_out": 15242,
+   "min_out": 13917,
+   "max_out": 15337,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "skeptic_s_40_55_70": {
+   "desc": "skeptic: hold 0, m r2, s {40;55;70}",
+   "n_outcomes": 27,
+   "center_pre": 15672,
+   "center_post": 15573,
+   "p10_out": 14909,
+   "p25_out": 15193,
+   "p50_out": 15578,
+   "p75_out": 15910,
+   "p90_out": 16238,
+   "min_out": 14746,
+   "max_out": 16432,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  },
+  "skeptic_s_55_70_85": {
+   "desc": "skeptic: hold 0, m r2, s {55;70;85}",
+   "n_outcomes": 27,
+   "center_pre": 16315,
+   "center_post": 16213,
+   "p10_out": 15572,
+   "p25_out": 15840,
+   "p50_out": 16218,
+   "p75_out": 16542,
+   "p90_out": 16871,
+   "min_out": 15363,
+   "max_out": 17094,
+   "pct_weight_below_price": 0.0,
+   "label": "DƯỚI vùng"
+  }
+ },
+ "headline_vs_alternatives": [
+  {
+   "name": "HEADLINE r3 (holding 0, g 51,9% ±5pp nhất quán)",
+   "center_post": 16244,
+   "p10_out": 15578,
+   "p90_out": 16950,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "hold_0_10_20_30",
+   "desc": "r3 + truc CK holding {0;10;20;30} deu (r2)",
+   "center_post": 14960,
+   "p10_out": 13590,
+   "p90_out": 16327,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0703
+  },
+  {
+   "name": "hold_r1_10_20_30",
+   "desc": "r3 + CK holding {10;20;30} deu (r1, ky vong 20%)",
+   "center_post": 14532,
+   "p10_out": 13500,
+   "p90_out": 15521,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0938
+  },
+  {
+   "name": "hold_27",
+   "desc": "r3 + CK holding 27% co dinh (tham chieu HHS)",
+   "center_post": 13933,
+   "p10_out": 13375,
+   "p90_out": 14523,
+   "label": "TRONG vùng",
+   "pct_below": 0.2031
+  },
+  {
+   "name": "gov_5",
+   "desc": "r3 + CK quan tri 5%",
+   "center_post": 15432,
+   "p10_out": 14799,
+   "p90_out": 16102,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "gov_10",
+   "desc": "r3 + CK quan tri 10%",
+   "center_post": 14619,
+   "p10_out": 14020,
+   "p90_out": 15255,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "gov_15",
+   "desc": "r3 + CK quan tri 15%",
+   "center_post": 13807,
+   "p10_out": 13242,
+   "p90_out": 14407,
+   "label": "TRONG vùng",
+   "pct_below": 0.25
+  },
+  {
+   "name": "both_g40",
+   "desc": "ca backlog va dat cu o g 40% (+-5pp) — chieu xuong, khong co du lieu",
+   "center_post": 14622,
+   "p10_out": 14180,
+   "p90_out": 15104,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "r2_s_40_keep",
+   "desc": "r3 nhung giu s r2 {25;40;55} (khong nhat quan)",
+   "center_post": 14943,
+   "p10_out": 14276,
+   "p90_out": 15611,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "skeptic_s_40_55_70",
+   "desc": "skeptic: hold 0, m r2, s {40;55;70}",
+   "center_post": 15573,
+   "p10_out": 14909,
+   "p90_out": 16238,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "skeptic_s_55_70_85",
+   "desc": "skeptic: hold 0, m r2, s {55;70;85}",
+   "center_post": 16213,
+   "p10_out": 15572,
+   "p90_out": 16871,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "skeptic_bl_g40",
+   "desc": "skeptic: hold 0, s r2, backlog m=m(40%)",
+   "center_post": 14604,
+   "p10_out": 13964,
+   "p90_out": 15242,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "sgtl_loss_100",
+   "desc": "stress mat 100% tien gui SGTL 678,3 (can duoi cuc doan)",
+   "center_post": 15572,
+   "p10_out": 14906,
+   "p90_out": 16278,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "new_land_m10",
+   "desc": "quy dat moi -10%",
+   "center_post": 16090,
+   "p10_out": 15421,
+   "p90_out": 16797,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "new_land_p10",
+   "desc": "quy dat moi +10%",
+   "center_post": 16398,
+   "p10_out": 15736,
+   "p90_out": 17107,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "share_khac_050",
+   "desc": "so huu H1+khac 0,50",
+   "center_post": 16197,
+   "p10_out": 15540,
+   "p90_out": 16892,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "share_khac_100",
+   "desc": "so huu H1+khac 1,00",
+   "center_post": 16275,
+   "p10_out": 15604,
+   "p90_out": 16988,
+   "label": "DƯỚI vùng",
+   "pct_below": 0.0
+  },
+  {
+   "name": "r ±100bp (tâm sau CK)",
+   "center_post": {
+    "+0%": 16244,
+    "+1%": 16126,
+    "-1%": 16366
+   }
+  }
+ ],
+ "bridge_r2_to_r3": [
+  {
+   "step": "r2 công bố (giá 04/11 12.750, CK 5 tỷ ADV đến 04/11)",
+   "center_post": 13768,
+   "delta": 0,
+   "reason": "điểm xuất phát; control tái lập center_pre 13.857,2 trùng file"
+  },
+  {
+   "step": "đổi CK theo ADV đến 06/11 (giá 13.500)",
+   "center_post": 13770,
+   "delta": 2,
+   "reason": "đính chính 4; CK 5 tỷ 0.6446% → 0.6307%"
+  },
+  {
+   "step": "dinh chinh 1: CK holding -> base 0% (truc sang song song)",
+   "center_post": 14934,
+   "delta": 1164,
+   "reason": "đính chính 1: CK holding [UL] → base 0% (song song); tái lập skeptic 14.931"
+  },
+  {
+   "step": "dinh chinh 2a: thang du dat cu nhat quan voi g quan sat (s=s(g), g 51,9% +-5pp)",
+   "center_post": 16234,
+   "delta": 1300,
+   "reason": "đính chính 2: thặng dư đất cũ s=s(g) cùng biên gộp quan sát 51,9% ±5pp (r2 s 40% ⇔ g 40% mâu thuẫn m 33,5% ⇔ g 51,9%)"
+  },
+  {
+   "step": "dinh chinh 2b/3: backlog m=m(g) cung truc g doi xung +-5pp (r2 0,30/0,335/0,36 lech)",
+   "center_post": 16244,
+   "delta": 10,
+   "reason": "đính chính 2/3: backlog m=m(g) cùng trục g đối xứng ±5pp (≈ giá bán ±10%)"
+  }
+ ],
+ "implied_by_price": {
+  "hold_uniform_for_center_eq_px": 0.3206382940986777,
+  "gov_for_center_eq_px": 0.1689101681207083,
+  "g_both_for_center_eq_px": 0.2891033512987027,
+  "g_old_only_for_center_eq_px": 0.16273140338361197,
+  "pb_at_price": 1.1139567705202107,
+  "s_old_for_center_eq_px": 0.05993909590028841,
+  "note": "Giá 13500 ⇔ CK holding đều 32.1% (phần qua công ty con), HOẶC CK quản trị 16.9%, HOẶC biên gộp BĐS chung 28.9% cho cả backlog lẫn đất cũ (quan sát 51,9%), HOẶC chỉ đất cũ g 16.3% (s 6.0%); P/B giá 1.11x."
+ },
+ "assumptions": [
+  {
+   "key": "hold_base",
+   "value": 0.0,
+   "basis": "dinh chinh 1 (TOP5D TCH#1) + quy tac chung: CK holding do lon [UL] => base 0%; du lieu chi cho CAU TRUC (2 tang niem yet, CRV free float ~3%) => song song {0;10;20;30} va r1 {10;20;30}",
+   "source": "TOP5D_CORRECTIONS_20261108.md TCH#1; dd_TCH_20261031/GAPS.md"
+  },
+  {
+   "key": "g_obs",
+   "value": 0.519,
+   "basis": "bien gop ban BDS 6T FY26 51,9% (6T FY25 51,0%) — DU LIEU quan sat, chu yeu NC-II",
+   "source": "dd_TCH_20261031/calc/notes_read.md TM25 (BCTC HN 6T FY26)"
+  },
+  {
+   "key": "g_axis",
+   "value": [
+    -0.05,
+    0.0,
+    0.05
+   ],
+   "w": [
+    0.25,
+    0.5,
+    0.25
+   ],
+   "basis": "doi xung +-5pp quanh g_obs, ap DOC LAP cho backlog (NC-II/GR/H2 da ky) va dat cu chua ban; +-5pp ~ gia ban +-10% (g'=1-(1-g)/(1+x): x=+10% -> 56,3%, -10% -> 46,6%) — do lon [UL] quy uoc doi xung, khong co du lieu gia ban",
+   "source": "dinh chinh 2,3"
+  },
+  {
+   "key": "m_of_g",
+   "value": "m = 0.8*(g - 0.10)",
+   "basis": "bien rong sau thue tren DT truoc VAT: tru CPBH+QLDN ~10% DT, thue TNDN 20% (r2: m 33,5% <=> g 51,9%)",
+   "source": "model_r2.py:15; SKEPTIC_20261031.md B3"
+  },
+  {
+   "key": "s_of_g",
+   "value": "s = 0.8*(g - 0.10)/(1 - g)",
+   "basis": "thang du sau thue tren GIA VON HTK (cung cong thuc quy doi skeptic B3); ap len chi phi DA phat sinh => than trong san (chi phi hoan thanh tuong lai cung sinh bien)",
+   "source": "SKEPTIC_20261031.md B3; TOP5D TCH#2"
+  },
+  {
+   "key": "r_axis",
+   "value": [
+    -0.01,
+    0.0,
+    0.01
+   ],
+   "w": [
+    0.25,
+    0.5,
+    0.25
+   ],
+   "basis": "r = 13,5% + 1,0 x (lai huy dong 12T hieu dung - 7,40%); dep 06/11 = 7,40% (cctg_12m 2026-11-02) => r 13,50%; truc +-100bp giu nhu r2",
+   "source": "deposit_rate_vn.effective_deposit_rate('2026-11-06')"
+  },
+  {
+   "key": "share_khac",
+   "value": 0.8,
+   "basis": "ty le so huu H1+khac [UL] (<20 d/cp); do nhay 0,5/1,0",
+   "source": "TOP5D TCH#5; model_r2.py"
+  },
+  {
+   "key": "new_land_npv",
+   "value": 0.0,
+   "basis": "quy dat moi 150 To Hieu 1.677,5 + I.14 1.328,8 = gia so (luat du an moi 03/11 NPV0); song song +-10%",
+   "source": "notes_read.md TM17"
+  },
+  {
+   "key": "gov_base",
+   "value": 0.0,
+   "basis": "CK quan tri = WARNING (luat 2026-09-27); song song 5/10/15%",
+   "source": "quy tac chung"
+  },
+  {
+   "key": "sgtl_loss_base",
+   "value": 0.0,
+   "basis": "tien gui 678,3 ty NH 'Sai Gon Tai Loc' — danh tinh chua xac minh; khong co du lieu han che rut => base sach so; stress mat 100% song song",
+   "source": "notes_read.md TM4; TOP5D TCH#6"
+  },
+  {
+   "key": "pv_years",
+   "value": {
+    "NC-II": 1.0,
+    "Green River": 1.5,
+    "H2": 2.0,
+    "H1+khac": 1.0,
+    "old_land": 4.0
+   },
+   "basis": "giu nhu r2 (tien do ban giao)",
+   "source": "model_r2.py"
+  },
+  {
+   "key": "ck_ref_size",
+   "value": "5 ty, ADV250 (+ADV60), luat can bac hai; sleeve 10/20/40 tr",
+   "basis": "STANDARD_r2 dieu 6",
+   "source": "STANDARD_r2.md"
+  }
+ ],
+ "control_r2_reproduced": {
+  "center_pre": 13857.218366767,
+  "file": 13857.218366767,
+  "hold0": 15028.353648130771,
+  "hold0_file": 15028.353648130771,
+  "ok": true
+ },
+ "r_sens_post": {
+  "+0%": 16244,
+  "+1%": 16126,
+  "-1%": 16366
+ },
+ "gordon_roe_xcheck": {
+  "TTM_BQ_796": {
+   "A_co_lai": 4094.4718195433006,
+   "B_khong_lai_cong_tien": 5252.388245695792,
+   "np": 796.1170819470001,
+   "roe_co_lai": 0.06547494692843474,
+   "roe_khong_lai": 0.05636426588517803
+  },
+  "norm_r2_727_UL": {
+   "A_co_lai": 3442.201274746078,
+   "B_khong_lai_cong_tien": 4600.11770089857,
+   "np": 727.4017858000001,
+   "roe_co_lai": 0.059823604342752065,
+   "roe_khong_lai": 0.04889448933646843
+  }
+ },
+ "gordon_note": "Kiểm chéo P/B–ROE (g 3%) cho 3.400–5.300 đ/cp — RẤT dưới NAV: ROE TTM 6,5% (LN mẹ TTM BQ 796) là giai đoạn TRƯỚC bàn giao chính NC-II, không đại diện năng lực sinh lời; NAV hàng tồn kho là phương pháp chính. Lệch lớn này là cờ: nếu TCH tái đầu tư tiền bán hàng vào quỹ đất ROE thấp (<Ke), giá trị cổ đông thấp hơn NAV — chính là cơ chế mà CK holding/quản trị song song đo; không đưa vào base (không có dữ liệu RONIC).",
+ "axes_included": [
+  "biên gộp backlog (2 chiều, ±5pp)",
+  "biên gộp đất cũ chưa bán (2 chiều, ±5pp ≈ giá bán ±10%)",
+  "r ±100bp"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "CK holding {0;10;20;30}",
+   "reason": "đính chính 1: độ lớn [UL], thực chất CK quản trị đổi tên (đếm đôi) ⇒ song song hold_0_10_20_30 / hold_r1_10_20_30 / hold_27"
+  },
+  {
+   "axis": "CK quản trị 5/10/15%",
+   "reason": "luật pháp lý/quản trị = WARNING; song song gov_*"
+  },
+  {
+   "axis": "biên ngành 40% cho backlog/đất cũ",
+   "reason": "không có dữ liệu (quan sát 51,0–51,9%); song song both_g40 / skeptic_bl_g40"
+  },
+  {
+   "axis": "chất lượng tài sản sổ sách (tiền gửi SGTL 678,3; dự phòng)",
+   "reason": "không có dữ liệu suy giảm; stress sgtl_loss_100 song song; WARNING"
+  },
+  {
+   "axis": "quỹ đất mới 150 Tô Hiệu + I.14",
+   "reason": "luật dự án mới NPV0; song song ±10%"
+  },
+  {
+   "axis": "sở hữu H1+khác 0,80",
+   "reason": "[UL], ảnh hưởng <80 đ/cp; song song 0,5/1,0"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "CK holding: r2 kỳ vọng 15% → base 0%",
+   "effect_dong_per_share": 1164,
+   "basis": "độ lớn [UL] ⇒ không đủ cơ sở trong base",
+   "source": "TOP5D TCH#1"
+  },
+  {
+   "item": "thặng dư đất cũ theo biên quan sát (s 69,7% ⇔ g 51,9%) thay s 40%",
+   "effect_dong_per_share": 1301,
+   "basis": "TM25 6T FY26 biên bán BĐS 51,9% (6T FY25 51,0%); đệm chi phí hoàn thành chưa định lượng ⇒ không vào base; s áp trên chi phí ĐÃ phát sinh (thận trọng sẵn)",
+   "source": "notes_read.md TM25; TOP5D TCH#2"
+  },
+  {
+   "item": "backlog m theo cùng trục g đối xứng",
+   "effect_dong_per_share": 10,
+   "basis": "r2 {30;33,5;36} lệch xuống nhẹ",
+   "source": "TOP5D TCH#2/3"
+  },
+  {
+   "item": "quỹ đất mới 3.006,3 = giá sổ (NPV0)",
+   "effect_dong_per_share": 0,
+   "basis": "TM17",
+   "source": "notes_read.md"
+  }
+ ],
+ "center_vs_p50_note": "tâm (kỳ vọng lưới, sau CK 5 tỷ) 16244 vs P50 kết cục 16208 vs giá trị tại tham số trung tâm 16208. Lưới đối xứng ⇒ ba số sát nhau (s(g) lồi ⇒ tâm > giá trị tham số trung tâm một chút); P10/P90 do g thấp/cao cả hai trục, không nhánh trọng số nhỏ.",
+ "center_change_vs_old": {
+  "vs_r2": 2476,
+  "vs_r2_pct": 0.17984595881166165,
+  "vs_zone_old": 0.284110671936759
+ },
+ "change_reason": "Vòng 3: CK holding [UL] ra khỏi base (song song); thặng dư đất cũ nhất quán với biên gộp BĐS quan sát 51,9% (r2 dùng 40% cho đất cũ nhưng 51,9% cho backlog); trục g ±5pp hai chiều cho cả backlog/đất cũ; giá 06/11 13.500 (+5,9% từ 04/11); kiểm chéo ROE bằng LN mẹ TTM BQ 796.",
+ "r2": {
+  "center_post": 13768,
+  "p10_out": 12559,
+  "p50_out": 13726,
+  "p90_out": 14983,
+  "label": "TRONG vung",
+  "price": 12750.0,
+  "pct_below_at_r2_price": 0.19140625,
+  "pct_below_at_13500": 0.4453,
+  "px_vs_center_at_13500": -0.01945823418139425
+ },
+ "zone_r2": {
+  "low": 12559,
+  "center": 13768,
+  "high": 14983
+ },
+ "zone_old": {
+  "low": 10150,
+  "center": 12650,
+  "high": 15050,
+  "dd_date": "2026-10-31",
+  "center_kind": "expected_weighted"
+ },
+ "fear_buy_eligible_2_5": false,
+ "fear_buy_25": "KHÔNG đủ điều kiện sleeve fear-buy §2.5: không có khủng hoảng/sự kiện sợ hãi; FLOOR_FAIL (CF_OA_3Y âm) — đây là lý do bỏ lệnh MUA TCH 03/11.",
+ "warnings": [
+  "QD 1020/QD-XPHC 03/04/2026 Thue TP Hai Phong: khai sai TNDN, phat 2,735 + truy thu 13,676 + cham nop 3,798 = 20,21 ty (da nop, CBTT 07/04/2026)",
+  "QD 1357/QD-XPHC 12/2024 UBCKNN (CBTT/giao dich ben lien quan, 295 tr) — 2 co quan, 2 loai vi pham trong 16 thang",
+  "Nhom kiem soat (Do Huu Ha 30,18% + HH Finance 5,81%, nguoi lien quan) = 35,99%, chiem 71,2% phieu DHDCD 2026; Truong BKS kiem KTT cong ty con; CRV free float ~3% (chuan duy tri niem yet chua kiem)",
+  "Tien gui 678,3 ty tai NH TMCP Sai Gon Tai Loc (21% tien+HTM) gan nhu khong rut khi HTM giam 2.025 — NH la ai/han che rut: INCONCLUSIVE (skeptic B9)",
+  "BLQ trong tap doan da duoc cong bo (BC quan tri 6T 2026, 3 NQ HDQT 16/04, 23/06, 21/07/2026; TCH cho CRV vay 30 ty, han muc 500 ty) — con mo: BLQ NGOAI tap doan (HH Finance, gia dinh Do)",
+  "Dragon Capital ban rong xuong 4,71% (15/06/2026) — nguon cung co to chuc",
+  "BCTC 6T FY26 chua soat xet; su dung von chao ban 865,5 ty (M7)",
+  "'Khong co khoi to/kiem toan ngoai tru': nguon = GAPS 31/10/2026 (27 PDF hoanghuy.vn) + web search 05/11/2026 (cafeland, baophapluat, stockbiz) — khong co NQ HDQT 10-11/2026 moi; NQ 08/2026 co phieu thuong 10% (da phat hanh, DKCC 04/09)",
+  "FLOOR_FAIL golden floor: BQ ticker_financial 2026Q3 CF_OA_3Y = −771,7 tỷ (fin_tch_r3.csv) do chi mua quỹ đất (150 Tô Hiệu 1.677,5 + I.14 1.328,8) — lý do bỏ lệnh MUA TCH 03/11; 8L rating gate LAG/production không áp cho sleeve DD nhưng là cờ đỏ dòng tiền.",
+  "Danh tính 'NH TMCP Sài Gòn Tài Lộc' (tiền gửi 678,3 tỷ, 21% tiền+HTM) MÂU THUẪN giữa nguồn: notes_read.md:21 'đọc ảnh; có thể SCB/SGB' vs investor_report:131 'Sacombank đổi tên' (không nguồn) ⇒ CHƯA xác minh; stress mất 100% = sgtl_loss_100.",
+  "Dự phòng 282,4 tỷ khoản đầu tư vào công ty con ở BCTC RIÊNG (theo skeptic 08/11; chưa tự đọc lại trong phiên này) — loại trừ ở hợp nhất, nhưng là tín hiệu kết quả công ty con dưới giá vốn đầu tư.",
+  "Giá tăng +13.9% trong 5 phiên (2026-10-30 11850 → 2026-11-06 13500) — câu r2 'sát P10' lỗi thời."
+ ],
+ "open_issues": [
+  "BCTC Q3 rieng CRV (toc do tieu NMTT NC-II, skeptic B5)",
+  "Xac minh NH Sai Gon Tai Loc",
+  "legal-vn: nhom uy quyen 7,37% + chuan duy tri niem yet CRV",
+  "BLQ ngoai tap doan (BC quan tri tu tr.13)",
+  "HHS SOTP thi truong ~0,5x phan CRV (skeptic B7) chua dung lam neo",
+  "Biên gộp FY24/FY25 cả năm theo mảng BĐS (BCTC kiểm toán FY25 là PDF scan — chưa OCR trong phiên này)"
+ ],
+ "closed_issues": [
+  "OShares: BQ 2026Q3 = 1.003,31 tr cp (fin_tch_r3.csv) = SH model; 912,1 tr là quý trước cp thưởng 10% — ĐÓNG"
+ ],
+ "corrections_check": [
+  {
+   "item": 1,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "hold_0 tái lập 14931 tại CK r2 (skeptic 14.931); song song hold_0_10_20_30 14960, r1 14532"
+  },
+  {
+   "item": 2,
+   "verdict": "ĐÚNG — áp (dạng trục g thống nhất, không chép lưới s của skeptic)",
+   "evidence": "quy đổi s(1−g)=0,8(g−0,1): g 51,9% ⇒ s 69,7%; skeptic s{55;70;85} 16213 (≈16.210), s{40;55;70} 15573 (≈15.571), backlog 40% 14604 (≈14.593) — tái lập; headline dùng g ±5pp hai trục ⇒ 16244. Biên FY24/FY25 cả năm theo mảng: CHƯA đọc được (PDF scan) — neo bằng 6T FY26 51,9% / 6T FY25 51,0%"
+  },
+  {
+   "item": 3,
+   "verdict": "ĐÚNG — áp một phần",
+   "evidence": "thêm trục giá bán hai chiều dưới dạng g ±5pp ≈ giá ±10% (độ lớn [UL], không có dữ liệu giá bán); KHÔNG thêm trục chất lượng tài sản vì không có dữ liệu — ghi rõ vùng hẹp do cấu trúc"
+  },
+  {
+   "item": 4,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "giá 13.500 (BQ 06/11); giá/tâm r2 -1.9%; % trọng số r2 dưới 13.500 = 44.5%"
+  },
+  {
+   "item": 5,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "share_khac 0,5/1,0 ⇒ 16197/16275; ROE TTM BQ 796 ⇒ 6.55%"
+  },
+  {
+   "item": 6,
+   "verdict": "ĐÚNG — áp",
+   "evidence": "WARNING FLOOR_FAIL (CF_OA_3Y −771,7 BQ), danh tính SGTL mâu thuẫn, dự phòng 282,4 riêng; OShares đóng"
+  }
+ ],
+ "lock_md5": "TCH/calc_r3/LOCK_md5.txt",
+ "sources": {
+  "model": "calc_r3/tch_r3.py -> tch_r3_out.json/txt, grid_tch_r3.csv",
+  "compare": "calc_r3/tch_r3_compare.py -> compare_r3_out.txt",
+  "price": "calc_r3/px_tch_r3_20261106.csv (BQ tav2_bq.ticker)",
+  "fin": "calc_r3/fin_tch_r3.csv (BQ tav2_bq.ticker_financial)",
+  "bctc": "dd_TCH_20261031/calc/notes_read.md"
+ }
+}

@@ -1,0 +1,15 @@
+# LOCK r3 post-run FPT — outputs sau 2 lan chay trung byte (run1.md5 == run2.md5); interpreter /home/trido/thanhdt/wc_venv/bin/python -I (python3 he thong thieu numpy)
+51b85a478e8b72288fe2d2f3665f55dc  run1.txt
+51b85a478e8b72288fe2d2f3665f55dc  run2.txt
+17ddd898d55fefa464eac0b97037615e  model_r3_out.json
+d1d9c592089b23618ef8d2ca97de4a8a  grid_fpt_r3.csv
+a38ee2917f5a60d4ebb804147a1cdf31  implied_wx_check.py
+e3d5093de697c638e3605bbf3e857996  implied_wx_check.txt
+0852357c605703219cff132d845cb862  make_summary_r3.py
+3cd68e7bd2571e98c50904994b361215  ../SUMMARY.json
+1d14cc2f2d167c0080f913de7a6dd1ca  ../SUMMARY_r2.json
+ba217250e9173d68421fdde929d0bfc2  ../SUMMARY_5F.json
+b44464b4cfc8671a64d0c9507946ad4d  ../ADDENDUM_5F.md
+800cba44943963ad9f7b51bd933e9301  ../ADDENDUM_5F_pre_r3.md
+63dc37651390749b023078090c73129c  ../SUMMARY_5F_pre_r3.json
+d3edc0bd9e254412ad6ebb31826d1a19  /home/trido/thanhdt/WorkingClaude/mike/kb/dd_price_zones.json  (chi doc, khong sua)

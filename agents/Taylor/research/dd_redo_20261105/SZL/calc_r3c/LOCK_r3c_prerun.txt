@@ -1,0 +1,32 @@
+# LOCK r3c pre-run — ghi 2026-11-09T01:09:21+07:00 TRUOC lan chay dau model_r3c.py (job Taylor_20261108_180625)
+# Minh bach: gia 27.700 (06/11) da biet tu r3/r3b; file gia giu nguyen r3, KHONG truy van lai. ADDENDUM_5F.md/SUMMARY_5F.json/SYNC_r3b: md5 TRUOC khi sua tai cho (r3c).
+bfa8b49d6d26fc32bcf07a5c9a9d146c  SZL/calc_r3c/assumptions_r3c.json
+9331f5b13cd68c336d63a83759ab2afb  SZL/calc_r3c/model_r3c.py
+5a9e885ef75f3761eaa6f6767e1b84ae  SZL/calc_r3c/write_lock_prerun.py
+0d06fba6914698923e299e3d6d73c6f4  SZL/calc_r3b/assumptions_r3b.json
+7a1978f681264859663cd9dc141ccfe0  SZL/calc_r3b/model_r3b.py
+47373344c1dfcddbd5da35d9dbf1050d  SZL/calc_r3b/model_r3b_out.txt
+cb89a9a499e734741633804aaa495232  SZL/calc_r3b/LOCK_r3b_prerun.txt
+cb38c25c011fc88e76ce97b688eb1dc7  SZL/calc_r3b/LOCK_r3b_post_md5.txt
+51bd57e93838555bcf7d54e4d1defdaf  SZL/calc_r3/assumptions_r3.json
+4e2fb77754c393ae88ab3de9e163a24d  SZL/calc_r3/model_r3.py
+bc6402e3475c672385475698a1fd11df  SZL/calc_r3/px_szl_r3_20261106.csv
+75ddecbfb6eafce50062c141f17ee110  SZL/calc_r3/snz_holdco_20261106.csv
+78951d5a7502eb4819eec6496b924c52  SZL/calc_r3/szl_cf_hist.csv
+7feebb7308c86cf116c7eeeda1e4bfaa  SZL/calc_r3/LOCK_md5.txt
+d03a054d5e9331777e1dd6e8f3093a78  SZL/calc_r3/model_r3_out.txt
+9d6e818ac1661cad0fa8bfcecd6ac985  SZL/calc/bq_oshares_szc_szb.csv
+6ef6a00565c73c60236e0175848e06cd  SZL/src/Q3_2026_hopnhat.pdf
+cc861ebf6d9a9ae0ad012e3b007cb966  SZL/SUMMARY.json
+cc861ebf6d9a9ae0ad012e3b007cb966  SZL/SUMMARY_r3b.json
+f7c45cb1d99329de62f501016a81ad5a  SZL/REPORT_r3b.md
+b53be177b46b236a9e234494cbf538a8  SZL/REPORT_r3.md
+83131c3e51f53f9eb5e35533f9e98c8a  SZL/ADDENDUM_5F.md
+af0909366ddb29fa15ac0f397baaf980  SZL/SUMMARY_5F.json
+14c75c12ce43193325d7b5584d3f417f  SZL/ADDENDUM_5F_SYNC_r3b.md
+a8b08634bbae57c678b393461c24ffe8  SZL/SUMMARY_5F_SYNC_r3b.json
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+517b35d2fce9dbb0b094a0352d976828  TOP5C_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  STANDARD_r2.md

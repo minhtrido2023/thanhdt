@@ -1,0 +1,184 @@
+{
+ "ticker": "TCH",
+ "job": "Taylor_20261107_130208; fix Taylor_20261107_131628",
+ "asof": "2026-11-07",
+ "moat_tier": "NONE",
+ "moat_type": "LOCATION (quy dat gia von cu, huu han)",
+ "risk1": "Bien quy dat moi (150 To Hieu, I.14 ~25% HTK, gia dau thi truong) mong hon 51,9% lich su khi thap tang HP cham => thang du NAV khong dat",
+ "reused": false,
+ "source_asof": "2026-11-07 (lam moi; khong co audit 5F truoc trong moat_tags.csv / REPORT / kb tch-dd-20261031)",
+ "moat_durable": false,
+ "durable_conditions": {
+  "i_excess_return": false,
+  "ii_named_mechanism": "chi cap du an (dat mua re truoc day), khong tai tao",
+  "iii_no_countdown": false
+ },
+ "evidence": {
+  "ROIC5Y": 0.056,
+  "ROIC10Y": 0.07,
+  "ROIC_Min5Y": 0.023,
+  "ROE5Y": 0.058,
+  "ROE_Min5Y": 0.018,
+  "Ke": 0.135,
+  "bds_gpm_6T_FY26": 0.519,
+  "peer_gpm_ttm_2016_25": {
+   "median14": 0.379,
+   "mean14": 0.394,
+   "median10": 0.39,
+   "mean10": 0.406
+  },
+  "peer_ROIC5Y_median": 0.071,
+  "bds_gpm_6T_FY25": 0.51,
+  "bds_gpm_note": "6T cung ky FY25 (DT BDS 220,8 ty), khong phai ca nam",
+  "ROIC_columns_note": "dong Q3 nam Y mang so FY(Y-1); dong 2026Q3 = FY2025; ROIC5Y>=11,9% den FY2018",
+  "ROIC_Trailing_excluded": "artifact (10,7-63,1% dong 2016Q3-2026Q3; LN TTM ~796 ty/VCSH 15.280 ~5,2%, uoc luong tu brief skeptic)",
+  "peer_single_gpm_2026Q3": {
+   "KDH": 0.675,
+   "PDR": 0.732,
+   "NVL": 0.557,
+   "VHM": 0.503
+  }
+ },
+ "model_changed": false,
+ "model_check": "NAV huu han: quy dat moi NPV0 (RONIC=Ke), s_old tam 40% <=> GPM ~40% ~ TB nganh 37,9-40,6% => da ngam NONE, nhat quan (chat-3c lech -1,1%..+0,3%)",
+ "current": {
+  "centre": 13768,
+  "p10": 12559,
+  "p50": 13726,
+  "p90": 14983,
+  "label": "TRONG vung"
+ },
+ "strict3c_range": {
+  "centre_land_only": [
+   13611,
+   13815
+  ],
+  "centre_full_with_backlog": [
+   13122,
+   13407
+  ],
+  "label": "TRONG (moi co 10tr-10ty)",
+  "status": "quy uoc cho Mike/user duyet"
+ },
+ "sensitivity": {
+  "WIDE": {
+   "centre": 14495,
+   "p10": 13221,
+   "p50": 14454,
+   "p90": 15798,
+   "d_pct": 0.053,
+   "label": "DUOI vung"
+  },
+  "NARROW": {
+   "centre": [
+    13611,
+    13815
+   ],
+   "label": "TRONG vung",
+   "note": "= NONE vi NAV khong co terminal"
+  },
+  "NONE": {
+   "centre": [
+    13611,
+    13815
+   ],
+   "label": "TRONG vung",
+   "hard_variant": {
+    "centre": 12947,
+    "p10": 11827,
+    "p50": 12904,
+    "p90": 14086,
+    "d_pct": -0.06,
+    "label": "TRONG vung"
+   }
+  }
+ },
+ "proposed_moat_tag_row": "TCH,NONE,LOCATION,L,\"Hoang Huy (Hai Phong residential developer + HHS trucks). BDS project GPM 51.9% (6T FY26) on OLD low-cost land bank, but firm-level ROIC5Y 5.6%/ROIC_Min5Y 2.3%/ROE5Y 5.8% < Ke 13.5% every FY window since FY2016 (peer ROIC5Y med 7.1%) — no multi-cycle excess return. Land advantage FINITE (NC-II backlog ~3 quarters; new land bought at open auction, thinner margin) = countdown clock. #1 risk: new-land (150 To Hieu, I.14) margin far below 51.9% while HP low-rise demand weak; governance WARNING (2 penalties 16m, related-party cash 678bn SG Tai Loc)\",2026-11-07,5f_cyclical,N",
+ "measured_by": "calc/model_5f.py -> model_5f_out.txt; calc/model_5f_fix.py -> model_5f_fix_out.txt/json (2 lan chay trung byte); calc/bq_5f_roic_gpm.csv",
+ "model_changed_note": "r2 giu nguyen (quy uoc cho Mike); ban chat-3c day du (b+m backlog nganh+s_old nganh) thap hon -2,6%..-4,7%, nhan van TRONG",
+ "backlog_margin_to_industry_variants": {
+  "a_m_backlog_nganh": {
+   "centre": [
+    13398,
+    13470
+   ],
+   "p10": [
+    12218,
+    12284
+   ],
+   "p50": [
+    13356,
+    13428
+   ],
+   "p90": [
+    14585,
+    14662
+   ],
+   "d_pct": [
+    -0.027,
+    -0.022
+   ],
+   "labels": [
+    "TRONG vung"
+   ]
+  },
+  "b_m_va_GM_chiphi_nganh": {
+   "centre": [
+    13266,
+    13363
+   ],
+   "p10": [
+    12096,
+    12185
+   ],
+   "p50": [
+    13227,
+    13323
+   ],
+   "p90": [
+    14443,
+    14547
+   ],
+   "d_pct": [
+    -0.036,
+    -0.029
+   ],
+   "labels": [
+    "TRONG vung"
+   ]
+  },
+  "c_chat3c_day_du": {
+   "centre": [
+    13122,
+    13407
+   ],
+   "p10": [
+    11971,
+    12224
+   ],
+   "p50": [
+    13083,
+    13367
+   ],
+   "p90": [
+    14285,
+    14595
+   ],
+   "d_pct": [
+    -0.047,
+    -0.026
+   ],
+   "labels": [
+    "TRONG vung"
+   ]
+  }
+ },
+ "final_convention_20261108": {
+  "decided_by": "user",
+  "at": "2026-11-08 10:50 ICT",
+  "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
+  "headline": "mô hình cơ sở hiện hành",
+  "headline_centre_report_of_record": 13768,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ }
+}

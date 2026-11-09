@@ -29,7 +29,7 @@
   "iii_note": "92% lap day / ~26 ha tu tag 06/2026, khong BCTC - can kiem chung; 2053 can kiem chung giay phep"
  },
  "model_changed": true,
- "model_changed_note": "REPORT_r2 KHONG nhat quan 3c: RONIC ngam vo cung + bien TTM 39,0% > TB chu ky SZL 33,6%; r3 sua cong thuc RONIC=Ke (tang truong NPV 0: cf0/r vinh vien, annuity khong tang truong 27n; r2 nhan (1-g/r) vao annuity 27n = NPV am, dem hai lan dong ho 2053). Headline = chat-3c, quy uoc cho Mike/user duyet; REPORT/SUMMARY cu khong sua",
+ "model_changed_note": "REPORT_r2 KHONG nhat quan 3c: RONIC ngam vo cung + bien TTM 39,0% > TB chu ky SZL 33,6%; r3 sua cong thuc RONIC=Ke (tang truong NPV 0: cf0/r vinh vien, annuity khong tang truong 27n; r2 nhan (1-g/r) vao annuity 27n = NPV am, dem hai lan dong ho 2053). [SUA TAI CHO 09/11 r3c, job Taylor_20261108_180625] Headline KHONG phai chat-3c (user 08/11 bac luat 3c chat); hien hanh = r3c tam 25.165 (5 ty) / 26.148 (40 tr), TRONG ca 2 co (REPORT_r3c.md, SUMMARY.json); RONIC=Ke o base do user duyet 09/11 rieng; 32.391 = r2 LOI THOI",
  "convention_pending": [
   "TB chu ky dung cua rieng SZL (peer KCN GPM khac dinh nghia: trung vi 49,1%/TB 46,0%); tach GPM theo mang CON MO (BCTC scan, khong co so mang trong thu muc)",
   "RONIC=Ke ap ca phan g ~ lam phat (mien g<=2% => tam 26.977 TRONG)",
@@ -233,7 +233,9 @@
   "at": "2026-11-08 10:50 ICT",
   "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
   "headline": "mô hình cơ sở hiện hành",
-  "headline_centre_report_of_record": 32391,
-  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+  "headline_centre_report_of_record": 25165,
+  "headline_centre_current": "r3c 09/11: 25165 (5 ty) / 26148 (40 tr) TRONG — 32391 o tren la r2 luc ghi 08/11, LOI THOI",
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "dd_r3_sync": "09/11: tâm hiện hành r3 = 25165 (REPORT_r3*.md); các center khác trong file là r2"
  }
 }

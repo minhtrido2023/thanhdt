@@ -16,3 +16,7 @@ e430be2363c19983d8d83120a3743e98  dd_redo_20261105/common.py
 adcfd34d718d70c34cd92fa6ac69f00b  dd_redo_20261105/bq_liq_nnc_mvc_dri_20261104.csv
 433e60cccc0b490856d46561300afca1  calc/summary_r2.py
 6edda90c3338471663d528279d1f16a1  ../../dd_MVC_20261103/r9/calc/model_r9_out.json
+# DINH CHINH DUONG DAN (r3, 09/11/2026 job Taylor_20261108_180136; skeptic TOP5D MVC#7): 2 dong tren ghi sai goc duong dan.
+#   'calc/summary_r2.py'                          -> dung: dd_redo_20261105/MVC/calc/summary_r2.py            md5 433e60cc... KHOP (md5sum lai 09/11)
+#   '../../dd_MVC_20261103/r9/calc/model_r9_out.json' -> dung: research/dd_MVC_20261103/r9/calc/model_r9_out.json md5 6edda90c... KHOP (md5sum lai 09/11)
+#   (tu calc/ phai la ../../../dd_MVC_20261103/...). Chi sai chu duong dan, noi dung file khong doi.

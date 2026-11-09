@@ -352,7 +352,32 @@
   "at": "2026-11-08 10:50 ICT",
   "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
   "headline": "mô hình cơ sở hiện hành",
-  "headline_centre_report_of_record": 15276,
-  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+  "headline_centre_report_of_record": 16241,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "dd_r3_sync": "09/11: tâm hiện hành r3 = 16241 (REPORT_r3*.md); các center khác trong file là r2"
+ },
+ "sync_r3_20261109": {
+  "job": "Taylor_20261108_180136",
+  "source": "REPORT_r3.md / SUMMARY.json (round 3)",
+  "price": 13500.0,
+  "price_date": "2026-11-06",
+  "headline_current": {
+   "centre": 16241,
+   "p10": 9940,
+   "p50": 15359,
+   "p90": 23471,
+   "below_px": 0.3053,
+   "label": "TRONG vung",
+   "rule4_5ty": true
+  },
+  "strict_3c_on_r3_grid": {
+   "center": 14415,
+   "p10": 9940,
+   "p50": 14588,
+   "p90": 18425,
+   "below": 0.3371,
+   "note": "do nhay rui ro (quy uoc user 08/11: KHONG ap 3c chat vao headline)"
+  },
+  "note": "'old' (15.276) va 'new' (chat-3c 13.010) la so r2/luoi cu gia 04/11 - lich su; headline hien hanh = headline_current. Moat NARROW/LOCATION khong doi."
  }
 }

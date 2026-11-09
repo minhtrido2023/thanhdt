@@ -1,0 +1,150 @@
+{
+ "ticker": "MVC",
+ "round": 2,
+ "job": "Taylor_20261105_020023",
+ "asof_price_date": "2026-11-04",
+ "price": 13800.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+ },
+ "center_pre_liq": 16694,
+ "center_post_liq": 15276,
+ "p10_post": 9857,
+ "p50_post": 13748,
+ "p90_post": 23516,
+ "p10_pre": 10772,
+ "p90_pre": 25699,
+ "p10_out": 9857,
+ "p50_out": 13748,
+ "p90_out": 23516,
+ "min_out": 7788,
+ "pct_weight_below_price": 0.5056944444444446,
+ "n_outcomes": 34992,
+ "n_cells": 4374,
+ "liq_disc_5bn": 0.08494479252418027,
+ "ck_ref_size": {
+  "size_vnd": 5000000000.0,
+  "Y": 1.0,
+  "disc_adv250": 0.08494479252418027,
+  "disc_adv60": 0.12977543771575262,
+  "q_over_adv250": 11.345457845951373,
+  "disc_1bn": 0.037988466083736606,
+  "disc_1bn_adv60": 0.058037340108442574,
+  "note": "5 ty = quy uoc fleet nhung Q/ADV250 11,3x (ADV60 26x) = NGOAI SUY ngoai vung hieu chinh luat can bac hai; ban 1 ty (Q/ADV 2,3x) bao song song",
+  "post_1bn": {
+   "center": 16060,
+   "p10": 10363,
+   "p50": 14453,
+   "p90": 24723,
+   "below": 0.42965534979423864,
+   "label": "TRONG vùng"
+  }
+ },
+ "ck_real_sleeve": {
+  "10tr": {
+   "adv250": 0.0037988466083736603,
+   "adv60": 0.005803734010844257
+  },
+  "40tr": {
+   "adv250": 0.007597693216747321,
+   "adv60": 0.011607468021688515
+  }
+ },
+ "px_vs_center_post": -0.0966420066030923,
+ "px_vs_p10_post": 0.399982378638033,
+ "px_vs_p90_post": -0.4131605926814331,
+ "label": "TRONG vùng",
+ "label_note": "TRONG vung o ca 5 ty va 1 ty. So voi so cu (P25-P75, nhan RE CO DIEU KIEN) nhan doi do DINH NGHIA vung. Luat 4: KHONG dat.",
+ "center_vs_p50_note": "tam = ky vong luoi 16,694 truoc CK; gia tri tai tham so trung tam (khong tre) 17,053; P50 ket cuc 15,024. P90 25,699 do nhanh STRUCTURAL (trong so 0,20) quyet dinh (trung vi nhanh sau CK 22,265); w_STRUCT 0,15 -> P90 sau CK 22,324, 0,10 -> 20,758. So o: moi nhanh 1.458 o x 8 ket cuc (STRUCTURAL bat bien theo VR/ADMIN/tran/bien TL nhung van dem du de trong so dung).",
+ "axes_included": [
+  "trang thai bien 0,20/0,45/0,35 (Bobby)",
+  "chi phi Tan Lap ca 0,85/1,0/1,15",
+  "REL gia TL/NNC 0,88/0,91/0,95",
+  "SL nam thuong 3 muc",
+  "han GP Tan Lap 2035/W/2045",
+  "anh xa ADMIN 3",
+  "bien chu ky Tan Lap 25%/30%/~NNC deu [UL] (DUA LAI)",
+  "tran chu ky branch/SL 1,40 (MOI, nhu NNC r2)",
+  "ket cuc trong o: 4 kich ban W0 x 2 duong gia PW0"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "r",
+   "reason": "co dinh 13,5%; do nhay rieng"
+  },
+  {
+   "axis": "tre GP mo moi (Bobby F6)",
+   "reason": "nhan dinh, trai ke hoach DHDCD 'khai thac 2028' -> khoi base (luat 3); do nhay -527"
+  },
+  {
+   "axis": "mo moi hai phia (upside + NPV gia xau)",
+   "reason": "lech NPV0 cua du an moi (luat 20) khong co IRR du lieu; do nhay -2,080"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "Hai mo moi da chi 438,4 ty",
+   "effect_dong_per_share": 0,
+   "basis": "so sach, NPV0 that (vong 2 KHONG tru tre GP; vong 1 tru -527)",
+   "source": "BCTC HN Q3/2026 XDCB/tra truoc"
+  },
+  {
+   "item": "Dat 30 ty; cum CN; mua NNC len 51%",
+   "effect_dong_per_share": 0,
+   "basis": "so sach / NPV0",
+   "source": "DHDCD 2026; SKEPTIC4/R7"
+  },
+  {
+   "item": "Co phan NNC 44,07% giai dong thoi",
+   "effect_dong_per_share": null,
+   "basis": "V_NNC tu mo hinh NNC r6 (khong tre GP, cung truc), khong dung gia thi truong",
+   "source": "nnc_model_r6"
+  }
+ ],
+ "gordon": {
+  "roe_blend": 0.1005111111111111,
+  "ps": 10382,
+  "roe_implied_center_r9": 0.14194140916758563,
+  "note": "mot bien the: MVC no rong, khong co LN lai tien gui dang ke de tach (so r9, co tre GP)"
+ },
+ "grid_desc": "Luoi MUC KET CUC n=34992 (4374 o x 8). Truc: trang thai x ca 3 x REL 3 x SL 3 x han GP TL 3 x ADMIN 3 x bien TL 3 x tran 2; trong so o = xac suat trang thai x deu; ket cuc W0 x PW0; r 13,5%; base khong tre GP. Phan vi _shared/wpct.py. Sau CK = x(1 - CK 5 ty).",
+ "zone_old": {
+  "low": 14000,
+  "center": 15100,
+  "high": 16500,
+  "dd_date": "2026-11-03",
+  "rev": 8,
+  "zone_def": "P25-P75 sau CK thanh khoan (ban cu)",
+  "source_file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md"
+ },
+ "r1": {
+  "center_post": 15082,
+  "p10": 11941,
+  "p50": 14424,
+  "p90": 20989,
+  "label": "TRONG vùng"
+ },
+ "center_change_pct": 0.011677863536288191,
+ "change_reason": "Tam sau CK 15.082 -> 15,276: bo tre GP (+571 tai tham so) bu boi truc bien Tan Lap (-) va tran (-); vong 1 'tam' la gia tri tham so, vong 2 la ky vong luoi. P10 11.941 -> 9,857 chu yeu do MUC KET CUC; 50.6% ket cuc duoi gia (vong 1: 40,3% o).",
+ "warnings": [
+  "So huu cheo MVC 44,07% NNC <-> NNC 10,3% MVC; Chu tich HDQT MVC = Chu tich Thanh Le va NNC; truong BKS MVC = TGD Thanh Le",
+  "Uy quyen DHDCD MVC 2026 mua NNC len 51% (gia/doi tac chua cong bo; ~1,52 tr cp, uoc ~72 ty theo SKEPTIC_20261103) - giao dich ben lien quan",
+  "Neu MVC >=51% NNC: Luat DN D195 co the buoc NNC thoai 10,3% MVC (~142 ty ~ 325-760 phien ADV MVC) -> ap luc cung - CAN legal-vn xac minh",
+  "DHDCD 2026 duyet cum cong nghiep toi 500 ty (ngoai 1.500 ty mo moi): no rong ~1,4-1,5 nghin ty truoc doanh thu mo, D/E ~0,9-1,0 (SKEPTIC_20261103 #1, CHUA DONG)",
+  "Du no BIDV 452 ty > han muc 350 ty hop dong da cong bo; tam ung 60,6 ty chua thuyet minh doi tuong",
+  "Thanh khoan rat thap: ADV250 0,44 ty, ADV60 0,19 ty; thoat 5 ty 113/57 phien",
+  "Tra cuu 'xu phat/khoi to MVC 2026': WebSearch 05/11/2026 khong thay; Simplize ghi MVC so huu NNC 43,55% (lech 44,07%, chua doi soat)"
+ ],
+ "open_issues": [
+  "Bien chu ky mang da Tan Lap (khong co bao cao bo phan) - nay la truc",
+  "Han GP Tan Lap, BOT",
+  "Free float uoc 30,2%",
+  "Xac suat trang thai la nhan dinh Bobby",
+  "HD tin dung BIDV moi + co cau 1.500 ty",
+  "Ty le so huu NNC 44,07% vs 43,55%"
+ ],
+ "fear_buy_2_5": "KHONG du dieu kien sleeve fear-buy §2.5 (khong co su kien so hai; luat 4 khong dat)"
+}

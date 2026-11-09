@@ -1,0 +1,147 @@
+{
+ "ticker": "GAS",
+ "asof": "2026-11-09",
+ "price_date": "2026-11-06",
+ "sources": {
+  "bctc": "calc/notes_bctc.md (BCTC HN Q3/2026 + soat xet 6T/2026, pvgas.com.vn)",
+  "np_quarterly": "calc/bq_fin_gas.csv (BQ ticker_financial NP_P0..P7; Q3/26 4.576,5 khop BCTC)",
+  "brent": "calc/brent_q.csv (BQ commodity_prices TE daily, loai T7/CN)",
+  "px": "calc/px_gas_daily_20261106.csv (BQ ticker)"
+ },
+ "shares": 2412949756,
+ "net_cash_bridge_bn": {
+  "tien_110": 15540.6,
+  "htm_123": 35269.9,
+  "htm_265": 7.0,
+  "vay_321": -1551.2,
+  "vay_339": -2710.4,
+  "co_tuc_phai_tra_313": -5491.7,
+  "cdkks_429": -1409.5,
+  "basis": "BCD HN 30/09/2026 p3-p4; co tuc phai tra la no da cong bo => tru; CDKKS tru theo so (tien le FPT r3 D3); gia 06/11 da ex-quyen co tuc (GDKHQ 22/09/2026: Close/Price 0,9718->1,0 trong px_gas_daily, 2,82% x ~80k ~ 2.276 d/cp = 5.491,7/2,413 ty cp) => tru co tuc phai tra dung"
+ },
+ "aro_provision_343_bn": 3300.0,
+ "aro_axis": {
+  "values": [
+   0.0,
+   0.5,
+   1.0
+  ],
+  "w": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "tag": "[UL] chua doc TM du phong DH; thoi diem chi tieu xa => PV < so sach; truc doi xung quanh 50%"
+ },
+ "tax_rate_interest": 0.2,
+ "interest_income_9T_bn": 1115.5,
+ "op_np_model": {
+  "desc": "LNST me NAM = a + b*Brent_nam (OLS 2016..2025, 10 diem); 2025 tru hoan nhap DP 1.631 ty x 0,8 (TM31 9T/25); LN hoat dong = fit - lai tien gui sau thue hien hanh (1.115,5/3*4*0,8 = 1.487 ty/nam). Hoi quy quy 2023Q3-2026Q3 bi loai: doc 108,7 ty/quy/USD, ngoai suy Brent 62 => 3.000 ty/nam, trai thuc te 2025 (Brent 68 => ~10.100 ty loi) — xem model_out sens",
+  "data": "calc/np_hist_gas.csv (BQ ticker_financial NP_P0 theo quy, cong nam) + calc/brent_y.csv (BQ commodity_prices TE brent TB nam)",
+  "years": [
+   2016,
+   2025
+  ],
+  "adj_2025_bn": -1304.8,
+  "b_axis": {
+   "values": [
+    0.75,
+    1.0,
+    1.25
+   ],
+   "w": [
+    0.25,
+    0.5,
+    0.25
+   ],
+   "tag": "[UL] he so nhay Brent +-25% quanh diem TB mau"
+  }
+ },
+ "scenarios": {
+  "XAU": {
+   "w": 0.275,
+   "brent_q4_26": 95,
+   "brent_2027": 72,
+   "brent_2028": 62,
+   "brent_lr": 62,
+   "decline": 0.04
+  },
+  "CO_SO": {
+   "w": 0.45,
+   "brent_q4_26": 100,
+   "brent_2027": 85,
+   "brent_2028": 75,
+   "brent_lr": 72,
+   "decline": 0.02
+  },
+  "TOT": {
+   "w": 0.275,
+   "brent_q4_26": 105,
+   "brent_2027": 100,
+   "brent_2028": 85,
+   "brent_lr": 82,
+   "decline": 0.0
+  },
+  "basis": "Q4/26: Brent TB T10 107, TB5 101 (sector read Bobby 09/11); 2027: K2/K1/K3-nhe (Bobby F3 trung vi 88 @03/2027); LR: TB 2023-25 = 76,5 (brent_q.csv), XAU = 2025 (68) tru 6; decline = mo cu suy giam + LNG pass-through bien mong (Bobby STRUCTURAL 2027-30 p=0,45) [UL]; trong so doi xung 0,275/0,45/0,275 (tien le FPT r3 D1)"
+ },
+ "lr_axis": {
+  "values": [
+   -5,
+   0,
+   5
+  ],
+  "w": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "tag": "[UL] Brent dai han +-5 USD"
+ },
+ "conv": {
+  "value": 1.0,
+  "basis": "capex duy tri ~ khau hao; capex tang truong (XDCB 5.916 ty, Lo B/LNG) = gia so NPV0 (luat 03/11) => khong cong khong tru"
+ },
+ "ronic_terminal": "= Ke (moat co dong ho dem nguoc => khong thuong); TV = NOPAT/(r + decline)",
+ "moat": {
+  "tier": "NARROW",
+  "type": "REGULATORY/INFRA natural monopoly (trung nguon ong + xu ly khi)",
+  "durable": false,
+  "reason_not_durable": "dong ho dem nguoc: mo cu suy giam, khi moi (Lo B/STT 2B) gia mua cao hon, LNG pass-through bien mong; cuoc ong tam tinh chua duyet",
+  "model_params_added": "khong"
+ },
+ "r": {
+  "value": 0.135,
+  "rule": "r = 13,5% + 1,0 x (dep12T - 7,40%)",
+  "dep12T": 0.074,
+  "dep_source": "deposit_rate_vn.effective_deposit_rate('2026-11-09') = cctg_12m(2026-11-02) 7,40%"
+ },
+ "liquidity": {
+  "formula": "CK = sigma_ngay(log Close, 250 phien) x sqrt(Q/ADV_trung_vi_250)",
+  "basis": "tien le FPT r3 model_r3.py:77-88",
+  "sizes": [
+   5000000000.0,
+   40000000.0,
+   10000000.0
+  ]
+ },
+ "sensitivities_not_in_grid": [
+  "truy thu cuoc ong tam tinh -1.500 ty mot lan [UL, khong co so]",
+  "lo ton kho LPG Q4/26 neu CP -15%: HTK 2.764 ty x ~60% LPG x 15% ~ -250 ty truoc thue [UL]",
+  "khong tru co tuc phai tra (neu gia con cum-dividend)",
+  "gom Q2/25 vao hoi quy"
+ ],
+ "residual_axis": {
+  "values": [
+   0.0,
+   0.5,
+   1.0
+  ],
+  "w": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "desc": "RES = LN TTM (Q4/25..Q3/26 = 14.741,7 ty) - hoan nhap DP 9T/26 492,2x0,8 - fit(Brent TTM = TB 2025Q4..2026Q3 brent_q.csv) ; phan LN vuot xu huong (LNG NT3&4, STT 2B, khau hao giam 2.194->1.691/9T, cau dien +9,8%). Truc doi xung 0/50/100% ben vung, giam theo decline nhu phan con lai [UL]"
+ },
+ "interest_income_note": "lai tien gui tru khoi LN hoat dong vi tien rong da tinh theo so"
+}

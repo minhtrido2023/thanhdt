@@ -1,0 +1,48 @@
+price: 13500.0
+asof_price_date: 2026-11-06
+r: 0.135
+n_outcomes: 27
+center_pre: 16347
+center_post: 16244
+center_param_post: 16208
+p10_out: 15578
+p25_out: 15884
+p50_out: 16208
+p75_out: 16601
+p90_out: 16950
+min_out: 15371
+max_out: 17240
+pct_weight_below_price: 0.0
+px_vs_center_post: -0.16892391036690468
+label: DƯỚI vùng
+liq_disc_5ty: 0.006306898502943162
+r2: {"center_post": 13768, "p10_out": 12559, "p50_out": 13726, "p90_out": 14983, "label": "TRONG vung", "price": 12750.0, "pct_below_at_r2_price": 0.19140625, "pct_below_at_13500": 0.4453, "px_vs_center_at_13500": -0.01945823418139425}
+sleeve 10tr: {"n_outcomes": 27, "center_pre": 16347, "center_post": 16342, "p10_out": 15673, "p25_out": 15980, "p50_out": 16306, "p75_out": 16702, "p90_out": 17053, "min_out": 15464, "max_out": 17344, "pct_weight_below_price": 0.0, "label": "DƯỚI vùng"}
+sleeve 20tr: {"n_outcomes": 27, "center_pre": 16347, "center_post": 16340, "p10_out": 15671, "p25_out": 15978, "p50_out": 16304, "p75_out": 16700, "p90_out": 17051, "min_out": 15462, "max_out": 17342, "pct_weight_below_price": 0.0, "label": "DƯỚI vùng"}
+sleeve 40tr: {"n_outcomes": 27, "center_pre": 16347, "center_post": 16338, "p10_out": 15668, "p25_out": 15976, "p50_out": 16301, "p75_out": 16697, "p90_out": 17048, "min_out": 15459, "max_out": 17339, "pct_weight_below_price": 0.0, "label": "DƯỚI vùng"}
+bridge r2 công bố (giá 04/11 12.750, CK 5 tỷ ADV đến 04/11): 13768 (+0)
+bridge đổi CK theo ADV đến 06/11 (giá 13.500): 13770 (+2)
+bridge dinh chinh 1: CK holding -> base 0% (truc sang song song): 14934 (+1164)
+bridge dinh chinh 2a: thang du dat cu nhat quan voi g quan sat (s=s(g), g 51,9% +-5pp): 16234 (+1300)
+bridge dinh chinh 2b/3: backlog m=m(g) cung truc g doi xung +-5pp (r2 0,30/0,335/0,36 lech): 16244 (+10)
+alt {"name": "HEADLINE r3 (holding 0, g 51,9% ±5pp nhất quán)", "center_post": 16244, "p10_out": 15578, "p90_out": 16950, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "hold_0_10_20_30", "desc": "r3 + truc CK holding {0;10;20;30} deu (r2)", "center_post": 14960, "p10_out": 13590, "p90_out": 16327, "label": "DƯỚI vùng", "pct_below": 0.0703}
+alt {"name": "hold_r1_10_20_30", "desc": "r3 + CK holding {10;20;30} deu (r1, ky vong 20%)", "center_post": 14532, "p10_out": 13500, "p90_out": 15521, "label": "DƯỚI vùng", "pct_below": 0.0938}
+alt {"name": "hold_27", "desc": "r3 + CK holding 27% co dinh (tham chieu HHS)", "center_post": 13933, "p10_out": 13375, "p90_out": 14523, "label": "TRONG vùng", "pct_below": 0.2031}
+alt {"name": "gov_5", "desc": "r3 + CK quan tri 5%", "center_post": 15432, "p10_out": 14799, "p90_out": 16102, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "gov_10", "desc": "r3 + CK quan tri 10%", "center_post": 14619, "p10_out": 14020, "p90_out": 15255, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "gov_15", "desc": "r3 + CK quan tri 15%", "center_post": 13807, "p10_out": 13242, "p90_out": 14407, "label": "TRONG vùng", "pct_below": 0.25}
+alt {"name": "both_g40", "desc": "ca backlog va dat cu o g 40% (+-5pp) — chieu xuong, khong co du lieu", "center_post": 14622, "p10_out": 14180, "p90_out": 15104, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "r2_s_40_keep", "desc": "r3 nhung giu s r2 {25;40;55} (khong nhat quan)", "center_post": 14943, "p10_out": 14276, "p90_out": 15611, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "skeptic_s_40_55_70", "desc": "skeptic: hold 0, m r2, s {40;55;70}", "center_post": 15573, "p10_out": 14909, "p90_out": 16238, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "skeptic_s_55_70_85", "desc": "skeptic: hold 0, m r2, s {55;70;85}", "center_post": 16213, "p10_out": 15572, "p90_out": 16871, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "skeptic_bl_g40", "desc": "skeptic: hold 0, s r2, backlog m=m(40%)", "center_post": 14604, "p10_out": 13964, "p90_out": 15242, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "sgtl_loss_100", "desc": "stress mat 100% tien gui SGTL 678,3 (can duoi cuc doan)", "center_post": 15572, "p10_out": 14906, "p90_out": 16278, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "new_land_m10", "desc": "quy dat moi -10%", "center_post": 16090, "p10_out": 15421, "p90_out": 16797, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "new_land_p10", "desc": "quy dat moi +10%", "center_post": 16398, "p10_out": 15736, "p90_out": 17107, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "share_khac_050", "desc": "so huu H1+khac 0,50", "center_post": 16197, "p10_out": 15540, "p90_out": 16892, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "share_khac_100", "desc": "so huu H1+khac 1,00", "center_post": 16275, "p10_out": 15604, "p90_out": 16988, "label": "DƯỚI vùng", "pct_below": 0.0}
+alt {"name": "r ±100bp (tâm sau CK)", "center_post": {"+0%": 16244, "+1%": 16126, "-1%": 16366}}
+implied {"hold_uniform_for_center_eq_px": 0.3206382940986777, "gov_for_center_eq_px": 0.1689101681207083, "g_both_for_center_eq_px": 0.2891033512987027, "g_old_only_for_center_eq_px": 0.16273140338361197, "pb_at_price": 1.1139567705202107, "s_old_for_center_eq_px": 0.05993909590028841, "note": "Giá 13500 ⇔ CK holding đều 32.1% (phần qua công ty con), HOẶC CK quản trị 16.9%, HOẶC biên gộp BĐS chung 28.9% cho cả backlog lẫn đất cũ (quan sát 51,9%), HOẶC chỉ đất cũ g 16.3% (s 6.0%); P/B giá 1.11x."}
+w250 2025-11-05..2026-11-06 ADV 87.13 ty sigma 0.0263 zero_vol 0 | 5000tr: CK 0.631% Q/ADV 5.7382% calib=True | 10tr: CK 0.028% Q/ADV 0.0115% calib=False | 20tr: CK 0.040% Q/ADV 0.0230% calib=False | 40tr: CK 0.056% Q/ADV 0.0459% calib=False
+w60 2026-08-12..2026-11-06 ADV 56.99 ty sigma 0.0239 zero_vol 0 | 5000tr: CK 0.707% Q/ADV 8.7737% calib=True | 10tr: CK 0.032% Q/ADV 0.0175% calib=False | 20tr: CK 0.045% Q/ADV 0.0351% calib=False | 40tr: CK 0.063% Q/ADV 0.0702% calib=False

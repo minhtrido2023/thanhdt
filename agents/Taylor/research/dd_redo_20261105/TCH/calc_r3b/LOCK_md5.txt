@@ -1,0 +1,34 @@
+# LOCK r3b TCH (job Taylor_20261109_003030) — chot TRUOC khi so voi gia; ghi luc 2026-11-09T07:35:57+0700 boi md5sum; model chay 2 lan trung byte (run1.md5 = run2.md5)
+## outputs model (chua doc gia)
+61fdb92edf325e54df0fe31a96e80628  tch_r3b_out.json
+5196adbfdff92d23525ca8a8b75110bc  tch_r3b_out.txt
+6ab8121f492559bc0c899e2ff6a25484  grid_tch_r3b.csv
+## upstream (tch_r3b.py doc/thuc thi + tch_r3b_compare.py se doc)
+LOCK bc9a874fdcb2523d7f9585de92fb4770 TCH/calc_r3b/tch_r3b.py
+LOCK 6a1f0e0dde520b5e95c3eff38dd45713 TCH/calc_r3b/assumptions_r3b.json
+LOCK a0b9dac72f6f2cf380a4d4186fdf35d8 TCH/calc_r3b/evidence_FY25_audited_pdfp42_TM24_TM25.png
+LOCK a83ad010bdffb06bbfde1f5474c143fe TCH/calc_r3/assumptions_r3.json
+LOCK f4c0c2d3685156af2845bebdb56ce33f TCH/calc_r3/tch_r3_out.json
+LOCK c31bf707884bb137074912e52d84e313 TCH/calc_r3/tch_r3.py
+LOCK e51490f9b07809141e65322092359dec TCH/calc_r3/LOCK_md5.txt
+LOCK 97da907cb6cf078a63f17857a5c734ca TCH/calc_r3/px_tch_r3.sql
+LOCK 7506d9ad853b6847effa97464f2040eb TCH/calc_r3/px_tch_r3_20261106.csv
+LOCK d207f3daad0d4892f4a3bd9ff315a0b3 TCH/calc_r3/fin_tch_r3.csv
+LOCK 29509b57feb7922c0200628acb92d968 TCH/SUMMARY.json
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 409582a3d2dd624aebc94d00e9988d1a ../dd_TCH_20261031/calc/notes_read.md
+LOCK 7533da97a93b50a5fac55a141261dd1d ../dd_TCH_20261031/src/gaps/bctn25.txt
+LOCK 0af723e44f071a80f680537663328a44 ../dd_TCH_20261031/src/FY25_audited_hopnhat.pdf
+LOCK ac36a1f97bebe510bbb0534b608727fc TOP5D_CORRECTIONS_20261108.md
+LOCK bf37f53ba652850301f152badd7d7831 STANDARD_r2.md
+## sau khoa (doc gia) — compare chay 2 lan trung byte (cmp1.md5 = cmp2.md5)
+POST d6388ebf016757a4e4b3abba717fd3fe  TCH/calc_r3b/tch_r3b_compare.py
+POST db3e82b0a1c3ea6e1e7f0da96e97a203  TCH/calc_r3b/compare_r3b_out.txt
+POST b878186108a380860291ab50cc2328a3  TCH/SUMMARY.json
+POST 29509b57feb7922c0200628acb92d968  TCH/SUMMARY_r3.json
+POST 1bf1cf0721089ec1c6ba5d4637bd7709  TCH/REPORT_r3b.md
+POST f3b90c0f7155a33f397bd62d65e8d008  TCH/SYNC_NOTE_r3b.md

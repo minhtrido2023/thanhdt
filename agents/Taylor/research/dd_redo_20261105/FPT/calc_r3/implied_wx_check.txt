@@ -1,0 +1,6 @@
+w XAU 0.55: tam 53,031
+w XAU 0.70: tam 50,695
+w XAU 0.80: tam 49,138
+w XAU 0.90: tam 47,581
+w XAU 1.00: tam 46,024
+w XAU ngu y (ti le CO_SO:TOT giu 0,45:0,275): 0.693

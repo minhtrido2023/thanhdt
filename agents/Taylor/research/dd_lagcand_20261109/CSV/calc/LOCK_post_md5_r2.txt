@@ -1,0 +1,12 @@
+# r2 2026-11-09T15:34:05+07:00 (sau chay, ap errata)
+dd1d6ce854d26ed968e1dfddfc6e7ba3  make_summary.py
+12808ac0261b639555b1270f398b7c2f  model.py
+f27491d707f1ecc6019a7a14d3454aed  assumptions.json
+95b36e69e6e924c8ded4635531a16f0c  model_out.json
+ff723f5685aabbd37584a505ff8a1c53  fin_csv_bq.csv
+a11ca604c03818434e99c187504f963b  px_csv.csv
+51ea3a04d6de9f9589af56c24b09e443  run1.txt
+51ea3a04d6de9f9589af56c24b09e443  run2.txt
+a9c5e182de13ce72585e95b32f2d175b  ../REPORT.md
+5c7acb1473e69cbed3f6302f1fc189cf  ../SUMMARY.json
+29b416da53bd8d7b01f2e518a78d28a3  ../ERRATA_r1_skeptic.md

@@ -1,0 +1,15 @@
+HTTP/2 200 
+cache-control: private
+content-length: 7577786
+content-type: application/octet-stream; charset=Unicode (UTF-8)
+set-cookie: dnn_IsMobile=False; path=/; HttpOnly
+set-cookie: .ASPXANONYMOUS=oqxYZkvkS-rCC06IecV9ZlH1ZmOYz91SIiAu7cHjUIioaQ-7v27sS2T-zOIwjC5tVcVyaVgcF3UVwVja6oGoJAeZuOGtZnveyXd-yc6VngdJH7_k0; expires=Sun, 17-Jan-2027 18:17:14 GMT; path=/; HttpOnly
+content-disposition: attachment; filename="20261030 - GAS - Consolidated financial statement for Q3.2026.pdf"
+set-cookie: dnn_IsMobile=False; path=/; HttpOnly
+set-cookie: .ASPXANONYMOUS=oqxYZkvkS-rCC06IecV9ZlH1ZmOYz91SIiAu7cHjUIioaQ-7v27sS2T-zOIwjC5tVcVyaVgcF3UVwVja6oGoJAeZuOGtZnveyXd-yc6VngdJH7_k0; expires=Sun, 17-Jan-2027 18:17:14 GMT; path=/; HttpOnly
+set-cookie: language=vi-VN; path=/; HttpOnly
+x-xss-protection: 1; mode=block
+x-frame-options: SAMEORIGIN
+date: Mon, 09 Nov 2026 07:37:14 GMT
+strict-transport-security: max-age=15552000
+

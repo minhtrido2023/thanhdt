@@ -1,0 +1,27 @@
+# LOCK r3 pre-run FPT — ghi 2026-11-09T01:05:07+07:00 TRUOC lan chay dau model_r3.py (job Taylor_20261108_180128)
+# Minh bach: gia 50.800 (06/11) da biet tu TOP5D_CORRECTIONS + truy van BQ truoc LOCK; gia dinh chot trong assumptions_r3.json.
+a873ef0eb43c9d1354f2b376e916064f  FPT/calc_r3/assumptions_r3.json
+c15138774b3da3a33625201fcf08f082  FPT/calc_r3/model_r3.py
+a9afd07490d3b6e37dd7acb8f73c602a  FPT/calc_r3/write_lock_prerun.py
+9470a427085f461d40a9db76a10da45a  FPT/calc_r3/px_fpt_r3.sql
+1ef90b777cee2199dcc0defe4f48aabd  FPT/calc_r3/px_fpt_r3_20261106.csv
+e6d0ac32e6f6374afcf2c9cd2e8bba21  FPT/calc/fpt_r2.py
+7fb57f0d6fbf4085b8f04bcf0c8c7011  FPT/calc/fpt_redo.py
+33772a6e33add436e5732eb65929eb1f  FPT/calc/assoc_px_20261104.csv
+6f934c3e89dd107ad471f5bf710a317f  FPT/calc/fpt_r2_out.txt
+248296d1ae585268678f8707384bc40d  FPT/calc/LOCK_r2_outputs_md5.txt
+1d14cc2f2d167c0080f913de7a6dd1ca  FPT/SUMMARY.json
+800cba44943963ad9f7b51bd933e9301  FPT/ADDENDUM_5F.md
+63dc37651390749b023078090c73129c  FPT/SUMMARY_5F.json
+4367dcae2ead3f1d10df40fcac3c86b2  FPT/REPORT_r2.md
+b664ec37b7728c5ccaa06b0a77d7d76c  _common_014125/r2common.py
+89e390381402790204264c5c2ae1254a  _common_014125/common.py
+442f39a3d556f43f75fa5f3f5519c2e9  _common_014125/bq_px_liq_20261104.csv
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+f9605983ad3b66b47ed80179bcad81da  /home/trido/thanhdt/WorkingClaude/cctg_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+fc06e3a866142684d87a43b34e0f17d2  /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_events.csv
+e9aa8ad7912333cee67e2d742bd3f3ab  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_FPT_20261101/calc/notes_q3_bctc.md
+ac36a1f97bebe510bbb0534b608727fc  TOP5D_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  STANDARD_r2.md

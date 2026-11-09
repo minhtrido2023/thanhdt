@@ -1,31 +1,32 @@
 {
  "ticker": "FPT",
- "asof_price_date": "2026-11-04",
- "price": 53900.0,
+ "asof_price_date": "2026-11-06",
+ "price": 50800.0,
  "r": 0.135,
  "r_anchor": {
+  "r": 0.135,
   "rate": 0.07400000000000001,
-  "date": "2026-11-03",
   "source": "cctg_12m(2026-11-02)",
-  "asof_rate": 0.07400000000000001,
-  "rule": "r = 13,5% + beta x (dep - dep_neo), beta = 1 (gia dinh)"
+  "dep_asof": 0.07400000000000001,
+  "dep_asof_source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
  },
- "center_pre_liq": 54305,
- "center_post_liq": 54203,
- "p10_post": 32389,
- "p50_post": 55182,
- "p90_post": 74557,
- "p25_post": 39897,
- "p75_post": 66124,
- "p10_pre": 32449,
- "p50_pre": 55285,
- "p90_pre": 74697,
- "liq_disc_5ty": 0.0018661001545660569,
- "px_vs_center_post": -0.005598029246979608,
- "px_vs_p10_post": 0.6641656376485396,
- "px_vs_p90_post": -0.27706757418349337,
- "grid_desc": "Luoi co trong so n=45: kich ban XAU/CO SO/TOT (w 0,35/0,45/0,20) x dich ty le chuyen lai thanh tien conv -0,20/-0,10/0/+0,10/+0,20 (san 0,10) x dich g dai han -1/0/+1 pp (deu); r co dinh 13,50%; DCF FCFE loi + FTEL/FRT thi gia 04/11 co CK + lien ket khac so + tien rong + XDCB do dang (NPV 0). Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
- "grid_n": 45,
+ "center_pre_liq": 57420,
+ "center_post_liq": 57312,
+ "p10_post": 45270,
+ "p50_post": 58124,
+ "p90_post": 68466,
+ "p25_post": 49369,
+ "p75_post": 63328,
+ "p10_pre": 45355,
+ "p50_pre": 58234,
+ "p90_pre": 68596,
+ "liq_disc_5ty": 0.0018813854107640475,
+ "px_vs_center_post": -0.11362291820914017,
+ "px_vs_p10_post": 0.122165014565915,
+ "px_vs_p90_post": -0.25803118951826876,
+ "grid_desc": "540 ket cuc = scen(3; 0,275/0,45/0,275) x dconv(5) x dg(3) x FRT(3) x lien ket khac(4); RONIC terminal = Ke; tru CDKKS; FTEL CK 0%; FOX/FRT thi gia 06/11; wpct mid-block",
+ "grid_n": 540,
  "label": "TRONG vùng",
  "zone_old": {
   "low": 55000,
@@ -34,58 +35,14 @@
   "dd_date": "2026-11-01",
   "center_kind": "expected_weighted"
  },
- "center_change_vs_old": -0.04775547445255479,
+ "center_change_vs_old": 3109,
  "sens_r": {
-  "b0.5_-100bp": {
-   "r": 0.13,
-   "value": 54019,
-   "dv": 1739,
-   "pct": 0.03325399410100727
-  },
-  "b0.5_-50bp": {
-   "r": 0.1325,
-   "value": 53127,
-   "dv": 846,
-   "pct": 0.016181462625246112
-  },
-  "b0.5_+50bp": {
-   "r": 0.1375,
-   "value": 51478,
-   "dv": -803,
-   "pct": -0.015358172863845887
-  },
-  "b0.5_+100bp": {
-   "r": 0.14,
-   "value": 50715,
-   "dv": -1566,
-   "pct": -0.02995412870464631
-  },
-  "b1.0_-100bp": {
-   "r": 0.125,
-   "value": 55961,
-   "dv": 3680,
-   "pct": 0.07038276206310745
-  },
-  "b1.0_-50bp": {
-   "r": 0.13,
-   "value": 54019,
-   "dv": 1739,
-   "pct": 0.03325399410100727
-  },
-  "b1.0_+50bp": {
-   "r": 0.14,
-   "value": 50715,
-   "dv": -1566,
-   "pct": -0.02995412870464631
-  },
-  "b1.0_+100bp": {
-   "r": 0.14500000000000002,
-   "value": 49297,
-   "dv": -2984,
-   "pct": -0.057074893958599326
-  }
+  "+100bp": 54602,
+  "+50bp": 55906,
+  "-100bp": 60478,
+  "-50bp": 58831
  },
- "change_reason": "r: Ke theo kich ban 13,4/12,85/12,3% -> MOT r 13,5% (-2,761 d/cp, chu yeu kich ban TOT mat Ke 12,3%); FOX/FRT theo thi gia 04/11 + XDCB do dang GD theo gia so (NPV 0) +242; kich ban/conv/g giu nguyen ban 01/11. Vung cu 55,000-66,700 = 1 truc g x Ke cua kich ban co so; moi = P10-P90 luoi n=45 (30,520-72,235).",
+ "change_reason": "r3: D1 trong so doi xung, D2 RONIC_T=Ke, D3 tru CDKKS, D4 gia 06/11, D7 CK FTEL ra do nhay (base 0%); D5/D6 do nhay",
  "warnings": [
   "FTEL: Nha nuoc (Bo Cong an) kiem soat ~50,16%, FPT 45,66% theo von chu; free float FOX <= ~4,2%; CK FTEL 0/15/30% theo kich ban",
   "Khoan 'chi phi phat trien khach hang' 618,8 ty chua thuyet minh (cau hoi IR)",
@@ -93,39 +50,34 @@
   "Phat thue 0,244 ty da nop (khong trong yeu); PwC soat xet 6T chap nhan toan phan"
  ],
  "open_issues": [
-  "Lai lien ket khong tach theo cong ty; Q4/25 lai LK 600 ty la uoc luong",
-  "conv 2021-2023 chua do cung dinh nghia",
-  "Gia tri lien ket khac (Synnex, FPT Online) theo so 1.500 ty (uoc luong)",
-  "Chua quet tin moi 02-04/11/2026",
-  "XDCB do dang chi gom 4 khuon vien da liet ke (760 ty); co the trung lap mot phan voi g1"
+  "lai LK Q4/25 600 ty chua kiem (GAPS G10)",
+  "tam nhay voi chan RONIC 5 nam: ROIC5Y 17,7% => 52.311; Ke => 50.652 (~gia)",
+  "vay ngoai te 30/09 trung 30/06 (G15)",
+  "BC quan tri 6T/2026 chua doc (G7)",
+  "ETR 11,1% -> 15,2% chua ro (G11)",
+  "phap ly sau 01/11 chua quet"
  ],
- "round": "r2",
- "job": "Taylor_20261105_020013",
- "p10_out": 32389,
- "p50_out": 55182,
- "p90_out": 74557,
- "pct_weight_below_price": 0.47524999999999995,
+ "round": "r3",
+ "job": "Taylor_20261108_180128",
+ "p10_out": 45270,
+ "p50_out": 58124,
+ "p90_out": 68466,
+ "pct_weight_below_price": 0.27041666666666664,
  "n_outcomes": 540,
- "min_outcome": 25463,
- "central_param_value_post": 58579,
+ "min_outcome": 40048,
+ "central_param_value_post": 57556,
  "ck_ref_size": {
-  "size_vnd": 5000000000.0,
-  "disc_adv250": 0.0018661001545660569,
-  "disc_adv60": 0.0021383838490488184,
-  "adv250": 566137945500.0,
-  "adv60": 346013429000.0
+  "size": "5 ty",
+  "adv250": 564758277200.0,
+  "adv60": 346013429000.0,
+  "ck_adv250": 0.0018813854107640475,
+  "ck_adv60": 0.0022099696812921538,
+  "part_adv250": 0.008853345230793902
  },
  "ck_real_sleeve": {
-  "sizes_vnd": [
-   10000000.0,
-   40000000.0
-  ],
-  "disc_adv250": {
-   "10tr": 8.345453596865136e-05,
-   "40tr": 0.0001669090719373027
-  },
-  "nav_spacex_ref": 940000000.0,
-  "note": "Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 0.883% -> trong vung; 10tr 0.002% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.007% -> DUOI vung (CK that ~ nua spread, chua do); 5 ty / ADV60 = 1.45%"
+  "10tr": 8.413811340689549e-05,
+  "40tr": 0.00016827622681379097,
+  "note": "Q/ADV250 < 0,1% => duoi vung hieu chinh luat can bac hai; CK that ~ nua spread, chua do"
  },
  "parallel_versions": {
   "co_truc_r_pm1pp": {
@@ -170,8 +122,7 @@
    "XAU": 1.0
   },
   "p90_scen_mix_pm5pct": {
-   "CO_SO": 0.314,
-   "TOT": 0.686
+   "TOT": 1.0
   }
  },
  "zone_old_r1": {
@@ -181,69 +132,74 @@
   "label": "TRONG vùng"
  },
  "axes_included": [
-  "kich ban XAU/CO_SO/TOT (0,35/0,45/0,20; FTEL CK 30/15/0% trong kich ban)",
-  "dich conv -0,20..+0,20 (5 diem deu, san 0,10)",
-  "dich g -1/0/+1pp (deu)",
-  "FRT quanh thi gia +20/0/-20% (0,25/0,50/0,25) [UL]",
-  "lien ket khac + TPB/FTS lech so: -1.300/0/+1.100/+2.600 d/cp (0,2/0,3/0,3/0,2) [UL; SKEPTIC T6a/T6b]"
+  "kich ban XAU/CO_SO/TOT 0,275/0,45/0,275 [UL doi xung]",
+  "dich conv 5 nam -0,20..+0,20 (deu, san 0,10)",
+  "dich g -1/0/+1pp (sau RONIC=Ke chi con tac dung qua (1+g)/Ke)",
+  "FRT quanh thi gia 06/11 +20/0/-20% (0,25/0,5/0,25) [UL]",
+  "lien ket khac + TPB/FTS lech so -1.300/0/+1.100/+2.600 d/cp (0,2/0,3/0,3/0,2) [UL; SKEPTIC_20261101 T6a/T6b]"
  ],
  "axes_excluded": [
   {
    "axis": "r (Ke)",
-   "reason": "luat 03/11 neo lai huy dong; ban song song co_truc_r_pm1pp"
+   "reason": "luat neo lai huy dong; song song co_truc_r_pm1pp"
   },
   {
-   "axis": "tien khach ung truoc 2.370 ty (hoc phi + nguoi mua tra truoc)",
-   "reason": "float theo mua (vong 1 §3); khong tru; neu tru: -1.257 d/cp (doi chieu)"
+   "axis": "CK FTEL 30/15/0%",
+   "reason": "do lon [UL]; luat user CK holding/quan tri ra do nhay, base 0%; gia FOX da la gia co phan thieu so; song song A"
+  },
+  {
+   "axis": "chan RONIC 5 nam (25,5%/17,7%/Ke)",
+   "reason": "RONIC 5 nam co mot phan du lieu (2025 ~48%); do nhay E/F/G"
+  },
+  {
+   "axis": "lai LK Q4/25 740",
+   "reason": "600 la uoc luong chua kiem; do nhay H"
+  },
+  {
+   "axis": "tien khach ung truoc 2.370 ty",
+   "reason": "float theo mua; do nhay I"
   }
  ],
  "base_adjustments": [
   {
-   "item": "FTEL (FOX) chiet khau theo kich ban 30/15/0%",
-   "effect_dong_per_share": -1495,
-   "basis": "free float FOX <= ~4,2%, Nha nuoc (Bo Cong an) ~50,16% kiem soat; CV 1906 18/03/2026 thoi hop nhat",
-   "source": "dd_FPT_20261101/REPORT.md §6; Q3HN p14"
+   "item": "loi ich CDKKS",
+   "effect_dong_per_share": -618,
+   "basis": "ma 429 BCD HN 30/09/2026 (tien rong cong 100%)",
+   "source": "dd_FPT_20261101/calc/notes_q3_bctc.md:85"
   },
   {
-   "item": "FRT",
+   "item": "FOX 45,66% thi gia 06/11",
    "effect_dong_per_share": 0,
-   "basis": "thi gia 04/11 x 46,54% (vong 1 tru 20% khong co co so -> bo khoi base, chuyen thanh truc)",
-   "source": "BQ tav2_bq.ticker 04/11 (assoc_px_20261104.csv)"
+   "basis": "thi gia, CK 0% base",
+   "source": "BQ px_fpt_r3_20261106.csv"
   },
   {
-   "item": "XDCB do dang khuon vien GD 760 ty",
+   "item": "FRT 46,54% thi gia 06/11",
    "effect_dong_per_share": 0,
-   "basis": "gia so = NPV 0",
+   "basis": "thi gia",
+   "source": "BQ px_fpt_r3_20261106.csv"
+  },
+  {
+   "item": "XDCB khuon vien GD 760 ty",
+   "effect_dong_per_share": 0,
+   "basis": "gia so = NPV0",
    "source": "Q3HN p37"
   },
   {
    "item": "Lien ket khac 1.500 ty",
    "effect_dong_per_share": 0,
-   "basis": "theo so (uoc luong, BCTC khong tach); lech so nam o truc oth",
+   "basis": "theo so (uoc luong, BCTC khong tach); lech so o truc oth",
    "source": "uoc luong"
   }
  ],
- "center_vs_p50_note": "tam = ky vong luoi 54,203; P50 55,182; gia tri tai tham so trung tam 58,579",
+ "center_vs_p50_note": "tam = ky vong luoi 57,312; P50 58,124; gia tri tai tham so trung tam 57,556. P10 do rieng nhanh XAU quyet dinh, P90 do rieng TOT.",
  "gordon_crosscheck": {
-  "A_khong_lai_tg_g0.04": 52205,
-  "B_co_lai_tg_g0.04": 49029,
-  "A_khong_lai_tg_g0.05": 55954,
-  "B_co_lai_tg_g0.05": 53203
+  "A_khong_lai_tg_RONICKe_g0.04": 50852,
+  "A_khong_lai_tg_RONICKe_g0.05": 51115,
+  "B_co_lai_tg_RONICKe_g0.04": 47471,
+  "B_co_lai_tg_RONICKe_g0.05": 47764
  },
- "lock_md5": {
-  "FPT/calc/fpt_r2.py": "e6d0ac32e6f6374afcf2c9cd2e8bba21",
-  "FPT/calc/fpt_redo.py": "7fb57f0d6fbf4085b8f04bcf0c8c7011",
-  "FPT/calc/assoc_px_20261104.csv": "33772a6e33add436e5732eb65929eb1f",
-  "_common_014125/common.py": "89e390381402790204264c5c2ae1254a",
-  "_common_014125/r2common.py": "b664ec37b7728c5ccaa06b0a77d7d76c",
-  "_common_014125/bq_px_liq_20261104.csv": "442f39a3d556f43f75fa5f3f5519c2e9",
-  "_shared/wpct.py": "4597bc083f0d64d8873141b12fbfb3a6",
-  "../../../../../deposit_rate_vn.py": "13dac039539fb91fc8f7256c03a71e5d",
-  "../../../../../cctg_rate_vn.py": "f9605983ad3b66b47ed80179bcad81da",
-  "../../../../../data/deposit_rate_vn_events.csv": "1bb3c27280abc1dbd014af7eecf8b3d4",
-  "../../../../../data/cctg_rate_vn_events.csv": "fc06e3a866142684d87a43b34e0f17d2",
-  "../../../../kb/dd_price_zones.json": "820180d3042303876d46a5a3bcd9bfbd"
- },
+ "lock_md5": "calc_r3/LOCK_r3_prerun.txt (truoc chay) + calc_r3/LOCK_r3_post_md5.txt",
  "warnings_r2_added": [
   "Vay ngoai te 30/09 trung tung dong voi 30/06 (JPY, EUR) - nghi chua danh gia lai ty gia [SKEPTIC T; GAPS G15]",
   "Giao dich ben lien quan 9T: mua Synnex 663 ty (cung ky 308), ban FRT 386, FTEL 115/211 [Q3HN p47-48]",
@@ -251,5 +207,284 @@
   "ETR 11,1% -> 15,2% chua ro nguyen nhan (thue toi thieu toan cau hay het uu dai)",
   "Thanh tra So TT&TT Binh Duong ve chi nhanh FTEL (2022-24) - khong trong yeu"
  ],
- "fear_buy_eligible_2_5": false
+ "fear_buy_eligible_2_5": false,
+ "price_date": "2026-11-06",
+ "price_source": "BQ tav2_bq.ticker Price (calc_r3/px_fpt_r3_20261106.csv)",
+ "label_by_size": {
+  "5ty": {
+   "center": 57312,
+   "p10": 45270,
+   "p90": 68466,
+   "label": "TRONG vùng",
+   "ck": 0.0018813854107640475
+  },
+  "sleeve_40tr": {
+   "center": 57410,
+   "p10": 45347,
+   "p90": 68584,
+   "label": "TRONG vùng",
+   "ck": 0.00016827622681379097
+  }
+ },
+ "rule4": {
+  "5ty": {
+   "threshold": 48715,
+   "pass_": false
+  },
+  "sleeve_40tr": {
+   "threshold": 48799,
+   "pass_": false
+  }
+ },
+ "zone_old_r2": {
+  "center": 54203,
+  "p10": 32389,
+  "p90": 74557,
+  "label": "TRONG vùng",
+  "price": 53900.0
+ },
+ "assumptions": [
+  {
+   "name": "trong so kich ban XAU/CO_SO/TOT",
+   "value": "0,275/0,45/0,275",
+   "basis": "D1 skeptic: r2 0,35/0,45/0,20 dem 2 lan du lieu conv (v2 da ha conv XAU 0,60->0,40 roi lai nang w XAU 0,30->0,35, REPORT.md:184); khong co du lieu doc lap cho nghieng => doi xung (tien le MBB D2)",
+   "source": "fpt_r2.py:45-47; dd_FPT_20261101/REPORT_v1.md:31",
+   "tag": "[UL] doi xung"
+  },
+  {
+   "name": "RONIC terminal",
+   "value": "= Ke (13,5%) moi kich ban; conv_T = 1 - gT/Ke",
+   "basis": "ADDENDUM_5F moat_durable=false => moat khong ben, RONIC=Ke (luat user); r2 ngam 16%/26,7%/5%",
+   "source": "ADDENDUM_5F.md; fpt_r2.py:40"
+  },
+  {
+   "name": "conv giai doan 5 nam",
+   "value": "XAU 0,40 / CO_SO 0,75 / TOT 0,85, dich -0,2..+0,2",
+   "basis": "giu r2: conv 9T/26 -0,12, FY25 0,60, FY24 1,07; RONIC ngam 5 nam 36%/93% co 1 phan du lieu (2025 LN me +19,3% voi conv 0,60 => ~48%)",
+   "source": "dd_FPT REPORT 4c",
+   "tag": "do nhay chan 25,5%/17,7%/Ke"
+  },
+  {
+   "name": "g 5 nam",
+   "value": "3%/9%/14%",
+   "basis": "giu r2 (da qua skeptic 01/11)",
+   "source": "fpt_r2.py SC"
+  },
+  {
+   "name": "loi ich CDKKS",
+   "value": "-1.165,8 ty",
+   "basis": "ma 429 BCD HN 30/09/2026; LNST CDKKS 9T26 ~ -1,6 ty nen LN mo hinh ~ LN me, phan CDKKS nam tren tai san rong (tien) cong 100%",
+   "source": "dd_FPT_20261101/calc/notes_q3_bctc.md:85,143-145"
+  },
+  {
+   "name": "FOX 45,66% / FRT 46,54% theo thi gia 06/11",
+   "value": "FOX 53.800, FRT 142.000 x OShares BQ",
+   "basis": "thi gia (D4)",
+   "source": "BQ tav2_bq.ticker -> px_fpt_r3_20261106.csv"
+  },
+  {
+   "name": "chiet khau FTEL",
+   "value": "0% base",
+   "basis": "do lon 30/15/0% la [UL] (khong co du lieu do lon); luat user: CK holding/quan tri [UL] ra do nhay base 0% (tien le DRI#1/PVT#1/TCH#1); gia FOX da la gia co phan thieu so",
+   "source": "TOP5D D7",
+   "tag": "song song 30/15/0%"
+  },
+  {
+   "name": "lai lien ket Q4/25",
+   "value": "600 ty",
+   "basis": "uoc luong, CHUA KIEM (GAPS G10); do nhay 740 (nhip 9T/26)",
+   "source": "fpt_r2.py:18",
+   "tag": "[UL] chua kiem"
+  },
+  {
+   "name": "FRT truc +20/0/-20% (0,25/0,5/0,25)",
+   "value": "doi xung quanh thi gia",
+   "basis": "giu r2",
+   "source": "fpt_r2.py FRT_AX",
+   "tag": "[UL]"
+  },
+  {
+   "name": "truc lien ket khac + TPB/FTS lech so",
+   "value": "-1.300/0/+1.100/+2.600 d/cp @0,2/0,3/0,3/0,2",
+   "basis": "giu r2 (SKEPTIC_20261101 T6a/T6b); khong co dinh chinh vong 3",
+   "source": "fpt_r2.py OTH_AX",
+   "tag": "[UL]"
+  },
+  {
+   "name": "XDCB khuon vien GD 760 ty",
+   "value": "gia so = NPV0",
+   "basis": "luat 03/11",
+   "source": "Q3HN p37"
+  },
+  {
+   "name": "tien khach ung truoc 2.370 ty",
+   "value": "khong tru (base)",
+   "basis": "float theo mua; do nhay tru",
+   "source": "notes_q3_bctc.md 312+319",
+   "tag": "do nhay"
+  },
+  {
+   "name": "r",
+   "value": "13,5% + 1,0 x (dep12T(06/11) - 7,40%)",
+   "basis": "luat user; dep12T 06/11 = cctg_12m(2026-11-02) 7,40% => 13,50%",
+   "source": "deposit_rate_vn.effective_deposit_rate"
+  }
+ ],
+ "headline_vs_alternatives": {
+  "headline": {
+   "center": 57312,
+   "p10": 45270,
+   "p50": 58124,
+   "p90": 68466,
+   "pct_below": 0.27041666666666664,
+   "label": "TRONG vùng"
+  },
+  "A_giu_CK_FTEL_30/15/0": {
+   "center": 55871,
+   "p10": 42388,
+   "p50": 56683,
+   "p90": 68466,
+   "pct_below": 0.27949999999999997,
+   "label": "TRONG vùng"
+  },
+  "B_trong_so_r2_0,35/0,45/0,20": {
+   "center": 55721,
+   "p10": 44254,
+   "p50": 56889,
+   "p90": 67196,
+   "pct_below": 0.3441666666666666,
+   "label": "TRONG vùng"
+  },
+  "C_RONIC_terminal_r2_(>Ke)": {
+   "center": 57524,
+   "p10": 35683,
+   "p50": 59087,
+   "p90": 76928,
+   "pct_below": 0.3335,
+   "label": "TRONG vùng"
+  },
+  "D_khong_tru_CDKKS": {
+   "center": 57929,
+   "p10": 45887,
+   "p50": 58741,
+   "p90": 69084,
+   "pct_below": 0.25987499999999997,
+   "label": "TRONG vùng"
+  },
+  "E_RONIC_5nam_chan_25,5%_(ROE_TTM)": {
+   "center": 54472,
+   "p10": 45270,
+   "p50": 56019,
+   "p90": 60570,
+   "pct_below": 0.27041666666666664,
+   "label": "TRONG vùng"
+  },
+  "F_RONIC_5nam_chan_17,7%_(ROIC5Y)": {
+   "center": 52311,
+   "p10": 45270,
+   "p50": 53635,
+   "p90": 56489,
+   "pct_below": 0.27791666666666665,
+   "label": "TRONG vùng"
+  },
+  "G_RONIC_5nam_chan_Ke": {
+   "center": 50652,
+   "p10": 45270,
+   "p50": 51211,
+   "p90": 54528,
+   "pct_below": 0.4220833333333335,
+   "label": "TRONG vùng"
+  },
+  "H_lai_LK_Q4/25_740": {
+   "center": 56616,
+   "p10": 44813,
+   "p50": 57414,
+   "p90": 67549,
+   "pct_below": 0.27225,
+   "label": "TRONG vùng"
+  },
+  "I_tru_tien_khach_ung_truoc_2.370": {
+   "center": 56058,
+   "p10": 44015,
+   "p50": 56870,
+   "p90": 67212,
+   "pct_below": 0.2770833333333333,
+   "label": "TRONG vùng"
+  },
+  "J_FOX/FRT_gia_04/11": {
+   "center": 57739,
+   "p10": 45691,
+   "p50": 58562,
+   "p90": 68891,
+   "pct_below": 0.26125,
+   "label": "TRONG vùng"
+  },
+  "co_truc_r_pm1pp": {
+   "center": 57426,
+   "p10": 45048,
+   "p50": 58120,
+   "p90": 68808,
+   "pct_below": 0.26786458333333335,
+   "label": "TRONG vùng"
+  }
+ },
+ "implied_by_price": {
+  "r": 0.16200781966253813,
+  "dep12_implied": 0.10100781966253812,
+  "ronic_phase_cap": 0.13938046987844127,
+  "r_if_keep_ftel_discount": 0.15508646179659885,
+  "w_xau": "0,693 neu CO_SO:TOT giu ti le 0,45:0,275 (implied_wx_check.txt); voi CO_SO co dinh 0,45 thi w XAU 0,55 (TOT 0) van cho tam 53.031 > gia"
+ },
+ "bridge_r2_to_r3": [
+  {
+   "center": 54203,
+   "delta": 0,
+   "p10": 32389,
+   "p90": 74557,
+   "pct_below_px": 0.4752,
+   "step": "0 r2 tai lap (gia 04/11)"
+  },
+  {
+   "center": 53834,
+   "delta": -370,
+   "p10": 32060,
+   "p90": 74166,
+   "pct_below_px": 0.419,
+   "step": "1 gia FPT/FOX/FRT + thanh khoan 06/11"
+  },
+  {
+   "center": 56700,
+   "delta": 2866,
+   "p10": 33418,
+   "p90": 77546,
+   "pct_below_px": 0.344,
+   "step": "2 D1 trong so doi xung 0,275/0,45/0,275"
+  },
+  {
+   "center": 56488,
+   "delta": -212,
+   "p10": 43005,
+   "p90": 69084,
+   "pct_below_px": 0.275,
+   "step": "3 D2 RONIC terminal = Ke ca 3 kich ban"
+  },
+  {
+   "center": 55871,
+   "delta": -617,
+   "p10": 42388,
+   "p90": 68466,
+   "pct_below_px": 0.2795,
+   "step": "4 D3 tru loi ich CDKKS 1.165,8 ty"
+  },
+  {
+   "center": 57312,
+   "delta": 1441,
+   "p10": 45270,
+   "p90": 68466,
+   "pct_below_px": 0.2704,
+   "step": "5 D7 CK FTEL [UL] -> base 0%"
+  }
+ ],
+ "r2_at_new_price_pct_below": 0.41525,
+ "fear_buy_note": "KHONG du dieu kien §2.5 (truot DK1 khong co trang thai so hai/scandal, DK4)"
 }

@@ -1,0 +1,231 @@
+{
+ "ticker": "CSV",
+ "asof_price_date": "2026-11-06",
+ "price": 22600.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.074,
+  "source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
+ },
+ "kind": "expected_weighted",
+ "center_pre_liq": 21073,
+ "center_post_liq": 20717,
+ "p10_post": 15825,
+ "p25_post": 18071,
+ "p50_post": 20647,
+ "p75_post": 23085,
+ "p90_post": 25470,
+ "p10_pre": 16097,
+ "p50_pre": 21002,
+ "p90_pre": 25907,
+ "liq_disc_5ty": 0.016883140087935178,
+ "px_vs_center_post": 0.09089153835014718,
+ "px_vs_p10_post": 0.42812006319115326,
+ "px_vs_p90_post": -0.11268158617981938,
+ "label": "TRONG vùng",
+ "label_by_size": {
+  "5ty": {
+   "center": 20717,
+   "p10": 15825,
+   "p90": 25470,
+   "label": "TRONG vùng",
+   "ck": 0.016883140087935178
+  },
+  "40tr": {
+   "center": 21041,
+   "p10": 16072,
+   "p90": 25868,
+   "label": "TRONG vùng",
+   "ck": 0.0015100739564109932
+  },
+  "10tr": {
+   "center": 21057,
+   "p10": 16084,
+   "p90": 25888,
+   "label": "TRONG vùng",
+   "ck": 0.0007550369782054966
+  }
+ },
+ "rule4": {
+  "5ty": {
+   "threshold": 17609,
+   "pass_": false
+  },
+  "40tr": {
+   "threshold": 17885,
+   "pass_": false
+  },
+  "10tr": {
+   "threshold": 17898,
+   "pass_": false
+  }
+ },
+ "pct_weight_below_price": 0.7125,
+ "grid_n": 27,
+ "grid_desc": "27 ket cuc (r2) = kich ban LN me chuan hoa XAU/CO_SO/TOT 179,7/235,0/294,5 ty (0,25/0,5/0,25) x dE +-10% x NPV Nhon Trach -20/0/+20% (0,2/0,6/0,2); gian doan CHUYEN KHOI BASE (E2) thanh do nhay; RONIC=Ke; + tien rong 525,6 ty + phan da chi Nhon Trach 346,484 ty gia von (E1) - CDKKS 50,0",
+ "scen_pre": {
+  "XAU": 17295,
+  "CO_SO": 21002,
+  "TOT": 24992
+ },
+ "central_param_value_pre": 21002,
+ "sens_r": {
+  "-100bp": 21789,
+  "-50bp": 21233,
+  "+50bp": 20238,
+  "+100bp": 19793
+ },
+ "sens": {
+  "RONIC=ROE5Y_18.3%_g4%": 22204,
+  "den_bu_BH1_+100ty": 21607,
+  "lai_tien_gui_tinh_trong_E_khong_cong_tien_rong": 15299,
+  "P/E_bang_gia_tren_E_CO_SO": 10.63,
+  "P/E_TTM": 8.48,
+  "P/B_me": 1.37
+ },
+ "implied_by_price": {
+  "r": 0.11836636161930297,
+  "dep12_implied": 0.05736636161930296,
+  "E_parent_perpetual_ty": 258.79993541000005
+ },
+ "lag_surprise": {
+  "q3_26_np_parent": 85.404855059,
+  "q3_25": 57.750156613,
+  "yoy_q3": 0.4788679385117842,
+  "q2_yoy": 1.0758171296555794,
+  "nine_m_yoy": 0.49507752678276873,
+  "driver": "gia H2SO4 +249% (Q2) / +289% (Q3) + phot pho vang; hang hoa thuong mai 9T GP 73,4 vs 15,4 ty",
+  "durable": false,
+  "one_off_est_ty": "60-85 (uoc luong)"
+ },
+ "ck_ref_size": {
+  "size": "5 ty",
+  "adv250": 9216510000.0,
+  "adv60": 5753765000.0,
+  "sigma_d": 0.02292194526748038,
+  "q_over_adv250": 0.5425047008032324,
+  "note": "ngoai vung hieu chinh (Q/ADV 54%)"
+ },
+ "sizing": {
+  "max_one_shot_vnd": 1000000000.0,
+  "exit": {
+   "5ty": {
+    "q_over_adv": 0.5425047008032324,
+    "days_at10": 5.425047008032324,
+    "days_at20": 2.712523504016162
+   },
+   "1ty": {
+    "q_over_adv": 0.10850094016064649,
+    "days_at10": 1.0850094016064649,
+    "days_at20": 0.5425047008032324
+   },
+   "40tr": {
+    "q_over_adv": 0.00434003760642586,
+    "days_at10": 0.043400376064258596,
+    "days_at20": 0.021700188032129298
+   }
+  },
+  "note": "<=1 ty/lan (~11% ADV250, ~17% ADV60); free float <=35% (Nha nuoc 65,0%)"
+ },
+ "moat": {
+  "tier": "NARROW",
+  "type": "COST/SCALE",
+  "source": "data/moat_tags.csv asof 2026-06-05 (tai dung)",
+  "durable": false,
+  "roe_min5y": 0.1366,
+  "roic_min5y": 0.1426,
+  "risk1_proposed": "di doi bat buoc BH1 -> Nhon Trach 1.840 ty ~ von CSH + cong suat xut noi dia ~x2 2027-30; lai 2026 la cu soc axit/phot pho tam thoi"
+ },
+ "auto_flags": {
+  "IDIOCRASH_20260727": "NHIEU (VNINDEX -1,0%, khong CBTT, hoi +3,75% phien sau)",
+  "DCF_CHEAP_29479": "NHIEU ve ket luan (thu nhap dinh chu ky)",
+  "ROE5Y_18_3": "that nhung gom dinh 2022; ROE_Min5Y 13,66% ~ Ke",
+  "ADV3T_6ty": "that"
+ },
+ "warnings": [
+  "Cuong che thao do BH1 QD 2408/QD-UBND 07/07/2026; dung NM Tan Binh 2 tu 15/08/2026 (QD 1122/QD-HDQT) - gian doan chuyen tiep KHONG vao base (r2), chi do nhay",
+  "Du an Nhon Trach ~1.840 ty (632 tu co + ~1.208 vay 10 nam), chua co ngay van hanh dong bo",
+  "Nha nuoc (Vinachem) 65,0%; free float <=35%",
+  "Khong chia co tuc tien 2025 (LN trich het vao quy DTPT)",
+  "UBND TP.HCM thu hoi dat tu nguyen tra lai (CBTT 19/10/2026) - chua doc noi dung"
+ ],
+ "open_issues": [
+  "G2 tra truoc nguoi ban 242,4 ty (~200 ty nghi Nhon Trach, CHUA xac nhan -> chi do nhay +1.779 d/cp)",
+  "G3 hang hoa thuong mai 350 ty la gi",
+  "G4 lich dung day chuyen BH1 / chay Nhon Trach",
+  "G5 boi thuong BH1 + dat HCM",
+  "G6 H2SO4 tu dot luu huynh hay thuong mai",
+  "E5 co tuc 21,17 ty tra 9T/26 co phai tra CDKKS: chua kiem"
+ ],
+ "fear_buy_eligible_2_5": false,
+ "assumptions_file": "calc/assumptions.json",
+ "assumptions_md5": "f27491d707f1ecc6019a7a14d3454aed",
+ "source_file": "src/q3_2026_HN.pdf",
+ "lock_md5": "calc/LOCK_prerun.txt (truoc chay) + calc/LOCK_post_md5.txt",
+ "sector_read": "kb/data_registry/market-state/sector_read_hoa_chat_xut_clo_20261109.md",
+ "round": "r2",
+ "job": "Taylor_20261109_073602",
+ "job_r2": "Taylor_20261109_083124",
+ "sens_e": {
+  "E1b_+ung_truoc_200ty_nghi_NhonTrach": {
+   "center": 22496,
+   "p10": 17604,
+   "p25": 19850,
+   "p50": 22427,
+   "p75": 24865,
+   "p90": 27249,
+   "min": 14324,
+   "max": 31565,
+   "n": 27
+  },
+  "E2_gian_doan_0/-25/-50_mot_chieu_khong_boi_thuong": {
+   "center": 20355,
+   "p10": 15821,
+   "p25": 17739,
+   "p50": 20243,
+   "p75": 22630,
+   "p90": 24968,
+   "min": 11971,
+   "max": 29785,
+   "n": 81
+  },
+  "E2_gian_doan_hai_chieu_boi_thuong_+100ty_vs_0": {
+   "center": 21245,
+   "p10": 16711,
+   "p25": 18628,
+   "p50": 21133,
+   "p75": 23519,
+   "p90": 25857,
+   "min": 12861,
+   "max": 30675,
+   "n": 81
+  },
+  "E1_r1_khong_cong_phan_da_chi(doi_chieu)": {
+   "center": 17634,
+   "p10": 12742,
+   "p25": 14988,
+   "p50": 17565,
+   "p75": 20003,
+   "p90": 22387,
+   "min": 9462,
+   "max": 26703,
+   "n": 27
+  }
+ },
+ "spent_book_ty": 346.484,
+ "prior_round": "SUMMARY_r1.json / REPORT_r1.md (r1: tam 17.273 P10 12.739 P90 21.885 TREN vung)",
+ "errata": {
+  "source": "ERRATA_r1_skeptic.md",
+  "applied": [
+   "E1",
+   "E2",
+   "E3",
+   "E4(theo errata, Taylor chua tu kiem ban scan)",
+   "E5",
+   "E6"
+  ],
+  "E4_note": "G1 dong theo errata skeptic: FAC 041/2025 (23/02/2026) va FAC 044/2026 (27/07/2026) chap nhan toan phan. Taylor KHONG tu kiem duoc (PDF scan, khong co cong cu render trong phien)."
+ }
+}

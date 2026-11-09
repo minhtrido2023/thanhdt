@@ -97,7 +97,7 @@ Nguồn rà: `dd_HHS_20261101/{SKEPTIC_20261101,GAPS,GAPS_FILL,BRIEF_gaps,REPORT
 7. **Q3/2026 chưa soát xét**; 6T sau soát xét AASC bị hạ LNTT −29%, LNST mẹ −34% so tự lập ⇒ Q3 LNST mẹ 115,8 có rủi ro tương tự. MỞ (M1).
 8. Ký quỹ 28,4 tỷ cho cá nhân Phạm Văn Xuân (31/12/2025 chỉ 3,77), mục đích không rõ — nay là trục lưới. MỞ.
 9. Nhóm Đinh Quang Chiến + PT Đô thị Từ Liêm + Thuỷ điện Trà Xom 5,06% → 5,12% (19/10/2026); chưa đọc tỷ lệ sau 21/10. MỞ.
-10. Bảo lãnh/mua lại xe: BCTC 2025 không thuyết minh ("không thuyết minh ≠ không có"); vay duy nhất 390 tỷ của CRV (VietinBank Ngô Quyền, **đáo hạn 18/11/2026**, thế chấp NC-II, HHS mẹ không bảo lãnh); phải trả Dongfeng 364,01 tỷ. Một phần.
+10. Bảo lãnh/mua lại xe: BCTC 2025 không thuyết minh ("không thuyết minh ≠ không có"); vay duy nhất 390 tỷ của CRV (VietinBank Ngô Quyền, thế chấp NC-II, HHS mẹ không bảo lãnh) — **[ĐÍNH CHÍNH r3 09/11: ĐÃ TRẢ trong 9T/2026, không còn nợ vay; 'đáo hạn 18/11/2026' là lỗi lẫn năm]**; phải trả Dongfeng 364,01 tỷ. Một phần.
 11. PPA chỉ thuyết minh tổng; haircut là ước lượng. MỞ.
 12. Dự toán chi phí còn lại để giao căn NC-II đã nhận tiền (3.099) chưa có ⇒ net cash thật chưa trừ khoản này (G10). MỞ.
 13. Đại lý Dongfeng: không có từ "độc quyền", số xe/hợp đồng/thời hạn chưa có. MỞ.

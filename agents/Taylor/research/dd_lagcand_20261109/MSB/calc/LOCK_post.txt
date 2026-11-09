@@ -1,0 +1,13 @@
+# post 2026-11-09T15:32:12.060222+07:00
+3f3ba648f097295e3c72ebfae7243d18  assumptions.json
+6fddaaf3a6265c42fc0246471ebcf236  model.py
+083533e3405f31c018d46aaddf44a9c5  notes_read.md
+e5816d0c9ec7359fb6fe521ae29d6584  bq_msb_px.csv
+a754ee095783cccfbc3c7a0a49f1ce0b  bq_peers_20261106.csv
+f5508cd5fad9177ae0d05be44ce5cdd4  bq_msb_fin.csv
+d08a5ea14274067b1146badb953f48dd  model_out.txt
+a5e16e325aa51b0d0da80e5a2fe5ef17  model_out.json
+c5ddc7d521c79085306d45aae4e54fea  bank_metrics.py
+6a15f7caaac7261e5cc7243cf6acf425  bank_metrics_out.txt
+c5f840dd185d55968c2e8a4b9ac7fa4b  peers_xcheck.py
+e183dd05f598b0899d9654e907616377  peers_xcheck_out.txt

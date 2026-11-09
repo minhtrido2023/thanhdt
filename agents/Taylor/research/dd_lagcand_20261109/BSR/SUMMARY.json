@@ -1,0 +1,271 @@
+{
+ "ticker": "BSR",
+ "asof_price_date": "2026-11-06",
+ "price": 26250.0,
+ "price_source": "BQ tav2_bq.ticker Price (calc/px_bsr.csv)",
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.07400000000000001,
+  "source": "cctg_12m(2026-11-02)",
+  "dep_asof": 0.07400000000000001,
+  "dep_asof_source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7.40%)"
+ },
+ "kind": "expected_weighted",
+ "center_pre_liq": 17578,
+ "center_post_liq": 17496,
+ "p10_post": 13093,
+ "p25_post": 14087,
+ "p50_post": 17350,
+ "p75_post": 19020,
+ "p90_post": 23345,
+ "p10_pre": 13154,
+ "p50_pre": 17431,
+ "p90_pre": 23453,
+ "liq_disc_5ty": 0.004623189202824706,
+ "px_vs_center_post": 0.500301663871211,
+ "px_vs_p10_post": 1.0048361494505031,
+ "px_vs_p90_post": 0.12444909298615103,
+ "label": "TRÊN vùng",
+ "pct_weight_below_price": 0.9874999999999998,
+ "n_outcomes": 81,
+ "min_outcome": 11825,
+ "max_outcome": 27800,
+ "grid_desc": "rev2: 81 ket cuc = kich ban(3; Bobby 0,30/0,50/0,20) x loi lam chuan hoa +-20% (3) x giai phong WC vuot 0/0,27/0,54 (3) x he so LN vuot nen 0,5/1/1,5 (3); RONIC=Ke; thue 10%->20% sau 2039; mo rong NPV0",
+ "scen_mid": {
+  "XAU": 13440,
+  "CO_SO": 17710,
+  "TOT": 23453
+ },
+ "components_d_per_share": {
+  "net_cash": 9012,
+  "fixed_incl_cip_minus_khcn": 9884,
+  "ops": {
+   "XAU": 3566,
+   "CO_SO": 5592,
+   "TOT": 8632
+  },
+  "windfall": {
+   "XAU": -571,
+   "CO_SO": 1673,
+   "TOT": 4376
+  },
+  "wc_excess_bn": 10413
+ },
+ "sens_r": {
+  "+100bp": 17116,
+  "+50bp": 17300,
+  "-50bp": 17708,
+  "-100bp": 17935
+ },
+ "sens_moat": {
+  "NONE/NARROW (RONIC=Ke, headline)": 17496,
+  "WIDE gia dinh RONIC 20%, g 4%": 18275
+ },
+ "parallel_versions": {
+  "sym_0275_045_0275": {
+   "center": 18031,
+   "p10": 13103,
+   "p25": 14362,
+   "p50": 17629,
+   "p75": 20608,
+   "p90": 23904,
+   "pct_below_px": 0.9828124999999998,
+   "min": 11825,
+   "max": 27800,
+   "n": 81
+  }
+ },
+ "label_by_size": {
+  "5ty": {
+   "center": 17496,
+   "p10": 13093,
+   "p90": 23345,
+   "label": "TRÊN vùng",
+   "ck": 0.004623189202824706
+  },
+  "sleeve_40tr": {
+   "center": 17570,
+   "p10": 13149,
+   "p90": 23443,
+   "label": "TRÊN vùng",
+   "ck": 0.0004135106132143641
+  }
+ },
+ "rule4": {
+  "5ty": {
+   "threshold": 14872,
+   "pass_": false
+  }
+ },
+ "ck_ref_size": {
+  "size": "5 ty",
+  "adv250": 260573709125.0,
+  "adv60": 257088715750.0,
+  "sigma_d": 0.033375052882078066,
+  "ck_adv250": 0.004623189202824706,
+  "part_adv250": 0.019188428551713353
+ },
+ "implied_by_price": {
+  "ke": 0.05078372145504351,
+  "core_nopat_bn": 9938,
+  "core_nopat_x_2023_25": 2.8452088996443976,
+  "grm_usd_bbl_above_coso": 4.797199747918568
+ },
+ "pe": {
+  "pe_ttm": 4.735867858242631,
+  "pb": 1.5736883402873365,
+  "ttm_np_bn": 27754
+ },
+ "moat": {
+  "tier": "NARROW",
+  "type": "ADMIN/LOCATION",
+  "durable": false,
+  "params": "khong thuong (RONIC=Ke)",
+  "moat_tags_csv": "chua co dong BSR -> de xuat trong REPORT muc 6"
+ },
+ "assumptions_md5": "6d64222bf929fdeaf7ad35bb4e033b32",
+ "assumptions_file": "calc/assumptions.json",
+ "auto_flags": {
+  "dcf_rich_21359": "THAT (huong dung, muc con nhe: tam DD 17.496)",
+  "pe_4_75": "NHIEU — PE tren LN dinh chu ky ~7,2-7,9x loi lam chuan hoa (TTM 27.754 / 3.863-3.493)",
+  "lag_hi": "THAT ve so (Q3 +888% YoY) nhung KHONG BEN (crack ngoai sinh + ton kho); gia sau cong bo -8,7%"
+ },
+ "warnings": [
+  "PVN so huu 92,12% (free float ~7,9%); quyet toan co phan hoa 2018 CHUA duoc phe duyet (Deloitte nhan manh, soat xet 6T/2026)",
+  "KH 2026 dieu chinh 06/11 LNST HN 18.579 ty < 9T thuc 24.902 ty (doc thang = Q4 lo -6.323 ty); doc la KH hanh chinh, chua xac minh",
+  "Thue NK MFN xang dau 0% den 31/12/2026 (ND 72, NQ 43) - quyet dinh 2027 nam o Chinh phu",
+  "Uu dai thue TNDN 10% den het 2039 (QD 952/QD-TTg)",
+  "Du an mo rong 39.004,5 ty (vay 23.402,7) - NPV0 base; rui ro tre tien do 2028->2029",
+  "Tien gui HTM 2.735,6 ty (trong 56.893) o MBV (ex-OceanBank) \"dang tam dung giao dich\" (TM5 tr.20): base giu nguyen; neu mat trang tam -> 16953 (do nhay, ~-544 d/cp)"
+ ],
+ "open_issues": [
+  "Tra truoc nguoi ban 3.009 ty (dau nam 372) va chi capex 3.155 ty vs TSCD+CIP tang ~0,7 nghin ty - chua giai thich",
+  "GRM tach crack/ton kho theo quy: BCTC khong cong bo; tach bang chung cap nganh (Bobby 3.2) + du phong ton kho 678 ty",
+  "TTDB xang 0% tu 01/11/2026 mau thuan nguon (Bobby muc 2)",
+  "E5: BQ Q1+Q2+Q3/2026 24.693 vs BCTC 9T 24.899 (lech 206 ty): chi anh huong PE TTM, khong vao gia tri",
+  "E5 dong: vay ngan han 13.525 ty la han muc quay vong BIDV/VCB/VietinBank (TM14) — binh thuong; da tru menh gia",
+  "E5 dong: PP LN gop ~-4 ty (DT 3.840 - GV 3.844)",
+  "E6 lech 2 chieu CHUA dinh luong: VAT khau tru 6.509 gan truc giai phong (xuong/len); cua so 2023-25 chua TA5 trong 1/3 vs chu ky ~4 nam (lech xuong nhe); nha may gan khau hao het 36,8/46,7 nghin ty nen capex duy tri = khau hao co the cao (lech len)",
+  "E2: ung truoc 2.601,2 ty cho 2 nha thau ky su Trung Quoc ghi 100% gia so — can xac nhan hop dong",
+  "LN loi 2019-25 (lai ~1,55) va lai/CP vay 2023-24 chua kiem"
+ ],
+ "fear_buy_eligible_2_5": false,
+ "job": "Taylor_20261109_083122",
+ "job_r1": "Taylor_20261109_073600",
+ "round": "r2",
+ "errata_r2": {
+  "steps": [
+   {
+    "name": "r1 (cong bo)",
+    "center": 16437,
+    "p10": 12034,
+    "p90": 22286,
+    "pct_below": 0.9968750000000001
+   },
+   {
+    "name": "E1-B rieng (boc ty gia, loi lam 3.493)",
+    "center": 17105,
+    "p10": 12701,
+    "p90": 22953,
+    "pct_below": 0.990625
+   },
+   {
+    "name": "E1-A rieng (giu ty gia, loi lam 3.895)",
+    "center": 17684,
+    "p10": 13281,
+    "p90": 23532,
+    "pct_below": 0.9812499999999998
+   },
+   {
+    "name": "E2 rieng (mo rong 100% gia so)",
+    "center": 16923,
+    "p10": 12520,
+    "p90": 22772,
+    "pct_below": 0.990625
+   },
+   {
+    "name": "E4 rieng (tru quy KTPL + NCI)",
+    "center": 16343,
+    "p10": 11940,
+    "p90": 22192,
+    "pct_below": 0.9968750000000001
+   },
+   {
+    "name": "E3 rieng (MBV mat trang, do nhay)",
+    "center": 15894,
+    "p10": 11490,
+    "p90": 21742,
+    "pct_below": 1.0
+   },
+   {
+    "name": "luy ke +E2",
+    "center": 16923,
+    "p10": 12520,
+    "p90": 22772,
+    "pct_below": 0.990625
+   },
+   {
+    "name": "luy ke +E2+E4",
+    "center": 16829,
+    "p10": 12426,
+    "p90": 22678,
+    "pct_below": 0.990625
+   },
+   {
+    "name": "luy ke +E2+E4+E1-B = rev2 HEADLINE",
+    "center": 17496,
+    "p10": 13093,
+    "p90": 23345,
+    "pct_below": 0.9874999999999998
+   },
+   {
+    "name": "rev2 bien the A (giu ty gia)",
+    "center": 18076,
+    "p10": 13673,
+    "p90": 23924,
+    "pct_below": 0.9749999999999999
+   },
+   {
+    "name": "rev2 B + MBV mat trang",
+    "center": 16953,
+    "p10": 12550,
+    "p90": 22801,
+    "pct_below": 0.9906249999999999
+   },
+   {
+    "name": "rev2 A + MBV mat trang",
+    "center": 17532,
+    "p10": 13129,
+    "p90": 23380,
+    "pct_below": 0.9874999999999998
+   }
+  ],
+  "headline_choice": "E1-B (boc ty gia rong; lai quy nam 1.292) lam headline vi tham trong; E1-A (giu ty gia) la ban song song",
+  "variant_A_giu_ty_gia": {
+   "name": "rev2 bien the A (giu ty gia)",
+   "center": 18076,
+   "p10": 13673,
+   "p90": 23924,
+   "pct_below": 0.9749999999999999
+  },
+  "mbv_loss_B": {
+   "name": "rev2 B + MBV mat trang",
+   "center": 16953,
+   "p10": 12550,
+   "p90": 22801,
+   "pct_below": 0.9906249999999999
+  },
+  "mbv_loss_per_share_est": -544,
+  "rule4_zone_range": "~14.400-15.400 (skeptic) ; headline B nguong 85 pct tam = 14872 ; ban A 15365",
+  "inside_zone_threshold_p90": "23345 (headline B) ; 23924 (ban A)",
+  "unchecked": [
+   "PDF goc BCTC HN Q3/2026 KHONG doi chieu lai trong phien r2 (khong co cong cu doc PDF): E1-E4 dung so theo ERRATA skeptic",
+   "lai/chi phi vay 2023-24 chua lay duoc",
+   "hop dong ung truoc 2.601 ty (China Chengda/Beijing Petrochemical Eng.): can xac nhan",
+   "nhanh LN loi 2019-25 (~1,55 lai) chua kiem",
+   "tin phap ly sau 03/11 chua quet duoc (khong co cong cu tim kiem tin trong phien nay)"
+  ]
+ }
+}

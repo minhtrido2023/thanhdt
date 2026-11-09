@@ -1,0 +1,16 @@
+{
+ "warnings_r3": [
+  "Forensic: HHS dang trong forensic_flags exclude => theo luat 02/11 bi loai khoi candidate plan bat ke nhan dinh gia",
+  "LN Q3/2026 chua soat xet; 6T bi ha -34% khi soat xet — neu Q3 ha tuong tu ~ -90 d/cp (uoc luong skeptic, chua do)",
+  "Du toan chi phi con lai giao can NC-II (3.099 da nhan tien) chua co; HTK co the chua gom chi phi hoan thien => s_obs co the cao (MO)",
+  "Cao tang HH1-HH4 (2.494 can) bien co the thap hon thap tang — nhan dinh, nam trong truc ds/kich ban doi xung",
+  "HHS Capital premium 143,5 ty; uy quyen bieu quyet 7,37-7,53% CRV; so huu chong tang TCH-HHS-CRV (giu tu r2)",
+  "TB 2124/TB-TTCP N01 tien SDD bo sung 7,87 ty; KL 08/KL-TTTP Pruksa; phat/truy thu thue 2025 2,44 ty (giu tu r2)",
+  "Dai ly Dongfeng khong co tu 'doc quyen'; phai tra Dongfeng 364,01 ty"
+ ],
+ "provenance_fix_r3": "Vay 390 ty CRV VietinBank (dao han 18/11/2026) DA TRA trong 9T/2026 (BQ ticker_financial HHS 2025Q4 LtDebt 390 ty -> 2026Q3 vay 0; dd_HHS REPORT.md:21,190). r2 §9.10, ADDENDUM luc 6c, warnings_r2_added ghi 'dao han 18/11/2026' la loi lan nam — da sua.",
+ "warnings_r2_added_r3_corrected": "muc 'Vay 390 ty CRV (VietinBank) dao han 18/11/2026, the chap NC-II' -> DA TRA 9T/2026, khong con no vay",
+ "center_history": "v1 11.900 -> r1 ~10.611 (luoi r1 tinh lai) -> r2 10.387 -> 5F r2 chat-3c 8.393-9.700 -> r3 (file nay); dao dong chu yeu do quy uoc CK holding va pv gia goc",
+ "fear_buy_eligible_2_5": false,
+ "news_scan_0108_11": "chua quet tin 01-08/11 trong phien headless nay (khong co nguon tin tu dong) — MO, chi WARNING"
+}

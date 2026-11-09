@@ -1,0 +1,7 @@
+# Errata cuối — TCH r3b (09/11/2026). Vòng cuối (circuit-breaker): KHÔNG có skeptic sau r3b; Mike kiểm cơ học.
+- Kiểm cơ học: chạy lại tch_r3b.py 2 lần trong bản sao /tmp — tch_r3b_out.json 61fdb92e…, out.txt 5196adbf…, grid 6ab8121f… trùng byte với artifact và LOCK; compare_r3b_out.txt db3e82b0… trùng LOCK (script compare không chạy lại được trong sandbox vì LOCK chứa đường dẫn tương đối ngoài cây ../../deposit_rate_vn.py — không phải lỗi số). LOCK ghi 07:35:57 ICT, trước compare (07:36:48).
+- Chiết khấu nhất quán (giá vốn + thặng dư cùng pv(y_dự án)) đã cài; y=4,k=0 tái lập đúng số skeptic 13.435; độ dốc theo k +1.779/1,0 k (skeptic 1.742, +2%).
+- NHÃN KHÔNG CHẮC (Taylor ghi mục 5): ba lựa chọn riêng lẻ có cơ sở đều đưa nhãn về TRONG — (i) biên gộp kiểm toán FY24/25 42,7% thay 51,9% ⇒ 13.642, 44,5% dưới giá; (ii) y=4 cho mọi dự án (k=0) ⇒ 13.435, 56,3% dưới giá; (iii) k chưa đo + y=4. Headline đứng nhờ 3 số ĐO ĐƯỢC nhưng không kiểm toán: biên 6T FY26 51,9% (chưa soát xét), mốc hoàn thành dự án, TMĐT.
+- Luật 4 theo cỡ: 5 tỷ KHÔNG đạt (ngưỡng 0,85×15.864 = 13.484 < giá 13.500, trượt 0,1%); sleeve 40 tr đạt (ngưỡng 13.562). TCH còn cờ FLOOR_FAIL (CF_OA_3Y −771,7 tỷ) ⇒ theo luật 02/11 loại khỏi candidate bất kể nhãn.
+- Vùng P10–P90 hẹp do cấu trúc: sổ sách/giá vốn là hằng số lớn; không phải thước đo bất định.
+- Quy ước CK holding base 0% (user phán xử) — tâm r2 13.768 → r3b 15.864.

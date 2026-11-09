@@ -1,0 +1,34 @@
+# LOCK r3 TCH (job Taylor_20261108_180134) — chot TRUOC khi so voi gia; ghi luc 2026-11-09T01:05:24+0700 boi lenh md5sum (khong do model ghi); model chay 2 lan trung byte (run1.md5 = run2.md5)
+## outputs model (chua doc gia)
+f4c0c2d3685156af2845bebdb56ce33f  tch_r3_out.json
+8f86bdeeb2d242b97a75ea68e9f6650f  tch_r3_out.txt
+bfcf4ff4420796a0c5c742e776cd4eca  grid_tch_r3.csv
+## upstream (tch_r3.py doc/thuc thi + tch_r3_compare.py se doc)
+LOCK c31bf707884bb137074912e52d84e313 TCH/calc_r3/tch_r3.py
+LOCK a83ad010bdffb06bbfde1f5474c143fe TCH/calc_r3/assumptions_r3.json
+LOCK 97da907cb6cf078a63f17857a5c734ca TCH/calc_r3/px_tch_r3.sql
+LOCK 7506d9ad853b6847effa97464f2040eb TCH/calc_r3/px_tch_r3_20261106.csv
+LOCK 5b85c1bed149e96bc24b7646fdb53783 TCH/calc_r3/fin_tch_r3.sql
+LOCK d207f3daad0d4892f4a3bd9ff315a0b3 TCH/calc_r3/fin_tch_r3.csv
+LOCK 0038a43a28ef5658777d2faab99464d5 TCH/calc/model_r2.py
+LOCK 847fb713566bb4cfb130b752cbd8663c TCH/calc/model_r2_out.json
+LOCK fb8ad8dbb78df3c1c0508bb4ce4692c7 TCH/SUMMARY_r2.json
+LOCK c48da959c789ba976dc1f653bb9e09b2 _common_020021/r2lib.py
+LOCK ced2dcc1ba3d5fbc7d691ea00732920d _common/liq.py
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK 409582a3d2dd624aebc94d00e9988d1a ../dd_TCH_20261031/calc/notes_read.md
+LOCK b13e990bf2804a0f8ac22657713e4600 ../dd_TCH_20261031/SKEPTIC_20261031.md
+LOCK ac36a1f97bebe510bbb0534b608727fc TOP5D_CORRECTIONS_20261108.md
+LOCK bf37f53ba652850301f152badd7d7831 STANDARD_r2.md
+## sau khoa (doc gia) — compare chay 2 lan trung byte (cmp1.md5 = cmp2.md5)
+POST f8efd23b34637808bfe2760093398ae6  calc_r3/tch_r3_compare.py
+POST 4b18065a441fefa1a904bb3d440ca001  calc_r3/compare_r3_out.txt
+POST 29509b57feb7922c0200628acb92d968  SUMMARY.json
+POST fb8ad8dbb78df3c1c0508bb4ce4692c7  SUMMARY_r2.json
+POST d6a0505137d4090449c855d68a3bc21c  REPORT_r3.md
+POST 20a9439fe3da90f1b5fdd0ccae1369ce  ADDENDUM_5F.md
+POST 38bb25dc63c01f5d3529eed5d067c3e4  SUMMARY_5F.json

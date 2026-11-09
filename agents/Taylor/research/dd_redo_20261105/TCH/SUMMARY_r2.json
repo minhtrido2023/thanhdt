@@ -1,0 +1,356 @@
+{
+ "ticker": "TCH",
+ "asof_price_date": "2026-11-04",
+ "price": 12750.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.074,
+  "date": "2026-11-03",
+  "source": "effective_deposit_rate = max(Big-4 12M 6,8%, CCTG 12M 7,4% ngay 02/11/2026); r neo 13,5%"
+ },
+ "dep_now": {
+  "rate": 0.07400000000000001,
+  "source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 13857.218366767,
+ "center_post_liq": 13767.899002985883,
+ "p10_post": 12559.079846812303,
+ "p50_post": 13726.165872051753,
+ "p90_post": 14983.19633245046,
+ "p10_pre": 12640.556985869629,
+ "p50_pre": 13815.214491785226,
+ "p90_pre": 15080.399948160582,
+ "liq_discount_ref": 0.006445692159642017,
+ "liq_ref_position_bn_vnd": 5,
+ "adv_med_bn_vnd": 87.134737,
+ "grid_n": 108,
+ "grid_desc": "4 truc, n=108 ket cuc tat dinh: bien rong backlog {30;33,5;36}% (1/4-1/2-1/4) [UL; skeptic B12 ~33-34%] x thang du HTK dat cu sau thue {25;40;55}% (1/4-1/2-1/4) [UL; duoi bien lich su ~70% (51,9% gop) — dem chi phi hoan thanh chua cong bo] x CK holding phan qua cong ty con {0;10;20;30}% (deu 1/4) [UL] x r {R-1;R;R+1}% (1/4-1/2-1/4). Co dinh: VCSH me 12.159,1 (truc tiep 5.958,6 + qua con 6.200,5); backlog NMTT NC-II 3.099 (68,02%), Green River 1.838, H2 618 (PV 1-2 nam); thang du dat cu PV 4 nam; quy dat moi 150 To Hieu + I.14 = NPV 0 (gia so). Phan vi wpct tren 108 o; tam = ky vong luoi. CK thanh khoan 5 ty ADV250.",
+ "label": "TRONG vung",
+ "px_vs_center": -0.07393277672687226,
+ "px_vs_p10": 0.015201762829476273,
+ "px_vs_p90": -0.14904672427029642,
+ "zone_old": {
+  "low": 10150,
+  "center": 12650,
+  "high": 15050,
+  "dd_date": "2026-10-31",
+  "center_kind": "expected_weighted"
+ },
+ "center_change_vs_old": 0.08837146268663099,
+ "change_reason": "Vong 1 +5,9% vs zone cu 12.650 (bo CK quan tri khoi base, quy dat moi NPV0). Vong 2: CK holding ky vong 20% -> 15% (truc gom 0) => tam tang.",
+ "warnings": [
+  "QD 1020/QD-XPHC 03/04/2026 Thue TP Hai Phong: khai sai TNDN, phat 2,735 + truy thu 13,676 + cham nop 3,798 = 20,21 ty (da nop, CBTT 07/04/2026)",
+  "QD 1357/QD-XPHC 12/2024 UBCKNN (CBTT/giao dich ben lien quan, 295 tr) — 2 co quan, 2 loai vi pham trong 16 thang",
+  "Nhom kiem soat (Do Huu Ha 30,18% + HH Finance 5,81%, nguoi lien quan) = 35,99%, chiem 71,2% phieu DHDCD 2026; Truong BKS kiem KTT cong ty con; CRV free float ~3% (chuan duy tri niem yet chua kiem)",
+  "Tien gui 678,3 ty tai NH TMCP Sai Gon Tai Loc (21% tien+HTM) gan nhu khong rut khi HTM giam 2.025 — NH la ai/han che rut: INCONCLUSIVE (skeptic B9)",
+  "BLQ trong tap doan da duoc cong bo (BC quan tri 6T 2026, 3 NQ HDQT 16/04, 23/06, 21/07/2026; TCH cho CRV vay 30 ty, han muc 500 ty) — con mo: BLQ NGOAI tap doan (HH Finance, gia dinh Do)",
+  "Dragon Capital ban rong xuong 4,71% (15/06/2026) — nguon cung co to chuc",
+  "BCTC 6T FY26 chua soat xet; su dung von chao ban 865,5 ty (M7)",
+  "'Khong co khoi to/kiem toan ngoai tru': nguon = GAPS 31/10/2026 (27 PDF hoanghuy.vn) + web search 05/11/2026 (cafeland, baophapluat, stockbiz) — khong co NQ HDQT 10-11/2026 moi; NQ 08/2026 co phieu thuong 10% (da phat hanh, DKCC 04/09)"
+ ],
+ "open_issues": [
+  "BCTC Q3 rieng CRV (toc do tieu NMTT NC-II, skeptic B5)",
+  "Xac minh NH Sai Gon Tai Loc",
+  "legal-vn: nhom uy quyen 7,37% + chuan duy tri niem yet CRV",
+  "BLQ ngoai tap doan (BC quan tri tu tr.13)",
+  "BQ OShares TCH 912,1 tr (truoc cp thuong) — dung 1.003,3",
+  "HHS SOTP thi truong ~0,5x phan CRV (skeptic B7) chua dung lam neo"
+ ],
+ "sources": {
+  "model": "calc/model_r2.py -> calc/model_r2_out.json/txt",
+  "lock": "calc/LOCK_r2_md5.txt",
+  "liq": "_common/liq.py + _common/bq_px_4ma_20261104.csv (via _common_020021/r2lib.py)",
+  "pct": "_shared/wpct.py"
+ },
+ "round": "r2",
+ "job": "Taylor_20261105_020021",
+ "p10_out": 12559.079846812303,
+ "p50_out": 13726.165872051753,
+ "p90_out": 14983.19633245046,
+ "pct_weight_below_price": 0.19140625,
+ "n_outcomes": 108,
+ "min_outcome_post": 11941.708258237395,
+ "adv60_med_bn_vnd": 53.1976705,
+ "ck_ref_size": {
+  "q_bn": 5,
+  "adv250": {
+   "q_bn": 5.0,
+   "disc": 0.006445692159642017,
+   "disc_Y05": 0.0032228460798210084,
+   "disc_Y15": 0.009668538239463025,
+   "q_over_adv": 0.05738239618488778,
+   "in_calib": true,
+   "days_at10": 0.5738239618488777,
+   "days_at20": 0.28691198092443887
+  },
+  "adv60": {
+   "q_bn": 5.0,
+   "disc": 0.007323117282777542,
+   "disc_Y05": 0.003661558641388771,
+   "disc_Y15": 0.010984675924166312,
+   "q_over_adv": 0.09398907796159985,
+   "in_calib": true,
+   "days_at10": 0.9398907796159984,
+   "days_at20": 0.4699453898079992
+  }
+ },
+ "ck_real_sleeve": {
+  "0.01": {
+   "adv250": {
+    "q_bn": 0.01,
+    "disc": 0.0002882601166199395,
+    "disc_Y05": 0.00014413005830996974,
+    "disc_Y15": 0.00043239017492990926,
+    "q_over_adv": 0.00011476479236977556,
+    "in_calib": true,
+    "days_at10": 0.0011476479236977556,
+    "days_at20": 0.0005738239618488778
+   },
+   "adv60": {
+    "q_bn": 0.01,
+    "disc": 0.0003274997610298827,
+    "disc_Y05": 0.00016374988051494135,
+    "disc_Y15": 0.000491249641544824,
+    "q_over_adv": 0.0001879781559231997,
+    "in_calib": true,
+    "days_at10": 0.0018797815592319967,
+    "days_at20": 0.0009398907796159984
+   }
+  },
+  "0.02": {
+   "adv250": {
+    "q_bn": 0.02,
+    "disc": 0.00040766136641516847,
+    "disc_Y05": 0.00020383068320758423,
+    "disc_Y15": 0.0006114920496227527,
+    "q_over_adv": 0.00022952958473955112,
+    "in_calib": true,
+    "days_at10": 0.002295295847395511,
+    "days_at20": 0.0011476479236977556
+   },
+   "adv60": {
+    "q_bn": 0.02,
+    "disc": 0.0004631546037224077,
+    "disc_Y05": 0.00023157730186120385,
+    "disc_Y15": 0.0006947319055836115,
+    "q_over_adv": 0.0003759563118463994,
+    "in_calib": true,
+    "days_at10": 0.0037595631184639934,
+    "days_at20": 0.0018797815592319967
+   }
+  },
+  "0.04": {
+   "adv250": {
+    "q_bn": 0.04,
+    "disc": 0.000576520233239879,
+    "disc_Y05": 0.0002882601166199395,
+    "disc_Y15": 0.0008647803498598185,
+    "q_over_adv": 0.00045905916947910224,
+    "in_calib": true,
+    "days_at10": 0.004590591694791022,
+    "days_at20": 0.002295295847395511
+   },
+   "adv60": {
+    "q_bn": 0.04,
+    "disc": 0.0006549995220597654,
+    "disc_Y05": 0.0003274997610298827,
+    "disc_Y15": 0.000982499283089648,
+    "q_over_adv": 0.0007519126236927988,
+    "in_calib": true,
+    "days_at10": 0.007519126236927987,
+    "days_at20": 0.0037595631184639934
+   }
+  }
+ },
+ "label_note": "Nhan theo co 5 ty/ADV250 (CK 0,64%, Q/ADV 5,7% — TRONG vung hieu chinh). Sleeve 10-40 tr CK <0,06%. Dinh nghia vung P10-P90 khong doi.",
+ "center_change_vs_r1": 0.02734028138043776,
+ "axes_included": [
+  "bien rong backlog 2 chieu",
+  "thang du dat cu 2 chieu quanh 40%",
+  "CK holding 0-30% (MOI r2 gom 0)",
+  "r +-100bp"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "CK quan tri (governance)",
+   "reason": "luat phap ly/quan tri = WARNING (2026-09-27); bao song song 5/10/15%"
+  },
+  {
+   "axis": "thang du quy dat moi 150 To Hieu + I.14",
+   "reason": "luat du an moi 03/11: NPV 0; bao song song +-10%"
+  },
+  {
+   "axis": "rui ro doi tac tien gui NH Sai Gon Tai Loc 678,3",
+   "reason": "skeptic B9 INCONCLUSIVE, khong co du lieu han che rut; bao stress mat 100% (can duoi cuc doan, khong phai kich ban)"
+  },
+  {
+   "axis": "thang du dat cu theo bien lich su ~70%",
+   "reason": "giu tam 40% (dem chi phi hoan thanh chua quan sat, skeptic B3); bao song song {40;55;70}"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "CK holding — vong 1 tam 20% trong base; r2 chuyen thanh truc xac suat {0;10;20;30} deu (ky vong 15%)",
+   "effect_dong_per_share": null,
+   "basis": "cau truc 2 tang niem yet, CRV free float ~3%, khop 24/62 phien (DNSE, dd_TCH_20261031 GAPS §1) — co so CHO SU TON TAI, DO LON = nhan dinh [UL]",
+   "source": "dd_TCH_20261031/GAPS.md + SKEPTIC_20261031.md B4/B7"
+  },
+  {
+   "item": "thang du dat cu tam 40% (< ~70% bien lich su)",
+   "effect_dong_per_share": null,
+   "basis": "dem chi phi hoan thanh HH1-HH4 + cao tang chua cong bo [UL]; skeptic B3 quy doi 40% <=> bien gop 40%",
+   "source": "SKEPTIC_20261031.md B3"
+  },
+  {
+   "item": "quy dat moi 3.006,3 = gia so (NPV 0)",
+   "effect_dong_per_share": 0.0,
+   "basis": "TM17 mua dat 6T FY26: 150 To Hieu 1.677,5 (me), I.14 1.328,8 (CRV)",
+   "source": "notes_read.md TM17"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong luoi; P50 = trung vi ket cuc; gia tri tai tham so trung tam dung hold 15% (= ky vong truc hold). Phan phoi gan doi xung; khong nhanh trong so nho nao quyet dinh P10/P90.",
+ "change_vs_r1": "(1) CK holding tu base 20% -> truc {0;10;20;30} (ky vong 15%); (2) tam = ky vong luoi; nhan TRONG giu nguyen.",
+ "parallel": {
+  "r1_hold_10_20_30 (tam 20%)": {
+   "n": 81,
+   "center_pre": 13466.839939645744,
+   "center_post": 13380.036835031617,
+   "p10_pre": 12640.556985869629,
+   "p50_pre": 13474.285927168314,
+   "p90_pre": 14297.140608922726,
+   "p10_post": 12559.079846812303,
+   "p50_post": 13387.434828010792,
+   "p90_post": 14204.985641794494,
+   "pct_w_below_px": 0.203125,
+   "min_post": 11941.708258237395,
+   "max_post": 14942.284811188467,
+   "disc": 0.006445692159642017
+  },
+  "hold_0 (khong CK holding)": {
+   "n": 27,
+   "center_pre": 15028.353648130771,
+   "center_post": 14931.485506848689,
+   "p10_pre": 14366.203440363062,
+   "p50_pre": 15036.585489151601,
+   "p90_pre": 15697.823027272598,
+   "p10_post": 14273.603315483693,
+   "p50_post": 14939.66428795639,
+   "p90_post": 15596.63969246226,
+   "pct_w_below_px": 0.0,
+   "min_post": 14126.699008076228,
+   "max_post": 15767.46571885469,
+   "disc": 0.006445692159642017
+  },
+  "s_old_theo_bien_lich_su {40;55;70}": {
+   "n": 108,
+   "center_pre": 14441.821835533547,
+   "center_post": 14348.734297757303,
+   "p10_pre": 13167.658521049441,
+   "p50_pre": 14400.73724177946,
+   "p90_pre": 15745.670620327115,
+   "p10_post": 13082.783847759469,
+   "p50_post": 14307.914522647057,
+   "p90_post": 15644.178874661367,
+   "pct_w_below_px": 0.05859375,
+   "min_post": 12445.779043025545,
+   "max_post": 16429.64400293023,
+   "disc": 0.006445692159642017
+  },
+  "quy_dat_moi_-10%": {
+   "n": 108,
+   "center_pre": 13710.27112541259,
+   "center_post": 13621.898938312952,
+   "p10_pre": 12501.375305973914,
+   "p50_pre": 13668.114533125687,
+   "p90_pre": 14925.61136475383,
+   "p10_post": 12420.795289179458,
+   "p50_post": 13580.01407444243,
+   "p90_post": 14829.405468602172,
+   "pct_w_below_px": 0.23828125,
+   "min_post": 11808.607870682594,
+   "max_post": 15607.882221628322,
+   "disc": 0.006445692159642017
+  },
+  "quy_dat_moi_+10%": {
+   "n": 108,
+   "center_pre": 14004.165608121411,
+   "center_post": 13913.899067658816,
+   "p10_pre": 12779.738665765344,
+   "p50_pre": 13962.314450444765,
+   "p90_pre": 15235.188531567335,
+   "p10_post": 12697.364404445148,
+   "p50_post": 13872.317669661077,
+   "p90_post": 15136.987196298745,
+   "pct_w_below_px": 0.140625,
+   "min_post": 12074.808645792202,
+   "max_post": 15927.049216081057,
+   "disc": 0.006445692159642017
+  },
+  "CK_quan_tri_5%": {
+   "n": 108,
+   "center_pre": 13164.35744842865,
+   "center_post": 13079.504052836588,
+   "p10_pre": 12008.529136576148,
+   "p50_pre": 13124.453767195962,
+   "p90_pre": 14326.379950752553,
+   "p10_post": 11931.125854471687,
+   "p50_post": 13039.857578449166,
+   "p90_post": 14234.036515827935,
+   "pct_w_below_px": 0.40234375,
+   "min_post": 11344.622845325528,
+   "max_post": 14979.092432911955,
+   "disc": 0.006445692159642017
+  },
+  "CK_quan_tri_10%": {
+   "n": 108,
+   "center_pre": 12471.4965300903,
+   "center_post": 12391.109102687295,
+   "p10_pre": 11376.501287282666,
+   "p50_pre": 12433.693042606705,
+   "p90_pre": 13572.359953344525,
+   "p10_post": 11303.171862131072,
+   "p50_post": 12353.549284846578,
+   "p90_post": 13484.876699205413,
+   "pct_w_below_px": 0.64453125,
+   "min_post": 10747.537432413657,
+   "max_post": 14190.719146969222,
+   "disc": 0.006445692159642017
+  },
+  "CK_quan_tri_15%": {
+   "n": 108,
+   "center_pre": 11778.63561175195,
+   "center_post": 11702.714152538001,
+   "p10_pre": 10744.473437989183,
+   "p50_pre": 11742.932318017442,
+   "p90_pre": 12818.339955936495,
+   "p10_post": 10675.217869790455,
+   "p50_post": 11667.24099124399,
+   "p90_post": 12735.71688258289,
+   "pct_w_below_px": 0.8984375,
+   "min_post": 10150.452019501787,
+   "max_post": 13402.345861026486,
+   "disc": 0.006445692159642017
+  },
+  "stress_mat_100%_tien_gui_SGTL_678": {
+   "n": 108,
+   "center_pre": 13181.158024876098,
+   "center_post": 13096.196337940153,
+   "p10_pre": 11964.496643978728,
+   "p50_pre": 13139.154149894326,
+   "p90_pre": 14404.339606269681,
+   "p10_post": 11887.377181766573,
+   "p50_post": 13054.463207006025,
+   "p90_post": 14311.493667404728,
+   "pct_w_below_px": 0.40234375,
+   "min_post": 11270.005593191669,
+   "max_post": 15095.763053808962,
+   "disc": 0.006445692159642017
+  }
+ },
+ "crosscheck": {
+  "ROE_co_lai": 0.059823604342752065,
+  "ROE_khong_lai_tru_tien": 0.04889448933646843,
+  "A_PB_ROE_co_lai_g3": 3442.201274746078,
+  "B_PB_ROE_khong_lai_g3_cong_tien": 4600.11770089857
+ }
+}

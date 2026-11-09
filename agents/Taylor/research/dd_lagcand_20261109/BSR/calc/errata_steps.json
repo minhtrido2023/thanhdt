@@ -1,0 +1,86 @@
+[
+ {
+  "name": "r1 (cong bo)",
+  "center": 16437,
+  "p10": 12034,
+  "p90": 22286,
+  "pct_below": 0.9968750000000001
+ },
+ {
+  "name": "E1-B rieng (boc ty gia, loi lam 3.493)",
+  "center": 17105,
+  "p10": 12701,
+  "p90": 22953,
+  "pct_below": 0.990625
+ },
+ {
+  "name": "E1-A rieng (giu ty gia, loi lam 3.895)",
+  "center": 17684,
+  "p10": 13281,
+  "p90": 23532,
+  "pct_below": 0.9812499999999998
+ },
+ {
+  "name": "E2 rieng (mo rong 100% gia so)",
+  "center": 16923,
+  "p10": 12520,
+  "p90": 22772,
+  "pct_below": 0.990625
+ },
+ {
+  "name": "E4 rieng (tru quy KTPL + NCI)",
+  "center": 16343,
+  "p10": 11940,
+  "p90": 22192,
+  "pct_below": 0.9968750000000001
+ },
+ {
+  "name": "E3 rieng (MBV mat trang, do nhay)",
+  "center": 15894,
+  "p10": 11490,
+  "p90": 21742,
+  "pct_below": 1.0
+ },
+ {
+  "name": "luy ke +E2",
+  "center": 16923,
+  "p10": 12520,
+  "p90": 22772,
+  "pct_below": 0.990625
+ },
+ {
+  "name": "luy ke +E2+E4",
+  "center": 16829,
+  "p10": 12426,
+  "p90": 22678,
+  "pct_below": 0.990625
+ },
+ {
+  "name": "luy ke +E2+E4+E1-B = rev2 HEADLINE",
+  "center": 17496,
+  "p10": 13093,
+  "p90": 23345,
+  "pct_below": 0.9874999999999998
+ },
+ {
+  "name": "rev2 bien the A (giu ty gia)",
+  "center": 18076,
+  "p10": 13673,
+  "p90": 23924,
+  "pct_below": 0.9749999999999999
+ },
+ {
+  "name": "rev2 B + MBV mat trang",
+  "center": 16953,
+  "p10": 12550,
+  "p90": 22801,
+  "pct_below": 0.9906249999999999
+ },
+ {
+  "name": "rev2 A + MBV mat trang",
+  "center": 17532,
+  "p10": 13129,
+  "p90": 23380,
+  "pct_below": 0.9874999999999998
+ }
+]

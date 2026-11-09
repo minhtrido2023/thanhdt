@@ -1,0 +1,20 @@
+# LOCK md5 SIP r3 — job Taylor_20261108_180132 — ghi lúc 2026-11-09T01:07:58+0700 TRƯỚC khi chạy model_r3.py
+627a563f0133692f5889a344813716d4  SIP/calc_r3/assumptions_r3.json
+343f4b438861012e335e849616aa1275  SIP/calc_r3/model_r3.py
+91c889bdc16d1077478f3957e27c9d1a  SIP/calc_r3/px_sip_r3.sql
+6bffdef96b53d65916150b72b32a5cbb  SIP/calc_r3/px_sip_r3_20261106.csv
+027b1a60ecb0ec7f56108c5f52ee03d0  SIP/calc/model_sip_r2.py
+930fb2f3742618384f508264547f435f  SIP/calc/model_sip_r2_out.json
+b413f388df676393f327c0e42282f414  SIP/SUMMARY_r2.json
+caad417a52293dad25a4516a2afd0d4d  SIP/SUMMARY_r1_stale.json
+95d8fe38f5c17c3f723d6c175ffac49b  _common_g2r2/ddr2.py
+89b5306ea5c456f2f9adbdeec335277b  _common_g2r2/px_g2r2_20261104.csv
+81a87069f3f895a3a93d62d85b8fb5f0  _common_g2/ddg2.py
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+ac36a1f97bebe510bbb0534b608727fc  TOP5D_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  STANDARD_r2.md
+de7011c0d277d315fab43b9409529ada  ../dd_SIP_20261101/calc/notes_read.md
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+f9605983ad3b66b47ed80179bcad81da  /home/trido/thanhdt/WorkingClaude/cctg_rate_vn.py
+fc06e3a866142684d87a43b34e0f17d2  /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_events.csv

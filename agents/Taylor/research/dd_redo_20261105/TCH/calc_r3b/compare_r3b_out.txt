@@ -1,0 +1,37 @@
+price: 13500.0
+asof_price_date: 2026-11-06
+n_outcomes: 81
+center_pre: 15964
+center_post: 15864
+p10_out: 14563
+p50_out: 15795
+p90_out: 17325
+min_out: 13987
+max_out: 18258
+pct_weight_below_price: 0.0
+px_vs_center_post: -0.14901664145234494
+label: DƯỚI vùng
+liq_disc_5ty: 0.006306898502943162
+sleeve 10tr: center 15960 P10 14651 P90 17430 below 0.0 DƯỚI vùng
+sleeve 20tr: center 15958 P10 14649 P90 17428 below 0.0 DƯỚI vùng
+sleeve 40tr: center 15955 P10 14647 P90 17425 below 0.0 DƯỚI vùng
+bridge r3 tai lap (control, tch_r3.py): 16244 (+0)
+bridge nhat quan gia von+thang du, y=4 dong nhat, k=0 (dang skeptic): 13435 (-2809)
+bridge y theo moc hoan thanh du an BCTN25 (GR 2,15; H2 1,15; NC-II 4,07; khac 1,0), k=0: 14321 (+886)
+bridge + k do tu TMDT (tam trung diem can GV da ket chuyen): 15864 (+1543)
+bridge + truc F +-25% (k x 0,75/1/1,25) = HEADLINE r3b: 15864 (+0)
+skeptic_check {"consistent_y4_k0_post": 13435, "skeptic_claim": 13435, "slope_per_k_post": 1779, "skeptic_slope_claim": 1742, "note": "tâm nhất quán y=4,k=0 tái lập skeptic; độ dốc theo k (y=4, chi phí y=2) lệch skeptic ~+2% — cách gán k cho nhóm SP đã hoàn thành chưa đối chiếu chi tiết"}
+par cons_y4_k0: 5ty center 13435 P10 12731 P90 14213 below 0.5625 TRONG vùng | 40tr 13512 P10 12805 P90 14295 TRONG vùng — nhat quan, y=4, k=0 (skeptic ~13.435 sau CK)
+par cons_yp_k0: 5ty center 14321 P10 13563 P90 15182 below 0.0781 DƯỚI vùng | 40tr 14404 P10 13642 P90 15270 DƯỚI vùng — nhat quan, y du an, k=0 (khong tinh chi phi tuong lai)
+par exact_C: 5ty center 16442 P10 14930 P90 18130 below 0.0 DƯỚI vùng | 40tr 16537 P10 15016 P90 18234 DƯỚI vùng — dang chinh xac: backlog chi chiem cost_bl/(1+k) trong HTK (C chua ban lon hon)
+par g_audit_427: 5ty center 13642 P10 12741 P90 14667 below 0.4453 TRONG vùng | 40tr 13721 P10 12814 P90 14752 TRONG vùng — g ca hai truc 42,7% +-5pp (BCTC kiem toan FY24/FY25 mang BDS) + k do + truc F
+par g_audit_427_k0: 5ty center 12893 P10 12361 P90 13488 below 0.9062 TRÊN vùng | 40tr 12968 P10 12433 P90 13566 TRONG vùng — g 42,7% +-5pp + nhat quan y du an, k=0 (can duoi ket hop)
+par headline_corr_g: 5ty center 15864 P10 14490 P90 17417 below 0.0 DƯỚI vùng | 40tr 15955 P10 14573 P90 17518 DƯỚI vùng — HEADLINE r3b nhung hai truc g TUONG QUAN HOAN TOAN
+par k_H2_cap1: 5ty center 15568 P10 14363 P90 16873 below 0.0 DƯỚI vùng | 40tr 15658 P10 14446 P90 16971 DƯỚI vùng — k H2 chan 1,0 (H2 "xong tho" ma HTK chi 25% TMDT — nghi TMDT H2 gom dat/hang muc da ghi o H1) + truc F
+par k_hi: 5ty center 16037 P10 14693 P90 17543 below 0.0 DƯỚI vùng | 40tr 16129 P10 14778 P90 17644 DƯỚI vùng — k can tren (chua ket chuyen GV nao) + truc F
+par k_lo: 5ty center 15709 P10 14473 P90 17081 below 0.0 DƯỚI vùng | 40tr 15799 P10 14557 P90 17179 DƯỚI vùng — k can duoi (GV da ket chuyen o can tren) + truc F
+par k_meas_y4: 5ty center 14683 P10 13528 P90 15986 below 0.0977 DƯỚI vùng | 40tr 14768 P10 13606 P90 16079 DƯỚI vùng — k do + truc F, nhung y=4 dong nhat (quy uoc skeptic/r2)
+par k_sym_0_02_04_06: 5ty center 15027 P10 13931 P90 16292 below 0.0195 DƯỚI vùng | 40tr 15114 P10 14012 P90 16386 DƯỚI vùng — nhat quan y du an + truc k doi xung {0;0,2;0,4;0,6} deu (fallback khi chua do)
+par k_sym_y4: 5ty center 13968 P10 13021 P90 15114 below 0.3164 TRONG vùng | 40tr 14049 P10 13096 P90 15201 TRONG vùng — nhat quan y=4 + truc k {0;0,2;0,4;0,6}
+par r3_old: 5ty center 16244 P10 15578 P90 16950 below 0.0 DƯỚI vùng | 40tr 16338 P10 15668 P90 17048 DƯỚI vùng — r3 cu (chi thang du chiet khau pv(4)) — song song theo yeu cau
+par r3_old_corr_g: 5ty center 16244 P10 15439 P90 17130 below 0.0 DƯỚI vùng | 40tr 16338 P10 15529 P90 17229 DƯỚI vùng — r3 cu, hai truc g TUONG QUAN HOAN TOAN

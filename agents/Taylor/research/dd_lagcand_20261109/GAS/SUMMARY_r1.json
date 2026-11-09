@@ -1,0 +1,111 @@
+{
+ "ticker": "GAS",
+ "asof_price_date": "2026-11-06",
+ "price": 74100.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.074,
+  "source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
+ },
+ "center_pre_liq": 46794,
+ "center_post_liq": 46488,
+ "p10_post": 39010,
+ "p25_post": 42012,
+ "p50_post": 45983,
+ "p75_post": 50479,
+ "p90_post": 55150,
+ "p10_pre": 39267,
+ "p50_pre": 46286,
+ "p90_pre": 55513,
+ "kind": "expected_weighted",
+ "center_kind": "expected_weighted",
+ "liq_disc_5ty": 0.006546092880069993,
+ "liq_disc_40tr": 0.0005855003466745554,
+ "px_vs_center_post": 0.593953619088621,
+ "px_vs_p10_post": 0.8995041829510835,
+ "px_vs_p90_post": 0.3436187488885156,
+ "label": "TRÊN vùng",
+ "pct_weight_below_price": 1.0,
+ "grid_n": 243,
+ "grid_desc": "243 = kich ban(3; 0,275/0,45/0,275) x he so Brent(3) x du phong DH 343(3) x Brent dai han +-5(3) x muc ben phan du LN 2026(3); RONIC=Ke; tien rong theo so; XDCB NPV0",
+ "label_by_size": {
+  "5ty": {
+   "center": 46488,
+   "p10": 39010,
+   "p90": 55150,
+   "label": "TRÊN vùng",
+   "ck": 0.006546092880069993
+  },
+  "sleeve_40tr": {
+   "center": 46767,
+   "p10": 39244,
+   "p90": 55480,
+   "label": "TRÊN vùng",
+   "ck": 0.0005855003466745554
+  }
+ },
+ "sens_r": {
+  "-100bp": 48573,
+  "-50bp": 47494,
+  "+50bp": 45547,
+  "+100bp": 44664
+ },
+ "implied_by_price": {
+  "r": 0.062419821571266076,
+  "note": "r=8% van cho tam 63.446 < gia (calc/sens_r_wide.txt)"
+ },
+ "scen_central": {
+  "XAU": 39972,
+  "CO_SO": 46309,
+  "TOT": 54411
+ },
+ "net_cash_per_share": 16434,
+ "moat": {
+  "tier": "NARROW",
+  "type": "REGULATORY/INFRA (doc quyen tu nhien trung nguon ong + xu ly khi)",
+  "durable": false,
+  "params_added": "khong",
+  "sens_wide_no_decline": 3695,
+  "sens_none_decline_plus3pp": -4758,
+  "moat_tags_csv": "chua co dong GAS -> de xuat trong REPORT"
+ },
+ "lag_surprise": {
+  "np_q3_26": 4576.5,
+  "np_q3_25": 2549.1,
+  "yoy": 0.7953395315993881,
+  "np_9t_26": 13381.2,
+  "np_9t_25": 10053.3,
+  "yoy_9t": 0.33102563337411617,
+  "np_q2_26": 5860.1,
+  "qoq": -0.2190406307059607,
+  "driver": "Brent Q3 90,7 vs 68,0 (+33%); khong phai khoan mot lan",
+  "durable": "CHU KY (theo Brent) - khong ben"
+ },
+ "auto_flags": {
+  "CEIL2_20260810": "THAT nhung chieu TANG (tran 07/08 +6,9% & 10/08 +6,97% sau KQ Q2); TTL 30 ngay het 09/09; khong la rui ro",
+  "DCF_auto_RICH_67081": "CUNG CHIEU, doc lap thap hon (tam 46.488)",
+  "PE_12_1": "dung (TTM 14.742 ty / 2,413 ty cp = 6.110 d; 74.100/6.110 = 12,1) nhung LN TTM o Brent 82, cao hon trung binh chu ky"
+ },
+ "warnings": [
+  "KHONG CON DU DIEU KIEN CONG TY DAI CHUNG: PVN 95,76%, co dong nho 4,24% < 10% (CBTT 31/12/2025); han 1 nam -> neu khong khac phuc phai nop ho so huy tu cach dai chung (rui ro huy niem yet/thoai von PVN cung cap lon) [WARNING, khong vao tam]",
+  "Thay Chu tich HDQT (23/07/2026) va TGD (21/07/2026) - PVN dieu dong; DHDCD bat thuong 14/09/2026 mien nhiem 3 TV HDQT",
+  "Cuoc van chuyen duong ong nhieu nam chay gia tam tinh (sector read Bobby) - rui ro truy thu/hoan tra hoi to (do nhay -1.500 ty = -618 d/cp)",
+  "Bao tieu: tien khi cam ket theo bao tieu 1.775,5 ty tra truoc (giam tu 2.122,6) - dang thu hoi",
+  "Soat xet 6T/2026 Deloitte: chap nhan toan phan"
+ ],
+ "open_issues": [
+  "thuyet minh du phong phai tra DH 3.300 ty chua doc (gia dinh ARO)",
+  "co cau san luong theo mo/khach hang chua co (BCTC quy khong tach)",
+  "cong thuc gia ban khi/tran-san chua kiem tu nguon goc",
+  "phuong an tang von/thoai von PVN de dat 10% free float chua co chi tiet",
+  "ty trong Q3 cua hoan nhap DP 9T/26 492 ty"
+ ],
+ "assumptions_md5": "3d026e48c49a96b639537feb52ec7b98",
+ "assumptions_file": "calc/assumptions.json",
+ "lock_md5": "calc/LOCK_prerun.txt + calc/LOCK_post_md5.txt",
+ "fear_buy_eligible_2_5": false,
+ "job": "Taylor_20261109_073604",
+ "round": "r1"
+}

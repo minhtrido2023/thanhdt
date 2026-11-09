@@ -1,0 +1,47 @@
+{
+ "headline": "Tuần 02/11–06/11 −0,56% so với VN-Index −0,93%: vượt chỉ số 0,37 điểm %, từ đầu −7,21%",
+ "key_points": [
+  "Tuần −0,56% so với VN-Index −0,93%, chênh +0,37 điểm %.",
+  "Phần bot quản lý (không gồm DGC) vượt VN-Index trong tuần và từ đầu.",
+  "DGC chiếm 35,3% NAV; tỷ trọng cổ phiếu 45,8% cuối tuần."
+ ],
+ "sections": {
+  "market": [
+   "VN-Index đóng cửa dưới cả MA20, MA50 và MA200; xu hướng trung hạn vẫn yếu.",
+   "Độ rộng phục hồi so với tuần trước nhưng đa số cổ phiếu vẫn dưới MA50."
+  ],
+  "risk": [
+   "Sụt giảm sâu nhất trong tuần −0,97%, nhẹ hơn VN-Index −2,41%."
+  ]
+ },
+ "outlook": [
+  {
+   "scenario": "Hồi phục kỹ thuật về vùng kháng cự gần",
+   "condition": "Giữ được vùng hỗ trợ gần, thanh khoản không suy yếu",
+   "invalidation": "Đóng cửa thủng đáy gần nhất của kỳ",
+   "prob": "trung bình"
+  },
+  {
+   "scenario": "Đi ngang, giằng co quanh MA20",
+   "condition": "Độ rộng giữ quanh mức hiện tại, khối lượng cân bằng",
+   "invalidation": "Đóng cửa trên MA50",
+   "prob": "trung bình"
+  },
+  {
+   "scenario": "Điều chỉnh tiếp về đáy gần nhất",
+   "condition": "Phá hỗ trợ gần kèm khối lượng lớn",
+   "invalidation": "Đóng cửa trên đỉnh kỳ",
+   "prob": "thấp"
+  }
+ ],
+ "internal": [
+  {
+   "title": "Cơ cấu và đối chiếu",
+   "bullets": [
+    "DGC 10.000 cp giá trị 330.000.000 đ, 35,3% NAV; ngoài phần bot quản lý.",
+    "Đối chiếu cầu NAV và giá trị cổ phiếu đầu/cuối kỳ khớp, chênh 0 đồng.",
+    "Nạp/rút trong kỳ 0 đồng."
+   ]
+  }
+ ]
+}

@@ -1,4 +1,18 @@
 {
+ "sync_note_r3b": {
+  "date": "2026-11-09",
+  "job": "Taylor_20261108_175121",
+  "note": "center 44767 trong file nay la r2 (da bi thay). Headline hien hanh = r3b",
+  "r3b": {
+   "center": 41849,
+   "p10": 33272,
+   "p50": 41362,
+   "p90": 50227,
+   "label": "DƯỚI vùng",
+   "price": 33000,
+   "src": "REPORT_r3b.md; SUMMARY.json"
+  }
+ },
  "ticker": "DGC",
  "job": "Taylor_20261107_124453",
  "round": 3,
@@ -386,7 +400,8 @@
   "at": "2026-11-08 10:50 ICT",
   "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
   "headline": "mô hình cơ sở hiện hành",
-  "headline_centre_report_of_record": 44767,
-  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+  "headline_centre_report_of_record": 41849,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "dd_r3b_sync": "09/11: tâm hiện hành r3b = 41849 (REPORT_r3b.md); các center khác trong file là r2"
  }
 }

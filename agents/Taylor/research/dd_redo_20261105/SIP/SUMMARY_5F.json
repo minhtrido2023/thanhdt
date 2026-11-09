@@ -118,7 +118,33 @@
   "at": "2026-11-08 10:50 ICT",
   "rule": "KHÔNG áp 3c chặt; moat chỉ thêm khi bền, không trừ",
   "headline": "mô hình cơ sở hiện hành",
-  "headline_centre_report_of_record": 54230,
-  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+  "headline_centre_report_of_record": 54466,
+  "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline",
+  "dd_r3_sync": "09/11: tâm hiện hành r3 = 54466 (REPORT_r3*.md); các center khác trong file là r2"
+ },
+ "r3_sync_20261109": {
+  "job": "Taylor_20261108_180132",
+  "note": "Đồng bộ r3: tâm hiện hành theo REPORT_r3.md; các tâm cũ dưới đây là lịch sử",
+  "current": {
+   "centre": 54466,
+   "p10": 43257,
+   "p50": 53085,
+   "p90": 69818,
+   "pct_below": 0.354,
+   "price": 50100,
+   "price_date": "2026-11-06",
+   "label": "TRONG vùng",
+   "sleeve40_label": "TRONG vùng",
+   "rule4": false,
+   "ronic": "Ke"
+  },
+  "old_centres": {
+   "r1": 53175,
+   "r2_report_of_record": 54230,
+   "strict_3c_5F": 49253,
+   "skeptic_point_r2": 53653
+  },
+  "why": "RONIC=Ke (đính chính #1, nhất quán quy ước user 08/11 không thưởng moat NARROW) −3.389 bù bởi đất 25/50/25 +1.186, thu hồi 100% +572, tài sản sổ sách +1.616, KTPL DT chưa TH −563, tạm ứng theo sổ +826",
+  "source": "SIP/SUMMARY_r3.json; calc_r3/model_r3_out.json"
  }
 }

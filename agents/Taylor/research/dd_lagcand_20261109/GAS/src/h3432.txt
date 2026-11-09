@@ -1,0 +1,15 @@
+HTTP/2 200 
+cache-control: private
+content-length: 8280628
+content-type: application/octet-stream; charset=Unicode (UTF-8)
+set-cookie: dnn_IsMobile=False; path=/; HttpOnly
+set-cookie: .ASPXANONYMOUS=RN1QXZR_F_qjEVxsk_ZwvlqaxAqobnz-EOw9_fNojLkG5_EZMee8T-zYaltbt2-lxaBUr1QWz1FJpC-1aL-ih414qDzyF_81dmowcKcTd1Q-dJMN0; expires=Sun, 17-Jan-2027 18:17:14 GMT; path=/; HttpOnly
+content-disposition: attachment; filename="20261030 - GAS - Bao cao tai chinh cong ty hop nhat Q3.2026.pdf"
+set-cookie: dnn_IsMobile=False; path=/; HttpOnly
+set-cookie: .ASPXANONYMOUS=RN1QXZR_F_qjEVxsk_ZwvlqaxAqobnz-EOw9_fNojLkG5_EZMee8T-zYaltbt2-lxaBUr1QWz1FJpC-1aL-ih414qDzyF_81dmowcKcTd1Q-dJMN0; expires=Sun, 17-Jan-2027 18:17:14 GMT; path=/; HttpOnly
+set-cookie: language=vi-VN; path=/; HttpOnly
+x-xss-protection: 1; mode=block
+x-frame-options: SAMEORIGIN
+date: Mon, 09 Nov 2026 07:37:14 GMT
+strict-transport-security: max-age=15552000
+

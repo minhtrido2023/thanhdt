@@ -161,5 +161,26 @@
   "headline": "mô hình cơ sở hiện hành",
   "headline_centre_report_of_record": 54203,
   "strict_3c_variants": "chỉ độ nhạy rủi ro, không phải headline"
+ },
+ "r3_sync": {
+  "job": "Taylor_20261108_180128",
+  "date": "2026-11-09",
+  "note": "Dong bo r3: cac tam cu trong file nay (old 54.203, NARROW_SYM 55.051, WIDE, ONE_WAY...) do o gia 04/11, trong so 0,35/0,45/0,20, CHUA tru CDKKS, CO CK FTEL — nay LICH SU. Headline hien hanh = REPORT_r3.md / SUMMARY.json r3.",
+  "headline_r3": {
+   "center": 57312,
+   "p10": 45270,
+   "p50": 58124,
+   "p90": 68466,
+   "label": "TRONG vùng",
+   "price": 50800.0,
+   "price_date": "2026-11-06",
+   "pct_below_px": 0.27041666666666664
+  },
+  "superseded_centers": {
+   "r2_headline": 54203,
+   "narrow_sym_5f": 55051,
+   "skeptic_point_with_ftel_discount": 55871
+  },
+  "backup": "SUMMARY_5F_pre_r3.json (byte-identical, md5 63dc3765... trong calc_r3/LOCK_r3_prerun.txt)"
  }
 }

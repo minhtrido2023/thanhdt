@@ -1,0 +1,152 @@
+{
+ "ticker": "BSR",
+ "asof_price_date": "2026-11-06",
+ "price": 26250.0,
+ "price_source": "BQ tav2_bq.ticker Price (calc/px_bsr.csv)",
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.07400000000000001,
+  "source": "cctg_12m(2026-11-02)",
+  "dep_asof": 0.07400000000000001,
+  "dep_asof_source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7.40%)"
+ },
+ "kind": "expected_weighted",
+ "center_pre_liq": 16514,
+ "center_post_liq": 16437,
+ "p10_post": 12034,
+ "p25_post": 13017,
+ "p50_post": 16422,
+ "p75_post": 18100,
+ "p90_post": 22286,
+ "p10_pre": 12090,
+ "p50_pre": 16498,
+ "p90_pre": 22389,
+ "liq_disc_5ty": 0.004623189202824706,
+ "px_vs_center_post": 0.5969674195112651,
+ "px_vs_p10_post": 1.1812719456255159,
+ "px_vs_p90_post": 0.1778859676388962,
+ "label": "TRÊN vùng",
+ "pct_weight_below_price": 0.9968750000000001,
+ "n_outcomes": 81,
+ "min_outcome": 10759,
+ "max_outcome": 26747,
+ "grid_desc": "81 ket cuc = kich ban(3; Bobby 0,30/0,50/0,20) x loi lam chuan hoa +-20% (3) x giai phong WC vuot 0/0,27/0,54 (3) x he so LN vuot nen 0,5/1/1,5 (3); RONIC=Ke; thue 10%->20% sau 2039; mo rong NPV0",
+ "scen_mid": {
+  "XAU": 12376,
+  "CO_SO": 16646,
+  "TOT": 22389
+ },
+ "components_d_per_share": {
+  "net_cash": 9012,
+  "fixed_incl_cip_minus_khcn": 9350,
+  "ops": {
+   "XAU": 2895,
+   "CO_SO": 4922,
+   "TOT": 7962
+  },
+  "windfall": {
+   "XAU": -571,
+   "CO_SO": 1673,
+   "TOT": 4376
+  },
+  "wc_excess_bn": 13014
+ },
+ "sens_r": {
+  "+100bp": 16101,
+  "+50bp": 16264,
+  "-50bp": 16624,
+  "-100bp": 16824
+ },
+ "sens_moat": {
+  "NONE/NARROW (RONIC=Ke, headline)": 16437,
+  "WIDE gia dinh RONIC 20%, g 4%": 17122
+ },
+ "parallel_versions": {
+  "sym_0275_045_0275": {
+   "center": 16972,
+   "p10": 12034,
+   "p25": 13301,
+   "p50": 16569,
+   "p75": 19410,
+   "p90": 22984,
+   "pct_below_px": 0.9957031249999999,
+   "min": 10759,
+   "max": 26747,
+   "n": 81
+  }
+ },
+ "label_by_size": {
+  "5ty": {
+   "center": 16437,
+   "p10": 12034,
+   "p90": 22286,
+   "label": "TRÊN vùng",
+   "ck": 0.004623189202824706
+  },
+  "sleeve_40tr": {
+   "center": 16507,
+   "p10": 12085,
+   "p90": 22380,
+   "label": "TRÊN vùng",
+   "ck": 0.0004135106132143641
+  }
+ },
+ "rule4": {
+  "5ty": {
+   "threshold": 13972,
+   "pass_": false
+  }
+ },
+ "ck_ref_size": {
+  "size": "5 ty",
+  "adv250": 260573709125.0,
+  "adv60": 257088715750.0,
+  "sigma_d": 0.033375052882078066,
+  "ck_adv250": 0.004623189202824706,
+  "part_adv250": 0.019188428551713353
+ },
+ "implied_by_price": {
+  "ke": 0.043259030302736354,
+  "core_nopat_bn": 10210,
+  "core_nopat_x_2023_25": 3.36976498650126,
+  "grm_usd_bbl_above_coso": 5.377606490726729
+ },
+ "pe": {
+  "pe_ttm": 4.735867858242631,
+  "pb": 1.5736883402873365,
+  "ttm_np_bn": 27754
+ },
+ "moat": {
+  "tier": "NARROW",
+  "type": "ADMIN/LOCATION",
+  "durable": false,
+  "params": "khong thuong (RONIC=Ke)",
+  "moat_tags_csv": "chua co dong BSR -> de xuat trong REPORT muc 6"
+ },
+ "assumptions_md5": "fe13e53d7b9ceef84461a0d8942fd5d4",
+ "assumptions_file": "calc/assumptions.json",
+ "auto_flags": {
+  "dcf_rich_21359": "THAT (huong dung, muc con nhe: tam DD 16.437)",
+  "pe_4_75": "NHIEU — PE tren LN dinh chu ky ~9x loi lam chuan hoa",
+  "lag_hi": "THAT ve so (Q3 +888% YoY) nhung KHONG BEN (crack ngoai sinh + ton kho); gia sau cong bo -8,7%"
+ },
+ "warnings": [
+  "PVN so huu 92,12% (free float ~7,9%); quyet toan co phan hoa 2018 CHUA duoc phe duyet (Deloitte nhan manh, soat xet 6T/2026)",
+  "KH 2026 dieu chinh 06/11 LNST HN 18.579 ty < 9T thuc 24.902 ty (doc thang = Q4 lo -6.323 ty); doc la KH hanh chinh, chua xac minh",
+  "Thue NK MFN xang dau 0% den 31/12/2026 (ND 72, NQ 43) - quyet dinh 2027 nam o Chinh phu",
+  "Uu dai thue TNDN 10% den het 2039 (QD 952/QD-TTg)",
+  "Du an mo rong 39.004,5 ty (vay 23.402,7) - NPV0 base; rui ro tre tien do 2028->2029"
+ ],
+ "open_issues": [
+  "BQ Q1+Q2+Q3/2026 = 24.693 ty vs BCTC 9T 24.899 ty (lech 206 ty, co the dieu chinh hoi to sau soat xet)",
+  "Vay ngan han 13.525 ty: dong tien/muc dich chua doc thuyet minh 14",
+  "Tra truoc nguoi ban 3.009 ty (dau nam 372) va chi capex 3.155 ty vs TSCD+CIP tang ~0,7 nghin ty - chua giai thich",
+  "GRM tach crack/ton kho theo quy: BCTC khong cong bo; tach bang chung cap nganh (Bobby 3.2) + du phong ton kho 678 ty",
+  "TTDB xang 0% tu 01/11/2026 mau thuan nguon (Bobby muc 2)"
+ ],
+ "fear_buy_eligible_2_5": false,
+ "job": "Taylor_20261109_073600",
+ "round": "r1"
+}

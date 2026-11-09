@@ -1,0 +1,148 @@
+{
+ "ticker": "MSB",
+ "asof_price_date": "2026-11-06",
+ "price": 16350.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.074,
+  "source": "cctg_12m(2026-11-02)",
+  "dep_asof": 0.074,
+  "dep_asof_source": "effective_deposit_rate('2026-11-09') = cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
+ },
+ "kind": "expected_weighted",
+ "center_kind": "expected_weighted",
+ "center_pre_liq": 12787,
+ "center_post_liq": 12739,
+ "p10_post": 8652,
+ "p25_post": 10231,
+ "p50_post": 12967,
+ "p75_post": 14743,
+ "p90_post": 16373,
+ "p10_pre": 8685,
+ "p50_pre": 13016,
+ "p90_pre": 16435,
+ "p10_out": 8652,
+ "p50_out": 12967,
+ "p90_out": 16373,
+ "liq_disc_5ty": 0.0037959806613735315,
+ "px_vs_center_post": 0.2834747957991741,
+ "px_vs_p10_post": 0.8897184505685298,
+ "px_vs_p90_post": -0.0014093757828230746,
+ "label": "TRONG vùng",
+ "label_note": "giá 16.350 sát CẠNH TRÊN (P90 16.373, cách 0,1%); 86% trọng số giá trị < giá; luật 4 KHÔNG đạt",
+ "pct_weight_below_price": 0.8625,
+ "n_outcomes": 27,
+ "grid_n": 27,
+ "min_outcome": 7134,
+ "central_param_value_post": 13180,
+ "grid_desc": "27 kết cục = kịch bản RI (3; 0,275/0,45/0,275) x dịch ROE -1/0/+1pp (0,25/0,5/0,25) x haircut phải thu bán nợ 4.001 tỷ 0/25/50% (0,5/0,3/0,2); RONIC terminal = Ke; có quyền mua 25% @10.000 (trừ PV tiền nộp)",
+ "scen_values_pre_liq": {
+  "XAU": 8899,
+  "CO_SO": 13230,
+  "TOT": 16435
+ },
+ "sens_r": {
+  "+100bp": 11296,
+  "+50bp": 11990,
+  "-50bp": 13550,
+  "-100bp": 14429
+ },
+ "sens_r_beta05": {
+  "+100bp": 11990,
+  "-100bp": 13550
+ },
+ "alternatives": {
+  "A_khong_quyen_mua": 12707,
+  "B_bao_phu_80pct": 12302,
+  "C_terminal_tang_truong_g6_RONIC=ROE_T": 13073,
+  "D_moat_NONE_ROE_ve_Ke_5nam(thong tin rui ro)": 12598
+ },
+ "implied_by_price": {
+  "ke": 0.11538374034741528,
+  "dep12_implied": 0.05438374034741528
+ },
+ "ck_ref_size": {
+  "size": "5 ty",
+  "adv250": 90195339500.0,
+  "adv60": 124229837500.0,
+  "adv20": 151828500000.0,
+  "sigma_d": 0.016122449967930736,
+  "ck_adv250": 0.0037959806613735315,
+  "part_adv250": 0.05543523676187282
+ },
+ "ck_real_sleeve": {
+  "40tr": 0.00033952283200423307,
+  "10tr": 0.00016976141600211653,
+  "note": "Q/ADV250 < 0,05% => CK ~ 0; không ràng buộc"
+ },
+ "label_by_size": {
+  "5ty": {
+   "center": 12739,
+   "p10": 8652,
+   "p90": 16373,
+   "label": "TRONG vùng"
+  },
+  "sleeve_40tr": {
+   "center": 12783,
+   "p10": 8682,
+   "p90": 16430,
+   "label": "TRONG vùng"
+  }
+ },
+ "rule4": {
+  "5ty": {
+   "threshold": 10828,
+   "pass_": false
+  },
+  "sleeve_40tr": {
+   "threshold": 10866,
+   "pass_": false
+  }
+ },
+ "assumptions_md5": "cec24f792b9df467907b9ef716f8ff5a",
+ "assumptions_file": "agents/Taylor/research/dd_lagcand_20261109/MSB/calc/assumptions.json",
+ "lock_md5": "calc/LOCK_prerun.txt (trước chạy) + calc/LOCK_post.txt",
+ "moat": {
+  "tier": "NONE",
+  "type": "(ứng viên NARROW FUNDING/CASA đã suy yếu)",
+  "durable": false,
+  "moat_tags_csv": "chưa có dòng MSB",
+  "basis": "ROE10Y 11,4% < Ke 13,5%; ROE trailing 13,7-14,1% ~ Ke; CASA (KKH/TG KH) 28,1% -> 20,4% trong 9T26"
+ },
+ "auto_flags_check": {
+  "Gordon_PB_1.31_vs_1.53_CHEAP": "NHIỄU — 1,53x đến từ ROE5Y 17,2% (gồm đỉnh 2021-22); ROE_Min5Y/trailing 14,1-14,2% @Ke 13,5% g6% => 1,08-1,09x (13.500-13.700đ) < giá",
+  "FSCORE_3": "thật nhưng ít thông tin cho NH (Piotroski thiết kế cho DN phi tài chính)",
+  "D/E_8,39": "bình thường NH (VCSH/TTS 10,7%)",
+  "ADV3T_134ty": "khớp bậc: ADV trung vị 60 phiên 124 tỷ, 20 phiên 152 tỷ, 250 phiên 90 tỷ"
+ },
+ "warnings": [
+  "NPL BCTC HN 2,70% (riêng 2,46%) vs IR deck 1,96%/1,64% — lệch ~0,7-0,8pp chưa giải thích (câu hỏi IR); bao phủ 47,2%",
+  "Phải thu bán nợ cho đối tác 4.001 tỷ (8,5% VCSH) đứng im từ 31/12/25, DP 38 tỷ",
+  "Mua hẳn miễn truy đòi LC 2.383 -> 9.229 tỷ (6T, x3,9) — kênh CV 9608 trừ khỏi room 2026-27",
+  "TNEX (CTTC số) dư nợ 10.021 tỷ x2,6 YTD, NPL 8,0%, nhóm 2 7,1%",
+  "CASA (KKH/TG KH) 28,1% -> 20,4%; chi phí lãi Q3 +83% YoY",
+  "Chào bán 936 tr CP @10.000 (25%) chờ thực hiện; cổ đông nhà nước thoái vốn nhiều lần bất thành (overhang)",
+  "Pháp lý: không tìm thấy (1 lượt tìm) — không WARNING; KPMG soát xét 6T chấp nhận toàn phần; đổi kiểm toán viên 2026"
+ ],
+ "open_issues": [
+  "giải thích NPL IR vs BCTC",
+  "bản chất + thu hồi phải thu bán nợ 4.001",
+  "phải thu khác 30/09 tách (Q3 không thuyết minh, +4.720 vs 30/06)",
+  "CAR theo TT14 / CET1",
+  "đối tượng mua/đáo hạn GTCG"
+ ],
+ "fear_buy_eligible_2_5": false,
+ "round": "r1",
+ "job": "Taylor_20261109_073606",
+ "price_source": "BQ tav2_bq.ticker Price (calc/bq_msb_px.csv)",
+ "lag_surprise": {
+  "NP_Q3_yoy": 0.294,
+  "NP_Q3_qoq": 0.319,
+  "NP_9T_yoy": 0.169,
+  "NP_TTM_yoy": 0.161,
+  "driver": "NII +607 tỷ (khối lượng + TNEX); DP thấp hơn +61; FX -155; OPEX -213",
+  "durable": "phần lớn bền (PPOP +17,7%), nhưng DP giảm khi NPL/nhóm 2 tăng là phần kém chất lượng"
+ }
+}

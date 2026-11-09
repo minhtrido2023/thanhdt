@@ -1,0 +1,25 @@
+# LOCK r3 MVC — ghi 2026-11-09 01:08:26 ICT TRUOC lan chay day du dau tien (chi --check da chay: khong doc gia/thanh khoan). Ghi boi lenh md5sum rieng, KHONG phai boi model.
+0059fa899507a05bf4e85f5edb81b089  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/MVC/calc_r3/mvc_redo_r3.py
+6c70fdcac7ca3d96577ebd1a4e1577bf  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/MVC/calc_r3/assumptions_r3.json
+406789f17a654a854206ac816f5f0159  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/MVC/calc_r3/r3data/px_mvc_20261106.csv
+c465c280a81fbf4e4ba30556c790374a  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/MVC/calc_r3/r3data/px_mvc_r3.sql
+42dd614e2bdb98b7e43677d6e7ea97f3  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/MVC/calc/mvc_redo_r2_out.json
+67f90de284c8ddf00debb0fead0ac569  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/MVC/calc/mvc_redo_r2.py
+02a4e6ca744e2390367103f7296e12be  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/NNC/calc/nnc_redo_r3_out.json
+e430be2363c19983d8d83120a3743e98  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/common.py
+4597bc083f0d64d8873141b12fbfb3a6  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_redo_20261105/_shared/wpct.py
+8f3a3cc715f1fec193c47cb62393bd6b  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_MVC_20261103/r8/calc/model_r8.py
+bd93107a93a7f958eea03e1a5f01eed0  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_MVC_20261103/r6/calc/model_r6.py
+9fd64a26a7daca9b0244c3f62ce7dd91  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_MVC_20261103/r6/calc/model_r5.py
+d3fb9637389ca6d9c7472e28f4846506  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_MVC_20261103/r6/calc/valuation_base.py
+6688f1e61c8568f63fae889312462442  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_NNC_20261030/r6/calc/nnc_model_r6.py
+14f3fb87c2d0b4c340382a371b26be29  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_NNC_20261030/r5/calc/nnc_model_r5.py
+812ca351e968913e2e4787bbcff9f552  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_NNC_20261030/r4/calc/model_r4.py
+c992769f86794f5d6f39b0df7e13bd91  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_NNC_20261030/r3/calc/model_r3.py
+e896ecfb84241240a4f1faf3ba1d90d3  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_NNC_20261030/r3/calc/sector_gpm_roe.csv
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+f9605983ad3b66b47ed80179bcad81da  /home/trido/thanhdt/WorkingClaude/cctg_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+fc06e3a866142684d87a43b34e0f17d2  /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_events.csv
+ea2c5f7629806f633aaab7857e3ea349  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_MVC_20261103/txt/VI_BaoCaoTaiChinhHopNhat_Q3_2026.txt
+910bdf9fdfef84603233819eefe9cdd5  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_MVC_20261103/txt/VI_BaoCaoTaiChinhRieng_Q3_2026.txt

@@ -1,0 +1,6 @@
+{
+ "superseded_by": "sua tai cho r3c 09/11/2026 (job Taylor_20261108_180625): ADDENDUM_5F.md:1, SUMMARY_5F.json:32 (+ headline_centre_current)",
+ "r3b_claim_wrong": "r3b ghi 'md5 SUMMARY_5F.json nam trong LOCK cua DDV/PVP/PVT/NT2' (ban .md ghi DDV/PVT/NT2) — SAI: md5 ADDENDUM_5F.md 83131c3e / SUMMARY_5F.json af090936 khong nam trong LOCK nao (grep -rl moi LOCK* duoi dd_redo_20261105/, 09/11)",
+ "current": {"round": "r3c", "center_5bn": 25165, "p90_5bn": 27710, "label_5bn": "TRONG sat canh (tham chieu)", "center_40": 26148, "p90_40": 28793, "label_40": "TRONG (hanh dong)", "price": 27700, "price_date": "2026-11-06"},
+ "source": "SUMMARY.json, REPORT_r3c.md"
+}

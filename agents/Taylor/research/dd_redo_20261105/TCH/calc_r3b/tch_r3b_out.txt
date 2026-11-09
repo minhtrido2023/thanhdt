@@ -1,0 +1,23 @@
+r 13.5000%; CONTROL r3 center_pre 16,346.83 (file 16,346.83)
+C chua ban phan me 7,140.7; k tam theo du an {"Green River": 0.1723, "H2": 2.9584, "me_khac": 0.0, "NC-II": 0.918, "khac": 0.0}; k range {"Green River": [0.1274, 0.221], "H2": [2.9584, 2.9584], "NC-II": [0.8097, 1.04]}; k binh quan (trong so C me) 0.7020
+skeptic doc: +1,789.8 d/cp (truoc CK) moi 1,0 k (y=4, chi phi y=2)
+bridge r3 tai lap (control, tch_r3.py): 16,346.8
+bridge nhat quan gia von+thang du, y=4 dong nhat, k=0 (dang skeptic): 13,520.0
+bridge y theo moc hoan thanh du an BCTN25 (GR 2,15; H2 1,15; NC-II 4,07; khac 1,0), k=0: 14,412.1
+bridge + k do tu TMDT (tam trung diem can GV da ket chuyen): 15,964.5
+bridge + truc F +-25% (k x 0,75/1/1,25) = HEADLINE r3b: 15,964.5
+R3b n=81 center_pre 15,964.5; tham so trung tam 15,894.9; min 14,075.5 max 18,374.0
+song song r3_old: center_pre 16,346.8 (n=27) — r3 cu (chi thang du chiet khau pv(4)) — song song theo yeu cau
+song song r3_old_corr_g: center_pre 16,346.8 (n=9) — r3 cu, hai truc g TUONG QUAN HOAN TOAN
+song song cons_y4_k0: center_pre 13,520.0 (n=27) — nhat quan, y=4, k=0 (skeptic ~13.435 sau CK)
+song song cons_yp_k0: center_pre 14,412.1 (n=27) — nhat quan, y du an, k=0 (khong tinh chi phi tuong lai)
+song song headline_corr_g: center_pre 15,964.5 (n=27) — HEADLINE r3b nhung hai truc g TUONG QUAN HOAN TOAN
+song song k_sym_0_02_04_06: center_pre 15,122.7 (n=108) — nhat quan y du an + truc k doi xung {0;0,2;0,4;0,6} deu (fallback khi chua do)
+song song k_sym_y4: center_pre 14,057.0 (n=108) — nhat quan y=4 + truc k {0;0,2;0,4;0,6}
+song song k_meas_y4: center_pre 14,776.5 (n=81) — k do + truc F, nhung y=4 dong nhat (quy uoc skeptic/r2)
+song song k_lo: center_pre 15,808.4 (n=81) — k can duoi (GV da ket chuyen o can tren) + truc F
+song song k_hi: center_pre 16,138.3 (n=81) — k can tren (chua ket chuyen GV nao) + truc F
+song song k_H2_cap1: center_pre 15,666.6 (n=81) — k H2 chan 1,0 (H2 "xong tho" ma HTK chi 25% TMDT — nghi TMDT H2 gom dat/hang muc da ghi o H1) + truc F
+song song exact_C: center_pre 16,546.8 (n=81) — dang chinh xac: backlog chi chiem cost_bl/(1+k) trong HTK (C chua ban lon hon)
+song song g_audit_427: center_pre 13,728.9 (n=81) — g ca hai truc 42,7% +-5pp (BCTC kiem toan FY24/FY25 mang BDS) + k do + truc F
+song song g_audit_427_k0: center_pre 12,975.0 (n=27) — g 42,7% +-5pp + nhat quan y du an, k=0 (can duoi ket hop)

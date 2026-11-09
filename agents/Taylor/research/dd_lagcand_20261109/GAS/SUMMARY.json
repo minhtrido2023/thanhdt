@@ -1,0 +1,201 @@
+{
+ "ticker": "GAS",
+ "asof_price_date": "2026-11-06",
+ "price": 74100.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.074,
+  "source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
+ },
+ "center_pre_liq": 50476,
+ "center_post_liq": 50146,
+ "p10_post": 43327,
+ "p25_post": 46019,
+ "p50_post": 49817,
+ "p75_post": 53890,
+ "p90_post": 57840,
+ "p10_pre": 43613,
+ "p50_pre": 50146,
+ "p90_pre": 58221,
+ "kind": "expected_weighted",
+ "center_kind": "expected_weighted",
+ "liq_disc_5ty": 0.006546092880069993,
+ "liq_disc_40tr": 0.0005855003466745554,
+ "px_vs_center_post": 0.4776889244027325,
+ "px_vs_p10_post": 0.710245673816029,
+ "px_vs_p90_post": 0.28111861923398695,
+ "label": "TRÊN vùng",
+ "pct_weight_below_price": 1.0,
+ "grid_n": 243,
+ "grid_desc": "243 = kich ban(3; 0,275/0,45/0,275; decline 2,8/1,4/0%) x he so Brent(3) x du phong DH 343(3) x Brent dai han +-5(3) x muc ben phan du LN 2026(3); RONIC=Ke; tien rong theo so + XDCB 5.916,4 gia so (NPV0) + bao tieu 1.775,5 - quy KT-PL 875,6; Q4=0,231 nam",
+ "label_by_size": {
+  "5ty": {
+   "center": 50146,
+   "p10": 43327,
+   "p90": 57840,
+   "label": "TRÊN vùng",
+   "ck": 0.006546092880069993
+  },
+  "sleeve_40tr": {
+   "center": 50447,
+   "p10": 43587,
+   "p90": 58187,
+   "label": "TRÊN vùng",
+   "ck": 0.0005855003466745554
+  }
+ },
+ "sens_r": {
+  "-100bp": 52365,
+  "-50bp": 51216,
+  "+50bp": 49146,
+  "+100bp": 48211
+ },
+ "implied_by_price": {
+  "r": 0.07047148119152846,
+  "perp_growth_at_r13_5": 0.05340345096058176,
+  "note": "r=8% cho tam 68405 < gia; label tuong doi theo khung, khong phai bang chung hung phan"
+ },
+ "scen_central": {
+  "XAU": 44338,
+  "CO_SO": 50168,
+  "TOT": 57120
+ },
+ "net_cash_per_share": 16434,
+ "moat": {
+  "tier": "NARROW",
+  "type": "REGULATORY/INFRA (doc quyen tu nhien trung nguon ong + xu ly khi)",
+  "durable": false,
+  "params_added": "khong",
+  "sens_none_decline_plus3pp": -5039,
+  "moat_tags_csv": "chua co dong GAS -> de xuat trong REPORT",
+  "sens_wide_no_decline": 2733,
+  "note_r2": "khong suy giam != WIDE (WIDE con doi RONIC>Ke); bien gop % giam la pha loang co hoc, khong dung lam bang chung"
+ },
+ "lag_surprise": {
+  "np_q3_26": 4576.5,
+  "np_q3_25": 2549.1,
+  "yoy": 0.7953395315993881,
+  "np_9t_26": 13381.2,
+  "np_9t_25": 10053.3,
+  "yoy_9t": 0.33102563337411617,
+  "np_q2_26": 5860.1,
+  "qoq": -0.2190406307059607,
+  "driver": "Brent Q3 90,7 vs 68,0 (+33%); khong phai khoan mot lan",
+  "durable": "CHU KY (theo Brent) - khong ben"
+ },
+ "auto_flags": {
+  "CEIL2_20260810": "THAT nhung chieu TANG (tran 07/08 +6,9% & 10/08 +6,97% sau KQ Q2); TTL 30 ngay het 09/09; khong la rui ro",
+  "DCF_auto_RICH_67081": "CUNG CHIEU, doc lap thap hon (tam 50146)",
+  "PE_12_1": "dung (TTM 14.742 ty / 2,413 ty cp = 6.110 d; 74.100/6.110 = 12,1; lich su 2016Q1-2026Q3 11,7-26,5x trung vi 15,6x => sat day 10 nam) nhung LN TTM o Brent 82, cao hon trung binh chu ky"
+ },
+ "warnings": [
+  "KHONG CON DU DIEU KIEN CONG TY DAI CHUNG: PVN 95,76%, co dong nho 4,24% < 10% (CBTT 31/12/2025); han 1 nam -> neu khong khac phuc phai nop ho so huy tu cach dai chung (rui ro huy niem yet/thoai von PVN cung cap lon) [WARNING, khong vao tam]",
+  "Thay Chu tich HDQT (23/07/2026) va TGD (21/07/2026) - PVN dieu dong; DHDCD bat thuong 14/09/2026 mien nhiem 3 TV HDQT",
+  "Cuoc van chuyen duong ong nhieu nam chay gia tam tinh (sector read Bobby) - rui ro truy thu/hoan tra hoi to (do nhay -1.500 ty = -618 d/cp)",
+  "Soat xet 6T/2026 Deloitte: chap nhan toan phan",
+  "Bao tieu: tien khi tra truoc 1.775,5 ty (giam tu 2.122,6) - tinh la tai san thu hoi trong tam r2 (+731 d/cp) [UL: chua tru thue]",
+  "Nhan TREN vung la TUONG DOI THEO KHUNG (r danh nghia 13,5%, RONIC=Ke, suy giam 1,4%), khong phai bang chung thi truong hung phan; P/E 12,1x sat day 10 nam"
+ ],
+ "open_issues": [
+  "thuyet minh du phong phai tra DH 343 (3.300 ty): CHUA KIEM - khong co trong TM16-23 BCTC HN Q3; do nhay tru 100% theo so = -679 d/cp, giu truc 0/50/100",
+  "ly do mien nhiem Chu tich/TGD 07/2026 va ke hoach free-float truoc 31/12/2026: CHUA KIEM (legal-vn)",
+  "co tuc: 2.500 d/cp = 6.032,4 ty (BQ + bao cao bien dong VCSH) nhung khoan phai tra 5.491,7 ty: lech 540,7 ty CHUA GIAI THICH",
+  "co cau san luong theo mo/khach hang chua co",
+  "cong thuc gia ban khi/tran-san chua kiem tu nguon goc",
+  "ty trong Q3 cua hoan nhap DP 9T/26 492 ty",
+  "E2 co so chi 10 diem nam (Brent 2016 chi 49 ngay du lieu); phan du RES co the chua lai ton kho LPG Q2-Q3/26 (thien lech len)"
+ ],
+ "assumptions_md5": "c02f04b50d650838b862f59824187de2",
+ "assumptions_file": "calc/assumptions_r2.json",
+ "lock_md5": "calc/LOCK_prerun_r2.txt + calc/LOCK_post_md5_r2.txt",
+ "fear_buy_eligible_2_5": false,
+ "job": "Taylor_20261109_083126",
+ "round": "r2",
+ "rule4_zone_5ty": {
+  "cheap_below": 43300.0,
+  "fair_to": 57800.0,
+  "expensive_above": 57800.0
+ },
+ "net_cash_per_share_incl_extras": 19259,
+ "pe": {
+  "ttm": 12.1,
+  "center": 8.2,
+  "hist": {
+   "n": 43,
+   "min": 11.7,
+   "max": 26.5,
+   "median": 15.6,
+   "window": "2016Q1..2026Q3, BQ ticker_financial.PE (gas_pe_quarterly.csv)"
+  }
+ },
+ "steps_cumulative": {
+  "r1 (goc)": {
+   "center": 46488,
+   "p10": 39010,
+   "p90": 55150
+  },
+  "+E1 XDCB 100% gia so": {
+   "center": 48924,
+   "p10": 41446,
+   "p90": 57585
+  },
+  "+E2 suy giam 2,8/1,4/0": {
+   "center": 49886,
+   "p10": 43064,
+   "p90": 57585
+  },
+  "+E6a Q4 = 0,231 nam": {
+   "center": 49775,
+   "p10": 42957,
+   "p90": 57470
+  },
+  "+E6b bao tieu +1.775,5": {
+   "center": 50506,
+   "p10": 43688,
+   "p90": 58201
+  },
+  "+E6c quy KT-PL -875,6 (= r2 cuoi)": {
+   "center": 50146,
+   "p10": 43327,
+   "p90": 57840
+  }
+ },
+ "steps_individual_vs_r1": {
+  "E1 XDCB": {
+   "center": 48924,
+   "p10": 41446,
+   "p90": 57585
+  },
+  "E2 suy giam": {
+   "center": 47450,
+   "p10": 40628,
+   "p90": 55150
+  },
+  "E6a Q4 0,231": {
+   "center": 46377,
+   "p10": 38903,
+   "p90": 55034
+  },
+  "E6b bao tieu": {
+   "center": 47219,
+   "p10": 39741,
+   "p90": 55881
+  },
+  "E6c quy KT-PL": {
+   "center": 46128,
+   "p10": 38650,
+   "p90": 54789
+  }
+ },
+ "sens_offgrid_dong_per_share": {
+  "truy_thu_cuoc_ong_-1500ty": -618,
+  "lo_ton_kho_LPG_-250ty_truoc_thue": -82,
+  "khong_tru_co_tuc_phai_tra": 2261,
+  "tru_100pct_du_phong_343_theo_so (thay 50%)": -679
+ },
+ "sens_no_decline": 2733,
+ "sens_decline_plus3pp": -5039,
+ "prev_round_file": "SUMMARY_r1.json"
+}

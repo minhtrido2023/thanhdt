@@ -1,0 +1,171 @@
+{
+ "ticker": "CSV",
+ "asof_price_date": "2026-11-06",
+ "price": 22600.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.074,
+  "source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
+ },
+ "kind": "expected_weighted",
+ "center_pre_liq": 17569,
+ "center_post_liq": 17273,
+ "p10_post": 12739,
+ "p25_post": 14656,
+ "p50_post": 17160,
+ "p75_post": 19547,
+ "p90_post": 21885,
+ "p10_pre": 12957,
+ "p50_pre": 17455,
+ "p90_pre": 22261,
+ "liq_disc_5ty": 0.016883140087935178,
+ "px_vs_center_post": 0.30840039367799466,
+ "px_vs_p10_post": 0.774079598084622,
+ "px_vs_p90_post": 0.032670779072424105,
+ "label": "TRÊN vùng",
+ "label_by_size": {
+  "5ty": {
+   "center": 17273,
+   "p10": 12739,
+   "p90": 21885,
+   "label": "TRÊN vùng",
+   "ck": 0.016883140087935178
+  },
+  "40tr": {
+   "center": 17543,
+   "p10": 12938,
+   "p90": 22227,
+   "label": "TRÊN vùng",
+   "ck": 0.0015100739564109932
+  },
+  "10tr": {
+   "center": 17556,
+   "p10": 12948,
+   "p90": 22244,
+   "label": "TRÊN vùng",
+   "ck": 0.0007550369782054966
+  }
+ },
+ "rule4": {
+  "5ty": {
+   "threshold": 14682,
+   "pass_": false
+  },
+  "40tr": {
+   "threshold": 14912,
+   "pass_": false
+  },
+  "10tr": {
+   "threshold": 14923,
+   "pass_": false
+  }
+ },
+ "pct_weight_below_price": 0.9275000000000001,
+ "grid_n": 81,
+ "grid_desc": "81 ket cuc = kich ban LN me chuan hoa XAU/CO_SO/TOT 179,7/235,0/294,5 ty (0,25/0,5/0,25) x dE +-10% x NPV Nhon Trach -20/0/+20% (0,2/0,6/0,2) x gian doan 0/-25/-50% 1 nam LN loi (0,4/0,4/0,2); RONIC=Ke; + tien rong 525,6 ty - CDKKS 50,0",
+ "scen_pre": {
+  "XAU": 14159,
+  "CO_SO": 17866,
+  "TOT": 21857
+ },
+ "central_param_value_pre": 17866,
+ "sens_r": {
+  "-100bp": 18345,
+  "-50bp": 17788,
+  "+50bp": 16794,
+  "+100bp": 16348
+ },
+ "sens": {
+  "RONIC=ROE5Y_18.3%_g4%": 18760,
+  "den_bu_BH1_+100ty": 18162,
+  "khong_gian_doan": 17634,
+  "lai_tien_gui_tinh_trong_E_khong_cong_tien_rong": 15299,
+  "P/E_bang_gia_tren_E_CO_SO": 10.63,
+  "P/E_TTM": 8.48,
+  "P/B_me": 1.37
+ },
+ "implied_by_price": {
+  "r": 0.09659883179317888,
+  "dep12_implied": 0.03559883179317887,
+  "E_parent_perpetual_ty": 305.5752754100001
+ },
+ "lag_surprise": {
+  "q3_26_np_parent": 85.404855059,
+  "q3_25": 57.750156613,
+  "yoy_q3": 0.4788679385117842,
+  "q2_yoy": 1.0758171296555794,
+  "nine_m_yoy": 0.49507752678276873,
+  "driver": "gia H2SO4 +249% (Q2) / +289% (Q3) + phot pho vang; hang hoa thuong mai 9T GP 73,4 vs 15,4 ty",
+  "durable": false,
+  "one_off_est_ty": "60-85 (uoc luong)"
+ },
+ "ck_ref_size": {
+  "size": "5 ty",
+  "adv250": 9216510000.0,
+  "adv60": 5753765000.0,
+  "sigma_d": 0.02292194526748038,
+  "q_over_adv250": 0.5425047008032324,
+  "note": "ngoai vung hieu chinh (Q/ADV 54%)"
+ },
+ "sizing": {
+  "max_one_shot_vnd": 1000000000.0,
+  "exit": {
+   "5ty": {
+    "q_over_adv": 0.5425047008032324,
+    "days_at10": 5.425047008032324,
+    "days_at20": 2.712523504016162
+   },
+   "1ty": {
+    "q_over_adv": 0.10850094016064649,
+    "days_at10": 1.0850094016064649,
+    "days_at20": 0.5425047008032324
+   },
+   "40tr": {
+    "q_over_adv": 0.00434003760642586,
+    "days_at10": 0.043400376064258596,
+    "days_at20": 0.021700188032129298
+   }
+  },
+  "note": "<=1 ty/lan (~11% ADV250, ~17% ADV60); free float <=35% (Nha nuoc 65,0%)"
+ },
+ "moat": {
+  "tier": "NARROW",
+  "type": "COST/SCALE",
+  "source": "data/moat_tags.csv asof 2026-06-05 (tai dung)",
+  "durable": false,
+  "roe_min5y": 0.1366,
+  "roic_min5y": 0.1426,
+  "risk1_proposed": "di doi bat buoc BH1 -> Nhon Trach 1.840 ty ~ von CSH + cong suat xut noi dia ~x2 2027-30; lai 2026 la cu soc axit/phot pho tam thoi"
+ },
+ "auto_flags": {
+  "IDIOCRASH_20260727": "NHIEU (VNINDEX -1,0%, khong CBTT, hoi +3,75% phien sau)",
+  "DCF_CHEAP_29479": "NHIEU ve ket luan (thu nhap dinh chu ky)",
+  "ROE5Y_18_3": "that nhung gom dinh 2022; ROE_Min5Y 13,66% ~ Ke",
+  "ADV3T_6ty": "that"
+ },
+ "warnings": [
+  "Cuong che thao do BH1 QD 2408/QD-UBND 07/07/2026; dung NM Tan Binh 2 tu 15/08/2026 (QD 1122/QD-HDQT)",
+  "Du an Nhon Trach ~1.840 ty (632 tu co + ~1.208 vay 10 nam), chua co ngay van hanh dong bo",
+  "Nha nuoc (Vinachem) 65,0%; free float <=35%",
+  "Khong chia co tuc tien 2025 (LN trich het vao quy DTPT)",
+  "UBND TP.HCM thu hoi dat tu nguyen tra lai (CBTT 19/10/2026) - chua doc noi dung"
+ ],
+ "open_issues": [
+  "G1 y kien soat xet 6T/kiem toan 2025 chua doc",
+  "G2 tra truoc nguoi ban 242,4 ty",
+  "G3 hang hoa thuong mai 350 ty la gi",
+  "G4 lich dung day chuyen BH1 / chay Nhon Trach",
+  "G5 boi thuong BH1 + dat HCM",
+  "G6 H2SO4 tu dot luu huynh hay thuong mai"
+ ],
+ "fear_buy_eligible_2_5": false,
+ "assumptions_file": "calc/assumptions.json",
+ "assumptions_md5": "890ed7e7c4ae57bd6ef85a71ff09fc34",
+ "source_file": "src/q3_2026_HN.pdf",
+ "lock_md5": "calc/LOCK_prerun.txt (truoc chay) + calc/LOCK_post_md5.txt",
+ "sector_read": "kb/data_registry/market-state/sector_read_hoa_chat_xut_clo_20261109.md",
+ "round": "r1",
+ "job": "Taylor_20261109_073602"
+}

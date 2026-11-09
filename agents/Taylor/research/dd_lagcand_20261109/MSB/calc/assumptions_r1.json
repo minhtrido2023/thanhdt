@@ -1,0 +1,27 @@
+{
+ "ticker": "MSB", "asof": "2026-11-09", "valuation_date": "2026-11-09",
+ "units": "ty dong; per-share dong",
+ "source_financials": "BCTC HN Q3/2026 goc msb.com.vn (calc/notes_read.md)",
+ "BV_0930": 46857.045, "shares_now_m": 3744.0,
+ "NI_9T26": 4414.028, "NI_Q4_25": 1851.246,
+ "r": {"Ke": 0.135, "rule": "r = 13,5% + 1,0 x (dep12T - 7,40%)", "dep12T": 0.074, "dep_src": "deposit_rate_vn.effective_deposit_rate('2026-11-09') = cctg_12m(2026-11-02) 7,40%", "beta_pass": [0.5, 1.0]},
+ "rights": {"new_shares_m": 936.0, "price": 10000, "cash_bn": 9360.0, "t_years": 0.5, "basis": "vnba 12/10/2026 + IR-Q3 p4 (NHNN chap thuan 46.800); base = co thuc hien, chu so huu nop tien; tru PV tien nop"},
+ "scenarios": {
+   "weights": {"XAU": 0.275, "CO_SO": 0.45, "TOT": 0.275},
+   "weights_basis": "doi xung (tien le MBB/FPT D1); khong co du lieu doc lap cho nghieng",
+   "Q4_26_NI": {"XAU": 1350, "CO_SO": 1700, "TOT": 1950},
+   "Q4_basis": "Q3/26 LNST 1.649; Q4/25 1.851 (mua vu Q4); XAU = DP Q4 ~900 (gap 2 Q3) xay lai bao phu (uoc luong)",
+   "ROE_path_27_29": {"XAU": [0.10, 0.105, 0.11], "CO_SO": [0.125, 0.135, 0.14], "TOT": [0.14, 0.155, 0.16]},
+   "ROE_T": {"XAU": 0.11, "CO_SO": 0.14, "TOT": 0.16},
+   "ROE_basis": "ROE trailing BQ 13,7-14,1% 10 quy lien (BQ ticker_financial ROE_Trailing 2024Q1-2026Q3); ROE_Min5Y 14,2%; ROE5Y 17,2% (gom dinh 2021-22); ROE10Y 11,4%. CO_SO 2027 12,5% = pha loang VCSH +20% tu quyen mua. XAU: chi phi tin dung tang (bao phu 47%, hinh thanh NPL 1,3%/nam, TNEX NPL ~8%) + NIM nen (CASA 28%->20%). TOT: TNEX mo rong + quay lai vung ROE5Y. Tat ca (uoc luong)."
+ },
+ "payout": 0.0, "payout_basis": "MSB chi CP thuong, khong tra tien mat 2025-26 (KH 2026 muc 7: 20% tu VCSH)",
+ "terminal": {"RONIC": "Ke", "formula": "TV_N = (ROE_T - Ke) * BV_N / Ke  (chi von hien huu giu RI; von moi RONIC=Ke => tang truong khong tao gia tri)", "basis": "moat NONE/NARROW khong ben (ROE10Y 11,4% < Ke) => khong thuong RONIC>Ke; KHONG ep ROE_T ve Ke (luat 08/11)"},
+ "axes": {
+   "roe_shift": {"values": [-0.01, 0.0, 0.01], "w": [0.25, 0.5, 0.25], "tag": "[UL] sai so duong ROE"},
+   "recv_haircut": {"values": [0.0, 0.25, 0.5], "w": [0.5, 0.3, 0.2], "base_amount_bn": 4001.159, "tax": 0.2, "tag": "[UL] phai thu ban no 4.001 ty dung im tu 31/12/25, DP chi 38 ty (SX6T p45; HN-Q3 p36) - rui ro CU THE quan sat duoc => kich ban co xac suat, khong vao tam tham so trung tam"}
+ },
+ "sensitivities": ["Ke +-50/100bp (luat lai huy dong)", "bao phu 80% (thieu DP sau thue)", "khong quyen mua", "terminal tang truong RONIC=ROE_T g=6%", "moat WIDE/NARROW/NONE", "Gordon auto ROE5Y 17,2%"],
+ "liquidity": {"method": "CK = sigma_ngay x sqrt(Q/ADV_median) (tien le FPT r3)", "sizes_vnd": [5e9, 4e7, 1e7], "window": "250 phien den 2026-11-06 (BQ calc/bq_msb_px.csv)"},
+ "price_for_label_only": {"price": 16350, "date": "2026-11-06", "src": "BQ tav2_bq.ticker Price"}
+}

@@ -1,116 +1,414 @@
 {
  "ticker": "MVC",
- "round": 2,
- "job": "Taylor_20261105_020023",
- "asof_price_date": "2026-11-04",
- "price": 13800.0,
+ "round": 3,
+ "job": "Taylor_20261108_180136",
+ "asof_price_date": "2026-11-06",
+ "price": 13500.0,
  "r": 0.135,
- "r_anchor": {
-  "rate": 0.07400000000000001,
-  "date": "cctg_12m(2026-11-02)",
-  "rule": "r = 13,5% + 1,0 x (dep - 7,40%)"
+ "dep": 0.07400000000000001,
+ "dep_src": "cctg_12m(2026-11-02)",
+ "center_pre_liq": 17759,
+ "center_post_liq": 16241,
+ "p10_post": 9940,
+ "p50_post": 15359,
+ "p90_post": 23471,
+ "p10_pre": 10870,
+ "p50_pre": 16794,
+ "p90_pre": 25664,
+ "p10_out": 9940,
+ "p50_out": 15359,
+ "p90_out": 23471,
+ "min_out": 7690,
+ "pct_weight_below_price": 0.3053475080018291,
+ "n_outcomes": 157464,
+ "n_cells": 6561,
+ "n_cells_note": "6.561 o (3 nhanh x 3^7) x 3 muc thue x 8 ket cuc = 157.464",
+ "center_param_nodelay": 17704,
+ "center_param_withdelay": 17133,
+ "label": "TRONG vùng",
+ "label_by_size": {
+  "10tr": "TRONG vùng",
+  "1ty": "TRONG vùng",
+  "40tr": "TRONG vùng",
+  "5ty": "TRONG vùng"
  },
- "center_pre_liq": 16694,
- "center_post_liq": 15276,
- "p10_post": 9857,
- "p50_post": 13748,
- "p90_post": 23516,
- "p10_pre": 10772,
- "p90_pre": 25699,
- "p10_out": 9857,
- "p50_out": 13748,
- "p90_out": 23516,
- "min_out": 7788,
- "pct_weight_below_price": 0.5056944444444446,
- "n_outcomes": 34992,
- "n_cells": 4374,
- "liq_disc_5bn": 0.08494479252418027,
+ "label_note": "TRONG vung o moi co (5 ty, 1 ty, 40 tr, 10 tr). Khong doi so r2.",
+ "rule4_by_size": {
+  "10tr": {
+   "center": 17691,
+   "thr_085": 15038,
+   "pass_": true
+  },
+  "1ty": {
+   "center": 17080,
+   "thr_085": 14518,
+   "pass_": true
+  },
+  "40tr": {
+   "center": 17623,
+   "thr_085": 14980,
+   "pass_": true
+  },
+  "5ty": {
+   "center": 16241,
+   "thr_085": 13805,
+   "pass_": true
+  }
+ },
+ "rule4_note": "Luat 4 DAT o moi co (r2: KHONG dat o 5 ty). Mong o 5 ty: 0,85 x 16.241 = 13.805 vs 13.500 (+2,3%). Phu thuoc truc bien TL: ban r2 mot chieu {25/30/~NNC} tam 15,763 -> 0,85x = 13,399 < 13.500 (TRUOT 0,7%).",
  "ck_ref_size": {
   "size_vnd": 5000000000.0,
   "Y": 1.0,
-  "disc_adv250": 0.08494479252418027,
-  "disc_adv60": 0.12977543771575262,
-  "q_over_adv250": 11.345457845951373,
-  "disc_1bn": 0.037988466083736606,
-  "disc_1bn_adv60": 0.058037340108442574,
-  "note": "5 ty = quy uoc fleet nhung Q/ADV250 11,3x (ADV60 26x) = NGOAI SUY ngoai vung hieu chinh luat can bac hai; ban 1 ty (Q/ADV 2,3x) bao song song",
-  "post_1bn": {
-   "center": 16060,
-   "p10": 10363,
-   "p50": 14453,
-   "p90": 24723,
-   "below": 0.42965534979423864,
-   "label": "TRONG vùng"
+  "adv250": 0.08547018049093726,
+  "adv60": 0.12970929695018063,
+  "q_over_adv250": 11.497953364301154,
+  "q_over_adv60": 26.480946958663242,
+  "note": "5 ty = quy uoc fleet; Q/ADV250 11,5x (ADV60 26,5x) = NGOAI SUY ngoai vung hieu chinh luat can bac hai"
+ },
+ "ck_by_size": {
+  "10tr": {
+   "adv250": 0.003822342672538241,
+   "adv60": 0.0058007761058862005,
+   "q_over_adv250": 0.02299590672860231,
+   "q_over_adv60": 0.05296189391732648
+  },
+  "1ty": {
+   "adv250": 0.03822342672538241,
+   "adv60": 0.058007761058862004,
+   "q_over_adv250": 2.299590672860231,
+   "q_over_adv60": 5.296189391732648
+  },
+  "40tr": {
+   "adv250": 0.007644685345076482,
+   "adv60": 0.011601552211772401,
+   "q_over_adv250": 0.09198362691440924,
+   "q_over_adv60": 0.21184757566930593
+  },
+  "5ty": {
+   "adv250": 0.08547018049093726,
+   "adv60": 0.12970929695018063,
+   "q_over_adv250": 11.497953364301154,
+   "q_over_adv60": 26.480946958663242
+  }
+ },
+ "post_by_size": {
+  "10tr": {
+   "center": 17691,
+   "p10": 10828,
+   "p50": 16730,
+   "p90": 25566,
+   "below": 0.2386
+  },
+  "1ty": {
+   "center": 17080,
+   "p10": 10454,
+   "p50": 16152,
+   "p90": 24683,
+   "below": 0.2598
+  },
+  "40tr": {
+   "center": 17623,
+   "p10": 10786,
+   "p50": 16666,
+   "p90": 25468,
+   "below": 0.2399
+  },
+  "5ty": {
+   "center": 16241,
+   "p10": 9940,
+   "p50": 15359,
+   "p90": 23471,
+   "below": 0.3053
   }
  },
  "ck_real_sleeve": {
   "10tr": {
-   "adv250": 0.0037988466083736603,
-   "adv60": 0.005803734010844257
+   "adv250": 0.003822342672538241,
+   "adv60": 0.0058007761058862005,
+   "q_over_adv250": 0.02299590672860231,
+   "q_over_adv60": 0.05296189391732648
   },
   "40tr": {
-   "adv250": 0.007597693216747321,
-   "adv60": 0.011607468021688515
+   "adv250": 0.007644685345076482,
+   "adv60": 0.011601552211772401,
+   "q_over_adv250": 0.09198362691440924,
+   "q_over_adv60": 0.21184757566930593
   }
  },
- "px_vs_center_post": -0.0966420066030923,
- "px_vs_p10_post": 0.399982378638033,
- "px_vs_p90_post": -0.4131605926814331,
- "label": "TRONG vùng",
- "label_note": "TRONG vung o ca 5 ty va 1 ty. So voi so cu (P25-P75, nhan RE CO DIEU KIEN) nhan doi do DINH NGHIA vung. Luat 4: KHONG dat.",
- "center_vs_p50_note": "tam = ky vong luoi 16,694 truoc CK; gia tri tai tham so trung tam (khong tre) 17,053; P50 ket cuc 15,024. P90 25,699 do nhanh STRUCTURAL (trong so 0,20) quyet dinh (trung vi nhanh sau CK 22,265); w_STRUCT 0,15 -> P90 sau CK 22,324, 0,10 -> 20,758. So o: moi nhanh 1.458 o x 8 ket cuc (STRUCTURAL bat bien theo VR/ADMIN/tran/bien TL nhung van dem du de trong so dung).",
+ "tranche": {
+  "sleeve_cap": "2-4% NAV SpaceX (~0,94 ty) = ~19-38 tr",
+  "per_session_cap_20pct_adv60": 37763000.0,
+  "note": "r2 ghi tranche <=1 ty: SAI (vuot tran sleeve); sua: <= min(4% NAV, 20% ADV60 ~ 37,8 tr/phien), toi da 1 phien/lenh"
+ },
+ "px_vs_center_post": -0.1687857527371639,
+ "px_vs_p10_post": 0.35808168285957254,
+ "px_vs_p90_post": -0.4248150270051606,
+ "center_vs_p50_note": "tam = ky vong luoi 17,759 truoc CK / 16,241 sau CK 5 ty; tham so trung tam (khong tre) 17,704 truoc CK; P50 ket cuc 15,359 sau CK. P90 do nhanh STRUCTURAL (0,20, Bobby) quyet dinh (trung vi nhanh sau CK 21,959); w_STRUCT 0,10 -> P90 21,495, 0,30 -> 25,309; P10 gan nhu bat bien (~9,9k).",
+ "assumptions": [
+  {
+   "id": "D1_infl_cap",
+   "value": "cap_thuc(y,path) = P_CYC_or_cap_TL * 1.03^(y-2026) / g(y,path)",
+   "basis": "Tran chu ky = muc gia giu bien TB chu ky tren chi phi mo hinh (tien 2026); chi phi mo hinh +3%/nam danh nghia (model_r5.py tanlap f=1.03^t, model_r8.py:53) => tran phai tang 3%/nam danh nghia tren MOI duong gia. Truoc: min(p,P_CYC) roi nhan g(y,path) => tren g2031 tran danh nghia phang toi 2030 (dem hai lan). Cung patch da ap va duoc skeptic chap nhan o NNC r3 (nnc_redo_r3.py:40-47). Ap cho tran ~NNC va tran bien 25/30/38% cua Tan Lap (model_r8.py:44,56 dung chung S.P_CYC).",
+   "source": "TOP5D_CORRECTIONS_20261108.md MVC#1; NNC/calc/assumptions_r3.json D1"
+  },
+  {
+   "id": "D2_cap_axis",
+   "value": "{SL 1,05 / theo SL nhanh / SL 1,40} deu 1/3",
+   "basis": "Nhat quan NNC r3 (SL 2024 = 1,05 tr m3 -> tran 260,6k; doi xung voi 1,40 -> 236,1k). model_r8.py:76 quy moi gia tri != 'branch' ve 1,40 => calc r3 dung ham branch rieng cap_for(float(cap_basis)).",
+   "source": "TOP5D MVC#2; NNC/calc/assumptions_r3.json D2_cap_axis"
+  },
+  {
+   "id": "rent_axis",
+   "value": "Thue Nui Nho (NNC) {2043 / 2030 / khong} deu [UL]",
+   "basis": "Thoi han hop dong chua xac minh (KT25 NNC 9.1); nhat quan luoi NNC r3; muc 2030 = noi suy PV theo ty trong PV thue sau 2030 (cung cong thuc nnc_redo_r3.py:32-33).",
+   "source": "TOP5D MVC#3"
+  },
+  {
+   "id": "tl_m_axis",
+   "value": "Bien chu ky Tan Lap {30% / ~NNC / 38%} deu [UL] (headline); ban r2 {25/30/~NNC} va ban khong truc (~NNC) bao song song",
+   "basis": "Khong co bao cao bo phan mang da MVC (BCTN25, BCTC Q2/Q3/6T26 gop da+gach+xang) => CHUA KIEM ca hai chieu. ~NNC (gia cum x REL + chi phi rieng TL) la tam co co so; truc r2 chi mo chieu giam (vi pham STANDARD_r2 #2). GPM hop nhat MVC thap hon peer la du lieu mot phan (gop gach/xang bien thap) - khong du de chi giu chieu giam. Doi xung +-4pp quanh ~NNC (~34% sau D1).",
+   "source": "TOP5D MVC#4; model_r8.py:9-11"
+  },
+  {
+   "id": "ICD_book",
+   "value": "ICD Hoa Lu (100%) = tai san thuan TRU tien = 38,728 ty (thay von gop 44,797)",
+   "basis": "Hop nhat - rieng 30/09/26: tien +2,923; tra truoc NH +0,041; GTGT +2,695; TSCD HH +20,830; CP tra truoc DH +16,073; no +0,911; dau tu cty con -44,797; doi chieu khop tong TS (166,523) va VCSH (165,612). Tai san thuan ICD 41,651, trong do tien 2,923 da nam trong NETFIN (BCTC HN) => dem doi chi 2,923 (khong phai 44,797). CIP ICD 37,69 -> 0 = CHUYEN sang TSCD (+19,9) va CP tra truoc DH (+16,1), khong phai xoa so.",
+   "source": "dd_MVC_20261103/txt/VI_BaoCaoTaiChinhHopNhat_Q3_2026.txt (BCDKT, V.11 dong 1739) vs VI_BaoCaoTaiChinhRieng_Q3_2026.txt (BCDKT, V.12 dong 443-447)"
+  },
+  {
+   "id": "NETFIN_provenance",
+   "value": "117,395 + 274,416 + 20,000 - 461,848 - 60,000 - 6,524",
+   "basis": "Doc lai BCTC HN Q3/26 (txt tu PDF): tien 117.395.029.976; HTM NH 274.415.908.083; HTM DH 20.000.000.000; vay NH 461.848.321.896; co tuc phai tra 60.000.000.000 (V.19); quy KTPL 6.523.765.195 => KHOP ca 6 so.",
+   "source": "VI_BaoCaoTaiChinhHopNhat_Q3_2026.txt dong 260, 277, BCDKT ma 265, ma 321, V.19, ma 323"
+  },
+  {
+   "id": "r",
+   "value": "r = 13,5% + 1,0 x (dep_12T_hieu_dung(2026-11-06) - 7,40%)",
+   "basis": "luat user 21",
+   "source": "deposit_rate_vn.effective_deposit_rate"
+  },
+  {
+   "id": "UL_kept",
+   "value": "trong so trang thai 0,20/0,45/0,35 (Bobby); W0 25/50/20/5; PW0 50/50; ca/REL/SL/han GP/ADMIN deu; FF 30,2%; CK = sigma x sqrt(Q/ADV250) Y=1",
+   "basis": "giu nhu r2 (nhan dinh/[UL], khai o §7)",
+   "source": "MVC/calc/mvc_redo_r2.py"
+  },
+  {
+   "id": "excluded_from_base",
+   "value": "tre GP Bobby F6; mo moi hai phia; chiet khau holding/quan tri; V_NNC theo gia thi truong",
+   "basis": "nhan dinh / [UL] => do nhay (base 0%)",
+   "source": "quy tac chung TOP5D"
+  }
+ ],
  "axes_included": [
-  "trang thai bien 0,20/0,45/0,35 (Bobby)",
-  "chi phi Tan Lap ca 0,85/1,0/1,15",
-  "REL gia TL/NNC 0,88/0,91/0,95",
+  "trang thai 0,20/0,45/0,35 (Bobby)",
+  "chi phi TL ca 0,85/1/1,15",
+  "REL 0,88/0,91/0,95",
   "SL nam thuong 3 muc",
-  "han GP Tan Lap 2035/W/2045",
+  "han GP TL 2035/W/2045",
   "anh xa ADMIN 3",
-  "bien chu ky Tan Lap 25%/30%/~NNC deu [UL] (DUA LAI)",
-  "tran chu ky branch/SL 1,40 (MOI, nhu NNC r2)",
-  "ket cuc trong o: 4 kich ban W0 x 2 duong gia PW0"
+  "bien chu ky TL {30%/~NNC/38%} deu [UL] (DOI XUNG, moi r3)",
+  "tran chu ky {SL 1,05/theo nhanh/SL 1,40} (moi r3)",
+  "thue Nui Nho {2043/2030/khong} (moi r3)",
+  "ket cuc trong o: W0 x PW0",
+  "D1 tran tang theo lam phat (co che, khong phai truc)"
  ],
  "axes_excluded": [
   {
    "axis": "r",
-   "reason": "co dinh 13,5%; do nhay rieng"
+   "reason": "13,5% theo luat 21; do nhay rieng"
   },
   {
    "axis": "tre GP mo moi (Bobby F6)",
-   "reason": "nhan dinh, trai ke hoach DHDCD 'khai thac 2028' -> khoi base (luat 3); do nhay -527"
+   "reason": "nhan dinh -> khoi base; do nhay -571"
   },
   {
-   "axis": "mo moi hai phia (upside + NPV gia xau)",
-   "reason": "lech NPV0 cua du an moi (luat 20) khong co IRR du lieu; do nhay -2,080"
+   "axis": "mo moi hai phia",
+   "reason": "lech NPV0 khong co IRR du lieu; do nhay -2,078"
+  },
+  {
+   "axis": "chiet khau holding/quan tri",
+   "reason": "[UL] -> base 0%; 6% -388, 15% -967 (truoc CK, tham so trung tam)"
+  },
+  {
+   "axis": "bien TL 25%",
+   "reason": "muc r2 chi mo chieu giam; ban r2 {25/30/~NNC} bao song song"
   }
  ],
  "base_adjustments": [
   {
-   "item": "Hai mo moi da chi 438,4 ty",
-   "effect_dong_per_share": 0,
-   "basis": "so sach, NPV0 that (vong 2 KHONG tru tre GP; vong 1 tru -527)",
-   "source": "BCTC HN Q3/2026 XDCB/tra truoc"
+   "item": "D1 tran chu ky tang theo lam phat (Tan Lap + NNC nhin xuyen)",
+   "effect_dong_per_share": 557,
+   "basis": "sua loi dem hai lan (co che), bien TL ~NNC 25,7% -> 34,0%",
+   "source": "assumptions_r3.json D1; TOP5D MVC#1"
   },
   {
-   "item": "Dat 30 ty; cum CN; mua NNC len 51%",
+   "item": "ICD Hoa Lu = tai san thuan tru tien 38,728 ty (thay von gop 44,797)",
+   "effect_dong_per_share": -58,
+   "basis": "hop nhat - rieng 30/09/26, khop tong TS va VCSH; tien ICD 2,923 da trong NETFIN",
+   "source": "BCTC HN + rieng Q3/26"
+  },
+  {
+   "item": "Hai mo moi da chi 438,4 ty; dat 30 ty; cum CN; mua NNC 51%",
    "effect_dong_per_share": 0,
    "basis": "so sach / NPV0",
-   "source": "DHDCD 2026; SKEPTIC4/R7"
+   "source": "BCTC HN Q3/26; DHDCD 2026"
   },
   {
    "item": "Co phan NNC 44,07% giai dong thoi",
    "effect_dong_per_share": null,
-   "basis": "V_NNC tu mo hinh NNC r6 (khong tre GP, cung truc), khong dung gia thi truong",
-   "source": "nnc_model_r6"
+   "basis": "V_NNC ngam 63,369 vs NNC r3 63,591 truoc CK (-0.3%) => nhat quan",
+   "source": "nnc_model_r6 + patch D1/D2/thue nhu NNC r3"
+  }
+ ],
+ "headline_vs_alternatives": {
+  "headline": {
+   "desc": "D1 + tran 3 muc + thue 3 muc + bien TL doi xung {30/~NNC/38} + ICD tai san thuan",
+   "center": 16241,
+   "p10": 9940,
+   "p50": 15359,
+   "p90": 23471,
+   "below": 0.3053
+  },
+  "tl_r2_onesided_25_30_nnc": {
+   "center": 15763,
+   "p10": 9910,
+   "p50": 14530,
+   "p90": 23398,
+   "below": 0.3775
+  },
+  "tl_no_axis_nnc_only": {
+   "center": 16222,
+   "p10": 9940,
+   "p50": 15350,
+   "p90": 23436,
+   "below": 0.3326
+  },
+  "rent_2043_only": {
+   "center": 16402,
+   "p10": 10197,
+   "p50": 15518,
+   "p90": 23623,
+   "below": 0.2909
+  },
+  "cap_r2_branch_140": {
+   "center": 16084,
+   "p10": 9940,
+   "p50": 15111,
+   "p90": 23444,
+   "below": 0.3231
+  },
+  "icd_r2_44797": {
+   "center": 16299,
+   "p10": 9999,
+   "p50": 15417,
+   "p90": 23529,
+   "below": 0.3006
+  },
+  "strict_3c_sensitivity": {
+   "center": 14415,
+   "p10": 9940,
+   "p50": 14588,
+   "p90": 18425,
+   "below": 0.3371,
+   "note": "do nhay rui ro (quy uoc user 08/11: KHONG ap 3c chat vao headline)"
+  },
+  "skeptic_point": {
+   "center": 15821,
+   "note": "skeptic = r2 + D1 + tran 1,05 + thue (chua doi xung bien TL, chua sua ICD) = buoc 4 bridge, tai lap trung (15.821)"
+  }
+ },
+ "implied_by_price": {
+  "cyclical_only_post": 14284,
+  "note_cyc": "CA nhanh CYCLICAL 100% sau CK 5 ty 14.284 > gia 13.500 (r2: 12.855 < gia) => gia khong con giai thich duoc chi bang CYC",
+  "w_structural_needed": -0.21786153438342326,
+  "note_ws": "am (-0,22): khong ty trong STRUCTURAL >=0 nao cho tam = gia",
+  "vnnc_at_market_47200_post": -1496,
+  "generic_disc_after_vnnc_market": 0.08446381265667513,
+  "note_vnnc": "NNC theo gia thi truong 47.200 (-1.496 sau CK) roi them chiet khau holding/quan tri chung ~8,4% => ra gia",
+  "roe_sustainable_implied": 0.13025723134273162,
+  "roe_implied_center": 0.15061539088493217,
+  "note_roe": "Gordon (ROE-3%)/(r-3%) x BVPS 15.460; ROE ben ngu y 13,0% (ROE TB Q4 2017-25 7,4% (ROE_MVC model_r6.py), Q3/26 TTM 20,7%)"
+ },
+ "bridge_r2_to_r3": {
+  "0 pin r2 (gia 04/11, CK 04/11)": 15276,
+  "1 r2 o CK 06/11": 15268,
+  "2 + D1 tran tang theo lam phat": 15824,
+  "3 + muc tran SL 1,05": 15982,
+  "4 + truc thue {2043/2030/khong}": 15821,
+  "5 + truc bien TL doi xung {30/~NNC/38}": 16299,
+  "6 + ICD tai san thuan tru tien (= r3)": 16241
+ },
+ "corrections": [
+  {
+   "n": 1,
+   "verdict": "DUNG - ap base",
+   "measured": 557,
+   "skeptic": 556,
+   "note": "bien TL ~NNC 25,7% -> 34,0% (NNC 34,3%) khop skeptic; patch runtime, khong sua file pin"
+  },
+  {
+   "n": 2,
+   "verdict": "DUNG - ap base",
+   "measured": 158,
+   "skeptic": 158
+  },
+  {
+   "n": 3,
+   "verdict": "DUNG - ap base",
+   "measured": -160,
+   "skeptic": -161,
+   "note": "V_NNC ngam 63,369 vs NNC r3 63,591 truoc CK (-0,3%)"
+  },
+  {
+   "n": 4,
+   "verdict": "DUNG mot phan - chon doi xung {30/~NNC/38} lam headline (khong bo truc)",
+   "measured": 478,
+   "skeptic": "bo truc 16.281 / doi xung 16.299",
+   "note": "ban bo truc tam 16,222; chon doi xung vi bien da rieng CHUA KIEM ca 2 chieu (STANDARD_r2 #2: giu bat dinh, khong gia vo biet)"
+  },
+  {
+   "n": 5,
+   "verdict": "SAI do lon - dem doi chi phan TIEN ICD 2,923 ty, khong phai ca 44,797",
+   "measured": -58,
+   "skeptic": -429,
+   "note": "hop nhat - rieng 30/09/26: ICD tai san thuan 41,651 = tien 2,923 + GTGT 2,695 + TSCD 20,830 + tra truoc DH 16,073 + tra truoc NH 0,041 - no 0,911; CIP 37,69 -> TSCD/tra truoc DH (chuyen loai, khong xoa so); TSCD/tra truoc khong nam trong NETFIN va khong nam trong DCF Tan Lap => giu theo so sach (NPV0)"
+  },
+  {
+   "n": 6,
+   "verdict": "DUNG - sua",
+   "note": "luat 4 ghi theo co; tranche sua ve tran sleeve + 20% ADV60"
+  },
+  {
+   "n": 7,
+   "verdict": "DUNG - sua",
+   "note": "274,416 / 20,000 / -60,000 (co tuc phai tra V.19) / -6,524 doc lai BCTC HN Q3 KHOP; LOCK_r2 ghi chu sua 2 duong dan (md5 khop); §2.5 KHONG du dieu kien"
   }
  ],
  "gordon": {
-  "roe_blend": 0.1005111111111111,
-  "ps": 10382,
-  "roe_implied_center_r9": 0.14194140916758563,
-  "note": "mot bien the: MVC no rong, khong co LN lai tien gui dang ke de tach (so r9, co tre GP)"
+  "roe_implied_center": 0.15061539088493217,
+  "roe_implied_price": 0.13025723134273162,
+  "note": "mot bien the (MVC no rong, khong tach lai tien gui)"
  },
- "grid_desc": "Luoi MUC KET CUC n=34992 (4374 o x 8). Truc: trang thai x ca 3 x REL 3 x SL 3 x han GP TL 3 x ADMIN 3 x bien TL 3 x tran 2; trong so o = xac suat trang thai x deu; ket cuc W0 x PW0; r 13,5%; base khong tre GP. Phan vi _shared/wpct.py. Sau CK = x(1 - CK 5 ty).",
+ "dep_sens_param": {
+  "+100": {
+   "r": 0.14500000000000002,
+   "pct": -0.023955172982148998
+  },
+  "+50": {
+   "r": 0.14,
+   "pct": -0.012226363407619179
+  },
+  "-100": {
+   "r": 0.12500000000000003,
+   "pct": 0.026061247673516474
+  },
+  "-50": {
+   "r": 0.13,
+   "pct": 0.012752393837032638
+  }
+ },
+ "grid_desc": "Luoi MUC KET CUC n=157464: trang thai x ca 3 x REL 3 x SL 3 x han GP TL 3 x ADMIN 3 x bien TL {30/~NNC/38} x tran {1,05/nhanh/1,40} x thue {2043/2030/khong} x W0 x PW0; trong so o = trang thai x deu; r 13,5%; base khong tre GP; D1 tran tang theo lam phat. Phan vi _shared/wpct.py. Sau CK = x(1 - CK 5 ty).",
  "zone_old": {
   "low": 14000,
   "center": 15100,
@@ -120,15 +418,16 @@
   "zone_def": "P25-P75 sau CK thanh khoan (ban cu)",
   "source_file": "agents/Taylor/research/dd_MVC_20261103/investor_report/MVC_DD_investor_report_20261103.md"
  },
- "r1": {
-  "center_post": 15082,
-  "p10": 11941,
-  "p50": 14424,
-  "p90": 20989,
-  "label": "TRONG vùng"
+ "r2": {
+  "center_post": 15276,
+  "p10": 9857,
+  "p50": 13748,
+  "p90": 23516,
+  "label": "TRONG vùng",
+  "price": 13800.0
  },
- "center_change_pct": 0.011677863536288191,
- "change_reason": "Tam sau CK 15.082 -> 15,276: bo tre GP (+571 tai tham so) bu boi truc bien Tan Lap (-) va tran (-); vong 1 'tam' la gia tri tham so, vong 2 la ky vong luoi. P10 11.941 -> 9,857 chu yeu do MUC KET CUC; 50.6% ket cuc duoi gia (vong 1: 40,3% o).",
+ "center_change_pct_vs_r2": 0.06319062943549558,
+ "change_reason": "tam 15.276 -> 16.241 (+6,3%): D1 +556, tran 1,05 +158, thue -161, bien TL doi xung +478, ICD -58, CK 06/11 -8.",
  "warnings": [
   "So huu cheo MVC 44,07% NNC <-> NNC 10,3% MVC; Chu tich HDQT MVC = Chu tich Thanh Le va NNC; truong BKS MVC = TGD Thanh Le",
   "Uy quyen DHDCD MVC 2026 mua NNC len 51% (gia/doi tac chua cong bo; ~1,52 tr cp, uoc ~72 ty theo SKEPTIC_20261103) - giao dich ben lien quan",
@@ -136,7 +435,10 @@
   "DHDCD 2026 duyet cum cong nghiep toi 500 ty (ngoai 1.500 ty mo moi): no rong ~1,4-1,5 nghin ty truoc doanh thu mo, D/E ~0,9-1,0 (SKEPTIC_20261103 #1, CHUA DONG)",
   "Du no BIDV 452 ty > han muc 350 ty hop dong da cong bo; tam ung 60,6 ty chua thuyet minh doi tuong",
   "Thanh khoan rat thap: ADV250 0,44 ty, ADV60 0,19 ty; thoat 5 ty 113/57 phien",
-  "Tra cuu 'xu phat/khoi to MVC 2026': WebSearch 05/11/2026 khong thay; Simplize ghi MVC so huu NNC 43,55% (lech 44,07%, chua doi soat)"
+  "Tra cuu 'xu phat/khoi to MVC 2026': WebSearch 05/11/2026 khong thay; Simplize ghi MVC so huu NNC 43,55% (lech 44,07%, chua doi soat)",
+  "Phap ly sau 05/11/2026: CHUA quet lai trong vong 3 (chi WARNING)",
+  "Rui ro buoc thoai theo Luat DN D195 khi MVC len 51% NNC (NNC dang so huu 10,3% MVC) - can legal-vn",
+  "Bien da rieng Tan Lap CHUA KIEM (khong co bao cao bo phan) - truc doi xung {30/~NNC/38}; GPM hop nhat MVC 2017-25 16,1% < peer (gop mang phu)"
  ],
  "open_issues": [
   "Bien chu ky mang da Tan Lap (khong co bao cao bo phan) - nay la truc",
@@ -144,7 +446,9 @@
   "Free float uoc 30,2%",
   "Xac suat trang thai la nhan dinh Bobby",
   "HD tin dung BIDV moi + co cau 1.500 ty",
-  "Ty le so huu NNC 44,07% vs 43,55%"
+  "Ty le so huu NNC 44,07% vs 43,55%",
+  "Nguon 117,395/461,848/1.546 BQ khop; 274,416/20,0/60,0/6,524 doc tu txt BCTC HN Q3 (pdftotext), chua soat PDF goc bang mat"
  ],
- "fear_buy_2_5": "KHONG du dieu kien sleeve fear-buy §2.5 (khong co su kien so hai; luat 4 khong dat)"
+ "fear_buy_2_5": "KHONG du dieu kien sleeve fear-buy §2.5 (khong co su kien so hai; DK2 no rong -> 1,4-1,5 nghin ty chua dong)",
+ "measured_by": "calc_r3/mvc_redo_r3.py (2 lan trung byte, run1.md5=run2.md5) + calc_r3/summary_r3.py; LOCK calc_r3/LOCK_r3_md5.txt"
 }

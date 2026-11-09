@@ -1,51 +1,81 @@
 {
  "ticker": "DGC",
- "round": 3,
- "job": "Taylor_20261108_164329",
+ "round": "3b",
+ "job": "Taylor_20261108_175121",
  "asof_price_date": "2026-11-06",
  "price": 33000.0,
- "price_src": "BQ tav2_bq.ticker Price 2026-11-06 (r3data/px_dgc_r3.sql)",
- "n_outcomes": 405,
- "center_pre": 41825,
- "center_post": 41522,
+ "price_src": "BQ tav2_bq.ticker Price 2026-11-06 (calc/r3data/px_dgc_r3.sql)",
+ "n_outcomes": 810,
+ "center_pre": 42154,
+ "center_post": 41849,
  "center_param_pre": 43727,
  "center_param_post": 43410,
- "p10_pre": 33171,
- "p50_pre": 41387,
- "p90_pre": 50293,
- "p10_out": 32931,
- "p25_out": 36970,
- "p50_out": 41087,
- "p75_out": 46408,
- "p90_out": 49929,
+ "p10_pre": 33515,
+ "p50_pre": 41664,
+ "p90_pre": 50593,
+ "p10_out": 33272,
+ "p25_out": 37287,
+ "p50_out": 41362,
+ "p75_out": 46502,
+ "p90_out": 50227,
  "min_out": 25782,
- "max_out": 59113,
- "pct_weight_below_price": 0.10208333333333333,
- "label": "TRONG vùng",
- "px_vs_center_post": -0.20524059534704497,
+ "max_out": 59765,
+ "pct_weight_below_price": 0.09114583333333336,
+ "label": "DƯỚI vùng",
+ "px_vs_center_post": -0.21145069177280218,
  "headline_vs_alternatives": {
+  "ore_w0": {
+   "desc": "mo lai khai truong w=0 (= headline r3)",
+   "n_outcomes": 405,
+   "center_post": 41522,
+   "p10_out": 32931,
+   "p50_out": 41087,
+   "p90_out": 49929,
+   "pct_weight_below_price": 0.10208333333333333,
+   "label": "TRONG vùng"
+  },
   "ore_w0.10": {
-   "desc": "mo lai khai truong w=0,10",
+   "desc": "mo lai w=0,10, bien vinh vien 0",
    "n_outcomes": 810,
-   "center_post": 42768,
-   "p10_out": 33267,
-   "p50_out": 42100,
-   "p90_out": 53030,
-   "pct_weight_below_price": 0.09187500000000001,
+   "center_post": 41587,
+   "p10_out": 33006,
+   "p50_out": 41228,
+   "p90_out": 49941,
+   "pct_weight_below_price": 0.09989583333333334,
    "label": "DƯỚI vùng"
   },
   "ore_w0.25": {
-   "desc": "mo lai khai truong w=0,25",
+   "desc": "mo lai w=0,25, bien vinh vien 0",
    "n_outcomes": 810,
-   "center_post": 44637,
-   "p10_out": 33983,
-   "p50_out": 44163,
-   "p90_out": 56573,
-   "pct_weight_below_price": 0.07656249999999998,
+   "center_post": 41685,
+   "p10_out": 33170,
+   "p50_out": 41260,
+   "p90_out": 49982,
+   "pct_weight_below_price": 0.09661458333333331,
    "label": "DƯỚI vùng"
   },
-  "ore_w0.50": {
-   "desc": "mo lai khai truong w=0,50 (= r2)",
+  "ore_w0.75": {
+   "desc": "mo lai w=0,75, bien vinh vien 0",
+   "n_outcomes": 810,
+   "center_post": 42012,
+   "p10_out": 33428,
+   "p50_out": 41617,
+   "p90_out": 50509,
+   "pct_weight_below_price": 0.08567708333333333,
+   "label": "DƯỚI vùng"
+  },
+  "ore_w1.0": {
+   "desc": "mo lai chac chan (w=1), bien vinh vien 0",
+   "n_outcomes": 405,
+   "center_post": 42176,
+   "p10_out": 33586,
+   "p50_out": 41742,
+   "p90_out": 50581,
+   "pct_weight_below_price": 0.08020833333333334,
+   "label": "DƯỚI vùng"
+  },
+  "ore_w0.5_term": {
+   "desc": "mo lai w=0,5 CO bien vinh vien 1.000 ty (= r3 dong w=0,50; thuong moat — doi chieu)",
    "n_outcomes": 810,
    "center_post": 47753,
    "p10_out": 35794,
@@ -54,120 +84,97 @@
    "pct_weight_below_price": 0.05104166666666667,
    "label": "DƯỚI vùng"
   },
+  "ore_w0.1_term": {
+   "desc": "mo lai w=0,10 CO bien vinh vien (= r3 dong w=0,10, doi chieu)",
+   "n_outcomes": 810,
+   "center_post": 42768,
+   "p10_out": 33267,
+   "p50_out": 42100,
+   "p90_out": 53030,
+   "pct_weight_below_price": 0.09187500000000001,
+   "label": "DƯỚI vùng"
+  },
+  "ore_w0.25_term": {
+   "desc": "mo lai w=0,25 CO bien vinh vien (= r3 dong w=0,25, doi chieu)",
+   "n_outcomes": 810,
+   "center_post": 44637,
+   "p10_out": 33983,
+   "p50_out": 44163,
+   "p90_out": 56573,
+   "pct_weight_below_price": 0.07656249999999998,
+   "label": "DƯỚI vùng"
+  },
   "r4_fix": {
-   "desc": "nen bien r4 16,5/17,5% (khong co dong co so) + bo chong lan du phong (dinh chinh 1 nguyen ban)",
-   "n_outcomes": 405,
-   "center_post": 39100,
-   "p10_out": 32655,
-   "p50_out": 38971,
-   "p90_out": 46167,
-   "pct_weight_below_price": 0.11875,
+   "desc": "nen bien r4 + bo chong lan du phong",
+   "n_outcomes": 810,
+   "center_post": 39427,
+   "p10_out": 32911,
+   "p50_out": 39289,
+   "p90_out": 46515,
+   "pct_weight_below_price": 0.10364583333333334,
    "label": "TRONG vùng"
   },
   "r4_nofix": {
    "desc": "nen bien r4 + du phong chong lan nhu r2 (doi chieu)",
-   "n_outcomes": 405,
-   "center_post": 37078,
-   "p10_out": 28946,
-   "p50_out": 36838,
-   "p90_out": 44601,
-   "pct_weight_below_price": 0.2520833333333333,
+   "n_outcomes": 810,
+   "center_post": 37405,
+   "p10_out": 29427,
+   "p50_out": 37140,
+   "p90_out": 44956,
+   "pct_weight_below_price": 0.23854166666666665,
    "label": "TRONG vùng"
   },
   "shield20": {
-   "desc": "la chan thue du phong 20% (TT48: tru khi chi that) [UL]",
-   "n_outcomes": 405,
-   "center_post": 42092,
-   "p10_out": 34075,
-   "p50_out": 41600,
-   "p90_out": 50226,
-   "pct_weight_below_price": 0.06250000000000001,
+   "desc": "la chan thue du phong 20% [UL]",
+   "n_outcomes": 810,
+   "center_post": 42419,
+   "p10_out": 34359,
+   "p50_out": 42050,
+   "p90_out": 50590,
+   "pct_weight_below_price": 0.05677083333333334,
    "label": "DƯỚI vùng"
   },
   "ronic20": {
-   "desc": "RONIC 20% (thuong moat — trai luat 3c, chi doi chieu)",
-   "n_outcomes": 405,
-   "center_post": 43456,
-   "p10_out": 34432,
-   "p50_out": 42969,
-   "p90_out": 52434,
-   "pct_weight_below_price": 0.0625,
+   "desc": "RONIC 20% (thuong moat — doi chieu)",
+   "n_outcomes": 810,
+   "center_post": 43813,
+   "p10_out": 34629,
+   "p50_out": 43323,
+   "p90_out": 52910,
+   "pct_weight_below_price": 0.05677083333333334,
    "label": "DƯỚI vùng"
   },
   "w_scn_r2": {
    "desc": "trong so kich ban 0,3/0,5/0,2 cua r2",
-   "n_outcomes": 405,
-   "center_post": 40867,
-   "p10_out": 32486,
-   "p50_out": 40474,
-   "p90_out": 49003,
-   "pct_weight_below_price": 0.11708333333333333,
+   "n_outcomes": 810,
+   "center_post": 41194,
+   "p10_out": 32767,
+   "p50_out": 40731,
+   "p90_out": 49556,
+   "pct_weight_below_price": 0.10541666666666666,
    "label": "TRONG vùng"
   },
   "legal_axis": {
-   "desc": "CO truc phap ly: haircut tien rong 3/9/29% (w 0,2/0,5/0,3) — ngoai base (vu an chi WARNING)",
-   "n_outcomes": 1215,
-   "center_post": 38592,
-   "p10_out": 29596,
-   "p50_out": 38455,
-   "p90_out": 47657,
-   "pct_weight_below_price": 0.21927083333333333,
+   "desc": "CO truc phap ly haircut tien rong 3/9/29% (w 0,2/0,5/0,3) — ngoai base",
+   "n_outcomes": 2430,
+   "center_post": 38919,
+   "p10_out": 29938,
+   "p50_out": 38760,
+   "p90_out": 47970,
+   "pct_weight_below_price": 0.20494791666666667,
    "label": "TRONG vùng"
   }
  },
- "bridge_pre": [
-  {
-   "step": "r2 (tai lap)",
-   "center_pre": 45087.86479245552,
-   "delta": null
-  },
-  {
-   "step": "c1 bo chong lan du phong tren nen r4",
-   "center_pre": 47124.421373499485,
-   "delta": 2036.5565810439657
-  },
-  {
-   "step": "c2 trong so 0,25/0,5/0,25",
-   "center_pre": 47777.85655276057,
-   "delta": 653.4351792610832
-  },
-  {
-   "step": "c3 RONIC = Ke",
-   "center_pre": 45661.46773577641,
-   "delta": -2116.3888169841593
-  },
-  {
-   "step": "c5 nen bien R2 (thay r4+fix; R2 khong chong lan)",
-   "center_pre": 48101.157330077745,
-   "delta": 2439.689594301337
-  },
-  {
-   "step": "c4 mo lai khai truong w 0,5 -> 0",
-   "center_pre": 41824.68590377276,
-   "delta": -6276.471426304983
-  }
- ],
- "single_correction_post": {
-  "c1": 2022,
-  "c2": 649,
-  "c3": -2046,
-  "c5_R2": 4791,
-  "c6_shield20": 570,
-  "c4_w0": -6813,
-  "c4_w0.1": -5450
- },
  "r_sens_post": {
-  "beta1.0_-100bp": 42990,
-  "beta1.0_-50bp": 42221,
-  "beta1.0_+50bp": 40848,
-  "beta1.0_+100bp": 40234,
-  "base": 41522
+  "-100bp": 43315,
+  "-50bp": 42547,
+  "+50bp": 41176,
+  "+100bp": 40562
  },
  "ck_ref_size": {
   "q_vnd": 5000000000.0,
-  "adv": "250 phien",
-  "disc": 0.00724700220209937,
-  "in_calib": true,
+  "disc_adv250": 0.00724700220209937,
+  "in_calib_adv250": true,
   "disc_adv60": 0.011262359266486919,
   "in_calib_adv60": false
  },
@@ -175,20 +182,20 @@
   "10tr": {
    "disc_adv250": 0.0003240957911396972,
    "disc_adv60": 0.0005036680181377883,
-   "q_over_adv250": 0.00011928384365943747,
-   "in_calib": false
+   "in_calib_adv250": false,
+   "in_calib_adv60": false
   },
   "20tr": {
    "disc_adv250": 0.00045834066333779773,
    "disc_adv60": 0.0007122941421840383,
-   "q_over_adv250": 0.00023856768731887493,
-   "in_calib": false
+   "in_calib_adv250": false,
+   "in_calib_adv60": true
   },
   "40tr": {
    "disc_adv250": 0.0006481915822793944,
    "disc_adv60": 0.0010073360362755767,
-   "q_over_adv250": 0.00047713537463774986,
-   "in_calib": false
+   "in_calib_adv250": false,
+   "in_calib_adv60": true
   }
  },
  "liquidity": {
@@ -202,26 +209,22 @@
     "5000tr": {
      "q_over_adv": 0.05964192182971873,
      "disc": 0.00724700220209937,
-     "in_calib": true,
-     "days_at_15pct": 0.3976128121981249
+     "in_calib": true
     },
     "10tr": {
      "q_over_adv": 0.00011928384365943747,
      "disc": 0.0003240957911396972,
-     "in_calib": false,
-     "days_at_15pct": 0.0007952256243962498
+     "in_calib": false
     },
     "20tr": {
      "q_over_adv": 0.00023856768731887493,
      "disc": 0.00045834066333779773,
-     "in_calib": false,
-     "days_at_15pct": 0.0015904512487924995
+     "in_calib": false
     },
     "40tr": {
      "q_over_adv": 0.00047713537463774986,
      "disc": 0.0006481915822793944,
-     "in_calib": false,
-     "days_at_15pct": 0.003180902497584999
+     "in_calib": false
     }
    }
   },
@@ -233,49 +236,164 @@
     "5000tr": {
      "q_over_adv": 0.28200662377157915,
      "disc": 0.011262359266486919,
-     "in_calib": false,
-     "days_at_15pct": 1.8800441584771943
+     "in_calib": false
     },
     "10tr": {
      "q_over_adv": 0.0005640132475431583,
      "disc": 0.0005036680181377883,
-     "in_calib": false,
-     "days_at_15pct": 0.0037600883169543885
+     "in_calib": false
     },
     "20tr": {
      "q_over_adv": 0.0011280264950863166,
      "disc": 0.0007122941421840383,
-     "in_calib": true,
-     "days_at_15pct": 0.007520176633908777
+     "in_calib": true
     },
     "40tr": {
      "q_over_adv": 0.0022560529901726333,
      "disc": 0.0010073360362755767,
-     "in_calib": true,
-     "days_at_15pct": 0.015040353267817554
+     "in_calib": true
     }
    }
   }
  },
- "p10_post": 32931,
- "p50_post": 41087,
- "p90_post": 49929,
- "center_post_liq": 41522,
- "liq_disc_5ty": 0.00724700220209937,
- "grid_n": 405,
- "grid_desc": "ket cuc = kich ban EBIT (xau/co so/tot 0,25/0,5/0,25) tren nen bien R2 x khai truong DUNG (w mo lai 0 o base) x du phong moi truong (mot lan/huu han 4 quy/vinh vien 100 ty/quy, 1/3 [UL], la chan thue 0 [UL]) x Nghi Son -500/0/+500 (0,25/0,5/0,25 [UL]) x he so EBIT 0,8..1,2 (deu) x lai huy dong -50/0/+50bp (0,25/0,5/0,25 [UL]); RONIC=Ke; n=405; tham so trung tam = co so, huu han 4 quy, NS so sach, m=1, Δr=0",
- "model_r3_out_md5": "ba91265ff8014116f6e4b9179a73d0fa",
- "r2": {
-  "center_post": 44767,
-  "p10_out": 32518,
-  "p50_out": 44633,
-  "p90_out": 57101,
-  "label": "TRONG vùng",
-  "price": 33450.0,
-  "asof_price_date": "2026-11-04",
-  "pct_weight_below_price": 0.12208333333333332
+ "exit_discipline": {
+  "position": {
+   "account": "ZaloPay",
+   "qty": 10000,
+   "cost": 39775.0,
+   "price": 33000.0,
+   "mkt_value": 330000000.0,
+   "nav_0611": 934551492.0,
+   "pct_nav_mkt": 0.35311055926279555,
+   "pct_nav_cost": 0.4256052271114452,
+   "sleeve_cap": [
+    0.02,
+    0.04
+   ],
+   "unrealized_vnd": -67750000.0,
+   "src": "dnse_raw_2026-11-08.jsonl (accountNo 0001743768, tradeQuantity 10000, costPrice 39775) + data/execution_logs/nav_history_ZaloPay.csv 2026-11-06"
+  },
+  "options": [
+   {
+    "option": "A giu nguyen 10.000 cp (35,3% NAV) — vi pham tran sleeve, can user chap nhan ngoai le bang van ban",
+    "keep_qty": 10000,
+    "sell_qty": 0,
+    "keep_pct_nav_mkt": 0.35311055926279555,
+    "sell_value_vnd": 0.0,
+    "q_over_adv60": 0.0,
+    "impact_adv60_one_shot": 0.0,
+    "per_tranche_q_over_adv60": 0.0,
+    "tranches": 0,
+    "realized_pnl_vnd_at_px": -0.0,
+    "fee_tax_vnd": 0.0
+   },
+   {
+    "option": "B giam ve ~10% NAV (buoc dem, 2 dot)",
+    "keep_qty": 2800,
+    "sell_qty": 7200,
+    "keep_pct_nav_mkt": 0.09887095659358275,
+    "sell_value_vnd": 237600000.0,
+    "q_over_adv60": 0.013400954761625441,
+    "impact_adv60_one_shot": 0.0024550909935229645,
+    "per_tranche_q_over_adv60": 0.006700477380812721,
+    "tranches": 2,
+    "realized_pnl_vnd_at_px": -48780000.0,
+    "fee_tax_vnd": 468072.0
+   },
+   {
+    "option": "C giam ve tran sleeve 4% NAV, 3 dot",
+    "keep_qty": 1100,
+    "sell_qty": 8900,
+    "keep_pct_nav_mkt": 0.03884216151890751,
+    "sell_value_vnd": 293700000.0,
+    "q_over_adv60": 0.01656506908034256,
+    "impact_adv60_one_shot": 0.00272958327353713,
+    "per_tranche_q_over_adv60": 0.00552168969344752,
+    "tranches": 3,
+    "realized_pnl_vnd_at_px": -60297500.0,
+    "fee_tax_vnd": 578589.0
+   },
+   {
+    "option": "D giam ve san sleeve 2% NAV, 3 dot",
+    "keep_qty": 500,
+    "sell_qty": 9500,
+    "keep_pct_nav_mkt": 0.017655527963139777,
+    "sell_value_vnd": 313500000.0,
+    "q_over_adv60": 0.01768181531047801,
+    "impact_adv60_one_shot": 0.00282009116212818,
+    "per_tranche_q_over_adv60": 0.005893938436826004,
+    "tranches": 3,
+    "realized_pnl_vnd_at_px": -64362500.0,
+    "fee_tax_vnd": 617595.0
+   }
+  ],
+  "note": "Lenh HOSE han che giao dich chi phien chieu; dot = 1 phien chieu. Impact = sigma60*sqrt(Q/ADV60) (cung cong thuc CK). KHONG quyet thay user, KHONG dat lenh."
  },
- "delta_center_vs_r2_pct": -0.07248642973618957,
+ "model_r3b_out_md5": "a8fa8dac3439d64f3bffdfd4429fbd73",
+ "r3": {
+  "center_post": 41522,
+  "p10_out": 32931,
+  "p50_out": 41087,
+  "p90_out": 49929,
+  "label": "TRONG vùng",
+  "price": 33000.0,
+  "pct_weight_below_price": 0.10208333333333333
+ },
+ "delta_center_vs_r3_pct": 0.007875343191561024,
+ "implied_by_price": {
+  "price": 33000.0,
+  "ebit_mult_for_center_eq_price": 0.5903,
+  "center_if_ore_closed_certain": 41509,
+  "center_if_prov_permanent_certain": 37045,
+  "center_if_xau_certain": 35333,
+  "center_if_xau_and_permanent": 30542,
+  "center_if_xau_permanent_closed": 30215,
+  "reading": "Gia 33.000 thap hon P10 ket cuc 33.272 (-0,8%). De TAM = gia can EBIT loi ~0.59x co so mai mai, hoac xau chac chan + du phong vinh vien chac chan + khai truong dong chac chan (30215). Rieng khai truong dong chac chan: 41509; rieng du phong vinh vien chac chan: 37045; rieng xau chac chan: 35333."
+ },
+ "sleeve_size_labels": {
+  "10tr_adv250": {
+   "center": 42141,
+   "p10": 33504,
+   "p50": 41651,
+   "p90": 50577,
+   "label": "DƯỚI vùng"
+  },
+  "10tr_adv60": {
+   "center": 42133,
+   "p10": 33498,
+   "p50": 41643,
+   "p90": 50568,
+   "label": "DƯỚI vùng"
+  },
+  "20tr_adv250": {
+   "center": 42135,
+   "p10": 33500,
+   "p50": 41645,
+   "p90": 50570,
+   "label": "DƯỚI vùng"
+  },
+  "20tr_adv60": {
+   "center": 42124,
+   "p10": 33491,
+   "p50": 41635,
+   "p90": 50557,
+   "label": "DƯỚI vùng"
+  },
+  "40tr_adv250": {
+   "center": 42127,
+   "p10": 33493,
+   "p50": 41637,
+   "p90": 50560,
+   "label": "DƯỚI vùng"
+  },
+  "40tr_adv60": {
+   "center": 42112,
+   "p10": 33481,
+   "p50": 41622,
+   "p90": 50542,
+   "label": "DƯỚI vùng"
+  }
+ },
  "assumptions": [
   {
    "item": "Nen bien gop 2027/28 = R2 19,5/20,7% (gia von Q3/26 x4 bo du phong, co dinh)",
@@ -291,11 +409,6 @@
    "item": "RONIC = Ke (13,5%)",
    "basis": "moat_durable=false (khai truong dung, ROIC5Y<Ke 2018-20)",
    "source": "ADDENDUM_5F_r2.md §2"
-  },
-  {
-   "item": "Khai truong 25 DUNG o base (w mo lai = 0)",
-   "basis": "hien trang quan sat duoc: Q3/26 chay 100% quang mua ngoai; khong co van ban/tin mo lai (WebSearch 08/11/2026); mo lai = khoi phuc co che hao, hao khong ben => khong cong",
-   "source": "REPORT.md dong 30; TOP5C #4; quet 08/11"
   },
   {
    "item": "Du phong moi truong 100 ty/quy: mot lan/huu han 4 quy/vinh vien, 1/3 moi nhanh [UL]",
@@ -326,61 +439,62 @@
    "item": "Phap ly khong vao base",
    "basis": "luat user 02/11: vu an chi WARNING; bao song song truc haircut tien rong",
    "source": "model_r2.py LEGAL"
+  },
+  {
+   "item": "Mo lai khai truong 25: w=0,5 (cach B, user duyet 08/11)",
+   "basis": "giu xac suat cua r2/r3-goc (model.py:37); khong co van ban/tin mo lai (quet 08/11) nhung cung khong co quyet dinh dong vinh vien — xac suat 0,5 [UL] la ngoai sinh, user chot",
+   "source": "dispatch Taylor_20261108_175121; TOP5C muc DGC #4"
+  },
+  {
+   "item": "Nhanh mo lai: +500 ty lai gop 2028 GIU; bien tang VINH VIEN (terminal 1.000 ty/nam) = 0",
+   "basis": "lai gop 2028 = loi ich co hoc cua quang tu khai (giam gia von quang mua ngoai) trong tam nhin du bao — khong phai thuong moat; bien vinh vien = hao chi phi ben, ma moat_durable=false => khong cong (quy uoc user 08/11: moat chi cong khi ben)",
+   "source": "model.py:37 (up28=500, up=1000); ADDENDUM_5F_r2.md §2"
   }
  ],
- "implied_by_price": {
-  "price": 33000.0,
-  "ebit_mult_for_center_eq_price": 0.6055,
-  "center_if_prov_permanent_certain": 36718,
-  "center_if_xau_certain": 35005,
-  "center_if_xau_and_permanent": 30215,
-  "note": "tam headline o r=13,5%, khai truong dung, NS so sach binh quan; he so EBIT ap len Q4/26, 2027, 2028 va terminal",
-  "reading": "Gia 33.000 ~ P10 ket cuc. De TAM = 33.000 can EBIT loi chi ~0.61x co so mai mai (tren nen R2, khai truong dung), hoac kich ban xau chac chan + du phong vinh vien chac chan (30215). Rieng du phong vinh vien chac chan: 36718; rieng kich ban xau chac chan: 35005."
- },
- "bridge_r2_to_r3": [
+ "headline_vs_alternatives_note": "Dong *_term = cong bien vinh vien (thuong moat) — chi doi chieu voi r3, khong phai ung vien headline.",
+ "bridge_r3_to_r3b": [
   {
-   "step": "r2 (tai lap)",
-   "center_pre": 45088,
-   "center_post_ck_r3": 44761,
+   "step": "r3 headline (w=0)",
+   "center_pre": 41825,
+   "center_post": 41522,
    "delta_pre": null
   },
   {
-   "step": "c1 bo chong lan du phong tren nen r4",
-   "center_pre": 47124,
-   "center_post_ck_r3": 46783,
-   "delta_pre": 2037
-  },
-  {
-   "step": "c2 trong so 0,25/0,5/0,25",
-   "center_pre": 47778,
-   "center_post_ck_r3": 47432,
-   "delta_pre": 653
-  },
-  {
-   "step": "c3 RONIC = Ke",
-   "center_pre": 45661,
-   "center_post_ck_r3": 45331,
-   "delta_pre": -2116
-  },
-  {
-   "step": "c5 nen bien R2 (thay r4+fix; R2 khong chong lan)",
+   "step": "w 0 -> 0,5 voi bien vinh vien 1.000 (= r3 dong w=0,50)",
    "center_pre": 48101,
-   "center_post_ck_r3": 47753,
-   "delta_pre": 2440
+   "center_post": 47753,
+   "delta_pre": 6276
   },
   {
-   "step": "c4 mo lai khai truong w 0,5 -> 0",
-   "center_pre": 41825,
-   "center_post_ck_r3": 41522,
-   "delta_pre": -6276
-  },
-  {
-   "step": "CK 5 ty ADV250 06/11 (0,725%) va gia moi",
-   "center_post_ck_r3": 41522,
-   "note": "r2 CK 0,712% @04/11 -> 44.767; r2 tai lap o CK moi = 44761"
+   "step": "bo bien vinh vien nhanh mo lai (cach B) = r3b",
+   "center_pre": 42154,
+   "center_post": 41849,
+   "delta_pre": -5947
   }
  ],
- "skeptic_check": {
+ "r3_line_corrections": {
+  "ore_w0_10": {
+   "r3_report": 42768,
+   "r3b": 41587,
+   "why": "r3 dong w=0,10 gom bien vinh vien 1.000 ty; cach B bo => 41.587 (khop skeptic)"
+  },
+  "ore_w0_25": {
+   "r3_report": 44637,
+   "r3b": 41685
+  },
+  "ore_w0_50": {
+   "r3_report": 47753,
+   "r3b": 41849
+  }
+ },
+ "skeptic_check_r3b": {
+  "skeptic_center": 41849,
+  "skeptic_p10": 33272,
+  "taylor_center": 41849,
+  "taylor_p10": 33272,
+  "verdict": "TRUNG SO (tai lap doc lap bang calc_r3b/model_r3b.py)"
+ },
+ "skeptic_check_r3": {
   "c1_dem_doi": {
    "verdict": "DUNG ve ban chat, so khac",
    "skeptic": 1612,
@@ -399,9 +513,8 @@
    "why": "r3 ap reinv=1-g/Ke cho ca 2027-28 tuong minh lan terminal (nhu cau truc model_r2)"
   },
   "c4_khai_truong": {
-   "verdict": "DUNG; r3 di xa hon: base w=0",
-   "r3_single_post_w0": -6813,
-   "note": "w>=0,10 => nhan DUOI vung; nhan phu thuoc gan hoan toan vao truc nay"
+   "verdict": "THAY bang cach B (user duyet 08/11): w=0,5, bien vinh vien nhanh mo lai = 0",
+   "r3b_center_post": 41849
   },
   "c5_nen_bien": {
    "verdict": "DUNG; R2 co dong co so => len BASE",
@@ -427,17 +540,23 @@
    "note": "ZaloPay 10.000 cp gia von 39.775 ~ 35% NAV theo skeptic (chua doi soat broker trong phien nay) >> tran sleeve 2-4%; §2.5 NON (tru #2 DN tu nhan truot)"
   }
  },
+ "text_fixes_vs_r3": [
+  "REPORT_r3.md:72 vi the: 10.000 x 33.000 = 330,0 tr = 35,3% NAV theo GIA THI TRUONG (NAV 934,55 tr ngay 06/11, nav_history_ZaloPay.csv); 42,6% neu tinh theo gia von 39.775 (397,75 tr). Doi soat broker dnse_raw_2026-11-08 (tradeQuantity 10000, costPrice 39775).",
+  "REPORT_r3.md:72 'tru #2' la tieu chi §2 (khong phai §2.5).",
+  "REPORT_r3.md:17 vien sai 'luat 3c' cho nen bien R2 — co so that la so BCTC Q3/26 (bien gop 20,5% gom du phong / 24,6% bo du phong), Q3 chay hoan toan quang mua ngoai, R2 19,5% ~ trung vi 4 peer 19,47%."
+ ],
  "axes_included": [
   "kich ban EBIT 2027-28 (R2)",
   "du phong moi truong lap (xuong)",
   "Nghi Son (hai chieu)",
   "he so EBIT loi (hai chieu)",
-  "lai huy dong (hai chieu)"
+  "lai huy dong (hai chieu)",
+  "mo lai khai truong 25 (len, chi phan 2028; w 0,5)"
  ],
  "axes_excluded": [
   {
-   "axis": "mo lai khai truong 25 (len)",
-   "reason": "khong co co so du lieu + moat khong ben; bao song song w 0,10/0,25/0,50"
+   "axis": "bien tang vinh vien cua nhanh mo lai",
+   "reason": "moat khong ben (cach B); bao doi chieu ore_w*_term"
   },
   {
    "axis": "phap ly (haircut tien rong)",
@@ -464,8 +583,6 @@
    "source": "BCTC HN Q3/2026 note 11 p30"
   }
  ],
- "center_vs_p50_note": "tam 41522 vs P50 ket cuc 41087 vs tham so trung tam 43410 (tham so trung tam = du phong huu han 4 quy; tam thap hon vi nhanh vinh vien -7.696 d/cp w 1/3). P10 do nhanh xau x du phong vinh vien quyet dinh.",
- "label_fragility": "Gia 33.000 chi tren P10 32.931 +0,2%: TRONG vung mong manh. DUOI vung neu mo lai khai truong w>=0,10, la chan thue 20%, hoac RONIC 20%.",
  "warnings": [
   "Vu an moi truong/khai thac/ke toan: CT HDQT cu Dao Huu Huyen (18,38%) bi tam giam 17/03/2026; khoi to them TGD Luu Bach Dat, TV HDQT Nguyen Quoc Trung, PTGD Phung Trong Tu, GD mo KT25 Trinh Quoc Khanh (07/2026). Phap nhan: chua thay quyet dinh khoi to phap nhan (quet 29/10 + WebSearch 05/11). Dieu 76 BLHS cho phep truy cuu phap nhan voi toi 227/235",
   "Y kien NGOAI TRU BCTC kiem toan 2025: 950,9 ty ton kho chua du bang chung + noi dung vu an (VietnamFinance 06/10/2026) — chua dong",
@@ -473,19 +590,20 @@
   "Du phong moi truong 200 ty (2 quy): mot lan hay lap CHUA phan dinh; TKV chi BVMT ~1.000+ ty/nam (tien le chi thuong xuyen co ton tai — ERRATA r11)",
   "Du phong moi truong KHONG duoc tru thue khi trich (TT48/2019) — chi phi thue hieu dung co the cao hon",
   "PAT (con): CT HDQT mien nhiem sau khoi to (28/07); TSB doi lanh dao 05-06/10",
-  "Tap trung vi the ZaloPay 10.000 cp",
   "Quet WebSearch 08/11/2026: chua thay tin truy to/xu phat phap nhan DGC moi sau 05/11; vu Lilama (cao trang VKS Lao Cai) lien quan cong ty con DGC Lao Cai mua quang — da biet",
-  "Tap trung vi the ZaloPay 10.000 cp (~35% NAV theo skeptic) >> tran sleeve 2-4% NAV — KHONG du dieu kien §2.5 (NON)"
+  "Tap trung vi the ZaloPay 10.000 cp = 35,3% NAV gia thi truong (42,6% gia von) >> tran sleeve 2-4% NAV — xem exit_discipline; KHONG du dieu kien §2.5 (NON)"
  ],
- "fear_buy_25": "NON: P/B me ~0,96 dat, tru #2 (NN chi phoi) truot — DN tu nhan",
  "open_issues": [
   "Von Nghi Son 2.400/2.900 chua co van ban goc",
   "Trong so mo lai khai truong va trong so du phong lap la [UL]",
   "EBIT 2027-28 nen r12 chua cap nhat luu huynh/P4 sau 28/10",
   "LCTT lech 48,23 ty",
   "Room ngoai",
-  "HTM 9.531 chua doi chieu PDF goc",
-  "Vi the ZaloPay chua doi soat broker trong phien nay"
+  "HTM 9.531 chua doi chieu PDF goc"
  ],
- "lock": "calc/LOCK_r3_md5.txt (19 file)"
+ "fear_buy_25": "NON: §2.5 — P/B me ~0,96 dat; tru #2 cua §2 (nha nuoc chi phoi) truot — DN tu nhan => NON dung",
+ "label_fragility": "Gia 33.000 duoi P10 33.272 chi 0,8%%: DUOI vung mong. Lat ve TRONG neu: w mo lai = 0 (r3), nen bien r4, trong so kich ban r2 0,3/0,5/0,2, hoac co truc phap ly. Giu DUOI o co sleeve that.",
+ "center_vs_p50_note": "tam 41849 vs P50 41362 vs tham so trung tam (khai truong dung) 43410; nhanh mo lai chi them +659 d/cp truoc CK (lai gop 2028), bo 11.883 d/cp bien vinh vien.",
+ "lock": "calc_r3b/LOCK_r3b_md5.txt (ghi 2026-11-09T00:54:10+0700 truoc compare)",
+ "reproduce": "$DNA_PYEXE -I calc_r3b/model_r3b.py -> LOCK -> compare_r3b.py -> make_summary_r3b.py; control assert r3 41.825 truoc CK (model_r3_out.json) + 3 dong mo lai r3"
 }

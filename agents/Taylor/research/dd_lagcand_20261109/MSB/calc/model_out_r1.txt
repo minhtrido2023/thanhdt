@@ -1,0 +1,72 @@
+Thanh khoan: 2025-11-04..2026-11-06 n=250 | sigma ngay 0.0161 | ADV trung vi 250 90.2 ty, 60 124.2, 20 151.8
+  CK Q=5 ty: 0.3796% | Q/ADV250 5.5435% | so phien thoat @15% ADV: 0.370
+  CK Q=0.04 ty: 0.0340% | Q/ADV250 0.0443% | so phien thoat @15% ADV: 0.003
+  CK Q=0.01 ty: 0.0170% | Q/ADV250 0.0111% | so phien thoat @15% ADV: 0.001
+
+== Tung kich ban (tham so trung tam, truoc CK) ==
+  XAU w=0.275: 8,899 d/cp (P/B ngu y tren BVPS 30/09 0.71x)
+  CO_SO w=0.45: 13,230 d/cp (P/B ngu y tren BVPS 30/09 1.06x)
+  TOT w=0.275: 16,435 d/cp (P/B ngu y tren BVPS 30/09 1.31x)
+BVPS 30/09 = 12,515 (sau CP thuong); LNST TTM 6,265 ty, EPS TTM 1,673
+
+HEADLINE truoc CK: {'center': 12787, 'p10': 8685, 'p25': 10270, 'p50': 13016, 'p75': 14799, 'p90': 16435, 'min': 7161, 'max': 18144, 'n': 27}
+HEADLINE sau CK 5 ty: {'center': 12739, 'p10': 8652, 'p25': 10231, 'p50': 12967, 'p75': 14743, 'p90': 16373, 'min': 7134, 'max': 18075, 'n': 27, 'pct_below_px': 0.8625} | trung tam tham so 13180
+Gia (chi gan nhan) 16350 @2026-11-06: TRONG vùng; px/tam +28.3%; luat4 (px <= 0,85 x tam = 10,828): False
+
+== Do nhay (tam co trong so, sau CK 5 ty) ==
+  dep-100bp_beta0.5: 13,550 (+6.4%)
+  dep-100bp_beta1.0: 14,429 (+13.3%)
+  dep-50bp_beta0.5: 13,136 (+3.1%)
+  dep-50bp_beta1.0: 13,550 (+6.4%)
+  dep+50bp_beta0.5: 12,357 (-3.0%)
+  dep+50bp_beta1.0: 11,990 (-5.9%)
+  dep+100bp_beta0.5: 11,990 (-5.9%)
+  dep+100bp_beta1.0: 11,296 (-11.3%)
+  A_khong_quyen_mua: 12,707 (-0.2%)
+  B_bao_phu_80pct: 12,302 (-3.4%)
+  C_terminal_tang_truong_g6_RONIC=ROE_T: 13,073 (+2.6%)
+  D_moat_NONE_ROE_ve_Ke_5nam(thong tin rui ro): 12,598 (-1.1%)
+  Ke ngu y de tam = gia 16350: 11.54% (dep12T ngu y 5.44%)
+
+== Kiem co Gordon P/B tu dong (P/B=(ROE-g)/(Ke-g)) ==
+  ROE5Y 17.2% Ke 12.3% g 6%: P/B 1.78x -> 22,309 d
+  ROE5Y 17.2% Ke 13.3% g 6%: P/B 1.54x -> 19,253 d
+  ROE5Y 17.2% Ke 13.5% g 6%: P/B 1.50x -> 18,739 d
+  ROE_Min5Y 14.2% Ke 12.3% g 6%: P/B 1.30x -> 16,290 d
+  ROE_Min5Y 14.2% Ke 13.3% g 6%: P/B 1.12x -> 14,058 d
+  ROE_Min5Y 14.2% Ke 13.5% g 6%: P/B 1.09x -> 13,683 d
+  ROE trailing Q3/26 14.1% Ke 12.3% g 6%: P/B 1.28x -> 16,071 d
+  ROE trailing Q3/26 14.1% Ke 13.3% g 6%: P/B 1.11x -> 13,870 d
+  ROE trailing Q3/26 14.1% Ke 13.5% g 6%: P/B 1.08x -> 13,500 d
+  ROE10Y 11.4% Ke 12.3% g 6%: P/B 0.86x -> 10,767 d
+  ROE10Y 11.4% Ke 13.3% g 6%: P/B 0.74x -> 9,292 d
+  ROE10Y 11.4% Ke 13.5% g 6%: P/B 0.72x -> 9,044 d
+
+Phan phoi (sau CK):
+  XAU        7,134  w=0.0138
+  XAU        7,347  w=0.0206
+  XAU        7,560  w=0.0344
+  XAU        8,439  w=0.0275
+  XAU        8,652  w=0.0413
+  XAU        8,865  w=0.0688
+  XAU        9,805  w=0.0138
+  XAU       10,018  w=0.0206
+  XAU       10,231  w=0.0344
+  CO_SO     11,257  w=0.0225
+  CO_SO     11,470  w=0.0338
+  CO_SO     11,683  w=0.0563
+  CO_SO     12,754  w=0.0450
+  CO_SO     12,967  w=0.0675
+  CO_SO     13,180  w=0.1125
+  TOT       14,315  w=0.0138
+  CO_SO     14,317  w=0.0225
+  TOT       14,528  w=0.0206
+  CO_SO     14,530  w=0.0338
+  TOT       14,741  w=0.0344
+  CO_SO     14,743  w=0.0563
+  TOT       15,947  w=0.0275
+  TOT       16,160  w=0.0413
+  TOT       16,373  w=0.0688
+  TOT       17,649  w=0.0138
+  TOT       17,862  w=0.0206
+  TOT       18,075  w=0.0344

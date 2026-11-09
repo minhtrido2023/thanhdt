@@ -1,0 +1,36 @@
+== HHS VONG 3 | gia 9,990 (2026-11-06, BQ) | r 13.50% (dep 12T 7.40% cctg_12m(2026-11-02); neo 7.40%)
+s_obs = 0.7016 (bien gop 52.05%) | khoi HTK cu 6,009.8 ty
+CK 5 ty: r2 1.4430% | r3 1.4097% (ADV250 16.22 ty, ADV60 9.50 ty, CK ADV60 1.4549%) | 10tr 0.0630% 40tr 0.1261%
+  Q/ADV250: 5 ty 30.84% (TREN vung hieu chinh ~0,1-20% => CK co the bi danh gia THAP) | 10tr 0.062% | 40tr 0.247%
+CONTROL r2 tai lap (04/11): n=5400 | tam 10,387 | P10 8,252 P25 9,097 P50 10,194 P75 11,468 P90 12,827 | %duoi gia 35.2% | min 6,070 max 16,834
+BRIDGE 0 r2 (gia 9.550 04/11): tam 10,387
+BRIDGE 1 gia+thanh khoan 06/11: tam 10,391 (buoc +4) P10 8,255 P90 12,831 %duoi 45.4% n=5400
+BRIDGE 2 #1 gia goc HTK cu cung pv(y), y 2,5/3,25/4 (s r2): tam 8,850 (buoc -1,541) P10 6,927 P90 11,008 %duoi 77.7% n=16200
+BRIDGE 3 #2 s = bien NC-II quan sat 0,70, lech kich ban doi xung +-0,15: tam 9,933 (buoc +1,083) P10 7,844 P90 12,308 %duoi 55.8% n=16200
+BRIDGE 4 #3 CK quan tri ra khoi tam (do nhay): tam 10,347 (buoc +414) P10 8,287 P90 12,719 %duoi 46.4% n=4050
+BRIDGE 5 #4 I.14 doi xung +-15%, ky quy ra do nhay: tam 10,324 (buoc -23) P10 8,281 P90 12,695 %duoi 46.6% n=2025
+BRIDGE 6 #6 trong so kich ban doi xung 0,25/0,50/0,25: tam 10,413 (buoc +89) P10 8,342 P90 12,795 %duoi 44.5% n=2025
+BRIDGE 7 BDSDT base theo so (truc 50/100/150%): tam 10,761 (buoc +348) P10 8,624 P90 13,207 %duoi 36.6% n=2025
+BRIDGE 8 #5 CK holding base 0% (HEADLINE): tam 13,969 (buoc +3,208) P10 12,422 P90 15,564 %duoi 0.0% n=405
+HEADLINE r3 (sau CK 5 ty): n=405 | tam 13,969 | P10 12,422 P25 13,140 P50 13,917 P75 14,775 P90 15,564 | %duoi gia 0.0% | min 10,994 max 17,339
+Truoc CK: n=405 | tam 14,169 | P10 12,599 P25 13,328 P50 14,116 P75 14,986 P90 15,786 | %duoi gia 0.0% | min 11,151 max 17,587
+Sleeve 40tr: n=405 | tam 14,151 | P10 12,583 P25 13,311 P50 14,099 P75 14,967 P90 15,766 | %duoi gia 0.0% | min 11,137 max 17,565
+Gia tri tai tham so trung tam (CO_SO, ds 0, y 3,25, BDSDT 100%, I.14 0, CK holding 0) sau CK 5 ty: 13,893
+Song song co_CK_holding_r2 (0/15/25/35/45%, ky vong 27%): n=2025 | tam 10,761 | P10 8,624 P25 9,468 P50 10,559 P75 11,823 P90 13,207 | %duoi gia 36.6% | min 6,871 max 17,339 | TRONG vùng
+Song song co_CK_holding_va_quan_tri_r2: n=8100 | tam 10,331 | P10 8,171 P25 9,028 P50 10,135 P75 11,422 P90 12,796 | %duoi gia 46.7% | min 5,841 max 17,339 | TRONG vùng
+Song song co_CK_holding_y4: n=675 | tam 10,220 | P10 8,251 P25 9,060 P50 10,036 P75 11,222 P90 12,458 | %duoi gia 48.3% | min 6,871 max 15,569 | TRONG vùng
+Song song co_CK_holding_y2.5: n=675 | tam 11,319 | P10 9,118 P25 9,995 P50 11,125 P75 12,417 P90 13,851 | %duoi gia 24.6% | min 7,553 max 17,339 | TRONG vùng
+Song song y_co_dinh_2.5: n=135 | tam 14,734 | P10 13,358 P25 13,946 P50 14,712 P75 15,510 P90 16,147 | %duoi gia 0.0% | min 12,233 max 17,339 | DƯỚI vùng
+Song song y_co_dinh_4.0: n=135 | tam 13,229 | P10 12,018 P25 12,542 P50 13,193 P75 13,891 P90 14,476 | %duoi gia 0.0% | min 10,994 max 15,569 | DƯỚI vùng
+Song song co_truc_CK_quan_tri_r2: n=1620 | tam 13,411 | P10 11,682 P25 12,470 P50 13,381 P75 14,332 P90 15,165 | %duoi gia 0.2% | min 9,345 max 17,339 | DƯỚI vùng
+Song song trong_so_kich_ban_r2_0.30/0.50/0.20: n=405 | tam 13,859 | P10 12,384 P25 13,019 P50 13,812 P75 14,635 P90 15,446 | %duoi gia 0.0% | min 10,994 max 17,339 | DƯỚI vùng
+Song song lech_s_kich_ban_r2_-0.25/+0.15: n=405 | tam 13,853 | P10 12,128 P25 12,930 P50 13,836 P75 14,757 P90 15,564 | %duoi gia 0.0% | min 10,571 max 17,339 | DƯỚI vùng
+Song song BDSDT_r2_0/50/100: n=405 | tam 13,492 | P10 11,945 P25 12,663 P50 13,441 P75 14,298 P90 15,087 | %duoi gia 0.0% | min 10,517 max 16,862 | DƯỚI vùng
+Song song co_truc_ky_quy: n=810 | tam 13,950 | P10 12,415 P25 13,110 P50 13,906 P75 14,757 P90 15,532 | %duoi gia 0.0% | min 10,929 max 17,339 | DƯỚI vùng
+Song song co_truc_r_pm1pp: n=1215 | tam 13,972 | P10 12,430 P25 13,117 P50 13,921 P75 14,787 P90 15,572 | %duoi gia 0.0% | min 10,786 max 17,583 | DƯỚI vùng
+Do nhay o to CO_SO LNST 42 x P/E 7,4 thay 35 x 6: +0 d/cp
+GIA NGU Y: CK holding co dinh 33.5% | y (headline) 8.72 nam | y (ban CK holding r2) 4.35 nam | dich s (headline) khong co nghiem trong mien | dich s (ban CK holding) -0.227
+NHAN: 5 ty DƯỚI vùng | 40tr DƯỚI vùng | gia 9,990 vs tam 13,969 (-28.5%) vs P10 12,422 (-19.6%)
+Luat 4 (gia <= 0,85 x tam): 5 ty nguong 11,874 -> DAT | 40tr nguong 12,029 -> DAT
+BAN CK HOLDING (song song): tam 10,761 P10 8,624 P90 13,207 -> TRONG vùng; luat 4 nguong 9,147
+SUMMARY.json (r3) written

@@ -1,0 +1,26 @@
+r 13.5000% (dep 7.40% cctg_12m(2026-11-02)); VCSH me 12,159.1 = 12,119 d/cp (74.1% tam)
+CONTROL r2 center_pre 13,857.2 (file 13,857.2); hold0 15,028.4 (file 15,028.4)
+bridge r2 tai lap (control): 13,857.2
+bridge dinh chinh 1: CK holding -> base 0% (truc sang song song): 15,028.4
+bridge dinh chinh 2a: thang du dat cu nhat quan voi g quan sat (s=s(g), g 51,9% +-5pp): 16,337.1
+bridge dinh chinh 2b/3: backlog m=m(g) cung truc g doi xung +-5pp (r2 0,30/0,335/0,36 lech): 16,346.8
+R3 n=27 center_pre 16,346.8; tham so trung tam (g 51,9% ca hai, s 0.697, m 0.3352) 16,310.5; min 15,468.1 max 17,349.1
+song song hold_0_10_20_30: center_pre 15,055.1 (n=108) — r3 + truc CK holding {0;10;20;30} deu (r2)
+song song hold_r1_10_20_30: center_pre 14,624.5 (n=81) — r3 + CK holding {10;20;30} deu (r1, ky vong 20%)
+song song hold_27: center_pre 14,021.8 (n=27) — r3 + CK holding 27% co dinh (tham chieu HHS)
+song song gov_5: center_pre 15,529.5 (n=27) — r3 + CK quan tri 5%
+song song gov_10: center_pre 14,712.1 (n=27) — r3 + CK quan tri 10%
+song song gov_15: center_pre 13,894.8 (n=27) — r3 + CK quan tri 15%
+song song sgtl_loss_100: center_pre 15,670.8 (n=27) — stress mat 100% tien gui SGTL 678,3 (can duoi cuc doan)
+song song new_land_m10: center_pre 16,191.7 (n=27) — quy dat moi -10%
+song song new_land_p10: center_pre 16,501.9 (n=27) — quy dat moi +10%
+song song share_khac_050: center_pre 16,299.9 (n=27) — so huu H1+khac 0,50
+song song share_khac_100: center_pre 16,378.1 (n=27) — so huu H1+khac 1,00
+song song both_g40: center_pre 14,714.4 (n=27) — ca backlog va dat cu o g 40% (+-5pp) — chieu xuong, khong co du lieu
+song song skeptic_s_40_55_70: center_pre 15,671.9 (n=27) — skeptic: hold 0, m r2, s {40;55;70}
+song song skeptic_s_55_70_85: center_pre 16,315.4 (n=27) — skeptic: hold 0, m r2, s {55;70;85}
+song song skeptic_bl_g40: center_pre 14,696.4 (n=27) — skeptic: hold 0, s r2, backlog m=m(40%)
+song song r2_s_40_keep: center_pre 15,038.0 (n=27) — r3 nhung giu s r2 {25;40;55} (khong nhat quan)
+r_sens_pre {"-1%": 16470.0, "+0%": 16346.8, "+1%": 16228.7}
+gordon TTM_BQ_796: LN 796.1 ROE co lai 6.55% => 4,094; khong lai 5.64% + tien => 5,252
+gordon norm_r2_727_UL: LN 727.4 ROE co lai 5.98% => 3,442; khong lai 4.89% + tien => 4,600

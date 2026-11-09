@@ -1,0 +1,255 @@
+{
+ "ticker": "FPT",
+ "asof_price_date": "2026-11-04",
+ "price": 53900.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 0.07400000000000001,
+  "date": "2026-11-03",
+  "source": "cctg_12m(2026-11-02)",
+  "asof_rate": 0.07400000000000001,
+  "rule": "r = 13,5% + beta x (dep - dep_neo), beta = 1 (gia dinh)"
+ },
+ "center_pre_liq": 54305,
+ "center_post_liq": 54203,
+ "p10_post": 32389,
+ "p50_post": 55182,
+ "p90_post": 74557,
+ "p25_post": 39897,
+ "p75_post": 66124,
+ "p10_pre": 32449,
+ "p50_pre": 55285,
+ "p90_pre": 74697,
+ "liq_disc_5ty": 0.0018661001545660569,
+ "px_vs_center_post": -0.005598029246979608,
+ "px_vs_p10_post": 0.6641656376485396,
+ "px_vs_p90_post": -0.27706757418349337,
+ "grid_desc": "Luoi co trong so n=45: kich ban XAU/CO SO/TOT (w 0,35/0,45/0,20) x dich ty le chuyen lai thanh tien conv -0,20/-0,10/0/+0,10/+0,20 (san 0,10) x dich g dai han -1/0/+1 pp (deu); r co dinh 13,50%; DCF FCFE loi + FTEL/FRT thi gia 04/11 co CK + lien ket khac so + tien rong + XDCB do dang (NPV 0). Ban SAU = nhan (1 - CK thanh khoan 5 ty, Y=1,0).",
+ "grid_n": 45,
+ "label": "TRONG vùng",
+ "zone_old": {
+  "low": 55000,
+  "center": 54800,
+  "high": 66700,
+  "dd_date": "2026-11-01",
+  "center_kind": "expected_weighted"
+ },
+ "center_change_vs_old": -0.04775547445255479,
+ "sens_r": {
+  "b0.5_-100bp": {
+   "r": 0.13,
+   "value": 54019,
+   "dv": 1739,
+   "pct": 0.03325399410100727
+  },
+  "b0.5_-50bp": {
+   "r": 0.1325,
+   "value": 53127,
+   "dv": 846,
+   "pct": 0.016181462625246112
+  },
+  "b0.5_+50bp": {
+   "r": 0.1375,
+   "value": 51478,
+   "dv": -803,
+   "pct": -0.015358172863845887
+  },
+  "b0.5_+100bp": {
+   "r": 0.14,
+   "value": 50715,
+   "dv": -1566,
+   "pct": -0.02995412870464631
+  },
+  "b1.0_-100bp": {
+   "r": 0.125,
+   "value": 55961,
+   "dv": 3680,
+   "pct": 0.07038276206310745
+  },
+  "b1.0_-50bp": {
+   "r": 0.13,
+   "value": 54019,
+   "dv": 1739,
+   "pct": 0.03325399410100727
+  },
+  "b1.0_+50bp": {
+   "r": 0.14,
+   "value": 50715,
+   "dv": -1566,
+   "pct": -0.02995412870464631
+  },
+  "b1.0_+100bp": {
+   "r": 0.14500000000000002,
+   "value": 49297,
+   "dv": -2984,
+   "pct": -0.057074893958599326
+  }
+ },
+ "change_reason": "r: Ke theo kich ban 13,4/12,85/12,3% -> MOT r 13,5% (-2,761 d/cp, chu yeu kich ban TOT mat Ke 12,3%); FOX/FRT theo thi gia 04/11 + XDCB do dang GD theo gia so (NPV 0) +242; kich ban/conv/g giu nguyen ban 01/11. Vung cu 55,000-66,700 = 1 truc g x Ke cua kich ban co so; moi = P10-P90 luoi n=45 (30,520-72,235).",
+ "warnings": [
+  "FTEL: Nha nuoc (Bo Cong an) kiem soat ~50,16%, FPT 45,66% theo von chu; free float FOX <= ~4,2%; CK FTEL 0/15/30% theo kich ban",
+  "Khoan 'chi phi phat trien khach hang' 618,8 ty chua thuyet minh (cau hoi IR)",
+  "Dong tien 9T/26 am (conv -0,12) - bien so quyet dinh la CFO Q4/26",
+  "Phat thue 0,244 ty da nop (khong trong yeu); PwC soat xet 6T chap nhan toan phan"
+ ],
+ "open_issues": [
+  "Lai lien ket khong tach theo cong ty; Q4/25 lai LK 600 ty la uoc luong",
+  "conv 2021-2023 chua do cung dinh nghia",
+  "Gia tri lien ket khac (Synnex, FPT Online) theo so 1.500 ty (uoc luong)",
+  "Chua quet tin moi 02-04/11/2026",
+  "XDCB do dang chi gom 4 khuon vien da liet ke (760 ty); co the trung lap mot phan voi g1"
+ ],
+ "round": "r2",
+ "job": "Taylor_20261105_020013",
+ "p10_out": 32389,
+ "p50_out": 55182,
+ "p90_out": 74557,
+ "pct_weight_below_price": 0.47524999999999995,
+ "n_outcomes": 540,
+ "min_outcome": 25463,
+ "central_param_value_post": 58579,
+ "ck_ref_size": {
+  "size_vnd": 5000000000.0,
+  "disc_adv250": 0.0018661001545660569,
+  "disc_adv60": 0.0021383838490488184,
+  "adv250": 566137945500.0,
+  "adv60": 346013429000.0
+ },
+ "ck_real_sleeve": {
+  "sizes_vnd": [
+   10000000.0,
+   40000000.0
+  ],
+  "disc_adv250": {
+   "10tr": 8.345453596865136e-05,
+   "40tr": 0.0001669090719373027
+  },
+  "nav_spacex_ref": 940000000.0,
+  "note": "Q/ADV250 (vung hieu chinh uoc luong ~0,1%-20% ADV): 5 ty 0.883% -> trong vung; 10tr 0.002% -> DUOI vung (CK that ~ nua spread, chua do); 40tr 0.007% -> DUOI vung (CK that ~ nua spread, chua do); 5 ty / ADV60 = 1.45%"
+ },
+ "parallel_versions": {
+  "co_truc_r_pm1pp": {
+   "n": 1620,
+   "center": 54384,
+   "p10": 32289,
+   "p25": 39766,
+   "p50": 55163,
+   "p75": 66377,
+   "p90": 75477,
+   "pct_below_px": 0.47522916666666654,
+   "min": 24935,
+   "max": 103459
+  },
+  "khong_truc_frt_d": {
+   "n": 180,
+   "center": 54203,
+   "p10": 32300,
+   "p25": 39903,
+   "p50": 55081,
+   "p75": 66065,
+   "p90": 74546,
+   "pct_below_px": 0.47300000000000003,
+   "min": 26731,
+   "max": 92992
+  },
+  "khong_truc_oth": {
+   "n": 135,
+   "center": 53615,
+   "p10": 31622,
+   "p25": 39022,
+   "p50": 54968,
+   "p75": 65422,
+   "p90": 73503,
+   "pct_below_px": 0.4924999999999999,
+   "min": 26760,
+   "max": 91666
+  }
+ },
+ "drivers": {
+  "p10_scen_mix_pm5pct": {
+   "XAU": 1.0
+  },
+  "p90_scen_mix_pm5pct": {
+   "CO_SO": 0.314,
+   "TOT": 0.686
+  }
+ },
+ "zone_old_r1": {
+  "center": 52183,
+  "p10": 30520,
+  "p90": 72235,
+  "label": "TRONG vùng"
+ },
+ "axes_included": [
+  "kich ban XAU/CO_SO/TOT (0,35/0,45/0,20; FTEL CK 30/15/0% trong kich ban)",
+  "dich conv -0,20..+0,20 (5 diem deu, san 0,10)",
+  "dich g -1/0/+1pp (deu)",
+  "FRT quanh thi gia +20/0/-20% (0,25/0,50/0,25) [UL]",
+  "lien ket khac + TPB/FTS lech so: -1.300/0/+1.100/+2.600 d/cp (0,2/0,3/0,3/0,2) [UL; SKEPTIC T6a/T6b]"
+ ],
+ "axes_excluded": [
+  {
+   "axis": "r (Ke)",
+   "reason": "luat 03/11 neo lai huy dong; ban song song co_truc_r_pm1pp"
+  },
+  {
+   "axis": "tien khach ung truoc 2.370 ty (hoc phi + nguoi mua tra truoc)",
+   "reason": "float theo mua (vong 1 §3); khong tru; neu tru: -1.257 d/cp (doi chieu)"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "FTEL (FOX) chiet khau theo kich ban 30/15/0%",
+   "effect_dong_per_share": -1495,
+   "basis": "free float FOX <= ~4,2%, Nha nuoc (Bo Cong an) ~50,16% kiem soat; CV 1906 18/03/2026 thoi hop nhat",
+   "source": "dd_FPT_20261101/REPORT.md §6; Q3HN p14"
+  },
+  {
+   "item": "FRT",
+   "effect_dong_per_share": 0,
+   "basis": "thi gia 04/11 x 46,54% (vong 1 tru 20% khong co co so -> bo khoi base, chuyen thanh truc)",
+   "source": "BQ tav2_bq.ticker 04/11 (assoc_px_20261104.csv)"
+  },
+  {
+   "item": "XDCB do dang khuon vien GD 760 ty",
+   "effect_dong_per_share": 0,
+   "basis": "gia so = NPV 0",
+   "source": "Q3HN p37"
+  },
+  {
+   "item": "Lien ket khac 1.500 ty",
+   "effect_dong_per_share": 0,
+   "basis": "theo so (uoc luong, BCTC khong tach); lech so nam o truc oth",
+   "source": "uoc luong"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong luoi 54,203; P50 55,182; gia tri tai tham so trung tam 58,579",
+ "gordon_crosscheck": {
+  "A_khong_lai_tg_g0.04": 52205,
+  "B_co_lai_tg_g0.04": 49029,
+  "A_khong_lai_tg_g0.05": 55954,
+  "B_co_lai_tg_g0.05": 53203
+ },
+ "lock_md5": {
+  "FPT/calc/fpt_r2.py": "e6d0ac32e6f6374afcf2c9cd2e8bba21",
+  "FPT/calc/fpt_redo.py": "7fb57f0d6fbf4085b8f04bcf0c8c7011",
+  "FPT/calc/assoc_px_20261104.csv": "33772a6e33add436e5732eb65929eb1f",
+  "_common_014125/common.py": "89e390381402790204264c5c2ae1254a",
+  "_common_014125/r2common.py": "b664ec37b7728c5ccaa06b0a77d7d76c",
+  "_common_014125/bq_px_liq_20261104.csv": "442f39a3d556f43f75fa5f3f5519c2e9",
+  "_shared/wpct.py": "4597bc083f0d64d8873141b12fbfb3a6",
+  "../../../../../deposit_rate_vn.py": "13dac039539fb91fc8f7256c03a71e5d",
+  "../../../../../cctg_rate_vn.py": "f9605983ad3b66b47ed80179bcad81da",
+  "../../../../../data/deposit_rate_vn_events.csv": "1bb3c27280abc1dbd014af7eecf8b3d4",
+  "../../../../../data/cctg_rate_vn_events.csv": "fc06e3a866142684d87a43b34e0f17d2",
+  "../../../../kb/dd_price_zones.json": "820180d3042303876d46a5a3bcd9bfbd"
+ },
+ "warnings_r2_added": [
+  "Vay ngoai te 30/09 trung tung dong voi 30/06 (JPY, EUR) - nghi chua danh gia lai ty gia [SKEPTIC T; GAPS G15]",
+  "Giao dich ben lien quan 9T: mua Synnex 663 ty (cung ky 308), ban FRT 386, FTEL 115/211 [Q3HN p47-48]",
+  "Bao cao quan tri 6T/2026 chua doc",
+  "ETR 11,1% -> 15,2% chua ro nguyen nhan (thue toi thieu toan cau hay het uu dai)",
+  "Thanh tra So TT&TT Binh Duong ve chi nhanh FTEL (2022-24) - khong trong yeu"
+ ],
+ "fear_buy_eligible_2_5": false
+}

@@ -1,0 +1,20 @@
+{
+ "job": "Taylor_20261108_180128", "ticker": "FPT", "round": "r3", "price_date": "2026-11-06",
+ "price_note": "gia 50.800 (06/11) da biet tu TOP5D_CORRECTIONS dong 1 truoc khi ghi LOCK; file gia lay BQ truoc LOCK — minh bach",
+ "headline_config": {"weights": "sym 0,275/0,45/0,275", "ronic_terminal": "Ke ca 3 kich ban", "nci_deduct": true, "ftel_discount": "0% (base); 30/15/0% song song", "assoc_px": "06/11", "phase_ronic_cap": null, "q4_25_assoc": 600},
+ "assumptions": [
+  {"name": "trong so kich ban XAU/CO_SO/TOT", "value": "0,275/0,45/0,275", "basis": "D1 skeptic: r2 0,35/0,45/0,20 dem 2 lan du lieu conv (v2 da ha conv XAU 0,60->0,40 roi lai nang w XAU 0,30->0,35, REPORT.md:184); khong co du lieu doc lap cho nghieng => doi xung (tien le MBB D2)", "source": "fpt_r2.py:45-47; dd_FPT_20261101/REPORT_v1.md:31", "tag": "[UL] doi xung"},
+  {"name": "RONIC terminal", "value": "= Ke (13,5%) moi kich ban; conv_T = 1 - gT/Ke", "basis": "ADDENDUM_5F moat_durable=false => moat khong ben, RONIC=Ke (luat user); r2 ngam 16%/26,7%/5%", "source": "ADDENDUM_5F.md; fpt_r2.py:40"},
+  {"name": "conv giai doan 5 nam", "value": "XAU 0,40 / CO_SO 0,75 / TOT 0,85, dich -0,2..+0,2", "basis": "giu r2: conv 9T/26 -0,12, FY25 0,60, FY24 1,07; RONIC ngam 5 nam 36%/93% co 1 phan du lieu (2025 LN me +19,3% voi conv 0,60 => ~48%)", "source": "dd_FPT REPORT 4c", "tag": "do nhay chan 25,5%/17,7%/Ke"},
+  {"name": "g 5 nam", "value": "3%/9%/14%", "basis": "giu r2 (da qua skeptic 01/11)", "source": "fpt_r2.py SC"},
+  {"name": "loi ich CDKKS", "value": "-1.165,8 ty", "basis": "ma 429 BCD HN 30/09/2026; LNST CDKKS 9T26 ~ -1,6 ty nen LN mo hinh ~ LN me, phan CDKKS nam tren tai san rong (tien) cong 100%", "source": "dd_FPT_20261101/calc/notes_q3_bctc.md:85,143-145"},
+  {"name": "FOX 45,66% / FRT 46,54% theo thi gia 06/11", "value": "FOX 53.800, FRT 142.000 x OShares BQ", "basis": "thi gia (D4)", "source": "BQ tav2_bq.ticker -> px_fpt_r3_20261106.csv"},
+  {"name": "chiet khau FTEL", "value": "0% base", "basis": "do lon 30/15/0% la [UL] (khong co du lieu do lon); luat user: CK holding/quan tri [UL] ra do nhay base 0% (tien le DRI#1/PVT#1/TCH#1); gia FOX da la gia co phan thieu so", "source": "TOP5D D7", "tag": "song song 30/15/0%"},
+  {"name": "lai lien ket Q4/25", "value": "600 ty", "basis": "uoc luong, CHUA KIEM (GAPS G10); do nhay 740 (nhip 9T/26)", "source": "fpt_r2.py:18", "tag": "[UL] chua kiem"},
+  {"name": "FRT truc +20/0/-20% (0,25/0,5/0,25)", "value": "doi xung quanh thi gia", "basis": "giu r2", "source": "fpt_r2.py FRT_AX", "tag": "[UL]"},
+  {"name": "truc lien ket khac + TPB/FTS lech so", "value": "-1.300/0/+1.100/+2.600 d/cp @0,2/0,3/0,3/0,2", "basis": "giu r2 (SKEPTIC_20261101 T6a/T6b); khong co dinh chinh vong 3", "source": "fpt_r2.py OTH_AX", "tag": "[UL]"},
+  {"name": "XDCB khuon vien GD 760 ty", "value": "gia so = NPV0", "basis": "luat 03/11", "source": "Q3HN p37"},
+  {"name": "tien khach ung truoc 2.370 ty", "value": "khong tru (base)", "basis": "float theo mua; do nhay tru", "source": "notes_q3_bctc.md 312+319", "tag": "do nhay"},
+  {"name": "r", "value": "13,5% + 1,0 x (dep12T(06/11) - 7,40%)", "basis": "luat user; dep12T 06/11 = cctg_12m(2026-11-02) 7,40% => 13,50%", "source": "deposit_rate_vn.effective_deposit_rate"}
+ ]
+}
