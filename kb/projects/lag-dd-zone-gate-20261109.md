@@ -14,5 +14,8 @@ Tắt = đổi hằng số `LAG_DD_ZONE_GATE_ENABLED=False` trong code (không e
 ## Hệ quả ngày 1 (09/11)
 Plan 10/11 có 4 LAG buy (BSR 25.950 / CSV 22.600 / GAS 73.000 / MSB 16.300) — tất cả TRÊN tâm (17.496 / 20.717 / 50.146 / 13.018) ⇒ cổng loại cả 4 ở cả 2 TK.
 
-## Điều kiện THOÁT — CHƯA định nghĩa bằng số (cần user chốt)
-"Khi edge LAG trở lại bình thường" chưa có thước đo. Đề xuất: dùng `edge_health_monitor` (nhãn edge-health causal) trở lại mức không-FAIL liên tục N tháng, HOẶC mốc xem lại cứng 2026-12-15 (trùng checkpoint `lag-adv-filter-tracking.md`). Mặc định: KHÔNG tự tắt.
+## Điều kiện THOÁT — user chốt 09/11 23:3x ICT (`decided_by: user`)
+- KHÔNG có dấu hiệu đáy đáng tin (mean12 là trung bình trượt 12 tháng, trễ 25 phiên + dữ liệu về theo mùa BCTC ⇒ không phải bộ dò đáy).
+- Nếu chưa có dấu hiệu: **khi có 1 THÁNG DƯƠNG trở lại ⇒ XEM XÉT candidate của quý đó** (user quyết từng lần; cổng không tự tắt). **Mốc xem lại cứng 15/12/2026.**
+- Mike diễn giải "tháng dương" = TB lợi suất 25 phiên của các sự kiện LAG theo `known_date` (nhân quả) > 0 VÀ ≥30 sự kiện (tháng ít sự kiện là nhiễu: 2026-08 n=4 +3,6%). Đo bằng `bin/lag_gate_exit_check.py` (chỉ đọc). Số 09/11: tháng đủ mẫu gần nhất 2026-09 −0,04% (n=96), 06 −3,18%, 05 −4,74%; dương gần nhất 2026-03 +1,67% — chưa có tháng dương mới.
+- Dữ liệu `lag_edge_health.csv` về theo lô (known_date cuối 23/09): thường chỉ 3-4 tháng/năm có đủ mẫu ⇒ "tháng dương" thực tế xuất hiện theo mùa BCTC, không đều.
