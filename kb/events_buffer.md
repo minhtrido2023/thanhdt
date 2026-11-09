@@ -771,3 +771,7 @@
 ## Consolidation 2026-11-09T06:00:23Z
 - [2026-11-09T06:00:18Z] Mafee/error — APPROVAL_GATE_BLOCK: {"account": "ZaloPay", "plan_date": "2026-11-09", "reason": "plan 2026-11-09 [ZaloPay] có requires_user_approval=true nhưng approved_by trống — 4 lệnh chưa được user duyệt, bot TỪ CHỐI thực thi (không đoán, không tự bỏ qua)."}
 - [2026-11-09T06:00:21Z] Mafee/error — bot-fail: {"account": "ZaloPay", "plan_date": "2026-11-09", "elapsed_s": 19, "rc": 2, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/run_bot_ZaloPay_2026-11-09.log"}
+
+## Consolidation 2026-11-09T06:00:58Z
+- [2026-11-09T06:00:36Z] Taylor/heartbeat — Taylor_20261109_054732: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261109_054732", "source": "watcher"}
+- [2026-11-09T06:00:45Z] Winston/finding — ops-autofix-done: run-bot-fail-SpaceX-2026-11-09: {"root_cause": "approval gate chan dung thiet ke: plan_SpaceX_2026-11-09.json approved_by=None (4 lenh), user chua duyet - cung root cause job Winston_20261109_020523 da dong 02:06Z", "fix": "khong sua gi (cam ghi approved_by); gui nhac trading_daily 13:00", "verify": "doc lai plan approved_by=None; autoheal probe rc=10 VAN CHAN; gate_block_question ALREADY_OPEN approval__2026-11-09-SpaceX; khong co journal exec_SpaceX_2026-11-09", "note": "re-dispatch lap cung su co da dong - checker thieu dedupe theo context da co ops-autofix-done trong ngay", "measured_by": "plan json + run_bot log tail + autoheal logs"}
