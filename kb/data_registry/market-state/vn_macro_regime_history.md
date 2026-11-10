@@ -30,6 +30,7 @@ last_update_19: 2026-11-01 (Bobby — SECTOR READ real-time BLIND KCN cho thuê 
 last_update_19: 2026-11-01 (Bobby — SECTOR READ real-time BLIND nhóm CNTT VN 3 khối: (1a) xuất khẩu phần mềm STRUCTURAL ~0,45 / CYCLICAL ~0,45 / ADMIN ~0,10 ambiguous ~50/50; (1b) CĐS nội địa ADMIN_GATED ~0,60 (giải ngân KHCN-CĐS 41,18% tại 26/10); (2a) băng rộng cố định STRUCTURAL bão hoà ~0,55 clean; (2b) TTDL ADMIN_GATED ~0,45 (giá điện TT 60/2025) / STRUCTURAL ~0,40 ambiguous; (3) giáo dục tư ADMIN_GATED ~0,55 (NQ 217/2025 miễn HP công lập, dự thảo trần ĐH tự chủ 2,5x) ambiguous ~60/40; FORECAST F1-F15 tới 2027-09-30; chi tiết ở file con sector_read_cntt_vienthong_giaoduc_vn_20261101.md)
 last_update_20: 2026-11-09 (Bobby — SECTOR READ real-time BLIND ngành lọc hoá dầu nội địa VN: CYCLICAL ~0,55 (đỉnh crack do cú sốc cung Hormuz/XK vùng Vịnh; xăng đỉnh T7, diesel đỉnh T9, chỉ số crack TE 66→48; late-peak → early-decline) / ADMIN_GATED ~0,30 (thuế NK MFN 0% + BVMT 0 đ/l tới 31/12/2026, giá bán, lệnh chạy tối đa, E10) / STRUCTURAL ~0,15 — ambiguous ~60/40; cả 2 nhà máy TA năm 2027; FORECAST F1-F6 (BQ tự chấm) + D1-D11 tới 2028-12-31; chi tiết ở file con sector_read_loc_hoa_dau_20261109.md)
 last_update_20: 2026-11-09 (Bobby — SECTOR READ real-time BLIND hoá chất cơ bản VN xút–clo + axit: biên xút–clo CYCLICAL ~0,45 / STRUCTURAL ~0,35 / ADMIN_GATED ~0,20, ambiguous ~55/45; xút TQ đáy 3 năm (sunsirs 568 CNY/t, −30% YoY); axit = cú sốc lưu huỳnh tạm thời đang đảo chiều (clean ~0,85); FORECAST khoá 20/60/120 ngày + E1-E4; chi tiết ở file con sector_read_hoa_chat_xut_clo_20261109.md)
+last_update_21: 2026-11-10 (Bobby — REGIME READ #3 real-time BLIND, cửa sổ 01/07→10/11/2026 VNINDEX ≈−8%: nhãn C điều chỉnh thanh khoản/dòng tiền cổ phiếu trên nền STRUCTURAL_ACCUMULATION nhẹ; trục 1 CONFIDENCE_LIQUIDITY ~60/STRUCTURAL ~40, trục 2 EXTERNAL_CYCLE (Fed/ngoại/dầu/thuế 301) + CONTAINABLE tái diễn (liên NH cuối tháng); ambiguous; bảng 5 tầng, 10 chỉ báo dẫn, dự báo khoá tới 2027-05-10)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1936,3 +1937,129 @@ Báo cáo đầy đủ: `reports/bobby_vn_macro_update_20261014.md`. Không dùn
 - **Kịch bản 6-12T (JUDGMENT):** A tích tụ tiếp có quản lý 50-55% · B đóng băng thanh khoản BĐS cục bộ 20-25% (nguy hiểm nhất với hệ mình) · C stress hệ thống 5-10% · D hạ cánh mềm sớm 15-20%.
 - **Mốc:** 17/10 QH khai mạc (3 luật Đất đai/Nhà ở/KDBĐS) · ~20/10-14/11 BCTC Q3 · 07/11 check tháng · 01/12 TT 50 · T12-T1 CCTG Big-4 ≥7,7% hoặc liên NH 3M >7,5%.
 - **Không đổi** V2.4/DT5G/margin (playbook thesis 08-26). Đính chính trong ngày: bản sáng dùng 6,4% làm lãi huy động chính, đã sửa chiều 14/10 theo chỉ đạo user.
+
+---
+
+## REGIME READ #3 (không phải episode chính thức) — cửa sổ 01/07 → 10/11/2026, VNINDEX ≈ −8% (Bobby, real-time BLIND, đọc 2026-11-10)
+
+**Dispatch bởi Mike.** Đầu vào duy nhất về giá: VNINDEX giảm ~7-8% trong cửa sổ (tự đọc BQ `tav2_bq.ticker`
+VNINDEX, chặn `time <= 2026-11-10`: 1.867 (01/07) → đáy 1.668,5 (22/07, −10,6% sau 15 phiên) → 1.832 (28/08) →
+1.705-1.690 (14-19/10) → 1.714 (09/11)). KHÔNG có forward-return, KHÔNG kết quả chiến lược/danh mục nào được cấp hay
+dùng. Ghi rõ: (dữ kiện) = số có nguồn + ngày; (suy luận) = của Bobby.
+
+### Phân loại
+- **Nhãn: C — ĐIỀU CHỈNH THANH KHOẢN/DÒNG TIỀN CỔ PHIẾU (de-leverage chậm) trên nền STRUCTURAL_ACCUMULATION tín dụng
+  mức nhẹ chưa crystallize. KHÔNG phải khủng hoảng cấu trúc đa năm; KHÔNG phải cú sốc niềm tin có tên cần một can
+  thiệp nhắm đích.** Confidence `ambiguous`.
+- **Trục 1 (gốc rễ cú giảm giá):** `CONFIDENCE_LIQUIDITY` ~60 / `STRUCTURAL` ~40. Động lực giá là dòng tiền (khối ngoại
+  bán ròng kỷ lục, margin kỷ lục trên thanh khoản thấp, lãi suất thực cao, cú thuế 301 tháng 7), KHÔNG phải lạm phát
+  cầu kéo (core đang GIẢM). Nền tín dụng > huy động vẫn là lớp Loại-1 đang tích luỹ — GIỮ ~55/45 như entry 10-13.
+- **Trục 2:** lớp dòng ngoại/Fed/dầu/thuế Mỹ = `EXTERNAL_CYCLE` (VN không quyết mốc kết thúc: Fed còn chu kỳ tăng,
+  thị trường định giá 81,2% tăng 12/2026). Lớp thanh khoản liên NH cuối tháng = `CONTAINABLE` (mỗi lần đều được OMO/
+  swap xử trong ~1 tuần) nhưng **TÁI DIỄN mỗi cuối tháng** (cuối T8, 21/09, cuối T10) ⇒ triệu chứng của nền thiếu vốn
+  cấu trúc, không phải sự kiện rời.
+- **Không đổi nhãn regime nền** (quy tắc đổi nhãn 09-30/10-13 không kích hoạt — bảng 7 chỉ báo bên dưới).
+
+### Chuỗi nguyên nhân (dữ kiện, ngày nguồn)
+1. **Chặng 07/2026 (cú −10,6%):** Mỹ áp Mục 301 **12,5%** với VN hiệu lực 24/07 (thay 10% Mục 122; ~49% kim ngạch XK
+   sang Mỹ được miễn — TT WTO 07/2026); họ VIC/VHM giảm sàn trắng bên mua 22/07; tin xấu riêng mã VCG/PC1/TV2/DGC/PNJ;
+   lo bán giải chấp; "lãi suất thực cao" (nhadautu 22/07). ⇒ CONFIDENCE_LIQUIDITY, trigger ngoại sinh có tên.
+2. **Chặng 09-11/2026 (trôi dần):** khối ngoại bán ròng HOSE T10 **~22,2-24,0 nghìn tỷ** (tháng thứ 3 liên tiếp, cao
+   nhất năm), 10T ~121,9 nghìn tỷ; sở hữu ngoại HOSE ~13% (thấp nhất ~8 năm) (VnEconomy, Báo Đấu thầu, 24hMoney 11/2026)
+   — "sell-on-news" quanh FTSE 21/09. Tuần 02-06/11 chậm lại: ~0,87 nghìn tỷ, phiên 06/11 mua ròng ~394 tỷ.
+   Margin CTCK **>457,5 nghìn tỷ** cuối Q3 (kỷ lục, +14,1% YTD; FiinTrade) trong khi GTGD bình quân Q3 ~14,8 nghìn tỷ/
+   phiên ⇒ (suy luận) đòn bẩy cao trên thanh khoản mỏng = cung bán tiềm năng khi giá giảm.
+3. **Chi phí vốn:** áp lực vốn vẫn ở MỨC cao dù HƯỚNG niêm yết đang giảm hành chính (bảng 5 tầng).
+4. **Chính sách: NỚI, không siết.** CV 9608/NHNN-CSTT (18/10) + chỉ đạo 19-20/10: giảm ≥0,5pp lãi tiền gửi NIÊM YẾT
+   kỳ hạn ≥6T, giảm 1,5-2pp lãi vay SXKD, không chạy đua huy động, vi phạm có thể bị hạ room (LSVN, VCCI 21/10) — đợt
+   thứ 4 trong năm (CV 3972 14/05, 4190 21/05, 07/2026). TT 50/2026 nâng trần LDR 85→95% hiệu lực 01/12. OMO giữ 4,5%.
+   Swap 2 tỷ USD kỳ hạn **182 ngày** (lần đầu) từ 06/11 (TBTCVN 06/11). Không có văn bản siết hệ thống nào.
+5. **Lạm phát = cost-push đang tan ở lõi:** CPI T10 **5,09% YoY** (tháng 2 liên tiếp >5%), +0,20% MoM do xăng +6,86%,
+   gas +10,35%; **core 4,04% YoY, −0,05% MoM**; BQ 10T CPI 4,57% (vượt trần 4,5%), core 4,24% (NSO qua TTTCTT 03/11).
+   Brent đỉnh ~117 (27/10) rồi ~95-98 đầu 11 (−16% trong tuần; nationthailand/qatar-tribune 11/2026, chưa đối chiếu ICE).
+6. **Tăng trưởng thật mạnh:** GDP Q3 **9,95%**, 9T 9,01% (NSO 03/10). XNK 10T 1.010 tỷ USD; tháng 10 xuất siêu
+   **~7,3 tỷ USD** (tháng thứ 2), 10T nhập siêu ~12,1 tỷ (từ 19,4 tỷ sau 9T) (TBTCVN/VietnamPlus 11/2026).
+7. **FX yên, VND mạnh lên:** trung tâm 25.615 (06/11); VCB bán 26.462 (07/07) → 26.020 (28/10) → **25.720 (10/11)**
+   (−2,8% từ đầu cửa sổ; `data/vcb_fx_rate.csv`); tự do ~26.070 (+1% so VCB). DXY ~101-103. Dự trữ: số cuối 87,6 tỷ USD
+   (18/06) — không có số mới.
+8. **Ngoại sinh:** Fed tăng 25bp 16/09 lên 3,75-4,00%, GIỮ 28/10 (10-2, Cook + Hammack muốn tăng) (federalreserve.gov
+   28/10); thị trường định giá 81,2% tăng 12/2026 (TTTCTT 05/11). VIX ~19,5 tuần 02/11 dù tech rout (Cboe).
+9. **Lợi nhuận Q3:** chưa có số tổng hợp đủ mẫu (FiinGroup 797/1.518 DN, 77% vốn hoá tới 30/10, không thấy % tăng
+   chung). Dự báo MBS ~+25%, HSC ~+30% (giảm tốc từ +38% Q1, +49% Q2). BĐS 69/127 DN +237%. Ngân hàng: chi phí dự
+   phòng 27 NH +42,5% YoY (SHS). ⇒ (suy luận) lợi nhuận KHÔNG phải nguyên nhân của cú giảm; định giá/dòng tiền mới là.
+
+### Bảng 5 tầng chi phí vốn (as-of 02-10/11/2026)
+| Tầng | Số | Hướng |
+|---|---|---|
+| A. Niêm yết Big-4 | 12M online **6,8%** (4/4 NH, CSV 02-09/11) · 12M quầy **5,9 → 5,4%** (−0,5pp sau CV 9608; VCB 5,4 ghi trong CSV 09/11) · 6M online 6,6% · 6M quầy: không có số mới | quầy GIẢM, online ĐỨNG |
+| B. CCTG Big-4 | VCB 6M **7,5%** · BIDV/CTG 6-9M 7,2%, 12M **7,4%** (CSV 02/11, không đổi từ 01/10) · spread CCTG12M − online12M +0,6pp; − quầy12M **+2,0pp** (từ +1,5) | ĐỨNG — directive không chạm CCTG |
+| C. Ngoài Big-4 | trần niêm yết 12M thị trường ~7,0%; MB/VPB/TCB/STB/OCB/BAB/NCB giảm 0,3-0,6pp từ ~20/10 · CCTG VPB **9,0%** (≥100tr, 184-389 ngày), TCB 6M 8,0 → **7,6%**, MB 6M 7,1% · 1 NH cộng thêm tới **9,1%** (CafeF 06/11) · số NH ≥7%: không có số | niêm yết GIẢM, "ẩn" vẫn ~9% |
+| D. Thị trường | ON **5,79% (30/10) → 4,51% (05/11)**; 1W 5,0; 1M 5,27; 3M **7,47 → 6,60%** · OMO 4,5%: bơm ròng +28,2 nghìn tỷ (26-30/10), hút ròng −4,0 nghìn tỷ (02-06/11) · swap 2 tỷ USD/182 ngày từ 06/11 · TPCP 10Y + tỷ lệ trúng thầu: không có số · USD/VND ở mục 7 | giảm sau cuối tháng, MỨC 3M vẫn ≈ CCTG |
+| E. Lượng | tín dụng **11,94% YTD (26/10), ~12,27% cuối T10** (Thống đốc tại QH 31/10, "khoảng") · YoY ~16,4% (**suy luận**: 1,1227×1,19/1,1477; giả định 2025 cả năm ~19%, 28/10/2025 14,77%) · huy động T10: không có số · sự kiện nới: TT 50 (LDR 95% từ 01/12) | tín dụng GIẢM TỐC chậm |
+**Đồng thuận:** A-quầy + C-niêm yết cùng hướng giảm (cùng một nguyên nhân hành chính). **Phân kỳ:** B (CCTG Big-4 đứng
+7,4-7,5), C-ẩn (~9%), D-3M (6,6-7,5) KHÔNG giảm. Cơ chế (suy luận, khớp entry 10-13): CV 9608 chỉ nhắm "lãi tiền gửi
+NIÊM YẾT"; CCTG + thoả thuận tiền gửi lớn nằm ngoài ⇒ giá vốn biên lộ ra ở đó. **HƯỚNG: niêm yết đi xuống (hành chính);
+MỨC: chi phí vốn biên thật ~7,4-9%, cao hơn niêm yết online 0,6-2,2pp — độ tin cậy trung bình-cao.** Quầy 12M Big-4
+giảm KHÔNG chạm định nghĩa "xu hướng hạ" của team (luật lấy kênh cao nhất = online 6,8% đứng; CCTG 6M 7,5% đứng).
+
+### 7 chỉ báo của entry 09-30 — trạng thái 10/11
+| # | Số | Cột |
+|---|---|---|
+| 1 Tín dụng | ~12,27% YTD cuối T10; YoY ~16,4% (suy luận) | GIỮA, nghiêng bác nhẹ |
+| 2 CPI/core | CPI 5,09% (2 tháng >5% = chạm cột xác nhận) NHƯNG core 4,04% giảm | cost-push ⇒ KHÔNG tính (quy tắc 09-09) |
+| 3 ON/OMO | ON 5,79-5,81% cuối T10 (<6%); bơm ròng tuần 26-30/10 | GIỮA (tái diễn cuối tháng) |
+| 4 Vốn biên | CCTG Big-4 ≤7,5% (bác) · ẩn ~9% · niêm yết giảm | PHÂN KỲ |
+| 5 FX | trung tâm 25.615 <25.800; VCB 25.720 | BÁC |
+| 6 NPL Q3 | 27 NH niêm yết **2,12%** (1,87% cuối 2025; Q2 1,97%); bao phủ **74%** (SHS) / ~80% (FiinRatings, 28 NH, thấp nhất 5 năm); nhóm 2 BIDV +25,6%, CTG ~+33% (kỳ so sánh không rõ) | GIỮA NPL; bao phủ CHẠM ngưỡng <75% của entry 10-13 (1 nguồn) |
+| 7 Tín dụng BĐS Q3 | không có số | — |
+⇒ 1/7 (bao phủ, 1 nguồn) ở cột xác nhận, 1/7 bác rõ (FX). Quy tắc đổi nhãn KHÔNG kích hoạt. Chưa tách được NPL trừ
+Sacombank cho Q3 (không có số).
+
+### 10 chỉ báo dẫn — ngưỡng "điều kiện vĩ mô đã thuận cho cổ phiếu" vs "còn xấu"
+⚠️ Đây là ngưỡng ĐIỀU KIỆN VĨ MÔ do Bobby đề xuất (judgment). Bobby KHÔNG biết và KHÔNG kiểm chứng sức dự báo của
+chúng với value/momentum/PEAD — việc đó thuộc Taylor + quant-skeptic, và ngưỡng escalate do user chốt.
+| # | Chỉ báo · tần suất · nguồn PIT | THUẬN | CÒN XẤU |
+|---|---|---|---|
+| L1 | Liên NH 3M bình quân tuần + ON 5 phiên cuối tháng · tuần · NHNN/VBMA PDF | 3M BQ tháng <6,0% VÀ ON cuối tháng <4% 2 kỳ liên tiếp (T11, T12) | 3M BQ tháng >7,5% HOẶC ON ≥6% ở 2 cuối tháng liên tiếp |
+| L2 | CCTG 12M cao nhất Big-4 · tuần · `cctg_rate_vn.py` / `data/cctg_rate_vn_events.csv` | ≤7,0% (giảm ≥0,4pp) | ≥7,6% (kill-switch A ARM) |
+| L3 | CCTG/tiền gửi "ẩn" nhóm tư nhân (VPB/TCB/MB) · tuần · `data/cctg_rate_vn_tier2_events.csv` | đỉnh ≤8,0% | đỉnh ≥9,5% hoặc thêm NH ≥9% |
+| L4 | Khối ngoại ròng HOSE · ngày/tháng · HOSE/báo | 2 tháng liên tiếp bán ròng <5 nghìn tỷ hoặc mua ròng | lại >15 nghìn tỷ/tháng |
+| L5 | Đòn bẩy/thanh khoản: GTGD khớp HOSE BQ 20 phiên (ngày, BQ `tav2_bq.ticker`) + margin CTCK (quý, FiinTrade) | GTGD BQ20 >20 nghìn tỷ, margin đi ngang | margin tăng tiếp khi GTGD BQ20 <15 nghìn tỷ |
+| L6 | USD/VND: VCB bán + trung tâm + chênh tự do · ngày · `data/vcb_fx_rate.csv`, NHNN | VCB bán <26.000, chênh tự do <1,5% | VCB bán >26.300 (+2,3%) trong ≤1 tháng, hoặc trung tâm >26.000 |
+| L7 | Fed + VIX + DXY · sự kiện/ngày · federalreserve.gov, Cboe | Fed GIỮ 09/12 và VIX <20 | Fed tăng + VIX >25 ≥5 phiên, hoặc DXY >105 |
+| L8 | Core CPI + Brent · tháng (NSO ~ngày 6) / ngày · `te_cpi_yoy_snapshot.csv` | core <4,0% và CPI <4,5% (mở dư địa nới thật) | core ≥4,5% và tăng 2 tháng (cầu kéo ⇒ nguy cơ siết hệ thống); Brent >115 bền |
+| L9 | Tín dụng YoY và chênh tín dụng−huy động YTD (cùng phạm vi, cùng mốc) · tháng · họp báo NHNN/NSO | YoY 14-16%, chênh <1pp | chênh >2pp HOẶC YoY lại ≥17% HOẶC <13% (siết cung) |
+| L10 | Chất lượng TS NH Q4 · quý (BCTC ~cuối 01/2027) · BCTC + SHS/FiinRatings | NPL 27 NH ≤2,1%, bao phủ ≥75% ổn định | NPL >2,4% hoặc bao phủ <70% |
+Đề xuất gộp (judgment): **THUẬN** khi ≥6/10 ở cột thuận VÀ L1, L6 không ở cột xấu; **CÒN XẤU** khi ≥3/10 cột xấu, hoặc
+L1 + L2 cùng xấu. Trạng thái 10/11 (ước, ô thiếu số tính là không thuận): thuận 2 (L6, L8 core), xấu 1-2 (L5 margin/
+GTGD; L10 bao phủ nghiêng), còn lại giữa ⇒ **CHƯA THUẬN, chưa "còn xấu" theo định nghĩa gộp**.
+
+### Dự báo khoá (falsifiable, Bobby chấm lại theo ngày)
+- **CHÍNH (đến 2027-05-10):** NHNN KHÔNG chuyển sang siết hệ thống — lãi OMO/tái cấp vốn vẫn ≤4,5%, KHÔNG cắt room tín
+  dụng diện rộng — VÀ không xảy ra sự kiện có tên (1 NH/1 tổ chức phát hành lớn) cần cứu nhắm đích. **P ≈ 75%.**
+  Sai nếu một trong hai xảy ra trước 10/05/2027.
+- F1 (mọi lần đọc tuần tới 2027-01-31): CCTG 12M cao nhất Big-4 nằm trong **[7,0%; 7,8%]** — P ≈ 70% (directive không
+  hạ được CCTG).
+- F2 (đến 2027-02-28): ON ≥5,0% ít nhất 1 phiên trong 5 phiên cuối T12/2026 HOẶC 10 phiên quanh Tết Đinh Mùi — P ≈ 75%.
+- F3 (NHNN công bố đầu 01/2027): tín dụng cả năm 2026 trong **[15,5%; 17,5%]** — P ≈ 70%.
+- F4 (NSO ~06/01/2027): core YoY T12/2026 <4,5% — P ≈ 75%; CPI T12 YoY trong [4,0; 5,5] — P ≈ 70%.
+- F5 (2027-02-26): tỷ giá trung tâm trong **[25.300; 26.100]** — P ≈ 80%.
+- F6 (BCTC Q4, ~cuối 01/2027): NPL 27 NH niêm yết > 2,12% — P ≈ 60%.
+
+### Điều gì đổi đọc này
+- **→ Loại-1 giai đoạn 2 (STRUCTURAL rõ):** core ≥4,5% tăng 2 tháng; NHNN siết hệ thống; F1 vỡ trần (CCTG Big-4
+  ≥7,8%) kèm 3M >7,5%; NPL Q4 >2,4% + bao phủ <70%.
+- **→ Loại-2 episode:** trigger có TÊN (NH/TPDN lớn) + phản ứng nhắm đích, trong khi L8/L9 vẫn bác.
+- **→ Bình thường hoá:** ≥6/10 cột thuận 2 tháng liên tiếp (đặc biệt L1, L2, L4).
+
+**Không xác minh được:** huy động T10 và chênh tín dụng−huy động cùng mốc; tín dụng YoY chính thức cuối T10; tín dụng
+BĐS Q3; NPL Q3 trừ Sacombank; dự trữ ngoại hối sau 18/06; TPCP 10Y + tỷ lệ trúng thầu; lợi nhuận Q3 tổng hợp đủ mẫu;
+Brent 06/11 từ ICE; số NH niêm yết ≥7%; mã số/văn bản gốc CV 9608 (chỉ qua báo).
+
+**Nguồn chính:** federalreserve.gov monetary20261028a (28/10) · thitruongtaichinhtiente.vn 86769 (03/11), 86726 (01/11),
+86808/86858 (05/11) · thoibaotaichinhvietnam.vn 206551 (06/11) · lsvn.vn a181148 + vcci.com.vn (20-21/10) · vneconomy.vn
+"Khối ngoại vẫn bán ròng hơn 22.000 tỷ" (11/2026) · baodauthau.vn post211930, post211687 · doanhnhan.baophapluat.vn
+(margin 457.500 tỷ, 10/2026) · vnbusiness.vn (nợ xấu, 05/11) · vietbao.vn 614600 (SHS) · nhadautu.vn d106505 (22/07) ·
+trungtamwto.vn 33105 (07/2026) · thitruongtaichinhtiente.vn 86006 (GDP, 03/10) · energyconnects.com (20/10) · Cboe
+"Week of 11/2/2026" · CSV nội bộ `deposit_rate_vn_events.csv`, `cctg_rate_vn*_events.csv`, `vcb_fx_rate.csv`,
+`te_cpi_yoy_snapshot.csv`; BQ `tav2_bq.ticker` VNINDEX ≤2026-11-10.

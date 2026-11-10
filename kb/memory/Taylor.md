@@ -25,3 +25,4 @@
 - [2026-11-10T06:02:44Z] CHỜ Mike arch-review BAL edge gate: code d0e01e21e (wt-bal-edge-gate-20261110) + mike c5c1e5374; khi merge phải chạy --bootstrap + cài cron (cần duyệt)
 - [2026-11-10T06:16:34Z] CHỜ Mike duyệt BAL edge gate VÒNG 2: code f103ae0fa (wt-bal-edge-gate-20261110) + mike 8f9250363; merge xong phải --bootstrap + cài cron (cần duyệt)
 - [2026-11-10T06:26:28Z] [bal-edge-monthly-gate 10/11] XONG job Taylor_20261110_053025: cong thang BAL HAI CAGR -2,62/-2,76pp (P>0 0,01), Calmar khong phan biet, DD tot hon = giam exposure (placebo); CHO quant-skeptic + user quyet; worktree wt-balgate-1110 giu de skeptic tai lap
+- [2026-11-10T08:30:26Z] [book-regime-fit 10/11] XONG job Taylor_20261110_082023: BAL binh thuong (beta), LAG lech duoi trai chua du goi gay, 0/32 bien timing; CHO quant-skeptic; next de xuat: per-event LAG
