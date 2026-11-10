@@ -965,3 +965,7 @@
 - [2026-11-10T12:07:16Z] DollarBill/heartbeat — DollarBill_20261110_120615: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261110_120615", "source": "watcher"}
 - [2026-11-10T12:07:18Z] DollarBill/heartbeat — DollarBill_20261110_120617: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261110_120617", "source": "watcher"}
 - [2026-11-10T12:07:51Z] DollarBill/decision — plan-ZaloPay-2026-11-11: {"plan": "HOLD ALL 0 lenh", "why": "BSR/CSV/GAS/MSB gia DNSE live > tam DD (luat 09/11); HTN/MZG/YEG FLAG_NO_ACK; TCH FLOOR_FAIL", "state": "NEUTRAL", "egg": 470663555}
+
+## Consolidation 2026-11-10T12:08:19Z
+- [2026-11-10T12:08:10Z] DollarBill/decision — plan-2026-11-11: {"account": "SpaceX", "plan_date": "2026-11-11", "decision": "HOLD ALL 0 lenh", "reason": "BSR/CSV/GAS/MSB gia DNSE live 25450/22600/73100/16350 > tam DD (luat 09/11); HTN/MZG/YEG chua ack DD; BAL 0; DT5G NEUTRAL; egg 751,3tr khong can chuyen", "status": "cho user duyet truoc 08:45 11/11"}
+- [2026-11-10T12:08:18Z] DollarBill/heartbeat — DollarBill_20261110_120617: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261110_120617", "source": "watcher"}
