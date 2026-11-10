@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-09T08:35:39Z] [dd-lagcand GAS r2 09/11] XONG job Taylor_20261109_083126: tam 46.488->50.146 (P10 43.327/P90 57.840) TREN vung @74.100; chua kiem: TM du phong 343, ly do mien nhiem; CHO Mike ghi so
 - [2026-11-10T03:54:07Z] [dd-dilution r4 10/11] XONG job Taylor_20261110_034232: HHS quyen 60%@10.000+co tuc CP 7% CHUA thuc hien, nhan DUOI khong doi (ex du 11.615/P10 10.711, TERP 9.346); SCL ex 28.000 > P90 ex 25.681 (5ty) TREN khong doi; ledger de xuat trong research/dd_dilution_update_20261110/SUMMARY.md; CHO Mike skeptic + ghi so
 - [2026-11-10T05:48:44Z] ĐANG DỞ job Taylor_20261110_053022 BAL edge gate: worktree wt-bal-edge-gate-20261110 (+mike wt agents/Taylor/wt-mike-bal-edge-20261110), selfcheck 65/0; NEXT: kiểm cắt cụt run e0930, bootstrap state, doc kb/projects/bal-edge-monthly-gate-20261110.md, commit, bus finding
 - [2026-11-10T06:02:44Z] CHỜ Mike arch-review BAL edge gate: code d0e01e21e (wt-bal-edge-gate-20261110) + mike c5c1e5374; khi merge phải chạy --bootstrap + cài cron (cần duyệt)
@@ -26,3 +25,4 @@
 - [2026-11-10T13:04:35Z] ĐANG DỞ job Taylor_20261110_125453 DD VGS: model khoa md5 191bb785, SUMMARY.json xong; NEXT: viet REPORT.md + bus finding
 - [2026-11-10T13:07:37Z] [dd-VGS 10/11] XONG job Taylor_20261110_125453: tam 26.520 sau CK5ty (P10 19.165/P90 34.314), gia 19.300 TRONG sat P10, luat4 dat; nua gia tri la lien ket+Legend City; CHO Mike skeptic + ghi so
 - [2026-11-10T13:08:02Z] CHỜ Mike skeptic+arch-review lag-cache-adjusted: code b16d7487d (wt-lagadj-1110) + mike 91a911827; R3 +0,92/+0,78pp vượt sàn nhiễu ⇒ user quyết re-pin; apply pkl + chạy refresh tay chỉ sau duyệt
+- [2026-11-10T13:20:38Z] [2026-11-10] dd-VGS r2 XONG job Taylor_20261110_131720: tam 26.778 (sau CK 1ty 26.526, P10 19.393/P90 34.722), gia 19.300 DUOI mong manh, luat4 dat; CHO Mike skeptic lan 2 + ghi so

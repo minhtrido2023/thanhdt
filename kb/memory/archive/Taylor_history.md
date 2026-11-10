@@ -2212,3 +2212,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-09T08:34:06Z] [dd-lagcand CSV r2 09/11] XONG job Taylor_20261109_083124: tam 17.273->20.717 (P10 15.825/P90 25.470) TRONG @22.600, luat4 khong dat; CHO Mike ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-09T08:35:39Z] [dd-lagcand GAS r2 09/11] XONG job Taylor_20261109_083126: tam 46.488->50.146 (P10 43.327/P90 57.840) TREN vung @74.100; chua kiem: TM du phong 343, ly do mien nhiem; CHO Mike ghi so
