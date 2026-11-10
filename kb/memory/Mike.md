@@ -12,3 +12,4 @@
 ## Mốc
 DT CRISIS ~11/10 sớm nhất; nav-loss-brake 11-09; commodity 11-25; BĐS 11-26; Livermore H20 03/12; LAG 12-15; audit đo lường ~12-27.
 
+- [2026-11-10T03:42:43Z] 10/11: DD pha loãng — Taylor_20261110_034232 làm HHS_r4+SCL_r4 (dd_dilution_update_20261110); xong → fundamental-skeptic → nhập entry mới vào kb/dd_price_zones.json
