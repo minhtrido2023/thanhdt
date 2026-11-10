@@ -2203,3 +2203,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-09T07:47:24Z] [dd-lagcand GAS 09/11] XONG job Taylor_20261109_073604: tam 46.488 (P10 39.010/P90 55.150) TREN vung @74.100 (r ngu y 6,2%); WARNING free float 4,24%; CHO Mike skeptic + ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-09T07:47:55Z] [dd-lagcand CSV 09/11] XONG job Taylor_20261109_073602: TREN vung @22.600 (tam 17.273 P10 12.739 P90 21.885); surprise = gia axit tam thoi; CHO Mike skeptic + ghi so
