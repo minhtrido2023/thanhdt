@@ -3378,6 +3378,48 @@
    "supersedes": "SCL@2026-10-29#4",
    "correction_reason": "GDKHQ quyền mua 15,4453% @12.500 đã xảy ra 09/11 ⇒ chuyển cơ sở cum (22.791/27.803 @29.400) sang ex (21.339/25.681 @28.000); mô hình không đổi.",
    "assumptions_md5": "0450ba0aee972c6c4ec97847fe2de68c"
+  },
+  {
+   "ticker": "VGS",
+   "dd_date": "2026-11-10",
+   "rev": 1,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 19393,
+   "center": 26526,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 18 kết cục r2 (lõi ống × liên kết 28,6% × Legend City), r 13,5%, sau CK thanh khoản cỡ thực thi ≤1 tỷ",
+   "zone_high": 34722,
+   "center_range": null,
+   "price_ref": 19300,
+   "price_date": "2026-11-10",
+   "verdict_label": "DƯỚI vùng (MONG MANH): giá 19.300 chỉ thấp hơn P10 0,5% ở cỡ ≤1 tỷ; ở cỡ 5 tỷ (không thực thi: 81% ADV250) là TRONG vùng (P10 19.165). Giá thấp hơn tâm sau CK 27,2% ⇒ luật 4 (≤0,85×tâm, ngưỡng 22.547) ĐẠT mọi cỡ và mọi độ nhạy (xấu nhất 23.379 trước CK, ngưỡng 19.685). ~nửa giá trị từ liên kết 28,6% không công bố (đỉnh chu kỳ) + Legend City; lõi ống+nợ ròng chỉ 15.033 < giá; moat NONE",
+   "skeptic_status": "vòng 1 fundamental-skeptic REFUTED mức văn bản (medium): hướng đúng, độ rẻ + nhãn lạc quan; vòng 2 (Taylor_20261110_131720) đã áp 9 đính chính (Phụ lục E), Mike kiểm md5/model khớp, KHÔNG chạy skeptic vòng 3 (cầu chì). Khoá: assumptions.json (r1) khoá 20:03 ICT trước khi lấy giá; assumptions_r2.json khoá 20:18 ICT SAU khi đã thấy giá (r2 thêm kịch bản xấu liên kết 0,7×sổ do skeptic chỉ ra, tâm 27.090→26.778) ⇒ khoá r2 chỉ chứng minh thứ tự chạy, không phải mù giá",
+   "source_file": "agents/Taylor/research/dd_VGS_20261110/REPORT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_VGS_20261110/REPORT.md",
+     "quote": "sau CK ở cỡ thực thi ≤1 tỷ là 26.526 (P10 19.393 · P90 34.722)",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_VGS_20261110/REPORT.md",
+     "quote": "Giá 19.300 (10/11/2026)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_VGS_20261110/calc/assumptions_r2.json",
+   "assumptions_md5": "c13014360aa523a102e31b5699c44db9",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-26",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "notes": "Cỡ 5 tỷ: tâm 26.215 · P10 19.165 · P90 34.314 (nhãn TRONG). Trước CK: tâm 26.778, P10 19.577, P50 28.410, P90 35.052. Độ nhạy liên kết: cơ sở=sổ 25.430; 0,75×sổ 24.911; cả ba kịch bản 0,75×sổ 23.379; cổ tức liên kết W2 đọc (b) 27.313; chiết khấu holding 30% 22.765. r 13,5% @ CCTG 12M 7,40% (02/11); ±50bp −2,4%/+2,6%. Mốc: M1 lãi liên kết Q4/26 (31/01/2027), M2 GPM Q4, M3 phải thu 31/12, M4 Legend City 31/12/2027, M5 kiểm toán 2026, M7 thuế AD HRC. Cờ quản trị W1–W7 (BKS từ nhiệm 09/2025; cổ tức liên kết 2025 nghi đếm hai lần; phải thu 2 khách; Vinaconex 2 chiều). dd_flag_verdict(VGS)=CLEAN. Chưa gửi email báo cáo.",
+   "recorded_at": "2026-11-10T20:30:00+07:00"
   }
  ],
  "center_kinds": [
