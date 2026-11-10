@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-09T07:47:20Z] [dd-lagcand MSB 09/11] XONG job Taylor_20261109_073606: tam 12.739 (P10 8.652/P90 16.373) TRONG sat canh tren @16.350, luat4 khong dat; moat NONE; CHO Mike skeptic + ghi so
 - [2026-11-09T07:47:24Z] [dd-lagcand GAS 09/11] XONG job Taylor_20261109_073604: tam 46.488 (P10 39.010/P90 55.150) TREN vung @74.100 (r ngu y 6,2%); WARNING free float 4,24%; CHO Mike skeptic + ghi so
 - [2026-11-09T07:47:55Z] [dd-lagcand CSV 09/11] XONG job Taylor_20261109_073602: TREN vung @22.600 (tam 17.273 P10 12.739 P90 21.885); surprise = gia axit tam thoi; CHO Mike skeptic + ghi so
 - [2026-11-09T08:33:26Z] [dd-lagcand MSB r2 09/11] XONG job Taylor_20261109_083128: tam 12.739->13.018 (P10 9.675/P90 16.373) TRONG bien tren @16.350, luat4 khong dat; CHO Mike ghi so
@@ -26,3 +25,4 @@
 - [2026-11-10T06:16:34Z] CHỜ Mike duyệt BAL edge gate VÒNG 2: code f103ae0fa (wt-bal-edge-gate-20261110) + mike 8f9250363; merge xong phải --bootstrap + cài cron (cần duyệt)
 - [2026-11-10T06:26:28Z] [bal-edge-monthly-gate 10/11] XONG job Taylor_20261110_053025: cong thang BAL HAI CAGR -2,62/-2,76pp (P>0 0,01), Calmar khong phan biet, DD tot hon = giam exposure (placebo); CHO quant-skeptic + user quyet; worktree wt-balgate-1110 giu de skeptic tai lap
 - [2026-11-10T08:30:26Z] [book-regime-fit 10/11] XONG job Taylor_20261110_082023: BAL binh thuong (beta), LAG lech duoi trai chua du goi gay, 0/32 bien timing; CHO quant-skeptic; next de xuat: per-event LAG
+- [2026-11-10T09:36:02Z] [2026-11-10] [book-regime-fit sua theo skeptic] XONG job Taylor_20261110_091634: gap gia pkl that, LAG -12,36% (A+codtuc), duoi trai con R3park0, yeu park70; CHO skeptic lan 2; khuyen owner pipeline them check so ma/phien

@@ -2197,3 +2197,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-09T07:46:34Z] [dd-lagcand BSR 09/11] XONG job Taylor_20261109_073600: tam 16.437 (P10 12.034/P90 22.286) TREN vung @26.250; KH 2026 dieu chinh ngu y Q4 lo; CHO Mike skeptic + ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-09T07:47:20Z] [dd-lagcand MSB 09/11] XONG job Taylor_20261109_073606: tam 12.739 (P10 8.652/P90 16.373) TRONG sat canh tren @16.350, luat4 khong dat; moat NONE; CHO Mike skeptic + ghi so
