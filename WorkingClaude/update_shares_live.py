@@ -72,6 +72,12 @@ CORP_ACTIONS = {
                  source="corp_action_daily snapshot 2026-09-14 (feed CONFIRMED, status executed): "
                         "ISS Co phieu thuong ti le 80.0% (exercise_ratio 0.8) + DIV tien mat "
                         "Ca nam 2025 1,400 VND (value_per_share 1400)")],
+    "TCB": [dict(ex_date="2026-10-29", stock_div_ratio=0.5, cash_div_per_share=0.0,
+                 source="tav2_bq.corporate_action id 6aa49b5403bfaa031b0c563c (fiinpro 12204128, "
+                        "executed): Tra co tuc 2025 bang co phieu ti le 50% (exercise_ratio 0.5), "
+                        "exright 2026-10-29, issue_volumn 3,543,120,207 = 7,086,240,414 x 0.5 khop; "
+                        "BQ Close/Price buoc x1.5 dung 10-29. Scanner key 10-30 (cash ~750) la "
+                        "phat hien lech 1 phien, KHONG phai su kien tien mat")],
 }
 WATCHLIST = list(CORP_ACTIONS.keys())
 
