@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-09T08:33:26Z] [dd-lagcand MSB r2 09/11] XONG job Taylor_20261109_083128: tam 12.739->13.018 (P10 9.675/P90 16.373) TRONG bien tren @16.350, luat4 khong dat; CHO Mike ghi so
 - [2026-11-09T08:34:06Z] [dd-lagcand CSV r2 09/11] XONG job Taylor_20261109_083124: tam 17.273->20.717 (P10 15.825/P90 25.470) TRONG @22.600, luat4 khong dat; CHO Mike ghi so
 - [2026-11-09T08:35:39Z] [dd-lagcand GAS r2 09/11] XONG job Taylor_20261109_083126: tam 46.488->50.146 (P10 43.327/P90 57.840) TREN vung @74.100; chua kiem: TM du phong 343, ly do mien nhiem; CHO Mike ghi so
 - [2026-11-10T03:54:07Z] [dd-dilution r4 10/11] XONG job Taylor_20261110_034232: HHS quyen 60%@10.000+co tuc CP 7% CHUA thuc hien, nhan DUOI khong doi (ex du 11.615/P10 10.711, TERP 9.346); SCL ex 28.000 > P90 ex 25.681 (5ty) TREN khong doi; ledger de xuat trong research/dd_dilution_update_20261110/SUMMARY.md; CHO Mike skeptic + ghi so
@@ -26,3 +25,4 @@
 - [2026-11-10T09:36:02Z] [2026-11-10] [book-regime-fit sua theo skeptic] XONG job Taylor_20261110_091634: gap gia pkl that, LAG -12,36% (A+codtuc), duoi trai con R3park0, yeu park70; CHO skeptic lan 2; khuyen owner pipeline them check so ma/phien
 - [2026-11-10T11:02:22Z] CHỜ arch-review vòng 2 lagcache: nhánh session/lagcache-1110 49e70d6df; bf13v2 (research/book_regime_fit_20261110/backfill13_v2, px md5 4974943…) --apply CHỈ sau duyệt; khi merge sửa mike/bin/asof_label_selfcheck.py:46 777→780
 - [2026-11-10T13:04:35Z] ĐANG DỞ job Taylor_20261110_125453 DD VGS: model khoa md5 191bb785, SUMMARY.json xong; NEXT: viet REPORT.md + bus finding
+- [2026-11-10T13:07:37Z] [dd-VGS 10/11] XONG job Taylor_20261110_125453: tam 26.520 sau CK5ty (P10 19.165/P90 34.314), gia 19.300 TRONG sat P10, luat4 dat; nua gia tri la lien ket+Legend City; CHO Mike skeptic + ghi so

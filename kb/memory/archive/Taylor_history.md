@@ -2206,3 +2206,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-09T07:47:55Z] [dd-lagcand CSV 09/11] XONG job Taylor_20261109_073602: TREN vung @22.600 (tam 17.273 P10 12.739 P90 21.885); surprise = gia axit tam thoi; CHO Mike skeptic + ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-09T08:33:26Z] [dd-lagcand MSB r2 09/11] XONG job Taylor_20261109_083128: tam 12.739->13.018 (P10 9.675/P90 16.373) TRONG bien tren @16.350, luat4 khong dat; CHO Mike ghi so
