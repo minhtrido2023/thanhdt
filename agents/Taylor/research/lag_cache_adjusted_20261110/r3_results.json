@@ -1,0 +1,198 @@
+{
+ "bootstrap": {
+  "L": 21,
+  "B": 4000,
+  "seed": 12345,
+  "paired": true
+ },
+ "r3_ctrl_p0_off": {
+  "ledger": "lag_cache_adjusted_20261110/sandbox_ctrl/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_etfcreatpit_exp_r3_ctrl_p0_off_univpit.csv",
+  "md5": "537e349b5589408c994f8aceafeb9a39",
+  "selfcheck_0VND": true,
+  "cagr_pct": 22.121,
+  "sharpe": 1.87,
+  "maxdd_pct": -16.23,
+  "calmar": 1.3628,
+  "IS_2014_19": {
+   "cagr_pct": 20.064,
+   "sharpe": 1.967,
+   "maxdd_pct": -12.5,
+   "calmar": 1.6047
+  },
+  "OOS_2020p": {
+   "cagr_pct": 24.058,
+   "sharpe": 1.822,
+   "maxdd_pct": -15.62,
+   "calmar": 1.5401
+  },
+  "control_byte_identical": true
+ },
+ "r3_ctrl_p0_1m": {
+  "ledger": "lag_cache_adjusted_20261110/sandbox_ctrl/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_etfcreatpit_exp_r3_ctrl_p0_1m_univpit_idledep1m.csv",
+  "md5": "a6ba34d83a4d374a73293d897c0b43d9",
+  "selfcheck_0VND": true,
+  "cagr_pct": 25.42,
+  "sharpe": 2.106,
+  "maxdd_pct": -13.85,
+  "calmar": 1.8353,
+  "IS_2014_19": {
+   "cagr_pct": 23.214,
+   "sharpe": 2.245,
+   "maxdd_pct": -12.82,
+   "calmar": 1.8108
+  },
+  "OOS_2020p": {
+   "cagr_pct": 27.499,
+   "sharpe": 2.034,
+   "maxdd_pct": -13.85,
+   "calmar": 1.9854
+  },
+  "control_byte_identical": true
+ },
+ "r3_adj_p0_off": {
+  "ledger": "lag_cache_adjusted_20261110/sandbox_adj/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_etfcreatpit_exp_r3_adj_p0_off_univpit.csv",
+  "md5": "f1bdcd02f9f771ebdb00965a217d0421",
+  "selfcheck_0VND": true,
+  "cagr_pct": 23.04,
+  "sharpe": 1.962,
+  "maxdd_pct": -16.43,
+  "calmar": 1.4026,
+  "IS_2014_19": {
+   "cagr_pct": 20.141,
+   "sharpe": 1.986,
+   "maxdd_pct": -12.67,
+   "calmar": 1.5901
+  },
+  "OOS_2020p": {
+   "cagr_pct": 25.79,
+   "sharpe": 1.968,
+   "maxdd_pct": -15.9,
+   "calmar": 1.6215
+  }
+ },
+ "r3_adj_p0_1m": {
+  "ledger": "lag_cache_adjusted_20261110/sandbox_adj/data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_etfcreatpit_exp_r3_adj_p0_1m_univpit_idledep1m.csv",
+  "md5": "54e98209594a31e40978c6dbf866f3da",
+  "selfcheck_0VND": true,
+  "cagr_pct": 26.2,
+  "sharpe": 2.188,
+  "maxdd_pct": -14.1,
+  "calmar": 1.8576,
+  "IS_2014_19": {
+   "cagr_pct": 23.147,
+   "sharpe": 2.254,
+   "maxdd_pct": -13.21,
+   "calmar": 1.7526
+  },
+  "OOS_2020p": {
+   "cagr_pct": 29.097,
+   "sharpe": 2.167,
+   "maxdd_pct": -14.1,
+   "calmar": 2.063
+  }
+ },
+ "bootstrap_paired": {
+  "r3_ctrl_p0_off": {
+   "E_cagr_pct": 22.19,
+   "cagr5_pct": 14.9,
+   "dd5_pct": -23.9,
+   "P_dd_lt_30": 0.0065,
+   "E_calmar": 1.488
+  },
+  "r3_ctrl_p0_1m": {
+   "E_cagr_pct": 25.49,
+   "cagr5_pct": 17.97,
+   "dd5_pct": -21.46,
+   "P_dd_lt_30": 0.0013,
+   "E_calmar": 1.8541
+  },
+  "r3_adj_p0_off": {
+   "E_cagr_pct": 23.12,
+   "cagr5_pct": 15.64,
+   "dd5_pct": -23.77,
+   "P_dd_lt_30": 0.0055,
+   "E_calmar": 1.5605
+  },
+  "r3_adj_p0_1m": {
+   "E_cagr_pct": 26.28,
+   "cagr5_pct": 18.67,
+   "dd5_pct": -21.35,
+   "P_dd_lt_30": 0.0013,
+   "E_calmar": 1.9233
+  }
+ },
+ "ab_paired_adj_vs_ctrl": {
+  "pin0%": {
+   "dCAGR_pp_point": 0.919,
+   "dMaxDD_pp_point": -0.2,
+   "dCalmar_point": 0.0398,
+   "P_dCAGR_gt0": 0.9175,
+   "dCAGR_pp_p5_p95": [
+    -0.117,
+    2.247
+   ],
+   "P_maxdd_better": 0.4995,
+   "P_calmar_gt": 0.826,
+   "N_trials": 1,
+   "DSR_N1_daily_excess": 0.9281,
+   "PBO": "không áp dụng (họ 1 cấu hình < 8)",
+   "dIS_pp": 0.077,
+   "dOOS_pp": 1.732,
+   "per_year_ret_diff_pp": {
+    "2014": 0.0,
+    "2015": -0.0,
+    "2016": -0.0,
+    "2017": 0.0,
+    "2018": -0.57,
+    "2019": 0.85,
+    "2020": -1.17,
+    "2021": 0.3,
+    "2022": 0.38,
+    "2023": 7.71,
+    "2024": 1.04,
+    "2025": 1.56,
+    "2026": 0.78
+   },
+   "years_negative": [
+    2018,
+    2020
+   ]
+  },
+  "pin1M": {
+   "dCAGR_pp_point": 0.78,
+   "dMaxDD_pp_point": -0.25,
+   "dCalmar_point": 0.0223,
+   "P_dCAGR_gt0": 0.874,
+   "dCAGR_pp_p5_p95": [
+    -0.253,
+    2.083
+   ],
+   "P_maxdd_better": 0.4793,
+   "P_calmar_gt": 0.754,
+   "N_trials": 1,
+   "DSR_N1_daily_excess": 0.9036,
+   "PBO": "không áp dụng (họ 1 cấu hình < 8)",
+   "dIS_pp": -0.067,
+   "dOOS_pp": 1.598,
+   "per_year_ret_diff_pp": {
+    "2014": 0.0,
+    "2015": -0.0,
+    "2016": 0.0,
+    "2017": 0.0,
+    "2018": -1.18,
+    "2019": 0.6,
+    "2020": -1.01,
+    "2021": 0.1,
+    "2022": 0.61,
+    "2023": 6.58,
+    "2024": 0.66,
+    "2025": 1.46,
+    "2026": 1.17
+   },
+   "years_negative": [
+    2018,
+    2020
+   ]
+  }
+ }
+}

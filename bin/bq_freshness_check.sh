@@ -861,7 +861,7 @@ fi
 
 # [pipeline-1d] làm mới data/earnings_surprise_data.pkl từ BQ SỐNG ngay trước golive (audit BCTC Q3
 # finding L1; user duyệt 2026-10-13, job Taylor_20261013_125149). golive lấy sự kiện LAG mới từ pkl
-# này, mà bản 15:30 (refresh_lagged_caches.py [3]) đọc qua BQ_LOCAL_CACHE = cache sync 23:45 ĐÊM
+# này, mà bản 15:30 (refresh_lagged_caches.py [3]; LƯU Ý: bước [1+2] giá nay đọc BQ SỐNG, [3] vẫn đọc cache) đọc qua BQ_LOCAL_CACHE = cache sync 23:45 ĐÊM
 # TRƯỚC ⇒ BCTC ingest ~16:36 hôm nay chỉ tới golive ở 19:00 NGÀY MAI (đo 10-13: pkl 15:30 = 58.233
 # dòng/max 08-21 = y hệt parquet cache; BQ sống đã có KBC 2026Q3). Bước này bỏ hẳn phiên trễ đó.
 # WARN-only: lỗi/timeout/dữ liệu đáng ngờ ⇒ script GIỮ pkl 15:30 (ghi nguyên tử, không bao giờ để

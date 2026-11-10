@@ -1,0 +1,76 @@
+{
+ "ctrl": {
+  "mean12": -0.62,
+  "win12": 35.6,
+  "n12": 570,
+  "pctl": 5.0,
+  "asof": "2026-09-23",
+  "neg_streak": 1,
+  "neg_streak_anchor": "known_date",
+  "neg_streak_entry_legacy": 2,
+  "verdict": "NEGATIVE",
+  "act": "canh bao: ha w_LAG .65->.50 neu keo dai 3 thang (dang 1, moc known_date)",
+  "events_md5": "e21b0af21d2dcf4d55ed385483167ec0",
+  "edge_md5": "4856c2390c254c51e569da8d98a147b2",
+  "n_events": 51966
+ },
+ "adj": {
+  "mean12": 0.02,
+  "win12": 36.5,
+  "n12": 583,
+  "pctl": 6.0,
+  "asof": "2026-09-23",
+  "neg_streak": 0,
+  "neg_streak_anchor": "known_date",
+  "neg_streak_entry_legacy": 0,
+  "verdict": "TROUGH",
+  "act": "khong tang w_LAG; von moi paper-trade",
+  "events_md5": "36426566362584164db8a20ab987f0c7",
+  "edge_md5": "2b3347fb6fa295793b41f23d475dad5b",
+  "n_events": 52175
+ },
+ "ctrl_vs_canonical": {
+  "events_csv_identical": true,
+  "edge_csv_identical": true,
+  "canonical_events_md5": "e21b0af21d2dcf4d55ed385483167ec0",
+  "canonical_edge_md5": "4856c2390c254c51e569da8d98a147b2"
+ },
+ "events": {
+  "both": 51966,
+  "only_ctrl": 0,
+  "only_adj": 209,
+  "pattern_changed": 385,
+  "lagged_pos_ctrl": 1197,
+  "lagged_pos_adj": 1213,
+  "post_ret_absdiff_gt1pp": 1030
+ },
+ "w_lag_history": {
+  "days": 3205,
+  "days_differ": 108,
+  "runs[start,end,n,ctrl,adj]": [
+   [
+    "2025-06-13",
+    "2025-08-27",
+    54,
+    0.5,
+    0.65
+   ],
+   [
+    "2025-12-15",
+    "2026-02-13",
+    43,
+    0.5,
+    0.65
+   ],
+   [
+    "2026-02-23",
+    "2026-03-09",
+    11,
+    0.5,
+    0.65
+   ]
+  ],
+  "first_day": "2014-01-02",
+  "last_day": "2026-11-09"
+ }
+}

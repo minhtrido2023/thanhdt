@@ -1,0 +1,22 @@
+{
+ "canonical_px": "af4b8c1b72f4b133248516eff8b459b0",
+ "canonical_ov": "afb2484e5fb702cd4335949d1a69db1b",
+ "raw_pull": "30d78da75e4560c201990bde359d8892",
+ "earnings_px_adj": "184900987c28cf447ae62b6fd73fb4e3",
+ "lagged_pos_ov_adj": "87b49b483d80969cc98cada6f0fdaf6c",
+ "end": "2026-11-09",
+ "rows_new": 3791117,
+ "rows_old": 3769344,
+ "validate_problems": [],
+ "stats": {
+  "new_max": "2026-11-09",
+  "old_max": "2026-11-09",
+  "min_tickers_per_session_from_2026-06-01": 766,
+  "old_keys": 3769344,
+  "lost_keys": 0,
+  "added_keys": 21773,
+  "sessions_dropping": 0,
+  "carried_tickers": 5,
+  "carried_rows": 16597
+ }
+}

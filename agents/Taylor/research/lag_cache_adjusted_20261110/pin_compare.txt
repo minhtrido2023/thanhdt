@@ -1,0 +1,28 @@
+⚠️  WC_ROOT='/home/trido/thanhdt/wt-lagadj-1110/WorkingClaude' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+A  537e349b5589  R3-park0-pin0pct-SAN
+B  f1bdcd02f9f7  R3-park0-pin0pct-LAGADJ-DEXUAT
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  LAG_CACHE_BASIS:  <không khai> → adjusted
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    22.121        23.040        0.920pp
+   Sharpe252                1.933         2.025        0.092
+   MaxDD                  -16.231       -16.427       -0.195pp
+   Calmar                   1.363         1.403        0.040
+   Final NAV (B)          603.061       662.159       59.098B
+
+   Trích dẫn phải nói rõ trục: "LAG_CACHE_BASIS <không khai> → adjusted" (A md5 537e349b…, B md5 f1bdcd02…).
+⚠️  WC_ROOT='/home/trido/thanhdt/wt-lagadj-1110/WorkingClaude' khác cây chứa script ('/home/trido/thanhdt/WorkingClaude') — vẫn dùng WC_ROOT theo override; kiểm tra nếu script này GHI dữ liệu
+A  a6ba34d83a4d  R3-park0-pin1M-SO-CHINH
+B  54e98209594a  R3-park0-pin1M-LAGADJ-DEXUAT
+
+✅ A/B HỢP LỆ — khác ĐÚNG 1 trục:  LAG_CACHE_BASIS:  <không khai> → adjusted
+
+   chỉ tiêu                     A             B       Δ (B−A)
+   CAGR                    25.420        26.200        0.780pp
+   Sharpe252                2.171         2.252        0.081
+   MaxDD                  -13.851       -14.104       -0.253pp
+   Calmar                   1.835         1.858        0.022
+   Final NAV (B)          840.620       908.143       67.522B
+
+   Trích dẫn phải nói rõ trục: "LAG_CACHE_BASIS <không khai> → adjusted" (A md5 a6ba34d8…, B md5 54e98209…).

@@ -1,0 +1,4 @@
+r3z_ctrl_p0_off LAG_CACHE_BASIS=canonical IDLE_CARRY_TIER=off LIQ_ZERO_BLOCK=lag
+r3z_ctrl_p0_1m LAG_CACHE_BASIS=canonical IDLE_CARRY_TIER=dep1m LIQ_ZERO_BLOCK=lag
+r3z_adj_p0_off LAG_CACHE_BASIS=adjusted IDLE_CARRY_TIER=off LIQ_ZERO_BLOCK=lag
+r3z_adj_p0_1m LAG_CACHE_BASIS=adjusted IDLE_CARRY_TIER=dep1m LIQ_ZERO_BLOCK=lag

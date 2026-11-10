@@ -1,0 +1,42 @@
+{
+ "ctrl": {
+  "final_B": 46.4259,
+  "ret_pct": -7.15,
+  "maxdd_pct": -12.17,
+  "BAL_final_B": 24.2961,
+  "LAG_final_B": 22.081,
+  "LAG_events": "97 stock + 36 ETF",
+  "mean12_latest": "-0.6",
+  "logs_md5": "ed8038c5b98bef58293f77cac4228f69",
+  "tx_md5": "19ae60eae16a8db85a29ffdfa865f083"
+ },
+ "ctrl2": {
+  "final_B": 46.4259,
+  "ret_pct": -7.15,
+  "maxdd_pct": -12.17,
+  "BAL_final_B": 24.2961,
+  "LAG_final_B": 22.081,
+  "LAG_events": "97 stock + 36 ETF",
+  "mean12_latest": "-0.6",
+  "logs_md5": "ed8038c5b98bef58293f77cac4228f69",
+  "tx_md5": "19ae60eae16a8db85a29ffdfa865f083"
+ },
+ "adjv2": {
+  "final_B": 47.2513,
+  "ret_pct": -5.5,
+  "maxdd_pct": -10.74,
+  "BAL_final_B": 24.2961,
+  "LAG_final_B": 22.9056,
+  "LAG_events": "102 stock + 37 ETF",
+  "mean12_latest": "0.0",
+  "logs_md5": "432058b21039ba572e107772681a348c",
+  "tx_md5": "3c6607428e57b4cf284a073a0f4c8857"
+ },
+ "BAL_tx_identical": true,
+ "LAG_tx": {
+  "ctrl": 140,
+  "adj": 147,
+  "only_ctrl": 12,
+  "only_adj": 18
+ }
+}

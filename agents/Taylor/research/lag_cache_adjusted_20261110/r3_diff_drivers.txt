@@ -1,0 +1,7 @@
+BAL TX ctrl 1404 adj 1404 | khác theo năm: {}
+LAG TX ctrl 5826 adj 5692 | khác theo năm: {'2015': 6, '2018': 63, '2019': 73, '2020': 26, '2021': 22, '2022': 8, '2023': 122, '2024': 25, '2025': 91, '2026': 2}
+w_lag_tgt khác: 108 ngày; theo năm {'2025': 67, '2026': 41}
+ctrl 2023 nav_lag_ref đầu/cuối 219.92 293.12 nav_bal_ref 126.05 128.93
+adj 2023 nav_lag_ref đầu/cuối 219.23 311.95 nav_bal_ref 126.05 128.93
+ctrl LAG buy 2023: 491 ['ABS', 'ADP', 'AFX', 'AGG', 'AST', 'BBC', 'BDB', 'BKC', 'BMC', 'BMS', 'BSI', 'BST', 'BVS', 'CCL', 'CDN', 'CHS', 'COM', 'CPC', 'CST', 'CTS', 'D11', 'D2D', 'DAD', 'DBC', 'DHA', 'DLG', 'DNA', 'DP3', 'DRI', 'DTC', 'DTP', 'DXG', 'DXP', 'FTM', 'GEX', 'HAR', 'HDG', 'HHS', 'HLD', 'HVA']
+adj LAG buy 2023: 440 ['ABS', 'ADP', 'AFX', 'AGG', 'AST', 'BBC', 'BDB', 'BDW', 'BKC', 'BMC', 'BMS', 'BSI', 'BST', 'BVS', 'CCL', 'CDN', 'CHS', 'COM', 'CPC', 'CST', 'CTS', 'D11', 'DAD', 'DBC', 'DHA', 'DLG', 'DNA', 'DNW', 'DP3', 'DRI', 'DTC', 'DXG', 'DXP', 'EID', 'FTM', 'GEX', 'HAR', 'HBH', 'HCM', 'HHS']

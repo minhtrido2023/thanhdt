@@ -1,0 +1,31 @@
+{
+ "asof": "2026-11-10 13:25:50+00:00",
+ "end": "2026-11-09",
+ "canonical_px": "af4b8c1b72f4b133248516eff8b459b0",
+ "canonical_ov": "afb2484e5fb702cd4335949d1a69db1b",
+ "raw_pull_v2": "258d793b9b0865ad71df5de741a28d70",
+ "earnings_px_adj_v2": "f791d8022ad68175982c7e2d2b39d204",
+ "lagged_pos_ov_adj_v2": "6c8ceb1debe0c4788aeb2fc3d4fb97ec",
+ "rows_v1": 3791117,
+ "rows_v2": 3791135,
+ "key_only_v1": 0,
+ "key_only_v2": 18,
+ "close_diff_rows": 12249,
+ "open_diff_rows": 12249,
+ "vol_diff_rows": 2567,
+ "price_ne_close_share": 0.7650798507570952,
+ "validate_problems": [],
+ "stats": {
+  "new_max": "2026-11-09",
+  "old_max": "2026-11-09",
+  "min_tickers_per_session_from_2026-06-01": 766,
+  "old_keys": 3769344,
+  "lost_keys": 0,
+  "added_keys": 21791,
+  "sessions_dropping": 0,
+  "carried_tickers": 5,
+  "carried_rows": 16597,
+  "carried_new": 0,
+  "asof": "2026-11-10 13:25:50+00:00"
+ }
+}

@@ -1,0 +1,2 @@
+r3_adj2_p0_off LAG_CACHE_BASIS=adjusted IDLE_CARRY_TIER=off
+r3_adj2_p0_1m LAG_CACHE_BASIS=adjusted IDLE_CARRY_TIER=dep1m

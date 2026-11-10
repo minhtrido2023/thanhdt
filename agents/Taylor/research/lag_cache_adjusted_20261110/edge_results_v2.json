@@ -1,0 +1,17 @@
+{
+ "adjv2": {
+  "mean12": 0.02,
+  "win12": 36.5,
+  "n12": 583,
+  "pctl": 6.0,
+  "asof": "2026-09-23",
+  "neg_streak": 0,
+  "neg_streak_anchor": "known_date",
+  "neg_streak_entry_legacy": 0,
+  "verdict": "TROUGH",
+  "act": "khong tang w_LAG; von moi paper-trade",
+  "events_md5": "2fa62575500fbbb1253fccab9142cd5b",
+  "edge_md5": "1cee2f5952d4ff3d1a97a7101a9ab23c",
+  "n_events": 52175
+ }
+}
