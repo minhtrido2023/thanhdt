@@ -2188,3 +2188,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-08T18:12:15Z] [dd-redo r3 MVC 09/11] XONG job Taylor_20261108_180136: tam 15.276->16.241 (P10 9.940/P90 23.471) TRONG @13.500, luat4 DAT moi co (mong 5 ty; ban TL mot chieu truot); ICD skeptic -429 sai (chi -58); CHO Mike skeptic cuoi + ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-08T18:12:29Z] [dd-redo r3c SZL 09/11] XONG job Taylor_20261108_180625: sua khung KTPL co phan, tam 24.529->25.165 (40tr 26.148, P90 28.793) TRONG ca 2 co (5ty ranh gioi P90+10d); CHO Mike kiem co hoc + ghi so
