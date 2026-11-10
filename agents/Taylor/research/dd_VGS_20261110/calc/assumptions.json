@@ -1,0 +1,55 @@
+{
+  "ticker": "VGS",
+  "asof": "2026-11-10",
+  "unit": "ty dong (1e9 VND) tru khi ghi khac",
+  "sources": {
+    "q3_hn": "src/BCTC-Q3-HN.pdf (BCTC hop nhat Q3/2026, lap 27/10/2026)",
+    "q3_rieng": "src/BCTC-Q3-trang.pdf (BCTC rieng Q3/2026)",
+    "fy25_hn": "src/bctc-2025-hop-nhat-TV.pdf (kiem toan AASC 24/03/2026, chap nhan toan phan)",
+    "h126_hn": "src/27.8-BCTC-giua-nien-do-trang.pdf (soat xet AASC 24/08/2026, khong ngoai tru)",
+    "bq_hist": "calc/bq_vgs_hist.csv (tav2_bq.ticker_financial, chi doi chieu)",
+    "liq": "calc/liq_vgs.csv (tav2_bq.ticker 250 phien den 2026-11-10)",
+    "deposit": "deposit_rate_vn.effective_deposit_rate('2026-11-10') = cctg_12m(2026-11-02) 7,40%"
+  },
+  "shares_m": 61.524155,
+  "bs_20260930": {
+    "equity_parent": 1433.341,
+    "cash": 71.653,
+    "htm_deposits": 1096.600,
+    "st_loans": 1201.601,
+    "vinaconex_bcc_payable_lt": 498.739,
+    "xdcb_legend_city": 891.547,
+    "xdcb_cc4_van_canh": 8.575,
+    "associate_carrying": 255.723
+  },
+  "pl": {
+    "fy25":  {"net_rev": 7318.591, "gp": 285.680, "fin_inc": 35.323, "fin_exp": 17.985, "assoc": 43.559, "sell": 61.760, "ga": 32.189, "other": 1.466, "pbt": 254.093, "tax": 37.052, "np_parent": 217.018, "div_from_assoc_in_fin_inc": 26.599},
+    "9m25":  {"net_rev": 5674.255, "gp": 199.332, "fin_inc": 31.805, "fin_exp": 13.612, "assoc": 14.888, "sell": 50.295, "ga": 18.663, "other": 0.909, "pbt": 164.364, "tax": 24.786, "np_parent": 139.561, "div_from_assoc_in_fin_inc": 26.599},
+    "9m26":  {"net_rev": 6205.254, "gp": 252.377, "fin_inc": 32.123, "fin_exp": 42.833, "assoc": 87.628, "sell": 80.147, "ga": 22.392, "other": 0.505, "pbt": 227.262, "tax": 27.961, "np_parent": 199.282, "div_from_assoc_in_fin_inc": 0.0},
+    "q3_26": {"net_rev": 2138.702, "gp": 98.391, "fin_inc": 20.359, "fin_exp": 18.239, "assoc": 45.591, "sell": 28.789, "ga": 8.313, "other": -0.067, "pbt": 108.933, "np_parent": 96.240},
+    "q3_25": {"net_rev": 1767.212, "gp": 76.719, "fin_inc": 2.904, "fin_exp": 3.551, "assoc": 19.348, "sell": 15.133, "ga": 5.776, "other": 0.518, "pbt": 75.029, "np_parent": 63.759}
+  },
+  "r": {
+    "anchor_r": 0.135, "anchor_dep": 0.074, "beta": 1.0, "dep_now": 0.074,
+    "rule": "r = 13,5% + 1,0 x (dep12T - 7,40%); dep12T(10/11) = cctg_12m(2026-11-02) 7,40% -> r = 13,50%"
+  },
+  "moat": {"tier": "NONE", "reward": false, "note": "RONIC = Ke, g = 0 (EPV); khong thuong moat, khong tru (luat 2026-11-08)"},
+  "core_scenarios": {
+    "_basis": "LN loi (ong + ton cuon nguoi, KHONG gom lien ket, lai rong tai chinh = 0) = DT x (GPM - SGA%) x (1 - thue 20%). GPM lich su TTM Q4 (bq_vgs_hist.csv): 2016-2025 = 4,9/4,7/2,6/3,3/3,9/4,3/2,3/2,5/3,0/3,9 -> trung vi 3,6%; TTM Q3/26 4,3%. SGA% TTM 1,62%, FY25 1,28%. Tat ca la (uoc luong).",
+    "bear": {"rev": 7000, "gpm": 0.025, "sga": 0.015, "w": 0.25},
+    "base": {"rev": 7700, "gpm": 0.036, "sga": 0.015, "w": 0.50},
+    "bull": {"rev": 8000, "gpm": 0.043, "sga": 0.015, "w": 0.25},
+    "tax": 0.20
+  },
+  "associate_scenarios": {
+    "_basis": "CTCP Tap doan San xuat thep Viet Duc (28,6%): phan lai 2024 10,9 / 2025 43,6 / TTM 116,3. (uoc luong)",
+    "bear": {"method": "book", "w": 0.25},
+    "base": {"method": "epv_avg3", "earn": [10.896, 43.559, 116.299], "w": 0.50},
+    "bull": {"method": "ttm_x_pe", "pe": 5.0, "w": 0.25}
+  },
+  "legend_city": {
+    "_basis": "Luat NPV=0: phan von rong cua VGS theo gia goc = XDCB LGC + CC4 - gop von Vinaconex (BCC 50:50 dinh gia 50% chi phi da chi = 426 ty, tuc doi tac doc lap tra dung gia von). Bear 0,7 = co so: GPMB phan con lai GD1 chua xong sau 16 nam tu QD 2204/2010 (thuyet minh 10 BCTC Q3). Bull khong thuong (khong co du lieu doc lap gia tri > gia von).",
+    "factors": {"bear": [0.7, 0.30], "base": [1.0, 0.70]}
+  },
+  "liquidity": {"sigma_d": 0.02338, "adv250_bn": 6.167, "adv60_bn": 2.23, "sizes_bn": [5.0, 1.0, 0.04], "method": "CK = sigma x sqrt(Q/ADV250)"}
+}

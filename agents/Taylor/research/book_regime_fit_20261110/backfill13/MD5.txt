@@ -1,0 +1,4 @@
+canonical_earnings_px af4b8c1b72f4b133248516eff8b459b0
+canonical_lagged_pos_ov afb2484e5fb702cd4335949d1a69db1b
+earnings_px_bf13 25a8ee1926df9601b391cdf6de6b7bf2
+lagged_pos_ov_bf13 c4a0f5fef6373ddf9f59db972bf42106

@@ -1,0 +1,20 @@
+bg_G1_L0_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L0.txt
+bg_G1_L1_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L1.txt
+bg_G1_L2_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L2.txt
+bg_G2_3m_L0_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G2_3m_L0.txt
+bg_G3_x2_L0_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G3_x2_L0.txt
+bg_G4_hu2_L0_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G4_hu2_L0.txt
+bg_G5_hl2_L0_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G5_hl2_L0.txt
+bg_G6_n3_L0_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G6_n3_L0.txt
+bg_G1_L0capx_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L0.txt BAL_BUY_BLOCK_EXEMPT=CAPIT
+bg_LAG_G1_L0_off IDLE_CARRY_TIER=off BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks_lag/G1_L0.txt BAL_BUY_BLOCK_BOOK=v23audit_LAG
+bg_G1_L0_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L0.txt
+bg_G1_L1_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L1.txt
+bg_G1_L2_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L2.txt
+bg_G2_3m_L0_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G2_3m_L0.txt
+bg_G3_x2_L0_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G3_x2_L0.txt
+bg_G4_hu2_L0_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G4_hu2_L0.txt
+bg_G5_hl2_L0_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G5_hl2_L0.txt
+bg_G6_n3_L0_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G6_n3_L0.txt
+bg_G1_L0capx_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks/G1_L0.txt BAL_BUY_BLOCK_EXEMPT=CAPIT
+bg_LAG_G1_L0_1m IDLE_CARRY_TIER=dep1m BAL_BUY_BLOCK_FILE=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/blocks_lag/G1_L0.txt BAL_BUY_BLOCK_BOOK=v23audit_LAG

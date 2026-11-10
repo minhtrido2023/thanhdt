@@ -1,0 +1,23 @@
+ctrl  BAL    gap    n=  7 value=  4.89B  orders |fill/Open-1|>2%:   0  >5%:   0  median|dev|=0.0000
+ctrl  BAL    normal n= 14 value= 22.92B  orders |fill/Open-1|>2%:   0  >5%:   0  median|dev|=0.0000
+ctrl  LAGGED gap    n= 42 value= 22.75B  orders |fill/Open-1|>2%:  27  >5%:   5  median|dev|=0.0280
+ctrl  LAGGED normal n= 49 value= 26.84B  orders |fill/Open-1|>2%:   1  >5%:   1  median|dev|=0.0000
+          ymd ticker  adj_price      Open_raw       dev
+10 2026-07-21    PVT    19200.0  16650.000000  0.153153
+46 2026-07-28    CSV    21950.0  19500.000000  0.125641
+48 2026-07-28    HT1    12300.0  11448.620690  0.074365
+9  2026-07-21    PNJ    43900.0  40900.000000  0.073350
+56 2026-07-28    SPM     9910.0   9300.000000  0.065591
+55 2026-07-28    PRC    10600.0  10100.000000  0.049505
+12 2026-07-21    SIP    49100.0  46850.000000  0.048026
+30 2026-07-27    GEE    71200.0  67995.396825  0.047130
+7  2026-07-21    AGP    34000.0  32500.000000  0.046154
+13 2026-07-21    VNM    55500.0  58100.000000 -0.044750
+fixA  BAL    gap    n=  7 value=  4.89B  orders |fill/Open-1|>2%:   3  >5%:   3  median|dev|=0.0000
+fixA  BAL    normal n= 14 value= 22.92B  orders |fill/Open-1|>2%:   2  >5%:   2  median|dev|=0.0000
+fixA  LAGGED gap    n= 35 value= 20.99B  orders |fill/Open-1|>2%:   0  >5%:   0  median|dev|=0.0000
+fixA  LAGGED normal n= 50 value= 28.31B  orders |fill/Open-1|>2%:   1  >5%:   1  median|dev|=0.0000
+fixB  BAL    gap    n=  7 value=  4.89B  orders |fill/Open-1|>2%:   0  >5%:   0  median|dev|=0.0000
+fixB  BAL    normal n= 14 value= 22.92B  orders |fill/Open-1|>2%:   0  >5%:   0  median|dev|=0.0000
+fixB  LAGGED gap    n= 43 value= 22.48B  orders |fill/Open-1|>2%:  16  >5%:  10  median|dev|=0.0000
+fixB  LAGGED normal n= 50 value= 27.39B  orders |fill/Open-1|>2%:  19  >5%:  13  median|dev|=0.0000

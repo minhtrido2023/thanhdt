@@ -1,0 +1,3 @@
+c13014360aa523a102e31b5699c44db9  calc/assumptions_r2.json
+05e025279e3603474cb8427f36dbc43d  calc/model_r2.py
+143d5f93308f581bf7ce79ed62a1865c  calc/post_r2.py

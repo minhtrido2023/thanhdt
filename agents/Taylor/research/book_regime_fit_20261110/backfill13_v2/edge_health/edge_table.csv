@@ -1,0 +1,4 @@
+tag,asof,mean12,win12,n12,verdict,neg_streak,w_LAG_good_state
+ctrl_canonical,2026-09-23,-0.62,35.6,570,NEGATIVE,1,0.5
+bf13_old_SUPERSEDED,2026-09-23,-0.47,35.7,583,NEGATIVE,1,0.5
+bf13v2,2026-09-23,-0.47,35.7,583,NEGATIVE,1,0.5

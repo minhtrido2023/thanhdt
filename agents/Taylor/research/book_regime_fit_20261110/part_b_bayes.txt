@@ -1,0 +1,4 @@
+R3park0 BAL z_intact -0.52 z_alpha0 -0.14 BF_gone_vs_intact 1.13
+R3park0 LAG z_intact -1.68 z_alpha0 -0.96 BF_gone_vs_intact 2.56
+park70 BAL z_intact -0.44 z_alpha0 0.05 BF_gone_vs_intact 1.1
+park70 LAG z_intact -1.38 z_alpha0 -0.81 BF_gone_vs_intact 1.85

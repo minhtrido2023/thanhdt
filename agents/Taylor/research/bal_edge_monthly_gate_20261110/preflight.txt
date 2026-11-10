@@ -1,0 +1,16 @@
+N cần cho power 80% (2 phía): 16 = 7.8 năm
+
+TRẦN DỮ LIỆU (12.5 năm = 26 quan sát): DSR tối đa có thể đạt = 0.9621  (đạt được)
+
+Với N có sẵn, Sharpe năm TỐI THIỂU phát hiện được: 0.958  (= ×0.96 effect giả định)
+
+>>> PHÁN: GO
+    Dữ liệu hiện có ĐỦ để hướng này đạt ngưỡng fleet nếu edge đúng như giả định. Được phép bắt đầu.
+
+TRẦN DỮ LIỆU (12.5 năm = 26 quan sát): DSR tối đa có thể đạt = 0.5930  ← VẪN DƯỚI ngưỡng
+
+Với N có sẵn, Sharpe năm TỐI THIỂU phát hiện được: 0.958  (= ×1.92 effect giả định)
+
+>>> PHÁN: NO-GO
+    ĐỪNG BẮT ĐẦU. N cần (88) > TOÀN BỘ dữ liệu có thể tồn tại (26). Chờ bao lâu cũng không đạt.
+    Đường ra duy nhất: tìm edge MẠNH HƠN ×1.92, không phải N lớn hơn.

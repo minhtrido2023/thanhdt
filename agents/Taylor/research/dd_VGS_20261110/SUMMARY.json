@@ -1,0 +1,136 @@
+{
+ "ticker": "VGS",
+ "asof_price_date": "2026-11-10",
+ "price": 19300.0,
+ "r": 0.135,
+ "r_anchor": {
+  "r": 0.135,
+  "rate": 0.074,
+  "source": "cctg_12m(2026-11-02)",
+  "rule": "r = 13,5% + 1,0 x (dep_12T - 7,40%)"
+ },
+ "kind": "expected_weighted_sotp",
+ "center_pre_liq": 26778,
+ "center_post_liq": 26526,
+ "p10_post": 19393,
+ "p90_post": 34722,
+ "p10_pre": 19577,
+ "p50_pre": 28410,
+ "p90_pre": 35052,
+ "px_vs_center_post": -0.2724119731584106,
+ "px_vs_p10_post": -0.004795544784200523,
+ "label": "DUOI vung",
+ "label_by_size": {
+  "5.0ty": {
+   "center": 26215,
+   "p10": 19165,
+   "p90": 34314,
+   "label": "TRONG vung",
+   "ck": 0.021051959933129902,
+   "ck_adv60": 0.0350087881343638,
+   "rule4_threshold": 22282,
+   "rule4_pass": true
+  },
+  "1.0ty": {
+   "center": 26526,
+   "p10": 19393,
+   "p90": 34722,
+   "label": "DUOI vung",
+   "ck": 0.009414722694016078,
+   "ck_adv60": 0.0156564060156651,
+   "rule4_threshold": 22547,
+   "rule4_pass": true
+  },
+  "0.04ty": {
+   "center": 26728,
+   "p10": 19540,
+   "p90": 34986,
+   "label": "DUOI vung",
+   "ck": 0.0018829445388032157,
+   "ck_adv60": 0.0031312812031330196,
+   "rule4_threshold": 22719,
+   "rule4_pass": true
+  }
+ },
+ "sens_r2": {
+  "assoc_base_book": 25430,
+  "assoc_base_pb_peer": 24911,
+  "assoc_w2_reading_b": 27313,
+  "m1_mid_weights": 25600,
+  "assoc_all_scen_pb075": 23379
+ },
+ "sens_r_center_pre": {
+  "-100bp": 28242,
+  "-50bp": 27482,
+  "+50bp": 26125,
+  "+100bp": 25517
+ },
+ "sens_r_beta05_center_pre": {
+  "-100bp": 27482,
+  "-50bp": 27123,
+  "+50bp": 26446,
+  "+100bp": 26125
+ },
+ "sens_other": {
+  "holding_discount_30pct_on_assoc_lgc": 22765,
+  "core_only_plus_netcash": 15033,
+  "moat": "NONE -> khong co tham so moat; NARROW/WIDE khong doi headline (khong thuong khi chua ben)"
+ },
+ "implied_by_price": {
+  "r_all_base": 0.2273,
+  "note": "r lam tam base (khong CK) = gia 19.300"
+ },
+ "normalized": {
+  "np_core_base": 129.4,
+  "np_assoc_avg3": 56.9,
+  "np_total": 186.3,
+  "eps_norm": 3028,
+  "pe_center_norm": 8.8,
+  "pe_price_norm": 6.4,
+  "pe_price_ttm": 4.29,
+  "pb_price": 0.83,
+  "bvps": 23297
+ },
+ "sotp_base_vps": {
+  "core": 15575,
+  "assoc": 6853,
+  "legend_city": 6524,
+  "net_cash": -542
+ },
+ "grid_desc": "r2: 18 ket cuc = LN loi XAU/CO_SO/TOT 56,0/129,4/179,2 ty (0,25/0,5/0,25) x lien ket 0,7xso sach/EPV TB3/TTMx5 (0,25/0,5/0,25) x Legend City gia goc x0,7/x1,0 (0,3/0,7); RONIC=Ke g=0; + no rong -33,3 ty",
+ "moat": {
+  "tier": "NONE",
+  "type": "SCALE/DISTRIBUTION (khong ben)",
+  "source": "lam moi 10/11/2026 (moat_tags.csv chua co VGS)",
+  "durable": false,
+  "roic5y": 0.087,
+  "roic_min5y": 0.057,
+  "roe_min3y": 0.061
+ },
+ "warnings": [
+  "Ca BKS 3 nguoi tu nhiem 15/09/2025 (NQ DHDCD bat thuong 07/11/2025)",
+  "Co tuc tu lien ket 26,6 ty ghi DT tai chinh 2025 trong khi gia tri lien ket van cong du phan lai 43,6 ty -> nghi dem 2 lan (chi 2025)",
+  "Phai thu 2 khach 481 ty = 74% phai thu KH 30/09 (01/01: 77 ty); Dien Xanh Chau A vua la khach (196,7) vua la NCC (198,5)",
+  "TM 33 ben lien quan khong ke giao dich mua/ban voi lien ket Tap doan SX thep Viet Duc",
+  "Legend City: QD chu truong 2010, GPMB GD1 chua xong; BCC 50:50 Vinaconex 498,7 ty"
+ ],
+ "assumptions_file": "calc/assumptions_r2.json",
+ "round": 2,
+ "headline_size_bn": 1.0,
+ "label_fragile": true,
+ "assumptions_md5": "c13014360aa523a102e31b5699c44db9",
+ "model_md5": "05e025279e3603474cb8427f36dbc43d",
+ "source_file": "src/BCTC-Q3-HN.pdf",
+ "source_md5": "e30e74cecf7bc93ba8804050edd534a7",
+ "lock": "calc/LOCK_r2_prerun.txt (khoa truoc khi chay lai; gia chi dung sau khoa)",
+ "sector_read": "kb/data_registry/market-state/sector_read_thep_20261031.md",
+ "job": "Taylor_20261110_131720",
+ "fear_buy_eligible_2_5": null,
+ "sens_r2_post_ck_1ty": {
+  "assoc_base_book": 25191,
+  "assoc_base_pb_peer": 24676,
+  "assoc_w2_reading_b": 27056,
+  "m1_mid_weights": 25359,
+  "assoc_all_scen_pb075": 23159
+ }
+}

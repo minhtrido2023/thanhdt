@@ -1,0 +1,37 @@
+{
+ "n_episodes_hist": 12,
+ "current": {
+  "trigger": "2026-09-24",
+  "run_sessions": 9,
+  "peak": "2026-05-18",
+  "trough": "2026-07-22",
+  "depth": -0.1345529425189581,
+  "sess_peak_to_trough": 47,
+  "sess_peak_to_trigger": 90,
+  "breadth_at_peak": 0.3117206982543641,
+  "breadth_at_trigger": 0.2593659942363112,
+  "ew_ret90_at_trigger": -0.10111107447574119,
+  "vni_ret90_at_trigger": -0.07928151291015284,
+  "state_at_trigger": 3.0,
+  "state_min_in_run": 3.0,
+  "radar_at_trigger": 21.568627450980397,
+  "vni_fwd60_from_trigger": NaN
+ },
+ "hist_median": {
+  "depth": -0.25095807123256114,
+  "sess_peak_to_trough": 126.5,
+  "sess_peak_to_trigger": 42.0,
+  "breadth_at_trigger": 0.33264683447749804,
+  "ew_ret90_at_trigger": -0.09014939874001493,
+  "vni_fwd60_from_trigger": 0.0001713382621547077
+ },
+ "pct_hist_state3_at_trigger": 0.25,
+ "n_hist_with_state": 8,
+ "pct_hist_ever_below3": 0.625,
+ "hist_2014_breadth_trigger_median": 0.33264683447749804,
+ "hist_2014_ew_minus_vni_median": -0.014635500109627164,
+ "breadth_now": 0.2319277108433735,
+ "breadth_pct_rank_since2008": 0.20731448011907294,
+ "ew_ret90_now": -0.11747565101391544,
+ "asof": "2026-11-09"
+}

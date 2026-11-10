@@ -1,0 +1,183 @@
+{
+  "schema": "bal_edge_gate/v1",
+  "book": "BAL",
+  "state": "LOCKED",
+  "since": "2026-09",
+  "month_evaluated": "2026-10",
+  "month_end_session": "2026-10-30",
+  "ret": -0.049093,
+  "pnl_vnd": -1535190181.09,
+  "n": 2,
+  "decision": "KEEP_LOCKED",
+  "min_n": 1,
+  "recent": [
+    {
+      "month": "2025-11",
+      "ret": -0.042783,
+      "n": 3,
+      "state_after": "LOCKED",
+      "decision": "LOCK"
+    },
+    {
+      "month": "2025-12",
+      "ret": null,
+      "n": 0,
+      "state_after": "LOCKED",
+      "decision": "HOLD_THIN"
+    },
+    {
+      "month": "2026-01",
+      "ret": 0.004158,
+      "n": 12,
+      "state_after": "ACTIVE",
+      "decision": "UNLOCK"
+    },
+    {
+      "month": "2026-02",
+      "ret": 0.051206,
+      "n": 22,
+      "state_after": "ACTIVE",
+      "decision": "KEEP_ACTIVE"
+    },
+    {
+      "month": "2026-03",
+      "ret": -0.083136,
+      "n": 14,
+      "state_after": "LOCKED",
+      "decision": "LOCK"
+    },
+    {
+      "month": "2026-04",
+      "ret": -0.0123,
+      "n": 13,
+      "state_after": "LOCKED",
+      "decision": "KEEP_LOCKED"
+    },
+    {
+      "month": "2026-05",
+      "ret": -0.017808,
+      "n": 4,
+      "state_after": "LOCKED",
+      "decision": "KEEP_LOCKED"
+    },
+    {
+      "month": "2026-06",
+      "ret": -0.000123,
+      "n": 2,
+      "state_after": "LOCKED",
+      "decision": "KEEP_LOCKED"
+    },
+    {
+      "month": "2026-07",
+      "ret": 0.008835,
+      "n": 1,
+      "state_after": "ACTIVE",
+      "decision": "UNLOCK"
+    },
+    {
+      "month": "2026-08",
+      "ret": 0.072689,
+      "n": 2,
+      "state_after": "ACTIVE",
+      "decision": "KEEP_ACTIVE"
+    },
+    {
+      "month": "2026-09",
+      "ret": -0.037891,
+      "n": 2,
+      "state_after": "LOCKED",
+      "decision": "LOCK"
+    },
+    {
+      "month": "2026-10",
+      "ret": -0.049093,
+      "n": 2,
+      "state_after": "LOCKED",
+      "decision": "KEEP_LOCKED"
+    }
+  ],
+  "asof": "2026-11-10",
+  "source": {
+    "audit_csv": "data/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_advprice_exp_balgate_e1030_univpit.csv",
+    "audit_md5": "6c0db4273a0e5d97bcb98ac4f289a926",
+    "engine": "pt_v23_audit_2014.py v23a none postbull 0 edge",
+    "knobs": {
+      "BASKET_WT": "namecap",
+      "BASKET_SELECT": "yieldcombo",
+      "PARK_STATES": "3:0.0",
+      "BASKET_CA_SNAPSHOT": "/home/trido/thanhdt/WorkingClaude/data/snapshots/corp_action_share_20260927.parquet",
+      "BQ_LOCAL_CACHE": "data/bq_cache",
+      "BQ_CACHE_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "NAV_TOTAL_B": "50",
+      "ETF_LIQ": "custompitg"
+    }
+  },
+  "lag_display": {
+    "source": "data/lag_edge_health.csv",
+    "note": "display-only — LAG không bị khoá tự động",
+    "months": [
+      {
+        "month": "2025-03",
+        "mean_pct": 5.821,
+        "n": 138
+      },
+      {
+        "month": "2025-05",
+        "mean_pct": 13.342,
+        "n": 43
+      },
+      {
+        "month": "2025-06",
+        "mean_pct": 5.22,
+        "n": 115
+      },
+      {
+        "month": "2025-08",
+        "mean_pct": 8.896,
+        "n": 34
+      },
+      {
+        "month": "2025-09",
+        "mean_pct": 2.777,
+        "n": 132
+      },
+      {
+        "month": "2025-11",
+        "mean_pct": -5.447,
+        "n": 22
+      },
+      {
+        "month": "2025-12",
+        "mean_pct": -0.05,
+        "n": 158
+      },
+      {
+        "month": "2026-03",
+        "mean_pct": 1.668,
+        "n": 149
+      },
+      {
+        "month": "2026-05",
+        "mean_pct": -4.737,
+        "n": 22
+      },
+      {
+        "month": "2026-06",
+        "mean_pct": -3.184,
+        "n": 119
+      },
+      {
+        "month": "2026-08",
+        "mean_pct": 3.6,
+        "n": 4
+      },
+      {
+        "month": "2026-09",
+        "mean_pct": -0.04,
+        "n": 96
+      }
+    ]
+  },
+  "scope_note": "chạy theo sổ BAL SHADOW (engine pinned R3), không phải sổ BAL live"
+}

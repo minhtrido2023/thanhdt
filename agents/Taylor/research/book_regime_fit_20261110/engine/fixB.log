@@ -1,0 +1,57 @@
+====================================================================================================
+  V2.3 = V2.2 (BAL | LAG static, parked) + CAPIT v2 — TRANSPARENT PAPER-TRADE
+  period=2026-06-11 -> 2026-11-09   NAV=50B (25B+25B)   state=tav2_bq.vnindex_5state_dt5g_live
+  LAG/BAL allocator=ON {1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65}
+====================================================================================================
+
+[1] Building HYBRID alt-fill prices...
+
+[2] Loading v11 signals + Release_Date + 5-state + overheat + D1...
+[BQ_LOCAL_CACHE] ready — 15 tables from /home/trido/thanhdt/WorkingClaude/data/bq_cache
+[BQ_LOCAL_CACHE] query took 5.7s (22504 rows)
+  signals: 22,504 rows
+[BQ_LOCAL_CACHE] query took 3.0s (5683 rows)
+  [EXBULL fix] suppressed 0 momentum signals in EX-BULL (state==5)
+  [regime_size] rating coverage 98.5%; weak buy-rows flagged (rating>=4): 41 -> halved to 5% ONLY in BEAR/CRISIS (state<=2), full 10% elsewhere
+
+[3] Loading prices/Open/sector/E1VFVN30...
+  [PARK select] BASKET_SELECT=yieldcombo (custom30V go-live 2026-06-30; yield-combo 1/PE+1/PCF, liq=gate)
+  [forensic exclude] /home/trido/thanhdt/WorkingClaude/data/forensic_flags.csv [mặc định (cây module → cây canonical)] — custom30 universe drops from flag date: {'KSF': '2026-06-20', 'VVS': '2026-06-20', 'PC1': '2026-06-20', 'HHS': '2026-06-20', 'L40': '2026-06-20', 'KLB': '2026-06-20', 'DIG': '2026-06-20', 'BFC': '2026-06-20'}
+[BQ_LOCAL_CACHE] query took 3.3s (27105 rows)
+  [oshares-step] corp-action LIVE BQ: 1976 dòng ISS+AIS (63 mã)
+  [oshares-step] exdate: 151 bước OShares, 111 bước ĐƯỢC DỜI (median 43 ngày), 38 giữ ngày quý (không khớp sự kiện), 0 bị chặn bởi cổng PIT
+  [PARK custompitg/namecap10] rule-based basket: 8 rebals, ~1650B/day parkable. Current (2026-11-05) 30 holdings:
+    NAB, TPB, SHB, CTG, VIB, MBB, OCB, ABB, HDB, IDC, HAH, PVT, MSB, PNJ, VPB, DCM, BID, HHV, TCM, TCB, VHM, HPG, VRE, EVF, VCB, HDG, POW, HVN, ACB, DGC
+
+[4] Building LAGGED schedule + price panels...
+  [LAG gate] forensic=True non_op=False -> 5491 entries (forensic-excluded 6)
+  LAG signals in window: 90
+
+[5] CAPIT v2 washout events...
+  washout 2026-07-20: state=3 grind=False dd52=-9.6% vn_cool=False -> size=0.75
+  [C overflow] CAPIT_BEAR_OVERFLOW=True (go-live 2026-06-30; gates: dd52<=-20% + breadth-broken + not-postbull; depth-sizing OFF)
+
+[6] BOOK A — BAL 25B...
+  BAL events: 21 stock + 25 ETF; final 24.2961B
+
+[7] BOOK B — LAG 25B (always-on, parked)...
+  LAG events: 97 stock + 36 ETF; final 22.7300B
+
+[8] Building combined logs...
+  [edge-alloc] source=lag_edge_health.csv label_col=known_date rows=583
+  [edge-alloc] thr=4.0%; mean12 latest=-0.6% (LAG tilt->.65 only if >= thr)
+  [ALLOCATOR] band-only ±10pp ON (w_LAG={1: 0.5, 2: 0.0, 3: 0.65, 4: 0.65, 5: 0.65}); 0 rebalances; latest state=3 tgt LAG 65% / current 48%
+
+[9] Saving...
+  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/book_regime_fit_20261110/engine/fixB_logs.csv
+  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/book_regime_fit_20261110/engine/fixB_transactions.csv (incl 21 MTM phantoms)
+  /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/book_regime_fit_20261110/engine/fixB_open_positions.csv: 21 open rows
+
+====================================================================================================
+ SUMMARY — V2.3 = V2.2 (BAL | LAG static + park) + CAPIT v2 on DT5G
+ Period: 2026-06-11 -> 2026-11-09 (0.413y)
+ Init: 50B   Final: 47.0756B   ret=-5.85%   MaxDD=-10.93%
+ CAPIT events fired in window: 1
+====================================================================================================
+
+Done. Run analyze_portfolio.py for the full report.

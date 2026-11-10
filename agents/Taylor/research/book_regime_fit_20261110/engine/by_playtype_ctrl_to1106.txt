@@ -1,0 +1,8 @@
+                          n    win  buy_bn  pnl_bn  pnl_pct_navbook
+book   pt                                                          
+BAL    CAPITB_E0          6  0.333   5.152  -0.115           -0.004
+       RE_BACKLOG_BUY_W   4  0.500   9.885  -2.213           -0.085
+LAGGED CAPITL_E0          6  0.333   5.813  -0.441           -0.017
+       LAG_HI            15  0.267   5.290  -0.114           -0.004
+       LAG_LO            12  0.417  13.888   0.015            0.001
+note: realized+MTM (sell rows incl. MTM_UNREALIZED) for holdings alive after 2026-07-01; includes P&L before 07-01 for holdings opened earlier
