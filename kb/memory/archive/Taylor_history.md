@@ -2194,3 +2194,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-09T00:38:03Z] [dd-redo r3b TCH 09/11] XONG job Taylor_20261109_003030 (vong cuoi): tam 16.244->15.864 (P10 14.563/P90 17.325) DUOI @13.500 ca 2 co; mong: g kiem toan 42,7% => TRONG; CHO Mike kiem co hoc + ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-09T07:46:34Z] [dd-lagcand BSR 09/11] XONG job Taylor_20261109_073600: tam 16.437 (P10 12.034/P90 22.286) TREN vung @26.250; KH 2026 dieu chinh ngu y Q4 lo; CHO Mike skeptic + ghi so
