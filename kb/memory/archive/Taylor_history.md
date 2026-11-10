@@ -2209,3 +2209,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-09T08:33:26Z] [dd-lagcand MSB r2 09/11] XONG job Taylor_20261109_083128: tam 12.739->13.018 (P10 9.675/P90 16.373) TRONG bien tren @16.350, luat4 khong dat; CHO Mike ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-09T08:34:06Z] [dd-lagcand CSV r2 09/11] XONG job Taylor_20261109_083124: tam 17.273->20.717 (P10 15.825/P90 25.470) TRONG @22.600, luat4 khong dat; CHO Mike ghi so
