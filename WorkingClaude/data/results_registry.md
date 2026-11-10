@@ -8539,3 +8539,14 @@ no_ledger: kết quả NO-GO, không pin số mới; 4 ledger treatment là thí
 - Cơ chế: BAL/LAG sổ cái độc lập → nới trần chỉ tiêu cash dư BAL (trung vị 0,7% NAV BAL lúc bị chặn), không chạm cash LAG (LAG navT 426,8135B ở mọi chân); ứng viên ngoài top-12 yếu hơn (excess 45d trung vị OOS −2,6%, hit 44%) + hiệu ứng đường đi (vị thế vụn <5% 14%→29%, STOP 29→51, BAL 2021 +122%→+65/84%).
 - Báo cáo: mike/agents/Taylor/research/bal_maxpos_lag_idle_20261009/REPORT.md · PREREG 7f7ff730.
 
+
+## 2026-11-10 — Cổng edge-health THEO THÁNG cho BAL (tháng âm ⇒ khoá mua mới) vs BLIND: **CÓ HẠI về CAGR, KHÔNG cải thiện rủi ro điều chỉnh** — job `Taylor_20261110_053025` ⚠️ PAPER-ONLY, không wire
+
+ledger_md5: d8c6817594b616389766fb0ddc7f7ea5
+
+- Treatment G1_L0 (luật user, trễ 0): pin0% md5 `d8c68175…` = 19,50% / 1,78 / −13,9% / 1,40; pin1M md5 `8ae049ac035d425cf5f0861927ca3488` = 22,66% / 2,05 / −13,3% / 1,71 (cả hai nạp `pin_ledger.py add`, nhãn `BAL-monthly-gate-G1L0-*-HAI`, `--decided-by agent`). KHÔNG phải anchor R3 mới; dải R3 park0 22,12%…25,42% và neo DD −25,2% GIỮ NGUYÊN.
+- Chân CONTROL byte-identical: `537e349b` (pin0%) / `a6ba34d8` (pin1M), code research `wt-balgate-1110` @ `33f005209` (knob `BAL_BUY_BLOCK_FILE` trơ khi không đặt). Self-check 0 VND 30/30 chân.
+- Nguồn số: `mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/results.json` (md5 8e32f1e43ac87507e08d407e0e28bbda, `analyze.py`) + `placebo.json` (md5 04b713c3dca70246575c30bc845bc97e). PREREG `PREREG.md` viết trước chân treatment.
+- N = 26 đợt khoá / 51 lần chuyển / 62/150 tháng khoá; N_trials = 9. ΔCAGR G1_L0 −2,62pp (pin0%) / −2,76pp (pin1M), P(Δ>0)=0,01 cả hai, CI90 pin0% [−4,76; −0,65]pp; IS −1,73 / OOS −3,46; LOO-năm không lật dấu. ΔSharpe −0,15/−0,12 (P>0 0,06/0,11); ΔCalmar +0,04/−0,13 (P 0,26/0,30) ⇒ không phân biệt được; ΔMaxDD +2,35/+0,59pp nhưng 8 placebo engine (cùng tỷ lệ khoá + số đợt) trung vị +2,76pp ⇒ là giảm exposure, không phải thông tin.
+- 18/18 chân (9 biến thể × 2 quy ước) ΔCAGR < 0, liều–tác dụng theo %tháng khoá; tốt nhất G5 (khoá cần 2 tháng âm) −0,47/−0,98pp, Calmar P≈0,55. DSR 0,021/0,008; PBO 0,107/0,169. Tín hiệu: P(tháng sau âm|âm) 39,5% vs 38,1% (Fisher p=1,0). LAG cùng luật (chỉ đo): −3,08/−3,37pp.
+- Báo cáo: `mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/REPORT.md`. Chờ quant-skeptic + quyết định user (nếu bật = khẩu vị rủi ro có giá ~−2,6pp/năm, không phải edge).
