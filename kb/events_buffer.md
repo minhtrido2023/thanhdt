@@ -809,3 +809,23 @@
 - [2026-11-10T06:05:32Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20261110_053025", "source": "watcher"}
 - [2026-11-10T06:06:08Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "in_progress", "note": "20/30 legs done, all EXIT=0"}
 - [2026-11-10T06:06:32Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+
+## Consolidation 2026-11-10T06:16:48Z
+- [2026-11-10T06:07:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:08:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:09:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:10:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:11:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:12:20Z] Taylor/heartbeat — Taylor_20261110_061206: {"status": "in_progress", "note": "doc code bal_edge_gate"}
+- [2026-11-10T06:12:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:13:07Z] Taylor/heartbeat — Taylor_20261110_061206: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261110_061206", "source": "watcher"}
+- [2026-11-10T06:13:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:13:45Z] Taylor/heartbeat — Taylor_20261110_061206: {"status": "in_progress", "note": "bal_edge_gate.py sửa xong; tiếp plan.py + selfcheck"}
+- [2026-11-10T06:14:07Z] Taylor/heartbeat — Taylor_20261110_061206: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261110_061206", "source": "watcher"}
+- [2026-11-10T06:14:33Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:15:07Z] Taylor/heartbeat — Taylor_20261110_061206: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261110_061206", "source": "watcher"}
+- [2026-11-10T06:15:22Z] Taylor/heartbeat — Taylor_20261110_061206: {"status": "in_progress", "note": "code+selfcheck xong; tạo lại bootstrap/replay, rồi doc + commit"}
+- [2026-11-10T06:15:34Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:16:07Z] Taylor/heartbeat — Taylor_20261110_061206: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261110_061206", "source": "watcher"}
+- [2026-11-10T06:16:34Z] Taylor/heartbeat — Taylor_20261110_053025: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20261110_053025", "source": "watcher"}
+- [2026-11-10T06:16:34Z] Taylor/finding — bal-edge-gate vòng 2 xong, chờ Mike duyệt: {"code_commits": {"wt-bal-edge-gate-20261110": "f103ae0fa (trên 0beaa99f1, d0e01e21e)", "mike_wt": "8f9250363 (trên c5c1e5374)"}, "MIN_N": 1, "final_state": "LOCKED từ 2026-09, tháng 2026-10 -4.91% n=2", "months_closed": 154, "restored_months": ["2015-04", "2017-01", "2018-12", "2019-04", "2022-01", "2024-04", "2025-01"], "transitions": 51, "last12": "2025-11 -4.28% n3 LOCK; 12 n/a n0; 2026-01 +0.42% n12 UNLOCK; 02 +5.12% n22; 03 -8.31% n14 LOCK; 04 -1.23% n13; 05 -1.78% n4; 06 -0.01% n2; 07 +0.88% n1 UNLOCK; 08 +7.27% n2; 09 -3.79% n2 LOCK; 10 -4.91% n2", "selfcheck": "bal_edge_gate 88/0 (env -u TZ, Kiritimati, Los_Angeles); dd_flag 48/0; lag_dd_zone 28/0; lag_governance 30/0; lag_rating_order 14/0; ops_health_check_selfcheck OK", "note": "cổng chạy theo sổ BAL shadow, không phải live; chưa merge, chưa ghi data/edge_gate_state.json, chưa cài cron", "measured_by": "bal_edge_gate.py --bootstrap --from-audit e1030 (md5 6c0db4273a0e5d97bcb98ac4f289a926) -> research/bal_edge_gate_20261110/edge_gate_state.proposed.json; selfcheck chạy trong phiên này"}

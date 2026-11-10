@@ -2191,3 +2191,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-11-08T18:12:29Z] [dd-redo r3c SZL 09/11] XONG job Taylor_20261108_180625: sua khung KTPL co phan, tam 24.529->25.165 (40tr 26.148, P90 28.793) TRONG ca 2 co (5ty ranh gioi P90+10d); CHO Mike kiem co hoc + ghi so
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-11-09T00:38:03Z] [dd-redo r3b TCH 09/11] XONG job Taylor_20261109_003030 (vong cuoi): tam 16.244->15.864 (P10 14.563/P90 17.325) DUOI @13.500 ca 2 co; mong: g kiem toan 42,7% => TRONG; CHO Mike kiem co hoc + ghi so
