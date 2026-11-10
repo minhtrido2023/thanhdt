@@ -89,8 +89,11 @@ def cases(m):
     # 7. DD cũ bị thay bằng DD mới hơn (cả sổ thật: TV2 → 2026-11-01)
     led2 = {"entries": [ent("AAA", dd="2026-10-28", c=30000), ent("AAA", dd="2026-11-01", c=20000), ent("AAA", dd="2026-10-29", c=1)]}
     ok("bản dd_date mới nhất thắng (không theo thứ tự ghi)", m.latest_entries(led2)["AAA"]["center"] == 20000)
-    real = json.load(open(LEDGER, encoding="utf-8"))
-    ok("sổ thật: TV2 dùng DD 2026-11-01 (tâm 20.700)", m.latest_entries(real)["TV2"]["center"] == 20700)
+    real_now = json.load(open(LEDGER, encoding="utf-8"))
+    # Các assertion "sổ thật" bên dưới ghim số của trạng thái 02/11. Sổ append-only có bản đính chính về sau (rev mới) nên
+    # test dùng ẢNH CHỤP sổ tại 02/11 (recorded_at ≤ 2026-11-02T23:59 ICT) thay vì bản mới nhất, kẻo vỡ mỗi lần sổ có rev mới.
+    real = dict(real_now, entries=[e for e in real_now["entries"] if (e.get("recorded_at") or "") <= "2026-11-02T23:59"])
+    ok("sổ thật (ảnh chụp 02/11): TV2 dùng DD 2026-11-01 (tâm 20.700)", m.latest_entries(real)["TV2"]["center"] == 20700)
     # 8. cờ: excluded / đang giữ / BANNED
     class FakeM:
         def positions(self, acc):
@@ -141,7 +144,7 @@ def cases(m):
     ok("asof lọc DD có dd_date > asof (không dùng DD tương lai)",
        m.latest_entries(lrev2, D(2026, 10, 31))["AAA"]["center"] == 1 and "AAA" not in m.latest_entries(lrev2, D(2026, 10, 29)))
     fpt = m.latest_entries(real, D(2026, 11, 2))["FPT"]
-    ok("sổ thật: FPT tâm = 54.800 (kỳ vọng trọng số), center_alt 59.800 base_scenario, rev 2",
+    ok("sổ thật (ảnh chụp 02/11): FPT tâm = 54.800 (kỳ vọng trọng số), center_alt 59.800 base_scenario, rev 2",
        (fpt["center"], fpt["center_kind"], fpt["center_alt"], fpt["center_alt_kind"], fpt["rev"]) == (54800, "expected_weighted", 59800, "base_scenario", 2))
     ok("sổ thật: asof 31/10 chưa có DD FPT (dd 01/11)", "FPT" not in m.latest_entries(real, D(2026, 10, 31)))
     # 12. (điểm 2) dnse_prices với payload DNSE thô: nghìn đồng, t=09:00 ICT, T7 không có bar

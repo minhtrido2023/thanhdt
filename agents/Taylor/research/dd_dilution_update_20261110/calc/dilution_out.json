@@ -1,0 +1,426 @@
+{
+ "HHS": {
+  "inputs": {
+   "N0": 431985968,
+   "NR": 259191580,
+   "offer": 10000,
+   "cash": 2591915800000,
+   "div": 0.07,
+   "n_final_full": 739559976,
+   "d5": 0.014097179630599711
+  },
+  "HEADLINE_CKholding0": {
+   "pre": {
+    "center": 13969,
+    "p10": 12422,
+    "p50": 13917,
+    "p90": 15564
+   },
+   "k_base": 1.0,
+   "scen": {
+    "khong_phat_hanh|k=0.8": {
+     "center": 13055,
+     "p10": 11609,
+     "p50": 13007,
+     "p90": 14546,
+     "cum_exerciser_center": 13969,
+     "rule4_threshold_ex": 11097
+    },
+    "khong_phat_hanh|k=0.946": {
+     "center": 13055,
+     "p10": 11609,
+     "p50": 13007,
+     "p90": 14546,
+     "cum_exerciser_center": 13969,
+     "rule4_threshold_ex": 11097
+    },
+    "khong_phat_hanh|k=1.0": {
+     "center": 13055,
+     "p10": 11609,
+     "p50": 13007,
+     "p90": 14546,
+     "cum_exerciser_center": 13969,
+     "rule4_threshold_ex": 11097
+    },
+    "khong_phat_hanh|k=1.024": {
+     "center": 13055,
+     "p10": 11609,
+     "p50": 13007,
+     "p90": 14546,
+     "cum_exerciser_center": 13969,
+     "rule4_threshold_ex": 11097
+    },
+    "chi_TCH_58.31pct|k=0.8": {
+     "center": 11582,
+     "p10": 10511,
+     "p50": 11546,
+     "p90": 12686,
+     "cum_exerciser_center": 13828,
+     "rule4_threshold_ex": 9845
+    },
+    "chi_TCH_58.31pct|k=0.946": {
+     "center": 11931,
+     "p10": 10860,
+     "p50": 11895,
+     "p90": 13035,
+     "cum_exerciser_center": 14425,
+     "rule4_threshold_ex": 10141
+    },
+    "chi_TCH_58.31pct|k=1.0": {
+     "center": 12060,
+     "p10": 10989,
+     "p50": 12024,
+     "p90": 13164,
+     "cum_exerciser_center": 14646,
+     "rule4_threshold_ex": 10251
+    },
+    "chi_TCH_58.31pct|k=1.024": {
+     "center": 12117,
+     "p10": 11046,
+     "p50": 12081,
+     "p90": 13221,
+     "cum_exerciser_center": 14744,
+     "rule4_threshold_ex": 10299
+    },
+    "bao_phu_50pct|k=0.8": {
+     "center": 11743,
+     "p10": 10631,
+     "p50": 11706,
+     "p90": 12890,
+     "cum_exerciser_center": 14105,
+     "rule4_threshold_ex": 9982
+    },
+    "bao_phu_50pct|k=0.946": {
+     "center": 12054,
+     "p10": 10942,
+     "p50": 12017,
+     "p90": 13201,
+     "cum_exerciser_center": 14636,
+     "rule4_threshold_ex": 10246
+    },
+    "bao_phu_50pct|k=1.0": {
+     "center": 12169,
+     "p10": 11057,
+     "p50": 12131,
+     "p90": 13315,
+     "cum_exerciser_center": 14833,
+     "rule4_threshold_ex": 10343
+    },
+    "bao_phu_50pct|k=1.024": {
+     "center": 12220,
+     "p10": 11108,
+     "p50": 12182,
+     "p90": 13366,
+     "cum_exerciser_center": 14920,
+     "rule4_threshold_ex": 10387
+    },
+    "du_100pct|k=0.8": {
+     "center": 10924,
+     "p10": 10020,
+     "p50": 10893,
+     "p90": 11855,
+     "cum_exerciser_center": 12701,
+     "rule4_threshold_ex": 9285
+    },
+    "du_100pct|k=0.946": {
+     "center": 11428,
+     "p10": 10525,
+     "p50": 11398,
+     "p90": 12360,
+     "cum_exerciser_center": 13565,
+     "rule4_threshold_ex": 9714
+    },
+    "du_100pct|k=1.0": {
+     "center": 11615,
+     "p10": 10711,
+     "p50": 11584,
+     "p90": 12546,
+     "cum_exerciser_center": 13884,
+     "rule4_threshold_ex": 9873
+    },
+    "du_100pct|k=1.024": {
+     "center": 11698,
+     "p10": 10794,
+     "p50": 11667,
+     "p90": 12629,
+     "cum_exerciser_center": 14026,
+     "rule4_threshold_ex": 9943
+    }
+   }
+  },
+  "song_song_CKholding_r2_27pct": {
+   "pre": {
+    "center": 10761,
+    "p10": 8624,
+    "p50": 10559,
+    "p90": 13207
+   },
+   "k_base": 0.73,
+   "scen": {
+    "khong_phat_hanh|k=0.73": {
+     "center": 10057,
+     "p10": 8060,
+     "p50": 9868,
+     "p90": 12343,
+     "cum_exerciser_center": 10761,
+     "rule4_threshold_ex": 8548
+    },
+    "khong_phat_hanh|k=0.8": {
+     "center": 10057,
+     "p10": 8060,
+     "p50": 9868,
+     "p90": 12343,
+     "cum_exerciser_center": 10761,
+     "rule4_threshold_ex": 8548
+    },
+    "chi_TCH_58.31pct|k=0.73": {
+     "center": 9194,
+     "p10": 7714,
+     "p50": 9054,
+     "p90": 10887,
+     "cum_exerciser_center": 9740,
+     "rule4_threshold_ex": 7815
+    },
+    "chi_TCH_58.31pct|k=0.8": {
+     "center": 9361,
+     "p10": 7881,
+     "p50": 9221,
+     "p90": 11054,
+     "cum_exerciser_center": 10026,
+     "rule4_threshold_ex": 7957
+    },
+    "bao_phu_50pct|k=0.73": {
+     "center": 9288,
+     "p10": 7752,
+     "p50": 9143,
+     "p90": 11047,
+     "cum_exerciser_center": 9902,
+     "rule4_threshold_ex": 7895
+    },
+    "bao_phu_50pct|k=0.8": {
+     "center": 9437,
+     "p10": 7901,
+     "p50": 9292,
+     "p90": 11196,
+     "cum_exerciser_center": 10157,
+     "rule4_threshold_ex": 8022
+    },
+    "du_100pct|k=0.73": {
+     "center": 8808,
+     "p10": 7560,
+     "p50": 8690,
+     "p90": 10237,
+     "cum_exerciser_center": 9079,
+     "rule4_threshold_ex": 7487
+    },
+    "du_100pct|k=0.8": {
+     "center": 9050,
+     "p10": 7802,
+     "p50": 8932,
+     "p90": 10479,
+     "cum_exerciser_center": 9493,
+     "rule4_threshold_ex": 7692
+    }
+   }
+  },
+  "round2": {
+   "cum_ckcash": {
+    "center": 13884,
+    "p10": 12337,
+    "p50": 13832,
+    "p90": 15479
+   },
+   "cum_ckcash_note": "cum_exerciser(tf(V,1,1)); 13.969 = không áp CK lên phần tiền 6.000đ đã nộp",
+   "rule4_breakeven_k_EX": 0.8207,
+   "rule4_EX_at_k": {
+    "1.0": {
+     "center": 11615,
+     "thr": 9873,
+     "pass_": true
+    },
+    "0.82": {
+     "center": 10993,
+     "thr": 9344,
+     "pass_": false
+    },
+    "0.8": {
+     "center": 10924,
+     "thr": 9285,
+     "pass_": false
+    }
+   },
+   "terp_div": 9346,
+   "center_per_px_cum": 1.397,
+   "center_per_terp_ex": 1.243,
+   "value_per_share_change": -0.1685,
+   "terp_change": -0.0654,
+   "parallel_ckholding": {
+    "r3_center": 10761,
+    "r3_px_vs_center": -0.0716,
+    "r4_ex_center": 8808,
+    "r4_terp_vs_center": 0.0611,
+    "r4_px10000_vs_cumcenter": -0.0707
+   },
+   "rule4_parallel": {
+    "thr": 7487
+   },
+   "k_company_7541": {
+    "gain_vnd": -141503888789,
+    "k": 0.9456
+   },
+   "tch_only_need_vnd": 1080569697020,
+   "tch_cover_vnd": 1511346102980,
+   "cash_q3_vnd": 181900000000,
+   "ex_k_0946": {
+    "center": 11428,
+    "p10": 10525,
+    "p50": 11398,
+    "p90": 12360
+   },
+   "ex_k_0946_cum_exerciser": 13565
+  },
+  "market_BQ_0911_close": {
+   "px": 9990,
+   "terp_rights": 9994,
+   "terp_rights_div": 9340,
+   "right_value_per_new": -10
+  },
+  "market_DNSE_1011_1046": {
+   "px": 10000,
+   "terp_rights": 10000,
+   "terp_rights_div": 9346,
+   "right_value_per_new": 0
+  },
+  "bargain_NDL": {
+   "own_after_calc": 0.7983,
+   "own_after_company": 0.7541,
+   "gain_vnd": 63463904423,
+   "k_equiv": 1.0244,
+   "note": "Tỷ lệ tự tính 79,8% != công ty nêu 75,41% (TT08) ⇒ cấu trúc phát hành NĐL chưa rõ; chỉ dùng làm độ nhạy"
+  }
+ },
+ "SCL": {
+  "inputs": {
+   "S0": 38836815,
+   "ratio": 0.154453,
+   "sub_px": 12500,
+   "new_sh": 5998463,
+   "cash": 74980782340,
+   "n_post": 44835278,
+   "terp_r3": 27138.967545668813
+  },
+  "ck40tr": {
+   "cum": {
+    "center": 23652,
+    "p10": 18986,
+    "p50": 23202,
+    "p90": 28854
+   },
+   "post_full_r3": {
+    "center": 22146,
+    "p10": 18104,
+    "p50": 21756,
+    "p90": 26651
+   },
+   "partial_recalc": {
+    "0.0": {
+     "center": 23652,
+     "p10": 18986,
+     "p50": 23202,
+     "p90": 28854
+    },
+    "0.5": {
+     "center": 22845,
+     "p10": 18513,
+     "p50": 22427,
+     "p90": 27674
+    },
+    "1.0": {
+     "center": 22146,
+     "p10": 18104,
+     "p50": 21756,
+     "p90": 26652
+    }
+   },
+   "esop2_sens": {
+    "center": 21896,
+    "p10": 17937,
+    "p50": 21514,
+    "p90": 26309
+   }
+  },
+  "ck5ty": {
+   "cum": {
+    "center": 22791,
+    "p10": 18295,
+    "p50": 22357,
+    "p90": 27803
+   },
+   "post_full_r3": {
+    "center": 21339,
+    "p10": 17445,
+    "p50": 20964,
+    "p90": 25681
+   },
+   "partial_recalc": {
+    "0.0": {
+     "center": 22791,
+     "p10": 18295,
+     "p50": 22357,
+     "p90": 27803
+    },
+    "0.5": {
+     "center": 22013,
+     "p10": 17839,
+     "p50": 21611,
+     "p90": 26666
+    },
+    "1.0": {
+     "center": 21340,
+     "p10": 17445,
+     "p50": 20964,
+     "p90": 25681
+    }
+   },
+   "esop2_sens": {
+    "center": 21106,
+    "p10": 17292,
+    "p50": 20738,
+    "p90": 25358
+   }
+  },
+  "esop_overlap": {
+   "base_pre_esop": 37916815,
+   "esop": 920000,
+   "new_rights": 6000000,
+   "reading_duplicate_pct": 2.095,
+   "reading_separate_pct": 2.095,
+   "note": "cả 2 cách đọc cùng mẫu số 43.916.815 → 2,095%; 2,1% đúng bằng 920.000/43,9tr (không phải 2,1% × 44,84 tr = 0,94 tr)"
+  },
+  "market": {
+   "close_0611_cum": 29400,
+   "close_0911_ex": 28000,
+   "ohlc_0911": [
+    28000,
+    29000,
+    27700,
+    28000
+   ],
+   "vol_0911": 45100,
+   "dnse_1011": {
+    "ref": 28100,
+    "match": 28300,
+    "time": "2026-11-10 10:18 ICT",
+    "vol_lots": 690
+   },
+   "px_0911_vs_terp": 0.0317,
+   "right_implied_0911_per_new": 15500,
+   "right_implied_0911_per_old": 2394,
+   "cum_equiv_0911": 30394,
+   "px_1011_vs_terp": 0.0428,
+   "right_implied_1011_per_new": 15800,
+   "right_implied_1011_per_old": 2440,
+   "cum_equiv_1011": 30740
+  }
+ }
+}
