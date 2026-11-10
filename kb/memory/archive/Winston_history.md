@@ -157,3 +157,6 @@
 
 ## Archived 2026-10-19 (keep=12 days=0 require_done=False)
 - [2026-09-18T05:34:58Z] Xong job Winston_20260918_052425 (treasury size): 36/446 su kien xac dinh duoc (3 mien phi + 33 suy OShares, do chinh xac 77% khop chinh xac tren control n=13), 410 THAT SU khong co du lieu — short_content/source_link NULL 100%, news_id link chet, OShares vendor khong theo doi CP quy (62 control co size that>0 ma OShares bat dong). Bay tai su dung: ISS/DIV co shares_delta NULL 100% => moi bo loc confounder dua tren shares_delta deu mu truoc phat hanh (VPB 1,19 ty CP bi quy nham). CHO: quant-skeptic soi 33 ca suy luan truoc khi nap bang.
+
+## Archived 2026-11-10 (keep=12 days=0 require_done=False)
+- [2026-09-21T02:08:13Z] Xong job Winston_20260921_020517 (ops-autofix SpaceX): run_bot exit 2 = approval gate DUNG thiet ke, KHONG bug — plan 09-21 (3 lenh park-trim ~11,8tr) gui user thu Sau 18/09 21:00+21:45, user khong duyet qua cuoi tuan; preflight 08:45 da bao NOT_APPROVED. Khong sua gi (ranh gioi cam ghi approved_by). CON TREO: question plan-SpaceX-2026-09-21-chua-duyet cho user chot A(duyet+chay lai truoc 14:30)/B(bo qua). LOP RUI RO MOI: plan gui THU SAU cho phien THU HAI khong co nhac lai cuoi tuan — kenh nhac duy nhat la preflight 08:45 sang cung phien.
