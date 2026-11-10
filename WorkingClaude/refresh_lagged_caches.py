@@ -12,8 +12,10 @@ pt_dates.detect_end_date() caps END_DATE at the lagged_pos_ov.pkl max time.
 
 This script (run as step 0 of papertrade_daily.bat) brings all 4 up to the
 latest BQ ticker date:
-  1. earnings_px.pkl            — daily Close (incremental append)
-  2. lagged_pos_ov.pkl          — daily Open + Volume_3M_P50 (incremental append)
+  1. earnings_px.pkl            — daily Close ĐIỀU CHỈNH, dựng lại toàn lịch sử mỗi ngày (BQ sống)
+  2. lagged_pos_ov.pkl          — daily Open ĐIỀU CHỈNH + Volume_3M_P50 + Price THÔ, cùng lần kéo với [1]
+     (lagged_cache_adjusted.build: validate độ sâu/độ phủ ⇒ lỗi thì KHÔNG ghi, exit 1 cuối script;
+      ghi nguyên tử + .prev; .pre_adj = ảnh chụp 1 lần bản cũ trước khi đổi cơ sở)
   3. earnings_surprise_data.pkl — quarterly NP_P0..P7 (full re-pull, cheap)
   4. earnings_events_classified.csv — recomputed pre/rel/post returns + pattern
      (raw events re-pulled, returns recomputed from the fresh px pivot)
@@ -21,76 +23,117 @@ latest BQ ticker date:
 All BQ access via simulate_holistic_nav.bq (same accessor the pt sims use), so
 PATH/auth behave identically under the Windows scheduled task.
 """
-import os, sys, io, pickle
+import os, sys, io, json, pickle, shutil, tempfile, fcntl
 import numpy as np, pandas as pd
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-WORKDIR = r"/home/trido/thanhdt/WorkingClaude"
+WORKDIR = os.environ.get("LAGCACHE_WORKDIR", r"/home/trido/thanhdt/WorkingClaude")
 sys.path.insert(0, WORKDIR); os.chdir(WORKDIR)
 from simulate_holistic_nav import bq
+import lagged_cache_adjusted as LCA
+
+# Khoá cả script: 2 lần chạy chồng nhau (cron + tay) không được cùng ghi pkl.
+_LOCK = open(os.path.join(WORKDIR, "data/.refresh_lagged_caches.lock"), "w")
+try:
+    fcntl.flock(_LOCK, fcntl.LOCK_EX | fcntl.LOCK_NB)
+except BlockingIOError:
+    print("!! refresh_lagged_caches đang chạy ở tiến trình khác (lock bận) -> thoát, không ghi gì")
+    sys.exit(3)
 
 print("=" * 80)
 print("  REFRESH LAGGED CACHES")
 print("=" * 80)
 
 
-def _save_pickle(obj, path):
-    """Write atomically-ish; fall back to .new if locked (OneDrive/Excel).
-    Force datetime64 → ns and StringDtype → object for cross-numpy compat."""
+def _prep(obj):
+    """datetime64 → ns, StringDtype → object (đọc chéo numpy cũ)."""
     obj = obj.copy()
     for c in obj.columns:
         if pd.api.types.is_datetime64_any_dtype(obj[c]):
-            obj[c] = obj[c].astype("datetime64[ns]")   # us/ms → ns avoids NotImplementedError on older numpy
-        elif hasattr(obj[c], "dtype") and str(obj[c].dtype) in ("string", "StringDtype"):
+            obj[c] = obj[c].astype("datetime64[ns]")
+        elif isinstance(obj[c].dtype, pd.StringDtype) or str(obj[c].dtype) in ("string", "StringDtype"):
             obj[c] = obj[c].astype(object)
-        elif isinstance(obj[c].dtype, pd.StringDtype):
-            obj[c] = obj[c].astype(object)
+    return obj
+
+
+def _save_pickles(items):
+    """Ghi nguyên tử nhiều file: dump HẾT ra tmp (mkstemp cùng thư mục + fsync) rồi mới os.replace
+    lần lượt + fsync thư mục; .prev = bản trước (1 bản lăn). Lỗi trước bước replace ⇒ không file nào đổi."""
+    tmps = []
     try:
-        with open(path, "wb") as f: pickle.dump(obj, f)
-        return path
-    except PermissionError:
-        alt = path.replace(".pkl", ".new.pkl")
-        with open(alt, "wb") as f: pickle.dump(obj, f)
-        print(f"  (locked, wrote {alt})")
-        return alt
+        for obj, path in items:
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=os.path.basename(path) + ".", suffix=".tmp")
+            tmps.append(tmp)
+            with os.fdopen(fd, "wb") as f:
+                pickle.dump(_prep(obj), f); f.flush(); os.fsync(f.fileno())
+        for (obj, path), tmp in zip(items, tmps):
+            if os.path.exists(path): shutil.copy2(path, path + ".prev")
+            os.replace(tmp, path)
+        dfd = os.open(os.path.dirname(items[0][1]), os.O_RDONLY)
+        try: os.fsync(dfd)
+        finally: os.close(dfd)
+    finally:
+        for tmp in tmps:
+            if os.path.exists(tmp): os.remove(tmp)
 
 
-# ── 1. earnings_px.pkl — daily Close, incremental ──────────────────────────
-print("\n[1] earnings_px.pkl (daily Close)...")
+def _save_json_atomic(obj, path):
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=os.path.basename(path) + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(obj, f, indent=1); f.flush(); os.fsync(f.fileno())
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp): os.remove(tmp)
+
+
+def _save_pickle(obj, path):
+    _save_pickles([(obj, path)])
+    return path
+
+
+# ── 1+2. earnings_px.pkl + lagged_pos_ov.pkl — KÉO LẠI TOÀN LỊCH SỬ, giá ĐIỀU CHỈNH ─────────
+# Không append nữa (append ⇒ dòng cũ kẹt cơ sở điều chỉnh lúc fetch ⇒ cú rơi giả ngày GDKHQ, và phiên
+# fetch lúc BQ chưa đủ thì thưa vĩnh viễn). Mỗi ngày dựng lại cả chuỗi 2011→END từ BQ SỐNG (không
+# phải BQ_LOCAL_CACHE: năm cũ trong cache không theo hồi tố) — xem lagged_cache_adjusted.py.
+# END = max(time) của tav2_bq.ticker ở CÙNG snapshot `asof` với 16 khúc năm (live, FOR SYSTEM_TIME AS OF).
+# State `data/lagged_carried.json` = mã đang được mang sang (BQ cắt lịch sử): chỉ mã MỚI tính vào trần.
+# Fail-safe: validate có vấn đề ⇒ KHÔNG ghi gì, giữ pkl cũ, exit 1 CUỐI script (bước 3/4 vẫn chạy).
+print("\n[1+2] earnings_px.pkl + lagged_pos_ov.pkl (dựng lại toàn lịch sử, giá điều chỉnh)...")
 with open("data/earnings_px.pkl", "rb") as f: px = pickle.load(f)
-px["time"] = pd.to_datetime(px["time"])
-px_max = px["time"].max(); px_tks = set(px["ticker"].unique())
-print(f"  current: {len(px):,} rows, max {px_max.date()}, {len(px_tks)} tickers")
-new_px = bq(f"""SELECT t.ticker, t.time, t.Close FROM tav2_bq.ticker AS t
-WHERE t.time > DATE '{px_max.date()}' AND t.Close > 0""")
-if len(new_px):
-    new_px["time"] = pd.to_datetime(new_px["time"])
-    new_px = new_px[new_px["ticker"].isin(px_tks)]
-    px = (pd.concat([px, new_px], ignore_index=True)
-          .drop_duplicates(["ticker", "time"]).sort_values(["ticker", "time"]).reset_index(drop=True))
-    _save_pickle(px, os.path.join(WORKDIR, "data/earnings_px.pkl"))
-    print(f"  +{len(new_px):,} rows -> {len(px):,} total, new max {px['time'].max().date()}")
-else:
-    print("  already current, nothing to append")
-
-
-# ── 2. lagged_pos_ov.pkl — daily Open + Volume_3M_P50, incremental ─────────
-print("\n[2] lagged_pos_ov.pkl (Open + Volume_3M_P50)...")
 with open("data/lagged_pos_ov.pkl", "rb") as f: ov = pickle.load(f)
-ov["time"] = pd.to_datetime(ov["time"])
-ov_max = ov["time"].max(); ov_tks = set(ov["ticker"].unique())
-print(f"  current: {len(ov):,} rows, max {ov_max.date()}, {len(ov_tks)} tickers")
-new_ov = bq(f"""SELECT t.ticker, t.time, t.Open, t.Volume_3M_P50 FROM tav2_bq.ticker AS t
-WHERE t.time > DATE '{ov_max.date()}' AND t.Close > 0""")
-if len(new_ov):
-    new_ov["time"] = pd.to_datetime(new_ov["time"])
-    new_ov = new_ov[new_ov["ticker"].isin(ov_tks)]
-    ov = (pd.concat([ov, new_ov], ignore_index=True)
-          .drop_duplicates(["ticker", "time"]).sort_values(["ticker", "time"]).reset_index(drop=True))
-    _save_pickle(ov, os.path.join(WORKDIR, "data/lagged_pos_ov.pkl"))
-    print(f"  +{len(new_ov):,} rows -> {len(ov):,} total, new max {ov['time'].max().date()}")
+px["time"] = pd.to_datetime(px["time"]); ov["time"] = pd.to_datetime(ov["time"])
+print(f"  current: px {len(px):,} / ov {len(ov):,} rows, max {px['time'].max().date()}, {px['ticker'].nunique()} tickers")
+ADJ_FAIL = []
+CARRY_STATE = os.path.join(WORKDIR, "data/lagged_carried.json")
+try:
+    with open(CARRY_STATE) as f: _known = set(json.load(f).get("tickers", []))
+except (FileNotFoundError, ValueError):
+    _known = set()
+try:
+    _asof = LCA.new_asof(); _lbq = LCA.live_bq(bq)
+    _end = pd.Timestamp(_lbq("SELECT MAX(t.time) AS mx FROM tav2_bq.ticker AS t" + LCA.asof_clause(_asof))["mx"].iloc[0])
+    npx, nov, problems, stats, carried = LCA.build(_lbq, px, ov, _end, known_carried=_known, asof=_asof)
+except Exception as e:
+    problems, stats, carried = [f"kéo BQ lỗi: {type(e).__name__}: {str(e)[:300]}"], {}, None
+print(f"  stats: {stats}")
+if carried is not None and len(carried):
+    print(f"  mang sang NGUYÊN TRẠNG dòng cũ của {len(carried)} mã bị BQ cắt lịch sử (cơ sở cũ):")
+    print(carried.to_string(index=False))
+if problems:
+    for p_ in problems: print(f"  !! {p_}")
+    print("  !! KHÔNG GHI earnings_px.pkl / lagged_pos_ov.pkl — giữ bản cũ")
+    ADJ_FAIL.extend(problems)
 else:
-    print("  already current, nothing to append")
+    for path in ("data/earnings_px.pkl", "data/lagged_pos_ov.pkl"):   # ảnh chụp 1 lần bản cơ sở-thô cuối
+        full = os.path.join(WORKDIR, path)
+        if not os.path.exists(full + ".pre_adj"): LCA.copy_atomic(full, full + ".pre_adj")
+    _save_pickles([(npx, os.path.join(WORKDIR, "data/earnings_px.pkl")),
+                   (nov, os.path.join(WORKDIR, "data/lagged_pos_ov.pkl"))])
+    _save_json_atomic({"tickers": sorted(carried["ticker"]) if len(carried) else [], "asof": stats.get("asof"),
+                       "end": str(_end.date())}, CARRY_STATE)
+    px, ov = npx, nov
+    print(f"  ghi: px {len(px):,} / ov {len(ov):,} rows, max {px['time'].max().date()}")
 
 
 # ── 3. earnings_surprise_data.pkl — full re-pull (cheap, quarterly) ────────
@@ -170,3 +213,6 @@ print(f"  lagged_pos_ov max:  {ov['time'].max().date()}")
 print(f"  surprise rel max:   {fin['Release_Date'].max().date()}")
 print(f"  events_cls rel max: {evdf['Release_Date'].max().date()}")
 print("=" * 80)
+if ADJ_FAIL:
+    print("!! [1+2] KHÔNG cập nhật pkl giá: " + " | ".join(ADJ_FAIL))
+    sys.exit(1)

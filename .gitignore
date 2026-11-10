@@ -144,3 +144,7 @@ WorkingClaude/.verify_a4_worktree/
 !WorkingClaude/data/pinned_ledgers/PINS.jsonl
 !WorkingClaude/data/pinned_ledgers/*.csv.gz
 WorkingClaude/data/raw/bdi_handybulk_*.html
+
+# lock của refresh_lagged_caches.py (flock, không phải artifact)
+WorkingClaude/data/.refresh_lagged_caches.lock
+data/.refresh_lagged_caches.lock

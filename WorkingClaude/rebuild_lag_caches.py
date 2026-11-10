@@ -1,6 +1,7 @@
 """One-time FULL rebuild of the 3 LAG caches from BQ, bypassing the broken incremental load.
 The existing ba_v11_*/earnings_* pickles were written with a newer-pandas StringDtype that
-pandas 2.3.3 cannot deserialize. refresh_lagged_caches.py can't fix them (it loads-then-appends).
+pandas 2.3.3 cannot deserialize. (Historical note: refresh_lagged_caches.py then loaded-then-appended and could not fix them;
+since feat/lag-cache-adjusted-20261110 it rebuilds the FULL adjusted history live each run — but still loads the old pkl for validation, so an unreadable pkl still needs this script.)
 This does a clean full pull and writes with plain object dtype (loadable here). Schemas match
 exactly what pt_v23_audit_2014.py / pt_v22_dt5g.py / pt_dates.detect_end_date consume.
 """

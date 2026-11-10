@@ -388,9 +388,12 @@ px_data["time"] = pd.to_datetime(px_data["time"])
 px_close = px_data.pivot_table(index="time", columns="ticker", values="Close", aggfunc="first").sort_index().ffill(limit=5)
 master_idx = pd.DatetimeIndex(px_close.index).as_unit("ns"); px_close.index = master_idx
 all_dates = np.array(master_idx)
+from lag_adv_basis import raw_price_panel, adv_px
 with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
 px_open_l = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
+# Price = giá THÔ (cơ sở của Volume_3M_P50). Cache điều chỉnh (lagged_cache_adjusted) có cột này; pkl cũ thì không ⇒ rơi về Close.
+px_raw_l = raw_price_panel(ov, master_idx)
 
 with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
 fin["Release_Date"] = pd.to_datetime(fin["Release_Date"]); FLOOR = 1e9
@@ -474,6 +477,9 @@ liq_lag = {}
 for tk in liq_l.columns:
     for d in win_idx:
         adv = liq_l.at[d, tk]; px = px_close.at[d, tk] if tk in px_close.columns else np.nan
+        # ADV VND = Volume_3M_P50 (cổ phiếu THÔ) × giá THÔ: COALESCE(Price, Close). Nhân với Close ĐIỀU CHỈNH = trộn cơ sở
+        # (cùng lớp lỗi LAG_ADV_BASIS=close của engine R3) — Close hồi tố thấp hơn Price ở mọi mã có quyền ⇒ ADV bị đánh thấp.
+        px = adv_px(px_raw_l, d, tk, px)
         if pd.notna(adv) and pd.notna(px):
             liq_lag[(tk, d)] = float(adv) * float(px)
 # liquidity_require_positive=True (2026-11-10, user duyệt): ADV<=0/thiếu ⇒ KHÔNG mua (mirror gate live cap_lag_orders).

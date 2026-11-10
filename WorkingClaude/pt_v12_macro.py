@@ -266,6 +266,8 @@ with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f)
 ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
+from lag_adv_basis import raw_price_panel, adv_px
+px_raw_l = raw_price_panel(ov, master_idx)   # Price thô (xem lag_adv_basis)
 
 ev = pd.read_csv("data/earnings_events_classified.csv", parse_dates=["Release_Date"])
 ev = ev.sort_values(["ticker","Release_Date"]).reset_index(drop=True)
@@ -363,9 +365,10 @@ for dt in sim_days_lag:
             fpx = px_open.at[dt, tk] if tk in px_open.columns else np.nan
             if pd.isna(fpx) or fpx<=0: continue
             adv = liq_l.at[dt, tk] if tk in liq_l.columns else 0
-            if pd.isna(adv) or adv*fpx < LIQ_MIN: continue
+            apx = adv_px(px_raw_l, dt, tk, fpx)
+            if pd.isna(adv) or adv*apx < LIQ_MIN: continue
             target = POS_PCT*nav_now
-            cap = LIQ_CAP*adv*MAX_FILL*fpx
+            cap = LIQ_CAP*adv*MAX_FILL*apx
             alloc = min(target, cap)
             if alloc<1e6 or alloc>cash_l: continue
             eff_px = fpx*(1+SLIP_IN)

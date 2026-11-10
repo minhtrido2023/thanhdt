@@ -144,7 +144,8 @@ def lag_edge_health():
     pa_HL3>=5), entry T+5 after release, measures the book's actual hold horizon
     (25 sessions), then trailing-12M mean/win at the latest COMPLETE event.
     Sources are the daily-refreshed caches (refresh_lagged_caches.py step [0/6]),
-    so this line stays live without extra BQ cost. Series inherently lags ~5 weeks
+    so this line stays live without a separate BQ pull of its own (the cache refresh itself
+    now re-pulls the FULL adjusted history live each day: ~152MB scanned, see kb/projects/lag-cache-adjusted-20261110.md §5). Series inherently lags ~5 weeks
     (events complete 25 sessions after entry).
     Pre-committed thresholds (research 2026-06-10, lag edge-cycle: trough=3rd pctile,
     recovery = 12M-mean > +4-5%; 5/5 troughs recovered >= +3.9% within 6M):

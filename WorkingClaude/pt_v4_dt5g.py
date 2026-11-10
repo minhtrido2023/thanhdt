@@ -408,6 +408,8 @@ all_dates = np.array(master_idx)
 with open("data/lagged_pos_ov.pkl","rb") as f: ov = pickle.load(f); ov["time"] = pd.to_datetime(ov["time"])
 px_open = ov.pivot_table(index="time", columns="ticker", values="Open", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
 liq_l = ov.pivot_table(index="time", columns="ticker", values="Volume_3M_P50", aggfunc="first").sort_index().reindex(master_idx).ffill(limit=5)
+from lag_adv_basis import raw_price_panel, adv_px
+px_raw_l = raw_price_panel(ov, master_idx)   # Price thô: ADV VND = Volume_3M_P50 thô × giá thô (pkl cũ không có cột ⇒ như cũ)
 
 # Build surprise_B_MA from full earnings_surprise_data (needed for S2 sizing).
 with open("data/earnings_surprise_data.pkl","rb") as f: fin = pickle.load(f)
@@ -497,9 +499,10 @@ for dt in sim_days_lag:
             fpx = px_open.at[dt, tk] if tk in px_open.columns else np.nan
             if pd.isna(fpx) or fpx<=0: continue
             adv = liq_l.at[dt, tk] if tk in liq_l.columns else 0
-            if pd.isna(adv) or adv*fpx < LIQ_MIN: continue
+            apx = adv_px(px_raw_l, dt, tk, fpx)
+            if pd.isna(adv) or adv*apx < LIQ_MIN: continue
             pos_pct = 0.10 if en_row["surprise"] > 0.5 else 0.08    # S2 sizing
-            target = pos_pct * nav_now; cap = LIQ_CAP_L * adv * MAX_FILL_L * fpx
+            target = pos_pct * nav_now; cap = LIQ_CAP_L * adv * MAX_FILL_L * apx
             alloc = min(target, cap)
             if alloc<1e6 or alloc>cash_l: continue
             eff_px = fpx*(1+SLIP_IN); shares = alloc/eff_px
