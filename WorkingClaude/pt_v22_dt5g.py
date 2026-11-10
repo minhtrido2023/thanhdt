@@ -476,8 +476,11 @@ for tk in liq_l.columns:
         adv = liq_l.at[d, tk]; px = px_close.at[d, tk] if tk in px_close.columns else np.nan
         if pd.notna(adv) and pd.notna(px):
             liq_lag[(tk, d)] = float(adv) * float(px)
+# liquidity_require_positive=True (2026-11-10, user duyệt): ADV<=0/thiếu ⇒ KHÔNG mua (mirror gate live cap_lag_orders).
+# Chỉ nhánh LAG; BAL (LIQ_FULL) và default engine dùng chung giữ nguyên. Ca HTT 1,93 tỷ ADV=0 ngày 07-24.
 LIQ_LAG = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
-           "liquidity_lookup": liq_lag, "exit_slippage_tiered": True}
+           "liquidity_lookup": liq_lag, "exit_slippage_tiered": True,
+           "liquidity_require_positive": True}
 
 # ============================================================================
 # 5. CAPIT v2 events (gate 30%, state routing, BEAR guard) + baskets
