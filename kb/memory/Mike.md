@@ -13,3 +13,4 @@
 DT CRISIS ~11/10 sớm nhất; nav-loss-brake 11-09; commodity 11-25; BĐS 11-26; Livermore H20 03/12; LAG 12-15; audit đo lường ~12-27.
 
 - [2026-11-10T03:42:43Z] 10/11: DD pha loãng — Taylor_20261110_034232 làm HHS_r4+SCL_r4 (dd_dilution_update_20261110); xong → fundamental-skeptic → nhập entry mới vào kb/dd_price_zones.json
+- [2026-11-10T04:03:02Z] 10/11: skeptic HHS_r4+SCL_r4 CONFIRMED(medium) không đổi nhãn; vòng 2 sửa Taylor_20261110_040253 → xong thì nhập 2 entry vào kb/dd_price_zones.json (từ ledger_proposed_entries.json, SCL ex-basis, HHS có ex_basis_pending/field mới cần kiểm schema)
