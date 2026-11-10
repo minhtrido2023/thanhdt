@@ -28,3 +28,4 @@
 - [2026-11-10T13:20:38Z] [2026-11-10] dd-VGS r2 XONG job Taylor_20261110_131720: tam 26.778 (sau CK 1ty 26.526, P10 19.393/P90 34.722), gia 19.300 DUOI mong manh, luat4 dat; CHO Mike skeptic lan 2 + ghi so
 - [2026-11-10T13:41:29Z] ĐANG DỞ job Taylor_20261110_132044 lagadj r2: A1 4 chân r3z xong (Δ pin0 -0,04/pin1M -0,37 ⇒ KHÔNG re-pin), pkl v2+pt v2 xong; code wt-lagadj-1110 sửa B uncommitted; NEXT: selfcheck, B5/B9/B10, doc, tách commit, bus
 - [2026-11-10T13:53:11Z] CHỜ Mike duyệt lag-cache-adjusted r2: code fd29f496a (wt-lagadj-1110) + mike edb3ffba0; KHÔNG re-pin R3; user quyết 4 mục trong doc §6; không merge/apply/cron trước duyệt
+- [2026-11-10T15:28:07Z] CHỜ Mike: lagadj r3 code cf21463b9 + mike eecd82ae7 + repin branch feat/repin-mirror-live-20261110 @307593815; chờ quant-skeptic, user quyết re-pin + neo DD -28,0 + TTL delist
