@@ -87,6 +87,7 @@ def disc_exit_triggers(pnl_pct, sessions_held, target_pct, stop_pct, max_session
       TARGET ⇔ pnl_pct ≥ +target_pct (đúng +10,00% là BẮN) · STOP ⇔ pnl_pct ≤ −stop_pct (đúng −10,00% là
       BẮN) · TIME ⇔ sessions_held ≥ max_sessions (`count_trading_days(entry, signal)` — phiên thứ N sau
       ngày vào; FPT/NNC vào 06/11 ⇒ phiên thứ 25 = 11/12/2026).
+    max_sessions=None ⇒ KHÔNG có TIME exit (user duyệt phương án B cho VGS 11/11/2026); TARGET/STOP vẫn xét.
     pnl_pct = marketPrice/avg_cost − 1 (giá vốn broker). None ⇒ trigger tương ứng KHÔNG bắn (caller fail-safe)."""
     out = []
     if pnl_pct is not None:
@@ -94,6 +95,6 @@ def disc_exit_triggers(pnl_pct, sessions_held, target_pct, stop_pct, max_session
             out.append("TARGET")
         if pnl_pct <= -stop_pct + DISC_EPS:
             out.append("STOP")
-    if sessions_held is not None and sessions_held >= max_sessions:
+    if max_sessions is not None and sessions_held is not None and sessions_held >= max_sessions:
         out.append("TIME")
     return out
