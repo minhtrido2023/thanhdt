@@ -734,3 +734,31 @@
 ## Consolidation 2026-11-11T02:15:05Z
 - [2026-11-11T02:15:04Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-11-11", "elapsed_s": 602, "rc": 0}
 - [2026-11-11T02:15:04Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-11-11", "elapsed_s": 603, "rc": 0}
+
+## Consolidation 2026-11-11T03:44:37Z
+- [2026-11-11T03:26:24Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "in_progress", "note": "bat dau: doc engine dcf + dcf_backtest"}
+- [2026-11-11T03:27:16Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:27:21Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "in_progress", "note": "doc xong engine; khoa tieu chi truoc, dung panel PIT"}
+- [2026-11-11T03:28:16Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:29:16Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:30:16Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:31:16Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:32:16Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:32:22Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "in_progress", "note": "panel PIT xong 14857 dong/6107 FV ok; dang phan tich"}
+- [2026-11-11T03:33:17Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:34:17Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:35:17Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:35:18Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "in_progress", "note": "chay bootstrap cum; song song viet trigger_freq (f) + variants (e)"}
+- [2026-11-11T03:36:17Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:37:18Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:38:19Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:38:49Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "in_progress", "note": "(f) xong; cho bootstrap; do do ben lech theo ma"}
+- [2026-11-11T03:39:19Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:40:19Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:40:20Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "in_progress", "note": "prelock K3 fail (khong hoi tu); chay luoi bien the (e)"}
+- [2026-11-11T03:41:19Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:42:19Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:42:29Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "in_progress", "note": "PIT+tai lap pass; cau noi DD vs engine xong; viet REPORT"}
+- [2026-11-11T03:43:19Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261111_032615", "source": "watcher"}
+- [2026-11-11T03:44:15Z] Taylor/finding — dd-vn-calib-20261111: {"verdict": "KHONG TUONG THICH (prelock K3: khong hoi tu)", "engine": "dcf_valuation domestic_v2 FCFE3y, PIT 2016Q1-2025Q4, nonfin rating<=3 universe_pit", "n_rows": 4451, "n_tickers": 437, "n_quarters": 40, "neff_touch60_by_ticker": 349, "med_FV_over_P": 1.168, "med_FVP_ci_by_ticker": [1.05, 1.3], "iqr_FV_over_P": [0.56, 2.2], "touch60": 0.72, "touch60_when_FV_lt_P": 0.325, "touch60_when_FV_lt_0.7P": 0.166, "gap_ratio_36": 1.009, "gap_ratio_36_ci_by_quarter": [0.97, 1.05], "beta_36": 0.07, "between_ticker_var_share": 0.57, "frac_tickers_medFVP_lt_0.75": 0.31, "frac_tickers_medFVP_gt_1.33": 0.46, "rule085_day_trigger_frac": 0.496, "rule085_tickers_never": 0.26, "diagnosis": "r/gT/shrink chi dich MUC (IQR log ~1.40, beta 0.074 khong doi); loi o co so FCFE3y; co so LNST: IQR log 0.74/0.84, beta 0.10/0.16, touch60|FV<P 61%/45% IS/OOS nhung muc vuot 2.0/1.5 => can tru tai dau tu g/ROE, KHONG tune r", "dd_bridge": "tam DD / engine trung vi 0.75; IQR log DD/gia 0.36 vs engine/gia 1.06 => lop phan doan DD sua manh engine, khong kiem PIT duoc", "proposals": ["P1 pha 2: FCFE co ban = LNST chuan hoa x (1-g/ROE), prelock moi + skeptic", "P2 DD: co canh bao khi engine FV/P <0.5 hoac >2, buoc trinh phuong phap thay the", "P3 cham PIT dd_price_zones 12/24/36 thang"], "n_trials": 144, "repro_md5_summary": "2b7c6f645aad2ff76d41d0c5fd39ed11 (2 lan chay giong)", "pit_check": "80 mau cat fin tai asof, max rel dev 0.0", "report": "agents/Taylor/research/dd_vn_calib_20261111/REPORT.md", "measured_by": "agents/Taylor/research/dd_vn_calib_20261111/calc/{build_panel,analyze,variants,trigger_freq,checks,ticker_persistence}.py -> out/*.json"}
+- [2026-11-11T03:44:20Z] Taylor/heartbeat — Taylor_20261111_032615: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261111_032615", "source": "watcher"}
