@@ -1005,3 +1005,13 @@
 - [2026-11-11T14:05:33Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261111_140332", "source": "watcher"}
 - [2026-11-11T14:06:21Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "in_progress", "note": "map+banner xong; dung figs matplotlib + md + pdf"}
 - [2026-11-11T14:06:34Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261111_140332", "source": "watcher"}
+
+## Consolidation 2026-11-11T14:11:44Z
+- [2026-11-11T14:07:34Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261111_140332", "source": "watcher"}
+- [2026-11-11T14:08:34Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261111_140332", "source": "watcher"}
+- [2026-11-11T14:09:33Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "in_progress", "note": "md+build_report.py xong, dang chay figs/pdf"}
+- [2026-11-11T14:09:35Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261111_140332", "source": "watcher"}
+- [2026-11-11T14:10:13Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "in_progress", "note": "PDF 9 trang dung xong, dang kiem tra bang mat"}
+- [2026-11-11T14:10:35Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261111_140332", "source": "watcher"}
+- [2026-11-11T14:11:30Z] Taylor/finding — dd-cst-report-20261111: {"pdf": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_CST_20261111/report/CST_DD_investor_report_20261111.pdf", "html": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_CST_20261111/report/CST_DD_investor_report_20261111.html", "md": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_CST_20261111/report/CST_DD_investor_report_20261111.md", "pdf_md5": "c15284f84c5dece5df758b4d98c924d3", "pages": 7, "body_words": 1215, "center_post_ck": 12681, "price": 14900, "price_over_center": "+17,5%", "email_sent": false, "dry_run": "send_dd_report_email.py --dry-run OK, images=14", "law18_grep": "rong (md/html/pdf)", "photos": "mo+tru so: thancaoson.vn; than antraxit: Wikimedia CC BY-SA 4.0 (minh hoa chung, khong phai anh SP cua CST)", "measured_by": "pymupdf page_count + wc tu thân + grep md/html/pdf trong phien nay; numbers from REPORT.md/model_out.json"}
+- [2026-11-11T14:11:35Z] Taylor/heartbeat — Taylor_20261111_140332: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261111_140332", "source": "watcher"}

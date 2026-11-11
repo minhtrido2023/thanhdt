@@ -2248,3 +2248,6 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-10T13:41:29Z] ĐANG DỞ job Taylor_20261110_132044 lagadj r2: A1 4 chân r3z xong (Δ pin0 -0,04/pin1M -0,37 ⇒ KHÔNG re-pin), pkl v2+pt v2 xong; code wt-lagadj-1110 sửa B uncommitted; NEXT: selfcheck, B5/B9/B10, doc, tách commit, bus
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T13:53:11Z] CHỜ Mike duyệt lag-cache-adjusted r2: code fd29f496a (wt-lagadj-1110) + mike edb3ffba0; KHÔNG re-pin R3; user quyết 4 mục trong doc §6; không merge/apply/cron trước duyệt
