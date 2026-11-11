@@ -2227,3 +2227,6 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-10T08:30:26Z] [book-regime-fit 10/11] XONG job Taylor_20261110_082023: BAL binh thuong (beta), LAG lech duoi trai chua du goi gay, 0/32 bien timing; CHO quant-skeptic; next de xuat: per-event LAG
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T09:36:02Z] [2026-11-10] [book-regime-fit sua theo skeptic] XONG job Taylor_20261110_091634: gap gia pkl that, LAG -12,36% (A+codtuc), duoi trai con R3park0, yeu park70; CHO skeptic lan 2; khuyen owner pipeline them check so ma/phien
