@@ -1,0 +1,504 @@
+{
+ "i_loglog": {
+  "2016": {
+   "n": 125,
+   "M1_logNI": 0.7087,
+   "M2_logNI+CFO/NI": 0.7109,
+   "M3_logCFO": 0.6035,
+   "M4_logFCFE": 0.4979,
+   "M5_logNI+logFCFE": 0.7129,
+   "M1_logNI|FE": 0.7375,
+   "M2_logNI+CFO/NI|FE": 0.7389,
+   "M3_logCFO|FE": 0.6389,
+   "M4_logFCFE|FE": 0.5291,
+   "M5_logNI+logFCFE|FE": 0.7418
+  },
+  "2017": {
+   "n": 120,
+   "M1_logNI": 0.8239,
+   "M2_logNI+CFO/NI": 0.824,
+   "M3_logCFO": 0.7305,
+   "M4_logFCFE": 0.5196,
+   "M5_logNI+logFCFE": 0.8306,
+   "M1_logNI|FE": 0.8424,
+   "M2_logNI+CFO/NI|FE": 0.8433,
+   "M3_logCFO|FE": 0.7815,
+   "M4_logFCFE|FE": 0.5824,
+   "M5_logNI+logFCFE|FE": 0.8489
+  },
+  "2018": {
+   "n": 107,
+   "M1_logNI": 0.834,
+   "M2_logNI+CFO/NI": 0.8405,
+   "M3_logCFO": 0.7784,
+   "M4_logFCFE": 0.5403,
+   "M5_logNI+logFCFE": 0.8341,
+   "M1_logNI|FE": 0.8551,
+   "M2_logNI+CFO/NI|FE": 0.8641,
+   "M3_logCFO|FE": 0.801,
+   "M4_logFCFE|FE": 0.5799,
+   "M5_logNI+logFCFE|FE": 0.8552
+  },
+  "2019": {
+   "n": 110,
+   "M1_logNI": 0.804,
+   "M2_logNI+CFO/NI": 0.806,
+   "M3_logCFO": 0.7112,
+   "M4_logFCFE": 0.526,
+   "M5_logNI+logFCFE": 0.8345,
+   "M1_logNI|FE": 0.8174,
+   "M2_logNI+CFO/NI|FE": 0.8188,
+   "M3_logCFO|FE": 0.7342,
+   "M4_logFCFE|FE": 0.5593,
+   "M5_logNI+logFCFE|FE": 0.85
+  },
+  "2020": {
+   "n": 138,
+   "M1_logNI": 0.8251,
+   "M2_logNI+CFO/NI": 0.8472,
+   "M3_logCFO": 0.7573,
+   "M4_logFCFE": 0.6152,
+   "M5_logNI+logFCFE": 0.8487,
+   "M1_logNI|FE": 0.8404,
+   "M2_logNI+CFO/NI|FE": 0.8621,
+   "M3_logCFO|FE": 0.7736,
+   "M4_logFCFE|FE": 0.6302,
+   "M5_logNI+logFCFE|FE": 0.8613
+  },
+  "2021": {
+   "n": 247,
+   "M1_logNI": 0.7318,
+   "M2_logNI+CFO/NI": 0.7473,
+   "M3_logCFO": 0.6662,
+   "M4_logFCFE": 0.4663,
+   "M5_logNI+logFCFE": 0.7489,
+   "M1_logNI|FE": 0.7487,
+   "M2_logNI+CFO/NI|FE": 0.7646,
+   "M3_logCFO|FE": 0.6893,
+   "M4_logFCFE|FE": 0.4954,
+   "M5_logNI+logFCFE|FE": 0.7638
+  },
+  "2022": {
+   "n": 180,
+   "M1_logNI": 0.8531,
+   "M2_logNI+CFO/NI": 0.8634,
+   "M3_logCFO": 0.7309,
+   "M4_logFCFE": 0.5627,
+   "M5_logNI+logFCFE": 0.8667,
+   "M1_logNI|FE": 0.8653,
+   "M2_logNI+CFO/NI|FE": 0.8794,
+   "M3_logCFO|FE": 0.7664,
+   "M4_logFCFE|FE": 0.5924,
+   "M5_logNI+logFCFE|FE": 0.8777
+  },
+  "2023": {
+   "n": 142,
+   "M1_logNI": 0.8152,
+   "M2_logNI+CFO/NI": 0.8217,
+   "M3_logCFO": 0.7039,
+   "M4_logFCFE": 0.5364,
+   "M5_logNI+logFCFE": 0.8254,
+   "M1_logNI|FE": 0.8415,
+   "M2_logNI+CFO/NI|FE": 0.852,
+   "M3_logCFO|FE": 0.7462,
+   "M4_logFCFE|FE": 0.5804,
+   "M5_logNI+logFCFE|FE": 0.8527
+  },
+  "2024": {
+   "n": 135,
+   "M1_logNI": 0.8604,
+   "M2_logNI+CFO/NI": 0.8693,
+   "M3_logCFO": 0.7699,
+   "M4_logFCFE": 0.4937,
+   "M5_logNI+logFCFE": 0.8652,
+   "M1_logNI|FE": 0.8682,
+   "M2_logNI+CFO/NI|FE": 0.8804,
+   "M3_logCFO|FE": 0.8126,
+   "M4_logFCFE|FE": 0.5416,
+   "M5_logNI+logFCFE|FE": 0.874
+  },
+  "2025": {
+   "n": 166,
+   "M1_logNI": 0.7733,
+   "M2_logNI+CFO/NI": 0.7956,
+   "M3_logCFO": 0.7609,
+   "M4_logFCFE": 0.5563,
+   "M5_logNI+logFCFE": 0.8055,
+   "M1_logNI|FE": 0.7839,
+   "M2_logNI+CFO/NI|FE": 0.8053,
+   "M3_logCFO|FE": 0.7712,
+   "M4_logFCFE|FE": 0.5802,
+   "M5_logNI+logFCFE|FE": 0.8181
+  }
+ },
+ "i_scaled": {
+  "2016": {
+   "n": 242,
+   "S1_NI": 0.4875,
+   "S1_NI|FE": 0.5279,
+   "S2_NI+CFO": 0.4902,
+   "S2_NI+CFO|FE": 0.5313,
+   "coef_S2FE": {
+    "NI": 8.816,
+    "CFO": 0.968
+   },
+   "S3_NI+FCFE": 0.4919,
+   "S3_NI+FCFE|FE": 0.5329,
+   "S4_FCFE": 0.234,
+   "S4_FCFE|FE": 0.3547,
+   "S5_CFO": 0.2897,
+   "S5_CFO|FE": 0.3853,
+   "S6_NI+CFO+CPX": 0.4912,
+   "S6_NI+CFO+CPX|FE": 0.5326,
+   "coef_S6FE": {
+    "NI": 8.775,
+    "CFO": 1.095,
+    "CPX": -0.808
+   }
+  },
+  "2017": {
+   "n": 262,
+   "S1_NI": 0.3992,
+   "S1_NI|FE": 0.4462,
+   "S2_NI+CFO": 0.4102,
+   "S2_NI+CFO|FE": 0.4565,
+   "coef_S2FE": {
+    "NI": 7.697,
+    "CFO": 1.39
+   },
+   "S3_NI+FCFE": 0.4224,
+   "S3_NI+FCFE|FE": 0.4674,
+   "S4_FCFE": 0.2165,
+   "S4_FCFE|FE": 0.3226,
+   "S5_CFO": 0.2222,
+   "S5_CFO|FE": 0.3135,
+   "S6_NI+CFO+CPX": 0.4218,
+   "S6_NI+CFO+CPX|FE": 0.4666,
+   "coef_S6FE": {
+    "NI": 7.607,
+    "CFO": 1.767,
+    "CPX": -2.327
+   }
+  },
+  "2018": {
+   "n": 228,
+   "S1_NI": 0.4615,
+   "S1_NI|FE": 0.5027,
+   "S2_NI+CFO": 0.4797,
+   "S2_NI+CFO|FE": 0.5198,
+   "coef_S2FE": {
+    "NI": 7.889,
+    "CFO": 2.013
+   },
+   "S3_NI+FCFE": 0.4875,
+   "S3_NI+FCFE|FE": 0.5244,
+   "S4_FCFE": 0.2831,
+   "S4_FCFE|FE": 0.3544,
+   "S5_CFO": 0.2867,
+   "S5_CFO|FE": 0.3448,
+   "S6_NI+CFO+CPX": 0.487,
+   "S6_NI+CFO+CPX|FE": 0.524,
+   "coef_S6FE": {
+    "NI": 7.685,
+    "CFO": 2.216,
+    "CPX": -1.544
+   }
+  },
+  "2019": {
+   "n": 234,
+   "S1_NI": 0.3399,
+   "S1_NI|FE": 0.394,
+   "S2_NI+CFO": 0.3514,
+   "S2_NI+CFO|FE": 0.4039,
+   "coef_S2FE": {
+    "NI": 7.8,
+    "CFO": 1.36
+   },
+   "S3_NI+FCFE": 0.342,
+   "S3_NI+FCFE|FE": 0.3947,
+   "S4_FCFE": 0.1115,
+   "S4_FCFE|FE": 0.1789,
+   "S5_CFO": 0.1598,
+   "S5_CFO|FE": 0.2193,
+   "S6_NI+CFO+CPX": 0.356,
+   "S6_NI+CFO+CPX|FE": 0.4132,
+   "coef_S6FE": {
+    "NI": 8.004,
+    "CFO": 1.141,
+    "CPX": 2.22
+   }
+  },
+  "2020": {
+   "n": 282,
+   "S1_NI": 0.3251,
+   "S1_NI|FE": 0.3645,
+   "S2_NI+CFO": 0.3317,
+   "S2_NI+CFO|FE": 0.3719,
+   "coef_S2FE": {
+    "NI": 6.364,
+    "CFO": 1.012
+   },
+   "S3_NI+FCFE": 0.3291,
+   "S3_NI+FCFE|FE": 0.3683,
+   "S4_FCFE": 0.1395,
+   "S4_FCFE|FE": 0.2096,
+   "S5_CFO": 0.1651,
+   "S5_CFO|FE": 0.2313,
+   "S6_NI+CFO+CPX": 0.3317,
+   "S6_NI+CFO+CPX|FE": 0.3719,
+   "coef_S6FE": {
+    "NI": 6.379,
+    "CFO": 0.991,
+    "CPX": 0.139
+   }
+  },
+  "2021": {
+   "n": 492,
+   "S1_NI": 0.1936,
+   "S1_NI|FE": 0.2339,
+   "S2_NI+CFO": 0.1945,
+   "S2_NI+CFO|FE": 0.2339,
+   "coef_S2FE": {
+    "NI": 5.57,
+    "CFO": -0.078
+   },
+   "S3_NI+FCFE": 0.1937,
+   "S3_NI+FCFE|FE": 0.2339,
+   "S4_FCFE": 0.0377,
+   "S4_FCFE|FE": 0.1042,
+   "S5_CFO": 0.0407,
+   "S5_CFO|FE": 0.1081,
+   "S6_NI+CFO+CPX": 0.1962,
+   "S6_NI+CFO+CPX|FE": 0.235,
+   "coef_S6FE": {
+    "NI": 5.541,
+    "CFO": 0.002,
+    "CPX": -0.588
+   }
+  },
+  "2022": {
+   "n": 374,
+   "S1_NI": 0.3433,
+   "S1_NI|FE": 0.4152,
+   "S2_NI+CFO": 0.3478,
+   "S2_NI+CFO|FE": 0.4197,
+   "coef_S2FE": {
+    "NI": 8.252,
+    "CFO": 0.92
+   },
+   "S3_NI+FCFE": 0.345,
+   "S3_NI+FCFE|FE": 0.4185,
+   "S4_FCFE": 0.1062,
+   "S4_FCFE|FE": 0.2186,
+   "S5_CFO": 0.1307,
+   "S5_CFO|FE": 0.2316,
+   "S6_NI+CFO+CPX": 0.349,
+   "S6_NI+CFO+CPX|FE": 0.4198,
+   "coef_S6FE": {
+    "NI": 8.264,
+    "CFO": 0.906,
+    "CPX": 0.132
+   }
+  },
+  "2023": {
+   "n": 352,
+   "S1_NI": 0.3027,
+   "S1_NI|FE": 0.3524,
+   "S2_NI+CFO": 0.31,
+   "S2_NI+CFO|FE": 0.3654,
+   "coef_S2FE": {
+    "NI": 6.349,
+    "CFO": 1.318
+   },
+   "S3_NI+FCFE": 0.3091,
+   "S3_NI+FCFE|FE": 0.3642,
+   "S4_FCFE": 0.1256,
+   "S4_FCFE|FE": 0.1985,
+   "S5_CFO": 0.1299,
+   "S5_CFO|FE": 0.2009,
+   "S6_NI+CFO+CPX": 0.3101,
+   "S6_NI+CFO+CPX|FE": 0.3657,
+   "coef_S6FE": {
+    "NI": 6.31,
+    "CFO": 1.37,
+    "CPX": -0.403
+   }
+  },
+  "2024": {
+   "n": 339,
+   "S1_NI": 0.399,
+   "S1_NI|FE": 0.4314,
+   "S2_NI+CFO": 0.4121,
+   "S2_NI+CFO|FE": 0.4463,
+   "coef_S2FE": {
+    "NI": 7.293,
+    "CFO": 1.598
+   },
+   "S3_NI+FCFE": 0.403,
+   "S3_NI+FCFE|FE": 0.4365,
+   "S4_FCFE": 0.1874,
+   "S4_FCFE|FE": 0.2453,
+   "S5_CFO": 0.2247,
+   "S5_CFO|FE": 0.2783,
+   "S6_NI+CFO+CPX": 0.4168,
+   "S6_NI+CFO+CPX|FE": 0.4503,
+   "coef_S6FE": {
+    "NI": 7.505,
+    "CFO": 1.375,
+    "CPX": 1.724
+   }
+  },
+  "2025": {
+   "n": 352,
+   "S1_NI": 0.359,
+   "S1_NI|FE": 0.3871,
+   "S2_NI+CFO": 0.3698,
+   "S2_NI+CFO|FE": 0.398,
+   "coef_S2FE": {
+    "NI": 7.752,
+    "CFO": 1.344
+   },
+   "S3_NI+FCFE": 0.3642,
+   "S3_NI+FCFE|FE": 0.3917,
+   "S4_FCFE": 0.15,
+   "S4_FCFE|FE": 0.1844,
+   "S5_CFO": 0.19,
+   "S5_CFO|FE": 0.2205,
+   "S6_NI+CFO+CPX": 0.3702,
+   "S6_NI+CFO+CPX|FE": 0.3986,
+   "coef_S6FE": {
+    "NI": 7.782,
+    "CFO": 1.276,
+    "CPX": 0.606
+   }
+  }
+ },
+ "ii_pe_premium": {
+  "2016_19": {
+   "n": 796,
+   "n_tk": 306,
+   "hi_minus_lo_logPE": 0.0026,
+   "ci_tk": [
+    -0.1827,
+    0.192
+   ],
+   "median_PE_by_tercile": {
+    "0": 10.91,
+    "1": 10.6,
+    "2": 9.72
+   }
+  },
+  "2020_25": {
+   "n": 1877,
+   "n_tk": 500,
+   "hi_minus_lo_logPE": -0.1265,
+   "ci_tk": [
+    -0.2665,
+    0.0038
+   ],
+   "median_PE_by_tercile": {
+    "0": 20.87,
+    "1": 13.18,
+    "2": 15.04
+   }
+  },
+  "by_year": {
+   "2016": {
+    "n": 204,
+    "hi_minus_lo": 0.0882
+   },
+   "2017": {
+    "n": 223,
+    "hi_minus_lo": -0.2511
+   },
+   "2018": {
+    "n": 176,
+    "hi_minus_lo": 0.2432
+   },
+   "2019": {
+    "n": 193,
+    "hi_minus_lo": 0.0004
+   },
+   "2020": {
+    "n": 249,
+    "hi_minus_lo": 0.0995
+   },
+   "2021": {
+    "n": 409,
+    "hi_minus_lo": -0.25
+   },
+   "2022": {
+    "n": 319,
+    "hi_minus_lo": -0.202
+   },
+   "2023": {
+    "n": 302,
+    "hi_minus_lo": -0.1191
+   },
+   "2024": {
+    "n": 296,
+    "hi_minus_lo": -0.1376
+   },
+   "2025": {
+    "n": 302,
+    "hi_minus_lo": -0.1101
+   }
+  }
+ },
+ "i_loglog_avg": {
+  "2016_19": {
+   "M1_logNI": 0.7927,
+   "M2_logNI+CFO/NI": 0.7954,
+   "M3_logCFO": 0.7059,
+   "M4_logFCFE": 0.521,
+   "M5_logNI+logFCFE": 0.803,
+   "M1_logNI|FE": 0.8131,
+   "M2_logNI+CFO/NI|FE": 0.8163,
+   "M3_logCFO|FE": 0.7389,
+   "M4_logFCFE|FE": 0.5627,
+   "M5_logNI+logFCFE|FE": 0.824
+  },
+  "2020_25": {
+   "M1_logNI": 0.8098,
+   "M2_logNI+CFO/NI": 0.8241,
+   "M3_logCFO": 0.7315,
+   "M4_logFCFE": 0.5384,
+   "M5_logNI+logFCFE": 0.8267,
+   "M1_logNI|FE": 0.8247,
+   "M2_logNI+CFO/NI|FE": 0.8406,
+   "M3_logCFO|FE": 0.7599,
+   "M4_logFCFE|FE": 0.57,
+   "M5_logNI+logFCFE|FE": 0.8413
+  }
+ },
+ "i_scaled_avg": {
+  "2016_19": {
+   "S1_NI": 0.422,
+   "S1_NI|FE": 0.4677,
+   "S2_NI+CFO": 0.4329,
+   "S2_NI+CFO|FE": 0.4779,
+   "S3_NI+FCFE": 0.436,
+   "S3_NI+FCFE|FE": 0.4798,
+   "S4_FCFE": 0.2113,
+   "S4_FCFE|FE": 0.3027,
+   "S5_CFO": 0.2396,
+   "S5_CFO|FE": 0.3157,
+   "S6_NI+CFO+CPX": 0.439,
+   "S6_NI+CFO+CPX|FE": 0.4841
+  },
+  "2020_25": {
+   "S1_NI": 0.3204,
+   "S1_NI|FE": 0.3641,
+   "S2_NI+CFO": 0.3276,
+   "S2_NI+CFO|FE": 0.3725,
+   "S3_NI+FCFE": 0.324,
+   "S3_NI+FCFE|FE": 0.3689,
+   "S4_FCFE": 0.1244,
+   "S4_FCFE|FE": 0.1934,
+   "S5_CFO": 0.1469,
+   "S5_CFO|FE": 0.2118,
+   "S6_NI+CFO+CPX": 0.329,
+   "S6_NI+CFO+CPX|FE": 0.3735
+  }
+ }
+}

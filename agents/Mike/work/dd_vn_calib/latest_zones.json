@@ -1,0 +1,227 @@
+[
+ {
+  "ticker": "FPT",
+  "dd_date": "2026-11-01",
+  "rev": 3,
+  "center": 57312,
+  "low": 45270,
+  "high": 68466,
+  "price_ref": 50800
+ },
+ {
+  "ticker": "HHS",
+  "dd_date": "2026-11-01",
+  "rev": 4,
+  "center": 13969,
+  "low": 12422,
+  "high": 15564,
+  "price_ref": 9990
+ },
+ {
+  "ticker": "SIP",
+  "dd_date": "2026-11-01",
+  "rev": 3,
+  "center": 54466,
+  "low": 43257,
+  "high": 69818,
+  "price_ref": 50100
+ },
+ {
+  "ticker": "TV2",
+  "dd_date": "2026-11-01",
+  "rev": 2,
+  "center": 17491,
+  "low": 7702,
+  "high": 30677,
+  "price_ref": 27400
+ },
+ {
+  "ticker": "HPG",
+  "dd_date": "2026-10-31",
+  "rev": 4,
+  "center": 21338,
+  "low": 13316,
+  "high": 28993,
+  "price_ref": 21200
+ },
+ {
+  "ticker": "MBB",
+  "dd_date": "2026-10-31",
+  "rev": 3,
+  "center": 21069,
+  "low": 14729,
+  "high": 27577,
+  "price_ref": 19250
+ },
+ {
+  "ticker": "TCH",
+  "dd_date": "2026-10-31",
+  "rev": 3,
+  "center": 15864,
+  "low": 14563,
+  "high": 17325,
+  "price_ref": 13500
+ },
+ {
+  "ticker": "NNC",
+  "dd_date": "2026-11-03",
+  "rev": 5,
+  "center": 61273,
+  "low": 30375,
+  "high": 95341,
+  "price_ref": 47200
+ },
+ {
+  "ticker": "DRI",
+  "dd_date": "2026-11-03",
+  "rev": 3,
+  "center": 15257,
+  "low": 12908,
+  "high": 17549,
+  "price_ref": 13100
+ },
+ {
+  "ticker": "DGC",
+  "dd_date": "2026-10-30",
+  "rev": 2,
+  "center": 41849,
+  "low": 33272,
+  "high": 50227,
+  "price_ref": 33000
+ },
+ {
+  "ticker": "PVP",
+  "dd_date": "2026-10-29",
+  "rev": 2,
+  "center": 23099,
+  "low": 13799,
+  "high": 30338,
+  "price_ref": 18000
+ },
+ {
+  "ticker": "PVT",
+  "dd_date": "2026-10-29",
+  "rev": 2,
+  "center": 18841,
+  "low": 13903,
+  "high": 24207,
+  "price_ref": 20550
+ },
+ {
+  "ticker": "SCL",
+  "dd_date": "2026-10-29",
+  "rev": 5,
+  "center": 21339,
+  "low": 17445,
+  "high": 25681,
+  "price_ref": 28000
+ },
+ {
+  "ticker": "DDV",
+  "dd_date": "2026-10-28",
+  "rev": 2,
+  "center": 15911,
+  "low": 13315,
+  "high": 18573,
+  "price_ref": 15200
+ },
+ {
+  "ticker": "NT2",
+  "dd_date": "2026-10-26",
+  "rev": 2,
+  "center": 24003,
+  "low": 18301,
+  "high": 29619,
+  "price_ref": 22200
+ },
+ {
+  "ticker": "SAS",
+  "dd_date": "2026-10-26",
+  "rev": 2,
+  "center": 31658,
+  "low": 25083,
+  "high": 38043,
+  "price_ref": 34200
+ },
+ {
+  "ticker": "SZL",
+  "dd_date": "2026-10-26",
+  "rev": 2,
+  "center": 25165,
+  "low": 22936,
+  "high": 27710,
+  "price_ref": 27700
+ },
+ {
+  "ticker": "TV1",
+  "dd_date": "2026-11-02",
+  "rev": 6,
+  "center": 16740,
+  "low": 8823,
+  "high": 25179,
+  "price_ref": 20400
+ },
+ {
+  "ticker": "MVC",
+  "dd_date": "2026-11-03",
+  "rev": 9,
+  "center": 16241,
+  "low": 9940,
+  "high": 23471,
+  "price_ref": 13500
+ },
+ {
+  "ticker": "DCM",
+  "dd_date": "2026-11-04",
+  "rev": 2,
+  "center": 24326,
+  "low": 21643,
+  "high": 26243,
+  "price_ref": 33000
+ },
+ {
+  "ticker": "BSR",
+  "dd_date": "2026-11-09",
+  "rev": 1,
+  "center": 17496,
+  "low": 13093,
+  "high": 23345,
+  "price_ref": 26250
+ },
+ {
+  "ticker": "CSV",
+  "dd_date": "2026-11-09",
+  "rev": 1,
+  "center": 20717,
+  "low": 15825,
+  "high": 25470,
+  "price_ref": 22600
+ },
+ {
+  "ticker": "GAS",
+  "dd_date": "2026-11-09",
+  "rev": 1,
+  "center": 50146,
+  "low": 43327,
+  "high": 57840,
+  "price_ref": 74100
+ },
+ {
+  "ticker": "MSB",
+  "dd_date": "2026-11-09",
+  "rev": 1,
+  "center": 13018,
+  "low": 9675,
+  "high": 16373,
+  "price_ref": 16350
+ },
+ {
+  "ticker": "VGS",
+  "dd_date": "2026-11-10",
+  "rev": 1,
+  "center": 26526,
+  "low": 19393,
+  "high": 34722,
+  "price_ref": 19300
+ }
+]

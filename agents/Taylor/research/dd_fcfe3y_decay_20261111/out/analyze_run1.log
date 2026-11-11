@@ -1,0 +1,33 @@
+Q1 main 12
+Q1 main 24
+Q1 main 36
+Q1 main 60
+Q1d 12
+Q1d 24
+Q1d 36
+Q1d 60
+Q2 12
+Q2 24
+Q2 36
+Q2 60
+Q3 C1_fcfe5 False True False
+Q3 C2_cfo3_minus_DA False True True
+Q3 C3_cfo3_minus_DA_gFA False True False
+Q3 C4_cfo3_minus_min_capex_DA False True True
+Q3 C5_NI3_plus_DA_minus_capex False True False
+Q3 C6_cfo5_minus_DA False True False
+Q3 C7_heavy_C2_else_base False True False
+Q3 C8_fcfe_12q_rolling False True False
+{
+ "Q1_verdict": {
+  "n_tk_excl0": 1,
+  "n_yr_excl0": 0,
+  "n_both_contain0": 3,
+  "verdict": "ARTIFACT"
+ },
+ "PBO": {
+  "24": 0.2857142857142857,
+  "36": 0.42857142857142855
+ },
+ "passers": []
+}

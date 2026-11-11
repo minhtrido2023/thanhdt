@@ -1,0 +1,77 @@
+{
+ "n_ticker_days": 277705,
+ "n_tickers": 437,
+ "day_frac_trig85": 0.4958067013557552,
+ "day_frac_le_center": 0.559914297545957,
+ "ticker_year_frac_any85": 0.6034883720930233,
+ "ticker_frac_ever85": 0.7391304347826086,
+ "ticker_frac_trig85_lt5pct_days": 0.2929061784897025,
+ "by_year": {
+  "2016": {
+   "ticker_years": 118,
+   "frac_ty_any85": 0.6017,
+   "mean_day_frac85": 0.5268,
+   "frac_ty_any_le_c": 0.678
+  },
+  "2017": {
+   "ticker_years": 131,
+   "frac_ty_any85": 0.6107,
+   "mean_day_frac85": 0.4629,
+   "frac_ty_any_le_c": 0.6565
+  },
+  "2018": {
+   "ticker_years": 131,
+   "frac_ty_any85": 0.5954,
+   "mean_day_frac85": 0.472,
+   "frac_ty_any_le_c": 0.6718
+  },
+  "2019": {
+   "ticker_years": 125,
+   "frac_ty_any85": 0.56,
+   "mean_day_frac85": 0.4883,
+   "frac_ty_any_le_c": 0.648
+  },
+  "2020": {
+   "ticker_years": 135,
+   "frac_ty_any85": 0.7407,
+   "mean_day_frac85": 0.579,
+   "frac_ty_any_le_c": 0.7556
+  },
+  "2021": {
+   "ticker_years": 198,
+   "frac_ty_any85": 0.6162,
+   "mean_day_frac85": 0.4798,
+   "frac_ty_any_le_c": 0.6566
+  },
+  "2022": {
+   "ticker_years": 253,
+   "frac_ty_any85": 0.6403,
+   "mean_day_frac85": 0.4683,
+   "frac_ty_any_le_c": 0.6798
+  },
+  "2023": {
+   "ticker_years": 170,
+   "frac_ty_any85": 0.6294,
+   "mean_day_frac85": 0.5138,
+   "frac_ty_any_le_c": 0.6882
+  },
+  "2024": {
+   "ticker_years": 159,
+   "frac_ty_any85": 0.5157,
+   "mean_day_frac85": 0.4112,
+   "frac_ty_any_le_c": 0.5723
+  },
+  "2025": {
+   "ticker_years": 175,
+   "frac_ty_any85": 0.6057,
+   "mean_day_frac85": 0.4613,
+   "frac_ty_any_le_c": 0.6571
+  },
+  "2026": {
+   "ticker_years": 125,
+   "frac_ty_any85": 0.48,
+   "mean_day_frac85": 0.4514,
+   "frac_ty_any_le_c": 0.544
+  }
+ }
+}

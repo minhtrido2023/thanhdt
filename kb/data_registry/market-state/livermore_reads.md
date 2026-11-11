@@ -69,3 +69,28 @@ last_update: 2026-10-25 (thêm luật REPORT_BLOCK, nhánh feat/livermore-report
 - artifact: agents/Mike/research/livermore_stock_battery_20261105/ (PREREG.md, cases/, SEALED_truth.json, livermore_results.csv, score.py, scored.txt)
 - kết quả: 55/100 hit (UP 21/40, DOWN 34/60), Brier 0,2507; base rate tăng 47%; B1 luôn UP 47, B2 mom20 50, B3 mom60 48. P(≥55|đồng xu)=0,184; P(≥55|base)=0,067.
 - PREREG: KHÔNG ĐẠT (Brier 0,2507 ≥ 0,25 — trượt 0,0007; hit hơn mọi baseline 5 điểm nhưng không khác đồng xu có ý nghĩa). Không RECOGNIZED nào. ACTION_IF_UP10 trùng hướng H20 (không thêm thông tin).
+
+### LVR-STK-2026-11-11-VGS
+- as_of: 2026-11-11 · close_asof: 20300 · created: 2026-11-11T23:00:00+07:00 · trigger: USER-ASKED (hỏi có mua được ở phiên 12/11 không) · nhãn: CỔ PHIẾU ĐƠN LẺ, không trộn hit-rate VNINDEX
+- due: H20 2026-12-10
+- classification: 250 markdown dài, có thể đang tạo đáy (hơi lẫn) / 60 tích luỹ→markup (rõ) / 20 đi ngang 18.300–19.800, 11/11 đóng trên đỉnh vùng lần đầu (hơi lẫn). 11/11 KL 949k = 1,84× TB10 (không phải 2,3×); chưa follow-through; 10/29 từng chạm 20.500 rồi bị bán ngược.
+- ENTRY_VERDICT: BUY_ON_PULLBACK 19.400–19.900 (KL lùi <~500k); giá tối đa 20.000, KHÔNG đuổi mở cửa >20.000. Nhánh WAIT_CONFIRM: đóng ≥20.600 KL ≥600k ⇒ tối đa ~21.000. Huỷ: đóng <18.900 trong 5 phiên hoặc <18.300.
+- forecast:
+    - H20_DIR: UP
+    - H20_P_UP: 0.57
+    - LEVEL: 18300 HOLD
+    - INVALIDATION: đóng <18.300; hoặc 5 phiên tới đóng <18.900 kèm KL bán >500k
+- outcome:
+
+### LVR-STK-2026-11-11-NNC
+- as_of: 2026-11-11 · close_asof: 47050 · created: 2026-11-11T23:00:00+07:00 · trigger: USER-ASKED · nhãn: CỔ PHIẾU ĐƠN LẺ
+- due: H20 2026-12-10
+- classification: 250 downtrend đã dừng, có thể tạo nền (mơ hồ) / 60 markup (rõ) / 20 đi ngang 46.500–47.500, mơ hồ nghiêng re-accumulation (02/11 hấp thụ KL 3,7×, đáy nâng; nhưng yếu hơn VNINDEX và KL không cạn).
+- ENTRY_VERDICT: BUY_ON_PULLBACK 45.000–46.000 (KL lùi <~35k), tối đa 46.000 — ở 47.050 R:R ≈1:1 (−6,8% tới 43.850 vs +6,2% tới 49.950). WAIT_CONFIRM: đóng ≥47.600 KL ≥60k + phiên sau không đóng <47.200 ⇒ tối đa 48.300. Huỷ: đóng <44.300 KL>60k hoặc <43.850.
+- forecast:
+    - H20_DIR: UP
+    - H20_P_UP: 0.53
+    - LEVEL: 43850 HOLD
+    - INVALIDATION: đóng <43.850; hoặc <44.300 KL>60k
+- note: giá trước ~24/08 có thể đã điều chỉnh ngược; sự kiện quyền 11–14/09 chưa kiểm.
+- outcome:

@@ -1,0 +1,11 @@
+{
+ "pit_sample": 80,
+ "pit_max_rel_dev": 0.0,
+ "bridge_n": 25,
+ "bridge_engine_ok": 17,
+ "bridge_med_dd_over_engine": 0.7475395398491214,
+ "bridge_med_engine_over_px": 1.367558029895733,
+ "bridge_med_dd_over_px": 1.0467763157894736,
+ "bridge_iqr_log_engine_over_px": 1.0563056418608474,
+ "bridge_iqr_log_dd_over_px": 0.3590965415619527
+}

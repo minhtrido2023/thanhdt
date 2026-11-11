@@ -1,0 +1,8 @@
+{
+ "n_tickers_ge4q": 291,
+ "frac_med_FVP_lt_0.75": 0.30927835051546393,
+ "frac_med_FVP_gt_1.33": 0.4570446735395189,
+ "frac_FVltP_ge80pct": 0.23024054982817868,
+ "between_ticker_var_share": 0.5664801248965925,
+ "autocorr_4q": 0.4535253959705315
+}

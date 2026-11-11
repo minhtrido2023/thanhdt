@@ -1,0 +1,54 @@
+variant med3|roe_v|clip1 done
+variant med3|roe_v|clip0.8 done
+variant med3|roe_s|clip1 done
+variant med3|roe_s|clip0.8 done
+variant ttm0|roe_v|clip1 done
+variant ttm0|roe_v|clip0.8 done
+variant ttm0|roe_s|clip1 done
+variant ttm0|roe_s|clip0.8 done
+variant mean5|roe_v|clip1 done
+variant mean5|roe_v|clip0.8 done
+variant mean5|roe_s|clip1 done
+variant mean5|roe_s|clip0.8 done
+{
+ "criterion_D_v0": {
+  "i_per_N": {
+   "12": true,
+   "24": true,
+   "36": true,
+   "60": false
+  },
+  "i": true,
+  "ii_per_N": {
+   "12": false,
+   "24": false,
+   "36": true,
+   "60": true
+  },
+  "ii": false,
+  "iii_evaluable_N": [
+   12,
+   24,
+   36
+  ],
+  "iii_pos": {
+   "12": true,
+   "24": true,
+   "36": true
+  },
+  "iii": true,
+  "PASS": false
+ },
+ "v_star": "ttm0|roe_s|clip1",
+ "PBO": {
+  "12": {
+   "pbo": 0.6857142857142857,
+   "n_splits": 70
+  },
+  "36": {
+   "pbo": 0.3142857142857143,
+   "n_splits": 70
+  }
+ },
+ "w_star": 0.0
+}

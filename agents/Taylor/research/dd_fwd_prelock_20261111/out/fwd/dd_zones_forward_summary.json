@@ -1,0 +1,43 @@
+{
+ "zones_md5": "68cf5c14af35be84bc8dec4a763d5009",
+ "price_last": "2026-11-10",
+ "asof_cut": null,
+ "n_entries_latest_rev": 28,
+ "n_scored": 27,
+ "dd_date_range": [
+  "2026-10-26",
+  "2026-11-10"
+ ],
+ "by_N": {
+  "3": {
+   "n_full": 0,
+   "first_scorable_date": "2027-01-29",
+   "all_scorable_date": "2027-02-10",
+   "descriptive_only": true
+  },
+  "6": {
+   "n_full": 0,
+   "first_scorable_date": "2027-04-29",
+   "all_scorable_date": "2027-05-10",
+   "descriptive_only": true
+  },
+  "12": {
+   "n_full": 0,
+   "first_scorable_date": "2027-10-29",
+   "all_scorable_date": "2027-11-10",
+   "descriptive_only": false
+  },
+  "24": {
+   "n_full": 0,
+   "first_scorable_date": "2028-10-29",
+   "all_scorable_date": "2028-11-10",
+   "descriptive_only": false
+  },
+  "36": {
+   "n_full": 0,
+   "first_scorable_date": "2029-10-29",
+   "all_scorable_date": "2029-11-10",
+   "descriptive_only": false
+  }
+ }
+}

@@ -1,0 +1,12 @@
+cf939423613bad6c6f023cf380ffa39c  out/summary.json
+d9ae9ab29ee9e6be151e767dfef2e8ce  out/cands_table.csv
+1abec9fcfe8f5252c03541a3b2e48aa5  out/q4_market.json
+555078f82d165c52120017d46d5cb9e4  out/recompute_hand.csv
+8dcb552f5994cfab03f6c9bb38b2c6ce  out/ext2.parquet
+ed2cea3fc1d584ae7febce619e6f463c  PRELOCK.md
+c1c8f9f8fecdcaae5a9667b7b2eeab4f  calc/analyze.py
+61f878b833db8b58f85cec76a468ba72  calc/bases.py
+7f0f3e0ea561c072d494062712806a48  calc/build_ext2.py
+e3bad83c042b3b970e7a77d8e310ceaa  calc/q4_market.py
+5c8c5e70136b2f7d709b480f7a11afc6  calc/recompute_hand.py
+15a97762879f2de82dba90303e5bb6e4  REPORT.md

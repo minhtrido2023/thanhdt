@@ -1,0 +1,2 @@
+74c9efbd09fffe7c19199b89dc785fc5  calc/assumptions.json
+a657448f528c6be7f72ec8ed3f285b3a  REPORT.md
