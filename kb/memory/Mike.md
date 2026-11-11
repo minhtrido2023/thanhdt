@@ -41,3 +41,4 @@ nav-loss-brake 11-09 (đã qua); commodity 11-25; BĐS 11-26; Livermore H20 03/1
 - [2026-11-11T13:53:16Z] DD CST: Taylor REPORT xong 11/11 20:52; đang chạy fundamental-skeptic -> áp đính chính -> PDF (không email) -> dd_price_zones.json (assumptions_md5 = calc/assumptions.json)
 - [2026-11-11T14:03:19Z] DD CST: skeptic xong+áp đính chính, dd_price_zones ghi (selfcheck 0 lỗi), kb/projects/cst-dd-20261111.md. Còn: dựng PDF/HTML (dd-investor-report) KHÔNG email -> trình user kèm PDF
 - [2026-11-11T14:12:38Z] DD CST XONG 11/11 21:15: PDF 7tr agents/Taylor/research/dd_CST_20261111/report/CST_DD_investor_report_20261111.pdf đã trình user; CHƯA gửi email (chờ user báo 'gửi email' → send_dd_report_email.py 1 lần, grep luật 18 trước). Zones ghi, KB pointer cst-dd-20261111.md
+- [2026-11-11T17:20:53Z] 12/11 00:20 ICT: user duyệt plan SpaceX+ZaloPay 12/11 (mua VGS+NNC trần Livermore 20.000/46.000); bot chạy 09:05. Trứng vàng cần rút/chuyển trước mở cửa (egg = cash).
