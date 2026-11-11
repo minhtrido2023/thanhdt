@@ -2230,3 +2230,9 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-10T09:36:02Z] [2026-11-10] [book-regime-fit sua theo skeptic] XONG job Taylor_20261110_091634: gap gia pkl that, LAG -12,36% (A+codtuc), duoi trai con R3park0, yeu park70; CHO skeptic lan 2; khuyen owner pipeline them check so ma/phien
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T11:02:22Z] CHỜ arch-review vòng 2 lagcache: nhánh session/lagcache-1110 49e70d6df; bf13v2 (research/book_regime_fit_20261110/backfill13_v2, px md5 4974943…) --apply CHỈ sau duyệt; khi merge sửa mike/bin/asof_label_selfcheck.py:46 777→780
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T13:04:35Z] ĐANG DỞ job Taylor_20261110_125453 DD VGS: model khoa md5 191bb785, SUMMARY.json xong; NEXT: viet REPORT.md + bus finding
