@@ -1,5 +1,5 @@
 {
-  "_doc": "Ngưỡng exit CỨNG cho vị thế DISCRETIONARY_SPECIAL — đọc bởi mike/bin/auto_exit_inject.py (nhánh DISCRETIONARY). Thêm/xoá vị thế CHỈ sửa file này, không sửa code. entry_date = ngày khớp ĐẦU TIÊN; giá vốn lấy từ broker (avg_cost) mỗi account. Mọi trigger chỉ là ĐỀ XUẤT SELL vào plan nháp (user duyệt plan). target_sell_floor_pct (tuỳ chọn, mặc định null = TẮT; sàn là chính sách user CHƯA duyệt — luật chỉ nói +10% ⇒ bán): nếu đặt số, sàn giá bán tuyệt đối của lệnh TARGET = avg_cost×(1+target_sell_floor_pct).",
+  "_doc": "Ngưỡng exit CỨNG cho vị thế DISCRETIONARY_SPECIAL — đọc bởi mike/bin/auto_exit_inject.py (nhánh DISCRETIONARY). Thêm/xoá vị thế CHỈ sửa file này, không sửa code. entry_date = ngày khớp ĐẦU TIÊN; giá vốn lấy từ broker (avg_cost) mỗi account. Mọi trigger chỉ là ĐỀ XUẤT SELL vào plan nháp (user duyệt plan). target_sell_floor_pct (tuỳ chọn, mặc định null = TẮT; sàn là chính sách user CHƯA duyệt — luật chỉ nói +10% ⇒ bán): nếu đặt số, sàn giá bán tuyệt đối của lệnh TARGET = avg_cost×(1+target_sell_floor_pct). max_sessions: int>0 = TIME exit sau N phiên; null (khai TƯỜNG MINH) = KHÔNG có TIME exit (thiếu khoá vẫn bị chặn).",
   "version": 1,
   "positions": [
     {
@@ -49,6 +49,30 @@
       "target_sell_floor_pct": null,
       "thin_liquidity": true,
       "approval_ref": "user 06/11/2026 14:19 ICT (decided_by: user) — mike/kb/projects/disc-fpt-nnc-approval-20261105.md mục CẬP NHẬT 06/11 14:19"
+    },
+    {
+      "ticker": "VGS",
+      "account": "SpaceX",
+      "book": "DISCRETIONARY_SPECIAL",
+      "entry_date": "2026-11-11",
+      "target_pct": 0.15,
+      "stop_pct": 0.1,
+      "max_sessions": null,
+      "target_sell_floor_pct": null,
+      "thin_liquidity": false,
+      "approval_ref": "user 10/11-11/11/2026 (decided_by: user) — Discord: mua VGS 5% NAV, +15% bán, -10% cắt lỗ (đề xuất, user xác nhận); max_sessions: phương án B = null/không TIME exit (user duyệt qua Mike, dispatch job Taylor_20261111_034523, 11/11 ~10:45 ICT) — THAY phương án A=25 (08:04 ICT)"
+    },
+    {
+      "ticker": "VGS",
+      "account": "ZaloPay",
+      "book": "DISCRETIONARY_SPECIAL",
+      "entry_date": "2026-11-11",
+      "target_pct": 0.15,
+      "stop_pct": 0.1,
+      "max_sessions": null,
+      "target_sell_floor_pct": null,
+      "thin_liquidity": false,
+      "approval_ref": "user 10/11-11/11/2026 (decided_by: user) — Discord: mua VGS 5% NAV, +15% bán, -10% cắt lỗ (đề xuất, user xác nhận); max_sessions: phương án B = null/không TIME exit (user duyệt qua Mike, dispatch job Taylor_20261111_034523, 11/11 ~10:45 ICT) — THAY phương án A=25 (08:04 ICT)"
     }
   ]
 }
