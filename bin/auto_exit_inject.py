@@ -539,7 +539,8 @@ def _load_disc_rules(account):
                 if isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 < v < 1:
                     raise ValueError(f"{k}={v!r} ngoài (0,1)")
             ms = e["max_sessions"]
-            if isinstance(ms, bool) or not isinstance(ms, int) or ms <= 0:
+            # None = KHÔNG có TIME exit (phải khai TƯỜNG MINH null — thiếu khoá vẫn KeyError)
+            if ms is not None and (isinstance(ms, bool) or not isinstance(ms, int) or ms <= 0):
                 raise ValueError(f"max_sessions={ms!r}")
             fp = e.get("target_sell_floor_pct")
             if fp is not None and (isinstance(fp, bool) or not isinstance(fp, (int, float)) or not -1 < fp < 1):
@@ -641,7 +642,7 @@ def _disc_candidates(account, plan, plan_date, signal_date, positions, add_block
             continue
         trig = rules.disc_exit_triggers(pnl, sessions, e["target_pct"], e["stop_pct"], e["max_sessions"])
         print(f"  [DISC] {tk}: pnl {pnl:+.2%} (đóng {mp:,.0f} / vốn broker {avg_cost:,.0f}), phiên {sessions}/"
-              f"{e['max_sessions']} ⇒ trigger={trig or '—'}")
+              f"{e['max_sessions'] if e['max_sessions'] is not None else '∞ (không TIME exit)'} ⇒ trigger={trig or '—'}")
         if not trig:
             continue
         primary = trig[0]
