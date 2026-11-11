@@ -13,6 +13,12 @@
 # hiệu lực 07-31 nhưng vẫn UPCOMING 08-05/08-06). Đuôi ≤10 tháng kế tiếp phủ T+5 của mã công bố
 # muộn + ngày rebalance custom30V (mùng 5 tháng 2/5/8/11). Đầu ≥10 (thay ≥15) bắt nhóm công bố sớm.
 #
+# NGOÀI CỬA SỔ — re-rate CÓ ĐIỀU KIỆN (2026-11-11, user duyệt P2, finding Taylor_20261111_011218): khi
+# gate cửa sổ = SKIP, vẫn chạy re-rate nếu `tav2_bq.ticker_financial` có SỐ DÒNG khác lần re-rate
+# trước (state `state/fa8l_tf_numrows.txt`; thiếu state ⇒ chạy 1 lần). Lý do: sau 10/11 chỉ còn dòng
+# thứ Bảy ⇒ mã ingest muộn (VTE công bố 21/10, vào BQ 04/11; TED 7 ngày) có rating trễ tới 6 ngày.
+# Không đổi crontab (dòng 17:30 vốn đã DAILY). Lỗi đọc BQ ⇒ SKIP (không chạy mù), dòng thứ Bảy vẫn là lưới.
+#
 # Thay thế 2 dòng cron TẠM THỜI thứ Ba (Winston_20260713_103213, guard ≤20260804) — đã xoá
 # cùng commit. Dòng thứ Bảy hàng tuần (08:30/09:15) GIỮ NGUYÊN làm baseline quanh năm.
 #
@@ -82,19 +88,50 @@ if [ "$MODE" = "--check" ]; then
   exit 0
 fi
 
+STATE_TF="${FA8L_WINDOW_STATE_TF:-$MIKE/state/fa8l_tf_numrows.txt}"   # numRows ticker_financial lúc re-rate trước
+
+_tf_numrows() {  # in numRows hiện tại của ticker_financial; rỗng nếu lỗi (FA8L_WINDOW_TF_CMD ghi đè cho selfcheck)
+  if [ -n "${FA8L_WINDOW_TF_CMD:-}" ]; then "$FA8L_WINDOW_TF_CMD" 2>/dev/null; return; fi
+  ( source "$ROOT/wc_env.sh" >/dev/null 2>&1
+    export PATH="/home/trido/google-cloud-sdk/bin:$PATH"
+    bq show --format=prettyjson "lithe-record-440915-m9:tav2_bq.ticker_financial" 2>/dev/null \
+      | python3 -c "import json,sys; print(int(json.load(sys.stdin)['numRows']))" 2>/dev/null )
+}
+
+# $1 = nội dung SKIP của gate. In "RUN-COND: ..." nếu ngoài cửa sổ mà ticker_financial đổi số dòng; ngược lại "SKIP: ...".
+_cond_gate() {
+  local now prev why="${1#SKIP: }"
+  now="$(_tf_numrows)"
+  case "$now" in ''|*[!0-9]*) echo "SKIP: $why; ticker_financial numRows khong doc duoc (BQ loi) — khong chay mu"; return;; esac
+  prev="$(cat "$STATE_TF" 2>/dev/null || true)"
+  if [ -z "$prev" ]; then echo "RUN-COND: chua co state numRows (now=$now) — chay 1 lan lap baseline"
+  elif [ "$prev" != "$now" ]; then echo "RUN-COND: ticker_financial numRows $prev -> $now (co dong moi tu lan re-rate truoc)"
+  else echo "SKIP: $why; ticker_financial numRows=$now khong doi tu lan re-rate truoc"; fi
+}
+
 TODAY_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT')"
 GATE="$(_gate "${FA8L_WINDOW_RUN_DATE:-}")"
+TF_BEFORE=""
 if [ "$GATE" != "RUN" ]; then
-  echo "[$TODAY_ICT] $GATE"
-  exit 0
+  COND="$(_cond_gate "$GATE")"
+  if [ "${COND#RUN-COND}" = "$COND" ]; then
+    echo "[$TODAY_ICT] $COND"
+    exit 0
+  fi
+  echo "[$TODAY_ICT] $COND (ngoai cua so mua BCTC)"
+else
+  echo "[$TODAY_ICT] RUN — trong cua so mua BCTC (ngay 10 thang dau quy .. ngay 10 thang ke tiep, moi ngay ke ca cuoi tuan, tru le VN)"
 fi
-
-echo "[$TODAY_ICT] RUN — trong cua so mua BCTC (ngay 10 thang dau quy .. ngay 10 thang ke tiep, moi ngay ke ca cuoi tuan, tru le VN)"
+# Đo numRows TRƯỚC refresh (dòng ingest trong lúc refresh chạy sẽ được lần sau bắt); ghi state chỉ khi 8l thành công.
+TF_BEFORE="$(_tf_numrows)"
 START_EPOCH="$(date +%s)"
 
 "${FA8L_WINDOW_CHILD_8L:-$MIKE/bin/refresh_fa_ratings_8l.sh}" >> "$LOG_8L" 2>&1
 RC1=$?
 echo "[$(TZ='Asia/Ho_Chi_Minh' date +'%F %T ICT')] refresh_fa_ratings_8l.sh exit=$RC1 (chi tiet: $LOG_8L)"
+if [ "$RC1" -eq 0 ]; then
+  case "$TF_BEFORE" in ''|*[!0-9]*) ;; *) mkdir -p "$(dirname "$STATE_TF")" && echo "$TF_BEFORE" > "$STATE_TF.tmp.$$" && mv "$STATE_TF.tmp.$$" "$STATE_TF";; esac
+fi
 
 # exit 3 = cổng ticker-gate chặn (tav2_bq.ticker thiếu mã): refresh_fa_ratings.sh cũng đọc ticker ⇒ bỏ qua.
 if [ "$RC1" -eq 3 ]; then
