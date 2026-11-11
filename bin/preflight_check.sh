@@ -196,7 +196,11 @@ if n_orders > 0 or _xfers:
     if not approved:   flags.append("NOT_APPROVED")
 if mode != "live": flags.append(f"mode={mode}")
 if rc_ok is False: flags.append("RISK_CHECK_FAIL")
-print(f"{approved}|{mafee_ok}|{mode}|{n_orders}|{est_val:.3f}|{state_nm}|{src}|{'|'.join(flags) if flags else 'OK'}")
+# Dòng này được bash đọc bằng `IFS='|' read` (1 dòng) ⇒ newline/'|' trong approved_by (text duyệt
+# tự do, ca thật 2026-11-11 SpaceX "user\n\n(John)...") cắt cụt kết quả ⇒ _flags rỗng ⇒ RED giả.
+# Chỉ làm phẳng để HIỂN THỊ; tính hợp lệ duyệt đã xét ở trên trên giá trị gốc.
+_appr_disp = " ".join(str(approved).replace("|", "/").split()) if approved else approved
+print(f"{_appr_disp}|{mafee_ok}|{mode}|{n_orders}|{est_val:.3f}|{state_nm}|{src}|{'|'.join(flags) if flags else 'OK'}")
 PY
   )
 

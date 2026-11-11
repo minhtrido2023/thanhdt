@@ -160,7 +160,7 @@ if [[ "$RC" -ne 0 || "$DRY_RUN" == "1" ]]; then
 fi
 
 "$MIKE_ROOT/bin/append_event.sh" Mike decision "plan-approval-${ACCOUNT}-${PLAN_DATE}" \
-  "{\"account\":\"${ACCOUNT}\",\"date\":\"${PLAN_DATE}\",\"approved_by\":\"${APPROVED_BY}\",\"decided_by\":\"user\"}" \
+  "$(python3 -c 'import json,sys; print(json.dumps({"account":sys.argv[1],"date":sys.argv[2],"approved_by":sys.argv[3],"decided_by":"user"},ensure_ascii=False))' "$ACCOUNT" "$PLAN_DATE" "$APPROVED_BY")" \
   || echo "⚠ append_event.sh lỗi — bus event không ghi được, báo lại kênh duyệt plan bằng tay."
 
 "$MIKE_ROOT/bin/notify_thread.sh" \
