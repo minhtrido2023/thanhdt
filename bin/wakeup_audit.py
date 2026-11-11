@@ -155,9 +155,13 @@ def is_bg_dispatch(cmd):
 
 
 def is_turn_boundary(rec):
-    """Turn mới bắt đầu khi user (người thật) gõ, hoặc queue-operation của bridge."""
-    if rec.get("type") == "queue-operation":
-        return True
+    """Turn mới bắt đầu khi user (người thật) gõ — record `user` có khối text đầu tiên.
+
+    KHÔNG tính `queue-operation`: bridge xếp hàng thông báo (vd kết quả subagent) GIỮA lượt
+    đang chạy; coi nó là ranh giới cắt đôi 1 lượt thật, ScheduleWakeup nằm ở nửa sau bị tính
+    là MISS ở nửa trước. Đo 2026-11-11: 8/69 lượt từ 11-03 bị báo MISS đều là dương tính giả
+    kiểu này (bỏ queue-op: 0/66).
+    Cố ý KHÔNG coi content dạng string là ranh giới: đó là "Stop hook feedback:" (hook chặn → cùng lượt). Lượt mới thật luôn kèm 1 record `user` text ngay sau queue-op."""
     if rec.get("type") != "user":
         return False
     content = rec.get("message", {}).get("content")
