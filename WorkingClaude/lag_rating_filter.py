@@ -153,6 +153,106 @@ QUALIFY ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) = 1""")
         return [], f"{type(ex).__name__}: {ex}"
 
 
+# ─────────────────────────────────────────────────────────────────────────────────────────────
+# SNAPSHOT AUDIT `lag_rating_gate_snapshot` (user duyệt P1 2026-11-11, job Taylor_20261111_015322;
+# nguồn: agents/Taylor/research/lag_rating_lag_q3_20261111/REPORT.md §3-4). DISPLAY/AUDIT-ONLY:
+# ghi lại rating + rating_time mà cổng 8L≤3 đang dùng cho TỪNG (ticker, Release_Date) của cand, để đo
+# trôi rating dòng Q3 (time-travel BQ chỉ giữ 7 ngày). KHÔNG lọc, KHÔNG đổi `cand`, KHÔNG raise.
+# Cùng SQL với cổng (dòng 8L mới nhất ≤ asof mỗi mã). Gọi TRƯỚC cổng, trên cùng `cand`.
+# ─────────────────────────────────────────────────────────────────────────────────────────────
+GATE_LOG_PATH = "/home/trido/thanhdt/WorkingClaude/data/lag_rating_gate_log.csv"
+GATE_LOG_COLS = ["logged_at_ict", "asof", "ticker", "release_date", "rating", "rating_time", "gate"]
+GATE_LOG_KEY = ("asof", "ticker", "release_date", "rating", "rating_time")
+
+
+def lag_rating_gate_snapshot(bq, cand, asof, rating_max_ok=RATING_MAX_OK):
+    """Trả (rows, lỗi|None). Mỗi row = một (ticker, Release_Date) của cand:
+    {"ticker","release_date","rating"(int|None),"rating_time"(str|None),"gate"("PASS"|"RATING_FAIL"|"NO_RATING")}.
+    NO_RATING = không có dòng 8L ≤ asof hoặc rating NULL (cổng loại fail-closed). KHÔNG raise, KHÔNG đụng cand."""
+    try:
+        if cand is None or not len(cand):
+            return [], None
+        if "ticker" not in cand.columns or "Release_Date" not in cand.columns:
+            return [], "cand thiếu cột ticker/Release_Date — không chụp được rating cổng"
+        tks = sorted(set(cand["ticker"]))
+        asof_d = pd.Timestamp(asof).date()
+        tl = ",".join(f"'{t}'" for t in tks)
+        a = bq(f"""SELECT f.ticker, f.rating, f.time
+FROM tav2_bq.fa_ratings_8l AS f
+WHERE f.ticker IN ({tl}) AND f.time <= DATE '{asof_d}'
+QUALIFY ROW_NUMBER() OVER (PARTITION BY f.ticker ORDER BY f.time DESC) = 1""")
+        rmap = {r.ticker: (r.rating, r.time) for r in a.itertuples()} if len(a) else {}
+        rows, seen = [], set()
+        for tk, rel in zip(cand["ticker"], cand["Release_Date"]):
+            rel_ts = pd.to_datetime(rel, errors="coerce")
+            if pd.isna(rel_ts):
+                continue
+            rel_d = str(rel_ts.date())
+            if (tk, rel_d) in seen:
+                continue
+            seen.add((tk, rel_d))
+            rt, rtime = rmap.get(tk, (None, None))
+            has_rt = rt is not None and not pd.isna(rt)
+            rtime_ts = pd.to_datetime(rtime, errors="coerce") if rtime is not None else pd.NaT
+            rows.append({"ticker": tk, "release_date": rel_d,
+                         "rating": int(rt) if has_rt else None,
+                         "rating_time": None if pd.isna(rtime_ts) else str(rtime_ts.date()),
+                         "gate": ("NO_RATING" if not has_rt else
+                                  "PASS" if float(rt) < rating_max_ok + 1 else "RATING_FAIL")})
+        rows.sort(key=lambda r: (r["release_date"], r["ticker"]))
+        return rows, None
+    except Exception as ex:
+        return [], f"{type(ex).__name__}: {ex}"
+
+
+def append_lag_rating_gate_log(rows, asof, path=None):
+    """Nối rows vào CSV audit (idempotent theo khoá asof+ticker+release_date+rating+rating_time; ghi
+    atomic tmp + os.replace). Trả (số dòng ghi, lỗi|None). KHÔNG bao giờ raise."""
+    try:
+        import csv
+        import datetime as _dt
+        import os
+        from zoneinfo import ZoneInfo
+        path = path or GATE_LOG_PATH
+        if not rows:
+            return 0, None
+        asof_s = str(pd.Timestamp(asof).date())
+        now = _dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%d %H:%M:%S")
+
+        def _k(d):
+            return tuple("" if d.get(c) is None else str(d.get(c)) for c in GATE_LOG_KEY)
+        old = []
+        if os.path.exists(path):
+            with open(path, newline="", encoding="utf-8") as f:
+                old = list(csv.DictReader(f))
+        have = {_k(d) for d in old}
+        add = []
+        for r in rows:
+            d = {"logged_at_ict": now, "asof": asof_s, "ticker": r["ticker"], "release_date": r["release_date"],
+                 "rating": "" if r["rating"] is None else r["rating"],
+                 "rating_time": r["rating_time"] or "", "gate": r["gate"]}
+            if _k(d) in have:
+                continue
+            have.add(_k(d))
+            add.append(d)
+        if not add:
+            return 0, None
+        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+        tmp = f"{path}.tmp.{os.getpid()}"
+        try:
+            with open(tmp, "w", newline="", encoding="utf-8") as f:
+                w = csv.DictWriter(f, fieldnames=GATE_LOG_COLS)
+                w.writeheader()
+                w.writerows([{c: d.get(c, "") for c in GATE_LOG_COLS} for d in old + add])
+            os.replace(tmp, path)
+        finally:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+        return len(add), None
+    except Exception as ex:
+        return 0, f"{type(ex).__name__}: {ex}"
+
+
 def annotate_stale_status(flags, lag_up, lag_recent):
     """Gắn `status` (UPCOMING …/WINDOW_PASSED …/None) cho từng cờ theo đúng 2 danh sách mà plan
     hiển thị. Khớp theo (ticker, release). Chỉ ghi thêm khoá vào dict cờ; không đụng lag_up/lag_recent.

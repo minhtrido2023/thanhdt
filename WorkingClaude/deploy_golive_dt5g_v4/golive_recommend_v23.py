@@ -103,6 +103,10 @@ from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
 from lag_liquidity_filter import lag_filter_illiquid, bal_filter_thin, ADV_MIN_VND
 from lag_rating_filter import (lag_filter_low_rating, lag_rating_stale_flags,
                                annotate_stale_status, format_lag_rating_stale_line)
+try:   # P1 2026-11-11: snapshot audit rating cổng — import lỗi KHÔNG được làm golive chết
+    from lag_rating_filter import lag_rating_gate_snapshot, append_lag_rating_gate_log
+except Exception:   # pragma: no cover
+    lag_rating_gate_snapshot = append_lag_rating_gate_log = None
 from lag_forensic_filter import lag_filter_forensic_banned
 
 OUTDIR = os.path.join(WORKDIR, "deploy_golive_dt5g_v4", "out"); os.makedirs(OUTDIR, exist_ok=True)
@@ -843,6 +847,7 @@ lag_up, lag_recent, lag_source_error = [], [], None
 lag_liq_dropped, lag_liq_error = [], None
 lag_rating_dropped, lag_rating_error = [], None
 lag_rating_stale, lag_rating_stale_error = [], None
+lag_rating_gate_snapshot_rows, lag_rating_gate_snapshot_error = [], None
 lag_forensic_dropped, lag_forensic_error = [], None
 try:
     # Point-in-time candidate source (fix 2026-07-12, audit Taylor_20260712_121642 R1):
@@ -873,6 +878,15 @@ try:
     # lẫn mã cổng loại bằng rating quý trước. Hàm không raise và không đụng `cand`: dòng ngay dưới
     # nhận đúng `cand` như trước khi có cờ ⇒ quyết định lọc KHÔNG đổi (lag_rating_stale_selfcheck.py).
     lag_rating_stale, lag_rating_stale_error = lag_rating_stale_flags(bq, cand, LATEST)
+    # SNAPSHOT AUDIT rating cổng (user duyệt P1 2026-11-11): DISPLAY/AUDIT-ONLY, không đổi `cand`, không raise.
+    try:   # lỗi snapshot (kể cả import/tên thiếu) KHÔNG được làm khối LAG/golive chết
+        lag_rating_gate_snapshot_rows, lag_rating_gate_snapshot_error = lag_rating_gate_snapshot(bq, cand, LATEST)
+        if lag_rating_gate_snapshot_rows:
+            _gl_n, _gl_err = append_lag_rating_gate_log(lag_rating_gate_snapshot_rows, LATEST)
+            if _gl_err:
+                lag_rating_gate_snapshot_error = f"ghi CSV: {_gl_err}"
+    except Exception as _gl_ex:
+        lag_rating_gate_snapshot_rows, lag_rating_gate_snapshot_error = [], f"{type(_gl_ex).__name__}: {_gl_ex}"
     cand, lag_rating_dropped, lag_rating_error = lag_filter_low_rating(bq, cand, LATEST)
     if lag_rating_dropped:
         print(f"  [lag-rating] loại {len(lag_rating_dropped)} ứng viên RATING_FAIL (8L≥4): "
@@ -1339,6 +1353,11 @@ status = {
     "lag_rating_stale": lag_rating_stale,
     "n_lag_rating_stale": len(lag_rating_stale),
     "lag_rating_stale_error": lag_rating_stale_error,
+    # SNAPSHOT AUDIT (P1 2026-11-11): rating + rating_time cổng 8L dùng cho từng ứng viên, ghi thêm vào
+    # data/lag_rating_gate_log.csv. Chỉ hiển thị/audit — không đổi quyết định lọc.
+    "lag_rating_gate_snapshot": lag_rating_gate_snapshot_rows,
+    "n_lag_rating_gate_snapshot": len(lag_rating_gate_snapshot_rows),
+    "lag_rating_gate_snapshot_error": lag_rating_gate_snapshot_error,
     # Ứng viên LAG bị loại vì GATE QUẢN TRỊ: BANNED vĩnh viễn hoặc cờ forensic severity=exclude.
     # `lag_forensic_filter_error` != None ⇒ CHỈ phần cờ forensic không chạy được (fail-open);
     # danh sách BANNED là hằng số trong code nên LUÔN áp, không phụ thuộc file.
