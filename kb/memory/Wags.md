@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-16T20:53:24Z] [2026-10-17] selfcheck-red sweep#4: snapshot_corp_action OPEN lan 2 => CAN USER (da post Architecture). Cho user tra question selfcheck-red-sweep-2026-10-16-can-user (A: HASH_EXCLUDE+ALTER ADD COLUMN); duyet xong => ap + rerun T3.7 + dong cau.
 - [2026-10-19T01:21:50Z] [2026-10-19] Cho user tra A/B/C cau Mike/retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path (da post Architecture 08:2x ICT). Tra loi => close_bus_question.py --decided-by-user + mo viec A / merge nhanh carry-forward C.
 - [2026-10-20T01:23:45Z] [2026-10-20] Câu Mike/retro-pattern-...-owned-recovery-path vẫn CHỜ USER A/B/C (mở lại 01:22Z sau khi bị đóng lây). Bài học: close_bus_question giờ chặn rc=5 đóng lây substring — đừng dùng --ack-substring-collateral trừ khi thật sự muốn.
 - [2026-10-21T15:32:27Z] 21/10: DRI bán tay = USER xác nhận (current_ops). Cờ plan-position-drift DRI 21/10 và compute_active_nav fail-closed liên quan DRI là ĐÃ BIẾT — không mở/escalate question mới.
@@ -27,3 +26,4 @@
 - [2026-11-05T06:35:00Z] [2026-11-05] Câu Mike/retro-pattern-recurring-dd-multi-round-assumption-unlocked CHỜ USER A/B/C. Đóng: close_bus_question.py "Mike/retro-pattern-recurring-dd-multi-round-assumption-unlocked" --resolution '<A/B/C+tóm tắt>' --evidence '<commit SKILL.md|lý do C>' --decided-by-user. A/B ⇒ sửa ~/.claude/skills/due-diligence/SKILL.md GỘP 1 lần với DD_SKILL_PROPOSAL.md của Taylor (lock giả định=bước 0, macro sau lấy BCTC).
 - [2026-11-09T01:30:41Z] [2026-11-09] Câu Mike/retro-pattern-recurring-anomaly-flags-stale-weekend-false-alarm CHỜ USER A/B/C (checker trong golive_recommend_v23.py = trading, Wags không sửa). User trả lời ⇒ close_bus_question --decided-by-user. Gặp OAuth expired hàng loạt ⇒ đóng các câu hệ quả bằng bằng chứng, đừng sửa code.
 - [2026-11-11T01:20:43Z] [2026-11-11] Câu Mike/retro-pattern-recurring-bg-dispatch-wakeup-miss-gate-checks-declaration-only CHỜ USER A/B/C (đã relay 10/11). Trả lời ⇒ close_bus_question --decided-by-user; A ⇒ mở rộng hooks/stop.sh (hiện chỉ Mike) + arch-reviewer.
+- [2026-11-11T03:57:45Z] [2026-11-11] Xong G2 stop-hook wakeup (4e2cfe867); cau retro bg-dispatch-wakeup-miss da dong. Neu MISS con tai dien: kiem wakeup_audit sau fix (queue-op artifact).
