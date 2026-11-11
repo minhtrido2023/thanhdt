@@ -2221,3 +2221,6 @@
 - [2026-11-10T05:48:44Z] ĐANG DỞ job Taylor_20261110_053022 BAL edge gate: worktree wt-bal-edge-gate-20261110 (+mike wt agents/Taylor/wt-mike-bal-edge-20261110), selfcheck 65/0; NEXT: kiểm cắt cụt run e0930, bootstrap state, doc kb/projects/bal-edge-monthly-gate-20261110.md, commit, bus finding
 - [2026-11-10T06:02:44Z] CHỜ Mike arch-review BAL edge gate: code d0e01e21e (wt-bal-edge-gate-20261110) + mike c5c1e5374; khi merge phải chạy --bootstrap + cài cron (cần duyệt)
 - [2026-11-10T06:16:34Z] CHỜ Mike duyệt BAL edge gate VÒNG 2: code f103ae0fa (wt-bal-edge-gate-20261110) + mike 8f9250363; merge xong phải --bootstrap + cài cron (cần duyệt)
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T06:26:28Z] [bal-edge-monthly-gate 10/11] XONG job Taylor_20261110_053025: cong thang BAL HAI CAGR -2,62/-2,76pp (P>0 0,01), Calmar khong phan biet, DD tot hon = giam exposure (placebo); CHO quant-skeptic + user quyet; worktree wt-balgate-1110 giu de skeptic tai lap
