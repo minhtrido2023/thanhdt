@@ -887,6 +887,8 @@ try:
                 lag_rating_gate_snapshot_error = f"ghi CSV: {_gl_err}"
     except Exception as _gl_ex:
         lag_rating_gate_snapshot_rows, lag_rating_gate_snapshot_error = [], f"{type(_gl_ex).__name__}: {_gl_ex}"
+    if lag_rating_gate_snapshot_error:   # không để lỗi audit chỉ nằm trong status.json (arch-review P1: fail-silent)
+        print(f"  WARNING: [lag-rating-snapshot] {lag_rating_gate_snapshot_error}")
     cand, lag_rating_dropped, lag_rating_error = lag_filter_low_rating(bq, cand, LATEST)
     if lag_rating_dropped:
         print(f"  [lag-rating] loại {len(lag_rating_dropped)} ứng viên RATING_FAIL (8L≥4): "

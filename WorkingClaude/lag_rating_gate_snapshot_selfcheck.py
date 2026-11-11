@@ -339,8 +339,12 @@ check("D3 khởi tạo biến snapshot NGOÀI try của khối LAG",
       0 < gl_new.find("lag_rating_gate_snapshot_rows, lag_rating_gate_snapshot_error = [], None") < gl_new.find("from lag_live_schedule import"))
 check("D4 snapshot bọc try/except riêng (lỗi không làm golive chết)",
       re.search(r"try:.*?\n\s+lag_rating_gate_snapshot_rows, lag_rating_gate_snapshot_error = lag_rating_gate_snapshot\(bq, cand, LATEST\).*?except Exception", gl_new, re.S) is not None)
-added = [l for l in gl_new.splitlines() if l not in set(gl_base.splitlines())]
-removed = [l for l in gl_base.splitlines() if l.strip() and l not in set(gl_new.splitlines())]
+# D5/D6 chỉ so KHỐI LAG (A_BLK..A_END), không so cả file golive: sửa dòng khác ngoài khối LAG không được làm selfcheck đỏ.
+_blk_base, _blk_new = _slice(gl_base, A_BLK, A_END), _slice(gl_new, A_BLK, A_END)
+added = [l for l in _blk_new.splitlines() if l not in set(_blk_base.splitlines())]
+removed = [l for l in _blk_base.splitlines() if l.strip() and l not in set(_blk_new.splitlines())]
+check("D7 lỗi snapshot được IN ra log golive (không chỉ nằm trong status.json)",
+      'print(f"  WARNING: [lag-rating-snapshot] {lag_rating_gate_snapshot_error}")' in gl_new)
 check("D5 so với bản gốc golive KHÔNG mất dòng nào", removed == [], f"{removed}")
 check("D6 mọi dòng THÊM đều thuộc snapshot (không đổi dòng nào khác của khối LAG)",
       all(("snapshot" in l or "_gl_" in l or l.strip().startswith("#") or "append_lag_rating_gate_log" in l
@@ -356,6 +360,7 @@ if not os.environ.get("LGS_NO_MUTATION"):
         ("lag_rating_filter.py", 'ZoneInfo("Asia/Ho_Chi_Minh")).strftime', 'ZoneInfo("UTC")).strftime', "mất neo ICT"),
         (GOLIVE_REL, "lag_rating_gate_snapshot(bq, cand, LATEST)\n        if lag_rating_gate_snapshot_rows", "lag_rating_gate_snapshot(bq, cand.iloc[:0], LATEST)\n        if lag_rating_gate_snapshot_rows", "snapshot nhận cand khác"),
         (GOLIVE_REL, '    "n_lag_rating_gate_snapshot": len(lag_rating_gate_snapshot_rows),\n', "", "mất khoá status"),
+        (GOLIVE_REL, '        print(f"  WARNING: [lag-rating-snapshot] {lag_rating_gate_snapshot_error}")\n', "        pass\n", "bỏ in lỗi snapshot"),
         (GOLIVE_REL, "    except Exception as _gl_ex:\n        lag_rating_gate_snapshot_rows, lag_rating_gate_snapshot_error = [], f\"{type(_gl_ex).__name__}: {_gl_ex}\"\n",
          "    except KeyboardInterrupt as _gl_ex:\n        pass\n", "bỏ bọc lỗi snapshot"),
         (GOLIVE_REL, "    cand, lag_rating_dropped, lag_rating_error = lag_filter_low_rating(bq, cand, LATEST)\n",
