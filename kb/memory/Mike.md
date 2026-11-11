@@ -16,3 +16,4 @@ nav-loss-brake 11-09 (đã qua); commodity 11-25; BĐS 11-26; Livermore H20 03/1
 
 - [2026-11-11T01:23:38Z] 11/11: Taylor_20261111_011218 xong (rating lag LAG Q3: M1 đóng 0/88; phát hiện rating dòng Q3 trôi 4/88; đề xuất P1 log rating cổng (rẻ) + P2 cron re-rate có điều kiện sau 10/11) — chờ user duyệt P1/P2
 - [2026-11-11T01:48:47Z] 11/11: P2 DONE + merged master — fa_ratings_earnings_window_daily.sh ngoài cửa sổ chạy có điều kiện (ticker_financial numRows đổi; state state/fa8l_tf_numrows.txt). Crontab không đổi. Lần 17:30 11/11 sẽ chạy 1 lần lập baseline. Kiểm log logs/fa_ratings_earnings_window.log tối nay. P1 (log rating cổng) chưa duyệt.
+- [2026-11-11T02:09:58Z] 11/11: P1 DONE merged WC main b086580fb (lag_rating_gate_snapshot + data/lag_rating_gate_log.csv, arch-review fixes R1/R2 applied). Kiểm sáng 12/11 CSV có dòng lượt golive 19:00 11/11. Nợ nhỏ: CSV gitignored/no backup, chưa data_registry entry, không file lock. P2: kiểm log 17:30 11/11.
