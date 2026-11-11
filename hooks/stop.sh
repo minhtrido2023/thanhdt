@@ -47,6 +47,44 @@ except Exception:
 # --- scope: only Mike's own session runs the circuit-breaker check (see header) ---
 [ "$id" = "Mike" ] || exit 0
 
+# --- G2 (2026-11-11, retro 07..10/11: MISS 4 ngay lien tiep, user chot phuong an A) ---
+# Hook cu (job-live-for-thread ben duoi) chi chan khi con job SONG gan DISCORD_THREAD_ID voi
+# heartbeat tuoi => bo lot ca job da xong/chua co heartbeat/phien khong co thread env. Cong nay
+# dua tren BANG CHUNG trong transcript luot: co dispatch.sh --bg (khong --no-followup, cung
+# dinh nghia voi bin/wakeup_audit.py) ma khong co ScheduleWakeup => chan 1 lan. --no-followup
+# duoc ton trong (is_bg_dispatch bo qua). Fail-open: transcript/parse loi -> khong chan.
+# Neu da co wakeup one-shot PENDING cho thread (luot truoc dat) thi khong chan (xem buoc 3).
+if [ -n "${MIKE_TRANSCRIPT_PATH:-}" ] && [ -r "${MIKE_TRANSCRIPT_PATH:-}" ]; then
+  _g2="$(python3 "$ROOT/bin/stop_wakeup_check.py" "$MIKE_TRANSCRIPT_PATH" 2>/dev/null)"
+  if [ "$_g2" = "MISS" ]; then
+    _g2_pending="0"
+    case "${DISCORD_THREAD_ID:-}" in
+      ''|*[!0-9]*) ;;
+      *) _g2_pending="$(python3 - "$DISCORD_THREAD_ID" "${WAGS_STOP_TASKS_API:-http://127.0.0.1:8199/api/tasks}" <<'PY' 2>/dev/null
+import sys, json, urllib.request
+tid, url = sys.argv[1], sys.argv[2]
+try:
+    with urllib.request.urlopen(url, timeout=5) as r:
+        tasks = json.load(r).get("tasks")
+    if not isinstance(tasks, list):
+        print("unknown"); sys.exit(0)
+    print("1" if any(t.get("enabled") and t.get("one_shot") and str(t.get("thread_id")) == tid
+                     for t in tasks) else "0")
+except Exception:
+    print("unknown")
+PY
+)" ;;
+    esac
+    if [ "$_g2_pending" = "0" ]; then
+      python3 -c '
+import json, sys
+print(json.dumps({"decision": "block", "reason": sys.argv[1]}))
+' "luot nay co dispatch.sh --bg (khong --no-followup) nhung chua goi ScheduleWakeup — dat ScheduleWakeup truoc khi ket thuc luot (MIKE.md §8), hoac dispatch lai voi --no-followup neu that su khong co buoc phu thuoc ket qua."
+      exit 0
+    fi
+  fi
+fi
+
 # --- fail-open: no (numeric) Discord thread on this session -> nothing to correlate ---
 _tid="${DISCORD_THREAD_ID:-}"
 [ -n "$_tid" ] || exit 0
