@@ -70,6 +70,11 @@ MUTANTS = {
                                     '        _send_disc_stop_alert(account, plan_date, disc_stop_alerts)\n'),
     "M11_lot_qty_unchecked": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
                               'if lot["qty"] > pos["qty"]:', "if False:"),
+    "M17_rules_null_unguarded": (os.path.join(WC_ROOT, "auto_exit_rules.py"), "auto_exit_rules",
+                                 "if max_sessions is not None and sessions_held is not None",
+                                 "if sessions_held is not None"),
+    "M18_validate_null_accepts_any": (os.path.join(HERE, "auto_exit_inject.py"), "auto_exit_inject",
+                                      "if ms is not None and (isinstance(ms, bool)", "if False and (isinstance(ms, bool)"),
 }
 
 
@@ -420,6 +425,49 @@ def test_injector():
           r["calls"].get("plan_has_stop_at_notify") == [True], str(r["calls"].get("plan_has_stop_at_notify")))
 
 
+def test_null_max_sessions():
+    """max_sessions=null (VGS, user duyệt phương án B 11/11/2026) ⇒ KHÔNG TIME exit; TARGET/STOP vẫn bắn;
+    giá trị rác (0/âm/bool/chuỗi/float, thiếu khoá) vẫn bị chặn ở validate."""
+    print("== N: max_sessions = null ⇒ không TIME exit ==")
+    def T(p, s):
+        try:
+            return rules.disc_exit_triggers(p, s, 0.15, 0.10, None)
+        except Exception as exc:  # noqa: BLE001 — đột biến M17 phải ra FAIL, không crash
+            return f"EXC {exc!r}"
+    check("N1 rules: None + 10000 phiên, pnl 0 ⇒ []", T(0.0, 10000) == [], str(T(0.0, 10000)))
+    check("N2 rules: None + đúng +15% (58650/51000) ⇒ TARGET", T(58650 / 51000 - 1, 500) == ["TARGET"])
+    check("N3 rules: None + đúng −10% (45900/51000) ⇒ STOP (không kèm TIME)", T(45900 / 51000 - 1, 500) == ["STOP"])
+    E = "2026-11-06"
+    lots_ok = {"FPT": [(800, E)]}
+    sig = nth_session_after(dt.date(2026, 11, 6), 60)
+    S, P = sig.isoformat(), next_trading_day(sig).isoformat()
+    null_rule = lambda: rule_entry(max_sessions=None, target_pct=0.15)  # noqa: E731
+    r = run(S, P, {"FPT": (800, 51000, 52000)}, [null_rule()], lots=lots_ok)
+    check("N4 inject: null, phiên 60, pnl +1,96% ⇒ KHÔNG SELL, KHÔNG blocked", not r["sells"] and not r["blocked"],
+          str(r["blocked"])[:200])
+    r = run(S, P, {"FPT": (800, 51000, 58650)}, [null_rule()], lots=lots_ok)
+    check("N5 inject: null + đúng +15% ⇒ 1 SELL TARGET (không TIME)", len(r["sells"]) == 1
+          and r["sells"][0]["disc_exit"]["triggers"] == ["TARGET"], str(r["sells"])[:200])
+    r = run(S, P, {"FPT": (800, 51000, 58649)}, [null_rule()], lots=lots_ok)
+    check("N5b inject: null + dưới +15% 1 đồng ⇒ không SELL", not r["sells"])
+    r = run(S, P, {"FPT": (800, 51000, 45900)}, [null_rule()], lots=lots_ok)
+    check("N6 inject: null + đúng −10% ⇒ SELL STOP đề xuất, requires_user_confirm", len(r["sells"]) == 1
+          and r["sells"][0]["disc_exit"]["triggers"] == ["STOP"]
+          and r["sells"][0]["disc_exit"]["requires_user_confirm"] is True, str(r["sells"])[:200])
+    for bad in (0, -1, True, False, "25", 2.5, "null"):
+        r = run(S, P, {"FPT": (800, 51000, 52000)}, [rule_entry(max_sessions=bad)], lots=lots_ok)
+        check(f"N7 rác max_sessions={bad!r} ⇒ không SELL + blocked 'max_sessions'", not r["sells"]
+              and any("max_sessions" in b["reason"] for b in r["blocked"]), str(r["blocked"])[:160])
+    miss = rule_entry()
+    del miss["max_sessions"]
+    r = run(S, P, {"FPT": (800, 51000, 52000)}, [miss], lots=lots_ok)
+    check("N8 THIẾU khoá max_sessions (≠ null tường minh) ⇒ blocked", not r["sells"]
+          and any("max_sessions" in b["reason"] for b in r["blocked"]), str(r["blocked"])[:160])
+    r = run(S, P, {"FPT": (800, 51000, 52000)}, [rule_entry()], lots=lots_ok)
+    check("N9 mặc định không đổi: int 25, phiên 60 ⇒ vẫn TIME SELL", len(r["sells"]) == 1
+          and r["sells"][0]["disc_exit"]["triggers"] == ["TIME"])
+
+
 class _Q:
     def __init__(self, **kw):
         self.__dict__.update(dict(last=None, ref=None, exchange="HOSE", bid=None, ask=None, floor=None,
@@ -498,6 +546,7 @@ def run_mutants():
 def main():
     test_rules()
     test_injector()
+    test_null_max_sessions()
     test_executor()
     if not os.environ.get("DISC_MUTANT") and not os.environ.get("DISC_NO_MUTANTS"):
         run_mutants()
