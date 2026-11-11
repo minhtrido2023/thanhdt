@@ -3420,6 +3420,54 @@
    "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
    "notes": "Cỡ 5 tỷ: tâm 26.215 · P10 19.165 · P90 34.314 (nhãn TRONG). Trước CK: tâm 26.778, P10 19.577, P50 28.410, P90 35.052. Độ nhạy liên kết: cơ sở=sổ 25.430; 0,75×sổ 24.911; cả ba kịch bản 0,75×sổ 23.379; cổ tức liên kết W2 đọc (b) 27.313; chiết khấu holding 30% 22.765. r 13,5% @ CCTG 12M 7,40% (02/11); ±50bp −2,4%/+2,6%. Mốc: M1 lãi liên kết Q4/26 (31/01/2027), M2 GPM Q4, M3 phải thu 31/12, M4 Legend City 31/12/2027, M5 kiểm toán 2026, M7 thuế AD HRC. Cờ quản trị W1–W7 (BKS từ nhiệm 09/2025; cổ tức liên kết 2025 nghi đếm hai lần; phải thu 2 khách; Vinaconex 2 chiều). dd_flag_verdict(VGS)=CLEAN. Chưa gửi email báo cáo.",
    "recorded_at": "2026-11-10T20:30:00+07:00"
+  },
+  {
+   "ticker": "CST",
+   "dd_date": "2026-11-11",
+   "rev": 1,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 6316,
+   "center": 12681,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số 3 kịch bản (30/45/25; N 35/75/130 tỷ/năm), thu nhập thặng dư hữu hạn tới 08/2045, r 13,5% (neo lãi huy động 7,40%), sau chiết khấu thanh khoản cỡ 0,3 tỷ",
+   "zone_high": 20799,
+   "center_range": null,
+   "price_ref": 14900,
+   "price_date": "2026-11-11",
+   "verdict_label": "TRONG vùng nhưng TRÊN tâm ~17%: giá 14.900 vs tâm sau CK 12.681 ⇒ không có biên an toàn; ngưỡng luật 0,85×tâm = 10.779. Điểm yếu: giá ⇔ N chuẩn hoá ≈88 tỷ/năm; nếu N theo chu kỳ trừ đỉnh (~106) tâm ≈15.300–17.700 (nhãn đảo). Moat NONE (nhà thầu giá vốn cộng lãi cho TKV, 97% DT nội bộ). Sizing tối đa ~0,1–0,3 tỷ (ADV60 0,132 tỷ)",
+   "skeptic_status": "vòng 1 fundamental-skeptic REFUTED mức văn bản (medium): nhãn định giá ĐỨNG (tái lập đúng 6.517/12.808/21.460, tâm 13.084/12.681); 14 đính chính đã áp (Phụ lục E: mốc khoá trước đối xứng, chuẩn hoá một lần, cơ chế tiền cấp quyền, vay, comp MVB...); không chạy vòng 2",
+   "source_file": "agents/Taylor/research/dd_CST_20261111/REPORT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_CST_20261111/REPORT.md",
+     "quote": "**13.084 đ/cp** trước chiết khấu thanh khoản, **12.681** sau chiết khấu ở cỡ 0,3 tỷ",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_CST_20261111/REPORT.md",
+     "quote": "bi quan 6.316, lạc quan 20.799 (sau chiết khấu thanh khoản)",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_CST_20261111/REPORT.md",
+     "quote": "Ở giá 14.900, giá đang CAO HƠN tâm giá trị khoảng 17%",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_CST_20261111/calc/assumptions.json",
+   "assumptions_md5": "74c9efbd09fffe7c19199b89dc785fc5",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-11",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "notes": "Sau skeptic. Tâm trước CK 13.084; N lõi (loại một lần) ⇒ tâm ≈11.263. Mốc: ĐHĐCĐ bất thường cổ tức 20–30/12/2026 (chốt 30/11); BCTC Q4 ~20/01/2027. Ghi chú để user cân nhắc — không phải tín hiệu mua.",
+   "recorded_at": "2026-11-11T21:02:57+07:00"
   }
  ],
  "center_kinds": [
