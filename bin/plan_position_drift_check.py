@@ -110,6 +110,19 @@ def paths():
     return out
 
 
+def anchor_session_date(date_str, today):
+    """Ngày KIỂM = phiên giao dịch cuối ≤ hôm nay ICT. `date_str` là NGÀY PLAN (phiên kế tiếp) hay ngày
+    tương lai ⇒ dnse_raw của nó CHƯA TỒN TẠI, vị thế thật nằm trong file của phiên đã đóng gần nhất
+    (retro 10/11: 23:32 ICT 10/11, date=2026-11-11 ⇒ CANNOT_CHECK giả, file thật là 2026-11-10).
+    Ngày ≤ hôm nay giữ nguyên (replay --date cũ, và T7/CN/lễ vẫn ra SKIP như trước)."""
+    d = dt.date.fromisoformat(date_str)
+    if d <= today:
+        return date_str
+    while today.weekday() >= 5 or is_holiday(today):
+        today -= dt.timedelta(days=1)
+    return today.isoformat()
+
+
 def now_ict():
     return dt.datetime.now(ICT).replace(tzinfo=None)
 
@@ -712,6 +725,8 @@ def main(argv=None):
         print(f"⚠️ **Vị thế sau plan ({a.account}): KHÔNG KIỂM ĐƯỢC** — môi trường sai: {e}")
         return 3
     date_str = a.date or now_ict().date().isoformat()
+    if not a.sim_live_at:
+        date_str = anchor_session_date(date_str, now_ict().date())
     sim_at = (a.sim_live_at + ":59")[:8] if a.sim_live_at else None
 
     with state_lock(P, a.account, date_str, not a.no_state):

@@ -732,12 +732,26 @@ _orig_live = M.live_read
 M.EXCHANGE_FN = lambda tk: "HOSE"
 
 
+def t_session_anchor():
+    """11/11 retro: --date = ngày PLAN (tương lai) ⇒ neo về phiên đã đóng gần nhất, không CANNOT_CHECK giả."""
+    A = M.anchor_session_date
+    d = dt.date.fromisoformat
+    check("anchor.future_plan_date_after_2300", A("2026-11-11", d("2026-11-10")) == "2026-11-10")   # ca 23:32 10/11
+    check("anchor.friday_night_plan_monday", A("2026-11-09", d("2026-11-06")) == "2026-11-06")      # T6 → plan T2
+    check("anchor.saturday_future", A("2026-11-10", d("2026-11-07")) == "2026-11-06")               # T7 → mốc T6
+    check("anchor.sunday_future", A("2026-11-10", d("2026-11-08")) == "2026-11-06")
+    check("anchor.holiday_today", A("2026-09-03", d("2026-09-02")) == "2026-08-28")                 # lễ 31/8-2/9
+    check("anchor.past_date_unchanged", A("2026-11-04", d("2026-11-10")) == "2026-11-04")           # replay
+    check("anchor.today_unchanged", A("2026-11-10", d("2026-11-10")) == "2026-11-10")
+    check("anchor.weekend_past_still_skip", A("2026-11-07", d("2026-11-10")) == "2026-11-07")       # SKIP giữ nguyên
+
+
 def main_tests():
     for fn in (t_qty_only, t_price_only, t_no_change, t_dnse_error, t_no_baseline, t_two_accounts,
                t_stale_now, t_stale_base_daily_move, t_mixed_frame, t_fills, t_sim_guard, t_weekend,
                t_partial_stale_and_notes, t_exchange_band, t_filters, t_live_stdout, t_retention, t_tz,
                t_env_guard, t_main_bus_state, lambda: t_report_block_fallback(capture), t_replay,
-               t_send_plan, t_quiet_outside_window):
+               t_send_plan, t_quiet_outside_window, t_session_anchor):
         try:
             fn()
         except Exception as e:
