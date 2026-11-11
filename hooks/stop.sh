@@ -54,7 +54,8 @@ except Exception:
 # dinh nghia voi bin/wakeup_audit.py) ma khong co ScheduleWakeup => chan 1 lan. --no-followup
 # duoc ton trong (is_bg_dispatch bo qua). Fail-open: transcript/parse loi -> khong chan.
 # Neu da co wakeup one-shot PENDING cho thread (luot truoc dat) thi khong chan (xem buoc 3).
-if [ -n "${MIKE_TRANSCRIPT_PATH:-}" ] && [ -r "${MIKE_TRANSCRIPT_PATH:-}" ]; then
+# Tat khan: MIKE_STOP_G2=off.
+if [ "${MIKE_STOP_G2:-}" != "off" ] && [ -n "${MIKE_TRANSCRIPT_PATH:-}" ] && [ -r "${MIKE_TRANSCRIPT_PATH:-}" ]; then
   _g2="$(python3 "$ROOT/bin/stop_wakeup_check.py" "$MIKE_TRANSCRIPT_PATH" 2>/dev/null)"
   if [ "$_g2" = "MISS" ]; then
     _g2_pending="0"
@@ -79,7 +80,7 @@ PY
       python3 -c '
 import json, sys
 print(json.dumps({"decision": "block", "reason": sys.argv[1]}))
-' "luot nay co dispatch.sh --bg (khong --no-followup) nhung chua goi ScheduleWakeup — dat ScheduleWakeup truoc khi ket thuc luot (MIKE.md §8), hoac dispatch lai voi --no-followup neu that su khong co buoc phu thuoc ket qua."
+' "luot nay co dispatch.sh --bg (khong --no-followup) nhung chua goi ScheduleWakeup — dat ScheduleWakeup truoc khi ket thuc luot (MIKE.md §8). Neu that su khong co buoc phu thuoc ket qua thi chi can ket thuc luot (job da chay roi — KHONG dispatch lai)."
       exit 0
     fi
   fi

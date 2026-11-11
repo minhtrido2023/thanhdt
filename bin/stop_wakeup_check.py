@@ -39,8 +39,16 @@ def main(path):
         # không thấy ranh giới trong đuôi => lượt dài hơn cửa sổ quét: không đoán
         if len(lines) >= TAIL:
             return "unknown"
-    bg = wake = False
+    bg_ids, wake = set(), False
     for rec in recs[start:]:
+        if rec.get("type") == "user":
+            # dispatch.sh từ chối (exit 8) = chưa launch gì ⇒ không tính là dispatch --bg thật
+            c = rec.get("message", {}).get("content")
+            for blk in c if isinstance(c, list) else []:
+                if isinstance(blk, dict) and blk.get("type") == "tool_result" \
+                        and "BLOCKED (exit 8)" in json.dumps(blk.get("content", ""), ensure_ascii=False):
+                    bg_ids.discard(blk.get("tool_use_id"))
+            continue
         if rec.get("type") != "assistant":
             continue
         content = rec.get("message", {}).get("content")
@@ -53,8 +61,8 @@ def main(path):
                 wake = True
             elif blk.get("name") == "Bash":
                 if is_bg_dispatch(str(blk.get("input", {}).get("command", ""))):
-                    bg = True
-    return "MISS" if (bg and not wake) else "OK"
+                    bg_ids.add(blk.get("id") or object())
+    return "MISS" if (bg_ids and not wake) else "OK"
 
 
 if __name__ == "__main__":

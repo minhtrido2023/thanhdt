@@ -12,6 +12,8 @@ def user(text): return {"type": "user", "message": {"role": "user", "content": [
 def tool_result(): return {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "x", "content": "ok"}]}}
 def bash(cmd): return {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "tool_use", "id": "b", "name": "Bash", "input": {"command": cmd}}]}}
 def wake(): return {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "tool_use", "id": "w", "name": "ScheduleWakeup", "input": {}}]}}
+def bash_id(cmd, i): return {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "tool_use", "id": i, "name": "Bash", "input": {"command": cmd}}]}}
+def tr(i, t): return {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": i, "content": t}]}}
 def qop(): return {"type": "queue-operation", "operation": "enqueue"}
 def text(t): return {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": t}]}}
 
@@ -25,7 +27,7 @@ srv = HTTPServer(("127.0.0.1", 0), H); threading.Thread(target=srv.serve_forever
 API = f"http://127.0.0.1:{srv.server_port}/api/tasks"
 DEAD = "http://127.0.0.1:9/api/tasks"
 
-def run(recs, agent="Mike", active=False, api=API, tid="111", path_ok=True):
+def run(recs, agent="Mike", active=False, api=API, tid="111", path_ok=True, off=False):
     with tempfile.TemporaryDirectory() as d:
         p = os.path.join(d, "t.jsonl")
         with open(p, "w") as f:
@@ -33,6 +35,7 @@ def run(recs, agent="Mike", active=False, api=API, tid="111", path_ok=True):
         payload = json.dumps({"session_id": "s", "cwd": d, "transcript_path": p if path_ok else d + "/nope", "stop_hook_active": active})
         env = dict(os.environ, DISCORD_THREAD_ID=tid, WAGS_STOP_TASKS_API=api, MIKE_EXCLUDE="none")
         env.pop("MIKE_SKIP", None)
+        if off: env["MIKE_STOP_G2"] = "off"
         r = subprocess.run(["bash", HOOK, agent], input=payload, capture_output=True, text=True, env=env, timeout=60)
     return r.returncode, ('"block"' in r.stdout)
 
@@ -49,8 +52,11 @@ CASES = [
     ("10 chi NHAC toi dispatch --bg trong tham so khac -> khong chan", [user("hi"), bash('bin/notify_thread.sh 1 "dung dispatch.sh X --bg nhe"'), tool_result()], {}, False),
     ("11 khong co DISCORD_THREAD_ID (phien khong thread) van chan", [user("hi"), bash(BG)], {"tid": ""}, True),
     ("12 API pending khong truy cap duoc -> fail-open, khong chan", [user("hi"), bash(BG)], {"api": DEAD}, False),
-    ("14 queue-operation GIUA bg va wakeup (cung luot) -> khong chan [ca MISS 10/11]", [user("hi"), bash(BG), tool_result(), qop(), tool_result(), wake(), text("ok"), qop()], {}, False),
+    ("14 queue-operation GIUA bg va wakeup (cung luot) -> khong chan [ca MISS 10/11]", [user("hi"), bash(BG), tool_result(), qop(), tool_result(), wake(), text("ok")], {}, False),
     ("15 queue-operation SAU wakeup -> khong chan (khong cat doi luot)", [user("hi"), bash(BG), wake(), qop(), qop()], {}, False),
+    ("16 dispatch bi exit 8 roi retry --no-followup -> khong chan", [user("hi"), bash_id(BG, "a"), tr("a", "BLOCKED (exit 8): dispatch --bg ..."), bash(BG + " --no-followup"), tool_result()], {}, False),
+    ("17 exit 8 roi retry --bg --wakeup-ack nhung quen wakeup -> CHAN", [user("hi"), bash_id(BG, "a"), tr("a", "BLOCKED (exit 8)"), bash(BG + " --wakeup-ack"), tool_result()], {}, True),
+    ("18 MIKE_STOP_G2=off -> khong chan", [user("hi"), bash(BG)], {"off": True}, False),
     ("13 heredoc prompt noi ve --bg, dispatch that khong bg -> khong chan", [user("hi"), bash("bin/dispatch.sh Taylor \"$(cat <<'P'\nlam gi do --bg\nP\n)\""), tool_result()], {}, False),
 ]
 bad = 0
