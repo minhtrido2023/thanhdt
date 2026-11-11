@@ -14,3 +14,5 @@
 ## Mốc
 nav-loss-brake 11-09 (đã qua); commodity 11-25; BĐS 11-26; Livermore H20 03/12; LAG 12-15; audit đo lường ~12-27; DT CRISIS sớm nhất ~11/10.
 
+- [2026-11-11T01:23:38Z] 11/11: Taylor_20261111_011218 xong (rating lag LAG Q3: M1 đóng 0/88; phát hiện rating dòng Q3 trôi 4/88; đề xuất P1 log rating cổng (rẻ) + P2 cron re-rate có điều kiện sau 10/11) — chờ user duyệt P1/P2
+- [2026-11-11T01:48:47Z] 11/11: P2 DONE + merged master — fa_ratings_earnings_window_daily.sh ngoài cửa sổ chạy có điều kiện (ticker_financial numRows đổi; state state/fa8l_tf_numrows.txt). Crontab không đổi. Lần 17:30 11/11 sẽ chạy 1 lần lập baseline. Kiểm log logs/fa_ratings_earnings_window.log tối nay. P1 (log rating cổng) chưa duyệt.
