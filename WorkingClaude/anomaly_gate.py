@@ -31,6 +31,17 @@ def _ict_today():
     return (datetime.datetime.now(datetime.timezone.utc) + timedelta(hours=7)).date()
 
 
+def last_session_on_or_before(d):
+    """Phiên giao dịch GẦN NHẤT ≤ d (bỏ T7/CN + lễ theo trading_bot.vn_market). Checker độ tươi
+    phải so với MỐC NÀY, không so với ngày lịch: anomaly_scan chỉ chạy T2-T6 nên file ghi cuối
+    T6 là đúng suốt T7/CN/lễ (retro 24/10, 25/10, 01/11, 08/11 báo `anomaly-flags-stale` giả)."""
+    from trading_bot.vn_market import is_holiday
+    d = pd.Timestamp(d).date()
+    while d.weekday() >= 5 or is_holiday(d):
+        d -= timedelta(days=1)
+    return d
+
+
 def _ict_date_of(ts_str):
     t = pd.Timestamp(ts_str)
     if t.tzinfo is not None:
@@ -53,7 +64,7 @@ def anomaly_flags_freshness(ref_date=None):
     Trả dict {"is_stale": bool, "generated_at": str|None, "reason": str}.
     """
     p = os.path.join(WORKDIR, "data", "anomaly_flags.json")
-    ref = pd.Timestamp(ref_date).date() if ref_date is not None else _ict_today()
+    ref = last_session_on_or_before(ref_date if ref_date is not None else _ict_today())
     try:
         flags = json.load(open(p, encoding="utf-8"))
     except Exception as ex:
@@ -68,9 +79,9 @@ def anomaly_flags_freshness(ref_date=None):
     except Exception as ex:
         return {"is_stale": True, "generated_at": str(gen),
                 "reason": f"_meta.generated_at không parse được ({ex})"}
-    if d != ref:
+    if d < ref:   # ghi SAU phiên gần nhất (vd quét tay T7) = vẫn tươi
         return {"is_stale": True, "generated_at": str(gen),
-                "reason": f"lần ghi cuối {d} (ICT) ≠ ngày giao dịch {ref}"}
+                "reason": f"lần ghi cuối {d} (ICT) < phiên giao dịch gần nhất {ref}"}
     return {"is_stale": False, "generated_at": str(gen), "reason": ""}
 
 
