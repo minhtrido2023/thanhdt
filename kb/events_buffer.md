@@ -962,3 +962,7 @@
 
 ## Consolidation 2026-11-11T12:07:41Z
 - [2026-11-11T12:07:25Z] DollarBill/decision — plan-2026-11-12-SpaceX: {"decision": "HOLD ALL 0 lenh", "why": "khong LAG toi han, TCH loai 02/11, DISC khong lap vi chua duoc duyet; VGS 2400 khong khop 11/11", "dt5g": "NEUTRAL", "approval": "pending"}
+
+## Consolidation 2026-11-11T12:08:04Z
+- [2026-11-11T12:07:50Z] DollarBill/decision — plan-2026-11-12-ZaloPay: {"plan": "ZaloPay 2026-11-12", "orders": "BUY DISC NNC 300cp (tran 48461); 0 LAG (all WINDOW_PASSED); VGS khong dua vao (gia 20300 > tran duyet 19879)", "approval": "cho user duyet truoc 08:45 12/11"}
+- [2026-11-11T12:07:58Z] DollarBill/heartbeat — DollarBill_20261111_120557: {"status": "still_running", "elapsed_min": 2, "job_id": "DollarBill_20261111_120557", "source": "watcher"}

@@ -367,3 +367,6 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-05T12:11:14Z] [2026-11-05 19:xx ICT] Plan SpaceX 11-06 XONG: SELL TV1 400cp LO 20.600, 0 mua; cho duyet truoc 08:45 06/11; cron 21:00 gui report (job DollarBill_20261105_120929)
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-05T12:11:29Z] [2026-11-05 19:xx ICT] Plan ZaloPay 11-06 XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 06/11 (job DollarBill_20261105_120927)
