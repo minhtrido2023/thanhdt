@@ -370,3 +370,6 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-05T12:11:29Z] [2026-11-05 19:xx ICT] Plan ZaloPay 11-06 XONG HOLD ALL 0 lenh; cho user duyet truoc 08:45 06/11 (job DollarBill_20261105_120927)
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-05T15:21:57Z] [2026-11-05 22:4x ICT] Plan 06/11 rev2 ca 2 acct: chen BUY DISC FPT/NNC (SpaceX 800/900, ZaloPay 500/600, tran RuleA 54.487/48.719, cash_only); gate DD+funding OK; cho user duyet truoc 08:45 06/11; Mike gui report. Sau fill: theo doi gia von/so phien/±10% -> Livermore (job DollarBill_20261105_151839)
