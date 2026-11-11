@@ -24,3 +24,4 @@
 - [2026-11-11T03:52:31Z] CHỜ Mike bổ sung Discord timestamp user chọn B cho VGS max_sessions=null (bus 01:05Z ghi A=25); code+data đã merge 11/11
 - [2026-11-11T04:21:24Z] [dd-blend 11/11] XONG job Taylor_20261111_040113: prelock K3n w*=0 (khong vuot); hau kiem w=0.5 tot hon ro (AEdm -18..29%, beta x2.5), H1 bac; K3n ti so la loi thiet ke; CHO Mike skeptic + user duyet de xuat DD
 - [2026-11-11T04:57:08Z] [dd-fwd-prelock 11/11] XONG job Taylor_20261111_043843: V_ngan KHONG co thong tin bo sung on dinh (truot IS), DD giu hien-thi-chi; forward scorer san sang, moc 12T 10-11/2027 — CHO Mike skeptic
+- [2026-11-11T05:28:00Z] [dd-fcfe3y-decay 11/11] XONG job Taylor_20261111_051016: Q1 nhan khoa ARTIFACT (luc thong ke thap, mo ta suy yeu tu 2021+); co che = tru capex (capex/CFO thanh du bao duong OOS); 0/8 sua, C4 sat nguong 2/4 — CHO Mike skeptic; chay lai ~Q4/2027
