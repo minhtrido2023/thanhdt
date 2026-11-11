@@ -2236,3 +2236,9 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-10T13:04:35Z] ĐANG DỞ job Taylor_20261110_125453 DD VGS: model khoa md5 191bb785, SUMMARY.json xong; NEXT: viet REPORT.md + bus finding
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T13:07:37Z] [dd-VGS 10/11] XONG job Taylor_20261110_125453: tam 26.520 sau CK5ty (P10 19.165/P90 34.314), gia 19.300 TRONG sat P10, luat4 dat; nua gia tri la lien ket+Legend City; CHO Mike skeptic + ghi so
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T13:08:02Z] CHỜ Mike skeptic+arch-review lag-cache-adjusted: code b16d7487d (wt-lagadj-1110) + mike 91a911827; R3 +0,92/+0,78pp vượt sàn nhiễu ⇒ user quyết re-pin; apply pkl + chạy refresh tay chỉ sau duyệt
