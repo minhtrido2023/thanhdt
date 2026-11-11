@@ -2242,3 +2242,9 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-10T13:08:02Z] CHỜ Mike skeptic+arch-review lag-cache-adjusted: code b16d7487d (wt-lagadj-1110) + mike 91a911827; R3 +0,92/+0,78pp vượt sàn nhiễu ⇒ user quyết re-pin; apply pkl + chạy refresh tay chỉ sau duyệt
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T13:20:38Z] [2026-11-10] dd-VGS r2 XONG job Taylor_20261110_131720: tam 26.778 (sau CK 1ty 26.526, P10 19.393/P90 34.722), gia 19.300 DUOI mong manh, luat4 dat; CHO Mike skeptic lan 2 + ghi so
+
+## Archived 2026-11-11 (keep=12 days=0 require_done=False)
+- [2026-11-10T13:41:29Z] ĐANG DỞ job Taylor_20261110_132044 lagadj r2: A1 4 chân r3z xong (Δ pin0 -0,04/pin1M -0,37 ⇒ KHÔNG re-pin), pkl v2+pt v2 xong; code wt-lagadj-1110 sửa B uncommitted; NEXT: selfcheck, B5/B9/B10, doc, tách commit, bus
