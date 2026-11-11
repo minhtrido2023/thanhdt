@@ -25,4 +25,4 @@
 - [2026-11-11T00:44:34Z] CHỜ user chọn A/B/C cho paper expvol_pacing (N=2/25; DISC buy thiếu state_<T>_<acct>.json không vào trial); checkpoint kế 2026-12-08
 - [2026-11-11T01:22:18Z] [lag-rating-lag-q3 11/11] XONG job Taylor_20261111_011218: M1 dong 0/88; lo moi = troi rating dong Q3 (VGS); de xuat P1 log rating cong/P2 re-rate co dieu kien — CHO Mike/user
 - [2026-11-11T03:44:15Z] [dd-vn-calib 11/11] XONG job Taylor_20261111_032615: engine FCFE KHONG TUONG THICH (K3 khong hoi tu, lech theo ma); de xuat P1 FCFE=LNSTx(1-g/ROE) pha 2 — CHO Mike/user duyet
-- [2026-11-11T03:46:22Z] ĐANG DỞ job Taylor_20261111_034523 VGS max_sessions=null: wt /home/trido/thanhdt/WorkingClaude/wt-vgs-null-1111 (+mike/ worktree lồng); sửa auto_exit_rules.py + auto_exit_inject.py validate + json VGS null + auto_exit_disc_selfcheck.py; NEXT arch-review, merge, bus. LƯU Ý bus 01:05Z ghi user chọn A=25, dispatch nói B
+- [2026-11-11T03:52:31Z] CHỜ Mike bổ sung Discord timestamp user chọn B cho VGS max_sessions=null (bus 01:05Z ghi A=25); code+data đã merge 11/11
