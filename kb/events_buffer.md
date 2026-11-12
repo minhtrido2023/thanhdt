@@ -1199,3 +1199,15 @@
 - [2026-11-12T16:57:48Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "in_progress", "note": "TB 6/20 xong; chờ tiếp"}
 - [2026-11-12T16:58:12Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261112_162004", "source": "watcher"}
 - [2026-11-12T16:59:12Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+
+## Consolidation 2026-11-12T17:07:01Z
+- [2026-11-12T17:00:12Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+- [2026-11-12T17:00:45Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "in_progress", "note": "resume #3: ladder L0-L4 xong, compare 6/6 PASS; TB4-10 dang chay; kiem L4==L3 byte"}
+- [2026-11-12T17:01:12Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+- [2026-11-12T17:02:13Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+- [2026-11-12T17:02:32Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "in_progress", "note": "determinism merge 0/3107 lech, quick 1986; blast radius xong; cho TB4-10"}
+- [2026-11-12T17:03:13Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+- [2026-11-12T17:04:13Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+- [2026-11-12T17:05:13Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+- [2026-11-12T17:06:13Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20261112_162004", "source": "watcher"}
+- [2026-11-12T17:06:34Z] Taylor/heartbeat — Taylor_20261112_162004: {"status": "in_progress", "note": "REPORT nhap xong; cho TB7-10 (8 chan) roi dien sd + registry"}
