@@ -760,3 +760,7 @@
 
 ## Consolidation 2026-11-12T06:07:02Z
 - [2026-11-12T06:00:11Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-11-12", "elapsed_s": 9, "rc": 0}
+
+## Consolidation 2026-11-12T08:07:02Z
+- [2026-11-12T07:55:00Z] Mafee/status — ATC_POSTCLOSE_TIMEOUT: {"account": "SpaceX", "plan_date": "2026-11-12", "children": [{"order_id": "BUY-DISC-NNC-SpaceX-2026-11-12", "ticker": "NNC", "side": "buy", "oid": "264951", "qty": 200, "filled": 0, "last_seen": "poll 14:55:00 lệnh vẫn New"}], "note": "Quá 14:55 ICT vẫn còn lệnh chưa về trạng thái cuối — state/journal CÓ THỂ thiếu fill ATC. Đối soát email khớp lệnh DNSE (EOD leg 3)."}
+- [2026-11-12T07:55:00Z] Mafee/status — ATC_POSTCLOSE_TIMEOUT: {"account": "ZaloPay", "plan_date": "2026-11-12", "children": [{"order_id": "BUY-DISC-NNC-ZaloPay-2026-11-12", "ticker": "NNC", "side": "buy", "oid": "264891", "qty": 200, "filled": 0, "last_seen": "poll 14:55:00 lệnh vẫn New"}], "note": "Quá 14:55 ICT vẫn còn lệnh chưa về trạng thái cuối — state/journal CÓ THỂ thiếu fill ATC. Đối soát email khớp lệnh DNSE (EOD leg 3)."}
