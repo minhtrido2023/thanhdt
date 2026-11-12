@@ -1,5 +1,8 @@
 # LAG cache về cơ sở giá ĐIỀU CHỈNH (Phương án A) — 2026-11-10
 
+> ⚠️ **ĐÍNH CHÍNH 13/11/2026 01:3x ICT (arch-reviewer, Mike tự kiểm lại):** dòng "CHƯA apply, CHƯA merge" bên dưới ĐÃ LỖI THỜI. Nhánh đã squash lên `main` ở commit `97b2a7197` (reflog 10/11 15:30:03 +0000; message ghi "user duyệt 2026-11-10 22:10" — Mike chưa tìm thấy bản ghi duyệt khác ngoài message này) và `papertrade_daily.sh:43` chạy `refresh_lagged_caches.py` từ checkout main lúc 15:30 ICT T2-T6 ⇒ merge vào main = apply ở lần cron kế tiếp. Cache thật đã ở cơ sở điều chỉnh (`.pre_adj` sinh 11-10 08:30 UTC, còn nguyên); golive 11-11/11-12 đã dùng. Blast radius '4 rời/7 vào' bị phóng đại: 7/11 mã đã nằm trong `lag_liq_excluded`; delta live ≤ HTT, PHP rời / KLB, PHR vào. arch-review luồng C = NEEDS_CHANGES (code ổn, 65/65 + 27/27 + 13/13 + 4/4 tự chạy lại; thiếu validate Price/Volume_3M_P50, chưa có runbook rollback). Chờ user: PHÊ CHUẨN trạng thái live hay ROLLBACK.
+
+
 > **VÒNG 2** (job `Taylor_20261110_132044`, sau quant-skeptic REFUTED + arch-reviewer NEEDS_CHANGES) — §4 viết lại.
 > Job vòng 1 `Taylor_20261110_123246` · user chốt "làm A" 10/11. **ĐỀ XUẤT trên nhánh, CHƯA apply, CHƯA merge.**
 > Nhánh `feat/lag-cache-adjusted-20261110` ở cả 2 repo: code `wt-lagadj-1110` (repo ngoài),
