@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/refresh_ba_nav.py

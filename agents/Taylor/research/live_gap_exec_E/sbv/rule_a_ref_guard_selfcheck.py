@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/rule_a_ref_guard_selfcheck.py

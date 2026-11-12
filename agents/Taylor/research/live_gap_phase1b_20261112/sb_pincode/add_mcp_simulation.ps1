@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/add_mcp_simulation.ps1

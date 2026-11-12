@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/gen_sql.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/compare_d1_sector_exempt.py

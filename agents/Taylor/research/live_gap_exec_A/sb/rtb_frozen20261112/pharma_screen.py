@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-rtb/WorkingClaude/pharma_screen.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/package_8l_full.py

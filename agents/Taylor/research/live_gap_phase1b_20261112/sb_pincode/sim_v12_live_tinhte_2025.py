@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/sim_v12_live_tinhte_2025.py

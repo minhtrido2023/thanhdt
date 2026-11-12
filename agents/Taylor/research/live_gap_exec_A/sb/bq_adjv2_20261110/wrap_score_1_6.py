@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-q/WorkingClaude/wrap_score_1_6.py

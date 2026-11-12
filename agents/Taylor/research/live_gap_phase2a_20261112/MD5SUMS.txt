@@ -1,0 +1,14 @@
+a581abf004755b3f044737984c0d189a  panel.csv
+2d5efc08ba7e9dc172ee5a2ac41ff2c0  panel.parquet
+66723d011afb800e57908ebd1b8f802d  events.csv
+1b8fdccfe20dfc7b49bce1ef137f54b7  univariate.csv
+e610c66fc9478372d7b4432bd8ee7635  deciles.csv
+1a188fd8be6594131e66b42f1e76f2c7  hypotheses.csv
+0c1aaba9ee73b969ffcda51e14e0b2f7  placebo.csv
+0df64b4ed24477a0c539cd00ad3ddafd  univariate_pass.csv
+40039936207a62f7a719b9b0d6f6e143  build_panel.py
+f95d76ef5a239f0564529130c719560d  analyze.py
+89e96ba6288f00c0de4aabb7ccd5498f  ../live_gap_phase1b_20261112/ledgers/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-30_wtnamecap_advprice_exp_exp_gap_C1fix_v3_univpit.csv
+e50af7d916129cb943be32d7c0deee14  ../live_gap_phase0_20261112/fills_booked.csv
+970a827a423b2dcc34ff5d30c9e68eb8  ../live_gap_phase0_20261112/hurdle_pit.py
+4370eccaac124a20780e3ba624ac9356  /home/trido/thanhdt/WorkingClaude/data/bq_cache/manifest.json

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/energy_screen.py

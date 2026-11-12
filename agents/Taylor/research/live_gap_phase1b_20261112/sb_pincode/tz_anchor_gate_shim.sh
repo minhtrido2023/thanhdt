@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/tz_anchor_gate_shim.sh

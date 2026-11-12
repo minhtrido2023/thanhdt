@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/golden_from_custom30.py

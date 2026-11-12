@@ -1,0 +1,7 @@
+831ea71674ae6f9607dde1ef6951c39e  hurdle_pit.csv
+2f3ac42c2ea6ee8f6d97fff18fca742a  vs_savings_table.csv
+16ed017c3de8e376ae128823646a789d  book_summary.csv
+e50af7d916129cb943be32d7c0deee14  fills_booked.csv
+d98e209bd9344c9d59041683a7491555  fill_vs_open_stats.csv
+dac479c385311f9364f97d18168207b3  REPORT.md
+901101fd8e5d63b909d4e13db666a5a3  PROPOSAL_savings_row.proposed.md

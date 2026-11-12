@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/phosphorus_dgc_weekly.py

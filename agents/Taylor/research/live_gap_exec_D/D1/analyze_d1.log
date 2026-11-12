@@ -1,0 +1,20 @@
+{
+ "ledgers": {
+  "pin0": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/live_gap_exec_D/ledgers/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_liqzblag_advprice_exp_exp_gapD_p0_off_univpit.csv",
+  "pin1M": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/live_gap_exec_D/ledgers/v23_golive_audit_2014_now_matpostbull_shrink0_edge_etfliqcustompitg_park3-0_wtnamecap_liqzblag_advprice_exp_exp_gapD_p0_dep1m_univpit_idledep1m.csv"
+ },
+ "dep1m_src_counts_2014_2026": {
+  "real": 89,
+  "recon": 54
+ },
+ "perf_pin0": {
+  "cagr": 0.23388529956474513,
+  "sharpe": 1.823939969987548,
+  "maxdd": -0.1706233969188794
+ },
+ "perf_pin1M": {
+  "cagr": 0.2677087655217314,
+  "sharpe": 2.0549795783563107,
+  "maxdd": -0.1479419401502151
+ }
+}

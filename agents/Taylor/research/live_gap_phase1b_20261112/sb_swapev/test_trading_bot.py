@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/test_trading_bot.py

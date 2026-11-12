@@ -1,0 +1,370 @@
+[
+ {
+  "label": "CONTROL <=09-25 (ky vong N=326, mean 5.52, sd 94.58)",
+  "n_orders": 327,
+  "n_clusters": 144,
+  "n_days": 32,
+  "mean_bps": 5.06,
+  "sd_order": 94.37,
+  "median": 12.28,
+  "wtd_mean_bps": 13.41,
+  "cluster_mean": 6.23,
+  "cluster_sd": 78.3,
+  "ci95_mean_cluster": [
+   -25.9,
+   29.0
+  ],
+  "ci95_wtd_cluster": [
+   -5.2,
+   32.8
+  ],
+  "P_mean_gt_22": 0.108,
+  "P_wtd_gt_22": 0.182,
+  "notional_vnd": 4400377300
+ },
+ {
+  "label": "PRE-HYBRID 07-01..08-25",
+  "n_orders": 305,
+  "n_clusters": 132,
+  "n_days": 25,
+  "mean_bps": 8.42,
+  "sd_order": 95.96,
+  "median": 13.74,
+  "wtd_mean_bps": 15.15,
+  "cluster_mean": 8.08,
+  "cluster_sd": 80.67,
+  "ci95_mean_cluster": [
+   -24.9,
+   32.2
+  ],
+  "ci95_wtd_cluster": [
+   -4.5,
+   34.7
+  ],
+  "P_mean_gt_22": 0.185,
+  "P_wtd_gt_22": 0.231,
+  "notional_vnd": 4279872300
+ },
+ {
+  "label": "POST-HYBRID 08-26..11-11 (all)",
+  "n_orders": 357,
+  "n_clusters": 95,
+  "n_days": 26,
+  "mean_bps": -11.38,
+  "sd_order": 109.04,
+  "median": 0.0,
+  "wtd_mean_bps": -18.44,
+  "cluster_mean": -0.45,
+  "cluster_sd": 76.35,
+  "ci95_mean_cluster": [
+   -41.7,
+   19.6
+  ],
+  "ci95_wtd_cluster": [
+   -45.7,
+   13.4
+  ],
+  "P_mean_gt_22": 0.019,
+  "P_wtd_gt_22": 0.008,
+  "notional_vnd": 1767049650
+ },
+ {
+  "label": "POST BUY",
+  "n_orders": 66,
+  "n_clusters": 12,
+  "n_days": 9,
+  "mean_bps": -26.8,
+  "sd_order": 160.94,
+  "median": -62.5,
+  "wtd_mean_bps": -38.48,
+  "cluster_mean": -47.47,
+  "cluster_sd": 147.79,
+  "ci95_mean_cluster": [
+   -107.2,
+   95.5
+  ],
+  "ci95_wtd_cluster": [
+   -116.3,
+   80.3
+  ],
+  "P_mean_gt_22": 0.175,
+  "P_wtd_gt_22": 0.125,
+  "notional_vnd": 401475000
+ },
+ {
+  "label": "PRE BUY",
+  "n_orders": 210,
+  "n_clusters": 70,
+  "n_days": 23,
+  "mean_bps": 7.81,
+  "sd_order": 100.69,
+  "median": 13.74,
+  "wtd_mean_bps": 17.25,
+  "cluster_mean": 13.43,
+  "cluster_sd": 65.26,
+  "ci95_mean_cluster": [
+   -39.5,
+   41.0
+  ],
+  "ci95_wtd_cluster": [
+   -10.3,
+   47.8
+  ],
+  "P_mean_gt_22": 0.293,
+  "P_wtd_gt_22": 0.35,
+  "notional_vnd": 2588198300
+ },
+ {
+  "label": "POST SELL",
+  "n_orders": 291,
+  "n_clusters": 83,
+  "n_days": 21,
+  "mean_bps": -7.89,
+  "sd_order": 93.41,
+  "median": 0.0,
+  "wtd_mean_bps": -12.54,
+  "cluster_mean": 6.35,
+  "cluster_sd": 58.16,
+  "ci95_mean_cluster": [
+   -37.6,
+   18.7
+  ],
+  "ci95_wtd_cluster": [
+   -35.2,
+   11.0
+  ],
+  "P_mean_gt_22": 0.012,
+  "P_wtd_gt_22": 0.003,
+  "notional_vnd": 1365574650
+ },
+ {
+  "label": "PRE SELL",
+  "n_orders": 95,
+  "n_clusters": 63,
+  "n_days": 16,
+  "mean_bps": 9.75,
+  "sd_order": 85.04,
+  "median": 13.74,
+  "wtd_mean_bps": 11.93,
+  "cluster_mean": 2.16,
+  "cluster_sd": 94.58,
+  "ci95_mean_cluster": [
+   -10.4,
+   28.8
+  ],
+  "ci95_wtd_cluster": [
+   -15.4,
+   32.8
+  ],
+  "P_mean_gt_22": 0.103,
+  "P_wtd_gt_22": 0.187,
+  "notional_vnd": 1691674000
+ },
+ {
+  "label": "POST SpaceX",
+  "n_orders": 196,
+  "n_clusters": 71,
+  "n_days": 20,
+  "mean_bps": -9.36,
+  "sd_order": 112.18,
+  "median": 0.0,
+  "wtd_mean_bps": -13.72,
+  "cluster_mean": 3.32,
+  "cluster_sd": 85.52,
+  "ci95_mean_cluster": [
+   -43.3,
+   24.1
+  ],
+  "ci95_wtd_cluster": [
+   -40.7,
+   19.5
+  ],
+  "P_mean_gt_22": 0.034,
+  "P_wtd_gt_22": 0.017,
+  "notional_vnd": 1115864750
+ },
+ {
+  "label": "POST ZaloPay",
+  "n_orders": 161,
+  "n_clusters": 72,
+  "n_days": 23,
+  "mean_bps": -13.84,
+  "sd_order": 105.39,
+  "median": 0.0,
+  "wtd_mean_bps": -26.51,
+  "cluster_mean": -4.14,
+  "cluster_sd": 81.74,
+  "ci95_mean_cluster": [
+   -41.0,
+   18.7
+  ],
+  "ci95_wtd_cluster": [
+   -53.3,
+   7.9
+  ],
+  "P_mean_gt_22": 0.016,
+  "P_wtd_gt_22": 0.005,
+  "notional_vnd": 651184900
+ },
+ {
+  "label": "POST tod 1_ATO(<=09:15)",
+  "n_orders": 105,
+  "n_clusters": 73,
+  "n_days": 17,
+  "mean_bps": 6.56,
+  "sd_order": 24.54,
+  "median": 0.0,
+  "wtd_mean_bps": 6.61,
+  "cluster_mean": 5.57,
+  "cluster_sd": 24.2,
+  "ci95_mean_cluster": [
+   0.3,
+   12.3
+  ],
+  "ci95_wtd_cluster": [
+   2.6,
+   11.2
+  ],
+  "P_mean_gt_22": 0.0,
+  "P_wtd_gt_22": 0.0,
+  "notional_vnd": 356615050
+ },
+ {
+  "label": "POST tod 2_morning",
+  "n_orders": 194,
+  "n_clusters": 59,
+  "n_days": 16,
+  "mean_bps": -11.01,
+  "sd_order": 111.51,
+  "median": 0.0,
+  "wtd_mean_bps": -25.32,
+  "cluster_mean": 2.54,
+  "cluster_sd": 94.52,
+  "ci95_mean_cluster": [
+   -44.1,
+   24.5
+  ],
+  "ci95_wtd_cluster": [
+   -57.9,
+   11.4
+  ],
+  "P_mean_gt_22": 0.032,
+  "P_wtd_gt_22": 0.005,
+  "notional_vnd": 962587750
+ },
+ {
+  "label": "POST tod 3_afternoon",
+  "n_orders": 53,
+  "n_clusters": 19,
+  "n_days": 13,
+  "mean_bps": -48.27,
+  "sd_order": 178.38,
+  "median": -62.5,
+  "wtd_mean_bps": -32.23,
+  "cluster_mean": -44.05,
+  "cluster_sd": 184.74,
+  "ci95_mean_cluster": [
+   -126.6,
+   44.4
+  ],
+  "ci95_wtd_cluster": [
+   -108.8,
+   73.3
+  ],
+  "P_mean_gt_22": 0.062,
+  "P_wtd_gt_22": 0.127,
+  "notional_vnd": 247146850
+ },
+ {
+  "label": "POST tod 4_ATC(>=14:30)",
+  "n_orders": 5,
+  "n_clusters": 3,
+  "n_days": 2,
+  "mean_bps": -11.6,
+  "sd_order": 49.89,
+  "median": -12.05,
+  "wtd_mean_bps": -12.94,
+  "cluster_mean": 2.03,
+  "cluster_sd": 62.31,
+  "ci95_mean_cluster": [
+   -52.0,
+   70.2
+  ],
+  "ci95_wtd_cluster": [
+   -52.0,
+   70.2
+  ],
+  "P_mean_gt_22": 0.141,
+  "P_wtd_gt_22": 0.141,
+  "notional_vnd": 200700000
+ },
+ {
+  "label": "POST khung10phien#0 2026-09-14..2026-10-01",
+  "n_orders": 106,
+  "n_clusters": 41,
+  "n_days": 10,
+  "mean_bps": -2.69,
+  "sd_order": 57.2,
+  "median": 0.0,
+  "wtd_mean_bps": 2.04,
+  "cluster_mean": 3.76,
+  "cluster_sd": 37.49,
+  "ci95_mean_cluster": [
+   -21.0,
+   15.8
+  ],
+  "ci95_wtd_cluster": [
+   -25.8,
+   28.4
+  ],
+  "P_mean_gt_22": 0.003,
+  "P_wtd_gt_22": 0.084,
+  "notional_vnd": 452570000
+ },
+ {
+  "label": "POST khung10phien#1 2026-10-02..2026-10-29",
+  "n_orders": 195,
+  "n_clusters": 43,
+  "n_days": 10,
+  "mean_bps": 9.2,
+  "sd_order": 109.87,
+  "median": 0.0,
+  "wtd_mean_bps": -14.91,
+  "cluster_mean": 4.87,
+  "cluster_sd": 89.68,
+  "ci95_mean_cluster": [
+   -26.7,
+   51.6
+  ],
+  "ci95_wtd_cluster": [
+   -48.8,
+   30.6
+  ],
+  "P_mean_gt_22": 0.252,
+  "P_wtd_gt_22": 0.051,
+  "notional_vnd": 1103842150
+ },
+ {
+  "label": "POST khung10phien#2 2026-10-30..2026-11-11",
+  "n_orders": 56,
+  "n_clusters": 11,
+  "n_days": 6,
+  "mean_bps": -99.5,
+  "sd_order": 136.32,
+  "median": -58.37,
+  "wtd_mean_bps": -80.9,
+  "cluster_mean": -36.95,
+  "cluster_sd": 117.21,
+  "ci95_mean_cluster": [
+   -177.5,
+   -5.3
+  ],
+  "ci95_wtd_cluster": [
+   -173.1,
+   18.2
+  ],
+  "P_mean_gt_22": 0.005,
+  "P_wtd_gt_22": 0.02,
+  "notional_vnd": 210637500
+ }
+]

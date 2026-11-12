@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/cpi_vn_te_selfcheck.py

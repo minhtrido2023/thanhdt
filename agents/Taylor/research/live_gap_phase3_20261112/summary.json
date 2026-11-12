@@ -1,0 +1,76 @@
+{
+ "perf_P0": {
+  "cagr": 0.23388529956474513,
+  "sharpe": 1.823939969987548,
+  "maxdd": -0.1706233969188794
+ },
+ "perf_P30": {
+  "cagr": 0.24769961529478968,
+  "sharpe": 1.7886331132110342,
+  "maxdd": -0.1761660180839213
+ },
+ "cuts": {
+  "V2": [
+   -0.2,
+   -0.1
+  ],
+  "V4": [
+   -0.15,
+   -0.05
+  ],
+  "V3": [
+   0.5252281075956868,
+   0.6198477929984779
+  ],
+  "V5": [
+   3.32244889793499,
+   4.7007931987075455
+  ],
+  "V6": [
+   0.1244931509114807,
+   0.17026381939102497
+  ]
+ },
+ "passes": {
+  "V1": {
+   "c1_fdr_samesign": false,
+   "c2_placebo": false,
+   "c3_loyo": false,
+   "pass_123": false
+  },
+  "V2": {
+   "c1_fdr_samesign": false,
+   "c2_placebo": false,
+   "c3_loyo": false,
+   "pass_123": false
+  },
+  "V3": {
+   "c1_fdr_samesign": false,
+   "c2_placebo": false,
+   "c3_loyo": false,
+   "pass_123": false
+  },
+  "V4": {
+   "c1_fdr_samesign": false,
+   "c2_placebo": false,
+   "c3_loyo": false,
+   "pass_123": false
+  },
+  "V5": {
+   "c1_fdr_samesign": false,
+   "c2_placebo": false,
+   "c3_loyo": false,
+   "pass_123": false
+  },
+  "V6": {
+   "c1_fdr_samesign": false,
+   "c2_placebo": false,
+   "c3_loyo": false,
+   "pass_123": false
+  }
+ },
+ "step4_cuts": {
+  "dep1m_median_2019_2020": 4.3,
+  "spread_median_2019_2020": 2.366214268891932
+ }
+}

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/textile_screen.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/gpm_q4_5f.sql

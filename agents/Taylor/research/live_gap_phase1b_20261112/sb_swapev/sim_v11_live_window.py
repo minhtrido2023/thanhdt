@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/sim_v11_live_window.py

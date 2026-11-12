@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/mcp-off.ps1

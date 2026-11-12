@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/livestock_screen.py

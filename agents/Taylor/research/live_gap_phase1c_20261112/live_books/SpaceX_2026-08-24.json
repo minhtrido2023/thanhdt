@@ -1,0 +1,1331 @@
+{
+ "account_label": "SpaceX",
+ "account_no": "0002023347",
+ "asof": "2026-08-24",
+ "day0_date": "2026-08-04",
+ "bootstrap": "bootstrap_book_snapshot_SpaceX_20260804.json",
+ "excluded_tickers": [
+  "PNJ"
+ ],
+ "lots": [
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 800,
+   "price": 22650.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1068,
+   "price": 40254.026217228464,
+   "source": "bootstrap",
+   "corp_actions": [
+    "BID-2026-08-17-STOCK-BONUS"
+   ]
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1000,
+   "price": 34476.79,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 700,
+   "price": 26675.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-15",
+   "qty": 200,
+   "price": 51466.67,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1265,
+   "price": 22478.260869565216,
+   "source": "bootstrap",
+   "corp_actions": [
+    "MBB-2026-08-11-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "NCT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 500,
+   "price": 94360.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "PVT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 3000,
+   "price": 17100.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "PVT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN_TOPUP",
+   "entry_date": "2026-07-24",
+   "qty": 500,
+   "price": 17100.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SAB",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 1100,
+   "price": 47368.18,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 100,
+   "price": 13550.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SIP",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 1100,
+   "price": 47122.73,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SIP",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN_TOPUP",
+   "entry_date": "2026-07-27",
+   "qty": 600,
+   "price": 46941.67,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1000,
+   "price": 33900.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 500,
+   "price": 16800.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-07-28",
+   "qty": 100,
+   "price": 19600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-07-29",
+   "qty": 300,
+   "price": 19600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 500,
+   "price": 62300.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VHM",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 900,
+   "price": 74900.0,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VHM-2026-08-06-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 315,
+   "price": 16190.47619047619,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VIX-2026-08-20-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "VND",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 300,
+   "price": 17800.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VNM",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 900,
+   "price": 58600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1100,
+   "price": 27914.29,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 100,
+   "price": 24200.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 100,
+   "price": 24200.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 100,
+   "price": 23700.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 200,
+   "price": 23600.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 100,
+   "price": 23700.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 200,
+   "price": 23600.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 200,
+   "price": 23400.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 300,
+   "price": 23400.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 100,
+   "price": 23400.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 100,
+   "price": 23400.0,
+   "source": "exec_SpaceX_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 19800.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-TV1-DISC-01"
+  },
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 22700.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-ACB-PARK-01"
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 107,
+   "price": 36962.6168224299,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-BID-PARK-02",
+   "corp_actions": [
+    "BID-2026-08-17-STOCK-BONUS"
+   ]
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 32700.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-CTG-PARK-03"
+  },
+  {
+   "ticker": "EVF",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 12550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-EVF-PARK-04"
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 26950.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-HDB-PARK-05"
+  },
+  {
+   "ticker": "HPG",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 1200,
+   "price": 22200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-HPG-PARK-06"
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 20550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MBB-PARK-08"
+  },
+  {
+   "ticker": "MSB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 16250.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MSB-PARK-09"
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 700,
+   "price": 12100.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-SHB-PARK-10"
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 60500.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VCB-PARK-11"
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 14900.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIB-PARK-12"
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 105,
+   "price": 13285.714285714286,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIX-PARK-13",
+   "corp_actions": [
+    "VIX-2026-08-20-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 25900.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VPB-PARK-14"
+  },
+  {
+   "ticker": "VRE",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 25550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VRE-PARK-15"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 52900.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-LPB-PARK-07"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 400,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 200,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20300.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-14",
+   "qty": 600,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-14_journal.csv:BUY-TV1-DISC-2026-08-14"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-14",
+   "qty": 100,
+   "price": 20000.0,
+   "source": "exec_SpaceX_2026-08-14_journal.csv:BUY-TV1-DISC-2026-08-14"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-17",
+   "qty": 500,
+   "price": 20100.0,
+   "source": "exec_SpaceX_2026-08-17_journal.csv:BUY-TV1-DISC-2026-08-17"
+  }
+ ],
+ "park_lots": [
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 800,
+   "price": 22650.0,
+   "source": "bootstrap",
+   "market_price": 22500.0,
+   "mv_vnd": 18000000.0
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1068,
+   "price": 40254.026217228464,
+   "source": "bootstrap",
+   "corp_actions": [
+    "BID-2026-08-17-STOCK-BONUS"
+   ],
+   "market_price": 36900.0,
+   "mv_vnd": 39409200.0
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1000,
+   "price": 34476.79,
+   "source": "bootstrap",
+   "market_price": 31800.0,
+   "mv_vnd": 31800000.0
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 700,
+   "price": 26675.0,
+   "source": "bootstrap",
+   "market_price": 21080.0,
+   "mv_vnd": 14756000.0
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-15",
+   "qty": 200,
+   "price": 51466.67,
+   "source": "bootstrap",
+   "market_price": 49100.0,
+   "mv_vnd": 9820000.0
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1265,
+   "price": 22478.260869565216,
+   "source": "bootstrap",
+   "corp_actions": [
+    "MBB-2026-08-11-STOCK-DIVIDEND"
+   ],
+   "market_price": 20750.0,
+   "mv_vnd": 26248750.0
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 100,
+   "price": 13550.0,
+   "source": "bootstrap",
+   "market_price": 12100.0,
+   "mv_vnd": 1210000.0
+  },
+  {
+   "ticker": "TCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1000,
+   "price": 33900.0,
+   "source": "bootstrap",
+   "market_price": 20970.0,
+   "mv_vnd": 20970000.0
+  },
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 500,
+   "price": 16800.0,
+   "source": "bootstrap",
+   "market_price": 12260.0,
+   "mv_vnd": 6130000.0
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 500,
+   "price": 62300.0,
+   "source": "bootstrap",
+   "market_price": 59200.0,
+   "mv_vnd": 29600000.0
+  },
+  {
+   "ticker": "VHM",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 900,
+   "price": 74900.0,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VHM-2026-08-06-STOCK-DIVIDEND"
+   ],
+   "market_price": 73400.0,
+   "mv_vnd": 66060000.0
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 315,
+   "price": 16190.47619047619,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VIX-2026-08-20-STOCK-DIVIDEND"
+   ],
+   "market_price": 13800.0,
+   "mv_vnd": 4347000.0
+  },
+  {
+   "ticker": "VND",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 300,
+   "price": 17800.0,
+   "source": "bootstrap",
+   "market_price": 16800.0,
+   "mv_vnd": 5040000.0
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1100,
+   "price": 27914.29,
+   "source": "bootstrap",
+   "market_price": 20910.0,
+   "mv_vnd": 23001000.0
+  },
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 22700.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-ACB-PARK-01",
+   "market_price": 22500.0,
+   "mv_vnd": 2250000.0
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 107,
+   "price": 36962.6168224299,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-BID-PARK-02",
+   "corp_actions": [
+    "BID-2026-08-17-STOCK-BONUS"
+   ],
+   "market_price": 36900.0,
+   "mv_vnd": 3948300.0
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 32700.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-CTG-PARK-03",
+   "market_price": 31800.0,
+   "mv_vnd": 6360000.0
+  },
+  {
+   "ticker": "EVF",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 12550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-EVF-PARK-04",
+   "market_price": 12650.0,
+   "mv_vnd": 1265000.0
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 26950.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-HDB-PARK-05",
+   "market_price": 21080.0,
+   "mv_vnd": 2108000.0
+  },
+  {
+   "ticker": "HPG",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 1200,
+   "price": 22200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-HPG-PARK-06",
+   "market_price": 22250.0,
+   "mv_vnd": 26700000.0
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 20550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MBB-PARK-08",
+   "market_price": 20750.0,
+   "mv_vnd": 6225000.0
+  },
+  {
+   "ticker": "MSB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 16250.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MSB-PARK-09",
+   "market_price": 13290.0,
+   "mv_vnd": 6645000.0
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 700,
+   "price": 12100.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-SHB-PARK-10",
+   "market_price": 12100.0,
+   "mv_vnd": 8470000.0
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 60500.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VCB-PARK-11",
+   "market_price": 59200.0,
+   "mv_vnd": 11840000.0
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 14900.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIB-PARK-12",
+   "market_price": 13470.0,
+   "mv_vnd": 6735000.0
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 105,
+   "price": 13285.714285714286,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIX-PARK-13",
+   "corp_actions": [
+    "VIX-2026-08-20-STOCK-DIVIDEND"
+   ],
+   "market_price": 13800.0,
+   "mv_vnd": 1449000.0
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 25900.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VPB-PARK-14",
+   "market_price": 20910.0,
+   "mv_vnd": 2091000.0
+  },
+  {
+   "ticker": "VRE",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 25550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VRE-PARK-15",
+   "market_price": 25300.0,
+   "mv_vnd": 7590000.0
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 52900.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-LPB-PARK-07",
+   "market_price": 49100.0,
+   "mv_vnd": 9820000.0
+  }
+ ],
+ "by_book": {
+  "PARK": {
+   "qty": 14460,
+   "mv_vnd": 399888250.0,
+   "tickers": [
+    "ACB",
+    "BID",
+    "CTG",
+    "EVF",
+    "HDB",
+    "HPG",
+    "LPB",
+    "MBB",
+    "MSB",
+    "SHB",
+    "TCB",
+    "TPB",
+    "VCB",
+    "VHM",
+    "VIB",
+    "VIX",
+    "VND",
+    "VPB",
+    "VRE"
+   ]
+  },
+  "CAPIT": {
+   "qty": 7700,
+   "mv_vnd": 303758000.0,
+   "tickers": [
+    "NCT",
+    "PVT",
+    "SAB",
+    "SIP",
+    "VNM"
+   ]
+  },
+  "DISCRETIONARY_SPECIAL": {
+   "qty": 6000,
+   "mv_vnd": 92778000.0,
+   "tickers": [
+    "DRI",
+    "TV1"
+   ]
+  },
+  "LAG": {
+   "qty": 1500,
+   "mv_vnd": 39000000.0,
+   "tickers": [
+    "SCL"
+   ]
+  }
+ },
+ "broker_positions": {
+  "ACB": {
+   "qty": 900,
+   "market_price": 22500.0,
+   "sellable": 900,
+   "broker_market_price": 22750.0
+  },
+  "BID": {
+   "qty": 1175,
+   "market_price": 36900.0,
+   "sellable": 1100,
+   "broker_market_price": 36900.0
+  },
+  "CTG": {
+   "qty": 1200,
+   "market_price": 31800.0,
+   "sellable": 1200,
+   "broker_market_price": 32150.0
+  },
+  "DRI": {
+   "qty": 3700,
+   "market_price": 13140.0,
+   "sellable": 3700,
+   "broker_market_price": 14000.0
+  },
+  "EVF": {
+   "qty": 100,
+   "market_price": 12650.0,
+   "sellable": 100,
+   "broker_market_price": 12550.0
+  },
+  "HDB": {
+   "qty": 800,
+   "market_price": 21080.0,
+   "sellable": 800,
+   "broker_market_price": 27300.0
+  },
+  "HPG": {
+   "qty": 1200,
+   "market_price": 22250.0,
+   "sellable": 1200,
+   "broker_market_price": 21700.0
+  },
+  "LPB": {
+   "qty": 400,
+   "market_price": 49100.0,
+   "sellable": 400,
+   "broker_market_price": 50000.0
+  },
+  "MBB": {
+   "qty": 1565,
+   "market_price": 20750.0,
+   "sellable": 1400,
+   "broker_market_price": 20850.0
+  },
+  "MSB": {
+   "qty": 500,
+   "market_price": 13290.0,
+   "sellable": 500,
+   "broker_market_price": 15900.0
+  },
+  "NCT": {
+   "qty": 500,
+   "market_price": 82700.0,
+   "sellable": 500,
+   "broker_market_price": 83000.0
+  },
+  "PVT": {
+   "qty": 3500,
+   "market_price": 20650.0,
+   "sellable": 3500,
+   "broker_market_price": 20450.0
+  },
+  "SAB": {
+   "qty": 1100,
+   "market_price": 46100.0,
+   "sellable": 1100,
+   "broker_market_price": 46800.0
+  },
+  "SCL": {
+   "qty": 1500,
+   "market_price": 26000.0,
+   "sellable": 1500,
+   "broker_market_price": 26300.0
+  },
+  "SHB": {
+   "qty": 800,
+   "market_price": 12100.0,
+   "sellable": 800,
+   "broker_market_price": 11900.0
+  },
+  "SIP": {
+   "qty": 1700,
+   "market_price": 50000.0,
+   "sellable": 1700,
+   "broker_market_price": 49900.0
+  },
+  "TCB": {
+   "qty": 1000,
+   "market_price": 20970.0,
+   "sellable": 1000,
+   "broker_market_price": 31650.0
+  },
+  "TPB": {
+   "qty": 500,
+   "market_price": 12260.0,
+   "sellable": 500,
+   "broker_market_price": 14800.0
+  },
+  "TV1": {
+   "qty": 2300,
+   "market_price": 19200.0,
+   "sellable": 2300,
+   "broker_market_price": 19900.0
+  },
+  "VCB": {
+   "qty": 700,
+   "market_price": 59200.0,
+   "sellable": 700,
+   "broker_market_price": 59100.0
+  },
+  "VHM": {
+   "qty": 900,
+   "market_price": 73400.0,
+   "sellable": 400,
+   "broker_market_price": 71700.0
+  },
+  "VIB": {
+   "qty": 500,
+   "market_price": 13470.0,
+   "sellable": 500,
+   "broker_market_price": 14750.0
+  },
+  "VIX": {
+   "qty": 420,
+   "market_price": 13800.0,
+   "sellable": 400,
+   "broker_market_price": 13500.0
+  },
+  "VND": {
+   "qty": 300,
+   "market_price": 16800.0,
+   "sellable": 300,
+   "broker_market_price": 16900.0
+  },
+  "VNM": {
+   "qty": 900,
+   "market_price": 60470.0,
+   "sellable": 900,
+   "broker_market_price": 63800.0
+  },
+  "VPB": {
+   "qty": 1200,
+   "market_price": 20910.0,
+   "sellable": 1200,
+   "broker_market_price": 25700.0
+  },
+  "VRE": {
+   "qty": 300,
+   "market_price": 25300.0,
+   "sellable": 300,
+   "broker_market_price": 25300.0
+  }
+ },
+ "park_mv_vnd": 399888250.0,
+ "park_mv_verified_vnd": 399888250.0,
+ "cash_available_vnd": 816632.0,
+ "cash_total_vnd": 9741252.0,
+ "cash_dividend_receiving_vnd": 8920000.0,
+ "egg_assets_vnd": 100341256.0,
+ "cash_debt_vnd": 0.0,
+ "balance_all_zero": false,
+ "cash_basis": "total_cash",
+ "unverified_tickers": [],
+ "warnings": [
+  "2026-08-05 corp action VHM-2026-08-06-STOCK-DIVIDEND ×2.0 (ex 2026-08-06, corp_actions.json): 1 lô VHM 500→1000cp (hệ số hiệu dụng 2.000000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-10 corp action MBB-2026-08-11-STOCK-DIVIDEND ×1.15 (ex 2026-08-11, corp_actions.json): 1 lô MBB 1100→1265cp (hệ số hiệu dụng 1.150000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-14 corp action BID-2026-08-17-STOCK-BONUS ×1.068433 (ex 2026-08-17, corp_actions.json): 2 lô BID 1100→1175cp (hệ số hiệu dụng 1.068182 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-19 corp action VIX-2026-08-20-STOCK-DIVIDEND ×1.05 (ex 2026-08-20, corp_actions.json): 2 lô VIX 400→420cp (hệ số hiệu dụng 1.050000 sau làm tròn mức vị thế) — tổng giá vốn không đổi"
+ ],
+ "frame_blocked_tickers": [],
+ "frame_blocked_detail": {},
+ "n_fills_applied": 79,
+ "reconcile": {
+  "ok": true,
+  "n_tickers": 27,
+  "mismatches": [],
+  "broker": {
+   "source": "dnse_raw_2026-08-24.jsonl",
+   "asof": "2026-08-24",
+   "total_cash_vnd": 9741252.0,
+   "dividend_receiving_vnd": 8920000.0,
+   "total_debt_vnd": 0.0,
+   "egg_assets_vnd": 100341256.0,
+   "balance_all_zero": false,
+   "ts_positions": "2026-08-24T04:49:59",
+   "ts_balances": "2026-08-24T04:49:59"
+  }
+ },
+ "corp_actions_applied": [
+  {
+   "id": "VHM-2026-08-06-STOCK-DIVIDEND",
+   "ticker": "VHM",
+   "qty_multiplier": 2.0,
+   "ex_date": "2026-08-06",
+   "broker_effective_ts": "2026-08-05T12:00:00",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "MBB-2026-08-11-STOCK-DIVIDEND",
+   "ticker": "MBB",
+   "qty_multiplier": 1.15,
+   "ex_date": "2026-08-11",
+   "broker_effective_ts": "2026-08-10T19:32:49",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "BID-2026-08-17-STOCK-BONUS",
+   "ticker": "BID",
+   "qty_multiplier": 1.068433,
+   "ex_date": "2026-08-17",
+   "broker_effective_ts": "2026-08-14T19:08:57",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "VIX-2026-08-20-STOCK-DIVIDEND",
+   "ticker": "VIX",
+   "qty_multiplier": 1.05,
+   "ex_date": "2026-08-20",
+   "broker_effective_ts": "2026-08-19T18:49:04",
+   "lots_adjusted": 2
+  }
+ ],
+ "rights_subscriptions_applied": []
+}

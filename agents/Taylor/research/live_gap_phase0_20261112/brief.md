@@ -1,0 +1,11 @@
+# GĐ0 — Thước đo "so với gửi tiết kiệm" + kiểm kê thực thi (user DUYỆT plan 12/11/2026 17:40 ICT)
+Plan gốc: kb/projects/bal-lag-live-gap-research-plan-20261112.md (đọc §0, §1). Bạn làm GĐ0, KHÔNG làm GĐ1 (job khác song song, scope khác).
+Quy tắc: tra mike/kb/data_registry/ trước khi chọn nguồn dữ liệu; mọi số khai nguồn+lệnh tái lập; không đổi production, không sửa template báo cáo NĐT (chỉ ĐỀ XUẤT patch ở dạng .proposed); universe_pit không dùng ticker_prune.
+
+Việc (ghi mọi thứ vào agents/Taylor/research/live_gap_phase0_20261112/):
+1. HURDLE PIT: dựng chuỗi lãi tiết kiệm hiệu dụng theo ngày = max(Big-4 12T, CCTG 12T), nguồn deposit_rate_vn.py + fiinprox_deposit_1m_big4 (CANONICAL-PIT 2019-02→2026-09) + chuỗi phục dựng trước 2019 (ghi rõ đoạn phục dựng, độ tin cậy). Xuất hurdle_pit.csv + hàm tính "lợi suất tiết kiệm tích luỹ giữa 2 ngày" (lãi đơn theo kỳ, ghi quy ước). Selfcheck: khớp 7,4% hiện tại và +2,70% cho 01/07→11/11/2026.
+2. BẢNG "VS TIẾT KIỆM" cho SpaceX và ZaloPay ở các cửa sổ: inception, MTD, tháng 7/8/9/10, 01/07→11/11 — dùng nav_period_returns.py (KHÔNG tự tính TWR, §31), cột: live TWR, VN-Index, hurdle, excess. Xuất CSV+md. ZaloPay cho cả bản có và không có DGC (nav_sleeve_history_ZaloPay.csv).
+3. GẮN SỔ BOOK cho journal: mọi FILL từ 2026-07-01 theo exec_<acct>_<date>_journal.csv; cột book trống (88+30 SpaceX, 43+32 ZaloPay) → suy book từ plan JSON / tín hiệu cùng ngày, ghi cột book_inferred + căn cứ + độ chắc chắn; KHÔNG sửa file gốc, xuất file mới. Bảng đếm deal+notional+P&L đã thực hiện theo book (BAL/LAG/CAPIT/DISCRETIONARY/PARK) hai account.
+4. FILL-VS-OPEN từ 2026-08-26 (HYBRID fill_timing go-live): chạy lại phép đo của execution_alpha_20260925/FINDINGS.md trên fill từ 08-26 đến nay, tách BUY/SELL, so ngưỡng rollback +22bps (current_ops.md:66). Báo mean, sd, N độc lập (gộp cụm ngày), kết luận có chạm ngưỡng không.
+5. ĐỀ XUẤT (không áp): patch .proposed thêm dòng "so với gửi tiết kiệm" vào bảng hiệu suất (fund-unit-performance-policy-20261010.md, nav_period_returns.py) — chỉ mô tả diff + rủi ro §21/§31.
+Kết thúc: ghi bus finding (append_event.sh Taylor finding "live-gap-phase0-20261112" ...) có đường dẫn artifact + md5 + lệnh tái lập, cập nhật kb/memory/Taylor.md. Nếu có số không truy ra được thì nói thẳng.

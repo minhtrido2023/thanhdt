@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/newdeals_daily_report.py

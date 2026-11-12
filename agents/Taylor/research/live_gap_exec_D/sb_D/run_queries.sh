@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-D-1112/WorkingClaude/run_queries.sh

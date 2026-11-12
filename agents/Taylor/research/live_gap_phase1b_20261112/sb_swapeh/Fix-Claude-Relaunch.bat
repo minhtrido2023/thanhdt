@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/Fix-Claude-Relaunch.bat

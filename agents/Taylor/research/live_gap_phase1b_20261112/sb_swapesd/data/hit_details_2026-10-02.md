@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/hit_details_2026-10-02.md

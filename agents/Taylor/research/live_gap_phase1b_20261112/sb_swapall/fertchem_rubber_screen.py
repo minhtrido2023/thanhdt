@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/fertchem_rubber_screen.py

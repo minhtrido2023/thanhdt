@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/paper_trade_daily.py

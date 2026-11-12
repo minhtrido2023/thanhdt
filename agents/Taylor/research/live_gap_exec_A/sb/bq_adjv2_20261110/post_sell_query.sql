@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-q/WorkingClaude/post_sell_query.sql

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/dot2_batch_selfcheck.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/kelly_sizing_q2q3_spec.md

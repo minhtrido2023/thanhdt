@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/aviation_screen.py

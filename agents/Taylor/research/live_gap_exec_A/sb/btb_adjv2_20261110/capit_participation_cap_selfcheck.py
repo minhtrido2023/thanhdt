@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/capit_participation_cap_selfcheck.py

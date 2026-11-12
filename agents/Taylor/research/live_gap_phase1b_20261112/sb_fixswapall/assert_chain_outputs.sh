@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-p1-1112/WorkingClaude/assert_chain_outputs.sh

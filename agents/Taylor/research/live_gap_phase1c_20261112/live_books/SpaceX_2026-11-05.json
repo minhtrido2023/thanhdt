@@ -1,0 +1,365 @@
+{
+ "account_label": "SpaceX",
+ "account_no": "0002023347",
+ "asof": "2026-11-05",
+ "day0_date": "2026-08-04",
+ "bootstrap": "bootstrap_book_snapshot_SpaceX_20260804.json",
+ "excluded_tickers": [
+  "PNJ"
+ ],
+ "lots": [
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 65,
+   "price": 20550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MBB-PARK-08"
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 47,
+   "price": 13619.744058500914,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIB-PARK-12",
+   "corp_actions": [
+    "VIB-2026-09-10-BONUS-ISSUE"
+   ]
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-17",
+   "qty": 400,
+   "price": 20100.0,
+   "source": "exec_SpaceX_2026-08-17_journal.csv:BUY-TV1-DISC-2026-08-17"
+  },
+  {
+   "ticker": "MBB",
+   "book": "CORP_ACTION",
+   "play_type": "RIGHTS_SUBSCRIPTION",
+   "entry_date": "2026-08-28",
+   "qty": 110,
+   "price": 10000.0,
+   "source": "exec_SpaceX_2026-08-28_journal.csv:MBB-RIGHTS-2026-08-28"
+  },
+  {
+   "ticker": "HT1",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 500,
+   "price": 13500.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-HT1-LAG-01"
+  },
+  {
+   "ticker": "VPB",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 300,
+   "price": 24000.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-VPB-LAG-01"
+  },
+  {
+   "ticker": "HT1",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 500,
+   "price": 13500.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-HT1-LAG-01"
+  },
+  {
+   "ticker": "VPB",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 300,
+   "price": 23950.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-VPB-LAG-01"
+  },
+  {
+   "ticker": "HT1",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 500,
+   "price": 13450.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-HT1-LAG-01"
+  },
+  {
+   "ticker": "VPB",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 300,
+   "price": 23900.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-VPB-LAG-01"
+  },
+  {
+   "ticker": "HT1",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 600,
+   "price": 13450.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-HT1-LAG-01"
+  },
+  {
+   "ticker": "VPB",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 300,
+   "price": 23850.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-VPB-LAG-01"
+  },
+  {
+   "ticker": "HT1",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 600,
+   "price": 13450.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-HT1-LAG-01"
+  },
+  {
+   "ticker": "VPB",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-26",
+   "qty": 300,
+   "price": 23850.0,
+   "source": "exec_SpaceX_2026-10-26_journal.csv:BUY-VPB-LAG-01"
+  },
+  {
+   "ticker": "MCH",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-29",
+   "qty": 100,
+   "price": 136200.0,
+   "source": "exec_SpaceX_2026-10-29_journal.csv:BUY-MCH-LAG-01"
+  },
+  {
+   "ticker": "MCH",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-10-29",
+   "qty": 100,
+   "price": 136400.0,
+   "source": "exec_SpaceX_2026-10-29_journal.csv:BUY-MCH-LAG-01"
+  }
+ ],
+ "park_lots": [
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 65,
+   "price": 20550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MBB-PARK-08",
+   "market_price": 19500.0,
+   "mv_vnd": 1267500.0
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 47,
+   "price": 13619.744058500914,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIB-PARK-12",
+   "corp_actions": [
+    "VIB-2026-09-10-BONUS-ISSUE"
+   ],
+   "market_price": 14100.0,
+   "mv_vnd": 662700.0
+  }
+ ],
+ "by_book": {
+  "PARK": {
+   "qty": 112,
+   "mv_vnd": 1930200.0,
+   "tickers": [
+    "MBB",
+    "VIB"
+   ]
+  },
+  "DISCRETIONARY_SPECIAL": {
+   "qty": 400,
+   "mv_vnd": 8240000.0,
+   "tickers": [
+    "TV1"
+   ]
+  },
+  "CORP_ACTION": {
+   "qty": 110,
+   "mv_vnd": 2145000.0,
+   "tickers": [
+    "MBB"
+   ]
+  },
+  "LAG": {
+   "qty": 4400,
+   "mv_vnd": 94550000.0,
+   "tickers": [
+    "HT1",
+    "MCH",
+    "VPB"
+   ]
+  }
+ },
+ "broker_positions": {
+  "HT1": {
+   "qty": 2700,
+   "market_price": 13000.0,
+   "sellable": 2700,
+   "broker_market_price": 13000.0
+  },
+  "MBB": {
+   "qty": 175,
+   "market_price": 19500.0,
+   "sellable": 65,
+   "broker_market_price": 19500.0
+  },
+  "MCH": {
+   "qty": 200,
+   "market_price": 133000.0,
+   "sellable": 200,
+   "broker_market_price": 133000.0
+  },
+  "TV1": {
+   "qty": 400,
+   "market_price": 20600.0,
+   "sellable": 400,
+   "broker_market_price": 20300.0
+  },
+  "VIB": {
+   "qty": 47,
+   "market_price": 14100.0,
+   "sellable": 0,
+   "broker_market_price": 14100.0
+  },
+  "VPB": {
+   "qty": 1500,
+   "market_price": 21900.0,
+   "sellable": 1500,
+   "broker_market_price": 21900.0
+  }
+ },
+ "park_mv_vnd": 1930200.0,
+ "park_mv_verified_vnd": 1930200.0,
+ "cash_available_vnd": 58587103.0,
+ "cash_total_vnd": 86824211.0,
+ "cash_dividend_receiving_vnd": 0.0,
+ "egg_assets_vnd": 750391821.0,
+ "cash_debt_vnd": 0.0,
+ "balance_all_zero": false,
+ "cash_basis": "total_cash",
+ "unverified_tickers": [],
+ "warnings": [
+  "2026-10-21 DRI BÁN +1,200cp chỉ có ở statement DNSE (ngoài journal bot) ⇒ trừ lô FIFO theo ticker",
+  "2026-10-29 SCL BÁN 800cp lệnh tay ĐÃ KHAI + broker xác nhận (MA-20261029-SpaceX-SCL-SELL-344271; statement chưa về) ⇒ trừ lô FIFO theo ticker",
+  "2026-08-05 corp action VHM-2026-08-06-STOCK-DIVIDEND ×2.0 (ex 2026-08-06, corp_actions.json): 1 lô VHM 500→1000cp (hệ số hiệu dụng 2.000000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-10 corp action MBB-2026-08-11-STOCK-DIVIDEND ×1.15 (ex 2026-08-11, corp_actions.json): 1 lô MBB 1100→1265cp (hệ số hiệu dụng 1.150000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-14 corp action BID-2026-08-17-STOCK-BONUS ×1.068433 (ex 2026-08-17, corp_actions.json): 2 lô BID 1100→1175cp (hệ số hiệu dụng 1.068182 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-19 corp action VIX-2026-08-20-STOCK-DIVIDEND ×1.05 (ex 2026-08-20, corp_actions.json): 2 lô VIX 400→420cp (hệ số hiệu dụng 1.050000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-27 corp action MSB-2026-08-28-BONUS-ISSUE ×1.2 (ex 2026-08-28, corp_actions.json): 1 lô MSB 500→600cp (hệ số hiệu dụng 1.200000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-09-09 corp action VIB-2026-09-10-BONUS-ISSUE ×1.095 (ex 2026-09-10, corp_actions.json): 1 lô VIB 500→547cp (hệ số hiệu dụng 1.094000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-09-23 corp action VPB-2026-09-24-BONUS-ISSUE ×1.2604104 (ex 2026-09-24, corp_actions.json): 2 lô VPB 1100→1386cp (hệ số hiệu dụng 1.260000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-10-01 corp action TPB-2026-10-02-STOCK-DIVIDEND ×1.15 (ex 2026-10-02, corp_actions.json): 1 lô TPB 200→230cp (hệ số hiệu dụng 1.150000 sau làm tròn mức vị thế) — tổng giá vốn không đổi"
+ ],
+ "frame_blocked_tickers": [],
+ "frame_blocked_detail": {},
+ "n_fills_applied": 270,
+ "reconcile": {
+  "ok": true,
+  "n_tickers": 6,
+  "mismatches": [],
+  "broker": {
+   "source": "dnse_raw_2026-11-05.jsonl",
+   "asof": "2026-11-05",
+   "total_cash_vnd": 86824211.0,
+   "dividend_receiving_vnd": 0.0,
+   "total_debt_vnd": 0.0,
+   "egg_assets_vnd": 750391821.0,
+   "balance_all_zero": false,
+   "ts_positions": "2026-11-05T23:30:08",
+   "ts_balances": "2026-11-05T20:15:10"
+  }
+ },
+ "corp_actions_applied": [
+  {
+   "id": "VHM-2026-08-06-STOCK-DIVIDEND",
+   "ticker": "VHM",
+   "qty_multiplier": 2.0,
+   "ex_date": "2026-08-06",
+   "broker_effective_ts": "2026-08-05T12:00:00",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "MBB-2026-08-11-STOCK-DIVIDEND",
+   "ticker": "MBB",
+   "qty_multiplier": 1.15,
+   "ex_date": "2026-08-11",
+   "broker_effective_ts": "2026-08-10T19:32:49",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "BID-2026-08-17-STOCK-BONUS",
+   "ticker": "BID",
+   "qty_multiplier": 1.068433,
+   "ex_date": "2026-08-17",
+   "broker_effective_ts": "2026-08-14T19:08:57",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "VIX-2026-08-20-STOCK-DIVIDEND",
+   "ticker": "VIX",
+   "qty_multiplier": 1.05,
+   "ex_date": "2026-08-20",
+   "broker_effective_ts": "2026-08-19T18:49:04",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "MSB-2026-08-28-BONUS-ISSUE",
+   "ticker": "MSB",
+   "qty_multiplier": 1.2,
+   "ex_date": "2026-08-28",
+   "broker_effective_ts": "2026-08-27T18:58:15",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "VIB-2026-09-10-BONUS-ISSUE",
+   "ticker": "VIB",
+   "qty_multiplier": 1.095,
+   "ex_date": "2026-09-10",
+   "broker_effective_ts": "2026-09-09T11:45:14.274417",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "VPB-2026-09-24-BONUS-ISSUE",
+   "ticker": "VPB",
+   "qty_multiplier": 1.2604104,
+   "ex_date": "2026-09-24",
+   "broker_effective_ts": "2026-09-23T11:58:04.716582",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "TPB-2026-10-02-STOCK-DIVIDEND",
+   "ticker": "TPB",
+   "qty_multiplier": 1.15,
+   "ex_date": "2026-10-02",
+   "broker_effective_ts": "2026-10-01T11:52:12",
+   "lots_adjusted": 1
+  }
+ ],
+ "rights_subscriptions_applied": []
+}

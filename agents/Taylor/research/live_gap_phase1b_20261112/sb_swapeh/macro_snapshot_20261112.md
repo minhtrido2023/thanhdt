@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/macro_snapshot_20261112.md

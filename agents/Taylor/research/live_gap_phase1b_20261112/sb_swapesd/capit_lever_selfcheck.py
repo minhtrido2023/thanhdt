@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/capit_lever_selfcheck.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-rtb/WorkingClaude/deploy_windows.ps1

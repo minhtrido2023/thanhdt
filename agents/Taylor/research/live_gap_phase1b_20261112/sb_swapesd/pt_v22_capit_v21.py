@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/pt_v22_capit_v21.py

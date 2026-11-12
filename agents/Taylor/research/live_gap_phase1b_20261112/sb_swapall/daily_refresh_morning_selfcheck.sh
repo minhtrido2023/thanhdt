@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/daily_refresh_morning_selfcheck.sh

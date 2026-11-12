@@ -1,0 +1,41 @@
+TK,ky,book,pp
+SpaceX,thang 8 (từ 04/08),CAPIT,0.642
+SpaceX,thang 8 (từ 04/08),DISCRETIONARY_SPECIAL,0.414
+SpaceX,thang 8 (từ 04/08),LAG,0.698
+SpaceX,thang 8 (từ 04/08),PARK,0.370
+SpaceX,thang 9,BAL,-0.298
+SpaceX,thang 9,CAPIT,0.648
+SpaceX,thang 9,CORP_ACTION,-0.016
+SpaceX,thang 9,DISCRETIONARY_SPECIAL,1.015
+SpaceX,thang 9,LAG,0.122
+SpaceX,thang 9,PARK,-1.887
+SpaceX,thang 10,BAL,-0.914
+SpaceX,thang 10,CAPIT,-0.329
+SpaceX,thang 10,CORP_ACTION,-0.004
+SpaceX,thang 10,DISCRETIONARY_SPECIAL,-0.247
+SpaceX,thang 10,LAG,-0.566
+SpaceX,thang 10,PARK,-0.273
+SpaceX,Nov→11/11,CORP_ACTION,0.001
+SpaceX,Nov→11/11,DISCRETIONARY_SPECIAL,0.061
+SpaceX,Nov→11/11,LAG,-0.312
+SpaceX,Nov→11/11,PARK,-0.005
+ZaloPay,thang 8 (từ 04/08),CAPIT,0.853
+ZaloPay,thang 8 (từ 04/08),DISCRETIONARY_SPECIAL,0.366
+ZaloPay,thang 8 (từ 04/08),LAG,1.121
+ZaloPay,thang 8 (từ 04/08),PARK,0.214
+ZaloPay,thang 9,BAL,-0.252
+ZaloPay,thang 9,CAPIT,0.657
+ZaloPay,thang 9,CORP_ACTION,-0.005
+ZaloPay,thang 9,DISCRETIONARY_SPECIAL,0.964
+ZaloPay,thang 9,LAG,0.041
+ZaloPay,thang 9,PARK,-1.411
+ZaloPay,thang 10,BAL,-0.749
+ZaloPay,thang 10,CAPIT,-0.298
+ZaloPay,thang 10,CORP_ACTION,-0.001
+ZaloPay,thang 10,DISCRETIONARY_SPECIAL,-0.190
+ZaloPay,thang 10,LAG,-0.644
+ZaloPay,thang 10,PARK,-0.197
+ZaloPay,Nov→11/11,CORP_ACTION,0.000
+ZaloPay,Nov→11/11,DISCRETIONARY_SPECIAL,0.011
+ZaloPay,Nov→11/11,LAG,-0.432
+ZaloPay,Nov→11/11,PARK,-0.002

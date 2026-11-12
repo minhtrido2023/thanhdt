@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/ic_panel_8l.py

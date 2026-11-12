@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/model_redesign_plan.md

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/live_picks_2026.py

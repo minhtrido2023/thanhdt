@@ -1,0 +1,11 @@
+TK,regime,buoc,r_pct,vs_hurdle,live_minus_engine,md5
+SpaceX,cold,W1 cold park=0,0.016,-2.53,-3.88,82f73258972fc77b7cd54a4cb2677770
+SpaceX,cold,W1P cold + lịch park live,-8.216,-10.76,4.35,0746de33b65a5dcdd7f5a380017a6fc0
+SpaceX,warm,W1 warm-live park=0,-0.818,-3.37,-3.04,df8969f71c05af9ad0b7202228c55122
+SpaceX,warm,W1P warm-live + lịch park live,-8.387,-10.93,4.52,1ac895cecc321ef4658c149aba81849c
+SpaceX,live,LIVE,-3.862,-6.41,,GĐ0 vs_savings_table.csv
+ZaloPay,cold,W1 cold park=0,0.029,-2.43,-2.64,ef0674b1f895d3881328ca60487f5d3e
+ZaloPay,cold,W1P cold + lịch park live,-7.257,-9.71,4.65,d3e55cc457f2aea23748e841e4385327
+ZaloPay,warm,W1 warm-live park=0,-0.49,-2.95,-2.12,df99ba9751ce12c8f31a5765c1fff1de
+ZaloPay,warm,W1P warm-live + lịch park live,-7.231,-9.69,4.62,746eb5b25d4152bdca971a16ed22c23a
+ZaloPay,live,LIVE,-2.609,-5.06,,GĐ0 vs_savings_table.csv

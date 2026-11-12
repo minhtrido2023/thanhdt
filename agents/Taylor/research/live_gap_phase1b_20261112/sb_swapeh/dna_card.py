@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/dna_card.py

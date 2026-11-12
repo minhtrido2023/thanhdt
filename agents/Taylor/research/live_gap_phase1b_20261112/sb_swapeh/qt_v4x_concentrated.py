@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/qt_v4x_concentrated.py

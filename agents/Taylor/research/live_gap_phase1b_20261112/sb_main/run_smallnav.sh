@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/run_smallnav.sh

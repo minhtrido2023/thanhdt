@@ -1,0 +1,354 @@
+{
+ "W0_adj_e1111": {
+  "md5": "544ad0a177d49be6c109073f38402604",
+  "first": "2026-07-01",
+  "last": "2026-11-11",
+  "nav_first": 50000000000.0,
+  "nav_last": 49750693235.89051,
+  "n_days": 93,
+  "stock_share_mean": 0.6192835772223712,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 49470000180.95601,
+   "2026-08": 53230136956.336525,
+   "2026-09": 51452071106.061386,
+   "2026-10": 49399933357.40694,
+   "2026-11": 49750693235.89051
+  },
+  "buys_by_book": {
+   "BAL": 16,
+   "LAG": 32
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 13,
+   "CAPITL_E*": 13,
+   "LAG_HI": 11,
+   "LAG_LO": 8,
+   "RE_BACKLOG_BUY_W": 3
+  },
+  "buy_tickers": [
+   "AGP",
+   "BMS",
+   "BVB",
+   "DDN",
+   "IVS",
+   "KHS",
+   "NBC",
+   "NCT",
+   "PCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "TMG",
+   "TRC",
+   "VIC",
+   "VNM",
+   "VPI",
+   "XPH"
+  ]
+ },
+ "W0_adj": {
+  "md5": "7895ddef71bdcb80967cfeeefbf99f0c",
+  "first": "2026-07-01",
+  "last": "2026-11-11",
+  "nav_first": 50000000000.0,
+  "nav_last": 49750693235.89051,
+  "n_days": 93,
+  "stock_share_mean": 0.6192835772223712,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 49470000180.95601,
+   "2026-08": 53230136956.336525,
+   "2026-09": 51452071106.061386,
+   "2026-10": 49399933357.40694,
+   "2026-11": 49750693235.89051
+  },
+  "buys_by_book": {
+   "BAL": 16,
+   "LAG": 32
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 13,
+   "CAPITL_E*": 13,
+   "LAG_HI": 11,
+   "LAG_LO": 8,
+   "RE_BACKLOG_BUY_W": 3
+  },
+  "buy_tickers": [
+   "AGP",
+   "BMS",
+   "BVB",
+   "DDN",
+   "IVS",
+   "KHS",
+   "NBC",
+   "NCT",
+   "PCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "TMG",
+   "TRC",
+   "VIC",
+   "VNM",
+   "VPI",
+   "XPH"
+  ]
+ },
+ "W0_ctrlLAG": {
+  "md5": "7895ddef71bdcb80967cfeeefbf99f0c",
+  "first": "2026-07-01",
+  "last": "2026-11-11",
+  "nav_first": 50000000000.0,
+  "nav_last": 49750693235.89051,
+  "n_days": 93,
+  "stock_share_mean": 0.6192835772223712,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 49470000180.95601,
+   "2026-08": 53230136956.336525,
+   "2026-09": 51452071106.061386,
+   "2026-10": 49399933357.40694,
+   "2026-11": 49750693235.89051
+  },
+  "buys_by_book": {
+   "BAL": 16,
+   "LAG": 32
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 13,
+   "CAPITL_E*": 13,
+   "LAG_HI": 11,
+   "LAG_LO": 8,
+   "RE_BACKLOG_BUY_W": 3
+  },
+  "buy_tickers": [
+   "AGP",
+   "BMS",
+   "BVB",
+   "DDN",
+   "IVS",
+   "KHS",
+   "NBC",
+   "NCT",
+   "PCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "TMG",
+   "TRC",
+   "VIC",
+   "VNM",
+   "VPI",
+   "XPH"
+  ]
+ },
+ "W1_adj": {
+  "md5": "82f73258972fc77b7cd54a4cb2677770",
+  "first": "2026-07-01",
+  "last": "2026-11-11",
+  "nav_first": 1000000000.0,
+  "nav_last": 1000163748.8202828,
+  "n_days": 93,
+  "stock_share_mean": 0.6573994700277747,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 987962065.7047888,
+   "2026-08": 1069896602.8692372,
+   "2026-09": 1033432271.0922945,
+   "2026-10": 993145819.1062212,
+   "2026-11": 1000163748.8202828
+  },
+  "buys_by_book": {
+   "BAL": 8,
+   "LAG": 7
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 6,
+   "CAPITL_E*": 6,
+   "LAG_LO": 1,
+   "RE_BACKLOG_BUY_W": 2
+  },
+  "buy_tickers": [
+   "AGP",
+   "NCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "VNM",
+   "VPI"
+  ]
+ },
+ "Z0_adj": {
+  "md5": "78412d150e7a811e7fa6ef0d47b87e41",
+  "first": "2026-07-06",
+  "last": "2026-11-11",
+  "nav_first": 50000000000.0,
+  "nav_last": 49750693235.89051,
+  "n_days": 90,
+  "stock_share_mean": 0.6399263631297835,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 49470000180.95601,
+   "2026-08": 53230136956.336525,
+   "2026-09": 51452071106.061386,
+   "2026-10": 49399933357.40694,
+   "2026-11": 49750693235.89051
+  },
+  "buys_by_book": {
+   "BAL": 16,
+   "LAG": 32
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 13,
+   "CAPITL_E*": 13,
+   "LAG_HI": 11,
+   "LAG_LO": 8,
+   "RE_BACKLOG_BUY_W": 3
+  },
+  "buy_tickers": [
+   "AGP",
+   "BMS",
+   "BVB",
+   "DDN",
+   "IVS",
+   "KHS",
+   "NBC",
+   "NCT",
+   "PCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "TMG",
+   "TRC",
+   "VIC",
+   "VNM",
+   "VPI",
+   "XPH"
+  ]
+ },
+ "Z1_adj": {
+  "md5": "3554bdf9bcccb079251e48fa1f130c9b",
+  "first": "2026-07-06",
+  "last": "2026-11-11",
+  "nav_first": 1000000000.0,
+  "nav_last": 1000163748.8202828,
+  "n_days": 90,
+  "stock_share_mean": 0.6793127856953672,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 987962065.7047888,
+   "2026-08": 1069896602.8692372,
+   "2026-09": 1033432271.0922945,
+   "2026-10": 993145819.1062212,
+   "2026-11": 1000163748.8202828
+  },
+  "buys_by_book": {
+   "BAL": 8,
+   "LAG": 7
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 6,
+   "CAPITL_E*": 6,
+   "LAG_LO": 1,
+   "RE_BACKLOG_BUY_W": 2
+  },
+  "buy_tickers": [
+   "AGP",
+   "NCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "VNM",
+   "VPI"
+  ]
+ },
+ "W2a_adj": {
+  "md5": "82f73258972fc77b7cd54a4cb2677770",
+  "first": "2026-07-01",
+  "last": "2026-11-11",
+  "nav_first": 1000000000.0,
+  "nav_last": 1000163748.8202828,
+  "n_days": 93,
+  "stock_share_mean": 0.6573994700277747,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 987962065.7047888,
+   "2026-08": 1069896602.8692372,
+   "2026-09": 1033432271.0922945,
+   "2026-10": 993145819.1062212,
+   "2026-11": 1000163748.8202828
+  },
+  "buys_by_book": {
+   "BAL": 8,
+   "LAG": 7
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 6,
+   "CAPITL_E*": 6,
+   "LAG_LO": 1,
+   "RE_BACKLOG_BUY_W": 2
+  },
+  "buy_tickers": [
+   "AGP",
+   "NCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "VNM",
+   "VPI"
+  ]
+ },
+ "Z2a_adj": {
+  "md5": "3554bdf9bcccb079251e48fa1f130c9b",
+  "first": "2026-07-06",
+  "last": "2026-11-11",
+  "nav_first": 1000000000.0,
+  "nav_last": 1000163748.8202828,
+  "n_days": 90,
+  "stock_share_mean": 0.6793127856953672,
+  "etf_share_mean": 0.0,
+  "month_end_nav": {
+   "2026-07": 987962065.7047888,
+   "2026-08": 1069896602.8692372,
+   "2026-09": 1033432271.0922945,
+   "2026-10": 993145819.1062212,
+   "2026-11": 1000163748.8202828
+  },
+  "buys_by_book": {
+   "BAL": 8,
+   "LAG": 7
+  },
+  "buys_by_tier": {
+   "CAPITB_E*": 6,
+   "CAPITL_E*": 6,
+   "LAG_LO": 1,
+   "RE_BACKLOG_BUY_W": 2
+  },
+  "buy_tickers": [
+   "AGP",
+   "NCT",
+   "PNJ",
+   "PVT",
+   "SAB",
+   "SIP",
+   "TCH",
+   "VNM",
+   "VPI"
+  ]
+ }
+}

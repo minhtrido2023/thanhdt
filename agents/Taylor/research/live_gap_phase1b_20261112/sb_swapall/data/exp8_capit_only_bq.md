@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/exp8_capit_only_bq.md

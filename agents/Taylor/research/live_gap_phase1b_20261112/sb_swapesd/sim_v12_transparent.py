@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/sim_v12_transparent.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/px_szl_r3.sql

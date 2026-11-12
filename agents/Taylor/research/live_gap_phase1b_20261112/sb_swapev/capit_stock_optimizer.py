@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/capit_stock_optimizer.py

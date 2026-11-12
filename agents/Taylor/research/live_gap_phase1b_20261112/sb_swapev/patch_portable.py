@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/patch_portable.py

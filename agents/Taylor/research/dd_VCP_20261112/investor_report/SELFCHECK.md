@@ -1,0 +1,11 @@
+# SELFCHECK — VCP investor report (12/11/2026)
+- PDF 7 trang (thân ~6 trang + phụ lục); thân ~1.148 từ (không tính bảng, hình, tiêu đề, phụ lục).
+- grep nội bộ (SpaceX|ZaloPay|NAV|Taylor|Bobby|Mike|skeptic|Wendy|Spyros) trên md và html: rỗng. "giá vốn điện" = COGS, hợp lệ.
+- grep fear-buy/nhãn (QUALIFY|AMBIGUOUS|NON|§2.5|fear|sợ hãi|kiểm định|xung đột lợi ích|vùng mua|0,85|biên an toàn): rỗng.
+- grep luật 18 (đính chính|thay bản|trước đây|đã sửa|vòng N|rN|sai sót|31.700): rỗng.
+- Render PNG và đọc bằng mắt: trang 1 (banner, hero, tóm tắt), trang 2 (kịch bản, bản đồ), trang 3–6 (ảnh nhà máy, hình, football field, ma trận rủi ro): dấu tiếng Việt đúng, bảng không tràn, nhãn bản đồ không chồng.
+- `send_dd_report_email.py --dry-run --html-out`: 13 thẻ img, mọi alt đóng đúng; KHÔNG gửi thật (dry-run, 11,6 MB).
+- Số khớp calc/model_out.json (md5 assumptions 22d79a2869f2f66a84d332c3e85069b7): tâm 41.560/40.273, bear 21.669, bull 67.385, độ nhạy lãi huy động 45.656/43.515/39.769/38.120 (tính lại từ model_out.json).
+- Giá neo 37.900 = đóng cửa 11/11/2026 (BQ); không lấy giá DNSE trong phiên.
+- Ghi chú: toạ độ bản đồ gần đúng (Wikipedia: Mường Bú, Mộc Châu; OSM: còn lại); Xuân Minh/Bái Thượng vẽ ở cấp huyện, điện rác Bắc Ninh ở cấp tỉnh; Đăk Glun nằm ngoài khung bản đồ (ghi trong chú thích/bảng).
+- Không sửa kb/dd_price_zones.json, không gửi email, không đặt lệnh.

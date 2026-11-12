@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/golden_custom30_nav.py

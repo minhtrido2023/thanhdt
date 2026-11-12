@@ -1,0 +1,18 @@
+account,regime,step,ret_pct,nav_entry,vs_hurdle_pp,live_minus_engine_pp,ledger_md5
+SpaceX,cold,W0 pin park0 @50B (tiền mặt 01/07),-0.499,50000000000.000,-3.047,-3.363,7895ddef71bdcb80967cfeeefbf99f0c
+SpaceX,cold,W1 quy mô live 1B,0.016,1000000000.000,-2.532,-3.878,82f73258972fc77b7cd54a4cb2677770
+SpaceX,cold,W2a +LIQ_ZERO_BLOCK=lag,0.016,1000000000.000,-2.532,-3.878,82f73258972fc77b7cd54a4cb2677770
+SpaceX,warm,W0 warm @50B gốc 2014,2.961,575204450708.414,0.413,-6.823,a63b200089dae9e0c29eb4cc684dcade
+SpaceX,warm-D5,W0 warm @50B LAG canonical (sandbox_ctrl),2.961,575204450708.414,0.413,-6.823,a63b200089dae9e0c29eb4cc684dcade
+SpaceX,warm-D5,W0 warm @50B LAG vintage 10-29 (pin-era),1.625,534086686509.124,-0.923,-5.487,ae506bd13ee486cd5abb7b2bc59d41f4
+SpaceX,warm,"W1 warm quy mô live (NAV_TOTAL_B=0,079958)",-0.818,995518604.380,-3.366,-3.044,df8969f71c05af9ad0b7202228c55122
+SpaceX,live,LIVE account,-3.862,,-6.410,,GĐ0 vs_savings_table.csv
+SpaceX,ref,hurdle PIT (tiết kiệm),2.548,,,,
+ZaloPay,cold,W0 pin park0 @50B (tiền mặt 06/07),-0.499,50000000000.000,-2.954,-2.110,78412d150e7a811e7fa6ef0d47b87e41
+ZaloPay,cold,"W1 quy mô live 0,525B",0.028,525366000.000,-2.427,-2.637,ef0674b1f895d3881328ca60487f5d3e
+ZaloPay,warm,W0 warm @50B gốc 2014,3.103,574408375796.859,0.648,-5.712,a63b200089dae9e0c29eb4cc684dcade
+ZaloPay,warm-D5,W0 warm @50B LAG canonical (sandbox_ctrl),3.103,574408375796.859,0.648,-5.712,a63b200089dae9e0c29eb4cc684dcade
+ZaloPay,warm-D5,W0 warm @50B LAG vintage 10-29 (pin-era),1.764,533357861968.530,-0.691,-4.373,ae506bd13ee486cd5abb7b2bc59d41f4
+ZaloPay,warm,"W1 warm quy mô live (NAV_TOTAL_B=0,046052)",-0.490,537637687.741,-2.945,-2.119,df99ba9751ce12c8f31a5765c1fff1de
+ZaloPay,live,LIVE bot,-2.609,,-5.064,,GĐ0 vs_savings_table.csv
+ZaloPay,ref,hurdle PIT (tiết kiệm),2.455,,,,

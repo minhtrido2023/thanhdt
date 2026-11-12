@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-q/WorkingClaude/logto_silent_defaults_selfcheck.py

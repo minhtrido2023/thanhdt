@@ -1,0 +1,596 @@
+{
+ "account_label": "SpaceX",
+ "account_no": "0002023347",
+ "asof": "2026-08-04",
+ "day0_date": "2026-08-04",
+ "bootstrap": "bootstrap_book_snapshot_SpaceX_20260804.json",
+ "excluded_tickers": [
+  "PNJ"
+ ],
+ "lots": [
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1500,
+   "price": 22650.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1900,
+   "price": 42991.3,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 2300,
+   "price": 34476.79,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1500,
+   "price": 26675.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-15",
+   "qty": 900,
+   "price": 51466.67,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 2400,
+   "price": 25850.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "NCT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 500,
+   "price": 94360.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "PVT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 3000,
+   "price": 17100.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "PVT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN_TOPUP",
+   "entry_date": "2026-07-24",
+   "qty": 500,
+   "price": 17100.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SAB",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 1100,
+   "price": 47368.18,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1500,
+   "price": 13550.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SHS",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 200,
+   "price": 18900.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SIP",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 1100,
+   "price": 47122.73,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SIP",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN_TOPUP",
+   "entry_date": "2026-07-27",
+   "qty": 600,
+   "price": 46941.67,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 2000,
+   "price": 33900.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 800,
+   "price": 16800.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-07-28",
+   "qty": 100,
+   "price": 19600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-07-29",
+   "qty": 300,
+   "price": 19600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1300,
+   "price": 62300.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VHM",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 500,
+   "price": 149800.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 700,
+   "price": 17000.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VND",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 300,
+   "price": 17800.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VNM",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 900,
+   "price": 58600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 2300,
+   "price": 27914.29,
+   "source": "bootstrap"
+  }
+ ],
+ "park_lots": [
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1500,
+   "price": 22650.0,
+   "source": "bootstrap",
+   "market_price": 22450.0,
+   "mv_vnd": 33675000.0
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1900,
+   "price": 42991.3,
+   "source": "bootstrap",
+   "market_price": 35570.0,
+   "mv_vnd": 67583000.0
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 2300,
+   "price": 34476.79,
+   "source": "bootstrap",
+   "market_price": 31850.0,
+   "mv_vnd": 73255000.0
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 1500,
+   "price": 26675.0,
+   "source": "bootstrap",
+   "market_price": 20540.0,
+   "mv_vnd": 30810000.0
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-15",
+   "qty": 900,
+   "price": 51466.67,
+   "source": "bootstrap",
+   "market_price": 53800.0,
+   "mv_vnd": 48420000.0
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 2400,
+   "price": 25850.0,
+   "source": "bootstrap",
+   "market_price": 20330.0,
+   "mv_vnd": 48792000.0
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1500,
+   "price": 13550.0,
+   "source": "bootstrap",
+   "market_price": 11800.0,
+   "mv_vnd": 17700000.0
+  },
+  {
+   "ticker": "SHS",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 200,
+   "price": 18900.0,
+   "source": "bootstrap",
+   "market_price": 15170.0,
+   "mv_vnd": 3034000.0
+  },
+  {
+   "ticker": "TCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 2000,
+   "price": 33900.0,
+   "source": "bootstrap",
+   "market_price": 19770.0,
+   "mv_vnd": 39540000.0
+  },
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 800,
+   "price": 16800.0,
+   "source": "bootstrap",
+   "market_price": 12210.0,
+   "mv_vnd": 9768000.0
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 1300,
+   "price": 62300.0,
+   "source": "bootstrap",
+   "market_price": 60000.0,
+   "mv_vnd": 78000000.0
+  },
+  {
+   "ticker": "VHM",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 500,
+   "price": 149800.0,
+   "source": "bootstrap",
+   "market_price": 76450.0,
+   "mv_vnd": 38225000.0
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 700,
+   "price": 17000.0,
+   "source": "bootstrap",
+   "market_price": 13240.0,
+   "mv_vnd": 9268000.0
+  },
+  {
+   "ticker": "VND",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-01",
+   "qty": 300,
+   "price": 17800.0,
+   "source": "bootstrap",
+   "market_price": 16950.0,
+   "mv_vnd": 5085000.0
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 2300,
+   "price": 27914.29,
+   "source": "bootstrap",
+   "market_price": 20350.0,
+   "mv_vnd": 46805000.0
+  }
+ ],
+ "by_book": {
+  "PARK": {
+   "qty": 20100,
+   "mv_vnd": 549960000.0,
+   "tickers": [
+    "ACB",
+    "BID",
+    "CTG",
+    "HDB",
+    "LPB",
+    "MBB",
+    "SHB",
+    "SHS",
+    "TCB",
+    "TPB",
+    "VCB",
+    "VHM",
+    "VIX",
+    "VND",
+    "VPB"
+   ]
+  },
+  "CAPIT": {
+   "qty": 7700,
+   "mv_vnd": 294447000.0,
+   "tickers": [
+    "NCT",
+    "PVT",
+    "SAB",
+    "SIP",
+    "VNM"
+   ]
+  },
+  "DISCRETIONARY_SPECIAL": {
+   "qty": 400,
+   "mv_vnd": 7272000.0,
+   "tickers": [
+    "TV1"
+   ]
+  }
+ },
+ "broker_positions": {
+  "ACB": {
+   "qty": 1500,
+   "market_price": 22450.0,
+   "sellable": 1500,
+   "broker_market_price": 22550.0
+  },
+  "BID": {
+   "qty": 1900,
+   "market_price": 35570.0,
+   "sellable": 1900,
+   "broker_market_price": 38250.0
+  },
+  "CTG": {
+   "qty": 2300,
+   "market_price": 31850.0,
+   "sellable": 2300,
+   "broker_market_price": 31800.0
+  },
+  "HDB": {
+   "qty": 1500,
+   "market_price": 20540.0,
+   "sellable": 1500,
+   "broker_market_price": 26000.0
+  },
+  "LPB": {
+   "qty": 900,
+   "market_price": 53800.0,
+   "sellable": 900,
+   "broker_market_price": 53000.0
+  },
+  "MBB": {
+   "qty": 2400,
+   "market_price": 20330.0,
+   "sellable": 2400,
+   "broker_market_price": 24000.0
+  },
+  "NCT": {
+   "qty": 500,
+   "market_price": 82900.0,
+   "sellable": 500,
+   "broker_market_price": 83400.0
+  },
+  "PVT": {
+   "qty": 3500,
+   "market_price": 18700.0,
+   "sellable": 3500,
+   "broker_market_price": 18600.0
+  },
+  "SAB": {
+   "qty": 1100,
+   "market_price": 45100.0,
+   "sellable": 1100,
+   "broker_market_price": 44800.0
+  },
+  "SHB": {
+   "qty": 1500,
+   "market_price": 11800.0,
+   "sellable": 1500,
+   "broker_market_price": 11900.0
+  },
+  "SHS": {
+   "qty": 200,
+   "market_price": 15170.0,
+   "sellable": 200,
+   "broker_market_price": 15600.0
+  },
+  "SIP": {
+   "qty": 1700,
+   "market_price": 51000.0,
+   "sellable": 1700,
+   "broker_market_price": 49650.0
+  },
+  "TCB": {
+   "qty": 2000,
+   "market_price": 19770.0,
+   "sellable": 2000,
+   "broker_market_price": 29950.0
+  },
+  "TPB": {
+   "qty": 800,
+   "market_price": 12210.0,
+   "sellable": 800,
+   "broker_market_price": 14400.0
+  },
+  "TV1": {
+   "qty": 400,
+   "market_price": 18180.0,
+   "sellable": 400,
+   "broker_market_price": 19500.0
+  },
+  "VCB": {
+   "qty": 1300,
+   "market_price": 60000.0,
+   "sellable": 1300,
+   "broker_market_price": 60800.0
+  },
+  "VHM": {
+   "qty": 500,
+   "market_price": 76450.0,
+   "sellable": 500,
+   "broker_market_price": 148000.0
+  },
+  "VIX": {
+   "qty": 700,
+   "market_price": 13240.0,
+   "sellable": 700,
+   "broker_market_price": 13400.0
+  },
+  "VND": {
+   "qty": 300,
+   "market_price": 16950.0,
+   "sellable": 300,
+   "broker_market_price": 16850.0
+  },
+  "VNM": {
+   "qty": 900,
+   "market_price": 56930.0,
+   "sellable": 900,
+   "broker_market_price": 60300.0
+  },
+  "VPB": {
+   "qty": 2300,
+   "market_price": 20350.0,
+   "sellable": 2300,
+   "broker_market_price": 25500.0
+  }
+ },
+ "park_mv_vnd": 549960000.0,
+ "park_mv_verified_vnd": 549960000.0,
+ "cash_available_vnd": 4821143.0,
+ "cash_total_vnd": 14596271.0,
+ "cash_dividend_receiving_vnd": 9775000.0,
+ "egg_assets_vnd": 0.0,
+ "cash_debt_vnd": 0.0,
+ "balance_all_zero": false,
+ "cash_basis": "total_cash",
+ "unverified_tickers": [],
+ "warnings": [],
+ "frame_blocked_tickers": [],
+ "frame_blocked_detail": {},
+ "n_fills_applied": 0,
+ "reconcile": {
+  "ok": true,
+  "n_tickers": 21,
+  "mismatches": [],
+  "broker": {
+   "source": "dnse_raw_2026-08-04.jsonl",
+   "asof": "2026-08-04",
+   "total_cash_vnd": 14596271.0,
+   "dividend_receiving_vnd": 9775000.0,
+   "total_debt_vnd": 0.0,
+   "egg_assets_vnd": 0.0,
+   "balance_all_zero": false,
+   "ts_positions": "2026-08-04T19:10:44",
+   "ts_balances": "2026-08-04T19:10:44"
+  }
+ },
+ "corp_actions_applied": [],
+ "rights_subscriptions_applied": []
+}

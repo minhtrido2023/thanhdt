@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/C3_SAFER_DEPLOY_SPEC.md

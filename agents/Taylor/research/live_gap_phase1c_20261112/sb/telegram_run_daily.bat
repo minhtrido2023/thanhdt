@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-p1c-1112/WorkingClaude/telegram_run_daily.bat

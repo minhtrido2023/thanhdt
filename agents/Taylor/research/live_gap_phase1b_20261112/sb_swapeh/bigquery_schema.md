@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/bigquery_schema.md

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/vn30_8l.py

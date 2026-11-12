@@ -1,0 +1,958 @@
+{
+ "account_label": "ZaloPay",
+ "account_no": "0001743768",
+ "asof": "2026-08-12",
+ "day0_date": "2026-08-04",
+ "bootstrap": "bootstrap_book_snapshot_ZaloPay_20260804.json",
+ "excluded_tickers": [
+  "DGC",
+  "PNJ"
+ ],
+ "lots": [
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-13",
+   "qty": 300,
+   "price": 40766.67,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "CSV",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-07-28",
+   "qty": 1000,
+   "price": 19750.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-15",
+   "qty": 250,
+   "price": 32685.29,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-16",
+   "qty": 200,
+   "price": 32150.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "DGC",
+   "book": "EXCLUDED",
+   "play_type": "LEGACY_EXCLUDED",
+   "entry_date": "2026-06-26",
+   "qty": 10000,
+   "price": 47775.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "PARK_ENTRY",
+   "entry_date": "2026-07-23",
+   "qty": 459,
+   "price": 25891.05,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "PARK_ENTRY",
+   "entry_date": "2026-07-22",
+   "qty": 352,
+   "price": 54843.18,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-10",
+   "qty": 115,
+   "price": 21478.260869565216,
+   "source": "bootstrap",
+   "corp_actions": [
+    "MBB-2026-08-11-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-20",
+   "qty": 117,
+   "price": 20571.7958974359,
+   "source": "bootstrap",
+   "corp_actions": [
+    "MBB-2026-08-11-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "NCT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 373,
+   "price": 94400.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "PVT",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 2071,
+   "price": 17248.31,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SAB",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 744,
+   "price": 47450.2,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SIP",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 749,
+   "price": 47140.05,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TCB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-20",
+   "qty": 356,
+   "price": 31207.87,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-09",
+   "qty": 100,
+   "price": 61400.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VHM",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-10",
+   "qty": 300,
+   "price": 74000.0,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VHM-2026-08-06-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "VNM",
+   "book": "CAPIT",
+   "play_type": "CAPIT_GOLDEN",
+   "entry_date": "2026-07-21",
+   "qty": 601,
+   "price": 58699.83,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VPB",
+   "book": "LAG",
+   "play_type": "LAG_LO",
+   "entry_date": "2026-07-27",
+   "qty": 700,
+   "price": 24950.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2025-11-20",
+   "qty": 600,
+   "price": 27886.7,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 500,
+   "price": 23700.0,
+   "source": "exec_ZaloPay_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 100,
+   "price": 23600.0,
+   "source": "exec_ZaloPay_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 200,
+   "price": 23500.0,
+   "source": "exec_ZaloPay_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "SCL",
+   "book": "LAG",
+   "play_type": "LAG_HI",
+   "entry_date": "2026-08-10",
+   "qty": 200,
+   "price": 23400.0,
+   "source": "exec_ZaloPay_2026-08-10_journal.csv:BUY-SCL-LAG-03"
+  },
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 22700.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-ACB-PARK-01"
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 39550.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-BID-PARK-02"
+  },
+  {
+   "ticker": "HPG",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 22200.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-HPG-PARK-03"
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 400,
+   "price": 20550.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-MBB-PARK-04"
+  },
+  {
+   "ticker": "MSB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 16250.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-MSB-PARK-05"
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 12100.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-SHB-PARK-06"
+  },
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 14800.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-TPB-PARK-07"
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 60500.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VCB-PARK-08"
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 14900.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VIB-PARK-09"
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13950.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VIX-PARK-10"
+  },
+  {
+   "ticker": "VRE",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 25550.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VRE-PARK-11"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 400,
+   "price": 13200.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13200.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13200.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  }
+ ],
+ "park_lots": [
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-13",
+   "qty": 300,
+   "price": 40766.67,
+   "source": "bootstrap",
+   "market_price": 36740.0,
+   "mv_vnd": 11022000.0
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-15",
+   "qty": 250,
+   "price": 32685.29,
+   "source": "bootstrap",
+   "market_price": 32200.000000000004,
+   "mv_vnd": 8050000.000000001
+  },
+  {
+   "ticker": "CTG",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-16",
+   "qty": 200,
+   "price": 32150.0,
+   "source": "bootstrap",
+   "market_price": 32200.000000000004,
+   "mv_vnd": 6440000.000000001
+  },
+  {
+   "ticker": "HDB",
+   "book": "PARK",
+   "play_type": "PARK_ENTRY",
+   "entry_date": "2026-07-23",
+   "qty": 459,
+   "price": 25891.05,
+   "source": "bootstrap",
+   "market_price": 20920.0,
+   "mv_vnd": 9602280.0
+  },
+  {
+   "ticker": "LPB",
+   "book": "PARK",
+   "play_type": "PARK_ENTRY",
+   "entry_date": "2026-07-22",
+   "qty": 352,
+   "price": 54843.18,
+   "source": "bootstrap",
+   "market_price": 53800.0,
+   "mv_vnd": 18937600.0
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-10",
+   "qty": 115,
+   "price": 21478.260869565216,
+   "source": "bootstrap",
+   "corp_actions": [
+    "MBB-2026-08-11-STOCK-DIVIDEND"
+   ],
+   "market_price": 20450.0,
+   "mv_vnd": 2351750.0
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-20",
+   "qty": 117,
+   "price": 20571.7958974359,
+   "source": "bootstrap",
+   "corp_actions": [
+    "MBB-2026-08-11-STOCK-DIVIDEND"
+   ],
+   "market_price": 20450.0,
+   "mv_vnd": 2392650.0
+  },
+  {
+   "ticker": "TCB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-20",
+   "qty": 356,
+   "price": 31207.87,
+   "source": "bootstrap",
+   "market_price": 21000.0,
+   "mv_vnd": 7476000.0
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-09",
+   "qty": 100,
+   "price": 61400.0,
+   "source": "bootstrap",
+   "market_price": 59700.0,
+   "mv_vnd": 5970000.0
+  },
+  {
+   "ticker": "VHM",
+   "book": "PARK",
+   "play_type": "",
+   "entry_date": "2026-07-10",
+   "qty": 300,
+   "price": 74000.0,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VHM-2026-08-06-STOCK-DIVIDEND"
+   ],
+   "market_price": 73800.0,
+   "mv_vnd": 22140000.0
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2025-11-20",
+   "qty": 600,
+   "price": 27886.7,
+   "source": "bootstrap",
+   "market_price": 20390.0,
+   "mv_vnd": 12234000.0
+  },
+  {
+   "ticker": "ACB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 22700.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-ACB-PARK-01",
+   "market_price": 22750.0,
+   "mv_vnd": 6825000.0
+  },
+  {
+   "ticker": "BID",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 39550.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-BID-PARK-02",
+   "market_price": 36740.0,
+   "mv_vnd": 3674000.0
+  },
+  {
+   "ticker": "HPG",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 22200.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-HPG-PARK-03",
+   "market_price": 22100.0,
+   "mv_vnd": 11050000.0
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 400,
+   "price": 20550.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-MBB-PARK-04",
+   "market_price": 20450.0,
+   "mv_vnd": 8180000.0
+  },
+  {
+   "ticker": "MSB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 16250.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-MSB-PARK-05",
+   "market_price": 13370.0,
+   "mv_vnd": 2674000.0
+  },
+  {
+   "ticker": "SHB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 12100.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-SHB-PARK-06",
+   "market_price": 11850.0,
+   "mv_vnd": 3555000.0
+  },
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 14800.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-TPB-PARK-07",
+   "market_price": 12340.0,
+   "mv_vnd": 1234000.0
+  },
+  {
+   "ticker": "VCB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 60500.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VCB-PARK-08",
+   "market_price": 59700.0,
+   "mv_vnd": 11940000.0
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 14900.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VIB-PARK-09",
+   "market_price": 13520.0,
+   "mv_vnd": 2704000.0
+  },
+  {
+   "ticker": "VIX",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13950.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VIX-PARK-10",
+   "market_price": 13620.0,
+   "mv_vnd": 1362000.0
+  },
+  {
+   "ticker": "VRE",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 25550.0,
+   "source": "exec_ZaloPay_2026-08-11_journal.csv:BUY-VRE-PARK-11",
+   "market_price": 25450.0,
+   "mv_vnd": 2545000.0
+  }
+ ],
+ "by_book": {
+  "PARK": {
+   "qty": 5649,
+   "mv_vnd": 162359280.0,
+   "tickers": [
+    "ACB",
+    "BID",
+    "CTG",
+    "HDB",
+    "HPG",
+    "LPB",
+    "MBB",
+    "MSB",
+    "SHB",
+    "TCB",
+    "TPB",
+    "VCB",
+    "VHM",
+    "VIB",
+    "VIX",
+    "VPB",
+    "VRE"
+   ]
+  },
+  "LAG": {
+   "qty": 2700,
+   "mv_vnd": 60023000.0,
+   "tickers": [
+    "CSV",
+    "SCL",
+    "VPB"
+   ]
+  },
+  "EXCLUDED": {
+   "qty": 10000,
+   "mv_vnd": 363000000.0,
+   "tickers": [
+    "DGC"
+   ]
+  },
+  "CAPIT": {
+   "qty": 4538,
+   "mv_vnd": 180657830.0,
+   "tickers": [
+    "NCT",
+    "PVT",
+    "SAB",
+    "SIP",
+    "VNM"
+   ]
+  },
+  "DISCRETIONARY_SPECIAL": {
+   "qty": 1900,
+   "mv_vnd": 24263000.0,
+   "tickers": [
+    "DRI"
+   ]
+  }
+ },
+ "broker_positions": {
+  "ACB": {
+   "qty": 300,
+   "market_price": 22750.0,
+   "sellable": 0,
+   "broker_market_price": 22650.0
+  },
+  "BID": {
+   "qty": 400,
+   "market_price": 36740.0,
+   "sellable": 300,
+   "broker_market_price": 39100.0
+  },
+  "CSV": {
+   "qty": 1000,
+   "market_price": 22150.0,
+   "sellable": 1000,
+   "broker_market_price": 22350.0
+  },
+  "CTG": {
+   "qty": 450,
+   "market_price": 32200.000000000004,
+   "sellable": 450,
+   "broker_market_price": 32300.0
+  },
+  "DGC": {
+   "qty": 10000,
+   "market_price": 36300.0,
+   "sellable": 10000,
+   "broker_market_price": 44100.0
+  },
+  "DRI": {
+   "qty": 1900,
+   "market_price": 12770.0,
+   "sellable": 0,
+   "broker_market_price": 13200.0
+  },
+  "HDB": {
+   "qty": 459,
+   "market_price": 20920.0,
+   "sellable": 459,
+   "broker_market_price": 26900.0
+  },
+  "HPG": {
+   "qty": 500,
+   "market_price": 22100.0,
+   "sellable": 0,
+   "broker_market_price": 22050.0
+  },
+  "LPB": {
+   "qty": 352,
+   "market_price": 53800.0,
+   "sellable": 352,
+   "broker_market_price": 53700.0
+  },
+  "MBB": {
+   "qty": 632,
+   "market_price": 20450.0,
+   "sellable": 202,
+   "broker_market_price": 20350.0
+  },
+  "MSB": {
+   "qty": 200,
+   "market_price": 13370.0,
+   "sellable": 0,
+   "broker_market_price": 16250.0
+  },
+  "NCT": {
+   "qty": 373,
+   "market_price": 82500.0,
+   "sellable": 373,
+   "broker_market_price": 82400.0
+  },
+  "PVT": {
+   "qty": 2071,
+   "market_price": 20100.0,
+   "sellable": 2071,
+   "broker_market_price": 19700.0
+  },
+  "SAB": {
+   "qty": 744,
+   "market_price": 46300.0,
+   "sellable": 744,
+   "broker_market_price": 45650.0
+  },
+  "SCL": {
+   "qty": 1000,
+   "market_price": 23600.0,
+   "sellable": 1000,
+   "broker_market_price": 23300.0
+  },
+  "SHB": {
+   "qty": 300,
+   "market_price": 11850.0,
+   "sellable": 0,
+   "broker_market_price": 11900.0
+  },
+  "SIP": {
+   "qty": 749,
+   "market_price": 51100.0,
+   "sellable": 749,
+   "broker_market_price": 50900.0
+  },
+  "TCB": {
+   "qty": 356,
+   "market_price": 21000.0,
+   "sellable": 356,
+   "broker_market_price": 31000.0
+  },
+  "TPB": {
+   "qty": 100,
+   "market_price": 12340.0,
+   "sellable": 0,
+   "broker_market_price": 14700.0
+  },
+  "VCB": {
+   "qty": 300,
+   "market_price": 59700.0,
+   "sellable": 100,
+   "broker_market_price": 59800.0
+  },
+  "VHM": {
+   "qty": 300,
+   "market_price": 73800.0,
+   "sellable": 0,
+   "broker_market_price": 72100.0
+  },
+  "VIB": {
+   "qty": 200,
+   "market_price": 13520.0,
+   "sellable": 0,
+   "broker_market_price": 14800.0
+  },
+  "VIX": {
+   "qty": 100,
+   "market_price": 13620.0,
+   "sellable": 0,
+   "broker_market_price": 14200.0
+  },
+  "VNM": {
+   "qty": 601,
+   "market_price": 59130.0,
+   "sellable": 601,
+   "broker_market_price": 62000.0
+  },
+  "VPB": {
+   "qty": 1300,
+   "market_price": 20390.0,
+   "sellable": 1300,
+   "broker_market_price": 25500.0
+  },
+  "VRE": {
+   "qty": 100,
+   "market_price": 25450.0,
+   "sellable": 0,
+   "broker_market_price": 25450.0
+  }
+ },
+ "park_mv_vnd": 162359280.0,
+ "park_mv_verified_vnd": 162359280.0,
+ "cash_available_vnd": 63264900.0,
+ "cash_total_vnd": 69719065.0,
+ "cash_dividend_receiving_vnd": 6453500.0,
+ "egg_assets_vnd": 0.0,
+ "cash_debt_vnd": 0.0,
+ "balance_all_zero": false,
+ "cash_basis": "total_cash",
+ "unverified_tickers": [],
+ "warnings": [
+  "2026-08-05 corp action VHM-2026-08-06-STOCK-DIVIDEND ×2.0 (ex 2026-08-06, corp_actions.json): 2 lô VHM 300→600cp (hệ số hiệu dụng 2.000000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-10 corp action MBB-2026-08-11-STOCK-DIVIDEND ×1.15 (ex 2026-08-11, corp_actions.json): 2 lô MBB 202→232cp (hệ số hiệu dụng 1.148515 sau làm tròn mức vị thế) — tổng giá vốn không đổi"
+ ],
+ "frame_blocked_tickers": [],
+ "frame_blocked_detail": {},
+ "n_fills_applied": 35,
+ "reconcile": {
+  "ok": true,
+  "n_tickers": 26,
+  "mismatches": [],
+  "broker": {
+   "source": "dnse_raw_2026-08-12.jsonl",
+   "asof": "2026-08-12",
+   "total_cash_vnd": 69719065.0,
+   "dividend_receiving_vnd": 6453500.0,
+   "total_debt_vnd": 0.0,
+   "egg_assets_vnd": 0.0,
+   "balance_all_zero": false,
+   "ts_positions": "2026-08-12T23:53:22",
+   "ts_balances": "2026-08-12T20:30:45"
+  }
+ },
+ "corp_actions_applied": [
+  {
+   "id": "VHM-2026-08-06-STOCK-DIVIDEND",
+   "ticker": "VHM",
+   "qty_multiplier": 2.0,
+   "ex_date": "2026-08-06",
+   "broker_effective_ts": "2026-08-05T12:00:00",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "MBB-2026-08-11-STOCK-DIVIDEND",
+   "ticker": "MBB",
+   "qty_multiplier": 1.15,
+   "ex_date": "2026-08-11",
+   "broker_effective_ts": "2026-08-10T19:32:49",
+   "lots_adjusted": 2
+  }
+ ],
+ "rights_subscriptions_applied": []
+}

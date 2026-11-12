@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/pt_8l_daily.bat

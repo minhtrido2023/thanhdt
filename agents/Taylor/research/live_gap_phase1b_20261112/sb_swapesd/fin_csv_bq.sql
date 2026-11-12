@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/fin_csv_bq.sql

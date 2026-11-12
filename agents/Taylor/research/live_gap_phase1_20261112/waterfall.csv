@@ -1,0 +1,18 @@
+account,step,leg,md5,window,ret_pct,delta_pp,hurdle_pct,vni_pct
+SpaceX,W0 pin park0 @50B,W0_adj,7895ddef71bdcb80967cfeeefbf99f0c,2026-07-01→2026-11-11,-0.499,,,
+SpaceX,W1 vốn thật 1B,W1_adj,82f73258972fc77b7cd54a4cb2677770,2026-07-01→2026-11-11,0.016,0.515,,
+SpaceX,W2a +LIQ_ZERO_BLOCK=lag,W2a_adj,82f73258972fc77b7cd54a4cb2677770,2026-07-01→2026-11-11,0.016,0.0,,
+SpaceX,W2b sàn ADV 2 tỷ / loại mã cờ / LAG DD-zone / excluded_tickers,CHƯA ĐO,,,,,,
+SpaceX,W3 lệnh tay thật,CHƯA ĐO,,,,,,
+SpaceX,W4 fill thật,CHƯA ĐO,,,,,,
+SpaceX,W5 tiền thật (egg),CHƯA ĐO,,,,,,
+SpaceX,LIVE (account),nav_period_returns.py,,,-3.862,-3.878,2.696,-6.081
+ZaloPay,W0 pin park0 @50B,Z0_adj,78412d150e7a811e7fa6ef0d47b87e41,2026-07-06→2026-11-11,-0.499,,,
+ZaloPay,W1 vốn thật 1B,Z1_adj,3554bdf9bcccb079251e48fa1f130c9b,2026-07-06→2026-11-11,0.016,0.515,,
+ZaloPay,W2a +LIQ_ZERO_BLOCK=lag,Z2a_adj,3554bdf9bcccb079251e48fa1f130c9b,2026-07-06→2026-11-11,0.016,0.0,,
+ZaloPay,W2b sàn ADV 2 tỷ / loại mã cờ / LAG DD-zone / excluded_tickers,CHƯA ĐO,,,,,,
+ZaloPay,W3 lệnh tay thật,CHƯA ĐO,,,,,,
+ZaloPay,W4 fill thật,CHƯA ĐO,,,,,,
+ZaloPay,W5 tiền thật (egg),CHƯA ĐO,,,,,,
+ZaloPay,LIVE (bot),nav_period_returns.py,,,-2.609,-2.625,2.595,-5.24
+ZaloPay,LIVE (account),nav_period_returns.py,,,-7.511,-7.527,2.595,-5.24

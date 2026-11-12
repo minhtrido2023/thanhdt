@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-rq/WorkingClaude/paper_trade_reminder.ps1

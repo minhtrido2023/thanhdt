@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/px_g2.sql

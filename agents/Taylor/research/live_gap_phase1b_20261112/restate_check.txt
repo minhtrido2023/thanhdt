@@ -1,0 +1,12 @@
+== earnings_surprise_data.pkl: bak_strdtype (mtime 2026-06-16) vs frozen 2026-11-12, chỉ Release_Date < 2026-06-16
+rows A 57110 B 57173 only A 1 only B 64
+  Release_Date: 189 / 57109 khác
+  NP_P0: 40 / 57109 khác
+  NP_P4: 10 / 57109 khác
+  NP_R: 44 / 57109 khác
+  Revenue_YoY_P0: 30 / 57109 khác
+  ví dụ only-B: [('BBT', '2025Q4'), ('BBT', '2026Q1'), ('BGE', '2025Q4'), ('CT6', '2026Q2'), ('DCV', '2025Q3'), ('DCV', '2025Q4'), ('HOT', '2026Q2'), ('HPD', '2026Q2')] Release_Date: [datetime.date(2026, 2, 2), datetime.date(2026, 5, 4), datetime.date(2026, 2, 2), datetime.date(2026, 5, 4), datetime.date(2026, 1, 20), datetime.date(2026, 1, 23), datetime.date(2026, 5, 4), datetime.date(2026, 5, 4)]
+  ví dụ NP_P0 khác: {('POM', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': -325461513464.0}, ('VVN', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': -358634905583.0}, ('CBI', '2025Q4'): {'Release_Date': Timestamp('2026-01-21 00:00:00'), 'NP_P0': -5113918980.0}, ('IDJ', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': -128143356212.0}, ('PXS', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': 3422543093.0}} {('POM', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': -323671466014.0}, ('VVN', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': -362630258874.0}, ('CBI', '2025Q4'): {'Release_Date': Timestamp('2026-01-21 00:00:00'), 'NP_P0': -5180502980.0}, ('IDJ', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': -183604951176.0}, ('PXS', '2025Q4'): {'Release_Date': Timestamp('2026-02-02 00:00:00'), 'NP_P0': 3428583806.0}}
+== lag_edge_health.csv: bak_20260927_prefailc vs frozen 2026-11-12, entry < 2026-06-19
+cols ['entry', 'ret', 'mean12', 'win12', 'n12'] ['entry', 'known_date', 'ret', 'mean12', 'win12', 'n12'] rows 5488 5525
+rows<06-19 5391 5412

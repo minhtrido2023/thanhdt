@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/score_fa_lh.py

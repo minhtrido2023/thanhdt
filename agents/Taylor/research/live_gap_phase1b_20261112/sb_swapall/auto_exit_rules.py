@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/auto_exit_rules.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/refresh_deposit_cctg_weekly.sh

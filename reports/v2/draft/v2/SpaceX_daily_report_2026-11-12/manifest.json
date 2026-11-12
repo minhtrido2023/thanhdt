@@ -1,0 +1,97 @@
+{
+ "version": 1,
+ "stem": "SpaceX_daily_report_2026-11-12",
+ "cadence": "daily",
+ "account": "SpaceX",
+ "pdf": "SpaceX_daily_report_2026-11-12.pdf",
+ "pdf_sha256": "cac0b3b92e741f9a81114e1c3f30b32ecb1337dcd377743df27b6743f7e3ec26",
+ "html": "SpaceX_daily_report_2026-11-12_email.html",
+ "html_sha256": "8316ee1f8c0a1cf5cd5e4b305fe4c7bd7dda4dbbe680b53af03bd1bbd72c4048",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "320fd5d71290b01cc82ee00f9eb037fd4ce84d1cfb8d22a21b8fd32085a61aee"
+  },
+  "fig1": {
+   "file": "03_pair.png",
+   "sha256": "9b03d39e47cf3caddbf94672559afe4fab40bd1a5d065dbfaaaadfe1ef290916"
+  }
+ },
+ "pages": 1,
+ "page_cap": 1,
+ "lint": {
+  "pages": 1,
+  "words_total": 210,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu ngày + lãi/lỗ + nạp/rút so với NAV cuối ngày",
+   942327551.0,
+   942327551.0,
+   0.0
+  ]
+ ],
+ "positions": [
+  [
+   "VGS",
+   2000.0,
+   "+1,50%"
+  ],
+  [
+   "FPT",
+   800.0,
+   "−3,10%"
+  ],
+  [
+   "HT1",
+   2700.0,
+   "−3,85%"
+  ],
+  [
+   "VPB",
+   1500.0,
+   "−7,23%"
+  ],
+  [
+   "MCH",
+   200.0,
+   "−9,10%"
+  ],
+  [
+   "NNC",
+   300.0,
+   "−0,14%"
+  ],
+  [
+   "MBB",
+   175.0,
+   "−6,99%"
+  ],
+  [
+   "VIB",
+   47.0,
+   "+3,16%"
+  ]
+ ],
+ "period": "2026-11-12",
+ "report_date": "2026-11-12",
+ "nav_date": "2026-11-12",
+ "numbers": {
+  "day_pct": -0.119,
+  "mtd_pct": -0.298,
+  "inception_pct": -3.977,
+  "nav1": 942327551.0,
+  "pnl_vnd": -1124182.0,
+  "flow_vnd": 0.0,
+  "n_traded": 1
+ },
+ "fills_error": null,
+ "positions_error": null,
+ "narrative": false
+}

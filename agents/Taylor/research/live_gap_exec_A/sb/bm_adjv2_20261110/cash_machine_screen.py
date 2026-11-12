@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112/WorkingClaude/cash_machine_screen.py

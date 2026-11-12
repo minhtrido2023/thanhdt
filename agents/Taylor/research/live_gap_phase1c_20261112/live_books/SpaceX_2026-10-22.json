@@ -1,0 +1,526 @@
+{
+ "account_label": "SpaceX",
+ "account_no": "0002023347",
+ "asof": "2026-10-22",
+ "day0_date": "2026-08-04",
+ "bootstrap": "bootstrap_book_snapshot_SpaceX_20260804.json",
+ "excluded_tickers": [
+  "PNJ"
+ ],
+ "lots": [
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 30,
+   "price": 14608.695652173914,
+   "source": "bootstrap",
+   "corp_actions": [
+    "TPB-2026-10-02-STOCK-DIVIDEND"
+   ]
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-07-28",
+   "qty": 100,
+   "price": 19600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-07-29",
+   "qty": 300,
+   "price": 19600.0,
+   "source": "bootstrap"
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 160,
+   "price": 22154.198412698413,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VPB-2026-09-24-BONUS-ISSUE"
+   ]
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 19800.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-TV1-DISC-01"
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 65,
+   "price": 20550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MBB-PARK-08"
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 47,
+   "price": 13619.744058500914,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIB-PARK-12",
+   "corp_actions": [
+    "VIB-2026-09-10-BONUS-ISSUE"
+   ]
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 126,
+   "price": 20555.555555555555,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VPB-PARK-14",
+   "corp_actions": [
+    "VPB-2026-09-24-BONUS-ISSUE"
+   ]
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13200.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 100,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 300,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 200,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "DRI",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 500,
+   "price": 13300.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-DRI-DISC-02"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 200,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-13",
+   "qty": 100,
+   "price": 20300.0,
+   "source": "exec_SpaceX_2026-08-13_journal.csv:BUY-TV1-DISC-2026-08-13"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-14",
+   "qty": 600,
+   "price": 20400.0,
+   "source": "exec_SpaceX_2026-08-14_journal.csv:BUY-TV1-DISC-2026-08-14"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-14",
+   "qty": 100,
+   "price": 20000.0,
+   "source": "exec_SpaceX_2026-08-14_journal.csv:BUY-TV1-DISC-2026-08-14"
+  },
+  {
+   "ticker": "TV1",
+   "book": "DISCRETIONARY_SPECIAL",
+   "play_type": "DISCRETIONARY_SPECIAL_SITUATION",
+   "entry_date": "2026-08-17",
+   "qty": 500,
+   "price": 20100.0,
+   "source": "exec_SpaceX_2026-08-17_journal.csv:BUY-TV1-DISC-2026-08-17"
+  },
+  {
+   "ticker": "MBB",
+   "book": "CORP_ACTION",
+   "play_type": "RIGHTS_SUBSCRIPTION",
+   "entry_date": "2026-08-28",
+   "qty": 110,
+   "price": 10000.0,
+   "source": "exec_SpaceX_2026-08-28_journal.csv:MBB-RIGHTS-2026-08-28"
+  }
+ ],
+ "park_lots": [
+  {
+   "ticker": "TPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 30,
+   "price": 14608.695652173914,
+   "source": "bootstrap",
+   "corp_actions": [
+    "TPB-2026-10-02-STOCK-DIVIDEND"
+   ],
+   "market_price": 12750.0,
+   "mv_vnd": 382500.0
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "NEUTRAL_park",
+   "entry_date": "2026-07-02",
+   "qty": 160,
+   "price": 22154.198412698413,
+   "source": "bootstrap",
+   "corp_actions": [
+    "VPB-2026-09-24-BONUS-ISSUE"
+   ],
+   "market_price": 23950.0,
+   "mv_vnd": 3832000.0
+  },
+  {
+   "ticker": "MBB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 65,
+   "price": 20550.0,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-MBB-PARK-08",
+   "market_price": 19900.0,
+   "mv_vnd": 1293500.0
+  },
+  {
+   "ticker": "VIB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 47,
+   "price": 13619.744058500914,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VIB-PARK-12",
+   "corp_actions": [
+    "VIB-2026-09-10-BONUS-ISSUE"
+   ],
+   "market_price": 14050.0,
+   "mv_vnd": 660350.0
+  },
+  {
+   "ticker": "VPB",
+   "book": "PARK",
+   "play_type": "PARK_ADD",
+   "entry_date": "2026-08-11",
+   "qty": 126,
+   "price": 20555.555555555555,
+   "source": "exec_SpaceX_2026-08-11_journal.csv:BUY-VPB-PARK-14",
+   "corp_actions": [
+    "VPB-2026-09-24-BONUS-ISSUE"
+   ],
+   "market_price": 23950.0,
+   "mv_vnd": 3017700.0
+  }
+ ],
+ "by_book": {
+  "PARK": {
+   "qty": 428,
+   "mv_vnd": 9186050.0,
+   "tickers": [
+    "MBB",
+    "TPB",
+    "VIB",
+    "VPB"
+   ]
+  },
+  "DISCRETIONARY_SPECIAL": {
+   "qty": 4800,
+   "mv_vnd": 81490000.0,
+   "tickers": [
+    "DRI",
+    "TV1"
+   ]
+  },
+  "CORP_ACTION": {
+   "qty": 110,
+   "mv_vnd": 2189000.0,
+   "tickers": [
+    "MBB"
+   ]
+  }
+ },
+ "broker_positions": {
+  "DRI": {
+   "qty": 2500,
+   "market_price": 15300.0,
+   "sellable": 2500,
+   "broker_market_price": 15200.0
+  },
+  "MBB": {
+   "qty": 175,
+   "market_price": 19900.0,
+   "sellable": 65,
+   "broker_market_price": 19900.0
+  },
+  "TPB": {
+   "qty": 30,
+   "market_price": 12750.0,
+   "sellable": 0,
+   "broker_market_price": 12750.0
+  },
+  "TV1": {
+   "qty": 2300,
+   "market_price": 18800.0,
+   "sellable": 2300,
+   "broker_market_price": 18700.0
+  },
+  "VIB": {
+   "qty": 47,
+   "market_price": 14050.0,
+   "sellable": 0,
+   "broker_market_price": 14050.0
+  },
+  "VPB": {
+   "qty": 286,
+   "market_price": 23950.0,
+   "sellable": 0,
+   "broker_market_price": 23950.0
+  }
+ },
+ "park_mv_vnd": 9186050.0,
+ "park_mv_verified_vnd": 9186050.0,
+ "cash_available_vnd": 21962653.0,
+ "cash_total_vnd": 25414484.0,
+ "cash_dividend_receiving_vnd": 3450000.0,
+ "egg_assets_vnd": 851086660.0,
+ "cash_debt_vnd": 0.0,
+ "balance_all_zero": false,
+ "cash_basis": "total_cash",
+ "unverified_tickers": [],
+ "warnings": [
+  "2026-10-21 DRI BÁN +1,200cp chỉ có ở statement DNSE (ngoài journal bot) ⇒ trừ lô FIFO theo ticker",
+  "2026-08-05 corp action VHM-2026-08-06-STOCK-DIVIDEND ×2.0 (ex 2026-08-06, corp_actions.json): 1 lô VHM 500→1000cp (hệ số hiệu dụng 2.000000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-10 corp action MBB-2026-08-11-STOCK-DIVIDEND ×1.15 (ex 2026-08-11, corp_actions.json): 1 lô MBB 1100→1265cp (hệ số hiệu dụng 1.150000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-14 corp action BID-2026-08-17-STOCK-BONUS ×1.068433 (ex 2026-08-17, corp_actions.json): 2 lô BID 1100→1175cp (hệ số hiệu dụng 1.068182 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-19 corp action VIX-2026-08-20-STOCK-DIVIDEND ×1.05 (ex 2026-08-20, corp_actions.json): 2 lô VIX 400→420cp (hệ số hiệu dụng 1.050000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-08-27 corp action MSB-2026-08-28-BONUS-ISSUE ×1.2 (ex 2026-08-28, corp_actions.json): 1 lô MSB 500→600cp (hệ số hiệu dụng 1.200000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-09-09 corp action VIB-2026-09-10-BONUS-ISSUE ×1.095 (ex 2026-09-10, corp_actions.json): 1 lô VIB 500→547cp (hệ số hiệu dụng 1.094000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-09-23 corp action VPB-2026-09-24-BONUS-ISSUE ×1.2604104 (ex 2026-09-24, corp_actions.json): 2 lô VPB 1100→1386cp (hệ số hiệu dụng 1.260000 sau làm tròn mức vị thế) — tổng giá vốn không đổi",
+  "2026-10-01 corp action TPB-2026-10-02-STOCK-DIVIDEND ×1.15 (ex 2026-10-02, corp_actions.json): 1 lô TPB 200→230cp (hệ số hiệu dụng 1.150000 sau làm tròn mức vị thế) — tổng giá vốn không đổi"
+ ],
+ "frame_blocked_tickers": [],
+ "frame_blocked_detail": {},
+ "n_fills_applied": 220,
+ "reconcile": {
+  "ok": true,
+  "n_tickers": 6,
+  "mismatches": [],
+  "broker": {
+   "source": "dnse_raw_2026-10-22.jsonl",
+   "asof": "2026-10-22",
+   "total_cash_vnd": 25414484.0,
+   "dividend_receiving_vnd": 3450000.0,
+   "total_debt_vnd": 0.0,
+   "egg_assets_vnd": 851086660.0,
+   "balance_all_zero": false,
+   "ts_positions": "2026-10-22T23:30:15",
+   "ts_balances": "2026-10-22T22:44:43"
+  }
+ },
+ "corp_actions_applied": [
+  {
+   "id": "VHM-2026-08-06-STOCK-DIVIDEND",
+   "ticker": "VHM",
+   "qty_multiplier": 2.0,
+   "ex_date": "2026-08-06",
+   "broker_effective_ts": "2026-08-05T12:00:00",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "MBB-2026-08-11-STOCK-DIVIDEND",
+   "ticker": "MBB",
+   "qty_multiplier": 1.15,
+   "ex_date": "2026-08-11",
+   "broker_effective_ts": "2026-08-10T19:32:49",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "BID-2026-08-17-STOCK-BONUS",
+   "ticker": "BID",
+   "qty_multiplier": 1.068433,
+   "ex_date": "2026-08-17",
+   "broker_effective_ts": "2026-08-14T19:08:57",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "VIX-2026-08-20-STOCK-DIVIDEND",
+   "ticker": "VIX",
+   "qty_multiplier": 1.05,
+   "ex_date": "2026-08-20",
+   "broker_effective_ts": "2026-08-19T18:49:04",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "MSB-2026-08-28-BONUS-ISSUE",
+   "ticker": "MSB",
+   "qty_multiplier": 1.2,
+   "ex_date": "2026-08-28",
+   "broker_effective_ts": "2026-08-27T18:58:15",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "VIB-2026-09-10-BONUS-ISSUE",
+   "ticker": "VIB",
+   "qty_multiplier": 1.095,
+   "ex_date": "2026-09-10",
+   "broker_effective_ts": "2026-09-09T11:45:14.274417",
+   "lots_adjusted": 1
+  },
+  {
+   "id": "VPB-2026-09-24-BONUS-ISSUE",
+   "ticker": "VPB",
+   "qty_multiplier": 1.2604104,
+   "ex_date": "2026-09-24",
+   "broker_effective_ts": "2026-09-23T11:58:04.716582",
+   "lots_adjusted": 2
+  },
+  {
+   "id": "TPB-2026-10-02-STOCK-DIVIDEND",
+   "ticker": "TPB",
+   "qty_multiplier": 1.15,
+   "ex_date": "2026-10-02",
+   "broker_effective_ts": "2026-10-01T11:52:12",
+   "lots_adjusted": 1
+  }
+ ],
+ "rights_subscriptions_applied": []
+}

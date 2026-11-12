@@ -1,0 +1,127 @@
+{
+ "ticker": "VCP",
+ "asof": "2026-11-12",
+ "shares": 83789658,
+ "price_compare": {
+  "bq_close_2026_11_11": 37900,
+  "brief_price": 31700,
+  "brief_price_note": "brief ghi 31.700 = dong 11/11; BQ tav2_bq.ticker: 31.700 la dong 06/11, 11/11 = 37.900"
+ },
+ "sources": {
+  "Q3_2026": "src/bctc_hn_q3_2026.pdf (HN Q3/26, chua soat xet, lap 28-29/10/2026); img/hn_q3_pNN.png",
+  "H1_2026": "src/bctc_hn_h1_2026_reviewed.pdf (HN 6T/26 soat xet); img2/h1_pNN.png",
+  "FY2025": "src/bctc_hn_2025_audited.pdf (AASC, bao cao 24/03/2026, y kien chap nhan toan phan); img2/kt25_pNN.png",
+  "BQ": "tav2_bq.ticker_financial (NP_P0/Revenue_P0 = so QUY, NP_P0 = me), tav2_bq.ticker (gia/KL)"
+ },
+ "basis": "B0 = VCSH cong ty me 30/09/2026 (3.269,77 - LICKS 619,70 = 2.650,07) TRU co tuc 2025 900d/cp x 83,79tr cp = 75,41 (DKCC 27/10, tra 06/11/2026, chua ghi no tai 30/09) => 2.574,66 ty. LN = LNST cong ty me.",
+ "B0_bn": 2574.66,
+ "r": 0.135,
+ "r_anchor": "13,5% @ dep12T 7,40% = effective_deposit_rate('2026-11-12') cctg_12m(2026-11-02), bang diem neo 03/11 (7,40%); beta=1 => r khong doi",
+ "g": 0.02,
+ "g_note": "(uoc luong) danh nghia thap hon lam phat: khung gia PPA dong bang 2024-26 (Bobby §3), Pc giam sau khi tra no; bu lai bang bo sung cong suat. Do nhay g 0-4%",
+ "reinv_cap": 0.8,
+ "scenarios": {
+  "bear": {
+   "N": 306.5,
+   "loss_bn": 401.85,
+   "w": 0.3,
+   "basis": "LNST me 2024 kiem toan 306,5 (nam thuy van thuong, it nha may hon) + El Nino 2026-27 (Bobby F2/F8/F10); loss_bn = 50% x 803,7 ty cho vay ro hon (vong 2, skeptic): 664,0 cho ca nhan vay dam bao bang co phan ben thu ba (566,6 + 97,4) + 51,0 cam co chinh cp VCP (30,6 + 20,4) + 88,7 tin chap 5% (84,2 + 4,5); TRU Song Da 19,7 da du phong 100% [H1/26 PL01]. Ty le 50% la uoc luong; vong 1 dung 664,0 => 332,0",
+   "loss_basket": {
+    "parent_collateral_third_party": 664.0,
+    "vcp_share_pledged": 51.0,
+    "unsecured_5pct": 88.7,
+    "total": 803.7,
+    "loss_rate_estimate": 0.5,
+    "round1_loss_bn": 332.0
+   }
+  },
+  "base": {
+   "N": 441.5,
+   "loss_bn": 0.0,
+   "w": 0.45,
+   "basis": "LNST me 2025 kiem toan 441,5 (nam La Nina mua nhieu, CHUA co Dak Lo 1-3 ca nam, Linh Linh) ~ trung vi TTM 3 nam 411,8; hai chieu bu tru (uoc luong)"
+  },
+  "bull": {
+   "N": 700.8,
+   "loss_bn": 0.0,
+   "w": 0.25,
+   "basis": "LNST me TTM Q4/25-Q3/26 = 137,5+140,2+177,7+245,4 = 700,8 (KT25 - 9T25; BCTC Q3/26) — gia dinh LN gop phi-dien Q3/26 174 ty lap lai"
+  }
+ },
+ "N_short_median_TTM3y": {
+  "TTM_Q3_2024": 265.7,
+  "TTM_Q3_2025": 411.8,
+  "TTM_Q3_2026": 700.8
+ },
+ "fcfe_conso": {
+  "2024": {
+   "cfo": 462.348,
+   "capex": 79.09
+  },
+  "2025": {
+   "cfo": 342.665,
+   "capex": 84.137
+  },
+  "TTM_Q3_26": {
+   "cfo": 776.7,
+   "capex": 435.9,
+   "note": "CFO 9T26 1.004,4 + Q4/25 (342,7-197,1) = 1.150,0 TRU 373,3 (dong 09 'giam phai thu' 9T26: mot lan, khop phai thu khac 30/6 455,3 -> 30/9 74,9 va phai thu Linh Linh 359,0 luc mua) = 776,7; capex 351,8 + 84,1 (9T25 trong)"
+  }
+ },
+ "fcfe_basis": "FCFE = CFO - capex (no vay giu nguyen; CFO VN da tru lai vay da tra). Khong cong vay rong vi 2025 vay rong +1.328 ty dung cho M&A/cho vay ca nhan",
+ "parent_share": 0.92,
+ "parent_share_basis": "LNST me/LNST HN: 2025 441,5/481,1 = 0,918; 9T26 563,3/612,6 = 0,920",
+ "rev3": [
+  1772.499,
+  2286.794,
+  2946.8
+ ],
+ "da_note": "KH 2024 284,0; 2025 279,5 (KT25 LCTT); TTM Q3/26 uoc ~220 (KH 9T26 LCTT 134,2 + Q4/25 ~85 uoc luong) dung cho EBITDA TTM; da3 trong C4 giu 281 (min(capex,KH)=capex nen khong doi)",
+ "peer_capex_rev_median": 0.0133,
+ "peer_capex_basis": "VSH/SHP/CHP/TBC/HJS/SJD/TMP/AVC/GHC/DRL/S4A/SBH/HNA/NED/TTE 2023-25, BQ -CF_Invest/Revenue (calc/peer_capex_raw.csv); peer thuan thuy dien, VCP co mang thuong mai doanh thu lon => D2 thien cao",
+ "moat": {
+  "tier": "NARROW",
+  "params_added": "none",
+  "note": "NARROW chi vi co che giay phep; dinh luong tuong duong NONE (ROIC_Min5Y 7,8% / ROIC5Y 12,2% / ROE_Min3Y 8,4% deu < Ke 13,5%); khong thuong, khong tru (luat 08/11)"
+ },
+ "liquidity": {
+  "method": "sigma_d*sqrt(Q/ADV), giong dd_CST/dd_VGS",
+  "sizes_bn": [
+   1.0,
+   0.3,
+   0.1
+  ]
+ },
+ "variantB": {
+  "B_end2025_bn": 2146.8,
+  "dB_bn": 427.86,
+  "note": "B cuoi 2025 (VCSH me 31/12/25) + dB = 2574,66 - 2146,8 theo gia so (sau co tuc 75,41); N van = LNST me 2025"
+ },
+ "bull_sens": {
+  "q3_nonpower_rev": 602.6,
+  "q3_nonpower_gp": 174.0,
+  "services_rev_q3_est": 112.0,
+  "other_rev_q3_est": 2.0,
+  "services_gm": 0.449,
+  "hh_normal_gm": 0.045,
+  "cit_trading": 0.2,
+  "cit_note": "20% pho thong (uoc luong) cho thuong mai; dich vu mien thue",
+  "fin_rev_9T": 91.618,
+  "lcttt_interest_received_9T": 21.254,
+  "tax_9T": 0.107,
+  "parent_share": 0.92
+ },
+ "weights_alt": {
+  "w_035_045_020": {
+   "bear": 0.35,
+   "base": 0.45,
+   "bull": 0.2
+  },
+  "w_040_040_020": {
+   "bear": 0.4,
+   "base": 0.4,
+   "bull": 0.2
+  }
+ },
+ "da_ttm_est": 220.0
+}

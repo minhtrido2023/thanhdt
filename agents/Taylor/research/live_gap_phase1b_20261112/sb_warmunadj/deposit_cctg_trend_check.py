@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/wt-livegap-p1-1112/WorkingClaude/deposit_cctg_trend_check.py

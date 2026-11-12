@@ -1,0 +1,34 @@
+== earnings_events_classified.csv: vintage_20261029 (tái lập byte pin 4707bcbe) vs frozen 2026-11-12
+cut<2026-06-19: rows A 51219 B 51227 onlyA 0 onlyB 8
+  Release_Date: 0 / 51219 khác
+  NP_R: 0 / 51219 khác
+  Rev_YoY: 0 / 51219 khác
+  pre_ret: 18938 / 51219 khác
+  rel_ret: 16993 / 51219 khác
+  post_ret: 18881 / 51219 khác
+  pattern: 288 / 51219 khác
+  vd post_ret khác lớn nhất:
+ticker quarter Release_Date_A  post_ret_A  post_ret_B pattern_A pattern_B
+   CTW  2019Q3     2019-11-01  134.375000  275.170843     NOISE     NOISE
+   NBT  2020Q2     2020-07-24  163.793103   66.793169     NOISE     NOISE
+   CCR  2017Q1     2017-04-17  -78.279468    9.505703     NOISE     NOISE
+   DM7  2022Q3     2022-10-24  192.794760  109.375000     NOISE     NOISE
+   VLW  2021Q3     2021-10-21   43.366187  118.170426     NOISE     NOISE
+  năm của dòng post_ret khác: {2011: 443, 2012: 649, 2013: 666, 2014: 698, 2015: 734, 2016: 962, 2017: 1174, 2018: 1362, 2019: 1440, 2020: 1500, 2021: 1640, 2022: 1680, 2023: 1717, 2024: 1707, 2025: 1687, 2026: 822}
+  onlyB: ticker quarter Release_Date_B
+   KHW  2017Q1     2017-04-19
+   LAW  2016Q1     2016-04-22
+   NBT  2016Q2     2016-07-26
+   NBT  2016Q3     2016-10-25
+   NQB  2017Q1     2017-05-03
+   PIS  2016Q2     2016-08-01
+   PTM  2015Q1     2015-04-22
+   TMG  2017Q1     2017-05-03
+cut<2018-07-06: rows A 18059 B 18067 onlyA 0 onlyB 8
+  Release_Date: 0 / 18059 khác
+  NP_R: 0 / 18059 khác
+  Rev_YoY: 0 / 18059 khác
+  pre_ret: 6023 / 18059 khác
+  rel_ret: 5361 / 18059 khác
+  post_ret: 5993 / 18059 khác
+  pattern: 103 / 18059 khác

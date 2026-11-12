@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/custom30_ic.py

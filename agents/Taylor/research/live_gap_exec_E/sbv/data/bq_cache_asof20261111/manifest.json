@@ -1,0 +1,93 @@
+{
+  "tables": {
+    "custom30v_8l": {
+      "file": "custom30v_8l.parquet",
+      "rows": 1500,
+      "size_mb": 0.0
+    },
+    "risk_rating": {
+      "file": "risk_rating.parquet",
+      "rows": 120336,
+      "size_mb": 0.2
+    },
+    "vnindex_5state": {
+      "file": "vnindex_5state.parquet",
+      "rows": 6404,
+      "size_mb": 0.0,
+      "max_time": "2026-11-11"
+    },
+    "vnindex_5state_dt5g_live": {
+      "file": "vnindex_5state_dt5g_live.parquet",
+      "rows": 3207,
+      "size_mb": 0.0,
+      "max_time": "2026-11-11"
+    },
+    "vnindex_5state_tam_quan_v34b_clean": {
+      "file": "vnindex_5state_tam_quan_v34b_clean.parquet",
+      "rows": 6404,
+      "size_mb": 0.0,
+      "max_time": "2026-11-11"
+    },
+    "vnindex_5state_dt_4gate": {
+      "file": "vnindex_5state_dt_4gate.parquet",
+      "rows": 6291,
+      "size_mb": 0.0,
+      "max_time": "2026-06-02"
+    },
+    "fa_ratings": {
+      "file": "fa_ratings.parquet",
+      "rows": 12993,
+      "size_mb": 2.4,
+      "max_time": "2026-11-04"
+    },
+    "fa_ratings_8l": {
+      "file": "fa_ratings_8l.parquet",
+      "rows": 54808,
+      "size_mb": 0.1,
+      "max_time": "2026-11-11"
+    },
+    "ticker_financial": {
+      "file": "ticker_financial.parquet",
+      "rows": 68735,
+      "size_mb": 72.8,
+      "max_time": "2026-11-11"
+    },
+    "ticker_1m": {
+      "file": "ticker_1m.parquet",
+      "rows": 19475,
+      "size_mb": 8.9
+    },
+    "ticker_prune": {
+      "file": "ticker_prune/",
+      "rows": 772672,
+      "size_mb": 440.0,
+      "max_time": "2026-11-11"
+    },
+    "ticker": {
+      "file": "ticker/",
+      "rows": 3550900,
+      "size_mb": 1474.8,
+      "max_time": "2026-11-11"
+    },
+    "custom30_8l": {
+      "file": "custom30_8l.parquet",
+      "rows": 1500,
+      "size_mb": 0.0
+    },
+    "universe_pit_q": {
+      "file": "universe_pit_q/",
+      "rows": 3551510,
+      "size_mb": 7.0,
+      "max_time": "2026-11-11"
+    },
+    "universe_pit": {
+      "file": "universe_pit/",
+      "rows": 3551510,
+      "size_mb": 5.1,
+      "max_time": "2026-11-11"
+    }
+  },
+  "verified": true,
+  "verified_at": "2026-11-11T16:59:36Z",
+  "verified_at_epoch": 1794416376.4929502
+}

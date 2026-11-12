@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/validate_macro_report.md

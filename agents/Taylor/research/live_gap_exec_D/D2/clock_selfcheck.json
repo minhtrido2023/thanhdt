@@ -1,0 +1,27 @@
+{
+ "committed_vs_dt4gate_diffs": 0,
+ "episode_end_k_mismatch(non-commit)": 0,
+ "n_episodes": 129,
+ "dt4_vs_dt5g_live_state_diffs(=macro cap)": 50,
+ "old_clock_def_nonzero_days(state_raw!=state)": 50,
+ "cache_last_date": "2026-11-11",
+ "get_dt_gate_clock": {
+  "active": false,
+  "cand": null,
+  "k": null,
+  "need": null,
+  "committed": 3,
+  "asof": "2026-11-12"
+ },
+ "replay_bq_last": {
+  "active": false,
+  "cand": 0,
+  "k": 0,
+  "need": 0,
+  "committed": 3,
+  "asof": "2026-11-12"
+ },
+ "match_today": true,
+ "cache_vs_bq_k_diffs_overlap": 0,
+ "overlap_days": 3207
+}

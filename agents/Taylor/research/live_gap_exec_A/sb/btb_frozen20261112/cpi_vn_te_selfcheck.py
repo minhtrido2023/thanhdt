@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/cpi_vn_te_selfcheck.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/simulation_email.py

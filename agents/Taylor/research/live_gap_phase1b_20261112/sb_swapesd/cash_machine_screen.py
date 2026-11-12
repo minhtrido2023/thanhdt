@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/cash_machine_screen.py

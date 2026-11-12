@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA-1112-rq/WorkingClaude/cross_check_csv.sql

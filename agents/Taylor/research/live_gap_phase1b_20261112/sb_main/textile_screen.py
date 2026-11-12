@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/textile_screen.py

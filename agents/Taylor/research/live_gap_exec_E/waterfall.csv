@@ -1,0 +1,33 @@
+TK,regime,step,thanh_phan,pp
+SpaceX,cold,0,ENGINE park mục tiêu,-7.879
+SpaceX,cold,1,"fidelity park (buy-only tới 06/08, trim 07-06)",1.467
+SpaceX,cold,2,W2b mã cờ 11-03 (adv/ddzone/excl/lever inert),-0.659
+SpaceX,cold,3,"W3 lệnh tay DISC (sổ, từ 04/08)",1.243
+SpaceX,cold,4,W4 fill thật vs Open (non-DISC),-0.13
+SpaceX,cold,5,W5 lãi egg,0.715
+SpaceX,cold,6,dư chưa giải thích,1.381
+SpaceX,cold,7,LIVE,-3.862
+SpaceX,warm,0,ENGINE park mục tiêu,-8.39
+SpaceX,warm,1,"fidelity park (buy-only tới 06/08, trim 07-06)",1.49
+SpaceX,warm,2,W2b mã cờ 11-03 (adv/ddzone/excl/lever inert),-0.668
+SpaceX,warm,3,"W3 lệnh tay DISC (sổ, từ 04/08)",1.243
+SpaceX,warm,4,W4 fill thật vs Open (non-DISC),-0.13
+SpaceX,warm,5,W5 lãi egg,0.715
+SpaceX,warm,6,dư chưa giải thích,1.879
+SpaceX,warm,7,LIVE,-3.862
+ZaloPay,cold,0,ENGINE park mục tiêu,-6.446
+ZaloPay,cold,1,"fidelity park (buy-only tới 06/08, trim 07-06)",1.592
+ZaloPay,cold,2,W2b mã cờ 11-03 (adv/ddzone/excl/lever inert),-0.67
+ZaloPay,cold,3,"W3 lệnh tay DISC (sổ, từ 04/08)",1.151
+ZaloPay,cold,4,W4 fill thật vs Open (non-DISC),-0.729
+ZaloPay,cold,5,W5 lãi egg,0.689
+ZaloPay,cold,6,dư chưa giải thích,1.804
+ZaloPay,cold,7,LIVE,-2.609
+ZaloPay,warm,0,ENGINE park mục tiêu,-6.779
+ZaloPay,warm,1,"fidelity park (buy-only tới 06/08, trim 07-06)",1.497
+ZaloPay,warm,2,W2b mã cờ 11-03 (adv/ddzone/excl/lever inert),-0.68
+ZaloPay,warm,3,"W3 lệnh tay DISC (sổ, từ 04/08)",1.151
+ZaloPay,warm,4,W4 fill thật vs Open (non-DISC),-0.729
+ZaloPay,warm,5,W5 lãi egg,0.689
+ZaloPay,warm,6,dư chưa giải thích,2.242
+ZaloPay,warm,7,LIVE,-2.609

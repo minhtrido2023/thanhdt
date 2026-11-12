@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/remind_bc.bat

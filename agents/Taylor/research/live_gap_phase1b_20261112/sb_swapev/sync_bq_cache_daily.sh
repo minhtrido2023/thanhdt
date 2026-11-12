@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/sync_bq_cache_daily.sh

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/book_c_live_signal.sql
