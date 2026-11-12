@@ -2275,3 +2275,6 @@
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-11-11T05:28:00Z] [dd-fcfe3y-decay 11/11] XONG job Taylor_20261111_051016: Q1 nhan khoa ARTIFACT (luc thong ke thap, mo ta suy yeu tu 2021+); co che = tru capex (capex/CFO thanh du bao duong OOS); 0/8 sua, C4 sat nguong 2/4 — CHO Mike skeptic; chay lai ~Q4/2027
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T10:11:57Z] [dd-cfo-anchor 11/11] XONG job Taylor_20261111_095819: 0/9 nen trung dung dat prelock (D2 capex chuan nganh gan nhat, truot BH); thi truong KHONG thuong CFO/LN; giu V_dai — CHO Mike skeptic + user
