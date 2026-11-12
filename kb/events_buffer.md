@@ -1107,3 +1107,7 @@
 - [2026-11-12T15:28:42Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261112_151839", "source": "watcher"}
 - [2026-11-12T15:29:29Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "in_progress", "note": "D2: liqz_all xong (0 qua), dang chay liqz_adv100/old_adv100"}
 - [2026-11-12T15:29:35Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+
+## Consolidation 2026-11-12T15:29:56Z
+- [2026-11-12T15:29:39Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:29:40Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261112_151837", "source": "watcher"}
