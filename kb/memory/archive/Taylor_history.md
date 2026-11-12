@@ -2266,3 +2266,6 @@
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-11-11T03:52:31Z] CHỜ Mike bổ sung Discord timestamp user chọn B cho VGS max_sessions=null (bus 01:05Z ghi A=25); code+data đã merge 11/11
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T04:21:24Z] [dd-blend 11/11] XONG job Taylor_20261111_040113: prelock K3n w*=0 (khong vuot); hau kiem w=0.5 tot hon ro (AEdm -18..29%, beta x2.5), H1 bac; K3n ti so la loi thiet ke; CHO Mike skeptic + user duyet de xuat DD
