@@ -2278,3 +2278,6 @@
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-11-11T10:11:57Z] [dd-cfo-anchor 11/11] XONG job Taylor_20261111_095819: 0/9 nen trung dung dat prelock (D2 capex chuan nganh gan nhat, truot BH); thi truong KHONG thuong CFO/LN; giu V_dai — CHO Mike skeptic + user
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T13:48:37Z] ĐANG DỞ job Taylor_20261111_133358 DD CST: model xong (calc/model_out.json, tâm 13.084/sau CK 12.681, giá 14.900 TRÊN tâm) | NEXT: viết REPORT.md + md5 assumptions + bus finding
