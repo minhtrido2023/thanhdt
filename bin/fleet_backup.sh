@@ -18,6 +18,13 @@ echo "==================== fleet_backup $ts ===================="
 # 2) fleet repo (own git) -> github:mike-fleet  (bus/logs/locks/state are gitignored in mike)
 echo "==> Fleet repo -> github:mike-fleet"
 git -C "$MIKE" add -A
+# GitHub HARD-rejects any blob >100MB (GH001) — one such file blocks EVERY later push until
+# history is rewritten (incident 2026-11-12: 113MB .pkl in Taylor research via this add -A).
+# Unstage oversized files BEFORE they can enter a commit; file stays on disk, loudly reported.
+while IFS= read -r -d '' f; do
+  [ -f "$MIKE/$f" ] && [ "$(stat -c %s "$MIKE/$f")" -gt 95000000 ] || continue
+  git -C "$MIKE" rm -q --cached -- "$f" && echo "   WARN: unstaged >95MB file (GitHub limit 100MB): $f — add to .gitignore"
+done < <(git -C "$MIKE" diff --cached --name-only --diff-filter=AM -z)
 if git -C "$MIKE" diff --cached --quiet; then
   echo "   (no fleet changes to commit)"
 elif commit_err="$(MIKE_KB_SIZE_GATE=warn git -C "$MIKE" commit -q -m "fleet backup $ts" 2>&1)"; then
@@ -32,10 +39,19 @@ else
   echo "   FAIL fleet commit — hôm nay KHÔNG vào backup, push dưới đây chỉ đẩy HEAD CŨ:"
   echo "$commit_err" | sed 's/^/     /'
 fi
-if git -C "$MIKE" push -q github HEAD:mike-fleet 2>/dev/null; then
+# stderr is CAPTURED, not discarded: the old 2>/dev/null + fixed "PAT expired?" hint misdiagnosed
+# a GH001 large-file rejection as an auth problem for 2 nights (2026-11-10/11).
+if push_err="$(git -C "$MIKE" push -q github HEAD:mike-fleet 2>&1)"; then
   echo "   OK fleet pushed: $(git -C "$MIKE" rev-parse --short HEAD)"
 else
-  echo "   FAIL fleet push (PAT expired? regenerate token in ~/.git-credentials)"
+  if echo "$push_err" | grep -qiE 'GH001|large file|exceeds .*file size limit'; then
+    echo "   FAIL fleet push — FILE >100MB trong lịch sử chưa push (KHÔNG phải PAT); cần gỡ khỏi history:"
+  elif echo "$push_err" | grep -qiE 'authentication|401|403|invalid username|token'; then
+    echo "   FAIL fleet push — lỗi AUTH (PAT hết hạn/sai?) — tạo token mới trong ~/.git-credentials:"
+  else
+    echo "   FAIL fleet push — lý do khác, xem stderr:"
+  fi
+  echo "$push_err" | grep -v -iE 'https://[^ ]*:[^ ]*@' | tail -15 | sed 's/^/     /'
 fi
 
 # 3) main workspace backup (code, docs, data reports, scrubbed Claude history)

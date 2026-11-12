@@ -16,6 +16,10 @@ agents/Taylor/exp_*/**/*.parquet
 agents/Taylor/exp_*/**/*.pkl
 agents/Taylor/probe_*/**/*.parquet
 agents/Taylor/probe_*/**/*.pkl
+# 2026-11-12 (Wags): research/ cũng theo chính sách trên — .pkl 113MB lọt vào qua fleet_backup add -A
+# và chặn push GitHub (GH001 >100MB). File vẫn nằm trên đĩa.
+agents/Taylor/research/**/*.pkl
+agents/Taylor/research/**/*.parquet
 agents/Taylor/exp_breadth/breadth_panel.csv
 agents/Taylor/exp_capitexit/panel.csv
 agents/Taylor/exp_capitgate/panel.csv

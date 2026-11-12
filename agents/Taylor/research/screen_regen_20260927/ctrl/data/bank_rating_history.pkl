@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/bank_rating_history.pkl
