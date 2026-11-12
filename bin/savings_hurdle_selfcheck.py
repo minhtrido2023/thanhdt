@@ -76,10 +76,23 @@ s = sh.report_savings("2024-06-01", "2025-06-01", 8.0, ev=EV2)
 ok(s["days"] == 365 and s["annualized_pct"] is not None, "365 ngày được quy năm")
 near(s["annualized_pct"], npr.annualize_or_null(1 + s["hurdle_pct"] / 100, 365)[0], 1e-9, "dùng cửa chung")
 
-# 4. Cờ mốc neo (code luôn có; ev tổng hợp ⇒ last_anchor 2026-06-01)
-ok(sh.report_savings("2026-02-01", "2026-03-01", 0, ev=EV)["anchor_warning"], "kỳ chạm neo ⇒ cờ")
-ok(sh.report_savings("2026-06-02", "2026-06-20", 0, ev=synth([("2026-01-01", 5.0)]))["anchor_warning"] is None,
-   "kỳ sau neo ⇒ không cờ")
+# 4. Cờ mốc neo: bật khi BẤT KỲ ngày tích luỹ dùng lãi của dòng neo tay (không chỉ from_date <= neo cuối)
+AN = frozenset([dt.date(2026, 1, 1), dt.date(2026, 3, 1)])      # neo tay; 2026-05-01 là mốc công bố
+ok(sh.report_savings("2026-02-01", "2026-03-01", 0, ev=EV, anchors=AN)["anchor_warning"], "kỳ chạm neo ⇒ cờ")
+ok(sh.report_savings("2026-06-02", "2026-06-20", 0, ev=EV, anchors=AN)["anchor_warning"] is None,
+   "kỳ chỉ dùng mốc công bố (05-01) ⇒ không cờ")
+ok(sh.report_savings("2026-02-01", "2026-03-01", 0, ev=EV)["anchor_warning"] is None, "không khai anchors ⇒ không cờ")
+# ca brief: kỳ 01/07→19/07 mang dòng neo 06-01 (from_date SAU neo cuối) ⇒ PHẢI cờ (code cũ bỏ sót)
+EVA = synth([("2026-01-01", 6.0), ("2026-06-01", 6.8), ("2026-09-30", 7.5)])
+AN2 = frozenset([dt.date(2026, 1, 1), dt.date(2026, 6, 1)])
+ok(sh.report_savings("2026-07-01", "2026-07-19", 0, ev=EVA, anchors=AN2)["anchor_warning"],
+   "01/07→19/07 mang neo 06-01 ⇒ cờ")
+ok(sh.report_savings("2026-09-30", "2026-10-15", 0, ev=EVA, anchors=AN2)["anchor_warning"] is None,
+   "kỳ sau mốc công bố 09-30 ⇒ không cờ")
+ok(sh.report_savings("2026-09-25", "2026-10-15", 0, ev=EVA, anchors=AN2)["anchor_warning"],
+   "kỳ vắt qua 09-30 còn 5 ngày dưới neo ⇒ cờ")
+ok(sh.report_savings("2026-07-01", "2026-07-19", 0)["anchor_warning"] is not None
+   and sh.report_savings("2026-10-12", "2026-11-09", 0)["anchor_warning"] is None, "dữ liệu thật: 01/07→19/07 cờ, 12/10→09/11 không")
 
 # 5. Dữ liệu thật: khớp GĐ0 vs_savings_table
 real = sh.report_savings("2026-07-01", "2026-11-11", -3.862)

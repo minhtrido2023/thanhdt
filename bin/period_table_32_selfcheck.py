@@ -232,6 +232,53 @@ def main() -> int:
     ok(src.count("_check_benchmark_table(report)") == 1
        and src.index("_check_period_returns(report)\n") < src.index("_check_benchmark_table(report)"),
        "deliver() phải gọi cổng bảng ngay sau cổng period-return")
+    # 9. Luồng B2 (13/11): cột "gửi tiết kiệm" — khớp CLI ±0,005 + excess = TWR − hurdle; template chưa đổi
+    #    (bảng không có cột này ⇒ phần trên không đổi hành vi). Dương: khớp; âm: lệch số / thiếu khối CLI.
+    CS, CX = "Gửi tiết kiệm cùng kỳ", "Chênh lệch so với gửi tiết kiệm"
+    asv = copy.deepcopy(a)
+    for k, _ in pt.PERIODS:
+        if asv.get(k):
+            hv = round(0.37 + 0.11 * len(k), 3)
+            asv[k]["savings"] = {"hurdle_pct": hv, "excess_vs_savings_pp": round(asv[k]["return_pct"] - hv, 3),
+                                 "status": "ok"}
+    def with_sav(text, sv_of=lambda k, x: x):
+        out = []
+        for ln in text.splitlines():
+            if ln.startswith("| Giai đoạn"):
+                out.append(ln + f" {CS} | {CX} |")
+            elif ln.startswith("|---"):
+                out.append(ln + "---:|---:|")
+            elif ln.startswith("|"):
+                key = pt._period_of(ln.split("|")[1].strip())[1]
+                sv = (asv.get(key) or {}).get("savings") or {}
+                out.append(ln + f" {pt.fmt_num(sv_of('h', sv.get('hurdle_pct')), '%')} | "
+                                f"{pt.fmt_num(sv_of('x', sv.get('excess_vs_savings_pp')), 'pp')} |")
+            else:
+                out.append(ln)
+        return "\n".join(out) + "\n"
+    ts = with_sav(pt.render(a, None))
+    ok("(none)" not in ts and CS in ts, "dựng bảng savings")
+    ok("inception: khớp CLI" in passes(doc(ts), mkcli(asv, b)), "B2 dương: cột tiết kiệm khớp CLI")
+    ok("khớp" in passes(doc(pt.render(a, None)), mkcli(asv, b)), "B2: bảng KHÔNG có cột tiết kiệm ⇒ không đổi hành vi")
+    blocks(doc(with_sav(pt.render(a, None), lambda w, x: x + 0.02 if w == "h" else x)), mkcli(asv, b), (CS,))   # hurdle lệch
+    blocks(doc(with_sav(pt.render(a, None), lambda w, x: x + 0.02 if w == "x" else x)), mkcli(asv, b), (CX,))   # excess lệch
+    a_ok = copy.deepcopy(asv)
+    a_ok["inception"]["savings"]["hurdle_pct"] += 0.004                  # ⩽ 0,005 vẫn qua
+    a_ok["inception"]["savings"]["excess_vs_savings_pp"] -= 0.004
+    passes(doc(ts), mkcli(a_ok, b))
+    a_bad = copy.deepcopy(asv)
+    a_bad["inception"]["savings"]["hurdle_pct"] += 0.007                 # > 0,005 ⇒ chặn
+    blocks(doc(ts), mkcli(a_bad, b), (CS, "lệch"))
+    a_nos = copy.deepcopy(asv)
+    del a_nos["inception"]["savings"]
+    blocks(doc(ts), mkcli(a_nos, b), ("khối `savings`",))                 # CLI không có khối ⇒ chặn
+    a_un = copy.deepcopy(asv)
+    a_un["inception"]["savings"] = {"hurdle_pct": None, "excess_vs_savings_pp": None, "status": "unavailable"}
+    blocks(doc(ts), mkcli(a_un, b), (CS,))                               # CLI không có số mà bảng có số ⇒ chặn
+    tx = with_sav(pt.render(a, None))
+    tx = replace_cell(doc(tx), "Từ khi bắt đầu", CX, pt.fmt_num(asv["inception"]["savings"]["excess_vs_savings_pp"] + 0.02, "pp"))
+    blocks(tx, mkcli(asv, b), (CX,))                                     # excess tự bịa
+
     print(f"OK — {N_OK} assertion PASS (period_table_32_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0
 

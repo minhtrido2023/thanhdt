@@ -233,6 +233,14 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
         raise TableBlock(f"benchmark-table BLOCK ({name}): cột tỉ suất tài khoản phải là cột 2 tên "
                          f"'{account}', header = {header}")
     idx[account] = 1                           # N-a vòng 2: ô tỉ suất TK cũng đối chiếu CLI
+    # Cột "gửi tiết kiệm" (tùy chọn, Luồng B2 13/11): template CHƯA có cột này ⇒ không đổi hành vi; khi
+    # có, ô phải khớp khối `savings` của CLI ±CELL_TOL_PP và excess = TWR − hurdle. Nhận cột theo tên:
+    # chứa "tiết kiệm" + (có "chênh" ⇒ cột excess, ngược lại ⇒ cột hurdle).
+    sav_cols = {}
+    for i, c in enumerate(header):
+        if "tiết kiệm" in norm(c).lower():
+            sav_cols["xs" if "chênh" in norm(c).lower() else "h"] = c
+            idx[c] = i
     need_sleeve = any(_period_of(r[0])[0] for r in rows if r)
     out = {}
     rc, j, err = cli(account, report_date, False)
@@ -275,9 +283,25 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
         if not bm:
             raise TableBlock(f"benchmark-table BLOCK ({name}): CLI không có kỳ {key} / khối benchmark "
                              f"cho dòng {r[0]!r}")
+        sv = p.get("savings") if sav_cols else None
+        if sleeve and sav_cols and not isinstance(sv, dict):    # CLI --sleeve bot chưa phát khối savings
+            cells = {c: cv for c, cv in cells.items() if c not in sav_cols.values()}
+        elif sav_cols and not isinstance(sv, dict):
+            raise TableBlock(f"benchmark-table BLOCK ({name}): bảng có cột tiết kiệm {list(sav_cols.values())} "
+                             f"nhưng CLI không có khối `savings` cho kỳ {key} — không đối chiếu được")
         want = {COL_PRICE: bm.get("vnindex_price_pct"), COL_TR: bm.get("vnindex_tr_pct"),
                 COL_XP: bm.get("excess_vs_price_pp"), COL_XT: bm.get("excess_vs_tr_pp"),
                 account: p.get("return_pct")}
+        if sv is not None:
+            if "h" in sav_cols:
+                want[sav_cols["h"]] = sv.get("hurdle_pct")
+            if "xs" in sav_cols:
+                want[sav_cols["xs"]] = sv.get("excess_vs_savings_pp")
+            if "h" in sav_cols and "xs" in sav_cols:        # nhất quán nội tại của chính bảng
+                hv, xv, tv = (cells[sav_cols["h"]][1], cells[sav_cols["xs"]][1], cells[account][1])
+                if all(isinstance(z, float) for z in (hv, xv, tv)) and abs((tv - hv) - xv) > 2 * CELL_TOL_PP + 1e-9:
+                    raise TableBlock(f"benchmark-table BLOCK ({name}): dòng {r[0]!r}: cột '{sav_cols['xs']}' "
+                                     f"{xv:+.3f} ≠ TWR {tv:+.3f} − cột '{sav_cols['h']}' {hv:+.3f} = {tv - hv:+.3f}")
         for c, (raw, v) in cells.items():
             w = want[c]
             if w is None:
