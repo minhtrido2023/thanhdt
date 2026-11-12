@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-10T15:28:07Z] CHỜ Mike: lagadj r3 code cf21463b9 + mike eecd82ae7 + repin branch feat/repin-mirror-live-20261110 @307593815; chờ quant-skeptic, user quyết re-pin + neo DD -28,0 + TTL delist
-- [2026-11-11T00:44:34Z] CHỜ user chọn A/B/C cho paper expvol_pacing (N=2/25; DISC buy thiếu state_<T>_<acct>.json không vào trial); checkpoint kế 2026-12-08
 - [2026-11-11T01:22:18Z] [lag-rating-lag-q3 11/11] XONG job Taylor_20261111_011218: M1 dong 0/88; lo moi = troi rating dong Q3 (VGS); de xuat P1 log rating cong/P2 re-rate co dieu kien — CHO Mike/user
 - [2026-11-11T03:44:15Z] [dd-vn-calib 11/11] XONG job Taylor_20261111_032615: engine FCFE KHONG TUONG THICH (K3 khong hoi tu, lech theo ma); de xuat P1 FCFE=LNSTx(1-g/ROE) pha 2 — CHO Mike/user duyet
 - [2026-11-11T03:52:31Z] CHỜ Mike bổ sung Discord timestamp user chọn B cho VGS max_sessions=null (bus 01:05Z ghi A=25); code+data đã merge 11/11
@@ -26,3 +24,5 @@
 - [2026-11-11T13:48:37Z] ĐANG DỞ job Taylor_20261111_133358 DD CST: model xong (calc/model_out.json, tâm 13.084/sau CK 12.681, giá 14.900 TRÊN tâm) | NEXT: viết REPORT.md + md5 assumptions + bus finding
 - [2026-11-11T13:52:00Z] [dd-CST 11/11] XONG job Taylor_20261111_133358: tam 13.084 (sau CK 0,3ty 12.681; P10 6.316/P90 20.799), gia 14.900 TREN tam, moat NONE; assumptions_md5 74c9efbd — CHO Mike skeptic + ghi so
 - [2026-11-11T14:11:30Z] [dd-cst-report 11/11] XONG job Taylor_20261111_140332: PDF 7tr + HTML tại research/dd_CST_20261111/report/, CHƯA gửi email (dry-run OK) — CHỜ user nói 'gửi email'; vùng giá ghi dd_price_zones là việc Mike
+- [2026-11-12T05:26:18Z] ĐANG DỞ job Taylor_20261112_051752 DD VCP: model xong calc/model_out.json | NEXT: viết REPORT.md + bus finding
+- [2026-11-12T05:29:46Z] [dd-vcp 12/11] XONG job Taylor_20261112_051752: tam 41.810 (sau CK 40.515), vung 22.502-67.385, gia BQ 11/11 37.900 sat tam; flag cho vay ca nhan 823 ty + LCTT lech + bien phe lieu Q3 — CHO Mike skeptic + ghi so

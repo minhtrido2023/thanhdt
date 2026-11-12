@@ -41,6 +41,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`sector_read_phan_dam_ure_20261104.md`](sector_read_phan_dam_ure_20261104.md) — sector read BLIND phân đạm urê VN (giá urê quốc tế, biên urê−khí, hạn ngạch TQ, thuế XK/VAT, nguồn khí), Bobby 2026-11-04 | CANONICAL |
 | [`sector_read_hoa_chat_xut_clo_20261109.md`](sector_read_hoa_chat_xut_clo_20261109.md) — sector read BLIND hoá chất cơ bản VN (xút–clo, axit sunfuric; xút TQ, PVC, lưu huỳnh, alumina Tây Nguyên, pipeline xút nội địa, điện–muối), Bobby 2026-11-09 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_khi_dot_lpg_20261109.md`](sector_read_khi_dot_lpg_20261109.md) — sector read BLIND khí đốt / phân phối khí & LPG VN (trung nguồn khí nội địa gắn dầu, LNG nhập khẩu + điện LNG/Qc, LPG CP, suy giảm mỏ, Lô B), Bobby 2026-11-09 (parent `vn_macro_regime_history.md`) | CANONICAL |
+| [`sector_read_thuy_dien_20261112.md`](sector_read_thuy_dien_20261112.md) — sector read BLIND thuỷ điện vừa và nhỏ (30-100 MW) miền Bắc/Bắc Trung Bộ (El Niño 2026-27, Qc/CfD, khung giá 1.110 đ/kWh, tái đàm phán PPA, EVN người mua duy nhất), Bobby 2026-11-12 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`vnindex_5state.md`](vnindex_5state.md) — tav2_bq.vnindex_5state | TRAP |
 | [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_bq.vnindex_5state_staging / _archive_* / _v2g_* / _tam_quan_v31/v33b_clean / _baseline_* | ARCHIVE |
 | [`vnindex_5state_csv_local.md`](vnindex_5state_csv_local.md) — data/vnindex_5state.csv | TRAP |

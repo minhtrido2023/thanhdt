@@ -2251,3 +2251,9 @@
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-11-10T13:53:11Z] CHỜ Mike duyệt lag-cache-adjusted r2: code fd29f496a (wt-lagadj-1110) + mike edb3ffba0; KHÔNG re-pin R3; user quyết 4 mục trong doc §6; không merge/apply/cron trước duyệt
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-10T15:28:07Z] CHỜ Mike: lagadj r3 code cf21463b9 + mike eecd82ae7 + repin branch feat/repin-mirror-live-20261110 @307593815; chờ quant-skeptic, user quyết re-pin + neo DD -28,0 + TTL delist
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T00:44:34Z] CHỜ user chọn A/B/C cho paper expvol_pacing (N=2/25; DISC buy thiếu state_<T>_<acct>.json không vào trial); checkpoint kế 2026-12-08
