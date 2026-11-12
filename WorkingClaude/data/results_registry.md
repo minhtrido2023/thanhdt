@@ -8550,3 +8550,16 @@ ledger_md5: d8c6817594b616389766fb0ddc7f7ea5
 - N = 26 đợt khoá / 51 lần chuyển / 62/150 tháng khoá; N_trials = 9. ΔCAGR G1_L0 −2,62pp (pin0%) / −2,76pp (pin1M), P(Δ>0)=0,01 cả hai, CI90 pin0% [−4,76; −0,65]pp; IS −1,73 / OOS −3,46; LOO-năm không lật dấu. ΔSharpe −0,15/−0,12 (P>0 0,06/0,11); ΔCalmar +0,04/−0,13 (P 0,26/0,30) ⇒ không phân biệt được; ΔMaxDD +2,35/+0,59pp nhưng 8 placebo engine (cùng tỷ lệ khoá + số đợt) trung vị +2,76pp ⇒ là giảm exposure, không phải thông tin.
 - 18/18 chân (9 biến thể × 2 quy ước) ΔCAGR < 0, liều–tác dụng theo %tháng khoá; tốt nhất G5 (khoá cần 2 tháng âm) −0,47/−0,98pp, Calmar P≈0,55. DSR 0,021/0,008; PBO 0,107/0,169. Tín hiệu: P(tháng sau âm|âm) 39,5% vs 38,1% (Fisher p=1,0). LAG cùng luật (chỉ đo): −3,08/−3,37pp.
 - Báo cáo: `mike/agents/Taylor/research/bal_edge_monthly_gate_20261110/REPORT.md`. Chờ quant-skeptic + quyết định user (nếu bật = khẩu vị rủi ro có giá ~−2,6pp/năm, không phải edge).
+
+## 2026-11-12 — Luồng A PIN LADDER (mergesort → LIQ_ZERO_BLOCK=lag → cache LAG adj v2 → data LAG 12/11): dải mới **pin0% 23,39% (SÀN) … pin1M 26,77% (TRẦN)** · boot DD 5th **−27,6% / −25,0%** — job `Taylor_20261112_162004` ⚠️ PAPER + REGISTRY, CHƯA quant-skeptic, neo sizing **−25,2% KHÔNG ĐỔI**, `trading_rules.json` KHÔNG ĐỔI
+
+ledger_md5: 84f796bdedde8fefa02b37012e65bdde
+
+- Đầu ladder L3 (= L4 trùng byte): pin0% md5 `84f796bd…` = CAGR 23,39% / Sharpe 1,81 / MaxDD −17,1% / Calmar 1,37, IS 16,77% / OOS 29,77%; pin1M md5 `35c8968f81cf68d3721c4c549e4eaafd` = 26,77% / 2,04 / −14,8% / 1,81, IS 20,15% / OOS 33,16%. Bootstrap circular L=21 B=4000 seed 12345: CAGR 5th 15,1% / 18,2%; **DD 5th −27,6% / −25,0%**; P(DD<−30%) 2,5% / 0,8%.
+- Bước (pin0% / pin1M), mỗi bước đúng 1 trục (`pin_ledger.py compare` rc=0 cả 7 cặp): L0 pin 10-08 `537e349b`/`a6ba34d8` 22,12/25,42 → L1 +mergesort `2f7739b5`/`fe398133` 22,31/25,87 → L2 +LIQ_ZERO_BLOCK=lag `5ae929c6`/`52b39597` 23,44/27,11 (IS 20,08→16,85, OOS 24,33→29,80 ở sàn; DD5 −23,6→−27,7) → L3 +cache LAG adj v2 23,39/26,77 → L4 data LAG 12/11 = L3 trùng byte (0 lần đảo ngưỡng EDGE_THR 4,0 trước 06-19).
+- Sàn nhiễu tie-break (10 seed trên L4): sd CAGR 0,17pp (sàn) / 0,26pp (trần), trung bình 23,39% / 26,30%. Chỉ bước LIQ vượt nhiễu (4,7–6,7 sd CAGR); mergesort và adj v2 trong nhiễu. Trần nên đọc ~26,3% (trung bình seed), 26,77% gần đỉnh phân phối.
+- Control: code SAU A2 + `LIQ_ZERO_BLOCK=off` + data vintage 10-29 ⇒ `4707bcbe` (sexies) và `537e349b`/`a6ba34d8` byte-identical. Determinism AUDIT_END 06-19 vs 07-29: mergesort 0/3.107 phiên lệch; quicksort 1.986. Self-check 0 VND mọi chân (34 chân), threads=1, RAM ≤3,34G.
+- DSR (manifest `man_2026_07_recon.json`, N=68/120/200) = 1,0000; PBO họ 0,2085. N trials job = 5 cấu hình × 2 đầu dải (trục định trước, không chọn trên kết quả) ⇒ không phải claim edge. LIQ là fidelity-to-live, không phải edge.
+- **Neo DD:** số đo sàn mới −27,6% sâu hơn neo −25,2% 2,4pp — CHỈ BÁO, user quyết riêng. BQ cache current CHƯA ĐO (snapshot 2,0GB, đĩa 98%).
+- Kho: 6 ledger `ladderA-L{1,2,3}-*` trong `data/pinned_ledgers/PINS.jsonl` (`decided_by: agent`, control = bước trước). Nhánh code: `feat/live-gap-exec-A-20261112` @ `efdb282bd` (KHÔNG merge).
+- Nguồn số: `mike/agents/Taylor/research/live_gap_exec_A/REPORT.md` (+ `logs/leg_metrics.log`, `logs/bootstrap.log`, `logs/tb_stats.log`, `logs/compare.log`, `logs/dsr.log`).
