@@ -1051,3 +1051,59 @@
 
 ## Consolidation 2026-11-12T14:07:01Z
 - [2026-11-12T13:49:36Z] quant-skeptic/verification — ✅ CONFIRMED live-gap-phase3-20261112: {"verdict": "CONFIRMED", "confidence": "medium", "summary": "Null 0/6 biến thời điểm đứng vững; PREREG thật có trước phép thử; mọi số tái lập. Sửa bắt buộc: (a) P0 IDLE_CARRY_TIER=off trả 0% cho 59-74% NAV nhàn rỗi trong khi chính sách tiết kiệm hưởng lãi 12T trên 100% NAV ⇒ câu CAGR gần như không đổi sai; cùng quy ước chính sách tốn 0,8-1,4pp CAGR, DD/Sharpe/hạng placebo vẫn đứng ⇒ DT5G là bảo hiểm; (b) P(thắng 12T) 77,6% chưa ghi quy ước lãi nhàn rỗi, dải thật ~67-90%; CI90 65-88% hẹp quá (N_eff 11,5); (c) placebo hoán vị-trong-năm không phải null hợp lệ cho dữ liệu cụm tháng; (d) khai lần chạy thử, lý do đổi PE sai, chân 12T cân lại hằng ngày không thực hiện được.", "required_changes": ["ghi quy ước lãi nhàn rỗi + chạy IDLE_CARRY_TIER=dep1m", "CI theo N_eff", "chính sách hai chân cùng quy ước lãi, lãi <=3T, trễ T+1", "bỏ placebo hoán vị-trong-năm khỏi brief", "khai lần chạy thử, sửa lý do PE, đăng ký VNINDEX_pe_only vào data_registry"]}
+
+## Consolidation 2026-11-12T15:29:39Z
+- [2026-11-12T15:18:43Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "in_progress", "note": "doc brief + boi canh"}
+- [2026-11-12T15:18:48Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "in_progress", "note": "doc brief + REPORT GD2B/GD3"}
+- [2026-11-12T15:18:50Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "in_progress", "note": "doc brief + p1c REPORT"}
+- [2026-11-12T15:19:19Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "in_progress", "note": "B: tao worktree, doc nav_period_returns"}
+- [2026-11-12T15:19:33Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:19:35Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:19:38Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:19:40Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:19:53Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "in_progress", "note": "worktree wt-livegap-D-1112 = sb engine + carry knob; sap chay control P0 off + dep1m"}
+- [2026-11-12T15:20:17Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "in_progress", "note": "worktree wt-livegap-E-1112 + hook PARK_NOJIT/NOSELL_UNTIL; dang tra luat W2b"}
+- [2026-11-12T15:20:33Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:20:35Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:20:38Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:20:40Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:21:22Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "in_progress", "note": "B: savings_hurdle.py + wiring xong, khop GD0; viet selfcheck"}
+- [2026-11-12T15:21:33Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:21:35Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:21:36Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "in_progress", "note": "D2: doc GD2B code + DT gate clock logic"}
+- [2026-11-12T15:21:38Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:21:40Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:22:31Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "in_progress", "note": "2 commit A1/A2 tren feat/live-gap-exec-A-20261112; dung harness ladder"}
+- [2026-11-12T15:22:33Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:22:36Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:22:38Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:22:41Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:22:54Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "in_progress", "note": "D2: clock dung lai, selfcheck 0 lech (3206 phien truncation replay); dang viet analyze_d2"}
+- [2026-11-12T15:23:15Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "in_progress", "note": "9 chan cold E1 xong (ctl byte-identical 0746de33); queue 8 warm + 11 tiebreak vintage dang chay"}
+- [2026-11-12T15:23:33Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:23:36Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:23:38Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:23:41Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:24:33Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:24:36Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:24:38Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:24:41Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:25:21Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "in_progress", "note": "E1 cold xong: fidelity dong phan lon gap thang 7; dang cho warm/tiebreak, chuan bi W2b"}
+- [2026-11-12T15:25:33Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:25:36Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:25:39Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:25:41Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:26:34Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:26:37Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:26:39Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:26:41Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:27:34Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:27:37Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:27:39Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:27:41Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:28:34Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261112_151832", "source": "watcher"}
+- [2026-11-12T15:28:38Z] Taylor/heartbeat — Taylor_20261112_151834: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261112_151834", "source": "watcher"}
+- [2026-11-12T15:28:39Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261112_151837", "source": "watcher"}
+- [2026-11-12T15:28:42Z] Taylor/heartbeat — Taylor_20261112_151839: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261112_151839", "source": "watcher"}
+- [2026-11-12T15:29:29Z] Taylor/heartbeat — Taylor_20261112_151837: {"status": "in_progress", "note": "D2: liqz_all xong (0 qua), dang chay liqz_adv100/old_adv100"}
+- [2026-11-12T15:29:35Z] Taylor/heartbeat — Taylor_20261112_151832: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261112_151832", "source": "watcher"}
