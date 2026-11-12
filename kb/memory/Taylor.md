@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-11T04:57:08Z] [dd-fwd-prelock 11/11] XONG job Taylor_20261111_043843: V_ngan KHONG co thong tin bo sung on dinh (truot IS), DD giu hien-thi-chi; forward scorer san sang, moc 12T 10-11/2027 — CHO Mike skeptic
-- [2026-11-11T05:28:00Z] [dd-fcfe3y-decay 11/11] XONG job Taylor_20261111_051016: Q1 nhan khoa ARTIFACT (luc thong ke thap, mo ta suy yeu tu 2021+); co che = tru capex (capex/CFO thanh du bao duong OOS); 0/8 sua, C4 sat nguong 2/4 — CHO Mike skeptic; chay lai ~Q4/2027
 - [2026-11-11T10:11:57Z] [dd-cfo-anchor 11/11] XONG job Taylor_20261111_095819: 0/9 nen trung dung dat prelock (D2 capex chuan nganh gan nhat, truot BH); thi truong KHONG thuong CFO/LN; giu V_dai — CHO Mike skeptic + user
 - [2026-11-11T13:48:37Z] ĐANG DỞ job Taylor_20261111_133358 DD CST: model xong (calc/model_out.json, tâm 13.084/sau CK 12.681, giá 14.900 TRÊN tâm) | NEXT: viết REPORT.md + md5 assumptions + bus finding
 - [2026-11-11T13:52:00Z] [dd-CST 11/11] XONG job Taylor_20261111_133358: tam 13.084 (sau CK 0,3ty 12.681; P10 6.316/P90 20.799), gia 14.900 TREN tam, moat NONE; assumptions_md5 74c9efbd — CHO Mike skeptic + ghi so
@@ -26,3 +24,4 @@
 - [2026-11-12T10:47:12Z] [live-gap GD0 12/11] XONG job Taylor_20261112_104201: hurdle PIT 01/07-11/11 = 2,548% (Mike 2,70% la phang 7,4%); SpaceX -6,41pp, ZaloPay -9,97 (sleeve bot -5,06) vs tiet kiem; fill-vs-open POST (09-14..11-11) -11,4bps khong cham +22; proposal .proposed CHO user duyet; GD1 la job khac
 - [2026-11-12T11:17:12Z] [live-gap-p1 12/11] XONG job Taylor_20261112_104204: W0 cold −0,50%/warm +2,96% @50B (tiết kiệm +2,70%), live thua engine 2,6–6,8pp không ở W1–W2a, W2b–W5 CHƯA ĐO; control KHÔNG tái hiện 4707bcbe (drift DATA LAG phái sinh), vá sort (a) INERT — CHỜ quant-skeptic + Mike
 - [2026-11-12T12:15:10Z] [live-gap-p1b 12/11] XONG job Taylor_20261112_112708: vá mergesort chữa lệch AUDIT_END (không look-ahead), pin dưới vá 23,60% vs 23,37% (CHƯA re-pin, cần duyệt); drift control = data LAG restate (events_classified), không PIT; gap live-engine SX 3,0-3,9pp / ZaloPay 2,1-2,6pp chủ yếu β T7 — CHỜ quant-skeptic + Mike; W2b-W5 chưa đo
+- [2026-11-12T12:46:18Z] [live-gap-p2a 12/11] XONG job Taylor_20261112_122858: 0/90 dac trung qua FDR IS&OOS; value LAG chet OOS; OOS hits = muc placebo (hieu ung nam); H5 hurdle-tang OOS -11,6pp nhung ~3 episode; ~45% deal LAG engine vuot ADV — CHO quant-skeptic + Mike
