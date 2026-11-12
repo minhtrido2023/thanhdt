@@ -455,3 +455,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING â€
 
 ## Archived 2026-11-11 (keep=12 days=0 require_done=False)
 - [2026-10-16T20:53:24Z] [2026-10-17] selfcheck-red sweep#4: snapshot_corp_action OPEN lan 2 => CAN USER (da post Architecture). Cho user tra question selfcheck-red-sweep-2026-10-16-can-user (A: HASH_EXCLUDE+ALTER ADD COLUMN); duyet xong => ap + rerun T3.7 + dong cau.
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-10-19T01:21:50Z] [2026-10-19] Cho user tra A/B/C cau Mike/retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path (da post Architecture 08:2x ICT). Tra loi => close_bus_question.py --decided-by-user + mo viec A / merge nhanh carry-forward C.
