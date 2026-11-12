@@ -376,3 +376,6 @@
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-11-06T12:11:14Z] [2026-11-06 19:xx ICT] Plan ZaloPay 11-09 XONG: BUY BSR1200/CSV1100/GAS300/MSB1500 (LAG), egg>=81.2tr; cho duyet truoc 08:45 09/11 (job DollarBill_20261106_120926)
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-06T12:11:39Z] [2026-11-06 19:xx ICT] Plan SpaceX 11-09 XONG: BUY LAG BSR/CSV/GAS/MSB 141,3tr, egg>=128,4tr; cho duyet truoc 08:45 09/11 (job DollarBill_20261106_120928)
