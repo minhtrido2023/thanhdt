@@ -2260,3 +2260,9 @@
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-11-11T01:22:18Z] [lag-rating-lag-q3 11/11] XONG job Taylor_20261111_011218: M1 dong 0/88; lo moi = troi rating dong Q3 (VGS); de xuat P1 log rating cong/P2 re-rate co dieu kien — CHO Mike/user
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T03:44:15Z] [dd-vn-calib 11/11] XONG job Taylor_20261111_032615: engine FCFE KHONG TUONG THICH (K3 khong hoi tu, lech theo ma); de xuat P1 FCFE=LNSTx(1-g/ROE) pha 2 — CHO Mike/user duyet
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T03:52:31Z] CHỜ Mike bổ sung Discord timestamp user chọn B cho VGS max_sessions=null (bus 01:05Z ghi A=25); code+data đã merge 11/11
