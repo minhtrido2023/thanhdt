@@ -40,7 +40,7 @@ def load_rating8l(start, end, bq):
     FROM tav2_bq.fa_ratings_8l AS f
     WHERE f.time <= DATE '{end}'""")
     df["time"] = pd.to_datetime(df["time"])
-    return df.sort_values("time")[["ticker","time","rating8l"]]
+    return df.sort_values(["time","ticker"], kind="mergesort")[["ticker","time","rating8l"]]  # stable: research/live-gap-p1 (a)
 
 
 def build_capit_suppress_windows(comovement_csv="data/daily_comovement_dt5g.csv",
@@ -90,7 +90,7 @@ def apply_regime_size(sig, start, end, bq, base_tiers=None, buy_tiers=None,
     s["time"] = pd.to_datetime(s["time"])
 
     rd = rating_df if rating_df is not None else load_rating8l(start, end, bq)
-    s = s.sort_values("time")
+    s = s.sort_values("time", kind="mergesort")  # stable: giữ thứ tự ưu tiên đầu vào trong cùng ngày (research/live-gap-p1 (a))
     s = pd.merge_asof(s, rd, on="time", by="ticker", direction="backward")
 
     weak_mask = (s["rating8l"] >= WEAK_RATING_MIN) & s["play_type"].isin(set(base_tiers))
