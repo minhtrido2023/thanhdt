@@ -3468,6 +3468,54 @@
    "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
    "notes": "Sau skeptic. Tâm trước CK 13.084; N lõi (loại một lần) ⇒ tâm ≈11.263. Mốc: ĐHĐCĐ bất thường cổ tức 20–30/12/2026 (chốt 30/11); BCTC Q4 ~20/01/2027. Ghi chú để user cân nhắc — không phải tín hiệu mua.",
    "recorded_at": "2026-11-11T21:02:57+07:00"
+  },
+  {
+   "ticker": "VCP",
+   "dd_date": "2026-11-12",
+   "rev": 1,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 20997,
+   "center": 40273,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số 3 kịch bản (bear 30% N 306,5−lỗ cho vay 401,9 / base 45% N 441,5 / bull 25% N 700,8 tỷ), r 13,5% (neo lãi huy động 12T hiệu dụng 7,40%), g 2% (ước lượng), sau chiết khấu thanh khoản cỡ 1 tỷ; trước CK 41.560",
+   "zone_high": 65297,
+   "center_range": null,
+   "price_ref": 37900,
+   "price_date": "2026-11-11",
+   "verdict_label": "TRONG vùng, sát tâm: giá 37.900 vs tâm sau CK 40.273 (−5,9%), trên ngưỡng 0,85×tâm = 34.232 ⇒ chưa đủ biên an toàn. Điểm yếu: biên mỏng — bull trừ phần biên phế liệu vượt thường + lãi dồn tích chưa thu thì tâm ≈36.937 (giá TRÊN tâm); cách đọc NPV=0 B cho tâm ≈46.081. Vùng bất định tâm ≈36.900–46.100. Rủi ro số 1: cho vay cá nhân 823 tỷ (lãi thu tiền 21,25/91,6 tỷ 9T), 46,8% cp VCP cầm cố. Moat NARROW (định lượng ≈ NONE). Sizing ≤0,3 tỷ (ADV60 0,30 tỷ)",
+   "skeptic_status": "vòng 1 fundamental-skeptic REFUTED mức văn bản (medium): số liệu sạch (13 số truy về BCTC khớp, mô hình tái lập), nhãn ĐỨNG; 10 thay đổi đã áp (rổ lỗ bear 803,7 tỷ, NPV=0 viết lại + biến thể B, comp ngành P/E trung vị 9,3x, lãi thực thu, bảng độ nhạy bull...); không chạy vòng 2 (Mike tái lập mô hình: identical)",
+   "source_file": "agents/Taylor/research/dd_VCP_20261112/REPORT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_VCP_20261112/REPORT.md",
+     "quote": "Tâm giá trị 41.560 đ/cp trước chiết khấu thanh khoản; 40.273 đ/cp sau chiết khấu (vị thế 1 tỷ)",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_VCP_20261112/REPORT.md",
+     "quote": "sau chiết khấu [20.997 ; 65.297]",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_VCP_20261112/REPORT.md",
+     "quote": "**37.900** (đóng cửa 11/11/2026, BQ)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_VCP_20261112/calc/assumptions.json",
+   "assumptions_md5": "22d79a2869f2f66a84d332c3e85069b7",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-12",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "notes": "Sau skeptic. Mốc: BCTC Q4/26 ≤30/01/2027 (LN gộp ngoài điện ≥100 tỷ nâng / ≤5% biên hạ), BCTC 2026 kiểm toán ≤31/03/2027. Ghi chú để user cân nhắc — không phải tín hiệu mua.",
+   "recorded_at": "2026-11-12T12:44:52+07:00"
   }
  ],
  "center_kinds": [
