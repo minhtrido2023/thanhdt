@@ -10,3 +10,4 @@
 - Open cũ: đối soát fill VGS 11/11 (ATC oid 232411/232401 "New" sau 14:55); anomaly-flags-stale, bg-dispatch-wakeup-miss chờ user; lệnh đối ứng cùng mã chưa có guard.
 - Wakeup MISS 0/9 hôm 12/11 (ngày thứ 2 liên tiếp) — theo dõi.
 
+- [2026-11-12T17:49:42Z] [13/11 00:52] B xong (feat/savings-row-20261112 @9246cd93e, chưa merge); skeptic B job quant-skeptic_20261112_174928 đang chạy. Sau đó: tổng hợp 4 việc chờ user + đề xuất A vòng 2 (NULL Volume_3M_P50) + C chưa chạy.
