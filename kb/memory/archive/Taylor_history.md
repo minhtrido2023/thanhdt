@@ -2257,3 +2257,6 @@
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-11-11T00:44:34Z] CHỜ user chọn A/B/C cho paper expvol_pacing (N=2/25; DISC buy thiếu state_<T>_<acct>.json không vào trial); checkpoint kế 2026-12-08
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T01:22:18Z] [lag-rating-lag-q3 11/11] XONG job Taylor_20261111_011218: M1 dong 0/88; lo moi = troi rating dong Q3 (VGS); de xuat P1 log rating cong/P2 re-rate co dieu kien — CHO Mike/user
