@@ -2281,3 +2281,9 @@
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-11-11T13:48:37Z] ĐANG DỞ job Taylor_20261111_133358 DD CST: model xong (calc/model_out.json, tâm 13.084/sau CK 12.681, giá 14.900 TRÊN tâm) | NEXT: viết REPORT.md + md5 assumptions + bus finding
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T13:52:00Z] [dd-CST 11/11] XONG job Taylor_20261111_133358: tam 13.084 (sau CK 0,3ty 12.681; P10 6.316/P90 20.799), gia 14.900 TREN tam, moat NONE; assumptions_md5 74c9efbd — CHO Mike skeptic + ghi so
+
+## Archived 2026-11-12 (keep=12 days=0 require_done=False)
+- [2026-11-11T14:11:30Z] [dd-cst-report 11/11] XONG job Taylor_20261111_140332: PDF 7tr + HTML tại research/dd_CST_20261111/report/, CHƯA gửi email (dry-run OK) — CHỜ user nói 'gửi email'; vùng giá ghi dd_price_zones là việc Mike

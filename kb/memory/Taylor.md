@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-11T13:52:00Z] [dd-CST 11/11] XONG job Taylor_20261111_133358: tam 13.084 (sau CK 0,3ty 12.681; P10 6.316/P90 20.799), gia 14.900 TREN tam, moat NONE; assumptions_md5 74c9efbd — CHO Mike skeptic + ghi so
-- [2026-11-11T14:11:30Z] [dd-cst-report 11/11] XONG job Taylor_20261111_140332: PDF 7tr + HTML tại research/dd_CST_20261111/report/, CHƯA gửi email (dry-run OK) — CHỜ user nói 'gửi email'; vùng giá ghi dd_price_zones là việc Mike
 - [2026-11-12T05:26:18Z] ĐANG DỞ job Taylor_20261112_051752 DD VCP: model xong calc/model_out.json | NEXT: viết REPORT.md + bus finding
 - [2026-11-12T05:29:46Z] [dd-vcp 12/11] XONG job Taylor_20261112_051752: tam 41.810 (sau CK 40.515), vung 22.502-67.385, gia BQ 11/11 37.900 sat tam; flag cho vay ca nhan 823 ty + LCTT lech + bien phe lieu Q3 — CHO Mike skeptic + ghi so
 - [2026-11-12T05:54:03Z] [dd-vcp-report 12/11] XONG job Taylor_20261112_054520: PDF 7tr + HTML tại research/dd_VCP_20261112/investor_report/, CHƯA gửi email — CHỜ user nói 'gửi email'; vùng giá ghi dd_price_zones là việc Mike
@@ -26,3 +24,5 @@
 - [2026-11-12T13:05:33Z] [live-gap-p1c 12/11] XONG job Taylor_20261112_122855: park khớp lịch live => DẤU GAP ĐẢO, live thắng engine +4,35..+4,65pp (engine -8,2/-7,3%); beta gần cân, gap là alpha (engine tín hiệu alpha đổi dấu theo park); live BAL+LAG ~5% NAV => không phải phép thử BAL/LAG; tie-break sd 0,35pp CAGR — CHỜ quant-skeptic + Mike; W2b-W5 chưa đo
 - [2026-11-12T13:28:37Z] [live-gap-p2b 12/11] XONG job Taylor_20261112_125912: 0 dac trung ben IS->OOS tren tap giao dich duoc (placebo 0/1 vs that 0), log_adv20/H1-IS mat; H5 theo episode PIT dep1m -1,18pp tho/-0,37 khu nam, 7 episode => khong ket luan; lực thấp rho<0,25 — CHO quant-skeptic + Mike
 - [2026-11-12T13:40:44Z] [live-gap-p3 12/11] XONG job Taylor_20261112_132954: 0/6 bien thoi diem qua PREREG (MDE 14-110pp, ~5 cua so/era); baseline P0 thang tiet kiem 12T 77,6% (3T 62%), thua 2019/2022; ref DT5G CRISIS/BEAR->tiet kiem CAGR ~= engine, DD -12,6 vs -17,1 (bao hiem, khong ung vien); sizing w 0,4/0,6/0,8 cho DD p5 -10/-15/-20 — CHO quant-skeptic + Mike
+- [2026-11-12T16:21:44Z] ĐANG DỞ job Taylor_20261112_162004 Luồng A: infra xong, batch1 (C30_off_q,L0,L1) chạy nền logs/batch1.out | NEXT: batch2 L2/L3/L4 + tb 10 seed, determinism AUDIT_END 07-29, pin_ledger add, registry, REPORT
+- [2026-11-12T16:26:49Z] [live-gap-exec-D 12/11] XONG job Taylor_20261112_162001: P(thang 12T) 77,6-84,6% (pin0/pin1M; -1,5pp: 74-82%), CI N_eff 45-98%; chinh sach DT5G->tiet kiem 1T ton 0,9-2,7pp CAGR, DD +2,4-4,5pp (bao hiem); D2 0 dac trung qua, MDE80 BAL 0,5/LAG 0,3 — CHO quant-skeptic + Mike

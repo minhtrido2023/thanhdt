@@ -91,3 +91,4 @@ note: >
   Báo cáo: `mike/agents/Winston/research/ticker_prune_hidden_risk_audit_20260729.md`.
 - 2026-10-14 (Mike, rollout quỹ bước 4): +price-volume/vnindex_total_return.md, +trading-bot/nav_sleeve_history.md (CANONICAL); vnindex_mirror_col.md bổ sung bẫy VNINDEX 2025-04-09.
 - 2026-10-26 (Winston, job Winston_20261026_065210): +feeds/bq_commodity_prices.md (CANONICAL-WITH-TRAPS; không tìm ra writer).
+- 2026-11-12 (Taylor, job Taylor_20261112_162001, Luồng D1e): +research-caches/vnindex_pe_only_csv.md (DEPRECATED — bản sao lưu của rebuild_vnindex_csv.py; VNINDEX_PE trong VNINDEX.csv có từ 2006, trùng 100% 2014–18, 85% 2019+).

@@ -12,6 +12,7 @@ title: Research caches lớn (KHÔNG production — đừng nhầm là sống)
 | [`edge_panel_csv.md`](edge_panel_csv.md) — data/edge_panel.csv (panel THÁNG signal+forward, IC/edge-health) | DERIVED — research-only nhưng **refresh DAILY 15:30 ICT** |
 | [`static_panels.md`](static_panels.md) — data/fa_ratings_lh.csv (05-15), data/intraday_full.pkl (05-17), data/value_panel_2014.csv (pinned PIT) | RESEARCH |
 | [`vnindex_csv.md`](vnindex_csv.md) — data/VNINDEX.csv | RESEARCH |
+| [`vnindex_pe_only_csv.md`](vnindex_pe_only_csv.md) — data/VNINDEX_pe_only.csv (bản sao lưu đông cứng 2026-05-10, PE 2014→2026-03-30) | DEPRECATED |
 
 ⚠️ Tiêu đề nhóm ("đừng nhầm là sống") đúng cho 3 nguồn tĩnh, **KHÔNG đúng cho `edge_panel.csv`** —
 nguồn này được `papertrade_daily.sh` step [22] ghi lại mỗi phiên T2-T6. Nó nằm ở nhóm này vì
