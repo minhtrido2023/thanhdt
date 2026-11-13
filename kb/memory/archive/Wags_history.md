@@ -458,3 +458,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-11-12 (keep=12 days=0 require_done=False)
 - [2026-10-19T01:21:50Z] [2026-10-19] Cho user tra A/B/C cau Mike/retro-pattern-recurring-fail-closed-gate-without-owned-recovery-path (da post Architecture 08:2x ICT). Tra loi => close_bus_question.py --decided-by-user + mo viec A / merge nhanh carry-forward C.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-10-20T01:23:45Z] [2026-10-20] Câu Mike/retro-pattern-...-owned-recovery-path vẫn CHỜ USER A/B/C (mở lại 01:22Z sau khi bị đóng lây). Bài học: close_bus_question giờ chặn rc=5 đóng lây substring — đừng dùng --ack-substring-collateral trừ khi thật sự muốn.

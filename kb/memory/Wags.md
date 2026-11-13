@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-20T01:23:45Z] [2026-10-20] Câu Mike/retro-pattern-...-owned-recovery-path vẫn CHỜ USER A/B/C (mở lại 01:22Z sau khi bị đóng lây). Bài học: close_bus_question giờ chặn rc=5 đóng lây substring — đừng dùng --ack-substring-collateral trừ khi thật sự muốn.
 - [2026-10-21T15:32:27Z] 21/10: DRI bán tay = USER xác nhận (current_ops). Cờ plan-position-drift DRI 21/10 và compute_active_nav fail-closed liên quan DRI là ĐÃ BIẾT — không mở/escalate question mới.
 - [2026-10-25T03:13:44Z] ĐANG DỞ: cq-2026-10-25 10 finding đã fix+commit (44fdb739d e8d1e1baf c6bb0bd0e 5aa77a1b4 9dde202b7); chờ arch-reviewer + quant-skeptic (e8d1e1baf) | NEXT: đọc verdict, sửa nếu NEEDS_CHANGES (1 lượt), rồi bus finding topic cq-2026-10-25-wags-autodispatch + notify_thread.sh architecture
 - [2026-10-25T03:25:28Z] [2026-10-25] cq-2026-10-25: auto_exit_inject #3/#10 PARKED branch cq-2026-10-25-auto-exit-inject-pending-approval, CHỜ USER (question cq-2026-10-25-auto-exit-inject-approval) trước cron 26/10 20:40. Duyệt A => git merge branch; B/hết hạn => giữ revert. Chốt: finding autodispatch chạm sinh-lệnh SELL (auto_exit_inject) = escalate, không tự sửa.
@@ -27,3 +26,4 @@
 - [2026-11-11T01:20:43Z] [2026-11-11] Câu Mike/retro-pattern-recurring-bg-dispatch-wakeup-miss-gate-checks-declaration-only CHỜ USER A/B/C (đã relay 10/11). Trả lời ⇒ close_bus_question --decided-by-user; A ⇒ mở rộng hooks/stop.sh (hiện chỉ Mike) + arch-reviewer.
 - [2026-11-11T03:57:45Z] [2026-11-11] Xong G2 stop-hook wakeup (4e2cfe867); cau retro bg-dispatch-wakeup-miss da dong. Neu MISS con tai dien: kiem wakeup_audit sau fix (queue-op artifact).
 - [2026-11-12T01:23:04Z] [2026-11-12] Fleet backup kẹt do GH001 (.pkl 113MB trong dcfac6bbc), KHÔNG phải PAT. CHỜ USER câu Wags/fleet-backup-gh001-history-rewrite: A ⇒ git bundle backup + filter-repo master từ fc5bd02d gỡ research/**/*.pkl|parquet lúc không job LIVE, push, close --decided-by-user. PAT thật hết 15/11 07:17 ICT (việc riêng của user).
+- [2026-11-13T01:20:44Z] [2026-11-13] Câu Wags/fleet-backup-gh001-history-rewrite vẫn CHỜ USER (checker 13/11 báo đúng, không fix). Lưu ý PAT hết 15/11 07:17 ICT: duyệt A phải làm trước hoặc đổi PAT.
