@@ -215,8 +215,10 @@ def _flow_note(f: dict, reason: str) -> dict:
 
 
 def compute_period_returns(account: str, report_date: datetime.date, rows: list, inception: dict,
-                            flows: list = None, benchmark=None) -> dict:
-    """`benchmark` (tuỳ chọn): hàm `(from_date, to_date) -> dict` — thêm khối `benchmark` vào mỗi kỳ
+                            flows: list = None, benchmark=None, savings=None) -> dict:
+    """`savings` (tuỳ chọn): hàm `(from_date, to_date, return_pct) -> dict` — thêm khối `savings`
+    (`savings_hurdle.savings_fn()`); không truyền ⇒ đầu ra như cũ, từng byte.
+    `benchmark` (tuỳ chọn): hàm `(from_date, to_date) -> dict` — thêm khối `benchmark` vào mỗi kỳ
     (CLI dùng `vnindex_total_return.report_benchmark`). Không truyền ⇒ đầu ra như cũ, từng byte."""
     nav1_row = _last_on_or_before(rows, report_date)
     if nav1_row is None:
@@ -233,7 +235,7 @@ def compute_period_returns(account: str, report_date: datetime.date, rows: list,
         # khong duoc doan `[]` (mot lan NAP thanh LAI — sai theo huong co loi cho minh).
         flows = load_flows(account, require_file=True)
     ledger, info = build_ledger(rows, flows, inception_from, inception_nav0)
-    return _assemble(account, report_date, ledger, info, inception_from, benchmark, inception)
+    return _assemble(account, report_date, ledger, info, inception_from, benchmark, inception, savings)
 
 
 # Mốc VN-Index kỳ "từ khi bắt đầu" được sớm hơn inception_date tối đa ngần này ngày lịch (chặn gõ nhầm
@@ -264,7 +266,8 @@ def index_anchor_date(account: str, inception: dict) -> str:
 
 
 def _assemble(account: str, report_date: datetime.date, ledger: list, info: dict,
-              inception_from: datetime.date, benchmark=None, inception: dict = None) -> dict:
+              inception_from: datetime.date, benchmark=None, inception: dict = None,
+              savings=None) -> dict:
     i1 = max(i for i, row in enumerate(ledger) if row["date"] <= report_date)
 
     monday = report_date - datetime.timedelta(days=report_date.weekday())
@@ -302,6 +305,13 @@ def _assemble(account: str, report_date: datetime.date, ledger: list, info: dict
                                ("excess_vs_tr_pp", "vnindex_tr_pct")):
                     bm[k] = (round(p["return_pct"] - bm[col], 3) if bm.get(col) is not None else None)
                 p["benchmark"] = bm
+    if savings is not None:
+        # Mốc ngày = ĐÚNG from_date/to_date của kỳ sổ đơn vị (không do người soạn chọn). Riêng kỳ dùng
+        # dòng 0: cùng ngày với mốc vốn gốc — SpaceX 01/07 (NAV gốc = số dư SÁNG 01/07 ⇒ lãi từ 01/07).
+        for key in ("inception", "wtd", "mtd", "day"):
+            p = out[key]
+            if p is not None:
+                p["savings"] = savings(p["from_date"], p["to_date"], p["return_pct"])
     return out
 
 
@@ -324,6 +334,18 @@ def compute_sleeve_period_returns(account: str, report_date: datetime.date, rows
     out["outside_scope"] = sb["outside_scope"]
     out["outside_at_inception_vnd"] = sb["outside0_vnd"]
     return out
+
+
+def _savings_fn():
+    """Khối savings — đường CẢNH BÁO: lỗi import/đọc không làm mất số tỉ suất."""
+    try:
+        import savings_hurdle as sh
+        return sh.savings_fn()
+    except Exception as exc:                # noqa: BLE001
+        err = _exc_text(exc)
+        return lambda a, b, r=None: {"from_date": a, "to_date": b, "hurdle_pct": None,
+                                     "excess_vs_savings_pp": None, "status": "unavailable",
+                                     "reason": f"không nạp được savings_hurdle: {err}"}
 
 
 def _benchmark_fn():
@@ -382,7 +404,7 @@ def main() -> int:
                 return 3
         else:
             result = compute_period_returns(args.account, report_date, rows, inception,
-                                            benchmark=_benchmark_fn())
+                                            benchmark=_benchmark_fn(), savings=_savings_fn())
     except (FileNotFoundError, ValueError, KeyError, CashFlowError) as e:
         print(f"LỖI nav_period_returns: {e}", file=sys.stderr)
         return 1

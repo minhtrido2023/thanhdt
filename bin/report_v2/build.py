@@ -40,6 +40,8 @@ sys.path.insert(0, HERE)
 import data_sources as S  # noqa: E402
 import narrative as N  # noqa: E402
 import render as R  # noqa: E402
+sys.path.insert(0, os.path.dirname(HERE))
+import period_table_32 as PT  # noqa: E402  (nhãn/cảnh báo tiết kiệm NGUYÊN VĂN + div_receiving: cùng nguồn với cổng)
 from render import bullets, footnote, img, kpi_tiles, pct, section, table, vn  # noqa: E402
 
 MANIFEST_TAG = "report_v2_manifest:"
@@ -121,6 +123,25 @@ def nav_parts(acct, d):
     g = {k: float(r.get(k) or 0) for k in ("nav", "mtm_stock", "cash", "egg_assets", "margin_debt", "offbook_assets")}
     g["date"] = S.D(r["date"])
     return g
+
+
+def savings_cols(header, per_rows, periods, acct, report_date):
+    """B4: thêm 2 cột tiết kiệm (+ footnote nhãn/cảnh báo NGUYÊN VĂN của `period_table_32`) vào bảng hiệu suất PDF/email
+    khi CLI phát khối `savings`. Số lấy NGUYÊN từ khối `savings` (không tự trừ). Kỳ không có khối ⇒ ô '—'.
+    Không kỳ nào có khối ⇒ bảng như cũ. Trả (header, rows, color_cols_thêm, footnotes_html)."""
+    sv = [(p or {}).get("savings") for p in periods]
+    if not any(isinstance(x, dict) and x.get("hurdle_pct") is not None for x in sv):
+        return header, per_rows, (), []
+    rows = []
+    for r, x in zip(per_rows, sv):
+        ok_ = isinstance(x, dict) and x.get("hurdle_pct") is not None and x.get("excess_vs_savings_pp") is not None
+        rows.append(r + ([pct(x["hurdle_pct"]), R.pp(x["excess_vs_savings_pp"]).replace(" điểm %", "")] if ok_ else ["—", "—"]))
+    aw = next((x["anchor_warning"] for x in sv if isinstance(x, dict) and x.get("anchor_warning")), None)
+    recv, _used, ev = PT.div_receiving_ex(acct, S.D(report_date).isoformat())
+    if recv is None:     # không có dữ kiện ⇒ DỪNG, không dựng PDF/email với nhãn đoán (coding_guidelines §29)
+        raise RuntimeError(f"savings_cols: không xác định được nhãn tiết kiệm cho {acct} {report_date}: {ev}")
+    notes = [footnote(PT.sav_label_for(recv, ev))] + ([footnote(aw)] if aw else []) + [footnote(PT.SAV_WARN)]
+    return header + ["Gửi tiết kiệm (tham chiếu)", "Chênh so tiết kiệm (điểm %)"], rows, (7,), notes
 
 
 def bridge_numbers(p, attr=None):
@@ -372,8 +393,9 @@ def build_monthly(acct, period, out_dir, nar_path=None):
                          pct(b_["vnindex_tr_pct"]) if b_.get("vnindex_tr_pct") is not None else "không có",
                          R.pp(b_["excess_vs_price_pp"]).replace(" điểm %", "") if b_.get("excess_vs_price_pp") is not None else "không có",
                          R.pp(b_["excess_vs_tr_pp"]).replace(" điểm %", "") if b_.get("excess_vs_tr_pp") is not None else "không có"])
-    tb_per = cx.tbl(["Giai đoạn", cx.acct, "VN-Index", "VN-Index có cổ tức", "Chênh (điểm %)", "Chênh có cổ tức"],
-                    per_rows, color_cols=(1, 4, 5))
+    ph, per_rows, pc, sav_notes = savings_cols(["Giai đoạn", cx.acct, "VN-Index", "VN-Index có cổ tức", "Chênh (điểm %)", "Chênh có cổ tức"],
+                                               per_rows, [mtd, qtd, ytd, inc], cx.acct, m_end)
+    tb_per = cx.tbl(ph, per_rows, color_cols=(1, 4, 5) + pc)
     ml = [x[0] for x in months]
     f_grid = R.chart_month_grid(ml, [x[1] for x in months], [x[2] for x in months],
                                 "Tỷ suất từng tháng so với VN-Index", cx.f("03_months.png"),
@@ -492,7 +514,7 @@ def build_monthly(acct, period, out_dir, nar_path=None):
            img(png_br, 470), tb_br, footnote(fl_txt),
            apply_narrative(cx, nar, "bridge", ["Hiệu suất tính theo giá đơn vị, đã loại nạp/rút; NAV tuyệt đối chỉ dùng trong cầu NAV."]))
     cx.add(section(f"Hiệu suất: tháng {pct(mtd['return_pct'])}, từ đầu {pct(inc['return_pct'])} so với VN-Index {pct(inc['benchmark']['vnindex_price_pct'])}"),
-           tb_per, img(f_grid),
+           tb_per, *sav_notes, img(f_grid),
            apply_narrative(cx, nar, "performance", [f"Chênh tháng so VN-Index giá {R.pp(ex_m)}; từ khi bắt đầu {R.pp(ex_i)}."]))
     cx.add(section(f"Rủi ro: sụt giảm tháng {pct(rk['mdd'], 2, False)} so với VN-Index {pct(rk_v['mdd'], 2, False)}"),
            tb_risk, img(f_uw),
@@ -755,8 +777,9 @@ def build_weekly(acct, period, out_dir, nar_path=None):
                          pct(b_["vnindex_tr_pct"]) if b_.get("vnindex_tr_pct") is not None else "không có",
                          R.pp(b_["excess_vs_price_pp"]).replace(" điểm %", "") if b_.get("excess_vs_price_pp") is not None else "không có",
                          R.pp(b_["excess_vs_tr_pp"]).replace(" điểm %", "") if b_.get("excess_vs_tr_pp") is not None else "không có"])
-    tb_per = cx.tbl(["Giai đoạn", cx.acct, "VN-Index", "VN-Index có cổ tức", "Chênh (điểm %)", "Chênh có cổ tức"],
-                    per_rows, color_cols=(1, 4, 5))
+    ph, per_rows, pc, sav_notes = savings_cols(["Giai đoạn", cx.acct, "VN-Index", "VN-Index có cổ tức", "Chênh (điểm %)", "Chênh có cổ tức"],
+                                               per_rows, [wtd, mtd, inc], cx.acct, fri)
+    tb_per = cx.tbl(ph, per_rows, color_cols=(1, 4, 5) + pc)
     # NAV theo ngày trong tuần: tỷ suất ngày từ sổ đơn vị (đúng số pipeline; ngày có nạp/rút `bod` đã loại dòng tiền)
     drows = []
     for i in range(1, len(led)):
@@ -827,7 +850,7 @@ def build_weekly(acct, period, out_dir, nar_path=None):
     cx.add(section(f"Cầu NAV: lãi/lỗ đầu tư {R.mil(br['pnl'])}, nạp/rút {R.mil(br['flow'])}"),
            img(png_br, 470), tb_br, footnote(fl_txt),
            apply_narrative(cx, nar, "bridge", ["Hiệu suất tính theo giá đơn vị, đã loại nạp/rút; NAV tuyệt đối chỉ dùng trong cầu NAV."]))
-    cx.add(section(f"Hiệu suất: tuần {pct(wtd['return_pct'])}, từ đầu {pct(inc['return_pct'])}"), tb_per, tb_days,
+    cx.add(section(f"Hiệu suất: tuần {pct(wtd['return_pct'])}, từ đầu {pct(inc['return_pct'])}"), tb_per, *sav_notes, tb_days,
            apply_narrative(cx, nar, "performance", [f"Chênh tuần so VN-Index giá {R.pp(ex_w)}."]))
     if f_attr:
         cx.add(section(f"Đóng góp: giá cổ phiếu {R.mil(br['price'])}, phí và thuế {R.mil(-(br['fee'] + br['tax']))}"),

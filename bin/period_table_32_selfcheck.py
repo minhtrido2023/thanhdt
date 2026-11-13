@@ -22,6 +22,11 @@ import report_delivery_gate as rdg  # noqa: E402
 from nav_period_benchmark_selfcheck import bm_fn, fixture  # noqa: E402
 
 N_OK = 0
+RECV = [0.0]                       # cashDividendReceiving giả cho selfcheck (B4); test đọc thật ở cuối
+_real_ex = pt.div_receiving_ex
+pt.div_receiving = lambda *a, **k: RECV[0]
+pt.div_receiving_ex = lambda *a, **k: (RECV[0], None, "fixture")
+_recv_fn = lambda account, d: RECV[0]  # noqa: E731
 
 
 def ok(cond, msg):
@@ -33,7 +38,7 @@ def ok(cond, msg):
 
 def blocks(text, cli, must=(), installed=True, acc="ZaloPay"):
     try:
-        pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed)
+        pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed, recv_fn=_recv_fn)
     except pt.TableBlock as e:
         for m in must:
             ok(m in str(e), f"thông điệp phải trích {m!r}: {e}")
@@ -42,7 +47,7 @@ def blocks(text, cli, must=(), installed=True, acc="ZaloPay"):
 
 
 def passes(text, cli, installed=True, acc="ZaloPay"):
-    out = pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed)
+    out = pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed, recv_fn=_recv_fn)
     ok(out and ("PASS" in out[0] or "WARN" in out[0]), f"phải qua: {out}")
     return out[0]
 
@@ -72,6 +77,11 @@ def replace_cell(text, row_kw, col, new):
 
 
 def main() -> int:
+    # B3: selfcheck PHẢI test module của CHÍNH cây chứa nó (worktree từng có symlink `mike` → checkout chính;
+    # `python3 mike/bin/..._selfcheck.py` chạy từ gốc worktree sẽ test nhầm master).
+    for mod in (pt, npr, rdg):
+        ok(os.path.realpath(mod.__file__).startswith(os.path.realpath(HERE) + os.sep),
+           f"{mod.__name__} nạp từ {mod.__file__}, KHÔNG phải cây của selfcheck ({HERE}) — test nhầm cây khác")
     D, series, inc, rows, _sat = fixture()
     rd = D[66]
     a = npr.compute_period_returns("ZaloPay", rd, rows, inc, [], benchmark=bm_fn(series))
@@ -174,7 +184,7 @@ def main() -> int:
     ok(nfd != doc(t) and "(b) inception: khớp CLI" in passes(nfd, cli), "NFD + 'Luỹ' ⇒ vẫn đối chiếu")
     notab = "# Báo cáo tuần\n\n### 3.2 Hiệu suất\n\nkhông có bảng\n"
     blocks(notab, cli, ("không có bảng", "bắt buộc có bảng 3.2"))
-    sk = pt.check_report("X_weekly.md", notab, "ZaloPay", "2030-06-06", cli=cli, series_installed=lambda: False)
+    sk = pt.check_report("X_weekly.md", notab, "ZaloPay", "2030-06-06", cli=cli, series_installed=lambda: False, recv_fn=_recv_fn)
     ok("SKIP" in sk[0], f"chưa cài chuỗi ⇒ SKIP: {sk}")
     blocks(replace_cell(doc(t), "Tuần này", "ZaloPay", pt.fmt_num(a["wtd"]["return_pct"] + 0.02, "%")), cli,
            ("Tuần này", "'ZaloPay'", f"{a['wtd']['return_pct']:+.3f}"))
@@ -232,6 +242,134 @@ def main() -> int:
     ok(src.count("_check_benchmark_table(report)") == 1
        and src.index("_check_period_returns(report)\n") < src.index("_check_benchmark_table(report)"),
        "deliver() phải gọi cổng bảng ngay sau cổng period-return")
+    # 9. Luồng B2 (13/11): cột "gửi tiết kiệm" — khớp CLI ±0,005 + excess = TWR − hurdle; template chưa đổi
+    #    (bảng không có cột này ⇒ phần trên không đổi hành vi). Dương: khớp; âm: lệch số / thiếu khối CLI.
+    CS, CX = pt.COL_SAV, pt.COL_SAVX
+    asv = copy.deepcopy(a)
+    for k, _ in pt.PERIODS:
+        if asv.get(k):
+            hv = round(0.37 + 0.11 * len(k), 3)
+            asv[k]["savings"] = {"hurdle_pct": hv, "excess_vs_savings_pp": round(asv[k]["return_pct"] - hv, 3),
+                                 "status": "ok", "anchor_warning": "Cảnh báo neo giả."}
+    ts = pt.render(asv, None)                                   # B3: render TỰ phát cột + nhãn + cảnh báo
+    ok(CS in ts and CX in ts and pt.SAV_LABEL in ts and pt.SAV_WARN in ts, "B3: render có cột + nhãn + cảnh báo")
+    ok("Cảnh báo neo giả." in ts, "B3: render in anchor_warning của CLI")
+    ok("chưa tính thuế" not in ts, "B3: không còn câu 'chưa tính thuế' cũ trong bảng render")
+    ok(CS not in pt.render(a, None) and pt.SAV_LABEL not in pt.render(a, None),
+       "B3: CLI không phát savings ⇒ bảng KHÔNG có cột/nhãn tiết kiệm (hành vi cũ)")
+    ok("inception: khớp CLI" in passes(doc(ts), mkcli(asv, b)), "B2 dương: cột tiết kiệm khớp CLI")
+    ok("khớp" in passes(doc(pt.render(a, None)), mkcli(asv, b)), "B2: bảng KHÔNG có cột tiết kiệm ⇒ không đổi hành vi")
+    def bump(col, d):
+        return replace_cell(doc(ts), "Từ khi bắt đầu", col, pt.fmt_num(
+            asv["inception"]["savings"]["hurdle_pct" if col == CS else "excess_vs_savings_pp"] + d,
+            "%" if col == CS else "pp"))
+    blocks(bump(CS, 0.02), mkcli(asv, b), (CS,))                # hurdle lệch
+    blocks(bump(CX, 0.02), mkcli(asv, b), (CX,))                # excess lệch
+    a_ok = copy.deepcopy(asv)
+    a_ok["inception"]["savings"]["hurdle_pct"] += 0.004                  # ⩽ 0,005 vẫn qua
+    a_ok["inception"]["savings"]["excess_vs_savings_pp"] -= 0.004
+    passes(doc(ts), mkcli(a_ok, b))
+    a_bad = copy.deepcopy(asv)
+    a_bad["inception"]["savings"]["hurdle_pct"] += 0.007                 # > 0,005 ⇒ chặn
+    blocks(doc(ts), mkcli(a_bad, b), (CS, "lệch"))
+    a_nos = copy.deepcopy(asv)
+    del a_nos["inception"]["savings"]
+    blocks(doc(ts), mkcli(a_nos, b), ("khối `savings`",))                 # CLI không có khối ⇒ chặn
+    a_un = copy.deepcopy(asv)
+    a_un["inception"]["savings"] = {"hurdle_pct": None, "excess_vs_savings_pp": None, "status": "unavailable"}
+    blocks(doc(ts), mkcli(a_un, b), (CS,))                               # CLI không có số mà bảng có số ⇒ chặn
+    blocks(bump(CX, 0.02), mkcli(asv, b), (CX,))                         # excess tự bịa
+    # B3: nhãn/cảnh báo bắt buộc NGUYÊN VĂN
+    blocks(doc(ts.replace(pt.SAV_LABEL, "")), mkcli(asv, b), ("nhãn tiết kiệm",))
+    blocks(doc(ts.replace(pt.SAV_WARN, "")), mkcli(asv, b), ("cảnh báo",))
+    blocks(doc(ts.replace("miễn thuế TNCN", "chịu thuế TNCN")), mkcli(asv, b), ("nhãn tiết kiệm",))   # sửa chữ nhãn
+    # B3 / skeptic B2: cột GIỐNG tiết kiệm nhưng không nhận ra theo tên ⇒ CHẶN (không để lọt khỏi đối chiếu)
+    for bad_name in ("Gửi tiet kiem", "Lãi gửi ngân hàng", "Hurdle (tiền gửi)", "Savings", "Lãi tiền gửi 12T"):
+        tsx = ts.replace(CS, bad_name)
+        blocks(doc(tsx), mkcli(asv, b), (bad_name,))
+    # mọi cột render() phát ra đều được cổng phân loại (không cột "mồ côi" tên lạ)
+    hdr = [c.strip() for c in ts.splitlines()[0].strip("|").split("|")]
+    ok(all(any(k in pt.strip_accents(c) for k in pt.SAV_LIKE) is False or "tiết kiệm" in c for c in hdr),
+       "B3: mọi cột giống tiết kiệm trong header render() đều chứa 'tiết kiệm'")
+    # sleeve: dòng bot có "—" ở cột tiết kiệm, cổng bỏ qua khi CLI --sleeve bot không có khối savings
+    tz = pt.render(asv, b)
+    ok("—" in tz and CS in tz, "B3: dòng bot có cột tiết kiệm '—'")
+    passes(doc(tz), mkcli(asv, b))
+
+    # ── B4 (13/11): nhãn có điều kiện theo cashDividendReceiving của kỳ ───────────────────────────────
+    ALT = pt.SAV_LABEL_ALT
+    ok(ALT != pt.SAV_LABEL and "5% cổ tức" not in ALT and "chờ về" in ALT, "B4: biến thể ALT khác V0, không khẳng định 5% đã trừ")
+    ok(pt.sav_label_for(0) == pt.SAV_LABEL and pt.sav_label_for(0.0) == pt.SAV_LABEL, "B4: recv=0 ⇒ nhãn V0")
+    for v in (1.0, 3_800_000.0):
+        ok(pt.sav_label_for(v) == ALT, f"B4: recv={v!r} ⇒ nhãn ALT")
+    nr = pt.sav_label_for(None, "đã thử 2030-06-07: không có file")
+    ok(nr.startswith(pt.NEEDS_REVIEW_TAG) and "2030-06-07: không có file" in nr and ALT not in nr and pt.SAV_LABEL not in nr,
+       "B5: recv=None ⇒ KHÔNG chọn nhãn nào, dòng NEEDS-REVIEW nêu bằng chứng đã đọc")
+    try:
+        RECV[0] = 3_800_000.0
+        t_alt = pt.render(asv, None)
+        ok(ALT in t_alt and pt.SAV_LABEL not in t_alt, "B4: recv≠0 ⇒ render in ALT, không in V0")
+        passes(doc(t_alt), mkcli(asv, b))                        # cổng chấp nhận ALT nguyên văn
+        blocks(doc(ts), mkcli(asv, b), ("cashDividendReceiving", "3,800,000"))   # V0 khi recv≠0 ⇒ CHẶN
+        RECV[0] = None
+        blocks(doc(ts), mkcli(asv, b), ("không đọc được",))      # V0 khi không đọc được ⇒ CHẶN
+        blocks(doc(t_alt), mkcli(asv, b), ("không đọc được", "KHÔNG tự rơi sang ALT"))   # B5: ALT cũng CHẶN khi recv=None
+        t_nr = pt.render(asv, None, recv=None)
+        ok(pt.NEEDS_REVIEW_TAG in t_nr, "B5: render recv=None ⇒ dòng NEEDS-REVIEW, không nhãn")
+        blocks(doc(t_nr), mkcli(asv, b), ("không đọc được",))
+        RECV[0] = 0.0
+        passes(doc(ts), mkcli(asv, b))                            # V0 khi recv=0 ⇒ qua
+        blocks(doc(t_alt), mkcli(asv, b), ("cổ tức tiền mặt đang chờ về",))   # B5: ALT khi recv=0 là KHẲNG ĐỊNH SAI ⇒ CHẶN
+        blocks(doc(t_alt.replace("chưa được trừ", "đã được trừ")), mkcli(asv, b), ("nhãn tiết kiệm",))   # sửa chữ ALT
+        # B5 mutation: MỌI biến thể khác V0/ALT đều bị chặn (recv=0 cho V0, recv≠0 cho ALT)
+        RECV[0] = 0.0
+        for nm, mut in (("V0 cắt cuối", pt.SAV_LABEL[:-3]), ("V0 thêm đuôi", pt.SAV_LABEL + " Thêm."),
+                        ("V0 đổi 5%→3%", pt.SAV_LABEL.replace("5% cổ tức", "3% cổ tức")),
+                        ("V0 bỏ 'miễn thuế'", pt.SAV_LABEL.replace("miễn thuế", "chịu thuế")),
+                        ("V0 thêm chữ giữa", pt.SAV_LABEL.replace("Đây là mốc", "Đây chỉ là mốc")),
+                        ("V0 + dòng ALT cùng lúc", pt.SAV_LABEL + "_\n_" + ALT)):
+            blocks(doc(ts.replace(pt.SAV_LABEL, mut)), mkcli(asv, b), ("nhãn tiết kiệm",))
+            ok(True, f"B5 mutation chặn: {nm}")
+        blocks(doc(ts.replace(pt.SAV_LABEL, ALT)), mkcli(asv, b), ("cổ tức tiền mặt đang chờ về",))   # ALT khi recv=0 ⇒ CHẶN
+        RECV[0] = 3_800_000.0
+        for nm, mut in (("ALT cắt cuối", ALT[:-3]), ("ALT thêm đuôi", ALT + " Thêm."),
+                        ("ALT đổi 5%→3%", ALT.replace("5% khấu trừ", "3% khấu trừ")),
+                        ("ALT đổi 'cao hơn'→'thấp hơn'", ALT.replace("cao hơn", "thấp hơn")),
+                        ("ALT hai dòng", ALT + "_\n_" + ALT)):
+            blocks(doc(t_alt.replace(ALT, mut)), mkcli(asv, b), ("nhãn tiết kiệm",))
+            ok(True, f"B5 mutation chặn: {nm}")
+        RECV[0] = 0.0
+        blocks(doc(ts.replace(pt.SAV_LABEL, "").replace(ALT, "")), mkcli(asv, b), ("nhãn tiết kiệm",))
+    finally:
+        RECV[0] = 0.0
+    # đọc THẬT (hàm gốc) trên thư mục giả: lọc account_no, lấy bản ghi balances CUỐI ngày, thiếu ⇒ None
+    import json as _j, tempfile as _t
+    with _t.TemporaryDirectory() as td:
+        inc = Path(td) / "inc.json"
+        inc.write_text(_j.dumps({"A1": {"account_no": "111"}, "A2": {"account_no": "222"}}), encoding="utf-8")
+        (Path(td) / "dnse_raw_2030-06-06.jsonl").write_text("\n".join(_j.dumps(r) for r in [
+            {"account_no": "111", "kind": "balances", "ts": "t1", "payload": {"stock": {"cashDividendReceiving": 5}}},
+            {"account_no": "222", "kind": "balances", "ts": "t2", "payload": {"stock": {"cashDividendReceiving": 900}}},
+            {"account_no": "111", "kind": "balances", "ts": "t3", "payload": {"stock": {"cashDividendReceiving": 0}}},
+            {"account_no": "111", "kind": "orders", "ts": "t4", "payload": {}}]), encoding="utf-8")
+        g = lambda acc, d: _real_ex(acc, d, exec_dir=td, inception_path=str(inc))[0]  # noqa: E731
+        ok(g("A1", "2030-06-06") == 0.0, "B4: lấy bản ghi balances CUỐI của đúng account (A1=0, bỏ A2=900)")
+        ok(g("A2", "2030-06-06") == 900.0, "B4: account khác ⇒ số khác (§12)")
+        ok(g("A1", "2030-06-07") is None, "B4: thứ Sáu GIAO DỊCH thiếu file ⇒ None (không suy ra 0, không nhảy qua lỗ hổng thật)")
+        rec = lambda v, acc="111": {"account_no": acc, "kind": "balances", "ts": "t", "payload": {"stock": {"cashDividendReceiving": v}}}  # noqa: E731
+        (Path(td) / "dnse_raw_2030-06-14.jsonl").write_text(_j.dumps(rec(7)), encoding="utf-8")      # thứ Sáu
+        (Path(td) / "dnse_raw_2030-08-30.jsonl").write_text(_j.dumps(rec(11)), encoding="utf-8")     # thứ Sáu trước lễ 2/9
+        # B5: report_date cuối tuần / lễ (không có file) ⇒ lùi về phiên giao dịch gần nhất trước đó
+        ok(g("A1", "2030-06-15") == 7.0 and g("A1", "2030-06-16") == 7.0, "B5: thứ Bảy/Chủ nhật ⇒ lấy balances thứ Sáu")
+        ex = _real_ex("A1", "2030-06-15", exec_dir=td, inception_path=str(inc))
+        ok(ex[1] == "2030-06-14" and "ngày nghỉ" in ex[2], f"B5: bằng chứng nêu ngày thật đã đọc: {ex[2]!r}")
+        ok(g("A1", "2030-09-02") == 11.0, "B5: thứ Hai lễ 2/9 (cuối tuần + lễ) ⇒ lấy balances thứ Sáu 30/8")
+        ok(g("A1", "2030-06-17") is None, "B5: thứ Hai GIAO DỊCH thiếu file ⇒ None, không lùi sang thứ Sáu")
+        ok(g("A2", "2030-06-15") is None, "B5: account khác không có balances thứ Sáu ⇒ None (lọc account khi lùi)")
+        none_ev = _real_ex("A1", "2030-06-17", exec_dir=td, inception_path=str(inc))[2]
+        ok("2030-06-17: không có file" in none_ev, f"B5: None kèm bằng chứng đã thử: {none_ev!r}")
+        ok(g("A3", "2030-06-06") is None, "B4: account không có mốc ⇒ None")
+
     print(f"OK — {N_OK} assertion PASS (period_table_32_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0
 
