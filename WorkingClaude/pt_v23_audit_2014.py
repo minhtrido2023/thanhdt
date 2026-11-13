@@ -1044,10 +1044,13 @@ opens_df["time"] = pd.to_datetime(opens_df["time"])
 print(f"  opens: {len(opens_df):,} rows ({len(_opens_parts)} year chunks)")
 open_prices = {tk: dict(zip(g["time"], g["open_price"])) for tk, g in opens_df.groupby("ticker")}
 prices = {tk: dict(zip(g["time"], g["Close"])) for tk, g in sig_f.groupby("ticker")}
+liq_map = dict(zip(zip(sig_f["ticker"], sig_f["time"]), sig_f["liq"]))
+# A9 (verdict A7 (c)): liq_map (= bảng ADV THỰC THI của BAL: trần mua 20% ADV + slippage bậc) dựng TRƯỚC bộ lọc
+# SIG_ADV_MIN. Bộ lọc là CỔNG TẦNG TÍN HIỆU, không được đục lỗ bảng thực thi — bản A7 lọc trước nên ngày ADV 1–2 tỷ
+# mất key ⇒ fill ngày 2..5 thành "không trần" (legacy full size). Thứ tự này: OFF vẫn byte-identical.
 if SIG_ADV_MIN > 0:
     _n0 = len(sig_f); sig_f = sig_f[pd.to_numeric(sig_f["liq"], errors="coerce") >= SIG_ADV_MIN].copy()
-    print(f"  [SIG_ADV_MIN={SIG_ADV_MIN:,.0f}] BAL signal rows {_n0:,} -> {len(sig_f):,}", flush=True)
-liq_map = dict(zip(zip(sig_f["ticker"], sig_f["time"]), sig_f["liq"]))
+    print(f"  [SIG_ADV_MIN={SIG_ADV_MIN:,.0f}] BAL signal rows {_n0:,} -> {len(sig_f):,} (liq_map giữ {len(liq_map):,} key)", flush=True)
 
 vni = bq(VNI_QUERY.format(start=START_DATE, end=END_DATE))
 vni["time"] = pd.to_datetime(vni["time"])
@@ -1609,6 +1612,35 @@ LIQ_LAG = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
            "liquidity_lookup": liq_lag, "exit_slippage_tiered": True,
            "liquidity_require_positive": (LIQ_ZERO_BLOCK in ("1", "lag", "both"))}
 if _SELLCAP_KW: LIQ_LAG.update(sell_adv_cap=SELL_ADV_CAP, sell_adv_maxcarry=SELL_ADV_MAXCARRY, sell_cap_log=_SELLCAP_KW["sell_cap_log"])
+if _SELLCAP_KW:
+    # A9 (verdict A7 (b)/(d)): bảng ADV DÀY cho trần bán, CẢ HAI book, cùng định nghĩa pit với LAG live:
+    # ADV(d) = median Volume t-60..t-1 (min LAG_ADV_MINP phiên) × PxAdv(t-1), PxAdv = COALESCE(Price, Close).
+    # Giá trị tại d chỉ dùng dữ liệu <= d-1 ⇒ ADV "phiên trước", biết trước Open d (không nhìn trước).
+    # Mọi phiên của mọi mã BAL-universe (univ_window_pred) ∪ LAG/CAPIT (lag_universe) — KHÔNG cắt sàn liq,
+    # nên mã tụt dưới 1 tỷ/ra universe vẫn có ADV THẬT (thấp) thay vì giá trị cũ cao của liq_map.
+    _sa_tk = sorted(set(opens_df["ticker"].unique()) | set(lag_universe))
+    _sa_start = (pd.Timestamp(START_DATE) - pd.Timedelta(days=200)).date()
+    _sa_parts = []
+    for _i in range(0, len(_sa_tk), 250):
+        _in = ",".join(f"'{t}'" for t in _sa_tk[_i:_i+250])
+        _pp = bq(f"""SELECT t.ticker, t.time, t.Volume, COALESCE(t.Price, t.Close) AS PxAdv
+FROM tav2_bq.ticker AS t
+WHERE t.time BETWEEN DATE '{_sa_start}' AND DATE '{END_DATE}' AND t.ticker IN ({_in})""")
+        assert len(_pp) < 1_990_000, f"bq() max_rows cap risk (sell-adv chunk {_i})"
+        _sa_parts.append(_pp)
+    _sa = pd.concat(_sa_parts, ignore_index=True); del _sa_parts
+    _sa["time"] = pd.to_datetime(_sa["time"])
+    _sa = _sa.sort_values(["ticker", "time"], kind="mergesort").reset_index(drop=True)
+    _sg = _sa.groupby("ticker", sort=False)
+    _sa["_adv"] = (_sg["Volume"].transform(lambda x: x.shift(1).rolling(60, min_periods=LAG_ADV_MINP).median())
+                   * _sg["PxAdv"].shift(1))
+    _sa = _sa[_sa["_adv"].notna()]
+    SELL_ADV_PIT = {tk: (g["time"].values.astype("datetime64[ns]").astype(np.int64), g["_adv"].to_numpy(float))
+                    for tk, g in _sa.groupby("ticker", sort=False)}
+    print(f"  [SELL_ADV_CAP A9] bảng ADV pit dày: {len(SELL_ADV_PIT)} mã / {len(_sa):,} phiên (yêu cầu {len(_sa_tk)} mã)", flush=True)
+    del _sa, _sg
+    LIQ_FULL["sell_adv_lookup"] = SELL_ADV_PIT
+    LIQ_LAG["sell_adv_lookup"] = SELL_ADV_PIT
 
 # LAG SUE-TILT (#23, Taylor 2026-06-27): finer 3-tier weight by surprise tercile vs the binary HI/LO@0.5.
 # REJECTED (backtest @50B): 3-tier LOSES -0.66pp CAGR (27.44->26.78), worse BOTH halves (IS -0.7 / OOS -0.2),
@@ -2332,7 +2364,8 @@ if _SELLCAP_KW:
         for _sim, _g in _scl.groupby("sim"):
             _ex = _g[_g["carry"] == 0]
             print(f"  [SELL_ADV_CAP={SELL_ADV_CAP:g} {_sim}] exits capped {len(_ex)} | carry-slices {len(_g)} | "
-                  f"max carry {int(_g['carry'].max())} | forced {int(_g['forced'].sum())} | zero-liq slices {int((_g['liq'] <= 0).sum())}")
+                  f"max carry {int(_g['carry'].max())} | forced {int(_g['forced'].sum())} | zero-liq slices {int((_g['liq'] <= 0).sum())}"
+                  f" | missing-ADV slices {int((_g['liq_src'] < 0).sum())}")
         if os.environ.get("SELL_CAP_LOG_OUT"): _scl.to_csv(os.environ["SELL_CAP_LOG_OUT"], index=False)
     else:
         print(f"  [SELL_ADV_CAP={SELL_ADV_CAP:g}] 0 exits capped")

@@ -456,6 +456,9 @@ def simulate(signals_df, prices, vni_dates, *,
                                              #   (remainder carried to next session). None = legacy full sell (byte-identical).
              sell_adv_maxcarry=20,           # sessions a capped exit may carry before the rest is force-sold (only if sell_adv_cap)
              sell_cap_log=None,              # optional list: one dict per capped/carried exit slice (diagnostics)
+             sell_adv_lookup=None,           # R&D A9: DENSE per-ticker ADV for the sell cap, {tk: (int64 ns dates, float VND)}.
+                                             #   CONVENTION: value at d = ADV KNOWN BEFORE d's Open (pit: median Volume t-60..t-1
+                                             #   x PxAdv(t-1)) => as-of <= d. None = fallback to liquidity_lookup as-of STRICTLY < d.
              sector_limit_per_sector=None,   # dict {sector_id: max_pos} for per-sector caps
              sector_cap_exempt_tiers=None,   # set/list of play_types exempt from sector caps (D1)
              tier_position_limit=None,       # dict {play_type: max_concurrent} for per-tier cap (E3)
@@ -567,23 +570,32 @@ def simulate(signals_df, prices, vni_dates, *,
     _ETF_LIQ_ON = (etf_liquidity_pct is not None and etf_adv_lookup is not None)
     _sellcap_on = bool(sell_adv_cap) and t1_open_exec and liquidity_lookup is not None
     if _sellcap_on:
-        # liquidity_lookup may be SPARSE (BAL liq_map = signal rows only) — a missing key is NOT
-        # zero liquidity. Sell-cap uses the latest known ADV <= today (as-of, no look-ahead).
-        _sc_ser = {}
-        for (_k_tk, _k_d), _k_v in liquidity_lookup.items():
-            _sc_ser.setdefault(_k_tk, []).append((_k_d, _k_v))
-        for _k_tk in _sc_ser:
-            _l = sorted(_sc_ser[_k_tk], key=lambda x: x[0])
-            _sc_ser[_k_tk] = (np.array([pd.Timestamp(x[0]).value for x in _l]), np.array([float(x[1] or 0) for x in _l]))
+        # A9 (fix verdict A7 (b)/(d)): the sell cap must NOT reuse the buy table as-of — BAL liq_map is cut at
+        # liq>=1e9 in SQL, so a missing key there means "below floor / left the universe", and an as-of
+        # carry-forward would hand back an older, HIGHER ADV (optimistic sell cap).
+        # Preferred: sell_adv_lookup = dense pit table (value at d already uses data <= d-1) -> as-of <= d.
+        # Fallback (no dense table): series from liquidity_lookup (end-of-day d values) -> as-of STRICTLY < d
+        # (previous session; never today's close-of-day ADV for a sell that fills at today's Open).
+        # Missing ticker / no earlier value -> 0 = cannot sell today (forced at sell_adv_maxcarry).
+        if sell_adv_lookup is not None:
+            _sc_ser, _sc_side = sell_adv_lookup, "right"
+        else:
+            _sc_ser, _sc_side = {}, "left"
+            for (_k_tk, _k_d), _k_v in liquidity_lookup.items():
+                _sc_ser.setdefault(_k_tk, []).append((_k_d, _k_v))
+            for _k_tk in _sc_ser:
+                _l = sorted(_sc_ser[_k_tk], key=lambda x: x[0])
+                _sc_ser[_k_tk] = (np.array([pd.Timestamp(x[0]).value for x in _l]), np.array([float(x[1] or 0) for x in _l]))
         def _sc_liq(tk, d):
-            v = liquidity_lookup.get((tk, d))
-            if v is not None:
-                return float(v), 0
+            """(ADV VND usable for a sell filling at d's Open, src): src 1 = found, -1 = missing (-> 0)."""
             a = _sc_ser.get(tk)
             if a is None:
                 return 0.0, -1
-            j = np.searchsorted(a[0], pd.Timestamp(d).value, side="right") - 1
-            return (float(a[1][j]), 1) if j >= 0 else (0.0, -1)
+            j = np.searchsorted(a[0], pd.Timestamp(d).value, side=_sc_side) - 1
+            if j < 0:
+                return 0.0, -1
+            v = float(a[1][j])
+            return (v if v > 0 else 0.0), 1
     def _etf_day_cap(today):
         """Max VND of E1VFVN30 tradeable today (liquidity ceiling for parking buys AND sells).
         None/inf when no cap configured (legacy behavior)."""
@@ -776,7 +788,9 @@ def simulate(signals_df, prices, vni_dates, *,
                         g_s = sh_s * open_px
                         extra_slip = 0.0
                         if exit_slippage_tiered and _liq_c > 0:
-                            _p = g_s / _liq_c
+                            # A9: a capped slice is BY CONSTRUCTION exactly sell_adv_cap x ADV; g_s/_liq_c recomputed in
+                            # floats can land at 0.2000000001 and jump to the 0.5% tier (seen in selfcheck T3a).
+                            _p = sell_adv_cap
                             if _p > 0.20:    extra_slip = 0.005
                             elif _p > 0.10:  extra_slip = 0.003
                             elif _p > 0.05:  extra_slip = 0.001
@@ -806,7 +820,9 @@ def simulate(signals_df, prices, vni_dates, *,
                         continue
                 extra_slip = 0.0
                 if exit_slippage_tiered and liquidity_lookup:
-                    liq = liquidity_lookup.get((tk, today)) or 0
+                    # A9 (verdict A7 (d)): under the sell cap the final/whole slice uses the SAME as-of ADV as
+                    # the earlier slices (exact-key lookup only on the legacy path => byte-identical when OFF).
+                    liq = (_liq_c if _sellcap_on else (liquidity_lookup.get((tk, today)) or 0))
                     if liq > 0:
                         pct_of_adv = gross / liq
                         if pct_of_adv > 0.20:    extra_slip = 0.005
