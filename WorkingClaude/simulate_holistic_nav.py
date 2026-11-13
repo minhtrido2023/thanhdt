@@ -301,6 +301,102 @@ def _finalize_partial(entry, positions, tk, play_type, ticker_sector_map, vni_da
     }
 
 
+# ---------------------------------------------------------------------------------------------
+# IDLE-CASH AGE LEDGER (user chot 08:02 ICT 2026-09-28: "rut truoc han coi nhu huong lai 0%").
+# Module level on purpose: this is the whole semantic of the dep1m_21s convention, so it must be
+# unit-testable on its own (`idle_cash_age_selfcheck.py`) instead of only through a full backtest.
+#
+# A lot is [age_sessions, amount_vnd]. The list is AGE-ORDERED: index 0 = oldest, last = newest.
+# `age` counts SESSIONS ELAPSED since the lot appeared, so a lot created this session has age 0 and
+# is on its 1st session of being idle. In the DAILY pay mode, eligibility is `age >= min_age`, i.e.
+# a lot first earns on its (min_age+1)-th session and the first min_age sessions are never credited
+# retroactively -- a CONSERVATIVE CONVENTION that strictly under-pays a rolled term deposit, NOT a
+# look-ahead constraint (see the note at deposit_pay_mode). The MATURITY pay mode implements the
+# faithful rule instead: see idle_lots_mature below. In BOTH modes a lot spent before it matures
+# earns 0% by construction, with no claw-back mechanism needed.
+# ---------------------------------------------------------------------------------------------
+
+def idle_lots_reconcile(lots, target_cash, order="fifo", new_lot_tail=()):
+    """Bring the age-ordered cash-lot ledger `lots` (mutated IN PLACE) to `target_cash`.
+
+    Inflow  -> ONE new lot at age 0 (money that just arrived has been idle 0 sessions).
+    Outflow -> consumes existing lots. order="fifo": from the OLDEST end (index 0) -- kills matured
+    lots, so LESS carry = the conservative convention. order="lifo": from the NEWEST end -- keeps
+    the aged lots alive, so MORE carry. Negative target (margin) clamps to 0 => ledger emptied.
+    Invariant after the call: sum(amount) == max(target_cash, 0) to fp tolerance.
+
+    `new_lot_tail` = extra per-lot fields appended after [age, amount] on every NEW lot. The empty
+    default keeps the 2-field lot of the DAILY-pay mode byte-identical; the MATURITY-pay mode passes
+    (0.0, 0) = (accrued rate-sum, sessions already accrued in the lot's current term).
+    """
+    if order not in ("fifo", "lifo"):
+        raise ValueError(f"order={order!r} khong hop le; chi {{fifo,lifo}}")
+    tgt = max(float(target_cash), 0.0)
+    d = tgt - sum(lot[1] for lot in lots)
+    if d > 1e-9:
+        lots.append([0, d])
+        if new_lot_tail:
+            lots[-1].extend(new_lot_tail)
+    elif d < -1e-9:
+        need = -d
+        while need > 1e-12 and lots:
+            idx = 0 if order == "fifo" else len(lots) - 1
+            lot = lots[idx]
+            take = lot[1] if lot[1] <= need else need
+            lot[1] -= take
+            need -= take
+            if lot[1] <= 1e-9:
+                lots.pop(idx)
+    return lots
+
+
+def idle_lots_eligible(lots, min_age):
+    """Total amount that has ALREADY been idle >= `min_age` sessions (so: earns carry today)."""
+    return sum(a for g, a in lots if g >= min_age)
+
+
+# MATURITY-PAY mode (quant-skeptic 2026-09-28, user duyet 12:05 ICT). The DAILY mode above pays
+# r/252 per session only from session min_age+1 on, and NEVER back-pays the first min_age sessions
+# -- so a lot that survives n sessions is credited n-min_age days instead of the
+# min_age*floor(n/min_age) days a rolled 1-month term deposit actually pays. That under-pay is a
+# CONSERVATIVE CONVENTION, not a causality constraint: crediting a term that is ALREADY OVER, on its
+# anniversary session, uses no future information. This mode implements the faithful rule instead.
+# Extra per-lot fields (indices 2,3): accrued rate-SUM of the CURRENT term, and how many sessions
+# that term has accrued. A rate-sum (not a day count) is what makes it exact under a time-varying
+# PIT rate -- no averaging, no approximation -- and correct under partial consumption, since a lot
+# trimmed mid-term simply carries the same rate-sum on a smaller principal.
+IDLE_LOT_ACCRUED, IDLE_LOT_TERM_DAYS = 2, 3
+
+
+def idle_lots_mature(lots, term_sessions):
+    """Pay out every lot whose CURRENT term has already accrued `term_sessions` sessions.
+
+    Returns the VND credited this session and resets those lots onto a fresh term. Must be called
+    BEFORE `idle_lots_accrue` in the same session, so a lot born at session s is paid at age
+    `term_sessions` -- the same session the DAILY mode makes its first payment on -- for exactly the
+    sessions s..s+term_sessions-1 it spent maturing.
+
+    A lot consumed before its term completes is dropped by the reconcile with its accrual NEVER
+    paid => "rut truoc han = 0%", enforced by construction with no claw-back. The interest paid is
+    NOT folded back into the lot: it lands in `cash` and the next reconcile turns it into a fresh
+    age-0 lot, so there is no compounding inside a term (same convention as the daily mode).
+    """
+    paid = 0.0
+    for lot in lots:
+        if lot[IDLE_LOT_TERM_DAYS] >= term_sessions:
+            paid += lot[1] * lot[IDLE_LOT_ACCRUED]
+            lot[IDLE_LOT_ACCRUED] = 0.0
+            lot[IDLE_LOT_TERM_DAYS] = 0
+    return paid
+
+
+def idle_lots_accrue(lots, rate_per_session):
+    """Book one session of carry onto every lot's current (still unpaid) term."""
+    for lot in lots:
+        lot[IDLE_LOT_ACCRUED] += rate_per_session
+        lot[IDLE_LOT_TERM_DAYS] += 1
+
+
 def simulate(signals_df, prices, vni_dates, *,
              allowed_tiers, max_positions,
              hold_days=HOLD_DAYS, stop_loss=STOP_LOSS, min_hold=MIN_HOLD,
@@ -371,7 +467,35 @@ def simulate(signals_df, prices, vni_dates, *,
              profit_target=None,             # close position if ret >= profit_target (e.g., 0.30 = +30%)
              pt_blacklist_days=0,            # re-entry blacklist after PROFIT_TARGET exit (default 0 = re-enter freely)
              deposit_annual=0.0,             # idle cash yield (default 0%/yr; set 0.01 or 0.005 for realistic VN non-term)
+                                             # ALSO accepts a pd.Series/dict {date -> fraction/yr} for a TIME-VARYING
+                                             # point-in-time carry proxy (W2/Q2 2026-09-27). Scalar path unchanged.
              borrow_annual=0.10,             # margin borrow rate (default 10%/yr per CLAUDE.md); charged when cash<0
+             # --- IDLE-CASH AGE GATE (user chot 08:02 ICT 2026-09-28: "rut truoc han coi nhu huong
+             # lai 0%"). A 1-month term deposit is NOT daily-liquid: crediting the 1M rate to cash
+             # that turns over inside the month over-pays. With this on, carry is credited ONLY to
+             # the portion of cash that has ALREADY sat idle >= deposit_min_age_sessions sessions as
+             # of that session. Sessions 1..min_age of a lot pay 0%; from session min_age+1 on the
+             # lot earns r/252. NO back-pay ever: a lot idle 100 sessions is NEVER credited for its
+             # first min_age sessions. NOTE (quant-skeptic 2026-09-28): this is a CONSERVATIVE
+             # CONVENTION, not a look-ahead constraint -- paying a completed term at its
+             # anniversary is causal. The engine under-pays a matured lot by 1..min_age days,
+             # so the CAGR it yields is a LOWER BOUND of the faithful early-withdrawal-0% number.
+             # Cash spent before it matures therefore earns 0% automatically -- no claw-back needed.
+             # 0 (default) = OFF, original expression, byte-identical.
+             deposit_min_age_sessions=0,
+             # Which lot a cash OUTFLOW consumes. "fifo" = oldest first => kills matured lots =>
+             # LESS carry = the CONSERVATIVE convention (pin). "lifo" = newest first => keeps the
+             # aged lots => MORE carry (sensitivity leg only).
+             deposit_age_order="fifo",
+             # How a matured slice is PAID. "daily" (default, byte-identical to the pinned
+             # dep1m_21s leg) = r/252 every session from session min_age+1 on, first min_age
+             # sessions never credited. "maturity" = the FAITHFUL "rut truoc han = 0%" rule: each
+             # lot is credited its whole accrued term on every min_age-session anniversary of
+             # itself, and 0 for a term still in progress when the cash is spent. "daily" strictly
+             # UNDER-pays a rolled term deposit (n-min_age days vs min_age*floor(n/min_age)), so it
+             # is a LOWER bound on "maturity", not an estimate of it.
+             deposit_pay_mode="daily",
+             idle_age_log=None,              # optional list to capture per-session {ymd, cash, eligible, nav} when the age gate is on
              nav_log_extra=None,             # optional list to capture (date, cash, n_pos, deployed_pct, state)
              etf_log=None,                   # optional list to capture ETF rebalance events {ymd, action, amount_vnd, price_vn30, friction_cost, cash_after, cash_etf_after}
              event_log=None,                 # optional list to capture every BUY/SELL event individually (analyze_portfolio.py format)
@@ -465,6 +589,41 @@ def simulate(signals_df, prices, vni_dates, *,
     sig_by_date = {d: g for d, g in sig_filtered.groupby("time")}
     date_idx = {d: i for i, d in enumerate(vni_dates)}
 
+    # TIME-VARYING IDLE-CASH CARRY (W2/Q2, job Taylor_20260927_141318). `deposit_annual` may now be
+    # a pd.Series / dict {date -> annual rate as a FRACTION} instead of a scalar, so a backtest can
+    # use a point-in-time idle-cash proxy (idle_rate_proxy.py) rather than one constant. Scalar
+    # (incl. the 0.0 default) takes the ORIGINAL code path untouched -> byte-identical when unused.
+    # A date missing from the map resolves to 0.0 (no carry), never to a forward-filled guess: the
+    # PIT forward-fill is the proxy module's job, not this engine's.
+    _dep_lut = None
+    if not isinstance(deposit_annual, (int, float, np.floating, np.integer)):
+        _dep_lut = {pd.Timestamp(k): float(v) for k, v in dict(deposit_annual).items()}
+
+    # IDLE-CASH AGE GATE state (see deposit_min_age_sessions). `_cash_lots` is an age-ordered
+    # ledger [[age_sessions, amount_vnd], ...]: index 0 = OLDEST lot, last = newest. It is
+    # reconciled to the engine's real `cash` twice per session (step 4 = after exits, before the
+    # carry; step 6z = after every buy/park, before the NAV record), so an outflow consumes real
+    # lots instead of being netted away. Ages advance once per session, at the session's START.
+    _age_min = int(deposit_min_age_sessions or 0)
+    _age_on = _age_min > 0
+    _age_order = str(deposit_age_order or "fifo").strip().lower()
+    if _age_on and _age_order not in ("fifo", "lifo"):
+        raise ValueError(f"deposit_age_order={deposit_age_order!r} khong hop le; chi {{fifo,lifo}}")
+    _age_mode = str(deposit_pay_mode or "daily").strip().lower()
+    if _age_mode not in ("daily", "maturity"):
+        raise ValueError(f"deposit_pay_mode={deposit_pay_mode!r} khong hop le; chi {{daily,maturity}}")
+    if _age_mode == "maturity" and not _age_on:
+        raise ValueError("deposit_pay_mode='maturity' vo nghia khi deposit_min_age_sessions=0 "
+                         "(khong co ky han nao de dao han): chan cung de khong sinh mot chan im "
+                         "lang y het chan daily")
+    # Lots carry 2 extra fields ONLY in maturity mode (see idle_lots_mature) — the daily mode keeps
+    # the 2-field lot so its path stays byte-identical to the pinned dep1m_21s leg.
+    _age_tail = (0.0, 0) if _age_mode == "maturity" else ()
+    _cash_lots = []
+
+    def _lots_reconcile(target_cash):
+        idle_lots_reconcile(_cash_lots, target_cash, _age_order, _age_tail)
+
     # Slippage: pay more on buy, get less on sell
     sell_cost_factor = (1 - TC_SELL - CG_TAX) * (1 - slippage)   # 0.998 * (1 - slip)
     buy_cost_factor  = (1 + TC_BUY) * (1 + slippage)             # 1.001 * (1 + slip)
@@ -537,6 +696,12 @@ def simulate(signals_df, prices, vni_dates, *,
         return (sell_vnd, gross_before, gross_after)
 
     for i, today in enumerate(vni_dates):
+        # 0z) IDLE-CASH AGE GATE: every surviving lot is one session older as this session opens.
+        #     Done BEFORE any cash moves so a lot created later today starts at age 0 and must
+        #     still live through min_age full sessions before it can earn anything.
+        if _age_on:
+            for _lot in _cash_lots:
+                _lot[0] += 1
         # 0) T+1 OPEN EXEC: execute pending exits from prior session at today's Open price
         if t1_open_exec and pending_exits:
             still_pending = []
@@ -877,8 +1042,29 @@ def simulate(signals_df, prices, vni_dates, *,
         #    _interest_today = the cash change from interest (no tx row); recorded so the per-session
         #    cash-flow self-check can reconcile it (>0 = deposit earned, <0 = borrow interest paid).
         _cash_pre_int = cash
-        if cash > 0 and deposit_annual > 0:
-            cash *= (1 + deposit_annual / 252)
+        _dep_today = deposit_annual if _dep_lut is None else _dep_lut.get(today, 0.0)
+        _age_elig = None
+        if _age_on:
+            # Reconcile FIRST (today's sale proceeds enter as an age-0 lot), then pay only the
+            # matured part. The interest itself is NOT added to a lot here: it shows up as new
+            # cash at the 6z reconcile and so starts its own age-0 clock (conservative).
+            _lots_reconcile(cash)
+        if _age_on and _age_mode == "maturity":
+            # Mature BEFORE accruing, so a term is paid on the anniversary session (age == _age_min)
+            # -- the very session the daily mode makes its first payment on. `_age_elig` logs the
+            # PRINCIPAL whose term completed today (the daily mode logs the principal that earns
+            # today); in this mode the payment is that principal x its accrued rate-SUM, so it is
+            # exact under the time-varying PIT rate without any approximation.
+            _age_elig = sum(lot[1] for lot in _cash_lots
+                            if lot[IDLE_LOT_TERM_DAYS] >= _age_min)
+            cash += idle_lots_mature(_cash_lots, _age_min)
+            idle_lots_accrue(_cash_lots, max(_dep_today, 0.0) / 252)
+        elif _age_on:
+            _age_elig = idle_lots_eligible(_cash_lots, _age_min)
+            if cash > 0 and _dep_today > 0 and _age_elig > 0:
+                cash += _age_elig * _dep_today / 252
+        elif cash > 0 and _dep_today > 0:
+            cash *= (1 + _dep_today / 252)
         if cash < 0 and borrow_annual > 0:
             cash *= (1 + borrow_annual / 252)  # cash<0 grows MORE negative (interest expense)
         _interest_today = cash - _cash_pre_int
@@ -1433,12 +1619,27 @@ def simulate(signals_df, prices, vni_dates, *,
                             "target_etf_frac": None, "holding_id": _hid_lev, "lot_entry_date": today,
                             "lot_cost_basis": float(_lev_amt), "reason_tag": "LEVER_AT_BOTTOM"})
 
+        # 6z) IDLE-CASH AGE GATE: second reconcile of the session, AFTER every buy / ETF park /
+        #     delever has moved cash. This is what makes the outflow consume real lots (fifo =
+        #     the matured ones) instead of quietly netting against today's inflow.
+        if _age_on:
+            _lots_reconcile(cash)
+
         # 7) Record NAV (include pending partial fills + ETF mark-to-market)
         positions_mv = sum(p["shares"] * p["last_price"] for p in positions.values())
         pending_mv = sum(p["filled_shares"] * p.get("last_seen_price", 0)
                          for p in pending_entries if p["filled_shares"] > 0)
         cash_etf_val = _etf_mark(today)
         nav = cash + cash_etf_val + positions_mv + pending_mv
+        if _age_on and idle_age_log is not None:
+            # `leg` = simulate()'s own name, because ONE book can be simulated more than once in a
+            # run (BAL is simulated a first time to build the CAPIT trigger path, then again with
+            # the CAPIT arms). Without it the two passes get averaged together and the reported
+            # "matured cash % of NAV" belongs to no single ledger.
+            idle_age_log.append({"leg": name, "ymd": today, "cash_pre_int": float(_cash_pre_int),
+                                 "eligible": float(_age_elig or 0.0), "rate": float(_dep_today),
+                                 "nav": float(nav), "n_lots": len(_cash_lots),
+                                 "pay_mode": _age_mode, "interest": float(_interest_today)})
         nav_history.append({
             "time": today, "nav": nav,
             "cash": float(cash),

@@ -12,6 +12,16 @@ Ba tang (dung dung ten user da duyet o §2.2 cua ke hoach):
              lai qua money-market, mat het spread san pham".
   spot     : carry egg DNSE do that (8.543%/nam). CHI cho cua so nhin truoc ngan;
              goi voi ngay ngoai khoang -> raise ValueError.
+  dep1m    : lai suat HUY DONG ky han 1 THANG, khach CA NHAN, binh quan nhom Big 4 (FiinPro).
+             Day la tier user CHOT 2026-09-27 23:58 ICT lam quy uoc pin ("tien mat thi neo theo
+             lai suat huy dong 1 thang"). HAI DOAN, KHAC NHAU VE BAN CHAT:
+               2019-02..2026-09 = SO THAT do FiinPro cong bo (92 thang, moi thang chup ngay 15).
+               truoc 2019-02     = DUNG LAI  = sbv_low + DEP1M_OFFSET_PP. KHONG phai so cong bo.
+             Route FiinPro tra HTTP 500 cho moi ngay <= 2018-12 (Mike do 2014/2015/2016/2018 deu
+             rong) va trial het han 2026-09-28 ⇒ KHONG the keo them. Doan dung lai phu 53/150
+             thang cua cua so backtest (2014-01..2026-06 — dung con so ENGINE TU IN qua
+             `dep1m_coverage()`; ban dau docstring ghi "54/143", sai ca tu va mau, quant-skeptic
+             bat 2026-09-27) ⇒ moi ket luan phai kem bang bat dinh offset (p25/p75).
 
 HAIRCUT_PP = 2.04 — KHONG phai con so quy uoc 1.0pp trong ban ke hoach. Do that tren
 143 thang 2014-01..2026-08: median(SBV low >12-24M - lien NH 3M) = +2.040pp
@@ -44,6 +54,15 @@ BAY (mang theo khi bao so):
     module khong tu y lam thay.
  4. Doi chieu cheo chi phu 2025-11..2026-09 (3 moc/chuoi, lech 0.00pp). Doan 2014..2025-10
     CHUA co nguon doc lap xac minh — xem REPORT.md muc 1.
+ 5. Tier `dep1m` KHONG dong nhat ve chat luong theo thoi gian: 2019-02 tro di la so cong bo,
+    truoc do la SO DUNG LAI tu mot offset trung vi do tren 90 thang overlap. Lien ngan hang
+    KHONG bac cau duoc (median dep1m - ibor1M = -0.240 nhung sd 2.472, corr -0.141) — chi
+    sbv_low bac cau duoc (median -2.525, sd 0.883, corr +0.619). Do lai bang
+    `measure_dep1m_offset()`.
+ 6. 8 thang trong doan dung lai KHUYET sbv_low (2015-02, 2016-02, 2016-08, 2017-01..03, 2017-05,
+    2017-09) ⇒ duoc forward-fill tu thang truoc, y nhu hai tier kia. Day la ff cua mot moc CHINH
+    SACH da cong bo (dung PIT), KHONG phai noi suy tuong lai. `monthly_table()` ghi nhan bang cot
+    `dep1m_src` (real / recon / recon_ff) de dem duoc.
 """
 from __future__ import annotations
 
@@ -59,6 +78,7 @@ DATA_DIR = os.environ.get("IDLE_RATE_PROXY_DIR", _DEFAULT_DIR)
 
 SBV_CSV = "fiinprox_sbv_avg_deposit_rate_monthly_2011_2026.csv"
 IB_CSV = "fiinprox_interbank_avg_rate_monthly_2014_2026.csv"
+DEP1M_CSV = "fiinprox_deposit_1m_big4_monthly_2019_2026.csv"
 
 HAIRCUT_PP = 2.04          # median(SBV low >12-24M - lien NH 3M), 143 thang 2014-01..2026-08
 HAIRCUT_TENOR = "3 tháng"  # tenor dung de hieu chinh haircut (dispatch W1 muc 2)
@@ -68,7 +88,14 @@ SPOT_RATE_PCT = 8.543      # carry egg DNSE do that, Job U Taylor_20260927_08562
 SPOT_VALID_FROM = date(2026, 8, 18)   # ngay dau tien egg.totalValue != 0
 SPOT_VALID_TO = date(2027, 3, 31)     # ke hoach §2.2: chi cho "ky nhin truoc ngan (<= 6 thang)"
 
-TIERS = ("baseline", "floor", "spot")
+# Tier `dep1m` (user chot 2026-09-27 23:58 ICT). Offset dung de DUNG LAI doan truoc 2019-02:
+# median(dep1m - sbv_low) do tren 90 thang overlap 2019-02..2026-08 = -2.525pp
+# (mean -2.857, sd 0.883, p25 -3.400, p75 -2.300, corr +0.619). Dung MEDIAN theo yeu cau dispatch.
+# Ghi de qua env chi de do BANG BAT DINH cua cau (chan p25 / p75) — KHONG de "tune".
+DEP1M_OFFSET_PP = float(os.environ.get("IDLE_DEP1M_OFFSET_PP", "-2.525"))
+DEP1M_REAL_FROM = "2019-02"        # thang dau tien co SO THAT (FiinPro tra 500 cho moi ngay <= 2018-12)
+
+TIERS = ("baseline", "floor", "spot", "dep1m")
 
 
 def _to_date(d) -> date:
@@ -102,7 +129,11 @@ def _load(data_dir: str) -> pd.DataFrame:
     i["m"] = i["period"].str.slice(0, 7)
     ib = i.pivot(index="m", columns="ten", values="rate_pct")
 
-    df = dep.join(ib, how="outer").sort_index()
+    d1 = pd.read_csv(os.path.join(data_dir, DEP1M_CSV))
+    d1 = d1[d1["series"] == "big4_1m_individual"].copy()      # mot chuoi duy nhat; loc tuong minh
+    d1m = d1.set_index("period")["rate_pct"].rename("dep1m_real")
+
+    df = dep.join(ib, how="outer").join(d1m, how="outer").sort_index()
     df.index.name = "month"
     return df
 
@@ -112,6 +143,14 @@ def monthly_table(data_dir: str | None = None) -> pd.DataFrame:
     df = _load(data_dir or DATA_DIR).copy()
     df["baseline_pct"] = (df["sbv_low"] - HAIRCUT_PP).clip(lower=0.0)
     df["floor_pct"] = df["ib_" + FLOOR_TENOR].clip(lower=0.0)
+    # dep1m: SO THAT tu DEP1M_REAL_FROM tro di; truoc do DUNG LAI tu sbv_low + offset.
+    # KHONG back-fill so that ve qua khu (se la nhin trom tuong lai) va KHONG dung recon de
+    # lap cho thang khuyet cua doan that (de ham r_idle ff nhu hai tier kia, xem BAY 6).
+    real = df["dep1m_real"].where(df.index >= DEP1M_REAL_FROM)
+    recon = (df["sbv_low"] + DEP1M_OFFSET_PP).clip(lower=0.0).where(df.index < DEP1M_REAL_FROM)
+    df["dep1m_pct"] = real.combine_first(recon)
+    df["dep1m_src"] = np.where(real.notna(), "real",
+                               np.where(recon.notna(), "recon", ""))
     return df
 
 
@@ -126,6 +165,37 @@ def measure_haircut(data_dir: str | None = None, tenor: str = HAIRCUT_TENOR) -> 
         "p75": float(d.quantile(0.75)), "mean": float(d.mean()),
         "sd": float(d.std()), "frac_negative": float((d < 0).mean()),
     }
+
+
+def measure_dep1m_offset(data_dir: str | None = None, ref: str = "sbv_low") -> dict:
+    """Do offset (dep1m THAT - chuoi bac cau) tren doan overlap — bang chung cho DEP1M_OFFSET_PP.
+
+    ref = "sbv_low" (cau DUNG DUOC) hoac "ib_1 tháng" (cau KHONG dung duoc, giu lai de chung minh).
+    """
+    df = _load(data_dir or DATA_DIR)
+    d = (df["dep1m_real"] - df[ref]).dropna()
+    j = df[["dep1m_real", ref]].dropna()
+    return {
+        "ref": ref, "n": int(len(d)),
+        "first": str(d.index[0]), "last": str(d.index[-1]),
+        "median": float(d.median()), "mean": float(d.mean()),
+        "sd": float(d.std()), "p25": float(d.quantile(0.25)), "p75": float(d.quantile(0.75)),
+        "corr": float(j["dep1m_real"].corr(j[ref])),
+    }
+
+
+def dep1m_coverage(data_dir: str | None = None, first_month: str = "2014-01",
+                   last_month: str = "2026-06") -> dict:
+    """Dem thang THAT vs DUNG LAI vs FF trong mot cua so — so phai bao cao kem moi ket luan."""
+    tbl = monthly_table(data_dir)
+    months = [f"{y}-{m:02d}" for y in range(int(first_month[:4]), int(last_month[:4]) + 1)
+              for m in range(1, 13)]
+    months = [m for m in months if first_month <= m <= last_month]
+    real = [m for m in months if m in tbl.index and tbl.loc[m, "dep1m_src"] == "real"]
+    recon = [m for m in months if m in tbl.index and tbl.loc[m, "dep1m_src"] == "recon"]
+    ff = [m for m in months if m not in tbl.index or tbl.loc[m, "dep1m_src"] == ""]
+    return {"window": f"{first_month}..{last_month}", "n_months": len(months),
+            "n_real": len(real), "n_recon": len(recon), "n_ff": len(ff), "ff_months": ff}
 
 
 def r_idle(d, tier: str = "baseline", data_dir: str | None = None) -> float:
@@ -148,7 +218,7 @@ def r_idle(d, tier: str = "baseline", data_dir: str | None = None) -> float:
             )
         return SPOT_RATE_PCT
 
-    col = "baseline_pct" if tier == "baseline" else "floor_pct"
+    col = {"baseline": "baseline_pct", "floor": "floor_pct", "dep1m": "dep1m_pct"}[tier]
     tbl = monthly_table(data_dir)[col].dropna()
     cutoff = _pit_month(dd)
     avail = tbl.loc[:cutoff]              # <= cutoff: PIT + forward-fill trong mot buoc
@@ -168,6 +238,14 @@ def r_idle_series(dates, tier: str = "baseline", data_dir: str | None = None) ->
 if __name__ == "__main__":
     import json
     import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--dep1m":
+        print(json.dumps(measure_dep1m_offset(), ensure_ascii=False))
+        print(json.dumps(measure_dep1m_offset(ref="ib_1 tháng"), ensure_ascii=False))
+        print(json.dumps(dep1m_coverage(), ensure_ascii=False))
+        t = monthly_table()
+        print(t.loc["2014-01":, ["sbv_low", "dep1m_real", "dep1m_pct", "dep1m_src"]].to_string())
+        raise SystemExit(0)
 
     if len(sys.argv) > 1 and sys.argv[1] == "--haircut":
         for tn in ("qua đêm", "1 tháng", "3 tháng", "6 tháng"):

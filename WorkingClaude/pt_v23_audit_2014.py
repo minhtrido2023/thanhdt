@@ -57,6 +57,13 @@ if os.path.realpath(_SELF_DIR) != os.path.realpath(WORKDIR):
     print("     (nhung cay do phai co du data/ — nhieu *.csv bi .gitignore an khoi worktree)")
     print("=" * 100)
 sys.path.insert(0, WORKDIR)
+# W2/Q2 WORKTREE ISOLATION (job Taylor_20260927_141318). The line above puts the HARDCODED canonical
+# WORKDIR ahead of everything, so a copy of this script running from a worktree still imported the
+# CANONICAL siblings -- the patched simulate_holistic_nav.py was never loaded (caught by a real crash,
+# not by reading the code). Re-insert THIS file's own directory at position 0 so siblings resolve from
+# the same tree as the script, while WORKDIR/data stays canonical exactly as the pinned command has it.
+# In the canonical tree both paths are the same directory, so this line is a no-op there.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 os.chdir(WORKDIR)
 
 import simulate_holistic_nav as shn
@@ -250,6 +257,97 @@ if BASKET_WT == "fincap":
 BASKET_TOPN = int(os.environ.get("BASKET_TOPN", "30"))
 BASKET_NAMECAP = float(os.environ.get("BASKET_NAMECAP", "0.10"))
 _sz_tag = "" if (BASKET_TOPN == 30 and abs(BASKET_NAMECAP - 0.10) < 1e-9) else f"_n{BASKET_TOPN}_cap{int(round(BASKET_NAMECAP*100))}"
+# IDLE-CASH CARRY (W2/Q2 cua kb/projects/custom30v-revalidation-plan-20260927.md, job
+# Taylor_20260927_141318). Engine's historical assumption is 0%/yr on idle cash (CLAUDE.md cost
+# model) -> every park-vs-no-park comparison so far silently paid the no-park leg NOTHING. This knob
+# feeds the POINT-IN-TIME proxy from `idle_rate_proxy.py` (W1, user approved plan §7 on 2026-09-27)
+# into simulate()'s existing `deposit_annual`, which credits ONLY cash>0 -- i.e. the NOT-yet-parked
+# cash (parked cash lives in the ETF/basket lots after the step-6b sweep). AUDIT/R&D ONLY.
+#   off (default) -> deposit_annual=0.0, byte-identical to the pinned anchor. Proven by cmp.
+#   baseline      -> tier 1 (SBV >12-24M low - 2.04pp haircut).  floor -> tier 2 (interbank 1M).
+#   dep1m         -> tier USER CHOT 2026-09-27 23:58 ICT ("tien mat thi neo theo lai suat huy dong
+#                    1 thang. Lay can cu nay lam so pin"): lai suat huy dong 1 thang, ca nhan,
+#                    binh quan Big 4. SO THAT 2019-02..2026-09; TRUOC DO dung lai tu SBV 12M-thap
+#                    + offset trung vi (-2.525pp) do tren 90 thang overlap. Doan dung lai = 53/150
+#                    thang cua cua so ⇒ moi so pin phai kem chan p25/p75 (bang bat dinh cua cau).
+# `spot` is deliberately NOT accepted here: plan §2.2 limits it to a <=6-month forward window, so
+# it must never enter a 2014-2026 backtest.
+IDLE_CARRY_TIER = os.environ.get("IDLE_CARRY_TIER", "off").strip().lower()
+if IDLE_CARRY_TIER not in ("off", "baseline", "floor", "dep1m"):
+    raise ValueError(f"IDLE_CARRY_TIER={IDLE_CARRY_TIER!r} khong hop le; chi "
+                     f"{{off,baseline,floor,dep1m}} "
+                     f"(tier 'spot' bi tu choi co y: ke hoach §2.2 chi cho cua so nhin truoc <=6 thang)")
+_idle_tag = "" if IDLE_CARRY_TIER == "off" else f"_idle{IDLE_CARRY_TIER}"
+# §8: IDLE_DEP1M_OFFSET_PP la mot TRUC DOI SO (doi so ⇒ doi ket qua) ⇒ PHAI doi ten file. Chi co
+# nghia voi tier dep1m; dat kem tier khac la loi cau hinh im lang nen chan cung.
+_dep1m_off_raw = os.environ.get("IDLE_DEP1M_OFFSET_PP", "").strip()
+if _dep1m_off_raw:
+    if IDLE_CARRY_TIER != "dep1m":
+        raise ValueError(f"IDLE_DEP1M_OFFSET_PP={_dep1m_off_raw!r} chi co nghia voi "
+                         f"IDLE_CARRY_TIER=dep1m; dang co TIER={IDLE_CARRY_TIER!r}")
+    _idle_tag += "_off" + _dep1m_off_raw.replace("-", "m").replace(".", "p")   # -3.4 -> _offm3p4
+# IDLE-CASH AGE GATE (user chot 08:02 ICT 2026-09-28, Discord): "rut truoc han coi nhu huong lai
+# 0%". A 1-month term deposit is not daily-liquid, so paying the 1M rate on cash that turns over
+# inside the month over-states the carry. IDLE_CARRY_MIN_AGE=<n sessions> credits carry ONLY to the
+# slice of cash that has ALREADY sat idle >= n sessions; sessions 1..n of a lot pay 0% and are NEVER
+# back-paid. NOTE (quant-skeptic 2026-09-28): the no-back-pay rule is a CONSERVATIVE CONVENTION, not
+# a look-ahead constraint -- crediting a completed 21-session term at session 22 is causal, and is how
+# a rolled 1M term deposit actually pays. This engine therefore UNDER-pays a matured lot by 1..21 days,
+# so the resulting CAGR is a lower bound of the faithful 'rut truoc han = 0%' number, not a point
+# estimate of it. Cash spent before it matures earns 0% by construction. IDLE_CARRY_AGE_ORDER picks which lot an outflow eats:
+#   fifo (default) = oldest first  -> kills matured lots -> LESS carry -> the CONSERVATIVE pin.
+#   lifo           = newest first  -> preserves aged lots -> MORE carry -> sensitivity leg only.
+# §8: BOTH are argument axes (they change the numbers) => BOTH go in the filename.
+_min_age_raw = os.environ.get("IDLE_CARRY_MIN_AGE", "").strip()
+IDLE_CARRY_MIN_AGE = int(_min_age_raw) if _min_age_raw else 0
+IDLE_CARRY_AGE_ORDER = os.environ.get("IDLE_CARRY_AGE_ORDER", "fifo").strip().lower()
+if IDLE_CARRY_MIN_AGE < 0:
+    raise ValueError(f"IDLE_CARRY_MIN_AGE={IDLE_CARRY_MIN_AGE} phai >= 0")
+if IDLE_CARRY_AGE_ORDER not in ("fifo", "lifo"):
+    raise ValueError(f"IDLE_CARRY_AGE_ORDER={IDLE_CARRY_AGE_ORDER!r} khong hop le; chi {{fifo,lifo}}")
+if IDLE_CARRY_MIN_AGE and IDLE_CARRY_TIER == "off" and not os.environ.get("IDLE_CARRY_FLAT", "").strip():
+    raise ValueError(f"IDLE_CARRY_MIN_AGE={IDLE_CARRY_MIN_AGE} vo nghia khi khong co nguon carry "
+                     f"(TIER=off va khong co FLAT): chan cung de khong sinh mot chan im lang y het chan control")
+if IDLE_CARRY_MIN_AGE == 0 and os.environ.get("IDLE_CARRY_AGE_ORDER", "").strip():
+    raise ValueError("IDLE_CARRY_AGE_ORDER chi co nghia khi IDLE_CARRY_MIN_AGE > 0")
+if IDLE_CARRY_MIN_AGE:
+    _idle_tag += f"_{IDLE_CARRY_MIN_AGE}s{IDLE_CARRY_AGE_ORDER}"   # 21 + fifo -> _21sfifo
+# IDLE_CARRY_PAY_MODE (quant-skeptic recommended_rerun #1, user duyet 12:05 ICT 2026-09-28) — HOW a
+# matured slice gets paid, orthogonal to WHICH slice is matured (MIN_AGE) and to the rate (TIER).
+#   daily (default)  = the pinned dep1m_21s convention: r/252 per session from session MIN_AGE+1 on,
+#                      the first MIN_AGE sessions never back-paid => a lot alive n sessions earns
+#                      n-MIN_AGE days. THAN TRONG: strictly under-pays a rolled 1M term deposit.
+#   maturity         = the FAITHFUL rule: every MIN_AGE-session anniversary of a lot credits that
+#                      whole term (MIN_AGE sessions of PIT rate, exact -- the lot carries a rate-SUM,
+#                      not an average); a term still in progress when the cash is spent pays 0%.
+#                      A lot alive n sessions earns MIN_AGE*floor(n/MIN_AGE) days >= the daily mode.
+# Default is daily on purpose: it keeps every already-pinned leg reproducible byte-for-byte.
+# §8: this is an argument axis (it changes the numbers) => it goes in the filename.
+IDLE_CARRY_PAY_MODE = os.environ.get("IDLE_CARRY_PAY_MODE", "daily").strip().lower()
+if IDLE_CARRY_PAY_MODE not in ("daily", "maturity"):
+    raise ValueError(f"IDLE_CARRY_PAY_MODE={IDLE_CARRY_PAY_MODE!r} khong hop le; chi {{daily,maturity}}")
+if IDLE_CARRY_PAY_MODE == "maturity":
+    if not IDLE_CARRY_MIN_AGE:
+        raise ValueError("IDLE_CARRY_PAY_MODE=maturity vo nghia khi IDLE_CARRY_MIN_AGE=0 (khong co "
+                         "ky han nao de dao han): chan cung de khong sinh mot chan im lang y het "
+                         "chan carry thuong")
+    _idle_tag += "_mat"                                            # -> _21sfifo_mat
+# W2b NOISE-FLOOR CONTROL (job Taylor_20260927_155645, quant-skeptic recommended_rerun #2). A FLAT
+# scalar %/yr on idle cash, used ONLY to measure how much the simulator's discrete trade path moves
+# when the cash level is nudged by an amount comparable to the tier-1<->tier-2 gap. Not a proxy, not
+# PIT -- a constant, so it carries no look-ahead by construction. Mutually exclusive with
+# IDLE_CARRY_TIER: a leg must not have two carry sources.
+IDLE_CARRY_FLAT = os.environ.get("IDLE_CARRY_FLAT", "").strip()
+if IDLE_CARRY_FLAT:
+    if IDLE_CARRY_TIER != "off":
+        raise ValueError("IDLE_CARRY_FLAT va IDLE_CARRY_TIER loai tru nhau (mot chan chi duoc co MOT "
+                         f"nguon carry); dang co TIER={IDLE_CARRY_TIER!r} FLAT={IDLE_CARRY_FLAT!r}")
+    IDLE_CARRY_FLAT = float(IDLE_CARRY_FLAT)          # fraction/yr, e.g. 0.035 = 3.5%/yr
+    if not (0.0 <= IDLE_CARRY_FLAT <= 0.20):
+        raise ValueError(f"IDLE_CARRY_FLAT={IDLE_CARRY_FLAT} ngoai [0, 0.20]")
+    _idle_tag = f"_idleflat{int(round(IDLE_CARRY_FLAT*10000))}"   # 0.035 -> _idleflat350 (§8: truc doi so => doi ten file)
+else:
+    IDLE_CARRY_FLAT = None
 # Q-SLEEVE audit knobs (plan_quality_sleeve_20260712.md, family N=5). All default OFF = byte-identical.
 # BASKET_GATE_RATING: override the _PIT_PARAMS gate for custom* vehicles ("2" = Đ1 strict gate,
 # "none" = no rating gate — used when BASKET_QFLOOR=1 replaces it with the Đ2 fundamentals floor,
@@ -735,7 +833,7 @@ AUDIT_PATH  = os.path.join(WORKDIR, "data",
                            {"v23a": "v23_golive_audit_2014_now.csv",
                             "v23c": "v23c_golive_audit_2014_now.csv",
                             "v22base": "v22base_audit_2014_now.csv",
-                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _sel_tag + _NAV_TAG + _START_TAG + _EXP_TAG + ".csv"))
+                            "singlebook": "singlebook_audit_2014_now.csv"}.get(MODE, MODE+"_audit.csv").replace(".csv", _capsuf + _matsuf + _liqsuf + _park_tag + _wt_tag + _sz_tag + _qs_tag + _qt_tag + _bullpark_tag + _c30b_tag + _recpark_tag + _vm_tag + _dnpr_tag + _dvr8l_tag + _dcf_tag + _droptag + _sel_tag + _idle_tag + _NAV_TAG + _START_TAG + _EXP_TAG + ".csv"))
 
 BUY_TIERS_V11 = {"MEGA","MOMENTUM","MOMENTUM_N","MOMENTUM_S","MOMENTUM_QUALITY",
                  "MOMENTUM_A","MOMENTUM_S_N","COMPOUNDER_BUY","DEEP_VALUE_RECOVERY","S_PRO",
@@ -934,6 +1032,51 @@ liq_map = dict(zip(zip(sig_f["ticker"], sig_f["time"]), sig_f["liq"]))
 vni = bq(VNI_QUERY.format(start=START_DATE, end=END_DATE))
 vni["time"] = pd.to_datetime(vni["time"])
 vni_dates = sorted(vni["time"].unique())
+# IDLE-CASH CARRY series (see IDLE_CARRY_TIER above). Built ONCE from vni_dates so BAL and LAG see
+# the identical rate on the identical session. r_idle_series returns %/yr -> /100 to a fraction.
+if IDLE_CARRY_FLAT is not None:
+    DEPOSIT_ANNUAL = IDLE_CARRY_FLAT
+    print(f"  [idle-carry] FLAT scalar {IDLE_CARRY_FLAT*100:.3f}%/yr (noise-floor control, khong PIT-proxy)")
+elif IDLE_CARRY_TIER == "off":
+    DEPOSIT_ANNUAL = 0.0
+else:
+    import idle_rate_proxy as _irp
+    # PRE-START POLICY (explicit, NOT a silent swallow): the tier-2 interbank series only begins
+    # 2014-01, so under the PIT rule (month T usable from the 1st of T+1) no rate exists for the
+    # sessions in Jan-2014 (and any warm-up session before that). Those days get carry = 0 --
+    # fail-safe and look-ahead-free. Back-filling the first known month would leak 1 month of
+    # future rate into the very start of the window; paying 0 cannot. Count is printed so the
+    # number is auditable, never invisible.
+    _idle_dts = [pd.Timestamp(d) for d in vni_dates]
+    _idle_pct, _idle_nostart = [], 0
+    for _d in _idle_dts:
+        try:
+            _idle_pct.append(_irp.r_idle(_d, tier=IDLE_CARRY_TIER))
+        except ValueError:
+            _idle_pct.append(0.0); _idle_nostart += 1
+    _idle_pct = np.array(_idle_pct, dtype=float)
+    DEPOSIT_ANNUAL = pd.Series(_idle_pct / 100.0, index=_idle_dts)
+    print(f"  [idle-carry] pre-series sessions paid 0%: {_idle_nostart}"
+          + (f" ({_idle_dts[0].date()}..{_idle_dts[_idle_nostart-1].date()})" if _idle_nostart else ""))
+    if IDLE_CARRY_TIER == "dep1m":
+        _cov = _irp.dep1m_coverage(first_month=str(pd.Timestamp(START_DATE).to_period("M")),
+                                   last_month=str(pd.Timestamp(END_DATE).to_period("M")))
+        print(f"  [idle-carry] dep1m offset={_irp.DEP1M_OFFSET_PP:+.3f}pp  coverage {_cov['window']}: "
+              f"{_cov['n_real']} thang SO THAT / {_cov['n_recon']} thang DUNG LAI / "
+              f"{_cov['n_ff']} thang ff ({','.join(_cov['ff_months'])})")
+    print(f"  [idle-carry] tier={IDLE_CARRY_TIER} n={len(DEPOSIT_ANNUAL)} "
+          f"first={DEPOSIT_ANNUAL.iloc[0]*100:.3f}%/yr last={DEPOSIT_ANNUAL.iloc[-1]*100:.3f}%/yr "
+          f"mean={DEPOSIT_ANNUAL.mean()*100:.3f}%/yr min={DEPOSIT_ANNUAL.min()*100:.3f}% "
+          f"max={DEPOSIT_ANNUAL.max()*100:.3f}%  (PIT: moc thang T dung tu dau thang T+1)")
+# Age-gate instrumentation: one list per book, filled only when IDLE_CARRY_MIN_AGE > 0 (simulate()
+# ignores them otherwise). Read after both books run to report matured-cash % of NAV and the count
+# of sessions that were paid 0% purely because nothing had matured yet.
+IDLE_AGE_LOG_BAL, IDLE_AGE_LOG_LAG = [], []
+if IDLE_CARRY_MIN_AGE:
+    print(f"  [idle-carry] AGE GATE ON: min_age={IDLE_CARRY_MIN_AGE} phien, order={IDLE_CARRY_AGE_ORDER} "
+          f"pay_mode={IDLE_CARRY_PAY_MODE} "
+          f"(lo tien phai nam im du {IDLE_CARRY_MIN_AGE} phien moi duoc tra lai; KHONG truy linh; "
+          f"tien tieu truoc khi du tuoi huong 0%)")
 vni_close_by_date = dict(zip(vni["time"], vni["Close"]))
 
 etf_real = bq(f"""SELECT t.time, t.Close FROM tav2_bq.ticker AS t
@@ -2051,7 +2194,10 @@ BAL_KW = dict(allowed_tiers=RS["allowed_tiers"], max_positions=MAX_POS_V11,
               sector_limit_per_sector={8: 4}, ticker_sector_map=sec_map,
               sector_cap_exempt_tiers=RS["sector_cap_exempt"],
               tier_weights_by_state=RS["tier_weights_by_state"],
-              deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+              deposit_annual=DEPOSIT_ANNUAL, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+              deposit_min_age_sessions=IDLE_CARRY_MIN_AGE, deposit_age_order=IDLE_CARRY_AGE_ORDER,
+              deposit_pay_mode=IDLE_CARRY_PAY_MODE,
+              idle_age_log=IDLE_AGE_LOG_BAL,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               open_prices=open_prices, t1_open_exec=True,
@@ -2104,7 +2250,10 @@ LAG_KW = dict(allowed_tiers=list(_LAG_BASE_TIERS), max_positions=12,
               hold_days_by_tier={t: 25 for t in _LAG_BASE_TIERS},
               tier_position_limit={t: 12 for t in _LAG_BASE_TIERS},
               count_inflight_slots=LAG_SLOT_INFLIGHT,
-              deposit_annual=0.0, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+              deposit_annual=DEPOSIT_ANNUAL, borrow_annual=BORROW_ANNUAL, state_by_date=state_ff,
+              deposit_min_age_sessions=IDLE_CARRY_MIN_AGE, deposit_age_order=IDLE_CARRY_AGE_ORDER,
+              deposit_pay_mode=IDLE_CARRY_PAY_MODE,
+              idle_age_log=IDLE_AGE_LOG_LAG,
               cash_etf_states=PARK_STATES_DICT, cash_etf_states_by_date=PARK_BY_DATE, vn30_underlying=vn30_underlying,
               etf_mgmt_fee_annual=0.0, etf_tracking_drag_annual=0.0, etf_rebalance_friction=0.0015,
               fund_tiebreak_col=("_fund_tb" if _LAG_FUND_DNPR else None),   # Wave1/H8a within-tier reorder (OFF-default None = byte-identical)
@@ -2523,7 +2672,37 @@ meta = [
  ("fee_buy","fee = buy_amount x ((1+0.0015)x(1+slippage_book)-1); slippage_book: BAL=0.0, LAG=0.001"),
  ("fee_sell","fee = sell_amount x (1-(1-0.0015-0.001)x(1-slippage_book)x(1-tier_slip)); tier_slip: 0 if trade<=5% ADV, 0.001 if >5%, 0.003 if >10%, 0.005 if >20% ADV"),
  ("fee_etf","E1VFVN30 parking rebalance friction = 0.15% of amount_vnd per side; ETF priced at tav2_bq.ticker Close of E1VFVN30"),
- ("cash_identity","per book per day: cash(d)-cash(d-1) == SUM over that day's TX of [sell: +(sell_amount-fee) | buy: -(buy_amount+fee)]. cash(d) = bal_cash_ref / lag_cash_ref in DAILY rows. No other cash flows exist (deposit interest = 0, no margin)"),
+ ("cash_identity",
+  # OFF leg emits this string BYTE-FOR-BYTE as before (anchor ledger md5 4707bcbe depends on it --
+  # verified: re-ordering the clauses alone already breaks the md5). Carry legs get a DIFFERENT
+  # string because for them the old text is wrong: interest mutates cash with no TX row.
+  ("per book per day: cash(d)-cash(d-1) == SUM over that day's TX of [sell: +(sell_amount-fee) | "
+   "buy: -(buy_amount+fee)]. cash(d) = bal_cash_ref / lag_cash_ref in DAILY rows. No other cash "
+   "flows exist (deposit interest = 0, no margin)")
+  if (IDLE_CARRY_FLAT is None and IDLE_CARRY_TIER == "off") else
+  ("per book per day: cash(d)-cash(d-1) == SUM over that day's TX of [sell: +(sell_amount-fee) | "
+   "buy: -(buy_amount+fee)] + deposit interest credited that day on cash>0. cash(d) = "
+   "bal_cash_ref / lag_cash_ref in DAILY rows. IDLE-CASH CARRY IS ACTIVE ON THIS LEG ("
+   + (f"FLAT {IDLE_CARRY_FLAT*100:.3f}%/yr" if IDLE_CARRY_FLAT is not None
+      else f"PIT proxy tier={IDLE_CARRY_TIER}")
+   + ", compounded /252 per session, credited only while cash>0): that interest mutates cash with "
+     "NO tx row, so a TX-only rebuild of cash will NOT close. Add the `interest` column of the NAV "
+     "frame, exactly as the engine's own cash-flow self-check does (`_resid = dcash - f_full - "
+     "interest`). No margin."
+   + ("" if not IDLE_CARRY_MIN_AGE else
+      (f" AGE GATE: interest that day = rate/252 x the slice of cash that had ALREADY been idle "
+       f">= {IDLE_CARRY_MIN_AGE} sessions, NOT x total cash. Cash-lot ledger reconciled to real cash "
+       f"twice per session; outflows consume lots {IDLE_CARRY_AGE_ORDER.upper()}. No back-pay: the "
+       f"first {IDLE_CARRY_MIN_AGE} sessions of a lot are never credited retroactively."
+       if IDLE_CARRY_PAY_MODE == "daily" else
+       f" AGE GATE (pay_mode=maturity): interest is paid in LUMPS, not daily — on every "
+       f"{IDLE_CARRY_MIN_AGE}-session anniversary of a cash lot, that lot is credited its whole "
+       f"accrued term (the SUM of rate/252 over exactly those {IDLE_CARRY_MIN_AGE} sessions, so "
+       f"exact under the time-varying PIT rate). A term still in progress when the cash is spent "
+       f"pays 0% ('rut truoc han = 0%'). Most sessions therefore show interest = 0 and that is "
+       f"CORRECT — do NOT reconcile this leg against a daily-accrual expectation. Cash-lot ledger "
+       f"reconciled to real cash twice per session; outflows consume lots "
+       f"{IDLE_CARRY_AGE_ORDER.upper()}; interest paid does not compound into the term.")))),
  ("nav_identity","book NAV ref (nav_bal_ref/nav_lag_ref) = cash_ref + stocks_ref(mark at BQ Close) + etf_ref(mark at E1VFVN30 Close). Positions reconstructable from TX by holding_id (buys add shares, sells remove)"),
  ("mtm_rows","TX rows whose reason starts with MTM are NOT cash events. MTM_UNREALIZED = open stock positions & ETF lots marked at final session Close. MTM_PENDING_PARTIAL = residual market value of an order still completing its multi-day fill on the final session (its filled shares already appear as ENTRY_FILL buys earlier in the TX log; this phantom marks them to the final stocks value). Property: final cash_ref + SUM(all MTM sell_amount) == final book NAV ref, per book"),
  ("combination_rule", (f"V2.3A ALLOCATOR: cap_bal/cap_lag start at (1-w0)/w0 x 50e9 with w0=w_LAG(state day1); each day cap_x *= (1+book ref-NAV daily return); if |cap_lag/(cap_bal+cap_lag) - w_tgt(state)| > {ALLOC_REBAL_BAND} then total -= {ALLOC_REBAL_TC} x |moved capital| and reset to target. w_tgt by state: {STATE_LAG_WEIGHT}. combined_nav = cap_bal + cap_lag"
@@ -2656,6 +2835,27 @@ audit = pd.concat([meta_df, ev_df, tx_df, rb_df, daily_df, annual_df, metric_df,
 os.makedirs(os.path.join(WORKDIR, "data"), exist_ok=True)
 audit.to_csv(AUDIT_PATH, index=False, encoding="utf-8")
 print(f"  -> {AUDIT_PATH}  ({len(audit):,} rows)")
+
+if IDLE_CARRY_MIN_AGE:
+    # Instrumentation for the age gate (reported with every _NNsORDER leg). eligible/nav is the
+    # share of NAV that was actually EARNING on that session; zero_sessions counts sessions where
+    # there WAS idle cash and a positive rate but nothing had matured yet, so carry paid was 0.
+    for _bk, _lg in (("BAL", IDLE_AGE_LOG_BAL), ("LAG", IDLE_AGE_LOG_LAG)):
+        if not _lg:
+            print(f"  [age-gate:{_bk}] log rong (khong chay?)"); continue
+        # PHAI tach theo `leg`: BAL duoc simulate 2 lan trong mot run (lan dau de dung duong CAPIT
+        # trigger, lan sau moi la ledger that). Gop lai thi con so khong thuoc ledger nao ca.
+        for _leg, _d in pd.DataFrame(_lg).groupby("leg", sort=False):
+            _elig_frac = (_d["eligible"] / _d["nav"].where(_d["nav"] > 0)).dropna()
+            _cash_frac = (_d["cash_pre_int"] / _d["nav"].where(_d["nav"] > 0)).dropna()
+            _live = _d[(_d["cash_pre_int"] > 0) & (_d["rate"] > 0)]
+            _zero = int((_live["eligible"] <= 0).sum())
+            print(f"  [age-gate:{_bk}/{_leg}] n={len(_d)} phien | tien du tuoi/NAV "
+                  f"mean={_elig_frac.mean()*100:.2f}% median={_elig_frac.median()*100:.2f}% "
+                  f"max={_elig_frac.max()*100:.2f}% | TONG tien/NAV mean={_cash_frac.mean()*100:.2f}% | "
+                  f"phien tra 0% vi CHUA DU TUOI (co tien + co rate nhung eligible=0): {_zero} "
+                  f"({_zero/max(len(_live),1)*100:.1f}% cua {len(_live)} phien co tien&rate) | "
+                  f"so lo trung binh={_d['n_lots'].mean():.1f}")
 
 print("\nANNUAL (sys vs VNINDEX):")
 for r in annual_rows:
