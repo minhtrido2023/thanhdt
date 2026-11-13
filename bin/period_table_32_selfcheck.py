@@ -72,6 +72,11 @@ def replace_cell(text, row_kw, col, new):
 
 
 def main() -> int:
+    # B3: selfcheck PHẢI test module của CHÍNH cây chứa nó (worktree từng có symlink `mike` → checkout chính;
+    # `python3 mike/bin/..._selfcheck.py` chạy từ gốc worktree sẽ test nhầm master).
+    for mod in (pt, npr, rdg):
+        ok(os.path.realpath(mod.__file__).startswith(os.path.realpath(HERE) + os.sep),
+           f"{mod.__name__} nạp từ {mod.__file__}, KHÔNG phải cây của selfcheck ({HERE}) — test nhầm cây khác")
     D, series, inc, rows, _sat = fixture()
     rd = D[66]
     a = npr.compute_period_returns("ZaloPay", rd, rows, inc, [], benchmark=bm_fn(series))
@@ -234,34 +239,27 @@ def main() -> int:
        "deliver() phải gọi cổng bảng ngay sau cổng period-return")
     # 9. Luồng B2 (13/11): cột "gửi tiết kiệm" — khớp CLI ±0,005 + excess = TWR − hurdle; template chưa đổi
     #    (bảng không có cột này ⇒ phần trên không đổi hành vi). Dương: khớp; âm: lệch số / thiếu khối CLI.
-    CS, CX = "Gửi tiết kiệm cùng kỳ", "Chênh lệch so với gửi tiết kiệm"
+    CS, CX = pt.COL_SAV, pt.COL_SAVX
     asv = copy.deepcopy(a)
     for k, _ in pt.PERIODS:
         if asv.get(k):
             hv = round(0.37 + 0.11 * len(k), 3)
             asv[k]["savings"] = {"hurdle_pct": hv, "excess_vs_savings_pp": round(asv[k]["return_pct"] - hv, 3),
-                                 "status": "ok"}
-    def with_sav(text, sv_of=lambda k, x: x):
-        out = []
-        for ln in text.splitlines():
-            if ln.startswith("| Giai đoạn"):
-                out.append(ln + f" {CS} | {CX} |")
-            elif ln.startswith("|---"):
-                out.append(ln + "---:|---:|")
-            elif ln.startswith("|"):
-                key = pt._period_of(ln.split("|")[1].strip())[1]
-                sv = (asv.get(key) or {}).get("savings") or {}
-                out.append(ln + f" {pt.fmt_num(sv_of('h', sv.get('hurdle_pct')), '%')} | "
-                                f"{pt.fmt_num(sv_of('x', sv.get('excess_vs_savings_pp')), 'pp')} |")
-            else:
-                out.append(ln)
-        return "\n".join(out) + "\n"
-    ts = with_sav(pt.render(a, None))
-    ok("(none)" not in ts and CS in ts, "dựng bảng savings")
+                                 "status": "ok", "anchor_warning": "Cảnh báo neo giả."}
+    ts = pt.render(asv, None)                                   # B3: render TỰ phát cột + nhãn + cảnh báo
+    ok(CS in ts and CX in ts and pt.SAV_LABEL in ts and pt.SAV_WARN in ts, "B3: render có cột + nhãn + cảnh báo")
+    ok("Cảnh báo neo giả." in ts, "B3: render in anchor_warning của CLI")
+    ok("chưa tính thuế" not in ts, "B3: không còn câu 'chưa tính thuế' cũ trong bảng render")
+    ok(CS not in pt.render(a, None) and pt.SAV_LABEL not in pt.render(a, None),
+       "B3: CLI không phát savings ⇒ bảng KHÔNG có cột/nhãn tiết kiệm (hành vi cũ)")
     ok("inception: khớp CLI" in passes(doc(ts), mkcli(asv, b)), "B2 dương: cột tiết kiệm khớp CLI")
     ok("khớp" in passes(doc(pt.render(a, None)), mkcli(asv, b)), "B2: bảng KHÔNG có cột tiết kiệm ⇒ không đổi hành vi")
-    blocks(doc(with_sav(pt.render(a, None), lambda w, x: x + 0.02 if w == "h" else x)), mkcli(asv, b), (CS,))   # hurdle lệch
-    blocks(doc(with_sav(pt.render(a, None), lambda w, x: x + 0.02 if w == "x" else x)), mkcli(asv, b), (CX,))   # excess lệch
+    def bump(col, d):
+        return replace_cell(doc(ts), "Từ khi bắt đầu", col, pt.fmt_num(
+            asv["inception"]["savings"]["hurdle_pct" if col == CS else "excess_vs_savings_pp"] + d,
+            "%" if col == CS else "pp"))
+    blocks(bump(CS, 0.02), mkcli(asv, b), (CS,))                # hurdle lệch
+    blocks(bump(CX, 0.02), mkcli(asv, b), (CX,))                # excess lệch
     a_ok = copy.deepcopy(asv)
     a_ok["inception"]["savings"]["hurdle_pct"] += 0.004                  # ⩽ 0,005 vẫn qua
     a_ok["inception"]["savings"]["excess_vs_savings_pp"] -= 0.004
@@ -275,9 +273,23 @@ def main() -> int:
     a_un = copy.deepcopy(asv)
     a_un["inception"]["savings"] = {"hurdle_pct": None, "excess_vs_savings_pp": None, "status": "unavailable"}
     blocks(doc(ts), mkcli(a_un, b), (CS,))                               # CLI không có số mà bảng có số ⇒ chặn
-    tx = with_sav(pt.render(a, None))
-    tx = replace_cell(doc(tx), "Từ khi bắt đầu", CX, pt.fmt_num(asv["inception"]["savings"]["excess_vs_savings_pp"] + 0.02, "pp"))
-    blocks(tx, mkcli(asv, b), (CX,))                                     # excess tự bịa
+    blocks(bump(CX, 0.02), mkcli(asv, b), (CX,))                         # excess tự bịa
+    # B3: nhãn/cảnh báo bắt buộc NGUYÊN VĂN
+    blocks(doc(ts.replace(pt.SAV_LABEL, "")), mkcli(asv, b), ("nhãn tiết kiệm",))
+    blocks(doc(ts.replace(pt.SAV_WARN, "")), mkcli(asv, b), ("cảnh báo",))
+    blocks(doc(ts.replace("miễn thuế TNCN", "chịu thuế TNCN")), mkcli(asv, b), ("nhãn tiết kiệm",))   # sửa chữ nhãn
+    # B3 / skeptic B2: cột GIỐNG tiết kiệm nhưng không nhận ra theo tên ⇒ CHẶN (không để lọt khỏi đối chiếu)
+    for bad_name in ("Gửi tiet kiem", "Lãi gửi ngân hàng", "Hurdle (tiền gửi)", "Savings", "Lãi tiền gửi 12T"):
+        tsx = ts.replace(CS, bad_name)
+        blocks(doc(tsx), mkcli(asv, b), (bad_name,))
+    # mọi cột render() phát ra đều được cổng phân loại (không cột "mồ côi" tên lạ)
+    hdr = [c.strip() for c in ts.splitlines()[0].strip("|").split("|")]
+    ok(all(any(k in pt.strip_accents(c) for k in pt.SAV_LIKE) is False or "tiết kiệm" in c for c in hdr),
+       "B3: mọi cột giống tiết kiệm trong header render() đều chứa 'tiết kiệm'")
+    # sleeve: dòng bot có "—" ở cột tiết kiệm, cổng bỏ qua khi CLI --sleeve bot không có khối savings
+    tz = pt.render(asv, b)
+    ok("—" in tz and CS in tz, "B3: dòng bot có cột tiết kiệm '—'")
+    passes(doc(tz), mkcli(asv, b))
 
     print(f"OK — {N_OK} assertion PASS (period_table_32_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0

@@ -28,7 +28,19 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 COL_PRICE, COL_TR = "VN-Index (giá)", "VN-Index có cổ tức"
 COL_XP, COL_XT = "Chênh so giá", "Chênh so có cổ tức"
+COL_SAV, COL_SAVX = "Gửi tiết kiệm (tham chiếu)", "Chênh so tiết kiệm"   # tên chứa "tiết kiệm" (+ "chênh" cho excess) = QUY ƯỚC cổng
 NO_NUMBER = "chưa có số"
+# Nhãn + cảnh báo user DUYỆT 13/11/2026 (Wendy: TK cá nhân; Luật TNCN 109/2025/QH15 Đ4). Thay footnote CLI
+# ("chưa tính thuế") — cổng đòi ĐÚNG hai câu này khi bảng có cột tiết kiệm.
+SAV_LABEL = ("So với gửi tiết kiệm: mức lãi tham chiếu lấy theo lãi suất 12 tháng cao nhất trong Big-4 (kênh "
+             "online) và chứng chỉ tiền gửi 12 tháng, tính lãi đơn theo số ngày thực tế/365. Đây là mốc THƯỢNG "
+             "CẬN, chỉ để tham khảo, không phải lợi suất bảo đảm của bất kỳ kênh nào. Lãi tiền gửi cá nhân được "
+             "miễn thuế TNCN (Luật Thuế TNCN 109/2025/QH15, Điều 4); lợi suất danh mục đã trừ phí giao dịch và "
+             "thuế TNCN khấu trừ tại nguồn (0,1% giá bán, 5% cổ tức).")
+SAV_WARN = ("Kết quả trong quá khứ không bảo đảm kết quả trong tương lai. Thông tin này không phải cam kết hay "
+            "dự báo về thu nhập hoặc lợi nhuận; đầu tư cổ phiếu có thể thua lỗ vốn, khác với tiền gửi.")
+# cột "giống tiết kiệm" (so sau bỏ dấu) — nếu có mà KHÔNG nhận ra theo tên "tiết kiệm" ⇒ cổng CHẶN (skeptic B2)
+SAV_LIKE = ("tiet kiem", "gui tien", "tien gui", "lai gui", "gui ngan hang", "hurdle", "saving", "deposit")
 SLEEVE_LABEL = "Phần bot quản lý (không gồm DGC)"
 CELL_TOL_PP = 0.005           # SPEC §A5: dung sai làm tròn hiển thị 2 chữ số
 PERIODS = (("wtd", "Tuần này"), ("mtd", "Từ đầu tháng"), ("inception", "Từ khi bắt đầu hoạt động"))
@@ -72,26 +84,44 @@ def _cells(p: dict) -> list:
             fmt_num(bm["excess_vs_tr_pp"], "pp") if bm.get("excess_vs_tr_pp") is not None else na]
 
 
+def _has_sav(main: dict) -> bool:
+    return any(isinstance((main.get(k) or {}).get("savings"), dict) for k, _ in PERIODS)
+
+
+def _sav_cells(p: dict) -> list:
+    sv = p.get("savings")
+    if not isinstance(sv, dict) or sv.get("hurdle_pct") is None or sv.get("excess_vs_savings_pp") is None:
+        return [_na((sv or {}).get("reason") or "không có khối tiết kiệm")] * 2
+    return [fmt_num(sv["hurdle_pct"], "%"), fmt_num(sv["excess_vs_savings_pp"], "pp")]
+
+
+def strip_accents(x: str) -> str:
+    x = unicodedata.normalize("NFD", x.lower()).replace("đ", "d")
+    return "".join(ch for ch in x if unicodedata.category(ch) != "Mn")
+
+
 def render(main: dict, sleeve: dict = None) -> str:
     """Bảng markdown + chú thích. `sleeve` = đầu ra `--sleeve bot` (dict có `inception`) hoặc dict
     `{"status": "unavailable", "reason": ...}` hoặc None (không có dòng b)."""
     acc, rd = main["account"], main["report_date"]
-    lines = [f"| Giai đoạn | {acc} | {COL_PRICE} | {COL_TR} | {COL_XP} | {COL_XT} |",
-             "|---|---:|---:|---:|---:|---:|"]
+    sav = _has_sav(main)         # CLI không phát khối savings ⇒ bảng như cũ (không cột tiết kiệm)
+    lines = [f"| Giai đoạn | {acc} | {COL_PRICE} | {COL_TR} | {COL_XP} | {COL_XT} |"
+             + (f" {COL_SAV} | {COL_SAVX} |" if sav else ""),
+             "|---|---:|---:|---:|---:|---:|" + ("---:|---:|" if sav else "")]
     for key, _ in PERIODS:
         p = main.get(key)
         if p is not None:
-            lines.append("| " + " | ".join([_label(key, p, rd)] + _cells(p)) + " |")
+            lines.append("| " + " | ".join([_label(key, p, rd)] + _cells(p) + (_sav_cells(p) if sav else [])) + " |")
     if sleeve is not None:
         for key, _ in PERIODS:
             if sleeve.get("status") == "unavailable":
-                cells = [_na(sleeve.get("reason"))] * 5
+                cells = [_na(sleeve.get("reason"))] * (7 if sav else 5)
                 lbl = f"{SLEEVE_LABEL} — {dict(PERIODS)[key]}"
             else:
                 p = sleeve.get(key)
                 if p is None:
                     continue
-                cells = _cells(p)
+                cells = _cells(p) + (["—", "—"] if sav else [])    # chuỗi bot: chưa có mốc tiết kiệm
                 lbl = f"{SLEEVE_LABEL} — {_label(key, p, rd)}"
             lines.append("| " + " | ".join([lbl] + cells) + " |")
     foot = next((main[k]["benchmark"]["footnote"] for k in ("inception", "mtd", "wtd")
@@ -109,6 +139,14 @@ def render(main: dict, sleeve: dict = None) -> str:
         notes.append(f"Dòng \"{SLEEVE_LABEL}\": loại phần ngoài bot ({tick}) ≈ "
                      f"{fmt_num(100 * (1 - nav_b / nav_a), '%').lstrip('+')} NAV ngày {_ddmm(rd)}; "
                      f"số chính thức của tài khoản là các dòng phía trên.")
+    if sav:
+        notes += [SAV_LABEL]
+        aw = next((main[k]["savings"].get("anchor_warning") for k in ("inception", "mtd", "wtd")
+                   if isinstance(main.get(k), dict) and isinstance(main[k].get("savings"), dict)
+                   and main[k]["savings"].get("anchor_warning")), None)
+        if aw:
+            notes.append(aw)
+        notes.append(SAV_WARN)
     return "\n".join(lines) + ("\n\n" + "\n".join(f"_{n}_" for n in notes) if notes else "") + "\n"
 
 
@@ -241,6 +279,19 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
         if "tiết kiệm" in norm(c).lower():
             sav_cols["xs" if "chênh" in norm(c).lower() else "h"] = c
             idx[c] = i
+    # Skeptic B2: cột GIỐNG tiết kiệm mà không nhận ra theo tên (bỏ dấu / viết khác) ⇒ cổng sẽ KHÔNG đối chiếu
+    # số của nó — CHẶN thay vì bỏ qua lặng lẽ.
+    known = {norm(c) for c in (COL_PRICE, COL_TR, COL_XP, COL_XT, account, "Giai đoạn")} | {norm(c) for c in sav_cols.values()}
+    for c in header:
+        if norm(c) not in known and any(k in strip_accents(norm(c)) for k in SAV_LIKE):
+            raise TableBlock(f"benchmark-table BLOCK ({name}): cột '{c}' giống cột tiết kiệm nhưng cổng không "
+                             f"nhận ra theo tên (cột tiết kiệm phải chứa 'tiết kiệm', cột chênh thêm 'chênh', "
+                             f"có dấu; header {header}) — số trong cột sẽ không được đối chiếu CLI")
+    if sav_cols:
+        for what, txt in (("nhãn tiết kiệm đã duyệt", SAV_LABEL), ("cảnh báo kết quả quá khứ", SAV_WARN)):
+            if norm(txt) not in text:
+                raise TableBlock(f"benchmark-table BLOCK ({name}): bảng có cột tiết kiệm nhưng thiếu {what} "
+                                 f"NGUYÊN VĂN dưới bảng (render bằng `period_table_32.py`): {txt[:60]!r}…")
     need_sleeve = any(_period_of(r[0])[0] for r in rows if r)
     out = {}
     rc, j, err = cli(account, report_date, False)
