@@ -116,3 +116,12 @@
 
 ## 2026-10-25 — ⚠️ CAVEAT CAPACITY gắn vào pin R3 (user duyệt ghi 21:04 ICT) — số pin KHÔNG đổi
 Pin R3 (`pin0%` 22,12% … `pin1M` 25,42% ở park 0) chạy KHÔNG ràng buộc khối lượng: 31% giá trị mua LAG ở ngày `Volume = 0`, ~85% vượt 10% KL khớp cùng ngày. Dưới trần tham gia 5–10% (bỏ phần không khớp) CAGR là 15,41–17,36% (sàn) / 17,92–19,95% (trần) — tham chiếu hindsight, KHÔNG phải pin. Nguồn: `lag-capacity-floor-20261025` A (commit `6724d841e`, quant-skeptic CONFIRMED medium); chi tiết + caveat: `kb/projects/lag-adv-filter-tracking.md` § 2026-10-25. Khi trích pin R3 cho capacity/vận hành 50 tỷ phải kèm caveat này.
+
+
+## Dọn canonical 13/11/2026 22:50 — dòng neo −25,2% cũ + chuỗi "điểm thận trọng" (NGUYÊN VĂN, LỊCH SỬ)
+> Chuyển từ `kb/canonical.md` khi user đổi neo theo cỡ NAV (neo mới: xem canonical banner 🔴 NEO). Nguyên văn:
+
+  ⚠️ **Neo sizing DD vẫn lấy đầu SÀN −25,2%** (KHÔNG lấy −23,6% của đầu trần) — sizing đứng ở cận
+  xấu, neo thực tế KHÔNG đổi. Điểm THẬN TRỌNG trong dải = chân `dep1m_21s` FIFO = **25,24%** — **GIỮ 25,24% làm số chính, KHÔNG re-pin** (chân TRẢ KHI ĐÁO HẠN = điểm trung thực của luật user = **25,34%**, FIFO; chênh **+0,10pp = 1/5 sàn nhiễu** ⇒ không đổi pin; vẫn là MỘT TRONG dải — luật CẤM trích 1 số trần trụi giữ nguyên); ⚠️ **KHÔNG gọi là "điểm thực tế"**. Chân maturity, min_age, giới hạn `pin1M`: `kb/projects/r3-pin-history.md`.
+  FAIL-C đã đóng) **và** đúng knob park live LÚC ĐO (0,30; **live nay = 0, park TẮT từ 2026-10-01**). Neo sizing DD (bootstrap 5th) = **−25,2%**;
+- ✅ **park=0 ĐÃ PIN (user duyệt 2026-10-08 23:30)**: **`pin0%` 22,12% … `pin1M` 25,42%** (egg = lãi 1M Big-4 PIT, KHÔNG 8,543%); **neo DD GIỮ −25,2%** (park0 đo −23,9%); park 0 vs 0,3 KHÔNG phân biệt được. 25,42% chỉ là ĐẦU TRẦN. Registry mục "2026-10-08".
