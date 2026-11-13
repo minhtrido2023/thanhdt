@@ -173,3 +173,6 @@
 
 ## Archived 2026-11-07 (keep=12 days=0 require_done=False)
 - [2026-11-06T07:42:41Z] 06/11 14:45: injector DISC arch NEEDS_CHANGES -> vòng 2 Taylor (sonnet) trên nhánh session/disc-exit-20261106; xong thì re-review (1 arch-reviewer giới hạn diff r2) -> merge -> cron. Hỏi user: TIME bán 12/12 (phiên 26) hay 11/12? Finding ngoài phạm vi: plan đã duyệt ⇒ auto_exit_inject REFUSE hết, STOP không ai được báo.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T17:49:42Z] [13/11 00:52] B xong (feat/savings-row-20261112 @9246cd93e, chưa merge); skeptic B job quant-skeptic_20261112_174928 đang chạy. Sau đó: tổng hợp 4 việc chờ user + đề xuất A vòng 2 (NULL Volume_3M_P50) + C chưa chạy.

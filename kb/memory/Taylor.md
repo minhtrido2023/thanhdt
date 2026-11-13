@@ -26,3 +26,4 @@
 - [2026-11-13T02:55:36Z] [live-gap-exec-B3 13/11] XONG: nhanh feat/savings-row-b3-20261113 (04fc4ce7f) KHONG merge; e2e gate tuan 06/11 COMPLETE (stub gui); v2 selfcheck chua ket luan (timeout); cau 5% co tuc phu thuoc cashDividendReceiving=0 — CHO Mike/user
 - [2026-11-13T03:07:35Z] [live-gap-exec-A3 13/11] XONG job Taylor_20261113_021435: nhanh feat/live-gap-exec-A3-20261113 (6bbb4a443) KHONG merge; L3P pin0 22,91/pin1M 26,61, DD5 -27,89/-24,96; MINP tro (live=60); pin ladderA3-L3P-* (command thieu env, da annotate) — CHO quant-skeptic + user
 
+- [2026-11-13T03:59:56Z] ĐANG DỞ: A4 (job Taylor_20261113_034625) research/live_gap_exec_A4: Việc2 XONG (trùng byte). Chờ seed TB s3-10 (logs/tb.done) + L3F -> viết REPORT.md, registry, pin, bus topic live-gap-exec-A4-20261113 | NEXT: boot sd seed, REPORT
