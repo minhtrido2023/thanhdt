@@ -2324,3 +2324,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T18:43:29Z] [live-gap-exec-A2 13/11] XONG job Taylor_20261112_181209: lo NULL khong phai nguyen nhan (L2 sach pit 23,32/26,85, DD5 -27,7/-25,3); chenh L1->L2 = fill ao ma ADV<=0; de xuat LAG_ADV_SRC=pit mac dinh — CHO quant-skeptic + user; nhanh 4f7609c34/770393ce2 KHONG merge
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T19:03:34Z] [live-gap-exec-B2 13/11] XONG job Taylor_20261112_181211: nhanh feat/savings-row-20261112 (418667a32) KHONG merge; v2 selfcheck PASS 177 x3; anchor_warning siet, gate crosscheck cot tiet kiem — CHO user/Wendy duyet cau chu+thue+ten cot template
