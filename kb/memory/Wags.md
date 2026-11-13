@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-21T15:32:27Z] 21/10: DRI bán tay = USER xác nhận (current_ops). Cờ plan-position-drift DRI 21/10 và compute_active_nav fail-closed liên quan DRI là ĐÃ BIẾT — không mở/escalate question mới.
 - [2026-10-25T03:13:44Z] ĐANG DỞ: cq-2026-10-25 10 finding đã fix+commit (44fdb739d e8d1e1baf c6bb0bd0e 5aa77a1b4 9dde202b7); chờ arch-reviewer + quant-skeptic (e8d1e1baf) | NEXT: đọc verdict, sửa nếu NEEDS_CHANGES (1 lượt), rồi bus finding topic cq-2026-10-25-wags-autodispatch + notify_thread.sh architecture
 - [2026-10-25T03:25:28Z] [2026-10-25] cq-2026-10-25: auto_exit_inject #3/#10 PARKED branch cq-2026-10-25-auto-exit-inject-pending-approval, CHỜ USER (question cq-2026-10-25-auto-exit-inject-approval) trước cron 26/10 20:40. Duyệt A => git merge branch; B/hết hạn => giữ revert. Chốt: finding autodispatch chạm sinh-lệnh SELL (auto_exit_inject) = escalate, không tự sửa.
 - [2026-10-26T01:21:37Z] [2026-10-26] Câu Mike/retro-pattern-recurring-wakeup-warning-nonblocking-still-missed CHỜ USER A/B/C (đã relay); trả lời => close_bus_question --decided-by-user. Checker sẽ còn báo tới khi user trả lời — không phải bug.
@@ -27,3 +26,4 @@
 - [2026-11-11T03:57:45Z] [2026-11-11] Xong G2 stop-hook wakeup (4e2cfe867); cau retro bg-dispatch-wakeup-miss da dong. Neu MISS con tai dien: kiem wakeup_audit sau fix (queue-op artifact).
 - [2026-11-12T01:23:04Z] [2026-11-12] Fleet backup kẹt do GH001 (.pkl 113MB trong dcfac6bbc), KHÔNG phải PAT. CHỜ USER câu Wags/fleet-backup-gh001-history-rewrite: A ⇒ git bundle backup + filter-repo master từ fc5bd02d gỡ research/**/*.pkl|parquet lúc không job LIVE, push, close --decided-by-user. PAT thật hết 15/11 07:17 ICT (việc riêng của user).
 - [2026-11-13T01:20:44Z] [2026-11-13] Câu Wags/fleet-backup-gh001-history-rewrite vẫn CHỜ USER (checker 13/11 báo đúng, không fix). Lưu ý PAT hết 15/11 07:17 ICT: duyệt A phải làm trước hoặc đổi PAT.
+- [2026-11-13T10:09:55Z] ĐANG DỞ sweep 13/11 (Wags_20261113_093003): chờ arch-reviewer → merge fix/wags-scsweep-20261113 (925199ca4 ec771492b) rồi đóng 4 câu; book_clearing PARKED nhánh fix/book-clearing-lag-dd-zone-gate-20261113 (86508eed3) CHỜ USER; Taylor_20261113_100934 nhận commodity+annualization. NEXT: gh001 user duyệt A 16:39 ICT 13/11 ⇒ làm rewrite (đúng 1 lần, ngoài giờ LIVE).

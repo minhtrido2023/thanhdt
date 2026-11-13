@@ -1383,3 +1383,33 @@
 - [2026-11-13T10:06:00Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20261113_094054", "source": "watcher"}
 - [2026-11-13T10:06:09Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20261113_093003", "source": "watcher"}
 - [2026-11-13T10:07:00Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20261113_094054", "source": "watcher"}
+
+## Consolidation 2026-11-13T10:15:47Z
+- [2026-11-13T10:10:09Z] Taylor/heartbeat — Taylor_20261113_100934: {"status": "in_progress", "note": "(1) thu snapshot asof20260729 lam input dong bang cho t_repro"}
+- [2026-11-13T10:10:35Z] Taylor/heartbeat — Taylor_20261113_100934: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261113_100934", "source": "watcher"}
+- [2026-11-13T10:11:36Z] Taylor/heartbeat — Taylor_20261113_100934: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261113_100934", "source": "watcher"}
+- [2026-11-13T10:12:36Z] Taylor/heartbeat — Taylor_20261113_100934: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261113_100934", "source": "watcher"}
+- [2026-11-13T10:13:36Z] Taylor/heartbeat — Taylor_20261113_100934: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261113_100934", "source": "watcher"}
+- [2026-11-13T10:14:15Z] Taylor/answer — selfcheck-red: mike/bin/commodity_cycle_forward_tracker_selfcheck.py: {"resolution": "t_repro đóng băng input Close/ICB bằng fixture md5 khoá; 26/28 khớp baseline ≤1e-9 (ngưỡng giữ nguyên), 2 sự kiện trôi 2026-03-11 (rubber/urea) so vintage đóng băng ≤1e-9, trần trôi <1e-4; 46 assertion, mutation 8/8, TZ giữ/unset/New_York xanh", "evidence": "f9968fc23 + 318ba6805 (master), rc=0", "resolves": ["Wags/selfcheck-red: mike/bin/commodity_cycle_forward_tracker_selfcheck.py"], "closed_by": "Taylor"}
+- [2026-11-13T10:14:36Z] Taylor/heartbeat — Taylor_20261113_100934: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261113_100934", "source": "watcher"}
+- [2026-11-13T10:15:36Z] Taylor/heartbeat — Taylor_20261113_100934: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261113_100934", "source": "watcher"}
+- [2026-11-13T10:07:09Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 37, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:08:00Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:08:09Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 38, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:09:00Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:09:09Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 39, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:09:20Z] Wags/heartbeat — Wags_20261113_093003: {"status": "in_progress", "note": "4 fix commit (925199ca4, ec771492b tren fix/wags-scsweep; book_clearing parked fix/book-clearing-lag-dd-zone-gate-20261113). Tiep: arch-reviewer"}
+- [2026-11-13T10:09:55Z] Wags/heartbeat — Wags_20261113_093003: {"status": "in_progress", "note": "cho arch-reviewer 3 commit; Taylor bg Taylor_20261113_100934 nhan commodity + 68 file annualization"}
+- [2026-11-13T10:10:00Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:10:09Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 40, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:11:00Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:11:09Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 41, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:12:01Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:12:10Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 42, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:13:01Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:13:10Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 43, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:13:26Z] Wags/heartbeat — Wags_20261113_094054: {"status": "in_progress", "note": "waiting Wags_093003 + Taylor_100934 (new branches off old master)"}
+- [2026-11-13T10:14:02Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:14:10Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 44, "job_id": "Wags_20261113_093003", "source": "watcher"}
+- [2026-11-13T10:15:02Z] Wags/heartbeat — Wags_20261113_094054: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20261113_094054", "source": "watcher"}
+- [2026-11-13T10:15:10Z] Wags/heartbeat — Wags_20261113_093003: {"status": "still_running", "elapsed_min": 45, "job_id": "Wags_20261113_093003", "source": "watcher"}

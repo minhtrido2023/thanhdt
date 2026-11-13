@@ -461,3 +461,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-10-20T01:23:45Z] [2026-10-20] Câu Mike/retro-pattern-...-owned-recovery-path vẫn CHỜ USER A/B/C (mở lại 01:22Z sau khi bị đóng lây). Bài học: close_bus_question giờ chặn rc=5 đóng lây substring — đừng dùng --ack-substring-collateral trừ khi thật sự muốn.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-10-21T15:32:27Z] 21/10: DRI bán tay = USER xác nhận (current_ops). Cờ plan-position-drift DRI 21/10 và compute_active_nav fail-closed liên quan DRI là ĐÃ BIẾT — không mở/escalate question mới.
