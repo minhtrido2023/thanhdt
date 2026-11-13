@@ -134,7 +134,7 @@ def build_conditions(led, vfull, dates):
     le = pd.read_csv(W + "/data/lag_edge_health.csv", parse_dates=["entry", "known_date"]).sort_values(["known_date", "entry"])
     df["V5"] = [le[le.known_date <= t].mean12.iloc[-1] if (le.known_date <= t).any() else np.nan for t in dates]
     lr = np.log(vfull).diff()
-    vol = lr.rolling(60, min_periods=55).std() * np.sqrt(252)
+    vol = lr.rolling(60, min_periods=55).std() * np.sqrt(len(lr) / ((lr.index[-1] - lr.index[0]).days / 365.25))
     df["V6"] = vol.reindex(dates).values
     return df
 
@@ -238,7 +238,7 @@ def perf(n):
     yrs = (n.index[-1] - n.index[0]).days / 365.25
     cagr = (n.iloc[-1] / n.iloc[0]) ** (1 / yrs) - 1
     r = n.pct_change().dropna()
-    sh = r.mean() / r.std() * np.sqrt(252) if r.std() > 0 else np.nan
+    sh = r.mean() / r.std() * np.sqrt(len(r) / yrs) if r.std() > 0 else np.nan
     dd = (n / n.cummax() - 1).min()
     return cagr, sh, dd
 

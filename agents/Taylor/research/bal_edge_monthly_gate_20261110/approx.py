@@ -63,7 +63,7 @@ def metrics(nav, dates):
     yrs = (dates[-1] - dates[0]).days / 365.25
     cagr = (nav.iloc[-1] / nav.iloc[0]) ** (1 / yrs) - 1
     r = nav.pct_change().dropna()
-    sh = r.mean() / r.std() * np.sqrt(252)
+    sh = r.mean() / r.std() * np.sqrt(len(r) / yrs)  # Sharpe lịch (n_returns/yrs)
     dd = (nav / nav.cummax() - 1).min()
     return dict(cagr=cagr, sharpe=sh, maxdd=dd, calmar=cagr / -dd if dd < 0 else np.nan)
 

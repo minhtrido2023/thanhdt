@@ -41,14 +41,14 @@ def met(nav):
     cagr = (nav.iloc[-1] / nav.iloc[0]) ** (1 / yrs) - 1
     r = nav.pct_change().dropna()
     dd = (nav / nav.cummax() - 1).min()
-    return dict(cagr=cagr, sharpe=r.mean() / r.std() * np.sqrt(252), maxdd=dd, calmar=cagr / -dd)
+    return dict(cagr=cagr, sharpe=r.mean() / r.std() * np.sqrt(len(r) / yrs), maxdd=dd, calmar=cagr / -dd)
 
 
 def met_r(r, yrs):
     nav = np.cumprod(1 + r)
     cagr = nav[-1] ** (1 / yrs) - 1
     dd = (nav / np.maximum.accumulate(nav) - 1).min()
-    return cagr, r.mean() / r.std() * np.sqrt(252), dd, cagr / -dd
+    return cagr, r.mean() / r.std() * np.sqrt(len(r) / yrs), dd, cagr / -dd
 
 
 def split(nav, a, b):
@@ -140,7 +140,8 @@ def dsr_pbo(carry="off", S=16):
     R = pd.DataFrame(cols).pct_change().dropna()
     ex = R.drop(columns="BLIND").sub(R["BLIND"], axis=0)        # excess daily vs blind
     sr = ex.mean() / ex.std()                                   # per-period SR of excess
-    n = len(ex); N = ex.shape[1]; var_sr = sr.var(ddof=1)
+    n = len(ex); K = n / ((ex.index[-1] - ex.index[0]).days / 365.25)   # phiên/năm lịch
+    N = ex.shape[1]; var_sr = sr.var(ddof=1)
     emc = 0.5772156649
     sr0 = np.sqrt(var_sr) * ((1 - emc) * norm.ppf(1 - 1 / N) + emc * norm.ppf(1 - 1 / (N * np.e)))
     best = sr.idxmax(); x = ex[best]
@@ -154,8 +155,8 @@ def dsr_pbo(carry="off", S=16):
         k = si.idxmax(); rank = so.rank().loc[k] / (len(so) + 1)
         lam.append(np.log(rank / (1 - rank)))
     lam = np.array(lam)
-    return dict(carry=carry, n_trials=int(N), best=best, best_excess_sr_ann=float(sr[best] * np.sqrt(252)),
-                excess_sr_ann={k: float(v * np.sqrt(252)) for k, v in sr.items()}, sr0_ann=float(sr0 * np.sqrt(252)),
+    return dict(carry=carry, n_trials=int(N), best=best, best_excess_sr_ann=float(sr[best] * np.sqrt(K)),
+                excess_sr_ann={k: float(v * np.sqrt(K)) for k, v in sr.items()}, sr0_ann=float(sr0 * np.sqrt(K)),
                 dsr=float(dsr), pbo=float((lam <= 0).mean()), n_splits=len(lam),
                 is_best_blind_share=None)
 
