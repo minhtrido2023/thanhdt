@@ -1,8 +1,8 @@
 # Paper-Trade Comparison — 5 Systems
 
-*Generated: 2026-11-12 15:44*
+*Generated: 2026-11-13 15:45*
 
-*Window: 2026-04-01 → 2026-11-11 (224 calendar days)*
+*Window: 2026-04-01 → 2026-11-12 (225 calendar days)*
 
 *Init NAV: 50B VND fresh, all-cash, no positions (each system)*
 
@@ -11,30 +11,30 @@
 
 | System | Final NAV | Total Ret | CAGR | Vol (ann) | Sharpe | Max DD | Calmar |
 |---|---|---|---|---|---|---|---|
-| **V11 Song Sinh + KELLY + DT5G ⭐** | 50.673B | +1.50% | +2.46% | 16.53% | +0.23 | -11.81% | +0.21 |
-| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 49.557B | -0.83% | -1.36% | 10.02% | -0.09 | -8.07% | -0.17 |
-| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 47.999B | -3.95% | -8.64% | 10.55% | -0.79 | -6.84% | -1.26 |
-| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 47.768B | -4.46% | -10.33% | 13.42% | -0.74 | -10.74% | -0.96 |
-| **VNINDEX Buy & Hold (rebased 50B)** | 51.291B | +2.58% | +4.24% | 16.82% | +0.33 | -13.46% | +0.32 |
+| **V11 Song Sinh + KELLY + DT5G ⭐** | 50.366B | +0.88% | +1.44% | 16.49% | +0.17 | -11.81% | +0.12 |
+| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 49.446B | -1.06% | -1.71% | 9.99% | -0.12 | -8.07% | -0.21 |
+| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 47.790B | -4.37% | -9.47% | 10.52% | -0.88 | -6.84% | -1.38 |
+| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 47.486B | -5.03% | -11.52% | 13.39% | -0.84 | -10.74% | -1.07 |
+| **VNINDEX Buy & Hold (rebased 50B)** | 50.934B | +1.87% | +3.05% | 16.79% | +0.26 | -13.46% | +0.23 |
 
 ## Delta vs V23 (production baseline)
 
 | System | ΔRet | ΔDD | Verdict |
 |---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | +5.96pp | -1.07pp | Return better, DD worse |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +3.63pp | +2.67pp | Both better |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +0.51pp | +3.90pp | Both better |
-| VNINDEX Buy & Hold (rebased 50B) | +7.05pp | -2.71pp | Return better, DD worse |
+| V11 Song Sinh + KELLY + DT5G ⭐ | +5.91pp | -1.07pp | Return better, DD worse |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +3.97pp | +2.67pp | Both better |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +0.66pp | +3.90pp | Both better |
+| VNINDEX Buy & Hold (rebased 50B) | +6.90pp | -2.71pp | Return better, DD worse |
 
 ## Grind lens — current drawdown & recent momentum
 
 | System | Cur DD (from peak) | Underwater | Peak date | Trailing 1M | Trailing 3M |
 |---|---|---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | -8.9% | 181d | 2026-05-14 | +0.8% | -2.4% |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -4.3% | 188d | 2026-05-07 | +0.6% | -2.5% |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -4.3% | 133d | 2026-07-01 | +1.0% | -0.7% |
-| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -8.1% | 133d | 2026-07-01 | +0.5% | -3.1% |
-| VNINDEX Buy & Hold (rebased 50B) | -9.4% | 177d | 2026-05-18 | +1.6% | -1.5% |
+| V11 Song Sinh + KELLY + DT5G ⭐ | -9.5% | 182d | 2026-05-14 | +0.6% | -3.6% |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -4.5% | 189d | 2026-05-07 | +0.6% | -2.7% |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -4.7% | 134d | 2026-07-01 | +0.7% | -1.6% |
+| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -8.7% | 134d | 2026-07-01 | +0.4% | -4.0% |
+| VNINDEX Buy & Hold (rebased 50B) | -10.0% | 178d | 2026-05-18 | +1.8% | -3.3% |
 
 *Grind = sustained underwater stretch where the book bleeds while the index holds/rises (style-divergence). V2.3's known weak spot is the 2025-08→ style-divergence grind (momentum lags the VIC-led megacap index); watch V2.3 trailing-3M vs VNINDEX.*
 
@@ -73,7 +73,7 @@
 | 2026-10-22 | 51.22B | 50.00B | 48.13B | 47.99B | 51.69B |
 | 2026-10-29 | 51.25B | 50.01B | 48.15B | 47.84B | 51.55B |
 | 2026-11-05 | 50.89B | 49.55B | 48.11B | 47.61B | 51.11B |
-| 2026-11-11 | 50.67B | 49.56B | 48.00B | 47.77B | 51.29B |
+| 2026-11-12 | 50.37B | 49.45B | 47.79B | 47.49B | 50.93B |
 
 ## Files
 

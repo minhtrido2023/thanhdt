@@ -8563,3 +8563,33 @@ ledger_md5: 84f796bdedde8fefa02b37012e65bdde
 - **Neo DD:** số đo sàn mới −27,6% sâu hơn neo −25,2% 2,4pp — CHỈ BÁO, user quyết riêng. BQ cache current CHƯA ĐO (snapshot 2,0GB, đĩa 98%).
 - Kho: 6 ledger `ladderA-L{1,2,3}-*` trong `data/pinned_ledgers/PINS.jsonl` (`decided_by: agent`, control = bước trước). Nhánh code: `feat/live-gap-exec-A-20261112` @ `efdb282bd` (KHÔNG merge).
 - Nguồn số: `mike/agents/Taylor/research/live_gap_exec_A/REPORT.md` (+ `logs/leg_metrics.log`, `logs/bootstrap.log`, `logs/tb_stats.log`, `logs/compare.log`, `logs/dsr.log`).
+
+## 2026-11-13 — Luồng A3: L3 (cache LAG adj v2) + `LAG_ADV_SRC=pit` + `LIQ_ZERO_BLOCK=lag` trên cơ sở production: dải **pin0% 22,91% (SÀN) … pin1M 26,61% (TRẦN)** · boot DD 5th **−27,89% / −24,96%** — job `Taylor_20261113_021435` ⚠️ PAPER + REGISTRY, CHƯA quant-skeptic, neo sizing **−25,2% KHÔNG ĐỔI**, `trading_rules.json` KHÔNG ĐỔI
+
+ledger_md5: 80f509ec3dbbd55233412913407e6f53
+
+- pin0% md5 `80f509ec…` = CAGR 22,91% / Sharpe 1,78 / MaxDD −17,1% / Calmar 1,34, IS 16,47% / OOS 29,12%, năm 2015 5,0%; pin1M md5 `e2de0ac45c7c265827fc53ac0a750675` = 26,61% / 2,04 / −14,8% / 1,80, IS 19,80% / OOS 33,20%, 2015 8,0%. Bootstrap circular L=21 B=4000 seed 12345 (2 chữ số): CAGR 5th 14,72% / 18,13%; **DD 5th −27,89% / −24,96%**; P(DD<−30%) 2,73% / 0,80%.
+- So control L3 (bq, cùng script, trùng byte `84f796bd`/`35c8968f`): Δ CAGR −0,48pp (pin0%, ≈2,8 sd tie-break 0,17) / −0,16pp (pin1M, ≈0,6 sd 0,26); Δ DD5 −0,32 / +0,04pp. Cơ chế của −0,48pp sàn CHƯA phân rã.
+- `LAG_ADV_MINP` ∈ {10,20,40,60}: ledger TRÙNG BYTE ở cả 4 giá trị × 2 đầu dải × 2 data LAG (vint 10-29, adj v2) — knob có vào engine (số key ADV 2.180.690 → 2.164.290) nhưng 0/7.094 lệnh mua LAG có < 267 dòng lịch sử trước ngày fill ⇒ trơ theo cấu trúc. MINP khớp live = **60** (BQ `Volume_3M_P50` NULL cho tới dòng thứ 60 của mã: 643 mã niêm yết sau 2014-06, k đầu tiên non-NULL p0 = 60).
+- Cơ chế 2015 (đính chính câu A2): fill ảo KHÔNG TRẦN của CẢ HAI loại ngày `off` cho mua trọn size — `Volume_3M_P50` ≤ 0 VÀ ngày `Volume_3M_P50` NULL; cửa sổ 2015H2–16H1 loại NULL 10 holding / 45,9 tỷ mua / lãi 5,56 tỷ vs ≤0 18 / 89,8 / 2,74 tỷ (pin0%).
+- Mặc định mới chuẩn bị trên nhánh `feat/live-gap-exec-A3-20261113` @ `6bbb4a443` (KHÔNG merge): không đặt ⇒ `LIQ_ZERO_BLOCK=lag` + `LAG_ADV_SRC=pit`. Chân không-env = `80f509ec` (trùng L3P). Lùi `LIQ_ZERO_BLOCK=off LAG_ADV_SRC=bq` ⇒ `2f7739b5` (= pin ladderA-L1, tên file canonical cũ); `=lag =bq` ⇒ `5ae929c6`/`84f796bd`. Self-check 0 VND 21/21 chân.
+- Kho: `ladderA3-L3P-advsrcpit-pin0pct/pin1M` (`decided_by: agent`, control = ladderA-L3 byte-identical). ⚠️ Trường `command` lúc add thiếu env cố định ⇒ `pin_ledger.py compare` báo 8 trục giả; đã `annotate` khai env đầy đủ (1 trục thật: LAG_ADV_SRC).
+- Nguồn số: `mike/agents/Taylor/research/live_gap_exec_A3/REPORT.md` (+ `logs/metrics_L3.log`, `logs/boot2_L3.log`, `logs/boot2_A2.log`, `logs/minp_probe.log`, `logs/minp_inert_*.log`).
+
+## 2026-11-13 — Luồng A4: phân rã Δ −0,48pp bq→pit + chạy lại pin trên mã merged (`7f25febc1`): dải **pin0% 22,91% (SÀN) … pin1M 26,61% (TRẦN)** · DD5 **−27,89% … −24,96%**
+
+ledger_md5: 80f509ec3dbbd55233412913407e6f53
+
+- Chạy lại trên mã merged: pin0% `80f509ec…` và pin1M `e2de0ac45c7c265827fc53ac0a750675` TRÙNG BYTE với ladderA3-L3P; self-check 0 VND (BAL+LAG). Boot (L=21,B=4000,seed 12345): CAGR5 14,72% / 18,13%, DD5 −27,89% / −24,96%.
+- Δ −0,48pp (bq→pit) là hiệu ứng thật: 10 seed, Δ ghép cặp −0,482pp sd 0,014, 10/10 âm; sd từng cấu hình 0,170/0,179. Cơ chế: BQ `Volume_3M_P50` gồm ngày t (khớp pit(t+1) 98,65%) ⇒ bq cộng khối lượng ngày fill; Σ mua LAG −6,0%, pnl LAG −41B; fill-NULL-only 23,19% (−0,20) rồi pit −0,28.
+- Nguồn số: `mike/agents/Taylor/research/live_gap_exec_A4/REPORT.md` (+ `logs/`, `noise.py`, `decomp*.py`). `no_ledger` cho 20 ledger seed/fill (thí nghiệm `_exp_A4_*`, không pin). Chưa qua quant-skeptic.
+
+## 2026-11-13 — Luồng A5: pin chính xác trên mã ĐÃ COMMIT (trùng byte `80f509ec` / `e2de0ac4`) + bằng chứng neo sizing: neo −25,2% (`4707bcbe`) CHỨA FILL ẢO; thang 1-trục bỏ fill ảo −3,96pp ⇒ DD5 sàn engine trung thực **−29,09% (park 0,3) / −27,89% (park 0)** — job `Taylor_20261113_071030` ⚠️ PAPER + REGISTRY, CHƯA quant-skeptic, neo sizing **−25,2% KHÔNG ĐỔI** (user quyết), `trading_rules.json` KHÔNG ĐỔI
+
+no_ledger: V1 trùng byte pin sẵn có (80f509ec, e2de0ac4); 6 chân thang park 0,3 là thí nghiệm, ledger + md5 ở mike/agents/Taylor/research/live_gap_exec_A5/ledgers + logs/legs_summary.log, không pin.
+
+- Việc 1: pin0% trên main `7f25febc1` (worktree sạch) ⇒ `80f509ec…` 22,91% / Sharpe 1,78 / MaxDD −17,1% / IS 16,47 / OOS 29,12 / DD5 −27,89%; pin1M trên `e9a9aed1a` (= `770393ce2` + 1 dòng mặc định pit A4, nay đã commit; nhánh `research/live-gap-A5-r-20261113`; main KHÔNG có `IDLE_CARRY_TIER`) ⇒ `e2de0ac4…` 26,61% / 2,04 / −14,8% / 19,80 / 33,20 / DD5 −24,96%. Self-check 0 VND cả hai. Data: cache asof0729 manifest `7f29e9ab`, CA snapshot `e3bf03ef`, LAG adj v2 (`sb/m_adj/LAG_MD5`).
+- Neo −25,2% = `4707bcbe` (park 0,3, `LIQ_ZERO_BLOCK` chưa có = off = fill ảo ở ngày ADV ≤0/NULL, ADV bq, quicksort, LAG vint 10-29); tái lập trùng byte (`C30_off_q`). Thang pin0% (DD5 2 chữ số, boot L=21 B=4000 seed 12345), park 0,3: neo −25,20 → mergesort `c95b4158` −25,12 → **lag `6db7c630` −29,08 (−3,96)** → adj v2 `151bd903` −29,07 → pit `dc8910f8` −29,09; park 0: `537e349b` −23,90 → −23,56 → **−27,73 (−4,17)** → −27,57 → −27,89. pin1M park 0,3 mới `5f55a5b3` −27,30 (neo `bcd0469f` −23,56).
+- ADV live (gate `cap_lag_orders`, dòng t-1) = pit ở 29/32 cặp (mã,ngày) lệnh LAG thật (48 lệnh, 17 mã, 12 ngày; max |log| 0,002); bq-ngày-fill lệch tới 0,097 log. 0/48 lệnh vượt trần, 0 dòng cap LAG trong 904 log run_bot ⇒ ở NAV live trần không ràng buộc.
+- DD sleeve BAL+LAG live 76 phiên: −23,25% (SpaceX) / −23,24% (ZaloPay) — p10–13 phân phối engine `lag`, p5–7 engine fill ảo; N=1, không phân biệt được.
+- Nguồn số: `mike/agents/Taylor/research/live_gap_exec_A5/REPORT.md` (+ `logs/boot2_A5.log`, `logs/boot2_pinned.log`, `logs/metrics_A5.log`, `logs/adv_live_vs_pit.log`, `logs/sleeve_dd*.log`).
