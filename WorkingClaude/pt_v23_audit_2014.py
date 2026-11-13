@@ -283,8 +283,12 @@ if os.environ.get("BASKET_LIQ_FLOOR_B", "").strip(): _qs_tag += f"_liqf{os.envir
 # nhóm này ở cả 2 tầng từ 07-21 ⇒ mặc định "" để lại một ĐỘ LỆCH FIDELITY ĐÃ BIẾT, ĐÃ ĐO
 # (cận trên +4,08pp) giữa engine và live — cố ý chấp nhận, KHÔNG phải bỏ sót: đổi mặc định phải
 # chờ phân rã xong cơ chế. Bật lại bằng `LIQ_ZERO_BLOCK=lag` (có tag filename, không đè pin cũ).
-LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "").strip().lower()
-if LIQ_ZERO_BLOCK in ("off", "none", "0", ""): LIQ_ZERO_BLOCK = ""       # legacy: tên file canonical cũ
+# ⚠️ ĐỔI MẶC ĐỊNH 2026-11-13 (Luồng A3, job Taylor_20261113_021435; user duyệt phương án (a) 13/11 09:1x ICT
+# sau quant-skeptic CONFIRMED Luồng A2): KHÔNG đặt/rỗng ⇒ "lag" (khớp gate live `cap_lag_orders`), đi cùng
+# LAG_ADV_SRC=pit — cơ chế đã phân rã (A2 §1.4: phần "lãi" bị chặn là fill ảo không trần, capacity-infeasible).
+# Lùi về hành vi + tên file + byte cũ: `LIQ_ZERO_BLOCK=off` (đã chứng minh byte-identical, REPORT A3 §4).
+LIQ_ZERO_BLOCK = os.environ.get("LIQ_ZERO_BLOCK", "").strip().lower() or "lag"
+if LIQ_ZERO_BLOCK in ("off", "none", "0"): LIQ_ZERO_BLOCK = ""           # legacy: tên file canonical cũ
 elif LIQ_ZERO_BLOCK in ("1", "lag"): _qs_tag += "_liqzblag"
 elif LIQ_ZERO_BLOCK == "both": _qs_tag += "_liqzbboth"
 else: raise SystemExit(f"LIQ_ZERO_BLOCK không hợp lệ: {LIQ_ZERO_BLOCK!r} (lag|both|off)")
@@ -305,7 +309,9 @@ elif LAG_ADV_BASIS != "close": raise SystemExit(f"LAG_ADV_BASIS không hợp l�
 #   fill = COALESCE(Volume_3M_P50, trung vị Volume 60 dòng gồm t) × PxAdv(t) — CHỈ vá lỗ NULL, giữ định nghĩa BQ
 #   pit  = trung vị Volume 60 dòng TRƯỚC t (t-60..t-1) × PxAdv(t-1) — không gồm ngày fill (PIT tại giờ mở cửa)
 # min_periods = LAG_ADV_MINP (mặc định 20 dòng) cho đường tự tính.
-LAG_ADV_SRC = os.environ.get("LAG_ADV_SRC", "bq").strip().lower()
+# ⚠️ ĐỔI MẶC ĐỊNH 2026-11-13 (Luồng A3, job Taylor_20261113_021435, user duyệt (a)): KHÔNG đặt/rỗng ⇒ "pit".
+# Lùi về hành vi + tên file + byte cũ: `LAG_ADV_SRC=bq` (byte-identical, REPORT A3 §4).
+LAG_ADV_SRC = os.environ.get("LAG_ADV_SRC", "").strip().lower() or "pit"
 LAG_ADV_MINP = int(os.environ.get("LAG_ADV_MINP", "20"))
 if LAG_ADV_SRC not in ("bq", "fill", "pit"): raise SystemExit(f"LAG_ADV_SRC không hợp lệ: {LAG_ADV_SRC!r} (bq|fill|pit)")
 if LAG_ADV_SRC != "bq": _qs_tag += f"_advsrc{LAG_ADV_SRC}" + ("" if LAG_ADV_MINP == 20 else f"mp{LAG_ADV_MINP}")
