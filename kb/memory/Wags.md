@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-25T03:25:28Z] [2026-10-25] cq-2026-10-25: auto_exit_inject #3/#10 PARKED branch cq-2026-10-25-auto-exit-inject-pending-approval, CHỜ USER (question cq-2026-10-25-auto-exit-inject-approval) trước cron 26/10 20:40. Duyệt A => git merge branch; B/hết hạn => giữ revert. Chốt: finding autodispatch chạm sinh-lệnh SELL (auto_exit_inject) = escalate, không tự sửa.
 - [2026-10-26T01:21:37Z] [2026-10-26] Câu Mike/retro-pattern-recurring-wakeup-warning-nonblocking-still-missed CHỜ USER A/B/C (đã relay); trả lời => close_bus_question --decided-by-user. Checker sẽ còn báo tới khi user trả lời — không phải bug.
 - [2026-10-30T01:20:36Z] [2026-10-30] Câu Mike/retro-pattern-recurring-drift-checker-runs-before-evidence CHỜ USER A/B (đã relay 29/10 17:31Z); trả lời => close_bus_question --decided-by-user; A => sửa plan_position_drift_check + dời cron (cần duyệt).
 - [2026-11-03T01:20:42Z] [2026-11-03] Câu Taylor/pnj-bctc-q3-review-trigger CHỜ USER A/B (đã relay Discord 02/11 qua pnj_q3_review_watch). User trả lời ⇒ close_bus_question --decided-by-user; checker báo tới lúc đó là đúng, không phải bug.
@@ -27,3 +26,4 @@
 - [2026-11-13T01:20:44Z] [2026-11-13] Câu Wags/fleet-backup-gh001-history-rewrite vẫn CHỜ USER (checker 13/11 báo đúng, không fix). Lưu ý PAT hết 15/11 07:17 ICT: duyệt A phải làm trước hoặc đổi PAT.
 - [2026-11-13T10:09:55Z] ĐANG DỞ sweep 13/11 (Wags_20261113_093003): chờ arch-reviewer → merge fix/wags-scsweep-20261113 (925199ca4 ec771492b) rồi đóng 4 câu; book_clearing PARKED nhánh fix/book-clearing-lag-dd-zone-gate-20261113 (86508eed3) CHỜ USER; Taylor_20261113_100934 nhận commodity+annualization. NEXT: gh001 user duyệt A 16:39 ICT 13/11 ⇒ làm rewrite (đúng 1 lần, ngoài giờ LIVE).
 - [2026-11-13T10:23:12Z] [2026-11-13] GH001 rewrite: bundle+commit xoa sb/sbv (78bda2620) XONG; doi ref master CHUA lam - chan boi job Taylor + 2 nhanh fix/* chua merge tren lich su cu. CHO USER cau Wags/fleet-backup-gh001-rewrite-swap-blocked A/B/C; quy trinh trong finding trace Wags_20261113_094054. PAT het 15/11 07:17 ICT.
+- [2026-11-13T10:23:38Z] [2026-11-13] Taylor_20261113_100934 xong việc(1) commodity (403 cuối phiên vô hại); việc(2) annualization CHƯA làm. GH001 swap vẫn chờ user trả lời câu rewrite-swap-blocked + merge fix/wags-scsweep. PAT hết 15/11 07:17 ICT.
