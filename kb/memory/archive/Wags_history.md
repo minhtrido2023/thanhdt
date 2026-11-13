@@ -464,3 +464,6 @@ BAI HOC: append text phu vao $logfile cua job LA THAY DOI VAN BAN USER-FACING �
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-10-21T15:32:27Z] 21/10: DRI bán tay = USER xác nhận (current_ops). Cờ plan-position-drift DRI 21/10 và compute_active_nav fail-closed liên quan DRI là ĐÃ BIẾT — không mở/escalate question mới.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-10-25T03:13:44Z] ĐANG DỞ: cq-2026-10-25 10 finding đã fix+commit (44fdb739d e8d1e1baf c6bb0bd0e 5aa77a1b4 9dde202b7); chờ arch-reviewer + quant-skeptic (e8d1e1baf) | NEXT: đọc verdict, sửa nếu NEEDS_CHANGES (1 lượt), rồi bus finding topic cq-2026-10-25-wags-autodispatch + notify_thread.sh architecture

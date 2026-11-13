@@ -2321,3 +2321,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T17:49:03Z] [live-gap-exec-B 13/11] XONG job Taylor_20261112_172358: nhanh feat/savings-row-20261112 (9246cd93e) KHONG merge; savings selfcheck 56 PASS; report_return_gate_selfcheck FAIL co san tren master; report_v2_selfcheck timeout chua ket luan; template/gate chua sua — CHO user duyet + Wendy ve cach dien dat
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T18:43:29Z] [live-gap-exec-A2 13/11] XONG job Taylor_20261112_181209: lo NULL khong phai nguyen nhan (L2 sach pit 23,32/26,85, DD5 -27,7/-25,3); chenh L1->L2 = fill ao ma ADV<=0; de xuat LAG_ADV_SRC=pit mac dinh — CHO quant-skeptic + user; nhanh 4f7609c34/770393ce2 KHONG merge
