@@ -54,3 +54,10 @@ Nguồn: `agents/Taylor/research/live_gap_exec_A4/REPORT.md`, bus `live-gap-exec
 - Dải trên cơ sở production: pin0% 22,91% (DD5 −27,89%) … pin1M 26,61% (DD5 −24,96%). Neo sizing −25,2% GIỮ (user quyết riêng).
 - ⚠️ Đính chính của skeptic: chân pin1M chạy trên code nghiên cứu (770393ce2 + 1 dòng chưa commit), KHÔNG phải main đã merge như REPORT §4 ghi — provenance cần ghi lại hoặc chạy lại pin1M sau khi merge IDLE_CARRY_TIER.
 - Còn nợ: so ADV lúc đặt lệnh live với pit; 10 seed cho chân fill; ADV thấp giả sau corp-action (cửa sổ 60 phiên trộn khối lượng thô, cả bq lẫn pit).
+
+## Vòng 3 — dòng "so với gửi tiết kiệm" ĐÃ MERGE master (13/11 12:55 ICT)
+- Merge `cb40031c6` (nhánh `feat/savings-row-b3-20261113`, 6 commit B2–B5). Skeptic B3/B4/B5 đều CONFIRMED (medium); user duyệt câu ALT cổ tức nguyên văn 13/11 11:20 ICT (provenance ghi ở `period_table_32.py`, comment `SAV_LABEL_ALT`).
+- B5 sửa 3 mục của B4: cổng chỉ nhận ĐÚNG 1 dòng V0 (khi `cashDividendReceiving`=0) hoặc ALT (khi ≠0); không đọc được dữ kiện ⇒ BLOCK có bằng chứng (không rơi sang ALT); `report_date` ngày không giao dịch lùi về phiên giao dịch gần nhất.
+- Kiểm sau merge: `e2e_gate.py` với `E2E_ROOT_BRANCH=0` trên master canonical ⇒ COMPLETE, DELIVER_RC 0 (`agents/Taylor/research/live_gap_exec_B5/e2e_postmerge/gate_run.log`; phải dùng `python3` hệ thống vì `wc_venv` thiếu pymupdf — artifact_lint cần nó). report_v2_selfcheck 3 TZ rc=0.
+- Nhánh gốc repo mike là `master` (không phải `main`).
+- Gợi ý skeptic chưa làm (tuỳ chọn): `norm()` từng dòng ứng viên trước khi so khớp chính xác trong `check_report`.
