@@ -1028,7 +1028,7 @@ def part_r2(M, r):
     r["R2c_fail_open_holds_blocks_transfer"] = (rc2 == 0 and not p2.get("book_transfers") and same2
                                                 and any("FAIL_OPEN" in b.get("reason", "") for b in rep2["blocked"]))
     bot_set = bot_filter_names()
-    r["R2d_ast_parity_gates_vs_bot_execute"] = bot_set == set(BCm.GATE_STEPS) and len(bot_set) == 5
+    r["R2d_ast_parity_gates_vs_bot_execute"] = bot_set == set(BCm.GATE_STEPS) and len(bot_set) == 6
     if not r["R2d_ast_parity_gates_vs_bot_execute"] and not QUIET[0]:
         print(f"      bot_execute filter_*={sorted(bot_set)} vs GATE_STEPS={sorted(BCm.GATE_STEPS)}")
     # tích hợp: cổng THẬT (không vá), mã excluded ⇒ chặn ở bước 1; mã thường ⇒ đi hết chuỗi thật
@@ -1046,6 +1046,29 @@ def part_r2(M, r):
                                            and (ok_r or any(n in why_r for n in BCm.GATE_STEPS)))
     finally:
         sbi.close()
+    # R2f: chuyển nhãn sang LAG phải qua cổng DD-zone (user 09/11): mọi cổng khác pass-through,
+    # riêng filter_lag_dd_zone_orders loại lệnh LAG ⇒ target_book_gates phải CHẶN và nêu đúng tên.
+    import trading_bot.plan as _TPf
+    import dataclasses as _dc
+    _names = [n for n in BCm.GATE_STEPS if n != "filter_excluded_tickers"]
+    _saved = {n: getattr(_TPf, n) for n in _names}
+    sbl = SB()
+    try:
+        for n in _names:
+            setattr(_TPf, n, lambda t, asof=None: (t, []))
+        _TPf.filter_lag_dd_zone_orders = (lambda t, asof=None: (
+            _dc.replace(t, orders=[o for o in t.orders if (o.book or "").upper() != "LAG"]),
+            [{"action": "BLOCKED", "reason": "stub: LAG chưa có DD"}]))
+        sbl.write_plan(base_plan(200))
+        trial, xs, _ = BCm.apply_opportunities(sbl.read_plan(), [{
+            "ticker": "VPB", "to_book": "LAG", "transfer_qty": 200, "buy_order_ids": ["BUY-VPB-LAG-01"],
+            "park_sell_order_ids": ["SELL-VPB-PARK-01"], "ref_price_buy": 23500.0}], LABEL, PD, "t")
+        ok_z, why_z = BCm.target_book_gates(trial, xs[0], set())
+        r["R2f_lag_transfer_needs_dd_zone_gate"] = (ok_z is False and "filter_lag_dd_zone_orders" in why_z)
+    finally:
+        for n, f in _saved.items():
+            setattr(_TPf, n, f)
+        sbl.close()
 
     hypo_bal(M, False)
 

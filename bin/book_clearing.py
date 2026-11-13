@@ -347,7 +347,7 @@ def sell_cap_problems(plan):
 # cap_lag_orders (xem docstring). `book_clearing_g3_selfcheck` có AST parity test: tập này phải
 # BẰNG tập `filter_*` mà bot_execute.py gọi — bot thêm cổng mới mà quên ở đây ⇒ selfcheck đỏ.
 GATE_STEPS = ("filter_excluded_tickers", "filter_signal_holds", "filter_dd_flag_orders",
-              "filter_lag_rating_orders", "filter_lag_governance_orders")
+              "filter_lag_dd_zone_orders", "filter_lag_rating_orders", "filter_lag_governance_orders")
 
 
 CORP_ACTION_TIMEOUT_S = 30   # trần thời gian đọc BQ ở đường apply (đang giữ flock) — quá ⇒ chặn chuyển, fail-closed
@@ -403,7 +403,8 @@ def plan_asof(plan):
 
 def target_book_gates(plan, x, excluded):
     """Lệnh MUA đích (qty GỐC, trước khi giảm) có qua đủ cổng của book đích không — đúng các hàm
-    bot_execute chạy: filter_excluded_tickers, filter_dd_flag_orders, filter_lag_rating_orders,
+    bot_execute chạy (đúng thứ tự GATE_STEPS): filter_excluded_tickers, filter_signal_holds,
+    filter_dd_flag_orders, filter_lag_dd_zone_orders, filter_lag_rating_orders,
     filter_lag_governance_orders. KHÔNG gọi cap_lag_orders (trần %ADV đo TÁC ĐỘNG THỊ TRƯỜNG; phần
     chuyển nhãn không chạm thị trường — cùng lý lẽ docstring net_offsetting_orders).
     Khác bot: FAIL_OPEN của nguồn ⇒ CHẶN chuyển (cơ chế mới, không kế thừa fail-open).
