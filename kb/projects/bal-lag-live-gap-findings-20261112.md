@@ -80,3 +80,9 @@ Nguồn: `agents/Taylor/research/live_gap_exec_A6/REPORT.md` (job `Taylor_202611
 - **ADV sau thưởng/cổ tức CP:** (mã,ngày) ảnh hưởng 3,4–4,3%; lệnh cap sai 1,03% (1B) / 3,79% (50B); vốn mua bị cắt ≤0,69% (cận trên). Thật nhưng nhỏ; DD5 sau quy đổi CHƯA đo. Ghi chú: chênh 50B −4,11 trộn ledger khác commit/cache LAG (vint vs adj) — đã công bố.
 - **Rerun skeptic đề nghị (chưa làm, chưa dispatch):** knob trần ADV phía bán (20%/ngày, carry phần dư) rồi chạy lại S1/S2 L1/L3P + DD5; 50B L1 trên cây A6 + cache adj; chẩn đoán vì sao engine 1B chọn mã LAG kém thanh khoản hơn live; knob adj-ADV đo DD5.
 - **Hệ quả cho quyết định neo (USER QUYẾT, chưa đổi):** ngoài A/A'/B còn câu hỏi MỚI — neo áp cho CỠ NAV nào. Live ~1 tỷ; bằng chứng 1B không dùng làm neo được tới khi có trần bán. Khuyến nghị giữ A (−29,09%) làm sàn tạm cho engine 50B, nhận rõ đó có thể quá nông ở NAV nhỏ.
+
+## QUYẾT ĐỊNH USER 13/11 16:39 ICT (`decided_by: user`) — neo sizing DD = phương án A
+- **Neo sizing DD5 = −29,09%** (engine `lag`+`pit`, park 0,3 = đầu sàn của dải park XẤU HƠN, luật neo 10-08); thay neo cũ −25,2% (ledger `4707bcbe`, có fill ảo). KHÔNG còn trích −25,2% như neo hiện hành.
+- Ràng buộc đi kèm (skeptic A6): −29,09% là **cạnh dưới dải bootstrap** của engine 50B và có thể NÔNG ở NAV live ~1 tỷ (engine không có trần ADV phía bán). Câu hỏi "neo cho cỡ NAV nào" + rerun trần bán: chưa dispatch, chờ user.
+- Không code/config nào đọc neo (grep `mike/bin`, `trading_bot`, `trading_rules.json` = 0) ⇒ KHÔNG đổi production; chỉ đổi con số trích dẫn trong KB/báo cáo/số pin.
+- Cùng lượt: xoá `live_gap_exec_E/{sb,sbv}` (đĩa 98%→94%); đóng bus `nav-loss-brake-review-20261113` = A (giữ cảnh báo); đóng `fleet-backup-gh001-history-rewrite` = A → dispatch Wags `Wags_20261113_094054` thực thi (bundle backup → filter-repo → push mike-fleet).
