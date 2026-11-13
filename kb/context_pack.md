@@ -155,12 +155,12 @@ Taylor `dt-gate-badzone-count-review-20261019` (job `Taylor_20261019_160133`): b
   +2,34pp trong đó **2,05pp (87,8%) là SỐ HỌC TRỰC TIẾP** (tiền nhàn rỗi 46,4% NAV, trước trả 0%
   nay ~3,5%/năm), chỉ 0,285pp là đường giao dịch — DƯỚI sàn nhiễu W2b 0,46pp ⇒ **KHÔNG đọc là
   "hệ tốt lên"**, đây là đổi thước đo áp đều mọi phương tiện. Quy đổi thực tế ~21,9% … ~24,2%.
-  ⚠️ **Neo sizing DD vẫn lấy đầu SÀN −25,2%** (KHÔNG lấy −23,6% của đầu trần) — sizing đứng ở cận
-  xấu, neo thực tế KHÔNG đổi. Điểm THẬN TRỌNG trong dải = chân `dep1m_21s` FIFO = **25,24%** — **GIỮ 25,24% làm số chính, KHÔNG re-pin** (chân TRẢ KHI ĐÁO HẠN = điểm trung thực của luật user = **25,34%**, FIFO; chênh **+0,10pp = 1/5 sàn nhiễu** ⇒ không đổi pin; vẫn là MỘT TRONG dải — luật CẤM trích 1 số trần trụi giữ nguyên); ⚠️ **KHÔNG gọi là "điểm thực tế"**. Chân maturity, min_age, giới hạn `pin1M`: `kb/projects/r3-pin-history.md`.
+  ⚠️ Neo sizing DD: xem 🔴 NEO bên dưới (−25,2% cũ = lịch sử). Điểm THẬN TRỌNG = chân `dep1m_21s` FIFO **25,24%** — **GIỮ, KHÔNG re-pin**; **KHÔNG gọi là "điểm thực tế"**; CẤM trích 1 số trần trụi. Chi tiết: `kb/projects/r3-pin-history.md`.
+- 🔴 **NEO SIZING DD ĐÃ ĐỔI — user chốt 2026-11-13 22:29 (`decided_by: user`):** **NAV ≤2 tỷ (live ~1,55 tỷ) ⇒ DD5 ≈ −33%** (ước lượng engine −30…−34, không phải số đo live); **50B nghiên cứu ⇒ −29,09%**. "Neo −25,2%" còn lại = LỊCH SỬ. Không code nào đọc neo. Chi tiết: `kb/projects/bal-lag-live-gap-findings-20261112.md` (Vòng 4).
 - **R3 NEUTRAL-only @50B: CAGR 23.37% / Sharpe 1.88 / DD −14.6% / Calmar 1.60** = **`pin0%` (đầu SÀN của dải)** — pin CHÍNH THỨC từ
   **2026-09-27 (sexies)**, Final NAV 684,52B, ledger md5 `4707bcbe…`, IS 20,00% / OOS 26,50%,
   self-check 0 VND. **Số SẠCH đầu tiên trên CẢ HAI chiều**: nhãn edge-health causal (`known_date`,
-  FAIL-C đã đóng) **và** đúng knob park live LÚC ĐO (0,30; **live nay = 0, park TẮT từ 2026-10-01**). Neo sizing DD (bootstrap 5th) = **−25,2%**;
+  FAIL-C đã đóng) **và** đúng knob park live LÚC ĐO (0,30; **live nay = 0, park TẮT từ 2026-10-01**). Neo DD5 cũ −25,2% (lịch sử, xem 🔴 NEO);
   DSR 1,0000 · PBO(68) 0,2085.
   ✅ **Ba rail park ĐÃ ĐỒNG BỘ** (commit mike `1f15139b` đồng bộ ở 0,30; **live HIỆN = 0,0 từ 2026-10-01**, user chốt — xem current_ops): R1 MUA `ETF_PARK`, R2 BÁN `compute_park_trim.py PARK_TARGET_F1`, R3 policy `trading_rules.json`. ⚠️ "R3" ở đây = rail policy, KHÁC "R3" ở số pin (config backtest R3 NEUTRAL-only). Cổng cơ học `bin/park_rail_consistency_selfcheck.py` đọc giá trị 3 rail bằng AST, rc=1 khi lệch. ✅ R2 ĐỌC R3 từ commit `adb125b7` (27/09): `compute_park_trim.py` lấy `trading_rules.json` `neutral_parking.default_park_of_idle_pct` làm nguồn sự thật duy nhất, fail-closed.
   Lịch sử pin (quinquies, 24,42%, 28,86%, 27,x%), `LAG_ADV_BASIS`, fidelity `liq<=0` → `kb/projects/r3-pin-history.md` — **KHÔNG trích +1,62pp như "edge mới"**; **không trích +3,85pp/+4,08pp/+4,11pp như edge đã kiểm chứng**. ⚠️ **MIXED-universe khi trích dẫn**: `universe_pit` cho cổng quyết định, `ticker_prune` vẫn cho CAPIT pool/maturity. LAG fidelity: Đóng hẳn câu hỏi CHỈ bằng tích luỹ fill thật, không
@@ -168,7 +168,7 @@ Taylor `dt-gate-badzone-count-review-20261019` (job `Taylor_20261019_160133`): b
   `kb/projects/lag-adv-filter-tracking.md`, chi tiết cơ chế: `agents/Taylor/research/
   lag_fidelity_decomp_20260803/T5_DECISION.md`.
 - Bootstrap 5th-pct + P(DD<−30%) + chuỗi số SUPERSEDED: `kb/projects/r3-pin-history.md`.
-- ✅ **park=0 ĐÃ PIN (user duyệt 2026-10-08 23:30)**: **`pin0%` 22,12% … `pin1M` 25,42%** (egg = lãi 1M Big-4 PIT, KHÔNG 8,543%); **neo DD GIỮ −25,2%** (park0 đo −23,9%); park 0 vs 0,3 KHÔNG phân biệt được. 25,42% chỉ là ĐẦU TRẦN. Registry mục "2026-10-08".
+- ✅ **park=0 ĐÃ PIN (user duyệt 2026-10-08 23:30)**: **`pin0%` 22,12% … `pin1M` 25,42%** (egg = lãi 1M Big-4 PIT, KHÔNG 8,543%); neo DD: xem 🔴 NEO; park 0 vs 0,3 KHÔNG phân biệt được. 25,42% chỉ là ĐẦU TRẦN. Registry mục "2026-10-08".
 - **DSR/PBO đã hết trôi — họ trial nay GHIM bằng `DSR_FAMILY_MANIFEST`** (merge `f2cfb124`):
   **DSR 1,0000** (ann-SR R3 **1,815** trên ledger pin park 0,30; 1,616 ở bản @0,7). **Số pin của V2.4 là PBO = 0,2085** (chạy lại trên ledger pin park 0,30 — **không đổi**, vì CSCV
   đo trên HỌ TRIAL, ledger R3 không thuộc họ) trên họ gốc phục dựng
