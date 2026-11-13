@@ -413,6 +413,17 @@ LAG_ADV_SRC = os.environ.get("LAG_ADV_SRC", "").strip().lower() or "pit"
 LAG_ADV_MINP = int(os.environ.get("LAG_ADV_MINP", "20"))
 if LAG_ADV_SRC not in ("bq", "fill", "pit"): raise SystemExit(f"LAG_ADV_SRC không hợp lệ: {LAG_ADV_SRC!r} (bq|fill|pit)")
 if LAG_ADV_SRC != "bq": _qs_tag += f"_advsrc{LAG_ADV_SRC}" + ("" if LAG_ADV_MINP == 20 else f"mp{LAG_ADV_MINP}")
+# SELL_ADV_CAP (R&D Luồng A7, job Taylor_20261113_134219, PAPER): trần ADV PHÍA BÁN. Bản cũ bán HẾT vị thế tại
+# Open T+1 (chỉ phạt slippage bậc ≤0,5%) trong khi phía mua bị trần 20% ADV ⇒ DD ở NAV nhỏ nông giả.
+# Bật: SELL_ADV_CAP=0.2 ⇒ mỗi phiên chỉ bán ≤ 0.2 × liquidity_lookup(tk, ngày) (cùng nguồn ADV của book:
+# liq_map cho BAL, liq_lag cho LAG), phần dư carry sang phiên sau, mỗi lát chịu cùng slippage bậc.
+# ADV ≤0/thiếu ⇒ không bán được phiên đó; quá SELL_ADV_MAXCARRY phiên (mặc định 20) ⇒ bán nốt (đếm, báo cáo).
+# KHÔNG đặt/rỗng = OFF = byte-identical (không truyền kwarg, không đổi tên file).
+SELL_ADV_CAP = float(os.environ.get("SELL_ADV_CAP", "").strip() or 0)
+SELL_ADV_MAXCARRY = int(os.environ.get("SELL_ADV_MAXCARRY", "20"))
+if SELL_ADV_CAP > 0: _qs_tag += f"_sellcap{SELL_ADV_CAP:g}" + ("" if SELL_ADV_MAXCARRY == 20 else f"mc{SELL_ADV_MAXCARRY}")
+_SELLCAP_KW = ({"sell_adv_cap": SELL_ADV_CAP, "sell_adv_maxcarry": SELL_ADV_MAXCARRY, "sell_cap_log": []}
+               if SELL_ADV_CAP > 0 else {})
 # ETF_CREATION_BASIS (ĐỀ XUẤT 2026-09-27, audit measurement-integrity FAIL-E): rổ top-30 của
 # nhánh ETF_LIQ="creation". Bản cũ có BA lỗi trong 2 dòng: (1) `Volume_3M_P50*Close` trộn SỐ LƯỢNG
 # thô với GIÁ đã điều chỉnh — đúng cái đã vá cho LAG_ADV_BASIS ở trên, sót call-site này;
@@ -1205,6 +1216,7 @@ for d in vni_dates:
 LIQ_FULL = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
             "liquidity_lookup": liq_map, "exit_slippage_tiered": True,
             "liquidity_require_positive": (LIQ_ZERO_BLOCK == "both")}
+if _SELLCAP_KW: LIQ_FULL.update(sell_adv_cap=SELL_ADV_CAP, sell_adv_maxcarry=SELL_ADV_MAXCARRY, sell_cap_log=_SELLCAP_KW["sell_cap_log"])
 
 # ============================================================================
 # 4. LAGGED PEAD schedule (signal layer from earnings files; prices from BQ)
@@ -1586,6 +1598,7 @@ WHERE t.time BETWEEN DATE '{_vstart}' AND DATE '{END_DATE}' AND t.ticker IN ({in
 LIQ_LAG = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
            "liquidity_lookup": liq_lag, "exit_slippage_tiered": True,
            "liquidity_require_positive": (LIQ_ZERO_BLOCK in ("1", "lag", "both"))}
+if _SELLCAP_KW: LIQ_LAG.update(sell_adv_cap=SELL_ADV_CAP, sell_adv_maxcarry=SELL_ADV_MAXCARRY, sell_cap_log=_SELLCAP_KW["sell_cap_log"])
 
 # LAG SUE-TILT (#23, Taylor 2026-06-27): finer 3-tier weight by surprise tercile vs the binary HI/LO@0.5.
 # REJECTED (backtest @50B): 3-tier LOSES -0.66pp CAGR (27.44->26.78), worse BOTH halves (IS -0.7 / OOS -0.2),
@@ -2296,6 +2309,16 @@ nav_lag, _ = simulate(sig_lagC, prices_lag, vni_dates, tier_weights=tw_lagC,
                       name="v23audit_LAG", **merge_extra(kwB, ex_lagC), **LIQ_LAG)
 nav_lag["time"] = pd.to_datetime(nav_lag["time"])
 print(f"  LAG events: {len(events_lag)} stock + {len(etf_lag)} ETF; final {nav_lag.set_index('time')['nav'].iloc[-1]/1e9:.4f}B")
+if _SELLCAP_KW:
+    _scl = pd.DataFrame(_SELLCAP_KW["sell_cap_log"])
+    if len(_scl):
+        for _sim, _g in _scl.groupby("sim"):
+            _ex = _g[_g["carry"] == 0]
+            print(f"  [SELL_ADV_CAP={SELL_ADV_CAP:g} {_sim}] exits capped {len(_ex)} | carry-slices {len(_g)} | "
+                  f"max carry {int(_g['carry'].max())} | forced {int(_g['forced'].sum())} | zero-liq slices {int((_g['liq'] <= 0).sum())}")
+        if os.environ.get("SELL_CAP_LOG_OUT"): _scl.to_csv(os.environ["SELL_CAP_LOG_OUT"], index=False)
+    else:
+        print(f"  [SELL_ADV_CAP={SELL_ADV_CAP:g}] 0 exits capped")
 
 # ============================================================================
 # 8. Allocator overlay (band-only ±10pp) — instrumented for audit

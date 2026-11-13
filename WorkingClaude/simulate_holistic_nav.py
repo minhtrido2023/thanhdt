@@ -452,6 +452,10 @@ def simulate(signals_df, prices, vni_dates, *,
              liquidity_lookup=None,          # dict: (ticker, time) -> volume_3m_p50 * price (real unadjusted notional, VND)
              liquidity_require_positive=False,  # True: liq missing/<=0 → CANNOT buy that day (mirror live gate). False = legacy (no cap → full size)
              exit_slippage_tiered=False,     # True: add extra slip on exit if position large vs ADV
+             sell_adv_cap=None,              # R&D A7: max fraction of liquidity_lookup ADV sold per session on T+1-Open exits
+                                             #   (remainder carried to next session). None = legacy full sell (byte-identical).
+             sell_adv_maxcarry=20,           # sessions a capped exit may carry before the rest is force-sold (only if sell_adv_cap)
+             sell_cap_log=None,              # optional list: one dict per capped/carried exit slice (diagnostics)
              sector_limit_per_sector=None,   # dict {sector_id: max_pos} for per-sector caps
              sector_cap_exempt_tiers=None,   # set/list of play_types exempt from sector caps (D1)
              tier_position_limit=None,       # dict {play_type: max_concurrent} for per-tier cap (E3)
@@ -561,6 +565,7 @@ def simulate(signals_df, prices, vni_dates, *,
         return sum(lot["shares"] * px_f for lot in etf_lots)
 
     _ETF_LIQ_ON = (etf_liquidity_pct is not None and etf_adv_lookup is not None)
+    _sellcap_on = bool(sell_adv_cap) and t1_open_exec and liquidity_lookup is not None
     def _etf_day_cap(today):
         """Max VND of E1VFVN30 tradeable today (liquidity ceiling for parking buys AND sells).
         None/inf when no cap configured (legacy behavior)."""
@@ -728,6 +733,58 @@ def simulate(signals_df, prices, vni_dates, *,
                     continue
                 # Execute the sell at Open
                 gross = pos["shares"] * open_px
+                if _sellcap_on:
+                    # A7 sell-side ADV cap: sell at most sell_adv_cap x ADV today; carry the rest.
+                    _liq_c = liquidity_lookup.get((tk, today)) or 0
+                    _carry = entry.get("_carry", 0)
+                    _frac = 1.0
+                    if _carry < sell_adv_maxcarry:
+                        _cap_vnd = sell_adv_cap * _liq_c if _liq_c > 0 else 0.0
+                        if gross > _cap_vnd:
+                            _frac = _cap_vnd / gross if gross > 0 else 1.0
+                    if sell_cap_log is not None and (_frac < 1.0 or _carry > 0):
+                        sell_cap_log.append({"sim": name, "ymd": today, "ticker": tk,
+                                             "play_type": pos.get("play_type", "?"), "carry": _carry,
+                                             "frac": _frac, "gross_full": float(gross),
+                                             "forced": _carry >= sell_adv_maxcarry, "liq": float(_liq_c)})
+                    if _frac < 1.0:
+                        entry["_carry"] = _carry + 1
+                        still_pending.append(entry)
+                        if _frac <= 0.0:
+                            continue  # nothing sellable today
+                        # partial slice: sell _frac of the position at Open, keep remainder open
+                        sh_s = pos["shares"] * _frac
+                        g_s = sh_s * open_px
+                        extra_slip = 0.0
+                        if exit_slippage_tiered and _liq_c > 0:
+                            _p = g_s / _liq_c
+                            if _p > 0.20:    extra_slip = 0.005
+                            elif _p > 0.10:  extra_slip = 0.003
+                            elif _p > 0.05:  extra_slip = 0.001
+                        proceeds = g_s * sell_cost_factor * (1 - extra_slip)
+                        cost_s = pos["cost_basis"] * _frac
+                        cash += proceeds
+                        trades.append({
+                            "ticker": tk, "entry_date": pos["entry_date"], "exit_date": today,
+                            "entry_price": pos["entry_price"], "exit_price": open_px,
+                            "ret_gross": (open_px / pos["entry_price"]) - 1,
+                            "ret_net": (proceeds / cost_s) - 1 if cost_s > 0 else 0.0,
+                            "reason": reason + "_SELLCAP", "days_held": pos["days_held"],
+                            "play_type": pos.get("play_type", "?"), "exit_extra_slip": extra_slip,
+                        })
+                        if event_log is not None:
+                            event_log.append({
+                                "ymd": today, "ticker": tk, "action": "sell",
+                                "buy_amount": 0.0, "sell_amount": float(g_s),
+                                "fee": float(max(g_s - proceeds, 0.0)),
+                                "adj_price": float(open_px), "shares": float(sh_s),
+                                "holding_id": pos.get("holding_id", f"{tk}_{pos['entry_date'].strftime('%Y%m%d')}_?"),
+                                "play_type": pos.get("play_type", "?"),
+                                "cash_after": float(cash), "reason": reason + "_SELLCAP",
+                            })
+                        pos["shares"] -= sh_s
+                        pos["cost_basis"] -= cost_s
+                        continue
                 extra_slip = 0.0
                 if exit_slippage_tiered and liquidity_lookup:
                     liq = liquidity_lookup.get((tk, today)) or 0
@@ -976,7 +1033,10 @@ def simulate(signals_df, prices, vni_dates, *,
         # 3b) Execute full close
         # T+1 OPEN EXEC MODE: defer exits to next session's Open (realistic timing)
         if t1_open_exec:
+            _pend_tk = {e["ticker"] for e in pending_exits} if _sellcap_on else ()
             for tk, reason in to_close:
+                if tk in _pend_tk:
+                    continue  # A7: exit already queued/carrying for this name
                 pending_exits.append({"ticker": tk, "reason": reason,
                                       "trigger_date": today})
             to_close = []  # do not execute today
