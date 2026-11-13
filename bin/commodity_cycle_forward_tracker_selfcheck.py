@@ -15,6 +15,10 @@ import pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPRO_CSV = os.path.join(HERE, "..", "agents/Taylor/research/commodity_cycle_prereg_20261025/events_posthoc_105_3M.csv")
 N_OK = 0
+FIXTURE_MD5 = {"close_vintage_20261113.parquet": "dc6ccc45555638a1d07ca24e44e5f53d",
+               "icb_pit_20251231.csv": "0441eb20e3cb287f217a108c59066a5f"}
+FROZEN_DRIFT = {("rubber", "2026-03-11"): 0.09696310444268669,  # vintage đóng băng 13/11; baseline 0.096927
+                ("urea", "2026-03-11"): -0.16201114723465165}
 
 
 def load(src):
@@ -161,19 +165,18 @@ def t_review(T):
 
 def t_repro(T):
     ref = pd.read_csv(REPRO_CSV)
-    mk = T.load_market()
-    # Ghim phân loại ngành về vintage baseline: load_market lấy ICB_Code `.last()` = phân loại HIỆN TẠI,
-    # nên mã bị tái phân ngành sau ngày dựng baseline kéo nhóm đối chứng trôi. Đã cắn thật 2026-10-30:
-    # NED 2357→7535 (từ 2026-01-05) và HDG 8633→7535 (từ 2026-09-07; kb/data_registry/fundamentals/
-    # rating_8l_history.md) rơi vào ngành 75 của "crude oil" ⇒ n_ctrl +1/+1/+2, X lệch ≤3,3e-3 ở 3 sự
-    # kiện (2017-10, 2021-01, 2023-10) trong khi r_exp khớp từng bit. Baseline khớp ĐÚNG với ICB tại
-    # 2025-12-31 (đo: lệch X 5e-17; cutoff 2026-09-06 vẫn lệch 6,8e-4 vì NED) — tức dựng trước đợt
-    # tái phân ngành đầu 2026. Mọi entry trong repro đều ≤ 2026-03, nên ICB PIT này là đúng, không chỉ "cho xanh".
-    import duckdb
-    _pit = duckdb.connect().sql(f"""select ticker, arg_max(ICB_Code, time) c
-        from read_parquet('{T.WC_ROOT}/data/bq_cache/ticker/*.parquet')
-        where time <= '2025-12-31' and ICB_Code is not null group by 1""").df()
-    mk.icb.update(pd.Series(_pit.c.astype(int).astype(str).str.zfill(4).values, index=_pit.ticker.values))
+    # Input ĐÓNG BĂNG (selfcheck-red sweep 13/11): giá bq_cache/ticker bị revise sau khi dựng baseline (25/10) —
+    # chỉ 2 sự kiện entry 2026-03-11 (cửa sổ 63 phiên tới ~06/2026) trôi (rubber X +3,6e-5, urea +1,1e-6), 26/28 khớp
+    # từng bit. Không còn vintage 25/10 để dựng lại ⇒ đóng băng Close ở vintage 13/11 + ICB PIT 2025-12-31 vào fixture
+    # (md5 khoá), 26 sự kiện còn lại so baseline ≤1e-9, 2 sự kiện trôi so giá trị vintage đóng băng ≤1e-9 và
+    # trần trôi so baseline <1e-4. KHÔNG nới ngưỡng 1e-9.
+    fx = os.path.join(HERE, "..", "agents/Taylor/research/commodity_cycle_prereg_20261025/fixtures")
+    import hashlib
+    for fn, h in FIXTURE_MD5.items():
+        ok(hashlib.md5(open(os.path.join(fx, fn), "rb").read()).hexdigest() == h, f"fixture {fn} md5 khoá")
+    mk = T.load_market(close_src=os.path.join(fx, "close_vintage_20261113.parquet"))
+    _pit = pd.read_csv(os.path.join(fx, "icb_pit_20251231.csv"))
+    mk.icb = pd.Series(_pit.icb.astype(int).astype(str).str.zfill(4).values, index=_pit.ticker.values)  # ICB 2025-12-31; mã chưa có thì ICB cuối
     wb = T.load_wb()
     rows = []
     for fam, s in wb.items():
@@ -188,7 +191,15 @@ def t_repro(T):
     ok(len(got) == len(ref) == 28, f"tái dựng 28 sự kiện chọn-ô (got {len(got)})")
     ok((got.family == ref.family).all() and (got.sig_month == ref.sig_month).all() and (got.entry == ref.entry).all(),
        "family/sig_month/entry khớp events_posthoc_105_3M.csv")
-    ok(np.abs(got.X.values - ref.X.values).max() < 1e-9, "X khớp ≤1e-9")
+    d = np.abs(got.X.values - ref.X.values)
+    drift = {(f, e) for f, e in zip(got.family[d > 1e-9], got.entry[d > 1e-9])}
+    ok(drift <= set(FROZEN_DRIFT), f"chỉ các sự kiện trôi đã khai báo lệch baseline >1e-9 (thấy {sorted(drift)})")
+    ok(d.max() < 1e-4, f"trần trôi so baseline <1e-4 (max {d.max():.2e})")
+    for (f, e), xv in FROZEN_DRIFT.items():
+        g = got[(got.family == f) & (got.entry == e)].X.values
+        ok(len(g) == 1 and abs(g[0] - xv) < 1e-9, f"X {f}@{e} khớp vintage đóng băng ≤1e-9")
+    m = ~((got.family + got.entry).isin([f + e for f, e in FROZEN_DRIFT]))
+    ok(m.sum() == 26 and d[m.values].max() < 1e-9, "26 sự kiện còn lại: X khớp baseline ≤1e-9")
 
 
 def run_all(T, repro=True):

@@ -111,12 +111,12 @@ class Market:
                     fallback=fb, exp=",".join(sorted(re.index)))
 
 
-def load_market(map_csv=None):
+def load_market(map_csv=None, close_src=None):
     import duckdb
     cmap = pd.read_csv(map_csv or os.path.join(LOCK_DIR, "commodity_map.csv"))
     prim = cmap[cmap.in_primary == "Y"]
     con = duckdb.connect()
-    P = con.sql(f"""select time, ticker, Close, ICB_Code from read_parquet('{WC_ROOT}/data/bq_cache/ticker/*.parquet')
+    P = con.sql(f"""select time, ticker, Close, ICB_Code from read_parquet('{close_src or WC_ROOT + "/data/bq_cache/ticker/*.parquet"}')
                    where time >= '2013-06-01' and Close > 0""").df()
     P["time"] = pd.to_datetime(P.time)
     close = P.pivot_table(index="time", columns="ticker", values="Close").sort_index().ffill()
