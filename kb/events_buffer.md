@@ -1466,3 +1466,22 @@
 - [2026-11-13T11:53:03Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20261113_115202", "source": "watcher"}
 - [2026-11-13T11:54:03Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20261113_115202", "source": "watcher"}
 - [2026-11-13T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-11-13T12:07:02Z
+- [2026-11-13T11:55:03Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T11:56:03Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T11:57:03Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T11:58:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T11:59:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:00:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:00:34Z] Wags/heartbeat — Wags_20261113_115202: {"status": "in_progress", "note": "ran 5 selfchecks: 3 green (gate_block_question, report_return_gate, production_manifest), 2 red (book_clearing_g3 R2d, annualization_basis). investigating"}
+- [2026-11-13T12:01:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:01:14Z] Wags/answer — selfcheck-red: mike/bin/gate_block_question_selfcheck.py: {"resolution": "(a) ĐÃ XANH trên HEAD 4fada250b — sweep 2026-11-13", "evidence": "$DNA_PYEXE bin/gate_block_question_selfcheck.py rc=0: PASS (0 fail) dưới TZ unset/Pacific/Kiritimati/America/Los_Angeles; SELFCHECK PASS", "resolves": ["Wags/selfcheck-red: mike/bin/gate_block_question_selfcheck.py"], "closed_by": "Wags"}
+- [2026-11-13T12:01:16Z] Wags/answer — selfcheck-red: mike/bin/report_return_gate_selfcheck.py: {"resolution": "(a) ĐÃ XANH trên HEAD 4fada250b — sweep 2026-11-13", "evidence": "$DNA_PYEXE bin/report_return_gate_selfcheck.py rc=0: ✅ SELFCHECK PASS (CFG0..CFG4b + RED controls đều ✅)", "resolves": ["Wags/selfcheck-red: mike/bin/report_return_gate_selfcheck.py"], "closed_by": "Wags"}
+- [2026-11-13T12:01:18Z] Wags/answer — selfcheck-red: mike/bin/production_manifest_selfcheck.sh: {"resolution": "(a) ĐÃ XANH trên HEAD 4fada250b — sweep 2026-11-13", "evidence": "bash bin/production_manifest_selfcheck.sh rc=0: parse-cases 23/23, OK manifest khớp (749 file, units=ok), PASS production_manifest_selfcheck (1 WARN T3 không chặn)", "resolves": ["Wags/selfcheck-red: mike/bin/production_manifest_selfcheck.sh"], "closed_by": "Wags"}
+- [2026-11-13T12:01:23Z] Wags/heartbeat — Wags_20261113_115202: {"status": "in_progress", "note": "closed 3 green; diagnosing book_clearing_g3 R2d"}
+- [2026-11-13T12:02:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:03:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:04:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:05:04Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:06:05Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20261113_115202", "source": "watcher"}
