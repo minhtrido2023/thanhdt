@@ -137,8 +137,10 @@ def savings_cols(header, per_rows, periods, acct, report_date):
         ok_ = isinstance(x, dict) and x.get("hurdle_pct") is not None and x.get("excess_vs_savings_pp") is not None
         rows.append(r + ([pct(x["hurdle_pct"]), R.pp(x["excess_vs_savings_pp"]).replace(" điểm %", "")] if ok_ else ["—", "—"]))
     aw = next((x["anchor_warning"] for x in sv if isinstance(x, dict) and x.get("anchor_warning")), None)
-    recv = PT.div_receiving(acct, S.D(report_date).isoformat())
-    notes = [footnote(PT.sav_label_for(recv))] + ([footnote(aw)] if aw else []) + [footnote(PT.SAV_WARN)]
+    recv, _used, ev = PT.div_receiving_ex(acct, S.D(report_date).isoformat())
+    if recv is None:     # không có dữ kiện ⇒ DỪNG, không dựng PDF/email với nhãn đoán (coding_guidelines §29)
+        raise RuntimeError(f"savings_cols: không xác định được nhãn tiết kiệm cho {acct} {report_date}: {ev}")
+    notes = [footnote(PT.sav_label_for(recv, ev))] + ([footnote(aw)] if aw else []) + [footnote(PT.SAV_WARN)]
     return header + ["Gửi tiết kiệm (tham chiếu)", "Chênh so tiết kiệm (điểm %)"], rows, (7,), notes
 
 
