@@ -1,4 +1,4 @@
-# Fleet status — 2026-11-13T02:05:18 UTC
+# Fleet status — 2026-11-13T02:05:27 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
@@ -16,13 +16,13 @@
 | Winston | Winston | child | dead | 2026-11-11T03:48:35Z | 2776 |  |
 | workingclaude-10 | workingclaude-10 | child | dead | 2026-11-12T01:25:28Z | 1479 |  |
 | workingclaude-24 | workingclaude-24 | child | dead | 2026-11-13T01:22:56Z | 42 |  |
-| workingclaude-27 | workingclaude-27 | child | dead | 2026-11-12T18:46:26Z | 438 |  |
+| workingclaude-27 | workingclaude-27 | child | dead | 2026-11-12T18:46:26Z | 439 |  |
 | workingclaude-47 | workingclaude-47 | child | dead | 2026-11-12T05:48:31Z | 1216 |  |
 | workingclaude-49 | workingclaude-49 | child | dead | 2026-11-12T19:06:12Z | 419 |  |
 | workingclaude-4e | workingclaude-4e | child | dead | 2026-11-12T17:51:03Z | 494 |  |
 | workingclaude-54 | workingclaude-54 | child | dead | 2026-11-12T17:28:05Z | 517 |  |
 | workingclaude-75 | workingclaude-75 | child | dead | 2026-11-11T05:00:04Z | 2705 |  |
-| workingclaude-83 | workingclaude-83 | child | dead | 2026-11-11T10:14:24Z | 2390 |  |
+| workingclaude-83 | workingclaude-83 | child | dead | 2026-11-11T10:14:24Z | 2391 |  |
 | workingclaude-92 | workingclaude-92 | child | dead | 2026-11-11T05:38:30Z | 2666 |  |
 | workingclaude-a7 | workingclaude-a7 | child | dead | 2026-11-11T03:47:50Z | 2777 |  |
 | workingclaude-c6 | workingclaude-c6 | child | dead | 2026-11-12T17:29:03Z | 516 |  |
