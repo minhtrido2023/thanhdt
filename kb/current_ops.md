@@ -40,7 +40,7 @@
 
 ## CAPIT đòn bẩy TẮT từ 2026-10-13 (`capit_margin_lever.enabled=false`, user duyệt): KHÔNG plan nào sizing ×1,3, KHÔNG cấp margin; chỉ user bật lại: `kb/projects/capit-margin-hold-20261013.md`
 
-## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13: tin đỏ Trading Daily ⇒ báo user, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; mốc 11-09: chờ user (bus `nav-loss-brake-review-20261113`): `kb/projects/nav-loss-brake-monitor-20261013.md`
+## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13: tin đỏ Trading Daily ⇒ báo user, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; mốc 11-09 đóng: user giữ cảnh báo (13/11): `kb/projects/nav-loss-brake-monitor-20261013.md`
 
 ## Cổng giá trong phiên → hồ sơ DD khủng hoảng 7 ngày (user 2026-11-01: KHÔNG tự bán)
 - `bin/intraday_price_watch.py`: báo [CỔNG GIÁ] + mở hồ sơ; user quyết bán, mặc định GIỮ; không đụng lệnh. PREREG/H1 OOS cũ hết hiệu lực.
