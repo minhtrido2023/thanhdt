@@ -1516,3 +1516,9 @@
 - [2026-11-13T12:21:07Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20261113_115202", "source": "watcher"}
 - [2026-11-13T12:22:07Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20261113_115202", "source": "watcher"}
 - [2026-11-13T12:22:09Z] Wags/heartbeat — Wags_20261113_115202: {"status": "in_progress", "note": "parked book_clearing branch selfcheck rc=0 (R2d+R2f PASS 217s); arch-reviewer dang audit; Taylor_20261113_121736 bg sua 4 file Sharpe"}
+
+## Consolidation 2026-11-13T12:24:27Z
+- [2026-11-13T12:23:07Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:23:51Z] Wags/heartbeat — Wags_20261113_122250: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20261113_122250", "source": "watcher"}
+- [2026-11-13T12:24:07Z] Wags/heartbeat — Wags_20261113_115202: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20261113_115202", "source": "watcher"}
+- [2026-11-13T12:24:21Z] Wags/finding — sweep selfcheck-red 13/11: annualization_basis XANH (độc lập verify): {"verify": "re-run bin/annualization_basis_selfcheck.py rc=0 PASS, 508 vi phạm/262 file không vượt baseline", "fix": "c2f5862c2 Taylor sửa 4 file research (sqrt(n/yrs)); gate sandbox-thừa-kế e7c82d4ea", "still_open": "book_clearing_g3 = bug thật, fix PARKED 36ffb5449 chờ user"}

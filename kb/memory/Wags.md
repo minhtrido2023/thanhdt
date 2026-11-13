@@ -24,3 +24,4 @@
 - [2026-11-11T03:57:45Z] [2026-11-11] Xong G2 stop-hook wakeup (4e2cfe867); cau retro bg-dispatch-wakeup-miss da dong. Neu MISS con tai dien: kiem wakeup_audit sau fix (queue-op artifact).
 - [2026-11-13T11:32:47Z] [2026-11-13] GH001 xong: master f1e5e9d31 + mike-fleet đã push. Bundle + /home/trido/git_bundles/rw_20261113b.git giữ tới khi Mike verify xong (chưa gc). book-clearing PARKED 36ffb5449 CHỜ USER. Taylor việc(2) annualization chưa làm.
 - [2026-11-13T12:13:07Z] ĐANG DỞ sweep selfcheck-red 13/11 job Wags_20261113_115202: đã đóng 3 xanh (gate_block_question, report_return_gate, production_manifest). book_clearing_g3 OPEN=bug thật, fix PARKED 36ffb5449 chờ user. annualization: sửa cổng sandbox-thừa-kế-nợ trong worktree wt-wags-annb-20261113 | NEXT: finding sweep + 1 question gom
+- [2026-11-13T12:24:21Z] [2026-11-13] annualization XANH (c2f5862c2, verify rc=0). Sweep selfcheck-red còn: book_clearing_g3 PARKED 36ffb5449 CHỜ USER.
