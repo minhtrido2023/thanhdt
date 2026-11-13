@@ -1,10 +1,10 @@
 # LAG cache về cơ sở giá ĐIỀU CHỈNH (Phương án A) — 2026-11-10
 
-> ⚠️ **ĐÍNH CHÍNH 13/11/2026 01:3x ICT (arch-reviewer, Mike tự kiểm lại):** dòng "CHƯA apply, CHƯA merge" bên dưới ĐÃ LỖI THỜI. Nhánh đã squash lên `main` ở commit `97b2a7197` (reflog 10/11 15:30:03 +0000; message ghi "user duyệt 2026-11-10 22:10" — Mike chưa tìm thấy bản ghi duyệt khác ngoài message này) và `papertrade_daily.sh:43` chạy `refresh_lagged_caches.py` từ checkout main lúc 15:30 ICT T2-T6 ⇒ merge vào main = apply ở lần cron kế tiếp. Cache thật đã ở cơ sở điều chỉnh (`.pre_adj` sinh 11-10 08:30 UTC, còn nguyên); golive 11-11/11-12 đã dùng. Blast radius '4 rời/7 vào' bị phóng đại: 7/11 mã đã nằm trong `lag_liq_excluded`; delta live ≤ HTT, PHP rời / KLB, PHR vào. arch-review luồng C = NEEDS_CHANGES (code ổn, 65/65 + 27/27 + 13/13 + 4/4 tự chạy lại; thiếu validate Price/Volume_3M_P50, chưa có runbook rollback). Chờ user: PHÊ CHUẨN trạng thái live hay ROLLBACK.
+> ✅ **PHÊ CHUẨN bởi user 13/11/2026 09:1x ICT** (`decided_by: user`, qua Mike, job `Taylor_20261113_021438`): trạng thái LIVE của `97b2a7197` (main, chạy từ cron 15:30 ICT 10/11) được GIỮ. Bối cảnh: dòng "CHƯA apply, CHƯA merge" bên dưới đã lỗi thời từ 10/11 — nhánh squash lên `main` ở `97b2a7197` và `papertrade_daily.sh:43` chạy `refresh_lagged_caches.py` từ checkout main ⇒ merge = apply ở lần cron kế. `.pre_adj` sinh 10/11 08:30 UTC còn nguyên (md5 kiểm lại 13/11: `af4b8c1b72f4…` / `afb2484e5fb7…`). arch-review luồng C = NEEDS_CHANGES (code ổn) ⇒ 3 việc vá ở luồng C2 (nhánh `feat/lag-cache-c2-20261113`, commit `b1b91a5e6`, CHƯA merge, chờ arch-reviewer): validate độ phủ Price/Volume_3M_P50, runbook rollback (§7), sửa ghi chép (§4.3/§6.3). Blast radius đã đính chính ở §4.3.
 
 
 > **VÒNG 2** (job `Taylor_20261110_132044`, sau quant-skeptic REFUTED + arch-reviewer NEEDS_CHANGES) — §4 viết lại.
-> Job vòng 1 `Taylor_20261110_123246` · user chốt "làm A" 10/11. **ĐỀ XUẤT trên nhánh, CHƯA apply, CHƯA merge.**
+> Job vòng 1 `Taylor_20261110_123246` · user chốt "làm A" 10/11. ~~ĐỀ XUẤT trên nhánh, CHƯA apply, CHƯA merge.~~ **(lỗi thời — LIVE từ 10/11, phê chuẩn 13/11, xem banner)**
 > Nhánh `feat/lag-cache-adjusted-20261110` ở cả 2 repo: code `wt-lagadj-1110` (repo ngoài),
 > research + doc `mike/agents/Taylor/wt-mike-lagadj-1110`. Artifact: `agents/Taylor/research/lag_cache_adjusted_20261110/`
 > (md5 mọi file: `MD5SUMS`). Chờ: quant-skeptic → arch-reviewer → **user duyệt** (xem §6).
@@ -78,6 +78,12 @@ Vòng 1 báo ΔCAGR +0,92/+0,78pp "vượt sàn nhiễu" — **bị quant-skepti
 ### 4.3 Tác động lên lệnh LAG thật — `live_lag_candidates` (pa_HL3 → qualify; vòng 2 đo trên pkl vòng 2, `live_cand_impact.json`)
 - Cửa sổ 120 ngày tới 2026-11-10 (2.080 sự kiện): qualify **206 → 209**; chỉ có ở bản cũ: **HTT, PHP, PMP, TMG**; chỉ có ở bản adj: **BSP, DMN, KLB, LAW, NBC, PHR, TPC**; tier đổi ở mã qualify cả hai: 0; **229 sự kiện đổi pa_HL3 > 0,5pp**.
   Toàn lịch sử 59.255 sự kiện: qualify 5.606 → 5.629, 2.252 sự kiện đổi pa_HL3 > 0,5pp.
+- **ĐÍNH CHÍNH blast radius (C2, 13/11, `research/live_gap_exec_C2/attrib_4.py` → `attrib_4.csv`):** danh sách "4 rời / 7 vào" ở trên là ở tầng `qualify`, CHƯA qua các bộ lọc golive. **7/11 mã (BSP, PMP, TMG, DMN, LAW, NBC, TPC) nằm trong `lag_liq_excluded`** (`data/golive_v23_status.json` signal 11-12: BSP/PMP/TMG `Volume_3M_P50=0`, DMN/LAW/TPC ADV3T 0,00–0,01 tỷ, NBC 0,34 tỷ < sàn 2 tỷ) ⇒ không bao giờ thành lệnh dù cache nào. Delta live tối đa = **HTT, PHP rời / KLB, PHR vào**. Quy nguyên theo mã (pa_HL3 ctrl→adj, ngưỡng 5,0; entry = release+5 phiên):
+  - HTT 2026Q2 (release 07-17, entry 07-24): 6,11→4,62 ⇒ rời. Q3 (entry 10-30): 5,19→3,92, không qualify ở cả hai.
+  - PHP 2026Q3 (release 10-29, entry **11-05**): 5,29→4,10 ⇒ rời. Q2: 4,13 cả hai.
+  - KLB 2026Q2 (release 07-23, entry 07-30): 4,37→5,40 ⇒ vào. Q3 (entry 11-02): 4,51→5,52 nhưng không qualify ở cả hai (prior_n_good 19 ≥ 4, pa_HL3 adj ≥ 5 ⇒ theo công thức chỉ còn NP_R < 15). **KLB còn bị `lag_forensic_excluded`** (cờ 2026-06-20) ⇒ không thành lệnh.
+  - PHR 2026Q3 (release 11-02, entry **11-09**): −0,32→5,06 ⇒ vào. Nguyên nhân: post_ret quý trước dính cú rơi giả GDKHQ 09-11 (−45,7%) ở cơ sở cũ — bản adj là bản ĐÚNG. Q2: 5,73/5,75 qualify cả hai.
+  - **Cửa sổ entry đang mở** (golive `lag_recent`: entry ∈ [LATEST−5 ngày, LATEST]; `lag_up`: entry > LATEST): signal 11-12 ⇒ entry ≥ 11-07 ⇒ trong 4 mã chỉ PHR (11-09) còn trong cửa sổ; PHP (11-05) ra khỏi cửa sổ từ signal 11-11. Cả hai entry (11-05, 11-09) đều TRƯỚC lần apply đầu (cron 15:30 10/11) ⇒ ngày entry đã chấm bằng cache cũ. **Đo: 0 lệnh** cho HTT/PHP/KLB/PHR trong `orders[]` của mọi `data/trade_plans/plan_{SpaceX,ZaloPay,main}_2026-11-{05..13}.json`; PHP chỉ xuất hiện ở `window_passed` (SKIP) plan ZaloPay 11-11/11-12. ⇒ tác động lệnh LIVE tới 13/11 = 0; về sau chỉ đổi qua sự kiện MỚI (pa_HL3 lịch sử đã đổi ở 229 sự kiện trong cửa sổ 120 ngày).
 - w_cur (pt_v22 logs): 0,476 → 0,484. Danh sách mã đổi ⇒ **đổi lệnh LAG thật qua plan** ⇒ nằm trong danh sách USER QUYẾT (§6).
 - Papertrade `pt_v22_dt5g` từ 07-01 (đã sửa ADV = Volume_3M_P50 × **Price thô** `COALESCE(Price, Close)`, `pt_v22_dt5g.py` trong nhánh; `pt_results_v2.json`): ctrl −7,15% / DD −12,17% (final 46,4259B; chạy 2 lần tất định, tx md5 trùng) → adj **−5,50% / DD −10,74%** (47,2513B). BAL tx y hệt; LAG tx 140→147 (12 chỉ ở ctrl, 18 chỉ ở adj). Vòng 1 ghi −5,59% khi ADV còn trộn cơ sở (Close điều chỉnh) — số cũ bỏ.
   Papertrade ctrl vs log canonical cũ: 46,4259 vs 46,4262, LAG events 97+36 vs 96+42 (không byte-identical; nguyên nhân chưa truy). Chỉ đọc theo hướng.
@@ -95,14 +101,20 @@ Vòng 1 báo ΔCAGR +0,92/+0,78pp "vượt sàn nhiễu" — **bị quant-skepti
 ## 6. Cần user quyết
 1. **Rebuild toàn bộ lịch sử cache mỗi ngày từ BQ sống** (không cửa sổ ngắn, không qua BQ_LOCAL_CACHE), ~5,2' + ~173MB/ngày.
 2. **R3: KHÔNG re-pin** (kết luận §4.1) — chỉ cần xác nhận. Riêng: có muốn re-pin cấu hình mirror-live `LIQ_ZERO_BLOCK=lag` (23,28/26,53) hay không (ngoài nhánh này).
-3. **Đổi lệnh LAG thật:** 4 mã rời (HTT, PHP, PMP, TMG), 7 mã vào (BSP, DMN, KLB, LAW, NBC, PHR, TPC), 229 sự kiện đổi pa_HL3 >0,5pp (§4.3).
+3. **Đổi lệnh LAG thật:** 4 mã rời (HTT, PHP, PMP, TMG), 7 mã vào (BSP, DMN, KLB, LAW, NBC, PHR, TPC), 229 sự kiện đổi pa_HL3 >0,5pp (§4.3). **ĐÍNH CHÍNH 13/11:** 7/11 đã bị `lag_liq_excluded` ⇒ delta live ≤ HTT, PHP rời / KLB, PHR vào; KLB còn bị forensic-exclude; đo 0 lệnh thật tới 13/11 (§4.3).
 4. Edge health NEGATIVE→TROUGH: **không đổi w_LAG live (0,50 cả hai)** — chỉ đổi nhãn/cảnh báo.
 5. Dời/chấp nhận đệm 3' với `orb_drift_monitor` 15:50 (§5).
 
-## 7. Việc sau khi duyệt
-1. Merge nhánh code (repo ngoài) + mike; chạy `refresh_lagged_caches.py` 1 lần tay (tạo `.pre_adj`, `lagged_carried.json`), đối md5 với artifact research (cùng END) hoặc ghi md5 mới.
-2. Cron refresh giữ nguyên lịch (§5); thêm theo dõi exit≠0.
-3. Chạy lại `lag_edge_health` + papertrade LAG trên pkl mới; cập nhật `kb/projects/lag-edge-health-staleness.md`.
+## 7. Đã duyệt — trạng thái + runbook rollback
+**PHÊ CHUẨN bởi user 13/11/2026** (live từ cron 15:30 ICT 10/11, commit `97b2a7197`). Việc 1–3 cũ (merge, chạy tay, chạy lại edge_health/papertrade) đã xảy ra qua cron từ 10/11. Còn treo: nhánh C2 `feat/lag-cache-c2-20261113` (`b1b91a5e6`: validate độ phủ Price/Volume_3M_P50 60 phiên — NaN cửa sổ >2% hoặc 1 phiên >5%, loại mã mang sang ⇒ fail-closed exit 1; .prev/CSV nguyên tử; dọn tmp mồ côi) chờ arch-reviewer → merge.
+
+**Rollback (về cơ sở giá thô, append) — làm trọn TRƯỚC 19:00 ICT** (chuỗi `bq_freshness_check.sh` 19:00 → golive đọc `earnings_events_classified.csv` + `pt_v22_dt5g_logs.csv`). Bản đầy đủ có lệnh: `kb/ops_runbook.md` § "Rollback LAG cache điều chỉnh". Tóm tắt:
+1. `git revert` `97b2a7197` trên main (nếu C2 đã merge: revert commit C2 trước, rồi `97b2a7197`). Revert thử trên main 13/11: sạch, không xung đột.
+2. Kiểm md5 `data/earnings_px.pkl.pre_adj` = `af4b8c1b72f4b133248516eff8b459b0`, `data/lagged_pos_ov.pkl.pre_adj` = `afb2484e5fb702cd4335949d1a69db1b` (cơ sở thô, max 2026-11-09, không có cột Price) — lệch ⇒ DỪNG, hỏi Taylor.
+3. Cất bản hiện hành (`earnings_px.pkl`, `lagged_pos_ov.pkl`, `lagged_carried.json`) vào `data/rollback_lagadj_<ngày>/`; chép `.pre_adj` đè lên tên chính (tmp + `mv`).
+4. Chạy `refresh_lagged_caches.py` code CŨ (append 11-10→END) rồi `pt_v12_macro.py`, `pt_v4_dt5g.py`, `pt_v22_dt5g.py`, `edge_health_monitor.py --refresh` (đúng env `papertrade_daily.sh`).
+5. Quá 19:00 ⇒ golive/plan ngày đó đã chạy trên cache adj: chạy lại chuỗi 19:00 + gửi lại plan (luật duyệt plan trước ngày).
+Không thêm knob env "append mode": giữ được đường append = giữ song song code cũ trong `refresh_lagged_caches.py` (không tối thiểu); revert 1 commit đã đủ và đã thử sạch.
 
 ## 8. Vòng 3 (job Taylor_20261110_151145) — blast-radius ADV + re-pin mirror-live
 - **Blast-radius ADV (arch mục 2+3):** sau apply `lagged_pos_ov` mang giá ĐIỀU CHỈNH; `pt_v4_dt5g.py` (papertrade_daily bước [11]) và `pt_v12_macro.py` (bước [8]) nhân `Volume_3M_P50` thô với `px_open` điều chỉnh ⇒ ADV lệch theo hệ số điều chỉnh (mã chia tách/cổ tức cổ phiếu). Đã vá: helper dùng chung `lag_adv_basis` (COALESCE(Price thô, Close/Open thô); thiếu cột Price ⇒ hành vi cũ), `pt_v22/pt_v4/pt_v12` đều dùng. Selfcheck 13 ca (3 ca × 3 engine + biên) + mutation 4/4; A/B ctrl vs sau-vá trên pkl canonical = byte-identical logs. Commit code `cf21463b9`.

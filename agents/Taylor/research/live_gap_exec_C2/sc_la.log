@@ -1,0 +1,82 @@
+PASS fixture PHR: bản cũ có cú rơi giả < -5%
+PASS fixture PHR: bản điều chỉnh không có ngày < -10%
+PASS fixture VHM: bản cũ có cú rơi giả < -5%
+PASS fixture VHM: bản điều chỉnh không có ngày < -10%
+PASS fixture DRI: bản cũ có cú rơi giả < -5%
+PASS fixture DRI: bản điều chỉnh không có ngày < -10%
+PASS fixture TRC: bản điều chỉnh không có ngày < -10%
+PASS fixture PHR 09-11 cũ -45,7% / mới 0,0%
+PASS fixture VHM 08-06 cũ -49,6%
+PASS pull: 2 khúc năm (2025, 2026)
+PASS pull: qualify alias t. (bẫy tên bảng = tên cột)
+PASS pull: lọc universe + dedupe
+PASS pull: time datetime64[ns]
+PASS pull: năm rỗng ⇒ raise
+PASS validate: khung sạch ⇒ 0 vấn đề
+PASS validate: max < END ⇒ vấn đề
+PASS validate: END ≠ max ⇒ vấn đề
+PASS validate: phiên thưa (31/80) ⇒ vấn đề
+PASS validate: dòng rác Chủ nhật 1 mã KHÔNG bị coi là phiên thưa
+PASS validate: mất cặp (mã,phiên) > 0,2% ⇒ vấn đề
+PASS validate: lỗ 0,46% không phạm luật mất-theo-phiên (tách đúng 2 luật)
+PASS validate: phiên mất 10% số mã so với bản cũ ⇒ vấn đề
+PASS validate: Close<=0 ⇒ vấn đề
+PASS carry: mã bị BQ cắt đầu ⇒ mang dòng cũ sang, đủ khoá
+PASS carry: lỗ hổng GIỮA chuỗi KHÔNG mang sang
+PASS carry: mã biến mất hẳn ⇒ mang sang
+PASS build: nguồn sạch ⇒ 0 vấn đề
+PASS build: 25 mã bị cắt lịch sử (>20) ⇒ vấn đề
+PASS build: fixture ⇒ px cột Close = giá điều chỉnh BQ
+PASS build: ov giữ Open+Volume_3M_P50 điều chỉnh
+PASS validate: bản mới lùi ngày so với bản cũ ⇒ vấn đề
+PASS thin: phiên 42 (30 mã) bị gắn thưa nhờ trung vị phiên TRƯỚC (80), không tự kéo trung vị xuống
+PASS build: nguồn mất >0,2% cặp (mã,phiên) so với pkl cũ ⇒ vấn đề
+PASS build: nguồn mất >5% mã trong 1 phiên so với pkl cũ ⇒ vấn đề
+PASS build: dòng mang sang giữ Open/Volume_3M_P50/Price (không NaN)
+PASS carry nhiều ngày: ngày 1, 15 mã mới bị cắt ⇒ qua trần
+PASS carry nhiều ngày: ngày 2, 15 mã đã mang + 10 mã mới (tổng 25) ⇒ KHÔNG chặn
+PASS carry nhiều ngày: không state ⇒ 25 mã mới > 20 ⇒ chặn
+PASS carry nhiều ngày: +30 mã mới ⇒ chặn
+PASS snapshot: mọi khúc năm cùng 1 mốc FOR SYSTEM_TIME AS OF
+PASS snapshot: alias t. đứng TRƯỚC FOR SYSTEM_TIME (cú pháp BQ)
+PASS copy_atomic: bị kill giữa chừng ⇒ không có đích cụt, không sót tmp
+PASS copy_atomic: chạy bình thường ⇒ đích đủ byte
+PASS live_bq: gọi BQ khi KHÔNG có BQ_LOCAL_CACHE
+PASS live_bq: khôi phục BQ_LOCAL_CACHE
+PASS live_bq: khôi phục cả khi lỗi
+PASS phủ: Price NaN toàn bộ 5 phiên cuối ⇒ vấn đề
+PASS phủ: Volume_3M_P50 NaN toàn bộ 5 phiên cuối ⇒ vấn đề
+PASS phủ: Price NaN rải 3% cửa sổ 60 phiên ⇒ vấn đề cửa sổ
+PASS phủ: 3/80 mã (3,75%) NaN 1 phiên ⇒ KHÔNG chặn (dưới ngưỡng phiên 5%)
+PASS phủ: 5/80 mã (6,25%) NaN 1 phiên ⇒ chặn
+PASS phủ: NaN chỉ TRƯỚC cửa sổ 60 phiên ⇒ KHÔNG chặn
+PASS phủ: thiếu cột Price ⇒ vấn đề
+PASS phủ: NaN Price chỉ ở mã MANG SANG ⇒ KHÔNG chặn (loại khỏi phép đo)
+PASS phủ: qua build, BQ trả Price NULL phiên cuối ⇒ chặn
+PASS tích hợp good: exit 0
+PASS tích hợp good: pkl = nguồn điều chỉnh (Close khớp, có phiên cuối)
+PASS tích hợp good: .prev = bản trước, .pre_adj = bản trước
+PASS tích hợp good: ghi state lagged_carried.json (0 mã mang sang)
+PASS tích hợp good: Price thô vào lagged_pos_ov.pkl
+PASS tích hợp good: không sót .tmp
+PASS tích hợp good lần 2: .pre_adj KHÔNG bị ghi đè
+PASS tích hợp 25 mã bị cắt, KHÔNG state ⇒ exit 1, không ghi state
+PASS tích hợp 25 mã bị cắt ĐÃ trong state ⇒ exit 0 (không chặn vĩnh viễn)
+PASS tích hợp ngày 2 cùng nguồn cắt ⇒ vẫn exit 0
+PASS tích hợp kill: lần chép bị chặn thật (exit≠0, 'killed')
+PASS tích hợp kill giữa lúc chép .pre_adj ⇒ không có .pre_adj cụt, pkl không đổi
+PASS tích hợp kill khi chép .prev ⇒ .prev không cụt, pkl không đổi
+PASS tích hợp kill giữa to_csv ⇒ CSV cũ nguyên vẹn
+PASS tích hợp dọn *.tmp mồ côi của script, giữ tmp lạ
+PASS tích hợp thin: exit 1
+PASS tích hợp thin: pkl KHÔNG đổi, không .prev/.pre_adj, không state
+PASS tích hợp thin: bước [3]/[4] vẫn chạy
+PASS tích hợp error: exit 1
+PASS tích hợp error: pkl KHÔNG đổi, không .prev/.pre_adj, không state
+PASS tích hợp error: bước [3]/[4] vẫn chạy
+PASS tích hợp nullprice: exit 1
+PASS tích hợp nullprice: pkl KHÔNG đổi, không .prev/.pre_adj, không state
+PASS tích hợp nullprice: bước [3]/[4] vẫn chạy
+PASS tích hợp lock bận: exit 3, không ghi
+
+80/80 PASS

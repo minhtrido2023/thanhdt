@@ -1,0 +1,41 @@
+BẮT  bỏ lọc cuối tuần
+BẮT  DEPTH_FRAC 0
+BẮT  LOST_KEYS_MAX nới
+BẮT  SESSION_DROP_MAX nới
+BẮT  carry lấy cả lỗ giữa
+BẮT  carry không mang
+BẮT  bỏ trần CARRY
+BẮT  live_bq không gỡ cache
+BẮT  pull lệch năm cuối
+BẮT  pull không lọc universe
+BẮT  bỏ kiểm END
+BẮT  bỏ kiểm Close<=0
+BẮT  bỏ kiểm lùi ngày
+BẮT  validate so với chính bản mới
+BẮT  phủ: nới ngưỡng cửa sổ
+BẮT  phủ: nới ngưỡng phiên
+BẮT  phủ: chỉ kiểm Price
+BẮT  phủ: không loại mã mang sang
+BẮT  phủ: kiểm cả lịch sử (không cửa sổ)
+BẮT  phủ: không gọi
+BẮT  phủ: build không truyền mã mang sang
+BẮT  phủ: thiếu cột không chặn
+BẮT  carry chỉ cột PX (mất Open/Volume/Price)
+BẮT  trung vị không shift(1)
+BẮT  trần carry đếm DỒN
+BẮT  16 khúc không cùng snapshot
+BẮT  copy_atomic ghi thẳng
+BẮT  pull rỗng không raise
+BẮT  refresh chép .pre_adj không nguyên tử
+BẮT  refresh không đọc state carry
+BẮT  refresh không lưu state carry
+BẮT  refresh ghi dù có vấn đề
+BẮT  refresh không exit 1
+BẮT  refresh .pre_adj ghi đè
+BẮT  refresh đọc BQ_LOCAL_CACHE
+BẮT  refresh .prev không nguyên tử
+BẮT  refresh CSV ghi thẳng
+BẮT  refresh không dọn tmp mồ côi
+BẮT  refresh dọn cả tmp lạ
+
+MUTATION: 39/39 bị bắt

@@ -896,3 +896,24 @@ Mã LAG (due_today/upcoming) CHỈ vào `orders[]` khi `data/lag_dd/<mã>_<relea
 - **Không chạy `lag_dd_pack.py` vào T7/CN, trước 08:20, hoặc khi `ops_health_check`/`anomaly_scan` chết** (arch-review vòng 2): file anomaly cũ ⇒ ANOMALY_NA hàng loạt ⇒ gói CLEARED hôm trước bị hạ FLAG, `flags_hash` đổi ⇒ ack cũ thành ACK_STALE và phải hỏi lại user. `PACK_ASOF_MAX_DAYS=7`: kỳ nghỉ dài (Tết) chắc chắn ra PACK_STALE — chạy lại pack sau khi `anomaly_scan` đã chạy phiên giao dịch gần nhất.
 
 - **Duyệt plan = chấp nhận (user chốt 2026-10-21 23:28 ICT, "Nếu tôi duyệt plan thì được phép mua. Không cần quá cứng")**: cổng DD KHÔNG chặn cứng ở tầng đặt lệnh (không thêm gate kiểu `filter_lag_rating_orders`). Khối 🔴 `LAG_DD_GATE_VIOLATION` trong báo cáo duyệt plan là cảnh báo để user thấy trước khi duyệt; user duyệt plan có khối đỏ ⇒ bot được mua như plan. Mã FLAG chưa ack vẫn mặc định đứng NGOÀI plan do DollarBill (fail-closed ở khâu lập plan); user muốn mua dù có cờ thì ghi ack PROCEED hoặc tự duyệt plan có mã đó.
+
+## Rollback LAG cache điều chỉnh (`97b2a7197`, LIVE từ 10/11/2026, user phê chuẩn 13/11) — thêm 2026-11-13 (job `Taylor_20261113_021438`)
+Khi nào: user/Mike quyết quay về cơ sở giá THÔ-append (vd validate fail nhiều ngày liền, BQ đổi điều chỉnh sai). Không chạm lệnh thật trực tiếp,
+nhưng đổi ứng viên LAG ⇒ **làm trọn TRƯỚC 19:00 ICT** (chuỗi `bq_freshness_check.sh` 19:00 → golive đọc `earnings_events_classified.csv` + `pt_v22_dt5g_logs.csv`).
+Không chạy cùng lúc cron 15:30 (`refresh_lagged_caches.py` có flock; thấy `lock bận` ⇒ chờ chain xong).
+```bash
+cd /home/trido/thanhdt && git checkout main
+git revert --no-edit <commit-C2-nếu-đã-merge>   # nhánh feat/lag-cache-c2-20261113; chưa merge thì bỏ dòng này
+git revert --no-edit 97b2a7197                  # thử 13/11 trên main: sạch, không xung đột
+source WorkingClaude/wc_env.sh; cd "$WORKDIR_8L"
+md5sum data/earnings_px.pkl.pre_adj data/lagged_pos_ov.pkl.pre_adj
+#  PHẢI = af4b8c1b72f4b133248516eff8b459b0 / afb2484e5fb702cd4335949d1a69db1b (cơ sở thô, max 2026-11-09, không cột Price). Lệch ⇒ DỪNG, hỏi Taylor.
+B=data/rollback_lagadj_$(TZ=Asia/Ho_Chi_Minh date +%Y%m%d); mkdir -p "$B"
+cp -p data/earnings_px.pkl data/lagged_pos_ov.pkl data/lagged_carried.json "$B"/ && rm data/lagged_carried.json
+for f in earnings_px lagged_pos_ov; do cp -p data/$f.pkl.pre_adj data/$f.pkl.rb.tmp && mv data/$f.pkl.rb.tmp data/$f.pkl; done
+for s in refresh_lagged_caches.py pt_v12_macro.py pt_v4_dt5g.py pt_v22_dt5g.py "edge_health_monitor.py --refresh"; do
+  $DNA_PYEXE $s || { echo "FAIL $s"; break; }; done
+```
+Kiểm sau: `refresh_lagged_caches.py` code cũ in `[1] earnings_px.pkl (daily Close)` + `+N rows -> ... new max <END>` (đường append) và exit 0; `lagged_pos_ov.pkl` không còn cột `Price` (helper `lag_adv_basis` đã bị revert cùng);
+`pt_v22_dt5g_logs.csv` có dòng ngày hôm nay. Quá 19:00 ⇒ golive/plan ngày đó đã chạy trên cache adj: chạy lại chuỗi 19:00 + gửi lại plan (luật plan phải tới user trước ngày).
+Không có knob env "append mode" — cố ý (giữ code cũ song song không tối thiểu; revert 1 commit đủ). Bối cảnh: `kb/projects/lag-cache-adjusted-20261110.md` §7.

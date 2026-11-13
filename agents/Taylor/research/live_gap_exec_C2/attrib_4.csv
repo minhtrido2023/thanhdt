@@ -1,0 +1,23 @@
+ticker,quarter,release,entry_T+5,pa_HL3_ctrl,q_ctrl,pa_HL3_adjv2,q_adjv2,pa_HL3_live_now,q_live_now,prior_n_good_ctrl,lag_liq_excluded_1112
+BSP,2026Q2,2026-07-22,2026-07-29,2.7,False,3.9,False,3.9,False,15,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+BSP,2026Q3,2026-10-21,2026-10-28,2.7,False,7.83,True,7.83,True,15,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+DMN,2026Q2,2026-07-31,2026-08-07,3.47,False,5.13,False,5.13,False,4,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
+DMN,2026Q3,2026-11-02,2026-11-09,3.47,False,5.13,True,5.13,True,4,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
+HTT,2026Q2,2026-07-17,2026-07-24,6.11,True,4.62,False,4.62,False,14,
+HTT,2026Q3,2026-10-23,2026-10-30,5.19,False,3.92,False,3.92,False,15,
+KLB,2026Q2,2026-07-23,2026-07-30,4.37,False,5.4,True,5.4,True,18,
+KLB,2026Q3,2026-10-26,2026-11-02,4.51,False,5.52,False,5.52,False,19,
+LAW,2026Q2,2026-07-27,2026-08-03,4.55,False,5.4,False,5.4,False,13,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
+LAW,2026Q3,2026-10-19,2026-10-26,4.55,False,5.4,True,5.4,True,13,"ADV3T 0.00 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
+NBC,2026Q2,2026-07-20,2026-07-27,5.66,True,5.67,True,5.67,True,21,"ADV3T 0.34 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
+NBC,2026Q3,2026-10-21,2026-10-28,4.18,False,5.61,True,5.61,True,22,"ADV3T 0.34 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
+PHP,2026Q2,2026-07-29,2026-08-05,4.13,False,4.13,False,4.13,False,15,
+PHP,2026Q3,2026-10-29,2026-11-05,5.29,True,4.1,False,4.1,False,16,
+PHR,2026Q2,2026-07-31,2026-08-07,5.73,True,5.75,True,5.75,True,25,
+PHR,2026Q3,2026-11-02,2026-11-09,-0.32,False,5.06,True,5.06,True,26,
+PMP,2026Q2,2026-07-21,2026-07-28,5.12,True,4.56,False,4.56,False,14,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+PMP,2026Q3,2026-10-29,2026-11-05,5.12,True,5.11,True,5.11,True,14,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+TMG,2026Q2,2026-07-17,2026-07-24,5.06,True,7.17,True,7.17,True,18,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+TMG,2026Q3,2026-11-02,2026-11-09,5.06,True,4.91,False,4.91,False,18,"Volume_3M_P50=0.0 → ADV ≤ 0, không mua được (mirror liquidity_require_positive)"
+TPC,2026Q2,2026-07-23,2026-07-30,1.78,False,1.78,False,1.78,False,23,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
+TPC,2026Q3,2026-11-04,2026-11-11,1.78,False,8.41,True,8.41,True,23,"ADV3T 0.01 tỷ/phiên < sàn 2 tỷ — dưới sàn thanh khoản hệ thống (user chốt 2026-08-10, hiệu quả vốn)"
