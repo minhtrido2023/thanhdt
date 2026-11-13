@@ -1637,3 +1637,28 @@
 - [2026-11-13T16:04:33Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20261113_153627", "source": "watcher"}
 - [2026-11-13T16:05:33Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20261113_153627", "source": "watcher"}
 - [2026-11-13T16:06:33Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+
+## Consolidation 2026-11-13T16:27:45Z
+- [2026-11-13T16:07:34Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:08:34Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:09:34Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:10:34Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:11:35Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 35, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:12:35Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 36, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:13:35Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 37, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:14:35Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 38, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:15:35Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 39, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:16:35Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 40, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:17:35Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 41, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:18:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 42, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:19:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 43, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:20:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 44, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:21:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 45, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:22:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 46, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:23:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 47, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:24:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 48, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:25:36Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 49, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:25:56Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "in_progress", "note": "10 chan xong, self-check 0 VND; dang bootstrap DD5 (16 ledger x 15 cau hinh)"}
+- [2026-11-13T16:26:37Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 50, "job_id": "Taylor_20261113_153627", "source": "watcher"}
+- [2026-11-13T16:27:13Z] Taylor/finding — live-gap-A9 viec4: DD5 theo NAV sau sua tran ban - neo NAV live KHONG doi: {"report": "agents/Taylor/research/live_gap_exec_A9/REPORT.md", "commit_code": "8b5f7fd0d research/live-gap-A9-sellcap-fix-20261114", "dd5_cF": {"1B": "-33,24 [-33,83;-30,28]", "2B": "-33,06 [-33,61;-30,12]", "5B": "-31,17 [-31,68;-28,73]", "50B": "-26,22 [-27,28;-25,94]"}, "a7_dd5_cF": {"1B": -33.24, "2B": -33.07, "5B": -31.18, "50B": -25.96}, "paired_a9_minus_a7_cF": {"1B": "+0,00 [-0,03;+0,03]", "2B": "+0,00", "5B": "+0,02", "50B": "-0,40 [-0,81;-0,13]"}, "cagr_cF": {"1B": 28.49, "2B": 28.02, "5B": 27.48, "50B": 22.62}, "selfcheck_0VND": "10/10 chan BAL+LAG", "bal_sellcap": "so lenh BAL bi cat gan nhu giu nguyen nhung max carry 1-4 -> 9-20 phien o NAV<=5B (ADV that thap hon as-of cu); LAG khong doi (liq_lag pit von day)", "conclusion": "huong lech A7 dung la lac quan nhung do lon ~0 o NAV live; neo DD5 NAV<=2 ty giu ~-33% (canh duoi -33,8); chi 50B sau them 0,26-0,40pp; bat dinh mo: pin1M/park0.3 o NAV nho, gate live chua mo phong, tran 1/2 share ADV", "n_note": "15 cau hinh bootstrap khong doc lap, 1 chuoi lich su", "status": "PAPER, chua quant-skeptic/arch-reviewer, KHONG merge, KHONG pin", "measured_by": "agents/Taylor/research/live_gap_exec_A9/logs/{metrics.log,boot_band.log,paired.log}"}
+- [2026-11-13T16:27:37Z] Taylor/heartbeat — Taylor_20261113_153627: {"status": "still_running", "elapsed_min": 51, "job_id": "Taylor_20261113_153627", "source": "watcher"}
