@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/universe_pit_p3_selfcheck.py

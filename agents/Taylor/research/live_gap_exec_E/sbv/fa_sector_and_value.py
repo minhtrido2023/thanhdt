@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/fa_sector_and_value.py

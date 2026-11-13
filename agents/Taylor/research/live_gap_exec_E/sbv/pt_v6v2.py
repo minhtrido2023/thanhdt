@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/pt_v6v2.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/test_fa_t6_refined.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-E-1112/WorkingClaude/SCREEN_SORT_DIRECTION_AUDIT_20260927.md
