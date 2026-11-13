@@ -188,3 +188,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T18:44:46Z] [13/11 01:50] A2 xong (claimed): NULL KHÔNG phải nguyên nhân chính; DD5 sàn sạch NULL -27,7% THẬT; đề xuất LIQ=lag + LAG_ADV_SRC=pit (chưa đổi). Skeptic A2 chạy (verify_finding live-gap-exec-A2). B2 Taylor_20261112_181211 còn chạy. Chờ user: LAG cache phê chuẩn/rollback; chủ TK SpaceX.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T18:52:35Z] [13/11 01:55] Skeptic A2 CONFIRMED (medium). Chờ user duyệt: (a) Taylor chạy MINP sweep {10,20,40} + L3 adj v2 + pit + bootstrap 2 số lẻ rồi merge lag+pit, hay (b) merge ngay. B2 còn chạy (Taylor_20261112_181211). Vẫn chờ: LAG cache phê chuẩn/rollback; chủ TK SpaceX.
