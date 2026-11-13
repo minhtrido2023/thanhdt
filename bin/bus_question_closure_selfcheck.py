@@ -183,6 +183,25 @@ with p.open('a',encoding='utf-8') as f:f.write(json.dumps(r,ensure_ascii=False)+
                             capture_output=True, text=True)
     assert forced.returncode == 0, (forced.returncode, forced.stderr)
 
+    # ── --provenance-json (decision-inbox 2026-11-13): merge vào payload, KHÔNG ghi đè key của helper.
+    ts_p = "2026-08-18T05:00:00+00:00"
+    write_event(root, "Mike", event("Mike", "question", "prov-q", ts_p))
+    for bad in ('{"decided_by":"agent"}', '{"resolves":["x"]}', '{"closed_by":"X"}', '[1]', '{not json'):
+        r = subprocess.run([sys.executable, str(HELPER), "Mike/prov-q", "--resolution", "r",
+                            "--evidence", "e", "--provenance-json", bad, "--root", str(root)],
+                           capture_output=True, text=True)
+        assert r.returncode == 2, (bad, r.returncode, r.stderr)
+    assert "prov-q" in topics(root), topics(root)   # bị từ chối ⇒ chưa ghi gì
+    good = subprocess.run([sys.executable, str(HELPER), "Mike/prov-q", "--resolution", "r",
+                           "--evidence", "e", "--decided-by-user", "--provenance-json",
+                           '{"decision":{"option":"A"},"provenance":{"via":"decision_inbox"}}',
+                           "--root", str(root)], capture_output=True, text=True)
+    assert good.returncode == 0 and "CLOSED" in good.stdout, (good.returncode, good.stderr)
+    ans = [json.loads(l) for l in (root / "bus" / "inbox" / "Mike.jsonl").read_text().splitlines()]
+    ans = [x for x in ans if x["event_type"] == "answer" and x["topic"] == "prov-q"][-1]["payload"]
+    assert ans["provenance"] == {"via": "decision_inbox"} and ans["decision"] == {"option": "A"}, ans
+    assert ans["decided_by"] == "user" and ans["resolves"] == ["Mike/prov-q"], ans
+
 # Tự đếm (§16), không chép số tay: mọi `assert` của file nằm trên luồng không rẽ nhánh nên tới
 # được dòng này = tất cả đã chạy và qua. `python -O` gỡ assert ⇒ không được in PASS.
 import ast  # noqa: E402

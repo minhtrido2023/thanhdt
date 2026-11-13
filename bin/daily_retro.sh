@@ -117,6 +117,52 @@ _mb_note="$(head -c 200 "$_mb_err" 2>/dev/null | tr '\n' ' ')"
 case "$_mb_warn_block" in *"chưa có dữ liệu"*) _mb_note="KHÔNG-CÓ-SỐ-ĐẾM ${_mb_note:-(không có stderr: file cảnh báo chưa có, hoặc helper treo/vắng)}";; esac
 echo "$(date -Iseconds) [measured-by-warn] $TODAY ${_mb_note:-ok}" >> "$LOG"
 
+# --- Đếm lần classifier CHẶN tool call (decision-inbox 2026-11-13, DESIGN §5) --------------
+# `CCDB_PERMISSION_MODE=auto` ⇒ classifier chặn lệnh bus hợp lệ mà không ai thấy (đo 14/10→13/11:
+# 73 lần ở phiên Mike). Đọc-only (bin/classifier_denial_count.py, bucket theo ngày ICT). Leo thang khi
+# Mike > ngưỡng/ngày HOẶC có lần nào chặn close_bus_question.py (đúng ca 13/11). FAIL-OPEN: helper
+# lỗi/treo ⇒ chuỗi "chưa có dữ liệu", retro chạy y như cũ.
+CLF_THRESHOLD="${DAILY_RETRO_CLF_THRESHOLD:-5}"
+_clf_json="$(timeout "${DAILY_RETRO_CLF_TIMEOUT:-60}" python3 "$ROOT/bin/classifier_denial_count.py" --day "$TODAY" --json 2>/dev/null || true)"
+_clf_mike="$(printf '%s' "$_clf_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["by_agent"].get("Mike",0))' 2>/dev/null || true)"
+_clf_close="$(printf '%s' "$_clf_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["close_bus_question"])' 2>/dev/null || true)"
+if [ -n "$_clf_mike" ] && [ -n "$_clf_close" ]; then
+  _clf_block="[classifier denials $TODAY ICT] $_clf_json"
+  if [ "$_clf_mike" -gt "$CLF_THRESHOLD" ] || [ "$_clf_close" -gt 0 ]; then
+    # Payload PHẢI đủ để user trả lời được ("A"/"B" qua Decision Inbox): summary + options + recommendation + risk
+    # (vòng 2 arch-review 13/11, mục 7 — bản cũ chỉ chứa số đếm thô ⇒ câu hỏi rỗng, relay in "(không có summary)").
+    _clf_payload="$(printf '%s' "$_clf_json" | CLF_THR="$CLF_THRESHOLD" python3 -c '
+import json, os, sys
+d = json.load(sys.stdin)
+thr = os.environ.get("CLF_THR", "5")
+mike = d.get("by_agent", {}).get("Mike", 0)
+close = d.get("close_bus_question", 0)
+d["summary"] = ("Classifier chặn tool call %s lần của Mike trong ngày %s ICT (ngưỡng %s/ngày); %s lần chặn close_bus_question.py. "
+                "Lệnh bus hợp lệ bị chặn im lặng thì câu hỏi không được đóng và việc kẹt mà không ai thấy."
+                % (mike, d["day"], thr, close))
+d["options"] = [
+    "A: thêm allow-list cho lệnh bus/ghi nhớ rủi ro thấp theo DESIGN §8 (decision_inbox_design_20261113) vào agents/Mike/.claude/settings.json; user tự thêm, KHÔNG allow dispatch.sh/approve_plan*",
+    "B: giữ nguyên cấu hình, chấp nhận classifier chặn và đóng câu hỏi bằng Decision Inbox/đóng tay",
+]
+d["recommendation"] = ("A, chỉ các dòng rủi ro THẤP–TRUNG BÌNH trong DESIGN §8; đo lại bằng classifier_denial_count.py sau 1 tuần. "
+                       "Không đụng đường tiền (approve_plan*, BOT_STOP, trading_rules).")
+d["risk"] = "normal"
+d["measured_by"] = "bin/classifier_denial_count.py --day " + d["day"] + " --json"
+print(json.dumps(d, ensure_ascii=False))' 2>/dev/null || true)"
+    _clf_esc_ok=0
+    if [ -n "$_clf_payload" ] && timeout 60 python3 "$ROOT/bin/retro_escalate.py" --pattern classifier-denials-mike --days 1 \
+      --payload "$_clf_payload" >> "$LOG" 2>&1; then _clf_esc_ok=1; fi
+    if [ "$_clf_esc_ok" = 1 ]; then
+      _clf_block="$_clf_block — VƯỢT NGƯỠNG (Mike>$CLF_THRESHOLD hoặc close_bus_question bị chặn): bash ĐÃ escalate qua retro_escalate.py, KHÔNG escalate lại."
+    else
+      _clf_block="$_clf_block — VƯỢT NGƯỠNG (Mike>$CLF_THRESHOLD hoặc close_bus_question bị chặn) nhưng ESCALATE THẤT BẠI (payload rỗng hoặc retro_escalate lỗi, xem $LOG) — cần escalate tay."
+    fi
+  fi
+else
+  _clf_block="[classifier denials $TODAY ICT] KHÔNG-CÓ-SỐ-ĐẾM (classifier_denial_count.py lỗi hoặc treo)"
+fi
+echo "$(date -Iseconds) [classifier-denials] $TODAY mike=${_clf_mike:-?} close_bus_question=${_clf_close:-?}" >> "$LOG"
+
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
@@ -169,6 +215,9 @@ $_mb_warn_block
    Đây chỉ là số đếm: KHÔNG escalate, KHÔNG tạo question từ nó. Chỉ nêu 1 dòng trong retro nếu
    có xu hướng đổi ĐÁNG KỂ so với hôm trước (so '24h' với '24h trước đó'); không đổi đáng kể
    thì không nêu gì.
+2g. CLASSIFIER CHẶN LỆNH (số đếm THÔNG TIN, bash đã đếm + đã tự escalate nếu vượt ngưỡng — ĐỪNG tự đếm lại):
+$_clf_block
+   Chỉ nêu 1 dòng trong retro nếu đáng kể (vượt ngưỡng, hoặc lệnh bus bị chặn lặp lại nhiều ngày).
 2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
    là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
    'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong

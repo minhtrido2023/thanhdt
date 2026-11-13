@@ -85,5 +85,38 @@ for k in real absent crash hang empty; do ok "[$k] đúng 1 dòng [measured-by-w
 ok "[real] dòng log báo 'ok' (có số đếm thật)" "$(lg real | grep -q ' ok$' && echo 1 || echo 0)" "$(lg real)"
 for k in absent crash hang empty; do ok "[$k] dòng log đánh dấu KHÔNG-CÓ-SỐ-ĐẾM" "$(lg $k | grep -q 'KHÔNG-CÓ-SỐ-ĐẾM' && echo 1 || echo 0)" "$(lg $k)"; done
 ok "[crash] dòng log mang stderr thật của helper ('boom')" "$(lg crash | grep -q 'boom' && echo 1 || echo 0)" "$(lg crash)"
+# ── Nhánh VƯỢT NGƯỠNG classifier (decision-inbox vòng 2, mục 7): payload leo thang KHÔNG được rỗng ──
+# Stub classifier_denial_count.py (cùng hình dạng JSON với bản thật) + retro_escalate.py (ghi lại --payload).
+mkclf() { # <dir> <mike_count> <close_count>
+  local d="$1"
+  SEED=0 mk "$d" "-"
+  cat > "$d/bin/classifier_denial_count.py" <<PYSTUB
+import json
+print(json.dumps({"day": "2026-11-13", "total": $2, "by_agent": {"Mike": $2, "Taylor": 0}, "by_cmd_top5": [], "close_bus_question": $3}))
+PYSTUB
+  cat > "$d/bin/retro_escalate.py" <<'PYSTUB'
+import json, os, sys
+a = sys.argv[1:]
+open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "escalate.payload"), "w").write(a[a.index("--payload") + 1])
+open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "escalate.args"), "w").write(" ".join(a[:a.index("--payload")]))
+PYSTUB
+}
+mkclf "$T/clf_over" 9 0;  rc[clf_over]="$(run "$T/clf_over")"
+mkclf "$T/clf_close" 1 2; rc[clf_close]="$(run "$T/clf_close")"
+mkclf "$T/clf_under" 1 0; rc[clf_under]="$(run "$T/clf_under")"
+pj() { python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); v=d.get(sys.argv[2]); print("" if v is None else (json.dumps(v,ensure_ascii=False) if not isinstance(v,str) else v))' "$T/$1/escalate.payload" "$2" 2>/dev/null; }
+for k in clf_over clf_close; do
+  ok "[$k] retro_escalate được gọi với payload JSON hợp lệ" "$(python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$T/$k/escalate.payload" 2>/dev/null && echo 1 || echo 0)"
+  ok "[$k] payload có summary KHÔNG rỗng (≥40 ký tự)" "$([ "$(pj $k summary | wc -c)" -ge 40 ] && echo 1 || echo 0)" "$(pj $k summary)"
+  ok "[$k] payload có ≥2 options, mỗi option bắt đầu bằng nhãn A:/B:" "$(python3 -c 'import json,sys; o=json.load(open(sys.argv[1]))["options"]; sys.exit(0 if len(o)>=2 and all(x.startswith(chr(65+i)+":") for i,x in enumerate(o)) else 1)' "$T/$k/escalate.payload" 2>/dev/null && echo 1 || echo 0)"
+  ok "[$k] payload có recommendation KHÔNG rỗng" "$([ -n "$(pj $k recommendation)" ] && echo 1 || echo 0)"
+  ok "[$k] payload risk = normal (câu allow-list không phải câu tiền)" "$([ "$(pj $k risk)" = normal ] && echo 1 || echo 0)"
+  ok "[$k] payload vẫn mang số đếm thô + measured_by" "$([ -n "$(pj $k by_agent)" ] && [ -n "$(pj $k measured_by)" ] && echo 1 || echo 0)"
+  ok "[$k] gọi đúng --pattern classifier-denials-mike --days 1" "$(grep -q -- '--pattern classifier-denials-mike --days 1' "$T/$k/escalate.args" && echo 1 || echo 0)"
+  ok "[$k] retro vẫn đủ 3 dispatch Mike→Wags→Mike" "$([ "$(cat "$T/$k/calls.n" 2>/dev/null)" = 3 ] && echo 1 || echo 0)"
+done
+ok "[clf_over] summary nêu số lần thật (9) và ngưỡng (5)" "$(pj clf_over summary | grep -q '9 lần' && pj clf_over summary | grep -q 'ngưỡng 5' && echo 1 || echo 0)" "$(pj clf_over summary)"
+ok "[clf_close] ca close_bus_question bị chặn (2 lần) nêu trong summary" "$(pj clf_close summary | grep -q '2 lần chặn close_bus_question' && echo 1 || echo 0)" "$(pj clf_close summary)"
+ok "[clf_under] dưới ngưỡng ⇒ KHÔNG escalate" "$([ ! -e "$T/clf_under/escalate.payload" ] && echo 1 || echo 0)"
 echo "---"; echo "PASS=$pass FAIL=$fail"
 [ "$fail" -eq 0 ]

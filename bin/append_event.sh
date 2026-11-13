@@ -169,6 +169,23 @@ except ValueError as exc:
     } ;;
 esac
 
+# --- Chốt `on_answer` của câu hỏi (decision-inbox 2026-11-13, DESIGN §4) -----------------------
+# Câu hỏi có thể khai hậu quả theo phương án (`payload.on_answer`); `decision_inbox.py` sẽ CHẠY chúng khi user
+# trả lời. Sai schema / action lạ / câu money kèm on_answer ⇒ từ chối NGAY LÚC GHI (fail loud) để lỗi hiện khi
+# hỏi, không phải khi user đã trả lời. Chỉ chạy khi payload có chuỗi `"on_answer"` — mọi question khác: 0 chi phí.
+# Lý do từ chối lấy NGUYÊN VĂN từ validator (§29): validator vắng/hỏng cũng hiện ra ở đây, không bị che.
+# Chỉ payload JSON (bắt đầu bằng `{`) mới có thể mang on_answer; câu hỏi text thường chứa `\u` (vd 'C:\users')
+# KHÔNG được đưa vào validator (arch-review vòng 2, lỗi C: rc=1 với thông báo sai).
+_payload_lead="${payload#"${payload%%[![:space:]]*}"}"
+case "$etype:$_payload_lead" in question:'{'*)
+  case "$payload" in *'"on_answer"'*|*'\u'*)   # `\u…` = khoá bị escape unicode để lách chuỗi trên (vòng 2, mức thấp)
+    _oa_err="$(printf '%s' "$payload" | python3 "$ROOT/bin/decision_actions.py" --validate \
+      --agent "$id" --topic "$topic" --root "$ROOT" 2>&1 >/dev/null)" || \
+      die "payload.on_answer KHÔNG hợp lệ — câu hỏi chưa được ghi.
+  Lý do (từ bin/decision_actions.py): $_oa_err"
+  ;; esac
+;; esac
+
 kbver="$(tr -dc '0-9' < "$ROOT/kb/version.txt" 2>/dev/null || true)"; kbver="${kbver:-0}"
 line="$(python3 "$PY" event "$id" "$etype" "$topic" "$payload" "$kbver" "$trace_id")"
 
