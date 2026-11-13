@@ -2312,3 +2312,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T16:26:49Z] [live-gap-exec-D 12/11] XONG job Taylor_20261112_162001: P(thang 12T) 77,6-84,6% (pin0/pin1M; -1,5pp: 74-82%), CI N_eff 45-98%; chinh sach DT5G->tiet kiem 1T ton 0,9-2,7pp CAGR, DD +2,4-4,5pp (bao hiem); D2 0 dac trung qua, MDE80 BAL 0,5/LAG 0,3 — CHO quant-skeptic + Mike
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T16:32:39Z] [live-gap-E 12/11] XONG job Taylor_20261112_151839/162006: waterfall dong, du +1,4..2,2pp (T9, gia thuyet ro park live/CAPIT size chua do); W3 fills_booked thieu lenh ban DISC (dung so); pin 23,37 trong phan phoi tie-break — CHO quant-skeptic + Mike
