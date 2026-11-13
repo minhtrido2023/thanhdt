@@ -206,8 +206,44 @@ def save_baseline(counts):
     os.replace(tmp, BASELINE_PATH)
 
 
+def drop_sandbox_mirrors(files, wc_root=None):
+    """Bỏ file .py nằm trong SANDBOX (thư mục con ≠ WC_ROOT có `wc_env.sh` — bản sao cả cây
+    WorkingClaude Taylor dựng để tái lập vintage) MÀ trùng TỪNG BYTE với file canonical cùng đường
+    dẫn tương đối. Nợ của nó đã được đếm ở file canonical; đếm lại = báo nợ mới giả (sweep 13/11:
+    5394/5462 dòng CHẶN là bản sao y hệt). Bản sao ĐÃ SỬA / file không có canonical ⇒ VẪN quét."""
+    wc_root = os.path.abspath(wc_root or WC_ROOT)
+    roots_cache, kept, dropped = {}, [], 0
+
+    def sb_root(d):
+        if d not in roots_cache:
+            if d == wc_root or not d.startswith(wc_root + os.sep):
+                roots_cache[d] = None
+            elif os.path.isfile(os.path.join(d, "wc_env.sh")):
+                roots_cache[d] = d
+            else:
+                roots_cache[d] = sb_root(os.path.dirname(d))
+        return roots_cache[d]
+
+    for p in files:
+        sb = sb_root(os.path.dirname(os.path.abspath(p)))
+        if sb:
+            canon = os.path.join(wc_root, os.path.relpath(os.path.abspath(p), sb))
+            try:
+                if os.path.isfile(canon):
+                    with open(p, "rb") as f1, open(canon, "rb") as f2:
+                        if f1.read() == f2.read():
+                            dropped += 1
+                            continue
+            except OSError:
+                pass   # đọc lỗi ⇒ giữ lại để quét (không im lặng bỏ)
+        kept.append(p)
+    return kept, dropped
+
+
 def cmd_scan(roots, update=False, accept_new_debt=False, seed=False):
-    files = walk_roots(roots)
+    files, n_mirror = drop_sandbox_mirrors(walk_roots(roots))
+    if n_mirror:
+        print(f"annualization_basis: bỏ {n_mirror} file sandbox trùng byte với canonical (nợ đếm ở canonical)")
     counts, details, unparsable = scan_paths(files)
     for p, err in unparsable:
         print(f"annualization_basis: KHÔNG PARSE ĐƯỢC {p} ({err}) — không gate file này",
@@ -334,6 +370,28 @@ def cmd_selfcheck():
         print(f"  ca thật {rel}: {state} ({len(found)} hit: "
               f"{[(l, r) for l, r, _ in found]})")
         n += 1
+
+    # sandbox mirror: bản sao y hệt bị bỏ; bản sao ĐÃ SỬA, file không có canonical, file ngoài
+    # sandbox (cùng tên) đều VẪN quét
+    import tempfile
+    with tempfile.TemporaryDirectory() as wc:
+        def w(rel, txt):
+            os.makedirs(os.path.dirname(os.path.join(wc, rel)), exist_ok=True)
+            with open(os.path.join(wc, rel), "w", encoding="utf-8") as f:
+                f.write(txt)
+        w("wc_env.sh", "")
+        w("a.py", BAD_LITERAL)
+        w("r/sb/wc_env.sh", "")
+        w("r/sb/a.py", BAD_LITERAL)                   # y hệt ⇒ bỏ
+        w("r/sb/sub/b.py", BAD_LITERAL)                # không có canonical ⇒ giữ
+        w("r/sb2/wc_env.sh", "")
+        w("r/sb2/a.py", BAD_LITERAL + "\n# sửa\n")    # đã sửa ⇒ giữ
+        w("r/nosb/a.py", BAD_LITERAL)                  # không phải sandbox ⇒ giữ
+        allf = walk_roots([wc])
+        kept, dropped = drop_sandbox_mirrors(allf, wc)
+        rel = sorted(os.path.relpath(p, wc) for p in kept)
+        chk(dropped == 1 and rel == ["a.py", "r/nosb/a.py", "r/sb/sub/b.py", "r/sb2/a.py"],
+            f"drop_sandbox_mirrors sai: dropped={dropped} kept={rel}")
 
     print(f"OK — {n} assertion PASS (annualization_basis_selfcheck.py)")
     return 0

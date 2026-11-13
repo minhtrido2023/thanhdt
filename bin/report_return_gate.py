@@ -2046,6 +2046,7 @@ def _selfcheck() -> int:
     _fake_slm.compute_status = _fake_compute_status
     _fake_slm.load_ratings = lambda: {"FPT": 1}
     _fake_slm.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
+    _fake_slm.double_confirm_set = lambda df, ratings: {"FPT": "ACCUMULATE"}  # newdeals gọi từ de28d1893
     _fake_alphalens = _types.ModuleType("alphalens_report")
     _fake_alphalens.generate_section = lambda as_of_date=None: "alphalens stub"
     _fake_converge = _types.ModuleType("converge_report")
@@ -2105,6 +2106,7 @@ def _selfcheck() -> int:
     _fake_slm2.compute_status = _fake_compute_status
     _fake_slm2.load_ratings = lambda: {"FPT": 1}
     _fake_slm2.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
+    _fake_slm2.double_confirm_set = lambda df, ratings: {"FPT": "ACCUMULATE"}
     _fake_alphalens2 = _types.ModuleType("alphalens_report")
     _fake_alphalens2.generate_section = lambda as_of_date=None: "alphalens stub"
     _fake_converge2 = _types.ModuleType("converge_report")
