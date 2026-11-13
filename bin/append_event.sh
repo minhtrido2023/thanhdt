@@ -169,6 +169,20 @@ except ValueError as exc:
     } ;;
 esac
 
+# --- Chốt `on_answer` của câu hỏi (decision-inbox 2026-11-13, DESIGN §4) -----------------------
+# Câu hỏi có thể khai hậu quả theo phương án (`payload.on_answer`); `decision_inbox.py` sẽ CHẠY chúng khi user
+# trả lời. Sai schema / action lạ / câu money kèm on_answer ⇒ từ chối NGAY LÚC GHI (fail loud) để lỗi hiện khi
+# hỏi, không phải khi user đã trả lời. Chỉ chạy khi payload có chuỗi `"on_answer"` — mọi question khác: 0 chi phí.
+# Lý do từ chối lấy NGUYÊN VĂN từ validator (§29): validator vắng/hỏng cũng hiện ra ở đây, không bị che.
+case "$etype" in question)
+  case "$payload" in *'"on_answer"'*)
+    _oa_err="$(printf '%s' "$payload" | python3 "$ROOT/bin/decision_actions.py" --validate \
+      --agent "$id" --topic "$topic" --root "$ROOT" 2>&1 >/dev/null)" || \
+      die "payload.on_answer KHÔNG hợp lệ — câu hỏi chưa được ghi.
+  Lý do (từ bin/decision_actions.py): $_oa_err"
+  ;; esac
+;; esac
+
 kbver="$(tr -dc '0-9' < "$ROOT/kb/version.txt" 2>/dev/null || true)"; kbver="${kbver:-0}"
 line="$(python3 "$PY" event "$id" "$etype" "$topic" "$payload" "$kbver" "$trace_id")"
 

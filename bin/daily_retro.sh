@@ -135,7 +135,7 @@ if [ -n "$_clf_mike" ] && [ -n "$_clf_close" ]; then
     _clf_block="$_clf_block — VƯỢT NGƯỠNG (Mike>$CLF_THRESHOLD hoặc close_bus_question bị chặn): bash ĐÃ escalate qua retro_escalate.py, KHÔNG escalate lại."
   fi
 else
-  _clf_block="[classifier denials $TODAY ICT] chưa có dữ liệu (helper không chạy được)"
+  _clf_block="[classifier denials $TODAY ICT] KHÔNG-CÓ-SỐ-ĐẾM (classifier_denial_count.py lỗi hoặc treo)"
 fi
 echo "$(date -Iseconds) [classifier-denials] $TODAY mike=${_clf_mike:-?} close_bus_question=${_clf_close:-?}" >> "$LOG"
 
