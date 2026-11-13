@@ -25,6 +25,11 @@ import sys
 import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from wc_paths import find_wc_root  # noqa: E402
+_WC = find_wc_root(__file__)
+EXEC_DIR = os.path.join(_WC, "data", "execution_logs")
+INCEPTION_PATH = os.path.join(_WC, "data", "account_inception.json")
 
 COL_PRICE, COL_TR = "VN-Index (giá)", "VN-Index có cổ tức"
 COL_XP, COL_XT = "Chênh so giá", "Chênh so có cổ tức"
@@ -32,11 +37,17 @@ COL_SAV, COL_SAVX = "Gửi tiết kiệm (tham chiếu)", "Chênh so tiết ki�
 NO_NUMBER = "chưa có số"
 # Nhãn + cảnh báo user DUYỆT 13/11/2026 (Wendy: TK cá nhân; Luật TNCN 109/2025/QH15 Đ4). Thay footnote CLI
 # ("chưa tính thuế") — cổng đòi ĐÚNG hai câu này khi bảng có cột tiết kiệm.
-SAV_LABEL = ("So với gửi tiết kiệm: mức lãi tham chiếu lấy theo lãi suất 12 tháng cao nhất trong Big-4 (kênh "
+_SAV_HEAD = ("So với gửi tiết kiệm: mức lãi tham chiếu lấy theo lãi suất 12 tháng cao nhất trong Big-4 (kênh "
              "online) và chứng chỉ tiền gửi 12 tháng, tính lãi đơn theo số ngày thực tế/365. Đây là mốc THƯỢNG "
              "CẬN, chỉ để tham khảo, không phải lợi suất bảo đảm của bất kỳ kênh nào. Lãi tiền gửi cá nhân được "
-             "miễn thuế TNCN (Luật Thuế TNCN 109/2025/QH15, Điều 4); lợi suất danh mục đã trừ phí giao dịch và "
-             "thuế TNCN khấu trừ tại nguồn (0,1% giá bán, 5% cổ tức).")
+             "miễn thuế TNCN (Luật Thuế TNCN 109/2025/QH15, Điều 4); ")
+# Biến thể 1 (user duyệt 13/11): đúng tuyệt đối khi cashDividendReceiving = 0 của kỳ.
+SAV_LABEL = _SAV_HEAD + ("lợi suất danh mục đã trừ phí giao dịch và thuế TNCN khấu trừ tại nguồn (0,1% giá bán, "
+                         "5% cổ tức).")
+# Biến thể 2 (B4, CHỜ user duyệt câu chữ): dùng khi cashDividendReceiving ≠ 0 hoặc không đọc được.
+SAV_LABEL_ALT = _SAV_HEAD + ("lợi suất danh mục đã trừ phí giao dịch và thuế TNCN khấu trừ tại nguồn trên giá bán "
+                             "(0,1%). Cổ tức tiền mặt đang chờ về tài khoản vào cuối kỳ, chưa được trừ thuế TNCN "
+                             "5% khấu trừ tại nguồn, nên lợi suất danh mục có thể cao hơn thực nhận một khoản nhỏ.")
 SAV_WARN = ("Kết quả trong quá khứ không bảo đảm kết quả trong tương lai. Thông tin này không phải cam kết hay "
             "dự báo về thu nhập hoặc lợi nhuận; đầu tư cổ phiếu có thể thua lỗ vốn, khác với tiền gửi.")
 # cột "giống tiết kiệm" (so sau bỏ dấu) — nếu có mà KHÔNG nhận ra theo tên "tiết kiệm" ⇒ cổng CHẶN (skeptic B2)
@@ -95,16 +106,44 @@ def _sav_cells(p: dict) -> list:
     return [fmt_num(sv["hurdle_pct"], "%"), fmt_num(sv["excess_vs_savings_pp"], "pp")]
 
 
+def div_receiving(account: str, report_date: str, exec_dir: str = None, inception_path: str = None):
+    """`cashDividendReceiving` (VND) của bản ghi `balances` CUỐI NGÀY `report_date` trong dnse_raw, lọc
+    account_no ở dòng đầu (§12). None = không đọc được (thiếu file/mốc/bản ghi) — KHÔNG suy ra 0."""
+    try:
+        with open(inception_path or INCEPTION_PATH, encoding="utf-8") as f:
+            acct_no = str(json.load(f)[account]["account_no"])
+        last = None
+        with open(os.path.join(exec_dir or EXEC_DIR, f"dnse_raw_{report_date}.jsonl"), encoding="utf-8") as f:
+            for line in f:
+                rec = json.loads(line)
+                if str(rec.get("account_no")) != acct_no:
+                    continue
+                if rec.get("kind") == "balances":
+                    v = (rec.get("payload", {}).get("stock") or {}).get("cashDividendReceiving")
+                    if v is not None:
+                        last = float(v)
+        return last
+    except (OSError, KeyError, ValueError, TypeError):
+        return None
+
+
+def sav_label_for(recv) -> str:
+    """Nhãn tiết kiệm đúng với dữ kiện: chỉ khi chắc chắn cổ tức chờ về = 0 mới dùng câu '5% cổ tức đã trừ'."""
+    return SAV_LABEL if recv == 0 else SAV_LABEL_ALT
+
+
 def strip_accents(x: str) -> str:
     x = unicodedata.normalize("NFD", x.lower()).replace("đ", "d")
     return "".join(ch for ch in x if unicodedata.category(ch) != "Mn")
 
 
-def render(main: dict, sleeve: dict = None) -> str:
+def render(main: dict, sleeve: dict = None, recv="auto") -> str:
     """Bảng markdown + chú thích. `sleeve` = đầu ra `--sleeve bot` (dict có `inception`) hoặc dict
     `{"status": "unavailable", "reason": ...}` hoặc None (không có dòng b)."""
     acc, rd = main["account"], main["report_date"]
-    sav = _has_sav(main)         # CLI không phát khối savings ⇒ bảng như cũ (không cột tiết kiệm)
+    sav = _has_sav(main)
+    if sav and recv == "auto":
+        recv = div_receiving(acc, rd)         # CLI không phát khối savings ⇒ bảng như cũ (không cột tiết kiệm)
     lines = [f"| Giai đoạn | {acc} | {COL_PRICE} | {COL_TR} | {COL_XP} | {COL_XT} |"
              + (f" {COL_SAV} | {COL_SAVX} |" if sav else ""),
              "|---|---:|---:|---:|---:|---:|" + ("---:|---:|" if sav else "")]
@@ -140,7 +179,7 @@ def render(main: dict, sleeve: dict = None) -> str:
                      f"{fmt_num(100 * (1 - nav_b / nav_a), '%').lstrip('+')} NAV ngày {_ddmm(rd)}; "
                      f"số chính thức của tài khoản là các dòng phía trên.")
     if sav:
-        notes += [SAV_LABEL]
+        notes += [sav_label_for(recv)]
         aw = next((main[k]["savings"].get("anchor_warning") for k in ("inception", "mtd", "wtd")
                    if isinstance(main.get(k), dict) and isinstance(main[k].get("savings"), dict)
                    and main[k]["savings"].get("anchor_warning")), None)
@@ -231,7 +270,7 @@ def _series_installed() -> bool:
 
 
 def check_report(name: str, text: str, account: str, report_date: str, cli=run_cli,
-                 series_installed=None) -> list:
+                 series_installed=None, recv_fn=div_receiving) -> list:
     """Trả list dòng PASS (để in); vi phạm ⇒ TableBlock (thông điệp trích đúng ô + số CLI — §29).
     Chỉ gọi cho weekly/monthly. Bảng của `account` = bảng 'Hiệu suất lũy kế' có cột thứ 2 tên `account`
     (báo cáo gộp SpaceX_ZaloPay_* có một bảng mỗi TK). Không có bảng: chuỗi có cổ tức đã cài ⇒ CHẶN
@@ -288,10 +327,20 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
                              f"nhận ra theo tên (cột tiết kiệm phải chứa 'tiết kiệm', cột chênh thêm 'chênh', "
                              f"có dấu; header {header}) — số trong cột sẽ không được đối chiếu CLI")
     if sav_cols:
-        for what, txt in (("nhãn tiết kiệm đã duyệt", SAV_LABEL), ("cảnh báo kết quả quá khứ", SAV_WARN)):
-            if norm(txt) not in text:
-                raise TableBlock(f"benchmark-table BLOCK ({name}): bảng có cột tiết kiệm nhưng thiếu {what} "
-                                 f"NGUYÊN VĂN dưới bảng (render bằng `period_table_32.py`): {txt[:60]!r}…")
+        recv = recv_fn(account, report_date)
+        has0, hasalt = norm(SAV_LABEL) in text, norm(SAV_LABEL_ALT) in text
+        if not (has0 or hasalt):
+            raise TableBlock(f"benchmark-table BLOCK ({name}): bảng có cột tiết kiệm nhưng thiếu nhãn tiết kiệm "
+                             f"đã duyệt NGUYÊN VĂN dưới bảng (một trong hai biến thể; render bằng "
+                             f"`period_table_32.py`): {SAV_LABEL[:60]!r}…")
+        if has0 and not hasalt and recv != 0:
+            raise TableBlock(f"benchmark-table BLOCK ({name}): nhãn nói 5% cổ tức đã khấu trừ nhưng "
+                             f"cashDividendReceiving cuối {report_date} = "
+                             f"{'không đọc được' if recv is None else f'{recv:,.0f}đ (≠0, cổ tức chưa về)'} "
+                             f"— phải dùng biến thể cổ tức-đang-chờ (render lại bằng `period_table_32.py`)")
+        if norm(SAV_WARN) not in text:
+            raise TableBlock(f"benchmark-table BLOCK ({name}): bảng có cột tiết kiệm nhưng thiếu cảnh báo kết "
+                             f"quả quá khứ NGUYÊN VĂN dưới bảng (render bằng `period_table_32.py`): {SAV_WARN[:60]!r}…")
     need_sleeve = any(_period_of(r[0])[0] for r in rows if r)
     out = {}
     rc, j, err = cli(account, report_date, False)

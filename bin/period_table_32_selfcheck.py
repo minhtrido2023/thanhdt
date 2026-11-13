@@ -22,6 +22,10 @@ import report_delivery_gate as rdg  # noqa: E402
 from nav_period_benchmark_selfcheck import bm_fn, fixture  # noqa: E402
 
 N_OK = 0
+RECV = [0.0]                       # cashDividendReceiving giả cho selfcheck (B4); test đọc thật ở cuối
+_real_div_receiving = pt.div_receiving
+pt.div_receiving = lambda *a, **k: RECV[0]
+_recv_fn = lambda account, d: RECV[0]  # noqa: E731
 
 
 def ok(cond, msg):
@@ -33,7 +37,7 @@ def ok(cond, msg):
 
 def blocks(text, cli, must=(), installed=True, acc="ZaloPay"):
     try:
-        pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed)
+        pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed, recv_fn=_recv_fn)
     except pt.TableBlock as e:
         for m in must:
             ok(m in str(e), f"thông điệp phải trích {m!r}: {e}")
@@ -42,7 +46,7 @@ def blocks(text, cli, must=(), installed=True, acc="ZaloPay"):
 
 
 def passes(text, cli, installed=True, acc="ZaloPay"):
-    out = pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed)
+    out = pt.check_report("X_weekly.md", text, acc, "2030-06-06", cli=cli, series_installed=lambda: installed, recv_fn=_recv_fn)
     ok(out and ("PASS" in out[0] or "WARN" in out[0]), f"phải qua: {out}")
     return out[0]
 
@@ -179,7 +183,7 @@ def main() -> int:
     ok(nfd != doc(t) and "(b) inception: khớp CLI" in passes(nfd, cli), "NFD + 'Luỹ' ⇒ vẫn đối chiếu")
     notab = "# Báo cáo tuần\n\n### 3.2 Hiệu suất\n\nkhông có bảng\n"
     blocks(notab, cli, ("không có bảng", "bắt buộc có bảng 3.2"))
-    sk = pt.check_report("X_weekly.md", notab, "ZaloPay", "2030-06-06", cli=cli, series_installed=lambda: False)
+    sk = pt.check_report("X_weekly.md", notab, "ZaloPay", "2030-06-06", cli=cli, series_installed=lambda: False, recv_fn=_recv_fn)
     ok("SKIP" in sk[0], f"chưa cài chuỗi ⇒ SKIP: {sk}")
     blocks(replace_cell(doc(t), "Tuần này", "ZaloPay", pt.fmt_num(a["wtd"]["return_pct"] + 0.02, "%")), cli,
            ("Tuần này", "'ZaloPay'", f"{a['wtd']['return_pct']:+.3f}"))
@@ -290,6 +294,44 @@ def main() -> int:
     tz = pt.render(asv, b)
     ok("—" in tz and CS in tz, "B3: dòng bot có cột tiết kiệm '—'")
     passes(doc(tz), mkcli(asv, b))
+
+    # ── B4 (13/11): nhãn có điều kiện theo cashDividendReceiving của kỳ ───────────────────────────────
+    ALT = pt.SAV_LABEL_ALT
+    ok(ALT != pt.SAV_LABEL and "5% cổ tức" not in ALT and "chờ về" in ALT, "B4: biến thể ALT khác V0, không khẳng định 5% đã trừ")
+    ok(pt.sav_label_for(0) == pt.SAV_LABEL and pt.sav_label_for(0.0) == pt.SAV_LABEL, "B4: recv=0 ⇒ nhãn V0")
+    for v in (1.0, 3_800_000.0, None):
+        ok(pt.sav_label_for(v) == ALT, f"B4: recv={v!r} ⇒ nhãn ALT (không suy ra 0 khi không đọc được)")
+    try:
+        RECV[0] = 3_800_000.0
+        t_alt = pt.render(asv, None)
+        ok(ALT in t_alt and pt.SAV_LABEL not in t_alt, "B4: recv≠0 ⇒ render in ALT, không in V0")
+        passes(doc(t_alt), mkcli(asv, b))                        # cổng chấp nhận ALT nguyên văn
+        blocks(doc(ts), mkcli(asv, b), ("cashDividendReceiving", "3,800,000"))   # V0 khi recv≠0 ⇒ CHẶN
+        RECV[0] = None
+        blocks(doc(ts), mkcli(asv, b), ("không đọc được",))      # V0 khi không đọc được ⇒ CHẶN
+        passes(doc(t_alt), mkcli(asv, b))
+        RECV[0] = 0.0
+        passes(doc(ts), mkcli(asv, b))                            # V0 khi recv=0 ⇒ qua
+        passes(doc(t_alt), mkcli(asv, b))                         # ALT luôn đúng (thận trọng) ⇒ qua
+        blocks(doc(t_alt.replace("chưa được trừ", "đã được trừ")), mkcli(asv, b), ("nhãn tiết kiệm",))   # sửa chữ ALT
+        blocks(doc(ts.replace(pt.SAV_LABEL, "").replace(ALT, "")), mkcli(asv, b), ("nhãn tiết kiệm",))
+    finally:
+        RECV[0] = 0.0
+    # đọc THẬT (hàm gốc) trên thư mục giả: lọc account_no, lấy bản ghi balances CUỐI ngày, thiếu ⇒ None
+    import json as _j, tempfile as _t
+    with _t.TemporaryDirectory() as td:
+        inc = Path(td) / "inc.json"
+        inc.write_text(_j.dumps({"A1": {"account_no": "111"}, "A2": {"account_no": "222"}}), encoding="utf-8")
+        (Path(td) / "dnse_raw_2030-06-06.jsonl").write_text("\n".join(_j.dumps(r) for r in [
+            {"account_no": "111", "kind": "balances", "ts": "t1", "payload": {"stock": {"cashDividendReceiving": 5}}},
+            {"account_no": "222", "kind": "balances", "ts": "t2", "payload": {"stock": {"cashDividendReceiving": 900}}},
+            {"account_no": "111", "kind": "balances", "ts": "t3", "payload": {"stock": {"cashDividendReceiving": 0}}},
+            {"account_no": "111", "kind": "orders", "ts": "t4", "payload": {}}]), encoding="utf-8")
+        g = lambda acc, d: _real_div_receiving(acc, d, exec_dir=td, inception_path=str(inc))  # noqa: E731
+        ok(g("A1", "2030-06-06") == 0.0, "B4: lấy bản ghi balances CUỐI của đúng account (A1=0, bỏ A2=900)")
+        ok(g("A2", "2030-06-06") == 900.0, "B4: account khác ⇒ số khác (§12)")
+        ok(g("A1", "2030-06-07") is None, "B4: thiếu file ngày ⇒ None (không suy ra 0)")
+        ok(g("A3", "2030-06-06") is None, "B4: account không có mốc ⇒ None")
 
     print(f"OK — {N_OK} assertion PASS (period_table_32_selfcheck.py, TZ={os.environ.get('TZ')!r})")
     return 0
