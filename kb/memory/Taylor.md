@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-12T17:17:00Z] [live-gap-exec-A 13/11] XONG job Taylor_20261112_162004: nhanh feat/live-gap-exec-A-20261112 (efdb282bd) KHONG merge; dai moi 23,39/26,77 (seed mean 26,30), DD5 -27,6/-25,0 vs neo -25,2 — CHO quant-skeptic + user; registry+6 pin chua commit
 - [2026-11-12T17:49:03Z] [live-gap-exec-B 13/11] XONG job Taylor_20261112_172358: nhanh feat/savings-row-20261112 (9246cd93e) KHONG merge; savings selfcheck 56 PASS; report_return_gate_selfcheck FAIL co san tren master; report_v2_selfcheck timeout chua ket luan; template/gate chua sua — CHO user duyet + Wendy ve cach dien dat
 - [2026-11-12T18:43:29Z] [live-gap-exec-A2 13/11] XONG job Taylor_20261112_181209: lo NULL khong phai nguyen nhan (L2 sach pit 23,32/26,85, DD5 -27,7/-25,3); chenh L1->L2 = fill ao ma ADV<=0; de xuat LAG_ADV_SRC=pit mac dinh — CHO quant-skeptic + user; nhanh 4f7609c34/770393ce2 KHONG merge
 - [2026-11-12T19:03:34Z] [live-gap-exec-B2 13/11] XONG job Taylor_20261112_181211: nhanh feat/savings-row-20261112 (418667a32) KHONG merge; v2 selfcheck PASS 177 x3; anchor_warning siet, gate crosscheck cot tiet kiem — CHO user/Wendy duyet cau chu+thue+ten cot template
@@ -27,3 +26,4 @@
 - [2026-11-13T07:32:55Z] [live-gap-exec-A5 13/11] XONG job Taylor_20261113_071030: pin trung byte tren ma commit (80f509ec main sach / e2de0ac4 e9a9aed1a); neo -25,2 (4707bcbe) chua fill ao, bo fill ao -3,96pp => DD5 san trung thuc -29,09 (park0.3)/-27,89 (park0); ADV live=pit 29/32 — CHO quant-skeptic + user quyet neo
 - [2026-11-13T08:01:28Z] [decision-inbox 13/11] XONG job Taylor_20261113_075639: DESIGN.md o research/decision_inbox_design_20261113 (cog CUSTOM_COGS_DIR + bin/decision_inbox.py, chua code) — CHO user duyet + allow-list user tu them
 - [2026-11-13T08:18:48Z] [decision-inbox impl 13/11] XONG job Taylor_20261113_080329: nhanh feat/decision-inbox-20261113 (head 2b17704de) KHONG merge, cog chua bat; selfcheck 221 ca x2 TZ 0 fail; CHO Mike chay arch-reviewer toan diff roi merge; user bat shadow (2 dong .env) sau merge; buoc 7 doi soat chua lam
+- [2026-11-13T08:26:07Z] [live-gap-exec-A6 13/11] XONG job Taylor_20261113_075112: nhanh research/live-gap-A6-carry-20261113 (262c117c3) 1 cay, pin0 80f509ec + pin1M e2de0ac4 trung byte, KHONG merge; DD5 dai L3P p0.3 -28,54 [-29,09;-27,99] (s12345 = canh duoi); small-NAV 1B DD5 -32,75 (chenh L1 chi -1,6pp) => neo cho NAV live chua chot — CHO quant-skeptic + arch-review + user

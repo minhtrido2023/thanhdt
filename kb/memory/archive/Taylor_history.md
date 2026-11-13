@@ -2315,3 +2315,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T16:32:39Z] [live-gap-E 12/11] XONG job Taylor_20261112_151839/162006: waterfall dong, du +1,4..2,2pp (T9, gia thuyet ro park live/CAPIT size chua do); W3 fills_booked thieu lenh ban DISC (dung so); pin 23,37 trong phan phoi tie-break — CHO quant-skeptic + Mike
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T17:17:00Z] [live-gap-exec-A 13/11] XONG job Taylor_20261112_162004: nhanh feat/live-gap-exec-A-20261112 (efdb282bd) KHONG merge; dai moi 23,39/26,77 (seed mean 26,30), DD5 -27,6/-25,0 vs neo -25,2 — CHO quant-skeptic + user; registry+6 pin chua commit
