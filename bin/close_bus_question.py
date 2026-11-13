@@ -11,6 +11,9 @@ import sys
 
 
 ROOT = Path(__file__).resolve().parent.parent
+# Các key do chính helper đặt — provenance bên ngoài không được ghi đè (đặc biệt decided_by).
+RESERVED_KEYS = frozenset({"resolves", "decided_by", "closed_by", "resolution", "evidence",
+                           "source_topic"})
 
 
 def pending(root: Path) -> list[dict]:
@@ -46,8 +49,23 @@ def main() -> int:
                     help="xác nhận: biết answer dưới topic này cũng đóng LÂY câu pending khác có"
                          " topic là chuỗi con của nó (matcher `q_topic in r`). Không truyền cờ"
                          " ⇒ chặn rc=5 (coord-2026-10-20: đóng `X-recurring` đóng nhầm `X`)")
+    ap.add_argument("--provenance-json", default="",
+                    help="JSON object merge vào payload answer (vd decision_inbox: decision/provenance)."
+                         f" Cấm ghi đè các key {sorted(RESERVED_KEYS)}; phải là dict")
     ap.add_argument("--root", type=Path, default=ROOT, help=argparse.SUPPRESS)
     a = ap.parse_args()
+
+    extra: dict = {}
+    if a.provenance_json:
+        try:
+            extra = json.loads(a.provenance_json)
+        except ValueError as exc:
+            ap.error(f"--provenance-json không phải JSON hợp lệ: {exc}")
+        if not isinstance(extra, dict):
+            ap.error("--provenance-json phải là JSON object")
+        clash = sorted(RESERVED_KEYS & set(extra))
+        if clash:
+            ap.error(f"--provenance-json không được ghi đè key {clash}")
 
     if "/" not in a.question_ref:
         ap.error("question_ref must be Agent/topic")
@@ -95,6 +113,7 @@ def main() -> int:
             return 4
 
     payload = {
+        **extra,
         "resolution": a.resolution,
         "evidence": a.evidence,
         "resolves": [a.question_ref],
