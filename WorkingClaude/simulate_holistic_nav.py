@@ -566,6 +566,24 @@ def simulate(signals_df, prices, vni_dates, *,
 
     _ETF_LIQ_ON = (etf_liquidity_pct is not None and etf_adv_lookup is not None)
     _sellcap_on = bool(sell_adv_cap) and t1_open_exec and liquidity_lookup is not None
+    if _sellcap_on:
+        # liquidity_lookup may be SPARSE (BAL liq_map = signal rows only) — a missing key is NOT
+        # zero liquidity. Sell-cap uses the latest known ADV <= today (as-of, no look-ahead).
+        _sc_ser = {}
+        for (_k_tk, _k_d), _k_v in liquidity_lookup.items():
+            _sc_ser.setdefault(_k_tk, []).append((_k_d, _k_v))
+        for _k_tk in _sc_ser:
+            _l = sorted(_sc_ser[_k_tk], key=lambda x: x[0])
+            _sc_ser[_k_tk] = (np.array([pd.Timestamp(x[0]).value for x in _l]), np.array([float(x[1] or 0) for x in _l]))
+        def _sc_liq(tk, d):
+            v = liquidity_lookup.get((tk, d))
+            if v is not None:
+                return float(v), 0
+            a = _sc_ser.get(tk)
+            if a is None:
+                return 0.0, -1
+            j = np.searchsorted(a[0], pd.Timestamp(d).value, side="right") - 1
+            return (float(a[1][j]), 1) if j >= 0 else (0.0, -1)
     def _etf_day_cap(today):
         """Max VND of E1VFVN30 tradeable today (liquidity ceiling for parking buys AND sells).
         None/inf when no cap configured (legacy behavior)."""
@@ -735,7 +753,7 @@ def simulate(signals_df, prices, vni_dates, *,
                 gross = pos["shares"] * open_px
                 if _sellcap_on:
                     # A7 sell-side ADV cap: sell at most sell_adv_cap x ADV today; carry the rest.
-                    _liq_c = liquidity_lookup.get((tk, today)) or 0
+                    _liq_c, _liq_src = _sc_liq(tk, today)
                     _carry = entry.get("_carry", 0)
                     _frac = 1.0
                     if _carry < sell_adv_maxcarry:
@@ -746,7 +764,8 @@ def simulate(signals_df, prices, vni_dates, *,
                         sell_cap_log.append({"sim": name, "ymd": today, "ticker": tk,
                                              "play_type": pos.get("play_type", "?"), "carry": _carry,
                                              "frac": _frac, "gross_full": float(gross),
-                                             "forced": _carry >= sell_adv_maxcarry, "liq": float(_liq_c)})
+                                             "forced": _carry >= sell_adv_maxcarry, "liq": float(_liq_c),
+                                             "liq_src": _liq_src})
                     if _frac < 1.0:
                         entry["_carry"] = _carry + 1
                         still_pending.append(entry)

@@ -421,6 +421,12 @@ if LAG_ADV_SRC != "bq": _qs_tag += f"_advsrc{LAG_ADV_SRC}" + ("" if LAG_ADV_MINP
 # KHÔNG đặt/rỗng = OFF = byte-identical (không truyền kwarg, không đổi tên file).
 SELL_ADV_CAP = float(os.environ.get("SELL_ADV_CAP", "").strip() or 0)
 SELL_ADV_MAXCARRY = int(os.environ.get("SELL_ADV_MAXCARRY", "20"))
+# SIG_ADV_MIN (R&D Luồng A7): SÀN ADV TẦNG TÍN HIỆU như LIVE — lag_liquidity_filter.ADV_MIN_VND=2e9 (user chốt
+# 2026-08-10): LAG `lag_filter_illiquid` loại ứng viên ADV3T < sàn; BAL `bal_filter_thin` loại dòng tín hiệu liq < sàn.
+# ADV3T = Volume_3M_P50 × COALESCE(Price, Close) TẠI NGÀY TÍN HIỆU (dòng BQ sd — live chạy tối sd sau sync). Engine gốc
+# chỉ có ADV>0 (LAG) / liq≥1e9 trong SQL (BAL). KHÔNG đặt = OFF = byte-identical.
+SIG_ADV_MIN = float(os.environ.get("SIG_ADV_MIN", "").strip() or 0)
+if SIG_ADV_MIN > 0: _qs_tag += f"_sigadv{int(SIG_ADV_MIN/1e6)}m"
 if SELL_ADV_CAP > 0: _qs_tag += f"_sellcap{SELL_ADV_CAP:g}" + ("" if SELL_ADV_MAXCARRY == 20 else f"mc{SELL_ADV_MAXCARRY}")
 _SELLCAP_KW = ({"sell_adv_cap": SELL_ADV_CAP, "sell_adv_maxcarry": SELL_ADV_MAXCARRY, "sell_cap_log": []}
                if SELL_ADV_CAP > 0 else {})
@@ -1038,6 +1044,9 @@ opens_df["time"] = pd.to_datetime(opens_df["time"])
 print(f"  opens: {len(opens_df):,} rows ({len(_opens_parts)} year chunks)")
 open_prices = {tk: dict(zip(g["time"], g["open_price"])) for tk, g in opens_df.groupby("ticker")}
 prices = {tk: dict(zip(g["time"], g["Close"])) for tk, g in sig_f.groupby("ticker")}
+if SIG_ADV_MIN > 0:
+    _n0 = len(sig_f); sig_f = sig_f[pd.to_numeric(sig_f["liq"], errors="coerce") >= SIG_ADV_MIN].copy()
+    print(f"  [SIG_ADV_MIN={SIG_ADV_MIN:,.0f}] BAL signal rows {_n0:,} -> {len(sig_f):,}", flush=True)
 liq_map = dict(zip(zip(sig_f["ticker"], sig_f["time"]), sig_f["liq"]))
 
 vni = bq(VNI_QUERY.format(start=START_DATE, end=END_DATE))
@@ -1571,6 +1580,7 @@ for tk, g in lagpx.groupby("ticker"):
     gl = g[g["Volume_3M_P50"].notna() & g[_advcol].notna()]
     for d, adv, px in zip(gl["time"], gl["Volume_3M_P50"].astype(float), gl[_advcol].astype(float)):
         liq_lag[(tk, d)] = adv * px
+_liq_lag_sig = dict(liq_lag) if SIG_ADV_MIN > 0 else None   # ADV3T BQ-def tại ngày tín hiệu (trước khi đổi nguồn pit)
 if LAG_ADV_SRC != "bq":
     _vstart = (pd.Timestamp(START_DATE) - pd.Timedelta(days=200)).date()
     _vp = []
@@ -1613,10 +1623,15 @@ def _lag_ptype(s):
         return "LAG_HI" if s > 0.5 else "LAG_LO"                      # binary baseline (byte-identical)
     return "LAG_TOP" if s >= _sue_q[1] else ("LAG_HI" if s >= _sue_q[0] else "LAG_LO")
 lag_rows = []
+_sigadv_drop = []
 for c in lag_cand:
     tk, sd = c["ticker"], c["sd"]
     px_sd = prices_lag.get(tk, {}).get(sd, np.nan)
     if pd.isna(px_sd) or px_sd <= 0: continue
+    if SIG_ADV_MIN > 0:
+        _a_sd = _liq_lag_sig.get((tk, sd))
+        if _a_sd is None or not (float(_a_sd) >= SIG_ADV_MIN):
+            _sigadv_drop.append(tk); continue
     lag_rows.append({"time": sd, "ticker": tk,
                      "play_type": _lag_ptype(c["surprise"]),
                      "ta": 400.0, "Close": float(px_sd),
@@ -1624,6 +1639,8 @@ for c in lag_cand:
 _lag_cols = ["time","ticker","play_type","ta","Close"] + (["_fund_tb"] if _LAG_FUND_DNPR else [])
 sig_lag = pd.DataFrame(lag_rows, columns=_lag_cols)
 print(f"  LAG signals in window: {len(sig_lag)}  [fund_dnpr_reorder={_LAG_FUND_DNPR}]")
+if SIG_ADV_MIN > 0:
+    print(f"  [SIG_ADV_MIN={SIG_ADV_MIN:,.0f}] LAG candidates dropped {len(_sigadv_drop)} ({len(set(_sigadv_drop))} mã)", flush=True)
 shn.TIER_PRIORITY.update({"LAG_TOP": 90, "LAG_HI": 88, "LAG_LO": 82})
 LAG_TW = ({"LAG_TOP": 0.11, "LAG_HI": 0.09, "LAG_LO": 0.08} if LAG_SUE_TILT
           else {"LAG_HI": 0.10, "LAG_LO": 0.08})
