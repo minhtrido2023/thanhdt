@@ -151,8 +151,10 @@ if os.path.exists(PINNED_CSV) and os.path.exists(FIXTURE_EH):
         fl = extract_gate(ROOT)["w_lag_target"]
         live_bad = [r["ymd"].date() for _, r in flips.iterrows()
                     if abs(fl(r["state"], r["ymd"]) - r["w_lag_tgt"]) > 1e-9]
+        n_all = sum(abs(fl(r["state"], r["ymd"]) - r["w_lag_tgt"]) > 1e-9 for _, r in d.iterrows())
         print(f"  [INFO] live data/lag_edge_health.csv vs pin: {len(live_bad)}/{len(flips)} "
-              f"flip days differ {live_bad[:3]} (data vintage, not a gate check)")
+              f"flip days, {n_all}/{len(d)} all days differ {live_bad[:3]} "
+              f"(data vintage, not a gate check)")
 else:
     check("G. pinned R3 CSV + frozen edge-health fixture present", False,
           f"{PINNED_CSV} / {FIXTURE_EH}")

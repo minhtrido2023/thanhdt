@@ -5,7 +5,8 @@
 §4.3 `ticker_prune_replacement_plan.md`. Ba câu hỏi, không hơn:
 
   T1. Rổ custom30V ở MỌI mốc rebal trong cửa sổ gần đây có GIỐNG HỆT giữa `UNIVERSE_SOURCE`
-      "prune" (cũ) và "pit" (mới) không? Bắt buộc giống ở mốc rebal LIVE mới nhất.
+      "prune" (cũ) và "pit" (mới) không? Mốc rebal LIVE mới nhất: giống hệt HOẶC chênh lành tính
+      đã chứng minh bằng dữ liệu (`_explain_divergence`; sửa 2026-11-13 — prune là bảng legacy).
   T2. Fail-safe: `universe_pit` thiếu ngày cần dùng → DỪNG CÓ LỖI, KHÔNG im lặng dùng ticker_prune.
   T3. Nhánh đọc qua BQ_LOCAL_CACHE (DuckDB) có ra CÙNG membership như đọc thẳng BigQuery không —
       cache là đường chạy production của `custom30_history.py` khi manifest verified.
@@ -92,9 +93,11 @@ def _explain_divergence(bq, rebal_date, into_pit, out_of_pit, prune_basket):
              f"FROM `lithe-record-440915-m9.tav2_bq.ticker` t WHERE t.ticker IN ('{names}') "
              f"AND t.time BETWEEN DATE '{d0}' AND DATE '{d1}' GROUP BY t.ticker")
     L = dict(zip(liq["ticker"], liq["liq_bn"]))
-    lo_in = min((L.get(t) for t in into_pit), default=None)
-    if lo_in is None or any(L.get(t) is None for t in prune_basket):
+    # NaN (AVG NULL) = KHÔNG đo được ⇒ không lành tính; so sánh với NaN luôn False nên phải chặn
+    # trước, nếu không cổng fail-OPEN (arch-review 2026-11-13).
+    if any(pd.isna(L.get(t)) for t in list(into_pit) + list(prune_basket)):
         return {"benign": False, "reason": f"không đo được thanh khoản 3M ({L})"}
+    lo_in = min(L[t] for t in into_pit)
     floor_t = min(prune_basket, key=lambda t: L[t])
     if lo_in < L[floor_t]:
         return {"benign": False,
@@ -135,7 +138,7 @@ def main():
         if why["benign"]:
             # KHÔNG hạ chuẩn: chênh CHỈ được bỏ qua khi chứng minh được bằng dữ liệu rằng nguyên
             # nhân là LỖ HỔNG ĐỘ ĐẦY ĐỦ của `ticker_prune` (tên chưa từng có dòng nào trong bảng
-            # đó) VÀ tên `pit` thêm vào thanh khoản KHÔNG kém tên bị bỏ ra. Đó chính là thứ
+            # đó) VÀ tên `pit` thêm vào thanh khoản KHÔNG kém tên kém nhất rổ prune. Đó chính là thứ
             # universe_pit sinh ra để sửa — byte-identical với một bảng đã biết là thiếu tên
             # không phải cái bar đúng. Mọi kiểu chênh khác vẫn FAIL CỨNG.
             print(f"  [diff-benign] T1 rổ {d.date()} — VÀO {into} / RA {out}: {why['reason']}",
