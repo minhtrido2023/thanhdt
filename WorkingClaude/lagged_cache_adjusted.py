@@ -33,6 +33,14 @@ DEPTH_FROM = "2014-01-01"  # trước 2014 thị trường mỏng/biến động
 LOST_KEYS_MAX = 0.002    # tối đa 0,2% cặp (mã, phiên) của bản cũ biến mất ở bản mới
 SESSION_DROP_MAX = 0.05  # phiên nào mất >5% số mã so với bản cũ ⇒ fail
 CARRY_TICKERS_MAX = 20   # >20 mã MỚI bị BQ cắt lịch sử (chưa nằm trong `known_carried`) cùng lúc = sự cố nguồn ⇒ fail
+# Độ phủ cột ADV (lag_adv_basis.adv_px rơi LẶNG LẼ về giá điều chỉnh khi Price NaN ⇒ phải chặn ở đây).
+# Đo 2026-11-13 trên data/lagged_pos_ov.pkl (max 2026-11-11), loại mã mang sang: 60 phiên gần nhất NaN
+# Price = 0, Volume_3M_P50 = 0; max theo phiên 2025–2026: Price 0,00% / V3 0,40%; max 2020+: 1,49% / 1,88%
+# (cửa sổ 60 phiên 1,16% / 1,66%). Dòng mang sang (cơ sở cũ, không có Price) KHÔNG tính — đã biết, có log.
+COVER_COLS = ("Price", "Volume_3M_P50")
+COVER_SESSIONS = 60      # số phiên (T2–T6) gần nhất được kiểm
+COVER_WIN_NAN_MAX = 0.02   # NaN trung bình cả cửa sổ > 2% ⇒ fail
+COVER_SESS_NAN_MAX = 0.05  # một phiên bất kỳ NaN > 5% ⇒ fail
 
 
 def live_bq(bq_fn):
@@ -117,7 +125,31 @@ def thin_sessions(cnt):
     return chk[chk < DEPTH_FRAC * base.reindex(chk.index)]
 
 
-def validate(new, old, end):
+def coverage_problems(new, carried_tickers=()):
+    """Độ phủ COVER_COLS ở COVER_SESSIONS phiên gần nhất (bỏ mã mang sang). Trả (problems, stats)."""
+    P, S = [], {}
+    miss = [c for c in COVER_COLS if c not in new.columns]
+    if miss:
+        return [f"thiếu cột {miss} trong bản mới"], S
+    w = new[(new["time"].dt.dayofweek < 5) & ~new["ticker"].isin(set(carried_tickers))]
+    sess = np.sort(w["time"].unique())[-COVER_SESSIONS:]
+    w = w[w["time"].isin(sess)]
+    if not len(w):
+        return ["độ phủ: cửa sổ kiểm rỗng"], S
+    for c in COVER_COLS:
+        per = w[c].isna().groupby(w["time"]).mean()
+        win, mx = float(w[c].isna().mean()), float(per.max())
+        S[f"nan_{c}_win{COVER_SESSIONS}"] = round(win, 5); S[f"nan_{c}_sess_max"] = round(mx, 5)
+        if win > COVER_WIN_NAN_MAX:
+            P.append(f"{c} NaN {win:.2%} trên {len(sess)} phiên gần nhất (>{COVER_WIN_NAN_MAX:.0%})")
+        if mx > COVER_SESS_NAN_MAX:
+            bad = per[per > COVER_SESS_NAN_MAX]
+            P.append(f"{c} NaN >{COVER_SESS_NAN_MAX:.0%} ở {len(bad)} phiên: "
+                     + ", ".join(f"{pd.Timestamp(d).date()}={v:.0%}" for d, v in bad.tail(5).items()))
+    return P, S
+
+
+def validate(new, old, end, carried_tickers=()):
     """So bản mới (điều chỉnh) với bản cũ. Trả (problems: list[str], stats: dict). problems rỗng ⇒ ghi được."""
     P, S = [], {}
     end = pd.Timestamp(end)
@@ -125,6 +157,8 @@ def validate(new, old, end):
         return ["bản mới rỗng"], S
     if new["Close"].isna().any() or (new["Close"] <= 0).any():
         P.append("Close NaN/<=0 trong bản mới")
+    cp, cs = coverage_problems(new, carried_tickers)
+    P.extend(cp); S.update(cs)
     S["new_max"] = str(new["time"].max().date()); S["old_max"] = str(old["time"].max().date())
     if new["time"].max() != end:
         P.append(f"max(time) bản mới {S['new_max']} != END {end.date()}")
@@ -185,7 +219,7 @@ def build(q, old_px, old_ov, end, known_carried=(), asof=None):
     tks = sorted(set(old["ticker"]))
     new = pull_adjusted(q, old["time"].min(), end, tks, asof=asof)
     new, carried = carry_truncated(new, old, PX_COLS + OV_COLS[2:])   # đủ cột: Close, Open, Volume_3M_P50, Price
-    problems, stats = validate(new, old_px, end)
+    problems, stats = validate(new, old_px, end, carried_tickers=set(carried["ticker"]) if len(carried) else ())
     stats["carried_tickers"] = len(carried); stats["carried_rows"] = int(carried["rows"].sum()) if len(carried) else 0
     new_carried = sorted(set(carried["ticker"]) - set(known_carried)) if len(carried) else []
     stats["carried_new"] = len(new_carried); stats["asof"] = None if asof is None else str(pd.Timestamp(asof))

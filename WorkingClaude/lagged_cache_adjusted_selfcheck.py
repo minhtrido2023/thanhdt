@@ -148,6 +148,29 @@ def unit():
     try: L.live_bq(lambda s: 1 / 0)("x")
     except ZeroDivisionError: pass
     ok("live_bq: khôi phục cả khi lỗi", os.environ.get("BQ_LOCAL_CACHE") == "data/bq_cache")
+    # 3h độ phủ Price / Volume_3M_P50 ở COVER_SESSIONS phiên gần nhất (C2, 2026-11-13)
+    sess = np.sort(base.time.unique()); last5 = sess[-5:]
+    for c in ("Price", "Volume_3M_P50"):
+        b = base.copy(); b.loc[b.time.isin(last5), c] = np.nan; p, _ = L.validate(b, base, end)
+        ok(f"phủ: {c} NaN toàn bộ 5 phiên cuối ⇒ vấn đề", any(c in x and "phiên" in x for x in p), p)
+    b = base.copy(); rng = np.random.default_rng(1); w = b.time.isin(sess[-60:])
+    b.loc[w & (rng.random(len(b)) < 0.03), "Price"] = np.nan; p, st = L.validate(b, base, end)
+    ok("phủ: Price NaN rải 3% cửa sổ 60 phiên ⇒ vấn đề cửa sổ", any("Price NaN" in x and "gần nhất" in x for x in p), (p, st))
+    b = base.copy(); b.loc[(b.time == sess[-1]) & (b.ticker < "T003"), "Price"] = np.nan; p, st = L.validate(b, base, end)
+    ok("phủ: 3/80 mã (3,75%) NaN 1 phiên ⇒ KHÔNG chặn (dưới ngưỡng phiên 5%)", p == [], (p, st))
+    b = base.copy(); b.loc[(b.time == sess[-1]) & (b.ticker < "T005"), "Price"] = np.nan; p, _ = L.validate(b, base, end)
+    ok("phủ: 5/80 mã (6,25%) NaN 1 phiên ⇒ chặn", any("Price NaN >5%" in x for x in p), p)
+    b = base.copy(); b.loc[b.time < sess[-60], "Price"] = np.nan; p, _ = L.validate(b, base, end)
+    ok("phủ: NaN chỉ TRƯỚC cửa sổ 60 phiên ⇒ KHÔNG chặn", p == [], p)
+    p, _ = L.validate(base.drop(columns="Price"), base, end)
+    ok("phủ: thiếu cột Price ⇒ vấn đề", any("thiếu cột" in x for x in p), p)
+    old_nan = base.copy(); old_nan.loc[old_nan.ticker < "T005", "Price"] = np.nan   # 5 mã mang sang: cơ sở cũ, không có Price
+    cut5 = base[~(base.ticker < "T005")]
+    _, nov5, p, st, car5 = L.build(stub_q(cut5), old_nan[L.PX_COLS], old_nan[L.OV_COLS], end)
+    ok("phủ: NaN Price chỉ ở mã MANG SANG ⇒ KHÔNG chặn (loại khỏi phép đo)", p == [] and len(car5) == 5 and nov5.Price.isna().any(), (p, st))
+    cut5b = cut5.copy(); cut5b.loc[cut5b.time == sess[-1], "Price"] = np.nan
+    _, _, p, _, _ = L.build(stub_q(cut5b), old_nan[L.PX_COLS], old_nan[L.OV_COLS], end)
+    ok("phủ: qua build, BQ trả Price NULL phiên cuối ⇒ chặn", any("Price NaN" in x for x in p), p)
 
 STUB = r'''
 import os, re, pandas as pd
@@ -159,6 +182,7 @@ def bq(sql):
         if os.environ.get("BQ_LOCAL_CACHE"): raise RuntimeError("bước [1+2] đọc BQ_LOCAL_CACHE thay vì BQ sống")
         a, b = re.findall(r"DATE '([0-9-]+)'", sql); g = f[(f.time >= a) & (f.time <= b)]
         if mode == "thin": g = g[~((g.time == f.time.max()) & (g.ticker > "T020"))]
+        if mode == "nullprice": g = g.assign(Price=g.Price.where(g.time < f.time.max()))
         return g.copy()
     if "ticker_financial" in sql:
         d = pd.DataFrame({"ticker": ["T001"], "quarter": ["2026Q2"], "time": [pd.Timestamp("2026-06-30")],
@@ -180,12 +204,14 @@ def integ():
             if os.path.exists(p_): os.remove(p_)
         old[L.PX_COLS].to_pickle(PX); old[L.OV_COLS].to_pickle(OV)
     script = os.path.join(MOD, "refresh_lagged_caches.py")
-    def run(mode, srcp="/src.pkl", kill_copy=False):
+    def run(mode, srcp="/src.pkl", kill_copy=False, inject=None):
         env = {**os.environ, "LAGCACHE_WORKDIR": root, "STUB_MODE": mode, "STUB_SRC": root + srcp, "BQ_LOCAL_CACHE": "data/bq_cache"}
         cmd = [sys.executable, script]
         if kill_copy:   # shutil.copy2 ghi dở rồi chết — mô phỏng bị kill giữa lúc chép .pre_adj
             cmd = [sys.executable, "-c", "import shutil,runpy,sys\ndef bad(a,b,**k):\n open(b,'wb').write(b'xx'); raise OSError('killed')\n"
                    "import os; sys.path.insert(0, os.path.dirname(sys.argv[1])); shutil.copy2=bad; sys.argv=[sys.argv[1]]; runpy.run_path(sys.argv[0], run_name='__main__')", script]
+        if inject:      # mã Python chạy trước script (giả lập bị kill ở một bước cụ thể)
+            cmd = [sys.executable, "-c", "import runpy,sys,os\n" + inject + "\nsys.path.insert(0, os.path.dirname(sys.argv[1])); sys.argv=[sys.argv[1]]; runpy.run_path(sys.argv[0], run_name='__main__')", script]
         return subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=600)
     STATE = root + "/data/lagged_carried.json"
     reset(); m0 = (md5(PX), md5(OV)); r = run("good")
@@ -209,8 +235,25 @@ def integ():
     reset(); m0 = md5(PX); r = run("good", kill_copy=True)
     ok("tích hợp kill: lần chép bị chặn thật (exit≠0, 'killed')", r.returncode != 0 and "killed" in (r.stdout + r.stderr), (r.returncode, r.stderr[-400:]))
     ok("tích hợp kill giữa lúc chép .pre_adj ⇒ không có .pre_adj cụt, pkl không đổi", not os.path.exists(PX + ".pre_adj") and md5(PX) == m0, os.listdir(root + "/data"))
+    # C2 mục 4: .prev nguyên tử — lần 2 (đã có .pre_adj) bị kill khi chép .prev ⇒ .prev cũ nguyên vẹn
+    reset(); r = run("good"); mprev, mpx = md5(PX + ".prev"), md5(PX)
+    r = run("good", kill_copy=True)
+    ok("tích hợp kill khi chép .prev ⇒ .prev không cụt, pkl không đổi", r.returncode != 0 and md5(PX + ".prev") == mprev and md5(PX) == mpx,
+       (r.returncode, r.stderr[-300:]))
+    # C2 mục 4: CSV bước [4] nguyên tử — to_csv ghi dở rồi chết ⇒ CSV cũ nguyên vẹn
+    CSV = root + "/data/earnings_events_classified.csv"
+    reset(); r = run("good"); mcsv = md5(CSV)
+    r = run("good", inject="import pandas as pd\ndef _bad(self, path, **k):\n open(path,'w').write('cut'); raise OSError('killed')\npd.DataFrame.to_csv=_bad")
+    ok("tích hợp kill giữa to_csv ⇒ CSV cũ nguyên vẹn", r.returncode != 0 and "killed" in r.stderr and md5(CSV) == mcsv, (r.returncode, r.stderr[-300:]))
+    # C2 mục 4: dọn tmp mồ côi của chính script, không đụng tmp lạ
+    orph = [root + "/data/earnings_px.pkl.abc123.tmp", root + "/data/earnings_events_classified.csv.zz.tmp"]
+    for f_ in orph + [root + "/data/khac.pkl.q.tmp"]: open(f_, "w").write("x")
+    r = run("good")
+    ok("tích hợp dọn *.tmp mồ côi của script, giữ tmp lạ", r.returncode == 0 and not any(os.path.exists(f_) for f_ in orph)
+       and os.path.exists(root + "/data/khac.pkl.q.tmp"), os.listdir(root + "/data"))
+    os.remove(root + "/data/khac.pkl.q.tmp")
     if os.path.exists(STATE): os.remove(STATE)
-    for mode in ("thin", "error"):
+    for mode in ("thin", "error", "nullprice"):
         reset(); m0 = (md5(PX), md5(OV)); r = run(mode)
         ok(f"tích hợp {mode}: exit 1", r.returncode == 1, r.stdout[-600:] + r.stderr[-600:])
         ok(f"tích hợp {mode}: pkl KHÔNG đổi, không .prev/.pre_adj, không state", (md5(PX), md5(OV)) == m0 and not os.path.exists(PX + ".pre_adj") and not os.path.exists(STATE))
@@ -235,7 +278,15 @@ MUTATIONS = [
     ("bỏ kiểm END", "if new[\"time\"].max() != end:", "if False:"),
     ("bỏ kiểm Close<=0", 'if new["Close"].isna().any() or (new["Close"] <= 0).any():', "if False:"),
     ("bỏ kiểm lùi ngày", 'if new["time"].max() < old["time"].max():', "if False:"),
-    ("validate so với chính bản mới", "problems, stats = validate(new, old_px, end)", "problems, stats = validate(new, new, end)"),
+    ("validate so với chính bản mới", "problems, stats = validate(new, old_px, end,", "problems, stats = validate(new, new, end,"),
+    ("phủ: nới ngưỡng cửa sổ", "COVER_WIN_NAN_MAX = 0.02", "COVER_WIN_NAN_MAX = 0.5"),
+    ("phủ: nới ngưỡng phiên", "COVER_SESS_NAN_MAX = 0.05", "COVER_SESS_NAN_MAX = 0.5"),
+    ("phủ: chỉ kiểm Price", 'COVER_COLS = ("Price", "Volume_3M_P50")', 'COVER_COLS = ("Price",)'),
+    ("phủ: không loại mã mang sang", '& ~new["ticker"].isin(set(carried_tickers))', ""),
+    ("phủ: kiểm cả lịch sử (không cửa sổ)", "[-COVER_SESSIONS:]", "[:]"),
+    ("phủ: không gọi", "    P.extend(cp); S.update(cs)\n", "\n"),
+    ("phủ: build không truyền mã mang sang", 'carried_tickers=set(carried["ticker"]) if len(carried) else ()', "carried_tickers=()"),
+    ("phủ: thiếu cột không chặn", 'return [f"thiếu cột {miss} trong bản mới"], S', "return [], S"),
     ("carry chỉ cột PX (mất Open/Volume/Price)", "new, carried = carry_truncated(new, old, PX_COLS + OV_COLS[2:])", "new, carried = carry_truncated(new, old, PX_COLS)"),
     ("trung vị không shift(1)", ".median().shift(1)", ".median()"),
     ("trần carry đếm DỒN", 'set(carried["ticker"]) - set(known_carried)', 'set(carried["ticker"])'),
@@ -251,6 +302,10 @@ REFRESH_MUTATIONS = [
     ("refresh không exit 1", "    sys.exit(1)\n", "    sys.exit(0)\n"),
     ("refresh .pre_adj ghi đè", 'if not os.path.exists(full + ".pre_adj"): ', ""),
     ("refresh đọc BQ_LOCAL_CACHE", "_lbq = LCA.live_bq(bq)", "_lbq = bq"),
+    ("refresh .prev không nguyên tử", 'LCA.copy_atomic(path, path + ".prev")', 'shutil.copy2(path, path + ".prev")'),
+    ("refresh CSV ghi thẳng", "_save_csv_atomic(evdf, out_csv)\nexcept", "evdf.to_csv(out_csv, index=False)\nexcept"),
+    ("refresh không dọn tmp mồ côi", "os.remove(os.path.join(WORKDIR, \"data\", _f))", "pass"),
+    ("refresh dọn cả tmp lạ", "and any(_f.startswith(b + \".\") for b in _OWN)", ""),
 ]
 
 def mutate():

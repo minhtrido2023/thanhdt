@@ -40,6 +40,14 @@ except BlockingIOError:
     print("!! refresh_lagged_caches đang chạy ở tiến trình khác (lock bận) -> thoát, không ghi gì")
     sys.exit(3)
 
+# Dọn *.tmp mồ côi (lần chạy trước bị kill giữa mkstemp và os.replace). Đang giữ lock ⇒ không tiến trình
+# refresh nào khác đang ghi; chỉ xoá tmp mang tiền tố file của CHÍNH script này.
+_OWN = ("earnings_px.pkl", "lagged_pos_ov.pkl", "earnings_surprise_data.pkl", "earnings_events.pkl",
+        "lagged_carried.json", "earnings_events_classified.csv")
+for _f in os.listdir(os.path.join(WORKDIR, "data")):
+    if _f.endswith(".tmp") and any(_f.startswith(b + ".") for b in _OWN):
+        os.remove(os.path.join(WORKDIR, "data", _f)); print(f"  dọn tmp mồ côi: data/{_f}")
+
 print("=" * 80)
 print("  REFRESH LAGGED CACHES")
 print("=" * 80)
@@ -67,7 +75,7 @@ def _save_pickles(items):
             with os.fdopen(fd, "wb") as f:
                 pickle.dump(_prep(obj), f); f.flush(); os.fsync(f.fileno())
         for (obj, path), tmp in zip(items, tmps):
-            if os.path.exists(path): shutil.copy2(path, path + ".prev")
+            if os.path.exists(path): LCA.copy_atomic(path, path + ".prev")
             os.replace(tmp, path)
         dfd = os.open(os.path.dirname(items[0][1]), os.O_RDONLY)
         try: os.fsync(dfd)
@@ -198,10 +206,18 @@ for _, r in ev.iterrows():
                  "pattern": classify(npr, pre, rel, post)})
 evdf = pd.DataFrame(rows)
 out_csv = os.path.join(WORKDIR, "data/earnings_events_classified.csv")
+def _save_csv_atomic(df, path):
+    fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), prefix=os.path.basename(path) + ".", suffix=".tmp")
+    os.close(fd)
+    try:
+        df.to_csv(tmp, index=False); os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp): os.remove(tmp)
+
 try:
-    evdf.to_csv(out_csv, index=False)
+    _save_csv_atomic(evdf, out_csv)
 except PermissionError:
-    out_csv = out_csv.replace(".csv", ".new.csv"); evdf.to_csv(out_csv, index=False)
+    out_csv = out_csv.replace(".csv", ".new.csv"); _save_csv_atomic(evdf, out_csv)
     print(f"  (locked, wrote {out_csv})")
 print(f"  recomputed {len(evdf):,} events with full windows, "
       f"Release_Date max {evdf['Release_Date'].max().date()}")
