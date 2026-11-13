@@ -18,7 +18,9 @@ not a copy that could drift.
 Run: python edge_wlag_gate_selfcheck.py   (exit 0 = all pass)
 """
 import ast
+import hashlib
 import os
+import shutil
 import sys
 import tempfile
 
@@ -120,20 +122,40 @@ check("F. old hardcode `w_tgt = STATE_LAG_WEIGHT.get` removed",
 
 # G. Equivalence vs the pinned R3 artifact: on every day the pinned CSV's w_lag_tgt CHANGES
 #    (the hardest days — exactly where the gate flips), the production function must reproduce
-#    the pinned value from the real data/lag_edge_health.csv.
-if os.path.exists(PINNED_CSV):
-    f = extract_gate(ROOT)["w_lag_target"]
+#    the pinned value from the lag_edge_health.csv VINTAGE that produced the pin.
+#    Input frozen 2026-11-13 (selfcheck-red sweep, job Taylor_20261113_093005): G used to read
+#    the LIVE data/lag_edge_health.csv, which is rebuilt daily and changed price basis at
+#    97b2a7197 (LAG cache → adjusted prices, 2026-11-10) → mean12 shifted on every row and 2
+#    flips crossed EDGE_THR (2025-06-13, 2025-12-15). That is a data-vintage axis, not a code
+#    regression: the function on the frozen vintage = 0/3107 days mismatch. Live divergence vs
+#    the pin is still PRINTED (INFO) — it belongs to the R3 re-pin workstream, not to G.
+FIXTURE_EH = os.path.join(ROOT, "data", "fixtures", "lag_edge_health_r3pin_vintage_20260927.csv")
+FIXTURE_EH_MD5 = "dc4ce3a9bd35152c5a344a4fe90d0554"  # = data/lag_edge_health_exp_causal.csv
+if os.path.exists(PINNED_CSV) and os.path.exists(FIXTURE_EH):
+    check("G. frozen edge-health fixture md5 intact",
+          hashlib.md5(open(FIXTURE_EH, "rb").read()).hexdigest() == FIXTURE_EH_MD5, FIXTURE_EH)
     df = pd.read_csv(PINNED_CSV, low_memory=False)
     d = df[df["record_type"] == "DAILY"][["ymd", "state", "w_lag_tgt"]].dropna(subset=["w_lag_tgt"])
     d["ymd"] = pd.to_datetime(d["ymd"])
     flips = d[d["w_lag_tgt"].ne(d["w_lag_tgt"].shift())]
-    bad = [(r["ymd"].date(), int(r["state"]), r["w_lag_tgt"], f(r["state"], r["ymd"]))
-           for _, r in flips.iterrows()
-           if abs(f(r["state"], r["ymd"]) - r["w_lag_tgt"]) > 1e-9]
-    check(f"G. matches pinned R3 w_lag_tgt on all {len(flips)} flip days", not bad,
-          f"first mismatches: {bad[:3]}" if bad else "")
+    with tempfile.TemporaryDirectory() as td:
+        os.makedirs(os.path.join(td, "data"))
+        shutil.copy(FIXTURE_EH, os.path.join(td, "data", "lag_edge_health.csv"))
+        f = extract_gate(td)["w_lag_target"]
+        bad = [(r["ymd"].date(), int(r["state"]), r["w_lag_tgt"], f(r["state"], r["ymd"]))
+               for _, r in flips.iterrows()
+               if abs(f(r["state"], r["ymd"]) - r["w_lag_tgt"]) > 1e-9]
+    check(f"G. matches pinned R3 w_lag_tgt on all {len(flips)} flip days (pin-vintage input)",
+          not bad, f"first mismatches: {bad[:3]}" if bad else "")
+    if os.path.exists(os.path.join(ROOT, "data", "lag_edge_health.csv")):
+        fl = extract_gate(ROOT)["w_lag_target"]
+        live_bad = [r["ymd"].date() for _, r in flips.iterrows()
+                    if abs(fl(r["state"], r["ymd"]) - r["w_lag_tgt"]) > 1e-9]
+        print(f"  [INFO] live data/lag_edge_health.csv vs pin: {len(live_bad)}/{len(flips)} "
+              f"flip days differ {live_bad[:3]} (data vintage, not a gate check)")
 else:
-    check("G. pinned R3 CSV present for equivalence check", False, PINNED_CSV)
+    check("G. pinned R3 CSV + frozen edge-health fixture present", False,
+          f"{PINNED_CSV} / {FIXTURE_EH}")
 
 print()
 if fails:
