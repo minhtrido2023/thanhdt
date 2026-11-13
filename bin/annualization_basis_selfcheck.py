@@ -206,38 +206,81 @@ def save_baseline(counts):
     os.replace(tmp, BASELINE_PATH)
 
 
+def _sandbox_canon(p, wc_root, cache):
+    """Đường dẫn canonical (cùng relpath dưới wc_root) nếu `p` nằm trong SANDBOX (thư mục con ≠
+    wc_root có `wc_env.sh`) và canonical tồn tại; ngược lại None."""
+    def sb_root(d):
+        if d not in cache:
+            if d == wc_root or not d.startswith(wc_root + os.sep):
+                cache[d] = None
+            elif os.path.isfile(os.path.join(d, "wc_env.sh")):
+                cache[d] = d
+            else:
+                cache[d] = sb_root(os.path.dirname(d))
+        return cache[d]
+    sb = sb_root(os.path.dirname(os.path.abspath(p)))
+    if not sb:
+        return None
+    canon = os.path.join(wc_root, os.path.relpath(os.path.abspath(p), sb))
+    return canon if os.path.isfile(canon) else None
+
+
 def drop_sandbox_mirrors(files, wc_root=None):
     """Bỏ file .py nằm trong SANDBOX (thư mục con ≠ WC_ROOT có `wc_env.sh` — bản sao cả cây
     WorkingClaude Taylor dựng để tái lập vintage) MÀ trùng TỪNG BYTE với file canonical cùng đường
     dẫn tương đối. Nợ của nó đã được đếm ở file canonical; đếm lại = báo nợ mới giả (sweep 13/11:
-    5394/5462 dòng CHẶN là bản sao y hệt). Bản sao ĐÃ SỬA / file không có canonical ⇒ VẪN quét."""
+    5394/5462 dòng CHẶN là bản sao y hệt). Bản sao ĐÃ SỬA / file không có canonical ⇒ VẪN quét
+    (bản sao đã sửa: xem `drop_inherited_debt`)."""
     wc_root = os.path.abspath(wc_root or WC_ROOT)
-    roots_cache, kept, dropped = {}, [], 0
-
-    def sb_root(d):
-        if d not in roots_cache:
-            if d == wc_root or not d.startswith(wc_root + os.sep):
-                roots_cache[d] = None
-            elif os.path.isfile(os.path.join(d, "wc_env.sh")):
-                roots_cache[d] = d
-            else:
-                roots_cache[d] = sb_root(os.path.dirname(d))
-        return roots_cache[d]
-
+    cache, kept, dropped = {}, [], 0
     for p in files:
-        sb = sb_root(os.path.dirname(os.path.abspath(p)))
-        if sb:
-            canon = os.path.join(wc_root, os.path.relpath(os.path.abspath(p), sb))
+        canon = _sandbox_canon(p, wc_root, cache)
+        if canon:
             try:
-                if os.path.isfile(canon):
-                    with open(p, "rb") as f1, open(canon, "rb") as f2:
-                        if f1.read() == f2.read():
-                            dropped += 1
-                            continue
+                with open(p, "rb") as f1, open(canon, "rb") as f2:
+                    if f1.read() == f2.read():
+                        dropped += 1
+                        continue
             except OSError:
                 pass   # đọc lỗi ⇒ giữ lại để quét (không im lặng bỏ)
         kept.append(p)
     return kept, dropped
+
+
+def drop_inherited_debt(counts, details, wc_root=None):
+    """Bản sao sandbox ĐÃ SỬA (vá vintage, không đụng phần hoá-năm) mang lại đúng các dòng vi phạm
+    của canonical ⇒ đó là nợ CŨ đã đếm ở canonical, không phải code mới (sweep 13/11 lượt 2 —
+    còn 51/68 file CHẶN là kiểu này: pt_v23_audit_2014.py 5/5, pt_v22_dt5g.py 1/1 dòng y hệt).
+    Trừ từng vi phạm khớp (rule, snippet) với MỘT vi phạm còn dư của canonical (multiset — dòng
+    nhân bản thêm vẫn bị đếm); vi phạm KHÁC canonical ⇒ VẪN đếm. Sửa tại chỗ; trả (n_file, n_vp)."""
+    from collections import Counter
+    wc_root = os.path.abspath(wc_root or WC_ROOT)
+    cache, n_files, n_viol = {}, 0, 0
+    for rel in list(details):
+        canon = _sandbox_canon(os.path.join(wc_root, rel), wc_root, cache)
+        if not canon:
+            continue
+        try:
+            with open(canon, "r", encoding="utf-8") as f:
+                pool = Counter((r, sn) for _, r, sn in violations_in_source(f.read(), canon))
+        except (SyntaxError, ValueError, UnicodeDecodeError, OSError):
+            continue   # canonical không đọc/parse được ⇒ không miễn gì (fail-closed)
+        rest = []
+        for v in details[rel]:
+            if pool[(v[1], v[2])] > 0:
+                pool[(v[1], v[2])] -= 1
+            else:
+                rest.append(v)
+        gone = len(details[rel]) - len(rest)
+        if gone:
+            n_files += 1
+            n_viol += gone
+            counts[rel] = len(rest)
+            if rest:
+                details[rel] = rest
+            else:
+                del details[rel]
+    return n_files, n_viol
 
 
 def cmd_scan(roots, update=False, accept_new_debt=False, seed=False):
@@ -245,6 +288,10 @@ def cmd_scan(roots, update=False, accept_new_debt=False, seed=False):
     if n_mirror:
         print(f"annualization_basis: bỏ {n_mirror} file sandbox trùng byte với canonical (nợ đếm ở canonical)")
     counts, details, unparsable = scan_paths(files)
+    n_inh_f, n_inh_v = drop_inherited_debt(counts, details)
+    if n_inh_v:
+        print(f"annualization_basis: bỏ {n_inh_v} vi phạm thừa kế y hệt canonical ở {n_inh_f} file "
+              f"sandbox đã sửa (nợ đếm ở canonical)")
     for p, err in unparsable:
         print(f"annualization_basis: KHÔNG PARSE ĐƯỢC {p} ({err}) — không gate file này",
               file=sys.stderr)
@@ -324,6 +371,7 @@ def h(r):
 
 
 def cmd_selfcheck():
+    global WC_ROOT, BASELINE_PATH   # fixture inherited-debt tạm trỏ WC_ROOT vào cây giả (scan_paths tính relpath theo nó)
     n = 0
 
     def chk(cond, msg):
@@ -392,6 +440,56 @@ def cmd_selfcheck():
         rel = sorted(os.path.relpath(p, wc) for p in kept)
         chk(dropped == 1 and rel == ["a.py", "r/nosb/a.py", "r/sb/sub/b.py", "r/sb2/a.py"],
             f"drop_sandbox_mirrors sai: dropped={dropped} kept={rel}")
+        # bản sao ĐÃ SỬA: vi phạm y hệt canonical ⇒ miễn; vi phạm MỚI / nhân bản thêm ⇒ VẪN đếm
+        extra = "\ndef boot2(s):\n    r = s; N = len(r); yrs = N / 252.0\n    return yrs\n"
+        w("r/sb2/c.py", BAD_LITERAL + extra)          # canonical c.py chỉ có BAD_LITERAL
+        w("c.py", BAD_LITERAL)
+        w("r/sb2/d.py", BAD_LITERAL + BAD_LITERAL.replace("def boot", "def boot3"))  # nhân đôi
+        w("d.py", BAD_LITERAL)
+        w("r/nosb/e.py", BAD_LITERAL)                 # ngoài sandbox ⇒ không miễn
+        w("e.py", BAD_LITERAL)
+        _old = WC_ROOT
+        WC_ROOT = wc
+        try:
+            kept, _ = drop_sandbox_mirrors(walk_roots([wc]), wc)
+            cnt, det, _ = scan_paths(kept)
+            nf, nv = drop_inherited_debt(cnt, det, wc)
+        finally:
+            WC_ROOT = _old
+        chk(cnt["r/sb2/a.py"] == 0 and "r/sb2/a.py" not in det,
+            f"bản sao đã sửa, vi phạm y hệt canonical phải được miễn, được {cnt.get('r/sb2/a.py')}")
+        chk(cnt["r/sb2/c.py"] == 1 and [r for _, r, _ in det["r/sb2/c.py"]] == ["yrs-per-session"],
+            f"vi phạm MỚI trong bản sao phải VẪN đếm, được {det.get('r/sb2/c.py')}")
+        chk(cnt["r/sb2/d.py"] == 2, f"dòng nhân bản thêm phải VẪN đếm (multiset), được {cnt.get('r/sb2/d.py')}")
+        chk(cnt["r/nosb/e.py"] == 2 and cnt["r/sb/sub/b.py"] == 2,
+            f"ngoài sandbox / không canonical ⇒ không miễn, được {cnt.get('r/nosb/e.py')}, {cnt.get('r/sb/sub/b.py')}")
+        chk(nf == 3 and nv == 6, f"đếm miễn sai: {nf} file / {nv} vp (muốn 3/6)")
+        # nối dây: cmd_scan THẬT trên cây chỉ có canonical (nợ trong baseline) + bản sao đã sửa
+        # mang đúng nợ đó ⇒ PASS; thêm 1 vi phạm mới vào bản sao ⇒ CHẶN
+        with tempfile.TemporaryDirectory() as wc2:
+            def w2(rel, txt):
+                os.makedirs(os.path.dirname(os.path.join(wc2, rel)), exist_ok=True)
+                with open(os.path.join(wc2, rel), "w", encoding="utf-8") as f:
+                    f.write(txt)
+            w2("wc_env.sh", "")
+            w2("a.py", BAD_LITERAL)
+            w2("r/sb/wc_env.sh", "")
+            w2("r/sb/a.py", BAD_LITERAL + "\n# vá vintage\n")
+            bl = os.path.join(wc2, "baseline.json")
+            with open(bl, "w", encoding="utf-8") as f:
+                json.dump({"files": {"a.py": 2}}, f)
+            old = (WC_ROOT, BASELINE_PATH)
+            WC_ROOT, BASELINE_PATH = wc2, bl
+            try:
+                import contextlib, io
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    rc_ok = cmd_scan([wc2])
+                    w2("r/sb/a.py", BAD_LITERAL + "\ndef z(n):\n    yrs = n / 252\n    return yrs\n")
+                    rc_new = cmd_scan([wc2])
+            finally:
+                WC_ROOT, BASELINE_PATH = old
+        chk(rc_ok == 0, f"cmd_scan: bản sao đã sửa chỉ mang nợ canonical phải PASS, rc={rc_ok}")
+        chk(rc_new == 1, f"cmd_scan: bản sao thêm vi phạm MỚI phải CHẶN, rc={rc_new}")
 
     print(f"OK — {n} assertion PASS (annualization_basis_selfcheck.py)")
     return 0
