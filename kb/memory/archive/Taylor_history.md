@@ -2297,3 +2297,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T12:15:10Z] [live-gap-p1b 12/11] XONG job Taylor_20261112_112708: vá mergesort chữa lệch AUDIT_END (không look-ahead), pin dưới vá 23,60% vs 23,37% (CHƯA re-pin, cần duyệt); drift control = data LAG restate (events_classified), không PIT; gap live-engine SX 3,0-3,9pp / ZaloPay 2,1-2,6pp chủ yếu β T7 — CHỜ quant-skeptic + Mike; W2b-W5 chưa đo
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T12:46:18Z] [live-gap-p2a 12/11] XONG job Taylor_20261112_122858: 0/90 dac trung qua FDR IS&OOS; value LAG chet OOS; OOS hits = muc placebo (hieu ung nam); H5 hurdle-tang OOS -11,6pp nhung ~3 episode; ~45% deal LAG engine vuot ADV — CHO quant-skeptic + Mike

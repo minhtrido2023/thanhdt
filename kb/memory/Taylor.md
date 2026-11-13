@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-12T12:46:18Z] [live-gap-p2a 12/11] XONG job Taylor_20261112_122858: 0/90 dac trung qua FDR IS&OOS; value LAG chet OOS; OOS hits = muc placebo (hieu ung nam); H5 hurdle-tang OOS -11,6pp nhung ~3 episode; ~45% deal LAG engine vuot ADV — CHO quant-skeptic + Mike
 - [2026-11-12T13:05:33Z] [live-gap-p1c 12/11] XONG job Taylor_20261112_122855: park khớp lịch live => DẤU GAP ĐẢO, live thắng engine +4,35..+4,65pp (engine -8,2/-7,3%); beta gần cân, gap là alpha (engine tín hiệu alpha đổi dấu theo park); live BAL+LAG ~5% NAV => không phải phép thử BAL/LAG; tie-break sd 0,35pp CAGR — CHỜ quant-skeptic + Mike; W2b-W5 chưa đo
 - [2026-11-12T13:28:37Z] [live-gap-p2b 12/11] XONG job Taylor_20261112_125912: 0 dac trung ben IS->OOS tren tap giao dich duoc (placebo 0/1 vs that 0), log_adv20/H1-IS mat; H5 theo episode PIT dep1m -1,18pp tho/-0,37 khu nam, 7 episode => khong ket luan; lực thấp rho<0,25 — CHO quant-skeptic + Mike
 - [2026-11-12T13:40:44Z] [live-gap-p3 12/11] XONG job Taylor_20261112_132954: 0/6 bien thoi diem qua PREREG (MDE 14-110pp, ~5 cua so/era); baseline P0 thang tiet kiem 12T 77,6% (3T 62%), thua 2019/2022; ref DT5G CRISIS/BEAR->tiet kiem CAGR ~= engine, DD -12,6 vs -17,1 (bao hiem, khong ung vien); sizing w 0,4/0,6/0,8 cho DD p5 -10/-15/-20 — CHO quant-skeptic + Mike
@@ -26,3 +25,4 @@
 - [2026-11-12T19:03:34Z] [live-gap-exec-B2 13/11] XONG job Taylor_20261112_181211: nhanh feat/savings-row-20261112 (418667a32) KHONG merge; v2 selfcheck PASS 177 x3; anchor_warning siet, gate crosscheck cot tiet kiem — CHO user/Wendy duyet cau chu+thue+ten cot template
 - [2026-11-13T02:20:52Z] ĐANG DỞ job Taylor_20261113_021435 Luồng A3: ladder 21 chân chạy nền (research/live_gap_exec_A3/batch.txt, logs/batch.done), nhánh feat/live-gap-exec-A3-20261113 6bbb4a443 | NEXT: metrics+boot2 ledgers A3, registry no_ledger, REPORT, bus finding live-gap-exec-A3-20261113
 - [2026-11-13T02:31:17Z] [live-gap-exec-C2 13/11] XONG job Taylor_20261113_021438: nhanh feat/lag-cache-c2-20261113 (b1b91a5e6) KHONG merge; validate phu Price/V3 80/80 x3TZ, mut 39/39; runbook rollback + dinh chinh blast (0 lenh live) o mike 7a01e5d94 — CHO arch-reviewer + Mike merge
+- [2026-11-13T02:55:36Z] [live-gap-exec-B3 13/11] XONG: nhanh feat/savings-row-b3-20261113 (04fc4ce7f) KHONG merge; e2e gate tuan 06/11 COMPLETE (stub gui); v2 selfcheck chua ket luan (timeout); cau 5% co tuc phu thuoc cashDividendReceiving=0 — CHO Mike/user
