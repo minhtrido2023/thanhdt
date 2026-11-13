@@ -734,3 +734,70 @@
 
 ## Consolidation 2026-11-13T02:06:08Z
 - [2026-11-13T02:05:58Z] Winston/finding — ops-autofix-done: run-bot-fail-SpaceX-2026-11-13: {"root_cause": "approval gate by design: plan_SpaceX_2026-11-13 requires_user_approval=true, approved_by=null (2 lenh BUY VGS 300, NNC 700); plan da gui duyet 12/11 (send_plan_report marker md5 9491d3b8)", "fix": "none - sua plan la ranh gioi cam; gate_block_question Mike/gate-block-approval-2026-11-13-SpaceX da mo cho user (deadline 10:00)", "verify": "khong co bot_execute SpaceX dang chay; dnse_raw 2026-11-13 chi 6 ppse + 6 loan_packages_resolve, 0 place_order; khong journal exec_SpaceX_2026-11-13; khong autoheal log hom nay", "stuck_orders": 0}
+
+## Consolidation 2026-11-13T02:31:36Z
+- [2026-11-13T02:10:05Z] Mafee/error — APPROVAL_GATE_BLOCK: {"account": "SpaceX", "plan_date": "2026-11-13", "reason": "plan 2026-11-13 [SpaceX] có requires_user_approval=true nhưng approved_by trống — 2 lệnh chưa được user duyệt, bot TỪ CHỐI thực thi (không đoán, không tự bỏ qua)."}
+- [2026-11-13T02:14:45Z] Mike/decision — plan-approval-SpaceX-2026-11-13: {"account": "SpaceX", "date": "2026-11-13", "approved_by": "user (John) - Discord, duyet plan 13/11", "decided_by": "user"}
+- [2026-11-13T02:30:03Z] Mike/answer — gate-block-approval-2026-11-13-SpaceX: {"resolution": "cổng approval [2026-11-13-SpaceX] đã phục hồi — probe artifact rc=0", "evidence": "probe `python3 /home/trido/thanhdt/WorkingClaude/mike/bin/gate_block_question.py probe approval --account SpaceX --date 2026-11-13` rc=0 lúc 2026-11-13T09:30:01+07:00: probe approval: OK approved_by='user (John) - Discord, duyet plan 13/11', exec_SpaceX_2026-11-13_journal.csv có event executor lúc 2026-11-13T09:15:09+07:00 > mở 2026-11-13T09:05:23+07:00", "resolves": ["Mike/gate-block-approval-2026-11-13-SpaceX"], "closed_by": "Mike", "source_topic": "gate-block-sweep"}
+- [2026-11-13T02:15:03Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "in_progress", "note": "doc brief C2, tao worktree"}
+- [2026-11-13T02:15:21Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "in_progress", "note": "doc brief A3 + co so A2, chuan bi worktree"}
+- [2026-11-13T02:15:36Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:15:39Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:15:41Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:16:36Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "in_progress", "note": "probe MINP: BQ Volume_3M_P50 NULL toi khi du 60 dong => MINP live=60; dung worktree"}
+- [2026-11-13T02:16:37Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:16:39Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:16:41Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:16:42Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "in_progress", "note": "do nguong phu Price/V3 xong, sua validate"}
+- [2026-11-13T02:16:43Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "in_progress", "note": "B3: render cột tiết kiệm + cổng nhãn/cột lạ xong, selfcheck 82 PASS; tiếp: symlink, gate e2e tuần 06/11, report_v2 selfcheck"}
+- [2026-11-13T02:17:37Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:17:39Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:17:41Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:18:27Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "in_progress", "note": "selfcheck 80/80, dang chay mutation + TZ"}
+- [2026-11-13T02:18:37Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:18:39Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:18:42Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:19:01Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "in_progress", "note": "commit mac dinh 6bbb4a443; chay 21 chan (7 control/default + 14 sweep MINP 10/20/40/60 x adj/vint x pin0/pin1M), 4 song song"}
+- [2026-11-13T02:19:37Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:19:39Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:19:42Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:20:37Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:20:40Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:20:42Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:20:52Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "in_progress", "note": "viec 3 (boot 2 chu so A2) + viec 4 (dinh chinh co che 2015 trong REPORT A2) xong; ladder 21 chan dang chay"}
+- [2026-11-13T02:21:37Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:21:40Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:21:43Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:22:37Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:22:40Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:22:43Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:23:38Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:23:40Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:23:43Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:24:38Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:24:40Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:24:43Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:25:08Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "in_progress", "note": "code commit b1b91a5e6; dang do quy nguyen 4 ma HTT/PHP/KLB/PHR"}
+- [2026-11-13T02:25:38Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:25:41Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:25:45Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:26:35Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "in_progress", "note": "tinh quy nguyen theo ma tren ctrl/adjv2/live csv"}
+- [2026-11-13T02:26:39Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:26:41Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:26:45Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:27:39Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:27:41Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:27:45Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:28:05Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "in_progress", "note": "quy nguyen xong: 0 lenh live cho 4 ma; dang viet runbook rollback"}
+- [2026-11-13T02:28:39Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:28:42Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:28:45Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:29:39Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:29:42Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:29:45Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:30:10Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "in_progress", "note": "docs xong (doc §4.3/§6.3/§7, cron_registry:89, ops_runbook); viet REPORT + commit"}
+- [2026-11-13T02:30:17Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "in_progress", "note": "control K_L3 off/1m trung byte 84f796bd/35c8968f tren code A3; L3P xong 80f509ec/e2de0ac4; con 17 chan"}
+- [2026-11-13T02:30:40Z] Taylor/heartbeat — Taylor_20261113_021435: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261113_021435", "source": "watcher"}
+- [2026-11-13T02:30:42Z] Taylor/heartbeat — Taylor_20261113_021438: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261113_021438", "source": "watcher"}
+- [2026-11-13T02:30:45Z] Taylor/heartbeat — Taylor_20261113_021440: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261113_021440", "source": "watcher"}
+- [2026-11-13T02:31:17Z] Taylor/finding — live-gap-exec-C2-20261113: {"branch": "feat/lag-cache-c2-20261113", "worktree": "/home/trido/thanhdt/wt-lagc2-1113", "commit": "b1b91a5e6 (tren main e614a10c6), CHUA merge - cho arch-reviewer", "docs_commit": "mike 7a01e5d94 (master): doc lag-cache §3/§4.3/§6.3/§7, cron_registry:89, ops_runbook rollback", "viec1_validate": "coverage_problems: 60 phien, NaN cua so >2% hoac 1 phien >5% hoac thieu cot => fail-closed exit 1; loai ma mang sang", "nguong_do_that": {"last60_loai_carried": {"Price": 0.0, "Volume_3M_P50": 0.0}, "last60_gom_carried_Price": "0,147% (max phien 0,49%)", "max_phien_2020plus": {"Price": "1,49%", "V3": "1,88%"}}, "dinh_chinh_brief": "Price NaN tu 2025 = 1.917 dong (khong phai 0); toan bo NaN 60 phien gan nhat la ma mang sang TLD/SSC/VTH/PMT", "selfcheck": "80/80 PASS x3 (env -u TZ, Kiritimati, LA); mutation 39/39", "viec2_rollback": "md5 .pre_adj khop af4b8c1b72f4/afb2484e5fb7; git revert 97b2a7197 thu tren main sach; runbook CHUA chay thu dau-cuoi; khong them knob append", "viec3_blast": "7/11 trong lag_liq_excluded (do); delta <= HTT,PHP roi / KLB,PHR vao; KLB con forensic-exclude; cua so entry mo (11-12) chi con PHR (entry 11-09, truoc apply); 0 lenh cho 4 ma trong plan 05-13/11", "viec4": ".prev copy_atomic, CSV tmp+os.replace, don tmp mo coi khi giu flock", "rui_ro": "dia / 99% (~4,5G trong)", "report": "mike/agents/Taylor/research/live_gap_exec_C2/REPORT.md", "measured_by": "lagged_cache_adjusted_selfcheck.py (+--mutate) logs trong research/live_gap_exec_C2/; attrib_4.py -> attrib_4.csv; git diff --numstat main HEAD"}
