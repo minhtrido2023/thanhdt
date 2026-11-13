@@ -902,15 +902,16 @@ Khi nào: user/Mike quyết quay về cơ sở giá THÔ-append (vd validate fai
 nhưng đổi ứng viên LAG ⇒ **làm trọn TRƯỚC 19:00 ICT** (chuỗi `bq_freshness_check.sh` 19:00 → golive đọc `earnings_events_classified.csv` + `pt_v22_dt5g_logs.csv`).
 Không chạy cùng lúc cron 15:30 (`refresh_lagged_caches.py` có flock; thấy `lock bận` ⇒ chờ chain xong).
 ```bash
+source /home/trido/thanhdt/WorkingClaude/wc_env.sh; cd "$WORKDIR_8L"
+# BƯỚC 0 (CƠ HỌC, làm TRƯỚC mọi git revert): kiểm bản gốc rollback còn nguyên. Lệch ⇒ DỪNG, hỏi Taylor, KHÔNG revert.
+printf '%s  %s\n' af4b8c1b72f4b133248516eff8b459b0 data/earnings_px.pkl.pre_adj afb2484e5fb702cd4335949d1a69db1b data/lagged_pos_ov.pkl.pre_adj | md5sum -c || { echo DUNG; exit 1; }
 cd /home/trido/thanhdt && git checkout main
-git revert --no-edit <commit-C2-nếu-đã-merge>   # nhánh feat/lag-cache-c2-20261113; chưa merge thì bỏ dòng này
+git revert --no-edit <commit-C2-nếu-đã-merge>   # nhánh feat/lag-cache-c2-20261113; thêm -m 1 NẾU C2 vào main bằng merge commit (ff/cherry-pick thì không); chưa merge thì bỏ dòng này
 git revert --no-edit 97b2a7197                  # thử 13/11 trên main: sạch, không xung đột
-source WorkingClaude/wc_env.sh; cd "$WORKDIR_8L"
-md5sum data/earnings_px.pkl.pre_adj data/lagged_pos_ov.pkl.pre_adj
-#  PHẢI = af4b8c1b72f4b133248516eff8b459b0 / afb2484e5fb702cd4335949d1a69db1b (cơ sở thô, max 2026-11-09, không cột Price). Lệch ⇒ DỪNG, hỏi Taylor.
+cd "$WORKDIR_8L"
 B=data/rollback_lagadj_$(TZ=Asia/Ho_Chi_Minh date +%Y%m%d); mkdir -p "$B"
 cp -p data/earnings_px.pkl data/lagged_pos_ov.pkl data/lagged_carried.json "$B"/ && rm data/lagged_carried.json
-for f in earnings_px lagged_pos_ov; do cp -p data/$f.pkl.pre_adj data/$f.pkl.rb.tmp && mv data/$f.pkl.rb.tmp data/$f.pkl; done
+for f in earnings_px lagged_pos_ov; do cp -p data/$f.pkl.pre_adj data/$f.pkl.rb_restore && mv data/$f.pkl.rb_restore data/$f.pkl; done
 for s in refresh_lagged_caches.py pt_v12_macro.py pt_v4_dt5g.py pt_v22_dt5g.py "edge_health_monitor.py --refresh"; do
   $DNA_PYEXE $s || { echo "FAIL $s"; break; }; done
 ```
