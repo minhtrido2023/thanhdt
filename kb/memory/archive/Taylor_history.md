@@ -2303,3 +2303,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T13:05:33Z] [live-gap-p1c 12/11] XONG job Taylor_20261112_122855: park khớp lịch live => DẤU GAP ĐẢO, live thắng engine +4,35..+4,65pp (engine -8,2/-7,3%); beta gần cân, gap là alpha (engine tín hiệu alpha đổi dấu theo park); live BAL+LAG ~5% NAV => không phải phép thử BAL/LAG; tie-break sd 0,35pp CAGR — CHỜ quant-skeptic + Mike; W2b-W5 chưa đo
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T13:28:37Z] [live-gap-p2b 12/11] XONG job Taylor_20261112_125912: 0 dac trung ben IS->OOS tren tap giao dich duoc (placebo 0/1 vs that 0), log_adv20/H1-IS mat; H5 theo episode PIT dep1m -1,18pp tho/-0,37 khu nam, 7 episode => khong ket luan; lực thấp rho<0,25 — CHO quant-skeptic + Mike

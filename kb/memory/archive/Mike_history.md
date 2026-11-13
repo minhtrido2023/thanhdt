@@ -176,3 +176,9 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T17:49:42Z] [13/11 00:52] B xong (feat/savings-row-20261112 @9246cd93e, chưa merge); skeptic B job quant-skeptic_20261112_174928 đang chạy. Sau đó: tổng hợp 4 việc chờ user + đề xuất A vòng 2 (NULL Volume_3M_P50) + C chưa chạy.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T17:54:33Z] [13/11 00:57] Skeptic B CONFIRMED. Đã báo tổng hợp NT: chờ user quyết (1) merge A1 mergesort, (2) re-pin (đề xuất không), (3) LIQ_ZERO_BLOCK default (hoãn, A vòng 2), (4) neo sizing, (5) dòng tiết kiệm + Wendy thuế; C chưa chạy. Không còn job mở.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T18:12:24Z] [13/11 01:25] USER DUYỆT cả 5 đề xuất + luồng C. Xong: A1 mergesort merged main f210c726b (không re-pin, giữ neo -25,2%). Dispatch: A2 Taylor_20261112_181209 (opus), B2 Taylor_20261112_181211 (sonnet). Đang làm: Wendy (thuế + diễn đạt 'thua tiết kiệm'), C = arch-reviewer rồi quant-skeptic nhánh feat/lag-cache-adjusted-20261110 (+feat/repin-mirror-live-20261110; KHÔNG merge trước reviewer; apply LAG cache đổi 4 mã rời/7 mã vào). LIQ_ZERO_BLOCK default HOÃN chờ A2.
