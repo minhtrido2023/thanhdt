@@ -45,3 +45,12 @@ Nguồn: `live_gap_phase3_20261112` (PREREG ghi 20:32:59 ICT, md5 `7c9bde3f…`,
 2. **Phân loại deal tốt/xấu?** Chưa phát hiện đặc trưng đơn lẻ nào bền IS→OOS (0/83); value LAG mạnh IS rồi ≈0 sau 2020 (thật). Lực thấp: không bắt ρ 0,3–0,45.
 3. **Khi nào an toàn?** Chưa phát hiện điều kiện thời điểm bền (0/6). Đòn bảy thực tế duy nhất kiểm được là TỶ TRỌNG (40/60/80% NAV ↔ DD p5 −10/−15/−20%) và DT5G (giảm DD, tốn CAGR). So với tiết kiệm: V2.4 thắng ~67–90% cửa sổ 12T tuỳ quy ước, thua nặng ở năm khởi đầu 2019 và 2022.
 4. **Chờ user:** (i) re-pin R3 / merge vá mergesort; (ii) dòng "so với gửi tiết kiệm" trong báo cáo (`PROPOSAL_savings_row.proposed.md`); (iii) merge fix LAG cache adjusted; (iv) bật `LIQ_ZERO_BLOCK=lag` mặc định cho backtest mới (đang opt-in, sinh fill ảo). 
+
+## Vòng 3 — A4: phân rã −0,48pp (13/11 11:40 ICT; skeptic CONFIRMED medium)
+Nguồn: `agents/Taylor/research/live_gap_exec_A4/REPORT.md`, bus `live-gap-exec-A4-20261113`.
+- Δ −0,48pp (pin0%, L3 bq 23,39 → L3P pit 22,91) là hiệu ứng THẬT, xác định: ghép cặp 10 seed sd 0,014, 10/10 âm. Toàn bộ nằm ở book LAG (BAL trùng 100%); rải 2021–2024 là chính.
+- Cơ chế: `Volume_3M_P50` BQ gồm phiên t; engine tra ADV ở ngày fill ⇒ bản bq cộng khối lượng ngày fill (nhìn trước 1 phiên). pit (t-60..t-1) khớp cách live đọc ADV — SUY LUẬN từ code, chưa đối chiếu lệnh live.
+- Tách 2 trục (1 lần/chân, chỉ gợi ý): vá NULL −0,20pp, đổi cửa sổ −0,28pp.
+- Dải trên cơ sở production: pin0% 22,91% (DD5 −27,89%) … pin1M 26,61% (DD5 −24,96%). Neo sizing −25,2% GIỮ (user quyết riêng).
+- ⚠️ Đính chính của skeptic: chân pin1M chạy trên code nghiên cứu (770393ce2 + 1 dòng chưa commit), KHÔNG phải main đã merge như REPORT §4 ghi — provenance cần ghi lại hoặc chạy lại pin1M sau khi merge IDLE_CARRY_TIER.
+- Còn nợ: so ADV lúc đặt lệnh live với pit; 10 seed cho chân fill; ADV thấp giả sau corp-action (cửa sổ 60 phiên trộn khối lượng thô, cả bq lẫn pit).
