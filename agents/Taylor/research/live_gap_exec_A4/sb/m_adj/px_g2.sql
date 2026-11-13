@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA4-1113/WorkingClaude/px_g2.sql

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA2-1113-r/WorkingClaude/show_custom30.py

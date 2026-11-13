@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/refresh_deposit_cctg_weekly.sh

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113-r/WorkingClaude/pt_8l_daily.sh

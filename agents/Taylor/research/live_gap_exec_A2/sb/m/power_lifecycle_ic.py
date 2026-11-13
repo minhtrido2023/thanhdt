@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/power_lifecycle_ic.py

@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/fa_quickwins_integrated.md

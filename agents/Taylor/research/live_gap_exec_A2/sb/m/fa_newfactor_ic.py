@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/fa_newfactor_ic.py

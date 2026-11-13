@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113-r/WorkingClaude/paper_trade_weekly_run.bat

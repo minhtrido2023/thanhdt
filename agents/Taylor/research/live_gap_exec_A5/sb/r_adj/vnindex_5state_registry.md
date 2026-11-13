@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA4-1113-r/WorkingClaude/vnindex_5state_registry.md

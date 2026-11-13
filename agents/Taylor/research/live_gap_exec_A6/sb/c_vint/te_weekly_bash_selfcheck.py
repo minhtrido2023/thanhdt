@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA6-1113/WorkingClaude/te_weekly_bash_selfcheck.py

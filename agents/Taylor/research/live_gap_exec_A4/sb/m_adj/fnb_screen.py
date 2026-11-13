@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA4-1113/WorkingClaude/fnb_screen.py

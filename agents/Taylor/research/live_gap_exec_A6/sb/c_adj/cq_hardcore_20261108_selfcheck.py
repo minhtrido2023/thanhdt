@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA6-1113/WorkingClaude/cq_hardcore_20261108_selfcheck.py

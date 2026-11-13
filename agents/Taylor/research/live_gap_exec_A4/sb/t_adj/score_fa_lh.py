@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA4-1113-tb/WorkingClaude/score_fa_lh.py

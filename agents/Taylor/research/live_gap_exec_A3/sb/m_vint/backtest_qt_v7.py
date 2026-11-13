@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/backtest_qt_v7.py

@@ -1,0 +1,7 @@
+./run_leg.sh S1_L3PcF adj NAV_TOTAL_B=1 SELL_ADV_CAP=0.2 SIG_ADV_MIN=2e9
+./run_leg.sh S2_L3PcF adj NAV_TOTAL_B=2 SELL_ADV_CAP=0.2 SIG_ADV_MIN=2e9
+./run_leg.sh S1_L3Pc adj NAV_TOTAL_B=1 SELL_ADV_CAP=0.2
+./run_leg.sh S2_L3Pc adj NAV_TOTAL_B=2 SELL_ADV_CAP=0.2
+./run_leg.sh B50_L3PcF adj SELL_ADV_CAP=0.2 SIG_ADV_MIN=2e9
+./run_leg.sh S5_L3PcF adj NAV_TOTAL_B=5 SELL_ADV_CAP=0.2 SIG_ADV_MIN=2e9
+./run_leg.sh V2_pin0 adj

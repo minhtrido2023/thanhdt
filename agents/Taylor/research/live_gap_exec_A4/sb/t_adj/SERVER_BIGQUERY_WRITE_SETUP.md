@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA4-1113-tb/WorkingClaude/SERVER_BIGQUERY_WRITE_SETUP.md

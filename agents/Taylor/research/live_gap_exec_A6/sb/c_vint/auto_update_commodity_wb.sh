@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA6-1113/WorkingClaude/auto_update_commodity_wb.sh

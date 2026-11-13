@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/sync_bq_cache_daily.sh

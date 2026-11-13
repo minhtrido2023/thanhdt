@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA4-1113/WorkingClaude/dot2_batch_selfcheck.py

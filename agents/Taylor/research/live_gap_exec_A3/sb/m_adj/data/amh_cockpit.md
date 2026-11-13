@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/amh_cockpit.md

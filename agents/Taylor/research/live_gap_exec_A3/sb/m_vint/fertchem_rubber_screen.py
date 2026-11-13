@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/fertchem_rubber_screen.py

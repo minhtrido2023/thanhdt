@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/capit_lever_selfcheck.py

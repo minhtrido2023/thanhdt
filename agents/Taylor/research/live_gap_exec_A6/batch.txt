@@ -1,0 +1,8 @@
+./run_leg.sh V1_pin0 adj
+./run_leg.sh V1_pin1M adj IDLE_CARRY_TIER=dep1m
+./run_leg.sh S1_L1 vint NAV_TOTAL_B=1 LIQ_ZERO_BLOCK=off LAG_ADV_SRC=bq
+./run_leg.sh S1_L3P adj NAV_TOTAL_B=1
+./run_leg.sh S2_L1 vint NAV_TOTAL_B=2 LIQ_ZERO_BLOCK=off LAG_ADV_SRC=bq
+./run_leg.sh S2_L3P adj NAV_TOTAL_B=2
+./run_leg.sh S1_L2 vint NAV_TOTAL_B=1 LIQ_ZERO_BLOCK=lag LAG_ADV_SRC=bq
+./run_leg.sh S2_L2 vint NAV_TOTAL_B=2 LIQ_ZERO_BLOCK=lag LAG_ADV_SRC=bq

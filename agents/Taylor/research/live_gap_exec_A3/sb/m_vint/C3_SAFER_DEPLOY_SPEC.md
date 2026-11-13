@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/C3_SAFER_DEPLOY_SPEC.md

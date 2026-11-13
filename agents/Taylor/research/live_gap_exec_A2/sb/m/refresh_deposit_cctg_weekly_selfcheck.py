@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/refresh_deposit_cctg_weekly_selfcheck.py

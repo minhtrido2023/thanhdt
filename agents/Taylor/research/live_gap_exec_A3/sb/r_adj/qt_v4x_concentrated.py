@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA3-1113-r/WorkingClaude/qt_v4x_concentrated.py

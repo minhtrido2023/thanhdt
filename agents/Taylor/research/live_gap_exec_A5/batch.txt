@@ -1,0 +1,8 @@
+./run_leg.sh V1_pin0 m adj
+./run_leg.sh V1_pin1M r adj
+./run_leg_q.sh C30_off_q PARK_STATES=3:0.3 IDLE_CARRY_TIER=off BASKET_WT=namecap BASKET_SELECT=yieldcombo
+./run_leg.sh P3_L1 m vint PARK_STATES=3:0.3 LIQ_ZERO_BLOCK=off LAG_ADV_SRC=bq
+./run_leg.sh P3_L2 m vint PARK_STATES=3:0.3 LIQ_ZERO_BLOCK=lag LAG_ADV_SRC=bq
+./run_leg.sh P3_L3 m adj PARK_STATES=3:0.3 LIQ_ZERO_BLOCK=lag LAG_ADV_SRC=bq
+./run_leg.sh P3_L3P m adj PARK_STATES=3:0.3
+./run_leg.sh P3_L3P_1m r adj PARK_STATES=3:0.3

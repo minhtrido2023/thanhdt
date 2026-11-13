@@ -1,0 +1,1 @@
+/home/trido/thanhdt/WorkingClaude/data/rubber_watch.md

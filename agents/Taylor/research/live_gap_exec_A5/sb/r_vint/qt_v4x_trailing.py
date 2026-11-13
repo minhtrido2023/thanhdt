@@ -1,0 +1,1 @@
+/home/trido/thanhdt/wt-livegapA4-1113-r/WorkingClaude/qt_v4x_trailing.py

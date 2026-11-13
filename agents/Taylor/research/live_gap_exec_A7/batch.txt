@@ -1,0 +1,10 @@
+./run_leg.sh V1_pin0 adj
+./run_leg.sh V1_pin1M adj IDLE_CARRY_TIER=dep1m
+./run_leg.sh S1_L3Pc adj NAV_TOTAL_B=1 SELL_ADV_CAP=0.2
+./run_leg.sh S1_L1c vint NAV_TOTAL_B=1 LIQ_ZERO_BLOCK=off LAG_ADV_SRC=bq SELL_ADV_CAP=0.2
+./run_leg.sh B50_L1adj adj LIQ_ZERO_BLOCK=off LAG_ADV_SRC=bq
+./run_leg.sh S2_L3Pc adj NAV_TOTAL_B=2 SELL_ADV_CAP=0.2
+./run_leg.sh S2_L1c vint NAV_TOTAL_B=2 LIQ_ZERO_BLOCK=off LAG_ADV_SRC=bq SELL_ADV_CAP=0.2
+./run_leg.sh B50_L3Pc adj SELL_ADV_CAP=0.2
+./run_leg.sh S5_L3Pc adj NAV_TOTAL_B=5 SELL_ADV_CAP=0.2
+./run_leg.sh S5_L3P adj NAV_TOTAL_B=5
