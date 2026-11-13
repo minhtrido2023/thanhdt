@@ -413,6 +413,23 @@ LAG_ADV_SRC = os.environ.get("LAG_ADV_SRC", "").strip().lower() or "pit"
 LAG_ADV_MINP = int(os.environ.get("LAG_ADV_MINP", "20"))
 if LAG_ADV_SRC not in ("bq", "fill", "pit"): raise SystemExit(f"LAG_ADV_SRC không hợp lệ: {LAG_ADV_SRC!r} (bq|fill|pit)")
 if LAG_ADV_SRC != "bq": _qs_tag += f"_advsrc{LAG_ADV_SRC}" + ("" if LAG_ADV_MINP == 20 else f"mp{LAG_ADV_MINP}")
+# SELL_ADV_CAP (R&D Luồng A7, job Taylor_20261113_134219, PAPER): trần ADV PHÍA BÁN. Bản cũ bán HẾT vị thế tại
+# Open T+1 (chỉ phạt slippage bậc ≤0,5%) trong khi phía mua bị trần 20% ADV ⇒ DD ở NAV nhỏ nông giả.
+# Bật: SELL_ADV_CAP=0.2 ⇒ mỗi phiên chỉ bán ≤ 0.2 × liquidity_lookup(tk, ngày) (cùng nguồn ADV của book:
+# liq_map cho BAL, liq_lag cho LAG), phần dư carry sang phiên sau, mỗi lát chịu cùng slippage bậc.
+# ADV ≤0/thiếu ⇒ không bán được phiên đó; quá SELL_ADV_MAXCARRY phiên (mặc định 20) ⇒ bán nốt (đếm, báo cáo).
+# KHÔNG đặt/rỗng = OFF = byte-identical (không truyền kwarg, không đổi tên file).
+SELL_ADV_CAP = float(os.environ.get("SELL_ADV_CAP", "").strip() or 0)
+SELL_ADV_MAXCARRY = int(os.environ.get("SELL_ADV_MAXCARRY", "20"))
+# SIG_ADV_MIN (R&D Luồng A7): SÀN ADV TẦNG TÍN HIỆU như LIVE — lag_liquidity_filter.ADV_MIN_VND=2e9 (user chốt
+# 2026-08-10): LAG `lag_filter_illiquid` loại ứng viên ADV3T < sàn; BAL `bal_filter_thin` loại dòng tín hiệu liq < sàn.
+# ADV3T = Volume_3M_P50 × COALESCE(Price, Close) TẠI NGÀY TÍN HIỆU (dòng BQ sd — live chạy tối sd sau sync). Engine gốc
+# chỉ có ADV>0 (LAG) / liq≥1e9 trong SQL (BAL). KHÔNG đặt = OFF = byte-identical.
+SIG_ADV_MIN = float(os.environ.get("SIG_ADV_MIN", "").strip() or 0)
+if SIG_ADV_MIN > 0: _qs_tag += f"_sigadv{int(SIG_ADV_MIN/1e6)}m"
+if SELL_ADV_CAP > 0: _qs_tag += f"_sellcap{SELL_ADV_CAP:g}" + ("" if SELL_ADV_MAXCARRY == 20 else f"mc{SELL_ADV_MAXCARRY}")
+_SELLCAP_KW = ({"sell_adv_cap": SELL_ADV_CAP, "sell_adv_maxcarry": SELL_ADV_MAXCARRY, "sell_cap_log": []}
+               if SELL_ADV_CAP > 0 else {})
 # ETF_CREATION_BASIS (ĐỀ XUẤT 2026-09-27, audit measurement-integrity FAIL-E): rổ top-30 của
 # nhánh ETF_LIQ="creation". Bản cũ có BA lỗi trong 2 dòng: (1) `Volume_3M_P50*Close` trộn SỐ LƯỢNG
 # thô với GIÁ đã điều chỉnh — đúng cái đã vá cho LAG_ADV_BASIS ở trên, sót call-site này;
@@ -1028,6 +1045,12 @@ print(f"  opens: {len(opens_df):,} rows ({len(_opens_parts)} year chunks)")
 open_prices = {tk: dict(zip(g["time"], g["open_price"])) for tk, g in opens_df.groupby("ticker")}
 prices = {tk: dict(zip(g["time"], g["Close"])) for tk, g in sig_f.groupby("ticker")}
 liq_map = dict(zip(zip(sig_f["ticker"], sig_f["time"]), sig_f["liq"]))
+# A9 (verdict A7 (c)): liq_map (= bảng ADV THỰC THI của BAL: trần mua 20% ADV + slippage bậc) dựng TRƯỚC bộ lọc
+# SIG_ADV_MIN. Bộ lọc là CỔNG TẦNG TÍN HIỆU, không được đục lỗ bảng thực thi — bản A7 lọc trước nên ngày ADV 1–2 tỷ
+# mất key ⇒ fill ngày 2..5 thành "không trần" (legacy full size). Thứ tự này: OFF vẫn byte-identical.
+if SIG_ADV_MIN > 0:
+    _n0 = len(sig_f); sig_f = sig_f[pd.to_numeric(sig_f["liq"], errors="coerce") >= SIG_ADV_MIN].copy()
+    print(f"  [SIG_ADV_MIN={SIG_ADV_MIN:,.0f}] BAL signal rows {_n0:,} -> {len(sig_f):,} (liq_map giữ {len(liq_map):,} key)", flush=True)
 
 vni = bq(VNI_QUERY.format(start=START_DATE, end=END_DATE))
 vni["time"] = pd.to_datetime(vni["time"])
@@ -1205,6 +1228,7 @@ for d in vni_dates:
 LIQ_FULL = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
             "liquidity_lookup": liq_map, "exit_slippage_tiered": True,
             "liquidity_require_positive": (LIQ_ZERO_BLOCK == "both")}
+if _SELLCAP_KW: LIQ_FULL.update(sell_adv_cap=SELL_ADV_CAP, sell_adv_maxcarry=SELL_ADV_MAXCARRY, sell_cap_log=_SELLCAP_KW["sell_cap_log"])
 
 # ============================================================================
 # 4. LAGGED PEAD schedule (signal layer from earnings files; prices from BQ)
@@ -1559,6 +1583,7 @@ for tk, g in lagpx.groupby("ticker"):
     gl = g[g["Volume_3M_P50"].notna() & g[_advcol].notna()]
     for d, adv, px in zip(gl["time"], gl["Volume_3M_P50"].astype(float), gl[_advcol].astype(float)):
         liq_lag[(tk, d)] = adv * px
+_liq_lag_sig = dict(liq_lag) if SIG_ADV_MIN > 0 else None   # ADV3T BQ-def tại ngày tín hiệu (trước khi đổi nguồn pit)
 if LAG_ADV_SRC != "bq":
     _vstart = (pd.Timestamp(START_DATE) - pd.Timedelta(days=200)).date()
     _vp = []
@@ -1586,6 +1611,36 @@ WHERE t.time BETWEEN DATE '{_vstart}' AND DATE '{END_DATE}' AND t.ticker IN ({in
 LIQ_LAG = {"liquidity_volume_pct": 0.20, "max_fill_days": 5,
            "liquidity_lookup": liq_lag, "exit_slippage_tiered": True,
            "liquidity_require_positive": (LIQ_ZERO_BLOCK in ("1", "lag", "both"))}
+if _SELLCAP_KW: LIQ_LAG.update(sell_adv_cap=SELL_ADV_CAP, sell_adv_maxcarry=SELL_ADV_MAXCARRY, sell_cap_log=_SELLCAP_KW["sell_cap_log"])
+if _SELLCAP_KW:
+    # A9 (verdict A7 (b)/(d)): bảng ADV DÀY cho trần bán, CẢ HAI book, cùng định nghĩa pit với LAG live:
+    # ADV(d) = median Volume t-60..t-1 (min LAG_ADV_MINP phiên) × PxAdv(t-1), PxAdv = COALESCE(Price, Close).
+    # Giá trị tại d chỉ dùng dữ liệu <= d-1 ⇒ ADV "phiên trước", biết trước Open d (không nhìn trước).
+    # Mọi phiên của mọi mã BAL-universe (univ_window_pred) ∪ LAG/CAPIT (lag_universe) — KHÔNG cắt sàn liq,
+    # nên mã tụt dưới 1 tỷ/ra universe vẫn có ADV THẬT (thấp) thay vì giá trị cũ cao của liq_map.
+    _sa_tk = sorted(set(opens_df["ticker"].unique()) | set(lag_universe))
+    _sa_start = (pd.Timestamp(START_DATE) - pd.Timedelta(days=200)).date()
+    _sa_parts = []
+    for _i in range(0, len(_sa_tk), 250):
+        _in = ",".join(f"'{t}'" for t in _sa_tk[_i:_i+250])
+        _pp = bq(f"""SELECT t.ticker, t.time, t.Volume, COALESCE(t.Price, t.Close) AS PxAdv
+FROM tav2_bq.ticker AS t
+WHERE t.time BETWEEN DATE '{_sa_start}' AND DATE '{END_DATE}' AND t.ticker IN ({_in})""")
+        assert len(_pp) < 1_990_000, f"bq() max_rows cap risk (sell-adv chunk {_i})"
+        _sa_parts.append(_pp)
+    _sa = pd.concat(_sa_parts, ignore_index=True); del _sa_parts
+    _sa["time"] = pd.to_datetime(_sa["time"])
+    _sa = _sa.sort_values(["ticker", "time"], kind="mergesort").reset_index(drop=True)
+    _sg = _sa.groupby("ticker", sort=False)
+    _sa["_adv"] = (_sg["Volume"].transform(lambda x: x.shift(1).rolling(60, min_periods=LAG_ADV_MINP).median())
+                   * _sg["PxAdv"].shift(1))
+    _sa = _sa[_sa["_adv"].notna()]
+    SELL_ADV_PIT = {tk: (g["time"].values.astype("datetime64[ns]").astype(np.int64), g["_adv"].to_numpy(float))
+                    for tk, g in _sa.groupby("ticker", sort=False)}
+    print(f"  [SELL_ADV_CAP A9] bảng ADV pit dày: {len(SELL_ADV_PIT)} mã / {len(_sa):,} phiên (yêu cầu {len(_sa_tk)} mã)", flush=True)
+    del _sa, _sg
+    LIQ_FULL["sell_adv_lookup"] = SELL_ADV_PIT
+    LIQ_LAG["sell_adv_lookup"] = SELL_ADV_PIT
 
 # LAG SUE-TILT (#23, Taylor 2026-06-27): finer 3-tier weight by surprise tercile vs the binary HI/LO@0.5.
 # REJECTED (backtest @50B): 3-tier LOSES -0.66pp CAGR (27.44->26.78), worse BOTH halves (IS -0.7 / OOS -0.2),
@@ -1600,10 +1655,15 @@ def _lag_ptype(s):
         return "LAG_HI" if s > 0.5 else "LAG_LO"                      # binary baseline (byte-identical)
     return "LAG_TOP" if s >= _sue_q[1] else ("LAG_HI" if s >= _sue_q[0] else "LAG_LO")
 lag_rows = []
+_sigadv_drop = []
 for c in lag_cand:
     tk, sd = c["ticker"], c["sd"]
     px_sd = prices_lag.get(tk, {}).get(sd, np.nan)
     if pd.isna(px_sd) or px_sd <= 0: continue
+    if SIG_ADV_MIN > 0:
+        _a_sd = _liq_lag_sig.get((tk, sd))
+        if _a_sd is None or not (float(_a_sd) >= SIG_ADV_MIN):
+            _sigadv_drop.append(tk); continue
     lag_rows.append({"time": sd, "ticker": tk,
                      "play_type": _lag_ptype(c["surprise"]),
                      "ta": 400.0, "Close": float(px_sd),
@@ -1611,6 +1671,8 @@ for c in lag_cand:
 _lag_cols = ["time","ticker","play_type","ta","Close"] + (["_fund_tb"] if _LAG_FUND_DNPR else [])
 sig_lag = pd.DataFrame(lag_rows, columns=_lag_cols)
 print(f"  LAG signals in window: {len(sig_lag)}  [fund_dnpr_reorder={_LAG_FUND_DNPR}]")
+if SIG_ADV_MIN > 0:
+    print(f"  [SIG_ADV_MIN={SIG_ADV_MIN:,.0f}] LAG candidates dropped {len(_sigadv_drop)} ({len(set(_sigadv_drop))} mã)", flush=True)
 shn.TIER_PRIORITY.update({"LAG_TOP": 90, "LAG_HI": 88, "LAG_LO": 82})
 LAG_TW = ({"LAG_TOP": 0.11, "LAG_HI": 0.09, "LAG_LO": 0.08} if LAG_SUE_TILT
           else {"LAG_HI": 0.10, "LAG_LO": 0.08})
@@ -2296,6 +2358,17 @@ nav_lag, _ = simulate(sig_lagC, prices_lag, vni_dates, tier_weights=tw_lagC,
                       name="v23audit_LAG", **merge_extra(kwB, ex_lagC), **LIQ_LAG)
 nav_lag["time"] = pd.to_datetime(nav_lag["time"])
 print(f"  LAG events: {len(events_lag)} stock + {len(etf_lag)} ETF; final {nav_lag.set_index('time')['nav'].iloc[-1]/1e9:.4f}B")
+if _SELLCAP_KW:
+    _scl = pd.DataFrame(_SELLCAP_KW["sell_cap_log"])
+    if len(_scl):
+        for _sim, _g in _scl.groupby("sim"):
+            _ex = _g[_g["carry"] == 0]
+            print(f"  [SELL_ADV_CAP={SELL_ADV_CAP:g} {_sim}] exits capped {len(_ex)} | carry-slices {len(_g)} | "
+                  f"max carry {int(_g['carry'].max())} | forced {int(_g['forced'].sum())} | zero-liq slices {int((_g['liq'] <= 0).sum())}"
+                  f" | missing-ADV slices {int((_g['liq_src'] < 0).sum())}")
+        if os.environ.get("SELL_CAP_LOG_OUT"): _scl.to_csv(os.environ["SELL_CAP_LOG_OUT"], index=False)
+    else:
+        print(f"  [SELL_ADV_CAP={SELL_ADV_CAP:g}] 0 exits capped")
 
 # ============================================================================
 # 8. Allocator overlay (band-only ±10pp) — instrumented for audit
