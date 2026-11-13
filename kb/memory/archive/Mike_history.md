@@ -191,3 +191,9 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T18:52:35Z] [13/11 01:55] Skeptic A2 CONFIRMED (medium). Chờ user duyệt: (a) Taylor chạy MINP sweep {10,20,40} + L3 adj v2 + pit + bootstrap 2 số lẻ rồi merge lag+pit, hay (b) merge ngay. B2 còn chạy (Taylor_20261112_181211). Vẫn chờ: LAG cache phê chuẩn/rollback; chủ TK SpaceX.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T19:04:40Z] [13/11 02:08] B2 xong (claimed), nhánh @418667a32 chưa merge; skeptic B2 đang chạy. Chờ user: A2 (a)/(b); LAG cache phê chuẩn/rollback; chủ TK SpaceX; câu chữ/thuế dòng tiết kiệm.
+
+## Archived 2026-11-13 (keep=12 days=0 require_done=False)
+- [2026-11-12T19:10:32Z] [13/11 02:12] Skeptic B2 CONFIRMED (high). Chuỗi live-gap exec xong; không job mở. CHỜ USER: A2 (a)/(b); LAG cache phê chuẩn/rollback; chủ TK SpaceX; câu chữ/thuế dòng tiết kiệm. B2 trước merge: chạy report_delivery_gate end-to-end trên báo cáo tuần thật + xử symlink worktree.
