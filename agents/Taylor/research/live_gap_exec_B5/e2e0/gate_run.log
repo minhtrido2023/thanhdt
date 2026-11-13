@@ -1,0 +1,24 @@
+⚠️  report_delivery_gate: chạy từ /home/trido/thanhdt/WorkingClaude/wt-b5-clean-20261113 nhưng GHI SỔ THẬT + gọi script con của cây canonical /home/trido/thanhdt/WorkingClaude/mike — đây không phải sandbox
+CỔNG TỈ SUẤT — SpaceX_weekly_report_2026-11-02_to_2026-11-06.md | chốt 2026-11-06 | tài khoản SpaceX | dung sai 0.15pp
+
+ma        KL       TK  % cong bo  % ky vong  lech pp co tuc GOP  gia von THO  ket qua
+FPT      800   SpaceX      -0.66      -0.66    -0.00       0.00    51,137.50  OK
+HT1     2700   SpaceX      -5.33      -5.33     0.00       0.00    13,468.52  OK
+VPB     1500   SpaceX      -6.60      -6.60    -0.00       0.00    23,607.50  OK
+MCH      200   SpaceX      -4.77      -4.77    -0.00       0.00   136,300.00  OK
+NNC      100   SpaceX       0.64       0.64     0.00       0.00    46,900.00  OK
+MBB      175   SpaceX      -6.75      -6.75     0.00     656.72    21,313.43  OK
+VIB       47   SpaceX       2.79       2.79    -0.00       0.00    13,619.74  OK
+
+TỔNG kỳ vọng (vị thế đang giữ, đã cộng cổ tức RÒNG — đối chiếu tay với dòng tổng trong báo cáo):
+   SpaceX   giá vốn thô     149,006,232  lãi/lỗ tổng      -6,050,303    -4.06%
+
+CƠ SỞ GIÁ VỐN / CỔ TỨC — bằng chứng đã dùng:
+   · SpaceX · MBB ex 2026-07-09: 1,000đ/cp lúc chốt quyền ÷ hệ số KL 1.1500 × phần hưởng 0.7552 = 656.72đ/cp trên KL đang giữ
+
+Đã kiểm 7 dòng bảng + 0 tỉ suất trong văn xuôi + 0 dòng vị thế dạng báo cáo ngày ('MÃ <giá trị>M, ±x%'); 0 dòng KHÔNG khớp sổ vị thế broker (bảng lãi/lỗ ĐÃ THỰC HIỆN / phân bổ — NGOÀI phạm vi cổng này, xem docstring).
+
+✅ PASS — mọi tỉ suất vị thế đang giữ đã khớp kỳ vọng dựng từ sổ broker + cổ tức đã xác minh.
+report_delivery_gate: INCOMPLETE — benchmark-table BLOCK (SpaceX_weekly_report_2026-11-02_to_2026-11-06.md): bảng có cột tiết kiệm ['Gửi tiết kiệm (tham chiếu)', 'Chênh so tiết kiệm'] nhưng CLI không có khối `savings` cho kỳ wtd — không đối chiếu được
+report_delivery_gate: period-return PASS (SpaceX_weekly_report_2026-11-02_to_2026-11-06.md): -3.94% vs canonical -3.944% (lệch 0.004pp)
+DELIVER_RC 1 stub_calls [] ROOT /home/trido/thanhdt/WorkingClaude/mike
