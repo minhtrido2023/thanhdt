@@ -12,6 +12,8 @@ registered: 2026-11-12 (Taylor, job Taylor_20261112_162001, Luồng D1e theo qua
 
 **Status: DEPRECATED — bản sao lưu một lần, không ai cập nhật.**
 
+⚠️ SUPERSEDED BY `data/VNINDEX.csv` (cột `VNINDEX_PE`) / BQ mirror ON 2026-05-10 (frozen_since; bổ sung dòng thiếu 2026-11-14 KB weekly review).
+
 ## Là gì
 Bản copy `data/VNINDEX.csv` phiên bản CŨ (trước lần `rebuild_vnindex_csv.py` thay bằng OHLCV từ BQ).
 Cột: `time,Open,High,Low,Close,Volume,Pe,trading_session,volume_session,ticker`. 3051 phiên non-null `Pe`,
