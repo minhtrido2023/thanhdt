@@ -64,7 +64,7 @@ class Msg:
         self.reactions.append(e)
 
 
-def mk(e: Env, ids=(str(USER_ID),), mode="live", script=None, timeout=30.0):
+def mk(e: Env, ids=(str(USER_ID),), mode="live", script=None, timeout=None):
     bot = NS(user=NS(id=BOT_ID))
     c = cog_mod.DecisionInboxCog(bot, e.root, set(ids), mode, script=script or REPO / "bin" / "decision_inbox.py", timeout=timeout,
                                   inbox_path=REPO / "bin" / "decision_inbox.py")
@@ -96,6 +96,12 @@ with tempfile.TemporaryDirectory() as td:
                       ("5 tin bot này KHÔNG có thẻ", Msg(5, "xin chào", author=BOT_ID, bot=True))):
         run(c.on_message(msg))
         check(f"{name} ⇒ lọc rẻ, không spawn", raw_files(e) == [] and msg.replies == [] and msg.reactions == [])
+    ptr = e.root / "state" / "decision_inbox" / "last_bot" / "5.json"
+    check("5b tin bot KHÔNG thẻ vẫn ghi con trỏ last-bot của channel (vòng 2, mục 3)",
+          ptr.exists() and json.loads(ptr.read_text(encoding="utf-8"))["message_id"] == "5", str(ptr))
+    check("5c tin bot của BOT KHÁC không ghi con trỏ", json.loads(ptr.read_text(encoding="utf-8"))["message_id"] != "4")
+    check("5d timeout mặc định của cog > ngân sách nội bộ của script",
+          c.timeout > c.inbox.SCRIPT_BUDGET_S and c.timeout == c.inbox.SCRIPT_BUDGET_S + 60.0, f"{c.timeout} vs {c.inbox.SCRIPT_BUDGET_S}")
 
     # tin bot có thẻ ⇒ ghi raw + surfaced
     run(c.on_message(Msg(10, f"❓ [#{q1['tag']}]", author=BOT_ID, bot=True)))
@@ -147,6 +153,31 @@ with tempfile.TemporaryDirectory() as td:
         m = Msg(1, "A #q000000")
         run(c4.on_message(m))
         check(name, m.replies == [] and c4.errors == 1, f"errors={c4.errors}")
+        kind = {"11": "script_timeout", "12": "script_rc", "13": "script_bad_json"}[name.split()[0]]
+        check(f"{name.split()[0]}b lỗi để lại dấu: state errors.jsonl kind={kind}",
+              any(r.get("kind") == kind for r in e4.state_rows("errors.jsonl")), str(e4.state_rows("errors.jsonl")))
+        check(f"{name.split()[0]}c … và lên bus status decision-inbox-error",
+              any(r["payload"].get("kind") == kind for r in e4.statuses("decision-inbox-error")), str(e4.statuses("decision-inbox-error")))
+
+    # timeout ⇒ giết CẢ NHÓM tiến trình (con của script không được mồ côi)
+    sp = Path(td) / "spawn_child.py"
+    pidf = Path(td) / "child.pid"
+    sp.write_text("import subprocess,sys,time\nc=subprocess.Popen(['sleep','60'])\n"
+                  f"open({str(pidf)!r},'w').write(str(c.pid))\ntime.sleep(60)\n", encoding="utf-8")
+    e4 = Env(tempfile.mkdtemp())
+    c4 = mk(e4, script=sp, timeout=2.0)
+    run(c4.on_message(Msg(1, "A #q000000")))
+    import time as _t
+    _t.sleep(0.3)
+    child = int(pidf.read_text()) if pidf.exists() else 0
+    try:
+        os.kill(child, 0)
+        alive = True
+    except ProcessLookupError:
+        alive = False
+    except PermissionError:
+        alive = True
+    check("11d timeout ⇒ tiến trình CON của script cũng bị giết (killpg)", child > 0 and not alive, f"child={child} alive={alive}")
 
     # message hỏng (thiếu thuộc tính) ⇒ nuốt lỗi
     bad = NS(id=1, content="A", author=None)

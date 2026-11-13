@@ -20,6 +20,7 @@ import importlib.util
 import json
 import logging
 import os
+import signal
 import sys
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -43,14 +44,16 @@ def _load_inbox(script: Path):
 
 class DecisionInboxCog(commands.Cog):
     def __init__(self, bot, root: Path, user_ids: set[str], mode: str,
-                 script: Path | None = None, timeout: float = 30.0, inbox_path: Path | None = None):
+                 script: Path | None = None, timeout: float | None = None, inbox_path: Path | None = None):
         self.bot = bot
         self.root = Path(root)
         self.user_ids = user_ids
         self.mode = mode if mode in ("shadow", "live") else "shadow"
         self.script = Path(script) if script else self.root / "bin" / "decision_inbox.py"
-        self.timeout = timeout
         self.inbox = _load_inbox(Path(inbox_path) if inbox_path else self.root / "bin" / "decision_inbox.py")
+        # Timeout cog PHẢI > tổng timeout nội bộ xấu nhất của script (inbox.SCRIPT_BUDGET_S); nếu cog kill sớm hơn
+        # thì script đang giữa `đóng` ↔ `on_answer` bị giết (vòng 2, mục 6).
+        self.timeout = float(timeout) if timeout is not None else float(self.inbox.SCRIPT_BUDGET_S) + 60.0
         self._lock = asyncio.Lock()
         self.errors = 0
 
@@ -68,6 +71,7 @@ class DecisionInboxCog(commands.Cog):
         content = message.content or ""
         me = getattr(self.bot, "user", None)
         if me is not None and message.author.id == me.id:
+            self._note_bot(message)   # con trỏ 'tin bot gần nhất của channel' — kể cả tin KHÔNG thẻ (mục 3)
             if not self.inbox.TAG_RE.search(content):
                 return None
             kind = "bot_message"
@@ -87,6 +91,13 @@ class DecisionInboxCog(commands.Cog):
             "content": content, "created_at": message.created_at.isoformat(),
             "guild_id": str(getattr(getattr(message, "guild", None), "id", "") or ""),
         }
+
+    def _note_bot(self, message) -> None:
+        try:
+            self.inbox.note_bot_message(self.root, str(message.channel.id), str(message.id),
+                                        message.created_at.isoformat())
+        except Exception:  # noqa: BLE001 — thiếu con trỏ ⇒ script fail-closed ở T3, không hỏng listener
+            logger.warning("decision_inbox: không ghi được con trỏ last-bot", exc_info=True)
 
     async def _handle(self, message) -> None:
         if not self.user_ids:
@@ -117,30 +128,42 @@ class DecisionInboxCog(commands.Cog):
         if out.get("reply"):
             await message.reply(out["reply"], mention_author=False)
 
+    async def _fail(self, kind: str, detail: dict) -> None:
+        """Mọi lỗi chạy script phải để lại dấu: state errors.jsonl + bus status decision-inbox-error."""
+        self.errors += 1
+        logger.error("decision_inbox: %s %s", kind, detail)
+        try:
+            await asyncio.get_running_loop().run_in_executor(
+                None, lambda: self.inbox.record_error(self.root, kind, detail))
+        except Exception:  # noqa: BLE001
+            logger.warning("decision_inbox: không ghi được record_error", exc_info=True)
+
     async def _run_script(self, evf: Path) -> dict | None:
         env = dict(os.environ, DECISION_INBOX_MODE=self.mode, DECISION_INBOX_USER_IDS=",".join(sorted(self.user_ids)))
         proc = await asyncio.create_subprocess_exec(
             sys.executable, str(self.script), "--event-file", str(evf), "--root", str(self.root),
-            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env=env)
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env=env,
+            start_new_session=True)   # cả nhóm tiến trình (close_bus_question, dispatch…) kill được 1 phát
         try:
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=self.timeout)
         except asyncio.TimeoutError:
-            proc.kill()
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                proc.kill()
             await proc.wait()
-            self.errors += 1
-            logger.error("decision_inbox: script quá %ss, đã kill", self.timeout)
+            await self._fail("script_timeout", {"timeout_s": self.timeout, "event_file": evf.name})
             return None
         if proc.returncode != 0:
-            self.errors += 1
-            logger.error("decision_inbox: script rc=%s stderr=%s", proc.returncode, stderr.decode("utf-8", "replace")[-300:])
+            await self._fail("script_rc", {"rc": proc.returncode, "event_file": evf.name,
+                                           "stderr": stderr.decode("utf-8", "replace")[-300:]})
             return None
         for ln in reversed(stdout.decode("utf-8", "replace").splitlines()):
             try:
                 return json.loads(ln)
             except ValueError:
                 continue
-        self.errors += 1
-        logger.error("decision_inbox: script không in JSON hợp lệ")
+        await self._fail("script_bad_json", {"event_file": evf.name, "stdout": stdout.decode("utf-8", "replace")[-300:]})
         return None
 
 

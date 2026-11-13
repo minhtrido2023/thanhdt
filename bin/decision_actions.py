@@ -44,6 +44,7 @@ DISPATCH_TARGETS = {"Taylor", "Winston", "Wags"}          # cấm Mafee/DollarBi
 PAPER_FIELDS = {"end", "review_date", "status", "end_or_trigger"}
 LETTERS = set("ABCDEFGH")
 MAX_ACTIONS = 5
+ACTION_TIMEOUT = 30   # mỗi subprocess; decision_inbox.ACTIONS_BUDGET_S = MAX_ACTIONS × ACTION_TIMEOUT
 TOPIC_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:\-]{0,119}$")
 TEMPLATE_RE = re.compile(r"^[a-z0-9_]{1,60}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -76,6 +77,8 @@ def validate_action(act, root: Path) -> list[str]:
             errs.append(f"remember: agent phải ∈ {sorted(REMEMBER_AGENTS)}")
         if not s("note") or len(act["note"]) > 400:
             errs.append("remember: note bắt buộc, ≤400 ký tự")
+        elif act["note"].lstrip().startswith("-"):   # remember.sh hiểu `--clear`/`--set` là cờ (vòng 2, mục 5)
+            errs.append("remember: note không được bắt đầu bằng '-' (chặn tiêm cờ --clear/--set)")
     elif name == "append_event":
         if act.get("agent") not in EVENT_AGENTS:
             errs.append(f"append_event: agent phải ∈ {sorted(EVENT_AGENTS)}")
@@ -88,6 +91,8 @@ def validate_action(act, root: Path) -> list[str]:
     elif name == "notify_thread":
         if not s("message") or len(act["message"]) > 1500:
             errs.append("notify_thread: message bắt buộc, ≤1500 ký tự")
+        elif act["message"].lstrip().startswith("-"):   # notify_thread.sh gửi cờ lạ thành text/diễn giải cờ
+            errs.append("notify_thread: message không được bắt đầu bằng '-'")
         if act.get("channel") not in _channels(root):
             errs.append("notify_thread: channel phải là TÊN khai trong kb/discord_channels.json")
     elif name == "dispatch_bg":
@@ -132,7 +137,7 @@ def validate_on_answer(on_answer, root: Path = ROOT) -> list[str]:
 
 
 # ───────────────────────── chạy ─────────────────────────
-def _run(cmd: list[str], timeout: int = 60) -> tuple[bool, str]:
+def _run(cmd: list[str], timeout: int = ACTION_TIMEOUT) -> tuple[bool, str]:
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     return r.returncode == 0, ((r.stdout or "") + (r.stderr or ""))[-300:]
 
@@ -166,8 +171,8 @@ def _execute(root: Path, act: dict) -> tuple[bool, str]:
     if n == "dispatch_bg":
         prompt = (root / "decision_templates" / f"{act['template']}.md").read_text(encoding="utf-8")
         env = dict(os.environ, DISPATCH_FROM="Mike")
-        r = subprocess.run([str(b / "dispatch.sh"), act["target"], prompt, "--bg", "--timeout",
-                            str(act.get("timeout", 900))], capture_output=True, text=True, timeout=60, env=env)
+        r = subprocess.run([str(b / "dispatch.sh"), act["target"], prompt, "--bg", "--no-followup", "--timeout",
+                            str(act.get("timeout", 900))], capture_output=True, text=True, timeout=ACTION_TIMEOUT, env=env)
         return r.returncode == 0, ((r.stdout or "") + (r.stderr or ""))[-300:]
     return _paper_set(root, act)
 
@@ -232,7 +237,7 @@ def _post_unknown(root: Path, key: dict, name) -> None:
         subprocess.run([str(root / "bin" / "append_event.sh"), "Mike", "status", "decision-action-unknown",
                         json.dumps({**key, "action": name, "note": "ledger có `started` mà không có kết quả; KHÔNG chạy lại, cần người kiểm",
                                     "measured_by": "state/decision_inbox/actions.jsonl"}, ensure_ascii=False)],
-                       capture_output=True, text=True, timeout=30)
+                       capture_output=True, text=True, timeout=ACTION_TIMEOUT)
     except (OSError, subprocess.SubprocessError):
         pass
 

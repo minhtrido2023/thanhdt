@@ -175,7 +175,7 @@ esac
 # hỏi, không phải khi user đã trả lời. Chỉ chạy khi payload có chuỗi `"on_answer"` — mọi question khác: 0 chi phí.
 # Lý do từ chối lấy NGUYÊN VĂN từ validator (§29): validator vắng/hỏng cũng hiện ra ở đây, không bị che.
 case "$etype" in question)
-  case "$payload" in *'"on_answer"'*)
+  case "$payload" in *'"on_answer"'*|*'\u'*)   # `\u…` = khoá bị escape unicode để lách chuỗi trên (vòng 2, mức thấp)
     _oa_err="$(printf '%s' "$payload" | python3 "$ROOT/bin/decision_actions.py" --validate \
       --agent "$id" --topic "$topic" --root "$ROOT" 2>&1 >/dev/null)" || \
       die "payload.on_answer KHÔNG hợp lệ — câu hỏi chưa được ghi.

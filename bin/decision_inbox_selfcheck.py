@@ -63,10 +63,18 @@ class Env:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
         return {"tag": "q" + eid[:6], "ref": f"{agent}/{topic}", "eid": eid}
 
-    def bot(self, mid, chan, *tags):
+    def note_untagged_bot(self, mid, chan, now=None):
+        """Giống cog: ghi con trỏ 'tin bot gần nhất của channel' cho MỌI tin bot (kể cả không thẻ)."""
+        note = getattr(di, "note_bot_message", None)
+        if note:
+            note(self.root, chan, mid, (now or self.now).isoformat())
+
+    def bot(self, mid, chan, *tags, now=None, pointer=True):
         content = "Câu hỏi: " + " ".join(f"[#{t}]" for t in tags)
+        if pointer:
+            self.note_untagged_bot(mid, chan, now)   # cog ghi con trỏ TRƯỚC khi gọi script
         return self.run({"kind": "bot_message", "message_id": mid, "channel_id": chan,
-                         "content": content})
+                         "content": content}, now=now)
 
     def user(self, mid, chan, text, ref=None, author="u1", **kw):
         ev = {"kind": "user_message", "message_id": mid, "channel_id": chan, "author_id": author,
@@ -91,6 +99,15 @@ class Env:
             for line in p.read_text(encoding="utf-8").splitlines():
                 r = json.loads(line)
                 if r["event_type"] in ("status", "error") and r["topic"] == topic:
+                    out.append(r)
+        return out
+
+    def finding_topics(self, topic):
+        out = []
+        for p in (self.root / "bus" / "inbox").glob("*.jsonl"):
+            for line in p.read_text(encoding="utf-8").splitlines():
+                r = json.loads(line)
+                if r["event_type"] == "finding" and r["topic"] == topic:
                     out.append(r)
         return out
 
@@ -128,8 +145,9 @@ def label_cases():
     check("risk 'bot-stop' (gạch nối) ⇒ money", di.classify_risk("Mike", "bot-stop-policy", {}) == "money")
     check("risk 'trading_rules' ⇒ money", di.classify_risk("Mike", "x", {"summary": "sửa trading_rules.json"}) == "money")
     check("risk mặc định normal", di.classify_risk("Mike", "docs-cleanup", {"options": ["A", "B"]}) == "normal")
-    check("risk explicit normal thắng heuristic",
-          di.classify_risk("DollarBill", "plan", {"risk": "normal"}) == "normal")
+    check("risk explicit normal thắng heuristic (agent thường; DollarBill/Mafee thì KHÔNG — vòng 2)",
+          di.classify_risk("Taylor", "plan", {"risk": "normal"}) == "normal"
+          and di.classify_risk("DollarBill", "plan", {"risk": "normal"}) == "money")
 
 
 def main() -> int:
@@ -174,7 +192,11 @@ def main() -> int:
               and q1["tag"] in r["reply"] and q2["tag"] in r["reply"], str(r))
         r = e.user("m2", "c1", "A")
         check("2 lần hai cùng tập ⇒ KHÔNG hỏi thêm", r["outcome"] == "ambiguous_suppressed", str(r))
-        r = e.user("m3", "c1", "A", now=e.now + dt.timedelta(hours=25))
+        # T3 có TTL 6h (vòng 2) ⇒ kiểm TTL hỏi-lại 24h qua đường reply-to tin 2 thẻ (T1 không có TTL)
+        e.bot("b0", "c1", q1["tag"], q2["tag"])
+        r = e.user("m2a", "c1", "A", ref="b0")
+        check("2 reply-to tin 2 thẻ, cùng tập đã hỏi ⇒ suppressed", r["outcome"] == "ambiguous_suppressed", str(r))
+        r = e.user("m3", "c1", "A", ref="b0", now=e.now + dt.timedelta(hours=25))
         check("2 sau TTL 24h ⇒ hỏi lại", r["outcome"] == "ambiguous_asked", str(r))
         check("2 không đóng gì", e.answers() == [])
         check("2 status ambiguous lên bus", len(e.statuses("decision-inbox-ambiguous")) >= 1)

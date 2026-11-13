@@ -129,7 +129,26 @@ _clf_close="$(printf '%s' "$_clf_json" | python3 -c 'import json,sys; print(json
 if [ -n "$_clf_mike" ] && [ -n "$_clf_close" ]; then
   _clf_block="[classifier denials $TODAY ICT] $_clf_json"
   if [ "$_clf_mike" -gt "$CLF_THRESHOLD" ] || [ "$_clf_close" -gt 0 ]; then
-    _clf_payload="$(printf '%s' "$_clf_json" | python3 -c 'import json,sys; d=json.load(sys.stdin); d["measured_by"]="bin/classifier_denial_count.py --day "+d["day"]+" --json"; print(json.dumps(d,ensure_ascii=False))' 2>/dev/null || true)"
+    # Payload PHẢI đủ để user trả lời được ("A"/"B" qua Decision Inbox): summary + options + recommendation + risk
+    # (vòng 2 arch-review 13/11, mục 7 — bản cũ chỉ chứa số đếm thô ⇒ câu hỏi rỗng, relay in "(không có summary)").
+    _clf_payload="$(printf '%s' "$_clf_json" | CLF_THR="$CLF_THRESHOLD" python3 -c '
+import json, os, sys
+d = json.load(sys.stdin)
+thr = os.environ.get("CLF_THR", "5")
+mike = d.get("by_agent", {}).get("Mike", 0)
+close = d.get("close_bus_question", 0)
+d["summary"] = ("Classifier chặn tool call %s lần của Mike trong ngày %s ICT (ngưỡng %s/ngày); %s lần chặn close_bus_question.py. "
+                "Lệnh bus hợp lệ bị chặn im lặng thì câu hỏi không được đóng và việc kẹt mà không ai thấy."
+                % (mike, d["day"], thr, close))
+d["options"] = [
+    "A: thêm allow-list cho lệnh bus/ghi nhớ rủi ro thấp theo DESIGN §8 (decision_inbox_design_20261113) vào agents/Mike/.claude/settings.json; user tự thêm, KHÔNG allow dispatch.sh/approve_plan*",
+    "B: giữ nguyên cấu hình, chấp nhận classifier chặn và đóng câu hỏi bằng Decision Inbox/đóng tay",
+]
+d["recommendation"] = ("A, chỉ các dòng rủi ro THẤP–TRUNG BÌNH trong DESIGN §8; đo lại bằng classifier_denial_count.py sau 1 tuần. "
+                       "Không đụng đường tiền (approve_plan*, BOT_STOP, trading_rules).")
+d["risk"] = "normal"
+d["measured_by"] = "bin/classifier_denial_count.py --day " + d["day"] + " --json"
+print(json.dumps(d, ensure_ascii=False))' 2>/dev/null || true)"
     [ -n "$_clf_payload" ] && timeout 60 python3 "$ROOT/bin/retro_escalate.py" --pattern classifier-denials-mike --days 1 \
       --payload "$_clf_payload" >> "$LOG" 2>&1 || true
     _clf_block="$_clf_block — VƯỢT NGƯỠNG (Mike>$CLF_THRESHOLD hoặc close_bus_question bị chặn): bash ĐÃ escalate qua retro_escalate.py, KHÔNG escalate lại."

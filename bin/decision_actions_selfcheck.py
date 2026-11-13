@@ -110,7 +110,7 @@ def main() -> int:
         check("R1 gọi đúng stub theo thứ tự (remember/append_event/notify/dispatch)", names == ["remember.sh", "append_event.sh", "notify_thread.sh", "dispatch.sh"], str(names))
         disp = [x for x in c if x["script"] == "dispatch.sh"][0]
         check("R1 dispatch: target + prompt từ template + --bg + DISPATCH_FROM=Mike",
-              disp["argv"][0] == "Taylor" and "Làm việc X" in disp["argv"][1] and "--bg" in disp["argv"]
+              disp["argv"][0] == "Taylor" and "Làm việc X" in disp["argv"][1] and "--bg" in disp["argv"] and "--no-followup" in disp["argv"]
               and disp["dispatch_from"] == "Mike" and disp["argv"][-1] == "600", str(disp))
         reg = json.loads((root / "kb" / "paper_programs_registry.json").read_text(encoding="utf-8"))
         pa = {p["id"]: p for p in reg["programs"]}
@@ -179,6 +179,11 @@ def main() -> int:
         check("E4 risk=normal khai tường minh ⇒ qua", rc == 0)
         rc, _ = ae("plan-without-onanswer", {"options": ["A", "B"]})
         check("E5 câu money KHÔNG có on_answer ⇒ ghi bình thường (guard không đụng)", rc == 0)
+        # E7 (vòng 2, mức thấp): khoá `on_answer` viết bằng escape unicode không được lách validate lúc ghi
+        r7 = subprocess.run([str(root / "bin" / "append_event.sh"), "Mike", "question", "docs-escaped",
+                             '{"options":["A","B"],"on\\u005fanswer":{"A":[{"action":"shell","cmd":"x"}]}}'],
+                            capture_output=True, text=True)
+        check("E7 khoá on_answer escape unicode + action lạ ⇒ vẫn bị chặn lúc ghi", r7.returncode == 1 and "whitelist" in (r7.stdout + r7.stderr), r7.stdout + r7.stderr)
         os.remove(root / "bin" / "decision_actions.py")
         rc, out = ae("docs-novalidator", {"options": ["A"], "on_answer": {"A": [{"action": "remember", "agent": "Mike", "note": "x"}]}})
         check("E6 validator vắng ⇒ từ chối fail-loud, nêu lỗi thật", rc == 1 and "decision_actions.py" in out, out)
