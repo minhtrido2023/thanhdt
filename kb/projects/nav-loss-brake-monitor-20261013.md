@@ -24,4 +24,4 @@
 - Nạp tiền không khai trong `data/account_cash_flows.json` sẽ che lỗ — nhánh
   `feat/fund-cashflow-detect-20261012` là chỗ đóng.
 - Đường mở "đợt đòn bẩy" chưa từng chạy trên dữ liệu thật (chưa có lệnh vay gói 1840 nào).
-- **Mốc xem lại 2026-11-09**: sau ~4 tuần không báo giả ⇒ trình user quyết tự tạo BOT_STOP hay giữ cảnh báo.
+- **Mốc xem lại 2026-11-09 — ĐÃ REVIEW 13/11**: 47 lượt chạy (13/10→13/11), 0 chạm ngưỡng thật; 7 lượt rc=1 đều `UNMEASURABLE` (21,22,26,29/10 — không đo được NAV, không phải lỗ). Khuyến nghị giữ CHỈ CẢNH BÁO; chờ user quyết (bus question `nav-loss-brake-review-20261113`).

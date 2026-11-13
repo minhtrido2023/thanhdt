@@ -635,7 +635,7 @@
       "gate_criteria": [
         {
           "text": "Nhãn có mặt trong tav2_bq.custom30v_8l từ kỳ rebalance 2026-11-05 (yield_floor_note khác NULL cho mọi dòng; is_stable_payer NULL đúng bằng số dòng BANKING_EXCLUDED)",
-          "status": "pending"
+          "status": "pass"
         },
         {
           "text": "NẾU có episode drawdown ≥5% VNINDEX trong kỳ quan sát: nhóm BELOW_FLOOR trong rổ có ΔMDD ≥1pp tốt hơn nhóm ABOVE_FLOOR trong cùng rổ (nhất quán với chân H2 của research)",
