@@ -149,9 +149,14 @@ d["recommendation"] = ("A, chỉ các dòng rủi ro THẤP–TRUNG BÌNH trong 
 d["risk"] = "normal"
 d["measured_by"] = "bin/classifier_denial_count.py --day " + d["day"] + " --json"
 print(json.dumps(d, ensure_ascii=False))' 2>/dev/null || true)"
-    [ -n "$_clf_payload" ] && timeout 60 python3 "$ROOT/bin/retro_escalate.py" --pattern classifier-denials-mike --days 1 \
-      --payload "$_clf_payload" >> "$LOG" 2>&1 || true
-    _clf_block="$_clf_block — VƯỢT NGƯỠNG (Mike>$CLF_THRESHOLD hoặc close_bus_question bị chặn): bash ĐÃ escalate qua retro_escalate.py, KHÔNG escalate lại."
+    _clf_esc_ok=0
+    if [ -n "$_clf_payload" ] && timeout 60 python3 "$ROOT/bin/retro_escalate.py" --pattern classifier-denials-mike --days 1 \
+      --payload "$_clf_payload" >> "$LOG" 2>&1; then _clf_esc_ok=1; fi
+    if [ "$_clf_esc_ok" = 1 ]; then
+      _clf_block="$_clf_block — VƯỢT NGƯỠNG (Mike>$CLF_THRESHOLD hoặc close_bus_question bị chặn): bash ĐÃ escalate qua retro_escalate.py, KHÔNG escalate lại."
+    else
+      _clf_block="$_clf_block — VƯỢT NGƯỠNG (Mike>$CLF_THRESHOLD hoặc close_bus_question bị chặn) nhưng ESCALATE THẤT BẠI (payload rỗng hoặc retro_escalate lỗi, xem $LOG) — cần escalate tay."
+    fi
   fi
 else
   _clf_block="[classifier denials $TODAY ICT] KHÔNG-CÓ-SỐ-ĐẾM (classifier_denial_count.py lỗi hoặc treo)"
