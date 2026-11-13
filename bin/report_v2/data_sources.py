@@ -65,7 +65,8 @@ def periods(acct, report_date):
     """Đúng đầu ra CLI `nav_period_returns.py --account A --report-date D` (kèm benchmark)."""
     rows = npr.load_nav_history(acct)
     inc = npr.load_inception(acct)
-    return npr.compute_period_returns(acct, D(report_date), rows, inc, benchmark=npr._benchmark_fn())
+    return npr.compute_period_returns(acct, D(report_date), rows, inc, benchmark=npr._benchmark_fn(),
+                                      savings=npr._savings_fn())   # B4: khối savings cho cột tiết kiệm ở PDF/email
 
 
 def _ledger(acct):
