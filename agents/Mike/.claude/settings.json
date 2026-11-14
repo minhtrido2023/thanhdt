@@ -43,6 +43,13 @@
       "Bash(bin/jobs.sh status *)",
       "Bash(bin/jobs.sh list *)",
       "Bash(bin/jobs.sh wait *)",
+      "Bash(python3 /home/trido/thanhdt/WorkingClaude/mike/bin/close_bus_question.py *)",
+      "Bash(/home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh *)",
+      "Bash(/home/trido/thanhdt/WorkingClaude/mike/bin/remember.sh *)",
+      "Bash(/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh *)",
+      "Bash(/home/trido/thanhdt/WorkingClaude/mike/bin/jobs.sh claim-reply *)",
+      "Bash(/home/trido/thanhdt/WorkingClaude/mike/bin/jobs.sh cancel *)",
+      "Bash(/home/trido/thanhdt/WorkingClaude/mike/bin/verify_finding.sh *)",
       "Edit(//home/trido/thanhdt/WorkingClaude/data/trade_plans/**)",
       "Write(//home/trido/thanhdt/WorkingClaude/data/trade_plans/**)"
     ]
