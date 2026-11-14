@@ -29,6 +29,14 @@ REGISTRY = os.environ.get("LIVERMORE_REGISTRY") or os.path.join(
 DATA_DIR = os.environ.get("LIVERMORE_DATA_DIR") or os.path.join(ROOT, "data", "livermore")
 STATE_DIR = os.environ.get("LIVERMORE_STATE_DIR") or os.path.join(ROOT, "state")
 HORIZON = 20            # phiên
+
+# Vai Livermore thu hẹp 2026-11-14 (user duyệt, decided_by: user; REPORT agents/Taylor/research/livermore_divergence_20261114):
+# KHÔNG mở lần đọc VNINDEX có forecast H20 mới (phân kỳ RSI NO-GO, cổng 12 lần = cổng GIẾT). Bật lại CHỈ bằng env tường minh.
+NARROWED_MSG = "role narrowed 2026-11-14: dự báo hướng VNINDEX H20 đã TẮT (bật lại: LIVERMORE_VNINDEX_FORECAST=1)"
+
+
+def vnindex_forecast_enabled():
+    return os.environ.get("LIVERMORE_VNINDEX_FORECAST") == "1"
 PKG_BARS = 500          # số phiên OHLCV đưa cho Livermore
 FREEZE_HOUR = 19        # DT5G publish ~19:01 ICT; trước giờ này phiên hôm nay chưa "đóng sổ"
 

@@ -25,6 +25,12 @@ while [ $# -gt 0 ]; do
 done
 die() { echo "LIVERMORE-RUN-FAIL: $*" >&2; exit 1; }
 
+# Vai thu hẹp 2026-11-14 (user duyệt): KHÔNG lập entry VNINDEX có forecast H20 mới. Bật lại = LIVERMORE_VNINDEX_FORECAST=1.
+if [ "${LIVERMORE_VNINDEX_FORECAST:-0}" != "1" ]; then
+  echo "[livermore_run] role narrowed 2026-11-14: dự báo hướng VNINDEX H20 đã TẮT — không chạy (bật lại: LIVERMORE_VNINDEX_FORECAST=1)" >&2
+  exit 3
+fi
+
 # Khoá TOÀN BỘ lượt chạy (xếp hàng tối đa 30', lượt sau thấy entry EXISTS và thoát). Khoá ở state/locks, không ở kb/.
 LOCKDIR="${LIVERMORE_STATE_DIR:-$ROOT/state}/locks"
 mkdir -p "$LOCKDIR"

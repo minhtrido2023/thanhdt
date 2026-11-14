@@ -50,7 +50,8 @@ def inner():
                LIVERMORE_DT5G_CSV=os.path.join(tmp, "dt5g.csv"), LIVERMORE_NOW="2026-10-22T19:30:00",
                FAKE_CLAUDE_COUNT=os.path.join(tmp, "claude.count"), FAKE_NOTIFY_LOG=os.path.join(tmp, "notify.log"),
                LIVERMORE_CLAUDE_BIN=os.path.join(tmp, "claude_fake"), LIVERMORE_NOTIFY_BIN=os.path.join(tmp, "notify_fake"),
-               LIVERMORE_PY=sys.executable)
+               LIVERMORE_PY=sys.executable,
+               LIVERMORE_VNINDEX_FORECAST="1")   # =1 chỉ để test các nhánh bật-lại; mặc định production = TẮT (khối §0 bên dưới)
     os.environ.update(env)
     for name, body in (("claude_fake", FAKE_CLAUDE), ("notify_fake", FAKE_NOTIFY)):
         p = os.path.join(tmp, name)
@@ -203,6 +204,23 @@ def inner():
     r = subprocess.run([sys.executable, os.path.join(BIN, "livermore_common.py"), "package", "2026-10-20", pk],
                        capture_output=True, text=True)
     check("gói-cũ-hơn-kỳ-vọng-bị-từ-chối", r.returncode != 0, r.stdout[-100:])
+
+    # ── 0. vai thu hẹp 2026-11-14: MẶC ĐỊNH TẮT forecast VNINDEX (cò + run.sh), bật lại chỉ bằng env =1 ──
+    reset()
+    write_bars(walk(299) + [1300.0])         # phá đỉnh ⇒ ở chế độ bật sẽ kích hoạt
+    os.environ.pop("LIVERMORE_VNINDEX_FORECAST")
+    rc0 = T.evaluate([], clock_fn=lambda: None)
+    check("narrow-trigger-rc0", rc0 == 0, f"rc={rc0}")
+    check("narrow-trigger-không-gọi-LLM-không-entry-không-báo",
+          cnt() == 0 and "### LVR-2026-10-22" not in C.read_registry() and not nlog(), f"cnt={cnt()}")
+    r0 = subprocess.run([os.environ["LIVERMORE_RUN_BIN"], "--as-of", "2026-10-22"], capture_output=True, text=True)
+    check("narrow-run.sh-rc3-không-LLM", r0.returncode == 3 and cnt() == 0 and "role narrowed 2026-11-14" in r0.stderr,
+          f"rc={r0.returncode} {r0.stderr[-150:]}")
+    check("narrow-run.sh-không-entry", "### LVR-2026-10-22" not in C.read_registry())
+    os.environ["LIVERMORE_VNINDEX_FORECAST"] = "yes"
+    check("narrow-chỉ-'1'-mới-bật", not C.vnindex_forecast_enabled())
+    os.environ["LIVERMORE_VNINDEX_FORECAST"] = "1"
+    check("narrow-env=1-bật-lại", C.vnindex_forecast_enabled())
 
     # ── 5. chuỗi đầy đủ: trigger → run.sh → claude giả → registry → notify ──
     reset()
@@ -534,6 +552,9 @@ def inner():
 
 
 MUTANTS = [
+    ("livermore_trigger_check.py", "    if not C.vnindex_forecast_enabled():", "    if False:", "vai thu hẹp: cò bỏ chặn forecast"),
+    ("livermore_run.sh", 'if [ "${LIVERMORE_VNINDEX_FORECAST:-0}" != "1" ]; then', "if false; then", "vai thu hẹp: run.sh bỏ chặn"),
+    ("livermore_common.py", 'os.environ.get("LIVERMORE_VNINDEX_FORECAST") == "1"', 'bool(os.environ.get("LIVERMORE_VNINDEX_FORECAST", "1"))', "vai thu hẹp: mặc định BẬT"),
     ("livermore_trigger_check.py", "MIN_GAP = 20", "MIN_GAP = 1", "bỏ khoảng cách 20 phiên"),
     ("livermore_trigger_check.py", 'if gap or k.startswith("DT_ENTER_")]', 'if gap]', "DT_ENTER không vượt khoảng cách"),
     ("livermore_trigger_check.py", 'if gap or k.startswith("DT_ENTER_")]', 'if gap or k.startswith("DT_")]', "DT_MOVE cũng vượt khoảng cách"),
