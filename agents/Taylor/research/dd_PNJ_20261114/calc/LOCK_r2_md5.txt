@@ -1,0 +1,6 @@
+0efafe3c1c3d31282ece9af7c0d1653d  calc/assumptions_r2.json
+62df005900703347a056838b0bbb82e6  calc/model_r2.py
+bd9fa7f7d34cd49ce03781f0313a5398  calc/model_r2_out.json
+0ecbc539064726534c3d0b24e4bf8ac0  REPORT.md
+9d235492a958c1fe7a72f580a019a47f  INTERNAL_criteria_check.md
+# r1 lock: calc/LOCK_md5.txt (khong doi). r2 job Taylor_20261114_021336 2026-11-14T02:20:40Z

@@ -1,0 +1,147 @@
+{
+ "version": 1,
+ "stem": "SpaceX_weekly_report_2026-11-09_to_2026-11-13",
+ "cadence": "weekly",
+ "account": "SpaceX",
+ "pdf": "SpaceX_weekly_report_2026-11-09_to_2026-11-13.pdf",
+ "pdf_sha256": "4067c66f2f744f41118acb818569a32e81333030d51681fb6ebfee78d71859e7",
+ "html": "SpaceX_weekly_report_2026-11-09_to_2026-11-13_email.html",
+ "html_sha256": "1e2de6dbf31909e3a1507788b895590c6151782a2e281b4880a1a6fa14bbc80a",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "c2334acfe499c3a4c818788483053b9cfdc1cc2a1ce20e16e368500645274435"
+  },
+  "fig1": {
+   "file": "01_nav_vs_vni.png",
+   "sha256": "3de8ffc2874a6da1fd869b77ea4fe92fcd1bffc2706c6c80f6b785006e071e90"
+  },
+  "fig5": {
+   "file": "02_bridge.png",
+   "sha256": "2e132e7fba5b8509cd7f439995af252992b7d693029b201ac4342f544764e8f8"
+  },
+  "fig17": {
+   "file": "03_attribution.png",
+   "sha256": "497c47efcb9f52cd4f6f781abde61c357441c719ca88b270e88c7c60818cb53a"
+  },
+  "fig25": {
+   "file": "04_allocation.png",
+   "sha256": "f65d9e692378fdd37c41235d27760b09da00b95ae1727b9ce7c6d0755bc8662b"
+  }
+ },
+ "pages": 4,
+ "page_cap": 5,
+ "lint": {
+  "pages": 4,
+  "words_total": 1332,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ",
+   942167552.0,
+   942167552.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu đầu kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   142846750.0,
+   142846750.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu cuối kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   196601600.0,
+   196601600.0,
+   0.0
+  ]
+ ],
+ "positions": [
+  [
+   "VGS",
+   2300.0,
+   "0,00%"
+  ],
+  [
+   "FPT",
+   800.0,
+   "−2,03%"
+  ],
+  [
+   "HT1",
+   2700.0,
+   "−4,22%"
+  ],
+  [
+   "VPB",
+   1500.0,
+   "−6,39%"
+  ],
+  [
+   "MCH",
+   200.0,
+   "−9,39%"
+  ],
+  [
+   "NNC",
+   300.0,
+   "−1,85%"
+  ],
+  [
+   "MBB",
+   175.0,
+   "−7,22%"
+  ],
+  [
+   "VIB",
+   47.0,
+   "+3,16%"
+  ]
+ ],
+ "period": "2026-11-09_to_2026-11-13",
+ "report_date": "2026-11-13",
+ "nav_date": "2026-11-13",
+ "market_block": {
+  "md": "/home/trido/thanhdt/WorkingClaude/mike/data/livermore/report_block_2026-11-13_weekly.md",
+  "block_sha256": "29767104f88431f2f831531c3fa5f488cb387d547d7ffe0c1d57390e815c6c7c"
+ },
+ "market_facts_error": null,
+ "regime_error": null,
+ "attribution_error": null,
+ "numbers": {
+  "wtd_pct": -0.051,
+  "mtd_pct": -0.315,
+  "inception_pct": -3.993,
+  "nav1": 942167552.0,
+  "pnl_vnd": -480385.0,
+  "flow_vnd": 0.0
+ },
+ "daily_rows": [
+  [
+   "09/11",
+   "+0,02%"
+  ],
+  [
+   "10/11",
+   "+0,14%"
+  ],
+  [
+   "11/11",
+   "−0,08%"
+  ],
+  [
+   "12/11",
+   "−0,12%"
+  ],
+  [
+   "13/11",
+   "−0,02%"
+  ]
+ ],
+ "narrative": true
+}

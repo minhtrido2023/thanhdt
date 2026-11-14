@@ -1,0 +1,9 @@
+ts,account,ticker,last,floor,ceiling,ref,headroom_floor,extreme_band,in_band,r15,rvol_20d,trig_ii_threshold,trig_ii_would_fire,parent_done,linger
+2026-01-15T10:46:30,selfcheck-ftwin,FPT,72100.0,,,72100.0,,0.030000,0,,,,,0,0
+2026-01-15T10:46:30,selfcheck-ftwin,MBB,26000.0,,,26000.0,,0.030000,0,,0.018019,-0.054057,,0,0
+2026-01-15T09:16:00,selfcheck-ftwin,FPT,72100.0,,,72100.0,,0.030000,0,,,,,0,0
+2026-01-15T09:16:00,selfcheck-ftwin,MBB,26000.0,,,26000.0,,0.030000,0,,0.018019,-0.054057,,0,0
+2026-01-15T10:46:30,selfcheck-ftwin,FPT,72100.0,,,72100.0,,0.030000,0,,,,,0,0
+2026-01-15T10:46:30,selfcheck-ftwin,MBB,26000.0,,,26000.0,,0.030000,0,,0.018019,-0.054057,,0,0
+2026-01-15T11:00:30,selfcheck-ftwin,FPT,72100.0,,,72100.0,,0.030000,0,,,,,0,0
+2026-01-15T11:00:30,selfcheck-ftwin,MBB,26000.0,,,26000.0,,0.030000,0,,0.018019,-0.054057,,0,0

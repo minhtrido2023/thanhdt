@@ -1,0 +1,35 @@
+{
+ "Q4_implied_npat": -6741.66,
+ "equity_2026_est": 6440.65,
+ "bvps_2026_est": 12586.277651840848,
+ "bvps_930": 25760.78714922223,
+ "bull_F_bn": 15254.3,
+ "bull_ps_n550": 14368,
+ "base_F_bn": 6758.8,
+ "base_ps_n550": 6366,
+ "bear_F_bn": 1351.8,
+ "bear_ps_n550": 1273,
+ "bull_ps_n400": 16731,
+ "base_ps_n400": 7413,
+ "bear_ps_n400": 1483,
+ "base_r_b1.0_d-100bp": 7409,
+ "base_r_b1.0_d-50bp": 6854,
+ "base_r_b1.0_d50bp": 5934,
+ "base_r_b1.0_d100bp": 5548,
+ "base_r_b0.5_d-100bp": 6854,
+ "base_r_b0.5_d-50bp": 6602,
+ "base_r_b0.5_d50bp": 6143,
+ "base_r_b0.5_d100bp": 5934,
+ "base_roe0.1": 6366,
+ "base_roe0.135": 8016,
+ "base_roe0.2": 9549,
+ "V_ngan_raw_bn": 19076.8,
+ "V_ngan_raw_ps": 37280
+}
+{
+ "weighted_ps_n550": 6438,
+ "weighted_ps_n400": 7498,
+ "V_ngan_post_dilution_550": 17968,
+ "cfo3_avg": -340.3,
+ "zone_cheap_085x": 5472
+}

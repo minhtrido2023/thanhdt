@@ -1,0 +1,105 @@
+ts,event,parent_id,ticker,side,child_oid,qty,price,filled_total,book,play_type,note
+2026-11-14T13:39:37,PLACE,BUY-TST-01,TST,buy,OID1,1000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:in-window hyb:blk left=5"
+2026-11-14T13:39:37,PLACE,BUY-E2E,TST,buy,OID1,1000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:in-window hyb:blk left=5"
+2026-11-14T13:39:37,PLACE,BUY-E2E,TST,buy,OID2,1000,20000,1000,LAG,LAG_HI,"adp:dip(ratio=0.08%,no-hist→cross); ft:in-window hyb:blk left=4"
+2026-11-14T13:39:37,PLACE,BUY-E2E,TST,buy,OID3,1000,20000,2000,LAG,LAG_HI,"adp:dip(ratio=0.06%,no-hist→cross); ft:in-window hyb:blk left=3"
+2026-11-14T13:39:37,PLACE,BUY-E2E,TST,buy,OID4,1000,20000,3000,LAG,LAG_HI,"adp:dip(ratio=0.04%,no-hist→cross); ft:in-window hyb:blk left=2"
+2026-11-14T13:39:37,PLACE,BUY-E2E,TST,buy,OID5,1000,20000,4000,LAG,LAG_HI,"adp:dip(ratio=0.02%,no-hist→cross); ft:in-window hyb:blk left=1"
+2026-11-14T13:39:37,HYBRID_DEFER,BUY-STRAND,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:37,PLACE,BUY-STRAND,TST,buy,OID1,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4 hyb"
+2026-11-14T13:39:38,HYBRID_DEFER,SELL-CRASH,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:38,PLACE,SELL-CRASH,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb
+2026-11-14T13:39:38,PLACE,SELL-CRASH,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.16%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:39,HYBRID_DEFER,SELL-NORMAL,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ0,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ1,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ2,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ3,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ4,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ5,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ6,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ7,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ8,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:39,HYBRID_DEFER,BQ9,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ0,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ1,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ2,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ3,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ4,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ5,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ6,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ7,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ8,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,HYBRID_DEFER,BQ9,TST,buy,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 5 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,PLACE,BQ0,TST,buy,OID1,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ1,TST,buy,OID2,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ2,TST,buy,OID3,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ3,TST,buy,OID4,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ4,TST,buy,OID5,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ5,TST,buy,OID6,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ6,TST,buy,OID7,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ7,TST,buy,OID8,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ8,TST,buy,OID9,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,PLACE,BQ9,TST,buy,OID10,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:40,HYBRID_DEFER,SELL-THR,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:40,PLACE,SELL-THR,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb
+2026-11-14T13:39:41,PLACE,BQ0,TST,buy,OID1,5000,20000,0,LAG,LAG_HI,"adp:dip(ratio=0.10%,no-hist→cross); ft:out×4"
+2026-11-14T13:39:41,HYBRID_DEFER,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:41,PLACE,SELL-FLAKY,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb
+2026-11-14T13:39:41,HYBRID_DEFER,SELL-FAIL1,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:42,HYBRID_DEFER,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,NO_QUOTE,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,thiếu quote — thử lại sau
+2026-11-14T13:39:42,HYBRID_DEFER,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:42,PLACE,SELL-FLAKY,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb
+2026-11-14T13:39:43,HYBRID_DEFER,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:43,PLACE,SELL-FLAKY,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb
+2026-11-14T13:39:43,HYBRID_DEFER,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:43,PLACE,SELL-FLAKY,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb
+2026-11-14T13:39:44,HYBRID_DEFER,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:44,PLACE,SELL-FLAKY,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb
+2026-11-14T13:39:44,HYBRID_DEFER,SELL-FLAKY,TST,sell,,,,0,LAG,LAG_HI,"lịch HYBRID: ngoài block, còn 4 block phía trước — chờ block kế tiếp (hết cửa sổ sẽ tự đặt bình thường)"
+2026-11-14T13:39:44,PLACE,SELL-FLAKY,TST,sell,OID1,8000,20000,0,LAG,LAG_HI,EXTREME_DOWN sell-to-floor; ft:out×1 hyb

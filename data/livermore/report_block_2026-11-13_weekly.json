@@ -1,0 +1,133 @@
+{
+ "status": "PASS",
+ "kind": "weekly",
+ "period_end": "2026-11-13",
+ "as_of": "2026-11-13",
+ "md": "/home/trido/thanhdt/WorkingClaude/mike/data/livermore/report_block_2026-11-13_weekly.md",
+ "sha256": "3a5271977afde8bc04b0df391742fee376c595f3713f892936391735dad9d468",
+ "forecast": {
+  "mode": "REPEAT",
+  "entry_as_of": "2026-10-21",
+  "due": "2026-11-18",
+  "gap": 17,
+  "fields": {
+   "H20_DIR": "UP",
+   "H20_P_UP": "0.56",
+   "LEVEL": "1677 HOLD",
+   "INVALIDATION": "đóng <1690 trong 5 phiên với vol ≥700M, hoặc bất kỳ phiên đóng <1677."
+  },
+  "result": [
+   "UP",
+   0.56,
+   "HOLD"
+  ]
+ },
+ "attempts": 1,
+ "facts": [
+  [
+   "Đóng cửa 13/11/2026",
+   "1.734,93 điểm"
+  ],
+  [
+   "Đóng cửa 06/11/2026 (cuối kỳ trước)",
+   "1.725,36 điểm"
+  ],
+  [
+   "Thay đổi trong kỳ",
+   "+0,55%"
+  ],
+  [
+   "Chuỗi phiên tăng liên tiếp tính đến 13/11/2026",
+   "1 phiên"
+  ],
+  [
+   "MA20 ngày 13/11/2026",
+   "1.736,40 (cuối kỳ trước 1.730,18)"
+  ],
+  [
+   "Đóng cửa so với MA20",
+   "−0,08%"
+  ],
+  [
+   "MA50 ngày 13/11/2026",
+   "1.759,23 (cuối kỳ trước 1.769,06)"
+  ],
+  [
+   "Đóng cửa so với MA50",
+   "−1,38%"
+  ],
+  [
+   "MA200 ngày 13/11/2026",
+   "1.787,25 (cuối kỳ trước 1.791,07)"
+  ],
+  [
+   "Đóng cửa so với MA200",
+   "−2,93%"
+  ],
+  [
+   "RSI(14)",
+   "48,5 (cuối kỳ trước 45,5)"
+  ],
+  [
+   "MACD trừ đường tín hiệu",
+   "+1,87 (cuối kỳ trước +0,53)"
+  ],
+  [
+   "Phiên MACD trừ tín hiệu đổi dấu gần nhất trong kỳ",
+   "10/11/2026"
+  ],
+  [
+   "Dòng tiền CMF",
+   "+0,17 (cuối kỳ trước +0,01)"
+  ],
+  [
+   "Cao nhất trong kỳ (giá trong phiên)",
+   "1.751,57 ngày 11/11/2026"
+  ],
+  [
+   "Thấp nhất trong kỳ (giá trong phiên)",
+   "1.701,90 ngày 09/11/2026"
+  ],
+  [
+   "Đóng cửa thấp nhất trong kỳ",
+   "1.714,32 ngày 09/11/2026"
+  ],
+  [
+   "Đỉnh 60 phiên (~3 tháng)",
+   "1.874,48 ngày 07/09/2026"
+  ],
+  [
+   "Đáy 60 phiên (~3 tháng)",
+   "1.677,19 ngày 20/10/2026"
+  ],
+  [
+   "Đỉnh 250 phiên (~1 năm)",
+   "1.933,11 ngày 19/05/2026"
+  ],
+  [
+   "Đáy 250 phiên (~1 năm)",
+   "1.586,44 ngày 23/03/2026"
+  ],
+  [
+   "Khối lượng khớp trung bình phiên trong kỳ (5 phiên)",
+   "709 triệu cp"
+  ],
+  [
+   "Khối lượng khớp trung bình phiên kỳ trước (5 phiên)",
+   "828 triệu cp"
+  ],
+  [
+   "Chênh lệch khối lượng trung bình so với kỳ trước",
+   "−14,4%"
+  ],
+  [
+   "Phiên khối lượng lớn nhất trong kỳ",
+   "10/11/2026: 877 triệu cp, đóng cửa +1,68%"
+  ],
+  [
+   "Khối lượng trung bình 20 phiên",
+   "725 triệu cp"
+  ]
+ ],
+ "created": "2026-11-14T09:04:56+07:00"
+}

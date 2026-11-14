@@ -6,7 +6,7 @@
 81a87069f3f895a3a93d62d85b8fb5f0  _common_g2/ddg2.py
 13dac039539fb91fc8f7256c03a71e5d  ../../../../../deposit_rate_vn.py
 f9605983ad3b66b47ed80179bcad81da  ../../../../../cctg_rate_vn.py
-1bb3c27280abc1dbd014af7eecf8b3d4  ../../../../../data/deposit_rate_vn_events.csv
+bbd3b0905ce587fdc7a0e8b7f9f592bb  ../../../../../data/deposit_rate_vn_events.csv
 fc06e3a866142684d87a43b34e0f17d2  ../../../../../data/cctg_rate_vn_events.csv
 3ff162ff82ad31e38c66f37ef1b02a8a  TV1/calc/model_tv1_r2.py
 58c7a3501965e83322c8299d912ce7b9  TV1/calc/tv1_v2_core.py

@@ -2,5 +2,5 @@
 == dcf_check_selfcheck.py rc=0 ::   [19] path không ghi được → nuốt lỗi, không raise: OK   [20] _dcf_check_for_order KHÔNG tự ghi lịch sử (chỉ report gọi): OK 
 == dcf_selector_selfcheck.py rc=0 ::   OK    all 2 dcf_at(...) call-sites sit inside an `dcf_at is not None` guard (3 guards; unguarded lines=[]) -> OFF leaves yieldcombo untouched SELFCHECK PASS 
 == dcf_refresh_gate_selfcheck.py rc=0 ::   [PASS] dry run writes no state file ALL PASS 
-== dcf_earning_power_test.py rc=0 ::     ALL        2M⟂PE=+0.0378(t+5.7)  3M⟂PE=+0.0430(t+6.8)     ALL        2M⟂PE=+0.0242(t+3.6)  3M⟂PE=+0.0348(t+5.0) 
+== dcf_earning_power_test.py rc=0 ::     ALL        2M⟂PE=+0.0372(t+5.7)  3M⟂PE=+0.0419(t+6.7)     ALL        2M⟂PE=+0.0241(t+3.6)  3M⟂PE=+0.0323(t+4.9) 
 == tz_asof_ict_dd_dcf_selfcheck.py rc=0 :: 115/115 PASS ALL PASS 

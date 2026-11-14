@@ -1,0 +1,3 @@
+4e3fce77fa22d0b2cd8a8d4d7f8be463  calc/assumptions.json
+7996ffb6dd545d46f6f11fd07b10a0d3  calc/model.py
+caf25da7f621040fea75ad8515fbcdce  REPORT.md

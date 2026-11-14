@@ -1,0 +1,27 @@
+{
+  "plan_date": "2099-01-01",
+  "plan_created_at": "2099-01-01T00:00:00",
+  "px_hist": {},
+  "exchange_override": {},
+  "parents": {
+    "SELL-FLAKY": {
+      "filled": 0,
+      "done": false,
+      "atc_sent": false,
+      "children": [
+        {
+          "oid": "OID1",
+          "qty": 8000,
+          "price": 20000,
+          "filled": 0,
+          "status": "open",
+          "ts": "2099-01-01T09:03:00"
+        }
+      ],
+      "last_slice_ts": "2099-01-01T09:03:00",
+      "dcf_check": null,
+      "place_fail_streak": 0,
+      "place_fail_note": ""
+    }
+  }
+}

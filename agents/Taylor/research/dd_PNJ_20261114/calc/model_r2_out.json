@@ -1,0 +1,72 @@
+{
+ "q3_prov_lctt03": 320.7,
+ "q3_inv_prov_delta": 812.1,
+ "gpm_q3_reported": 0.0871,
+ "gpm_q3_preprov_lo": 0.1329,
+ "gpm_q3_preprov_hi": 0.2032,
+ "npm_2029_plan": 0.0277,
+ "npm_2028_plan": 0.0237,
+ "npm_9m_2025": 0.0635,
+ "bank_delta": -606.5,
+ "bank_delta_pct": -0.1436,
+ "bank_by_name_delta": {
+  "ACB": -499.9,
+  "HSBC": -12.1,
+  "Shinhan": 0.0,
+  "Kasikorn": 0.0,
+  "SCB": 0.0,
+  "VCB": -801.5,
+  "VietinBank": 706.9,
+  "BIDV": 0.0,
+  "Woori": 0.0,
+  "KEB_Hana": 0.0
+ },
+ "bvps_h1_sx": 26263,
+ "bvps_2026_est": 12586,
+ "raise_at_bvps2026_550m_bn": 6922.5,
+ "price_needed_8000bn_550m": 14545,
+ "raise_at_bvps_h1_550m_bn": 14444.6,
+ "bull_g5_ps550": 14368,
+ "bull_g5_ps400": 16731,
+ "bull_g0_ps550": 11929,
+ "bull_g0_ps400": 13892,
+ "base_g5_ps550": 6366,
+ "base_g5_ps400": 7413,
+ "base_g0_ps550": 7635,
+ "base_g0_ps400": 8891,
+ "bear_g5_ps550": 1273,
+ "bear_g5_ps400": 1483,
+ "bear_g0_ps550": 3817,
+ "bear_g0_ps400": 4445,
+ "bear_alt_g5_ps550": 3267,
+ "bear_alt_g5_ps400": 3804,
+ "bear_alt_g0_ps550": 5726,
+ "bear_alt_g0_ps400": 6668,
+ "level_grid": {
+  "1200.0": {
+   "roe": 0.0759,
+   "g5_n550": 3263,
+   "g0_n550": 5726,
+   "g5_n400": 3799
+  },
+  "1600.0": {
+   "roe": 0.1013,
+   "g5_n550": 6446,
+   "g0_n550": 7635,
+   "g5_n400": 7506
+  },
+  "2112.9": {
+   "roe": 0.1337,
+   "g5_n550": 10527,
+   "g0_n550": 10082,
+   "g5_n400": 12259
+  },
+  "2828.5": {
+   "roe": 0.179,
+   "g5_n550": 16221,
+   "g0_n550": 13497,
+   "g5_n400": 18890
+  }
+ },
+ "r1_weighted_ps550_reproduced": 6438
+}
