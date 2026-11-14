@@ -2342,3 +2342,15 @@
 
 ## Archived 2026-11-14 (keep=12 days=0 require_done=False)
 - [2026-11-13T07:32:55Z] [live-gap-exec-A5 13/11] XONG job Taylor_20261113_071030: pin trung byte tren ma commit (80f509ec main sach / e2de0ac4 e9a9aed1a); neo -25,2 (4707bcbe) chua fill ao, bo fill ao -3,96pp => DD5 san trung thuc -29,09 (park0.3)/-27,89 (park0); ADV live=pit 29/32 — CHO quant-skeptic + user quyet neo
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-11-13T08:01:28Z] [decision-inbox 13/11] XONG job Taylor_20261113_075639: DESIGN.md o research/decision_inbox_design_20261113 (cog CUSTOM_COGS_DIR + bin/decision_inbox.py, chua code) — CHO user duyet + allow-list user tu them
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-11-13T08:18:48Z] [decision-inbox impl 13/11] XONG job Taylor_20261113_080329: nhanh feat/decision-inbox-20261113 (head 2b17704de) KHONG merge, cog chua bat; selfcheck 221 ca x2 TZ 0 fail; CHO Mike chay arch-reviewer toan diff roi merge; user bat shadow (2 dong .env) sau merge; buoc 7 doi soat chua lam
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-11-13T08:26:07Z] [live-gap-exec-A6 13/11] XONG job Taylor_20261113_075112: nhanh research/live-gap-A6-carry-20261113 (262c117c3) 1 cay, pin0 80f509ec + pin1M e2de0ac4 trung byte, KHONG merge; DD5 dai L3P p0.3 -28,54 [-29,09;-27,99] (s12345 = canh duoi); small-NAV 1B DD5 -32,75 (chenh L1 chi -1,6pp) => neo cho NAV live chua chot — CHO quant-skeptic + arch-review + user
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-11-13T08:40:19Z] [decision-inbox vong2 13/11] XONG job Taylor_20261113_083010: nhanh feat/decision-inbox-20261113 (03187c254) KHONG merge; 7 muc + 2 muc thap, selfcheck r2 17/77->77/77; CHO arch-reviewer vong 3 (chi neu NEEDS_CHANGES lan nua -> circuit-breaker) roi Mike merge; retention state jsonl chua lam
