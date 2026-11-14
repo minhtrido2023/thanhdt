@@ -1,0 +1,73 @@
+{
+ "base_rows": 3208,
+ "base_first": "2014-01-02",
+ "base_last": "2026-11-12",
+ "selfcheck_overlap": 3208,
+ "diff_dt4_vs_live_state_raw": 0,
+ "diff_dt4_vs_live_state(DT5G)": 50,
+ "transitions_base": 166,
+ "transitions_dt4": 53,
+ "transitions_dt5g_live_state": 51,
+ "episodes_total": 129,
+ "by_need_outcome": {
+  "need10_commit": 42,
+  "need10_revert": 51,
+  "need25_commit": 11,
+  "need25_revert": 25
+ },
+ "qualifying_k5of10_or_k15of25": 82,
+ "qualifying_by_need_outcome": {
+  "need10_commit": 42,
+  "need10_revert": 25,
+  "need25_commit": 11,
+  "need25_revert": 4
+ },
+ "qualifying_commit_rate": 0.646,
+ "qualifying_by_year": {
+  "2014": 4,
+  "2015": 5,
+  "2016": 3,
+  "2017": 2,
+  "2018": 9,
+  "2019": 6,
+  "2020": 9,
+  "2021": 9,
+  "2022": 6,
+  "2023": 9,
+  "2024": 5,
+  "2025": 10,
+  "2026": 5
+ },
+ "qualifying_IS_2014_2019": 29,
+ "qualifying_OOS_2020p": 53,
+ "qualifying_by_from_to": {
+  "CRISIS->BEAR": 3,
+  "CRISIS->NEUTRAL": 7,
+  "BEAR->CRISIS": 3,
+  "BEAR->NEUTRAL": 8,
+  "NEUTRAL->CRISIS": 5,
+  "NEUTRAL->BEAR": 21,
+  "NEUTRAL->BULL": 16,
+  "NEUTRAL->EXBULL": 2,
+  "BULL->CRISIS": 3,
+  "BULL->BEAR": 1,
+  "BULL->NEUTRAL": 9,
+  "BULL->EXBULL": 2,
+  "EXBULL->NEUTRAL": 1,
+  "EXBULL->BULL": 1
+ },
+ "commits_leaving_BULL_EXBULL": 11,
+ "commits_leaving_dates": [
+  "2018-02-27",
+  "2018-05-09",
+  "2021-02-19",
+  "2021-07-26",
+  "2021-09-10",
+  "2021-12-27",
+  "2024-05-14",
+  "2025-05-19",
+  "2025-09-22",
+  "2025-10-06",
+  "2026-02-13"
+ ]
+}

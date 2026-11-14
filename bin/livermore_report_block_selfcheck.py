@@ -84,7 +84,7 @@ def entry(as_of, due, trig="LIVE-BASELINE"):
 
 def inner():
     tmp = tempfile.mkdtemp(prefix="lvb_sc_")
-    env = dict(LIVERMORE_TEST="1", LIVERMORE_NOW="2026-10-24T09:00:00",
+    env = dict(LIVERMORE_TEST="1", LIVERMORE_NOW="2026-10-24T09:00:00", LIVERMORE_VNINDEX_FORECAST="1",   # =1 chỉ để test nhánh bật-lại (#4b); mặc định production = TẮT (#4d)
                LIVERMORE_REGISTRY=os.path.join(tmp, "reg.md"), LIVERMORE_DATA_DIR=os.path.join(tmp, "data"),
                LIVERMORE_STATE_DIR=os.path.join(tmp, "state"), LIVERMORE_BARS_CSV=os.path.join(tmp, "bars.csv"),
                LIVERMORE_IND_CSV=os.path.join(tmp, "ind.csv"), LIVERMORE_BREADTH_CSV=os.path.join(tmp, "br.csv"),
@@ -202,6 +202,19 @@ def inner():
           and "trigger: REPORT_BLOCK_WEEKLY" in regtxt, (meta, regtxt[-300:]))
     check("#4c NEW: dòng dự báo lấy từ entry mới (GIẢM, 1650 bị phá)", "**GIẢM**" in open(md_p).read()
           and "1650: bị phá" in open(md_p).read() and "lập mới" in open(md_p).read())
+    # 4d. vai thu hẹp 2026-11-14: MẶC ĐỊNH TẮT ⇒ gap ≥20 KHÔNG lập forecast mới, không gọi LLM forecast, không ghi sổ
+    os.environ.pop("LIVERMORE_VNINDEX_FORECAST")
+    reset([entry(sess_before(20), "2026-11-30")])
+    rc, meta = run()
+    regtxt = open(env["LIVERMORE_REGISTRY"]).read(); mdn = open(md_p).read() if os.path.exists(md_p) else ""
+    check("#4d mặc định TẮT: gap 20 ⇒ NONE, KHÔNG entry mới trong sổ, khối không mang dòng dự báo/hit-rate",
+          rc == 0 and meta["forecast"]["mode"] == "NONE" and "### LVR-2026-10-23" not in regtxt
+          and "không có dự báo được lập cho kỳ này" in mdn and "không dự báo hướng thị trường" in mdn
+          and "chấm điểm sau 20 phiên" not in mdn and "**TĂNG**" not in mdn and "**GIẢM**" not in mdn, (meta.get("forecast"), mdn[-300:]))
+    import livermore_common as _C
+    check("#4e vnindex_forecast_enabled(): mặc định False; chỉ '1' mới bật", not _C.vnindex_forecast_enabled()
+          and (os.environ.__setitem__("LIVERMORE_VNINDEX_FORECAST", "true") or not _C.vnindex_forecast_enabled()))
+    os.environ["LIVERMORE_VNINDEX_FORECAST"] = "1"
     # 5. mù về sau: entry SAU as-of KHÔNG được nhắc lại; nó nằm trong 20 phiên ⇒ không lập NEW lùi ngày ⇒ NONE
     reset([entry(after[0], "2026-12-01")])
     rc, meta = run()
@@ -318,6 +331,7 @@ def inner():
 
 
 MUTANTS = [
+    ("M16 vai thu hẹp: bỏ chặn forecast mới", "        if not C.vnindex_forecast_enabled():", "        if False:"),
     ("M1 bỏ kiểm số lạ", "    bad_n = sorted(b_nums - f_nums)", "    bad_n = []"),
     ("M2 khoảng cách 19 phiên", "MIN_GAP = C.HORIZON ", "MIN_GAP = C.HORIZON - 1 "),
     ("M3 bỏ lọc mù entry sau as-of", 'if e["as_of"] <= as_of]', "if True]"),

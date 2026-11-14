@@ -287,6 +287,9 @@ def resolve_forecast(as_of, kind, run_new=True):
                    else f"sổ đã có lần đọc sau as-of trong vòng {MIN_GAP} phiên")
             return {"mode": "NONE", "entry_as_of": None, "due": None, "gap": gap, "fields": None,
                     "result": None, "why": why}
+        if not C.vnindex_forecast_enabled():                    # role narrowed 2026-11-14: không lập forecast mới
+            return {"mode": "NONE", "entry_as_of": None, "due": None, "gap": gap, "fields": None,
+                    "result": None, "why": C.NARROWED_MSG}
         if not run_new:
             raise BlockError("cần forecast MỚI nhưng run_new=False")
         env = dict(os.environ, LIVERMORE_ALLOW_PAST="1")   # as_of đã được kiểm ≤ phiên kỳ vọng ở build_facts
@@ -410,6 +413,12 @@ def paths(as_of, kind):
 def assemble(facts, lines, fc):
     as_of = dt.date.fromisoformat(facts["as_of"])
     ns = n_scored()
+    if fc["mode"] == "NONE":        # vai thu hẹp 2026-11-14: khối mô tả vùng/khối lượng, KHÔNG dự báo hướng
+        tail = ("*Nguồn số liệu: HOSE, tính toán nội bộ; mọi con số do hệ thống tính và được kiểm tra tự động trước khi "
+                "đưa vào nhận định. Khối này chỉ mô tả cấu trúc giá và khối lượng đã xảy ra, không dự báo hướng thị "
+                "trường. Đây là nhận định tham khảo, không phải khuyến nghị đầu tư.*")
+        return "\n".join([f"**Kỹ thuật (VN-Index, dữ liệu đóng cửa {dmy(as_of)}) — {MARKER}:**",
+                          *lines, forecast_line(fc), "", tail]) + "\n"
     return "\n".join([
         f"**Kỹ thuật (VN-Index, dữ liệu đóng cửa {dmy(as_of)}) — {MARKER}:**",
         *lines,

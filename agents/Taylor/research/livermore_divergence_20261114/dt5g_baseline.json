@@ -1,0 +1,11 @@
+{
+ "p_random_day_down_commit_within40": 0.278,
+ "RBEAR_followed_within40": "7/13",
+ "p_binom_ge": 0.043,
+ "coverage_90d": 0.248,
+ "commits_leaving_BULL": 11,
+ "covered_obs": 6,
+ "covered_expected": 2.73,
+ "p_binom_cover_ge": 0.033,
+ "note": "m\u00f4 t\u1ea3, ngo\u00e0i h\u1ecd 48, N=13/11, kh\u00f4ng v\u00e0o ti\u00eau ch\u00ed; kh\u00f4ng hi\u1ec7u ch\u1ec9nh \u0111a ki\u1ec3m \u0111\u1ecbnh"
+}

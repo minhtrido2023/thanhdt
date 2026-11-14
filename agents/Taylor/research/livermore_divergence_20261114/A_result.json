@@ -1,0 +1,62 @@
+{
+ "N": 100,
+ "n_recognized_true": 0,
+ "check_sign_mom20_case_vs_truth": 1.0,
+ "check_sign_mom60_case_vs_truth": 1.0,
+ "ols_P_UP": {
+  "coef": {
+   "const": 0.4365,
+   "mom20": 0.0481,
+   "mom60": -0.0286,
+   "rp250": 0.0969
+  },
+  "R2": 0.2882,
+  "R2_adj": 0.2659,
+  "R2_LOO": 0.1474
+ },
+ "corr_P_UP_mom20": 0.2926,
+ "corr_P_UP_mom60": 0.3237,
+ "corr_P_UP_rp250": 0.5188,
+ "ols_DIR": {
+  "coef": {
+   "const": 0.0344,
+   "mom20": 0.4854,
+   "mom60": -0.2317,
+   "rp250": 0.7533
+  },
+  "R2": 0.2041,
+  "R2_adj": 0.1792,
+  "R2_LOO": 0.0886
+ },
+ "corr_DIR_mom20": 0.2687,
+ "corr_DIR_mom60": 0.2714,
+ "corr_DIR_rp250": 0.43,
+ "logit_DIR_McFadden_R2": 0.1636,
+ "logit_DIR_coef_std": {
+  "const": -0.4881,
+  "mom20": 0.3929,
+  "mom60": -0.2447,
+  "rp250": 1.0634
+ },
+ "R1_contra_mom20": {
+  "agree_with_livermore": 33,
+  "hit_vs_truth": 50,
+  "n_UP_calls": 49
+ },
+ "R2_contra_mom60": {
+  "agree_with_livermore": 35,
+  "hit_vs_truth": 52,
+  "n_UP_calls": 47
+ },
+ "R3_contra_rp250": {
+  "agree_with_livermore": 32,
+  "hit_vs_truth": 53,
+  "n_UP_calls": 54
+ },
+ "livermore_hit": 55,
+ "base_rate_up": 0.47,
+ "rec=False": {
+  "N": 100,
+  "hit": 55
+ }
+}

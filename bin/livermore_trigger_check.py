@@ -182,6 +182,9 @@ def run_score():
 def evaluate(argv, clock_fn=real_clock):
     global DRY
     dry = DRY = "--dry-run" in argv
+    if not C.vnindex_forecast_enabled():                        # role narrowed 2026-11-14 (user duyệt, decided_by: user)
+        print(f"[trigger] {C.NARROWED_MSG} — không mở đọc VNINDEX có forecast (scorer vẫn chấm entry cũ)")
+        return 0
     today = C.today_ict()
     bars = C.get_bars(today - dt.timedelta(days=700))
     if len(bars) < HI_LO_WIN + 1:
