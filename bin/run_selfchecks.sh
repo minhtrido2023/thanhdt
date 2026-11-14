@@ -144,6 +144,11 @@ for f in "${FILES[@]}"; do
     *annualization_basis_selfcheck.py) t=240 ;;
     *book_clearing_g3_selfcheck.py) t=480 ;;
     *report_gate_quarterly_selfcheck.py) t=300 ;;
+    # cùng lượt: due_diligence_corp_flags 125s rc=0; report_v2 KHÔNG treo — build.py render PDF cho
+    # 2 account × 3 cadence × 2 lần (kiểm tất định), đo >16 phút với ~120 assertion `ok`, 0 FAIL
+    # (máy có 2 bản chạy song song lúc đo ⇒ số đo bi quan).
+    *due_diligence_corp_flags_selfcheck.py) t=300 ;;
+    *report_v2_selfcheck.py) t=1800 ;;
   esac
   # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
   # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
