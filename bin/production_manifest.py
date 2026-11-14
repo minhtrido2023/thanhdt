@@ -784,6 +784,17 @@ def diff_manifests(old, new):
     CẢ HAI bản đọc được systemd (cron/headless không có D-Bus user session)."""
     out = []
     of, nf = old.get("files", {}), new.get("files", {})
+    units_ok = old.get("units_status") == "ok" and new.get("units_status") == "ok"
+    if not units_ok:
+        # File chỉ vào production qua gốc systemd (vd work_tree_server.py ← mike-work-tree.service) thì
+        # cũng chỉ so được khi CẢ HAI bản đọc được systemd — giống luật gốc bên dưới. Trước 2026-11-14
+        # luật này chỉ áp cho gốc, không áp cho file ⇒ chạy dưới cron/headless (không D-Bus) báo
+        # "rời production" giả + FAIL (weekly ops audit 2026-11-14 tái hiện: có D-Bus PASS, không D-Bus FAIL).
+        def _unit_only(v):
+            rs = v.get("roots") or []
+            return bool(rs) and all(str(r).startswith("unit ") for r in rs)
+        of = {k: v for k, v in of.items() if not _unit_only(v)}
+        nf = {k: v for k, v in nf.items() if not _unit_only(v)}
     for p in sorted(set(nf) - set(of)):
         w = "WARN " if nf[p]["tier"] == "T3" else ""
         out.append(f"{w}+ {p} [{nf[p]['tier']}] (mới vào production, từ {nf[p]['parent']})")
@@ -793,7 +804,6 @@ def diff_manifests(old, new):
     for p in sorted(set(of) & set(nf)):
         if of[p]["tier"] != nf[p]["tier"]:  # kể cả T3 <-> T0-T2: đổi vai trò thật, vẫn FAIL
             out.append(f"~ {p} tầng {of[p]['tier']} -> {nf[p]['tier']}")
-    units_ok = old.get("units_status") == "ok" and new.get("units_status") == "ok"
     key = lambda r: (r["kind"], r["schedule"], r["script"], r["tier"])
     ro = {key(r) for r in old.get("roots", []) if units_ok or r["kind"] != "unit"}
     rn = {key(r) for r in new.get("roots", []) if units_ok or r["kind"] != "unit"}
