@@ -1066,3 +1066,7 @@
 
 ## Consolidation 2026-11-14T17:33:29Z
 - [2026-11-14T17:32:59Z] Mike/heartbeat — Mike_20261114_173240: {"status": "in_progress", "note": "retro finalize: đọc index"}
+
+## Consolidation 2026-11-14T17:33:46Z
+- [2026-11-14T17:33:38Z] Mike/finding — retro-2026-11-14-final: {"summary": "Retro 14/11 finalized, Wags GAPS FOUND fixed; open: weekly report 09-13/11 gate not confirmed COMPLETE", "file": "kb/incidents/retro/retro-2026-11-14.md", "measured_by": "file+commit 8b4d5659c"}
+- [2026-11-14T17:33:41Z] Mike/heartbeat — Mike_20261114_173240: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261114_173240", "source": "watcher"}
