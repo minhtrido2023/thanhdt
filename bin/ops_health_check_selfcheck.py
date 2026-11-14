@@ -2779,6 +2779,34 @@ def case_c5_khac_account_van_escalate():
               any("plan-ZaloPay-2026-09-21-chua-duyet" in ln for ln in pend), repr(lines))
 
 
+def case_c5_dedupe_cau_hoi_dang_lap():
+    """arch-review coord-2026-11-06 vòng 2: 1 câu đăng lại 2 lần = MỘT câu hỏi (kèm 'đăng lặp'),
+    2 topic khác nhau = 'Có 2' và không có 'đăng lặp'; dòng HINT dùng cùng mẫu số đã dedupe."""
+    with tempfile.TemporaryDirectory() as tmp:
+        inbox = os.path.join(tmp, "mike", "bus", "inbox")
+        os.makedirs(os.path.join(tmp, "mike", "agents", "Mike"), exist_ok=True)
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            ev("Mike", "question", "dup-topic-zeta", ago(0, 20)),
+            ev("Mike", "question", "dup-topic-zeta", ago(0, 10)),
+        ])
+        lines, _ = run_check5(tmp)
+        j = joined(lines)
+        check("check5: 2 lần đăng cùng Agent/topic => 'Có 1 câu hỏi'", "Có 1 câu hỏi" in j, repr(lines))
+        check("check5: có nhãn 'đăng lặp' với số lần 2", "đăng lặp" in j and ": 2" in j, repr(lines))
+        check("check5: mẫu số HINT không lộ 'x/2'", "/2 câu hỏi trên CÓ THỂ" not in j, repr(lines))
+    with tempfile.TemporaryDirectory() as tmp:
+        inbox = os.path.join(tmp, "mike", "bus", "inbox")
+        os.makedirs(os.path.join(tmp, "mike", "agents", "Mike"), exist_ok=True)
+        write_events(os.path.join(inbox, "Mike.jsonl"), [
+            ev("Mike", "question", "topic-alpha-one", ago(0, 20)),
+            ev("Mike", "question", "topic-beta-two", ago(0, 10)),
+        ])
+        lines, _ = run_check5(tmp)
+        j = joined(lines)
+        check("check5: 2 topic khác nhau => 'Có 2 câu hỏi'", "Có 2 câu hỏi" in j, repr(lines))
+        check("check5: 2 topic khác nhau => không có 'đăng lặp'", "đăng lặp" not in j, repr(lines))
+
+
 def case_c5_approved_by_user_variant():
     """preflight_check.sh:63 / merge_park_orders.py:127 coi `approved_by_user` cũng là đã
     duyệt — checker đọc thiếu khoá đó thì plan chạy thật vẫn bị escalate."""
@@ -2995,7 +3023,8 @@ def main():
                case_c5_plan_da_duyet_that_thi_khong_escalate,
                case_c5_dry_run_khong_ghi_bus,
                case_c5_khac_account_van_escalate,
-               case_c5_approved_by_user_variant):
+               case_c5_approved_by_user_variant,
+               case_c5_dedupe_cau_hoi_dang_lap):
         fn()
     if FAILS:
         print(f"\nFAIL: {len(FAILS)} assertion hỏng")
