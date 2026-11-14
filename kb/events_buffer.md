@@ -1056,3 +1056,7 @@
 - [2026-11-14T12:33:34Z] Taylor/heartbeat — Taylor_20261114_122716: {"status": "in_progress", "note": "hinh+md xong, dang dung PDF/HTML/selfcheck"}
 - [2026-11-14T12:34:18Z] Taylor/heartbeat — Taylor_20261114_122716: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261114_122716", "source": "watcher"}
 - [2026-11-14T12:34:51Z] Taylor/finding — dd-pat-20261114-report: bao cao NDT PAT xong, chua gui email: {"dir": "mike/agents/Taylor/research/dd_PAT_20261114/investor_report", "pdf_pages": 8, "pdf_md5": "faa850f828c263ef6c9f99e70016556e", "centre": 66600, "zone": [56600, 76600], "price_13_11_bq": 71000, "price_vs_centre_pct": 6.6, "discrepancy": "brief ghi 72.700 la dong cua 13/11 nhung BQ cho 13/11=71.000 (72.700 la 06/11); bao cao dung 71.000, van trong vung", "greps": "3 grep rong", "email": "dry-run only, khong gui", "dd_price_zones": "khong ghi", "measured_by": "investor_report/SELFCHECK.md (grep, python tinh lai, bq query tav2_bq.ticker PAT 2026-11-05..13, md5sum PDF)"}
+
+## Consolidation 2026-11-14T17:31:36Z
+- [2026-11-14T17:31:15Z] Mike/heartbeat — Mike_20261114_173014: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261114_173014", "source": "watcher"}
+- [2026-11-14T17:31:24Z] Mike/finding — retro-draft-2026-11-14: {"summary": "Draft retro 14/11: 4 sự cố, 2 pattern; mở: weekly report 09-13/11 delivery chưa xác nhận COMPLETE", "file": "state/retro_draft_2026-11-14.md"}
