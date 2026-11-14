@@ -2339,3 +2339,6 @@
 
 ## Archived 2026-11-14 (keep=12 days=0 require_done=False)
 - [2026-11-13T04:30:54Z] [live-gap-exec-A4 13/11] XONG: Δ -0,48pp bq->pit THAT (ghep cap sd 0,014, 10/10 seed); cua so ADV BQ gom ngay fill; pin merged trung byte 80f509ec/e2de0ac4; registry them, KHONG merge/pin moi — CHO quant-skeptic + user
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-11-13T07:32:55Z] [live-gap-exec-A5 13/11] XONG job Taylor_20261113_071030: pin trung byte tren ma commit (80f509ec main sach / e2de0ac4 e9a9aed1a); neo -25,2 (4707bcbe) chua fill ao, bo fill ao -3,96pp => DD5 san trung thuc -29,09 (park0.3)/-27,89 (park0); ADV live=pit 29/32 — CHO quant-skeptic + user quyet neo

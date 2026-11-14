@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-13T07:32:55Z] [live-gap-exec-A5 13/11] XONG job Taylor_20261113_071030: pin trung byte tren ma commit (80f509ec main sach / e2de0ac4 e9a9aed1a); neo -25,2 (4707bcbe) chua fill ao, bo fill ao -3,96pp => DD5 san trung thuc -29,09 (park0.3)/-27,89 (park0); ADV live=pit 29/32 — CHO quant-skeptic + user quyet neo
 - [2026-11-13T08:01:28Z] [decision-inbox 13/11] XONG job Taylor_20261113_075639: DESIGN.md o research/decision_inbox_design_20261113 (cog CUSTOM_COGS_DIR + bin/decision_inbox.py, chua code) — CHO user duyet + allow-list user tu them
 - [2026-11-13T08:18:48Z] [decision-inbox impl 13/11] XONG job Taylor_20261113_080329: nhanh feat/decision-inbox-20261113 (head 2b17704de) KHONG merge, cog chua bat; selfcheck 221 ca x2 TZ 0 fail; CHO Mike chay arch-reviewer toan diff roi merge; user bat shadow (2 dong .env) sau merge; buoc 7 doi soat chua lam
 - [2026-11-13T08:26:07Z] [live-gap-exec-A6 13/11] XONG job Taylor_20261113_075112: nhanh research/live-gap-A6-carry-20261113 (262c117c3) 1 cay, pin0 80f509ec + pin1M e2de0ac4 trung byte, KHONG merge; DD5 dai L3P p0.3 -28,54 [-29,09;-27,99] (s12345 = canh duoi); small-NAV 1B DD5 -32,75 (chenh L1 chi -1,6pp) => neo cho NAV live chua chot — CHO quant-skeptic + arch-review + user
@@ -26,3 +25,4 @@
 - [2026-11-14T02:02:14Z] [dd-pnj 14/11] XONG REPORT job Taylor_20261114_014836: de xuat GIU LOAI, tam 6.440 vs gia 14.950; md5 REPORT caf25da7, assumptions 4e3fce77 — CHO Mike chay fundamental-skeptic + trinh user; KHONG sua excluded_tickers
 - [2026-11-14T02:21:01Z] [dd-pnj r2 14/11] XONG job Taylor_20261114_021336: 10 muc skeptic ap (muc 1 chi mot phan: CHUA MU, tam 6.440 dinh chi lam neo luat 4); NON giu; REPORT md5 0ecbc539 — CHO luot dinh gia mu that (phien moi) neu user muon neo luat 4
 - [2026-11-14T02:21:04Z] ĐANG DỞ: weekly 09-13/11 đã promote nhưng delivery gate BLOCK G5 (VN-Index có cổ tức) | NEXT: điều tra G5 11-11 sau backfill Winston (VNH dup, mã V-Y), chạy vnindex_total_return --update, rồi report_delivery_gate x2 (không dựng lại build)
+- [2026-11-14T02:34:48Z] [dd-pnj report 14/11] XONG job Taylor_20261114_022155: investor_report/ PDF 10tr md5 fea39145, chua gui email — CHO Mike doc kiem + user bao 'gui email'; dd_price_zones.json chua ghi
