@@ -19,7 +19,7 @@
 **Bỏ:** dự báo hướng VNINDEX H20; "đọc DT5G sớm hơn". Entry sống đang chờ chấm (LVR-2026-10-21 due 18/11; LVR-STK FPT/NNC 03/12; VGS/NNC 10/12) giữ nguyên, append-only.
 
 ## Cơ chế (nhánh `feat/livermore-role-narrowed-20261114`)
-`livermore_trigger_check.py` (cò cron 19:45) + `livermore_run.sh` + `livermore_report_block.py` mặc định TẮT lập forecast VNINDEX; bật lại chỉ bằng env `LIVERMORE_VNINDEX_FORECAST=1`. Crontab KHÔNG đổi (script tự no-op, scorer vẫn chạy).
+`livermore_trigger_check.py` (cò cron 19:45) + `livermore_run.sh` + `livermore_report_block.py` mặc định TẮT lập forecast VNINDEX; bật lại cần CẢ env `LIVERMORE_VNINDEX_FORECAST=1` LẪN khôi phục agent def cũ (md5 `c3c0d7a9`, bản lưu `agents/Taylor/research/livermore_divergence_20261114/livermore_agent_def_before_20261114.md`) — def mới cấm H20_DIR VNINDEX nên chỉ đặt env thì agent từ chối (rc=1, alert). Crontab KHÔNG đổi (script tự no-op, scorer vẫn chạy).
 
 ## ĐỪNG đề xuất lại
 Phân kỳ RSI làm tín hiệu/đặc trưng (VNINDEX hay cổ phiếu) và dự báo hướng VNINDEX bằng đọc tape — **trừ khi có dữ liệu mới hoặc PREREG riêng** (kèm N độc lập đủ cho MDE và qua quant-skeptic).

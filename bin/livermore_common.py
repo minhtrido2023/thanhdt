@@ -32,7 +32,7 @@ HORIZON = 20            # phiên
 
 # Vai Livermore thu hẹp 2026-11-14 (user duyệt, decided_by: user; REPORT agents/Taylor/research/livermore_divergence_20261114):
 # KHÔNG mở lần đọc VNINDEX có forecast H20 mới (phân kỳ RSI NO-GO, cổng 12 lần = cổng GIẾT). Bật lại CHỈ bằng env tường minh.
-NARROWED_MSG = "role narrowed 2026-11-14: dự báo hướng VNINDEX H20 đã TẮT (bật lại: LIVERMORE_VNINDEX_FORECAST=1)"
+NARROWED_MSG = "role narrowed 2026-11-14: dự báo hướng VNINDEX H20 đã TẮT (bật lại = đặt LIVERMORE_VNINDEX_FORECAST=1 VÀ khôi phục agent def cũ md5 c3c0d7a9, xem livermore-divergence-nogo-20261114.md)"
 
 
 def vnindex_forecast_enabled():

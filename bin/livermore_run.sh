@@ -25,9 +25,10 @@ while [ $# -gt 0 ]; do
 done
 die() { echo "LIVERMORE-RUN-FAIL: $*" >&2; exit 1; }
 
-# Vai thu hẹp 2026-11-14 (user duyệt): KHÔNG lập entry VNINDEX có forecast H20 mới. Bật lại = LIVERMORE_VNINDEX_FORECAST=1.
+# Vai thu hẹp 2026-11-14 (user duyệt): KHÔNG lập entry VNINDEX có forecast H20 mới. Bật lại = LIVERMORE_VNINDEX_FORECAST=1 VÀ khôi phục ~/.claude/agents/livermore.md bản cũ (md5 c3c0d7a9, agents/Taylor/research/livermore_divergence_20261114/livermore_agent_def_before_20261114.md) — agent def mới cấm H20_DIR VNINDEX nên chỉ đặt env là agent từ chối, rc=1.
+# rc=3: vai thu hẹp, không chạy (không phải lỗi).
 if [ "${LIVERMORE_VNINDEX_FORECAST:-0}" != "1" ]; then
-  echo "[livermore_run] role narrowed 2026-11-14: dự báo hướng VNINDEX H20 đã TẮT — không chạy (bật lại: LIVERMORE_VNINDEX_FORECAST=1)" >&2
+  echo "[livermore_run] role narrowed 2026-11-14: dự báo hướng VNINDEX H20 đã TẮT — không chạy (bật lại cần CẢ env LIVERMORE_VNINDEX_FORECAST=1 lẫn khôi phục agent def cũ)" >&2
   exit 3
 fi
 

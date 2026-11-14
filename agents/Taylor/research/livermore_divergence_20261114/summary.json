@@ -1,0 +1,18 @@
+{
+ "prereg_md5": "cd943e11b9fbc923221d02812989d007",
+ "n_trials": 48,
+ "n_pass": 0,
+ "n_crit_a": 0,
+ "n_BH": 0,
+ "PBO": 0.7357420357420358,
+ "SR0_DSR": 1.8629124375423027,
+ "max_DSR": 0.004810100757031965,
+ "U2_exR_OOS_gt0_CI_excl0": 1,
+ "U2_exR_pos_CI_excl0": 0,
+ "U2_net_pos": 0,
+ "DT": {
+  "n": 13,
+  "false_alarm_40": 6,
+  "commits_covered": 6
+ }
+}
