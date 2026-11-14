@@ -160,3 +160,6 @@
 
 ## Archived 2026-11-10 (keep=12 days=0 require_done=False)
 - [2026-09-21T02:08:13Z] Xong job Winston_20260921_020517 (ops-autofix SpaceX): run_bot exit 2 = approval gate DUNG thiet ke, KHONG bug — plan 09-21 (3 lenh park-trim ~11,8tr) gui user thu Sau 18/09 21:00+21:45, user khong duyet qua cuoi tuan; preflight 08:45 da bao NOT_APPROVED. Khong sua gi (ranh gioi cam ghi approved_by). CON TREO: question plan-SpaceX-2026-09-21-chua-duyet cho user chot A(duyet+chay lai truoc 14:30)/B(bo qua). LOP RUI RO MOI: plan gui THU SAU cho phien THU HAI khong co nhac lai cuoi tuan — kenh nhac duy nhat la preflight 08:45 sang cung phien.
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-09-22T02:06:40Z] [2026-09-22T02:1xZ] Xong job Winston_20260922_020520 (ops-autofix ZaloPay): run_bot exit 2 = approval gate DUNG thiet ke, KHONG bug — plan 09-22 (3 lenh park-trim HDB/LPB/VPB ~10,21tr) gui 09-21 21:00 ICT, user chua duyet luc 09:05. Khong lenh ket, khong journal, bot khong chet. Khong sua gi (ranh gioi cam). Ngay thu 2 lien tiep cung shape (SpaceX 09-21 user duyet 09:10 roi chay lai khop du) => duyet buoi sang la NHIP BINH THUONG cua user, checker nen coi exit-2-vi-chua-duyet luc 09:05 la canh bao nhe, khong phai su co. CON TREO: question plan-ZaloPay-2026-09-22-chua-duyet cho user chot A(duyet+chay lai truoc 14:30)/B(bo qua).
