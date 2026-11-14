@@ -138,6 +138,12 @@ for f in "${FILES[@]}"; do
     *oshares_dcf_selfcheck.py) t=1100 ;;
     # cùng đợt: fa_ratings_ticker_gate 95s (ALL ENVIRONMENTS OK, chạy 3 TZ) — rc=124 giả.
     *fa_ratings_ticker_gate_selfcheck.sh) t=240 ;;
+    # weekly ops audit 2026-11-14 (job Mike_20261114_075225): đo tay annualization_basis 60s (PASS, sát
+    # trần), book_clearing_g3 228s (PASS — 0 lỗi; có test tranh khoá 0,6s cố ý), report_gate_quarterly
+    # 142s (rc=0). Cả ba rc=124 dưới trần 60s là giả.
+    *annualization_basis_selfcheck.py) t=240 ;;
+    *book_clearing_g3_selfcheck.py) t=480 ;;
+    *report_gate_quarterly_selfcheck.py) t=300 ;;
   esac
   # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
   # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
