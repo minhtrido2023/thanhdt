@@ -6,15 +6,21 @@ decision/money questions remain open. Supported recurring classes:
   * context-bloat-same-day: all context files are back under their hard limits;
   * report email/delivery gap: a daily report has COMPLETE hash-bound delivery proof;
   * scheduled report cron in a worktree: both entries now point at the stable repo;
-  * selfcheck-red: latest full-sweep artifact says that exact file is PASS.
+  * selfcheck-red: latest full-sweep artifact says that exact file is PASS;
+  * plan-t1-not-ready-<date>-<account>: plan file for that exact date now exists on disk;
+  * wags-{fix-not-confirmed,autofix-review-needed,arch-review-round2-unresolved}: coord-<date>:
+    per-day meta-alarm of the Wags coordination loop, expired after META_EXPIRE_DAYS (the loop
+    re-scans daily and re-raises anything still real; payload carries expired_unverified=true).
 
 Use --dry-run --json for audit/selfcheck. Normal mode appends exact-topic answers, so
 bus_question_audit.py's timestamp-aware matcher closes the original question.
 """
 import argparse
+import datetime as dt
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -105,6 +111,46 @@ def selfcheck_resolved(root, topic):
     return None
 
 
+PLAN_T1_RE = re.compile(r"^plan-t1-not-ready-(\d{4}-\d{2}-\d{2})-([A-Za-z0-9_]+)$")
+META_RE = re.compile(r"^(wags-fix-not-confirmed|wags-autofix-review-needed|"
+                     r"wags-arch-review-round2-unresolved): coord-(\d{4}-\d{2}-\d{2})$")
+META_EXPIRE_DAYS = 3
+
+
+def plan_t1_resolved(plans_dir, topic):
+    """Gate plan-t1-not-ready lifts once plan_<account>_<date>.json exists with that plan_date."""
+    m = PLAN_T1_RE.match(topic)
+    if not m:
+        return None
+    date, account = m.groups()
+    path = plans_dir / f"plan_{account}_{date}.json"
+    try:
+        plan = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return None
+    if not isinstance(plan, dict) or str(plan.get("plan_date")) != date:
+        return None
+    n = len(plan.get("orders") or []) if isinstance(plan.get("orders"), list) else "?"
+    return f"{path.name} exists with plan_date={date} (orders={n}, approved_by={plan.get('approved_by')!r})"
+
+
+def meta_alarm_expired(topic, today):
+    """Return (evidence, extra_payload) for an aged-out Wags per-day meta-alarm, else None."""
+    m = META_RE.match(topic)
+    if not m:
+        return None
+    kind, date = m.groups()
+    try:
+        age = (today - dt.date.fromisoformat(date)).days
+    except ValueError:
+        return None
+    if age < META_EXPIRE_DAYS:
+        return None
+    return (f"{kind}: coord-{date} aged {age}d >= {META_EXPIRE_DAYS}d; Wags loop re-scans daily "
+            f"and re-raises anything still real. EXPIRED, NOT verified fixed",
+            {"expired_unverified": True, "kind": kind})
+
+
 def pending(root):
     audit = ROOT / "bin" / "bus_question_audit.py"
     env = dict(os.environ, BUS_AUDIT_ROOT=str(root))
@@ -120,6 +166,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", type=Path, default=ROOT)
     ap.add_argument("--crontab-file", type=Path)
+    ap.add_argument("--plans-dir", type=Path, default=None,
+                    help="thư mục plan_<account>_<date>.json (mặc định <root>/../data/trade_plans)")
+    ap.add_argument("--today", default=None, help=argparse.SUPPRESS)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
@@ -138,21 +187,32 @@ def main():
         "2-dong-cron-chay-check_report_cadence-tu-worktree-phien":
             cron_resolved(root, cron_text),
     }
+    plans_dir = args.plans_dir or (root.parent / "data" / "trade_plans")
+    today = (dt.date.fromisoformat(args.today) if args.today else
+             dt.datetime.now(dt.timezone(dt.timedelta(hours=7))).date())  # ICT
     actions = []
     for item in pending(root):
         topic = str(item.get("topic") or "")
         evidence = shared.get(topic)
+        extra = {}
         if topic.startswith("selfcheck-red: "):
             evidence = selfcheck_resolved(root, topic)
+        elif topic.startswith("plan-t1-not-ready-"):
+            evidence = plan_t1_resolved(plans_dir, topic)
+        elif topic.startswith("wags-"):
+            hit = meta_alarm_expired(topic, today)
+            if hit:
+                evidence, extra = hit
         if evidence:
             actions.append({"agent": item.get("agent"), "topic": topic,
-                            "evidence": evidence})
+                            "evidence": evidence, "extra": extra})
 
     closed = []
     if not args.dry_run:
         append = root / "bin" / "append_event.sh"
         for action in actions:
-            payload = json.dumps({"closed_by": "bus_question_housekeeping.py (daily)",
+            payload = json.dumps({**action.get("extra", {}),
+                                  "closed_by": "bus_question_housekeeping.py (daily)",
                                   "evidence": action["evidence"],
                                   "decided_by": "agent"}, ensure_ascii=False)
             run = subprocess.run([str(append), "Mike", "answer", action["topic"], payload],

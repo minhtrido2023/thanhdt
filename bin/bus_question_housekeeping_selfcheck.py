@@ -57,9 +57,10 @@ def fixture():
     return td, root, cron, report
 
 
-def run(root, cron):
+def run(root, cron, today="2026-08-15"):
     proc = subprocess.run([sys.executable, str(SCRIPT), "--root", str(root),
-                           "--crontab-file", str(cron), "--dry-run", "--json"],
+                           "--crontab-file", str(cron), "--dry-run", "--json",
+                           "--plans-dir", str(root / "plans"), "--today", today],
                           capture_output=True, text=True, env=dict(os.environ))
     try:
         return proc.returncode, json.loads(proc.stdout), proc.stderr
@@ -108,6 +109,35 @@ try:
     rc, out, detail = run(root, cron)
     check("same topic asked again after old answer becomes eligible again",
           topics[0] in {item["topic"] for item in out.get("eligible", [])}, str(out))
+finally:
+    td.cleanup()
+
+# --- plan-t1-not-ready + Wags per-day meta-alarms (bus-cleanup 2026-11-14) ---
+td, root, cron, report = fixture()
+try:
+    (root / "plans").mkdir()
+    qs = ["plan-t1-not-ready-2026-11-16-SpaceX", "plan-t1-not-ready-2026-11-16-ZaloPay",
+          "wags-fix-not-confirmed: coord-2026-11-10", "wags-arch-review-round2-unresolved: coord-2026-11-10",
+          "wags-fix-not-confirmed: coord-2026-11-13", "wags-autofix-review-needed: coord-2026-11-05"]
+    (root / "bus/inbox/Mike.jsonl").write_text(
+        "".join(json.dumps(event("question", t, "2026-11-13T14:00:00Z")) + "\n" for t in qs),
+        encoding="utf-8")
+    # SpaceX plan exists for the right date; ZaloPay file is a STALE earlier-date plan
+    (root / "plans/plan_SpaceX_2026-11-16.json").write_text(
+        json.dumps({"plan_date": "2026-11-16", "orders": []}), encoding="utf-8")
+    (root / "plans/plan_ZaloPay_2026-11-16.json").write_text(
+        json.dumps({"plan_date": "2026-11-13", "orders": []}), encoding="utf-8")
+    rc, out, detail = run(root, cron, today="2026-11-14")
+    el = {i["topic"]: i for i in out.get("eligible", [])}
+    check("plan-t1-not-ready closes when plan_date matches", qs[0] in el, str(out) or detail)
+    check("plan-t1-not-ready stays open when file has wrong plan_date", qs[1] not in el, str(out))
+    check("wags meta-alarm aged >=3d expires", qs[2] in el and qs[3] in el and qs[5] in el, str(out))
+    check("expired meta-alarm flagged expired_unverified",
+          el.get(qs[2], {}).get("extra", {}).get("expired_unverified") is True, str(out))
+    check("fresh wags meta-alarm (1d) stays open", qs[4] not in el, str(out))
+    (root / "plans/plan_SpaceX_2026-11-16.json").write_text("{broken", encoding="utf-8")
+    rc, out, detail = run(root, cron, today="2026-11-14")
+    check("corrupt plan file closes nothing", qs[0] not in {i["topic"] for i in out.get("eligible", [])}, str(out))
 finally:
     td.cleanup()
 

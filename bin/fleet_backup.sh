@@ -21,10 +21,25 @@ git -C "$MIKE" add -A
 # GitHub HARD-rejects any blob >100MB (GH001) — one such file blocks EVERY later push until
 # history is rewritten (incident 2026-11-12: 113MB .pkl in Taylor research via this add -A).
 # Unstage oversized files BEFORE they can enter a commit; file stays on disk, loudly reported.
-while IFS= read -r -d '' f; do
-  [ -f "$MIKE/$f" ] && [ "$(stat -c %s "$MIKE/$f")" -gt 95000000 ] || continue
-  git -C "$MIKE" rm -q --cached -- "$f" && echo "   WARN: unstaged >95MB file (GitHub limit 100MB): $f — add to .gitignore"
-done < <(git -C "$MIKE" diff --cached --name-only --diff-filter=AM -z)
+# `git reset` (NOT `git rm --cached`): a tracked file that merely GREW past the limit goes back
+# to its HEAD version in the index instead of being staged as a DELETION (arch-review b4d46c33).
+# --no-renames: a renamed/copied big blob shows up as plain A, not R/C that --diff-filter=AM misses.
+# unstage_oversized() is extracted + tested by bin/fleet_backup_guard_selfcheck.sh — keep it standalone.
+unstage_oversized() {
+  local repo="$1" limit="${FLEET_BACKUP_MAX_BYTES:-95000000}" f n=0
+  while IFS= read -r -d '' f; do
+    [ -f "$repo/$f" ] && [ "$(stat -c %s "$repo/$f")" -gt "$limit" ] || continue
+    git -C "$repo" reset -q -- "$f" && { echo "   WARN: unstaged >95MB file (GitHub limit 100MB): $f — add to .gitignore"; n=$((n+1)); }
+  done < <(git -C "$repo" diff --cached --name-only --no-renames --diff-filter=AM -z)
+  return 0
+}
+unstage_out="$(unstage_oversized "$MIKE")"
+if [ -n "$unstage_out" ]; then
+  echo "$unstage_out"
+  # surface to a channel someone reads (bus -> KB + ops_health), not only backup.log
+  "$MIKE/bin/append_event.sh" Wags finding "fleet-backup-unstaged-oversized-$(date -u +%F)" \
+    "fleet_backup bỏ khỏi commit file >95MB (còn trên đĩa, cần gitignore): $(echo "$unstage_out" | sed 's/.*limit 100MB): //; s/ — add.*//' | tr '\n' ' ')" >/dev/null 2>&1 || true
+fi
 if git -C "$MIKE" diff --cached --quiet; then
   echo "   (no fleet changes to commit)"
 elif commit_err="$(MIKE_KB_SIZE_GATE=warn git -C "$MIKE" commit -q -m "fleet backup $ts" 2>&1)"; then

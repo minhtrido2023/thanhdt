@@ -956,7 +956,11 @@ if pending_q:
         for w in _rare_toks(c_topic):
             topic_df[w] += 1
     hints = []
+    _hint_seen = set()   # dedupe (agent, topic): câu đăng lặp chỉ sinh 1 hint, mẫu số = _pq_uniq
     for q_agent, q_topic, q_ts in pending_q_meta:
+        if (q_agent, q_topic) in _hint_seen:
+            continue
+        _hint_seen.add((q_agent, q_topic))
         q_rare = _rare_toks(q_topic, topic_df)
         for c_agent, c_topic, c_ts in closure_cands:
             if c_topic == q_topic or c_ts < q_ts:
@@ -972,7 +976,7 @@ if pending_q:
                 hints.append(f"{q_agent}/{q_topic} ~ [{who}; {why}] {c_topic}")
                 break
     if hints:
-        W(f"{WARN_ONLY} {len(hints)}/{len(pending_q)} câu hỏi trên CÓ THỂ đã xử lý xong "
+        W(f"{WARN_ONLY} {len(hints)}/{len(_pq_uniq)} câu hỏi trên CÓ THỂ đã xử lý xong "
           f"nhưng ghi bus SAI QUY ƯỚC (có sự kiện đăng sau, cùng tiền tố topic HOẶC chung "
           f"từ hiếm trong {WIN_H}h — GỢI Ý thôi, phải tự kiểm chứng; quy ước đóng: "
           f"`answer`/`decision` GIỮ NGUYÊN topic câu hỏi): {hints}")
