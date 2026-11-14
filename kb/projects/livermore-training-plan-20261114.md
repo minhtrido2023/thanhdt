@@ -217,3 +217,7 @@ Bỏ: dự báo hướng VNINDEX, "đọc sớm hơn DT5G".
 4. Nếu G1/G2 thất bại: đồng ý thu hẹp vai Livermore về 3 việc §9 (bỏ dự báo hướng VNINDEX)?
 5. Có cho Livermore tiếp tục đọc theo MÃ (FPT/NNC/VGS) trong khi P0–P2 chạy? (đề xuất: có, nhưng chỉ
    ENTRY_VERDICT dạng cơ học §5, chấm riêng, không trộn vào cổng VNINDEX.)
+
+## Kết quả P0/P1 + quyết định user (14/11/2026, thêm cuối — không sửa nội dung cũ)
+- P0/P1 (job `Taylor_20261114_063556`): **G1 trượt 0/48**, DSR max 0,005, PBO 0,74; U2 0/24 dương sau phí; U1 không đủ N; H2 R² 0,20–0,29 (<0,5). PREREG md5 cd943e11b9fbc923221d02812989d007; REPORT `agents/Taylor/research/livermore_divergence_20261114/REPORT.md`.
+- **User duyệt 14/11 (`decided_by: user`):** (1) phân kỳ RSI → NO-GO + thu hẹp vai về 3 việc §9; (2) BỎ đo κ (không chạy 60 lượt); P2 không chạy (G1 trượt). Quant-skeptic không chạy. Chi tiết: `livermore-divergence-nogo-20261114.md`.
