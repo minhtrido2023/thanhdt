@@ -1,0 +1,52 @@
+section,item,value_bn,per_share_vnd,rel_to_EV
+meta,assumptions_md5=52883de26cd4b176ef181025fc259afd,,,
+meta,r=0.1350 g=0.020 net_cash_bn=415.41 roll_years=0.1233,,,
+scenario,bear (p=0.3),1612.6,64503,-0.2585
+scenario,base (p=0.5),2236.8,89473,0.0285
+scenario,bull (p=0.2),2862.8,114513,0.3164
+center,EV_weighted_pre_liquidity,2174.7,86990,0
+center,range_low_0.85,1848.5,73941,-0.15
+center,range_high_1.15,2501.0,100038,0.15
+vshort,NP_norm_median_TTM12=291.11 ROE=0.4428 b=0.0452,2465.4,98617,0.1337
+vshort,D=|ln(Vngan/Vdai)|=0.1254,,,
+sens:r_lai_huy_dong,beta=0.5 dDep=-100bp r=0.1300,2244.7,89786,0.0321
+sens:r_lai_huy_dong,beta=0.5 dDep=-50bp r=0.1325,2208.9,88357,0.0157
+sens:r_lai_huy_dong,beta=0.5 dDep=+0bp r=0.1350,2174.7,86990,0.0
+sens:r_lai_huy_dong,beta=0.5 dDep=+50bp r=0.1375,2142.0,85680,-0.0151
+sens:r_lai_huy_dong,beta=0.5 dDep=+100bp r=0.1400,2110.6,84425,-0.0295
+sens:r_lai_huy_dong,beta=1.0 dDep=-100bp r=0.1250,2321.2,92847,0.0673
+sens:r_lai_huy_dong,beta=1.0 dDep=-50bp r=0.1300,2244.7,89786,0.0321
+sens:r_lai_huy_dong,beta=1.0 dDep=+0bp r=0.1350,2174.7,86990,0.0
+sens:r_lai_huy_dong,beta=1.0 dDep=+50bp r=0.1400,2110.6,84425,-0.0295
+sens:r_lai_huy_dong,beta=1.0 dDep=+100bp r=0.1450,2051.6,82064,-0.0566
+sens:g,g=0.00,1950.0,77998,-0.1034
+sens:g,g=0.02,2174.7,86990,0.0
+sens:g,g=0.03,2318.2,92730,0.066
+sens:tien_cam_co,"S1 tru 42,6 ty cam co cho cong ty thanh vien",2131.5,85259,-0.0199
+sens:tien_cam_co,"S2 tru toan bo 441,6 ty cam co",1726.2,69048,-0.2063
+sens:phap_ly_WARNING,L1 thue 20% tu Q4/26 + truy thu 210 + moi truong 100,1721.2,68847,-0.2086
+sens:dat_thue,"K dong tien toi 2034, khong TV, hoan nguyen 50.0",1531.2,61248,-0.2959
+sens:moat,"fade: FCFE gia tri cuoi x0,8",2059.1,82363,-0.0532
+sens:kich_ban_EBIT,bear EBIT±10%: +10%,1732.6,69304,-0.2033
+sens:kich_ban_EBIT,bear EBIT±10%: -10%,1492.6,59703,-0.3137
+sens:kich_ban_EBIT,base EBIT±10%: +10%,2419.2,96770,0.1124
+sens:kich_ban_EBIT,base EBIT±10%: -10%,2054.4,82175,-0.0553
+sens:kich_ban_EBIT,bull EBIT±10%: +10%,3107.9,124315,0.4291
+sens:kich_ban_EBIT,bull EBIT±10%: -10%,2617.8,104712,0.2037
+liq_discount,CK 5% (Mike ap),2066.0,82640,-0.05
+liq_discount,CK 10% (Mike ap),1957.3,78291,-0.1
+liq_discount,CK 20% (Mike ap),1739.8,69592,-0.2
+liquidity,6T tu 2026-05-14: median_vol_cp=6600 phien_khong_khop=17/129,,,
+liquidity,3T tu 2026-08-14: median_vol_cp=8250 phien_khong_khop=0/63,,,
+check,H1+Q3=9T rev: 1379.303 vs 1379.304 -> OK,,,
+check,H1+Q3=9T gp: 250.598 vs 250.598 -> OK,,,
+check,H1+Q3=9T lntt: 230.385 vs 230.384 -> OK,,,
+check,H1+Q3=9T lnst: 215.713 vs 215.713 -> OK,,,
+check,BS tong TS = No + VCSH: 942.19 vs 942.19 -> OK,,,
+check,VCSH = VDL+DTPT+LNCPP: 708.446 vs 708.446 -> OK,,,
+check,LNST quy 2026 (BQ) = 9T: 215.713 vs 215.713 -> OK,,,
+check,LNST quy 2024 (BQ) = KT 2024: 264.942 vs 264.94 -> OK,,,
+check,Q3 LNTT = LNgop+DTTC-CPTC-CPBH-QLDN: 63.748 vs 63.747 -> OK,,,
+check,Thue XK 9T / DT nuoc ngoai ~10%: 0.106 vs 0.1 -> OK,,,
+check,KTPL 2025 / LNST 2025 = 6%: 0.06 vs 0.06 -> OK,,,
+check,EBIT HD TTM = Q4/25 + 9T26: 273.658 vs 273.7 -> OK,,,

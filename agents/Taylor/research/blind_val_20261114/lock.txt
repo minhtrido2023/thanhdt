@@ -1,0 +1,4 @@
+md5sum assumptions_blind.md (khoá TRƯỚC khi chạy mô hình):
+52883de26cd4b176ef181025fc259afd  assumptions_blind.md
+locked_at: 2026-11-14T13:08:12+00:00 (giờ hệ thống)
+locked_at_ICT: 2026-11-14T20:08:12+07:00
