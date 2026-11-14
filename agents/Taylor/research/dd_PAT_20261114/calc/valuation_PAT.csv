@@ -1,0 +1,56 @@
+block,item,value_bn,per_share_vnd
+meta,EBT_Q3_runrate_annual,215.4,
+meta,"XK_Q3_annual (DT - ban DLC, can tren)",255.0,
+meta,XK_tax_step_5pp,12.7,
+meta,EBT_base_rev2,202.6,
+scenario,base,1789.3,71572
+scenario,good,2653.0,106120
+scenario,bad_gc,1654.5,66178
+scenario,bad_finite,1175.9,47037
+scenario,bad,1415.2,56608
+scenario,weighted,1849.8,73992
+scenario,centre_after_liq10,1664.8,66593
+zone,cheap<=0.85*centre,,56604
+zone,expensive>=1.15*centre,,76582
+sens_245,weighted_FCFE_fund_EBT245,1993.5,79739
+sens_245,centre_after_liq10_EBT245,1794.1,71765
+sens_245,rev1_replica_no_fund_EBT245,2085.2,83406
+sens_fund,rev2_base_without_fund_haircut,1933.1,77325
+two_base,V_ngan (x(1-5.5%)),2292.7,91707
+two_base,V_dai(=DCF base),1789.3,71572
+two_base,D=|ln(Vn/Vd)|,0.248,
+two_base,"V_C4 (theo doi, khong doi)",3120.3,124811
+two_base,"V_D2 (theo doi, 5% uoc luong)",2369.6,94785
+r_sens,beta1.0_-100bp_r0.1250,1972.2,78889
+r_sens,beta1.0_-50bp_r0.1300,1908.4,76334
+r_sens,beta1.0_+50bp_r0.1400,1795.9,71837
+r_sens,beta1.0_+100bp_r0.1450,1746.2,69847
+r_sens,beta0.5_-100bp_r0.1300,1908.4,76334
+r_sens,beta0.5_-50bp_r0.1325,1878.5,75138
+r_sens,beta0.5_+50bp_r0.1375,1822.3,72893
+r_sens,beta0.5_+100bp_r0.1400,1795.9,71837
+liq,disc0%,1849.8,73992
+liq,disc5%,1757.3,70293
+liq,disc10%,1664.8,66593
+liq,disc20%,1479.8,59194
+moat_sens,"NONE fade -30% to 2033 (weighted, pre-liq)",1687.7,67508
+moat_sens,NONE after liq10,1518.9,60757
+per_bn_EBT,"base scenario, +1bn EBT/yr forever (d/cp)",6.567,262.7
+per_bn_EBT,centre effect if shift only base (x0.5 weight x0.9 liq),,118.2
+per_bn_EBT,centre effect if shift all scenarios (x0.9),,236.4
+M2,"thue XK hoan: +step EBT, tam (x0.5x0.9) d/cp",86.4,1556
+M3,base EBT 160: tam,1534.8,61391
+M3,base EBT 150: tam,1504.3,60170
+M6,base EBT 330: tam,2053.5,82139
+M1,M1_bad_0.50/0.35/0.15 pre-liq,1731.8,69272
+M1,M1_bad_0.50/0.35/0.15 centre,1558.6,62345
+M1,M1_mid_0.30/0.50/0.20 pre-liq,1849.8,73992
+M1,M1_mid_0.30/0.50/0.20 centre,1664.8,66593
+M1,M1_good_0.20/0.45/0.35 pre-liq,2016.8,80671
+M1,M1_good_0.20/0.45/0.35 centre,1815.1,72604
+sens_pledge,net cash -42.6bn (centre),1626.5,65059
+ebt_sens,P4 price +/-10% (~176 rev),176,87% EBT co so
+ebt_sens,electricity +/-5% (~500/yr est),25,
+ebt_sens,XK tax step (Q3 mix / 9T26 ~650 / 2025 ~1738),12.7 / 32 / 87,
+ebt_sens,volume -20% (~445 contribution est),89,
+meta,NETCASH_true,415.4,16616

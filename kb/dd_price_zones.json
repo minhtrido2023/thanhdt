@@ -3557,6 +3557,54 @@
       "expires_basis": "BCTC quý mới hơn Q3/2026 (Q4/2026 ~30/01/2027) hoặc 120 ngày",
       "notes": "Trigger đổi: Q4/2026 công bố + hồ sơ phát hành; chỉ cơ sở nghiên cứu, không phải tín hiệu mua. Chưa mù giá ⇒ watch KHÔNG được dùng tâm.",
       "recorded_at": "2026-11-14T09:48:34+07:00"
+    },
+    {
+      "ticker": "PAT",
+      "dd_date": "2026-11-14",
+      "rev": 1,
+      "bctc_quarter": "2026Q3",
+      "zone_low": 56600,
+      "center": 66600,
+      "center_kind": "expected_weighted",
+      "center_desc": "kỳ vọng trọng số 3 kịch bản (xấu 0,30 = 56.600 / cơ sở 0,50 = 71.600 / tốt 0,20 = 106.100), trước CK thanh khoản 74.000; sau CK thanh khoản 10% (giả định, vị thế ≤0,5 tỷ) = 66.600; r 13,5% @ lãi huy động 12T hiệu dụng 7,40%, g 2% (ước lượng)",
+      "zone_high": 76600,
+      "center_range": null,
+      "price_ref": 71000,
+      "price_date": "2026-11-13",
+      "verdict_label": "GIÁ TRONG vùng hợp lý 56.600–76.600, cao hơn tâm 6,6% (cách cận trên 7,3%); không có biên an toàn. Moat NARROW, không thưởng/không trừ. Pháp lý chỉ WARNING.",
+      "skeptic_status": "vòng 1 fundamental-skeptic REFUTED mức mô hình (số BCTC khớp ảnh gốc; thiếu trừ trích quỹ KTPL 5,5%, EBT cơ sở 245 cao hơn run-rate Q3, bỏ sót TM4 cầm cố Vietinbank, M1 lệch một chiều); 10 đính chính đã áp ở rev2 (tâm 75.100→66.600); CHƯA chạy vòng skeptic 2 cho rev2",
+      "source_file": "agents/Taylor/research/dd_PAT_20261114/REPORT.md",
+      "evidence": [
+        {
+          "file": "agents/Taylor/research/dd_PAT_20261114/REPORT.md",
+          "quote": "Sau chiết khấu thanh khoản 10%: **66.600 đ/cp**",
+          "fields": [
+            "center"
+          ]
+        },
+        {
+          "file": "agents/Taylor/research/dd_PAT_20261114/REPORT.md",
+          "quote": "Hợp lý 56.600–76.600",
+          "fields": [
+            "zone_low",
+            "zone_high"
+          ]
+        },
+        {
+          "file": "agents/Taylor/research/dd_PAT_20261114/REPORT.md",
+          "quote": "Giá đóng cửa 13/11/2026 = 71.000",
+          "fields": [
+            "price_ref"
+          ]
+        }
+      ],
+      "assumptions_file": "agents/Taylor/research/dd_PAT_20261114/assumptions_PAT.md",
+      "assumptions_md5": "efedd16c1ada3c03858c604af749b534",
+      "null_reason": null,
+      "expires_on": null,
+      "expires_basis": "BCTC quý mới hơn Q3/2026 (Q4/2026 ~20–25/01/2027) hoặc 120 ngày",
+      "notes": "MÙ GIÁ MỘT PHẦN: người dựng thấy giá thị trường (brief ghi nhầm 72.700; thật 71.000) + cột PE khi truy vấn; giả định khoá 1 lần trước khi chạy mô hình, skeptic không thấy dấu hiệu hiệu chỉnh theo giá (2 lỗi đều đẩy giá trị LÊN, rev2 đẩy tâm ra xa giá). Xác suất kịch bản + CK thanh khoản 10% là giả định. Chỉ cơ sở nghiên cứu, không phải tín hiệu mua; luật 02/11 #4 cần giá < 56.600 (0,85×tâm) + user duyệt từng lần.",
+      "recorded_at": "2026-11-14T19:36:16+07:00"
     }
   ],
   "center_kinds": [

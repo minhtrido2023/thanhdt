@@ -1,0 +1,31 @@
+block,item,value_bn,per_share_vnd
+scenario,base,2173.3,86933
+scenario,good,2783.2,111329
+scenario,bad_gc,1726.6,69063
+scenario,bad_finite,1219.1,48762
+scenario,bad,1472.8,58913
+scenario,weighted,2085.2,83406
+two_base,V_ngan,2426.1,97044
+two_base,V_dai(=DCF base),2173.3,86933
+two_base,D=|ln(Vn/Vd)|,0.11,
+two_base,V_C4 (theo doi),3120.3,124811
+two_base,"V_D2 (theo doi, capex/DT nganh 5% uoc luong)",2369.6,94785
+r_sens,beta1.0_-100bp_r0.1250,2228.2,89130
+r_sens,beta1.0_-50bp_r0.1300,2153.6,86143
+r_sens,beta1.0_+50bp_r0.1400,2022.2,80888
+r_sens,beta1.0_+100bp_r0.1450,1964.1,78563
+r_sens,beta0.5_-100bp_r0.1300,2153.6,86143
+r_sens,beta0.5_-50bp_r0.1325,2118.6,84745
+r_sens,beta0.5_+50bp_r0.1375,2053.0,82122
+r_sens,beta0.5_+100bp_r0.1400,2022.2,80888
+liq,disc0%,2085.2,83406
+liq,disc5%,1980.9,79236
+liq,disc10%,1876.6,75065
+liq,disc20%,1668.1,66725
+moat_sens,"NONE (fade -30% to 2033, info only)",1758.5,70338
+ebt_sens,"P4 price +/-10% (~ +/-176 rev, ~full pass to EBT)",176,
+ebt_sens,electricity +/-5% (~500/yr est),25,
+ebt_sens,export tax 10->15% on ~650 (run-rate 9T26) / ~1738 (2025 mix),32 / 87,
+ebt_sens,volume -20% (contribution ~445/yr est),89,
+meta,NETCASH_true,415.4,16616
+meta,cfo3_avg,373.1,
