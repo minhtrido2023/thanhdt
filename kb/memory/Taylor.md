@@ -23,3 +23,4 @@
 - [2026-11-14T02:21:04Z] ĐANG DỞ: weekly 09-13/11 đã promote nhưng delivery gate BLOCK G5 (VN-Index có cổ tức) | NEXT: điều tra G5 11-11 sau backfill Winston (VNH dup, mã V-Y), chạy vnindex_total_return --update, rồi report_delivery_gate x2 (không dựng lại build)
 - [2026-11-14T02:34:48Z] [dd-pnj report 14/11] XONG job Taylor_20261114_022155: investor_report/ PDF 10tr md5 fea39145, chua gui email — CHO Mike doc kiem + user bao 'gui email'; dd_price_zones.json chua ghi
 - [2026-11-14T06:57:01Z] [livermore-p0p1 14/11] XONG job Taylor_20261114_063556: 0/48 phan ky dat (G1 kich hoat), H2 R2 0.2-0.29 khong kich hoat; REPORT agents/Taylor/research/livermore_divergence_20261114/REPORT.md md5 850f0bec — CHO Mike quant-skeptic + chay kappa (tuy chon) + user chot thu hep vai/NO-GO
+- [2026-11-14T07:37:53Z] [sweep 14/11] universe_pit_p3_selfcheck OPEN: cho universe_pit 13/11 dung bu (dispatch Winston bi chan quyen ghi BQ) — tu dong khi xanh; 3 cau khac CLOSED
