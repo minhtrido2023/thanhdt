@@ -2336,3 +2336,6 @@
 
 ## Archived 2026-11-14 (keep=12 days=0 require_done=False)
 - [2026-11-13T03:59:56Z] ĐANG DỞ: A4 (job Taylor_20261113_034625) research/live_gap_exec_A4: Việc2 XONG (trùng byte). Chờ seed TB s3-10 (logs/tb.done) + L3F -> viết REPORT.md, registry, pin, bus topic live-gap-exec-A4-20261113 | NEXT: boot sd seed, REPORT
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-11-13T04:30:54Z] [live-gap-exec-A4 13/11] XONG: Δ -0,48pp bq->pit THAT (ghep cap sd 0,014, 10/10 seed); cua so ADV BQ gom ngay fill; pin merged trung byte 80f509ec/e2de0ac4; registry them, KHONG merge/pin moi — CHO quant-skeptic + user

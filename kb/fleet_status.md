@@ -1,4 +1,4 @@
-# Fleet status — 2026-11-14T02:07:06 UTC
+# Fleet status — 2026-11-14T02:07:19 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
@@ -21,7 +21,7 @@
 | Taylor_924874 | taylor-96 | child | dead | 2026-11-13T04:30:01Z | 1297 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Wags | Wags | child | working | 2026-11-14T01:53:28Z | 13 |  |
 | Wags_1397064 | wags-a5 | child | dead | 2026-11-13T10:10:02Z | 957 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Wags |
-| Winston | Winston | child | working | 2026-11-14T02:04:09Z | 2 |  |
+| Winston | Winston | child | working | 2026-11-14T02:07:13Z | 0 |  |
 | be47731d | be47731d | child | dead | 2026-11-13T05:46:32Z | 1220 |  |
 | workingclaude-01 | workingclaude-01 | child | dead | 2026-11-13T16:30:29Z | 576 |  |
 | workingclaude-12 | workingclaude-12 | child | dead | 2026-11-13T04:36:37Z | 1290 |  |
@@ -29,11 +29,11 @@
 | workingclaude-24 | workingclaude-24 | child | dead | 2026-11-13T01:22:56Z | 1484 |  |
 | workingclaude-27 | workingclaude-27 | child | dead | 2026-11-12T18:46:26Z | 1880 |  |
 | workingclaude-47 | workingclaude-47 | child | dead | 2026-11-12T05:48:31Z | 2658 |  |
-| workingclaude-49 | workingclaude-49 | child | dead | 2026-11-12T19:06:12Z | 1860 |  |
+| workingclaude-49 | workingclaude-49 | child | dead | 2026-11-12T19:06:12Z | 1861 |  |
 | workingclaude-4e | workingclaude-4e | child | dead | 2026-11-12T17:51:03Z | 1936 |  |
-| workingclaude-54 | workingclaude-54 | child | dead | 2026-11-13T07:39:12Z | 1107 |  |
+| workingclaude-54 | workingclaude-54 | child | dead | 2026-11-13T07:39:12Z | 1108 |  |
 | workingclaude-9e | workingclaude-9e | child | dead | 2026-11-13T08:35:43Z | 1051 |  |
-| workingclaude-ad | workingclaude-ad | child | dead | 2026-11-13T03:00:15Z | 1386 |  |
+| workingclaude-ad | workingclaude-ad | child | dead | 2026-11-13T03:00:15Z | 1387 |  |
 | workingclaude-af | workingclaude-af | child | dead | 2026-11-13T03:13:48Z | 1373 |  |
 | workingclaude-bb | workingclaude-bb | child | dead | 2026-11-13T14:45:28Z | 681 |  |
 | workingclaude-c6 | workingclaude-c6 | child | dead | 2026-11-12T17:29:03Z | 1958 |  |
