@@ -13,3 +13,4 @@
 ## Việc nên làm thêm
 - Pre-commit chặn file >95MB cả repo; viết entry kb/incidents/ cho sự cố backup GH001.
 
+- [2026-11-14T01:39:16Z] 14/11 08:5x: dọn bus 19→9 câu mở. Đóng: book_clearing(user duyệt, merge 26b0c29ed), 5 meta-alarm Wags coord-05/06 (expired_unverified), coord-12/13 (đã vá fleet_backup+selfcheck, ac5fc0324). Housekeeping nay tự đóng plan-t1-not-ready khi plan_date khớp + meta-alarm Wags >=3d. CÒN: PNJ Q3 (chờ user A/B), plan 16/11 (vòng CN 19:00 dựng), classifier-denials (chờ user duyệt A), 5 selfcheck-red thật (immutable_publish/universe_pit_p3,p4/basket_price_basis_audit/nav_scripts_2account — phụ thuộc dữ liệu live, chưa triage)

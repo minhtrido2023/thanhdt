@@ -14,10 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-13T02:31:17Z] [live-gap-exec-C2 13/11] XONG job Taylor_20261113_021438: nhanh feat/lag-cache-c2-20261113 (b1b91a5e6) KHONG merge; validate phu Price/V3 80/80 x3TZ, mut 39/39; runbook rollback + dinh chinh blast (0 lenh live) o mike 7a01e5d94 — CHO arch-reviewer + Mike merge
-- [2026-11-13T02:55:36Z] [live-gap-exec-B3 13/11] XONG: nhanh feat/savings-row-b3-20261113 (04fc4ce7f) KHONG merge; e2e gate tuan 06/11 COMPLETE (stub gui); v2 selfcheck chua ket luan (timeout); cau 5% co tuc phu thuoc cashDividendReceiving=0 — CHO Mike/user
-- [2026-11-13T03:07:35Z] [live-gap-exec-A3 13/11] XONG job Taylor_20261113_021435: nhanh feat/live-gap-exec-A3-20261113 (6bbb4a443) KHONG merge; L3P pin0 22,91/pin1M 26,61, DD5 -27,89/-24,96; MINP tro (live=60); pin ladderA3-L3P-* (command thieu env, da annotate) — CHO quant-skeptic + user
-
 - [2026-11-13T03:59:56Z] ĐANG DỞ: A4 (job Taylor_20261113_034625) research/live_gap_exec_A4: Việc2 XONG (trùng byte). Chờ seed TB s3-10 (logs/tb.done) + L3F -> viết REPORT.md, registry, pin, bus topic live-gap-exec-A4-20261113 | NEXT: boot sd seed, REPORT
 - [2026-11-13T04:30:54Z] [live-gap-exec-A4 13/11] XONG: Δ -0,48pp bq->pit THAT (ghep cap sd 0,014, 10/10 seed); cua so ADV BQ gom ngay fill; pin merged trung byte 80f509ec/e2de0ac4; registry them, KHONG merge/pin moi — CHO quant-skeptic + user
 - [2026-11-13T07:32:55Z] [live-gap-exec-A5 13/11] XONG job Taylor_20261113_071030: pin trung byte tren ma commit (80f509ec main sach / e2de0ac4 e9a9aed1a); neo -25,2 (4707bcbe) chua fill ao, bo fill ao -3,96pp => DD5 san trung thuc -29,09 (park0.3)/-27,89 (park0); ADV live=pit 29/32 — CHO quant-skeptic + user quyet neo
@@ -29,3 +25,4 @@
 - [2026-11-13T14:30:34Z] [live-gap-exec-A7 13/11] XONG job Taylor_20261113_134219: nhanh research/live-gap-A7-sellcap-20261113 (414468bcb) KHONG merge; tran ban khong doi DD5; thieu san ADV 2ty la nguon lech; DD5 NAV live (1-2B) ~-33% vs 50B -26 — CHO quant-skeptic + user chot neo; chua do pin1M/park0.3 o NAV nho
 - [2026-11-13T15:36:37Z] ĐANG DỞ: A9 (job Taylor_20261113_153627) sua tran ban A7 -> nhanh research/live-gap-A9-sellcap-fix-20261114 tu 414468bcb | NEXT: doc REPORT A7 + verdict, sua code
 - [2026-11-13T16:27:25Z] [live-gap-exec-A9 13/11] XONG job Taylor_20261113_153627: nhanh research/live-gap-A9-sellcap-fix-20261114 (8b5f7fd0d, worktree wt-livegapA7-1113 doi nhanh tai cho) KHONG merge; neo DD5 NAV live khong doi -33,2, 50B -26,22 — CHO arch-reviewer vong 2 + quant-skeptic, Mike merge
+- [2026-11-14T01:48:53Z] ĐANG DỞ: DD PNJ (job Taylor_20261114_014836) research/dd_PNJ_20261114 | NEXT: lay BCTC Q3 pnj.com.vn, cho Bobby sector_read_ban_le_trang_suc_vang_20261114.md

@@ -2327,3 +2327,9 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T19:03:34Z] [live-gap-exec-B2 13/11] XONG job Taylor_20261112_181211: nhanh feat/savings-row-20261112 (418667a32) KHONG merge; v2 selfcheck PASS 177 x3; anchor_warning siet, gate crosscheck cot tiet kiem — CHO user/Wendy duyet cau chu+thue+ten cot template
+
+## Archived 2026-11-14 (keep=12 days=0 require_done=False)
+- [2026-11-13T02:31:17Z] [live-gap-exec-C2 13/11] XONG job Taylor_20261113_021438: nhanh feat/lag-cache-c2-20261113 (b1b91a5e6) KHONG merge; validate phu Price/V3 80/80 x3TZ, mut 39/39; runbook rollback + dinh chinh blast (0 lenh live) o mike 7a01e5d94 — CHO arch-reviewer + Mike merge
+- [2026-11-13T02:55:36Z] [live-gap-exec-B3 13/11] XONG: nhanh feat/savings-row-b3-20261113 (04fc4ce7f) KHONG merge; e2e gate tuan 06/11 COMPLETE (stub gui); v2 selfcheck chua ket luan (timeout); cau 5% co tuc phu thuoc cashDividendReceiving=0 — CHO Mike/user
+- [2026-11-13T03:07:35Z] [live-gap-exec-A3 13/11] XONG job Taylor_20261113_021435: nhanh feat/live-gap-exec-A3-20261113 (6bbb4a443) KHONG merge; L3P pin0 22,91/pin1M 26,61, DD5 -27,89/-24,96; MINP tro (live=60); pin ladderA3-L3P-* (command thieu env, da annotate) — CHO quant-skeptic + user
+
