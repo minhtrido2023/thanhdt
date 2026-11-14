@@ -1,0 +1,9 @@
+LOCK assumptions_objective.md
+4a177526f4fd099744aff766a2b1d3e0  assumptions_objective.md
+locked_at_utc 2026-11-14T16:38:21Z
+
+# Sau khoá (không sửa assumptions_objective.md):
+model_run_utc 2026-11-14 (calc/model.py, md5 below)
+ĐÍNH CHÍNH 1 (làm tròn, không đổi giả định): assumptions §2.2 ghi EBIT 2027 ≈ 182 và EBIT dài hạn ≈ 254 (tính tay với tỷ lệ đã làm tròn 13,1%/17,1%); mô hình dùng tỷ lệ chưa làm tròn ⇒ 180,1 và 252,6 (GPM 13,0%/17,1%). Kết quả báo cáo theo số mô hình.
+ĐÍNH CHÍNH 2 (hiển thị): dòng in "ebitLR_x1.1/x1.2" trong stdout in hệ số thành "1" do định dạng; giá trị định giá đúng (96.174/102.695).
+df86bb94475bf30f20ed258f50d1b12a  calc/model.py
