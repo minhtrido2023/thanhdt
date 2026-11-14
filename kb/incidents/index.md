@@ -4,7 +4,7 @@ title: Incidents — Mike fleet (sổ postmortem, cấu trúc OKF)
 owner: Mike fleet (mọi agent ghi; daily_retro.sh ghi entry RETRO hằng đêm)
 format: OKF (Open Knowledge Format) — markdown + YAML frontmatter, 1 sự cố = 1 file
 migrated_from: kb/INCIDENTS.md (single-file 408KB, migrate → OKF 2026-07-30 job Winston_20260730_144031)
-entries: 233 file (111 sự cố + 121 RETRO + 1 mục open-items chung)
+entries: 238 file (113 sự cố + 124 RETRO + 1 mục open-items chung)
 ---
 
 # Incidents — Mike fleet
@@ -77,6 +77,8 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 
 | Ngày | Sự cố | status |
 |---|---|---|
+| 2026-11-14 | [2026-11/2026-11-14-cron-health-check-relative-log-path-blindspot.md](2026-11/2026-11-14-cron-health-check-relative-log-path-blindspot.md) | ? |
+| 2026-11-13 | [2026-11/2026-11-13-ticker-raw-lost-U-Y-block-5-sessions.md](2026-11/2026-11-13-ticker-raw-lost-U-Y-block-5-sessions.md) | ? |
 | 2026-11-11 | [2026-11/2026-11-11-approved-by-newline-preflight-red-and-lost-decision.md](2026-11/2026-11-11-approved-by-newline-preflight-red-and-lost-decision.md) | ? |
 
 ### 2026-10

@@ -262,6 +262,14 @@ def main():
                           "(im lặng mất nếu không có MTA cấu hình), không thể verify freshness/lỗi.",
             })
             continue
+        # Đường dẫn log TƯƠNG ĐỐI (vd `cd /home/trido/thanhdt/WorkingClaude && ... >> mike/logs/x.log`)
+        # được shell resolve theo thư mục của `cd` đầu lệnh — không có `cd` thì cron chạy ở $HOME.
+        # Trước 2026-11-14 bộ kiểm resolve theo CWD của chính nó ⇒ 10 job báo LOG_MISSING giả
+        # VÀ không bao giờ được quét lỗi (điểm mù, weekly ops audit 2026-11-14).
+        if not os.path.isabs(log_target):
+            cd_m = re.match(r"^\s*cd\s+(\S+)\s*&&", j["cmd"])
+            base = cd_m.group(1) if cd_m else os.path.expanduser("~")
+            log_target = os.path.join(base, log_target)
         paths = resolve_log_paths(log_target)
         if not paths:
             rows.append({
