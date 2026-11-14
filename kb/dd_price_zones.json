@@ -3665,6 +3665,56 @@
       "center_alt": 78300,
       "center_alt_kind": "expected_weighted",
       "center_alt_desc": "lượt mù giá thật: kỳ vọng trọng số 86.990 trước CK → 78.300 sau CK 10%, EBIT cơ sở 245 (assumptions_blind md5 52883de2…). Skeptic REFUTED mức cơ sở EBIT (245 = trung bình 3 chế độ không so được; cơ sở 185–205 ⇒ 68.700–73.000 sau CK). KHÔNG dùng làm neo; chỉ cho thấy lượt mù KHÔNG cho tâm thấp hơn rev1."
+    },
+    {
+      "ticker": "PAT",
+      "dd_date": "2026-11-14",
+      "rev": 3,
+      "bctc_quarter": "2026Q3",
+      "zone_low": 49600,
+      "center": 64700,
+      "center_kind": "expected_weighted",
+      "center_desc": "kỳ vọng trọng số cây kịch bản 4 nút độc lập 54 lá (quặng O 0,1375/0,3875/0,475; giá thực hiện P 0,32/0,58/0,10; giá DLC T 0,65/0,25/0,10; thuế 15% 0,90) TRƯỚC chiết khấu thanh khoản; r 13,5% @ lãi huy động 12T hiệu dụng 7,40%, g 2%; mù giá thật (valuer + skeptic hai chiều + vòng đính chính stateless)",
+      "zone_high": 79200,
+      "center_range": null,
+      "price_ref": 71000,
+      "price_date": "2026-11-13",
+      "verdict_label": "GIÁ 71.000 cao hơn tâm 9,7%, TRONG vùng P25–P75 49.600–79.200; không có biên an toàn; cổng 0,85×tâm (54.995) không đạt. Moat NONE, không thưởng/trừ. Pháp lý chỉ WARNING.",
+      "skeptic_status": "2 skeptic mù giá hai chiều: lạc quan REFUTED (tâm hiệu chỉnh 65–78k), bi quan INCONCLUSIVE (92–96k), 0 lỗi dữ kiện; đã áp 1 vòng đính chính bằng agent mới stateless (r2); CHƯA chạy skeptic lần 2 cho r2",
+      "source_file": "agents/Taylor/research/dd_PAT_objective_20261114/valuation/FINAL_r2.md",
+      "evidence": [
+        {
+          "file": "agents/Taylor/research/dd_PAT_objective_20261114/valuation/FINAL_r2.md",
+          "quote": "**tâm ≈ 64.700 đ/cp**",
+          "fields": [
+            "center"
+          ]
+        },
+        {
+          "file": "agents/Taylor/research/dd_PAT_objective_20261114/valuation/FINAL_r2.md",
+          "quote": "Vùng P25–P75 là **49.600–79.200**",
+          "fields": [
+            "zone_low",
+            "zone_high"
+          ]
+        },
+        {
+          "file": "kb/projects/pat-dd-objective-20261114.md",
+          "quote": "Giá đóng cửa 13/11/2026 = 71.000",
+          "fields": [
+            "price_ref"
+          ]
+        }
+      ],
+      "assumptions_file": "agents/Taylor/research/dd_PAT_objective_20261114/valuation/assumptions_objective_r2.md",
+      "assumptions_md5": "f2eb154f22bdbd38db92cb240d60235a",
+      "null_reason": null,
+      "expires_on": null,
+      "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc tờ trình GD bên liên quan DLC–PAT (ĐHĐCĐ 12/05 & 14/08/2026) hoặc 120 ngày",
+      "notes": "MÙ GIÁ THẬT (người dựng + 2 skeptic + vòng đính chính đều stateless, không thấy giá/REPORT cũ; giá chỉ so SAU khi khoá). Nút kém chắc nhất: giá DLC trả sau 01/01/2027 (xs 0,65 netback chưa có văn bản) và truyền dẫn giá TQ→PAT (nếu giữ giá thực hiện: ~71.700; ±5% giá ⇒ ±38% giá trị). Chiết khấu thanh khoản mô tả riêng (~1,5% nếu thoát 50.000 cp ở 10% tham gia), KHÔNG trừ vào tâm. Cổ tức tạm ứng 2026 chưa công bố: nếu chốt quyền trước ngày vào lệnh thì trừ phần chia. Chỉ cơ sở nghiên cứu, không phải tín hiệu mua; luật 02/11 #4 cần giá < 0,85×tâm + user duyệt từng lần.",
+      "supersedes": "PAT@2026-11-14#2",
+      "correction_reason": "Làm lại mù giá + khách quan theo chỉ đạo user 14/11 23:04: rev1/rev2 không mù thật (brief có giá + cột PE), skeptic một chiều; lượt mù trước dùng trung bình ba số khác chế độ làm EBIT cơ sở. rev3 dựng từ fact pack vận hành + cây kịch bản nhất quán, skeptic hai chiều mù giá.",
+      "recorded_at": "2026-11-14T23:50:00+07:00"
     }
   ],
   "center_kinds": [
