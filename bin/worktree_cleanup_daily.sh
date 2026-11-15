@@ -17,7 +17,7 @@ set -uo pipefail
 DEFAULT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROOT="$DEFAULT_ROOT"
 APPLY=0
-MASTER_BRANCH="master"
+MASTER_BRANCH="${MASTER_BRANCH:-master}"   # repo ngoài (/home/trido/thanhdt): MASTER_BRANCH=main
 CCDB_URL="${CCDB_API_URL:-http://127.0.0.1:8199}"
 LOCK="$ROOT/state/locks/worktree_cleanup.lock"
 LOG="$ROOT/logs/worktree_cleanup.log"
