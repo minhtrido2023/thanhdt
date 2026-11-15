@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-14T02:02:14Z] [dd-pnj 14/11] XONG REPORT job Taylor_20261114_014836: de xuat GIU LOAI, tam 6.440 vs gia 14.950; md5 REPORT caf25da7, assumptions 4e3fce77 — CHO Mike chay fundamental-skeptic + trinh user; KHONG sua excluded_tickers
 - [2026-11-14T02:21:01Z] [dd-pnj r2 14/11] XONG job Taylor_20261114_021336: 10 muc skeptic ap (muc 1 chi mot phan: CHUA MU, tam 6.440 dinh chi lam neo luat 4); NON giu; REPORT md5 0ecbc539 — CHO luot dinh gia mu that (phien moi) neu user muon neo luat 4
 - [2026-11-14T02:21:04Z] ĐANG DỞ: weekly 09-13/11 đã promote nhưng delivery gate BLOCK G5 (VN-Index có cổ tức) | NEXT: điều tra G5 11-11 sau backfill Winston (VNH dup, mã V-Y), chạy vnindex_total_return --update, rồi report_delivery_gate x2 (không dựng lại build)
 - [2026-11-14T02:34:48Z] [dd-pnj report 14/11] XONG job Taylor_20261114_022155: investor_report/ PDF 10tr md5 fea39145, chua gui email — CHO Mike doc kiem + user bao 'gui email'; dd_price_zones.json chua ghi
@@ -26,3 +25,4 @@
 - [2026-11-15T15:19:23Z] [ai-momentum P0 15/11] XONG job Taylor_20261115_150627: kb/projects/ai-momentum-p0-result-20261115.md (md5 5101c9cb), PREREG 5d3284d0b — CHO Mike quant-skeptic + user chot (2 nam hay noi nguong) + deepseek provider dang loi
 - [2026-11-15T15:58:58Z] [ai-momentum P1 15/11] XONG job Taylor_20261115_154607: nhanh research/ai-momentum-p1-20261115 (b07a773b0) KHONG merge; kb/projects/ai-momentum-p1-build-20261115.md — CHO Mike arch-review/quant-skeptic + user quyet noi nguong x2 (PREREG v3) + Wags xong M2
 - [2026-11-15T16:29:29Z] [ai-momentum P1-V3 15/11] XONG job Taylor_20261115_162439: nhanh research/ai-momentum-p1-20261115 (a09b71d5e) KHONG merge; kb/projects/ai-momentum-p1-v3-20261115.md; PREREG_v3 md5 d07ffcfd — CHO Mike arch-review/quant-skeptic + Wags xong M2 truoc khi cron
+- [2026-11-15T16:46:25Z] [ai-momentum P1-M2-WIRE 15/11] XONG job Taylor_20261115_163050: nhanh research/ai-momentum-p1-20261115 (efd12cbcd, da merge wags/m2-wrapper) KHONG merge master/cron; M2 OK 2/2 retro that; kb/projects/ai-momentum-p1-v3-20261115.md muc M2 — CHO Mike arch-review + user duyet cron

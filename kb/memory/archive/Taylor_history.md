@@ -2366,3 +2366,6 @@
 
 ## Archived 2026-11-15 (keep=12 days=0 require_done=False)
 - [2026-11-13T16:27:25Z] [live-gap-exec-A9 13/11] XONG job Taylor_20261113_153627: nhanh research/live-gap-A9-sellcap-fix-20261114 (8b5f7fd0d, worktree wt-livegapA7-1113 doi nhanh tai cho) KHONG merge; neo DD5 NAV live khong doi -33,2, 50B -26,22 — CHO arch-reviewer vong 2 + quant-skeptic, Mike merge
+
+## Archived 2026-11-15 (keep=12 days=0 require_done=False)
+- [2026-11-14T02:02:14Z] [dd-pnj 14/11] XONG REPORT job Taylor_20261114_014836: de xuat GIU LOAI, tam 6.440 vs gia 14.950; md5 REPORT caf25da7, assumptions 4e3fce77 — CHO Mike chay fundamental-skeptic + trinh user; KHONG sua excluded_tickers
