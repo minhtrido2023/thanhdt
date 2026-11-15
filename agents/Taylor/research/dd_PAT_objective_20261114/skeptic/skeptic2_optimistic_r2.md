@@ -1,0 +1,9 @@
+# Skeptic lần 2 (15/11/2026) — chiều LẠC QUAN, mù giá, trên r2 (md5 f2eb154f) — VERDICT: REFUTED (medium)
+Tái lập model: tâm 64.736, P25–P75 49.593–79.237, D 0,336. 20 số khớp ảnh BCTC Q3/2026. Không lỗi dữ kiện.
+- Lỗi logic chính: nút T — nhánh có lợi (T_b 0,25 + T_c 0,10, không bằng chứng) có trọng số 0,35 trong khi nhánh bất lợi (DLC trả DƯỚI netback, cùng tình trạng bằng chứng) chỉ là độ nhạy (r2 §1-1 vs §3). Đối xứng: T = T_a ⇒ 57.900 (−6.850; −10,6% so tâm). Thêm nhánh dưới netback đối xứng ⇒ 57.600. Tín hiệu duy nhất (#R5/#R6): giá ròng/tấn PAT 9T/26 ≈ +1% vs mảng P4 DGC +16,4% ⇒ khớp netback hoặc dưới, không khớp trên netback. Gia đình Đào nắm trực tiếp 16,7% PAT ⇒ lập luận động cơ #R4 yếu hơn r2 viết.
+- O1 (P=0,5 khi cả A và B được giải) dựa vào "hỗ trợ giá quặng" — khoản chính r2 xếp vào GỠ ⇒ hạ 0,25: −580. P(A)=0,5 có 4 yếu tố chống (KT25 hết giấy phép cuối 2026, tội danh khai thác, chưa ngày chạy lại, DGC lập kế hoạch dựa quặng nhập) ⇒ 0,35: −1.900 (thuần phán đoán, không vào tâm).
+- Vận chuyển dùng 3,85% FY25; 9T/26 = 22,844/487,508 = 4,69% ⇒ −1.150 (trái nguyên tắc 7a của r2).
+- Nút P: không áp (độ nhạy P(giảm)=0,40 ⇒ 62.200); cốc 1.825: không áp (độ nhạy cốc theo than ≈2.000 ⇒ 60.900; lưu huỳnh Q4 −30% nhưng cốc Q4 tăng 2.156; than mỡ tăng 6 quý liền); TX 0,05 mềm ⇒ −1.080 (NĐ 201/2026 có thể thay dự thảo 29/01, chưa đọc đủ phụ lục).
+- WARNING bổ sung: rủi ro sản lượng 2027 (PAT tự báo thiếu quặng 09/2026; tồn NVL 21→49,7 tỷ); chi phí xử lý xỉ/thải Tằng Loỏng; ưu đãi thuế TNDN (31,6 tỷ 9T/26) có điều kiện.
+- Tâm hiệu chỉnh: **≈56.100 (38.500–69.500; −13,4%)** = đòn 1 + vận chuyển + O1; +TX mềm 54.600; +P(A)=0,35 52.900; giữ nút T r2 chỉ áp vận chuyển+O1+TX: 61.900.
+- Dễ sai nhất: nút T — nếu hợp đồng DLC 2027 giá cố định/không phụ thuộc thuế, hoặc thuế XK chuyển một phần sang người mua nước ngoài (VN xuất khẩu P4 hàng đầu từ 2018), T_a đánh quá tay và tâm r2 ~62–64k vẫn đứng.

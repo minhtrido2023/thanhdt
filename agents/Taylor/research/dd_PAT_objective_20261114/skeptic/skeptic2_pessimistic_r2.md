@@ -1,0 +1,8 @@
+# Skeptic lần 2 (15/11/2026) — chiều BI QUAN, mù giá, trên r2 (md5 f2eb154f) — VERDICT: CONFIRMED (medium)
+Tái lập 64.736; 20 số khớp ảnh BCTC (p05,p06,p07,p20,p24,p28,p31,p32); KT-PL 9T DN tự tạm tính 12,943 = số r2 trừ. Không lỗi dữ kiện.
+- Nút T netback 0,65: ĐÚNG là chuẩn giao dịch độc lập trung tính (VN xuất ròng; DN khác xuất 100%; DLC giữ 51% PAT nên 49% giá chuyển thêm về thiểu số; [NỀN] NĐ 132/2020 đòi giá độc lập khi hưởng ưu đãi thuế), không phải khoản trừ thiếu bằng chứng. Dữ liệu không phân biệt được: netback ⇒ giá trước thuế 9T/26 +6,7%; trả giá gộp ⇒ +0,4%; P4 TQ +19,5%, DGC +16%. Hiệu chỉnh 0.
+- Nút P: có căn cứ base-rate (P4 TQ đang p90; hai lần trước giảm 12–33%) nhưng LỖI LOGIC: biên ±6,3% suy dưới giả định netback mà r2 áp cả lá T_b/T_c (nơi giá PAT ≈ +0,4%, không truyền dẫn) ⇒ chỉ áp P cho lá netback: **+2.500** (bỏ hẳn nút P: +7.000, cận trên, không đề xuất).
+- Nút O: chia đều ca một nguyên nhân = lấy điểm giữa (tuyến tính) nên 0; thời điểm KT25 dừng mâu thuẫn (Nhà Đầu Tư 19/03 vs Báo PL 29/10) — nếu tháng 3 thì P(O3)=0,3375 (+2.900, độ nhạy); "chưa giải trước 2028 ⇒ vĩnh viễn" mâu thuẫn với hazard hằng λ 0,055/tháng của r2 (+4.200 nếu hazard tiếp tục; không đưa vào tâm chặt).
+- Điện, DV/khác, 70 tỷ, KT-PL: ĐÚNG, không đếm hai lần; chi phí nhất quán theo chế độ: +730. g, terminal, capex, thuế TNDN: ĐÚNG. Cốc 2027 nửa đường +400 (độ nhạy).
+- Tâm hiệu chỉnh chặt (P×T + chi phí theo chế độ): **67.974 (+5,0%)**; thêm hazard + cốc 2027: 71.600–72.000 (ngoại suy, không đủ bằng chứng).
+- Kém chắc: nút T chưa văn bản; thời điểm KT25 dừng; "vĩnh viễn" sau 2028.

@@ -13,6 +13,7 @@
 | Chỉ tiêu | Giá trị | Ghi chú |
 |---|---|---|
 | Giá trị tâm; vùng P25–P75 | **64.700**; 49.600–79.200 đ/cp | Tâm = bình quân có trọng số xác suất của 54 kịch bản |
+| Khoảng sau phản biện độc lập hai chiều | 56.100–68.000 đ/cp | Tâm 64.700 nằm trong khoảng; chênh lệch chủ yếu do nút giá DLC chưa có văn bản (mục 6) |
 | Trong đó tiền ròng | 357,4 tỷ = 14.300 đ/cp | Đã trừ vay, quỹ khen thưởng – phúc lợi và 70 tỷ khoá cầm cố |
 | DT; LNST 9T/2026 | 1.379,3; 215,7 tỷ | −2,9%; −20,8% so với 9T/2025 |
 | Biên gộp Q3/2026 (Q3/2025) | 14,5% (25,7%) | Thấp nhất trong 15 kỳ quan sát được từ 2021 |
@@ -129,6 +130,17 @@
 | 3 | Chi phí quặng (nút O) | Hai đầu vào đều là phán đoán: xác suất 0,5 trung tính; ca đúng một nguyên nhân chia đều | Cố định O3: 52.500; O1: 82.100 |
 | 4 | Giá/tấn và nguyên liệu/tấn 2026 | Không có sản lượng; sai số ±7 điểm % | Không tách được giá khỏi chi phí trên tấn |
 
+### Phản biện độc lập hai chiều
+
+Hai người phản biện, mỗi người chỉ đọc một chiều (tích cực hoặc tiêu cực) và không biết thị giá, cùng đối chiếu 20 số trọng yếu với ảnh BCTC Q3/2026 (đều khớp) và chạy lại mô hình (tái lập 64.736). Không có lỗi dữ kiện. Các hiệu chỉnh CÓ bằng chứng nằm trong khoảng 56.100–68.000:
+
+| Chiều | Hiệu chỉnh có bằng chứng | Tâm hiệu chỉnh |
+|---|---|---|
+| Tích cực (tìm chỗ lạc quan) | Nhánh DLC trả trên giá xuất khẩu sau thuế (xác suất 0,35) chưa có bằng chứng, nhưng nhánh trả dưới giá đó chưa được tính: đặt đối xứng ⇒ 57.900; chi phí vận chuyển theo 9T/2026 (4,69% doanh thu xuất khẩu) −1.150; hỗ trợ giá quặng chưa có quyết định −580 | ≈ 56.100 (−13,4%) |
+| Tiêu cực (tìm chỗ bi quan) | Biên độ giá ±6,3% suy ra dưới giả định DLC trả giá xuất khẩu sau thuế, không nên áp cho nhánh còn lại (+2.500); chi phí theo từng chế độ quặng nhất quán (+730) | ≈ 68.000 (+5,0%) |
+
+Cả hai cùng chỉ ra nút giá DLC là điểm quyết định: tờ trình giao dịch bên liên quan của ĐHĐCĐ 12/05 và 14/08/2026 có thể đưa tâm về đầu trên hoặc đầu dưới của khoảng. Tâm 64.700 được giữ nguyên vì các hiệu chỉnh trái chiều và đều nhỏ hơn bất định của nút này.
+
 ## 7. Khoản đã tính và khoản đã loại vì thiếu bằng chứng
 
 | Khoản | Trong cơ sở? | Bằng chứng |
@@ -220,7 +232,7 @@ BCTC Q3/2026 (lập 20/10/2026); BCTC soát xét bán niên 2026 (UHY, số 907/
 
 ## Phụ lục E. Quy trình độc lập
 
-Số liệu đối chiếu với trang BCTC gốc; ngành được đọc độc lập mù; giả định định giá khoá trước khi chạy mô hình; có người phản biện độc lập đọc cả chiều tích cực lẫn tiêu cực.
+Số liệu đối chiếu với trang BCTC gốc; ngành được đọc độc lập mù; giả định định giá khoá trước khi chạy mô hình; hai người phản biện độc lập, mỗi người đọc một chiều (tích cực / tiêu cực), đều không biết thị giá; kết quả ở mục 6.
 
 ## Phụ lục F. Tuyên bố miễn trừ trách nhiệm
 
