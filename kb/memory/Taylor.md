@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-13T10:23:05Z] ĐANG DỞ: annualization_basis_selfcheck 68 file chặn (danh sách agents/Wags/research/ann_remaining_20261113.txt) | NEXT: sau khi Wags merge ec771492b vào master -> chạy $DNA_PYEXE bin/annualization_basis_selfcheck.py --update-baseline --accept-new-debt (scan ~2+ phút, chạy nền), ghi lý do frozen/PREREG/paper-only, rc=0 + đóng bus 'Wags/selfcheck-red: mike/bin/annualization_basis_selfcheck.py'
 - [2026-11-13T14:30:34Z] [live-gap-exec-A7 13/11] XONG job Taylor_20261113_134219: nhanh research/live-gap-A7-sellcap-20261113 (414468bcb) KHONG merge; tran ban khong doi DD5; thieu san ADV 2ty la nguon lech; DD5 NAV live (1-2B) ~-33% vs 50B -26 — CHO quant-skeptic + user chot neo; chua do pin1M/park0.3 o NAV nho
 - [2026-11-13T15:36:37Z] ĐANG DỞ: A9 (job Taylor_20261113_153627) sua tran ban A7 -> nhanh research/live-gap-A9-sellcap-fix-20261114 tu 414468bcb | NEXT: doc REPORT A7 + verdict, sua code
 - [2026-11-13T16:27:25Z] [live-gap-exec-A9 13/11] XONG job Taylor_20261113_153627: nhanh research/live-gap-A9-sellcap-fix-20261114 (8b5f7fd0d, worktree wt-livegapA7-1113 doi nhanh tai cho) KHONG merge; neo DD5 NAV live khong doi -33,2, 50B -26,22 — CHO arch-reviewer vong 2 + quant-skeptic, Mike merge
@@ -26,3 +25,4 @@
 - [2026-11-14T07:37:53Z] [sweep 14/11] universe_pit_p3_selfcheck OPEN: cho universe_pit 13/11 dung bu (dispatch Winston bi chan quyen ghi BQ) — tu dong khi xanh; 3 cau khac CLOSED
 - [2026-11-14T12:15:19Z] [dd-pat 14/11] XONG REPORT job Taylor_20261114_120425: tam 75.100 (sau CK thanh khoan 10%), gia 72.700 trong vung hop ly; REPORT md5 303958a8, assumptions d8783c94 — CHO Mike chay fundamental-skeptic; chua ghi dd_price_zones
 - [2026-11-14T12:34:51Z] [dd-pat báo cáo NĐT 14/11] XONG job Taylor_20261114_122716: investor_report/ PDF 8tr; LƯU Ý giá 13/11 BQ = 71.000 (72.700 là 06/11) — CHỜ Mike xác nhận + user báo 'gửi email'; chưa ghi dd_price_zones
+- [2026-11-15T14:49:54Z] [ai-momentum plan 15/11] XONG job Taylor_20261115_144310: kb/projects/ai-momentum-research-plan-20261115.md (md5 d72baef6), chua code/chua cron — CHO user tra 4 cau F (muc tieu G-proc vs G-fcst, vu tru, M2, topic) roi moi P0; INDEX.md chua them dong (Mike/consolidator)

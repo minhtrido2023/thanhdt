@@ -2354,3 +2354,6 @@
 
 ## Archived 2026-11-14 (keep=12 days=0 require_done=False)
 - [2026-11-13T08:40:19Z] [decision-inbox vong2 13/11] XONG job Taylor_20261113_083010: nhanh feat/decision-inbox-20261113 (03187c254) KHONG merge; 7 muc + 2 muc thap, selfcheck r2 17/77->77/77; CHO arch-reviewer vong 3 (chi neu NEEDS_CHANGES lan nua -> circuit-breaker) roi Mike merge; retention state jsonl chua lam
+
+## Archived 2026-11-15 (keep=12 days=0 require_done=False)
+- [2026-11-13T10:23:05Z] ĐANG DỞ: annualization_basis_selfcheck 68 file chặn (danh sách agents/Wags/research/ann_remaining_20261113.txt) | NEXT: sau khi Wags merge ec771492b vào master -> chạy $DNA_PYEXE bin/annualization_basis_selfcheck.py --update-baseline --accept-new-debt (scan ~2+ phút, chạy nền), ghi lý do frozen/PREREG/paper-only, rc=0 + đóng bus 'Wags/selfcheck-red: mike/bin/annualization_basis_selfcheck.py'
