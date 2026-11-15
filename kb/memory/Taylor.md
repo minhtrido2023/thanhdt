@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-13T15:36:37Z] ĐANG DỞ: A9 (job Taylor_20261113_153627) sua tran ban A7 -> nhanh research/live-gap-A9-sellcap-fix-20261114 tu 414468bcb | NEXT: doc REPORT A7 + verdict, sua code
 - [2026-11-13T16:27:25Z] [live-gap-exec-A9 13/11] XONG job Taylor_20261113_153627: nhanh research/live-gap-A9-sellcap-fix-20261114 (8b5f7fd0d, worktree wt-livegapA7-1113 doi nhanh tai cho) KHONG merge; neo DD5 NAV live khong doi -33,2, 50B -26,22 — CHO arch-reviewer vong 2 + quant-skeptic, Mike merge
 - [2026-11-14T02:02:14Z] [dd-pnj 14/11] XONG REPORT job Taylor_20261114_014836: de xuat GIU LOAI, tam 6.440 vs gia 14.950; md5 REPORT caf25da7, assumptions 4e3fce77 — CHO Mike chay fundamental-skeptic + trinh user; KHONG sua excluded_tickers
 - [2026-11-14T02:21:01Z] [dd-pnj r2 14/11] XONG job Taylor_20261114_021336: 10 muc skeptic ap (muc 1 chi mot phan: CHUA MU, tam 6.440 dinh chi lam neo luat 4); NON giu; REPORT md5 0ecbc539 — CHO luot dinh gia mu that (phien moi) neu user muon neo luat 4
@@ -26,3 +25,4 @@
 - [2026-11-14T12:34:51Z] [dd-pat báo cáo NĐT 14/11] XONG job Taylor_20261114_122716: investor_report/ PDF 8tr; LƯU Ý giá 13/11 BQ = 71.000 (72.700 là 06/11) — CHỜ Mike xác nhận + user báo 'gửi email'; chưa ghi dd_price_zones
 - [2026-11-15T14:49:54Z] [ai-momentum plan 15/11] XONG job Taylor_20261115_144310: kb/projects/ai-momentum-research-plan-20261115.md (md5 d72baef6), chua code/chua cron — CHO user tra 4 cau F (muc tieu G-proc vs G-fcst, vu tru, M2, topic) roi moi P0; INDEX.md chua them dong (Mike/consolidator)
 - [2026-11-15T15:19:23Z] [ai-momentum P0 15/11] XONG job Taylor_20261115_150627: kb/projects/ai-momentum-p0-result-20261115.md (md5 5101c9cb), PREREG 5d3284d0b — CHO Mike quant-skeptic + user chot (2 nam hay noi nguong) + deepseek provider dang loi
+- [2026-11-15T15:58:58Z] [ai-momentum P1 15/11] XONG job Taylor_20261115_154607: nhanh research/ai-momentum-p1-20261115 (b07a773b0) KHONG merge; kb/projects/ai-momentum-p1-build-20261115.md — CHO Mike arch-review/quant-skeptic + user quyet noi nguong x2 (PREREG v3) + Wags xong M2
