@@ -55,6 +55,11 @@
       "title": "Momentum deals (project)",
       "purpose": "Topic rieng cua du an momentum-deals — tach khoi van hanh hang ngay. Chua co script nao dung; dispatch dung --thread/ten nay."
     },
+    "momentum_lab": {
+      "id": "1571541823615406201",
+      "title": "Momentum Lab (AI-momentum)",
+      "purpose": "Du an nghien cuu AI-momentum (paper-only): canh bao bat thuong cua bin/ai_momentum_cron.sh (rc ngoai {0,3,4,6}, M1 FAIL, M2 FAIL lien tiep). User mo 2026-11-15."
+    },
     "new_deals": {
       "id": "1523612826260734112",
       "title": "New deals",

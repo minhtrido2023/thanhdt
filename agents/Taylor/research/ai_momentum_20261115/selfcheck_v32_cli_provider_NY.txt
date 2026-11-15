@@ -1,0 +1,42 @@
+== CA 1: claude mac dinh (khong --model, khong --effort)
+   chuoi cu: -p P --permission-mode auto --max-turns 50 $MODEL_FLAG(rong) --effort medium
+    ok   argv claude mac dinh
+== CA 2: --model opus --effort high (MAX_TURNS scale theo effort = 80)
+    ok   argv co --model
+== CA 2b: --model opus, KHONG --effort (MAX_TURNS scale theo MODEL = 80; sonnet van 50)
+    ok   argv opus/medium tran 80
+    ok   argv sonnet/medium tran 50
+== CA 3: --model fable --effort max  ⇒ CLAMP effort=high (chinh sach user 07-14)
+    ok   argv fable bi clamp
+== CA 4: --effort xhigh ⇒ MAX_TURNS=120
+    ok   argv xhigh
+== CA 5: --max-turns 33 tuong minh de len scale
+    ok   argv max-turns tuong minh
+== CA 6: prompt tieng Viet co dau " va backtick ⇒ toi nguyen ven trong DUNG 1 argv
+    ok   so argv chua prompt (phai la 1, khong bi tach tu) = 1
+    ok   prompt giu nguyen van ca " lan backtick = yes
+== CA 7: provider opencode ⇒ run --dir --auto, prompt POSITIONAL o cuoi
+    ok   argv opencode
+== CA 8: cong provider — agent ngoai allow_agents ⇒ HUY, CLI khong duoc chay
+    ok   exit code khac 0 = yes
+    ok   CLI KHONG duoc goi = khong-goi
+== CA 9: provider dang tat ⇒ HUY, khong am tham roi ve claude
+    ok   exit code khac 0 = yes
+    ok   CLI KHONG duoc goi = khong-goi
+== CA 10: model cua provider khac ⇒ HUY (khong tu dich tier — su co model-drift 07-17)
+    ok   exit code khac 0 = yes
+    ok   CLI KHONG duoc goi = khong-goi
+== CA 11: job record ghi lai provider + turn_cap (triage doc duoc, khong doan)
+    ok   job.provider = opencode
+    ok   job.turn_cap (opencode khong co turn-cap) = unsupported
+== CA 12: profile=prompt-inline ⇒ identity+context ĐƯỢC BƠM VÀO PROMPT
+   (provider khong doc duoc CLAUDE.md/AGENTS.md cua fleet — vd codex, agy)
+    ok   prompt co khoi identity = yes
+    ok   prompt co CLAUDE.md cua agent = yes
+    ok   prompt co @import DA EXPAND = yes
+== CA 13: provider antigravity (agy) — argv + prompt-inline
+    ok   argv agy (--add-dir, -p o cuoi)
+    ok   agy cung duoc bom identity (prompt-inline) = yes
+
+PASS — 23/23 assertion dung
+rc=0

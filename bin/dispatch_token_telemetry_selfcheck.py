@@ -332,7 +332,7 @@ def integration_tests(mutate):
             os.remove(os.path.join(s.mk, "bin", "job_telemetry.py"))
             os.symlink(os.path.join(REAL, "bin", "job_telemetry.py"), os.path.join(s.mk, "bin", "job_telemetry.py"))
             # I6 opencode: khong field nao, khong crash
-            r = s.run("ok", "--provider", "opencode", "--model", "opencode/deepseek-v4-flash-free")
+            r = s.run("ok", "--provider", "opencode", "--model", "opencode/deepseek-v4.1-flash-free")
             j = s.last_job()
             check("I6 opencode: done, KHONG co telemetry",
                   r.returncode == 0 and j.get("status") == "done"

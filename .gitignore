@@ -62,3 +62,6 @@ secrets/
 kb/work_ledger.jsonl.lock
 state/work_tree/*.lock
 agents/Taylor/research/dd_price_zone_threshold_20261101/hist_2y.csv
+
+# ai_momentum (P1): khoa flock cua ledger + khoa luot chay; ledger .jsonl THI duoc commit (fleet_backup git add -A) — xem kb/projects/ai-momentum-p1-v3-20261115.md
+*.lock

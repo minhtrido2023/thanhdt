@@ -169,8 +169,8 @@ print("yes" if sys.argv[2] in p else "no")' "$SB/argv.bin" "$VNP")"
 chk "prompt giu nguyen van ca \" lan backtick" "$_intact" "yes"
 
 echo "== CA 7: provider opencode ⇒ run --dir --auto, prompt POSITIONAL o cuoi"
-run Taylor "viec test" --provider opencode --model opencode/deepseek-v4-flash-free --effort high
-argv_is "argv opencode" run --dir "$MK/agents/Taylor" --auto -m opencode/deepseek-v4-flash-free --variant high "<PROMPT>"
+run Taylor "viec test" --provider opencode --model opencode/deepseek-v4.1-flash-free --effort high
+argv_is "argv opencode" run --dir "$MK/agents/Taylor" --auto -m opencode/deepseek-v4.1-flash-free --variant high "<PROMPT>"
 
 echo "== CA 8: cong provider — agent ngoai allow_agents ⇒ HUY, CLI khong duoc chay"
 rm -f "$SB/argv.bin"
@@ -202,7 +202,7 @@ chk "exit code khac 0" "$([ "$_rc" -ne 0 ] && echo yes || echo no)" "yes"
 chk "CLI KHONG duoc goi" "$([ -f "$SB/argv.bin" ] && echo goi || echo khong-goi)" "khong-goi"
 
 echo "== CA 11: job record ghi lai provider + turn_cap (triage doc duoc, khong doan)"
-run Taylor "viec test" --provider opencode --model opencode/deepseek-v4-flash-free
+run Taylor "viec test" --provider opencode --model opencode/deepseek-v4.1-flash-free
 _jf="$(find "$MK/bus/jobs" -name '*.json' | sort | tail -1)"
 _pv="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("provider",""))' "$_jf" 2>/dev/null)"
 _tc="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("turn_cap",""))' "$_jf" 2>/dev/null)"

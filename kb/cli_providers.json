@@ -104,8 +104,6 @@
       "env": {},
       "models": [
         "opencode/deepseek-v4.1-flash-free",
-        "opencode/ling-3.0-flash-free",
-        "opencode/nemotron-3-ultra-free",
         "opencode/mimo-v2.5-free",
         "opencode/laguna-s-2.1-free",
         "opencode/north-mini-code-free",
