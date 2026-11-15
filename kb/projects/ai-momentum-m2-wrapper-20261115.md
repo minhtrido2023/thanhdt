@@ -32,6 +32,6 @@ Giữ timeout ≥ 200s cho gói 10 sự kiện (đo 142s).
 Prompt = `agents/Taylor/research/ai_momentum_20261115/m2/blind_input.md` (+1 dòng no-tool, bản sao ở /tmp, không sửa file Taylor), model default `deepseek-v4.1-flash-free`: **rc=0, 142s, text 7.582 byte, JSON parse được, 10 phần tử `diem_dang_ngo`** (blind_driver + view_20s/60s + evidence). Chất lượng nội dung chưa chấm (việc của Taylor/PREREG).
 
 ## 5. Selfcheck — `bin/second_opinion_selfcheck.sh`
-Stub opencode/dispatch/append_event trong ROOT giả; không chạm mạng/bus thật. PASS dưới TZ=UTC, Asia/Ho_Chi_Minh, America/New_York (22 check). Mutation đã chứng minh test bắt được:
+Stub opencode/dispatch/append_event trong ROOT giả; không chạm mạng/bus thật. PASS dưới TZ=UTC, Asia/Ho_Chi_Minh, America/New_York (18 check). Mutation đã chứng minh test bắt được:
 raw mode lỡ post bus ⇒ FAIL ("raw goi bus", "raw loi goi bus"); bỏ `exec dispatch.sh` ở chế độ cũ ⇒ FAIL ("che do cu bi pha").
 Phủ: raw không bus, prompt nguyên văn, không khung 3-điểm, model default từ config, permission, exit 0/2/10/11/12, retry hồi phục, chế độ cũ còn dispatch+khung+lệnh bus.
