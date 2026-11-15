@@ -1,0 +1,21 @@
+ex20 T1 (CONT vs rest), delta=8pp / 12pp ; N = SO SU KIEN CO VIEW CO HUONG; Ntot = su kien can xu ly
+  p_dir=0.4 N_dir=  40 Ntot= 100  power d8=0.35 d12=0.60
+  p_dir=0.4 N_dir=  80 Ntot= 200  power d8=0.75 d12=0.98
+  p_dir=0.4 N_dir= 150 Ntot= 375  power d8=0.99 d12=1.00
+  p_dir=0.6 N_dir=  40 Ntot=  67  power d8=0.23 d12=0.49
+  p_dir=0.6 N_dir=  80 Ntot= 133  power d8=0.61 d12=0.97
+  p_dir=0.6 N_dir= 150 Ntot= 250  power d8=0.93 d12=1.00
+  p_dir=1.0 N_dir=  40 Ntot=  40  power d8=0.10 d12=0.14
+  p_dir=1.0 N_dir=  80 Ntot=  80  power d8=0.37 d12=0.69
+  p_dir=1.0 N_dir= 150 Ntot= 150  power d8=0.81 d12=0.98
+thang de toi N_dir (= N_dir / (rate*p_dir)); cong 3 thang cho ex60; hang doi toi da 10/tuan ~43/thang khong chan:
+  TB toan ky 13.1/thang p_dir=0.4: N80=15.3m N150=28.6m N250=47.7m
+  TB toan ky 13.1/thang p_dir=0.6: N80=10.2m N150=19.1m N250=31.8m
+  TB toan ky 13.1/thang p_dir=1.0: N80=6.1m N150=11.5m N250=19.1m
+  6 thang gan 6.3/thang p_dir=0.4: N80=31.7m N150=59.5m N250=99.2m
+  6 thang gan 6.3/thang p_dir=0.6: N80=21.2m N150=39.7m N250=66.1m
+  6 thang gan 6.3/thang p_dir=1.0: N80=12.7m N150=23.8m N250=39.7m
+chuan TB 13.2 N80=15.2m N150=28.4m N250=47.3m
+chuan 6m gan 6.3 N80=31.7m N150=59.5m N250=99.2m
+x2 TB 21.5 N80=9.3m N150=17.4m N250=29.1m
+x2 6m gan 12.3 N80=16.3m N150=30.5m N250=50.8m
