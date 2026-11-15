@@ -2357,3 +2357,6 @@
 
 ## Archived 2026-11-15 (keep=12 days=0 require_done=False)
 - [2026-11-13T10:23:05Z] ĐANG DỞ: annualization_basis_selfcheck 68 file chặn (danh sách agents/Wags/research/ann_remaining_20261113.txt) | NEXT: sau khi Wags merge ec771492b vào master -> chạy $DNA_PYEXE bin/annualization_basis_selfcheck.py --update-baseline --accept-new-debt (scan ~2+ phút, chạy nền), ghi lý do frozen/PREREG/paper-only, rc=0 + đóng bus 'Wags/selfcheck-red: mike/bin/annualization_basis_selfcheck.py'
+
+## Archived 2026-11-15 (keep=12 days=0 require_done=False)
+- [2026-11-13T14:30:34Z] [live-gap-exec-A7 13/11] XONG job Taylor_20261113_134219: nhanh research/live-gap-A7-sellcap-20261113 (414468bcb) KHONG merge; tran ban khong doi DD5; thieu san ADV 2ty la nguon lech; DD5 NAV live (1-2B) ~-33% vs 50B -26 — CHO quant-skeptic + user chot neo; chua do pin1M/park0.3 o NAV nho

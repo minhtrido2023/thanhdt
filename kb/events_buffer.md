@@ -721,3 +721,8 @@
 
 ## Consolidation 2026-11-15T15:18:00Z
 - [2026-11-15T15:17:30Z] Taylor/heartbeat — Taylor_20261115_150627: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261115_150627", "source": "watcher"}
+
+## Consolidation 2026-11-15T15:19:49Z
+- [2026-11-15T15:18:30Z] Taylor/heartbeat — Taylor_20261115_150627: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261115_150627", "source": "watcher"}
+- [2026-11-15T15:19:23Z] Taylor/finding — ai-momentum-p0-result-20261115: {"result_file": "kb/projects/ai-momentum-p0-result-20261115.md", "commits": {"prereg": "5d3284d0b", "dryrun": "7594932b4"}, "prereg_md5": "4ed34b380ba566a581daae9850eb9212", "events_R4": {"N": 341, "months": 26, "mean_per_month": 13.1, "last6m_per_month": 6.3}, "rating_source": "tav2_bq.fa_ratings_8l as-of (PIT)", "power": {"N150_ex20_8pp": 0.87, "N150_ex60_12pp": 0.85, "N40_ex20_12pp": 0.14}, "time_to_N150": "~24 thang o nhip 05-10/2026 (+3 thang cho ex60)", "dryrun": {"evidence_le_T": "10/10", "catalyst_within_4w": "5/10", "unknown": "4/10", "canary_leak": "0/10", "m2_deepseek": "FAIL 3/3 opencode UnknownError server-side", "flip_kappa": "chua do"}, "tokens": {"m1_10_sonnet": 763960, "canary": 68127}, "recommendation": "qua P1 co dieu kien: sua M2 provider + che do prompt rieng second_opinion (Wags), schema M1, M1 phien tran; user chap nhan ~2 nam hoac noi nguong (PREREG v2) hoac dung", "quant_skeptic": "chua goi (Mike)", "measured_by": "agents/Taylor/research/ai_momentum_20261115/{build_events.py,power_sim.py,m1/_raw.jsonl,m2/*.log}; Agent tool subagent_tokens"}
+- [2026-11-15T15:19:30Z] Taylor/heartbeat — Taylor_20261115_150627: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261115_150627", "source": "watcher"}
