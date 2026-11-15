@@ -83,8 +83,42 @@ def gate(check=None):
         reasons.append(wg[0].removeprefix("SKIP: "))
     ntd = next_trading_day(today)
     if reasons:
+        # CỨU HỘ (user duyệt A, 2026-11-15): ngoài cửa sổ BCTC mà phiên kế tiếp THIẾU plan hợp lệ cho ÍT NHẤT
+        # một account live (chuỗi 19:00 thứ Sáu hỏng — ca 13/11) ⇒ vẫn RUN. CHỈ áp khi lý do SKIP duy nhất là
+        # cửa sổ BCTC (đúng thứ Chủ nhật, cổng cửa sổ chạy được). Không đọc được nhãn/thư mục ⇒ giữ SKIP (fail-closed).
+        if today.weekday() == 6 and len(reasons) == 1 and r.returncode == 0 and wg[0].startswith("SKIP"):
+            miss = missing_plans(ntd)
+            if miss:
+                return f"RUN {ntd.isoformat()}"
+    if reasons:
         return "SKIP: " + "; ".join(reasons)
     return f"RUN {ntd.isoformat()}"
+
+
+def missing_plans(ntd):
+    """Danh sách account live KHÔNG có plan_<ACCT>_<ntd>.json hợp lệ (plan_date đúng ngày đích, orders là list).
+    Lỗi đọc nhãn account/thư mục ⇒ [] (KHÔNG kích hoạt cứu hộ — giữ hành vi SKIP cũ)."""
+    plan_dir = os.environ.get("SPR_PLAN_DIR") or os.path.join(WC_ROOT, "data", "trade_plans")
+    try:
+        labels = os.environ.get("SPR_LABELS")
+        if labels is None:
+            from trading_bot.config import live_dnse_labels
+            labels = " ".join(live_dnse_labels())
+        labels = labels.split()
+    except Exception:
+        return []
+    miss = []
+    for a in labels:
+        try:
+            with open(_plan_path(plan_dir, a, ntd.isoformat() if hasattr(ntd, "isoformat") else ntd)) as f:
+                pl = json.load(f)
+            ok = pl.get("plan_date", pl.get("date")) == (ntd.isoformat() if hasattr(ntd, "isoformat") else ntd) \
+                and isinstance(pl.get("orders"), list)
+        except Exception:
+            ok = False
+        if not ok:
+            miss.append(a)
+    return miss
 
 
 # ── DẤU DUYỆT ───────────────────────────────────────────────────────────────────────────────────

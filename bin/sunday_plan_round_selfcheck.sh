@@ -210,18 +210,39 @@ suite() {
 
   if sec gate; then
   g() { bash "$WRAP" --check "$1" 2>&1; }
+  # gs: như g nhưng SEED plan hợp lệ cho phiên kế tiếp của ngày đó (cả 2 account) ⇒ cổng cứu hộ KHÔNG kích hoạt,
+  # test thuần cổng cửa sổ/ngày như trước 2026-11-15.
+  gs() { local d="$1" n td; n="$(cd "$([ -d "$WC/trading_bot" ] && echo "$WC" || echo /home/trido/thanhdt/WorkingClaude)" && python3 -c "import datetime as dt,sys; from trading_bot.vn_market import next_trading_day; print(next_trading_day(dt.date.fromisoformat(sys.argv[1])))" "$d")"; td="$(mktemp -d)"
+    for A in $SPR_LABELS; do echo "{\"plan_date\":\"$n\",\"orders\":[]}" > "$td/plan_${A}_${n}.json"; done
+    SPR_PLAN_DIR="$td" bash "$WRAP" --check "$d" 2>&1; rm -rf "$td"; }
+  # gr: cứu hộ — dir rỗng (thiếu plan) hoặc thiếu MỘT account / sai plan_date.
+  gr() { local d="$1" mode="$2" n td; n="$(cd "$([ -d "$WC/trading_bot" ] && echo "$WC" || echo /home/trido/thanhdt/WorkingClaude)" && python3 -c "import datetime as dt,sys; from trading_bot.vn_market import next_trading_day; print(next_trading_day(dt.date.fromisoformat(sys.argv[1])))" "$d")"; td="$(mktemp -d)"
+    case "$mode" in
+      empty) : ;;
+      one)   echo "{\"plan_date\":\"$n\",\"orders\":[]}" > "$td/plan_SpaceX_${n}.json" ;;
+      stale) for A in $SPR_LABELS; do echo "{\"plan_date\":\"2000-01-01\",\"orders\":[]}" > "$td/plan_${A}_${n}.json"; done ;;
+      bad)   for A in $SPR_LABELS; do echo "{not json" > "$td/plan_${A}_${n}.json"; done ;;
+    esac
+    SPR_PLAN_DIR="$td" bash "$WRAP" --check "$d" 2>&1; rm -rf "$td"; }
   ck "gate CN trong cửa sổ (10-18) → RUN, đích thứ Hai 10-19"   eq "$(g 2026-10-18)" "RUN 2026-10-19"
   ck "gate CN 10-11 (≥10 tháng 10) → RUN"                      eq "$(g 2026-10-11)" "RUN 2026-10-12"
-  ck "gate CN 10-04 (<10 tháng 10) → SKIP"                      eq "$(g 2026-10-04 | cut -c1-4)" "SKIP"
-  ck "gate thứ Bảy 10-17 → SKIP (không phải CN)"                eq "$(g 2026-10-17 | cut -c1-4)" "SKIP"
-  ck "gate thứ Hai 10-12 → SKIP"                                eq "$(g 2026-10-12 | cut -c1-4)" "SKIP"
+  ck "gate CN 10-04 (<10 tháng 10) → SKIP"                      eq "$(gs 2026-10-04 | cut -c1-4)" "SKIP"
+  ck "gate thứ Bảy 10-17 → SKIP (không phải CN)"                eq "$(gs 2026-10-17 | cut -c1-4)" "SKIP"
+  ck "gate thứ Hai 10-12 → SKIP"                                eq "$(gs 2026-10-12 | cut -c1-4)" "SKIP"
   ck "gate CN 11-08 (tháng 2/5/8/11 ngày ≤10) → RUN"            eq "$(g 2026-11-08)" "RUN 2026-11-09"
-  ck "gate CN 11-15 (>10) → SKIP"                               eq "$(g 2026-11-15 | cut -c1-4)" "SKIP"
-  ck "gate CN 12-06 (ngoài cửa sổ) → SKIP"                      eq "$(g 2026-12-06 | cut -c1-4)" "SKIP"
-  ck "gate CN 09-20 (ngoài cửa sổ) → SKIP"                      eq "$(g 2026-09-20 | cut -c1-4)" "SKIP"
+  ck "gate CN 11-15 (>10) → SKIP"                               eq "$(gs 2026-11-15 | cut -c1-4)" "SKIP"
+  ck "CỨU HỘ: CN 11-15 (ngoài cửa sổ) + THIẾU plan cả 2 account → RUN 11-16"   eq "$(gr 2026-11-15 empty)" "RUN 2026-11-16"
+  ck "CỨU HỘ: CN 11-15 + thiếu MỘT account → RUN"                              eq "$(gr 2026-11-15 one)" "RUN 2026-11-16"
+  ck "CỨU HỘ: CN 11-15 + plan sai plan_date → RUN"                             eq "$(gr 2026-11-15 stale)" "RUN 2026-11-16"
+  ck "CỨU HỘ: CN 11-15 + plan JSON hỏng → RUN"                                 eq "$(gr 2026-11-15 bad)" "RUN 2026-11-16"
+  ck "CỨU HỘ: CN 11-15 + đủ plan hợp lệ cả 2 account → SKIP (không chạy thừa)" eq "$(gs 2026-11-15 | cut -c1-4)" "SKIP"
+  ck "CỨU HỘ: thứ Bảy 11-14 thiếu plan → vẫn SKIP (chỉ CN)"                    eq "$(gr 2026-11-14 empty | cut -c1-4)" "SKIP"
+  ck "CỨU HỘ: nhãn account đọc lỗi → SKIP (fail-closed)"                       eq "$(SPR_LABELS= gr 2026-11-15 empty | cut -c1-4)" "SKIP"
+  ck "gate CN 12-06 (ngoài cửa sổ) → SKIP"                      eq "$(gs 2026-12-06 | cut -c1-4)" "SKIP"
+  ck "gate CN 09-20 (ngoài cửa sổ) → SKIP"                      eq "$(gs 2026-09-20 | cut -c1-4)" "SKIP"
   ck "gate CN 2026-01-11 (tháng 1 ≥10) → RUN"                   eq "$(g 2026-01-11)" "RUN 2026-01-12"
   ck "gate thứ Hai là lễ (CN 2029-04-29, T2 30/04+01/05 lễ) → RUN, đích 2029-05-02" eq "$(g 2029-04-29)" "RUN 2029-05-02"
-  ck "gate CN chính nó là lễ (2028-04-30) → SKIP"               eq "$(g 2028-04-30 | cut -c1-4)" "SKIP"
+  ck "gate CN chính nó là lễ (2028-04-30) → SKIP"               eq "$(gs 2028-04-30 | cut -c1-4)" "SKIP"
   fi
 
   if sec noop; then
@@ -231,8 +252,10 @@ suite() {
   ck "thứ Bảy: không tạo stash/state"      eq "$(ls "$SC/state" | wc -l | tr -d ' ')" 0
   ck "thứ Bảy: plan nguyên vẹn"            sameF SpaceX
   ck "thứ Bảy: 1 dòng log SKIP"            has "$SC/out.log" "SKIP"
-  reset_sb; MIKE_NOW_ICT="2026-12-06T19:00:00" run_wrap
+  reset_sb; for A in $SPR_LABELS; do echo "{\"plan_date\":\"2026-12-07\",\"orders\":[]}" > "$SC/plans/plan_${A}_2026-12-07.json"; done; MIKE_NOW_ICT="2026-12-06T19:00:00" run_wrap
   ck "CN ngoài cửa sổ: rc=0, không notify" eq "$(rcv)$(wc -c <"$SC/notify.log" | tr -d ' ')" 00
+  reset_sb; MIKE_NOW_ICT="2026-12-06T19:00:00" run_wrap   # 12-07 KHÔNG có plan hợp lệ (sandbox chỉ có 10-19) ⇒ cứu hộ
+  ck "CỨU HỘ e2e: CN ngoài cửa sổ + THIẾU plan → wrapper CHẠY" has "$SC/out.log" "RUN vong plan Chu nhat -> plan dich 2026-12-07"
   fi
 
   # ── (a) cả hai GIỐNG ──
@@ -576,8 +599,8 @@ PY
   # --second-chance = verify + gửi lại (trong cửa sổ), và NHẢ khi ngoài cửa sổ
   reset_sb; run_wrap; : >"$SC/send.log"; run_wrap --second-chance
   ck "V6: second-chance trong cửa sổ → gọi send_plan_report --second-chance" has "$SC/send.log" "--second-chance"
-  : >"$SC/send.log"; MIKE_NOW_ICT="2026-12-06T23:00:00" run_wrap --second-chance
-  ck "V7: second-chance ngoài mùa BCTC → KHÔNG gửi"       eq "$(wc -c <"$SC/send.log" | tr -d ' ')" 0
+  for A in $SPR_LABELS; do echo "{\"plan_date\":\"2026-12-07\",\"orders\":[]}" > "$SC/plans/plan_${A}_2026-12-07.json"; done; : >"$SC/send.log"; MIKE_NOW_ICT="2026-12-06T23:00:00" run_wrap --second-chance
+  ck "V7: second-chance ngoài mùa BCTC (đủ plan) → KHÔNG gửi"       eq "$(wc -c <"$SC/send.log" | tr -d ' ')" 0
   # manifest còn 'running' (vòng bị ngắt) khi verify chạy ⇒ recover trước
   reset_sb; run_bg env STUB_KILL=kill9 STUB_ACCT_SpaceX=diff STUB_ACCT_ZaloPay=diff; sleep 1.5
   run_wrap --verify
@@ -692,6 +715,7 @@ run_mut M4-bo-recover-truoc-cong "recover" sh 'REC="$(recover_all)"; rrc=$?' 'RE
 run_mut M5-khong-go-duyet     "b"   lib 'bad = [k for k in plan if _is_approval_key(k)]' 'bad = []'
 run_mut M6-timeout-thanh-ok   "c"   sh  'STATUS[$a]="job_timeout"' 'STATUS[$a]="ok"'
 run_mut M7-bo-gate-cua-so     "gate" lib 'elif wg[0] != "RUN":' 'elif False:'
+run_mut M32-cuu-ho-luon-SKIP "gate" lib 'if miss:' 'if False:'
 run_mut M8-bo-qua-injector-loi "c"  sh  'if [ -n "$INJ_FAIL" ]; then' 'if false; then'
 run_mut M9-bo-trap-exit       "recover" sh 'trap _final_guard EXIT' 'trap : EXIT'
 run_mut M10-a-khong-khoi-phuc "a"   lib '                _restore(plan_dir, ntd, acct, ent, run_dir)
