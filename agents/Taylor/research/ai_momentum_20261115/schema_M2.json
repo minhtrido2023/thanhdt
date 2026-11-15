@@ -1,0 +1,8 @@
+{"title":"ai_momentum M2","type":"object","properties":{
+ "blind":{"type":"object","required":["event_id","blind_driver","blind_view_20s","blind_view_60s","evidence"],
+   "properties":{"event_id":{"type":"string"},"blind_driver":{"enum":["EARNINGS","CORP_ACTION","SECTOR_MACRO","FLOW_INDEX","NARRATIVE_ONLY","UNKNOWN"]},
+     "blind_view_20s":{"enum":["CONT","REV","NO_VIEW"]},"blind_view_60s":{"enum":["CONT","REV","NO_VIEW"]},"evidence":{"type":"array"}}},
+ "challenge":{"type":"object","required":["event_id","missed","disagree"],
+   "properties":{"event_id":{"type":"string"},
+     "missed":{"type":"array","items":{"type":"object","required":["item","source","date","verifiable"],"properties":{"item":{"type":"string"},"source":{"type":"string"},"date":{"type":"string"},"verifiable":{"type":"boolean"}}}},
+     "disagree":{"type":"array","items":{"type":"object","required":["m1_field","why","source","verifiable"]}}}}}}

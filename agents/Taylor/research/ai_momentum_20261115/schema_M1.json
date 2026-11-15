@@ -1,0 +1,12 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"ai_momentum M1","type":"object",
+ "required":["event_id","driver_class","evidence","what_market_prices_in","invalidation","view_20s","view_60s","confidence"],
+ "properties":{
+  "event_id":{"type":"string"},
+  "driver_class":{"enum":["EARNINGS","CORP_ACTION","SECTOR_MACRO","FLOW_INDEX","NARRATIVE_ONLY","UNKNOWN"]},
+  "evidence":{"type":"array","items":{"type":"object","required":["claim","source","date"],
+     "properties":{"claim":{"type":"string"},"source":{"type":"string","description":"news_le_T[i] | financials_released_le_T[i] | stats"},"date":{"type":"string","format":"date","description":"PHAI <= T"}}}},
+  "what_market_prices_in":{"type":"string"},
+  "invalidation":{"type":"string"},
+  "view_20s":{"enum":["CONT","REV","NO_VIEW"]},"view_60s":{"enum":["CONT","REV","NO_VIEW"]},
+  "confidence":{"type":"number","minimum":0,"maximum":1},
+  "dd_label":{"type":"string","description":"'LOAI khoi moi candidate' neu stats.dd_flag=true"}}}
