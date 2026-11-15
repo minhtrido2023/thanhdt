@@ -189,8 +189,8 @@ def validate(obj, schema, path="$"):
     errs = []
     if "enum" in schema and obj not in schema["enum"]: errs.append(f"{path}: {obj!r} not in enum")
     t = schema.get("type")
-    tmap = {"object": dict, "array": list, "string": str, "integer": int, "number": (int, float)}
-    if t and (not isinstance(obj, tmap[t]) or isinstance(obj, bool)): return errs + [f"{path}: expected {t}"]
+    tmap = {"object": dict, "array": list, "string": str, "integer": int, "number": (int, float), "boolean": bool}
+    if t and (not isinstance(obj, tmap[t]) or (isinstance(obj, bool) and t != "boolean")): return errs + [f"{path}: expected {t}"]
     if t == "number" or t == "integer":
         if "minimum" in schema and obj < schema["minimum"]: errs.append(f"{path}: < min")
         if "maximum" in schema and obj > schema["maximum"]: errs.append(f"{path}: > max")
@@ -247,25 +247,71 @@ def call_m1(packet, mode, schema_key="round1", extra=""):
             err = f"{type(e).__name__}: {str(e)[:200]}"
     return None, meta_all, err
 
-# ---------------------------------------------------------------- M2: adapter mong (doi che do khi Wags xong)
+# ---------------------------------------------------------------- M2: deepseek qua bin/second_opinion.sh --raw-prompt-file (Wags, 39d490f3e)
+M2_TIMEOUT = 240          # >=200s (Wags do 142s cho 10 su kien); +buffer cho subprocess
+NO_TOOL_LINE = "KHONG goi tool nao, tra loi truc tiep bang JSON (mot object JSON duy nhat, khong markdown)."   # thieu dong nay -> model goi glob roi TREO
+M2_PROMPT = {"blind": (HERE / "prompt_M2_blind.md"), "challenge": (HERE / "prompt_M2_challenge.md")}
+M2_SCHEMA = json.loads((HERE / "schema_M2.json").read_text())["properties"] if (HERE / "schema_M2.json").exists() else {}
+
+def _repo_root():
+    """Repo root cua CHINH worktree nay (khong hardcode canonical): di len tu HERE toi thu muc co bin/second_opinion.sh."""
+    for p in [HERE, *HERE.parents]:
+        if (p / "bin" / "second_opinion.sh").is_file(): return p
+    raise FileNotFoundError("bin/second_opinion.sh khong thay tu " + str(HERE))
+
+FORMAT_HINT = {   # deepseek tu bia ten truong neu khong co khung (do that 16/11: 'claim' thay 'item', 'FUNDAMENTAL' ngoai enum) => khung CHINH XAC theo schema_M2.json
+    "blind": 'Dinh dang tra loi: DUNG MOT object JSON {"event_id": "<event_id>", "blind_driver": mot trong [EARNINGS, CORP_ACTION, SECTOR_MACRO, FLOW_INDEX, NARRATIVE_ONLY, UNKNOWN], '
+             '"blind_view_20s": mot trong [CONT, REV, NO_VIEW], "blind_view_60s": mot trong [CONT, REV, NO_VIEW], "evidence": ["<chuoi: phan tu cua goi + ngay <= T>", ...]}. Khong them truong khac.',
+    "challenge": 'Dinh dang tra loi: DUNG MOT object JSON {"event_id": "<event_id>", "missed": [{"item": "<yeu to M1 bo qua>", "source": "<phan tu cua goi>", "date": "YYYY-MM-DD", "verifiable": true|false}], '
+                 '"disagree": [{"m1_field": "<ten truong cua M1>", "why": "<ly do>", "source": "<phan tu cua goi>", "verifiable": true|false}]}. Khong tim duoc => mang rong []. Khong them truong khac.'}
+
+def build_m2_prompt(stage, packet, m1=None):
+    """Blind: prompt + no-tool + GOI (TUYET DOI khong M1). Challenge: prompt + no-tool + GOI + JSON M1."""
+    parts = [M2_PROMPT[stage].read_text(encoding="utf-8").strip(), NO_TOOL_LINE, FORMAT_HINT[stage],
+             "Chi 1 su kien duoi day; tra MOT object JSON co event_id = " + packet["event_id"] + ".", "GOI:\n" + json.dumps(packet, ensure_ascii=False, indent=1)]
+    if stage == "challenge": parts.append("JSON CUA M1:\n" + json.dumps(m1, ensure_ascii=False, indent=1))
+    return "\n\n".join(parts) + "\n"
+
+def run_second_opinion(prompt_file, out_jsonl, text_out, timeout=M2_TIMEOUT):
+    cmd = [str(_repo_root() / "bin" / "second_opinion.sh"), "--raw-prompt-file", str(prompt_file), "--out", str(out_jsonl), "--text-out", str(text_out),
+           "--timeout", str(timeout)]
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 120).returncode
+M2_RUN = run_second_opinion
+
 def m2_adapter(stage, packet, m1=None):
-    """stage: 'blind' | 'challenge'. Tra {'status':'OK','data':{...}} hoac {'status':'FAIL','reason':...}.
-    HIEN TAI fail-open (second_opinion.sh dang duoc Wags sua: che do prompt rieng + khong post bus; KHONG goi wrapper cu —
-    no post bus 2 event/su kien). Khi Wags xong: thay than ham, giu nguyen hop dong tra ve + schema_M2.json."""
-    mode = os.environ.get("AI_MOMENTUM_M2", "off")
-    if mode == "off": return {"status": "FAIL", "reason": "adapter_not_enabled"}
-    return {"status": "FAIL", "reason": f"unknown_mode:{mode}"}
+    """stage: 'blind' | 'challenge'. Tra {'status':'OK','data':{...},'raw_jsonl':...} hoac {'status':'FAIL','reason':...}.
+    Fail-open: moi loi (exit 10/11/12/2, parse, schema, timeout) => FAIL (T1/T2 van cham, loai khoi T3). Model mac dinh cua wrapper; khong WebSearch."""
+    if os.environ.get("AI_MOMENTUM_M2", "on") == "off": return {"status": "FAIL", "reason": "adapter_disabled"}
+    assert stage in ("blind", "challenge"); assert stage == "blind" or m1 is not None
+    with tempfile.TemporaryDirectory(prefix="am_m2_") as d:
+        d = Path(d); pf, rj, tx = d / "prompt.md", d / "raw.jsonl", d / "text.txt"
+        pf.write_text(build_m2_prompt(stage, packet, m1), encoding="utf-8")
+        try: rc = M2_RUN(pf, rj, tx, M2_TIMEOUT)
+        except subprocess.TimeoutExpired: return {"status": "FAIL", "reason": "timeout_subprocess"}
+        if rc != 0: return {"status": "FAIL", "reason": f"second_opinion_exit_{rc}"}
+        raw = rj.read_text(encoding="utf-8") if rj.exists() else ""
+        txt = tx.read_text(encoding="utf-8") if tx.exists() else ""
+        try:
+            obj = _parse_json(txt)
+            if isinstance(obj, list) and len(obj) == 1: obj = obj[0]
+            if isinstance(obj, dict): obj.setdefault("event_id", packet["event_id"])
+            errs = validate(obj, M2_SCHEMA[stage]) + ([] if isinstance(obj, dict) and obj.get("event_id") == packet["event_id"] else ["event_id mismatch"])
+        except Exception as e: return {"status": "FAIL", "reason": f"parse_fail:{type(e).__name__}", "raw_text": txt[:20000]}
+        if errs: return {"status": "FAIL", "reason": "schema:" + "; ".join(errs[:3]), "raw_text": txt[:20000]}
+        return {"status": "OK", "data": obj, "raw_text": txt[:20000], "raw_jsonl_bytes": len(raw)}
 M2 = m2_adapter
 
 def run_m2(packet, m1):
+    """Blind chay TRUOC va KHONG nhan m1. Raw text M2 luu vao ledger (m2_raw) de audit, ca khi FAIL parse."""
+    raw = {}
     try:
-        b = M2("blind", packet)
-        if b.get("status") != "OK": return {"m2_status": "FAIL", "m2_reason": b.get("reason"), "blind": None, "challenge": None}
-        c = M2("challenge", packet, m1)
-        if c.get("status") != "OK": return {"m2_status": "FAIL", "m2_reason": c.get("reason"), "blind": b["data"], "challenge": None}
-        return {"m2_status": "OK", "m2_reason": None, "blind": b["data"], "challenge": c["data"]}
+        b = M2("blind", packet); raw["blind"] = b.get("raw_text")
+        if b.get("status") != "OK": return {"m2_status": "FAIL", "m2_reason": "blind:" + str(b.get("reason")), "blind": None, "challenge": None, "m2_raw": raw}
+        c = M2("challenge", packet, m1); raw["challenge"] = c.get("raw_text")
+        if c.get("status") != "OK": return {"m2_status": "FAIL", "m2_reason": "challenge:" + str(c.get("reason")), "blind": b["data"], "challenge": None, "m2_raw": raw}
+        return {"m2_status": "OK", "m2_reason": None, "blind": b["data"], "challenge": c["data"], "m2_raw": raw}
     except Exception as e:
-        return {"m2_status": "FAIL", "m2_reason": f"{type(e).__name__}: {str(e)[:150]}", "blind": None, "challenge": None}
+        return {"m2_status": "FAIL", "m2_reason": f"{type(e).__name__}: {str(e)[:150]}", "blind": None, "challenge": None, "m2_raw": raw}
 
 def process_event(packet, mode):
     r1, meta1, err1 = call_m1(packet, mode, "round1")

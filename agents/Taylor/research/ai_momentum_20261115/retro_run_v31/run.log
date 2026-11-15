@@ -1,0 +1,3 @@
+{"T": "2026-09-17", "mode": "retro", "n_candidates": 1, "processed": ["HID"], "skipped_capacity": [], "written": ["HID_2026-09-17"]}
+{"T": "2026-10-12", "mode": "retro", "n_candidates": 1, "processed": ["DXP"], "skipped_capacity": [], "written": ["DXP_2026-10-12"]}
+SECONDS {"HID_2026-09-17": 138.8, "DXP_2026-10-12": 109.1} total 247.9

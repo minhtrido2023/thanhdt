@@ -198,10 +198,69 @@ def t_today_ict(m):
     try: return m.today_ict() == datetime.date(2026, 11, 16)
     finally: m.dt = real_dt
 
+
+# ---------------- M2 adapter (second_opinion.sh raw) ----------------
+SENT = "SENTINEL_M1_KET_LUAN_XYZ"
+def _pk(): return {"event_id": "AAA_" + T, "ticker": "AAA", "T": T, "stats": {}, "sector_context": {}, "financials_released_le_T": [], "news_le_T": []}
+def _blind_ok(): return {"event_id": "AAA_" + T, "blind_driver": "UNKNOWN", "blind_view_20s": "NO_VIEW", "blind_view_60s": "NO_VIEW", "evidence": []}
+def _chal_ok(): return {"event_id": "AAA_" + T, "missed": [], "disagree": []}
+def _fake_run(m, rc=0, text=None, log=None, exc=None):
+    def run(pf, rj, tx, timeout=None):
+        if log is not None: log.append({"prompt": Path(pf).read_text(), "timeout": timeout})
+        if exc: raise exc
+        Path(rj).write_text('{"ev":1}\n')
+        if text is not None: Path(tx).write_text(text if isinstance(text, str) else json.dumps(text))
+        return rc
+    return run
+def t_m2a_ok_and_prompt(m):
+    log = []; m.M2_RUN = _fake_run(m, 0, _blind_ok(), log); os.environ.pop("AI_MOMENTUM_M2", None)
+    r = m.m2_adapter("blind", _pk())
+    pr = log[0]["prompt"]
+    log2 = []; m.M2_RUN = _fake_run(m, 0, _chal_ok(), log2); m.m2_adapter("challenge", _pk(), {"driver_class": "UNKNOWN"})
+    hint_ok = '"blind_driver"' in pr and "NARRATIVE_ONLY" in pr and '"m1_field"' in log2[0]["prompt"] and '"item"' in log2[0]["prompt"]
+    return hint_ok and r["status"] == "OK" and m.NO_TOOL_LINE in pr and "KHONG goi tool nao" in pr and log[0]["timeout"] >= 200 and "AAA_" + T in pr and r["raw_text"]
+def t_m2a_fail_modes(m):
+    os.environ.pop("AI_MOMENTUM_M2", None); ok = True
+    for rc in (10, 11, 12, 2):
+        m.M2_RUN = _fake_run(m, rc, ""); r = m.m2_adapter("blind", _pk()); ok &= (r["status"] == "FAIL" and f"exit_{rc}" in r["reason"])
+    m.M2_RUN = _fake_run(m, 0, "khong phai json {"); r = m.m2_adapter("blind", _pk()); ok &= (r["status"] == "FAIL" and r["reason"].startswith("parse_fail") and bool(r["raw_text"]))
+    m.M2_RUN = _fake_run(m, 0, dict(_blind_ok(), blind_view_20s="MOON")); r = m.m2_adapter("blind", _pk()); ok &= (r["status"] == "FAIL" and r["reason"].startswith("schema"))
+    m.M2_RUN = _fake_run(m, 0, dict(_blind_ok(), event_id="ZZZ_x")); r = m.m2_adapter("blind", _pk()); ok &= (r["status"] == "FAIL")
+    m.M2_RUN = _fake_run(m, exc=m.subprocess.TimeoutExpired("x", 1)); r = m.m2_adapter("blind", _pk()); ok &= (r["status"] == "FAIL" and "timeout" in r["reason"])
+    return bool(ok)
+def t_m2a_blind_before_and_no_m1(m):
+    log = []; os.environ.pop("AI_MOMENTUM_M2", None)
+    def run(pf, rj, tx, timeout=None):
+        pr = Path(pf).read_text(); log.append(pr)
+        Path(rj).write_text("{}\n"); Path(tx).write_text(json.dumps(_blind_ok() if len(log) == 1 else _chal_ok())); return 0
+    m.M2_RUN = run; m.M2 = m.m2_adapter
+    r = m.run_m2(_pk(), {"driver_class": SENT})
+    return r["m2_status"] == "OK" and len(log) == 2 and SENT not in log[0] and SENT in log[1] and "PHAN BIEN" in log[1].upper() + "PHAN BIEN" and "MÙ" in log[0] and r["m2_raw"]["blind"] and r["m2_raw"]["challenge"]
+def t_m2a_e2e_failopen(m):
+    os.environ.pop("AI_MOMENTUM_M2", None)
+    for rc in (10, 11, 12):
+        m.M2_RUN = _fake_run(m, rc, ""); e = Env(m, {T: [cand("AAA")]}); m.M2 = m.m2_adapter; e.day(T); r = e.rows()[0]
+        if not (r["m2_status"] == "FAIL" and r["m1_status"] == "OK" and f"exit_{rc}" in r["m2_reason"] and r["final"]["flipped_20s"] is False and "m2_raw" in r): return False
+    return True
+def t_m2a_schema_boolean(m):
+    os.environ.pop("AI_MOMENTUM_M2", None)
+    good = dict(_chal_ok(), missed=[{"item": "i", "source": "s", "date": "2026-11-13", "verifiable": True}], disagree=[{"m1_field": "f", "why": "w", "source": "s", "verifiable": False}])
+    m.M2_RUN = _fake_run(m, 0, good); a = m.m2_adapter("challenge", _pk(), {"x": 1})
+    bad = dict(good, missed=[{"item": "i", "source": "s", "date": "d", "verifiable": "yes"}]); m.M2_RUN = _fake_run(m, 0, bad); b = m.m2_adapter("challenge", _pk(), {"x": 1})
+    inv = dict(good, missed=[{"claim": "i", "source": "s", "date": "d", "verifiable": True}]); m.M2_RUN = _fake_run(m, 0, inv); c = m.m2_adapter("challenge", _pk(), {"x": 1})   # ten truong bia (ca that 16/11)
+    return a["status"] == "OK" and b["status"] == "FAIL" and c["status"] == "FAIL"
+def t_m2a_off_switch(m):
+    os.environ["AI_MOMENTUM_M2"] = "off"
+    try: return m.m2_adapter("blind", _pk())["reason"] == "adapter_disabled"
+    finally: os.environ.pop("AI_MOMENTUM_M2", None)
+def t_m2a_bin_in_own_worktree(m):
+    return (m._repo_root() / "bin" / "second_opinion.sh").is_file() and Path(m._repo_root()).resolve() == HERE.parents[3]
+
 TESTS = [t_no_double_append, t_ledger_append_twice, t_parallel_append, t_md5_tamper, t_no_outcome_in_packet, t_sql_pit, t_news_pit, t_fin_pit, t_m2_exception_failopen,
          t_m2_fail_status, t_m2_ok_rebuttal, t_schema_strict, t_m1_fail_recorded, t_capacity, t_capacity_resets_next_week, t_cooldown, t_cooldown_same_quarter,
          t_live_guard, t_dry_run_no_write, t_dd_flag, t_scorer_no_peek, t_scorer_look, t_scorer_ignores_unscored, t_today_ict,
-         t_prereg_params, t_prereg_stamp, t_prereg_lock, t_ticker_sens, t_scorer_ignores_other_prereg]
+         t_prereg_params, t_prereg_stamp, t_prereg_lock, t_ticker_sens, t_scorer_ignores_other_prereg,
+         t_m2a_ok_and_prompt, t_m2a_fail_modes, t_m2a_blind_before_and_no_m1, t_m2a_e2e_failopen, t_m2a_off_switch, t_m2a_bin_in_own_worktree, t_m2a_schema_boolean]
 MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("ledger append khong idempotent", 'if any(r["event_id"] == rec["event_id"] for r in self.read()): return False', "pass", "t_ledger_append_twice"),
     ("run_day bo guard idempotent (+ledger)", 'if any(r["event_id"] == f"{c[\'ticker\']}_{T}" for r in led.read()): continue', "pass", "t_no_double_append"),
@@ -235,6 +294,17 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("bo do nhay cum theo ma", 'if "T1" in out and "ticker" in df:', "if False:", "t_ticker_sens"),
     ("sensitivity lot vao ho BH (khoa T1 sai)", '"role": "descriptive_not_in_BH_family"', '"role": "bh"', "t_ticker_sens"),
     ("sc khong mang ticker", '"T": r["T"], "ticker": r["ticker"],', '"T": r["T"],', "t_ticker_sens"),
+    ("M2 blind nhan M1 (ro ri)", ['b = M2("blind", packet)', 'if stage == "challenge": parts.append'], ['b = M2("blind", packet, m1)', 'if m1 is not None: parts.append'], "t_m2a_blind_before_and_no_m1"),
+    ("M2 mat khung dinh dang", "NO_TOOL_LINE, FORMAT_HINT[stage],", "NO_TOOL_LINE,", "t_m2a_ok_and_prompt"),
+    ("validate khong biet boolean", ', "boolean": bool}', "}", "t_m2a_schema_boolean"),
+    ("M2 prompt mat dong no-tool", 'parts = [M2_PROMPT[stage].read_text(encoding="utf-8").strip(), NO_TOOL_LINE,', 'parts = [M2_PROMPT[stage].read_text(encoding="utf-8").strip(),', "t_m2a_ok_and_prompt"),
+    ("M2 timeout 240->100", "M2_TIMEOUT = 240", "M2_TIMEOUT = 100", "t_m2a_ok_and_prompt"),
+    ("M2 bo qua exit code", "if rc != 0: return", "if False: return", "t_m2a_fail_modes"),
+    ("M2 bo bat timeout", "except subprocess.TimeoutExpired: return", "except KeyError: return", "t_m2a_fail_modes"),
+    ("M2 bo kiem schema", "errs = validate(obj, M2_SCHEMA[stage]) +", "errs = [] +", "t_m2a_fail_modes"),
+    ("M2 bo kiem event_id", 'obj.get("event_id") == packet["event_id"]', 'True', "t_m2a_fail_modes"),
+    ("M2 mat raw ledger", '"blind": None, "challenge": None, "m2_raw": raw}\n    except', '"blind": None, "challenge": None}\n    except', "t_m2a_e2e_failopen"),
+    ("M2 hardcode bin canonical", 'return p\n    raise FileNotFoundError', 'return Path("/home/trido/thanhdt/WorkingClaude/mike")\n    raise FileNotFoundError', "t_m2a_bin_in_own_worktree"),
     ("today bo neo ICT", "dt.datetime.now(ICT).date()", "dt.datetime.now().date()", "t_today_ict"),
 ]
 def main():
