@@ -3,7 +3,9 @@ Hai bien the: ALL (khong loc rating) va R4 (rating_8l as-of <= 4, nguon PIT tav2
 Cooldown tinh tu SU KIEN da phat (greedy), khong phai tu ngay du dk lien truoc (khac SQL phu luc ke hoach)."""
 import sys, pandas as pd
 D = sys.argv[1]
-q = pd.read_csv(f"{D}/qual_days.csv", parse_dates=["time"])
+QIN = sys.argv[2] if len(sys.argv) > 2 else "qual_days.csv"      # v3: qual_days_loose.csv events_v3.csv
+EOUT = sys.argv[3] if len(sys.argv) > 3 else "events.csv"
+q = pd.read_csv(f"{D}/{QIN}", parse_dates=["time"])
 
 def greedy(df):
     out = []
@@ -17,7 +19,7 @@ def greedy(df):
 
 allv = greedy(q); allv["variant"] = "ALL"
 r4 = greedy(q[q.rating.notna() & (q.rating <= 4)]); r4["variant"] = "R4"
-ev = pd.concat([allv, r4]); ev.to_csv(f"{D}/events.csv", index=False)
+ev = pd.concat([allv, r4]); ev.to_csv(f"{D}/{EOUT}", index=False)
 for name, e in [("ALL", allv), ("R4", r4)]:
     e = e.copy(); e["ym"] = e.time.dt.strftime("%Y-%m")
     m = e.groupby("ym").size()

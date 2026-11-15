@@ -143,7 +143,7 @@ def _rows_for_score(m, n_dir, n_nv=0):
     rows, out = [], {}
     for i in range(n_dir + n_nv):
         d = datetime.date(2026, 1, 1) + datetime.timedelta(days=i * 4); eid = f"S{i}_{d}"; v = ("CONT" if i % 2 else "REV") if i < n_dir else "NO_VIEW"
-        rows.append({"event_id": eid, "ticker": f"S{i}", "T": str(d), "status": "processed", "mode": "live", "m1_status": "OK", "m2_status": "FAIL",
+        rows.append({"event_id": eid, "ticker": f"S{i}", "T": str(d), "status": "processed", "mode": "live", "m1_status": "OK", "m2_status": "FAIL", "prereg_md5": m.PREREG_MD5,
                      "m1_round1": {"evidence": [{}], "driver_class": "EARNINGS" if i % 3 else "UNKNOWN"}, "b1": {"view_20s": v}, "final": {"driver_class": "EARNINGS", "view_20s": v, "flipped_20s": False},
                      "usage": [{"cost_usd": 0.01}], "challenge": None})
         out[eid] = {"ex20": 0.01 * ((i % 7) - 3), "ex60": 0.02 * ((i % 5) - 2)}
@@ -157,6 +157,36 @@ def t_scorer_look(m):
 def t_scorer_ignores_unscored(m):
     rows, out = _rows_for_score(m, 85); out = {k: v for i, (k, v) in enumerate(out.items()) if i < 70}
     r = m.score_report(rows, out, "2026-12-31"); return r["N_scored"] == 70 and "effects" not in r
+def t_prereg_params(m):
+    s = m.sql_candidates(T)
+    return (m.V3["mom20"], m.V3["idio20"], m.V3["volr"], m.V3["liq_bn"], m.V3["rating_max"], m.V3["cap_week"], m.V3["cooldown_days"]) == (0.15, 0.1, 1.2, 1.0, 4, 10, 90) \
+        and all(x in s for x in ("mom20>=0.15", "idio20>=0.1 ", "volr>=1.2", "liq_bn>=1.0", "rating<=4")) \
+        and not any(x in s for x in ("mom20>=0.2", "idio20>=0.15", "volr>=1.5", "liq_bn>=3")) and m.CAP_WEEK == 10 and m.COOLDOWN_DAYS == 90
+def t_prereg_stamp(m):
+    cs = [cand(f"T{i:02d}", liq=100 - i) for i in range(12)]
+    e = Env(m, {T: cs}); e.day(T); rows = e.rows()
+    return len(rows) == 12 and {r["status"] for r in rows} == {"processed", "skipped_capacity"} \
+        and all(r.get("prereg_version") == "v3" and r.get("prereg_md5") == m.PREREG_MD5 and len(r["prereg_md5"]) == 32 for r in rows) \
+        and m.PREREG_MD5 == m._md5f(HERE / "PREREG_v3.md")
+def t_prereg_lock(m):
+    import shutil; ok_dir = Path(tempfile.mkdtemp()); bad_dir = Path(tempfile.mkdtemp()); old = m.HERE
+    for d in (ok_dir, bad_dir):
+        for f in ("PREREG_v3.md", "PREREG_v3.md5", "prereg_v3.json", "events_v3.csv"): shutil.copy(HERE / f, d / f)
+    (bad_dir / "prereg_v3.json").write_text((HERE / "prereg_v3.json").read_text().replace('"mom20": 0.15', '"mom20": 0.2'))
+    try:
+        m.HERE = ok_dir; good = m._load_prereg()[0]["mom20"] == 0.15
+        m.HERE = bad_dir
+        try: m._load_prereg(); return False
+        except SystemExit: return good
+    finally: m.HERE = old
+def t_ticker_sens(m):
+    rows, out = _rows_for_score(m, 80, 10); r = m.score_report(rows, out, "2026-12-31"); ef = r.get("effects", {}); ts = ef.get("T1_ticker_sensitivity")
+    return bool(ts) and ts["role"] == "descriptive_not_in_BH_family" and ts["n_tickers"] == 80 and ts["n_first"] == 80 and len(ts["boot_ci95"]) == 2 \
+        and ts["boot_ci95"][0] <= ts["boot_ci95"][1] and set(k for k in ef if k.startswith("T")) <= {"T1", "T2", "T3", "T1_ticker_sensitivity"}
+def t_scorer_ignores_other_prereg(m):
+    rows, out = _rows_for_score(m, 80, 10)
+    for r in rows[:30]: r["prereg_md5"] = "0" * 32
+    r = m.score_report(rows, out, "2026-12-31"); return r["N_scored"] == 60
 def t_today_ict(m):
     real_dt = m.dt
     class F(datetime.datetime):
@@ -170,7 +200,8 @@ def t_today_ict(m):
 
 TESTS = [t_no_double_append, t_ledger_append_twice, t_parallel_append, t_md5_tamper, t_no_outcome_in_packet, t_sql_pit, t_news_pit, t_fin_pit, t_m2_exception_failopen,
          t_m2_fail_status, t_m2_ok_rebuttal, t_schema_strict, t_m1_fail_recorded, t_capacity, t_capacity_resets_next_week, t_cooldown, t_cooldown_same_quarter,
-         t_live_guard, t_dry_run_no_write, t_dd_flag, t_scorer_no_peek, t_scorer_look, t_scorer_ignores_unscored, t_today_ict]
+         t_live_guard, t_dry_run_no_write, t_dd_flag, t_scorer_no_peek, t_scorer_look, t_scorer_ignores_unscored, t_today_ict,
+         t_prereg_params, t_prereg_stamp, t_prereg_lock, t_ticker_sens, t_scorer_ignores_other_prereg]
 MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("ledger append khong idempotent", 'if any(r["event_id"] == rec["event_id"] for r in self.read()): return False', "pass", "t_ledger_append_twice"),
     ("run_day bo guard idempotent (+ledger)", 'if any(r["event_id"] == f"{c[\'ticker\']}_{T}" for r in led.read()): continue', "pass", "t_no_double_append"),
@@ -186,13 +217,24 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("M2 loi khong fail-open", "    except Exception as e:\n        return {\"m2_status\": \"FAIL\"", "    except KeyboardInterrupt as e:\n        return {\"m2_status\": \"FAIL\"", "t_m2_exception_failopen"),
     ("M1 bo kiem schema", "errs = validate(obj, SCHEMA[schema_key]) + (", "errs = [] + (", "t_m1_fail_recorded"),
     ("schema cho phep truong thua", '"additionalProperties") is False', '"additionalProperties") is True', "t_schema_strict"),
-    ("tran hang doi 10->100", "CAP_WEEK = 10", "CAP_WEEK = 100", "t_capacity"),
+    ("tran hang doi 10->100", 'CAP_WEEK = V3["cap_week"]', "CAP_WEEK = 100", "t_capacity"),
     ("hang doi khong reset tuan", "and week_key(dt.date.fromisoformat(r[\"T\"])) == week_key(T))", ")", "t_capacity_resets_next_week"),
-    ("cooldown 90->0", "COOLDOWN_DAYS = 90", "COOLDOWN_DAYS = 0", "t_cooldown"),
+    ("cooldown 90->0", 'COOLDOWN_DAYS = V3["cooldown_days"]', "COOLDOWN_DAYS = 0", "t_cooldown"),
     ("live cho T != hom nay", 'if mode == "live" and Td != today:', 'if False:', "t_live_guard"),
     ("dry-run van ghi", "if dry_run or not (proc or skip): return out", "if not (proc or skip): return out", "t_dry_run_no_write"),
     ("scorer lo effects giua look", "    if look:\n        rep[\"look\"]", "    look = look or ('PEEK', _first_n_dir(sc, 10**9))\n    if look:\n        rep[\"look\"]", "t_scorer_no_peek"),
     ("scorer dem N khong huong", 'n_dir = [s for s in sc if s["v20"] in ("CONT", "REV")]', "n_dir = list(sc)", "t_scorer_no_peek"),
+    ("nguong mom20 sai (cu v2)", "mom20>={V3[\"mom20\"]}", "mom20>=0.20", "t_prereg_params"),
+    ("nguong volr sai (cu v2)", "volr>={V3[\"volr\"]}", "volr>=1.5", "t_prereg_params"),
+    ("nguong liq sai (cu v2)", "liq_bn>={V3[\"liq_bn\"]} AND rating", "liq_bn>=3 AND rating", "t_prereg_params"),
+    ("nguong idio sai (cu v2)", "idio20>={V3[\"idio20\"]}", "idio20>=0.15", "t_prereg_params"),
+    ("JSON v3 doi nguong (khong dong bo)", 'CAP_WEEK = V3["cap_week"]', "CAP_WEEK = 7", "t_prereg_params"),
+    ("mat prereg_version/md5 tren dong", 'rec.setdefault("prereg_version", PREREG_VERSION) != PREREG_VERSION or rec.setdefault("prereg_md5", PREREG_MD5) != PREREG_MD5', "False", "t_prereg_stamp"),
+    ("bo khoa md5 PREREG", 'if lock.get(f) != _md5f(HERE / f): raise SystemExit(', 'if False: raise SystemExit(', "t_prereg_lock"),
+    ("scorer dem dong prereg khac", ' and r.get("prereg_md5") == PREREG_MD5]', "]", "t_scorer_ignores_other_prereg"),
+    ("bo do nhay cum theo ma", 'if "T1" in out and "ticker" in df:', "if False:", "t_ticker_sens"),
+    ("sensitivity lot vao ho BH (khoa T1 sai)", '"role": "descriptive_not_in_BH_family"', '"role": "bh"', "t_ticker_sens"),
+    ("sc khong mang ticker", '"T": r["T"], "ticker": r["ticker"],', '"T": r["T"],', "t_ticker_sens"),
     ("today bo neo ICT", "dt.datetime.now(ICT).date()", "dt.datetime.now().date()", "t_today_ict"),
 ]
 def main():

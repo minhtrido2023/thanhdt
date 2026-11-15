@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ai_momentum_daily.py — P1 BUILD (PREREG v1 + PREREG_v2.md). Paper-only: KHONG lenh, KHONG plan, KHONG state_*.json.
+"""ai_momentum_daily.py — P1 BUILD (PREREG v3 = PREREG_v3.md + prereg_v3.json; v3 thay v2 truoc moi lan chay forward). Paper-only: KHONG lenh, KHONG plan, KHONG state_*.json.
 Luong: su kien moi ngay T (PREREG s1) -> hang doi <=10/tuan -> goi PIT -> M1 (claude phien TRAN) -> M2 (adapter, hien
 fail-open) -> ghi JSONL append-only (md5/dong, idempotent). `--score`: scorer chi in N + G-proc giua cac moc look.
   python3 ai_momentum_daily.py --date 2026-11-16 [--mode live|retro] [--dry-run] [--ledger-dir DIR]
@@ -14,8 +14,18 @@ HERE = Path(__file__).resolve().parent
 WC = Path("/home/trido/thanhdt/WorkingClaude")
 BQ_PROJECT = "lithe-record-440915-m9"
 BANNED = "PC1 VVS KSF NKG HSG HVN VJC NVL GEG SBA DMC IMP TRA TOS VTP BAF".split()
-CAP_WEEK = 10
-COOLDOWN_DAYS = 90
+# ---- PREREG v3: MOT nguon su that cho tham so su kien (prereg_v3.json). md5 khoa trong PREREG_v3.md5; lech => khong chay (fail-closed).
+def _md5f(p): return hashlib.md5(Path(p).read_bytes()).hexdigest()
+def _load_prereg():
+    v = json.loads((HERE / "prereg_v3.json").read_text())
+    lock = {ln.split()[1]: ln.split()[0] for ln in (HERE / "PREREG_v3.md5").read_text().splitlines() if ln.strip()}
+    for f in ("PREREG_v3.md", "prereg_v3.json", "events_v3.csv"):
+        if lock.get(f) != _md5f(HERE / f): raise SystemExit(f"PREREG v3 lech khoa md5: {f} (khong chay; sua tham so = PREREG moi)")
+    return v, lock["PREREG_v3.md"]
+V3, PREREG_MD5 = _load_prereg()
+PREREG_VERSION = V3["version"]
+CAP_WEEK = V3["cap_week"]
+COOLDOWN_DAYS = V3["cooldown_days"]
 PACKET_KEYS = {"event_id", "ticker", "T", "stats", "sector_context", "financials_released_le_T", "news_le_T"}
 FORBIDDEN_KEYS = {"ex20", "ex60", "r20", "r60", "c1", "c21", "c61", "profit_2W", "profit_1M", "profit_2M", "profit_3M"}
 M1_SYSTEM = (HERE / "prompt_M1_v2.md").read_text(encoding="utf-8") if (HERE / "prompt_M1_v2.md").exists() else ""
@@ -48,7 +58,7 @@ def sql_candidates(T):
   WHERE t.time BETWEEN DATE_SUB(DATE "{T}", INTERVAL 60 DAY) AND DATE "{T}" AND t.ticker != "VNINDEX"
   WINDOW w AS (PARTITION BY t.ticker ORDER BY t.time)),
 u AS (SELECT b.* FROM base b JOIN tav2_mike.universe_pit AS up
-      ON up.ticker=b.ticker AND up.time=b.time AND up.ruleset_version=1
+      ON up.ticker=b.ticker AND up.time=b.time AND up.ruleset_version={V3["universe_ruleset"]}
       WHERE b.time = DATE "{T}" AND up.in_universe),
 rt AS (SELECT r.ticker, r.time rt_time, r.route, r.rating FROM tav2_bq.fa_ratings_8l AS r
        WHERE r.time <= DATE "{T}" QUALIFY ROW_NUMBER() OVER (PARTITION BY r.ticker ORDER BY r.time DESC)=1),
@@ -59,7 +69,7 @@ x AS (SELECT u.ticker, u.time, CAST(u.ICB_Code AS STRING) icb, rt.route, rt.rati
 s AS (SELECT x.*, PERCENTILE_CONT(mom20,0.5) OVER (PARTITION BY route) route_ret20_med,
         COUNT(*) OVER (PARTITION BY route) route_n, PERCENT_RANK() OVER (PARTITION BY route ORDER BY mom20) pct_in_route,
         PERCENTILE_CONT(mom20,0.5) OVER (PARTITION BY icb) icb_ret20_med, COUNT(*) OVER (PARTITION BY icb) icb_n FROM x)
-SELECT * FROM s WHERE mom20>=0.20 AND idio20>=0.15 AND volr>=1.5 AND newhi AND liq_bn>=3 AND rating IS NOT NULL AND rating<=4
+SELECT * FROM s WHERE mom20>={V3["mom20"]} AND idio20>={V3["idio20"]} AND volr>={V3["volr"]} AND newhi AND liq_bn>={V3["liq_bn"]} AND rating IS NOT NULL AND rating<={V3["rating_max"]}
 ORDER BY liq_bn DESC, ticker"""
 
 def sql_freshness(T):
@@ -102,15 +112,18 @@ class Ledger:
         with open(str(self.path) + ".lock", "w") as lk:
             fcntl.flock(lk, fcntl.LOCK_EX)
             if any(r["event_id"] == rec["event_id"] for r in self.read()): return False
-            rec = dict(rec); rec["md5"] = line_md5(rec)
+            rec = dict(rec)
+            if rec.setdefault("prereg_version", PREREG_VERSION) != PREREG_VERSION or rec.setdefault("prereg_md5", PREREG_MD5) != PREREG_MD5:
+                raise RuntimeError("dong ledger mang prereg khac PREREG hien hanh")
+            rec["md5"] = line_md5(rec)
             with open(self.path, "a", encoding="utf-8") as f:
                 f.write(_canon(rec) + "\n"); f.flush(); os.fsync(f.fileno())   # §5: ghi NGAY sau khi xong 1 su kien
             return True
 
 # ---------------------------------------------------------------- su kien: cooldown + hang doi
 def quarter_of(d): return (d.year, (d.month - 1) // 3)
-def seed_history(path=HERE / "events.csv"):
-    """Lich su cooldown tu events.csv (R4, PIT-greedy P0): {ticker: [date,...]}."""
+def seed_history(path=HERE / "events_v3.csv"):
+    """Lich su cooldown tu events_v3.csv (R4, PIT-greedy, nguong v3): {ticker: [date,...]}."""
     import csv
     h = {}
     if Path(path).exists():
@@ -330,6 +343,21 @@ def _bperm_p(y, lab, months, nperm=10000, seed=20261115):
         perm = np.concatenate([blocks[i] for i in rng.permutation(len(blocks))]); c += (y[perm].mean() - y[~perm].mean()) >= obs
     return obs, (c + 1) / (nperm + 1)
 
+def _ticker_sens(d, nboot=10000, seed=20261115):
+    """(a) bootstrap CUM THEO MA (resample ma, giu moi su kien cua ma) -> CI 95% cua chenh T1; (b) chenh T1 chi su kien DAU TIEN moi ma."""
+    import numpy as np
+    rng = np.random.default_rng(seed); g = d.assign(w=d.lab.astype(float)).groupby("ticker")
+    S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+    S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+    def diff(i):
+        n1, n0 = N1[i].sum(), N0[i].sum()
+        return S1[i].sum() / n1 - S0[i].sum() / n0 if n1 > 0 and n0 > 0 else np.nan
+    k = len(S1); bs = np.array([diff(rng.integers(0, k, k)) for _ in range(nboot)])
+    first = d.sort_values("T").groupby("ticker").head(1)
+    fd = first.y[first.lab].mean() - first.y[~first.lab].mean() if first.lab.any() and (~first.lab).any() else float("nan")
+    return {"n_tickers": int(k), "n_events": len(d), "diff_all": float(diff(np.arange(k))), "boot_ci95": [float(np.nanpercentile(bs, 2.5)), float(np.nanpercentile(bs, 97.5))],
+            "diff_first_per_ticker": float(fd), "n_first": len(first), "role": "descriptive_not_in_BH_family"}
+
 def effects(df):
     """T1/T2/T3 (PREREG s4) tren df da cham. Chi goi o moc look."""
     import numpy as np, pandas as pd
@@ -339,6 +367,8 @@ def effects(df):
     if lab.sum() >= 3 and (~lab).sum() >= 3: out["T1"] = dict(zip(("diff", "p_raw"), _bperm_p(y, lab, d1.ym.to_numpy()))) | {"min_econ": 0.05}
     d2 = df.dropna(subset=["ex60"]); y = _winsor(d2.ex60).to_numpy(); lab = d2.driver.isin(["EARNINGS", "CORP_ACTION"]).to_numpy()
     if lab.sum() >= 3 and (~lab).sum() >= 3: out["T2"] = dict(zip(("diff", "p_raw"), _bperm_p(y, lab, d2.ym.to_numpy()))) | {"min_econ": 0.08}
+    if "T1" in out and "ticker" in df:      # v3 s2: do nhay cum theo ma — MO TA, KHONG vao ho BH (PREREG_v3 s3)
+        out["T1_ticker_sensitivity"] = _ticker_sens(d1.assign(y=_winsor(d1.ex20), lab=(d1.v20 == "CONT")))
     d3 = df.dropna(subset=["ex20"]); d3 = d3[(d3.v20 != "NO_VIEW") | (d3.b1_v20 != "NO_VIEW")]
     hit = lambda v, e: ((v == "CONT") & (e > 0)) | ((v == "REV") & (e < 0))     # NO_VIEW = khong trung (v2 lam ro)
     if len(d3) >= 6:
@@ -353,12 +383,12 @@ def score_report(rows, outcomes, now_date=None):
     """rows: ledger processed; outcomes: {event_id: {'ex20':..,'ex60':..}} chi cho su kien DU 61 phien.
     GIUA CAC MOC: chi tra N + G-proc (khong co khoa 'effects')."""
     import pandas as pd
-    ok = [r for r in rows if r["status"] == "processed" and r["m1_status"] == "OK" and r["mode"] == "live"]
+    ok = [r for r in rows if r["status"] == "processed" and r["m1_status"] == "OK" and r["mode"] == "live" and r.get("prereg_md5") == PREREG_MD5]
     sc = []
     for r in sorted(ok, key=lambda r: (r["T"], r["ticker"])):
         o = outcomes.get(r["event_id"])
         if o and o.get("ex60") is not None:
-            sc.append({"event_id": r["event_id"], "T": r["T"], "ex20": o["ex20"], "ex60": o["ex60"], "driver": r["final"]["driver_class"],
+            sc.append({"event_id": r["event_id"], "T": r["T"], "ticker": r["ticker"], "ex20": o["ex20"], "ex60": o["ex60"], "driver": r["final"]["driver_class"],
                        "v20": r["final"]["view_20s"], "b1_v20": r["b1"]["view_20s"]})
     n_dir = [s for s in sc if s["v20"] in ("CONT", "REV")]
     rep = {"N_scored": len(sc), "N_dir_scored": len(n_dir), "G_proc": gproc(rows)}

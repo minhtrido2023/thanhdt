@@ -1,0 +1,20 @@
+ex20 T1 (CONT vs rest), delta=8pp / 12pp ; N = SO SU KIEN CO VIEW CO HUONG; Ntot = su kien can xu ly
+  p_dir=0.3 N_dir=  40 Ntot= 133  power d8=0.35 d12=0.69
+  p_dir=0.3 N_dir=  80 Ntot= 267  power d8=0.78 d12=1.00
+  p_dir=0.3 N_dir= 150 Ntot= 500  power d8=0.96 d12=1.00
+  p_dir=0.4 N_dir=  40 Ntot= 100  power d8=0.29 d12=0.44
+  p_dir=0.4 N_dir=  80 Ntot= 200  power d8=0.73 d12=0.99
+  p_dir=0.4 N_dir= 150 Ntot= 375  power d8=0.95 d12=1.00
+thang toi N_dir (chua gom ~3 thang cho ex60 cua su kien cuoi); N250 = N_scored (moi su kien) / rate, KHONG nhan p_dir
+  TB 26 thang 21.5/thang p_dir=0.3 khong cat: N80=12.4m N150=23.3m
+  TB 26 thang 21.5/thang p_dir=0.3 co cat: N80=14.7m N150=27.5m
+  TB 26 thang 21.5/thang p_dir=0.4 khong cat: N80=9.3m N150=17.4m
+  TB 26 thang 21.5/thang p_dir=0.4 co cat: N80=11.0m N150=20.6m
+  TB 26 thang 21.5/thang FINAL N_scored=250 khong cat: 11.6m (tran 24 thang chan neu lon hon)
+  TB 26 thang 21.5/thang FINAL N_scored=250 co cat: 13.7m (tran 24 thang chan neu lon hon)
+  6 thang gan 12.3/thang p_dir=0.3 khong cat: N80=21.7m N150=40.7m
+  6 thang gan 12.3/thang p_dir=0.3 co cat: N80=25.6m N150=48.0m
+  6 thang gan 12.3/thang p_dir=0.4 khong cat: N80=16.3m N150=30.5m
+  6 thang gan 12.3/thang p_dir=0.4 co cat: N80=19.2m N150=36.0m
+  6 thang gan 12.3/thang FINAL N_scored=250 khong cat: 20.3m (tran 24 thang chan neu lon hon)
+  6 thang gan 12.3/thang FINAL N_scored=250 co cat: 24.0m (tran 24 thang chan neu lon hon)
