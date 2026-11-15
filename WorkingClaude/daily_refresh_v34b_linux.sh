@@ -101,18 +101,22 @@ _TI_EVENT="${TI_EVENT_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/append_eve
 _TI_SLEEP="${TI_RETRY_SLEEP:-600}"
 _ti_rc=2   # mặc định = 'không đo được' (fail-open) nếu vòng lặp không chạy
 for _ti_try in 1 2 3; do
-  python3 "$_TI_BIN"; _ti_rc=$?
+  _ti_out="$(python3 "$_TI_BIN")"; _ti_rc=$?
+  printf '%s\n' "$_ti_out"
   [ "$_ti_rc" = 1 ] || break
   echo "  ticker integrity FAIL (attempt $_ti_try/3)"
   [ "$_ti_try" -lt 3 ] && sleep "$_TI_SLEEP"
 done
+case "$LOG" in /*) _ti_log="$LOG" ;; *) _ti_log="$PWD/$LOG" ;; esac
 if [ "$_ti_rc" != 0 ] && [ "$_ti_rc" != 1 ]; then
   echo "  WARN: ticker_integrity_precheck KHÔNG đo được (rc=$_ti_rc) — fail-open, chain tiếp tục (không phải kết luận dữ liệu hỏng)"
+  "$_TI_EVENT" Winston status "ticker-integrity-precheck-unmeasurable" "{\"rc\":$_ti_rc,\"log\":\"$_ti_log\",\"note\":\"fail-open: precheck không đo được, chain tiếp tục\"}" 2>/dev/null || true
 elif [ "$_ti_rc" = 1 ]; then
-  _TI_MSG="🛑 daily_refresh_v34b ABORT $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): tav2_bq.ticker THỦNG so với ticker_1m (precheck rc=$_ti_rc sau 3 lần cách 10 phút). KHÔNG publish DT5G. Xem $LOG. Cần backfill ticker từ ticker_1m (quy trình job Winston_20261114_020203)."
+  _ti_why="$(printf '%s\n' "$_ti_out" | grep '^  - ' | head -6 | tr -d '"\\' | tr '\n' ';')"
+  _TI_MSG="🛑 daily_refresh_v34b ABORT $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): tav2_bq.ticker THỦNG so với ticker_1m (precheck rc=$_ti_rc sau 3 lần cách ${_TI_SLEEP}s). KHÔNG publish DT5G. LÝ DO: ${_ti_why:-xem log}. Log: $_ti_log. Kiểm tra bằng chứng (đối chiếu ticker vs ticker_1m) TRƯỚC khi backfill — chỉ INSERT mã còn thiếu từ ticker_1m (job Winston_20261114_020203)."
   "$_TI_NOTIFY" "$_TI_MSG" 2>/dev/null || true
   "$_TI_THREAD" "$_TI_MSG" "1521470705563340910" 2>/dev/null || true
-  "$_TI_EVENT" Winston error "ticker-integrity-precheck-fail" "{\"rc\":$_ti_rc,\"log\":\"$LOG\"}" 2>/dev/null || true
+  "$_TI_EVENT" Winston error "ticker-integrity-precheck-fail" "{\"rc\":$_ti_rc,\"log\":\"$_ti_log\",\"why\":\"$_ti_why\"}" 2>/dev/null || true
   die "ticker integrity precheck FAILED (rc=$_ti_rc) — ticker thủng so với ticker_1m, refusing to compute/publish DT5G"
 fi
 # TI-PRECHECK-END
