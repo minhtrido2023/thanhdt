@@ -15,3 +15,4 @@
 - Livermore thu hẹp vai; chấm TAY LVR-STK FPT/NNC 03/12, VGS/NNC 10/12; LVR-2026-10-21 scorer tự chấm 18/11.
 - NEO sizing DD: NAV ≤2 tỷ ⇒ DD5 ≈ −33%. 4 quy tắc DD-flag 02/11 giữ nguyên.
 
+- [2026-11-15T18:01:38Z] [16/11 01:0x] arch-review vòng 2 = NEEDS_CHANGES: freshness 95% từ chối mọi thứ Hai (mất ~25% sự kiện) + max-turns rc≠0 bị xếp InfraError. Đã DỪNG polish theo cầu chì, hỏi user 'sửa tiếp (1 lượt nhỏ + review vòng 3 chỉ diff)' hay 'dừng'. Nhánh research/ai-momentum-p1-20261115 HEAD 17d1f7e1f chưa merge. Cron KHÔNG trước tối T3 17/11; cần smoke test live (ledger tạm, --max-turns 1 để kiểm rc) trước.
