@@ -2369,3 +2369,6 @@
 
 ## Archived 2026-11-15 (keep=12 days=0 require_done=False)
 - [2026-11-14T02:02:14Z] [dd-pnj 14/11] XONG REPORT job Taylor_20261114_014836: de xuat GIU LOAI, tam 6.440 vs gia 14.950; md5 REPORT caf25da7, assumptions 4e3fce77 — CHO Mike chay fundamental-skeptic + trinh user; KHONG sua excluded_tickers
+
+## Archived 2026-11-15 (keep=12 days=0 require_done=False)
+- [2026-11-14T02:21:01Z] [dd-pnj r2 14/11] XONG job Taylor_20261114_021336: 10 muc skeptic ap (muc 1 chi mot phan: CHUA MU, tam 6.440 dinh chi lam neo luat 4); NON giu; REPORT md5 0ecbc539 — CHO luot dinh gia mu that (phien moi) neu user muon neo luat 4

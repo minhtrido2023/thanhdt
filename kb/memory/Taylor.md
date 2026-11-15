@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-14T02:21:01Z] [dd-pnj r2 14/11] XONG job Taylor_20261114_021336: 10 muc skeptic ap (muc 1 chi mot phan: CHUA MU, tam 6.440 dinh chi lam neo luat 4); NON giu; REPORT md5 0ecbc539 — CHO luot dinh gia mu that (phien moi) neu user muon neo luat 4
 - [2026-11-14T02:21:04Z] ĐANG DỞ: weekly 09-13/11 đã promote nhưng delivery gate BLOCK G5 (VN-Index có cổ tức) | NEXT: điều tra G5 11-11 sau backfill Winston (VNH dup, mã V-Y), chạy vnindex_total_return --update, rồi report_delivery_gate x2 (không dựng lại build)
 - [2026-11-14T02:34:48Z] [dd-pnj report 14/11] XONG job Taylor_20261114_022155: investor_report/ PDF 10tr md5 fea39145, chua gui email — CHO Mike doc kiem + user bao 'gui email'; dd_price_zones.json chua ghi
 - [2026-11-14T06:57:01Z] [livermore-p0p1 14/11] XONG job Taylor_20261114_063556: 0/48 phan ky dat (G1 kich hoat), H2 R2 0.2-0.29 khong kich hoat; REPORT agents/Taylor/research/livermore_divergence_20261114/REPORT.md md5 850f0bec — CHO Mike quant-skeptic + chay kappa (tuy chon) + user chot thu hep vai/NO-GO
@@ -26,3 +25,4 @@
 - [2026-11-15T15:58:58Z] [ai-momentum P1 15/11] XONG job Taylor_20261115_154607: nhanh research/ai-momentum-p1-20261115 (b07a773b0) KHONG merge; kb/projects/ai-momentum-p1-build-20261115.md — CHO Mike arch-review/quant-skeptic + user quyet noi nguong x2 (PREREG v3) + Wags xong M2
 - [2026-11-15T16:29:29Z] [ai-momentum P1-V3 15/11] XONG job Taylor_20261115_162439: nhanh research/ai-momentum-p1-20261115 (a09b71d5e) KHONG merge; kb/projects/ai-momentum-p1-v3-20261115.md; PREREG_v3 md5 d07ffcfd — CHO Mike arch-review/quant-skeptic + Wags xong M2 truoc khi cron
 - [2026-11-15T16:46:25Z] [ai-momentum P1-M2-WIRE 15/11] XONG job Taylor_20261115_163050: nhanh research/ai-momentum-p1-20261115 (efd12cbcd, da merge wags/m2-wrapper) KHONG merge master/cron; M2 OK 2/2 retro that; kb/projects/ai-momentum-p1-v3-20261115.md muc M2 — CHO Mike arch-review + user duyet cron
+- [2026-11-15T17:12:53Z] ĐANG DỞ: P1-ARCH-FIX vong2 job Taylor_20261115_170852 worktree agents/Taylor/wt-ai-momentum-p1 (B3 xong chua commit) | NEXT: rewrite ai_momentum_daily.py, wrapper bin/ai_momentum_cron.sh, PREREG_v3_2, selfcheck 3TZ, commit
