@@ -118,7 +118,7 @@ def measure():
         if len(row) != 3 or not _DATE.match(row[0]) or not row[1].isdigit() or not row[2].isdigit():
             raise MeasureError("dòng ticker không parse được: %r" % row)
         raw[row[0]] = (int(row[1]), int(row[2]))
-    q3 = ("SELECT CAST(m.time AS STRING) AS d, COUNT(*) AS n FROM tav2_bq.ticker_1m AS m "
+    q3 = ("SELECT CAST(m.time AS STRING) AS d, COUNT(DISTINCT m.ticker) AS n FROM tav2_bq.ticker_1m AS m "
           "JOIN tav2_bq.ticker_prune AS p ON p.time = m.time AND p.ticker = m.ticker "
           "LEFT JOIN tav2_bq.ticker AS t ON t.time = m.time AND t.ticker = m.ticker "
           "WHERE m.time >= DATE('%s') AND t.ticker IS NULL GROUP BY m.time" % lo)
