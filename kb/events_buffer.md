@@ -774,3 +774,28 @@
 - [2026-11-15T16:04:13Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 18, "job_id": "Wags_20261115_154609", "source": "watcher"}
 - [2026-11-15T16:05:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 19, "job_id": "Wags_20261115_154609", "source": "watcher"}
 - [2026-11-15T16:06:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 20, "job_id": "Wags_20261115_154609", "source": "watcher"}
+
+## Consolidation 2026-11-15T16:26:37Z
+- [2026-11-15T16:25:05Z] Taylor/heartbeat — Taylor_20261115_162439: {"status": "in_progress", "note": "P1-V3: da doc code, dang build events v3 + PREREG_v3"}
+- [2026-11-15T16:25:39Z] Taylor/heartbeat — Taylor_20261115_162439: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261115_162439", "source": "watcher"}
+- [2026-11-15T16:07:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 21, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:08:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:09:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:10:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:11:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 25, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:12:14Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 26, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:13:15Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 27, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:14:15Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 28, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:15:15Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 29, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:16:15Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 30, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:17:16Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 31, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:18:16Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 32, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:19:16Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 33, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:20:16Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:21:16Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:22:16Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:23:17Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 37, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:24:17Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 38, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:25:17Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 39, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:26:17Z] Wags/heartbeat — Wags_20261115_154609: {"status": "still_running", "elapsed_min": 40, "job_id": "Wags_20261115_154609", "source": "watcher"}
+- [2026-11-15T16:26:27Z] Wags/finding — wags-fix: second_opinion raw mode + M2 deepseek root cause: {"root_cause": "opencode/deepseek-v4-flash-free (default_model) da bi go khoi Zen; v4.1-flash-free chay duoc. Model cu fail UnknownError 2s xac dinh (5/5), ling/nemotron cung fail — khong phai flake", "fix": "kb/cli_providers.json default_model -> opencode/deepseek-v4.1-flash-free; second_opinion.sh them --raw-prompt-file/--out/--text-out/--timeout/--retries/--no-bus (khong bus, khong khung 3-diem, exit 0/2/10/11/12, retry backoff); che do cu giu nguyen", "verify": "bin/second_opinion_selfcheck.sh 18 PASS x3 TZ; 2 mutation bi bat; chay that gói M2 10 su kien: rc=0 142s JSON hop le 10 phan tu", "caveats": "(1) prompt M2 hien tai khien model goi glob roi treo -> Taylor them dong KHONG goi tool; (2) KHONG deny read/glob/grep trong OPENCODE_PERMISSION (opencode treo); (3) cac model con lai trong cli_providers.json chua kiem tung cai", "branch": "wags/m2-wrapper-20261115 @ /tmp/wt-m2wrap (chua merge main, can arch-review: cham cli_providers.json + dispatch default_model)", "doc": "kb/projects/ai-momentum-m2-wrapper-20261115.md"}
