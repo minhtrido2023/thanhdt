@@ -1,7 +1,6 @@
 # Working memory — DollarBill
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của DollarBill.
 
-- [2026-11-09T12:08:58Z] [2026-11-09 19:xx ICT] Plan SpaceX 11-10 XONG: BUY LAG BSR/CSV/GAS/MSB ngay 2/3 143,2tr, egg>=94,0tr; cho duyet truoc 08:45 10/11 (job DollarBill_20261109_120649)
 - [2026-11-09T12:09:02Z] [2026-11-09 19:xx ICT] Plan ZaloPay 11-10 XONG: BUY LAG residual ngay 2 BSR1200/CSV1100/GAS300/MSB1500 (102,45tr), egg>=66,4tr; cho duyet truoc 08:45 10/11 (job DollarBill_20261109_120648)
 - [2026-11-09T12:37:13Z] [2026-11-09 19:3x ICT] Plan 10/11 rev luat 09/11 ca 2 acct: 0 lenh (bo 4 LAG gia>tam DD), report da gui lai; cho user duyet truoc 08:45 10/11 (job DollarBill_20261109_123545)
 - [2026-11-10T12:07:51Z] [2026-11-10 19:xx ICT] Plan ZaloPay 11-11 XONG HOLD ALL 0 lenh (LAG gia>tam DD); cho duyet truoc 08:45 11/11 (job DollarBill_20261110_120615)
@@ -13,3 +12,4 @@
 - [2026-11-12T12:06:43Z] [2026-11-12 19:xx ICT] Plan ZaloPay 11-13 XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 13/11 (job DollarBill_20261112_120542)
 - [2026-11-12T12:07:42Z] [2026-11-12 19:xx ICT] Plan SpaceX 11-13 XONG: DISC VGS300/NNC700 (tran Livermore), 0 LAG/BAL, egg>=38,3tr; cho duyet truoc 08:45 13/11. Flag VGS entry_date exit_rules (11/11->12/11) cho Mike (job DollarBill_20261112_120544)
 - [2026-11-15T12:44:58Z] [2026-11-15 19:5x ICT] Plan ZaloPay 11-16 XONG HOLD ALL 0 lenh (vong CN toi); cho duyet truoc 08:45 16/11 (job DollarBill_20261115_124425)
+- [2026-11-15T12:45:39Z] [2026-11-15 19:5x ICT] Plan SpaceX 11-16 XONG (vong CN toi): BUY NNC 700cp tran 46000, egg>=32,3tr; cho duyet truoc 08:45 16/11 (job DollarBill_20261115_124427)

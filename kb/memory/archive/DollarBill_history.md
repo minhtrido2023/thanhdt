@@ -382,3 +382,6 @@
 
 ## Archived 2026-11-14 (keep=6 days=5 require_done=True)
 - [2026-11-08T12:06:38Z] [2026-11-08 19:xx ICT] Plan SpaceX 11-09 rev2 XONG (BUY BSR/CSV/GAS/MSB 141,3tr, egg>=100,1tr); chờ duyệt trước 08:45 09/11 (job DollarBill_20261108_120541)
+
+## Archived 2026-11-15 (keep=12 days=0 require_done=False)
+- [2026-11-09T12:08:58Z] [2026-11-09 19:xx ICT] Plan SpaceX 11-10 XONG: BUY LAG BSR/CSV/GAS/MSB ngay 2/3 143,2tr, egg>=94,0tr; cho duyet truoc 08:45 10/11 (job DollarBill_20261109_120649)
