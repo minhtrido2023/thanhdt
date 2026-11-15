@@ -1,0 +1,70 @@
+{
+ "event_id": "HII_2026-08-05",
+ "ticker": "HII",
+ "T": "2026-08-05",
+ "stats": {
+  "mom20": 0.4745,
+  "idio20": 0.5162,
+  "volr": 2.952,
+  "newhi_3m": true,
+  "liq_bn": 3.55,
+  "route_8l": "COMPOUNDER",
+  "rating_8l_asof": 3,
+  "rating_eff_date": "2026-07-30",
+  "dd_flag": false
+ },
+ "financials_released_le_T": [
+  {
+   "GPM_P0": "0.0694769773",
+   "NP_P0": "-4.1080458644E10",
+   "NP_P4": "-1.5535542755E10",
+   "PB": "0.4367007247043148",
+   "PE": "7.739068484193114",
+   "ROE_Trailing": "0.0606566071257768",
+   "Release_Date": "2026-02-02",
+   "Revenue_P0": "1.658269837287E12",
+   "Revenue_YoY_P0": "-0.1888178909492582",
+   "quarter": "2025Q4"
+  },
+  {
+   "GPM_P0": "0.0786880901",
+   "NP_P0": "7.5797557218E10",
+   "NP_P4": "-4.177146401E9",
+   "PB": "0.4338329342560369",
+   "PE": "3.2405381437413454",
+   "ROE_Trailing": "0.1387739090109438",
+   "Release_Date": "2026-04-29",
+   "Revenue_P0": "2.341838133518E12",
+   "Revenue_YoY_P0": "0.1498614373097397",
+   "quarter": "2026Q1"
+  },
+  {
+   "GPM_P0": "0.0957930258",
+   "NP_P0": "1.6337874431E11",
+   "NP_P4": "5.9071508087E10",
+   "PB": "0.4400614586562693",
+   "PE": "2.078107929153361",
+   "ROE_Trailing": "0.219282525513743",
+   "Release_Date": "2026-07-30",
+   "Revenue_P0": "3.91440881023E12",
+   "Revenue_YoY_P0": "0.959554953906648",
+   "quarter": "2026Q2"
+  }
+ ],
+ "news_le_T": [
+  {
+   "date": "2026-05-29",
+   "time": "2026-05-29T17:25:08",
+   "title": "HII: Thông báo và Nghị quyết HĐQT về ngày ĐKCC thực hiện quyền nhận cổ tức bằng tiền năm 2025",
+   "codes": "DIV",
+   "ingested": "2026-09-13"
+  },
+  {
+   "date": "2026-06-05",
+   "time": "2026-06-05T14:35:49",
+   "title": "HII: Thông báo về ngày ĐKCC trả cổ tức năm 2025 bằng tiền",
+   "codes": "DIV",
+   "ingested": "2026-09-13"
+  }
+ ]
+}

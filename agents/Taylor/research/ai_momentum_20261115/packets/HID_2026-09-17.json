@@ -1,0 +1,70 @@
+{
+ "event_id": "HID_2026-09-17",
+ "ticker": "HID",
+ "T": "2026-09-17",
+ "stats": {
+  "mom20": 0.6746,
+  "idio20": 0.6194,
+  "volr": 2.739,
+  "newhi_3m": true,
+  "liq_bn": 3.62,
+  "route_8l": "COMPOUNDER",
+  "rating_8l_asof": 4,
+  "rating_eff_date": "2026-07-30",
+  "dd_flag": false
+ },
+ "financials_released_le_T": [
+  {
+   "GPM_P0": "0.2614439356",
+   "NP_P0": "-8.5688903831E10",
+   "NP_P4": "8.384352048E9",
+   "PB": "0.4704109955523999",
+   "PE": "-10.713918860758776",
+   "ROE_Trailing": "-0.085570611161802",
+   "Release_Date": "2026-02-02",
+   "Revenue_P0": "9.1602198639E10",
+   "Revenue_YoY_P0": "-0.2298502591877926",
+   "quarter": "2025Q4"
+  },
+  {
+   "GPM_P0": "0.2379941579",
+   "NP_P0": "-1.3357552671E10",
+   "NP_P4": "4.14493545E8",
+   "PB": "0.432370800011058",
+   "PE": "-7.231779762413333",
+   "ROE_Trailing": "-0.1011592522759341",
+   "Release_Date": "2026-04-06",
+   "Revenue_P0": "7.5847516614E10",
+   "Revenue_YoY_P0": "-0.3763495950633035",
+   "quarter": "2026Q1"
+  },
+  {
+   "GPM_P0": "0.2092224642",
+   "NP_P0": "9.134943438E9",
+   "NP_P4": "-1.4822487181E10",
+   "PB": "0.2739187140579152",
+   "PE": "-8.347914983708902",
+   "ROE_Trailing": "-0.0489297431294539",
+   "Release_Date": "2026-07-30",
+   "Revenue_P0": "1.41598278003E11",
+   "Revenue_YoY_P0": "0.1704502756294525",
+   "quarter": "2026Q2"
+  }
+ ],
+ "news_le_T": [
+  {
+   "date": "2026-07-30",
+   "time": "2026-07-30T17:16:10",
+   "title": "HID: Giải trình biến động KQKD trên BCTC Hợp nhất và riêng Quý 2 năm 2026",
+   "codes": "MA",
+   "ingested": "2026-09-13"
+  },
+  {
+   "date": "2026-09-03",
+   "time": "2026-09-03T15:12:46",
+   "title": "HID: Giải trình biến động KQKD trên BCTC riêng và hợp nhất 6 tháng đầu năm 2026 đã soát xét",
+   "codes": "MA",
+   "ingested": "2026-09-13"
+  }
+ ]
+}

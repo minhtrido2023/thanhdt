@@ -1,0 +1,126 @@
+{
+ "event_id": "MSR_2026-08-17",
+ "ticker": "MSR",
+ "T": "2026-08-17",
+ "stats": {
+  "mom20": 0.2147,
+  "idio20": 0.2239,
+  "volr": 1.605,
+  "newhi_3m": true,
+  "liq_bn": 53.84,
+  "route_8l": "COMPOUNDER",
+  "rating_8l_asof": 4,
+  "rating_eff_date": "2026-07-27",
+  "dd_flag": false
+ },
+ "financials_released_le_T": [
+  {
+   "GPM_P0": "0.1847885153",
+   "NP_P0": "2.22494717E11",
+   "NP_P4": "-2.15847993E11",
+   "PB": "3.286394225837474",
+   "PE": null,
+   "ROE_Trailing": "5.777556953448E-4",
+   "Release_Date": "2026-01-29",
+   "Revenue_P0": "2.394678543E12",
+   "Revenue_YoY_P0": "-0.3809570705658458",
+   "quarter": "2025Q4"
+  },
+  {
+   "GPM_P0": "0.2372803476",
+   "NP_P0": "5.36679202E11",
+   "NP_P4": "-2.22007235E11",
+   "PB": "3.3120214877232064",
+   "PE": "54.70726959188778",
+   "ROE_Trailing": "0.0613659135698491",
+   "Release_Date": "2026-04-28",
+   "Revenue_P0": "2.993103444E12",
+   "Revenue_YoY_P0": "1.1491289064107568",
+   "quarter": "2026Q1"
+  },
+  {
+   "GPM_P0": "0.2447569591",
+   "NP_P0": "1.665652756E12",
+   "NP_P4": "5.643475E9",
+   "PB": "2.6810029934214925",
+   "PE": "15.86985678555924",
+   "ROE_Trailing": "0.1766924705533211",
+   "Release_Date": "2026-07-27",
+   "Revenue_P0": "8.137876711E12",
+   "Revenue_YoY_P0": "4.041095624831991",
+   "quarter": "2026Q2"
+  }
+ ],
+ "news_le_T": [
+  {
+   "date": "2026-07-02",
+   "time": "2026-07-02T15:57:00",
+   "title": "MSR: Quy chế chương trình phát hành cổ phần theo ESOP và danh sách người lao động tham gia ESOP",
+   "codes": "ISS",
+   "ingested": "2026-09-13"
+  },
+  {
+   "date": "2026-07-02",
+   "time": "2026-07-02T16:37:00",
+   "title": "MSR: Nghị quyết HDQT về Phương án phát hành ESOP",
+   "codes": "ISS",
+   "ingested": "2026-09-13"
+  },
+  {
+   "date": "2026-07-14",
+   "time": "2026-07-14T09:30:00+07:00",
+   "title": "MSR: Thông báo phát hành cổ phiếu theo chương trình lựa chọn cho người lao động trong Công ty | Announcement of stock issuance under the Company's employee stock option program at the Company",
+   "codes": "ISS",
+   "ingested": "2026-11-06"
+  },
+  {
+   "date": "2026-07-15",
+   "time": "2026-07-15T11:37:00+07:00",
+   "title": "MSR: Thông báo giao dịch mua cổ phiếu MSR của người nội bộ theo chương trình ESOP 2026",
+   "codes": "ISS",
+   "ingested": "2026-11-06"
+  },
+  {
+   "date": "2026-07-23",
+   "time": "2026-07-23T11:15:00+07:00",
+   "title": "MSR: Báo cáo kết quả phát hành cổ phiếu theo chương trình lựa chọn cho người lao động trong Công ty ngày 22",
+   "codes": "ISS",
+   "ingested": "2026-11-06"
+  },
+  {
+   "date": "2026-07-24",
+   "time": "2026-07-24T16:38:00+07:00",
+   "title": "MSR: Thông báo kết quả giao dịch cổ phiếu của người nội bộ theo ESOP 2026",
+   "codes": "ISS",
+   "ingested": "2026-11-06"
+  },
+  {
+   "date": "2026-07-31",
+   "time": "2026-07-31T15:39:00+07:00",
+   "title": "MSR: Nghị quyết về việc tăng vốn điều lệ do phát hành ESOP",
+   "codes": "ISS",
+   "ingested": "2026-11-06"
+  },
+  {
+   "date": "2026-07-31",
+   "time": "2026-07-31T15:42:00+07:00",
+   "title": "MSR: Thay đổi số lượng cổ phiếu do phát hành ESOP",
+   "codes": "ISS",
+   "ingested": "2026-11-06"
+  },
+  {
+   "date": "2026-08-05",
+   "time": "2026-08-05T08:47:00+07:00",
+   "title": "MSR: Công văn của SSC về việc nhận được Báo cáo kết qủa phát hành ESOP của MSR",
+   "codes": "ISS",
+   "ingested": "2026-11-06"
+  },
+  {
+   "date": "2026-08-12",
+   "time": "2026-08-12T10:09:00+07:00",
+   "title": "Masan High-Tech Materials (MSR) đề xuất chia cổ tức 10% bằng tiền mặt",
+   "codes": "DIV",
+   "ingested": "2026-11-06"
+  }
+ ]
+}

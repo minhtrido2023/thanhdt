@@ -1,0 +1,77 @@
+{
+ "event_id": "VOS_2026-10-07",
+ "ticker": "VOS",
+ "T": "2026-10-07",
+ "stats": {
+  "mom20": 0.2047,
+  "idio20": 0.2451,
+  "volr": 2.643,
+  "newhi_3m": true,
+  "liq_bn": 16.07,
+  "route_8l": "COMPOUNDER",
+  "rating_8l_asof": 4,
+  "rating_eff_date": "2026-07-28",
+  "dd_flag": false
+ },
+ "financials_released_le_T": [
+  {
+   "GPM_P0": "0.061552811",
+   "NP_P0": "2.16611146794E11",
+   "NP_P4": "-9.002493932E9",
+   "PB": "0.933005372851172",
+   "PE": "6.4775934959362536",
+   "ROE_Trailing": "0.149717101711793",
+   "Release_Date": "2026-01-23",
+   "Revenue_P0": "9.55893365038E11",
+   "Revenue_YoY_P0": "-0.284943445763297",
+   "quarter": "2025Q4"
+  },
+  {
+   "GPM_P0": "0.0791462977",
+   "NP_P0": "4.328202684E9",
+   "NP_P4": "-5.3853028976E10",
+   "PB": "0.83534912770997",
+   "PE": "4.879809078060248",
+   "ROE_Trailing": "0.179588633329455",
+   "Release_Date": "2026-04-22",
+   "Revenue_P0": "7.0903874669E11",
+   "Revenue_YoY_P0": "0.5335565666745272",
+   "quarter": "2026Q1"
+  },
+  {
+   "GPM_P0": "0.0972861908",
+   "NP_P0": "4.1317747671E10",
+   "NP_P4": "1.0284949227E10",
+   "PB": "0.7227980298394341",
+   "PE": "3.678067944182008",
+   "ROE_Trailing": "0.194379829427773",
+   "Release_Date": "2026-07-28",
+   "Revenue_P0": "9.2209951381E11",
+   "Revenue_YoY_P0": "0.1024708296484788",
+   "quarter": "2026Q2"
+  }
+ ],
+ "news_le_T": [
+  {
+   "date": "2026-09-14",
+   "time": "2026-09-14T17:35:04+07:00",
+   "title": "VOS: Nghị quyết HĐQT về việc chi trả cổ tức năm 2025",
+   "codes": "DIV",
+   "ingested": "2026-09-24"
+  },
+  {
+   "date": "2026-09-16",
+   "time": "2026-09-16T17:52:35+07:00",
+   "title": "VOS: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền chi trả cổ tức năm 2025 bằng tiền mặt",
+   "codes": "DIV",
+   "ingested": "2026-09-27"
+  },
+  {
+   "date": "2026-09-23",
+   "time": "2026-09-23T10:25:45+07:00",
+   "title": "VOS: Thông báo ngày ĐKCC chi trả cổ tức năm 2025 bằng tiền",
+   "codes": "DIV",
+   "ingested": "2026-09-28"
+  }
+ ]
+}

@@ -1,0 +1,722 @@
+# Prompt M2 — MÙ (deepseek qua bin/second_opinion.sh). KHÔNG thấy kết luận M1.
+Giả thuyết mặc định cần phản bác: "Đợt tăng của mỗi mã dưới đây chỉ là dòng tiền/đầu cơ, không có lý
+do cơ bản (NARRATIVE_ONLY)". Với TỪNG sự kiện trong gói, dựa CHỈ trên gói (dữ liệu ngày ≤ T; cấm web,
+cấm dùng hiểu biết về giá sau T): cho `blind_driver` (cùng 6 nhãn của M1, UNKNOWN hợp lệ),
+`blind_view_20s/60s` (CONT/REV/NO_VIEW), `evidence` (trỏ phần tử gói + ngày ≤ T).
+Ghi kết quả dạng JSON list theo `schema_M2.json#blind`.
+
+Định dạng: ghi kết quả 10 sự kiện vào trường diem_dang_ngo (mỗi phần tử: van_de=event_id + blind_driver + blind_view_20s/60s; vi_sao=bằng chứng trỏ phần tử gói + ngày; can_bang_chung=điều cần thêm). Được phép quá 3 phần tử cho dry-run này (10 sự kiện). CẤM web.
+
+## GÓI (10 sự kiện)
+[
+ {
+  "event_id": "FTS_2026-07-07",
+  "ticker": "FTS",
+  "T": "2026-07-07",
+  "stats": {
+   "mom20": 0.2273,
+   "idio20": 0.1965,
+   "volr": 2.996,
+   "newhi_3m": true,
+   "liq_bn": 55.63,
+   "route_8l": "SECURITIES",
+   "rating_8l_asof": 3,
+   "rating_eff_date": "2026-04-20",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.5225805294",
+    "NP_P0": "5.5114069962E10",
+    "NP_P4": "8.0679298426E10",
+    "PB": "2.7731727508327846",
+    "PE": "27.79525441918628",
+    "ROE_Trailing": "0.1017000609316",
+    "Release_Date": "2025-10-17",
+    "Revenue_P0": "2.84407920603E11",
+    "Revenue_YoY_P0": "0.2661322691848335",
+    "quarter": "2025Q3"
+   },
+   {
+    "GPM_P0": "0.4857360804",
+    "NP_P0": "1.28056922698E11",
+    "NP_P4": "1.59512673575E11",
+    "PB": "2.5360397333328835",
+    "PE": "28.25227427273192",
+    "ROE_Trailing": "0.0919366725324959",
+    "Release_Date": "2026-01-21",
+    "Revenue_P0": "3.70193994657E11",
+    "Revenue_YoY_P0": "0.1616995610978417",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.4694499524",
+    "NP_P0": "1.59915055919E11",
+    "NP_P4": "1.52966608704E11",
+    "PB": "2.10367603104381",
+    "PE": "23.60324745748601",
+    "ROE_Trailing": "0.0914258421943147",
+    "Release_Date": "2026-04-20",
+    "Revenue_P0": "3.78398564136E11",
+    "Revenue_YoY_P0": "0.2125686632859109",
+    "quarter": "2026Q1"
+   }
+  ],
+  "news_le_T": [
+   {
+    "date": "2026-05-07",
+    "time": "2026-05-07T14:39:00",
+    "title": "FTS: Quyết định của HĐQT về ngày ĐKCC để thực hiện quyền nhận cổ tức năm 2025 bằng tiền và cổ phiếu phát hành để tăng vốn cổ phần năm 2026",
+    "codes": "DIV",
+    "ingested": "2026-09-13"
+   },
+   {
+    "date": "2026-05-07",
+    "time": "2026-05-07T14:40:26",
+    "title": "FTS: Thông báo phát hành cổ phiếu để tăng vốn cổ phần từ NVCSH",
+    "codes": "ISS",
+    "ingested": "2026-09-13"
+   },
+   {
+    "date": "2026-05-12",
+    "time": "2026-05-12T17:45:48",
+    "title": "FTS: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2025 bằng tiền và phát hành cổ phiếu từ nguồn vốn chủ sở hữu",
+    "codes": "DIV,ISS",
+    "ingested": "2026-09-13"
+   },
+   {
+    "date": "2026-06-02",
+    "time": "2026-06-02T09:23:35",
+    "title": "FTS: Báo cáo kết quả đợt phát hành cổ phiếu để tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+    "codes": "ISS",
+    "ingested": "2026-09-13"
+   }
+  ]
+ },
+ {
+  "event_id": "PSI_2026-07-17",
+  "ticker": "PSI",
+  "T": "2026-07-17",
+  "stats": {
+   "mom20": 0.2637,
+   "idio20": 0.2841,
+   "volr": 1.71,
+   "newhi_3m": true,
+   "liq_bn": 4.4,
+   "route_8l": "SECURITIES",
+   "rating_8l_asof": 4,
+   "rating_eff_date": "2026-04-20",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.4918200603",
+    "NP_P0": "2.0097857343E10",
+    "NP_P4": "4.255557828E9",
+    "PB": "0.6026690076914473",
+    "PE": "10.714177848686724",
+    "ROE_Trailing": "0.0573266764675436",
+    "Release_Date": "2025-10-24",
+    "Revenue_P0": "1.34103247892E11",
+    "Revenue_YoY_P0": "0.598827907566436",
+    "quarter": "2025Q3"
+   },
+   {
+    "GPM_P0": "0.4911119853",
+    "NP_P0": "6.552533793E9",
+    "NP_P4": "3.842686146E9",
+    "PB": "0.6611364622125545",
+    "PE": "11.136590337772988",
+    "ROE_Trailing": "0.0606186263483509",
+    "Release_Date": "2026-01-22",
+    "Revenue_P0": "1.12828356632E11",
+    "Revenue_YoY_P0": "0.3982419136174344",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.5160760178",
+    "NP_P0": "2.5871600343E10",
+    "NP_P4": "8.303179497E9",
+    "PB": "0.6391263618731148",
+    "PE": "7.989415520403617",
+    "ROE_Trailing": "0.0823126725731762",
+    "Release_Date": "2026-04-20",
+    "Revenue_P0": "1.28330117311E11",
+    "Revenue_YoY_P0": "0.3459260792607284",
+    "quarter": "2026Q1"
+   }
+  ],
+  "news_le_T": []
+ },
+ {
+  "event_id": "ASP_2026-08-03",
+  "ticker": "ASP",
+  "T": "2026-08-03",
+  "stats": {
+   "mom20": 0.3631,
+   "idio20": 0.4069,
+   "volr": 1.741,
+   "newhi_3m": true,
+   "liq_bn": 3.83,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 4,
+   "rating_eff_date": "2026-07-29",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.1094968021",
+    "NP_P0": "3.90018429E9",
+    "NP_P4": "1.7991368795E10",
+    "PB": "0.5400505031886663",
+    "PE": "12.763302488360347",
+    "ROE_Trailing": null,
+    "Release_Date": "2026-02-02",
+    "Revenue_P0": "8.18816012551E11",
+    "Revenue_YoY_P0": "-0.0455423629419338",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.1176031889",
+    "NP_P0": "4.5797129582E10",
+    "NP_P4": "3.696187809E9",
+    "PB": "0.6047117833827849",
+    "PE": "4.056635663524189",
+    "ROE_Trailing": null,
+    "Release_Date": "2026-05-04",
+    "Revenue_P0": "8.16355533868E11",
+    "Revenue_YoY_P0": "0.0808299826419172",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.1254627258",
+    "NP_P0": "6.6639092996E10",
+    "NP_P4": "-8.732501053E9",
+    "PB": "0.969004497939736",
+    "PE": "3.267240092660093",
+    "ROE_Trailing": "0.33394755365539",
+    "Release_Date": "2026-07-29",
+    "Revenue_P0": "1.352028682302E12",
+    "Revenue_YoY_P0": "0.5814994642058859",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": []
+ },
+ {
+  "event_id": "HII_2026-08-05",
+  "ticker": "HII",
+  "T": "2026-08-05",
+  "stats": {
+   "mom20": 0.4745,
+   "idio20": 0.5162,
+   "volr": 2.952,
+   "newhi_3m": true,
+   "liq_bn": 3.55,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 3,
+   "rating_eff_date": "2026-07-30",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.0694769773",
+    "NP_P0": "-4.1080458644E10",
+    "NP_P4": "-1.5535542755E10",
+    "PB": "0.4367007247043148",
+    "PE": "7.739068484193114",
+    "ROE_Trailing": "0.0606566071257768",
+    "Release_Date": "2026-02-02",
+    "Revenue_P0": "1.658269837287E12",
+    "Revenue_YoY_P0": "-0.1888178909492582",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.0786880901",
+    "NP_P0": "7.5797557218E10",
+    "NP_P4": "-4.177146401E9",
+    "PB": "0.4338329342560369",
+    "PE": "3.2405381437413454",
+    "ROE_Trailing": "0.1387739090109438",
+    "Release_Date": "2026-04-29",
+    "Revenue_P0": "2.341838133518E12",
+    "Revenue_YoY_P0": "0.1498614373097397",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.0957930258",
+    "NP_P0": "1.6337874431E11",
+    "NP_P4": "5.9071508087E10",
+    "PB": "0.4400614586562693",
+    "PE": "2.078107929153361",
+    "ROE_Trailing": "0.219282525513743",
+    "Release_Date": "2026-07-30",
+    "Revenue_P0": "3.91440881023E12",
+    "Revenue_YoY_P0": "0.959554953906648",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": [
+   {
+    "date": "2026-05-29",
+    "time": "2026-05-29T17:25:08",
+    "title": "HII: Thông báo và Nghị quyết HĐQT về ngày ĐKCC thực hiện quyền nhận cổ tức bằng tiền năm 2025",
+    "codes": "DIV",
+    "ingested": "2026-09-13"
+   },
+   {
+    "date": "2026-06-05",
+    "time": "2026-06-05T14:35:49",
+    "title": "HII: Thông báo về ngày ĐKCC trả cổ tức năm 2025 bằng tiền",
+    "codes": "DIV",
+    "ingested": "2026-09-13"
+   }
+  ]
+ },
+ {
+  "event_id": "MSR_2026-08-17",
+  "ticker": "MSR",
+  "T": "2026-08-17",
+  "stats": {
+   "mom20": 0.2147,
+   "idio20": 0.2239,
+   "volr": 1.605,
+   "newhi_3m": true,
+   "liq_bn": 53.84,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 4,
+   "rating_eff_date": "2026-07-27",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.1847885153",
+    "NP_P0": "2.22494717E11",
+    "NP_P4": "-2.15847993E11",
+    "PB": "3.286394225837474",
+    "PE": null,
+    "ROE_Trailing": "5.777556953448E-4",
+    "Release_Date": "2026-01-29",
+    "Revenue_P0": "2.394678543E12",
+    "Revenue_YoY_P0": "-0.3809570705658458",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.2372803476",
+    "NP_P0": "5.36679202E11",
+    "NP_P4": "-2.22007235E11",
+    "PB": "3.3120214877232064",
+    "PE": "54.70726959188778",
+    "ROE_Trailing": "0.0613659135698491",
+    "Release_Date": "2026-04-28",
+    "Revenue_P0": "2.993103444E12",
+    "Revenue_YoY_P0": "1.1491289064107568",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.2447569591",
+    "NP_P0": "1.665652756E12",
+    "NP_P4": "5.643475E9",
+    "PB": "2.6810029934214925",
+    "PE": "15.86985678555924",
+    "ROE_Trailing": "0.1766924705533211",
+    "Release_Date": "2026-07-27",
+    "Revenue_P0": "8.137876711E12",
+    "Revenue_YoY_P0": "4.041095624831991",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": [
+   {
+    "date": "2026-07-02",
+    "time": "2026-07-02T15:57:00",
+    "title": "MSR: Quy chế chương trình phát hành cổ phần theo ESOP và danh sách người lao động tham gia ESOP",
+    "codes": "ISS",
+    "ingested": "2026-09-13"
+   },
+   {
+    "date": "2026-07-02",
+    "time": "2026-07-02T16:37:00",
+    "title": "MSR: Nghị quyết HDQT về Phương án phát hành ESOP",
+    "codes": "ISS",
+    "ingested": "2026-09-13"
+   },
+   {
+    "date": "2026-07-14",
+    "time": "2026-07-14T09:30:00+07:00",
+    "title": "MSR: Thông báo phát hành cổ phiếu theo chương trình lựa chọn cho người lao động trong Công ty | Announcement of stock issuance under the Company's employee stock option program at the Company",
+    "codes": "ISS",
+    "ingested": "2026-11-06"
+   },
+   {
+    "date": "2026-07-15",
+    "time": "2026-07-15T11:37:00+07:00",
+    "title": "MSR: Thông báo giao dịch mua cổ phiếu MSR của người nội bộ theo chương trình ESOP 2026",
+    "codes": "ISS",
+    "ingested": "2026-11-06"
+   },
+   {
+    "date": "2026-07-23",
+    "time": "2026-07-23T11:15:00+07:00",
+    "title": "MSR: Báo cáo kết quả phát hành cổ phiếu theo chương trình lựa chọn cho người lao động trong Công ty ngày 22",
+    "codes": "ISS",
+    "ingested": "2026-11-06"
+   },
+   {
+    "date": "2026-07-24",
+    "time": "2026-07-24T16:38:00+07:00",
+    "title": "MSR: Thông báo kết quả giao dịch cổ phiếu của người nội bộ theo ESOP 2026",
+    "codes": "ISS",
+    "ingested": "2026-11-06"
+   },
+   {
+    "date": "2026-07-31",
+    "time": "2026-07-31T15:39:00+07:00",
+    "title": "MSR: Nghị quyết về việc tăng vốn điều lệ do phát hành ESOP",
+    "codes": "ISS",
+    "ingested": "2026-11-06"
+   },
+   {
+    "date": "2026-07-31",
+    "time": "2026-07-31T15:42:00+07:00",
+    "title": "MSR: Thay đổi số lượng cổ phiếu do phát hành ESOP",
+    "codes": "ISS",
+    "ingested": "2026-11-06"
+   },
+   {
+    "date": "2026-08-05",
+    "time": "2026-08-05T08:47:00+07:00",
+    "title": "MSR: Công văn của SSC về việc nhận được Báo cáo kết qủa phát hành ESOP của MSR",
+    "codes": "ISS",
+    "ingested": "2026-11-06"
+   },
+   {
+    "date": "2026-08-12",
+    "time": "2026-08-12T10:09:00+07:00",
+    "title": "Masan High-Tech Materials (MSR) đề xuất chia cổ tức 10% bằng tiền mặt",
+    "codes": "DIV",
+    "ingested": "2026-11-06"
+   }
+  ]
+ },
+ {
+  "event_id": "HID_2026-09-17",
+  "ticker": "HID",
+  "T": "2026-09-17",
+  "stats": {
+   "mom20": 0.6746,
+   "idio20": 0.6194,
+   "volr": 2.739,
+   "newhi_3m": true,
+   "liq_bn": 3.62,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 4,
+   "rating_eff_date": "2026-07-30",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.2614439356",
+    "NP_P0": "-8.5688903831E10",
+    "NP_P4": "8.384352048E9",
+    "PB": "0.4704109955523999",
+    "PE": "-10.713918860758776",
+    "ROE_Trailing": "-0.085570611161802",
+    "Release_Date": "2026-02-02",
+    "Revenue_P0": "9.1602198639E10",
+    "Revenue_YoY_P0": "-0.2298502591877926",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.2379941579",
+    "NP_P0": "-1.3357552671E10",
+    "NP_P4": "4.14493545E8",
+    "PB": "0.432370800011058",
+    "PE": "-7.231779762413333",
+    "ROE_Trailing": "-0.1011592522759341",
+    "Release_Date": "2026-04-06",
+    "Revenue_P0": "7.5847516614E10",
+    "Revenue_YoY_P0": "-0.3763495950633035",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.2092224642",
+    "NP_P0": "9.134943438E9",
+    "NP_P4": "-1.4822487181E10",
+    "PB": "0.2739187140579152",
+    "PE": "-8.347914983708902",
+    "ROE_Trailing": "-0.0489297431294539",
+    "Release_Date": "2026-07-30",
+    "Revenue_P0": "1.41598278003E11",
+    "Revenue_YoY_P0": "0.1704502756294525",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": [
+   {
+    "date": "2026-07-30",
+    "time": "2026-07-30T17:16:10",
+    "title": "HID: Giải trình biến động KQKD trên BCTC Hợp nhất và riêng Quý 2 năm 2026",
+    "codes": "MA",
+    "ingested": "2026-09-13"
+   },
+   {
+    "date": "2026-09-03",
+    "time": "2026-09-03T15:12:46",
+    "title": "HID: Giải trình biến động KQKD trên BCTC riêng và hợp nhất 6 tháng đầu năm 2026 đã soát xét",
+    "codes": "MA",
+    "ingested": "2026-09-13"
+   }
+  ]
+ },
+ {
+  "event_id": "APH_2026-09-21",
+  "ticker": "APH",
+  "T": "2026-09-21",
+  "stats": {
+   "mom20": 0.2115,
+   "idio20": 0.1692,
+   "volr": 2.163,
+   "newhi_3m": true,
+   "liq_bn": 3.29,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 4,
+   "rating_eff_date": "2026-07-29",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.1400942504",
+    "NP_P0": "3.9509535565E10",
+    "NP_P4": "2.684813682E10",
+    "PB": "0.2625336300073931",
+    "PE": "9.306163600992551",
+    "ROE_Trailing": "0.0709233748626629",
+    "Release_Date": "2026-02-02",
+    "Revenue_P0": "2.19960141707E12",
+    "Revenue_YoY_P0": "-0.4280837788117998",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.1536785436",
+    "NP_P0": "6.4953188489E10",
+    "NP_P4": "1.3894658526E10",
+    "PB": "0.2393915409743086",
+    "PE": "6.625911659183272",
+    "ROE_Trailing": "0.0884550189387339",
+    "Release_Date": "2026-04-29",
+    "Revenue_P0": "2.225347923378E12",
+    "Revenue_YoY_P0": "-0.4233568648245587",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.1516617867",
+    "NP_P0": "8.6502560964E10",
+    "NP_P4": "6.0454083644E10",
+    "PB": "0.2189481194968298",
+    "PE": "5.462732818419953",
+    "ROE_Trailing": "0.0892680524418798",
+    "Release_Date": "2026-07-29",
+    "Revenue_P0": "2.457842512846E12",
+    "Revenue_YoY_P0": "0.0619126749009477",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": []
+ },
+ {
+  "event_id": "PVT_2026-09-29",
+  "ticker": "PVT",
+  "T": "2026-09-29",
+  "stats": {
+   "mom20": 0.2351,
+   "idio20": 0.2645,
+   "volr": 1.677,
+   "newhi_3m": true,
+   "liq_bn": 181.09,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 2,
+   "rating_eff_date": "2026-07-29",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.1465947617",
+    "NP_P0": "2.65898037562E11",
+    "NP_P4": "2.09058804294E11",
+    "PB": "0.8874969373830704",
+    "PE": "9.813609802318483",
+    "ROE_Trailing": "0.1202047377933819",
+    "Release_Date": "2026-02-02",
+    "Revenue_P0": "4.444125860472E12",
+    "Revenue_YoY_P0": "0.3600474357724859",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.1422593452",
+    "NP_P0": "3.19047081954E11",
+    "NP_P4": "2.1506008464E11",
+    "PB": "0.8803075066570264",
+    "PE": "9.146982490617027",
+    "ROE_Trailing": "0.1268605377950443",
+    "Release_Date": "2026-05-04",
+    "Revenue_P0": "4.177077006958E12",
+    "Revenue_YoY_P0": "0.4974041223222554",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.150897892",
+    "NP_P0": "5.528790546E11",
+    "NP_P4": "2.94782059372E11",
+    "PB": "0.721422999442273",
+    "PE": "6.271484131276122",
+    "ROE_Trailing": "0.1496223907747408",
+    "Release_Date": "2026-07-29",
+    "Revenue_P0": "5.713828308261E12",
+    "Revenue_YoY_P0": "0.3249069790900232",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": [
+   {
+    "date": "2026-06-17",
+    "time": "2026-06-17T17:04:08",
+    "title": "PVT: Báo cáo kết quả đợt phát hành CP để trả cổ tức năm 2025",
+    "codes": "DIV",
+    "ingested": "2026-09-13"
+   }
+  ]
+ },
+ {
+  "event_id": "VOS_2026-10-07",
+  "ticker": "VOS",
+  "T": "2026-10-07",
+  "stats": {
+   "mom20": 0.2047,
+   "idio20": 0.2451,
+   "volr": 2.643,
+   "newhi_3m": true,
+   "liq_bn": 16.07,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 4,
+   "rating_eff_date": "2026-07-28",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.061552811",
+    "NP_P0": "2.16611146794E11",
+    "NP_P4": "-9.002493932E9",
+    "PB": "0.933005372851172",
+    "PE": "6.4775934959362536",
+    "ROE_Trailing": "0.149717101711793",
+    "Release_Date": "2026-01-23",
+    "Revenue_P0": "9.55893365038E11",
+    "Revenue_YoY_P0": "-0.284943445763297",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.0791462977",
+    "NP_P0": "4.328202684E9",
+    "NP_P4": "-5.3853028976E10",
+    "PB": "0.83534912770997",
+    "PE": "4.879809078060248",
+    "ROE_Trailing": "0.179588633329455",
+    "Release_Date": "2026-04-22",
+    "Revenue_P0": "7.0903874669E11",
+    "Revenue_YoY_P0": "0.5335565666745272",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.0972861908",
+    "NP_P0": "4.1317747671E10",
+    "NP_P4": "1.0284949227E10",
+    "PB": "0.7227980298394341",
+    "PE": "3.678067944182008",
+    "ROE_Trailing": "0.194379829427773",
+    "Release_Date": "2026-07-28",
+    "Revenue_P0": "9.2209951381E11",
+    "Revenue_YoY_P0": "0.1024708296484788",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": [
+   {
+    "date": "2026-09-14",
+    "time": "2026-09-14T17:35:04+07:00",
+    "title": "VOS: Nghị quyết HĐQT về việc chi trả cổ tức năm 2025",
+    "codes": "DIV",
+    "ingested": "2026-09-24"
+   },
+   {
+    "date": "2026-09-16",
+    "time": "2026-09-16T17:52:35+07:00",
+    "title": "VOS: Thông báo về ngày đăng ký cuối cùng để thực hiện quyền chi trả cổ tức năm 2025 bằng tiền mặt",
+    "codes": "DIV",
+    "ingested": "2026-09-27"
+   },
+   {
+    "date": "2026-09-23",
+    "time": "2026-09-23T10:25:45+07:00",
+    "title": "VOS: Thông báo ngày ĐKCC chi trả cổ tức năm 2025 bằng tiền",
+    "codes": "DIV",
+    "ingested": "2026-09-28"
+   }
+  ]
+ },
+ {
+  "event_id": "DXP_2026-10-12",
+  "ticker": "DXP",
+  "T": "2026-10-12",
+  "stats": {
+   "mom20": 0.2734,
+   "idio20": 0.311,
+   "volr": 1.885,
+   "newhi_3m": true,
+   "liq_bn": 6.06,
+   "route_8l": "COMPOUNDER",
+   "rating_8l_asof": 3,
+   "rating_eff_date": "2026-07-30",
+   "dd_flag": false
+  },
+  "financials_released_le_T": [
+   {
+    "GPM_P0": "0.2536767831",
+    "NP_P0": "4.7151245359E10",
+    "NP_P4": "1.6958262029E10",
+    "PB": "0.7435846230650706",
+    "PE": "5.8135031637549455",
+    "ROE_Trailing": "0.1343136983772213",
+    "Release_Date": "2026-02-02",
+    "Revenue_P0": "2.80057672909E11",
+    "Revenue_YoY_P0": "0.5261024375289995",
+    "quarter": "2025Q4"
+   },
+   {
+    "GPM_P0": "0.2714518561",
+    "NP_P0": "5.0144680051E10",
+    "NP_P4": "1.7468857725E10",
+    "PB": "0.920219318320513",
+    "PE": "5.979079010654974",
+    "ROE_Trailing": "0.1643371050805282",
+    "Release_Date": "2026-05-04",
+    "Revenue_P0": "2.56501090575E11",
+    "Revenue_YoY_P0": "1.962745740016957",
+    "quarter": "2026Q1"
+   },
+   {
+    "GPM_P0": "0.2861211716",
+    "NP_P0": "6.1923977695E10",
+    "NP_P4": "2.8996610797E10",
+    "PB": "0.7876086946873639",
+    "PE": "4.455781723382626",
+    "ROE_Trailing": "0.1894214679895122",
+    "Release_Date": "2026-07-30",
+    "Revenue_P0": "3.15481529343E11",
+    "Revenue_YoY_P0": "0.9562765297557908",
+    "quarter": "2026Q2"
+   }
+  ],
+  "news_le_T": []
+ }
+]

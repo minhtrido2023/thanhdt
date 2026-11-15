@@ -1,0 +1,84 @@
+{
+ "event_id": "FTS_2026-07-07",
+ "ticker": "FTS",
+ "T": "2026-07-07",
+ "stats": {
+  "mom20": 0.2273,
+  "idio20": 0.1965,
+  "volr": 2.996,
+  "newhi_3m": true,
+  "liq_bn": 55.63,
+  "route_8l": "SECURITIES",
+  "rating_8l_asof": 3,
+  "rating_eff_date": "2026-04-20",
+  "dd_flag": false
+ },
+ "financials_released_le_T": [
+  {
+   "GPM_P0": "0.5225805294",
+   "NP_P0": "5.5114069962E10",
+   "NP_P4": "8.0679298426E10",
+   "PB": "2.7731727508327846",
+   "PE": "27.79525441918628",
+   "ROE_Trailing": "0.1017000609316",
+   "Release_Date": "2025-10-17",
+   "Revenue_P0": "2.84407920603E11",
+   "Revenue_YoY_P0": "0.2661322691848335",
+   "quarter": "2025Q3"
+  },
+  {
+   "GPM_P0": "0.4857360804",
+   "NP_P0": "1.28056922698E11",
+   "NP_P4": "1.59512673575E11",
+   "PB": "2.5360397333328835",
+   "PE": "28.25227427273192",
+   "ROE_Trailing": "0.0919366725324959",
+   "Release_Date": "2026-01-21",
+   "Revenue_P0": "3.70193994657E11",
+   "Revenue_YoY_P0": "0.1616995610978417",
+   "quarter": "2025Q4"
+  },
+  {
+   "GPM_P0": "0.4694499524",
+   "NP_P0": "1.59915055919E11",
+   "NP_P4": "1.52966608704E11",
+   "PB": "2.10367603104381",
+   "PE": "23.60324745748601",
+   "ROE_Trailing": "0.0914258421943147",
+   "Release_Date": "2026-04-20",
+   "Revenue_P0": "3.78398564136E11",
+   "Revenue_YoY_P0": "0.2125686632859109",
+   "quarter": "2026Q1"
+  }
+ ],
+ "news_le_T": [
+  {
+   "date": "2026-05-07",
+   "time": "2026-05-07T14:39:00",
+   "title": "FTS: Quyết định của HĐQT về ngày ĐKCC để thực hiện quyền nhận cổ tức năm 2025 bằng tiền và cổ phiếu phát hành để tăng vốn cổ phần năm 2026",
+   "codes": "DIV",
+   "ingested": "2026-09-13"
+  },
+  {
+   "date": "2026-05-07",
+   "time": "2026-05-07T14:40:26",
+   "title": "FTS: Thông báo phát hành cổ phiếu để tăng vốn cổ phần từ NVCSH",
+   "codes": "ISS",
+   "ingested": "2026-09-13"
+  },
+  {
+   "date": "2026-05-12",
+   "time": "2026-05-12T17:45:48",
+   "title": "FTS: Thông báo về ngày đăng ký cuối cùng trả cổ tức năm 2025 bằng tiền và phát hành cổ phiếu từ nguồn vốn chủ sở hữu",
+   "codes": "DIV,ISS",
+   "ingested": "2026-09-13"
+  },
+  {
+   "date": "2026-06-02",
+   "time": "2026-06-02T09:23:35",
+   "title": "FTS: Báo cáo kết quả đợt phát hành cổ phiếu để tăng vốn cổ phần từ nguồn vốn chủ sở hữu",
+   "codes": "ISS",
+   "ingested": "2026-09-13"
+  }
+ ]
+}
