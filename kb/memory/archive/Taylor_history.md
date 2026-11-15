@@ -2363,3 +2363,6 @@
 
 ## Archived 2026-11-15 (keep=12 days=0 require_done=False)
 - [2026-11-13T15:36:37Z] ĐANG DỞ: A9 (job Taylor_20261113_153627) sua tran ban A7 -> nhanh research/live-gap-A9-sellcap-fix-20261114 tu 414468bcb | NEXT: doc REPORT A7 + verdict, sua code
+
+## Archived 2026-11-15 (keep=12 days=0 require_done=False)
+- [2026-11-13T16:27:25Z] [live-gap-exec-A9 13/11] XONG job Taylor_20261113_153627: nhanh research/live-gap-A9-sellcap-fix-20261114 (8b5f7fd0d, worktree wt-livegapA7-1113 doi nhanh tai cho) KHONG merge; neo DD5 NAV live khong doi -33,2, 50B -26,22 — CHO arch-reviewer vong 2 + quant-skeptic, Mike merge
