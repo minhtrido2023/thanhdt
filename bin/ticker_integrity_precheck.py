@@ -8,8 +8,11 @@ phút tính toán. Precheck này bắt sớm, ngay sau step [0].
 
 FAIL (exit 1) nếu, trong 5 phiên gần nhất của ticker_1m:
   (a) MAX(time) của VNINDEX trong `ticker` < MAX(time) của `ticker`, hoặc
-  (b) COUNT(*) của `ticker` theo phiên < 97% COUNT(*) của `ticker_1m` cùng phiên
-      (phiên không có dòng nào trong `ticker` ⇒ 0 ⇒ FAIL).
+  (b) số mã thuộc ticker_1m ∩ ticker_prune(cùng phiên) mà VẮNG trong `ticker` > 2, hoặc
+      COUNT(*) `ticker` < 90% `ticker_1m` (lưới thảm hoạ). [arch-review 15/11: ngưỡng 97% trên TỔNG
+      dòng báo oan 6/19 phiên tự nhiên — đuôi kém thanh khoản rải rác thiếu 34-43 mã, 95,08-96,97% —
+      nên đổi sang universe thanh khoản; 0 mã prune thiếu trong 10-20..11-13.]
+      Phiên không có dòng nào trong `ticker` ⇒ FAIL. `ticker` trống cả cửa sổ ⇒ FAIL (không phải fail-open).
   (c) [mở rộng so với yêu cầu gốc, vì (a)+(b) để lọt lỗ VNINDEX ở phiên GIỮA: 1 dòng/800 = 0,1% ≪ 3%
       và MAX vẫn đúng] mỗi phiên mà ticker_1m có VNINDEX thì `ticker` cũng phải có VNINDEX.
 Exit 0 = PASS. Exit 2 = KHÔNG ĐO ĐƯỢC (bq lỗi / output không parse được) — caller fail-open + cảnh báo.
@@ -28,7 +31,8 @@ import sys
 
 PROJECT = "lithe-record-440915-m9"
 N_SESSIONS = 5
-MIN_RATIO = 0.97
+MIN_RATIO = 0.90        # CHỈ là lưới chặn thảm hoạ; baseline tự nhiên 95,08–99,1% (đo 10-20..11-06)
+MAX_LIQ_MISSING = 2     # mã thanh khoản (có trong ticker_prune cùng phiên) vắng trong ticker; đo: 0 trong 10-20..11-13
 BQ = os.environ.get("TI_BQ_BIN", "bq")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -37,9 +41,10 @@ class MeasureError(Exception):
     """Không đo được (không phải 'dữ liệu hỏng') — caller fail-open."""
 
 
-def evaluate(n1m, raw, vn1m=None):
+def evaluate(n1m, raw, vn1m=None, liq_missing=None):
     """n1m: {date: count ticker_1m}. raw: {date: (count ticker, count VNINDEX)}.
     vn1m: {date: số dòng VNINDEX trong ticker_1m} (None ⇒ bỏ luật (c)).
+    liq_missing: {date: số mã thanh khoản vắng trong ticker} (None ⇒ bỏ nhánh universe của (b)).
     Trả list lý do FAIL (rỗng = PASS)."""
     fails = []
     if not n1m:
@@ -54,6 +59,10 @@ def evaluate(n1m, raw, vn1m=None):
     for d in sorted(vn1m or {}):
         if vn1m[d] > 0 and raw.get(d, (0, 0))[1] == 0:
             fails.append("phiên %s: ticker_1m có VNINDEX nhưng ticker không" % d)
+    for d in sorted(liq_missing or {}):
+        if liq_missing[d] > MAX_LIQ_MISSING:
+            fails.append("phiên %s: %d mã thanh khoản (ticker_1m ∩ ticker_prune) vắng trong ticker (> %d)"
+                         % (d, liq_missing[d], MAX_LIQ_MISSING))
     for d in sorted(n1m):
         n_raw = raw.get(d, (0, 0))[0]
         if n_raw < MIN_RATIO * n1m[d]:
@@ -78,17 +87,19 @@ def _bq(sql, dry=False):
     return r.stdout
 
 
-def _rows(out):
+def _rows(out, allow_empty=False):
     rows = list(csv.reader(io.StringIO(out)))
+    if allow_empty and not out.strip():   # bq --format=csv in RỖNG HOÀN TOÀN (kể cả header) khi 0 dòng
+        return []
     if len(rows) < 2:
         raise MeasureError("bq trả không có dòng dữ liệu: %r" % out[:200])
     return rows[1:]
 
 
-def _query(sql):
+def _query(sql, allow_empty=False):
     est = _bq(sql, dry=True).strip().splitlines()
     print("  dry_run: %s" % (est[-1] if est else "?"))
-    return _rows(_bq(sql))
+    return _rows(_bq(sql), allow_empty)
 
 
 def measure():
@@ -103,19 +114,28 @@ def measure():
     q2 = ("SELECT CAST(t.time AS STRING) AS d, COUNT(*) AS n, COUNTIF(t.ticker = 'VNINDEX') AS v "
           "FROM tav2_bq.ticker AS t WHERE t.time >= DATE('%s') GROUP BY t.time" % lo)
     raw = {}
-    for row in _query(q2):
+    for row in _query(q2, allow_empty=True):
         if len(row) != 3 or not _DATE.match(row[0]) or not row[1].isdigit() or not row[2].isdigit():
             raise MeasureError("dòng ticker không parse được: %r" % row)
         raw[row[0]] = (int(row[1]), int(row[2]))
-    return n1m, raw, vn1m
+    q3 = ("SELECT CAST(m.time AS STRING) AS d, COUNT(*) AS n FROM tav2_bq.ticker_1m AS m "
+          "JOIN tav2_bq.ticker_prune AS p ON p.time = m.time AND p.ticker = m.ticker "
+          "LEFT JOIN tav2_bq.ticker AS t ON t.time = m.time AND t.ticker = m.ticker "
+          "WHERE m.time >= DATE('%s') AND t.ticker IS NULL GROUP BY m.time" % lo)
+    liq = {d: 0 for d in n1m}
+    for row in _query(q3, allow_empty=True):   # không dòng = không mã nào vắng = tốt
+        if len(row) != 2 or not _DATE.match(row[0]) or not row[1].isdigit():
+            raise MeasureError("dòng liq_missing không parse được: %r" % row)
+        liq[row[0]] = int(row[1])
+    return n1m, raw, vn1m, liq
 
 
 def main():
     print("ticker_integrity_precheck: ticker vs ticker_1m, %d phiên gần nhất, ngưỡng %.0f%%"
           % (N_SESSIONS, MIN_RATIO * 100))
     try:
-        n1m, raw, vn1m = measure()
-        fails = evaluate(n1m, raw, vn1m)
+        n1m, raw, vn1m, liq = measure()
+        fails = evaluate(n1m, raw, vn1m, liq)
     except MeasureError as e:
         print("MEASURE_ERROR (fail-open, KHÔNG phải kết luận dữ liệu hỏng): %s" % e)
         return 2
@@ -123,7 +143,7 @@ def main():
         print("MEASURE_ERROR bất ngờ (fail-open): %r" % e)
         return 2
     for d in sorted(n1m):
-        print("  %s ticker_1m=%d ticker=%d VNINDEX=%d" % (d, n1m[d], raw.get(d, (0, 0))[0], raw.get(d, (0, 0))[1]))
+        print("  %s ticker_1m=%d ticker=%d VNINDEX=%d liq_missing=%d" % (d, n1m[d], raw.get(d, (0, 0))[0], raw.get(d, (0, 0))[1], liq[d]))
     if fails:
         print("FAIL:")
         for f in fails:
