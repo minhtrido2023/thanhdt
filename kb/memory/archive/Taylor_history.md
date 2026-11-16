@@ -2384,3 +2384,6 @@
 
 ## Archived 2026-11-16 (keep=12 days=0 require_done=False)
 - [2026-11-14T07:37:53Z] [sweep 14/11] universe_pit_p3_selfcheck OPEN: cho universe_pit 13/11 dung bu (dispatch Winston bi chan quyen ghi BQ) — tu dong khi xanh; 3 cau khac CLOSED
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-14T12:15:19Z] [dd-pat 14/11] XONG REPORT job Taylor_20261114_120425: tam 75.100 (sau CK thanh khoan 10%), gia 72.700 trong vung hop ly; REPORT md5 303958a8, assumptions d8783c94 — CHO Mike chay fundamental-skeptic; chua ghi dd_price_zones
