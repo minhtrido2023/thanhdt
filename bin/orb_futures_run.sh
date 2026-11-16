@@ -2,7 +2,7 @@
 # orb_futures_run.sh — chạy executor ORB VN30F (trading_bot/orb_futures.py) cho 1 account.
 #   bin/orb_futures_run.sh [run|funding-alert|plan-block] [--account SpaceX]
 # run           : vòng lặp 09:31→14:45 (flock trong Python: gọi lại khi đang chạy ⇒ thoát ngay,
-#                 nên cron watchdog mỗi 10' an toàn — resume từ state, KHÔNG đặt lại lệnh).
+#                 nên cron watchdog mỗi 2' (09:32→14:50 ICT) an toàn — resume từ state, KHÔNG đặt lại lệnh).
 # funding-alert : nhắc nộp ký quỹ phái sinh khi cờ BẬT và thiếu (đi kèm nhịp egg_transfer_alert).
 # plan-block    : in khối plan report.
 # Cờ `orb_futures.enabled` (secrets/trading_bot_accounts.json, cấp profile) mặc định TẮT ⇒ DRY-RUN.
