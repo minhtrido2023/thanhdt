@@ -311,7 +311,14 @@ def t_infra_real_claude_errors(m):
                         (_cp(json.dumps({"is_error": True, "subtype": "error_max_turns", "num_turns": 9}), 1), RuntimeError),
                         (_cp(json.dumps({"is_error": True, "subtype": "error_max_budget_usd", "total_cost_usd": 0.5}), 1), RuntimeError),
                         (_cp(json.dumps({"is_error": True, "subtype": "error_max_turns", "result": "usage limit reached"}), 1), m.InfraError),
-                        (_cp(json.dumps({"is_error": False, "subtype": "success"}), 1), m.InfraError)]:
+                        (_cp(json.dumps({"is_error": False, "subtype": "success"}), 1), m.InfraError),
+                        # R3.1 (arch-review v3 #4): errors[] duoc doc; budget voi is_error=false; stderr-INFRA khi JSON khong subtype; JSON khong phai dict
+                        (_cp(json.dumps({"is_error": True, "subtype": "error_during_execution", "errors": ["usage limit reached"]}), 1), m.InfraError),
+                        (_cp(json.dumps({"is_error": True, "subtype": "error_max_turns", "errors": ["Reached max turns (8)"]}), 1), RuntimeError),
+                        (_cp(json.dumps({"is_error": False, "subtype": "error_max_budget_usd"}), 1), RuntimeError),
+                        (_cp(json.dumps({"is_error": True}), 1, "Not logged in - please login"), m.InfraError),
+                        (_cp(json.dumps({"is_error": True}), 1, "boom ngau nhien"), RuntimeError),
+                        (_cp(json.dumps([1, 2]), 0), m.InfraError)]:
             m.subprocess = _FakeSub([x])
             try: m.run_claude_m1("S", "U", "retro"); out.append(False)
             except m.InfraError as ex: out.append(want is m.InfraError)
@@ -320,7 +327,7 @@ def t_infra_real_claude_errors(m):
         m.subprocess = _FakeSub([_claude_ok("{}")]); txt, meta = m.run_claude_m1("SYS", "USR", "live"); fs = m.subprocess
         out.append(txt == "{}" and fs.cmds[0][0] == m.m1_argv("live", "SYS") and fs.cmds[0][1]["input"] == "USR")
     finally: m.subprocess = real
-    return all(out) and len(out) == 12
+    return all(out) and len(out) == 18
 def t_infra_cli_recovers_same_day(m):
     """B1 mutant: FileNotFoundError that chay qua run_claude_m1 -> run_day; sau khi 'cai lai CLI' chay lai ghi duoc su kien."""
     real = m.subprocess
@@ -370,7 +377,7 @@ def t_freshness_depth(m):
     ok &= f(full, T) is None and f(dict(full, pv_cov="323", pv_n="340"), T) is None and f(dict(full, pv_cov="949", pv_n="1000"), T) is not None and f(dict(full, pv_cov="950", pv_n="1000"), T) is None
     # R3: sql dung in_universe phien truoc + join ticker tai T (mutant: bo in_universe / <=T)
     q = m.sql_freshness(T)
-    ok &= (q.count("u.in_universe") >= 2 and "u.time < DATE" in q and "JOIN tkT" in q and "t.time = DATE" in q)
+    ok &= (q.count("u.in_universe") >= 2 and "u.time < DATE" in q and "FROM pv JOIN tkT USING(ticker)" in q and "LEFT" not in q and f't.time = DATE "{T}"' in q)
     return ok
 def t_hist_deterministic_vs_ledger(m):
     """B2: cooldown/cap khong phu thuoc ledger. Cung BQ, ledger co dong la/khong co => cung ke hoach; ledger rong sau kill => van dung cap tuan."""
@@ -574,8 +581,9 @@ def t_r3_sigterm_kills_m2_group(m):
 def t_r3_event_sql_in_protocol_hash(m):
     """(d) van ban SQL dinh nghia su kien nam trong CONST_PROTOCOL; doi SQL => hash doi."""
     c = m.protocol_consts()["event_sql_md5"]
-    return set(c) == {"candidates", "eligible_range"} and all(len(v) == 32 for v in c.values()) and c["candidates"] != c["eligible_range"] \
-        and m.hashlib.md5(m.sql_candidates("2000-01-03").encode()).hexdigest() == c["candidates"]
+    return set(c) == {"candidates", "eligible_range", "freshness"} and all(len(v) == 32 for v in c.values()) and len(set(c.values())) == 3 \
+        and m.hashlib.md5(m.sql_candidates("2000-01-03").encode()).hexdigest() == c["candidates"] \
+        and m.hashlib.md5(m.sql_freshness("2000-01-03").encode()).hexdigest() == c["freshness"]
 def t_r3_elig_rating_window(m):
     q = m.sql_eligible_range(T)
     return "rt.rt_time<=u.time" in q and "rt.rt_next IS NULL OR rt.rt_next>u.time" in q and "LEAD(r.time) OVER (PARTITION BY r.ticker ORDER BY r.time) rt_next" in q
@@ -658,7 +666,7 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("B1 rc!=0 khong JSON khong phai ha tang", 'if r.returncode: raise InfraError(f"claude rc={r.returncode}: {r.stderr[-400:]}', 'if r.returncode: raise RuntimeError(f"claude rc={r.returncode}: {r.stderr[-400:]}', "t_infra_real_claude_errors"),
     ("R3-B xet rc truoc JSON (max-turns thanh ha tang)", "    if not isinstance(d, dict):   # khong co JSON", "    if r.returncode: raise InfraError('rc')\n    if not isinstance(d, dict):   # khong co JSON", "t_infra_real_claude_errors"),
     ("R3-B max-turns rc!=0 thanh ha tang", 'if sub in ("error_max_turns", "error_max_budget_usd") or d.get("is_error"):\n            raise RuntimeError', 'if sub in ("error_max_turns", "error_max_budget_usd") or d.get("is_error"):\n            raise InfraError', "t_infra_real_claude_errors"),
-    ("B1 is_error usage/auth khong phai ha tang", 'if INFRA_RE.search(msg) or INFRA_RE.search(', 'if False and INFRA_RE.search(msg) or INFRA_RE.search(', "t_infra_real_claude_errors"),
+    ("B1 is_error usage/auth khong phai ha tang", 'if INFRA_RE.search(blob) or INFRA_RE.search(', 'if False and INFRA_RE.search(blob) or INFRA_RE.search(', "t_infra_real_claude_errors"),
     ("B1 run_day ghi dong khi ha tang hong", 'out["infra_stop"] = f"{p[\'event_id\']}: {str(e)[:300]}"; break', 'out["infra_stop"] = f"{p[\'event_id\']}: {str(e)[:300]}"; rec = dict(event_id=p["event_id"], ticker=p["ticker"], T=T, status="processed", mode=mode, stats={}, m1_status="FAIL", m1_error="infra", m2_status="SKIPPED", usage=[]); led.append(rec); break', "t_infra_stop_no_write_and_resume"),
     ("B2 cooldown replay bo luat khac-quy", " and quarter_of(d) != quarter_of(h[-1])", "", "t_replay_greedy"),
     ("B2 replay doc ca ngay T", "        if d >= T: continue                       # chi qua khu: khong bao gio doc T tro di\n", "", "t_replay_ignores_T_and_future"),
@@ -670,6 +678,14 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("B5 bo kiem ngay giao dich", "if not IS_TRADING_DAY(Td): raise NotTradingDay", "if False: raise NotTradingDay", "t_not_trading_day"),
     ("B5 ngay le khong tinh", "    if d.weekday() >= 5: return False\n", "    if d.weekday() >= 9: return False\n", "t_not_trading_day"),
     ("B5 bo run_lock", "fcntl.flock(self.f, fcntl.LOCK_EX | fcntl.LOCK_NB)", "pass", "t_run_lock_busy"),
+    # ---- R3.1 (arch-review v3): mutant SQL freshness (bi khoa md5 bat luc nap) + M1 ----
+    ("R3.1 freshness LEFT JOIN tkT (cong tat)", "(SELECT COUNT(*) FROM pv JOIN tkT USING(ticker)) pv_cov", "(SELECT COUNT(*) FROM pv LEFT JOIN tkT USING(ticker)) pv_cov", "t_freshness_depth"),
+    ("R3.1 freshness tkT doc T-1", 't.time = DATE "{T}" AND t.ticker != "VNINDEX")\nSELECT', 't.time = DATE_SUB(DATE "{T}", INTERVAL 1 DAY) AND t.ticker != "VNINDEX")\nSELECT', "t_freshness_depth"),
+    ("R3.1 freshness phien truoc = T", 'u.time < DATE "{T}" AND u.time >= DATE_SUB(DATE "{T}", INTERVAL 15 DAY)\n              AND', 'u.time <= DATE "{T}" AND u.time >= DATE_SUB(DATE "{T}", INTERVAL 15 DAY)\n              AND', "t_freshness_depth"),
+    ("R3.1 M1 bo errors[] khoi blob", 'blob = " ".join(str(x) for x in (d.get("result") or "", d.get("error") or "", errs_s))', 'blob = " ".join(str(x) for x in (d.get("result") or "", d.get("error") or ""))', "t_infra_real_claude_errors"),
+    ("R3.1 M1 bo nhanh stderr-INFRA", 'INFRA_RE.search(r.stderr[-300:] if not d.get("subtype") else "")', 'False', "t_infra_real_claude_errors"),
+    ("R3.1 M1 budget chi khi is_error", 'if sub in ("error_max_turns", "error_max_budget_usd") or d.get("is_error"):', 'if d.get("is_error"):', "t_infra_real_claude_errors"),
+    ("R3.1 M1 JSON list coi nhu dict rong", "    if not isinstance(d, dict):   # khong co JSON", "    d = d if isinstance(d, dict) else ({} if d is not None else d)\n    if not isinstance(d, dict):   # khong co JSON", "t_infra_real_claude_errors"),
     ("B6 cong freshness chi MAX(time)", "    if float(cov) < FRESH_RATIO * float(pv_n):", "    if False:", "t_freshness_depth"),
     ("R3 SQL freshness bo in_universe", "AND u.in_universe),\n tkT", "),\n tkT", "t_freshness_depth"),
     ("R3 SQL freshness phien truoc thanh <=T", 'u.time < DATE "{T}" AND u.time >=', 'u.time <= DATE "{T}" AND u.time >=', "t_freshness_depth"),

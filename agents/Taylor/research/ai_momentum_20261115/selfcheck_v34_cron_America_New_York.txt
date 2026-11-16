@@ -1,0 +1,47 @@
+TZ env=America/New_York
+== wrapper that
+  ok   rc0 sach: exit = 0
+  ok   rc0 sach: alert = 0
+  ok   doi so truyen: --date + --ledger-dir = --date 2026-11-16 --ledger-dir /tmp/am_cron_sc.PvnRxo/ledger
+  ok   rc=3: exit 0, im lang = 0/0
+  ok   rc=4: exit 0, im lang = 0/0
+  ok   rc=6: exit 0, im lang = 0/0
+  ok   rc=4 moc cuoi 23h: exit 0 + alert 1 = 0/1
+  ok   alert moc cuoi dung topic+noi dung = yes
+  ok   alert moc cuoi noi han 24:00 ICT = yes
+  ok   rc=4 tu doc gio ICT that: FINAL=gio ICT => 1 alert, FINAL=gio+1 => 0 = 1/0
+  ok   M2 alert: notify loi khong nho 'da bao' => luot sau van bao = 0/1
+  ok   rc=4 luot 22h: im lang = 0/0
+  ok   rc=4 08h (so sanh so hoc, khong bat 08 la bat phan): im lang = 0/0
+  ok   rc=3 o 23h: im lang = 0/0
+  ok   rc=5: alert 1 + exit 5 = 5/1
+  ok   rc=1: alert 1 + exit 1 = 1/1
+  ok   rc=7: alert 1 + exit 7 = 7/1
+  ok   alert dung topic Momentum Lab = yes
+  ok   M1 FAIL>0: alert = 1
+  ok   M2 FAIL streak 3: alert = 1
+  ok   M2 FAIL streak 2: im lang = 0
+  ok   M2 FAIL: bao lan dau / khong lap / hoi phuc im lang / hong lai bao = 1/0/0/1
+  ok   stdout rac: alert = 1
+  ok   timeout tong: exit 124, alert, <15s = 124/1/fast
+  ok   dang co luot khac: exit 0, python khong chay, im lang = 0/0/0
+  ok   sau khi nha khoa: chay lai duoc = 1
+== mutant (moi mutant PHAI lam it nhat 1 ca FAIL; target phai ton tai)
+  KILLED mutant[bo flock -n] (1 ca fail)
+  KILLED mutant[alert ca rc=3] (2 ca fail)
+  KILLED mutant[khong alert rc ha tang] (7 ca fail)
+  KILLED mutant[bo timeout tong] (1 ca fail)
+  KILLED mutant[bo canh bao M1 FAIL] (1 ca fail)
+  KILLED mutant[streak 3 -> 99] (3 ca fail)
+  KILLED mutant[M2 alert lap moi luot] (1 ca fail)
+  KILLED mutant[M2 hoi phuc khong xoa trang thai] (1 ca fail)
+  KILLED mutant[C rc=4 moc cuoi khong alert] (4 ca fail)
+  KILLED mutant[C rc=4 luon alert] (4 ca fail)
+  KILLED mutant[R3.1 bo export TZ (host UTC doc nham gio)] (1 ca fail)
+  KILLED mutant[R3.1 START_HOUR dung date -u] (1 ca fail)
+  KILLED mutant[R3.1 M2 ghi FAIL ke ca khi notify loi] (1 ca fail)
+  KILLED mutant[R3.1 alert() nuot rc notify] (1 ca fail)
+  KILLED mutant[R3.1 alert moc cuoi bo han 24:00] (1 ca fail)
+  KILLED mutant[C bo 10# (08 -> bat phan)] (1 ca fail)
+  KILLED mutant[doi topic] (2 ca fail)
+== 26 ca x (1+17) lan, 17 mutant (17 killed) -> ALL PASS

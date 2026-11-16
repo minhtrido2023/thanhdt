@@ -29,12 +29,12 @@ timeout --kill-after=30 "$TOTAL_TIMEOUT" "$PY" "$SCRIPT" --date "$TODAY" --ledge
 rc=$?
 echo "$(date -Is) ai_momentum_cron T=$TODAY rc=$rc out=$OUT" >> "$LOGDIR/cron.log"
 
-alert() { "$NOTIFY" "$1" "$TOPIC" >/dev/null 2>&1 || echo "$(date -Is) NOTIFY FAIL: $1" >> "$LOGDIR/cron.log"; }
+alert() { "$NOTIFY" "$1" "$TOPIC" >/dev/null 2>&1 || { echo "$(date -Is) NOTIFY FAIL: $1" >> "$LOGDIR/cron.log"; return 1; }; }   # tra rc that: caller co the KHONG ghi trang thai "da bao" khi gui loi
 _tail() { tail -n 6 "$ERR" 2>/dev/null | cut -c1-300; }
 
 case "$rc" in
   4) if [ "$((10#$START_HOUR))" -ge "$((10#$FINAL_HOUR))" ]; then   # moc cuoi ma BQ van chua day => khong con luot sau, ngay T mat im lang
-       alert "ai_momentum T=$TODAY: MOC CUOI ${FINAL_HOUR}:00 ICT van rc=4 (BQ chua ve/chua day) — ngay T KHONG co su kien nao duoc ghi; chay tay --date $TODAY khi BQ day. stderr cuoi: $(_tail)"
+       alert "ai_momentum T=$TODAY: MOC CUOI ${FINAL_HOUR}:00 ICT van rc=4 (BQ chua ve/chua day) — ngay T KHONG co su kien nao duoc ghi; chay tay --date $TODAY khi BQ day VA TRUOC 24:00 ICT (qua nua dem main() tu chuyen che do retro => ngay T khong vao N chinh). stderr cuoi: $(_tail)"
      fi
      exit 0 ;;
   3|6) exit 0 ;;                         # khong phai ngay GD / trung luot: im lang
@@ -55,6 +55,6 @@ PY
 msg="$(printf '%s\n' "$sum" | sed -n 1p)"; streak="$(printf '%s\n' "$sum" | sed -n 's/^STREAK=//p' | tail -1)"; streak="${streak:--1}"
 [ -n "$msg" ] && alert "ai_momentum T=$TODAY: $msg"
 if [ "$streak" -ge 3 ]; then
-  if [ "$(cat "$M2_STATE" 2>/dev/null)" != "FAIL" ]; then alert "ai_momentum T=$TODAY: M2 FAIL lien tiep=$streak (bao 1 lan khi doi trang thai; se bao lai khi M2 hoi phuc roi hong tiep)"; echo FAIL > "$M2_STATE"; fi
+  if [ "$(cat "$M2_STATE" 2>/dev/null)" != "FAIL" ]; then alert "ai_momentum T=$TODAY: M2 FAIL lien tiep=$streak (bao 1 lan khi doi trang thai; se bao lai khi M2 hoi phuc roi hong tiep)" && echo FAIL > "$M2_STATE"; fi   # chi nho "da bao" khi gui THANH CONG
 elif [ "$streak" -ge 0 ]; then echo OK > "$M2_STATE"; fi
 exit 0

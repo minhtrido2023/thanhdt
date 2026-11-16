@@ -47,7 +47,7 @@ def m1_argv(mode, system=""):
 def protocol_consts():
     return {"m1_argv": {m: m1_argv(m) for m in ("live", "retro")}, "m1_timeout": M1_TIMEOUT, "m2_model": M2_MODEL, "m2_timeout": M2_TIMEOUT,
             "m2_retries": M2_RETRIES, "m2_outer": M2_OUTER, "hist_days": HIST_DAYS, "fresh_ratio": FRESH_RATIO, "no_tool_line": NO_TOOL_LINE, "format_hint": FORMAT_HINT,
-            "event_sql_md5": {"candidates": hashlib.md5(sql_candidates("2000-01-03").encode()).hexdigest(), "eligible_range": hashlib.md5(sql_eligible_range("2000-01-03").encode()).hexdigest()}}   # R3-D(d): doi SQL dinh nghia su kien = doi giao thuc
+            "event_sql_md5": {"candidates": hashlib.md5(sql_candidates("2000-01-03").encode()).hexdigest(), "eligible_range": hashlib.md5(sql_eligible_range("2000-01-03").encode()).hexdigest(), "freshness": hashlib.md5(sql_freshness("2000-01-03").encode()).hexdigest()}}   # R3-D(d): doi SQL dinh nghia su kien = doi giao thuc
 def _consts_md5(): return hashlib.md5(json.dumps(protocol_consts(), sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 # ---- PREREG v3.2: MOT khoa md5 cho moi file giao thuc + hang so. Lech/thieu => khong chay (fail-closed, khong fallback).
@@ -332,8 +332,10 @@ def run_claude_m1(system, user, mode):
     # R3-B: JSON hop le di truoc rc. het max-turns/budget tra rc!=0 NHUNG la loi noi dung (m1_status=FAIL), khong dung luot chay.
     if r.returncode or d.get("is_error"):
         sub = str(d.get("subtype") or "")
-        msg = str(d.get("result") or d.get("error") or sub or r.stderr[-300:])[:300]
-        if INFRA_RE.search(msg) or INFRA_RE.search(r.stderr[-300:] if not d.get("subtype") else ""):
+        errs = d.get("errors"); errs_s = " | ".join(str(x) for x in errs) if isinstance(errs, list) else ""   # R3.1: JSON max-turns that mang loi trong errors[], khong co result
+        blob = " ".join(str(x) for x in (d.get("result") or "", d.get("error") or "", errs_s))
+        msg = str(d.get("result") or d.get("error") or errs_s or sub or r.stderr[-300:])[:300]
+        if INFRA_RE.search(blob) or INFRA_RE.search(r.stderr[-300:] if not d.get("subtype") else ""):
             raise InfraError(f"claude (ha tang) rc={r.returncode}: {msg}")
         if sub in ("error_max_turns", "error_max_budget_usd") or d.get("is_error"):
             raise RuntimeError(f"claude {sub or 'is_error'} rc={r.returncode}: {msg}")

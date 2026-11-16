@@ -15,14 +15,16 @@ sys.exit(int(os.environ.get("STUB_RC", "0")))
 PY
 cat > "$SB/notify.sh" <<'SH'
 #!/usr/bin/env bash
+[ -n "${STUB_NOTIFY_FAIL:-}" ] && exit 1
 printf '%s\t%s\n' "$2" "$1" >> "$STUB_ALERTS"
 SH
 chmod +x "$SB/notify.sh"
 # run <wrapper> [ENV=VAL ...] -> rc ; reset marks
 run() {
   local w="$1"; shift; : > "$SB/mark"; : > "$SB/alerts"; [ -n "${KEEP_STATE:-}" ] || rm -f "$SB/log/m2_alert.state"
+  local hr=(); [ -n "${NOHOUR:-}" ] || hr=(AI_MOMENTUM_HOUR=20)   # NOHOUR=1: KHONG tiem gio => wrapper tu doc gio ICT that (test neo TZ)
   env AI_MOMENTUM_SCRIPT="$SB/stub.py" AI_MOMENTUM_LEDGER_DIR="$SB/ledger" AI_MOMENTUM_LOCK="$SB/lock" AI_MOMENTUM_LOGDIR="$SB/log" AI_MOMENTUM_NOTIFY="$SB/notify.sh" \
-      AI_MOMENTUM_TODAY=2026-11-16 AI_MOMENTUM_HOUR=20 AI_MOMENTUM_TOTAL_TIMEOUT=60 STUB_MARK="$SB/mark" STUB_ALERTS="$SB/alerts" "$@" bash "$w"
+      AI_MOMENTUM_TODAY=2026-11-16 "${hr[@]}" AI_MOMENTUM_TOTAL_TIMEOUT=60 STUB_MARK="$SB/mark" STUB_ALERTS="$SB/alerts" "$@" bash "$w"
 }
 alerts() { wc -l < "$SB/alerts" | tr -d ' '; }
 cases() {   # $1 = wrapper path ; in ket qua tung ca
@@ -32,6 +34,13 @@ cases() {   # $1 = wrapper path ; in ket qua tung ca
   for r in 3 4 6; do run "$W" STUB_RC=$r; chk "rc=$r: exit 0, im lang" "$?/$(alerts)" "0/0"; done
   # C (R3): rc=4 o moc cuoi 23:00 ICT => alert 1 (topic momentum_lab) + exit 0; 22h = im lang; 00h (qua nua dem) khong tinh
   run "$W" STUB_RC=4 AI_MOMENTUM_HOUR=23; _rc=$?; chk "rc=4 moc cuoi 23h: exit 0 + alert 1" "$_rc/$(alerts)" "0/1"; grep -q "^momentum_lab.*MOC CUOI" "$SB/alerts" && chk "alert moc cuoi dung topic+noi dung" yes yes || chk "alert moc cuoi dung topic+noi dung" no yes
+  grep -q "TRUOC 24:00 ICT" "$SB/alerts" 2>/dev/null; run "$W" STUB_RC=4 AI_MOMENTUM_HOUR=23 >/dev/null; grep -q "TRUOC 24:00 ICT" "$SB/alerts" && chk "alert moc cuoi noi han 24:00 ICT" yes yes || chk "alert moc cuoi noi han 24:00 ICT" no yes
+  # R3.1 (arch-review v3 #2): KHONG tiem gio => wrapper phai TU doc gio ICT. FINAL_HOUR = gio ICT hien tai => 1 alert; gio+1 => 0 alert (may UTC: bo neo TZ => doc nham gio)
+  local ih; ih="$(TZ=Asia/Ho_Chi_Minh date +%H)"
+  NOHOUR=1 run "$W" STUB_RC=4 AI_MOMENTUM_FINAL_HOUR="$ih"; _a="$(alerts)"; NOHOUR=1 run "$W" STUB_RC=4 AI_MOMENTUM_FINAL_HOUR="$((10#$ih + 1))"; chk "rc=4 tu doc gio ICT that: FINAL=gio ICT => 1 alert, FINAL=gio+1 => 0" "$_a/$(alerts)" "1/0"
+  # R3.1 (#3): notify loi o luot dau => KHONG ghi trang thai 'da bao' => luot sau (notify phuc hoi) van bao
+  STUB_NOTIFY_FAIL=1 run "$W" STUB_RC=0 STUB_JSON='{"m1_fail":0,"m2_fail_streak":3,"written":[]}'; _b="$(alerts)"
+  KEEP_STATE=1 run "$W" STUB_RC=0 STUB_JSON='{"m1_fail":0,"m2_fail_streak":4,"written":[]}'; chk "M2 alert: notify loi khong nho 'da bao' => luot sau van bao" "$_b/$(alerts)" "0/1"
   run "$W" STUB_RC=4 AI_MOMENTUM_HOUR=22; chk "rc=4 luot 22h: im lang" "$?/$(alerts)" "0/0"
   run "$W" STUB_RC=4 AI_MOMENTUM_HOUR=08; chk "rc=4 08h (so sanh so hoc, khong bat 08 la bat phan): im lang" "$?/$(alerts)" "0/0"
   run "$W" STUB_RC=3 AI_MOMENTUM_HOUR=23; chk "rc=3 o 23h: im lang" "$?/$(alerts)" "0/0"
@@ -78,6 +87,11 @@ mutate "M2 alert lap moi luot" '!= "FAIL" ]; then alert' '!= "ZZZ" ]; then alert
 mutate "M2 hoi phuc khong xoa trang thai" 'echo OK > "$M2_STATE"' ':'
 mutate "C rc=4 moc cuoi khong alert" '-ge "$((10#$FINAL_HOUR))"' '-ge 99'
 mutate "C rc=4 luon alert" '-ge "$((10#$FINAL_HOUR))"' '-ge 0'
+mutate "R3.1 bo export TZ (host UTC doc nham gio)" 'export TZ=Asia/Ho_Chi_Minh' ': noop'
+mutate "R3.1 START_HOUR dung date -u" '$(date +%H)}"            # gio ICT luc BAT DAU' '$(date -u +%H)}"            # gio ICT luc BAT DAU'
+mutate "R3.1 M2 ghi FAIL ke ca khi notify loi" 'hong tiep)" && echo FAIL > "$M2_STATE"; fi' 'hong tiep)"; echo FAIL > "$M2_STATE"; fi'
+mutate "R3.1 alert() nuot rc notify" 'return 1; }; }' 'return 0; }; }'
+mutate "R3.1 alert moc cuoi bo han 24:00" 'VA TRUOC 24:00 ICT' 'VA som'
 mutate "C bo 10# (08 -> bat phan)" '"$((10#$START_HOUR))"' '"$((START_HOUR))"'
 mutate "doi topic" 'TOPIC=momentum_lab' 'TOPIC=trading_daily'
 echo "== $n_real ca x (1+$mut) lan, $mut mutant ($killed killed) -> $([ $fail -eq 0 ] && echo 'ALL PASS' || echo "$fail LOI")"

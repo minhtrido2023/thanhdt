@@ -100,3 +100,12 @@ Mike: smoke test live bằng `--ledger-dir` tạm → arch-review vòng 3 → qu
 - `selfcheck_ai_momentum.py`: **70 test, 101 mutant (100 killed gồm 1 mutant tự-kiểm harness; 13 bị khoá md5 bắt lúc nạp) ALL PASS** ×3 TZ (`env -u TZ`, `TZ=UTC`, `TZ=America/New_York`; lưu ý mutant `today bo neo ICT` chỉ bị bắt khi TZ máy ≠ ICT — chạy dưới TZ=ICT sẽ sống, đây là tính chất của mutant, không phải lỗi mã).
 - `bin/ai_momentum_cron_selfcheck.sh`: **23 ca × (1 + 12 mutant, 12 killed) ALL PASS** ×3 TZ.
 - `second_opinion_selfcheck.sh`: SELFCHECK PASS ×3 · `cli_provider_selfcheck.sh`: 23/23 PASS ×3 · `dispatch_token_telemetry_selfcheck.py`: 42 ok, **I7 FAIL ×2 + FileNotFoundError calls.txt ×3 TZ — lỗi có sẵn trên master, không đụng**.
+
+## R3.1 (Mike tự sửa 16/11 10:xx ICT, user duyệt (a) sau arch-review vòng 3 NEEDS_CHANGES — 2 MAJOR test-gap + 4 MINOR)
+1. **MAJOR** md5 `sql_freshness("2000-01-03")` vào `event_sql_md5` (CONST_PROTOCOL đổi `950b6883…`; chưa có ledger ⇒ an toàn) + assert chặt `FROM pv JOIN tkT USING(ticker)`, không `LEFT`, `t.time = DATE "{T}"`; 3 mutant SQL freshness mới (LEFT JOIN / tkT T-1 / phiên trước=T) bị khoá md5 bắt lúc nạp.
+2. **MAJOR** `bin/ai_momentum_cron_selfcheck.sh`: ca KHÔNG tiêm `AI_MOMENTUM_HOUR` (`NOHOUR=1`) — FINAL_HOUR=giờ ICT thật ⇒ 1 alert, giờ+1 ⇒ 0; mutant "bỏ export TZ" + "date -u" bị bắt.
+3. `alert()` trả rc thật; state `m2_alert.state=FAIL` chỉ ghi khi notify thành công (ca test + 2 mutant).
+4. `run_claude_m1` đọc `errors[]` (vào blob INFRA_RE + msg); +6 ca test (errors[] infra/max-turns, budget is_error=false, stderr-INFRA khi JSON không subtype, JSON không subtype + stderr lạ ⇒ nội dung, JSON list ⇒ Infra) + 4 mutant.
+5. Câu alert mốc cuối nói rõ hạn **24:00 ICT** (qua nửa đêm `main()` tự retro) + test + mutant.
+6. **Lịch cron thống nhất = 3 mốc 13:00/14:30/16:00 UTC (20:00/21:30/23:00 ICT)**; "19:35" cũ bị bỏ. Khi USER cài crontab phải thêm 3 dòng vào `kb/cron_registry.md` CÙNG COMMIT (§11) — Mike không tự cài.
+Không đổi: lịch lễ `vn_market` (nợ cũ: 2026-01-02, 2026-04-27 coi là ngày GD nhưng BQ không có ⇒ ồn ào rc=4 lúc 23:00, chấp nhận).
