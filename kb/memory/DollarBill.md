@@ -1,8 +1,6 @@
 # Working memory — DollarBill
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của DollarBill.
 
-- [2026-11-10T12:07:51Z] [2026-11-10 19:xx ICT] Plan ZaloPay 11-11 XONG HOLD ALL 0 lenh (LAG gia>tam DD); cho duyet truoc 08:45 11/11 (job DollarBill_20261110_120615)
-- [2026-11-10T12:08:10Z] [2026-11-10 19:xx ICT] Plan SpaceX 11-11 XONG: HOLD ALL 0 lenh (4 LAG gia>tam DD luat 09/11); cho duyet truoc 08:45 11/11 (job DollarBill_20261110_120617)
 - [2026-11-10T16:32:51Z] [2026-11-10 23:4x ICT] Plan 11/11 rev2 ca 2 acct: BUY DISC VGS (SpaceX 2400/ZaloPay 1500, tran 19.879) + NNC bo sung (900/500, tran 48.616); egg SpaceX>=42,4tr ZaloPay>=18,2tr truoc 09:00; CHUA approved (Mike trinh user). DANG CHO: Mike/user chot max_sessions VGS -> moi ghi discretionary_exit_rules.json (job DollarBill_20261110_162859)
 - [2026-11-11T12:07:25Z] [2026-11-11 19:xx ICT] Plan SpaceX 11-12 XONG HOLD ALL 0 lenh; VGS khong khop 11/11 (0cp), DISC khong lap - cho user quyet gom tiep; cho duyet truoc 08:45 12/11 (job DollarBill_20261111_120559)
 - [2026-11-11T12:07:50Z] [2026-11-11 19:xx ICT] Plan ZaloPay 11-12 XONG: BUY DISC NNC 300cp, 0 LAG, VGS bo (gia>tran); cho duyet truoc 08:45 12/11 (job DollarBill_20261111_120557)
