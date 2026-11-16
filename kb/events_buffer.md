@@ -753,3 +753,8 @@
 ## Consolidation 2026-11-16T12:04:33Z
 - [2026-11-16T12:04:21Z] DollarBill/decision — plan-2026-11-17-SpaceX: {"plan": "SpaceX 2026-11-17", "orders": "BUY DISC NNC 600cp tran 46000 (~27.6tr)", "egg": "chuyen >=27.7tr truoc 09:05", "lag_bal_capit": 0, "dt5g": "NEUTRAL", "status": "cho user duyet truoc 08:45"}
 - [2026-11-16T12:04:27Z] DollarBill/heartbeat — DollarBill_20261116_120326: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261116_120326", "source": "watcher"}
+
+## Consolidation 2026-11-16T13:07:02Z
+- [2026-11-16T12:10:50Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-11-16", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-11-16.md"}
+- [2026-11-16T12:12:48Z] Mafee/error — report_v2_fallback: {"account": "SpaceX", "plan_date": "2026-11-16", "stage": "build", "rc": "3", "reason": "build.py: THIẾU NGUỒN SỐ bắt buộc — nav_history_SpaceX.csv chưa có dòng NAV ngày 2026-11-16 (kỳ ngày kết thúc 2026-11-13) ", "fallback": "text-cu"}
+- [2026-11-16T12:13:50Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-11-16", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-11-16.md"}
