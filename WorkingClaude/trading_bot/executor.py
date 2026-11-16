@@ -2635,6 +2635,33 @@ def _await_postclose_fills(executors, deadline=ATC_POSTCLOSE_DEADLINE,
             e._save_state()
 
 
+def _check_fill_lagging(executors, phase, now):
+    """Fill-lagging check: 30 min before MORNING close (11:00), warn if <40% filled.
+
+    Khối lượng kế hoạch lấy từ `plan.orders[].qty` — parent state chỉ có `filled`, KHÔNG có
+    `qty` (bản cũ cộng `p.get("qty", 0)` ⇒ total_plan=0 ⇒ fill_rate=1.0 ⇒ không bao giờ nổ;
+    code-review 2026-11-15). Chỉ tính parent còn trong plan (parent mồ côi chỉ còn ở state —
+    xem `_OrphanParent` — không có qty kế hoạch).
+    """
+    if not (phase == "MORNING" and now.time() >= dt.time(11, 0)):
+        return
+    for e in executors:
+        ps = e.state.get("parents", {})
+        if not ps:
+            continue
+        plan_qty = {o.id: o.qty for o in e.plan.orders if o.id in ps}
+        total_plan = sum(plan_qty.values())
+        total_fill = sum(ps[pid].get("filled", 0) for pid in plan_qty)
+        fill_rate = total_fill / total_plan if total_plan else 1.0
+        if fill_rate < 0.4 and not e.state.get("_fill_lag_warned"):
+            e.state["_fill_lag_warned"] = True
+            _publish_bot_event("status", "fill_lagging", {
+                "account": e.label, "fill_rate_pct": round(fill_rate * 100, 1),
+                "note": f"Chỉ fill {fill_rate*100:.0f}% trước 11:00 — còn phiên chiều nhưng cần chú ý.",
+                "action_hint": "Xem execution_logs để quyết định có chuyển ATC không."
+            })
+
+
 def run_session(executors, once=False, max_cycles=None, force_phase=None):
     """Vòng lặp xuyên phiên cho 1..N account. Sổ participation dùng chung —
     truyền cùng 1 dict `shared` khi tạo các Executor (run_accounts lo việc này)."""
@@ -2678,22 +2705,7 @@ def run_session(executors, once=False, max_cycles=None, force_phase=None):
             print("[exec] ✅ tất cả account đã khớp đủ")
             break
 
-        # Fill-lagging check: 30 min before MORNING close (11:00), warn if <40% filled
-        if phase == "MORNING" and now.time() >= dt.time(11, 0):
-            for e in executors:
-                ps = e.state.get("parents", {})
-                if not ps:
-                    continue
-                total_plan = sum(p.get("qty", 0) for p in ps.values())
-                total_fill = sum(p.get("filled", 0) for p in ps.values())
-                fill_rate = total_fill / total_plan if total_plan else 1.0
-                if fill_rate < 0.4 and not e.state.get("_fill_lag_warned"):
-                    e.state["_fill_lag_warned"] = True
-                    _publish_bot_event("status", "fill_lagging", {
-                        "account": e.label, "fill_rate_pct": round(fill_rate * 100, 1),
-                        "note": f"Chỉ fill {fill_rate*100:.0f}% trước 11:00 — còn phiên chiều nhưng cần chú ý.",
-                        "action_hint": "Xem execution_logs để quyết định có chuyển ATC không."
-                    })
+        _check_fill_lagging(executors, phase, now)
 
         if phase == "CLOSED" and not force_phase:
             print("[exec] hết phiên — dừng")
