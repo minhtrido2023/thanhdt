@@ -2405,3 +2405,6 @@
 
 ## Archived 2026-11-16 (keep=12 days=0 require_done=False)
 - [2026-11-15T16:46:25Z] [ai-momentum P1-M2-WIRE 15/11] XONG job Taylor_20261115_163050: nhanh research/ai-momentum-p1-20261115 (efd12cbcd, da merge wags/m2-wrapper) KHONG merge master/cron; M2 OK 2/2 retro that; kb/projects/ai-momentum-p1-v3-20261115.md muc M2 — CHO Mike arch-review + user duyet cron
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-15T17:12:53Z] ĐANG DỞ: P1-ARCH-FIX vong2 job Taylor_20261115_170852 worktree agents/Taylor/wt-ai-momentum-p1 (B3 xong chua commit) | NEXT: rewrite ai_momentum_daily.py, wrapper bin/ai_momentum_cron.sh, PREREG_v3_2, selfcheck 3TZ, commit
