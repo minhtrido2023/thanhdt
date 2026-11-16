@@ -39,7 +39,7 @@ def _bq(sql):
     res = subprocess.run(['bq','query','--use_legacy_sql=false',
                           '--project_id=lithe-record-440915-m9',
                           '--format=csv','--max_rows=20000','-q',sql],
-                         capture_output=True, text=True, shell=True)
+                         capture_output=True, text=True)  # argv list, không qua shell (POSIX + shell: chỉ chạy cmd[0], mất SQL)
     if res.returncode != 0:
         raise RuntimeError(res.stderr)
     return res.stdout
