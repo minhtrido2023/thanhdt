@@ -1,0 +1,118 @@
+{
+ "balances": {
+  "stock": {
+   "totalCash": 1640,
+   "availableCash": 0,
+   "depositInterest": 1640,
+   "totalDebt": 10812643,
+   "depositFeeAmount": 941,
+   "secureAmount": 0,
+   "orderSecured": 0,
+   "withdrawableCash": -941,
+   "cashDividendReceiving": 0
+  },
+  "derivative": {
+   "pendingDepositWithdraw": 0,
+   "remainSecure": 0,
+   "usedSecure": 0,
+   "pendingSecure": 0,
+   "holdTaxAndFee": 0,
+   "totalLoanDebt": 0
+  },
+  "bond": {
+   "totalValue": 0
+  },
+  "egg": {
+   "totalValue": 752313273
+  }
+ },
+ "positions_DER": {
+  "positions": [],
+  "pageIndex": 0,
+  "pageSize": 50,
+  "pageNumber": 0,
+  "total": 0
+ },
+ "orders_DER": {
+  "orders": []
+ },
+ "orders_DER_cond": {
+  "orders": []
+ },
+ "loanpk_DER": {
+  "loanPackages": [
+   {
+    "id": 1306,
+    "initialRate": 0.1848,
+    "liquidRate": 0.1735,
+    "maintenanceRate": 0.1771,
+    "name": "Gói giao dịch 01",
+    "tradingFee": {
+     "channel": "ALL",
+     "createdDate": "2026-04-29T10:22:24.572111449Z",
+     "id": 3306,
+     "modifiedDate": "2026-04-29T10:22:24.572111449Z",
+     "name": "Phí linh hoạt",
+     "progressDailyCloseTradingFee": [
+      {
+       "fee": 1000.0,
+       "fromQuantity": 1,
+       "toQuantity": 99
+      },
+      {
+       "fee": 800.0,
+       "fromQuantity": 100,
+       "toQuantity": 999
+      },
+      {
+       "fee": 500.0,
+       "fromQuantity": 1000,
+       "toQuantity": 1499
+      },
+      {
+       "fee": 300.0,
+       "fromQuantity": 1500,
+       "toQuantity": 9999999
+      }
+     ],
+     "progressTradingFee": [
+      {
+       "fee": 1000.0,
+       "fromQuantity": 1,
+       "toQuantity": 99
+      },
+      {
+       "fee": 800.0,
+       "fromQuantity": 100,
+       "toQuantity": 999
+      },
+      {
+       "fee": 500.0,
+       "fromQuantity": 1000,
+       "toQuantity": 1499
+      },
+      {
+       "fee": 300.0,
+       "fromQuantity": 1500,
+       "toQuantity": 9999999
+      }
+     ],
+     "schemaType": "PROGRESSIVE",
+     "scope": "PRODUCT"
+    }
+   }
+  ],
+  "marketType": "DERIVATIVE",
+  "symbolType": "VN30F1M"
+ },
+ "instr_fu": {
+  "data": [],
+  "total": 0,
+  "page": 1,
+  "pageSize": 100
+ },
+ "secdef_VN30F1M": [],
+ "secdef_VN30F2611": [],
+ "secdef_VN30F2612": [],
+ "secdef_41I1FB000": []
+}
