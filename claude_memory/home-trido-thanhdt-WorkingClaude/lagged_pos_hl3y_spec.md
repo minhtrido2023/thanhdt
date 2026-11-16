@@ -1,6 +1,6 @@
 # LAGGED_POS — HL_3y Production Spec
 
-**Status**: ✅ Validated lookahead-free, paper-trade live from 2026-04-01
+**Status**: ✅ Validated lookahead-free, paper-trade live from [REDACTED]01
 **Date**: 2026-05-20
 
 ## Naming convention (locked)
@@ -155,7 +155,7 @@ User's hypothesis (validated): equal-weighted mean treats 10-year-old events sam
 
 ## Paper-trade live status (as of 2026-05-20)
 
-- Started: 2026-04-01 (49 days running)
+- Started: [REDACTED]01 (49 days running)
 - NAV: 49.50B (−1.00% vs 50B init)
 - Open [REDACTED]: 8 (HCM +14%, PVP +7%, others mixed)
 - Closed: 4 trades, WR 25%, avg −1.07%

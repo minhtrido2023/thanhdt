@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/fresh_real.py", line 3, in <module>
+    import ai_momentum_daily as m
+ModuleNotFoundError: No module named 'ai_momentum_daily'
+2026-11-16 {"pv_cov": "0", "pv_n": "340", "tk": "2026-11-13", "up": "2026-11-13", "up_n": "0"} -> ticker: MAX(time)=2026-11-13 < T=2026-11-16

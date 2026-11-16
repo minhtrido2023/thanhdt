@@ -102,7 +102,7 @@ LH v1 scripts (do NOT use for [REDACTED]):
 - `run_lh_matrix.py`, `tests_option_c.py`, `tests_growth_ta_filters.py`, etc. — research scripts
 
 Memory files (mark as R&D, not deployed):
-- `fa_long_hold_spec.md` — LH design history (annotate "NOT FOR PRODUCTION")
+- `fa_long_hold_spec.md` — LH design history (annotate "NOT FOR [REDACTED]ION")
 - `hybrid_v11_deployment.md` — annotate "REPLACED by BA-only"
 
 ## Lessons learned

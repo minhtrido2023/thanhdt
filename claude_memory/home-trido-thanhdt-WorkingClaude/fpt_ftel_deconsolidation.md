@@ -32,7 +32,7 @@ metadata:
 | `Revenue_YoY_P0` | **-22.3%** ❌ | Real organic = **+8.5% YoY** (12.48 trillion VND) |
 | `NP_YoY` | +14.4% | Real (parent shareholders) similar — unchanged by restructure |
 | Tech segment | – | **87% of revenue, 56% of profit** — still growing strong |
-| Q4 release `Release_Date` | 2026-04-28 | – |
+| Q4 release `Release_Date` | [REDACTED]28 | – |
 
 ## Model blind spot
 

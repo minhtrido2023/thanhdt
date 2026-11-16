@@ -89,7 +89,7 @@ Cause: pre-2018 trade war period DD pattern shifted by P3 (avoided some recovery
 
 ## DEPLOYMENT STATUS — 2026-05-15
 
-### ✅ DEPLOYED TO PRODUCTION
+### ✅ DEPLOYED TO [REDACTED]ION
 
 User approved V11 (V4_COMPOSITE + SV_TIGHT) deploy on 2026-05-15. Implementation in `recommend_holistic.py`:
 

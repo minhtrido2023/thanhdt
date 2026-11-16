@@ -49,7 +49,7 @@ V121_ENS wins FULL CAGR (+1.67pp vs V12.1 static, +3.56pp vs V11). 26 flips/12y 
 ## Operations
 
 - **Scheduler**: Windows scheduled task `PaperTrade3Sys` runs `papertrade_daily.bat` at 15:30 daily. Bat updated 2026-05-22 to include step [4/5] `pt_v121_ensemble.py` before final compare.
-- **Common base date**: 2026-04-01, 50B fresh start each system (independent).
+- **Common base date**: [REDACTED]01, 50B fresh start each system (independent).
 - **State source**: `tav2_bq.vnindex_5state_tam_quan_v34b_clean` for TQ34b variants; `tav2_bq.vnindex_5state` (LIVE) for V12_LIVE.
 
 ## Initial readings (smoke-test 2026-05-22, window 32 trading days)

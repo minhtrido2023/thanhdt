@@ -9,9 +9,9 @@ metadata:
 
 **[REDACTED]08.** User hỏi F-system (overlay phái sinh VN30F, không phải [REDACTED] chính) — đào sâu backtest + cải thiện. Production chính vẫn là DT5G + book cổ phiếu V4/V5; F-system là overlay OPTIONAL 20% vốn, state→long/short VN30F (CRISIS−100/BEAR−20/NEU+70/BULL+100/EXBULL+130 = map F_HAdapted live).
 
-**Dữ liệu VN30F:** KHÔNG có trong BigQuery ban đầu (chỉ `VN30` spot index + `E1VFVN30` ETF). **vnstock (source VCI) CÓ**: `VN30F1M` + `VN30F2M` full history 2017-08-10→now (~2188 phiên, OHLCV). Đã nạp vào **`tav2_bq.vn30f_daily`** (f1m OHLCV + f2m_close + spot_vn30 + basis + basis_pct). Files: vn30f1m_raw.csv, vn30f2m_raw.csv, vn30f_bq_upload.csv.
+**Dữ liệu VN30F:** KHÔNG có trong BigQuery ban đầu (chỉ `VN30` spot index + `E1VFVN30` ETF). **vnstock (source VCI) CÓ**: `[REDACTED]` + `VN30F2M` full history 2017-08-10→now (~2188 phiên, OHLCV). Đã nạp vào **`tav2_bq.vn30f_daily`** (f1m OHLCV + f2m_close + spot_vn30 + basis + basis_pct). Files: vn30f1m_raw.csv, vn30f2m_raw.csv, vn30f_bq_upload.csv.
 
-**Basis (VN30F1M − spot):** cấu trúc DISCOUNT, mean −0.21%/median −0.13%/std 0.78%, 63% ngày discount, p5 −1.51%. NỚI RỘNG đúng năm gấu (2020 −0.63%, 2022 −0.48%/79% ngày disc) — carry âm cho SHORT, dương cho LONG. NHƯNG **long-carry net ≈ 0%/năm** qua trọn chu kỳ (VN30F1M cum +172.6% ≈ spot +172.8%): convergence bù discount. Chuỗi VN30F1M là GHÉP THÔ (raw-stitched, roll đã nằm trong return) → backtest dùng return VN30F1M trực tiếp, BỎ roll cost nhân tạo 1.2%/yr (đã double-count).
+**Basis ([REDACTED] − spot):** cấu trúc DISCOUNT, mean −0.21%/median −0.13%/std 0.78%, 63% ngày discount, p5 −1.51%. NỚI RỘNG đúng năm gấu (2020 −0.63%, 2022 −0.48%/79% ngày disc) — carry âm cho SHORT, dương cho LONG. NHƯNG **long-carry net ≈ 0%/năm** qua trọn chu kỳ ([REDACTED] cum +172.6% ≈ spot +172.8%): convergence bù discount. Chuỗi [REDACTED] là GHÉP THÔ (raw-stitched, roll đã nằm trong return) → backtest dùng return [REDACTED] trực tiếp, BỎ roll cost nhân tạo 1.2%/yr (đã double-count).
 
 **Re-validation trên futures thật vs spot proxy (f_system_improve_test.py):**
 1. Basis KHÔNG phá hệ thống (overlay nặng long, long-carry≈0); vài cửa sổ futures còn tốt hơn spot (LIVE/CoDien 2018+ +20.7% vs spot +16.2%). Backtest cũ không ảo tổng thể.

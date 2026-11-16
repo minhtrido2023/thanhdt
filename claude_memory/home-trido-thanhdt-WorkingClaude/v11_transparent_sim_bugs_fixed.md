@@ -43,10 +43,10 @@ many rebalance buy+sells with different dates.
   with their REAL `entry_date` and `days_held = (last_day - entry_date).days`
 
 **Verification post-fix**: 4 open [REDACTED] in `v11_transparent_open_[REDACTED].new.csv`:
-- PAN BAL entry=2026-04-10 days=22 (real position)
-- E1VFVN30 BAL entry=2026-04-09 days=36 cost=21.38B (real ETF lot)
-- E1VFVN30 BAL entry=2026-04-24 days=21 cost=0.59B (real ETF lot)
-- E1VFVN30 VN30 entry=2026-04-09 days=36 cost=21.86B (real ETF lot)
+- PAN BAL entry=[REDACTED]10 days=22 (real position)
+- E1VFVN30 BAL entry=[REDACTED]09 days=36 cost=21.38B (real ETF lot)
+- E1VFVN30 BAL entry=[REDACTED]24 days=21 cost=0.59B (real ETF lot)
+- E1VFVN30 VN30 entry=[REDACTED]09 days=36 cost=21.86B (real ETF lot)
 
 Each lot's entry_date matches its actual buy row in
 `v11_transparent_transactions.csv` (`holding_id` cross-references).

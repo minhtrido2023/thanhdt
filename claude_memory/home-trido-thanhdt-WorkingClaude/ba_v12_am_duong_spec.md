@@ -100,7 +100,7 @@ TOTAL NAV (50B baseline)
 
 - [ ] BA v11 [REDACTED] already running (`recommend_holistic.py`) — confirmed ✅
 - [ ] LAGGED HL_3y backtested + validated lookahead-free — confirmed ✅
-- [ ] Paper-trade running since 2026-04-01 — confirmed ✅
+- [ ] Paper-trade running since [REDACTED]01 — confirmed ✅
 - [ ] Memory + spec documented — confirmed ✅
 - [ ] Capital allocation decided (recommend 25B BAL + 25B LAGGED = 50B)
 

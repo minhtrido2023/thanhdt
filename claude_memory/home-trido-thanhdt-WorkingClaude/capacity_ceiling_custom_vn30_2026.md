@@ -83,7 +83,7 @@ User: (1) chốt rổ vào **05/02, 05/05, 05/08, 05/11** (đầu tháng 2 mỗi
 
 **CHỐT vehicle [REDACTED] = `custompitg`** (PIT + timing 05/m2 + gate≤3): honest (no hindsight) + AN TOÀN (gate) + risk-adj tốt nhất nhóm honest ở mid-NAV. Quality-tilt 8L = optional (marginal). Số honest công bố @200B: **21.3%/Sh1.57/DD−15.8/Cal1.35** (vs strict 17.9/1.69/−14.4/1.24; vs hindsight-custom 22.3 thổi phồng).
 
-## ★★★★ DEPLOYED vào PRODUCTION ([REDACTED]14) — luật thuần, không ngoại lệ
+## ★★★★ DEPLOYED vào [REDACTED]ION ([REDACTED]14) — luật thuần, không ngoại lệ
 User ([REDACTED]14): áp dụng custompitg vào [REDACTED] thay block E1VFVN30; **bỏ hardcode ex-VIC** — "VIC đạt chuẩn 8L thì vào như mọi mã; hệ thống vận hành từ LUẬT bài bản không từ NGOẠI LỆ".
 1. **Refactor luật thuần** (`custom_basket.py`): XÓA hết hardcode (gồm VIC + index list). Universe = `ticker_prune ∩ ICB_Code IS NOT NULL` (1 luật: công ty niêm yết thật; index VN30/VNINDEX + ETF E1VFVN30 đều có ICB **NULL** → tự loại — verified). VIC cạnh tranh bình thường, gate 8L≤3 quyết định. **Kết quả ĐÚNG kinh tế từ luật**: VIC được nhận 11 quý **2014-2018 khi rating=3** (Vingroup blue-chip giai đoạn đó), **bị loại từ 2020+ khi rating tụt 4-5** (gồm sóng VIC-led 2025). "Ex-VIC" = HỆ QUẢ của gate, không phải carve-out.
 2. **Số rule-based custompitg** (audit BQ-verifiable, spot-check 0 VND + members_match=True mọi NAV; ≈ bản ex-VIC-hardcode, chênh <0.4pp): **50B 25.66/Sh1.79/DD−17.8/Cal1.44 · 100B 23.07/1.66/−17.3/1.33 · 200B 21.02/1.56/−15.8/1.33 · 500B 18.93/1.47/−17.9/1.06**.

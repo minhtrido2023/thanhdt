@@ -210,7 +210,7 @@ User-locked nomenclature:
 
 ## 11. Những thứ ĐÃ ÁP DỤNG / sẵn sàng deploy
 
-- ✅ **LAGGED HL_3y paper-trade live từ 2026-04-01** (49 days), via `lagged_pos_papertrade.py`
+- ✅ **LAGGED HL_3y paper-trade live từ [REDACTED]01** (49 days), via `lagged_pos_papertrade.py`
 - ✅ **v12 spec documented** ở `memory/ba_v12_am_duong_spec.md`
 - ✅ **LAGGED HL_3y standalone spec** ở `memory/lagged_pos_hl3y_spec.md`
 - ✅ Verified BA v11 [REDACTED] số liệu đúng (19.42% CAGR — đã update memory)

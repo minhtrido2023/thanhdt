@@ -7,7 +7,7 @@ metadata:
   originSessionId: da955fb4-3cf3-4f12-a372-44b0e169e1a4
 ---
 
-**[REDACTED]08.** User hỏi dùng F-system (overlay VN30F1M, margin không chiếm vốn) BẢO VỆ book V4/V5 (đã gated DT5G) đang paper-trade. Model: combined_ret = V_ret + λ×F_sleeve_ret. Files: f_protect_v4v5_test.py. NAV V4/V5 từ data/5sys_prodspec_201401_202605_dt5g.csv (V4_V121_ENS, V5_V4_KellyQ2).
+**[REDACTED]08.** User hỏi dùng F-system (overlay [REDACTED], margin không chiếm vốn) BẢO VỆ book V4/V5 (đã gated DT5G) đang paper-trade. Model: combined_ret = V_ret + λ×F_sleeve_ret. Files: f_protect_v4v5_test.py. NAV V4/V5 từ data/5sys_prodspec_201401_202605_dt5g.csv (V4_V121_ENS, V5_V4_KellyQ2).
 
 **KẾT LUẬN: F bảo vệ V4/V5 rất hạn chế + phần lớn DƯ THỪA.**
 

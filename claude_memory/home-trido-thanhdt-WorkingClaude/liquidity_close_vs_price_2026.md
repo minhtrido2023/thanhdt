@@ -39,7 +39,7 @@ concentrated 2021 (103 days!), 2015 (37), 2018 (24).** Direction = MORE bullish:
 BULL +35, NEUTRAL −70, CRISIS −20; dominant flips NEUTRAL→EXBULL(59)/→BULL(43). Mechanism: in
 broad bull (esp 2021 retail mania) the wider correct universe lifts breadth/ret_ew → higher
 r_score → correctly catches BULL/EX-BULL that Close-gate suppressed to NEUTRAL. Transitions 58→61 (no extra whipsaw).
-**BUT at the PRODUCTION v3.4b level (after concentration filter + US override + bull-aware +
+**BUT at the [REDACTED]ION v3.4b level (after concentration filter + US override + bull-aware +
 EMA→mode→min_stay smoothing) the change COLLAPSES to 0.7% (21/3092 days 2014+; FULL 2000+ 21
 days; transitions 271→273). The 2021 episode (103 ew-days) shrinks to 2 v3.4b-days.** The
 multi-layer chain absorbs almost all the breadth-gate difference → **deployed state is robust to

@@ -1,6 +1,6 @@
 # Paper-trade 5 systems — Apr 1 → Aug 31 2026
 
-**Started**: 2026-04-01 | **Decision target**: Sept 2026 | **Refresh**: daily 15:30 via Windows scheduled task
+**Started**: [REDACTED]01 | **Decision target**: Sept 2026 | **Refresh**: daily 15:30 via Windows scheduled task
 **Schedule task**: `PaperTrade3Sys` running `papertrade_daily.bat` (now 6 steps with V5 added)
 **Compare script**: `papertrade_compare.py` → outputs `data/papertrade_compare5.{md,csv}`
 
@@ -79,7 +79,7 @@ Each system starts fresh at 50B VND on Apr 1. All use Tam Quan v3.4b state class
 
 ---
 
-## V4 — V121_ENS = V12.1 + Ensemble (CURRENT PRODUCTION CANDIDATE)
+## V4 — V121_ENS = V12.1 + Ensemble (CURRENT [REDACTED]ION CANDIDATE)
 
 **Codename**: V121 Ensemble Âm Dương Tinh Tế + AND-HOLD
 **Script**: `pt_v121_ensemble.py`

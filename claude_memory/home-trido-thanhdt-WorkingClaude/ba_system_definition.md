@@ -174,9 +174,9 @@ VNINDEX -33% YTD, BA-system **+2.6%** YTD (essentially flat). 5-state regime cor
 ## BQ tables
 
 - `tav2_bq.fa_ratings` — 12,367 rows, Q1 2026 included (326 tickers)
-- `tav2_bq.vnindex_5state` — through 2026-04-28
+- `tav2_bq.vnindex_5state` — through [REDACTED]28
 - `tav2_bq.ticker` — daily indicators through 2026-03-30
-- `tav2_bq.ticker_prune` — quality universe through 2026-04-17
+- `tav2_bq.ticker_prune` — quality universe through [REDACTED]17
 - `tav2_bq.ticker_1m` — rolling 1-month snapshot through 2026-05-08
 - `tav2_bq.ticker_financial` — quarterly through 2026-05-08
 

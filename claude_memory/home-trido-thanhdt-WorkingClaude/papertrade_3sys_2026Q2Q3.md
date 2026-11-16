@@ -1,6 +1,6 @@
 ---
 name: papertrade-3sys-2026q2q3
-description: "Paper-trade A/B/C 3-system comparison infrastructure running 2026-04-01 → [REDACTED]31, daily refresh 15:30 via Windows scheduled task. Decision input for go-live choice in Sept 2026."
+description: "Paper-trade A/B/C 3-system comparison infrastructure running [REDACTED]01 → [REDACTED]31, daily refresh 15:30 via Windows scheduled task. Decision input for go-live choice in Sept 2026."
 metadata: 
   node_type: memory
   type: project
@@ -14,18 +14,18 @@ metadata:
 **How to apply:** Khi user hỏi về tiến độ paper-trade hoặc kết quả 3 hệ thống, đọc `data/papertrade_compare3.md` và `data/papertrade_compare3.csv`. Không invent số, không re-run sim trừ khi user yêu cầu. Daily refresh tự động qua scheduled task, baseline accumulate dần qua các ngày.
 
 **[REDACTED]:**
-- Window: 2026-04-01 → [REDACTED]31 (~5 months, ~110 trading days expected)
-- 3 systems, mỗi cái start fresh 50B all-cash 2026-04-01:
+- Window: [REDACTED]01 → [REDACTED]31 (~5 months, ~110 trading days expected)
+- 3 systems, mỗi cái start fresh 50B all-cash [REDACTED]01:
   1. **V11 Song Sinh + Tam Quan v3.4b** (`pt_v11_tq34b.py`) — 25B BAL + 25B VN30
   2. **V12 Âm Dương + Tam Quan v3.4b** (`pt_v12_tq34b.py`) — 25B BAL + 25B LAGGED HL3y
   3. **V12 Âm Dương + LIVE Tinh Tế** (`pt_v12_live.py`) — 25B BAL + 25B LAGGED, dùng `tav2_bq.vnindex_5state` [REDACTED]
-- Helper: `pt_dates.py` — START="2026-04-01", `detect_end_date()` returns min(today-1, lagged_pos_ov.pkl max, BQ 5state max) — currently caps at 2026-05-19
+- Helper: `pt_dates.py` — START="[REDACTED]01", `detect_end_date()` returns min(today-1, lagged_pos_ov.pkl max, BQ 5state max) — currently caps at 2026-05-19
 - Comparison: `papertrade_compare.py` → `data/papertrade_compare3.md` (headline metrics + delta vs V12 LIVE + weekly NAV snapshot) + `data/papertrade_compare3.csv`
 - Benchmark: VNINDEX rebased 50B (passive B&H)
 
 **Refresh cadence**: Windows scheduled task `PaperTrade3Sys` daily 15:30 (sau ATC), batch `papertrade_daily.bat` runs all 4 scripts sequentially. Verify: `schtasks /Query /TN "PaperTrade3Sys" /V /FO LIST`. Log per-run: `data/papertrade_run_<date>.log`.
 
-**Initial baseline (2026-04-01 → 2026-05-19, 33 trading days)**:
+**Initial baseline ([REDACTED]01 → 2026-05-19, 33 trading days)**:
 | System | Final NAV | Total Ret | CAGR | Sharpe | DD | Calmar |
 |---|---|---|---|---|---|---|
 | V11 + TQ v3.4b | 51.66B | +3.32% | +28.18% | +3.60 | -1.81% | +15.60 |

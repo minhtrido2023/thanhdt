@@ -6,7 +6,7 @@ originSessionId: 70c13426-2492-456b-9547-d14c8cf8fcb7
 ---
 # LH-system — Long-Hold FA Portfolio
 
-⚠️ **STATUS 2026-05-15: R&D PAUSED — DROPPED FROM PRODUCTION** ⚠️
+⚠️ **STATUS 2026-05-15: R&D PAUSED — DROPPED FROM [REDACTED]ION** ⚠️
 
 Original results were sizing-bug inflated (true CAGR 11.5% vs reported 19.85%).
 6 v2c trend-following variants ALL underperformed v1.

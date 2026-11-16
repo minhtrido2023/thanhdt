@@ -55,7 +55,7 @@ originSessionId: df3c1340-40c2-46c7-b6dc-247737308843
 
 70% is Pareto-optimal — 30% cash cushion prevents DD blowout when VN30 dips in NEUTRAL.
 
-### Test results — PRODUCTION 50/50 BAL+VN30 split at 50B
+### Test results — [REDACTED]ION 50/50 BAL+VN30 split at 50B
 
 | Variant | CAGR | Sharpe | DD | Calmar | NAV end |
 |---|---|---|---|---|---|
