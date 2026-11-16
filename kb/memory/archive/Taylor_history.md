@@ -2375,3 +2375,6 @@
 
 ## Archived 2026-11-15 (keep=12 days=0 require_done=False)
 - [2026-11-14T02:21:04Z] ĐANG DỞ: weekly 09-13/11 đã promote nhưng delivery gate BLOCK G5 (VN-Index có cổ tức) | NEXT: điều tra G5 11-11 sau backfill Winston (VNH dup, mã V-Y), chạy vnindex_total_return --update, rồi report_delivery_gate x2 (không dựng lại build)
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-14T02:34:48Z] [dd-pnj report 14/11] XONG job Taylor_20261114_022155: investor_report/ PDF 10tr md5 fea39145, chua gui email — CHO Mike doc kiem + user bao 'gui email'; dd_price_zones.json chua ghi

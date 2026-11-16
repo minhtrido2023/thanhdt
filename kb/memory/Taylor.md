@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-14T02:34:48Z] [dd-pnj report 14/11] XONG job Taylor_20261114_022155: investor_report/ PDF 10tr md5 fea39145, chua gui email — CHO Mike doc kiem + user bao 'gui email'; dd_price_zones.json chua ghi
 - [2026-11-14T06:57:01Z] [livermore-p0p1 14/11] XONG job Taylor_20261114_063556: 0/48 phan ky dat (G1 kich hoat), H2 R2 0.2-0.29 khong kich hoat; REPORT agents/Taylor/research/livermore_divergence_20261114/REPORT.md md5 850f0bec — CHO Mike quant-skeptic + chay kappa (tuy chon) + user chot thu hep vai/NO-GO
 - [2026-11-14T07:37:53Z] [sweep 14/11] universe_pit_p3_selfcheck OPEN: cho universe_pit 13/11 dung bu (dispatch Winston bi chan quyen ghi BQ) — tu dong khi xanh; 3 cau khac CLOSED
 - [2026-11-14T12:15:19Z] [dd-pat 14/11] XONG REPORT job Taylor_20261114_120425: tam 75.100 (sau CK thanh khoan 10%), gia 72.700 trong vung hop ly; REPORT md5 303958a8, assumptions d8783c94 — CHO Mike chay fundamental-skeptic; chua ghi dd_price_zones
@@ -26,3 +25,4 @@
 - [2026-11-15T16:46:25Z] [ai-momentum P1-M2-WIRE 15/11] XONG job Taylor_20261115_163050: nhanh research/ai-momentum-p1-20261115 (efd12cbcd, da merge wags/m2-wrapper) KHONG merge master/cron; M2 OK 2/2 retro that; kb/projects/ai-momentum-p1-v3-20261115.md muc M2 — CHO Mike arch-review + user duyet cron
 - [2026-11-15T17:12:53Z] ĐANG DỞ: P1-ARCH-FIX vong2 job Taylor_20261115_170852 worktree agents/Taylor/wt-ai-momentum-p1 (B3 xong chua commit) | NEXT: rewrite ai_momentum_daily.py, wrapper bin/ai_momentum_cron.sh, PREREG_v3_2, selfcheck 3TZ, commit
 - [2026-11-15T17:35:27Z] [ai-momentum ARCH-FIX v2 16/11] XONG job Taylor_20261115_170852: nhanh research/ai-momentum-p1-20261115 commit moi; CHO Mike smoke live --ledger-dir tam + arch-review vong 3 + quant-skeptic + user duyet cron
+- [2026-11-16T01:30:38Z] [ai-momentum R3 16/11] XONG job Taylor_20261116_011145: commit 2ec32179e nhanh research/ai-momentum-p1-20261115, KHONG merge/cron — CHO Mike smoke live + arch-review vong 3 + user duyet cron
