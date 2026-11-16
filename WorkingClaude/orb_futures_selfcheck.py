@@ -42,8 +42,13 @@ class Fake:
     nếu marketable (trừ khi `no_fill`)."""
 
     def __init__(self, clock, or_move=+5.0, path=None, no_fill=False, positions=None, orders=None,
-                 qmax=5, fx_dev=0.0, feed_lag_s=0):
+                 qmax=5, fx_dev=0.0, feed_lag_s=0, exit_no_fill=False, cancel_status="Cancelled",
+                 pc_fill_after=None, no_avg=False, exit_fill_hidden=False, drop_keys=()):
         self.clock, self.or_move, self.no_fill, self.qmax, self.fx_dev = clock, or_move, no_fill, qmax, fx_dev
+        self.exit_no_fill, self.cancel_status, self.pc_fill_after = exit_no_fill, cancel_status, pc_fill_after
+        self.no_avg, self.exit_fill_hidden, self.drop_keys = no_avg, exit_fill_hidden, set(drop_keys)
+        self.fail_lt = 0                                   # số lần latest_trade sắp tới sẽ ném lỗi (lỗi thoáng qua)
+        self.pc_reads = {}
         self.feed_lag = dt.timedelta(seconds=feed_lag_s)
         self.path = path or (lambda t: 1850.0 + or_move)
         self.pos = list(positions or [])
@@ -72,6 +77,9 @@ class Fake:
                  "floorPrice": 1720.5, "symbolTradingSanctionStatusCode": "NRM"}]
 
     def latest_trade(self, s, board_id=None):
+        if self.fail_lt > 0:
+            self.fail_lt -= 1
+            raise ConnectionError("lỗi mạng giả")
         return {"trades": [{"boardId": "G1", "matchPrice": self.path(self.clock()) * (1 + self.fx_dev)}]}
 
     def loan_packages(self, acc, market_type="STOCK", symbol=None):
@@ -89,10 +97,15 @@ class Fake:
     # account
     def positions(self, acc, market_type="STOCK"):
         assert market_type == "DERIVATIVE"
-        return {"positions": list(self.pos)}
+        return {} if "positions" in self.drop_keys else {"positions": list(self.pos)}
 
     def orders(self, acc, market_type="STOCK", order_category=None):
-        return {"orders": list(self.book)}
+        return {} if "orders" in self.drop_keys else {"orders": list(self.book)}
+
+    def _apply(self, sym, side):
+        net = sum((1 if p["side"] == "NB" else -1) * p["openQuantity"] for p in self.pos)
+        net += 1 if side == "buy" else -1
+        self.pos = [] if net == 0 else [{"symbol": sym, "openQuantity": abs(net), "side": "NB" if net > 0 else "NS"}]
 
     def place_order(self, acc, sym, qty, side, order_type="LO", price=None, market_type="STOCK",
                     loan_package_id=None, order_category="NORMAL"):
@@ -102,24 +115,33 @@ class Fake:
         self.book.append({"id": oid, "symbol": sym})
         px = self.path(self.clock())
         marketable = (side == "buy" and price >= px) or (side == "sell" and price <= px)
-        if marketable and not self.no_fill:
-            self.det[oid] = (1, px, "Filled")
-            net = sum((1 if p["side"] == "NB" else -1) * p["openQuantity"] for p in self.pos)
-            net += 1 if side == "buy" else -1
-            self.pos = [] if net == 0 else [{"symbol": sym, "openQuantity": abs(net),
-                                             "side": "NB" if net > 0 else "NS"}]
+        is_exit = len(self.placed) > 1
+        self.meta = getattr(self, "meta", {}); self.meta[oid] = (sym, side, px)
+        if is_exit and self.exit_fill_hidden:             # broker ĐÃ khớp nhưng order_detail báo cũ (view cũ)
+            self._apply(sym, side); self.det[oid] = (0, None, "New")
+        elif marketable and not self.no_fill and not (is_exit and self.exit_no_fill):
+            self.det[oid] = (1, px, "Filled"); self._apply(sym, side)
         else:
             self.det[oid] = (0, None, "New")
         return {"id": oid}
 
     def order_detail(self, acc, oid, market_type="STOCK"):
         q, px, st = self.det[oid]
-        return {"id": oid, "fillQuantity": q, "averagePrice": px, "orderStatus": st}
+        if st == "PendingCancel" and self.pc_fill_after is not None:
+            self.pc_reads[oid] = self.pc_reads.get(oid, 0) + 1
+            if self.pc_reads[oid] >= self.pc_fill_after:  # lệnh "đang huỷ" hoá ra KHỚP
+                sym, side, px0 = self.meta[oid]
+                self.det[oid] = (1, px0, "Filled"); self._apply(sym, side)
+                q, px, st = self.det[oid]
+        d = {"id": oid, "fillQuantity": q, "orderStatus": st}
+        if not self.no_avg:
+            d["averagePrice"] = px
+        return d
 
     def cancel_order(self, acc, oid, market_type="STOCK", order_category="NORMAL"):
         self.cancelled.append(oid)
         q, px, st = self.det[oid]
-        self.det[oid] = (q, px, "Cancelled")
+        self.det[oid] = (q, px, self.cancel_status if q == 0 else st)
         return {}
 
 
@@ -127,7 +149,7 @@ def mk(fake, clock, live=True, d=None):
     d = d or tempfile.mkdtemp(prefix="orbfut_")
     ev = []
     bot = OF.OrbFutures(fake, "SpaceX", "0002023347", live, clock=clock, sleep=clock.sleep,
-                        notify=lambda m: ev.append(("N", m)),
+                        notify=lambda m, red=False: ev.append(("N", m, red)),
                         publish=lambda a, b, c: ev.append(("B", a, b)), data_dir=d)
     return bot, ev, d
 
@@ -260,8 +282,11 @@ ck = Clock(20, 0); f = Fake(ck, qmax=0)
 fs = OF.funding_status(f, "0002023347")
 check(fs["status"] == "SHORT" and fs["short_vnd"] == 100_000_000, f"thiếu 100tr ({fs['short_vnd']})")
 check(abs(fs["im_vnd"] - 1850 * 100_000 * 0.1848) < 1, "ký quỹ ban đầu theo gói 1306")
+check(fs["min_required_vnd"] >= 55_000_000, f"ký quỹ tối thiểu ≥55tr ({fs['min_required_vnd']:,.0f})")
 blk = OF.plan_block("SpaceX", f, "0002023347", False, fund=fs)
-check("DRY-RUN" in blk and "100.0tr" in blk and "09:25" in blk and "Trứng vàng" in blk, "plan block đủ ý")
+check("TẮT/DRY" in blk and "CẦN NỘP" not in blk and len(blk.splitlines()) == 1, f"cờ TẮT ⇒ 1 dòng trạng thái, KHÔNG 'CẦN NỘP' ({blk[:60]})")
+blk = OF.plan_block("SpaceX", f, "0002023347", True, fund=fs)
+check("LIVE" in blk and "CẦN NỘP" in blk and "100.0tr" in blk and "09:25" in blk and "Trứng vàng" in blk, "cờ BẬT ⇒ khối đủ ý + CẦN NỘP")
 
 print("19. load_profile: thiếu khoá / giá trị không phải literal true ⇒ TẮT")
 tmp = tempfile.mkdtemp()
@@ -270,12 +295,160 @@ json.dump({"accounts": [{"label": "SpaceX", "orb_futures": {"enabled": "true"}},
                         {"label": "ZaloPay"}]}, open(pth, "w"))
 check(OF.load_profile("SpaceX", pth)[1]["enabled"] is False, "'true' chuỗi ⇒ TẮT")
 check(OF.load_profile("ZaloPay", pth)[1]["enabled"] is False, "không khoá ⇒ TẮT")
+json.dump({"accounts": [{"label": "SpaceX", "enabled": False, "orb_futures": {"enabled": True}},
+                        {"label": "ZaloPay", "enabled": True, "orb_futures": {"enabled": True}}]}, open(pth, "w"))
+check(OF.load_profile("SpaceX", pth)[1]["enabled"] is False, "m2: account enabled=false ⇒ ORB TẮT dù sleeve true")
+check(OF.load_profile("ZaloPay", pth)[1]["enabled"] is True, "account true + sleeve true ⇒ BẬT")
 
 print("20. Feed trễ 90s: 09:31:05 chưa có bar 09:30 ⇒ CHỜ (không bỏ phiên), vào khi bar tới")
 ck = Clock(9, 31, 5); f = Fake(ck, or_move=+5.0, feed_lag_s=90)
 bot, ev, d = mk(f, ck); r = bot.run()
 check(r == "CLOSED" and len(f.placed) == 2 and dt.time(9, 32, 30) <= f.placed[0]["t"].time() < dt.time(9, 33),
       f"vào lúc {f.placed[0]['t'].time() if f.placed else None}")
+
+def reds(ev, sub=""):
+    return [e for e in ev if e[0] == "N" and e[2] and sub in e[1]]
+
+
+def open_bot(path=None, **kw):
+    """Bot LIVE đã OPEN long sau 1 chu kỳ lúc 09:31:05."""
+    ck = Clock(9, 31, 5); f = Fake(ck, or_move=+5.0, path=path, **kw)
+    bot, ev, d = mk(f, ck); bot.run(once=True)
+    assert bot.state["stage"] == "OPEN", bot.state
+    return ck, f, bot, ev, d
+
+
+print("21. B1 BOT_STOP khi OPEN, hằng số=False: nhiều vòng, chạm stop ⇒ 0 lệnh đóng, KHÔNG SKIPPED, báo ĐỎ lặp")
+OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = False
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 30) else 1800.0)
+open(os.path.join(d, "BOT_STOP"), "w").close()
+ck.t = ck.t.replace(hour=10, minute=0)
+r = bot.run()
+n_red = len(reds(ev, "CẦN USER ĐÓNG TAY"))
+check(r == "OPEN" and len(f.placed) == 1, f"kết thúc phiên vẫn OPEN, chỉ 1 lệnh (vào) ({r}, {len(f.placed)})")
+check(n_red >= 10, f"báo ĐỎ lặp nhiều chu kỳ ({n_red})")
+check(any("CHẠM STOP" in e[1] for e in reds(ev)), "có báo 'CHẠM STOP' khi giá qua stop")
+check(any(e[0] == "N" and e[2] and "14:45" in e[1] for e in ev), "14:45 báo ĐỎ đóng tay")
+check(bot.state["stage"] != "SKIPPED", "KHÔNG bị ghi đè SKIPPED")
+bot2, ev2, _ = mk(f, Clock(14, 50), d=d); bot2.run()
+check(len(f.placed) == 1 and reds(ev2), "watchdog 14:50: vẫn báo ĐỎ, vẫn 0 lệnh mới")
+
+print("22. B1 BOT_STOP khi OPEN, hằng số=True: chạm stop ⇒ ĐÓNG; INIT dưới BOT_STOP vẫn SKIPPED (không vào)")
+OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = True
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 30) else 1800.0)
+open(os.path.join(d, "BOT_STOP"), "w").close()
+r = bot.run()
+check(r == "CLOSED" and bot.state["exit_reason"] == "STOP" and len(f.placed) == 2 and f.pos == [],
+      f"đóng STOP dưới BOT_STOP ({r}, {len(f.placed)})")
+ck = Clock(9, 31, 5); f = Fake(ck); bot, ev, d = mk(f, ck)
+open(os.path.join(d, "BOT_STOP"), "w").close()
+check(bot.run() == "SKIPPED" and not f.placed, "INIT + BOT_STOP ⇒ SKIPPED, 0 lệnh (kể cả hằng số=True)")
+OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = False
+ck = Clock(9, 31, 5); f = Fake(ck); bot, ev, d = mk(f, ck)
+open(os.path.join(d, "BOT_STOP"), "w").close()
+try:
+    bot._place("buy", 1860.0, "ENTRY"); refused = False
+except OF.OrderRefused:
+    refused = True
+check(refused and not f.placed, "_place: lớp chặn cuối từ chối khi BOT_STOP")
+
+print("23. B4 lỗi thoáng qua trong vòng giám sát: không crash, thử lại, ≥3 lỗi liên tiếp ⇒ báo ĐỎ")
+ck, f, bot, ev, d = open_bot()
+f.fail_lt = 2
+r1 = bot.run(once=True); r2 = bot.run(once=True)
+check(r1 == r2 == "OPEN" and bot.err_n == 2 and not reds(ev, "LIÊN TIẾP"), "2 lỗi: vẫn OPEN, chưa báo")
+f.fail_lt = 1
+bot.run(once=True)
+check(len(reds(ev, "LIÊN TIẾP")) == 1, "lỗi thứ 3 liên tiếp ⇒ 1 báo ĐỎ")
+r = bot.run()
+check(r == "CLOSED" and bot.err_n == 0 and len(f.placed) == 2, f"hồi phục ⇒ CLOSED ({r})")
+
+print("24. B3 order_detail thiếu averagePrice ⇒ KHÔNG crash, giá ƯỚC + cờ + báo ĐỎ")
+ck = Clock(9, 31, 5); f = Fake(ck, or_move=+5.0, no_avg=True)
+bot, ev, d = mk(f, ck)
+r = bot.run()
+check(r == "CLOSED" and bot.state.get("fill_px_estimated") is True and bot.state.get("exit_px_estimated") is True,
+      f"CLOSED, cờ fill_px_estimated + exit_px_estimated ({r})")
+check(bot.state["entry_px"] == 1855.0 and len(reds(ev, "giá ƯỚC")) == 2, "giá ước = LTP, 2 báo ĐỎ")
+
+print("25. Sau phiên: khởi động 15:00 (INIT) ⇒ 0 lệnh; M1 _exit ≥14:45 chỉ báo, 0 lệnh")
+ck = Clock(15, 0); f = Fake(ck); bot, ev, d = mk(f, ck)
+check(bot.run() == "SKIPPED" and not f.placed, "INIT 15:00 ⇒ SKIPPED, 0 lệnh")
+ck, f, bot, ev, d = open_bot()
+ck.t = ck.t.replace(hour=14, minute=46)
+bot._exit("TIME", ck.t)
+check(len(f.placed) == 1 and reds(ev, "14:45"), "_exit 14:46: 0 lệnh đóng, báo ĐỎ")
+bot2, ev2, _ = mk(f, ck, d=d)
+check(bot2.run() == "OPEN" and len(f.placed) == 1 and reds(ev2, "14:45"), "watchdog 14:46 ở OPEN: chỉ báo")
+
+print("26. B2 trạng thái kết thúc mà broker còn vị thế ⇒ báo ĐỎ MỖI lần chạy, 0 lệnh")
+ck = Clock(10, 0); f = Fake(ck, positions=[{"symbol": CT, "openQuantity": 1, "side": "NB"}])
+bot, ev, d = mk(f, ck); bot.stage("SKIPPED", skip_reason="x")
+for i in range(2):
+    b, e, _ = mk(f, ck, d=d)
+    check(b.run() == "SKIPPED" and not f.placed and reds(e, "CÒN +1 HĐ"), f"lần {i + 1}: SKIPPED + báo ĐỎ")
+f.pos = []
+b, e, _ = mk(f, ck, d=d); b.run()
+check(not reds(e), "broker phẳng ⇒ im lặng")
+
+print("27. B2 lệnh vào PendingCancel sau huỷ ⇒ PAUSED (KHÔNG SKIPPED)")
+ck = Clock(9, 31, 5); f = Fake(ck, no_fill=True, cancel_status="PendingCancel")
+bot, ev, d = mk(f, ck)
+check(bot.run() == "PAUSED" and "CÒN SỐNG" in bot.state["pause_reason"], f"PAUSED ({bot.state['stage']})")
+check(OF.order_state(0, "PendingCancel") == "ALIVE" and OF.order_state(0, "Cancelled") == "DEAD"
+      and OF.order_state(0, "") == "ALIVE" and OF.order_state(0, "Filled") == "ALIVE", "order_state: chỉ chết khi CHẮC")
+
+print("28. B2 lệnh đóng PendingCancel rồi KHỚP ⇒ chỉ 1 lệnh đóng, không đảo vị thế")
+ck = Clock(9, 31, 5)
+f = Fake(ck, or_move=+5.0, exit_no_fill=True, cancel_status="PendingCancel", pc_fill_after=6)
+bot, ev, d = mk(f, ck)
+r = bot.run()
+check(r == "CLOSED" and len(f.placed) == 2 and f.pos == [], f"CLOSED, 2 lệnh tổng, broker phẳng ({r}, {len(f.placed)}, {f.pos})")
+ck = Clock(9, 31, 5)
+f = Fake(ck, or_move=+5.0, exit_no_fill=True, cancel_status="PendingCancel")   # không bao giờ chết
+bot, ev, d = mk(f, ck)
+bot.run()
+check(len(f.placed) == 2 and reds(ev, "chưa CHẮC chết") and reds(ev, "14:45"),
+      f"PendingCancel mãi: KHÔNG đặt lệnh đóng thứ 2, báo ĐỎ ({len(f.placed)})")
+
+print("29. B2 view cũ: order_detail nói lệnh đóng Cancelled/0 nhưng broker đã phẳng ⇒ PAUSED, không đóng lần 2")
+ck = Clock(9, 31, 5); f = Fake(ck, or_move=+5.0, exit_fill_hidden=True)
+bot, ev, d = mk(f, ck)
+r = bot.run()
+check(r == "PAUSED" and len(f.placed) == 2 and f.pos == [], f"PAUSED, 0 lệnh đóng thứ 2 ({r}, {len(f.placed)})")
+
+print("30. M2 thiếu khoá positions/orders ⇒ PAUSED (không coi là rỗng); kết thúc + thiếu khoá ⇒ báo ĐỎ")
+for k in ("positions", "orders"):
+    ck = Clock(9, 31, 5); f = Fake(ck, drop_keys=[k]); bot, ev, d = mk(f, ck)
+    check(bot.run() == "PAUSED" and not f.placed and "thiếu khoá" in bot.state["pause_reason"], f"thiếu '{k}' ⇒ PAUSED")
+ck = Clock(10, 0); f = Fake(ck, drop_keys=["positions"]); bot, ev, d = mk(f, ck); bot.stage("CLOSED")
+b, e, _ = mk(f, ck, d=d); b.run()
+check(reds(e, "KHÔNG đọc được positions"), "CLOSED + positions thiếu khoá ⇒ báo ĐỎ")
+
+print("31. m1 đọc lại state SAU khi có khoá")
+ck = Clock(9, 31, 5); f = Fake(ck); bot, ev, d = mk(f, ck)
+other, _, _ = mk(f, ck, d=d); other.stage("SKIPPED", skip_reason="tiến trình khác")
+check(bot.state["stage"] == "INIT" and bot.run() == "SKIPPED" and not f.placed, "state cũ trong RAM bị bỏ, 0 lệnh")
+
+print("32. M3 default_notify: kênh rc≠0 ⇒ trả False, in stderr (không DEVNULL)")
+import io, contextlib as _cl                                # noqa: E401,E402
+tmpb = tempfile.mkdtemp()
+for nm, rc in (("notify_thread.sh", 1), ("notify_telegram.sh", 3)):
+    pth2 = os.path.join(tmpb, nm); open(pth2, "w").write(f"#!/bin/sh\necho loi-{nm} >&2\nexit {rc}\n"); os.chmod(pth2, 0o755)
+saved = (OF.MIKE_BIN, os.environ.pop("MIKE_BOT_TEST_MODE"))
+OF.MIKE_BIN = tmpb
+buf = io.StringIO()
+with _cl.redirect_stderr(buf):
+    ok = OF.default_notify("x", red=True)
+OF.MIKE_BIN = saved[0]; os.environ["MIKE_BOT_TEST_MODE"] = saved[1]
+check(ok is False and "rc=1" in buf.getvalue() and "rc=3" in buf.getvalue() and "loi-notify_telegram" in buf.getvalue(),
+      "2 kênh rc≠0 ⇒ False + stderr có rc và lỗi thật")
+open(os.path.join(tmpb, "notify_telegram.sh"), "w").write("#!/bin/sh\nexit 0\n")
+os.environ.pop("MIKE_BOT_TEST_MODE"); OF.MIKE_BIN = tmpb
+with _cl.redirect_stderr(io.StringIO()):
+    ok2 = OF.default_notify("x", red=True)
+OF.MIKE_BIN = saved[0]; os.environ["MIKE_BOT_TEST_MODE"] = saved[1]
+check(ok2 is True, "Telegram rc=0 ⇒ True dù Discord hỏng")
 
 print(f"\n{'ALL PASS' if not FAILS else f'{len(FAILS)} FAIL'} (TZ={os.environ.get('TZ')})")
 sys.exit(1 if FAILS else 0)
