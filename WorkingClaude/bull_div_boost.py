@@ -43,7 +43,7 @@ def _q(sql: str) -> str:
     cmd = ['bq', 'query', '--use_legacy_sql=false',
            '--project_id=lithe-record-440915-m9',
            '--format=csv', '--max_rows=10', '-q', sql]
-    res = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+    res = subprocess.run(cmd, capture_output=True, text=True)  # argv list, không qua shell (POSIX + shell: chỉ chạy cmd[0], mất SQL)
     if res.returncode != 0:
         raise RuntimeError(f"bq query failed: {res.stderr}")
     return res.stdout
