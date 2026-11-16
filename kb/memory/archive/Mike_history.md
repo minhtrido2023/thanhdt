@@ -197,3 +197,6 @@
 
 ## Archived 2026-11-13 (keep=12 days=0 require_done=False)
 - [2026-11-12T19:10:32Z] [13/11 02:12] Skeptic B2 CONFIRMED (high). Chuỗi live-gap exec xong; không job mở. CHỜ USER: A2 (a)/(b); LAG cache phê chuẩn/rollback; chủ TK SpaceX; câu chữ/thuế dòng tiết kiệm. B2 trước merge: chạy report_delivery_gate end-to-end trên báo cáo tuần thật + xử symlink worktree.
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-15T18:01:38Z] [16/11 01:0x] arch-review vòng 2 = NEEDS_CHANGES: freshness 95% từ chối mọi thứ Hai (mất ~25% sự kiện) + max-turns rc≠0 bị xếp InfraError. Đã DỪNG polish theo cầu chì, hỏi user 'sửa tiếp (1 lượt nhỏ + review vòng 3 chỉ diff)' hay 'dừng'. Nhánh research/ai-momentum-p1-20261115 HEAD 17d1f7e1f chưa merge. Cron KHÔNG trước tối T3 17/11; cần smoke test live (ledger tạm, --max-turns 1 để kiểm rc) trước.
