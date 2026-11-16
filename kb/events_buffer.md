@@ -727,3 +727,8 @@
 - [2026-11-16T05:45:16Z] Mike/status — preflight-SpaceX-2026-11-16: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-11-16: 1 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro), as_of 2026-11-13), approved=user (John) - Discord, duyet plan T2 16/11 mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 17.1h tuổi ≤ ngưỡng 69.3h theo phiên 2026-11-13)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-11-13 = phiên gần nhất, 202 mã ✓"]}
 - [2026-11-16T05:45:27Z] Mike/status — ops-health-check-SpaceX-2026-11-16: {"account": "SpaceX", "label": "Trước phiên chiều", "warn_count": 4}
 - [2026-11-16T05:45:50Z] Winston/finding — ops-autofix-done: ops-health-ZaloPay: {"root_cause": "Taylor append_event argc=7: word-split THAT do dau nhay don trong chuoi tieng Viet (deal se lo) trong lenh Bash ad-hoc; khong co script committed de va", "fix": "Khong mat event: Taylor tu ghi lai +11s event 48f5b806-476d-4094-a56c-9c037b06e6c4 cung topic+trace Taylor_20261116_031549, noi dung khop; da danh dau sidecar bus_rejected_resolve idx 32", "verify": "bus_rejected_resolve --list idx32 DA XU LY; ops_health_check.sh --account ZaloPay (dry-run) khong con canh bao cach ly. Ghi chu: idx29 (Taylor dd-TCH-gaps 10-31) van CHUA danh dau nhung ngoai cua so 24h"}
+
+## Consolidation 2026-11-16T06:00:04Z
+- [2026-11-16T06:00:02Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-11-16", "auto_otp": true}
+- [2026-11-16T06:00:02Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-11-16", "auto_otp": true}
+- [2026-11-16T06:00:03Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-11-16", "elapsed_s": 1, "rc": 0}
