@@ -310,6 +310,44 @@ class TableBlock(RuntimeError):
     pass
 
 
+# Ngoại lệ Q9 HẸP (user DUYỆT 16/11/2026 08:31 ICT, decided_by user, job Taylor_20261116_013249): cho qua ô
+# cột có cổ tức `chưa có số` CHỈ khi (1) tên file báo cáo khớp CHÍNH XÁC một dòng waiver decided_by=user chưa
+# hết hạn (so ngày ICT, `expires` tính cả ngày đó), (2) lý do CLI CHỈ gồm lỗi G5 (mọi vế '; ' bắt đầu 'G5:',
+# không có vế bị cắt '(+N lỗi nữa)'), (3) ô ghi 'chưa có số (G5'. Ô có SỐ vẫn đối chiếu CLI như thường.
+# Không đọc được file ⇒ coi như không có waiver (CHẶN). KHÔNG đổi G5_TOL, KHÔNG đổi Q9 cho báo cáo khác.
+Q9_WAIVERS_PATH = os.path.join(os.path.dirname(HERE), "data", "q9_waivers.json")
+_ICT = __import__("zoneinfo").ZoneInfo("Asia/Ho_Chi_Minh")
+
+
+def _q9_waiver(name: str, path: str = None, today: datetime.date = None):
+    """→ (waiver dict | None, ghi chú bằng chứng đã đọc)."""
+    path = path or Q9_WAIVERS_PATH
+    today = today or datetime.datetime.now(_ICT).date()
+    try:
+        with open(path, encoding="utf-8") as f:
+            items = json.load(f).get("waivers", [])
+    except (OSError, ValueError, AttributeError) as exc:
+        return None, f"không đọc được {path}: {type(exc).__name__} ({exc})"
+    for w in items:
+        if not isinstance(w, dict) or w.get("report") != name:
+            continue
+        if w.get("decided_by") != "user":
+            return None, f"waiver {name} có decided_by={w.get('decided_by')!r} ≠ 'user'"
+        try:
+            exp = datetime.date.fromisoformat(str(w.get("expires")))
+        except ValueError:
+            return None, f"waiver {name} expires={w.get('expires')!r} không đọc được"
+        if today > exp:
+            return None, f"waiver {name} đã hết hạn {exp} (hôm nay ICT {today})"
+        return w, f"waiver {name} còn hạn tới {exp}"
+    return None, f"không có waiver cho tên file {name!r} trong {path}"
+
+
+def _g5_only(reason) -> bool:
+    parts = [s.strip() for s in str(reason or "").split("; ")]
+    return bool(parts) and all(p.startswith("G5:") for p in parts) and "lỗi nữa)" not in str(reason)
+
+
 def run_cli(account: str, report_date: str, sleeve: bool = False, bin_dir: str = HERE) -> tuple:
     """(rc, json|None, stderr) của `<bin_dir>/nav_period_returns.py` (cổng giao báo cáo truyền bin của
     cây canonical, cùng chỗ `_check_period_returns` gọi)."""
@@ -329,7 +367,7 @@ def _series_installed() -> bool:
 
 
 def check_report(name: str, text: str, account: str, report_date: str, cli=run_cli,
-                 series_installed=None, recv_fn=div_receiving) -> list:
+                 series_installed=None, recv_fn=div_receiving, waivers_path=None, today=None) -> list:
     """Trả list dòng PASS (để in); vi phạm ⇒ TableBlock (thông điệp trích đúng ô + số CLI — §29).
     Chỉ gọi cho weekly/monthly. Bảng của `account` = bảng 'Hiệu suất lũy kế' có cột thứ 2 tên `account`
     (báo cáo gộp SpaceX_ZaloPay_* có một bảng mỗi TK). Không có bảng: chuỗi có cổ tức đã cài ⇒ CHẶN
@@ -431,7 +469,7 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
                              f"--report-date {report_date} --sleeve bot rc={rc}. stderr: "
                              f"{(err or '').strip()[-400:] or '(rỗng)'}")
         out[True] = j
-    passes, seen = [], set()
+    passes, seen, waived = [], set(), []
     for r in rows:
         if not r or len(r) <= max(idx.values()):
             continue
@@ -485,9 +523,15 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
                                      f"nhưng CLI không có số ({bm.get('reason')}) — phải ghi "
                                      f"'{NO_NUMBER} (lý do)', KHÔNG thay bằng số khác")
                 if c in (COL_TR, COL_XT) and not sleeve:
+                    wv, wev = (None, "lý do CLI không chỉ gồm G5")
+                    if _g5_only(bm.get("reason")) and raw.startswith(f"{NO_NUMBER} (G5"):
+                        wv, wev = _q9_waiver(name, waivers_path, today)
+                    if wv is not None:
+                        waived.append(f"{key}/{c}")
+                        continue
                     raise TableBlock(f"benchmark-table BLOCK ({name}): cột '{c}' dòng {r[0]!r} chưa có số "
                                      f"({bm.get('reason')}) — Q9 (user 2026-10-14): weekly/monthly CHẶN gửi "
-                                     f"khi cột có cổ tức thiếu số")
+                                     f"khi cột có cổ tức thiếu số. Ngoại lệ Q9: {wev}")
                 continue
             if not isinstance(v, float):
                 raise TableBlock(f"benchmark-table BLOCK ({name}): dòng {r[0]!r} cột '{c}' = {raw!r} không "
@@ -509,7 +553,12 @@ def check_report(name: str, text: str, account: str, report_date: str, cli=run_c
     if not passes:
         raise TableBlock(f"benchmark-table BLOCK ({name}): có cột '{COL_TR}' nhưng không dòng nào đối "
                          f"chiếu được")
-    return [f"benchmark-table PASS ({name}): " + "; ".join(passes)]
+    out_lines = [f"benchmark-table PASS ({name}): " + "; ".join(passes)]
+    if waived:
+        w, wev = _q9_waiver(name, waivers_path, today)
+        out_lines.append(f"Q9 WAIVER (user {str(w.get('decided_at', '?'))[:5]}) {name}: cho qua ô 'chưa có số' do G5 ở "
+                         f"{waived} — lý do: {w.get('reason')}; {wev}; KHÔNG áp cho báo cáo khác")
+    return out_lines
 
 
 # ─────────────────────────────────────────────────────────── CLI

@@ -1,0 +1,21 @@
+{
+  "_doc": "Ngoại lệ Q9 HẸP theo TÊN FILE báo cáo chính xác — period_table_32._q9_waiver. Chỉ cho qua ô cột có cổ tức 'chưa có số' khi lý do CLI chỉ gồm G5. Thêm dòng cần user duyệt (decided_by=user).",
+  "waivers": [
+    {
+      "report": "SpaceX_weekly_report_2026-11-09_to_2026-11-13.md",
+      "decided_by": "user",
+      "decided_at": "16/11/2026 08:31 ICT",
+      "expires": "2026-11-20",
+      "reason": "G5 ngày 2026-11-11 lệch +0.52 điểm % > 0.5 — lệch thật tích luỹ 60 phiên, KHÔNG phải lỗi ETL (Winston finding 2026-11-16T01:27:50Z); G5 tự qua sau ~1-2 tuần",
+      "approved_via": "Mike dispatch job Taylor_20261116_013249"
+    },
+    {
+      "report": "ZaloPay_weekly_report_2026-11-09_to_2026-11-13.md",
+      "decided_by": "user",
+      "decided_at": "16/11/2026 08:31 ICT",
+      "expires": "2026-11-20",
+      "reason": "G5 ngày 2026-11-11 lệch +0.52 điểm % > 0.5 — lệch thật tích luỹ 60 phiên, KHÔNG phải lỗi ETL (Winston finding 2026-11-16T01:27:50Z); G5 tự qua sau ~1-2 tuần",
+      "approved_via": "Mike dispatch job Taylor_20261116_013249"
+    }
+  ]
+}

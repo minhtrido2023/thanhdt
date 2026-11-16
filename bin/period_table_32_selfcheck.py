@@ -8,6 +8,7 @@
     TZ=Pacific/Kiritimati python3 mike/bin/period_table_32_selfcheck.py
 """
 import copy
+import datetime
 import json
 import os
 import sys
@@ -140,6 +141,75 @@ def main() -> int:
     tsub = replace_cell(doc(tg), "Từ khi bắt đầu", pt.COL_TR,
                         pt.fmt_num(g4["inception"]["benchmark"]["vnindex_price_pct"], "%"))
     blocks(tsub, mkcli(g4, None), ("KHÔNG thay bằng số khác",))
+
+    # 4c. Ngoại lệ Q9 HẸP theo tên file (user 16/11/2026): chỉ G5 + đúng tên + còn hạn + decided_by user
+    G5R = "G5: 2030-06-04 60 phiên rổ +1.55% vs VN-Index +1.03% (lệch +0.52 điểm %, > 0.5)"
+
+    def with_reason(j, reason):
+        j = copy.deepcopy(j)
+        for k, _ in pt.PERIODS:
+            if j.get(k) and j[k].get("benchmark", {}).get("vnindex_tr_pct") is None:
+                j[k]["benchmark"]["reason"] = reason
+        return j
+    g5 = with_reason(g4, G5R)
+    tg5 = doc(pt.render(g5, None))
+    ok("chưa có số (G5" in tg5, f"render G5:\n{tg5}")
+    WN = "SpaceX_weekly_report_2030-06-03_to_2030-06-07.md"
+    WD = datetime.date(2030, 6, 8)
+    wrow = {"report": WN, "decided_by": "user", "decided_at": "16/11/2026 08:31 ICT", "expires": "2030-06-10",
+            "reason": "G5 lệch thật (fixture)"}
+
+    def wfile(td, items, raw=None):
+        p = Path(td) / f"w{len(os.listdir(td))}.json"
+        p.write_text(raw if raw is not None else json.dumps({"waivers": items}), encoding="utf-8")
+        return str(p)
+
+    def chk(text, j, path, name=WN, today=WD):
+        return pt.check_report(name, text, "ZaloPay", "2030-06-06", cli=mkcli(j, None),
+                               series_installed=lambda: True, recv_fn=_recv_fn, waivers_path=path, today=today)
+
+    def wblock(text, j, path, must, **kw):
+        try:
+            chk(text, j, path, **kw)
+        except pt.TableBlock as e:
+            for m in must:
+                ok(m in str(e), f"waiver BLOCK phải trích {m!r}: {e}")
+            return
+        ok(False, f"waiver phải CHẶN ({must})")
+    with tempfile.TemporaryDirectory() as td:
+        good = wfile(td, [wrow])
+        out = chk(tg5, g5, good)
+        ok(len(out) == 2 and "PASS" in out[0] and out[1].startswith("Q9 WAIVER (user 16/11) " + WN)
+           and "inception/" + pt.COL_TR in out[1], f"waiver đúng ⇒ PASS + in dòng Q9 WAIVER: {out}")
+        ok(len(chk(tg5, g5, good, today=datetime.date(2030, 6, 10))) == 2, "expires tính cả ngày đó")
+        wblock(tg5, g5, good, ("Q9", "hết hạn"), today=datetime.date(2030, 6, 11))
+        wblock(tg5, g5, good, ("Q9", "không có waiver"), name="ZaloPay_weekly_report_2030-06-03_to_2030-06-07.md")
+        wblock(tg5, g5, good, ("không có waiver",), name=WN.replace(".md", "_v2.md"))
+        wblock(tg5, g5, wfile(td, [dict(wrow, decided_by="agent")]), ("decided_by",))
+        wblock(tg5, g5, wfile(td, [dict(wrow, expires="sớm")]), ("expires",))
+        wblock(tg5, g5, wfile(td, [], raw="{hỏng"), ("không đọc được",))
+        wblock(tg5, g5, str(Path(td) / "khong_co.json"), ("không đọc được",))
+        # lý do khác G5 / lẫn G5 với lỗi khác / có vế bị cắt ⇒ vẫn CHẶN dù có waiver đúng tên
+        wblock(doc(tg), g4, good, ("Q9", "G4", "không chỉ gồm G5"))
+        wblock(tg5, with_reason(g4, G5R + "; G2: 2030-06-04 thiếu chỉ số nguồn 2"), good, ("không chỉ gồm G5",))
+        wblock(tg5, with_reason(g4, G5R + " (+3 lỗi nữa)"), good, ("không chỉ gồm G5",))
+        # ô ghi lý do khác G5 trong khi CLI nói G5 ⇒ CHẶN (ô phải giữ nguyên ghi chú G5)
+        tg5x = tg5.replace("chưa có số (G5", "chưa có số (G4")
+        wblock(tg5x, g5, good, ("Q9",))
+        # ô có SỐ (khác CLI) ⇒ vẫn CHẶN; waiver không bao giờ cho qua số
+        tnum = replace_cell(tg5, "Từ khi bắt đầu", pt.COL_TR, "+1,00%")
+        wblock(tnum, g5, good, ("KHÔNG thay bằng số khác",))
+        # waiver không đụng cột giá: ô giá sai vẫn CHẶN
+        tpx = replace_cell(tg5, "Từ khi bắt đầu", pt.COL_PRICE, "+99,00%")
+        wblock(tpx, g5, good, (pt.COL_PRICE, "lệch"))
+    # file waiver THẬT trong repo: đúng 2 báo cáo 09-13/11, decided_by user, hết hạn 2026-11-20; tên khác ⇒ None
+    real = json.loads(Path(pt.Q9_WAIVERS_PATH).read_text(encoding="utf-8"))["waivers"]
+    ok(sorted(w["report"] for w in real) == [f"{x}_weekly_report_2026-11-09_to_2026-11-13.md" for x in ("SpaceX", "ZaloPay")]
+       and all(w["decided_by"] == "user" and w["expires"] == "2026-11-20" for w in real), f"waiver thật: {real}")
+    ok(pt._q9_waiver("SpaceX_weekly_report_2026-11-16_to_2026-11-20.md", today=datetime.date(2026, 11, 16))[0] is None
+       and pt._q9_waiver("SpaceX_weekly_report_2026-11-09_to_2026-11-13.md", today=datetime.date(2026, 11, 21))[0] is None
+       and pt._q9_waiver("ZaloPay_weekly_report_2026-11-09_to_2026-11-13.md", today=datetime.date(2026, 11, 20))[0],
+       "waiver thật: chỉ đúng tên + tới 20/11")
 
     # 5. chuỗi b: CLI rc=3 unavailable ⇒ dòng b 'chưa có số' qua; dòng b ghi số ⇒ chặn
     un = {"account": "ZaloPay", "report_date": rd.isoformat(), "series": "bot", "status": "unavailable",
