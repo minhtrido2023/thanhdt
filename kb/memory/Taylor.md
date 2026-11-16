@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-15T16:46:25Z] [ai-momentum P1-M2-WIRE 15/11] XONG job Taylor_20261115_163050: nhanh research/ai-momentum-p1-20261115 (efd12cbcd, da merge wags/m2-wrapper) KHONG merge master/cron; M2 OK 2/2 retro that; kb/projects/ai-momentum-p1-v3-20261115.md muc M2 — CHO Mike arch-review + user duyet cron
 - [2026-11-15T17:12:53Z] ĐANG DỞ: P1-ARCH-FIX vong2 job Taylor_20261115_170852 worktree agents/Taylor/wt-ai-momentum-p1 (B3 xong chua commit) | NEXT: rewrite ai_momentum_daily.py, wrapper bin/ai_momentum_cron.sh, PREREG_v3_2, selfcheck 3TZ, commit
 - [2026-11-15T17:35:27Z] [ai-momentum ARCH-FIX v2 16/11] XONG job Taylor_20261115_170852: nhanh research/ai-momentum-p1-20261115 commit moi; CHO Mike smoke live --ledger-dir tam + arch-review vong 3 + quant-skeptic + user duyet cron
 - [2026-11-16T01:30:38Z] [ai-momentum R3 16/11] XONG job Taylor_20261116_011145: commit 2ec32179e nhanh research/ai-momentum-p1-20261115, KHONG merge/cron — CHO Mike smoke live + arch-review vong 3 + user duyet cron
@@ -26,3 +25,4 @@
 - [2026-11-16T03:28:43Z] [lag-early-exit 16/11] XONG job Taylor_20261116_031549: NO-GO thoat som LAG, nhanh research/lag-early-exit-20261116 (f037ad41f) KHONG merge — CHO user chot A (giu T+25) / B (canh bao display-only)
 - [2026-11-16T16:21:43Z] ĐANG DỞ: job Taylor_20261116_162132 ORB futures live path (A probe..F spec) | NEXT: khao sat + worktree feat/orb-futures-live-20261116
 - [2026-11-16T16:41:16Z] [orb-futures 16/11] XONG job Taylor_20261116_162132: nhanh feat/orb-futures-live-20261116 (outer e9aad9819, mike d91e49d32) KHONG merge/cron, co TAT — CHO Mike arch-review+quant-skeptic; sau do DRY>=10 phien, sua NAV phai sinh truoc khi user nop ky quy
+- [2026-11-16T16:50:16Z] ĐANG DỞ: job Taylor_20261116_165006 ORB vong2 sua B1-B4,M1-3,m1-2,N1,spec | NEXT: sua orb_futures.py + selfcheck

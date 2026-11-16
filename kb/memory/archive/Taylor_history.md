@@ -2402,3 +2402,6 @@
 
 ## Archived 2026-11-16 (keep=12 days=0 require_done=False)
 - [2026-11-15T16:29:29Z] [ai-momentum P1-V3 15/11] XONG job Taylor_20261115_162439: nhanh research/ai-momentum-p1-20261115 (a09b71d5e) KHONG merge; kb/projects/ai-momentum-p1-v3-20261115.md; PREREG_v3 md5 d07ffcfd — CHO Mike arch-review/quant-skeptic + Wags xong M2 truoc khi cron
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-15T16:46:25Z] [ai-momentum P1-M2-WIRE 15/11] XONG job Taylor_20261115_163050: nhanh research/ai-momentum-p1-20261115 (efd12cbcd, da merge wags/m2-wrapper) KHONG merge master/cron; M2 OK 2/2 retro that; kb/projects/ai-momentum-p1-v3-20261115.md muc M2 — CHO Mike arch-review + user duyet cron
