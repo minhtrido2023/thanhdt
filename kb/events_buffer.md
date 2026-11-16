@@ -735,3 +735,6 @@
 
 ## Consolidation 2026-11-16T06:00:16Z
 - [2026-11-16T06:00:15Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-11-16", "elapsed_s": 13, "rc": 0}
+
+## Consolidation 2026-11-16T07:07:02Z
+- [2026-11-16T06:45:20Z] Mafee/status — fill_lagging: {"account": "SpaceX", "fill_rate_pct": 0.0, "n_due": 1, "checked_at": "13:45", "note": "Chỉ khớp 0% giá trị các lệnh đã qua hết cửa sổ thực thi (lúc 13:45) — cần chú ý.", "action_hint": "Xem execution_logs để quyết định có chuyển ATC không."}
