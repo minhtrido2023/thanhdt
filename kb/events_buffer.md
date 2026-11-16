@@ -569,3 +569,14 @@
 - [2026-11-16T01:05:02Z] Winston/status — deposit-cctg-weekly-dispatch: {"date": "2026-11-16", "current_deposit": "6.80", "current_cctg": "7.40"}
 - [2026-11-16T01:05:09Z] Winston/heartbeat — Winston_20261116_010503: {"status": "in_progress", "note": "bat dau 5 chuoi lai suat"}
 - [2026-11-16T01:06:03Z] Winston/heartbeat — Winston_20261116_010503: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261116_010503", "source": "watcher"}
+
+## Consolidation 2026-11-16T01:11:04Z
+- [2026-11-16T01:07:03Z] Winston/heartbeat — Winston_20261116_010503: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261116_010503", "source": "watcher"}
+- [2026-11-16T01:08:03Z] Winston/heartbeat — Winston_20261116_010503: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20261116_010503", "source": "watcher"}
+- [2026-11-16T01:09:04Z] Winston/heartbeat — Winston_20261116_010503: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20261116_010503", "source": "watcher"}
+- [2026-11-16T01:10:05Z] Winston/heartbeat — Winston_20261116_010503: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20261116_010503", "source": "watcher"}
+- [2026-11-16T01:10:46Z] Winston/status — deposit-cctg-weekly-done: {"series": "big4_12m", "rate": 6.8, "changed": false, "note": "ghi 2026-11-16=6.8 (3/4 mode; VCB online 5.4 outlier). Nguon: VietnamPlus 10/11, VietnamBiz 11/11, CafeF 15/11"}
+- [2026-11-16T01:10:46Z] Winston/question — deposit-cctg-weekly-question: {"series": "cctg_12m", "issue": "khong du 2 nguon DOC LAP trong 25 ngay: chi co thitruongtaichinhtiente 01/11 (BIDV/CTG 12M 7.4, BIDV/CTG 6-9T 7.2, VCB 6T 7.5); ngoisao 31/10 sao y nguyen cau chu (cung goc, khong doc lap). Khong ghi, giu 7.40 (12M) / 6M hien co. Cac bai khac chi la tiet kiem thuong, hoac cu >25 ngay (baonghean 30/9, bnews ~33 ngay)", "also": "cctg_6m cung bi chan boi cung ly do"}
+- [2026-11-16T01:10:46Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_6m", "status": "not_written_no_independent_source", "note": "VCB 6T 7.5 chi tu 1 goc (thitruongtaichinhtiente 01/11 = ngoisao 31/10 sao chep); gop vao question cctg_12m"}
+- [2026-11-16T01:10:46Z] Winston/status — deposit-cctg-weekly-done: {"series": "sbv_policy", "changed": false, "status": "no_new_independent_source", "note": "khong tim duoc bai doc lap <=120 ngay neu du refi+rediscount; khong goi verify"}
+- [2026-11-16T01:10:46Z] Winston/status — deposit-cctg-weekly-done: {"series": "cctg_tier2", "status": "no_numbers_written", "note": "VPB: 9%/100tr 184-389 ngay, 7.5%/10tr cung nhom; MB 6T 7.1; TCB Bao Loc 6T 7.6 (min 10tr) — tat ca chi tu thitruongtaichinhtiente 01/11 + ngoisao 31/10 (sao chep, khong doc lap) nen KHONG ghi; ACB khong co so. Tham khao, khong escalate"}
