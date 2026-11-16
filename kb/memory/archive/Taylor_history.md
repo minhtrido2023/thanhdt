@@ -2396,3 +2396,9 @@
 
 ## Archived 2026-11-16 (keep=12 days=0 require_done=False)
 - [2026-11-15T15:19:23Z] [ai-momentum P0 15/11] XONG job Taylor_20261115_150627: kb/projects/ai-momentum-p0-result-20261115.md (md5 5101c9cb), PREREG 5d3284d0b — CHO Mike quant-skeptic + user chot (2 nam hay noi nguong) + deepseek provider dang loi
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-15T15:58:58Z] [ai-momentum P1 15/11] XONG job Taylor_20261115_154607: nhanh research/ai-momentum-p1-20261115 (b07a773b0) KHONG merge; kb/projects/ai-momentum-p1-build-20261115.md — CHO Mike arch-review/quant-skeptic + user quyet noi nguong x2 (PREREG v3) + Wags xong M2
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-15T16:29:29Z] [ai-momentum P1-V3 15/11] XONG job Taylor_20261115_162439: nhanh research/ai-momentum-p1-20261115 (a09b71d5e) KHONG merge; kb/projects/ai-momentum-p1-v3-20261115.md; PREREG_v3 md5 d07ffcfd — CHO Mike arch-review/quant-skeptic + Wags xong M2 truoc khi cron

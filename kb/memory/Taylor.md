@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-15T15:58:58Z] [ai-momentum P1 15/11] XONG job Taylor_20261115_154607: nhanh research/ai-momentum-p1-20261115 (b07a773b0) KHONG merge; kb/projects/ai-momentum-p1-build-20261115.md — CHO Mike arch-review/quant-skeptic + user quyet noi nguong x2 (PREREG v3) + Wags xong M2
-- [2026-11-15T16:29:29Z] [ai-momentum P1-V3 15/11] XONG job Taylor_20261115_162439: nhanh research/ai-momentum-p1-20261115 (a09b71d5e) KHONG merge; kb/projects/ai-momentum-p1-v3-20261115.md; PREREG_v3 md5 d07ffcfd — CHO Mike arch-review/quant-skeptic + Wags xong M2 truoc khi cron
 - [2026-11-15T16:46:25Z] [ai-momentum P1-M2-WIRE 15/11] XONG job Taylor_20261115_163050: nhanh research/ai-momentum-p1-20261115 (efd12cbcd, da merge wags/m2-wrapper) KHONG merge master/cron; M2 OK 2/2 retro that; kb/projects/ai-momentum-p1-v3-20261115.md muc M2 — CHO Mike arch-review + user duyet cron
 - [2026-11-15T17:12:53Z] ĐANG DỞ: P1-ARCH-FIX vong2 job Taylor_20261115_170852 worktree agents/Taylor/wt-ai-momentum-p1 (B3 xong chua commit) | NEXT: rewrite ai_momentum_daily.py, wrapper bin/ai_momentum_cron.sh, PREREG_v3_2, selfcheck 3TZ, commit
 - [2026-11-15T17:35:27Z] [ai-momentum ARCH-FIX v2 16/11] XONG job Taylor_20261115_170852: nhanh research/ai-momentum-p1-20261115 commit moi; CHO Mike smoke live --ledger-dir tam + arch-review vong 3 + quant-skeptic + user duyet cron
@@ -26,3 +24,5 @@
 - [2026-11-16T01:58:14Z] [cq vong2 16/11] XONG job Taylor_20261116_014210: A 960c17f97, B 145b9cf92 KHONG merge — CHO Mike arch-review diff-only + merge
 - [2026-11-16T03:16:01Z] ĐANG DỞ: job Taylor_20261116_031549 LAG early-exit Bayes | NEXT: buoc 0 -> research/lag_early_exit_bayes_20261116/
 - [2026-11-16T03:28:43Z] [lag-early-exit 16/11] XONG job Taylor_20261116_031549: NO-GO thoat som LAG, nhanh research/lag-early-exit-20261116 (f037ad41f) KHONG merge — CHO user chot A (giu T+25) / B (canh bao display-only)
+- [2026-11-16T16:21:43Z] ĐANG DỞ: job Taylor_20261116_162132 ORB futures live path (A probe..F spec) | NEXT: khao sat + worktree feat/orb-futures-live-20261116
+- [2026-11-16T16:41:16Z] [orb-futures 16/11] XONG job Taylor_20261116_162132: nhanh feat/orb-futures-live-20261116 (outer e9aad9819, mike d91e49d32) KHONG merge/cron, co TAT — CHO Mike arch-review+quant-skeptic; sau do DRY>=10 phien, sua NAV phai sinh truoc khi user nop ky quy
