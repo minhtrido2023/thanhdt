@@ -388,3 +388,6 @@
 
 ## Archived 2026-11-15 (keep=6 days=5 require_done=True)
 - [2026-11-09T12:09:02Z] [2026-11-09 19:xx ICT] Plan ZaloPay 11-10 XONG: BUY LAG residual ngay 2 BSR1200/CSV1100/GAS300/MSB1500 (102,45tr), egg>=66,4tr; cho duyet truoc 08:45 10/11 (job DollarBill_20261109_120648)
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-09T12:37:13Z] [2026-11-09 19:3x ICT] Plan 10/11 rev luat 09/11 ca 2 acct: 0 lenh (bo 4 LAG gia>tam DD), report da gui lai; cho user duyet truoc 08:45 10/11 (job DollarBill_20261109_123545)
