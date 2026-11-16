@@ -36,7 +36,7 @@ class Env:
         def bq(sql):
             self.bq_calls.append(sql[:20])
             if sql.startswith("/* FRESHNESS */"):
-                return [self.fresh if self.fresh is not None else {"tk": self.cur_T, "tk_n": "900", "tk_prev": "900", "up": self.cur_T, "up_n": "340", "up_prev": "340"}]
+                return [self.fresh if self.fresh is not None else {"tk": self.cur_T, "up": self.cur_T, "up_n": "340", "pv_n": "340", "pv_cov": "340"}]
             if sql.startswith("/* ELIG_RANGE */"):
                 return self.extra + [{"ticker": c["ticker"], "time": d, "liq_bn": c["liq_bn"]} for d, cs in self.cd.items() if d < self.cur_T for c in cs]
             if "PERCENTILE_CONT" in sql: return self.cd.get(self.cur_T, [])
@@ -190,7 +190,8 @@ def _lock_dir(tamper=None, drop=None, tamper_const=False):
     return d
 def _loads(m, d):
     old = m.HERE; m.HERE = d
-    try: m._load_locked(); return "ok"
+    try:
+        _, lock, _ = m._load_locked(); m._check_const(lock); return "ok"
     except SystemExit: return "exit"
     except Exception as e: return type(e).__name__          # file thieu => loi, KHONG fallback ''/{}
     finally: m.HERE = old
@@ -305,7 +306,12 @@ def t_infra_real_claude_errors(m):
     try:
         for x, want in [(FileNotFoundError("claude"), m.InfraError), (subprocess.TimeoutExpired("claude", 1), m.InfraError), (_cp("", 2, "boom"), m.InfraError), (_cp("khong json"), m.InfraError),
                         (_cp(json.dumps({"is_error": True, "result": "Claude AI usage limit reached"})), m.InfraError), (_cp(json.dumps({"is_error": True, "result": "Not logged in - please login"})), m.InfraError),
-                        (_cp(json.dumps({"is_error": True, "result": "Error: Reached max turns (8)"})), RuntimeError)]:
+                        (_cp(json.dumps({"is_error": True, "result": "Error: Reached max turns (8)"})), RuntimeError),
+                        # R3-B: rc!=0 + JSON hop le subtype max-turns/budget => noi dung (RuntimeError), KHONG ha tang
+                        (_cp(json.dumps({"is_error": True, "subtype": "error_max_turns", "num_turns": 9}), 1), RuntimeError),
+                        (_cp(json.dumps({"is_error": True, "subtype": "error_max_budget_usd", "total_cost_usd": 0.5}), 1), RuntimeError),
+                        (_cp(json.dumps({"is_error": True, "subtype": "error_max_turns", "result": "usage limit reached"}), 1), m.InfraError),
+                        (_cp(json.dumps({"is_error": False, "subtype": "success"}), 1), m.InfraError)]:
             m.subprocess = _FakeSub([x])
             try: m.run_claude_m1("S", "U", "retro"); out.append(False)
             except m.InfraError as ex: out.append(want is m.InfraError)
@@ -314,7 +320,7 @@ def t_infra_real_claude_errors(m):
         m.subprocess = _FakeSub([_claude_ok("{}")]); txt, meta = m.run_claude_m1("SYS", "USR", "live"); fs = m.subprocess
         out.append(txt == "{}" and fs.cmds[0][0] == m.m1_argv("live", "SYS") and fs.cmds[0][1]["input"] == "USR")
     finally: m.subprocess = real
-    return all(out) and len(out) == 8
+    return all(out) and len(out) == 12
 def t_infra_cli_recovers_same_day(m):
     """B1 mutant: FileNotFoundError that chay qua run_claude_m1 -> run_day; sau khi 'cai lai CLI' chay lai ghi duoc su kien."""
     real = m.subprocess
@@ -350,9 +356,10 @@ def t_not_trading_day(m):
     real = m.is_trading_day
     return e.bq_calls == [] and not real(datetime.date(2026, 11, 14)) and not real(datetime.date(2026, 11, 15)) and not real(datetime.date(2026, 9, 2)) and real(datetime.date(2026, 11, 16))
 def t_freshness_depth(m):
-    """B6: MAX(time) dung nhung SO DONG chi vai % phien truoc (ban ghi dang do) => DataNotReady, KHONG ghi, KHONG goi M1."""
-    full = {"tk": T, "tk_n": "900", "tk_prev": "900", "up": T, "up_n": "340", "up_prev": "340"}
-    bad = [dict(full, tk_n="40"), dict(full, up_n="30"), dict(full, tk="2026-11-12"), dict(full, up=None), dict(full, tk_n=None), dict(full, up_prev="")]
+    """B6/R3: MAX(time) dung nhung ti le ma in_universe phien truoc co dong ticker tai T thap => DataNotReady, KHONG ghi, KHONG goi M1.
+    Thu Hai (ticker tang dan trong tuan roi tut) khong con bi tu choi vi so dong tho."""
+    full = {"tk": T, "up": T, "up_n": "340", "pv_n": "340", "pv_cov": "340"}
+    bad = [dict(full, pv_cov="40"), dict(full, up_n="0"), dict(full, tk="2026-11-12"), dict(full, up=None), dict(full, pv_cov=None), dict(full, pv_n="")]
     ok = True
     for fr in bad:
         e = Env(m, {T: [cand("AAA")]}, fresh=fr)
@@ -360,7 +367,11 @@ def t_freshness_depth(m):
         except m.DataNotReady as ex: ok &= (str(ex).count("T=") >= 1 and "23:45" not in str(ex))
         ok &= (e.rows() == [] and e.calls == [] and not list(Path(e.tmp).glob("*.jsonl")))
     f = m.freshness_problem
-    return ok and f(full, T) is None and f(dict(full, tk_n="855", tk_prev="900"), T) is None and f(dict(full, tk_n="949", tk_prev="1000"), T) is not None and f(dict(full, tk_n="950", tk_prev="1000"), T) is None
+    ok &= f(full, T) is None and f(dict(full, pv_cov="323", pv_n="340"), T) is None and f(dict(full, pv_cov="949", pv_n="1000"), T) is not None and f(dict(full, pv_cov="950", pv_n="1000"), T) is None
+    # R3: sql dung in_universe phien truoc + join ticker tai T (mutant: bo in_universe / <=T)
+    q = m.sql_freshness(T)
+    ok &= (q.count("u.in_universe") >= 2 and "u.time < DATE" in q and "JOIN tkT" in q and "t.time = DATE" in q)
+    return ok
 def t_hist_deterministic_vs_ledger(m):
     """B2: cooldown/cap khong phu thuoc ledger. Cung BQ, ledger co dong la/khong co => cung ke hoach; ledger rong sau kill => van dung cap tuan."""
     cs = [cand(f"T{i:02d}", liq=100 - i) for i in range(12)]
@@ -473,7 +484,103 @@ def t_kill_resume_midday(m):
     ids = e.ids()
     return o["infra_stop"] and len(ids) == len(set(ids)) and sum(r["status"] == "processed" for r in rows) == 10 and sum(r["status"] == "skipped_capacity" for r in rows) == 2 and len(e.calls) == 11 and o2["infra_stop"] is None
 
-TESTS = [t_no_double_append, t_ledger_append_twice, t_parallel_append, t_md5_tamper, t_no_outcome_in_packet, t_sql_pit, t_news_pit, t_fin_pit, t_m2_exception_failopen,
+# ---------------- R3 (D-a/c/d): test cho mutant song ----------------
+def t_r3_rebuttal_infra_not_swallowed(m):
+    """Phan bien M1 (vong 2) gap InfraError => dung luot, KHONG ghi dong, khong nuot."""
+    def m2(st, p, m1=None): return {"status": "OK", "data": {"x": 1} if st == "blind" else {"missed": [{"item": "i"}], "disagree": []}}
+    n = {"k": 0}
+    def m1f(tk, T_):
+        n["k"] += 1
+        if n["k"] >= 2: raise m.InfraError("claude overloaded 529")
+        return valid_m1(tk, T_)
+    e = Env(m, {T: [cand("AAA")]}, m1_fn=m1f, m2_fn=m2); o = e.day(T)
+    return bool(o["infra_stop"]) and e.rows() == []
+def t_r3_scorer_m2_ok_real(m):
+    """score_report: m2_ok phai phan anh m2_status that. Toan FAIL => khong co T3; co M2 OK => co T3."""
+    rows, out = _rows_for_score(m, 80, 10)
+    none = m.score_report(rows, out, "2026-12-31").get("effects", {})
+    for r in rows[:40]: r["m2_status"] = "OK"; r["m2_raw"] = {}
+    some = m.score_report(rows, out, "2026-12-31").get("effects", {})
+    return "T1" in none and "T3" not in none and "T3" in some
+def t_r3_cooldown_boundary(m):
+    """Dung 90 ngay + khac quy: CHUA du (> khong phai >=); 91 ngay moi du. Ca cooldown_ok lan replay_history."""
+    h = {"A": [datetime.date(2026, 6, 30)]}   # Q2; +90 = 2026-09-28 (Q3)
+    a = m.cooldown_ok("A", datetime.date(2026, 9, 28), h) is False and m.cooldown_ok("A", datetime.date(2026, 9, 29), h) is True
+    hh, _ = m.replay_history([{"ticker": "X", "time": "2026-06-30", "liq_bn": 1}, {"ticker": "X", "time": "2026-09-28", "liq_bn": 1}], datetime.date(2026, 11, 13))
+    hh2, _ = m.replay_history([{"ticker": "X", "time": "2026-06-30", "liq_bn": 1}, {"ticker": "X", "time": "2026-09-29", "liq_bn": 1}], datetime.date(2026, 11, 13))
+    return a and hh["X"] == [datetime.date(2026, 6, 30)] and hh2["X"] == [datetime.date(2026, 6, 30), datetime.date(2026, 9, 29)]
+def t_r3_run_lock_held_through_run(m):
+    """Khoa phai giu SUOT luot (luc goi M1), khong chi luc vao."""
+    import fcntl
+    st = {"locked": None}
+    def m1f(tk, T_):
+        f = open(Path(e.tmp) / ".run.lock", "w")
+        try: fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB); st["locked"] = False
+        except BlockingIOError: st["locked"] = True
+        finally: f.close()
+        return valid_m1(tk, T_)
+    e = Env(m, {T: [cand("AAA")]}, m1_fn=m1f); e.day(T)
+    return st["locked"] is True
+def t_r3_m2_blind_packet_clean(m):
+    """Blind nhan DUNG goi goc (khong them khoa nao, khong mang ket luan M1)."""
+    seen = []
+    def m2(st, p, m1=None): seen.append((st, json.dumps(p, sort_keys=True))); return {"status": "FAIL", "reason": "x"}
+    m.M2 = m2; pk = _pk(); m.run_m2(pk, {"driver_class": SENT, "view_20s": "CONT"})
+    return len(seen) == 1 and seen[0][0] == "blind" and SENT not in seen[0][1] and json.loads(seen[0][1]) == pk
+def t_r3_streak_live_only(m):
+    base = {"status": "processed", "m1_status": "OK"}
+    rows = [dict(base, mode="live", m2_status="OK"), dict(base, mode="retro", m2_status="FAIL"), dict(base, mode="retro", m2_status="FAIL"), dict(base, mode="retro", m2_status="FAIL")]
+    rows2 = [dict(base, mode="live", m2_status="OK")] + [dict(base, mode="live", m2_status="FAIL")] * 2 + [dict(base, mode="retro", m2_status="OK")]
+    return m.m2_fail_streak(rows) == 0 and m.m2_fail_streak(rows2) == 2
+def t_r3_infra_overloaded_529(m):
+    real = m.subprocess; out = []
+    try:
+        for msg in ("Overloaded", "API Error: 529 something", "overloaded_error"):
+            m.subprocess = _FakeSub([_cp(json.dumps({"is_error": True, "result": msg}))])
+            try: m.run_claude_m1("S", "U", "retro"); out.append(False)
+            except m.InfraError: out.append(True)
+            except Exception: out.append(False)
+    finally: m.subprocess = real
+    return all(out) and len(out) == 3
+def t_r3_skip_rows_full(m):
+    cs = [cand(f"T{i:02d}", liq=100 - i) for i in range(m.CAP_WEEK + 3)]
+    e = Env(m, {WK[0]: cs}); o = e.day(WK[0]); rows = e.rows()
+    sk = [r for r in rows if r["status"] == "skipped_capacity"]
+    return len(o["skipped_capacity"]) == 3 and len(sk) == 3 and len(rows) == len(cs) \
+        and all(r["stats"].get("rating_8l_asof") == 3 and r["stats"].get("route_8l") == "COMPOUNDER" and r["stats"].get("liq_bn") and r["stats"].get("rating_eff_date") == "2026-10-01" and r["stats"].get("rating_read_at") for r in sk)
+def t_r3_sigterm_kills_m2_group(m):
+    """(c) SIGTERM handler kill nhom second_opinion dang chay; run_second_opinion dang ky/huy dang ky nhom."""
+    import signal as sg
+    p = subprocess.Popen(["sleep", "60"], start_new_session=True); m._M2_PGIDS.add(p.pid)
+    try:
+        try: m._sigterm(); ok1 = False
+        except SystemExit as ex: ok1 = ex.code == 143
+        try: p.wait(timeout=5); ok2 = p.returncode == -9
+        except subprocess.TimeoutExpired: ok2 = False
+    finally:
+        m._M2_PGIDS.discard(p.pid)
+        try: os.killpg(p.pid, sg.SIGKILL)
+        except (ProcessLookupError, PermissionError): pass
+    seen = {}
+    class P:
+        pid = 424242; returncode = 0
+        def __init__(self, *a, **k): pass
+        def communicate(self, timeout=None): seen["in"] = 424242 in m._M2_PGIDS; return "", ""
+    real = m.subprocess
+    m.subprocess = types.SimpleNamespace(Popen=P, PIPE=subprocess.PIPE, TimeoutExpired=subprocess.TimeoutExpired)
+    try: m.run_second_opinion(Path("/x"), Path("/y"), Path("/z"))
+    finally: m.subprocess = real
+    return ok1 and ok2 and seen.get("in") is True and 424242 not in m._M2_PGIDS
+def t_r3_event_sql_in_protocol_hash(m):
+    """(d) van ban SQL dinh nghia su kien nam trong CONST_PROTOCOL; doi SQL => hash doi."""
+    c = m.protocol_consts()["event_sql_md5"]
+    return set(c) == {"candidates", "eligible_range"} and all(len(v) == 32 for v in c.values()) and c["candidates"] != c["eligible_range"] \
+        and m.hashlib.md5(m.sql_candidates("2000-01-03").encode()).hexdigest() == c["candidates"]
+def t_r3_elig_rating_window(m):
+    q = m.sql_eligible_range(T)
+    return "rt.rt_time<=u.time" in q and "rt.rt_next IS NULL OR rt.rt_next>u.time" in q and "LEAD(r.time) OVER (PARTITION BY r.ticker ORDER BY r.time) rt_next" in q
+
+TESTS = [t_r3_rebuttal_infra_not_swallowed, t_r3_scorer_m2_ok_real, t_r3_cooldown_boundary, t_r3_run_lock_held_through_run, t_r3_m2_blind_packet_clean, t_r3_streak_live_only, t_r3_infra_overloaded_529, t_r3_skip_rows_full, t_r3_sigterm_kills_m2_group, t_r3_event_sql_in_protocol_hash, t_r3_elig_rating_window, t_no_double_append, t_ledger_append_twice, t_parallel_append, t_md5_tamper, t_no_outcome_in_packet, t_sql_pit, t_news_pit, t_fin_pit, t_m2_exception_failopen,
          t_m2_fail_status, t_m2_ok_rebuttal, t_schema_strict, t_m1_fail_recorded, t_capacity, t_capacity_resets_next_week, t_cooldown, t_cooldown_same_quarter,
          t_live_guard, t_dry_run_no_write, t_dd_flag, t_scorer_no_peek, t_scorer_look, t_scorer_ignores_unscored, t_today_ict,
          t_prereg_params, t_prereg_stamp, t_prereg_lock, t_ticker_sens, t_scorer_ignores_other_prereg,
@@ -482,6 +589,23 @@ TESTS = [t_no_double_append, t_ledger_append_twice, t_parallel_append, t_md5_tam
          t_hist_deterministic_vs_ledger, t_replay_greedy, t_replay_ignores_T_and_future, t_cooldown_from_prev_day, t_rating_fin_news_pit, t_m1_content_checks, t_m1_argv, t_m2_dates,
          t_m2_record_and_cmd, t_m2_fail_reason_has_stderr, t_t3_only_m2_ok, t_run_lock_busy, t_m2_fail_streak, t_default_ledger_dir, t_outcomes_ruleset, t_kill_resume_midday]
 MUTANTS = [  # (ten, old, new, test phai BAT duoc)
+    # ---- R3 (D-a): 12 mutant song ----
+    ("R3 rebuttal M1 nuot InfraError", '        r2, meta2, err2 = call_m1(packet, mode, "final", "PHAN BIEN M2: " + json.dumps(ch, ensure_ascii=False) + "\\nVONG 1 CUA BAN: " + json.dumps(r1, ensure_ascii=False))\n',
+        '        try: r2, meta2, err2 = call_m1(packet, mode, "final", "PHAN BIEN M2: " + json.dumps(ch, ensure_ascii=False) + "\\nVONG 1 CUA BAN: " + json.dumps(r1, ensure_ascii=False))\n        except InfraError as _e: r2, meta2, err2 = None, [], str(_e)\n', "t_r3_rebuttal_infra_not_swallowed"),
+    ("R3 score_report m2_ok luon True", '"m2_ok": r.get("m2_status") == "OK"})', '"m2_ok": True})', "t_r3_scorer_m2_ok_real"),
+    ("R3 cooldown_ok '>' thanh '>='", "return (T - last).days > COOLDOWN_DAYS", "return (T - last).days >= COOLDOWN_DAYS", "t_r3_cooldown_boundary"),
+    ("R3 replay_history '>' thanh '>='", "((d - h[-1]).days > COOLDOWN_DAYS", "((d - h[-1]).days >= COOLDOWN_DAYS", "t_r3_cooldown_boundary"),
+    ("R3 run_lock chi giu luc vao", "    with run_lock(ledger_dir): return _run_day(Td, T, mode, ledger_dir, False, elig, ff)", "    with run_lock(ledger_dir): pass\n    return _run_day(Td, T, mode, ledger_dir, False, elig, ff)", "t_r3_run_lock_held_through_run"),
+    ("R3 M2 blind nhan M1 qua packet", 'b = M2("blind", packet);', 'b = M2("blind", dict(packet, m1_view=m1));', "t_r3_m2_blind_packet_clean"),
+    ("R3 m2_fail_streak dem ca retro", 'r.get("mode") == "live" and r.get("m1_status") == "OK"])', 'r.get("m1_status") == "OK"])', "t_r3_streak_live_only"),
+    ("R3 INFRA_RE bo overloaded", "quota|overloaded|credit", "quota|credit", "t_r3_infra_overloaded_529"),
+    ("R3 INFRA_RE bo 529", r"|\b429\b|\b529\b", r"|\b429\b", "t_r3_infra_overloaded_529"),
+    ("R3 SQL elig bo cua so hieu luc rating", "AND (rt.rt_next IS NULL OR rt.rt_next>u.time))\nSELECT x.ticker", ")\nSELECT x.ticker", "t_r3_elig_rating_window"),
+    ("R3 for c in skip khong ghi", "    for c in skip:\n        led.append(", "    for c in []:\n        led.append(", "t_r3_skip_rows_full"),
+    ("R3 skip ghi dong rong (stats mat rating)", '"status": "skipped_capacity", "mode": mode,\n                    "stats": {"liq_bn": _f(c["liq_bn"]), "route_8l": c["route"], "rating_8l_asof": int(float(c["rating"])),', '"status": "skipped_capacity", "mode": mode,\n                    "stats": {"liq_bn": _f(c["liq_bn"]), "route_8l": c["route"], "rating_8l_asof": None,', "t_r3_skip_rows_full"),
+    ("R3 SIGTERM khong kill nhom M2", "    for g in list(_M2_PGIDS):", "    for g in []:", "t_r3_sigterm_kills_m2_group"),
+    ("R3 run_second_opinion khong dang ky nhom", "    _M2_PGIDS.add(p.pid)\n", "    pass\n", "t_r3_sigterm_kills_m2_group"),
+    ("R3 SQL su kien khong vao hash", '"event_sql_md5": {"candidates": hashlib.md5(sql_candidates("2000-01-03").encode()).hexdigest(), "eligible_range"', '"event_sql_md5": {"candidates": "0", "eligible_range_": "0", "eligible_range"', "t_r3_event_sql_in_protocol_hash"),
     ("ledger append khong idempotent", 'if any(r["event_id"] == rec["event_id"] for r in self.read()): return False', "pass", "t_ledger_append_twice"),
     ("run_day bo guard idempotent (+ledger)", 'if any(r["event_id"] == f"{c[\'ticker\']}_{T}" for r in led.read()): continue', "pass", "t_no_double_append"),
     ("append khong khoa flock (mo rong cua so race)", ["fcntl.flock(lk, fcntl.LOCK_EX)", 'rec["md5"] = line_md5(rec)'], ["pass", '__import__("time").sleep(0.4); rec["md5"] = line_md5(rec)'], "t_parallel_append"),
@@ -510,7 +634,7 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("JSON v3 doi nguong (khong dong bo)", 'CAP_WEEK = V3["cap_week"]', "CAP_WEEK = 7", "t_prereg_params"),
     ("mat prereg_version/md5 tren dong", 'rec.setdefault("prereg_version", PREREG_VERSION) != PREREG_VERSION or rec.setdefault("prereg_md5", PREREG_MD5) != PREREG_MD5\n                    or rec.setdefault("protocol_md5", PROTOCOL_MD5) != PROTOCOL_MD5', "False", "t_prereg_stamp"),
     ("bo khoa md5 PREREG", 'if lock.get(f) != _md5b(b): raise SystemExit(', 'if False: raise SystemExit(', "t_prereg_lock"),
-    ("bo khoa hang so giao thuc", 'if lock.get("CONST_PROTOCOL") != _consts_md5(): raise SystemExit(', 'if False: raise SystemExit(', "t_prereg_lock"),
+    ("bo khoa hang so giao thuc", '    if lock.get("CONST_PROTOCOL") != _consts_md5(): raise SystemExit(', '    if False: raise SystemExit(', "t_prereg_lock"),
     ("scorer dem dong protocol khac", ' and r.get("protocol_md5") == PROTOCOL_MD5]', "]", "t_scorer_ignores_other_prereg"),
     ("G-proc khong loc protocol", ' and r.get("protocol_md5") == PROTOCOL_MD5 and r.get("mode") == "live"]', ' and r.get("mode") == "live"]', "t_scorer_ignores_other_prereg"),
     ("bo do nhay cum theo ma", 'if "T1" in out and "ticker" in df:', "if False:", "t_ticker_sens"),
@@ -531,8 +655,10 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     # ---- v3.2 ----
     ("B1 loi ha tang bi nuot o call_m1", "        except InfraError: raise\n", "        except KeyError: raise\n", "t_infra_stop_no_write_and_resume"),
     ("B1 FileNotFoundError khong thanh InfraError", "except (FileNotFoundError, PermissionError, subprocess.TimeoutExpired, OSError) as e:", "except KeyError as e:", "t_infra_cli_recovers_same_day"),
-    ("B1 rc!=0 khong phai ha tang", 'if r.returncode: raise InfraError(', 'if r.returncode: raise RuntimeError(', "t_infra_real_claude_errors"),
-    ("B1 is_error usage/auth khong phai ha tang", 'if INFRA_RE.search(msg): raise InfraError(', 'if False: raise InfraError(', "t_infra_real_claude_errors"),
+    ("B1 rc!=0 khong JSON khong phai ha tang", 'if r.returncode: raise InfraError(f"claude rc={r.returncode}: {r.stderr[-400:]}', 'if r.returncode: raise RuntimeError(f"claude rc={r.returncode}: {r.stderr[-400:]}', "t_infra_real_claude_errors"),
+    ("R3-B xet rc truoc JSON (max-turns thanh ha tang)", "    if not isinstance(d, dict):   # khong co JSON", "    if r.returncode: raise InfraError('rc')\n    if not isinstance(d, dict):   # khong co JSON", "t_infra_real_claude_errors"),
+    ("R3-B max-turns rc!=0 thanh ha tang", 'if sub in ("error_max_turns", "error_max_budget_usd") or d.get("is_error"):\n            raise RuntimeError', 'if sub in ("error_max_turns", "error_max_budget_usd") or d.get("is_error"):\n            raise InfraError', "t_infra_real_claude_errors"),
+    ("B1 is_error usage/auth khong phai ha tang", 'if INFRA_RE.search(msg) or INFRA_RE.search(', 'if False and INFRA_RE.search(msg) or INFRA_RE.search(', "t_infra_real_claude_errors"),
     ("B1 run_day ghi dong khi ha tang hong", 'out["infra_stop"] = f"{p[\'event_id\']}: {str(e)[:300]}"; break', 'out["infra_stop"] = f"{p[\'event_id\']}: {str(e)[:300]}"; rec = dict(event_id=p["event_id"], ticker=p["ticker"], T=T, status="processed", mode=mode, stats={}, m1_status="FAIL", m1_error="infra", m2_status="SKIPPED", usage=[]); led.append(rec); break', "t_infra_stop_no_write_and_resume"),
     ("B2 cooldown replay bo luat khac-quy", " and quarter_of(d) != quarter_of(h[-1])", "", "t_replay_greedy"),
     ("B2 replay doc ca ngay T", "        if d >= T: continue                       # chi qua khu: khong bao gio doc T tro di\n", "", "t_replay_ignores_T_and_future"),
@@ -544,9 +670,12 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("B5 bo kiem ngay giao dich", "if not IS_TRADING_DAY(Td): raise NotTradingDay", "if False: raise NotTradingDay", "t_not_trading_day"),
     ("B5 ngay le khong tinh", "    if d.weekday() >= 5: return False\n", "    if d.weekday() >= 9: return False\n", "t_not_trading_day"),
     ("B5 bo run_lock", "fcntl.flock(self.f, fcntl.LOCK_EX | fcntl.LOCK_NB)", "pass", "t_run_lock_busy"),
-    ("B6 cong freshness chi MAX(time)", "        if float(n) < FRESH_RATIO * float(pv): return", "        if False: return", "t_freshness_depth"),
-    ("B6 thieu dem dong van cho qua", '        if n in (None, "") or pv in (None, ""): return', '        if False: return', "t_freshness_depth"),
+    ("B6 cong freshness chi MAX(time)", "    if float(cov) < FRESH_RATIO * float(pv_n):", "    if False:", "t_freshness_depth"),
+    ("R3 SQL freshness bo in_universe", "AND u.in_universe),\n tkT", "),\n tkT", "t_freshness_depth"),
+    ("R3 SQL freshness phien truoc thanh <=T", 'u.time < DATE "{T}" AND u.time >=', 'u.time <= DATE "{T}" AND u.time >=', "t_freshness_depth"),
+    ("B6 thieu dem dong van cho qua", '    if pv_n in (None, "") or cov in (None, "") or float(pv_n) <= 0: return', '    if False: return', "t_freshness_depth"),
     ("B6 bo kiem MAX(time)<T", 'if not mx or str(mx)[:10] < T: return', 'if not mx: return', "t_freshness_depth"),
+    ("R3 up_n=0 van cho qua", 'if up_n in (None, "") or float(up_n) <= 0: return', 'if False: return', "t_freshness_depth"),
     ("B6 freshness khong raise (ghi tiep)", 'if prob: raise DataNotReady', 'if False: raise DataNotReady', "t_freshness_depth"),
     ("rating khong gioi han <=T", 'WHERE r.time <= DATE "{T}" QUALIFY', 'WHERE r.time <= DATE "2099-01-01" QUALIFY', "t_rating_fin_news_pit"),
     ("fin khong gioi han <=T", 'f.Release_Date <= DATE "{_date(T)}"', 'f.Release_Date <= DATE "2099-01-01"', "t_rating_fin_news_pit"),
@@ -557,7 +686,7 @@ MUTANTS = [  # (ten, old, new, test phai BAT duoc)
     ("M1 live thieu allowedTools (bi KHOA md5 bat)", ' + (["--allowedTools", "WebSearch"] if live else [])', "", "t_m1_argv"),
     ("M2 bo kiem ngay<=T", 'if not errs and not m2_dates_ok(stage, obj, packet["T"]): errs = ["date > T"]', "pass", "t_m2_dates"),
     ("M2 khong truyen --model", '"--model", M2_MODEL, "--timeout"', '"--timeout"', "t_m2_record_and_cmd"),
-    ("M2 khong kill nhom khi qua tran", "        try: os.killpg(p.pid, signal.SIGKILL)\n        except ProcessLookupError: pass\n", "        pass\n", "t_m2_record_and_cmd"),
+    ("M2 khong kill nhom khi qua tran", "            try: os.killpg(p.pid, signal.SIGKILL)\n            except ProcessLookupError: pass\n", "            pass\n", "t_m2_record_and_cmd"),
     ("M2 khong don tmpdir wrapper (TMPDIR)", "env=dict(os.environ, TMPDIR=str(Path(out_jsonl).parent))", "env=dict(os.environ)", "t_m2_record_and_cmd"),
     ("M2 reason mat duoi stderr", 'f"second_opinion_exit_{rc}: {tail[-200:]}"', 'f"second_opinion_exit_{rc}"', "t_m2_fail_reason_has_stderr"),
     ("T3 gom ca su kien M2 FAIL", "d3 = d3[d3.m2_ok.astype(bool) & (", "d3 = d3[d3.m2_ok.astype(bool) | (", "t_t3_only_m2_ok"),

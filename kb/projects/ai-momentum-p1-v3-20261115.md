@@ -75,3 +75,28 @@ Mike: smoke test live bằng `--ledger-dir` tạm → arch-review vòng 3 → qu
 - `bin/ai_momentum_cron_selfcheck.sh`: **17 ca × (1 + 7 mutant, 7 killed) ALL PASS** ×3 TZ.
 - `bin/second_opinion_selfcheck.sh`: **PASS** ×3 TZ. `bin/cli_provider_selfcheck.sh`: **23/23 PASS** ×3 TZ.
 - `bin/dispatch_token_telemetry_selfcheck.py`: **42 ok; I6 ok; I7 FAIL ×2** (`bg done sau retry`, `retry_causes`) ở cả 3 TZ + crash `FileNotFoundError calls.txt` — theo Mike là lỗi có sẵn trên master, **tôi không tự kiểm lại trên master** và không sửa.
+
+
+## R3 (job `Taylor_20261116_011145`, 2026-11-16) — 2 BLOCKER + C + D(a–f)
+**A — freshness (đã thay B6).** Đếm thô dòng `ticker` T vs phiên trước từ chối dữ liệu đã chốt của thứ Hai (bảng tăng dần trong tuần rồi tụt thứ Hai). Nay đo độ đầy = tỉ lệ mã `universe_pit` (rv1, `in_universe`) của **phiên trước** có dòng `ticker` tại T (`pv_cov/pv_n ≥ 0,95`), giữ `MAX(time)≥T` cho cả 2 bảng + `universe_pit` có mã in_universe tại T (`up_n>0`). Ngưỡng 0,95 giữ (min đo được 0,988 bên dưới; reviewer đo min 0,982). **Đo BQ thật** (`selfcheck_v33_freshness_real_bq.txt`): 11-09 338/342, 11-02 335/339, 10-26 338/342 (thứ Hai) · 09-03 351/355 (sau lễ) · 11-10/11-11/11-12/11-13 (≥0,997) → tất cả PASS; T=2026-12-30 (tương lai) và T=2026-11-16 (chưa có dữ liệu) → `DataNotReady` (`MAX(time)=… < T`).
+
+**B — `run_claude_m1`.** Parse stdout JSON TRƯỚC khi xét rc. JSON hợp lệ + `is_error`/rc≠0: khớp `INFRA_RE` ⇒ `InfraError`; còn lại (`error_max_turns`/`error_max_budget_usd`/is_error khác) ⇒ `RuntimeError` ⇒ `m1_status=FAIL`, ghi dòng, tiếp tục. `InfraError` chỉ khi không binary/timeout/không có JSON hợp lệ/khớp `INFRA_RE`/rc≠0 mà JSON không nói lỗi nội dung. Test rc=1+JSON max-turns / max-budget (RuntimeError), rc=1+max-turns nhưng result "usage limit" (Infra), rc=1+success (Infra) + 3 mutant. Chưa chạy `claude` live.
+
+**C — wrapper.** rc=4 ở lượt BẮT ĐẦU từ 23:00 ICT (`AI_MOMENTUM_FINAL_HOUR`, giờ lấy lúc bắt đầu, `10#` chống bát phân) ⇒ alert topic `momentum_lab` + exit 0. `kb/discord_channels.json`: entry `momentum_lab` đổi id sang topic MỚI `1571694105111691406` (topic cũ `1571541823615406201` đã đóng).
+
+**D.** (a) 14 mutant sống mới (rebuttal M1 nuốt Infra, `m2_ok` luôn True, `>`→`>=` ở `cooldown_ok` và `replay_history`, run_lock chỉ giữ lúc vào, blind nhận M1 qua packet, streak đếm cả retro, INFRA_RE bỏ overloaded / 529, SQL elig bỏ cửa sổ hiệu lực rating, `for c in skip` không ghi / ghi stats rỗng, SIGTERM không kill nhóm M2, không đăng ký nhóm, SQL sự kiện ra khỏi hash) + 3 mutant freshness; mutant SQL sự kiện bị **khoá md5 bắt lúc nạp** (đếm riêng) và có thêm assert cấu trúc SQL. (b) alert M2-FAIL chỉ khi đổi trạng thái OK→FAIL (`logs/ai_momentum/m2_alert.state`). (c) `_sigterm` kill nhóm `second_opinion.sh` đang chạy (`_M2_PGIDS`). (d) `CONST_PROTOCOL` nay băm cả van bản `sql_candidates` + `sql_eligible_range` ⇒ **`PREREG_v3_2.md5` dòng `CONST_PROTOCOL` cập nhật** `0b2d79ea…` → `0d3046fd…` (chưa có sự kiện forward nào; `PREREG_v3_2.md` không đổi byte; `protocol_md5` mỗi dòng = md5 file khoá nên đổi theo). (e) crontab mẫu bên dưới. (f) **chưa khai** lễ 2027.
+
+**(e) crontab mẫu — KHÔNG cài** (host UTC; 20:00/21:30/23:00 ICT = 13:00/14:30/16:00 UTC; wrapper tự export `TZ=Asia/Ho_Chi_Minh`):
+```
+0 13 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/ai_momentum_cron.sh
+30 14 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/ai_momentum_cron.sh
+0 16 * * 1-5 /home/trido/thanhdt/WorkingClaude/mike/bin/ai_momentum_cron.sh
+```
+(T2–T6 theo UTC trùng T2–T6 ICT cho cả 3 mốc vì 16:00 UTC = 23:00 ICT cùng ngày.)
+
+**(f) Lễ 2027.** `trading_bot/vn_market.py` (repo canonical, ngoài worktree này) chưa khai Tết Âm lịch / Giỗ Tổ 2027 và `data_registry` không có nguồn xác thực (thông báo chính thức Chính phủ/SGDCK/DNSE) cho danh sách ngày nghỉ 2027 ⇒ KHÔNG đoán. Hệ quả: đến khi khai, wrapper coi ngày lễ 2027 là ngày thường ⇒ BQ không có dòng T ⇒ rc=4 (im lặng, trừ khi trúng mốc 23:00 ⇒ alert). Việc cần làm trước 02/2027: có nguồn xác thực ⇒ khai `_VARIABLE_HOLIDAYS`.
+
+### Selfcheck R3 (output thật `selfcheck_v33_*_{unset,UTC,NY}.txt`)
+- `selfcheck_ai_momentum.py`: **70 test, 101 mutant (100 killed gồm 1 mutant tự-kiểm harness; 13 bị khoá md5 bắt lúc nạp) ALL PASS** ×3 TZ (`env -u TZ`, `TZ=UTC`, `TZ=America/New_York`; lưu ý mutant `today bo neo ICT` chỉ bị bắt khi TZ máy ≠ ICT — chạy dưới TZ=ICT sẽ sống, đây là tính chất của mutant, không phải lỗi mã).
+- `bin/ai_momentum_cron_selfcheck.sh`: **23 ca × (1 + 12 mutant, 12 killed) ALL PASS** ×3 TZ.
+- `second_opinion_selfcheck.sh`: SELFCHECK PASS ×3 · `cli_provider_selfcheck.sh`: 23/23 PASS ×3 · `dispatch_token_telemetry_selfcheck.py`: 42 ok, **I7 FAIL ×2 + FileNotFoundError calls.txt ×3 TZ — lỗi có sẵn trên master, không đụng**.

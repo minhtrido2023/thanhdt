@@ -46,7 +46,8 @@ def m1_argv(mode, system=""):
 
 def protocol_consts():
     return {"m1_argv": {m: m1_argv(m) for m in ("live", "retro")}, "m1_timeout": M1_TIMEOUT, "m2_model": M2_MODEL, "m2_timeout": M2_TIMEOUT,
-            "m2_retries": M2_RETRIES, "m2_outer": M2_OUTER, "hist_days": HIST_DAYS, "fresh_ratio": FRESH_RATIO, "no_tool_line": NO_TOOL_LINE, "format_hint": FORMAT_HINT}
+            "m2_retries": M2_RETRIES, "m2_outer": M2_OUTER, "hist_days": HIST_DAYS, "fresh_ratio": FRESH_RATIO, "no_tool_line": NO_TOOL_LINE, "format_hint": FORMAT_HINT,
+            "event_sql_md5": {"candidates": hashlib.md5(sql_candidates("2000-01-03").encode()).hexdigest(), "eligible_range": hashlib.md5(sql_eligible_range("2000-01-03").encode()).hexdigest()}}   # R3-D(d): doi SQL dinh nghia su kien = doi giao thuc
 def _consts_md5(): return hashlib.md5(json.dumps(protocol_consts(), sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 # ---- PREREG v3.2: MOT khoa md5 cho moi file giao thuc + hang so. Lech/thieu => khong chay (fail-closed, khong fallback).
@@ -62,7 +63,6 @@ def _load_locked():
         b = (HERE / f).read_bytes()          # doc 1 lan: hash va noi dung la CUNG bytes
         if lock.get(f) != _md5b(b): raise SystemExit(f"PREREG v3.2 lech khoa md5: {f} (khong chay; sua giao thuc = PREREG moi)")
         blobs[f] = b
-    if lock.get("CONST_PROTOCOL") != _consts_md5(): raise SystemExit("PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so giao thuc doi: M1/M2 argv, model, timeout, FORMAT_HINT...)")
     return blobs, lock, _md5b(raw)
 _BLOBS, _LOCK, PROTOCOL_MD5 = _load_locked()
 PREREG_MD5 = _LOCK["PREREG_v3_2.md"]
@@ -124,22 +124,31 @@ SELECT * FROM s WHERE mom20>={V3["mom20"]} AND idio20>={V3["idio20"]} AND volr>=
 ORDER BY liq_bn DESC, ticker"""
 
 def sql_freshness(T):
-    """/* marker FRESHNESS */ MAX(time) + DO DAY (so dong T vs phien truoc do) cho ca ticker va universe_pit(in_universe)."""
+    """/* marker FRESHNESS */ R3: do day = ti le ma universe_pit(in_universe) cua PHIEN TRUOC co dong ticker tai T.
+    (Dem tho dong ticker T vs phien truoc sai vao thu Hai: bang ticker tang dan trong tuan roi tut — 815->860->803.)"""
     T = _date(T)
     return f"""/* FRESHNESS */
-WITH tk AS (SELECT t.time, COUNT(*) n FROM tav2_bq.ticker AS t WHERE t.time BETWEEN DATE_SUB(DATE "{T}", INTERVAL 15 DAY) AND DATE "{T}" AND t.ticker != "VNINDEX" GROUP BY 1),
- up AS (SELECT u.time, COUNT(*) n FROM tav2_mike.universe_pit AS u WHERE u.time BETWEEN DATE_SUB(DATE "{T}", INTERVAL 15 DAY) AND DATE "{T}"
-        AND u.ruleset_version={V3["universe_ruleset"]} AND u.in_universe GROUP BY 1)
-SELECT (SELECT MAX(time) FROM tk) tk, (SELECT n FROM tk WHERE time=DATE "{T}") tk_n, (SELECT n FROM tk WHERE time=(SELECT MAX(time) FROM tk WHERE time<DATE "{T}")) tk_prev,
- (SELECT MAX(time) FROM up) up, (SELECT n FROM up WHERE time=DATE "{T}") up_n, (SELECT n FROM up WHERE time=(SELECT MAX(time) FROM up WHERE time<DATE "{T}")) up_prev"""
+WITH prev AS (SELECT MAX(u.time) d FROM tav2_mike.universe_pit AS u WHERE u.time < DATE "{T}" AND u.time >= DATE_SUB(DATE "{T}", INTERVAL 15 DAY)
+              AND u.ruleset_version={V3["universe_ruleset"]}),
+ pv AS (SELECT u.ticker FROM tav2_mike.universe_pit AS u, prev WHERE u.time = prev.d AND u.ruleset_version={V3["universe_ruleset"]} AND u.in_universe),
+ tkT AS (SELECT DISTINCT t.ticker FROM tav2_bq.ticker AS t WHERE t.time = DATE "{T}" AND t.ticker != "VNINDEX")
+SELECT (SELECT MAX(t.time) FROM tav2_bq.ticker AS t WHERE t.time BETWEEN DATE_SUB(DATE "{T}", INTERVAL 15 DAY) AND DATE "{T}" AND t.ticker != "VNINDEX") tk,
+ (SELECT MAX(u.time) FROM tav2_mike.universe_pit AS u WHERE u.time BETWEEN DATE_SUB(DATE "{T}", INTERVAL 15 DAY) AND DATE "{T}" AND u.ruleset_version={V3["universe_ruleset"]}) up,
+ (SELECT COUNT(*) FROM tav2_mike.universe_pit AS u WHERE u.time = DATE "{T}" AND u.ruleset_version={V3["universe_ruleset"]} AND u.in_universe) up_n,
+ (SELECT COUNT(*) FROM pv) pv_n,
+ (SELECT COUNT(*) FROM pv JOIN tkT USING(ticker)) pv_cov"""
 
 def freshness_problem(fr, T):
-    """None neu du lieu da toi T VA du day; nguoc lai chuoi mo ta NOI SUY tu so doc duoc (coding_guidelines §29)."""
+    """None neu du lieu da toi T VA du day; nguoc lai chuoi mo ta NOI SUY tu so doc duoc (coding_guidelines §29).
+    Do day = pv_cov/pv_n (ma in_universe phien truoc co dong ticker tai T) >= FRESH_RATIO."""
     for name, k in (("ticker", "tk"), ("universe_pit", "up")):
-        mx, n, pv = fr.get(k), fr.get(k + "_n"), fr.get(k + "_prev")
+        mx = fr.get(k)
         if not mx or str(mx)[:10] < T: return f"{name}: MAX(time)={mx} < T={T}"
-        if n in (None, "") or pv in (None, ""): return f"{name}: thieu dem dong (n_T={n}, n_phien_truoc={pv})"
-        if float(n) < FRESH_RATIO * float(pv): return f"{name}: so dong tai T={n} < {FRESH_RATIO:.0%} cua phien truoc ({pv})"
+    up_n, pv_n, cov = fr.get("up_n"), fr.get("pv_n"), fr.get("pv_cov")
+    if up_n in (None, "") or float(up_n) <= 0: return f"universe_pit: khong co ma in_universe tai T={T} (n={up_n})"
+    if pv_n in (None, "") or cov in (None, "") or float(pv_n) <= 0: return f"thieu dem phu (pv_n={pv_n}, pv_cov={cov})"
+    if float(cov) < FRESH_RATIO * float(pv_n):
+        return f"ticker: chi {cov}/{pv_n} ma in_universe phien truoc co dong tai T={T} (<{FRESH_RATIO:.0%})"
     return None
 
 def sql_eligible_range(T):
@@ -163,6 +172,11 @@ x AS (SELECT u.ticker, u.time, rt.rating, u.Close/u.c20-1 mom20, (u.Close/u.c20-
 SELECT x.ticker, CAST(x.time AS STRING) time, x.liq_bn FROM x
 WHERE mom20>={V3["mom20"]} AND idio20>={V3["idio20"]} AND volr>={V3["volr"]} AND newhi AND liq_bn>={V3["liq_bn"]} AND rating IS NOT NULL AND rating<={V3["rating_max"]}
 ORDER BY x.time, x.ticker"""
+
+# R3-D(d): khoa hang so KIEM SAU khi cac ham SQL da dinh nghia (hash van ban SQL su kien nam trong CONST_PROTOCOL)
+def _check_const(lock):
+    if lock.get("CONST_PROTOCOL") != _consts_md5(): raise SystemExit("PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so giao thuc doi: M1/M2 argv, model, timeout, FORMAT_HINT, SQL su kien...)")
+_check_const(_LOCK)
 
 def sql_fin(T, tks):
     l = ",".join(f'"{t}"' for t in tks)
@@ -310,13 +324,20 @@ def run_claude_m1(system, user, mode):
                                env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": os.environ.get("HOME", "/home/trido"), "TZ": "Asia/Ho_Chi_Minh"})
     except (FileNotFoundError, PermissionError, subprocess.TimeoutExpired, OSError) as e:
         raise InfraError(f"claude khong chay duoc: {type(e).__name__}: {str(e)[:200]}") from e
-    if r.returncode: raise InfraError(f"claude rc={r.returncode}: {r.stderr[-400:]} {r.stdout[-200:]}")
     try: d = json.loads(r.stdout)
-    except ValueError as e: raise InfraError(f"claude stdout khong phai JSON: {r.stdout[:200]!r}") from e
-    if d.get("is_error"):
-        msg = str(d.get("result"))[:300]
-        if INFRA_RE.search(msg): raise InfraError(f"claude is_error (ha tang): {msg}")
-        raise RuntimeError(f"claude is_error: {msg}")
+    except ValueError: d = None
+    if not isinstance(d, dict):   # khong co JSON hop le => ha tang (rc!=0 hoac stdout rac)
+        if r.returncode: raise InfraError(f"claude rc={r.returncode}: {r.stderr[-400:]} {r.stdout[-200:]}")
+        raise InfraError(f"claude stdout khong phai JSON: {r.stdout[:200]!r}")
+    # R3-B: JSON hop le di truoc rc. het max-turns/budget tra rc!=0 NHUNG la loi noi dung (m1_status=FAIL), khong dung luot chay.
+    if r.returncode or d.get("is_error"):
+        sub = str(d.get("subtype") or "")
+        msg = str(d.get("result") or d.get("error") or sub or r.stderr[-300:])[:300]
+        if INFRA_RE.search(msg) or INFRA_RE.search(r.stderr[-300:] if not d.get("subtype") else ""):
+            raise InfraError(f"claude (ha tang) rc={r.returncode}: {msg}")
+        if sub in ("error_max_turns", "error_max_budget_usd") or d.get("is_error"):
+            raise RuntimeError(f"claude {sub or 'is_error'} rc={r.returncode}: {msg}")
+        raise InfraError(f"claude rc={r.returncode} JSON khong ro loi: {msg}")
     return d["result"], {"cost_usd": d.get("total_cost_usd"), "usage": {k: d["usage"].get(k) for k in
             ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens")}, "models": list(d.get("modelUsage", {})),
             "num_turns": d.get("num_turns"), "web_search_requests": ((d.get("usage") or {}).get("server_tool_use") or {}).get("web_search_requests")}
@@ -356,17 +377,27 @@ def build_m2_prompt(stage, packet, m1=None):
     if stage == "challenge": parts.append("JSON CUA M1:\n" + json.dumps(m1, ensure_ascii=False, indent=1))
     return "\n\n".join(parts) + "\n"
 
+_M2_PGIDS = set()    # nhom tien trinh second_opinion.sh dang chay: SIGTERM handler kill de timeout cua wrapper khong de con song
+def _sigterm(*_):
+    for g in list(_M2_PGIDS):
+        try: os.killpg(g, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError): pass
+    sys.exit(143)
+
 def run_second_opinion(prompt_file, out_jsonl, text_out, timeout=M2_TIMEOUT):
     """Tra (rc, stderr_tail). TMPDIR tro vao thu muc tam cua adapter => /tmp/so-raw.* bi don cung; bi qua tran ngoai => kill ca nhom tien trinh."""
     cmd = [str(_repo_root() / "bin" / "second_opinion.sh"), "--raw-prompt-file", str(prompt_file), "--out", str(out_jsonl), "--text-out", str(text_out),
            "--model", M2_MODEL, "--timeout", str(timeout), "--retries", str(M2_RETRIES)]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True,
                          env=dict(os.environ, TMPDIR=str(Path(out_jsonl).parent)))
-    try: _, err = p.communicate(timeout=M2_OUTER)
-    except subprocess.TimeoutExpired:
-        try: os.killpg(p.pid, signal.SIGKILL)
-        except ProcessLookupError: pass
-        p.communicate(); raise
+    _M2_PGIDS.add(p.pid)
+    try:
+        try: _, err = p.communicate(timeout=M2_OUTER)
+        except subprocess.TimeoutExpired:
+            try: os.killpg(p.pid, signal.SIGKILL)
+            except ProcessLookupError: pass
+            p.communicate(); raise
+    finally: _M2_PGIDS.discard(p.pid)
     return p.returncode, (err or "")[-300:]
 M2_RUN = run_second_opinion
 
@@ -618,7 +649,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(); ap.add_argument("--date"); ap.add_argument("--mode", choices=["live", "retro"])
     ap.add_argument("--dry-run", action="store_true"); ap.add_argument("--score", action="store_true")
     ap.add_argument("--ledger-dir", default=str(_repo_root() / "data" / "ai_momentum")); a = ap.parse_args(argv)
-    signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))      # de TemporaryDirectory/finally chay khi bi `timeout` giet
+    signal.signal(signal.SIGTERM, _sigterm)      # de TemporaryDirectory/finally chay khi bi `timeout` giet
     today = today_ict().isoformat()
     try:
         if a.score:
