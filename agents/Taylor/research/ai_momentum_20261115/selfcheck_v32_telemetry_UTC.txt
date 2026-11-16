@@ -1,0 +1,56 @@
+== S. tinh
+  ok   S1 dispatch.sh KHONG con goi spend_report.py
+== U. unit
+  ok   U1 cost-state: cost
+  ok   U1 cost-state: token = tong modelUsage
+  ok   U1 num_turns = 2 message id luong chinh (bo dup + sidechain)
+  ok   U2 fallback messages: token gom sidechain, turn chi luong chinh
+  ok   U2 fallback: KHONG co cost
+  ok   U3 uuid sai => {}
+  ok   U3 uuid sai (job) => {}
+  ok   U3 thieu transcript => chi session_id
+  ok   U3 kieu: so am/bool/chuoi => 0, cost NaN => bo (fallback)
+  ok   U4 tong token 2 session
+  ok   U4 cost = tong phien CO cost-state (can duoi)
+  ok   U4 session_id = ca 2, dedupe, dung thu tu
+  ok   U4 idempotent
+  ok   U4 CHI key whitelist
+  ok   U5 CLI ra field, rc=0
+  ok   U5 CLI thieu doi so => rong, rc=0
+  ok   U6 3 chuoi (pfm gop 4 job qua token chung + TIEP TUC; J0; re)
+  ok   U6 chuoi pfm: 4 job, cost 3.75, dung dau
+  ok   U6 resume + auto-callback -> chuoi job goc
+  ok   U6 khong token -> 40 ky tu dau
+  ok   U6 nguyen nhan resume
+== I. tich hop dispatch.sh
+  ok   I1 exit 0 + status done
+  ok   I1 $logfile = stdout CLI tung byte
+  ok   I1 result_summary khong doi
+  ok   I1 du 7 field
+  ok   I1 gia tri
+  ok   I1 session_id tren record = --session-id da truyen
+  ok   I2 rc=3 giu nguyen
+  ok   I2 telemetry co tren job fail
+  ok   I3 max-turns van duoc nhan ra (exit 5)
+  ok   I3 telemetry co tren job max-turns
+  ok   I4 transcript rac: van done rc=0
+  ok   I4 transcript rac: chi session_id, khong token
+  ok   I5 job_telemetry crash: van done rc=0, exit_code=0
+  ok   I5 job_telemetry rac: van done rc=0, exit_code=0
+  ok   I5 rac: chi num_turns=7 lot qua whitelist
+  ok   I8 telemetry treo: done, exit 0, khong field, <30s
+  ok   I6 opencode: done, KHONG co telemetry
+  ok   I9 kill trong telemetry: telemetry da chay
+  ok   I9 kill trong telemetry: record GIU done/exit_code=0
+  ok   I9 kill trong telemetry: dispatch exit GOC 0 (khong 143), nhanh
+  FAIL I7 bg done sau retry  (None, None)
+  FAIL I7 retry_causes=khac  None
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-ai-momentum-p1/bin/dispatch_token_telemetry_selfcheck.py", line 422, in <module>
+    sys.exit(main())
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-ai-momentum-p1/bin/dispatch_token_telemetry_selfcheck.py", line 410, in main
+    integration_tests(mutate)
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-ai-momentum-p1/bin/dispatch_token_telemetry_selfcheck.py", line 381, in integration_tests
+    calls = open(os.path.join(s.sb, "calls.txt")).read().split()
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tt-selfcheck-v93gp1_4/calls.txt'
+rc=1

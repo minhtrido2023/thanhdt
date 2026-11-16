@@ -1,0 +1,19 @@
+PASS raw ok rc=0
+PASS raw: KHONG goi dispatch/append_event (khong bus)
+PASS raw: prompt nguyen van, khong khung 3-diem
+PASS raw: khong co khung 3-diem
+PASS raw: model mac dinh tu cli_providers.json
+PASS raw: permission deny bash
+PASS raw: out + text-out ghi dung
+PASS raw provider loi rc=10
+PASS raw loi: van khong bus
+PASS raw text rong rc=11
+PASS raw timeout rc=12
+PASS raw retry+backoff hoi phuc rc=0
+PASS raw thieu file rc=2
+PASS raw thieu --out rc=2
+PASS raw chap nhan --no-bus
+PASS che do cu: van goi dispatch.sh voi khung 3-diem + lenh bus
+PASS che do cu: thieu tham so rc=2
+SELFCHECK PASS
+rc=0

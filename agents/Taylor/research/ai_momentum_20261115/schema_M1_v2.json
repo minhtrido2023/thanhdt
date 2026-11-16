@@ -1,0 +1,174 @@
+{
+ "round1": {
+  "title": "ai_momentum M1 v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+   "driver_class",
+   "evidence",
+   "what_market_prices_in",
+   "invalidation",
+   "view_20s",
+   "view_60s",
+   "confidence"
+  ],
+  "properties": {
+   "event_id": {
+    "type": "string"
+   },
+   "driver_class": {
+    "enum": [
+     "EARNINGS",
+     "CORP_ACTION",
+     "SECTOR_MACRO",
+     "FLOW_INDEX",
+     "NARRATIVE_ONLY",
+     "UNKNOWN"
+    ]
+   },
+   "evidence": {
+    "type": "array",
+    "maxItems": 3,
+    "items": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "claim",
+      "source",
+      "date"
+     ],
+     "properties": {
+      "claim": {
+       "type": "string"
+      },
+      "source": {
+       "type": "string"
+      },
+      "date": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "what_market_prices_in": {
+    "type": "string"
+   },
+   "invalidation": {
+    "type": "string"
+   },
+   "view_20s": {
+    "enum": [
+     "CONT",
+     "REV",
+     "NO_VIEW"
+    ]
+   },
+   "view_60s": {
+    "enum": [
+     "CONT",
+     "REV",
+     "NO_VIEW"
+    ]
+   },
+   "confidence": {
+    "type": "number",
+    "minimum": 0,
+    "maximum": 1
+   },
+   "dd_label": {
+    "type": "string"
+   }
+  }
+ },
+ "final": {
+  "title": "ai_momentum M1 v2 final",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+   "driver_class",
+   "evidence",
+   "what_market_prices_in",
+   "invalidation",
+   "view_20s",
+   "view_60s",
+   "confidence",
+   "rebuttal_accepted",
+   "rebuttal_rejected"
+  ],
+  "properties": {
+   "event_id": {
+    "type": "string"
+   },
+   "driver_class": {
+    "enum": [
+     "EARNINGS",
+     "CORP_ACTION",
+     "SECTOR_MACRO",
+     "FLOW_INDEX",
+     "NARRATIVE_ONLY",
+     "UNKNOWN"
+    ]
+   },
+   "evidence": {
+    "type": "array",
+    "maxItems": 3,
+    "items": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": [
+      "claim",
+      "source",
+      "date"
+     ],
+     "properties": {
+      "claim": {
+       "type": "string"
+      },
+      "source": {
+       "type": "string"
+      },
+      "date": {
+       "type": "string"
+      }
+     }
+    }
+   },
+   "what_market_prices_in": {
+    "type": "string"
+   },
+   "invalidation": {
+    "type": "string"
+   },
+   "view_20s": {
+    "enum": [
+     "CONT",
+     "REV",
+     "NO_VIEW"
+    ]
+   },
+   "view_60s": {
+    "enum": [
+     "CONT",
+     "REV",
+     "NO_VIEW"
+    ]
+   },
+   "confidence": {
+    "type": "number",
+    "minimum": 0,
+    "maximum": 1
+   },
+   "dd_label": {
+    "type": "string"
+   },
+   "rebuttal_accepted": {
+    "type": "integer",
+    "minimum": 0
+   },
+   "rebuttal_rejected": {
+    "type": "integer",
+    "minimum": 0
+   }
+  }
+ }
+}

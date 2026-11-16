@@ -1,0 +1,79 @@
+{
+ "event_id": "HID_2026-09-17",
+ "ticker": "HID",
+ "T": "2026-09-17",
+ "stats": {
+  "mom20": 0.6745562130177514,
+  "idio20": 0.6193827213015901,
+  "volr": 2.7386626660951565,
+  "newhi_3m": true,
+  "liq_bn": 3.6163438,
+  "route_8l": "COMPOUNDER",
+  "rating_8l_asof": 4,
+  "rating_eff_date": "2026-07-30",
+  "dd_flag": false
+ },
+ "sector_context": {
+  "route_ret20_median": -0.022900763358778664,
+  "route_n": 207,
+  "ticker_pct_in_route": 1.0,
+  "icb": "2357",
+  "icb_ret20_median": -0.05429975429975431,
+  "icb_n": 34,
+  "vnindex_ret20": 0.05517349171616126
+ },
+ "financials_released_le_T": [
+  {
+   "quarter": "2025Q4",
+   "Release_Date": "2026-02-02",
+   "NP_P0": -85688903831.0,
+   "NP_P4": 8384352048.0,
+   "Revenue_P0": 91602198639.0,
+   "Revenue_YoY_P0": -0.2298502591877926,
+   "GPM_P0": 0.2614439356,
+   "PE": -10.713918860758776,
+   "PB": 0.4704109955523999,
+   "ROE_Trailing": -0.085570611161802
+  },
+  {
+   "quarter": "2026Q1",
+   "Release_Date": "2026-04-06",
+   "NP_P0": -13357552671.0,
+   "NP_P4": 414493545.0,
+   "Revenue_P0": 75847516614.0,
+   "Revenue_YoY_P0": -0.3763495950633035,
+   "GPM_P0": 0.2379941579,
+   "PE": -7.231779762413333,
+   "PB": 0.432370800011058,
+   "ROE_Trailing": -0.1011592522759341
+  },
+  {
+   "quarter": "2026Q2",
+   "Release_Date": "2026-07-30",
+   "NP_P0": 9134943438.0,
+   "NP_P4": -14822487181.0,
+   "Revenue_P0": 141598278003.0,
+   "Revenue_YoY_P0": 0.1704502756294525,
+   "GPM_P0": 0.2092224642,
+   "PE": -8.347914983708902,
+   "PB": 0.2739187140579152,
+   "ROE_Trailing": -0.0489297431294539
+  }
+ ],
+ "news_le_T": [
+  {
+   "public_date": "2026-07-30",
+   "public_datetime": "2026-07-30T17:16:10",
+   "ingested_date": "2026-09-14",
+   "title": "HID: Giải trình biến động KQKD trên BCTC Hợp nhất và riêng Quý 2 năm 2026",
+   "codes": "MA"
+  },
+  {
+   "public_date": "2026-09-03",
+   "public_datetime": "2026-09-03T15:12:46",
+   "ingested_date": "2026-09-14",
+   "title": "HID: Giải trình biến động KQKD trên BCTC riêng và hợp nhất 6 tháng đầu năm 2026 đã soát xét",
+   "codes": "MA"
+  }
+ ]
+}

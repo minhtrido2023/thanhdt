@@ -1,0 +1,242 @@
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+TZ env=None  local=('UTC', 'UTC')
+PASS t_r3_rebuttal_infra_not_swallowed
+PASS t_r3_scorer_m2_ok_real
+PASS t_r3_cooldown_boundary
+PASS t_r3_run_lock_held_through_run
+PASS t_r3_m2_blind_packet_clean
+PASS t_r3_streak_live_only
+PASS t_r3_infra_overloaded_529
+PASS t_r3_skip_rows_full
+PASS t_r3_sigterm_kills_m2_group
+PASS t_r3_event_sql_in_protocol_hash
+PASS t_r3_elig_rating_window
+PASS t_no_double_append
+PASS t_ledger_append_twice
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+PASS t_parallel_append
+PASS t_md5_tamper
+PASS t_no_outcome_in_packet
+PASS t_sql_pit
+PASS t_news_pit
+PASS t_fin_pit
+PASS t_m2_exception_failopen
+PASS t_m2_fail_status
+PASS t_m2_ok_rebuttal
+PASS t_schema_strict
+PASS t_m1_fail_recorded
+PASS t_capacity
+PASS t_capacity_resets_next_week
+PASS t_cooldown
+PASS t_cooldown_same_quarter
+PASS t_live_guard
+PASS t_dry_run_no_write
+PASS t_dd_flag
+PASS t_scorer_no_peek
+PASS t_scorer_look
+PASS t_scorer_ignores_unscored
+PASS t_today_ict
+PASS t_prereg_params
+PASS t_prereg_stamp
+PASS t_prereg_lock
+PASS t_ticker_sens
+PASS t_scorer_ignores_other_prereg
+PASS t_m2a_ok_and_prompt
+PASS t_m2a_fail_modes
+PASS t_m2a_blind_before_and_no_m1
+PASS t_m2a_e2e_failopen
+PASS t_m2a_off_switch
+PASS t_m2a_bin_in_own_worktree
+PASS t_m2a_schema_boolean
+PASS t_protocol_nonempty
+PASS t_infra_stop_no_write_and_resume
+PASS t_infra_real_claude_errors
+PASS t_infra_cli_recovers_same_day
+PASS t_exit_codes
+PASS t_not_trading_day
+PASS t_freshness_depth
+PASS t_hist_deterministic_vs_ledger
+PASS t_replay_greedy
+PASS t_replay_ignores_T_and_future
+PASS t_cooldown_from_prev_day
+PASS t_rating_fin_news_pit
+PASS t_m1_content_checks
+PASS t_m1_argv
+PASS t_m2_dates
+PASS t_m2_record_and_cmd
+PASS t_m2_fail_reason_has_stderr
+PASS t_t3_only_m2_ok
+PASS t_run_lock_busy
+PASS t_m2_fail_streak
+PASS t_default_ledger_dir
+PASS t_outcomes_ruleset
+PASS t_kill_resume_midday
+KILLED mutant[R3 rebuttal M1 nuot InfraError] <- t_r3_rebuttal_infra_not_swallowed
+KILLED mutant[R3 score_report m2_ok luon True] <- t_r3_scorer_m2_ok_real
+KILLED mutant[R3 cooldown_ok '>' thanh '>='] <- t_r3_cooldown_boundary
+KILLED mutant[R3 replay_history '>' thanh '>='] <- t_r3_cooldown_boundary
+KILLED mutant[R3 run_lock chi giu luc vao] <- t_r3_run_lock_held_through_run
+KILLED mutant[R3 M2 blind nhan M1 qua packet] <- t_r3_m2_blind_packet_clean
+KILLED mutant[R3 m2_fail_streak dem ca retro] <- t_r3_streak_live_only
+KILLED mutant[R3 INFRA_RE bo overloaded] <- t_r3_infra_overloaded_529
+KILLED mutant[R3 INFRA_RE bo 529] <- t_r3_infra_overloaded_529
+KILLED(lock) mutant[R3 SQL elig bo cua so hieu luc rating] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[R3 for c in skip khong ghi] <- t_r3_skip_rows_full
+KILLED mutant[R3 skip ghi dong rong (stats mat rating)] <- t_r3_skip_rows_full
+KILLED mutant[R3 SIGTERM khong kill nhom M2] <- t_r3_sigterm_kills_m2_group
+KILLED mutant[R3 run_second_opinion khong dang ky nhom] <- t_r3_sigterm_kills_m2_group
+KILLED(lock) mutant[R3 SQL su kien khong vao hash] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[ledger append khong idempotent] <- t_ledger_append_twice
+KILLED mutant[run_day bo guard idempotent (+ledger)] <- t_no_double_append
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:568: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S1 = g.apply(lambda x: (x.y * x.w).sum()).to_numpy(); N1 = g.w.sum().to_numpy()          # nhom CONT
+/home/trido/thanhdt/WorkingClaude/mike/agents/Mike/wt-1571694105111691406/agents/Taylor/research/ai_momentum_20261115/ai_momentum_daily.py:569: FutureWarning: DataFrameGroupBy.apply operated on the grouping columns. This behavior is deprecated, and in a future version of pandas the grouping columns will be excluded from the operation. Either pass `include_groups=False` to exclude the groupings or explicitly select the grouping columns after groupby to silence this warning.
+  S0 = g.apply(lambda x: (x.y * (1 - x.w)).sum()).to_numpy(); N0 = g.size().to_numpy() - N1
+KILLED mutant[append khong khoa flock (mo rong cua so race)] <- t_parallel_append
+KILLED mutant[cooldown bo luat khac-quy] <- t_cooldown_same_quarter
+KILLED mutant[bo kiem md5 khi doc] <- t_md5_tamper
+KILLED(lock) mutant[SQL dung LEAD (lo tuong lai)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[SQL doc ticker_prune] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[bo loc ingested_at (code)] <- t_news_pit
+KILLED mutant[bo loc ingested_at (SQL)] <- t_sql_pit
+   (mutant lam test nem AssertionError)
+KILLED mutant[goi lot truong outcome] <- t_no_outcome_in_packet
+KILLED mutant[bo loc Release_Date<=T] <- t_fin_pit
+   (mutant lam test nem ValueError)
+KILLED mutant[M2 loi khong fail-open] <- t_m2_exception_failopen
+KILLED mutant[M1 bo kiem schema] <- t_m1_fail_recorded
+KILLED mutant[schema cho phep truong thua] <- t_schema_strict
+KILLED mutant[tran hang doi 10->100] <- t_capacity
+KILLED mutant[hang doi khong reset tuan] <- t_capacity_resets_next_week
+KILLED mutant[cooldown 90->0] <- t_cooldown
+KILLED mutant[live cho T != hom nay] <- t_live_guard
+KILLED mutant[dry-run van ghi] <- t_dry_run_no_write
+KILLED mutant[scorer lo effects giua look] <- t_scorer_no_peek
+KILLED mutant[scorer dem N khong huong] <- t_scorer_no_peek
+KILLED(lock) mutant[nguong mom20 sai (cu v2)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[nguong volr sai (cu v2)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[nguong liq sai (cu v2)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[nguong idio sai (cu v2)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[JSON v3 doi nguong (khong dong bo)] <- t_prereg_params
+KILLED mutant[mat prereg_version/md5 tren dong] <- t_prereg_stamp
+KILLED mutant[bo khoa md5 PREREG] <- t_prereg_lock
+KILLED mutant[bo khoa hang so giao thuc] <- t_prereg_lock
+KILLED mutant[scorer dem dong protocol khac] <- t_scorer_ignores_other_prereg
+KILLED mutant[G-proc khong loc protocol] <- t_scorer_ignores_other_prereg
+KILLED mutant[bo do nhay cum theo ma] <- t_ticker_sens
+KILLED mutant[sensitivity lot vao ho BH (khoa T1 sai)] <- t_ticker_sens
+KILLED mutant[sc khong mang ticker] <- t_ticker_sens
+KILLED mutant[M2 blind nhan M1 (ro ri)] <- t_m2a_blind_before_and_no_m1
+KILLED mutant[M2 mat khung dinh dang] <- t_m2a_ok_and_prompt
+KILLED mutant[validate khong biet boolean] <- t_m2a_schema_boolean
+KILLED mutant[M2 prompt mat dong no-tool] <- t_m2a_ok_and_prompt
+KILLED(lock) mutant[M2 timeout 240->100 (bi KHOA md5 bat)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[M2 bo qua exit code] <- t_m2a_fail_modes
+   (mutant lam test nem TimeoutExpired)
+KILLED mutant[M2 bo bat timeout] <- t_m2a_fail_modes
+KILLED mutant[M2 bo kiem schema] <- t_m2a_fail_modes
+KILLED mutant[M2 bo kiem event_id] <- t_m2a_fail_modes
+KILLED mutant[M2 mat raw ledger] <- t_m2a_e2e_failopen
+KILLED mutant[M2 hardcode bin canonical] <- t_m2a_bin_in_own_worktree
+KILLED mutant[today bo neo ICT] <- t_today_ict
+KILLED mutant[B1 loi ha tang bi nuot o call_m1] <- t_infra_stop_no_write_and_resume
+KILLED mutant[B1 FileNotFoundError khong thanh InfraError] <- t_infra_cli_recovers_same_day
+KILLED mutant[B1 rc!=0 khong JSON khong phai ha tang] <- t_infra_real_claude_errors
+KILLED mutant[R3-B xet rc truoc JSON (max-turns thanh ha tang)] <- t_infra_real_claude_errors
+KILLED mutant[R3-B max-turns rc!=0 thanh ha tang] <- t_infra_real_claude_errors
+KILLED mutant[B1 is_error usage/auth khong phai ha tang] <- t_infra_real_claude_errors
+KILLED mutant[B1 run_day ghi dong khi ha tang hong] <- t_infra_stop_no_write_and_resume
+KILLED mutant[B2 cooldown replay bo luat khac-quy] <- t_replay_greedy
+KILLED mutant[B2 replay doc ca ngay T] <- t_replay_ignores_T_and_future
+KILLED mutant[B2 cap tuan khong tru su kien truoc] <- t_hist_deterministic_vs_ledger
+KILLED mutant[B2 cooldown khong dung lich su BQ] <- t_cooldown_from_prev_day
+KILLED(lock) mutant[B2 SQL range doc den T (khong T-1)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[B5 khong phan biet exit 4] <- t_exit_codes
+KILLED mutant[B5 infra_stop khong ra exit 5] <- t_exit_codes
+KILLED mutant[B5 bo kiem ngay giao dich] <- t_not_trading_day
+KILLED mutant[B5 ngay le khong tinh] <- t_not_trading_day
+KILLED mutant[B5 bo run_lock] <- t_run_lock_busy
+KILLED(lock) mutant[R3.1 freshness LEFT JOIN tkT (cong tat)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[R3.1 freshness tkT doc T-1] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[R3.1 freshness phien truoc = T] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[R3.1 M1 bo errors[] khoi blob] <- t_infra_real_claude_errors
+KILLED mutant[R3.1 M1 bo nhanh stderr-INFRA] <- t_infra_real_claude_errors
+KILLED mutant[R3.1 M1 budget chi khi is_error] <- t_infra_real_claude_errors
+KILLED mutant[R3.1 M1 JSON list coi nhu dict rong] <- t_infra_real_claude_errors
+KILLED mutant[B6 cong freshness chi MAX(time)] <- t_freshness_depth
+KILLED(lock) mutant[R3 SQL freshness bo in_universe] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[R3 SQL freshness phien truoc thanh <=T] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+   (mutant lam test nem TypeError)
+KILLED mutant[B6 thieu dem dong van cho qua] <- t_freshness_depth
+KILLED mutant[B6 bo kiem MAX(time)<T] <- t_freshness_depth
+KILLED mutant[R3 up_n=0 van cho qua] <- t_freshness_depth
+KILLED mutant[B6 freshness khong raise (ghi tiep)] <- t_freshness_depth
+KILLED(lock) mutant[rating khong gioi han <=T] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[fin khong gioi han <=T] <- t_rating_fin_news_pit
+KILLED mutant[news khong gioi han <=T] <- t_rating_fin_news_pit
+KILLED mutant[M1 bo kiem evidence date<=T] <- t_m1_content_checks
+KILLED mutant[M1 bo kiem event_id] <- t_m1_content_checks
+KILLED(lock) mutant[M1 argv retro co WebSearch (bi KHOA md5 bat)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED(lock) mutant[M1 live thieu allowedTools (bi KHOA md5 bat)] <- khoa md5 giao thuc (PREREG v3.2 lech khoa md5: CONST_PROTOCOL (hang so)
+KILLED mutant[M2 bo kiem ngay<=T] <- t_m2_dates
+   (mutant lam test nem ValueError)
+KILLED mutant[M2 khong truyen --model] <- t_m2_record_and_cmd
+KILLED mutant[M2 khong kill nhom khi qua tran] <- t_m2_record_and_cmd
+   (mutant lam test nem KeyError)
+KILLED mutant[M2 khong don tmpdir wrapper (TMPDIR)] <- t_m2_record_and_cmd
+KILLED mutant[M2 reason mat duoi stderr] <- t_m2_fail_reason_has_stderr
+KILLED mutant[T3 gom ca su kien M2 FAIL] <- t_t3_only_m2_ok
+KILLED mutant[ledger mac dinh tro ve canonical] <- t_default_ledger_dir
+KILLED mutant[sql_outcomes hardcode ruleset 1] <- t_outcomes_ruleset
+HARNESS-OK  mutant[harness: dich khong ton tai (PHAI lam harness FAIL)] <- dich khong ton tai => harness FAIL dung
+== 70 tests, 108 mutants (107 killed, 18 boi khoa md5) -> ALL PASS

@@ -103,9 +103,7 @@
       "bin_env_override": "DISPATCH_OPENCODE_BIN",
       "env": {},
       "models": [
-        "opencode/deepseek-v4-flash-free",
-        "opencode/ling-3.0-flash-free",
-        "opencode/nemotron-3-ultra-free",
+        "opencode/deepseek-v4.1-flash-free",
         "opencode/mimo-v2.5-free",
         "opencode/laguna-s-2.1-free",
         "opencode/north-mini-code-free",
@@ -140,7 +138,7 @@
         "— xem muc TRANG THAI PERMISSION trong _README. Truoc do la deny-by-default + allowlist",
         "hep, da chan ca python3/sed/awk nen agent gan nhu chi doc duoc."
       ],
-      "default_model": "opencode/deepseek-v4-flash-free"
+      "default_model": "opencode/deepseek-v4.1-flash-free"
     },
     "codex": {
       "label": "OpenAI Codex CLI",

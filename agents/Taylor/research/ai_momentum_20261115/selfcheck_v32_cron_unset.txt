@@ -1,0 +1,29 @@
+TZ env=<unset>
+== wrapper that
+  ok   rc0 sach: exit = 0
+  ok   rc0 sach: alert = 0
+  ok   doi so truyen: --date + --ledger-dir = --date 2026-11-16 --ledger-dir /tmp/am_cron_sc.aWZdlc/ledger
+  ok   rc=3: exit 0, im lang = 0/0
+  ok   rc=4: exit 0, im lang = 0/0
+  ok   rc=6: exit 0, im lang = 0/0
+  ok   rc=5: alert 1 + exit 5 = 5/1
+  ok   rc=1: alert 1 + exit 1 = 1/1
+  ok   rc=7: alert 1 + exit 7 = 7/1
+  ok   alert dung topic Momentum Lab = yes
+  ok   M1 FAIL>0: alert = 1
+  ok   M2 FAIL streak 3: alert = 1
+  ok   M2 FAIL streak 2: im lang = 0
+  ok   stdout rac: alert = 1
+  ok   timeout tong: exit 124, alert, <15s = 124/1/fast
+  ok   dang co luot khac: exit 0, python khong chay, im lang = 0/0/0
+  ok   sau khi nha khoa: chay lai duoc = 1
+== mutant (moi mutant PHAI lam it nhat 1 ca FAIL; target phai ton tai)
+  KILLED mutant[bo flock -n] (1 ca fail)
+  KILLED mutant[alert ca rc=3] (1 ca fail)
+  KILLED mutant[khong alert rc ha tang] (7 ca fail)
+  KILLED mutant[bo timeout tong] (1 ca fail)
+  KILLED mutant[bo canh bao M1 FAIL] (1 ca fail)
+  KILLED mutant[streak 3 -> 99] (1 ca fail)
+  KILLED mutant[doi topic] (1 ca fail)
+== 17 ca x (1+7) lan, 7 mutant (7 killed) -> ALL PASS
+rc=0
