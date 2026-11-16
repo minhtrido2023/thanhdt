@@ -2390,3 +2390,9 @@
 
 ## Archived 2026-11-16 (keep=12 days=0 require_done=False)
 - [2026-11-14T12:34:51Z] [dd-pat báo cáo NĐT 14/11] XONG job Taylor_20261114_122716: investor_report/ PDF 8tr; LƯU Ý giá 13/11 BQ = 71.000 (72.700 là 06/11) — CHỜ Mike xác nhận + user báo 'gửi email'; chưa ghi dd_price_zones
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-15T14:49:54Z] [ai-momentum plan 15/11] XONG job Taylor_20261115_144310: kb/projects/ai-momentum-research-plan-20261115.md (md5 d72baef6), chua code/chua cron — CHO user tra 4 cau F (muc tieu G-proc vs G-fcst, vu tru, M2, topic) roi moi P0; INDEX.md chua them dong (Mike/consolidator)
+
+## Archived 2026-11-16 (keep=12 days=0 require_done=False)
+- [2026-11-15T15:19:23Z] [ai-momentum P0 15/11] XONG job Taylor_20261115_150627: kb/projects/ai-momentum-p0-result-20261115.md (md5 5101c9cb), PREREG 5d3284d0b — CHO Mike quant-skeptic + user chot (2 nam hay noi nguong) + deepseek provider dang loi
