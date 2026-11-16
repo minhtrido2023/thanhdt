@@ -1760,6 +1760,35 @@ class Executor:
             return None
         return max(LOT, -(-remaining // left))   # ceil chia nguyên, tối thiểu 1 lô
 
+    def _fill_timing_base_active(self, o):
+        """True khi layer fill-timing (lịch cửa sổ cơ bản) áp cho lệnh này — đúng 3 cổng đầu
+        của `_fill_timing_mult`, tách ra để `_fill_lag_due` đọc CÙNG điều kiện (không chép)."""
+        return bool(self.cfg.get("fill_timing_enabled", True)
+                    and o.urgency != "high"
+                    and not (self.cfg.get("fill_timing_live_gate", True)
+                             and self.cfg.get("mode") != "paper"))
+
+    def _fill_lag_due(self, o, now):
+        """True = parent `o` đã qua HẾT cửa sổ thực thi theo lịch của chính nó ⇒ được tính vào
+        cảnh báo `fill_lagging` lúc `now`. Mốc sàn 11:00 (30' trước đóng phiên sáng) như cũ.
+
+        Vì sao không kiểm mọi parent lúc 11:00 (arch-review 2026-11-16, vòng 2): lịch HYBRID
+        LIVE HOÃN mọi lệnh MUA tới block 11:00 và trải tới 13:45 (`_hybrid_defer`) ⇒ ngày
+        chỉ-mua luôn ~0% lúc 11:00 ⇒ nổ sai theo thiết kế (replay journal thật: 13 ca).
+          • HYBRID bật cho lệnh này → due khi `_hybrid_sched` hết block (blocks_left == 0):
+            BUY sau 13:45, SELL sau 10:15 (đọc thẳng hybrid_*_blocks, không hardcode).
+          • Chỉ fill-timing cơ bản → due sau cuối cửa sổ của chiều đó (buy/sell_window_end).
+          • Uniform → due từ 11:00."""
+        t = now.time()
+        if t < dt.time(11, 0):
+            return False
+        if self._hybrid_active(o):
+            return self._hybrid_sched(o, now)[1] == 0
+        if self._fill_timing_base_active(o):
+            key = "buy_window_end" if o.side == "buy" else "sell_window_end"
+            return t >= _parse_hhmm(self.cfg.get(key, "11:15" if o.side == "buy" else "09:45"))
+        return True
+
     def _fill_timing_mult(self, o, now):
         """Fill-Timing Layer (Layer-3): trả interval multiplier theo cửa sổ tối ưu.
         1.0 = tốc độ bình thường (trong cửa sổ); N = interval × N (ngoài cửa sổ).
@@ -1768,11 +1797,7 @@ class Executor:
         Khi `fill_timing_hybrid_enabled` bật, hai quy tắc gom-cửa-sổ trên được THAY bằng lịch
         HYBRID trải block (xem `_hybrid_mult`); mọi cổng/hành vi khác giữ nguyên.
         """
-        if not self.cfg.get("fill_timing_enabled", True):
-            return 1.0
-        if o.urgency == "high":
-            return 1.0
-        if self.cfg.get("fill_timing_live_gate", True) and self.cfg.get("mode") != "paper":
+        if not self._fill_timing_base_active(o):
             return 1.0
         t = now.time()
         mult = self.cfg.get("fill_timing_outside_mult", 4.0)
@@ -2504,10 +2529,8 @@ class Executor:
             ps = self.state["parents"][o.id]
             pct = 100.0 * ps["filled"] / o.qty if o.qty else 0
             tot_plan += o.value
-            fills = [c for c in ps["children"] if c.get("filled")]
-            avg = (sum(c["filled"] * (c["price"] or o.ref_price) for c in fills) /
-                   max(1, sum(c["filled"] for c in fills))) if fills else 0
-            tot_fill += ps["filled"] * (avg or o.ref_price)
+            fill_val, avg = _parent_fill_value(o, ps)
+            tot_fill += fill_val
             avg_disp = f"{avg:,.0f}" if avg else "-"
             lines.append(f"| {o.id} | {o.ticker} | {o.side} | {o.qty:,} | "
                          f"{ps['filled']:,} | {pct:.0f}% | {o.ref_price:,.0f} | "
@@ -2635,6 +2658,54 @@ def _await_postclose_fills(executors, deadline=ATC_POSTCLOSE_DEADLINE,
             e._save_state()
 
 
+def _parent_fill_value(o, ps):
+    """(giá trị đã khớp VND, giá khớp TB) của 1 parent — công thức DUY NHẤT, dùng chung
+    `write_report` và `_check_fill_lagging`: KL khớp × giá khớp TB của child (child thiếu giá,
+    vd ATC, lấy `o.ref_price`)."""
+    fills = [c for c in ps["children"] if c.get("filled")]
+    avg = (sum(c["filled"] * (c["price"] or o.ref_price) for c in fills) /
+           max(1, sum(c["filled"] for c in fills))) if fills else 0
+    return ps["filled"] * (avg or o.ref_price), avg
+
+
+def _check_fill_lagging(executors, phase, now):
+    """Cảnh báo bus `fill_lagging` (1 lần/account/phiên): tỷ lệ khớp THEO GIÁ TRỊ < 40% trên
+    các parent ĐÃ QUA HẾT cửa sổ thực thi của chính nó (`Executor._fill_lag_due`).
+
+    • Khối lượng kế hoạch lấy từ `plan.orders` — parent state không có `qty` (bản gốc cộng
+      `p.get("qty", 0)` ⇒ total=0 ⇒ không bao giờ nổ; code-review 2026-11-15).
+    • Chỉ parent CÒN trong plan VÀ đã có trong state (parent mồ côi không có KL kế hoạch).
+    • Theo GIÁ TRỊ (`_parent_fill_value`, như `write_report`), không theo số cổ phiếu.
+    • Ngày chỉ-mua + HYBRID: lúc 11:00 chưa parent nào due ⇒ im; 13:45 mới tính lệnh mua.
+    • Lỗi của 1 account chỉ ghi journal `FILL_LAG_CHECK_ERROR` — cảnh báo phụ trợ KHÔNG bao
+      giờ được làm dừng vòng thực thi hay bỏ qua account khác."""
+    if phase not in ("MORNING", "AFTERNOON"):
+        return
+    for e in executors:
+        try:
+            if e.state.get("_fill_lag_warned"):
+                continue
+            ps = e.state.get("parents", {})
+            due = [o for o in e.plan.orders if o.id in ps and e._fill_lag_due(o, now)]
+            total_plan = sum(o.value for o in due)
+            total_fill = sum(_parent_fill_value(o, ps[o.id])[0] for o in due)
+            fill_rate = total_fill / total_plan if total_plan else 1.0
+            if fill_rate < 0.4:
+                e.state["_fill_lag_warned"] = True
+                _publish_bot_event("status", "fill_lagging", {
+                    "account": e.label, "fill_rate_pct": round(fill_rate * 100, 1),
+                    "n_due": len(due), "checked_at": f"{now:%H:%M}",
+                    "note": f"Chỉ khớp {fill_rate*100:.0f}% giá trị các lệnh đã qua hết cửa sổ "
+                            f"thực thi (lúc {now:%H:%M}) — cần chú ý.",
+                    "action_hint": "Xem execution_logs để quyết định có chuyển ATC không."
+                })
+        except Exception as ex:
+            try:
+                e._journal("FILL_LAG_CHECK_ERROR", note=f"{type(ex).__name__}: {ex}")
+            except Exception:
+                pass
+
+
 def run_session(executors, once=False, max_cycles=None, force_phase=None):
     """Vòng lặp xuyên phiên cho 1..N account. Sổ participation dùng chung —
     truyền cùng 1 dict `shared` khi tạo các Executor (run_accounts lo việc này)."""
@@ -2678,22 +2749,7 @@ def run_session(executors, once=False, max_cycles=None, force_phase=None):
             print("[exec] ✅ tất cả account đã khớp đủ")
             break
 
-        # Fill-lagging check: 30 min before MORNING close (11:00), warn if <40% filled
-        if phase == "MORNING" and now.time() >= dt.time(11, 0):
-            for e in executors:
-                ps = e.state.get("parents", {})
-                if not ps:
-                    continue
-                total_plan = sum(p.get("qty", 0) for p in ps.values())
-                total_fill = sum(p.get("filled", 0) for p in ps.values())
-                fill_rate = total_fill / total_plan if total_plan else 1.0
-                if fill_rate < 0.4 and not e.state.get("_fill_lag_warned"):
-                    e.state["_fill_lag_warned"] = True
-                    _publish_bot_event("status", "fill_lagging", {
-                        "account": e.label, "fill_rate_pct": round(fill_rate * 100, 1),
-                        "note": f"Chỉ fill {fill_rate*100:.0f}% trước 11:00 — còn phiên chiều nhưng cần chú ý.",
-                        "action_hint": "Xem execution_logs để quyết định có chuyển ATC không."
-                    })
+        _check_fill_lagging(executors, phase, now)
 
         if phase == "CLOSED" and not force_phase:
             print("[exec] hết phiên — dừng")
