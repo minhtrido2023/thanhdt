@@ -235,7 +235,10 @@ class Sandbox:
         os.remove(p) if os.path.exists(p) else None
         env = {k: v for k, v in os.environ.items() if k not in ("DISCORD_THREAD_ID", "TZ", "JOB_ID")}
         env.update(DISPATCH_CGROUP_DETACH="0", DISPATCH_CLAUDE_BIN=self.cli, DISPATCH_OPENCODE_BIN=self.cli,
-                   DISPATCH_FROM="Mike", CLAUDE_CONFIG_DIR=self.cfg, TT_SB=self.sb)
+                   DISPATCH_FROM="Mike", CLAUDE_CONFIG_DIR=self.cfg, TT_SB=self.sb,
+                   # Selfcheck kiem TELEMETRY, khong kiem cong wakeup exit 8: chay trong phien tuong tac
+                   # Mike (CLAUDECODE=1) thi cong chan --bg => I7 do (job khong bao gio sinh ra).
+                   MIKE_WAKEUP_GATE="off")
         return env
 
     def cmd(self, *args):
@@ -369,6 +372,7 @@ def integration_tests(mutate):
                 return
         # I7 --bg + retry: cong don 2 attempt + retry_causes
         r = s.run("retry", "--bg", "--retries", "1")
+        check("I7 dispatch --bg khong bi chan (rc=0)", r.returncode == 0, (r.returncode, r.stderr[-300:]))
         deadline = time.time() + 120
         j = {}
         while time.time() < deadline:
