@@ -194,10 +194,18 @@ Sửa (1)+(2) cần: probe 1 lần SAU khi nộp ký quỹ để biết field n�
    - watchdog cùng lệnh, **mỗi 2' từ 09:32 tới 14:50 ICT** (flock ⇒ không trùng; resume state; trạng thái kết thúc ⇒ chỉ đọc positions + báo nếu ≠0):
      `32-58/2 2 * * 1-5` · `*/2 3-6 * * 1-5` · `0-50/2 7 * * 1-5`
    - `30,45 1 * * 1-5` + `0,15 2 * * 1-5` `bin/orb_futures_run.sh funding-alert` (chỉ có tác dụng khi cờ BẬT).
-4. **DRY-run tối thiểu 10 phiên** (đề xuất; Mike/user có thể đổi): journal DRY vs `orb_pt_log.csv` — sig khớp 100%, giá vào/thoát lệch
+4. **DRY-run tối thiểu 5 phiên** (USER CHỐT 2026-11-17 11:35 ICT, thay đề xuất 10): journal DRY vs `orb_pt_log.csv` — sig khớp 100%, giá vào/thoát lệch
    bao nhiêu bps; 0 PAUSED vô cớ. 5. Sửa NAV (mục 7) + selfcheck, merge. 6. User nộp ký quỹ 100tr ⇒ Taylor probe field `derivative` +
    ppse qmax ⇒ chốt mapping. 7. **ĐIỀU KIỆN BẮT BUỘC trước khi bật LIVE (R2 vòng 3): cron watchdog 2' ở bước 3 ĐÃ CÀI và đã thấy chạy thật trong log
    DRY** — không có watchdog thì vị thế khớp ngầm sau khi tiến trình chính chết/kết thúc chỉ được phát hiện khi có người nhìn.
    Sau đó user bật cờ: diff đề xuất cho SpaceX profile trong `secrets/trading_bot_accounts.json`:
    `"orb_futures": {"enabled": true}` (thêm cạnh `"overrides"`, KHÔNG trong overrides). 8. Phiên LIVE đầu: Mike theo dõi; xác minh
    positions schema, order_detail, LO sàn/trần, phí thật từ email khớp lệnh (§27) — cập nhật mục 3 "chưa xác minh".
+
+
+## 10. Quyết định user 2026-11-17 11:35 ICT (`decided_by: user`) — KHÔNG hỏi lại
+1. **BOT_STOP khi đang giữ vị thế phái sinh: bot ĐƯỢC tự đặt lệnh ĐÓNG** (`ORB_CLOSE_ALLOWED_UNDER_BOT_STOP=True`, outer commit `815a6925d`); lệnh VÀO vẫn bị chặn dưới BOT_STOP.
+2. **DRY 5 phiên** (không phải 10). Cron DRY ĐÃ CÀI 2026-11-17 (backup `state/crontab_backup_20261117T043630Z_orb_futures.txt`): 4 dòng UTC (run 02:30 + watchdog 2' tới 14:50 ICT). Phiên DRY đầu: T4 18/11. `funding-alert` CHƯA cài (chỉ có tác dụng khi cờ BẬT ⇒ cài lúc bật LIVE).
+3. **Vốn: user TỰ nạp ký quỹ phái sinh** (nộp thử nhỏ trước để probe field `balances.derivative`, rồi đủ 100tr sau khi NAV sửa).
+4. **Tin [DRY] vào Trading Daily: duyệt** (2 tin/ngày: vào và thoát lệnh dự kiến).
+Còn lại trước LIVE: sửa NAV (mục 7) · fix chốt probe field · user duyệt bật cờ.
