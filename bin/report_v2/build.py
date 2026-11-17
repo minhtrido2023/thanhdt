@@ -120,7 +120,8 @@ class Ctx:
 # ───────────────────────── khối dùng chung ─────────────────────────
 def nav_parts(acct, d):
     r = S.nav_row_on_or_before(acct, d)
-    g = {k: float(r.get(k) or 0) for k in ("nav", "mtm_stock", "cash", "egg_assets", "margin_debt", "offbook_assets")}
+    g = {k: float(r.get(k) or 0) for k in ("nav", "mtm_stock", "cash", "egg_assets", "margin_debt", "offbook_assets",
+                                               "derivative_assets")}
     g["date"] = S.D(r["date"])
     return g
 
@@ -254,6 +255,9 @@ def asset_block_rows(nav, n_pos, stock_pct_ret):
          ["Tiền mặt", vn(nav["cash"]), pct(nav["cash"] / nv * 100, 1, False), ""],
          ["Tiền gửi Trứng vàng", vn(nav["egg_assets"]), pct(nav["egg_assets"] / nv * 100, 1, False), ""],
          ["Nợ ký quỹ", vn(-nav["margin_debt"]) if nav["margin_debt"] else "0", pct(-nav["margin_debt"] / nv * 100, 1, False) if nav["margin_debt"] else "0,0%", ""]]
+    if nav.get("derivative_assets"):
+        r.append(["Hợp đồng tương lai — tiền ký quỹ", vn(nav["derivative_assets"]),
+                  pct(nav["derivative_assets"] / nv * 100, 1, False), ""])
     if nav.get("offbook_assets"):
         r.append(["Tài sản ngoài sổ CTCK", vn(nav["offbook_assets"]), pct(nav["offbook_assets"] / nv * 100, 1, False), ""])
     r.append(["Tổng NAV", vn(nv), "100,0%", ""])

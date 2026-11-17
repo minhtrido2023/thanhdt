@@ -790,6 +790,18 @@ def classify_corp_action_gap(ev, qty_now, qty_prev, price_ref, mkt_price, tol_pc
     return "unexplained", {"price_ref": price_ref, "mkt_price": mkt_price, "diff_pct": diff_pct}
 
 
+def live_derivative_positions(account_no):
+    """Vị thế DERIVATIVE thật (read-only). None nếu không đọc được ⇒ derivative_margin chặn NAV."""
+    sys.path.insert(0, WC_ROOT)
+    try:
+        from trading_bot.brokers import get_dnse_client
+        import derivative_margin
+        return derivative_margin.read_derivative_positions(get_dnse_client(None), account_no)
+    except Exception as e:
+        print(f"⚠️ Không đọc được vị thế phái sinh ({account_no}): {_exc_text(e)}", file=sys.stderr)
+        return None
+
+
 def broker_positions(account_label, account_no):
     """Vị thế THẬT từ API broker (source of truth) → {sym: {"qty": ..., "marketPrice": ...}}.
 
@@ -1446,6 +1458,17 @@ def main():
     # dùng cho tài sản off-book KHÁC egg (nếu có trong tương lai).
     egg_value = float((bal.get("payload", {}).get("egg") or {}).get("totalValue") or 0)
 
+    # Tài sản tiểu khoản PHÁI SINH (ký quỹ ORB, từ 17/11/2026) — `derivative_margin.py` giữ công
+    # thức + danh sách field đã/chưa xác minh. Fail-closed: field chưa xác minh ≠ 0 / vị thế mở /
+    # không đọc được vị thế khi đang có ký quỹ ⇒ KHÔNG ghi NAV (rc=2, lượt retry/escalate sẵn có).
+    import derivative_margin
+    derivative_value, _dreject = derivative_margin.live_gate(
+        bal.get("payload"), lambda: live_derivative_positions(account_no), args.from_raw)
+    if _dreject:
+        print(f"❌ [{args.date}] Tài sản phái sinh ({bal.get('ts')}) KHÔNG định giá được: {_dreject}. "
+              f"KHÔNG tính NAV (thiếu khoản này NAV sẽ tụt giả đúng bằng tiền ký quỹ).", file=sys.stderr)
+        return 2
+
     # INVARIANT (bug 2026-07-07 lần 2, user chỉ ra): bản ghi balance phải MỚI HƠN cú khớp
     # CUỐI CÙNG trong ngày — ngày vừa mua vừa bán, DNSE cập nhật tiền theo TỪNG khớp
     # (mua khớp T0: totalCash → secureAmount trong vòng vài phút), snapshot chụp GIỮA
@@ -1804,7 +1827,7 @@ def main():
     # + egg_value: Trứng vàng tự đọc từ API (field egg.totalValue trong balances), live từ 2026-08-18.
     # + offbook: tài sản off-book user tự báo KHÁC egg — cộng thẳng vào NAV thật,
     # KHÔNG lẫn vào 'cash' (cash vẫn = sức mua thật ở tài khoản môi giới).
-    nav = mtm_stock + cash - debt + offbook + egg_value
+    nav = mtm_stock + cash - debt + offbook + egg_value + derivative_value
 
     sell_today = today_sell_value(args.account, args.date)
     stale_warning = None
@@ -1828,7 +1851,8 @@ def main():
     jump_ok, jump_msg = nav_jump_verdict(
         args.account, args.date, prev_nav, nav, sanity_max, hist_rows,
         components={"mtm_stock": mtm_stock, "cash": cash, "debt": debt,
-                    "egg": egg_value, "offbook": offbook}, balance_ts=bal["ts"])
+                    "egg": egg_value, "offbook": offbook, "derivative": derivative_value},
+        balance_ts=bal["ts"])
     if jump_msg:
         print(jump_msg)
     if not jump_ok:
@@ -1842,12 +1866,16 @@ def main():
                        "cum_dividend_excl": f"{cum_div['amount']:.0f}",
                        "nav_is_estimate": "True" if args.from_raw else "False",
                        "nav_source": (f"backfill dnse_raw positions@{positions_ts} balances@{bal['ts']} "
-                                      f"+ BQ Price" if args.from_raw else "live")})
+                                      f"+ BQ Price" if args.from_raw else "live"),
+                       "derivative_assets": f"{derivative_value:.0f}"})
     hist_rows.sort(key=lambda r: r["date"])
     # `cash` = tiền THẬT của broker TRỪ cổ tức phải thu chưa qua ex-date (cum_dividend_excl),
-    # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets luôn đúng trên mọi dòng.
+    # để bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + egg_assets
+    # + derivative_assets luôn đúng trên mọi dòng. `derivative_assets` = cột CUỐI (thêm 17/11/2026,
+    # reader DictReader; dòng cũ để trống = 0).
     fieldnames = ["date", "nav", "mtm_stock", "cash", "margin_debt", "offbook_assets",
-                  "egg_assets", "balance_ts", "cum_dividend_excl", "nav_is_estimate", "nav_source"]
+                  "egg_assets", "balance_ts", "cum_dividend_excl", "nav_is_estimate", "nav_source",
+                  "derivative_assets"]
     _write_nav_history(hist_path, hist_rows, fieldnames)
 
     # Hiệu suất hiển thị: MỘT nguồn (giá đơn vị quỹ). `day_change`/`prev_nav` ở trên chỉ còn
@@ -1858,6 +1886,7 @@ def main():
         f"💰 **NAV {args.date}: {nav:,.0f} VND** ({paren})",
         f"   Cổ phiếu {mtm_stock:,.0f} · Tiền mặt {cash:,.0f} · Nợ margin {debt:,.0f}"
         + (f" · Trứng vàng {egg_value:,.0f}" if egg_value else "")
+        + (f" · Ký quỹ phái sinh {derivative_value:,.0f}" if derivative_value else "")
         + (f" · Off-book {offbook:,.0f}" if offbook else ""),
     ] + perf_lines
     # Đọc CHÍNH thư mục mà lần chụp này vừa ghi nav_history và đọc dnse_raw. Báo cáo chỉ nhận MỘT
@@ -1908,6 +1937,7 @@ def main():
            "mtm_stock": mtm_stock, "cash": cash, "cash_broker": cash_broker,
            "cum_dividend_excl": cum_div, "margin_debt": debt,
            "egg_assets": egg_value, "egg_assets_auto": True,
+           "derivative_assets": derivative_value,
            "offbook_assets": offbook, "offbook_assets_note": offbook_note,
            "offbook_assets_asof": offbook_asof, "offbook_stale_warning": offbook_stale_warning,
            "stale_warning": stale_warning, "prev_nav": prev_nav, "day_change": day_change,

@@ -114,7 +114,7 @@ AUDIT_LOG = "nav_history_corrections.jsonl"
 BACKUP_DIR = "restatement_backups"
 # Cột tiền của một dòng nav_history ngoài `nav`: báo cáo có thể in riêng từng cột này.
 MONEY_COLUMNS = ("mtm_stock", "cash", "margin_debt", "offbook_assets", "egg_assets",
-                 "cum_dividend_excl")
+                 "cum_dividend_excl", "derivative_assets")
 # Khung được phép `apply` (giờ ICT, hai đầu tính cả): ngoài khung ghi nav_history của
 # daily_nav_snapshot.py (19:00–21:45) và cách nó một quãng.
 APPLY_WINDOW_ICT = (datetime.time(9, 0), datetime.time(18, 30))
@@ -214,17 +214,17 @@ def _check_row(row: dict, fields: list, where: str) -> None:
     try:
         datetime.date.fromisoformat(row["date"])
         parts = {k: _num(row, k) for k in ("nav", "mtm_stock", "cash", "margin_debt",
-                                           "offbook_assets", "egg_assets")}
+                                           "offbook_assets", "egg_assets", "derivative_assets")}
     except ValueError as exc:
         raise RestatementError(f"{where}: ô không phải số/ngày ({exc})") from exc
     if not all(math.isfinite(v) for v in parts.values()):
         raise RestatementError(f"{where}: có ô không hữu hạn: {parts}")
     want = (parts["mtm_stock"] + parts["cash"] - parts["margin_debt"] + parts["offbook_assets"]
-            + parts["egg_assets"])
+            + parts["egg_assets"] + parts["derivative_assets"])
     if abs(parts["nav"] - want) > NAV_INVARIANT_TOL:
         raise RestatementError(
             f"{where}: vỡ bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + "
-            f"egg_assets: nav {parts['nav']:,.0f} nhưng các cột cộng lại {want:,.0f} (lệch "
+            f"egg_assets + derivative_assets: nav {parts['nav']:,.0f} nhưng các cột cộng lại {want:,.0f} (lệch "
             f"{parts['nav'] - want:+,.0f} đ)")
     if not row.get("balance_ts"):
         raise RestatementError(f"{where}: thiếu balance_ts")
