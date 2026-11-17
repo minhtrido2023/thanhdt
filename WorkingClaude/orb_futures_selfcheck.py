@@ -576,5 +576,50 @@ check(r == "CLOSED" and reds(ev, "KHÔNG đọc được positions") and n_err[0
       f"lỗi đọc ⇒ ĐỎ ngay, 1 lần đọc ({r}, n_err={n_err[0]})")
 check(not reds(ev, "BROKER CÒN"), "lỗi đọc ≠ 'BROKER CÒN'")
 
+print("42. R2 vòng 4: đọc lại lần 2 LỖI (open→err→phẳng) ⇒ ĐỎ 'KHÔNG đọc được' đúng 1 lần, dừng ở lần 2, KHÔNG 'BROKER CÒN'")
+
+
+def seq_positions(f, bot, seq):
+    """Sau khi state = CLOSED, các lần đọc positions lần lượt trả: 'open' (+1 NB) | 'none' (dòng thiếu số lượng)
+    | 'err' (ném lỗi) | 'flat'. Trả list ghi lại các lần đọc đã xảy ra."""
+    orig, reads = f.positions, []
+
+    def scripted(acc, market_type="STOCK"):
+        if bot.state["stage"] != "CLOSED":
+            return orig(acc, market_type)
+        k = len(reads)
+        step = seq[min(k, len(seq) - 1)]
+        reads.append(step)
+        if step == "err":
+            raise ConnectionError("positions lỗi giả lần đọc lại")
+        if step == "open":
+            return {"positions": [{"symbol": CT, "openQuantity": 1, "side": "NB"}]}
+        if step == "none":
+            return {"positions": [{"symbol": CT}]}
+        return {"positions": []}
+    f.positions = scripted
+    return reads
+
+
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 0) else 1800.0)
+reads = seq_positions(f, bot, ["open", "err", "flat"])
+r = bot.run()
+check(r == "CLOSED" and reads == ["open", "err"], f"dừng ở lần đọc 2, không chạy lần 3 ({r}, {reads})")
+check(len(reds(ev, "KHÔNG đọc được positions")) == 1, f"đúng 1 ĐỎ 'KHÔNG đọc được' ({len(reds(ev, 'KHÔNG đọc được positions'))})")
+check(not reds(ev, "BROKER CÒN"), "lỗi đọc ở lần ≥2 ≠ 'BROKER CÒN'")
+
+print("43. R2 vòng 4: dòng vị thế thiếu số lượng (None) ⇒ ĐỎ 'không đọc được số lượng'; open,open,None ⇒ cũng ĐỎ")
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 0) else 1800.0)
+reads = seq_positions(f, bot, ["none", "none", "none"])
+r = bot.run()
+check(r == "CLOSED" and len(reads) == OF.TERMINAL_CONFIRM_TRIES, f"None ×{OF.TERMINAL_CONFIRM_TRIES} đọc đủ số lần ({r}, {reads})")
+check(len(reds(ev, "không đọc được số lượng")) == 1, f"đúng 1 ĐỎ 'không đọc được số lượng' ({len(reds(ev, 'không đọc được số lượng'))})")
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 0) else 1800.0)
+reads = seq_positions(f, bot, ["open", "open", "none"])
+r = bot.run()
+check(r == "CLOSED" and reads == ["open", "open", "none"], f"open,open,None đọc đủ 3 lần ({r}, {reads})")
+check(len(reds(ev, "không đọc được số lượng")) + len(reds(ev, "BROKER CÒN")) >= 1, "open,open,None ⇒ có ĐỎ (không im lặng)")
+check(len(reds(ev, "BROKER CÒN +1 HĐ")) == 0, "lần đọc cuối None ⇒ KHÔNG nói còn +1 (số cuối không rõ)")
+
 print(f"\n{'ALL PASS' if not FAILS else f'{len(FAILS)} FAIL'} (TZ={os.environ.get('TZ')})")
 sys.exit(1 if FAILS else 0)
