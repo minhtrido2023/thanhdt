@@ -140,6 +140,8 @@ bỏ ước giá khớp, bỏ try/except, đặt lệnh sau 14:45, thiếu khoá
   BOT_STOP+False: "bot KHÔNG đặt lệnh nào, cần user đóng tay". **N-e** test lớp chặn `_place` ≥14:45; selfcheck dọn tmpdir khi thoát.
 - Selfcheck vòng 3: 38 kịch bản / 88 assertion PASS dưới `env -u TZ`, `Asia/Ho_Chi_Minh`, `America/New_York`, `Pacific/Kiritimati`;
   7 mutant mới SỐNG với selfcheck vòng 2 → BỊ BẮT với vòng 3 (B1c, B1d, R2, N-a, N-b, N-c, N-e).
+- Vòng 4 (outer 1cb1ce075): R2 "vừa chuyển sang <TERMINAL>" đọc positions tối đa `TERMINAL_CONFIRM_TRIES`=3 × 2s, chỉ báo "BROKER CÒN" khi MỌI lần còn (lỗi đọc vẫn ĐỎ ngay); watchdog/chạy lại giữ 1 lần đọc; xoá `_last_alert["loop_err"]` khi hồi phục.
+  Selfcheck 41 kịch bản / 95 PASS × 4 TZ; 6 mutant bị bắt (r3-file, bỏ đọc lại, báo lần đầu, hết lần im lặng, lỗi⇒đọc lại, giữ loop_err).
 **Selfcheck bản 1** `orb_futures_selfcheck.py` (FakeClient, `MIKE_BOT_TEST_MODE=1` trước import): 20 kịch bản / 38 assertion PASS dưới
 `env -u TZ`, `TZ=Asia/Ho_Chi_Minh`, `TZ=America/New_York`, `TZ=Pacific/Kiritimati`. Đột biến (mutation) bị bắt: bỏ chặn lệnh lạ, DRY
 gọi broker, đảo chiều stop, bỏ strict bar 09:30, bỏ ân hạn feed 09:33. (Đột biến "bỏ PAUSE khi restart ở _PENDING" KHÔNG làm test fail
