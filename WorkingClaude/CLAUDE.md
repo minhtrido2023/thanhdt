@@ -45,6 +45,13 @@ hunk cho symbol chỉ khi hunk nằm GỌN trong symbol đó) → `git diff` m�
 Output của srcwalk là bằng chứng **điều hướng cấu trúc**, không phải bằng chứng runtime — mang
 theo dòng `confidence:` / `caveat:` nó in ra vào những gì bạn báo cáo.
 
+## Uỷ quyền tìm kiếm & test cho sub-agent Haiku (user duyệt 2026-11-17)
+
+- Tìm kiếm trên cả kho và chạy test → giao sub-agent `search` / `grep` / `audit` (Haiku 5.5, `~/.claude/agents/`) để giữ ngữ cảnh chính gọn.
+- Sub-agent PHẢI trả output thô (`file:dòng`, exit code, đuôi log); kết quả rỗng phải nói rõ kèm lệnh đã chạy. Người gọi vẫn tự đọc output test trước khi báo "xong" (mike/kb/coding_guidelines.md §19).
+- `audit` (chạy trong worktree riêng) chỉ soát cơ học; thay đổi chạm tiền/kiến trúc vẫn phải qua `arch-reviewer`/`quant-skeptic` (Opus).
+- Mọi thay đổi: đưa diff cho user xem trước; chưa có "bắt đầu" thì KHÔNG sửa file.
+
 ## BigQuery (Google Cloud)
 
 - **Project**: `lithe-record-440915-m9` · **Dataset**: `tav2_bq` (location `asia-southeast1`)
