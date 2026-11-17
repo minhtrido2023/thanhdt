@@ -2414,3 +2414,9 @@
 
 ## Archived 2026-11-17 (keep=12 days=0 require_done=False)
 - [2026-11-16T01:30:38Z] [ai-momentum R3 16/11] XONG job Taylor_20261116_011145: commit 2ec32179e nhanh research/ai-momentum-p1-20261115, KHONG merge/cron — CHO Mike smoke live + arch-review vong 3 + user duyet cron
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T01:33:41Z] [weekly 09-13/11 cadence rescue 16/11] job Taylor_20261116_013304: file chuan da co, CHO waiver Q9 (job 013249) roi chay report_delivery_gate cho SpaceX+ZaloPay (topic trading_report); khong dung lai
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T01:36:06Z] [cq-medium 16/11] XONG job Taylor_20261116_012626: A fix/fill-lagging-qty-20261116 (60908e01a), B fix/bull-div-boost-shell-20261116 (cd723aa2e) KHONG merge — CHO Mike arch-review + merge; worktree selfcheck rong can bu env gitignored (secrets/accounts, data/trade_plans, mike)
