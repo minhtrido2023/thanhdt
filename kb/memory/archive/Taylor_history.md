@@ -2408,3 +2408,9 @@
 
 ## Archived 2026-11-16 (keep=12 days=0 require_done=False)
 - [2026-11-15T17:12:53Z] ĐANG DỞ: P1-ARCH-FIX vong2 job Taylor_20261115_170852 worktree agents/Taylor/wt-ai-momentum-p1 (B3 xong chua commit) | NEXT: rewrite ai_momentum_daily.py, wrapper bin/ai_momentum_cron.sh, PREREG_v3_2, selfcheck 3TZ, commit
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-15T17:35:27Z] [ai-momentum ARCH-FIX v2 16/11] XONG job Taylor_20261115_170852: nhanh research/ai-momentum-p1-20261115 commit moi; CHO Mike smoke live --ledger-dir tam + arch-review vong 3 + quant-skeptic + user duyet cron
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T01:30:38Z] [ai-momentum R3 16/11] XONG job Taylor_20261116_011145: commit 2ec32179e nhanh research/ai-momentum-p1-20261115, KHONG merge/cron — CHO Mike smoke live + arch-review vong 3 + user duyet cron

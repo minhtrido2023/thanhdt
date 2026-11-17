@@ -10,3 +10,4 @@
 - Taylor: orb-futures vòng 2 (feat/orb-futures-live-20261116) chờ arch-review diff; chưa merge.
 - Mốc: 18/11 chấm LVR-2026-10-21; 26/11 Bobby review quý; 15/12 checkpoint LAG ADV + corp-action shadow.
 
+- [2026-11-17T03:41:22Z] [17/11 10:4x] User duyệt (a): Taylor vòng 3 nhỏ ORB (R1 test BOT_STOP+EXIT_PLACED, R2 watch_broker khi chuyển trạng thái kết thúc, N-a/b/c/e) → arch-review CHỈ DIFF → merge (cờ TẮT, không cron).

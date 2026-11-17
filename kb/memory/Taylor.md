@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-15T17:35:27Z] [ai-momentum ARCH-FIX v2 16/11] XONG job Taylor_20261115_170852: nhanh research/ai-momentum-p1-20261115 commit moi; CHO Mike smoke live --ledger-dir tam + arch-review vong 3 + quant-skeptic + user duyet cron
-- [2026-11-16T01:30:38Z] [ai-momentum R3 16/11] XONG job Taylor_20261116_011145: commit 2ec32179e nhanh research/ai-momentum-p1-20261115, KHONG merge/cron — CHO Mike smoke live + arch-review vong 3 + user duyet cron
 - [2026-11-16T01:33:41Z] [weekly 09-13/11 cadence rescue 16/11] job Taylor_20261116_013304: file chuan da co, CHO waiver Q9 (job 013249) roi chay report_delivery_gate cho SpaceX+ZaloPay (topic trading_report); khong dung lai
 - [2026-11-16T01:36:06Z] [cq-medium 16/11] XONG job Taylor_20261116_012626: A fix/fill-lagging-qty-20261116 (60908e01a), B fix/bull-div-boost-shell-20261116 (cd723aa2e) KHONG merge — CHO Mike arch-review + merge; worktree selfcheck rong can bu env gitignored (secrets/accounts, data/trade_plans, mike)
 - [2026-11-16T01:37:18Z] [q9-waiver 16/11] XONG job Taylor_20261116_013249: nhanh feat/q9-waiver-20261116 (17db40c3c) KHONG merge — CHO Mike arch-review + merge + chay gate that 2 weekly 09-13/11; waiver het han 2026-11-20
@@ -26,3 +24,5 @@
 - [2026-11-16T16:41:16Z] [orb-futures 16/11] XONG job Taylor_20261116_162132: nhanh feat/orb-futures-live-20261116 (outer e9aad9819, mike d91e49d32) KHONG merge/cron, co TAT — CHO Mike arch-review+quant-skeptic; sau do DRY>=10 phien, sua NAV phai sinh truoc khi user nop ky quy
 - [2026-11-16T16:50:16Z] ĐANG DỞ: job Taylor_20261116_165006 ORB vong2 sua B1-B4,M1-3,m1-2,N1,spec | NEXT: sua orb_futures.py + selfcheck
 - [2026-11-16T17:01:23Z] [orb-futures vong2 17/11] XONG job Taylor_20261116_165006: outer 6e4b80c22, mike 2a6ddf10c(prereg)+9f3da28cb, KHONG merge/cron, co TAT — CHO Mike arch-review diff-only (round-cap: loi moi => user); NAV fix blocker truoc nop ky quy
+- [2026-11-17T03:41:33Z] ĐANG DỞ: job Taylor_20261117_034120 ORB vong3 R1,R2,N-a,N-b,N-c,N-e | NEXT: sua orb_futures.py + selfcheck o wt-orb-futures-20261116
+- [2026-11-17T03:46:42Z] [orb-futures vong3 17/11] XONG job Taylor_20261117_034120: outer addddabf9, mike 3e41ae02a, KHONG merge/cron, co TAT — CHO Mike arch-review diff-only; watchdog cron = dieu kien truoc LIVE
