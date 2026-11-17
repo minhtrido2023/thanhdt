@@ -258,6 +258,32 @@ if [ -n "$DDZONE_CMD" ]; then
 fi
 export DDZONE_BLOCK
 
+# --- ORB futures sleeve VN30F (SpaceX; user duyệt 16/11/2026, job Taylor_20261116_162132). LUẬT duyệt trước +
+# kiểm ký quỹ phái sinh (số tiền cần nộp cụ thể) — KHÔNG có lệnh cụ thể, KHÔNG đụng orders/sizing cổ phiếu.
+# FAIL-OPEN: lỗi/treo/rỗng => 1 dòng cảnh báo, không chặn gửi. Sandbox selfcheck không chạy trừ khi cấp SEND_PLAN_ORB_CMD.
+ORB_BLOCK=""
+if [ "$ACCOUNT" = "SpaceX" ]; then
+  if [ -n "${SEND_PLAN_ORB_CMD:-}" ]; then
+    ORB_CMD=("$SEND_PLAN_ORB_CMD")
+  elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ] && [ -f "$WORKDIR/trading_bot/orb_futures.py" ]; then
+    ORB_CMD=(python3 -m trading_bot.orb_futures --account SpaceX --plan-block)
+  else
+    ORB_CMD=()
+  fi
+  if [ "${#ORB_CMD[@]}" -gt 0 ]; then
+    ORB_ERR="$(mktemp)"
+    ORB_BLOCK="$(cd "$WORKDIR" && timeout -k 5 "${SEND_PLAN_ORB_TIMEOUT:-60}" "${ORB_CMD[@]}" 2>"$ORB_ERR")"
+    ORB_RC=$?
+    if [ "$ORB_RC" -ne 0 ] || [ -z "$ORB_BLOCK" ]; then
+      _oerr="$(grep -v '^\s*$' "$ORB_ERR" | tail -1 | cut -c1-160)"
+      ORB_BLOCK="⚠️ ORB futures sleeve: KHÔNG KIỂM ĐƯỢC (rc=$ORB_RC${_oerr:+, $_oerr}) — plan cổ phiếu không bị ảnh hưởng."
+    fi
+    sed 's/^/[orb] /' "$ORB_ERR" >&2
+    rm -f "$ORB_ERR"
+  fi
+fi
+export ORB_BLOCK
+
 RESULT=$(cd "$WORKDIR" && SEND_PLAN_MIKE_BIN="$ROOT/bin" python3 - "$PLAN_FILE" "$EXPECTED_DATE" "$TODAY" "$NOW_ICT" "$ACCOUNT" << 'PY'
 import sys, json, os, re
 
@@ -1535,6 +1561,7 @@ for _env, _lbl in (("DRIFT_BLOCK", "vị thế sau plan"), ("LAGCAL_BLOCK", "l�
 
 _nc = os.environ.get("NOWCAST_BLOCK", "").strip()   # nowcast hàng hoá (ZaloPay, display-only, shell phía trên)
 _ddz = os.environ.get("DDZONE_BLOCK", "").strip()  # mã DD dưới vùng giá (ZaloPay, ghi chú, shell phía trên)
+_orb = os.environ.get("ORB_BLOCK", "").strip()    # ORB futures sleeve (SpaceX, luật + ký quỹ, shell phía trên)
 
 # Trạng thái duyệt — LÊN ĐẦU (việc đầu tiên người đọc cần biết), kèm số cảnh báo để biết có cần cuộn xuống.
 if approved:
@@ -1563,6 +1590,8 @@ if _nc:
     out += [""] + _nc.splitlines()
 if _ddz:
     out += [""] + _ddz.splitlines()
+if _orb:
+    out += [""] + _orb.splitlines()
 out.append("")
 if _ok_checks:
     out.append("✔ Kiểm tự động không bất thường: " + " · ".join(_ok_checks) + ".")
