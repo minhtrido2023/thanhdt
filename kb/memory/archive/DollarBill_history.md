@@ -395,3 +395,8 @@
 ## Archived 2026-11-16 (keep=6 days=5 require_done=True)
 - [2026-11-10T12:07:51Z] [2026-11-10 19:xx ICT] Plan ZaloPay 11-11 XONG HOLD ALL 0 lenh (LAG gia>tam DD); cho duyet truoc 08:45 11/11 (job DollarBill_20261110_120615)
 - [2026-11-10T12:08:10Z] [2026-11-10 19:xx ICT] Plan SpaceX 11-11 XONG: HOLD ALL 0 lenh (4 LAG gia>tam DD luat 09/11); cho duyet truoc 08:45 11/11 (job DollarBill_20261110_120617)
+
+## Archived 2026-11-17 (keep=6 days=5 require_done=True)
+- [2026-11-11T12:07:25Z] [2026-11-11 19:xx ICT] Plan SpaceX 11-12 XONG HOLD ALL 0 lenh; VGS khong khop 11/11 (0cp), DISC khong lap - cho user quyet gom tiep; cho duyet truoc 08:45 12/11 (job DollarBill_20261111_120559)
+- [2026-11-11T12:07:50Z] [2026-11-11 19:xx ICT] Plan ZaloPay 11-12 XONG: BUY DISC NNC 300cp, 0 LAG, VGS bo (gia>tran); cho duyet truoc 08:45 12/11 (job DollarBill_20261111_120557)
+- [2026-11-11T17:03:40Z] [2026-11-12 00:1x ICT] Plan 12/11 rev Livermore ca 2 acct XONG: SpaceX VGS2300/NNC700, ZaloPay VGS1500/NNC300, tran VGS 20.000/NNC 46.000 (Livermore thay RuleA); SpaceX egg>=38,5tr; CHUA duyet. Flag: exit_rules VGS entry_date 11/11 sai (chua khop) cho Mike/user (job DollarBill_20261111_170050)
