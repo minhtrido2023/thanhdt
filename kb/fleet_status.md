@@ -1,18 +1,18 @@
-# Fleet status — 2026-11-17T04:34:59 UTC
+# Fleet status — 2026-11-17T05:07:04 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-11-16T12:04:28Z | 990 |  |
-| Mike | Mike | child | working | 2026-11-17T04:26:13Z | 8 |  |
-| Mike_2444654 | mike-dd | child | dead | 2026-11-16T02:00:01Z | 1594 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_2670804 | mike-32 | child | dead | 2026-11-16T03:30:01Z | 1504 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Mike_3869847 | mike-4a | child | dead | 2026-11-17T03:50:01Z | 44 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
-| Taylor | Taylor | child | working | 2026-11-17T04:34:53Z | 0 |  |
-| Taylor_2351783 | taylor-d6 | child | dead | 2026-11-16T01:30:01Z | 1624 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
-| Wags | Wags | child | dead | 2026-11-17T01:21:04Z | 193 |  |
-| Winston | Winston | child | dead | 2026-11-16T05:46:02Z | 1368 |  |
-| mike-6b | mike-6b | external | dead | 2026-11-16T16:20:01Z | 734 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike |
-| mike-e5 | mike-e5 | external | dead | 2026-11-16T16:20:01Z | 734 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike |
-| thanhdt-18 | thanhdt-18 | child | dead | 2026-11-15T15:23:59Z | 2231 |  |
-| workingclaude-8f | workingclaude-8f | child | dead | 2026-11-17T01:21:54Z | 193 |  |
-| workingclaude-e0 | workingclaude-e0 | child | dead | 2026-11-15T15:26:47Z | 2228 |  |
+| DollarBill | DollarBill | child | dead | 2026-11-16T12:04:28Z | 1022 |  |
+| Mike | Mike | child | working | 2026-11-17T04:36:56Z | 30 |  |
+| Mike_2444654 | mike-dd | child | dead | 2026-11-16T02:00:01Z | 1627 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_2670804 | mike-32 | child | dead | 2026-11-16T03:30:01Z | 1537 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Mike_3869847 | mike-4a | child | dead | 2026-11-17T03:50:01Z | 77 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
+| Taylor | Taylor | child | dead | 2026-11-17T04:34:53Z | 32 |  |
+| Taylor_2351783 | taylor-d6 | child | dead | 2026-11-16T01:30:01Z | 1657 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
+| Wags | Wags | child | dead | 2026-11-17T01:21:04Z | 226 |  |
+| Winston | Winston | child | dead | 2026-11-16T05:46:02Z | 1401 |  |
+| mike-6b | mike-6b | external | dead | 2026-11-16T16:20:01Z | 767 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike |
+| mike-e5 | mike-e5 | external | dead | 2026-11-16T16:20:01Z | 767 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike |
+| thanhdt-18 | thanhdt-18 | child | dead | 2026-11-15T15:23:59Z | 2263 |  |
+| workingclaude-8f | workingclaude-8f | child | dead | 2026-11-17T01:21:54Z | 225 |  |
+| workingclaude-e0 | workingclaude-e0 | child | dead | 2026-11-15T15:26:47Z | 2260 |  |
