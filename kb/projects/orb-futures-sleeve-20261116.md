@@ -131,6 +131,15 @@ còn hạn (do `run_bot` 09:05 tạo; thiếu ⇒ bỏ phiên, báo).
 **Selfcheck vòng 2**: 32 kịch bản / 73 assertion PASS dưới `env -u TZ`, `TZ=Asia/Ho_Chi_Minh`, `America/New_York`, `Pacific/Kiritimati`,
 `Europe/London`; 11/11 mutant bị bắt (B1 BOT_STOP→SKIPPED, PendingCancel=chết, bỏ kiểm lệnh đóng trước, bỏ watch trạng thái kết thúc,
 bỏ ước giá khớp, bỏ try/except, đặt lệnh sau 14:45, thiếu khoá=rỗng, không đọc lại state, báo ĐỎ không Telegram, bỏ qua hằng số=True).
+
+**Vòng 3** (job `Taylor_20261117_034120`, arch-review vòng 2 NEEDS_CHANGES chỉ test-gap + minor):
+- **R1** test lệnh đóng treo (EXIT_PLACED) + BOT_STOP bật giữa `_await_exit`: hằng số False ⇒ không lệnh mới, không huỷ, ĐỎ lặp; True ⇒
+  huỷ, đặt lại, đóng xong. **R2** vòng lặp vừa sang SKIPPED/PAUSED/CLOSED/FLAT trong CÙNG tiến trình ⇒ LIVE gọi ngay `watch_broker`
+  (khớp ngầm báo ĐỎ ngay, không chờ watchdog). **N-a** `watch_broker` ở DRY chỉ ghi raw log + stdout, KHÔNG Telegram/Discord/bus.
+  **N-b** báo lỗi vòng giám sát qua `alert_repeat` (≤1 tin/60s, khoá `loop_err`) thay vì mỗi 3 lỗi. **N-c** cảnh báo late_open dưới
+  BOT_STOP+False: "bot KHÔNG đặt lệnh nào, cần user đóng tay". **N-e** test lớp chặn `_place` ≥14:45; selfcheck dọn tmpdir khi thoát.
+- Selfcheck vòng 3: 38 kịch bản / 88 assertion PASS dưới `env -u TZ`, `Asia/Ho_Chi_Minh`, `America/New_York`, `Pacific/Kiritimati`;
+  7 mutant mới SỐNG với selfcheck vòng 2 → BỊ BẮT với vòng 3 (B1c, B1d, R2, N-a, N-b, N-c, N-e).
 **Selfcheck bản 1** `orb_futures_selfcheck.py` (FakeClient, `MIKE_BOT_TEST_MODE=1` trước import): 20 kịch bản / 38 assertion PASS dưới
 `env -u TZ`, `TZ=Asia/Ho_Chi_Minh`, `TZ=America/New_York`, `TZ=Pacific/Kiritimati`. Đột biến (mutation) bị bắt: bỏ chặn lệnh lạ, DRY
 gọi broker, đảo chiều stop, bỏ strict bar 09:30, bỏ ân hạn feed 09:33. (Đột biến "bỏ PAUSE khi restart ở _PENDING" KHÔNG làm test fail
@@ -185,6 +194,8 @@ Sửa (1)+(2) cần: probe 1 lần SAU khi nộp ký quỹ để biết field n�
    - `30,45 1 * * 1-5` + `0,15 2 * * 1-5` `bin/orb_futures_run.sh funding-alert` (chỉ có tác dụng khi cờ BẬT).
 4. **DRY-run tối thiểu 10 phiên** (đề xuất; Mike/user có thể đổi): journal DRY vs `orb_pt_log.csv` — sig khớp 100%, giá vào/thoát lệch
    bao nhiêu bps; 0 PAUSED vô cớ. 5. Sửa NAV (mục 7) + selfcheck, merge. 6. User nộp ký quỹ 100tr ⇒ Taylor probe field `derivative` +
-   ppse qmax ⇒ chốt mapping. 7. User bật cờ: diff đề xuất cho SpaceX profile trong `secrets/trading_bot_accounts.json`:
+   ppse qmax ⇒ chốt mapping. 7. **ĐIỀU KIỆN BẮT BUỘC trước khi bật LIVE (R2 vòng 3): cron watchdog 2' ở bước 3 ĐÃ CÀI và đã thấy chạy thật trong log
+   DRY** — không có watchdog thì vị thế khớp ngầm sau khi tiến trình chính chết/kết thúc chỉ được phát hiện khi có người nhìn.
+   Sau đó user bật cờ: diff đề xuất cho SpaceX profile trong `secrets/trading_bot_accounts.json`:
    `"orb_futures": {"enabled": true}` (thêm cạnh `"overrides"`, KHÔNG trong overrides). 8. Phiên LIVE đầu: Mike theo dõi; xác minh
    positions schema, order_detail, LO sàn/trần, phí thật từ email khớp lệnh (§27) — cập nhật mục 3 "chưa xác minh".
