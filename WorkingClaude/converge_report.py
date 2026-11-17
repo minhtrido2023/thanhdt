@@ -115,7 +115,10 @@ def generate_section(as_of_date=None, live_set=None):
     lines = ["### 🔗 DC Book (double-confirm) — Paper Portfolio"]
     if as_of_date:
         lines[0] += f" ({as_of_date})"
-    lines.append(f"*Giá tham chiếu: {data_date} | Entry: {meta.get('start_date','2026-07-06')} "
+    season = meta.get("season")
+    lines.append(f"*Giá tham chiếu: {data_date} | "
+                 f"{('Sổ mùa BCTC ' + season + ' · ') if season else 'Seed cố định (chưa theo mùa) · '}"
+                 f"Entry: {meta.get('start_date','2026-07-06')} "
                  f"(giá {meta.get('entry_price_asof','?')}) | equal-weight, cap 20%, idle→custom30V*")
     lines.append("")
 
