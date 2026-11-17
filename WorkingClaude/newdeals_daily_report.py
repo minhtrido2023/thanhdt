@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """newdeals_daily_report.py — daily "New deals" Discord report.
 
-Combines TWO already-built, reusable data sources into ONE Discord message posted to the
+Combines already-built, reusable data sources into ONE Discord message posted to the
 "New deals" topic (thread 1523612826260734112):
 
-  1. AlphaLens Paper Portfolio  — reuses alphalens_report.generate_section()
-     (FPT/ACB/MBB/HDB paper book P&L vs entry + vs VNINDEX benchmark).
+  0. Dòng ĐỘ TƯƠI (newdeals_season.freshness_line): BCTC quý mới nhất phủ x% watchlist · rating 8L
+     ngày nào · DCF mùa nào · tuổi sổ DC — để không ai đọc nhãn cũ như nhãn mới (job Taylor_20261117_102211).
+  -- AlphaLens Paper Portfolio: ĐÃ GỠ khỏi báo cáo 17/11/2026 (user duyệt). Chương trình hết hạn 30/09/2026
+     (meta end_date) nhưng vẫn đăng sổ đóng băng mỗi sáng. data/alphalens_paper.json + alphalens_report.py
+     GIỮ NGUYÊN để audit (DollarBill plan report vẫn có thể gọi riêng).
   2. Golden/Strong Watchlist    — reuses sector_lens_monitor.compute_status() +
      build_telegram_message() + load_ratings(): the Group-A 6-state sector lens with the
      8L-rating DOUBLE-CONFIRM cross-check (rating<=2 AND sector-lens BUY = two independent
@@ -63,14 +66,14 @@ def build_message():
     only reads those existing signals instead of duplicating diff logic:
       - Golden/Strong (sector lens): `transitions` list (empty prior = baseline, ALSO
         treated as change-worthy so the user sees the first-ever snapshot).
-      - AlphaLens: an "EXIT ALERT" line in generate_section()'s own output (an entry
-        condition breach IS the "new deal" event for a buy-and-hold book).
       - DC Book: "ENTER"/"EXIT" markers in converge_report's own live-vs-seed diff.
 
     Returns (message: str, changed: bool). Raises if the sector-lens evaluation cannot
     read the cache (fatal -> caller aborts without sending, unchanged from before).
     """
     today = dt.date.today().isoformat()
+    from zoneinfo import ZoneInfo
+    today_ict = dt.datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).date().isoformat()
 
     # ---- Section 2 first: sector lens is the hard dependency (raises on cache failure) ----
     import sector_lens_monitor as slm
@@ -84,11 +87,6 @@ def build_message():
     sector_md = _html_to_discord(sector_tg)
     sector_changed = bool(r["transitions"]) or not r["prior"]   # baseline run also shown once
 
-    # ---- Section 1: AlphaLens (returns a string; degrades to a ⚠️ line, never raises) ----
-    from alphalens_report import generate_section
-    alphalens_md = generate_section(as_of_date=today)
-    alphalens_changed = "EXIT ALERT" in alphalens_md
-
     # ---- Section 3: ConvergePort paper book (double-confirm converge, job Taylor_20260706_093329).
     # Reuse the sector-lens set already computed above (r["df"] + ratings) so we don't run
     # compute_status() twice; degrades to a ⚠️ line, never raises.
@@ -100,13 +98,32 @@ def build_message():
     # words, to avoid false positives from unrelated text containing "enter"/"exit".
     converge_changed = ("🟢 ENTER" in converge_md) or ("🔴 EXIT" in converge_md)
 
-    changed = sector_changed or alphalens_changed or converge_changed
+    changed = sector_changed or converge_changed
+
+    # ---- Độ tươi + nhãn DD (job Taylor_20261117_102211): mã có DD dựa trên quý BCTC CŨ hơn quý mới
+    # nhất ⇒ "⚠️ DD cũ (Qx)" + gạch ACCUMULATE/STRONG (gắn cảnh báo, KHÔNG ẩn — user chọn).
+    import newdeals_season as nds
+    fresh_line, latest_q = nds.freshness_line(today_ict, wl=[n for n, _, _ in slm.NAMES])
+    try:
+        dd_index = nds.latest_dd_index(nds._load_json(nds.DD_ZONES, {}).get("entries", []))
+    except Exception as e:
+        _log(f"dd_price_zones.json không đọc được ({e}) — mọi mã hiện 'DD: chưa có'.")
+        dd_index = {}
+    seed_tk = set()
+    try:
+        seed_tk = {p["ticker"] for p in nds._load_json(nds.PAPER_FILE, {}).get("seed_double_confirm_set", [])}
+    except Exception:
+        pass
+    label_set = {n for n, _, _ in slm.NAMES} | set(live_dc) | seed_tk
+    # so DD với quý BCTC mới nhất CỦA CHÍNH MÃ (PIT), không phải quý max toàn universe
+    own_q = nds.ticker_quarters_from_cache(today_ict) or latest_q
+    sector_md = nds.apply_dd_labels(sector_md, dd_index, own_q, only=label_set)
+    converge_md = nds.apply_dd_labels(converge_md, dd_index, own_q, only=label_set)
 
     if changed:
         header = f"🆕 **NEW DEALS — {today}**  ·  *research/monitor, not an order*"
         parts = [
-            header,
-            "## AlphaLens Paper Portfolio\n" + alphalens_md,
+            header + "\n" + fresh_line,
             "## Golden/Strong Watchlist (8L + Sector Lens)\n" + sector_md,
             "## DC Book Paper Portfolio\n" + converge_md,
         ]
@@ -115,8 +132,8 @@ def build_message():
     # Không đổi gì hôm nay — 1 dòng "vẫn sống", KHÔNG phải im lặng (user: "để biết hệ
     # thống vẫn vận hành bình thường" — phân biệt "không có tin" với "hệ thống chết").
     quiet = (f"🆕 **NEW DEALS — {today}** — Không có deal mới / thay đổi thứ hạng đáng chú ý "
-             f"trong AlphaLens, Golden/Strong Watchlist, DC Book hôm nay. Hệ thống vẫn giám "
-             f"sát bình thường.")
+             f"trong Golden/Strong Watchlist, DC Book hôm nay. Hệ thống vẫn giám "
+             f"sát bình thường.\n{fresh_line}")
     return quiet, False
 
 
@@ -128,7 +145,7 @@ def _check_return_gate(message: str) -> bool:
     """CỔNG CHẶN CỨNG (coding_guidelines §21/§22, T1 corp-action crosscheck) — trước khi post,
     chạy `report_return_gate.run_gate()` trên đúng nội dung sắp lên Discord.
 
-    Đây là kênh duy nhất đăng "AlphaLens Paper Portfolio" / "DC Book Paper Portfolio" mà
+    Đây là kênh duy nhất đăng "DC Book Paper Portfolio" (AlphaLens đã gỡ 17/11) mà
     KHÔNG BAO GIỜ ghi ra file .md — `run_gate()` chỉ có 1 caller (`send_report_email.py`), nên
     trước bản vá này cổng không hề chạy trên message thật user đọc mỗi sáng. Không ghi vĩnh
     viễn ra `mike/reports/`: chỉ cần 1 file tạm mang TÊN có ngày (`accounts_asof_from_name()`
