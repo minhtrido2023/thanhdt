@@ -1,0 +1,51 @@
+bvps 30359
+npl_pct 0.0071
+npl0_pct 0.0058
+g2_pct 0.0028
+g2_0_pct 0.0016
+coverage 2.4317
+coverage0 2.5716
+loan_ytd 0.0852
+dep_ytd 0.0653
+g2_ytd 0.8483
+npl_abs_ytd 0.3195
+casa 0.3177
+casa0 0.3372
+kbnn_share 0.0879
+kbnn0_share 0.0752
+ldr_simple 0.9929
+accr_ytd 0.1797
+npl_formation_9m 3104
+credit_cost_9m_ann 0.007
+core_pat_9m 29861
+core_growth 0.1248
+head_growth 0.2442
+ppop_growth 0.3989
+core_ppop_growth 0.3095
+nii_growth 0.3452
+cir 0.3201
+q3_pbt_yoy -0.0019
+q3_ppop_yoy 0.4484
+roe_core_9m_ann 0.1665
+roe_head_9m_ann 0.1842
+roe_norm_cc4 0.1839
+roe_norm_cc6 0.1722
+roe_norm_cc8 0.1605
+roe_norm_cc10 0.1488
+scen {'bear': 30359, 'base': 35497, 'bull': 55198}
+weighted 39137
+ke_sens {'-100bp': 41950, '-50bp': 38455, '+0bp': 35497, '+50bp': 32961, '+100bp': 30764}
+ke_beta_real 46145
+beta_sens_05 {'-100bp': 38455, '+100bp': 32961}
+moat {'WIDE_roe18': 51377, 'NARROW_roe14.6': 35497, 'NONE_roe_eq_ke': 30359}
+roe_cet1 0.1381
+val_cet1 31803
+roe_anchors {0.132: 28958, 0.146: 35497, 0.16: 42035}
+g_sens {0.06: 34811, 0.07: 35497, 0.08: 36431}
+px 52100
+pb_px 1.7161
+implied_roe_at_px 0.1815
+implied_ke_at_px 0.1143
+np25 35177
+roe_2025 0.1673
+two_stage {'ke0.135_g10.13': 36843, 'ke0.135_g10.1': 36135, 'ke0.125_g10.13': 45069, 'ke0.125_g10.1': 43429}

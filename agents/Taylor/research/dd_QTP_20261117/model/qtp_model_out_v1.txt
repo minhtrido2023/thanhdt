@@ -1,0 +1,20 @@
+FX one-off sau thue 473.4
+TTM adj (12 diem): [546, 620, 543, 600, 550, 522, 568, 534, 563, 587, 723, 766]
+Trung vi TTM 3 nam (adj) 565.5 | TTM Q3/26 adj 765.8 | TTM tho 1239.2
+Net cash sau tam ung 1541.3 ty = 3425 d/cp | BVPS 13299 | NWC 2259
+NORM_OP (bo lai tien gui) 503.8
+Kich ban d/cp: xau 10614 co so 14796 tot 17814 | trong so 14505
+ r-100bp -> 15092 (+4.0%)
+ r-50bp -> 14791 (+2.0%)
+ r+50bp -> 14234 (-1.9%)
+ r+100bp -> 13977 (-3.6%)
+ sau CK thanh khoan 5%: 13780
+ sau CK thanh khoan 10%: 13055
+ sau CK thanh khoan 15%: 12329
+ROE norm 0.094 V_ngan 9308 V_dai(base DCF) 14796 D 0.463 ln2 0.693
+CFO3 1305 C4/nam 1290 V_C4 (vinh vien, chi theo doi) 21229 | V_C4 huu han 2047 21034
+ PE 6 x EPS norm 1257 = 7540 | PE x EPS_op + net cash = 10143
+ PE 7 x EPS norm 1257 = 8796 | PE x EPS_op + net cash = 11262
+ PE 8.5 x EPS norm 1257 = 10681 | PE x EPS_op + net cash = 12942
+ PB 0.6 x BVPS = 7980
+ PB 0.7 x BVPS = 9310

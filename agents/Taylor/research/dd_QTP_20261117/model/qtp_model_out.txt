@@ -1,0 +1,45 @@
+NORM 565.5 NORM_OP 503.8 EPS 1257 EPS_OP 1120 netcash 1541.3 3425 d/cp | NWC 2259
+Q4/26 stub 245.5 ty = 546 d/cp (uoc luong; skeptic ~600)
+Kich ban (dung 2047; xau dung 2040): xau 11546 co so 15200 tot 18324
+v1 xau (WC cuoi 2047, sai) = 10614 ; r2 xau (WC dung 2040) = 11546
+ trong so chon 0,25/0,65/0,10: truoc CK 14599 | sau CK10% 13139 | gia/tam sau CK 0.784
+ trong so 0,25/0,75/0: truoc CK 14286 | sau CK10% 12858 | gia/tam sau CK 0.801
+ trong so 0,5/0,5/0: truoc CK 13373 | sau CK10% 12035 | gia/tam sau CK 0.856
+ trong so v1 0,25/0,5/0,25: truoc CK 15067 | sau CK10% 13561 | gia/tam sau CK 0.760
+Khong co Q4/26 stub (chon): 14062 -> voi Q4 stub 14599 delta 537
+
+BANG DO NHAY VONG DOI (chon trong so; gia 10300):
+stop | co_so_truoc | co_so_sau | chon_truoc | chon_sau | gia/tam_chon_sau | gia/co_so_sau
+ 2030 | 13117 | 11805 | 12785 | 11507 | 0.895 | 0.872
+ 2035 | 14312 | 12881 | 13819 | 12437 | 0.828 | 0.800
+ 2040 | 14845 | 13361 | 14274 | 12847 | 0.802 | 0.771
+ 2047 | 15200 | 13680 | 14599 | 13139 | 0.784 | 0.753
+ 40y | 15250 | 13725 | 14656 | 13191 | 0.781 | 0.750
+
+Chi phi dong cua/hoan nguyen bai tro (UOC LUONG, khong trong mo hinh): tru tai nam dung, do nhay chon, dung 2047
+ close 200 ty -> 14556 (delta -42)
+ close 500 ty -> 14493 (delta -106)
+ close 1000 ty -> 14388 (delta -211)
+LNST danh nghia +3%/nam (UOC LUONG, ranh gioi tren cua lam phang): 16241 delta 1643
+
+r +-:
+ r-100bp -> 15151 (+3.8%)
+ r-50bp -> 14868 (+1.8%)
+ r+50bp -> 14343 (-1.7%)
+ r+100bp -> 14101 (-3.4%)
+
+BOI SO (NORM EPS 1257; EPS_op 1120; tien rong 3425 d/cp)
+ PE | A: PE*EPS_chuan(gom lai, KHONG cong tien rong) | B: PE*EPS_op + tien rong
+ 5 | 6283 | 9023
+ 6 | 7540 | 10143
+ 6.6 | 8294 | 10815
+ 7 | 8796 | 11262
+ 7.95 | 9990 | 12326
+ 8 | 10053 | 12382
+ 8.5 | 10681 | 12942
+ 9 | 11310 | 13502
+ median PE 22 peer (BQ 16/11, TTM tho): 8.99
+ median 8 peer tr1: 7.96
+ median 8 nhiet dien/thuy (PGV,NT2,NBP,POW,SJD,BTP,HND,PPC): 5.83
+ PB 0.6 x BVPS = 7980
+ PB 0.7 x BVPS = 9310

@@ -1,0 +1,9 @@
+# Vòng 2 — áp required_change của arch-reviewer (nhánh feat/newdeals-season-20261117, worktree /home/trido/thanhdt/wt-newdeals-season-20261117)
+Chỉ sửa đúng 6 mục, KHÔNG mở rộng phạm vi. Mỗi mục thêm ca selfcheck (+ mutant) chứng minh.
+1. Cổng §21: sửa mike/bin/report_return_gate.py (CÙNG nhánh/đợt merge — file nằm trong repo mike, tạo commit riêng ở repo mike nếu cần, báo rõ đường dẫn): thêm NAMES vào _fake_slm (ca 27) và stub ca 29; bỏ/tách "AlphaLens Paper Portfolio" khỏi PAPER_MARKERS hoặc coupling all(); sửa quiet_msg ca 28. Chạy lại `report_return_gate.py --selfcheck` với module nhánh đạt 269/269 (hoặc số mới có giải thích). Kiểm paper_entry_corpaction_crosscheck.load_books() vẫn nạp AlphaLens — nếu cổng có thể chặn báo cáo vì sổ không còn hiển thị thì sửa cho khớp.
+2. Idempotency mùa đầu (newdeals_season.py ~:341/:431-438): _bootstrap_prev lấy seed từ meta.season_history[-1] khi paper.meta.season == season (hoặc tái dùng snapshot/queue mùa đó nếu đã ghi). Selfcheck: giả lập kill giữa ghi paper và ghi state → lượt 2 phải trùng lượt 1 (exit ['AAA'], queue [BBB,CCC]).
+3. dd_status/apply_dd_labels (~:90,:161): so DD với quý BCTC mới nhất CỦA CHÍNH MÃ (PIT time<=asof), không phải quý max toàn universe. Selfcheck: universe có Q4 sớm, mã chưa công bố Q4 ⇒ KHÔNG "DD cũ".
+4. Thông điệp lỗi CLI (~:468): phân biệt "mùa đã xong, bus_pending — lượt sau post bù" với lỗi trước khi ghi state.
+5. Guard đủ mã: rating_8l.csv thiếu bất kỳ mã watchlist ⇒ hoãn (như rating_not_fresh), không diff.
+6. Thêm mục data_registry cho data/rating_8l_forward_events.csv (§9, mike/kb/data_registry/ — verify nguồn ghi bằng grep/mtime, không đoán). Thêm vào REPORT: trước lượt cron đầu phải chép backup data/converge_portfolio_paper.json (không theo git); question bus cần payload ghi rõ Mike đóng bằng cách nào (bus-question-closure).
+Deliverable: commit mới trên cùng nhánh, push, cập nhật REPORT.md, bus finding. Selfcheck dưới env -u TZ + TZ=America/New_York + mutation.

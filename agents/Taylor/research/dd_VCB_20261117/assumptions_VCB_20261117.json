@@ -1,0 +1,24 @@
+{
+  "ticker": "VCB",
+  "asof": "2026-11-17",
+  "source_bctc": "src/VCB_BCTC_Q3_2026_HN.pdf (BCTC hop nhat Q3/2026, ky 30/10/2026, CV 22146/VCB-CSTCKT; tai tu static2.vietstock.vn vi site VCB tai bang AJAX/404)",
+  "units": "ty VND tru khi ghi khac",
+  "bs_30_09_2026": {"equity_total": 253761.146, "nci": 92.442, "shares_m": 8355.675094, "loans_gross": 1816093.286, "loan_prov_total": 31168.107, "prov_general": 13424.623, "prov_specific": 17743.484, "npl_g3": 2571.437, "npl_g4": 1657.212, "npl_g5": 8588.936, "group2": 4994.510, "accrued_int_recv": 11811.110, "cust_deposits": 1781703.044, "casa_nonterm": 566125.581, "kbnn_deposit": 171617.232, "kbnn_term_vnd": 170175.0, "kbnn_repo": 10479.093, "gtcg_issued": 47392.009, "cd_issued": 31936.800, "total_assets": 2682408.935},
+  "bs_31_12_2025_restated": {"equity_total": 224587.750, "nci": 71.521, "loans_gross": 1673525.675, "loan_prov_total": 24980.391, "npl_g3": 761.291, "npl_g4": 301.991, "npl_g5": 8650.658, "group2": 2702.187, "accrued_int_recv": 10012.155, "cust_deposits": 1672534.846, "casa_nonterm": 563957.715, "kbnn_deposit": 136001.166},
+  "is_9m": {"nii_2026": 57178.799, "nii_2025": 42504.585, "ppop_2026": 49619.890, "ppop_2025": 35470.486, "prov_2026": 9179.836, "prov_2025": 2337.533, "pbt_2026": 40440.054, "pbt_2025": 33132.953, "pat_parent_2026": 33032.144, "pat_parent_2025": 26548.613, "other_net_2026": 5918.858, "other_net_2025": 2747.576, "opex_2026": 23362.638, "opex_2025": 17714.605},
+  "is_q3": {"nii_2026": 20385.955, "nii_2025": 14657.240, "ppop_2026": 17401.785, "ppop_2025": 12014.692, "prov_2026": 6184.109, "prov_2025": 775.587, "pbt_2026": 11217.676, "pbt_2025": 11239.105},
+  "bq_np_quarter_parent": {"2025Q1": 8696, "2025Q2": 8832, "2025Q3": 9020, "2025Q4": 8629, "2026Q1": 9457, "2026Q2": 14542, "2026Q3": 9033},
+  "one_off": {"basis": "Lai thuan HD khac 9T tang 3.171 ty do danh gia lai gia tri hop ly khi hop nhat kinh doanh (Bonday-Benthanh tu lien doanh 52% thanh cong ty con, GCN 03/06/2026) - giai trinh Phu luc I muc 2", "pretax_excess": 3171.282, "tax_rate_assumed": 0.0, "tax_basis": "skeptic r1: lai danh gia lai khi hop nhat KHONG chiu thue; ETR thuc 9T/25 19,82% x LNTT 37.269 = 7.388 vs thue thuc 7.386 (tr.20 BCTC)", "label": "uoc luong: coi toan bo phan tang them la mot-lan"},
+  "valuation": {
+    "method": "P/B = (ROE_ben - g)/(Ke - g), mot giai doan; NH => KHONG ap dung P/PCF, FCFE, V_dai/C4/D2",
+    "Ke_anchor": 0.135, "Ke_anchor_note": "r 13,5% neo 03/11/2026 (luat user 2026-11-03); lai huy dong 12T hieu dung deposit_rate_vn.effective_deposit_rate = 7,40% (CCTG 12M 02/11) tai 03/11 va 17/11 => khong dieu chinh; beta pass-through 1",
+    "Ke_beta_real": 0.12, "Ke_beta_real_note": "beta tuan VCB vs VNINDEX 06/2021-11/2026 = 0,763 (n=282, corr 0,60) => Blume 0,84; rf 6,75% + 0,84 x ERP 5,0-6,1% = 10,9-11,9%; lam tron 12% lam moc doc, KHONG lam tam",
+    "g": 0.07, "g_note": "uoc luong; <= GDP danh nghia dai han; << ROE x (1 - ti le co tuc tien ~10%)",
+    "scenarios": {"bear": {"p": 0.25, "roe": 0.135, "g": 0.07}, "base": {"p": 0.50, "roe": 0.146, "g": 0.07}, "bull": {"p": 0.25, "roe": 0.18, "g": 0.08}},
+    "roe_anchors": {"low_roe2025_norm_cc0.8": 0.132, "mid_tam": 0.146, "high_roe2026_core_norm_cc0.8": 0.16, "note": "r3: tam = trung diem 14,6%; 16% KHONG phai than trong (dung PPOP dinh NIM 2026); 13,2% = ROE 2025 chuan hoa CC 0,8% (skeptic R2)"},
+    "moat_tier": "NARROW", "moat_param": "khong thuong khong tru (luat 2026-11-08)",
+    "cet1_target_note": "CAR Basel III 30/06/2026 ~11,1-11,6% (bao chi, 1 nguon); muc tieu 10,5% + D-SIB gia dinh 1-2% => ~12,0%",
+    "liquidity_discount": 0.0, "liquidity_note": "ADV trung vi 3 nam = 175 ty/phien (BQ Price x Volume, 17/11/2026; 153 neu Close x Volume; 281 trung vi 1 nam); tham gia 5% ~ 8,75 ty/phien => chiet khau 0"
+  },
+  "share_actions_pending": {"bonus_from_reserve_bn": 10687, "bonus_ratio_est": 0.1279, "dividend_2025_profit_bn": 20331, "dividend_form": "chua ro (tien/co phieu) - cho phe duyet co quan nha nuoc", "private_placement_max": "6,5% (~543,1 trieu cp, <=55 NDT)", "source": "bao chi DHDCD 24/04/2026 (baodautu, nhadautu, doanhnhan.baophapluat) - CHUA doi chieu nghi quyet goc"}
+}

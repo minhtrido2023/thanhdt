@@ -1,0 +1,11 @@
+{
+  "_doc": "ĐỀ XUẤT (CHƯA GHI vào data/account_cash_flows.json). Mike ghi sau khi có GIỜ chuyển thật (HH:MM:SS) từ app/sao kê DNSE. Bằng chứng số tiền: probe read-only 17/11 ~17:00 ICT (probe_1700.json) — ZaloPay totalCash 14.282.895 (nav_history 16/11) -> 9.282.895 = -5.000.000; SpaceX totalCash 1.640 -> 2.581 (+941) + derivative.remainSecure 0 -> 4.999.059 = +5.000.000. Giờ: SAU 14:06:21 (bản ghi balances SpaceX cuối cùng còn remainSecure=0) — nếu >= 14:45 thì gán 'eod' dòng 17/11 (đúng). SpaceX nhãn trung tính, KHÔNG nhắc ZaloPay (báo cáo NĐT ngoài).",
+  "SpaceX": [
+    {"date": "2026-11-17", "time_ict": "<HH:MM:SS thật>", "amount_vnd": 5000000, "kind": "deposit",
+     "evidence": "Nạp thêm vốn 5.000.000đ ngày 17/11/2026 (user xác nhận); broker: totalCash +941 và ký quỹ phái sinh derivative.remainSecure 4.999.059 (probe read-only 17/11 ~17:00 ICT, mike/agents/Taylor/research/nav_deriv_20261117/probe_1700.json)."}
+  ],
+  "ZaloPay": [
+    {"date": "2026-11-17", "time_ict": "<HH:MM:SS thật>", "amount_vnd": -5000000, "kind": "withdraw",
+     "evidence": "Chuyển nội bộ 5.000.000đ sang tiểu khoản SpaceX (0002023347) để nộp ký quỹ phái sinh ORB, 17/11/2026 (user, qua Mike job Taylor_20261117_092943); broker: totalCash 14.282.895 -> 9.282.895 (probe_1700.json). Cặp với dòng nạp SpaceX cùng ngày."}
+  ]
+}

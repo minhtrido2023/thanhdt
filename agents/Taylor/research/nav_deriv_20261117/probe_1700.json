@@ -1,0 +1,75 @@
+{
+ "ts": "2026-11-17T16:31:15.857023+07:00",
+ "SpaceX": {
+  "balances": {
+   "stock": {
+    "totalCash": 2581,
+    "availableCash": 941,
+    "depositInterest": 1640,
+    "totalDebt": 10812643,
+    "depositFeeAmount": 941,
+    "secureAmount": 0,
+    "orderSecured": 0,
+    "withdrawableCash": 0,
+    "cashDividendReceiving": 0
+   },
+   "derivative": {
+    "pendingDepositWithdraw": 0,
+    "remainSecure": 4999059,
+    "usedSecure": 0,
+    "pendingSecure": 0,
+    "holdTaxAndFee": 0,
+    "totalLoanDebt": 0
+   },
+   "bond": {
+    "totalValue": 0
+   },
+   "egg": {
+    "totalValue": 752487951
+   }
+  },
+  "deriv_positions": {
+   "positions": [],
+   "pageIndex": 0,
+   "pageSize": 50,
+   "pageNumber": 0,
+   "total": 0
+  }
+ },
+ "ZaloPay": {
+  "balances": {
+   "stock": {
+    "totalCash": 9282895,
+    "availableCash": 9280743,
+    "depositInterest": 2152,
+    "totalDebt": 0,
+    "depositFeeAmount": 2004,
+    "secureAmount": 0,
+    "orderSecured": 0,
+    "withdrawableCash": 9278739,
+    "cashDividendReceiving": 0
+   },
+   "derivative": {
+    "pendingDepositWithdraw": 0,
+    "remainSecure": 0,
+    "usedSecure": 0,
+    "pendingSecure": 0,
+    "holdTaxAndFee": 0,
+    "totalLoanDebt": 0
+   },
+   "bond": {
+    "totalValue": 0
+   },
+   "egg": {
+    "totalValue": 453710271
+   }
+  },
+  "deriv_positions": {
+   "positions": [],
+   "pageIndex": 0,
+   "pageSize": 50,
+   "pageNumber": 0,
+   "total": 0
+  }
+ }
+}
