@@ -2441,3 +2441,6 @@
 
 ## Archived 2026-11-17 (keep=12 days=0 require_done=False)
 - [2026-11-16T16:50:16Z] ĐANG DỞ: job Taylor_20261116_165006 ORB vong2 sua B1-B4,M1-3,m1-2,N1,spec | NEXT: sua orb_futures.py + selfcheck
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T17:01:23Z] [orb-futures vong2 17/11] XONG job Taylor_20261116_165006: outer 6e4b80c22, mike 2a6ddf10c(prereg)+9f3da28cb, KHONG merge/cron, co TAT — CHO Mike arch-review diff-only (round-cap: loi moi => user); NAV fix blocker truoc nop ky quy

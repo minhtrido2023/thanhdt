@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-16T17:01:23Z] [orb-futures vong2 17/11] XONG job Taylor_20261116_165006: outer 6e4b80c22, mike 2a6ddf10c(prereg)+9f3da28cb, KHONG merge/cron, co TAT — CHO Mike arch-review diff-only (round-cap: loi moi => user); NAV fix blocker truoc nop ky quy
 - [2026-11-17T03:41:33Z] ĐANG DỞ: job Taylor_20261117_034120 ORB vong3 R1,R2,N-a,N-b,N-c,N-e | NEXT: sua orb_futures.py + selfcheck o wt-orb-futures-20261116
 - [2026-11-17T03:46:42Z] [orb-futures vong3 17/11] XONG job Taylor_20261117_034120: outer addddabf9, mike 3e41ae02a, KHONG merge/cron, co TAT — CHO Mike arch-review diff-only; watchdog cron = dieu kien truoc LIVE
 - [2026-11-17T03:53:52Z] ĐANG DỞ: job Taylor_20261117_035339 DD QTP | NEXT: tai BCTC Q3/2026 -> agents/Taylor/research/dd_QTP_20261117/src, viet REPORT.md
@@ -26,3 +25,5 @@
 - [2026-11-17T04:34:44Z] [dd-qtp investor report 17/11] XONG job Taylor_20261117_042339: PDF md5 5facf0a700b689d234322b4e5a3368ac, CHUA gui email — CHO user 'gui email' + Mike ghi dd_price_zones
 - [2026-11-17T09:30:01Z] ĐANG DỞ: job Taylor_20261117_092943 NAV ky quy phai sinh SpaceX | NEXT: doc spec muc 7 + daily_nav_snapshot/compute_active_nav/reconcile/nav_period_returns
 - [2026-11-17T10:01:21Z] [nav-deriv 17/11] XONG job Taylor_20261117_092943: mike 760525131 nhanh feat/nav-deriv-margin-20261117 KHONG merge — CHO Mike arch-review+merge TRUOC 19:10 ICT + ghi flow cap SpaceX+5tr/ZaloPay-5tr (can gio that)
+- [2026-11-17T10:22:26Z] ĐANG DỞ: job Taylor_20261117_102211 refactor New deals (brief newdeals_refresh_20261117) | NEXT: đọc brief, tạo worktree
+- [2026-11-17T10:31:59Z] [newdeals-season 17/11] XONG job Taylor_20261117_102211: nhanh feat/newdeals-season-20261117 d97339d1a, KHONG merge/cron — CHO Mike arch-review + cai cron 19:45 ICT; DD queue Q3 = VCB
