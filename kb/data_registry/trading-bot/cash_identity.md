@@ -16,7 +16,8 @@ Với MỖI cửa sổ giữa hai lần chụp NAV liên tiếp của một tài
 
     ΔK = bán − mua − phí − thuế bán + cổ tức + lãi Trứng vàng − khấu trừ rút Trứng vàng
          + [dòng tiền ngoài] + nhiễu
-    K  = cash + cum_dividend_excl − margin_debt + offbook_assets + egg_assets   (cột nav_history)
+    K  = cash + cum_dividend_excl − margin_debt + offbook_assets + egg_assets + derivative_assets   (cột nav_history)
+    (derivative_assets = ký quỹ phái sinh remainSecure, từ 17/11/2026 — `bin/derivative_margin.py`; chuyển tiền cơ sở → ký quỹ triệt tiêu trong K)
 
 K là "tôi SỞ HỮU bao nhiêu tiền" (§25), không phải sức mua. Vay/trả ký quỹ và chuyển tiền ↔ Trứng
 vàng triệt tiêu trong K. Song song, ở MỌI cửa sổ, số lượng vị thế đổi phải bằng đúng lệnh đã đọc +
