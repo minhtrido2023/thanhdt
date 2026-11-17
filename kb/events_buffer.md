@@ -630,3 +630,6 @@
 - [2026-11-17T04:33:41Z] Taylor/heartbeat — Taylor_20261117_042339: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261117_042339", "source": "watcher"}
 - [2026-11-17T04:34:41Z] Taylor/heartbeat — Taylor_20261117_042339: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261117_042339", "source": "watcher"}
 - [2026-11-17T04:34:44Z] Taylor/finding — dd-qtp-investor-report-20261117: {"ticker": "QTP", "dir": "agents/Taylor/research/dd_QTP_20261117/investor_report/", "pdf": "QTP_DD_investor_report_20261117.pdf", "pdf_md5": "5facf0a700b689d234322b4e5a3368ac", "pages": 10, "body_words": 1114, "html": "QTP_DD_investor_report_20261117.html", "banner": "figs/title_banner.png", "price": "10300 DNSE 17/11 11:24 (=close 16/11)", "center_post_liq": 13140, "zone": [10390, 16490], "grep_forbidden": "empty (md+html)", "email": "dry-run only, NOT sent", "note": "nha may o Ha Khanh (Ha Long cu), khong phai Cam Pha; dd_price_zones chua ghi", "measured_by": "build_report.py all + md5sum + send_dd_report_email.py --dry-run; numbers from REPORT.md/model/qtp_model_out.txt"}
+
+## Consolidation 2026-11-17T05:07:01Z
+- [2026-11-17T04:36:22Z] Mafee/status — orb_futures_skip: {"account": "SpaceX", "mode": "DRY", "date": "2026-11-17", "msg": "BỎ phiên: lỡ cửa sổ vào lệnh 09:31–09:40"}
