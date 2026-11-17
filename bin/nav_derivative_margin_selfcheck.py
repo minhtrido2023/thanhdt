@@ -17,9 +17,10 @@ KHÉP KÍN: mọi ghi ở tempdir; không broker, không BQ. Đọc (không ghi)
      giá đơn vị KHÔNG đổi; ZaloPay −5tr + flow withdraw ⇒ KHÔNG đổi; thiếu flow ⇒ đổi (đối chứng).
   E. Mẫu số sizing cổ phiếu KHÔNG đổi khi có ký quỹ: compute_active_nav.cash_basis + egg đọc,
      park_holdings.read_broker_snapshot (nguồn của park/JIT-unpark) — cùng giá trị có/không block.
-  G. read_derivative_positions (client giả) + cổng live derivative_margin.live_gate.
+  G. read_derivative_positions (client giả) + cổng live derivative_margin.live_gate + dây nối live
+     (G10-G13 daily_nav_snapshot.live_derivative_positions với trading_bot.brokers giả; G14 AST chỗ gọi).
   F. reconcile_equity: raw thật 16/11 + bơm ký quỹ X + flow nạp X ⇒ residual y hệt bản gốc (±1đ).
-  --mutations: 11 mutant trên bản sao bin/ ở tempdir — mỗi mutant PHẢI làm selfcheck đỏ.
+  --mutations: 14 mutant trên bản sao bin/ ở tempdir — mỗi mutant PHẢI làm selfcheck đỏ.
 """
 import csv
 import datetime
@@ -342,6 +343,65 @@ def group_g():
     v, rj = DM.live_gate({"derivative": deriv()}, lambda: called.append(1) or None, False)
     check("G9 live, block toàn 0 ⇒ 0, không gọi đọc vị thế", v == 0 and rj is None and len(called) == 0, (v, rj, called))
 
+    # ── G10-G14: DÂY NỐI live trong daily_nav_snapshot (arch-review vòng 2 BLOCKING) ──
+    import ast
+    import types
+    import daily_nav_snapshot as D
+    seen = {}
+
+    class FC:
+        def __init__(self, r=None, exc=None):
+            self.r, self.exc = r, exc
+
+        def positions(self, acct, market_type=None):
+            seen["call"] = (acct, market_type)
+            if self.exc:
+                raise self.exc
+            return self.r
+
+    def run_live(client):
+        """live_derivative_positions với trading_bot.brokers GIẢ (không chạm broker thật)."""
+        mods = ("trading_bot", "trading_bot.brokers")
+        saved = {m: sys.modules.get(m) for m in mods}
+        pkg, brk = types.ModuleType("trading_bot"), types.ModuleType("trading_bot.brokers")
+        brk.get_dnse_client = lambda _cfg=None: client
+        pkg.brokers = brk
+        sys.modules["trading_bot"], sys.modules["trading_bot.brokers"] = pkg, brk
+        try:
+            with contextlib.redirect_stderr(io.StringIO()):
+                return D.live_derivative_positions("ACCT-X")
+        finally:
+            for m, v in saved.items():
+                if v is None:
+                    sys.modules.pop(m, None)
+                else:
+                    sys.modules[m] = v
+    check("G10 live_derivative_positions: client raise ⇒ None", run_live(FC(exc=RuntimeError("x"))) is None)
+    check("G11 live_derivative_positions: {} ⇒ None", run_live(FC({})) is None)
+    check("G12 live_derivative_positions: {'positions': []} ⇒ [] (và gọi đúng acct + DERIVATIVE)",
+          run_live(FC({"positions": []})) == [] and seen.get("call") == ("ACCT-X", "DERIVATIVE"), seen)
+    check("G13 live_derivative_positions: có vị thế ⇒ list đó",
+          run_live(FC({"positions": [{"s": 1}]})) == [{"s": 1}])
+    # Chỗ gọi live_gate trong main(): cấu trúc AST — args[2] = args.from_raw, args[1] = lambda
+    # gọi live_derivative_positions(account_no).
+    tree = ast.parse(open(os.path.join(BIN, "daily_nav_snapshot.py"), encoding="utf-8").read())
+    calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+             and n.func.attr == "live_gate" and isinstance(n.func.value, ast.Name)
+             and n.func.value.id == "derivative_margin"]
+    ok_shape = False
+    if len(calls) == 1 and len(calls[0].args) == 3 and not calls[0].keywords:
+        _, lam, fr = calls[0].args
+        lam_ok = (isinstance(lam, ast.Lambda) and not lam.args.args
+                  and isinstance(lam.body, ast.Call) and isinstance(lam.body.func, ast.Name)
+                  and lam.body.func.id == "live_derivative_positions"
+                  and len(lam.body.args) == 1 and isinstance(lam.body.args[0], ast.Name)
+                  and lam.body.args[0].id == "account_no" and not lam.body.keywords)
+        fr_ok = (isinstance(fr, ast.Attribute) and fr.attr == "from_raw"
+                 and isinstance(fr.value, ast.Name) and fr.value.id == "args")
+        ok_shape = lam_ok and fr_ok
+    check("G14 main(): derivative_margin.live_gate(payload, lambda: live_derivative_positions(account_no), "
+          "args.from_raw) — đúng dây nối live", ok_shape, f"{len(calls)} chỗ gọi")
+
 
 # ─────────────────────────── mutations ───────────────────────────
 MUTANTS = [
@@ -361,6 +421,13 @@ MUTANTS = [
     ("reconcile_equity.py", "args.starting_capital + net_flows + unrealized_pnl",
      "args.starting_capital + unrealized_pnl"),
     ("reconcile_equity.py", "           + derivative_value)\n", "           )\n"),
+    # X1/X2/X4 — dây nối live trong daily_nav_snapshot (arch-review vòng 2)
+    ("daily_nav_snapshot.py", "lambda: live_derivative_positions(account_no), args.from_raw)",
+     "lambda: live_derivative_positions(account_no), True)"),
+    ("daily_nav_snapshot.py", "lambda: live_derivative_positions(account_no), args.from_raw)",
+     "lambda: [], args.from_raw)"),
+    ("daily_nav_snapshot.py", "        return derivative_margin.read_derivative_positions(get_dnse_client(None), account_no)",
+     "        return []"),
 ]
 
 
