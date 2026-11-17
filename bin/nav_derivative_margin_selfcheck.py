@@ -17,8 +17,9 @@ KHÉP KÍN: mọi ghi ở tempdir; không broker, không BQ. Đọc (không ghi)
      giá đơn vị KHÔNG đổi; ZaloPay −5tr + flow withdraw ⇒ KHÔNG đổi; thiếu flow ⇒ đổi (đối chứng).
   E. Mẫu số sizing cổ phiếu KHÔNG đổi khi có ký quỹ: compute_active_nav.cash_basis + egg đọc,
      park_holdings.read_broker_snapshot (nguồn của park/JIT-unpark) — cùng giá trị có/không block.
+  G. read_derivative_positions (client giả) + cổng live derivative_margin.live_gate.
   F. reconcile_equity: raw thật 16/11 + bơm ký quỹ X + flow nạp X ⇒ residual y hệt bản gốc (±1đ).
-  --mutations: 8 mutant trên bản sao bin/ ở tempdir — mỗi mutant PHẢI làm selfcheck đỏ.
+  --mutations: 11 mutant trên bản sao bin/ ở tempdir — mỗi mutant PHẢI làm selfcheck đỏ.
 """
 import csv
 import datetime
@@ -228,7 +229,7 @@ def group_d():
                     check(f"D1 {acct}: NAV {amt:+,} + flow {amt:+,} ⇒ tỉ suất ngày = 0",
                           abs(ret) < 1e-9, f"{ret:.6%}")
                 else:
-                    check(f"D2 {acct} đối chứng: thiếu flow ⇒ tỉ suất ≠ 0 (cổng sẽ thấy)",
+                    check(f"D2 {acct} đối chứng: thiếu flow ⇒ tỉ suất ≠ 0 (chỉ cash_identity bắt; cổng NAV-jump 5% KHÔNG bắt 0,5%)",
                           abs(ret) > 0.004, f"{ret:.6%}")
 
 
@@ -311,6 +312,37 @@ def group_f():
           abs(o["residual"] - (b["residual"] - x)) <= 1, (o["residual"], b["residual"]))
 
 
+# ───────────────────────────── G ─────────────────────────────
+def group_g():
+    print("G. đọc vị thế phái sinh + cổng live (fail-closed)")
+    import derivative_margin as DM
+
+    class C:
+        def __init__(self, r=None, exc=None):
+            self.r, self.exc = r, exc
+
+        def positions(self, acct, market_type=None):
+            if self.exc:
+                raise self.exc
+            return self.r
+    check("G1 client raise ⇒ None", DM.read_derivative_positions(C(exc=RuntimeError("x")), "a") is None)
+    check("G2 {} ⇒ None", DM.read_derivative_positions(C({}), "a") is None)
+    check("G3 {'positions': []} ⇒ []", DM.read_derivative_positions(C({"positions": []}), "a") == [])
+    check("G4 có vị thế ⇒ list", DM.read_derivative_positions(C({"positions": [{"s": 1}]}), "a") == [{"s": 1}])
+    pl = {"derivative": deriv(remainSecure=4_999_059)}
+    v, rj = DM.live_gate(pl, lambda: None, False)
+    check("G5 live: không đọc được vị thế ⇒ từ chối (rc=2)", v is None and rj, (v, rj))
+    v, rj = DM.live_gate(pl, lambda: [], False)
+    check("G6 live: vị thế rỗng ⇒ nhận ký quỹ (rc=0)", v == 4_999_059 and rj is None, (v, rj))
+    v, rj = DM.live_gate(pl, lambda: [{"s": 1}], False)
+    check("G7 live: có vị thế mở ⇒ từ chối (rc=2)", v is None and rj, (v, rj))
+    called = []
+    v, rj = DM.live_gate(pl, lambda: called.append(1) or None, True)
+    check("G8 --from-raw: không gọi đọc vị thế, nhận ký quỹ", v == 4_999_059 and rj is None and not called, (v, rj, called))
+    v, rj = DM.live_gate({"derivative": deriv()}, lambda: called.append(1) or None, False)
+    check("G9 live, block toàn 0 ⇒ 0, không gọi đọc vị thế", v == 0 and rj is None and len(called) == 0, (v, rj, called))
+
+
 # ─────────────────────────── mutations ───────────────────────────
 MUTANTS = [
     ("daily_nav_snapshot.py", "nav = mtm_stock + cash - debt + offbook + egg_value + derivative_value",
@@ -319,6 +351,11 @@ MUTANTS = [
     ("derivative_margin.py", "    if positions:\n", "    if False:\n"),
     ("derivative_margin.py", "    if positions is None and remain > 0 and positions_required:",
      "    if False:"),
+    ("derivative_margin.py", "    return derivative_assets(payload, pos, positions_required=not from_raw)",
+     "    return derivative_assets(payload, pos, positions_required=False)"),
+    ("derivative_margin.py", "        pos = read_positions()", "        pos = []"),
+    ("derivative_margin.py", "    if isinstance(r, dict) and isinstance(r.get(\"positions\"), list):\n        return r[\"positions\"]\n    return None",
+     "    return []"),
     ("cash_identity.py", "+ row[\"egg\"]\n                        + row[\"deriv\"])", "+ row[\"egg\"])"),
     ("fund_restatement.py", "+ parts[\"egg_assets\"] + parts[\"derivative_assets\"])", "+ parts[\"egg_assets\"])"),
     ("reconcile_equity.py", "args.starting_capital + net_flows + unrealized_pnl",
@@ -367,7 +404,7 @@ def main():
     if "--mutations" in sys.argv:
         return 0 if run_mutations() else 1
     print(f"BIN={BIN}  TZ={os.environ.get('TZ')!r}")
-    for g in (group_a, group_b, group_c, group_d, group_e, group_f):
+    for g in (group_a, group_b, group_c, group_d, group_e, group_f, group_g):
         try:
             g()
         except Exception as e:      # noqa: BLE001 — nhóm nổ = FAIL, các nhóm sau vẫn chạy

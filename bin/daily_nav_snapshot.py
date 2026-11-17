@@ -1462,12 +1462,8 @@ def main():
     # thức + danh sách field đã/chưa xác minh. Fail-closed: field chưa xác minh ≠ 0 / vị thế mở /
     # không đọc được vị thế khi đang có ký quỹ ⇒ KHÔNG ghi NAV (rc=2, lượt retry/escalate sẵn có).
     import derivative_margin
-    _dpos = None
-    _dblock = (bal.get("payload") or {}).get("derivative") or {}
-    if not args.from_raw and any(_dblock.get(k) for k in ("remainSecure",) + derivative_margin.UNVERIFIED_FIELDS):
-        _dpos = live_derivative_positions(account_no)
-    derivative_value, _dreject = derivative_margin.derivative_assets(
-        bal.get("payload"), _dpos, positions_required=not args.from_raw)
+    derivative_value, _dreject = derivative_margin.live_gate(
+        bal.get("payload"), lambda: live_derivative_positions(account_no), args.from_raw)
     if _dreject:
         print(f"❌ [{args.date}] Tài sản phái sinh ({bal.get('ts')}) KHÔNG định giá được: {_dreject}. "
               f"KHÔNG tính NAV (thiếu khoản này NAV sẽ tụt giả đúng bằng tiền ký quỹ).", file=sys.stderr)

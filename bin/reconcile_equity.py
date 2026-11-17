@@ -439,8 +439,9 @@ def main():
             print(f"    + CP quyền mua user khai: {d} buy {ev[4]:,.0f} {ev[2]} @{ev[5]:,.0f} ({ev[1]}, phí 0)")
     if args.no_flows:
         print(f"  (--no-flows: BỎ dòng vốn nạp/rút {sum(f['amount_vnd'] for f in ext_flows):+,.0f})")
-    for f in ext_flows:
-        print(f"  + Dòng vốn {f['kind']} {f['date']} {f.get('time_ict') or ''}: {f['amount_vnd']:>+16,.0f}")
+    else:
+        for f in ext_flows:
+            print(f"  + Dòng vốn {f['kind']} {f['date']} {f.get('time_ict') or ''}: {f['amount_vnd']:>+16,.0f}")
     print(f"  + Lãi/lỗ chưa thực hiện:{unrealized_pnl:>+16,.0f}")
     if args.no_realized:
         print(f"  (--no-realized: BỎ realized {rz['realized']:+,.0f} + cổ tức {div['net']:+,.0f})")

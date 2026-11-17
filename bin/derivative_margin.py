@@ -89,3 +89,16 @@ def read_derivative_positions(client, account_no):
     if isinstance(r, dict) and isinstance(r.get("positions"), list):
         return r["positions"]
     return None
+
+
+def live_gate(payload, read_positions, from_raw):
+    """Cổng đường LIVE (daily_nav_snapshot): → (VND, None) hoặc (None, lý_do) ⇒ caller rc=2.
+
+    `read_positions`: callable không đối số → list/None (chỉ gọi khi KHÔNG from_raw và block
+    derivative có field ≠ 0). from_raw (backfill) ⇒ không đọc vị thế, positions_required=False.
+    """
+    pos = None
+    block = (payload or {}).get("derivative") or {}
+    if not from_raw and any(block.get(k) for k in ("remainSecure",) + UNVERIFIED_FIELDS):
+        pos = read_positions()
+    return derivative_assets(payload, pos, positions_required=not from_raw)
