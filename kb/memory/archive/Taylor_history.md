@@ -2420,3 +2420,9 @@
 
 ## Archived 2026-11-17 (keep=12 days=0 require_done=False)
 - [2026-11-16T01:36:06Z] [cq-medium 16/11] XONG job Taylor_20261116_012626: A fix/fill-lagging-qty-20261116 (60908e01a), B fix/bull-div-boost-shell-20261116 (cd723aa2e) KHONG merge — CHO Mike arch-review + merge; worktree selfcheck rong can bu env gitignored (secrets/accounts, data/trade_plans, mike)
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T01:37:18Z] [q9-waiver 16/11] XONG job Taylor_20261116_013249: nhanh feat/q9-waiver-20261116 (17db40c3c) KHONG merge — CHO Mike arch-review + merge + chay gate that 2 weekly 09-13/11; waiver het han 2026-11-20
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T01:58:14Z] [cq vong2 16/11] XONG job Taylor_20261116_014210: A 960c17f97, B 145b9cf92 KHONG merge — CHO Mike arch-review diff-only + merge

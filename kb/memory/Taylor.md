@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-16T01:37:18Z] [q9-waiver 16/11] XONG job Taylor_20261116_013249: nhanh feat/q9-waiver-20261116 (17db40c3c) KHONG merge — CHO Mike arch-review + merge + chay gate that 2 weekly 09-13/11; waiver het han 2026-11-20
-- [2026-11-16T01:58:14Z] [cq vong2 16/11] XONG job Taylor_20261116_014210: A 960c17f97, B 145b9cf92 KHONG merge — CHO Mike arch-review diff-only + merge
 - [2026-11-16T03:16:01Z] ĐANG DỞ: job Taylor_20261116_031549 LAG early-exit Bayes | NEXT: buoc 0 -> research/lag_early_exit_bayes_20261116/
 - [2026-11-16T03:28:43Z] [lag-early-exit 16/11] XONG job Taylor_20261116_031549: NO-GO thoat som LAG, nhanh research/lag-early-exit-20261116 (f037ad41f) KHONG merge — CHO user chot A (giu T+25) / B (canh bao display-only)
 - [2026-11-16T16:21:43Z] ĐANG DỞ: job Taylor_20261116_162132 ORB futures live path (A probe..F spec) | NEXT: khao sat + worktree feat/orb-futures-live-20261116
@@ -26,3 +24,5 @@
 - [2026-11-17T03:46:42Z] [orb-futures vong3 17/11] XONG job Taylor_20261117_034120: outer addddabf9, mike 3e41ae02a, KHONG merge/cron, co TAT — CHO Mike arch-review diff-only; watchdog cron = dieu kien truoc LIVE
 - [2026-11-17T03:53:52Z] ĐANG DỞ: job Taylor_20261117_035339 DD QTP | NEXT: tai BCTC Q3/2026 -> agents/Taylor/research/dd_QTP_20261117/src, viet REPORT.md
 - [2026-11-17T04:05:43Z] [dd-qtp 17/11] XONG job Taylor_20261117_035339: REPORT.md dd_QTP_20261117, tam sau CK 13.050 (vung 9.550-16.030) — CHO Mike fundamental-skeptic + dd_price_zones
+- [2026-11-17T04:15:20Z] ĐANG DỞ: job Taylor_20261117_041500 ORB vong4 R2 re-read + loop_err | NEXT: sua orb_futures.py + selfcheck wt-orb-futures-20261116
+- [2026-11-17T04:18:56Z] [orb-futures vong4 17/11] XONG job Taylor_20261117_041500: outer 1cb1ce075, mike ca6c73061, KHONG merge, co TAT — CHO Mike arch-review diff-only
