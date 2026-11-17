@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-16T03:16:01Z] ĐANG DỞ: job Taylor_20261116_031549 LAG early-exit Bayes | NEXT: buoc 0 -> research/lag_early_exit_bayes_20261116/
 - [2026-11-16T03:28:43Z] [lag-early-exit 16/11] XONG job Taylor_20261116_031549: NO-GO thoat som LAG, nhanh research/lag-early-exit-20261116 (f037ad41f) KHONG merge — CHO user chot A (giu T+25) / B (canh bao display-only)
 - [2026-11-16T16:21:43Z] ĐANG DỞ: job Taylor_20261116_162132 ORB futures live path (A probe..F spec) | NEXT: khao sat + worktree feat/orb-futures-live-20261116
 - [2026-11-16T16:41:16Z] [orb-futures 16/11] XONG job Taylor_20261116_162132: nhanh feat/orb-futures-live-20261116 (outer e9aad9819, mike d91e49d32) KHONG merge/cron, co TAT — CHO Mike arch-review+quant-skeptic; sau do DRY>=10 phien, sua NAV phai sinh truoc khi user nop ky quy
@@ -26,3 +25,4 @@
 - [2026-11-17T04:05:43Z] [dd-qtp 17/11] XONG job Taylor_20261117_035339: REPORT.md dd_QTP_20261117, tam sau CK 13.050 (vung 9.550-16.030) — CHO Mike fundamental-skeptic + dd_price_zones
 - [2026-11-17T04:15:20Z] ĐANG DỞ: job Taylor_20261117_041500 ORB vong4 R2 re-read + loop_err | NEXT: sua orb_futures.py + selfcheck wt-orb-futures-20261116
 - [2026-11-17T04:18:56Z] [orb-futures vong4 17/11] XONG job Taylor_20261117_041500: outer 1cb1ce075, mike ca6c73061, KHONG merge, co TAT — CHO Mike arch-review diff-only
+- [2026-11-17T04:21:55Z] [dd-qtp r2 17/11] XONG job Taylor_20261117_041718: tam sau CK 13.140 (vung 10.390-16.490), gia/tam 0,78; QD768 goc CHUA KIEM — CHO Mike chay lai skeptic/quyet dd_price_zones

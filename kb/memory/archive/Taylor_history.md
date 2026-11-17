@@ -2426,3 +2426,6 @@
 
 ## Archived 2026-11-17 (keep=12 days=0 require_done=False)
 - [2026-11-16T01:58:14Z] [cq vong2 16/11] XONG job Taylor_20261116_014210: A 960c17f97, B 145b9cf92 KHONG merge — CHO Mike arch-review diff-only + merge
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T03:16:01Z] ĐANG DỞ: job Taylor_20261116_031549 LAG early-exit Bayes | NEXT: buoc 0 -> research/lag_early_exit_bayes_20261116/
