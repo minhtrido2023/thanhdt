@@ -4,13 +4,17 @@
 # Discord) mà không ai ghi vào ledger thì cứ hiện "chờ/quá hạn" mãi (ca 2026-11-07: 6/12 mục chờ quyết sai).
 # Luật: chỉ ĐÓNG/CẬP NHẬT khi có artifact dẫn được (commit, crontab, log, bus answer); không dẫn được => ghi note
 # "verified_open" (làm mới `updated`) và GIỮ NGUYÊN trạng thái. KHÔNG quyết thay user, KHÔNG sửa code/cron/plan.
-# Cron: 30 0 * * *  (07:30 ICT, trước build 07:50 và bản tin 08:00). Marker: state/work_tree/verified_<ngày ICT>.
+# Cron 2 lần/ngày (user yêu cầu 17/11/2026: thông tin cũ không được nằm lại trên bảng việc):
+#   30 0 * * *  (07:30 ICT, trước build 07:50 và bản tin 08:00)  +  30 6 * * *  (13:30 ICT, giữa ngày).
+# Marker: slot state/work_tree/verified_<ngày ICT>_<AM|PM> (chống chạy lặp theo slot) + verified_<ngày ICT> (cho daily_decision_topic).
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CANON="$(python3 "$ROOT/bin/wc_paths.py" --mike-canonical 2>/dev/null || echo "$ROOT")"
 TODAY="$(TZ=Asia/Ho_Chi_Minh date +%F)"
-MARK="$CANON/state/work_tree/verified_$TODAY"
-[ -e "$MARK" ] && [ "${1:-}" != "--force" ] && { echo "đã xác minh hôm nay"; exit 0; }
+SLOT="$([ "$(TZ=Asia/Ho_Chi_Minh date +%H)" -lt 12 ] && echo AM || echo PM)"
+MARK="$CANON/state/work_tree/verified_${TODAY}_${SLOT}"
+MARK_DAY="$CANON/state/work_tree/verified_$TODAY"
+[ -e "$MARK" ] && [ "${1:-}" != "--force" ] && { echo "đã xác minh slot $SLOT hôm nay"; exit 0; }
 cd "$CANON" || exit 1
 TZ=Asia/Ho_Chi_Minh timeout 120 python3 bin/work_tree_build.py --quiet || echo "WARN: build trước verify lỗi" >&2
 read -r -d '' PROMPT <<'PEOF' || true
@@ -27,6 +31,6 @@ in: số mục đã đóng / cập nhật / giữ mở + 1 dòng mỗi mục đ�
 PEOF
 OUT="$(bin/dispatch.sh Wags "$PROMPT" --timeout 1500 2>&1)"; RC=$?
 echo "$OUT" | tail -15
-if [ $RC -eq 0 ]; then touch "$MARK"; else echo "work_tree_verify_daily: dispatch rc=$RC" >&2; fi
+if [ $RC -eq 0 ]; then touch "$MARK" "$MARK_DAY"; else echo "work_tree_verify_daily: dispatch rc=$RC" >&2; fi
 TZ=Asia/Ho_Chi_Minh timeout 120 python3 bin/work_tree_build.py --quiet
 exit $RC

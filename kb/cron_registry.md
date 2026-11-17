@@ -181,3 +181,8 @@ Làm mới cache r* cho dòng hiển thị DCF (display-only). Đề xuất + ru
 - `23 18 2-7 * *` (01:23 ICT ngày 3–8): `fund_bench_cron.sh dcf_rstar_refresh timeout 2400 … dcf_rstar_refresh.py` dưới `flock -n`; cache đã đủ tháng ⇒ rc=0 thoát ngay; dựng thật ~9 phút/1GB RAM. Log `logs/dcf_rstar_refresh.log`.
 - `37 3 * * *` (10:37 ICT hằng ngày): `fund_bench_cron.sh dcf_rstar_expiry timeout 120 … --check-expiry`; chỉ báo Trading Daily khi cache > 38 ngày.
 - §11: (1) nguồn BQ (panel) + `bq_cache`; (2) tươi sau phiên cuối tháng đã sync (23:45 ICT); (3) không cần T same-day; (4) consumer = `converge_report` DC book (hiển thị). Cache hết hạn hiển thị 2026-12-14 nếu job lỗi liên tục; lần dựng thật đầu tiên dự kiến 2026-12-03.
+
+## work_tree_verify_daily — ĐÃ CÀI 2026-11-17 14:5x ICT (Mike, user yêu cầu "cập nhật ≥2 lần/ngày, không để thông tin cũ nằm trên bảng việc"; backup crontab `state/crontab_backup_*_workverify.txt`)
+| Lịch | Script | Đọc | Ghi | Phụ thuộc | Kiểm |
+|---|---|---|---|---|---|
+| **07:30 + 13:30 ICT hằng ngày** (`30 0` + `30 6` UTC) | `mike/bin/work_tree_verify_daily.sh` (build → dispatch Wags xác minh mục "chờ quyết"/"quá hạn" với git/crontab/bus → build lại) | `state/work_tree/merged.json`, git, crontab, bus | `kb/work_ledger.jsonl` (close/note), marker `state/work_tree/verified_<ngày>_<AM\|PM>` + `verified_<ngày>` | trước build 07:50 / bản tin 08:00; slot PM không phụ thuộc gì | marker slot hôm nay tồn tại + `logs/work_tree_verify.log` không có `dispatch rc=`. Gốc lỗi: script có từ 11/07 nhưng KHÔNG ai cài cron (chỉ chạy tay 1 lần). |
