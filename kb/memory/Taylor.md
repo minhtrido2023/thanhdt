@@ -29,3 +29,4 @@
 - [2026-11-17T10:31:59Z] [newdeals-season 17/11] XONG job Taylor_20261117_102211: nhanh feat/newdeals-season-20261117 d97339d1a, KHONG merge/cron — CHO Mike arch-review + cai cron 19:45 ICT; DD queue Q3 = VCB
 - [2026-11-17T10:44:36Z] [newdeals-season vong2 17/11] XONG job Taylor_20261117_103907: outer 530263674 (pushed), mike 3a0f92f0f gate + 0023d9367 registry, KHONG merge/cron — CHO Mike arch-review + merge cung dot + backup converge_portfolio_paper.json truoc cron 19:45 ICT
 - [2026-11-17T11:02:54Z] ĐANG DỞ: job Taylor_20261117_110239 DD VCB | NEXT: đọc brief + skill due-diligence, viết REPORT.md dd_VCB_20261117
+- [2026-11-17T11:11:26Z] [dd-vcb 17/11] XONG job Taylor_20261117_110239: REPORT dd_VCB_20261117, tam 42.035 (vung 36.431-49.678, r13,5%; Ke beta-that 12% => 54.646), assumptions_md5 acba98b2 — CHO Mike fundamental-skeptic + dd_price_zones
