@@ -17,7 +17,7 @@ xem thì hiện ra kèm bằng chứng đã đọc (§29) cho tới khi người
   K = "tôi SỞ HỮU bao nhiêu tiền" (§25 — KHÔNG phải sức mua): `totalCash − totalDebt +
       egg.totalValue + off-book khai tay`, đọc từ CHÍNH các cột nav_history mà
       `daily_nav_snapshot.py` đã ghi từ balances của broker:
-          K = cash + cum_dividend_excl − margin_debt + offbook_assets + egg_assets
+          K = cash + cum_dividend_excl − margin_debt + offbook_assets + egg_assets + derivative_assets
       (`cash` của nav_history đã TRỪ cổ tức phải thu chưa qua ex-date; cộng lại để về totalCash).
       Vay/trả ký quỹ và chuyển tiền ↔ Trứng vàng triệt tiêu ngay trong K, không cần số hạng riêng.
   bán/mua  = Σ fillQuantity × averagePrice của các lệnh trong `dnse_raw_*.jsonl` (bản ghi `orders`
@@ -249,11 +249,15 @@ def load_nav_rows(account, nav_dir=None):
                        "cash": _num(rec.get("cash")), "debt": _num(rec.get("margin_debt")),
                        "offbook": _num(rec.get("offbook_assets")),
                        "egg": _num(rec.get("egg_assets")),
+                       "deriv": _num(rec.get("derivative_assets")),
                        "cum_div_excl": _num(rec.get("cum_dividend_excl"))}
             except ValueError as exc:
                 raise CashIdentityError(f"{path}: dòng {rec.get('date')!r} không đọc được ({exc})") from exc
             # "Tôi SỞ HỮU bao nhiêu tiền" (§25): totalCash − totalDebt + egg + off-book khai tay.
-            row["k"] = row["cash"] + row["cum_div_excl"] - row["debt"] + row["offbook"] + row["egg"]
+            # + ký quỹ phái sinh (cột `derivative_assets`, từ 17/11/2026): chuyển tiền cơ sở ↔ ký
+            # quỹ là chuyển NỘI BỘ, triệt tiêu trong K như egg.
+            row["k"] = (row["cash"] + row["cum_div_excl"] - row["debt"] + row["offbook"] + row["egg"]
+                        + row["deriv"])
             ts = rec.get("balance_ts")
             try:
                 row["snap"], row["snap_error"] = (_parse_ts(ts), None) if ts else (None, f"balance_ts rỗng ({ts!r})")

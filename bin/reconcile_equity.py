@@ -202,6 +202,9 @@ def main():
                           "trước 2026-09-27; chỉ làm residual TO HƠN, không nới lỏng cổng")
     ap.add_argument("--no-realized", action="store_true",
                      help="bỏ realized P&L + cổ tức khỏi vế trái — tái lập đúng bản trước 2026-09-13")
+    ap.add_argument("--no-flows", action="store_true",
+                     help="bỏ dòng vốn nạp/rút (account_cash_flows.json) khỏi vế trái — tái lập "
+                          "đúng bản trước 2026-11-17")
     ap.add_argument("--div-tax-rate", type=float, default=0.05,
                      help="thuế TNCN cổ tức tiền mặt trên phần đã chi trả (cá nhân cư trú 5%%)")
     args = ap.parse_args()
@@ -250,6 +253,32 @@ def main():
         (bal_rec.get("payload", {}).get("egg") or {}).get("totalValue") or 0)
     accrued_fee = stock.get("depositFeeAmount", 0)
     bal_ts = bal_rec["ts"]
+    # Ký quỹ phái sinh (17/11/2026) — cùng công thức daily_nav_snapshot (derivative_margin.py).
+    # Đối soát LỊCH SỬ: không đọc vị thế live ⇒ positions_required=False (dựa usedSecure==0);
+    # field chưa xác minh ≠ 0 ⇒ thoát 2, không đoán.
+    import derivative_margin
+    derivative_value, _dreject = derivative_margin.derivative_assets(
+        bal_rec.get("payload"), None, positions_required=False)
+    if _dreject:
+        print(f"❌ Tài sản phái sinh không định giá được ({bal_ts}): {_dreject}", file=sys.stderr)
+        sys.exit(2)
+    # Dòng vốn NGOẠI SINH (nạp/rút, account_cash_flows.json) sau mốc vốn ban đầu, tới lúc chụp
+    # balance: thiếu số hạng này thì mọi lần nạp/rút (vd chuyển vốn 17/11 vào ký quỹ) hiện thành
+    # residual. Mốc = seed['date'] (vốn ban đầu là NAV CUỐI ngày đó ⇒ flow cùng ngày đã nằm trong).
+    import account_cash_flows
+    # Không có seed (--starting-capital tay, vd SpaceX) ⇒ mốc = inception_date của
+    # data/account_inception.json (vốn khởi điểm = vốn ngày đó); không có cả hai ⇒ không cộng flow.
+    flow_start = (seed or {}).get("date")
+    if not flow_start:
+        _inc_path = os.path.join(WC_ROOT, "data", "account_inception.json")
+        if os.path.exists(_inc_path):
+            flow_start = (json.load(open(_inc_path, encoding="utf-8")).get(args.account)
+                          or {}).get("inception_date")
+    import datetime as _dtm
+    ext_flows = [f for f in account_cash_flows.load_flows(args.account)
+                 if flow_start and f["kind"] != "market_only" and flow_start < f["date"].isoformat()
+                 and account_cash_flows.flow_moment(f)[0] <= _dtm.datetime.fromisoformat(bal_ts)]
+    net_flows = 0.0 if args.no_flows else sum(f["amount_vnd"] for f in ext_flows)
 
     unrealized_pnl = snap["total_unrealized_pnl"]
     mtm_stock = snap["total_mtm_value"]
@@ -359,12 +388,14 @@ def main():
     dividends_net = 0.0 if args.no_realized else div["net"]
 
     # Vế trái: đường P&L — CHỈ dùng số THẬT (fee-rate xác nhận + depositFeeAmount thật từ API)
-    lhs = args.starting_capital + unrealized_pnl + realized + dividends_net - fees - accrued_fee
+    lhs = (args.starting_capital + net_flows + unrealized_pnl + realized + dividends_net - fees
+           - accrued_fee)
     # Vế phải: đường bảng cân đối (số dư THẬT từ broker) + offbook (user tự báo, vd Trứng vàng —
     # tiền vẫn của user, chỉ ngoài phạm vi balances() API, xem --offbook-assets ở trên)
     # + egg_value: Trứng vàng đọc TỰ ĐỘNG từ API (§25 chiều thứ ba) — cùng quy ước
     # daily_nav_snapshot.py:1254 / compute_active_nav.py:533.
-    rhs = mtm_stock + cash - debt + egg_value + args.offbook_assets + rights_receivable_value
+    rhs = (mtm_stock + cash - debt + egg_value + args.offbook_assets + rights_receivable_value
+           + derivative_value)
     if egg_value and args.offbook_assets:
         print(f"⚠️ CẢ HAI cùng > 0: egg.totalValue {egg_value:,.0f} (API) và --offbook-assets "
               f"{args.offbook_assets:,.0f} (user tự báo). --offbook-assets chỉ dành cho tài sản "
@@ -406,6 +437,10 @@ def main():
     for d, evs in sorted(rights_ev.items()):
         for ev in evs:
             print(f"    + CP quyền mua user khai: {d} buy {ev[4]:,.0f} {ev[2]} @{ev[5]:,.0f} ({ev[1]}, phí 0)")
+    if args.no_flows:
+        print(f"  (--no-flows: BỎ dòng vốn nạp/rút {sum(f['amount_vnd'] for f in ext_flows):+,.0f})")
+    for f in ext_flows:
+        print(f"  + Dòng vốn {f['kind']} {f['date']} {f.get('time_ict') or ''}: {f['amount_vnd']:>+16,.0f}")
     print(f"  + Lãi/lỗ chưa thực hiện:{unrealized_pnl:>+16,.0f}")
     if args.no_realized:
         print(f"  (--no-realized: BỎ realized {rz['realized']:+,.0f} + cổ tức {div['net']:+,.0f})")
@@ -427,6 +462,8 @@ def main():
         print(f"  + Trứng vàng (egg.totalValue, API):{egg_value:>11,.0f}")
     elif args.no_egg:
         print(f"  (--no-egg: BỎ Trứng vàng khỏi vế phải — tái lập bản trước 2026-09-27)")
+    if derivative_value:
+        print(f"  + Ký quỹ phái sinh (derivative.remainSecure, API): {derivative_value:>11,.0f}")
     if args.offbook_assets:
         print(f"  + Off-book (tự báo):   {args.offbook_assets:>16,.0f}")
     for tk, q, px, pay_d, cr_d in rights_receivable:
@@ -463,6 +500,8 @@ def main():
         "accrued_margin_fee_real": accrued_fee,
         "lhs_pnl_path": lhs, "mtm_stock": mtm_stock, "cash": cash, "margin_debt": debt,
         "egg_assets": egg_value, "egg_assets_auto": not args.no_egg,
+        "derivative_assets": derivative_value, "external_flows_net": net_flows,
+        "external_flows": [{**f, "date": f["date"].isoformat()} for f in ext_flows],
         "offbook_assets_used": args.offbook_assets,
         "rights_paid_not_credited": rights_receivable_value,
         "rhs_balance_sheet_path": rhs, "residual": residual,

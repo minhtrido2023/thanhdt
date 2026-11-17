@@ -374,7 +374,7 @@ def build_sleeve_rows(account: str, nav_rows: list, inception: dict, scope: list
                     p = all_price_fn(d, s)
                     in_mv += q_in * (p[0] if p else float("nan"))
             bottom = in_mv + _f(r, "cash") + _f(r, "egg_assets") + _f(r, "offbook_assets") \
-                - _f(r, "margin_debt") - recv
+                + _f(r, "derivative_assets") - _f(r, "margin_debt") - recv
             recon = nav_b - bottom
         table.append({"date": d.isoformat(), "nav_a": nav_a, "outside_mv": mv, "outside_recv": recv,
                       "nav_b": nav_b, "outside_qty_json": json.dumps(oq, sort_keys=True),

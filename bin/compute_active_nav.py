@@ -75,6 +75,16 @@ RANH GIỚI — chỗ nào VẪN phải dùng `availableCash`, đừng "thống 
   availableCash. Đúng tinh thần đã áp cho `manual_offbook_assets_vnd` (vào NAV, không vào
   sức mua).
 
+§derivative — KÝ QUỸ PHÁI SINH KHÔNG vào active_nav (quyết định 17/11/2026, job Taylor_20261117_092943):
+  `balances.derivative.remainSecure` (sleeve ORB) nằm NGOÀI `stock.totalCash` ⇒ `cash_basis()` tự
+  loại nó; KHÔNG cộng thêm. active_nav = mẫu số TỶ TRỌNG CỔ PHIẾU: tiền ký quỹ bị ràng buộc cho
+  hợp đồng tương lai, không mua được cổ phiếu (muốn dùng phải rút về tiểu khoản cơ sở = dòng vốn
+  nội bộ có chủ ý). Cộng vào ⇒ phóng đại mục tiêu mỗi mã đúng tỷ lệ ký quỹ/NAV mà không có tiền
+  thực để mua. NAV BÁO CÁO (nav_history, TWR, reconcile_equity) thì CÓ cộng — `derivative_margin.py`.
+  Hệ quả: `total_nav` ở đây ≠ `nav` của nav_history đúng bằng `derivative_assets` (cố ý).
+  Park/JIT-unpark/plan_funding cũng không thấy khoản này (đọc availableCash/totalCash/ppse STOCK
+  + egg) — selfcheck `nav_derivative_margin_selfcheck.py` nhóm E.
+
 FAIL-CLOSED. Ba guard (tái dùng NGUYÊN VẸN từ `park_holdings.py`, không viết lại —
 `_stock_block_all_zero` / `_cash_fields_all_zero` / `_cash_fields_inconsistent`) bắt lỗi
 feed DNSE trả block `stock` toàn 0 hoặc chỉ ăn 2/3 field tiền (sự cố thật 2026-07-27).

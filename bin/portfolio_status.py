@@ -682,7 +682,7 @@ def load_nav_row(account, date):
             row = dict(rec)
             row["date"] = _dt.date.fromisoformat(rec["date"])
             row["nav"] = float(rec["nav"])
-            for k in ("cash", "egg_assets"):
+            for k in ("cash", "egg_assets", "derivative_assets"):
                 row[k] = float(rec[k]) if rec.get(k) not in (None, "") else 0.0
             rows.append(row)
     rows.sort(key=lambda r: r["date"])
@@ -801,6 +801,7 @@ def build_output(account, date, returns_fn=None, lag_lots_fn=None, ledger_split_
 
     cash = today_row.get("cash") or 0
     egg = today_row.get("egg_assets") or 0
+    deriv = today_row.get("derivative_assets") or 0
     held = set(positions.keys())
 
     recs_date, recs_path = latest_recs_csv()
@@ -901,6 +902,10 @@ def build_output(account, date, returns_fn=None, lag_lots_fn=None, ledger_split_
                      f"{pct_nav} | {pnl_txt} | {note} |")
     egg_pct = f"{egg / nav * 100:.1f}%" if nav else "—"
     lines.append(f"| Trứng vàng | {egg / 1e6:,.1f}M | {egg_pct} | — | DNSE bond-like (off-book) |")
+    if deriv:
+        lines.append(f"| Ký quỹ phái sinh (ORB) | {deriv / 1e6:,.1f}M | "
+                     f"{deriv / nav * 100:.1f}% | — | tiền ký quỹ, không mua cổ phiếu |" if nav else
+                     f"| Ký quỹ phái sinh (ORB) | {deriv / 1e6:,.1f}M | — | — | tiền ký quỹ |")
     cash_pct = f"{cash / nav * 100:.1f}%" if nav else "—"
     lines.append(f"| Cash | {cash / 1e6:,.1f}M | {cash_pct} | 0% | Idle |")
     lines.append("")
