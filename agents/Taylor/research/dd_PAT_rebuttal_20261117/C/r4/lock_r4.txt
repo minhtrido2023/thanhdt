@@ -1,0 +1,5 @@
+r4 assumptions lock — PAT, mu gia
+locked_utc: 2026-11-17T12:48:31Z
+2521604da439d323074162f5102909ed  assumptions_objective_r4.md
+base (khong sua): f312ad6cac2f495beac38505c1ab0a39  ../assumptions_objective_r3.md
+Quy tac: calc_r4 chi chay SAU dong nay; moi lech khoi assumptions_objective_r4.md phai ghi ro trong VALUATION_r4.md muc 'Lech so voi gia dinh khoa'.

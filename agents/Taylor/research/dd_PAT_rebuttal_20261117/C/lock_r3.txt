@@ -1,0 +1,5 @@
+r3 assumptions lock — PAT, mu gia
+locked_utc: 2026-11-17T11:23:17Z
+f312ad6cac2f495beac38505c1ab0a39  assumptions_objective_r3.md
+base (khong sua): f2eb154f22bdbd38db92cb240d60235a  ../../dd_PAT_objective_20261114/valuation/assumptions_objective_r2.md
+Quy tac: model calc_r3 chi duoc chay SAU dong nay; moi lech khoi assumptions_objective_r3.md phai ghi ro trong VALUATION_r3.md muc 'Lech so voi gia dinh khoa'.

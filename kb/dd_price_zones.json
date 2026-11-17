@@ -3871,6 +3871,56 @@
       "supersedes": "QTP@2026-11-17#1",
       "correction_reason": "Đã đọc văn bản gốc QĐ 768/QĐ-TTg (user duyệt tải thủ công 17/11 14:16 ICT): quy tắc cuối = chuyển đổi khi 20 năm (nếu giá phù hợp) / dừng khi >40 năm không chuyển đổi được ⇒ mốc 2051–2054 của QTP, sau hạn thuê đất 2047; 'dừng sau 2030' không có trong văn bản cuối. Số tâm/vùng KHÔNG đổi.",
       "recorded_at": "2026-11-17T15:00:00+07:00"
+    },
+    {
+      "ticker": "PAT",
+      "dd_date": "2026-11-17",
+      "rev": 1,
+      "bctc_quarter": "2026Q3",
+      "zone_low": 47100,
+      "center": 66300,
+      "center_kind": "expected_weighted",
+      "center_desc": "kỳ vọng cây kịch bản r4 (khung quặng: mỗi nguồn có xs khôi phục riêng, hazard hằng; thuế XK 15% từ 01/01/2027 xs 0,97; nút P co giãn chung 0,25; cước 9T/26 4,69%; tồn kho dư giải phóng) TRƯỚC chiết khấu thanh khoản; r 13,5% (spread 6,1pp giữ nguyên: nghiên cứu cohort cổ tức KHÔNG phân biệt được), g 2%; mù giá thật (valuer+2 skeptic+đính chính, stateless; khoá r4 md5 2521604d… 12:48Z); P10–P90 37.400–98.600",
+      "zone_high": 81700,
+      "center_range": null,
+      "price_ref": 70200,
+      "price_date": "2026-11-17",
+      "verdict_label": "GIÁ 70.200 cao hơn tâm 5,9%, TRONG vùng P25–P75 47.100–81.700; không có biên an toàn; cổng 0,85×tâm (56.355) không đạt. Hiệu chỉnh trái chiều: bi quan xếp chồng 57.200 / lạc quan xếp chồng 71.700 (đều phụ thuộc phán đoán không có bằng chứng độc lập). Pháp lý chỉ WARNING.",
+      "skeptic_status": "phản biện user 17/11: 4 agent kiểm dữ kiện + quant-skeptic cohort cổ tức (CONFIRMED, tin cậy TB, có đính chính); 2 skeptic mù giá trên r3 66.864 (lạc quan CONFIRMED 67.000–71.500; bi quan REFUTED quá cao ~57.500) → 1 vòng đính chính valuer mới → r4; CHƯA chạy skeptic trên r4",
+      "source_file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r4/VALUATION_r4.md",
+      "evidence": [
+        {
+          "file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r4/VALUATION_r4.md",
+          "quote": "Tâm r4 = 66.300",
+          "fields": [
+            "center"
+          ]
+        },
+        {
+          "file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r4/VALUATION_r4.md",
+          "quote": "P25–P75 = **47.100 – 81.700**",
+          "fields": [
+            "zone_low",
+            "zone_high"
+          ]
+        },
+        {
+          "file": "kb/projects/pat-dd-user-rebuttal-20261117.md",
+          "quote": "Giá đóng cửa 17/11/2026 = 70.200",
+          "fields": [
+            "price_ref"
+          ]
+        }
+      ],
+      "assumptions_file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r4/assumptions_objective_r4.md",
+      "assumptions_md5": "2521604da439d323074162f5102909ed",
+      "null_reason": null,
+      "expires_on": null,
+      "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc tờ trình GD bên liên quan DLC–PAT (ĐHĐCĐ 12/05 & 14/08/2026) hoặc 120 ngày",
+      "notes": "Thay thế PAT@2026-11-14#rev4 (tâm 64.700) sau phản biện user 17/11. Nút kém chắc nhất: giá DLC trả PAT (58.900–88.100; 63,7% DT 9T/26 bán DLC) và giá thực hiện (±5% ⇒ ±24.700). Mốc: tờ trình GD bên liên quan 2027, BCTC Q4/2026 (~cuối 01/2027), tỷ lệ thuế XK/DT nước ngoài Q1/2027, giấy phép KT25. Phát hiện: LN lõi 2027 E[EBIT]~109 vs 2026E ~259 chủ yếu do thuế 15% + than cốc, không phụ thuộc quặng. Nghiên cứu #5: nhóm cổ tức ổn định ít sụt sâu hơn (13,1% vs 25,2% giá điều chỉnh; −6,6pp CI chứa 0 theo giá thô, BĐS không an toàn hơn) nhưng KHÔNG đủ sức bác/xác nhận spread 6,1pp.",
+      "supersedes": null,
+      "correction_reason": null,
+      "recorded_at": "2026-11-17T12:52:41Z"
     }
   ],
   "center_kinds": [

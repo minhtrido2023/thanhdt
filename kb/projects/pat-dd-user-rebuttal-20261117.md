@@ -20,3 +20,11 @@ A. Kiểm dữ kiện 1–4 (3 agent song song, web + BCTC ảnh; được đọ
 B. Nghiên cứu #5 (agent Opus stateless theo skill quant-research): cohort PIT cổ tức ổn định > lãi huy động; khẳng định "chưa có công ty nào bị giảm sâu" kiểm bằng phản ví dụ + drawdown/forward return; r* ngầm theo nhóm; hiệu chỉnh r có OOS (IS ≤2019 / OOS 2020+), DSR, quant-skeptic. KHÔNG sửa r production khi chưa CONFIRMED.
 C. Sau A+B: valuer mù-giá MỚI dựng r3 (cơ sở lợi nhuận từ bằng chứng mới; node T/TX/O cập nhật; nếu B CONFIRMED mới đổi spread) → skeptic hai chiều mù giá → so giá → cập nhật báo cáo + sổ rev5; email CHỈ khi user báo.
 D. Báo user: từng phản biện ĐÚNG/MỘT PHẦN/SAI kèm bằng chứng, tâm mới, độ chênh so rev4.
+
+## KẾT QUẢ (17/11/2026 ~20:1x ICT) — A→D xong, sổ PAT 2026-11-17#1
+Artifact: `agents/Taylor/research/dd_PAT_rebuttal_20261117/` (A/ 3 báo cáo dữ kiện; B/ cohort cổ tức + REPORT_B.md đã đính chính theo quant-skeptic; C/ r3 + skeptic hai chiều + C/r4/). Tất cả agent stateless, mù giá; giá chỉ so SAU khi khoá.
+- **Phán quyết 5 điểm**: #1 MỘT PHẦN (khởi tố 14/03/2026 đúng; 'bắt 12/2025' không nguồn; đáy Q2–Q3 đúng với DGC, SAI với PAT — Q2/26 PAT tốt nhất, đáy Q1 và Q3; 'tốt dần' chưa kiểm được). #2 MỘT PHẦN (điện −2% đúng nhưng tác động PAT ≤~10 tỷ/năm; PAT 63,7% DT bán DLC, xuất khẩu chỉ 35%; 'DGC thứ ba thế giới' không nguồn). #3 MỘT PHẦN (hai chiều bằng chứng; chưa mỏ nào mở lại; nguồn Ai Cập chắc đến hết Q1/2027). #4 MỘT PHẦN (NĐ 199/2025: 10% 2026 → 15% từ 01/01/2027; chỉ Nhật 0% theo CPTPP, Hàn/Đài/Ấn chịu MFN; PAT 9T/26 thuế XNK/DT nước ngoài 10,59%). #5 MỘT PHẦN (nhóm cổ tức ổn định ÍT sụt sâu hơn nhưng CÓ sụt; không đủ sức bác/xác nhận spread 6,1pp ⇒ KHÔNG đổi r).
+- **r4**: tâm 66.300 (P25–P75 47.100–81.700; P10–P90 37.400–98.600), so rev4 64.700 = +1.600 (+2,5%); giá 70.200 (17/11) cao hơn tâm 5,9%, cổng 0,85×tâm không đạt. Hiệu chỉnh trái chiều 57.200–71.700. Nút kém chắc: giá DLC trả PAT, giá thực hiện, khung quặng. Chưa skeptic trên r4.
+- Email: KHÔNG gửi (chờ user báo).
+
+Giá đóng cửa 17/11/2026 = 70.200 (BQ ticker, ORDER BY time DESC; so SAU khi khoá r4).
