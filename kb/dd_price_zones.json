@@ -3765,6 +3765,59 @@
       "supersedes": "PAT@2026-11-14#3",
       "correction_reason": "Bổ sung skeptic lần 2 (15/11/2026, hai chiều mù giá) theo yêu cầu user; tâm/vùng/khoá giữ nguyên 64.700 (49.600–79.200). Khoảng tâm hiệu chỉnh có bằng chứng 56.100–68.000.",
       "recorded_at": "2026-11-15T16:55:00+07:00"
+    },
+    {
+      "ticker": "QTP",
+      "dd_date": "2026-11-17",
+      "rev": 1,
+      "bctc_quarter": "2026Q3",
+      "zone_low": 10390,
+      "center": 13140,
+      "center_kind": "expected_weighted",
+      "center_desc": "kỳ vọng trọng số 3 kịch bản DCF FCFE vòng đời hữu hạn tới 2047 (xấu 11.546 / cơ sở 15.200 / tốt 18.324; trọng số 0,25/0,65/0,10) SAU chiết khấu thanh khoản 10%; r 13,5% @ lãi huy động 12T hiệu dụng 7,40%; mù giá",
+      "zone_high": 16490,
+      "center_range": null,
+      "center_alt": 14599,
+      "center_alt_kind": "expected_weighted",
+      "price_ref": 10300,
+      "price_date": "2026-11-16",
+      "verdict_label": "Giá 10.300 = 0,78× tâm sau chiết khấu thanh khoản: RẺ theo DCF (có điều kiện vòng đời + giá cố định PPA); xấp xỉ HỢP LÝ theo bội số (PE ~8,2 trên EPS chuẩn hoá). Nếu nhà máy dừng 2030 thì giá/tâm 0,895 (mất biên 0,85). Moat NARROW không thưởng/trừ. Pháp lý (PDP8) chỉ WARNING, văn bản gốc QĐ 768 chưa kiểm.",
+      "skeptic_status": "fundamental-skeptic lần 1: INCONCLUSIVE (14 số khớp BCTC gốc, mô hình tái lập; chỉ ra trọng số kịch bản tốt, kiểm chéo PE, lịch dừng PDP8 chưa kiểm, mốc #1); đã áp 7 đính chính ở vòng 2 (tâm 13.050→13.140), KHÔNG chạy skeptic lần 2; chưa CONFIRMED — chưa đưa vào sleeve discretionary",
+      "source_file": "agents/Taylor/research/dd_QTP_20261117/REPORT.md",
+      "evidence": [
+        {
+          "file": "agents/Taylor/research/dd_QTP_20261117/REPORT.md",
+          "quote": "Sau chiết khấu 10%: ≈13.140đ/cp**, vùng **10.390 – 16.490**",
+          "fields": [
+            "center",
+            "zone_low",
+            "zone_high"
+          ]
+        },
+        {
+          "file": "agents/Taylor/research/dd_QTP_20261117/REPORT.md",
+          "quote": "Trước chiết khấu thanh khoản: 14.599đ/cp",
+          "fields": [
+            "center_alt"
+          ]
+        },
+        {
+          "file": "agents/Taylor/research/dd_QTP_20261117/REPORT.md",
+          "quote": "giá 10.300đ (16/11)",
+          "fields": [
+            "price_ref"
+          ]
+        }
+      ],
+      "assumptions_file": "agents/Taylor/research/dd_QTP_20261117/model/qtp_model.py",
+      "assumptions_md5": "b03568e1b3c89a0f1fc83cbd31218e07",
+      "null_reason": null,
+      "expires_on": null,
+      "expires_basis": "BCTC Q4/2026 (~21/01/2027) hoặc văn bản gốc PDP8/QĐ 768 chốt lịch dừng QTP hoặc 120 ngày",
+      "notes": "Nhạy nhất: (1) vòng đời nhà máy (dừng 2030 → 11.510 sau CK; 2035 → 12.440); (2) trọng số kịch bản (0,5/0,5/0 → giá/tâm 0,86 vượt ngưỡng 0,85); (3) giá cố định PPA sau khi hết khấu hao. Thanh khoản mỏng (ADV 1,22 tỷ/phiên, free float 19,6%) ⇒ sizing ≤0,5% NAV. Giá đã trừ quyền tạm ứng 700đ (GDKHQ 05/11). Chỉ cơ sở nghiên cứu, không phải tín hiệu mua; luật 02/11 #4 cần giá < 0,85×tâm + user duyệt từng lần.",
+      "supersedes": null,
+      "correction_reason": null,
+      "recorded_at": "2026-11-17T11:40:00+07:00"
     }
   ],
   "center_kinds": [

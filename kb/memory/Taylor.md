@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-16T03:28:43Z] [lag-early-exit 16/11] XONG job Taylor_20261116_031549: NO-GO thoat som LAG, nhanh research/lag-early-exit-20261116 (f037ad41f) KHONG merge — CHO user chot A (giu T+25) / B (canh bao display-only)
-- [2026-11-16T16:21:43Z] ĐANG DỞ: job Taylor_20261116_162132 ORB futures live path (A probe..F spec) | NEXT: khao sat + worktree feat/orb-futures-live-20261116
 - [2026-11-16T16:41:16Z] [orb-futures 16/11] XONG job Taylor_20261116_162132: nhanh feat/orb-futures-live-20261116 (outer e9aad9819, mike d91e49d32) KHONG merge/cron, co TAT — CHO Mike arch-review+quant-skeptic; sau do DRY>=10 phien, sua NAV phai sinh truoc khi user nop ky quy
 - [2026-11-16T16:50:16Z] ĐANG DỞ: job Taylor_20261116_165006 ORB vong2 sua B1-B4,M1-3,m1-2,N1,spec | NEXT: sua orb_futures.py + selfcheck
 - [2026-11-16T17:01:23Z] [orb-futures vong2 17/11] XONG job Taylor_20261116_165006: outer 6e4b80c22, mike 2a6ddf10c(prereg)+9f3da28cb, KHONG merge/cron, co TAT — CHO Mike arch-review diff-only (round-cap: loi moi => user); NAV fix blocker truoc nop ky quy
@@ -26,3 +24,5 @@
 - [2026-11-17T04:15:20Z] ĐANG DỞ: job Taylor_20261117_041500 ORB vong4 R2 re-read + loop_err | NEXT: sua orb_futures.py + selfcheck wt-orb-futures-20261116
 - [2026-11-17T04:18:56Z] [orb-futures vong4 17/11] XONG job Taylor_20261117_041500: outer 1cb1ce075, mike ca6c73061, KHONG merge, co TAT — CHO Mike arch-review diff-only
 - [2026-11-17T04:21:55Z] [dd-qtp r2 17/11] XONG job Taylor_20261117_041718: tam sau CK 13.140 (vung 10.390-16.490), gia/tam 0,78; QD768 goc CHUA KIEM — CHO Mike chay lai skeptic/quyet dd_price_zones
+- [2026-11-17T04:23:55Z] ĐANG DỞ: job Taylor_20261117_042339 QTP investor report | NEXT: build_report.py o research/dd_QTP_20261117/investor_report
+- [2026-11-17T04:34:44Z] [dd-qtp investor report 17/11] XONG job Taylor_20261117_042339: PDF md5 5facf0a700b689d234322b4e5a3368ac, CHUA gui email — CHO user 'gui email' + Mike ghi dd_price_zones

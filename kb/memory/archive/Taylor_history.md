@@ -2429,3 +2429,9 @@
 
 ## Archived 2026-11-17 (keep=12 days=0 require_done=False)
 - [2026-11-16T03:16:01Z] ĐANG DỞ: job Taylor_20261116_031549 LAG early-exit Bayes | NEXT: buoc 0 -> research/lag_early_exit_bayes_20261116/
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T03:28:43Z] [lag-early-exit 16/11] XONG job Taylor_20261116_031549: NO-GO thoat som LAG, nhanh research/lag-early-exit-20261116 (f037ad41f) KHONG merge — CHO user chot A (giu T+25) / B (canh bao display-only)
+
+## Archived 2026-11-17 (keep=12 days=0 require_done=False)
+- [2026-11-16T16:21:43Z] ĐANG DỞ: job Taylor_20261116_162132 ORB futures live path (A probe..F spec) | NEXT: khao sat + worktree feat/orb-futures-live-20261116
