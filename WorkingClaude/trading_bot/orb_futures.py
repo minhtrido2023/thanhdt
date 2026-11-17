@@ -81,7 +81,7 @@ POLL_S = 5
 ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = False
 ALERT_REPEAT_S = 60                # báo lặp (BOT_STOP+vị thế, còn vị thế sau 14:29…): tối đa 1 lần/60s/tiến trình;
                                    # mỗi lần watchdog gọi lại = 1 lần báo mới
-WATCH_ERR_ALERT_N = 3              # N lỗi liên tiếp trong vòng giám sát ⇒ báo ĐỎ (và mỗi N lỗi tiếp theo)
+WATCH_ERR_ALERT_N = 3              # ≥N lỗi liên tiếp trong vòng giám sát ⇒ báo ĐỎ, tối đa 1 tin/ALERT_REPEAT_S (N-b)
 CANCEL_CONFIRM_TRIES = 3           # sau huỷ: đọc lại tối đa 3 lần × 2s; vẫn chưa CHẮC chết ⇒ coi là sống
 WORST_DAY_PCT = 0.0946             # phiên tệ nhất lịch sử không stop (≈ 1 ngày khoá trần/sàn) — research stop
 MIN_MARGIN_FLOOR_VND = 55_000_000  # sàn ký quỹ tối thiểu (quant-skeptic 16/11): 43,3tr cũ − 17,4tr ⇒ < KQ duy trì
@@ -436,7 +436,9 @@ class OrbFutures:
 
     def watch_broker(self, why):
         """B2 — READ-ONLY positions phái sinh. Phẳng ⇒ True. Còn vị thế / không đọc được (LIVE) ⇒ báo ĐỎ.
-        Gọi ở MỌI lần chạy kể cả trạng thái kết thúc (SKIPPED/PAUSED/CLOSED/FLAT)."""
+        Gọi ở MỌI lần chạy kể cả trạng thái kết thúc (SKIPPED/PAUSED/CLOSED/FLAT).
+        N-a: DRY (cờ TẮT) ⇒ chỉ ghi raw log + stdout, KHÔNG Telegram/Discord/bus — vị thế phái sinh lúc DRY
+        là của user (giữ tay), bot không có lệnh nào trên broker nên không được spam."""
         try:
             pos = broker_positions(self.c, self.acc)
         except Exception as ex:                                     # noqa: BLE001
@@ -448,6 +450,12 @@ class OrbFutures:
             return True
         net = net_position(pos)
         self.raw("watch", {"why": why, "stage": self.state["stage"], "positions": pos, "net": net})
+        if not self.live:                                  # N-a
+            if net is None or abs(net) > 1e-9:
+                self.raw("watch_dry_position", {"why": why, "net": net})
+                print(f"[orb_fut] DRY: broker có vị thế phái sinh net={net} ({why}) — chỉ ghi log, không báo.")
+                return False
+            return True
         if net is None:
             self.alert_repeat("watch_unk", "watch", f"dòng vị thế phái sinh không đọc được số lượng ({why}, "
                               f"state {self.state['stage']}) — cần người kiểm tra.")
@@ -814,13 +822,20 @@ class OrbFutures:
                 except Exception as ex:                 # noqa: BLE001 — B4: lỗi thoáng qua ⇒ thử lại chu kỳ sau
                     self.err_n += 1
                     self.raw("loop_err", {"n": self.err_n, "stage": self.state["stage"], "err": repr(ex)})
-                    if self.err_n % WATCH_ERR_ALERT_N == 0:
-                        self.alert("watch_err", f"{self.err_n} lỗi LIÊN TIẾP trong vòng giám sát (stage "
-                                   f"{self.state['stage']}): {ex!r}"[:300] + " — bot vẫn thử lại; nếu đang có vị "
-                                   "thế, stop có thể KHÔNG được giám sát.")
+                    if self.err_n >= WATCH_ERR_ALERT_N:  # N-b: ≤1 tin / ALERT_REPEAT_S (khoá riêng), không mỗi N lỗi
+                        self.alert_repeat("loop_err", "watch_err", f"{self.err_n} lỗi LIÊN TIẾP trong vòng giám sát "
+                                          f"(stage {self.state['stage']}): {ex!r}"[:300] + " — bot vẫn thử lại; nếu "
+                                          "đang có vị thế, stop có thể KHÔNG được giám sát.")
                 if self.state["stage"] == "OPEN" and t.time() >= dt.time(14, 30):
-                    self.alert_repeat("late_open", "late_open", "⚠️ đã qua 14:29 mà vị thế ORB vẫn MỞ — bot đang "
-                                      "đặt lại lệnh đóng; nếu tới 14:45 chưa đóng ⇒ user đóng tay.")
+                    self.alert_repeat("late_open", "late_open", (   # N-c: nội dung đúng khi BOT_STOP chặn cả lệnh đóng
+                        "⚠️ đã qua 14:29 mà vị thế ORB vẫn MỞ, BOT_STOP đang bật — bot KHÔNG đặt lệnh nào, "
+                        "cần user đóng tay." if self.bot_stopped() and not ORB_CLOSE_ALLOWED_UNDER_BOT_STOP else
+                        "⚠️ đã qua 14:29 mà vị thế ORB vẫn MỞ — bot đang đặt lại lệnh đóng; nếu tới 14:45 chưa "
+                        "đóng ⇒ user đóng tay."))
+                if self.state["stage"] in TERMINAL:     # R2: vừa kết thúc TRONG tiến trình này ⇒ nhìn broker ngay
+                    if self.live:                       # (khớp ngầm không được im lặng tới lần watchdog sau)
+                        self.watch_broker(f"vừa chuyển sang {self.state['stage']}")
+                    return self.state["stage"]
                 if once:
                     return self.state["stage"]
                 self.sleep(POLL_S)

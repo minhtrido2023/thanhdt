@@ -6,8 +6,10 @@ Chạy:  python3 orb_futures_selfcheck.py
 """
 import os
 os.environ.setdefault("MIKE_BOT_TEST_MODE", "1")          # §5b — TRƯỚC mọi import bot
+import atexit
 import datetime as dt
 import json
+import shutil
 import sys
 import tempfile
 
@@ -18,6 +20,8 @@ ICT = OF.ICT
 DAY = dt.date(2026, 11, 17)
 CT = "41I1GB000"
 FAILS = []
+ROOT = tempfile.mkdtemp(prefix="orbfut_")                  # N-e: MỌI thư mục test nằm dưới đây, dọn khi thoát
+atexit.register(shutil.rmtree, ROOT, True)
 
 
 def check(cond, msg):
@@ -30,11 +34,15 @@ class Clock:
     def __init__(self, hh, mm, ss=0):
         self.t = dt.datetime(DAY.year, DAY.month, DAY.day, hh, mm, ss, tzinfo=ICT)
 
+    hook = None                                            # gọi sau mỗi sleep (vd bật BOT_STOP giữa chừng)
+
     def __call__(self):
         return self.t
 
     def sleep(self, s):
         self.t += dt.timedelta(seconds=s)
+        if self.hook:
+            self.hook(self.t)
 
 
 class Fake:
@@ -43,10 +51,12 @@ class Fake:
 
     def __init__(self, clock, or_move=+5.0, path=None, no_fill=False, positions=None, orders=None,
                  qmax=5, fx_dev=0.0, feed_lag_s=0, exit_no_fill=False, cancel_status="Cancelled",
-                 pc_fill_after=None, no_avg=False, exit_fill_hidden=False, drop_keys=()):
+                 pc_fill_after=None, no_avg=False, exit_fill_hidden=False, drop_keys=(),
+                 exit_nofill_n=None, entry_fill_hidden=False):
         self.clock, self.or_move, self.no_fill, self.qmax, self.fx_dev = clock, or_move, no_fill, qmax, fx_dev
         self.exit_no_fill, self.cancel_status, self.pc_fill_after = exit_no_fill, cancel_status, pc_fill_after
         self.no_avg, self.exit_fill_hidden, self.drop_keys = no_avg, exit_fill_hidden, set(drop_keys)
+        self.exit_nofill_n, self.entry_fill_hidden = exit_nofill_n, entry_fill_hidden   # n lệnh đóng đầu không khớp
         self.fail_lt = 0                                   # số lần latest_trade sắp tới sẽ ném lỗi (lỗi thoáng qua)
         self.pc_reads = {}
         self.feed_lag = dt.timedelta(seconds=feed_lag_s)
@@ -117,9 +127,11 @@ class Fake:
         marketable = (side == "buy" and price >= px) or (side == "sell" and price <= px)
         is_exit = len(self.placed) > 1
         self.meta = getattr(self, "meta", {}); self.meta[oid] = (sym, side, px)
-        if is_exit and self.exit_fill_hidden:             # broker ĐÃ khớp nhưng order_detail báo cũ (view cũ)
-            self._apply(sym, side); self.det[oid] = (0, None, "New")
-        elif marketable and not self.no_fill and not (is_exit and self.exit_no_fill):
+        exit_nofill = is_exit and (self.exit_no_fill or (self.exit_nofill_n is not None
+                                                          and len(self.placed) - 2 < self.exit_nofill_n))
+        if (is_exit and self.exit_fill_hidden) or (not is_exit and self.entry_fill_hidden):
+            self._apply(sym, side); self.det[oid] = (0, None, "New")   # broker ĐÃ khớp, order_detail báo cũ
+        elif marketable and not self.no_fill and not exit_nofill:
             self.det[oid] = (1, px, "Filled"); self._apply(sym, side)
         else:
             self.det[oid] = (0, None, "New")
@@ -146,7 +158,7 @@ class Fake:
 
 
 def mk(fake, clock, live=True, d=None):
-    d = d or tempfile.mkdtemp(prefix="orbfut_")
+    d = d or tempfile.mkdtemp(dir=ROOT)
     ev = []
     bot = OF.OrbFutures(fake, "SpaceX", "0002023347", live, clock=clock, sleep=clock.sleep,
                         notify=lambda m, red=False: ev.append(("N", m, red)),
@@ -289,7 +301,7 @@ blk = OF.plan_block("SpaceX", f, "0002023347", True, fund=fs)
 check("LIVE" in blk and "CẦN NỘP" in blk and "100.0tr" in blk and "09:25" in blk and "Trứng vàng" in blk, "cờ BẬT ⇒ khối đủ ý + CẦN NỘP")
 
 print("19. load_profile: thiếu khoá / giá trị không phải literal true ⇒ TẮT")
-tmp = tempfile.mkdtemp()
+tmp = tempfile.mkdtemp(dir=ROOT)
 pth = os.path.join(tmp, "a.json")
 json.dump({"accounts": [{"label": "SpaceX", "orb_futures": {"enabled": "true"}},
                         {"label": "ZaloPay"}]}, open(pth, "w"))
@@ -330,6 +342,9 @@ check(n_red >= 10, f"báo ĐỎ lặp nhiều chu kỳ ({n_red})")
 check(any("CHẠM STOP" in e[1] for e in reds(ev)), "có báo 'CHẠM STOP' khi giá qua stop")
 check(any(e[0] == "N" and e[2] and "14:45" in e[1] for e in ev), "14:45 báo ĐỎ đóng tay")
 check(bot.state["stage"] != "SKIPPED", "KHÔNG bị ghi đè SKIPPED")
+lo = reds(ev, "đã qua 14:29")
+check(lo and all("KHÔNG đặt lệnh nào" in e[1] for e in lo) and not any("đang đặt lại" in e[1] for e in lo),
+      f"N-c late_open dưới BOT_STOP+False: 'KHÔNG đặt lệnh nào', không 'đang đặt lại' ({len(lo)})")
 bot2, ev2, _ = mk(f, Clock(14, 50), d=d); bot2.run()
 check(len(f.placed) == 1 and reds(ev2), "watchdog 14:50: vẫn báo ĐỎ, vẫn 0 lệnh mới")
 
@@ -432,7 +447,7 @@ check(bot.state["stage"] == "INIT" and bot.run() == "SKIPPED" and not f.placed, 
 
 print("32. M3 default_notify: kênh rc≠0 ⇒ trả False, in stderr (không DEVNULL)")
 import io, contextlib as _cl                                # noqa: E401,E402
-tmpb = tempfile.mkdtemp()
+tmpb = tempfile.mkdtemp(dir=ROOT)
 for nm, rc in (("notify_thread.sh", 1), ("notify_telegram.sh", 3)):
     pth2 = os.path.join(tmpb, nm); open(pth2, "w").write(f"#!/bin/sh\necho loi-{nm} >&2\nexit {rc}\n"); os.chmod(pth2, 0o755)
 saved = (OF.MIKE_BIN, os.environ.pop("MIKE_BOT_TEST_MODE"))
@@ -449,6 +464,68 @@ with _cl.redirect_stderr(io.StringIO()):
     ok2 = OF.default_notify("x", red=True)
 OF.MIKE_BIN = saved[0]; os.environ["MIKE_BOT_TEST_MODE"] = saved[1]
 check(ok2 is True, "Telegram rc=0 ⇒ True dù Discord hỏng")
+
+print("33. R1 lệnh ĐÓNG treo (EXIT_PLACED), BOT_STOP bật GIỮA CHỪNG, hằng số=False ⇒ không lệnh mới, không huỷ, ĐỎ lặp")
+OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = False
+ck, f, bot, ev, d = open_bot(exit_nofill_n=99)
+ck.t = ck.t.replace(hour=14, minute=28, second=50)
+bs = os.path.join(d, "BOT_STOP")
+ck.hook = lambda t: t.time() >= dt.time(14, 29, 10) and not os.path.exists(bs) and open(bs, "w").close()
+r = bot.run()
+n_bs = len(reds(ev, "BOT_STOP đang bật"))
+check(len(f.placed) == 2, f"placed giữ nguyên 2 (vào + 1 đóng) ({len(f.placed)})")
+check(f.cancelled == [], f"KHÔNG huỷ lệnh đóng đang sống dưới BOT_STOP ({f.cancelled})")
+check(n_bs >= 10, f"báo ĐỎ BOT_STOP lặp ({n_bs})")
+check(r == "EXIT_PLACED" and bot.state["exit_oid"] == f.placed[1]["oid"], f"kết thúc EXIT_PLACED, giữ oid đóng ({r})")
+
+print("34. R1 cùng kịch bản, hằng số=True ⇒ huỷ lệnh đóng treo, đặt lại, ĐÓNG xong")
+OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = True
+ck, f, bot, ev, d = open_bot(exit_nofill_n=1)
+ck.t = ck.t.replace(hour=14, minute=28, second=50)
+bs = os.path.join(d, "BOT_STOP")
+ck.hook = lambda t: t.time() >= dt.time(14, 29, 10) and not os.path.exists(bs) and open(bs, "w").close()
+r = bot.run()
+check(r == "CLOSED" and len(f.placed) == 3 and f.cancelled == [f.placed[1]["oid"]] and f.pos == [],
+      f"CLOSED, huỷ đúng lệnh đóng 1, tổng 3 lệnh, phẳng ({r}, {len(f.placed)}, {f.cancelled})")
+check(reds(ev, "cho phép ĐÓNG"), "báo chế độ cho phép ĐÓNG")
+OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = False
+
+print("35. R2 lệnh vào báo Cancelled/khớp 0 nhưng broker CÓ vị thế ⇒ SKIPPED + báo ĐỎ NGAY trong cùng tiến trình")
+ck = Clock(9, 31, 5); f = Fake(ck, or_move=+5.0, entry_fill_hidden=True)
+bot, ev, d = mk(f, ck)
+r = bot.run()
+check(r == "SKIPPED" and len(f.placed) == 1 and f.pos, f"SKIPPED, 1 lệnh, broker còn vị thế ({r})")
+check(reds(ev, "CÒN +1 HĐ"), "báo ĐỎ 'BROKER CÒN +1 HĐ' ngay, không chờ watchdog")
+ck = Clock(9, 31, 5); f = Fake(ck, or_move=+5.0); bot, ev, d = mk(f, ck)
+check(bot.run() == "CLOSED" and not reds(ev, "BROKER CÒN"), "CLOSED + broker phẳng ⇒ không báo thừa")
+
+print("36. N-a DRY: trạng thái kết thúc + broker có vị thế (user giữ tay) ⇒ chỉ log, KHÔNG Telegram/Discord/ĐỎ")
+ck = Clock(10, 0); f = Fake(ck, positions=[{"symbol": CT, "openQuantity": 1, "side": "NB"}])
+bot, ev, d = mk(f, ck, live=False); bot.stage("SKIPPED", skip_reason="x")
+evs = []
+for _ in range(3):
+    b, e, _ = mk(f, ck, live=False, d=d); b.run(); evs += e
+rawp = os.path.join(d, "orb_futures", f"orb_futures_raw_{DAY}.jsonl")
+check(not [e for e in evs if e[0] == "N"] and not [e for e in evs if e[0] == "B"], f"DRY: 0 notify/bus ({len(evs)})")
+check(open(rawp).read().count("watch_dry_position") == 3, "DRY: ghi raw log mỗi lần")
+ck = Clock(9, 31, 5); f = Fake(ck, or_move=+5.0); bot, ev, d = mk(f, ck, live=False)
+check(bot.run() == "CLOSED" and not f.placed, "DRY chạy đủ vẫn CLOSED, 0 lệnh broker")
+
+print("37. N-b lỗi vòng giám sát kéo dài 150s ⇒ báo ĐỎ ≤1 tin/phút (không mỗi 3 lỗi)")
+ck, f, bot, ev, d = open_bot()
+f.fail_lt = 30
+r = bot.run()
+n_le = len(reds(ev, "LIÊN TIẾP"))
+check(r == "CLOSED" and 1 <= n_le <= 3, f"30 lỗi × 5s ⇒ {n_le} báo ĐỎ (cũ: 10), hồi phục CLOSED ({r})")
+
+print("38. N-e lớp chặn cuối _place ≥14:45 (không BOT_STOP) ⇒ OrderRefused, 0 lệnh")
+ck, f, bot, ev, d = open_bot()
+ck.t = ck.t.replace(hour=14, minute=45, second=0)
+try:
+    bot._place("sell", 1720.5, "EXIT"); refused = False
+except OF.OrderRefused:
+    refused = True
+check(refused and len(f.placed) == 1, f"14:45:00 ⇒ từ chối, placed giữ 1 ({len(f.placed)})")
 
 print(f"\n{'ALL PASS' if not FAILS else f'{len(FAILS)} FAIL'} (TZ={os.environ.get('TZ')})")
 sys.exit(1 if FAILS else 0)
