@@ -85,6 +85,42 @@ done
 # ghi được file local đó).
 [ "$ready" = 1 ] || die "ticker_prune still incomplete for $TODAY_ICT after 6 attempts (~1.5h) — refusing to compute DT5G on a stale/partial day. bq_freshness_check.sh's PUBLISHER-EVIDENCE gate will BLOCK DollarBill downstream since golive_state_today.json won't be written today."
 
+# --- 0b. ticker integrity precheck (2026-11-15, incident 2026-11-13-ticker-raw-lost-U-Y-block-5-sessions) ---
+# `ticker` từng bị writer ngoài làm thủng (VNINDEX 09-12/11 + khối W-Y 13/11) trong khi ticker_1m/
+# ticker_prune nguyên vẹn ⇒ step [0] (chỉ nhìn ticker_prune) qua, chain tính ~30 phút rồi mới ABORT ở
+# publish guard. Đối chiếu ticker vs ticker_1m 5 phiên (mike/bin/ticker_integrity_precheck.py):
+# rc0=PASS · rc1=FAIL toàn vẹn ⇒ retry 3 lần cách 10 phút (dữ liệu có thể đang được backfill) rồi
+# notify + bus + die (KHÔNG publish) · rc khác 0/1 (2=bq lỗi, 127=thiếu python…)=KHÔNG ĐO ĐƯỢC ⇒ FAIL-OPEN, chỉ cảnh báo — lỗi của
+# chính precheck không được chặn chain. Áp cả morning mode (thủng thì sáng cũng thủng).
+# TI-PRECHECK-BEGIN
+step "[0b] ticker integrity precheck (ticker vs ticker_1m)"
+_TI_BIN="${TI_PRECHECK_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/ticker_integrity_precheck.py}"
+_TI_NOTIFY="${TI_NOTIFY_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify.sh}"
+_TI_THREAD="${TI_NOTIFY_THREAD_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh}"
+_TI_EVENT="${TI_EVENT_BIN:-/home/trido/thanhdt/WorkingClaude/mike/bin/append_event.sh}"
+_TI_SLEEP="${TI_RETRY_SLEEP:-600}"
+_ti_rc=2   # mặc định = 'không đo được' (fail-open) nếu vòng lặp không chạy
+for _ti_try in 1 2 3; do
+  _ti_out="$(python3 "$_TI_BIN")"; _ti_rc=$?
+  printf '%s\n' "$_ti_out"
+  [ "$_ti_rc" = 1 ] || break
+  echo "  ticker integrity FAIL (attempt $_ti_try/3)"
+  [ "$_ti_try" -lt 3 ] && sleep "$_TI_SLEEP"
+done
+case "$LOG" in /*) _ti_log="$LOG" ;; *) _ti_log="$PWD/$LOG" ;; esac
+if [ "$_ti_rc" != 0 ] && [ "$_ti_rc" != 1 ]; then
+  echo "  WARN: ticker_integrity_precheck KHÔNG đo được (rc=$_ti_rc) — fail-open, chain tiếp tục (không phải kết luận dữ liệu hỏng)"
+  "$_TI_EVENT" Winston status "ticker-integrity-precheck-unmeasurable" "{\"rc\":$_ti_rc,\"log\":\"$_ti_log\",\"note\":\"fail-open: precheck không đo được, chain tiếp tục\"}" 2>/dev/null || true
+elif [ "$_ti_rc" = 1 ]; then
+  _ti_why="$(printf '%s\n' "$_ti_out" | grep '^  - ' | head -6 | tr -d '"\\' | tr '\n' ';')"
+  _TI_MSG="🛑 daily_refresh_v34b ABORT $(TZ='Asia/Ho_Chi_Minh' date '+%Y-%m-%d %H:%M ICT'): tav2_bq.ticker THỦNG so với ticker_1m (precheck rc=$_ti_rc sau 3 lần cách ${_TI_SLEEP}s). KHÔNG publish DT5G. LÝ DO: ${_ti_why:-xem log}. Log: $_ti_log. Kiểm tra bằng chứng (đối chiếu ticker vs ticker_1m) TRƯỚC khi backfill — chỉ INSERT mã còn thiếu từ ticker_1m (job Winston_20261114_020203)."
+  "$_TI_NOTIFY" "$_TI_MSG" 2>/dev/null || true
+  "$_TI_THREAD" "$_TI_MSG" "1521470705563340910" 2>/dev/null || true
+  "$_TI_EVENT" Winston error "ticker-integrity-precheck-fail" "{\"rc\":$_ti_rc,\"log\":\"$_ti_log\",\"why\":\"$_ti_why\"}" 2>/dev/null || true
+  die "ticker integrity precheck FAILED (rc=$_ti_rc) — ticker thủng so với ticker_1m, refusing to compute/publish DT5G"
+fi
+# TI-PRECHECK-END
+
 # --- 1. upstream local rebuild (produces vnindex_5state_tam_quan_v3_4b_full_history.csv) ---
 # Mốc thời gian cho post-chain freshness assertion (step [8b] dưới): mọi file output kỳ
 # vọng phải có mtime >= mốc này, nếu không chain die TRƯỚC khi publish BQ. Đặt SAU step
