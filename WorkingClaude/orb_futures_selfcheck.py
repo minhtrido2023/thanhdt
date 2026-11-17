@@ -517,6 +517,7 @@ f.fail_lt = 30
 r = bot.run()
 n_le = len(reds(ev, "LIÊN TIẾP"))
 check(r == "CLOSED" and 1 <= n_le <= 3, f"30 lỗi × 5s ⇒ {n_le} báo ĐỎ (cũ: 10), hồi phục CLOSED ({r})")
+check("loop_err" not in bot._last_alert, "minor vòng 4: hồi phục ⇒ xoá _last_alert['loop_err']")
 
 print("38. N-e lớp chặn cuối _place ≥14:45 (không BOT_STOP) ⇒ OrderRefused, 0 lệnh")
 ck, f, bot, ev, d = open_bot()
@@ -526,6 +527,54 @@ try:
 except OF.OrderRefused:
     refused = True
 check(refused and len(f.placed) == 1, f"14:45:00 ⇒ từ chối, placed giữ 1 ({len(f.placed)})")
+
+print("39. R2 vòng 4: positions TRỄ 1 lần đọc sau khớp lệnh đóng ⇒ KHÔNG báo 'BROKER CÒN' (đọc lại thấy phẳng)")
+
+
+def lag_positions(f, bot, n):
+    """n lần đọc positions ĐẦU TIÊN sau khi state = CLOSED trả vị thế cũ (+1 NB) dù broker đã phẳng."""
+    orig, left = f.positions, [n]
+
+    def lagged(acc, market_type="STOCK"):
+        if bot.state["stage"] == "CLOSED" and left[0] > 0:
+            left[0] -= 1
+            return {"positions": [{"symbol": CT, "openQuantity": 1, "side": "NB"}]}
+        return orig(acc, market_type)
+    f.positions = lagged
+    return left
+
+
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 0) else 1800.0)
+left = lag_positions(f, bot, 1)
+r = bot.run()
+check(r == "CLOSED" and f.pos == [] and left[0] == 0, f"CLOSED do bot khớp lệnh đóng, đã đọc trễ 1 lần ({r}, {left})")
+check(not reds(ev, "BROKER CÒN"), f"positions trễ 1 lần ⇒ KHÔNG báo ĐỎ giả ({len(reds(ev, 'BROKER CÒN'))})")
+
+print("40. R2 vòng 4: positions còn vị thế qua MỌI lần đọc (trễ > số lần) ⇒ VẪN báo ĐỎ, đúng 3 lần đọc")
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 0) else 1800.0)
+left = lag_positions(f, bot, 99)
+r = bot.run()
+check(r == "CLOSED" and 99 - left[0] == OF.TERMINAL_CONFIRM_TRIES, f"đọc đúng {OF.TERMINAL_CONFIRM_TRIES} lần ({99 - left[0]})")
+check(len(reds(ev, "BROKER CÒN +1 HĐ")) == 1, "hết số lần mà vẫn còn ⇒ báo ĐỎ 1 lần")
+
+print("41. R2 vòng 4: positions LỖI đọc ngay sau khi kết thúc ⇒ báo ĐỎ NGAY (không chờ đọc lại)")
+ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 0) else 1800.0)
+orig = f.positions
+n_err = [0]
+
+
+def boom(acc, market_type="STOCK"):
+    if bot.state["stage"] == "CLOSED":
+        n_err[0] += 1
+        raise ConnectionError("positions lỗi giả")
+    return orig(acc, market_type)
+
+
+f.positions = boom
+r = bot.run()
+check(r == "CLOSED" and reds(ev, "KHÔNG đọc được positions") and n_err[0] == 1,
+      f"lỗi đọc ⇒ ĐỎ ngay, 1 lần đọc ({r}, n_err={n_err[0]})")
+check(not reds(ev, "BROKER CÒN"), "lỗi đọc ≠ 'BROKER CÒN'")
 
 print(f"\n{'ALL PASS' if not FAILS else f'{len(FAILS)} FAIL'} (TZ={os.environ.get('TZ')})")
 sys.exit(1 if FAILS else 0)

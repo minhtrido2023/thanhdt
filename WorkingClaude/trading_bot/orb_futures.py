@@ -83,6 +83,8 @@ ALERT_REPEAT_S = 60                # báo lặp (BOT_STOP+vị thế, còn vị 
                                    # mỗi lần watchdog gọi lại = 1 lần báo mới
 WATCH_ERR_ALERT_N = 3              # ≥N lỗi liên tiếp trong vòng giám sát ⇒ báo ĐỎ, tối đa 1 tin/ALERT_REPEAT_S (N-b)
 CANCEL_CONFIRM_TRIES = 3           # sau huỷ: đọc lại tối đa 3 lần × 2s; vẫn chưa CHẮC chết ⇒ coi là sống
+TERMINAL_CONFIRM_TRIES = 3         # R2 vòng 4: vừa sang trạng thái kết thúc ⇒ đọc positions tối đa 3 lần × 2s;
+                                   # chỉ báo "BROKER CÒN" khi MỌI lần đọc đều còn (positions có thể trễ order_detail)
 WORST_DAY_PCT = 0.0946             # phiên tệ nhất lịch sử không stop (≈ 1 ngày khoá trần/sàn) — research stop
 MIN_MARGIN_FLOOR_VND = 55_000_000  # sàn ký quỹ tối thiểu (quant-skeptic 16/11): 43,3tr cũ − 17,4tr ⇒ < KQ duy trì
 
@@ -434,22 +436,29 @@ class OrbFutures:
     def bot_stopped(self):
         return os.path.exists(self.bot_stop_file)
 
-    def watch_broker(self, why):
+    def watch_broker(self, why, confirm_tries=1):
         """B2 — READ-ONLY positions phái sinh. Phẳng ⇒ True. Còn vị thế / không đọc được (LIVE) ⇒ báo ĐỎ.
         Gọi ở MỌI lần chạy kể cả trạng thái kết thúc (SKIPPED/PAUSED/CLOSED/FLAT).
         N-a: DRY (cờ TẮT) ⇒ chỉ ghi raw log + stdout, KHÔNG Telegram/Discord/bus — vị thế phái sinh lúc DRY
-        là của user (giữ tay), bot không có lệnh nào trên broker nên không được spam."""
-        try:
-            pos = broker_positions(self.c, self.acc)
-        except Exception as ex:                                     # noqa: BLE001
-            self.raw("watch_err", repr(ex))
-            if self.live:
-                self.alert_repeat("watch_err", "watch", f"KHÔNG đọc được positions phái sinh ({why}): {ex!r}"[:300]
-                                  + " — không xác nhận được TK phẳng, cần người kiểm tra.")
-                return False
-            return True
-        net = net_position(pos)
-        self.raw("watch", {"why": why, "stage": self.state["stage"], "positions": pos, "net": net})
+        là của user (giữ tay), bot không có lệnh nào trên broker nên không được spam.
+        confirm_tries>1 (R2 vòng 4): còn vị thế ⇒ đọc lại sau 2s, tối đa confirm_tries lần; phẳng ở BẤT KỲ lần nào
+        ⇒ True; chỉ báo khi MỌI lần đọc đều còn. Lỗi đọc ⇒ báo ĐỎ NGAY như cũ (không chờ đọc lại)."""
+        for i in range(max(1, confirm_tries)):
+            if i:
+                self.sleep(2)
+            try:
+                pos = broker_positions(self.c, self.acc)
+            except Exception as ex:                                 # noqa: BLE001
+                self.raw("watch_err", repr(ex))
+                if self.live:
+                    self.alert_repeat("watch_err", "watch", f"KHÔNG đọc được positions phái sinh ({why}): {ex!r}"[:300]
+                                      + " — không xác nhận được TK phẳng, cần người kiểm tra.")
+                    return False
+                return True
+            net = net_position(pos)
+            self.raw("watch", {"why": why, "stage": self.state["stage"], "positions": pos, "net": net, "try": i + 1})
+            if net is not None and abs(net) <= 1e-9:
+                return True
         if not self.live:                                  # N-a
             if net is None or abs(net) > 1e-9:
                 self.raw("watch_dry_position", {"why": why, "net": net})
@@ -816,6 +825,7 @@ class OrbFutures:
                     else:                               # stage lạ ⇒ không bao giờ quay vô hạn
                         self.pause(f"stage bất thường trong vòng lặp: {s}")
                     self.err_n = 0
+                    self._last_alert.pop("loop_err", None)   # minor vòng 4: hồi phục ⇒ đợt lỗi sau báo ngay
                 except OrderRefused as ex:
                     self.raw("order_refused", repr(ex))
                     self.alert_repeat("refused", "refused", f"lệnh bị chặn: {ex}")
@@ -834,7 +844,7 @@ class OrbFutures:
                         "đóng ⇒ user đóng tay."))
                 if self.state["stage"] in TERMINAL:     # R2: vừa kết thúc TRONG tiến trình này ⇒ nhìn broker ngay
                     if self.live:                       # (khớp ngầm không được im lặng tới lần watchdog sau)
-                        self.watch_broker(f"vừa chuyển sang {self.state['stage']}")
+                        self.watch_broker(f"vừa chuyển sang {self.state['stage']}", TERMINAL_CONFIRM_TRIES)
                     return self.state["stage"]
                 if once:
                     return self.state["stage"]
