@@ -96,7 +96,21 @@ DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá v�
 # khớp một dòng "### 🔗 DC Book (double-confirm) — Paper Portfolio" bên TRONG converge_md — không
 # khớp heading thật mà newdeals_daily_report.py tự in ra; đổi tên heading nội bộ đó (không ai
 # review vì nó không đụng gate) sẽ âm thầm vô hiệu hoá gate.
-PAPER_MARKERS = ("AlphaLens Paper Portfolio", "DC Book Paper Portfolio")
+#
+# 17/11/2026 (job Taylor_20261117_103907, arch-review vòng 2 mục 1): AlphaLens đã GỠ khỏi báo cáo New
+# deals (hết hạn 30/09) ⇒ heading "## AlphaLens Paper Portfolio" không còn được in. Giữ nó trong
+# tuple + `all()` ở selfcheck ca 27 sẽ làm cổng tự FAIL (coupling với heading đã biến mất). Chỉ còn
+# marker DC Book. `paper_entry_corpaction_crosscheck.load_books()` VẪN nạp AlphaLens (đối chiếu
+# corp-action của sổ paper còn nằm trong file data, dùng cho audit) — cổng kích bằng marker nên
+# báo cáo không còn mục AlphaLens thì cổng không chặn oan vì sổ không hiển thị.
+PAPER_MARKERS = ("DC Book Paper Portfolio",)
+# Sổ nào CÒN hiển thị trong báo cáo New deals (khoá = book trong load_books()). AlphaLens còn trong
+# file data (audit) nhưng KHÔNG in ⇒ cổng không được chặn báo cáo vì entry/corp-action của sổ ẩn.
+PAPER_BOOKS_DISPLAYED = ("converge",)
+
+
+def _displayed_books(books):
+    return [b for b in books if b[0] in PAPER_BOOKS_DISPLAYED]
 
 # Content-completeness gate (thêm 2026-09-02, sau vụ báo cáo tháng 08 — template tạo 25/08 với
 # 5/10 mục còn "[TBD" bị report_delivery_gate coi là hoàn tất và GIAO THẬT cho user 28/08, TRƯỚC
@@ -1205,7 +1219,7 @@ def paper_entry_gate(report_path: str, out=sys.stdout) -> tuple:
     except Exception as e:
         return True, [f"sổ paper: không nạp được công cụ đối chiếu ({e}) — CHẶN (fail-closed)"]
 
-    books = load_books()
+    books = _displayed_books(load_books())
     if not books:
         return True, ["báo cáo có mục sổ paper nhưng không đọc được file paper nào — CHẶN"]
 
@@ -2028,6 +2042,10 @@ def _selfcheck() -> int:
           (False, []))
     os.unlink(p_no)
 
+    check("sổ ẩn (alphalens) bị loại khỏi diện cổng; sổ converge giữ",
+          _displayed_books([("alphalens", "AAA", "2026-06-30", 1.0), ("converge", "BBB", "2026-11-17", 2.0)]),
+          [("converge", "BBB", "2026-11-17", 2.0)])
+
     # 27: coupling test THẬT với newdeals_daily_report.build_message() — thay ca cũ ("marker nhận
     # diện đúng 2 mục paper thật") vốn so PAPER_MARKERS với một bản copy cứng của CHÍNH NÓ (tautology,
     # không bao giờ fail được dù ai đổi tiêu đề thật). quant-skeptic vòng 3, Taylor_20260813_073404.
@@ -2047,6 +2065,7 @@ def _selfcheck() -> int:
     _fake_slm.load_ratings = lambda: {"FPT": 1}
     _fake_slm.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
     _fake_slm.double_confirm_set = lambda df, ratings: {"FPT": "ACCUMULATE"}  # newdeals gọi từ de28d1893
+    _fake_slm.NAMES = [("FPT", "Công nghệ", "A")]  # newdeals_daily_report đọc slm.NAMES (17/11/2026)
     _fake_alphalens = _types.ModuleType("alphalens_report")
     _fake_alphalens.generate_section = lambda as_of_date=None: "alphalens stub"
     _fake_converge = _types.ModuleType("converge_report")
@@ -2071,17 +2090,17 @@ def _selfcheck() -> int:
 
     check("coupling THẬT: build_message() nhánh có-thay-đổi → changed=True", changed, True)
     # all(), KHÔNG any(): production chỉ cần any() để KÍCH gate (đủ 1 marker khớp), nhưng
-    # selfcheck phải bắt được CẢ HAI marker trôi độc lập — any() sẽ vẫn PASS nếu marker[0]
+    # selfcheck phải bắt được MỌI marker trôi độc lập (hiện còn 1 marker sau khi gỡ AlphaLens) — any() sẽ vẫn PASS nếu marker[0]
     # ("AlphaLens Paper Portfolio") còn đúng trong khi marker[1] đã trôi, y hệt lỗ hổng vừa vá
     # (reverse-proof đã chạy tay: any() không bắt được khi marker[1] bị đổi lại về giá trị cũ sai).
-    check("coupling THẬT: CẢ HAI marker khớp heading thật (fail nếu bất kỳ heading nào trôi)",
+    check("coupling THẬT: MỌI marker khớp heading thật (fail nếu bất kỳ heading nào trôi)",
           all(m in msg for m in PAPER_MARKERS), True)
 
     # 28: ngày KHÔNG có gì mới — đường chạy hàng ngày thật, trước bản vá này chưa có test nào phủ.
     # one-liner "vẫn giám sát bình thường" không được chứa marker paper nào (không kích T1/BQ oan),
     # và run_gate() trên đúng nội dung đó phải PASS (rc=0) vì nó không mang mục paper nào cả.
     quiet_msg = ("🆕 **NEW DEALS — 2026-08-13** — Không có deal mới / thay đổi thứ hạng đáng chú ý "
-                 "trong AlphaLens, Golden/Strong Watchlist, DC Book hôm nay. Hệ thống vẫn giám "
+                 "trong Golden/Strong Watchlist, DC Book hôm nay. Hệ thống vẫn giám "
                  "sát bình thường.")
     check("ngày không đổi gì: one-liner KHÔNG chứa marker paper nào",
           any(m in quiet_msg for m in PAPER_MARKERS), False)
@@ -2107,6 +2126,7 @@ def _selfcheck() -> int:
     _fake_slm2.load_ratings = lambda: {"FPT": 1}
     _fake_slm2.build_telegram_message = lambda *a, **k: "<b>sector stub</b>"
     _fake_slm2.double_confirm_set = lambda df, ratings: {"FPT": "ACCUMULATE"}
+    _fake_slm2.NAMES = [("FPT", "Công nghệ", "A")]
     _fake_alphalens2 = _types.ModuleType("alphalens_report")
     _fake_alphalens2.generate_section = lambda as_of_date=None: "alphalens stub"
     _fake_converge2 = _types.ModuleType("converge_report")
