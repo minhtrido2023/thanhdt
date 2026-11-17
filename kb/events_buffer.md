@@ -800,3 +800,7 @@
 ## Consolidation 2026-11-17T15:58:06Z
 - [2026-11-17T15:57:05Z] Taylor/heartbeat — Taylor_20261117_155604: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261117_155604", "source": "watcher"}
 - [2026-11-17T15:57:51Z] Taylor/finding — dd-vcb-r3-applied: {"center": 35497, "weighted": 39137, "ke_pm100": [30764, 41950], "roe_anchors": {"13.2%": 28958, "14.6%": 35497, "16%": 42035}, "ke_beta_real_12pct": 46145, "applied": "A,B,C,D1,D2", "not_applied": "D3 bao lanh x2,37 va D4 co tuc tien tru 2% (brief khong ro dai luong)", "center_choice": "14.6% la phan doan cua Taylor, doi bang scenarios.base.roe", "assumptions_md5": "55731df5d9c0c9292b5695cc5d6c4cce", "measured_by": "python3 agents/Taylor/research/dd_VCB_20261117/calc.py; file r3_applied.md"}
+
+## Consolidation 2026-11-17T17:31:13Z
+- [2026-11-17T17:30:38Z] Mike/heartbeat — Mike_20261117_173017: {"status": "in_progress", "note": "retro draft: gathering evidence"}
+- [2026-11-17T17:31:06Z] Mike/finding — daily-retro-draft-2026-11-17: {"summary": "0 sự cố mới; pattern BQ-raw-gap đã đóng (wire [0b] merged 3f1dbed08); wakeup 11/11 tuân thủ", "draft": "state/retro_draft_2026-11-17.md"}
