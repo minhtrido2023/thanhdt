@@ -97,20 +97,20 @@ DEFAULT_TOL_PP = 0.15        # điểm %; nới hơn sai số làm tròn giá v�
 # khớp heading thật mà newdeals_daily_report.py tự in ra; đổi tên heading nội bộ đó (không ai
 # review vì nó không đụng gate) sẽ âm thầm vô hiệu hoá gate.
 #
-# 17/11/2026 (job Taylor_20261117_103907, arch-review vòng 2 mục 1): AlphaLens đã GỠ khỏi báo cáo New
-# deals (hết hạn 30/09) ⇒ heading "## AlphaLens Paper Portfolio" không còn được in. Giữ nó trong
-# tuple + `all()` ở selfcheck ca 27 sẽ làm cổng tự FAIL (coupling với heading đã biến mất). Chỉ còn
-# marker DC Book. `paper_entry_corpaction_crosscheck.load_books()` VẪN nạp AlphaLens (đối chiếu
-# corp-action của sổ paper còn nằm trong file data, dùng cho audit) — cổng kích bằng marker nên
-# báo cáo không còn mục AlphaLens thì cổng không chặn oan vì sổ không hiển thị.
-PAPER_MARKERS = ("DC Book Paper Portfolio",)
-# Sổ nào CÒN hiển thị trong báo cáo New deals (khoá = book trong load_books()). AlphaLens còn trong
-# file data (audit) nhưng KHÔNG in ⇒ cổng không được chặn báo cáo vì entry/corp-action của sổ ẩn.
-PAPER_BOOKS_DISPLAYED = ("converge",)
+# 17/11/2026: AlphaLens đã GỠ khỏi báo cáo New deals (hết hạn 30/09) nhưng marker GIỮ trong map: cổng
+# gác sổ nào có heading xuất hiện thật trong báo cáo (không phụ thuộc thứ tự merge giữa 2 repo).
+# marker -> book trong load_books(). Cổng chỉ gác sổ có marker XUẤT HIỆN trong báo cáo (arch-review
+# vòng 2, 17/11): đúng với cả main (còn in AlphaLens) lẫn nhánh mới, và tự gác lại nếu AlphaLens quay lại.
+PAPER_MARKER_BOOK = {
+    "AlphaLens Paper Portfolio": "alphalens",
+    "DC Book Paper Portfolio": "converge",
+}
+PAPER_MARKERS = tuple(PAPER_MARKER_BOOK)
 
 
-def _displayed_books(books):
-    return [b for b in books if b[0] in PAPER_BOOKS_DISPLAYED]
+def _displayed_books(books, text):
+    shown = {b for m, b in PAPER_MARKER_BOOK.items() if m in text}
+    return [b for b in books if b[0] in shown]
 
 # Content-completeness gate (thêm 2026-09-02, sau vụ báo cáo tháng 08 — template tạo 25/08 với
 # 5/10 mục còn "[TBD" bị report_delivery_gate coi là hoàn tất và GIAO THẬT cho user 28/08, TRƯỚC
@@ -1219,7 +1219,7 @@ def paper_entry_gate(report_path: str, out=sys.stdout) -> tuple:
     except Exception as e:
         return True, [f"sổ paper: không nạp được công cụ đối chiếu ({e}) — CHẶN (fail-closed)"]
 
-    books = _displayed_books(load_books())
+    books = _displayed_books(load_books(), text)
     if not books:
         return True, ["báo cáo có mục sổ paper nhưng không đọc được file paper nào — CHẶN"]
 
@@ -2042,9 +2042,11 @@ def _selfcheck() -> int:
           (False, []))
     os.unlink(p_no)
 
-    check("sổ ẩn (alphalens) bị loại khỏi diện cổng; sổ converge giữ",
-          _displayed_books([("alphalens", "AAA", "2026-06-30", 1.0), ("converge", "BBB", "2026-11-17", 2.0)]),
-          [("converge", "BBB", "2026-11-17", 2.0)])
+    _bk = [("alphalens", "AAA", "2026-06-30", 1.0), ("converge", "BBB", "2026-11-17", 2.0)]
+    check("báo cáo chỉ có heading DC Book ⇒ chỉ sổ converge trong diện cổng",
+          _displayed_books(_bk, "## DC Book Paper Portfolio\n..."), [_bk[1]])
+    check("báo cáo CÓ heading AlphaLens ⇒ sổ alphalens PHẢI trong diện cổng (không âm thầm bỏ gác)",
+          _displayed_books(_bk, "## AlphaLens Paper Portfolio\n## DC Book Paper Portfolio\n"), _bk)
 
     # 27: coupling test THẬT với newdeals_daily_report.build_message() — thay ca cũ ("marker nhận
     # diện đúng 2 mục paper thật") vốn so PAPER_MARKERS với một bản copy cứng của CHÍNH NÓ (tautology,
@@ -2089,12 +2091,12 @@ def _selfcheck() -> int:
                 sys.modules[n] = _saved_mods[n]
 
     check("coupling THẬT: build_message() nhánh có-thay-đổi → changed=True", changed, True)
-    # all(), KHÔNG any(): production chỉ cần any() để KÍCH gate (đủ 1 marker khớp), nhưng
-    # selfcheck phải bắt được MỌI marker trôi độc lập (hiện còn 1 marker sau khi gỡ AlphaLens) — any() sẽ vẫn PASS nếu marker[0]
-    # ("AlphaLens Paper Portfolio") còn đúng trong khi marker[1] đã trôi, y hệt lỗ hổng vừa vá
-    # (reverse-proof đã chạy tay: any() không bắt được khi marker[1] bị đổi lại về giá trị cũ sai).
-    check("coupling THẬT: MỌI marker khớp heading thật (fail nếu bất kỳ heading nào trôi)",
-          all(m in msg for m in PAPER_MARKERS), True)
+    # Heading DC Book PHẢI khớp heading thật (fail nếu trôi); mọi marker xuất hiện trong msg phải map
+    # vào một book đã biết (AlphaLens đã gỡ khỏi báo cáo nên không đòi nó có mặt).
+    check("coupling THẬT: heading DC Book khớp heading thật in ra bởi build_message()",
+          "DC Book Paper Portfolio" in msg, True)
+    check("coupling THẬT: mọi marker có trong msg đều map vào book đã biết",
+          all(PAPER_MARKER_BOOK[m] in ("alphalens", "converge") for m in PAPER_MARKERS if m in msg), True)
 
     # 28: ngày KHÔNG có gì mới — đường chạy hàng ngày thật, trước bản vá này chưa có test nào phủ.
     # one-liner "vẫn giám sát bình thường" không được chứa marker paper nào (không kích T1/BQ oan),
