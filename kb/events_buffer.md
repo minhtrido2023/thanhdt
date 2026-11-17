@@ -796,3 +796,7 @@
 ## Consolidation 2026-11-17T12:33:36Z
 - [2026-11-17T12:33:05Z] DollarBill/heartbeat — DollarBill_20261117_123004: {"status": "still_running", "elapsed_min": 3, "job_id": "DollarBill_20261117_123004", "source": "watcher"}
 - [2026-11-17T12:33:25Z] DollarBill/decision — plan-2026-11-18-SpaceX: {"plan": "SpaceX 2026-11-18", "decision": "HOLD ALL 0 lenh", "why": "NNC dong 47.950 > tran Livermore 46.000; VGS 4,74% NAV phan du <1 lo; 0 LAG/BAL/CAPIT; park NO_TRIM", "dt5g": "NEUTRAL", "egg": "khong can chuyen", "approved": false}
+
+## Consolidation 2026-11-17T15:58:06Z
+- [2026-11-17T15:57:05Z] Taylor/heartbeat — Taylor_20261117_155604: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261117_155604", "source": "watcher"}
+- [2026-11-17T15:57:51Z] Taylor/finding — dd-vcb-r3-applied: {"center": 35497, "weighted": 39137, "ke_pm100": [30764, 41950], "roe_anchors": {"13.2%": 28958, "14.6%": 35497, "16%": 42035}, "ke_beta_real_12pct": 46145, "applied": "A,B,C,D1,D2", "not_applied": "D3 bao lanh x2,37 va D4 co tuc tien tru 2% (brief khong ro dai luong)", "center_choice": "14.6% la phan doan cua Taylor, doi bang scenarios.base.roe", "assumptions_md5": "55731df5d9c0c9292b5695cc5d6c4cce", "measured_by": "python3 agents/Taylor/research/dd_VCB_20261117/calc.py; file r3_applied.md"}

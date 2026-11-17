@@ -31,3 +31,4 @@
 - [2026-11-17T11:02:54Z] ĐANG DỞ: job Taylor_20261117_110239 DD VCB | NEXT: đọc brief + skill due-diligence, viết REPORT.md dd_VCB_20261117
 - [2026-11-17T11:11:26Z] [dd-vcb 17/11] XONG job Taylor_20261117_110239: REPORT dd_VCB_20261117, tam 42.035 (vung 36.431-49.678, r13,5%; Ke beta-that 12% => 54.646), assumptions_md5 acba98b2 — CHO Mike fundamental-skeptic + dd_price_zones
 - [2026-11-17T11:22:22Z] [dd-vcb r2 17/11] XONG job Taylor_20261117_111929: 5/6 muc ap, muc 6 (doc BCTC KT 2025) bi chan do thieu cong cu PDF — CHO Mike skeptic vong 2; tam 42.035 khong doi
+- [2026-11-17T15:57:51Z] [dd-vcb r3 17/11] XONG job Taylor_20261117_155604: tam 35.497 (ROE 14,6%), D3/D4 chua ap (brief mo ho) — CHO Mike skeptic R3 + lam ro D3/D4
