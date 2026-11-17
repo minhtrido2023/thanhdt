@@ -111,6 +111,31 @@ def t_labels(m):
     check("⚠️ DD cũ" in m.apply_dd_labels("**AAA** x", idx, "2026Q4"), "quý mới hơn ⇒ DD 2026Q3 thành cũ")
 
 
+def t_own_quarter(m):
+    print("[DD so với quý BCTC của CHÍNH MÃ — vòng 2 mục 3]")
+    f = fin([("ERL", "2026-10-20", "2026Q3"), ("ERL", "2027-02-10", "2026Q4"),
+             ("SLW", "2026-10-25", "2026Q3"), ("OLD", "2026-07-30", "2026Q2")])
+    tq = m.ticker_quarters(f, "2027-03-01")
+    check(tq == {"ERL": "2026Q4", "SLW": "2026Q3", "OLD": "2026Q2"}, f"quý mới nhất theo mã (got {tq})")
+    check(m.ticker_quarters(f, "2027-01-01")["ERL"] == "2026Q3", "PIT: Q4 công bố sau asof ⇒ chưa tính")
+    idx = {"SLW": {"dd_date": "2026-11-01", "rev": 1, "bctc_quarter": "2026Q3"},
+           "ERL": {"dd_date": "2026-11-01", "rev": 1, "bctc_quarter": "2026Q3"},
+           "OLD": {"dd_date": "2026-08-01", "rev": 1, "bctc_quarter": "2026Q2"}}
+    check(m.dd_status("SLW", idx, tq)[0] == "fresh", "universe có Q4 sớm, SLW chưa công bố Q4 ⇒ KHÔNG 'DD cũ'")
+    check(m.dd_status("ERL", idx, tq)[0] == "stale", "ERL đã có Q4, DD Q3 ⇒ DD cũ")
+    check(m.dd_status("OLD", idx, tq)[0] == "fresh", "mã chưa công bố quý nào mới hơn Q2 ⇒ fresh")
+    out = m.apply_dd_labels("🟢 **SLW** x **BUY·STRONG**\n🟢 **ERL** y **BUY·STRONG**", idx, tq).split("\n")
+    check("DD cũ" not in out[0] and "~~" not in out[0] and out[0].endswith("DD asof 2026Q3"),
+          "nhãn: SLW không gạch, không cảnh báo")
+    check("⚠️ DD cũ (2026Q3)" in out[1] and "~~STRONG~~" in out[1] and "tới khi DD 2026Q4" in out[1],
+          "nhãn: ERL gạch + yêu cầu DD Q4 của chính nó")
+    ch = {"enter": ["SLW", "ERL"], "exit": [], "rerank": []}
+    cur = m.make_snapshot({"SLW": 2, "ERL": 2}, {}, ["SLW", "ERL"])
+    q = m.build_dd_queue(ch, cur, idx, "2026Q4", tq=tq)
+    st = {i["ticker"]: i["status"] for i in q["items"]}
+    check(st == {"SLW": "dd_fresh", "ERL": "queued"}, f"hàng đợi dùng quý theo mã (got {st})")
+
+
 def t_dcbook(m):
     print("[sổ DC theo mùa]")
     paper = {"meta": {"start_date": "2026-07-06", "entry_price_asof": "2026-06-26", "benchmark_entry": 1871.91},
@@ -184,12 +209,79 @@ def t_run(m):
         check(r3.get("bus_retry") == "2026Q3" and calls["bus"] == 2, "lượt sau post bù đúng 1 lần")
         m.run_refresh(asof="2026-11-19", rating_asof="2026-11-18", notify_bus=True, **kw)
         check(calls["bus"] == 2, "post bù xong ⇒ không post nữa")
+        # vòng 2 mục 2: kill GIỮA ghi sổ DC và ghi state ⇒ lượt 2 phải trùng lượt 1
+        shutil.rmtree(d); os.makedirs(d)
+        with open(P["paper_path"], "w") as f:
+            json.dump({"meta": {"start_date": "2026-07-06"}, "seed_double_confirm_set":
+                       [{"ticker": "AAA", "buy_mode": "ACCUMULATE", "entry_price": 5.0}]}, f)
+        wl3 = ["AAA", "BBB", "CCC"]
+        kw3 = dict(kw); kw3.update(wl=wl3, fin_df=fin([(t, "2026-10-25", "2026Q3") for t in wl3]),
+                                   ratings={t: 3 for t in wl3},
+                                   live_fn=lambda a: ({"BBB": "STRONG", "CCC": "ACCUMULATE"}, {}))
+        real_aw = m._atomic_write
+
+        def killing_aw(path, obj):
+            if path == P["state_path"]:
+                raise KeyboardInterrupt("kill giữa ghi sổ và ghi state")
+            return real_aw(path, obj)
+        m._atomic_write = killing_aw
+        try:
+            m.run_refresh(asof="2026-11-17", rating_asof="2026-11-16", **kw3)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            m._atomic_write = real_aw
+        check(not os.path.exists(P["state_path"]) and
+              json.load(open(P["paper_path"]))["meta"]["season"] == "2026Q3",
+              "tiền đề: sổ đã đặt lại nhưng state CHƯA ghi")
+        r_k2 = m.run_refresh(asof="2026-11-17", rating_asof="2026-11-16", **kw3)
+        check(r_k2["changes"]["exit"] == ["AAA"] and r_k2["changes"]["enter"] == ["BBB", "CCC"],
+              f"lượt 2 sau kill: RA ['AAA'], VÀO [BBB,CCC] (got {r_k2['changes']['exit']}/{r_k2['changes']['enter']})")
+        check([i["ticker"] for i in r_k2["queue"]] == ["BBB", "CCC"], "lượt 2 sau kill: hàng đợi [BBB, CCC]")
+        check(len(json.load(open(P["paper_path"]))["meta"]["season_history"]) == 1, "lượt 2 không đặt lại sổ lần nữa")
+        # vòng 2 mục 5: rating thiếu 1 mã watchlist ⇒ hoãn, không diff
+        shutil.rmtree(d); os.makedirs(d)
+        with open(P["paper_path"], "w") as f:
+            json.dump({"meta": {}, "seed_double_confirm_set": []}, f)
+        kw4 = dict(kw3); kw4["ratings"] = {"AAA": 2, "BBB": 2}
+        r_m = m.run_refresh(asof="2026-11-17", rating_asof="2026-11-16", **kw4)
+        check(r_m["reason"] == "rating_missing ['CCC']" and "changes" not in r_m
+              and not os.path.exists(P["state_path"]), "thiếu rating 1 mã watchlist ⇒ hoãn, không diff, không đánh dấu mùa")
         # dry ⇒ không ghi gì
         shutil.rmtree(d); os.makedirs(d)
         with open(P["paper_path"], "w") as f:
             json.dump({"meta": {}, "seed_double_confirm_set": []}, f)
         rd = m.run_refresh(asof="2026-11-17", rating_asof="2026-11-16", dry=True, **kw)
         check(rd.get("dry") and sorted(os.listdir(d)) == ["paper.json"], "--dry ⇒ không ghi file nào")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def t_cli_msg(m):
+    print("[thông điệp lỗi CLI — vòng 2 mục 4]")
+    a = m.describe_failure(m.BusPostError("2026Q3", RuntimeError("bus down")))
+    b = m.describe_failure(ValueError("thiếu giá"))
+    check("ĐÃ xong" in a and "bus_pending=2026Q3" in a and "post bù" in a and "KHÔNG đánh dấu xong" not in a,
+          "bus lỗi sau state ⇒ 'mùa đã xong, lượt sau post bù'")
+    check("KHÔNG đánh dấu xong" in b and "trước khi ghi state" in b and "post bù" not in b,
+          "lỗi trước state ⇒ 'mùa KHÔNG đánh dấu xong'")
+    d = tempfile.mkdtemp(prefix="nds_cli_")
+    try:
+        P = dict(state_path=f"{d}/state.json", queue_path=f"{d}/queue.json", snap_dir=f"{d}/snap",
+                 paper_path=f"{d}/paper.json", log_path=f"{d}/log")
+        json.dump({"meta": {}, "seed_double_confirm_set": []}, open(P["paper_path"], "w"))
+
+        def bad(*a):
+            raise RuntimeError("bus down")
+        try:
+            m.run_refresh(asof="2026-11-17", rating_asof="2026-11-16", notify_bus=True, wl=WL,
+                          fin_df=fin([(t, "2026-10-25", "2026Q3") for t in WL]), ratings={t: 2 for t in WL},
+                          live_fn=lambda a: ({}, {}), prices_fn=lambda tk: ({}, 1.0, "x"),
+                          mos_fn=lambda tk, a: {}, dd_entries=[], bus_fn=bad, **P)
+            check(False, "bus lỗi ⇒ BusPostError")
+        except m.BusPostError as e:
+            check(e.season == "2026Q3" and json.load(open(P["state_path"]))["bus_pending"] == "2026Q3",
+                  "run_refresh ném BusPostError SAU khi state đã ghi (bus_pending)")
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -216,7 +308,7 @@ def t_fresh_tz(m):
 
 
 MUTATIONS = [
-    ("stale-compare-flip", "if latest_q and q < latest_q:", "if latest_q and q > latest_q:"),
+    ("stale-compare-flip", "if lq and q < lq:", "if lq and q > lq:"),
     ("no-strike", 'line = _MODE_RE.sub(r"~~\\1~~", line) + f"', 'line = line + f"'),
     ("threshold-zero", 'if cov["frac"] < threshold:', 'if cov["frac"] < 0.0:'),
     ("no-idempotency", "    if q in done:\n", "    if False:\n"),
@@ -225,6 +317,12 @@ MUTATIONS = [
     ("rating-fresh-check-off", 'if cov["last_fin_date"] and (rating_asof or "") < cov["last_fin_date"]:', "if False:"),
     ("pit-off", 'df = df[df["time"] <= pd.Timestamp(asof)]', "df = df"),
     ("history-dropped", "hist.append(", "list("),
+    ("bootstrap-ignores-history", 'if meta.get("season") == season and hist:', "if False:"),
+    ("dd-uses-global-max", "lq = _own_q(latest_q, tk)", "lq = max(latest_q.values()) if isinstance(latest_q, dict) and latest_q else _own_q(latest_q, tk)"),
+    ("queue-ignores-own-quarter", "tq if tq is not None else season", "season"),
+    ("rating-missing-guard-off", "    if no_rating:\n", "    if False:\n"),
+    ("cli-msg-no-distinction", "if isinstance(exc, BusPostError):", "if False:"),
+    ("bus-error-not-wrapped", "        raise BusPostError(season, e) from e", "        raise"),
 ]
 
 
@@ -251,7 +349,7 @@ if __name__ == "__main__":
     if "--mutate" in sys.argv:
         sys.exit(mutate())
     m = _load()
-    for t in (t_trigger, t_diff_queue, t_labels, t_dcbook, t_run, t_fresh_tz):
+    for t in (t_trigger, t_diff_queue, t_labels, t_own_quarter, t_dcbook, t_run, t_cli_msg, t_fresh_tz):
         t(m)
     print(f"{'ALL PASS' if not FAILS else 'FAILED: ' + str(FAILS)}")
     sys.exit(1 if FAILS else 0)

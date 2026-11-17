@@ -152,18 +152,44 @@ def latest_dd_index(entries):
     return {t: v[1] for t, v in best.items()}
 
 
+def ticker_quarters(fin_df, asof):
+    """{ticker: quý BCTC mới nhất CỦA CHÍNH MÃ đó với time<=asof (PIT)}. Dùng để so DD: mã chưa công bố
+    quý mới nhất của toàn universe không bị coi là 'DD cũ' (vòng 2, mục 3)."""
+    import pandas as pd
+    df = fin_df[["ticker", "time", "quarter"]].copy()
+    df["time"] = pd.to_datetime(df["time"])
+    df = df[df["time"] <= pd.Timestamp(asof)]
+    return {str(t): str(q) for t, q in df.groupby("ticker")["quarter"].max().items()}
+
+
+def ticker_quarters_from_cache(asof, fin_path=None):
+    """ticker_quarters() từ cache ticker_financial; lỗi đọc ⇒ None (caller rơi về quý chung, thận trọng hơn)."""
+    try:
+        import pandas as pd
+        return ticker_quarters(pd.read_parquet(fin_path or FIN_PATH, columns=["ticker", "time", "quarter"]), asof)
+    except Exception:
+        return None
+
+
+def _own_q(latest_q, tk):
+    """latest_q = dict {ticker: quý} (chuẩn) hoặc str (quý chung — chỉ còn dùng khi không có bảng theo mã)."""
+    return latest_q.get(tk) if isinstance(latest_q, dict) else latest_q
+
+
 def dd_status(tk, dd_index, latest_q):
-    """('none'|'fresh'|'stale', dd_asof_quarter|None). stale = DD dựa trên quý CŨ hơn quý BCTC mới nhất."""
+    """('none'|'fresh'|'stale', dd_asof_quarter|None). stale = DD dựa trên quý CŨ hơn quý BCTC mới nhất
+    của CHÍNH MÃ (latest_q là dict theo mã; str = quý chung)."""
     d = (dd_index or {}).get(tk)
     q = d.get("bctc_quarter") if d else None
     if not q:
         return "none", None
-    if latest_q and q < latest_q:
+    lq = _own_q(latest_q, tk)
+    if lq and q < lq:
         return "stale", q
     return "fresh", q
 
 
-def build_dd_queue(changes, cur, dd_index, season, prev_queue=None, mos=None, cap=DD_CAP):
+def build_dd_queue(changes, cur, dd_index, season, prev_queue=None, mos=None, cap=DD_CAP, tq=None):
     """Ứng viên = VÀO + ĐỔI HẠNG sang hạng <=3 (+ phần deferred của mùa trước). Mã đã có DD đúng quý ⇒ dd_fresh (không
     tốn suất). Thứ tự ưu tiên: dư mùa trước → double-confirm → MoS DCF cao → rating thấp → ticker.
     `cap` suất đầu = queued; còn lại = deferred_next_season (ghi rõ)."""
@@ -186,7 +212,7 @@ def build_dd_queue(changes, cur, dd_index, season, prev_queue=None, mos=None, ca
 
     items, slots = [], 0
     for t in sorted(cands, key=key):
-        st, q = dd_status(t, dd_index, season)
+        st, q = dd_status(t, dd_index, tq if tq is not None else season)
         why = ("carried" if t in carried_set else
                "enter" if t in changes["enter"] else "rerank")
         it = {"ticker": t, "reason": why, "in_double_confirm": t in cur["dc"],
@@ -215,7 +241,7 @@ def apply_dd_labels(md, dd_index, latest_q, only=None):
             tk = tks[0]
             st, q = dd_status(tk, dd_index, latest_q)
             if st == "stale":
-                line = _MODE_RE.sub(r"~~\1~~", line) + f" · ⚠️ DD cũ ({q}) — tín hiệu chưa hợp lệ tới khi DD {latest_q}"
+                line = _MODE_RE.sub(r"~~\1~~", line) + f" · ⚠️ DD cũ ({q}) — tín hiệu chưa hợp lệ tới khi DD {_own_q(latest_q, tk)}"
             elif st == "fresh":
                 line += f" · DD asof {q}"
             else:
@@ -338,11 +364,43 @@ def _bootstrap_prev(season, wl, paper):
         e = pd.read_csv(FWD_EVENTS)
         e = e[(e.quarter == season) & e.ticker.isin(wl)]
         r = {str(t): int(v) for t, v in zip(e.ticker, e.rating_prev) if v == v}
-    dc = {p["ticker"]: p.get("buy_mode", "") for p in paper.get("seed_double_confirm_set", [])}
+    meta = paper.get("meta", {})
+    hist = meta.get("season_history") or []
+    if meta.get("season") == season and hist:
+        # sổ ĐÃ đặt lại cho mùa này (lượt trước bị kill giữa ghi sổ và ghi state): seed hiện tại là seed MỚI,
+        # seed "mùa trước" thật nằm ở season_history[-1] — dùng nó để lượt 2 cho đúng diff lượt 1.
+        base = hist[-1].get("seed_double_confirm_set", [])
+        src = "bootstrap: rating_prev (rating_8l_forward_events.csv) + season_history[-1] (sổ đã đặt lại)"
+    else:
+        base = paper.get("seed_double_confirm_set", [])
+        src = "bootstrap: rating_prev (rating_8l_forward_events.csv) + seed DC Book"
+    dc = {p["ticker"]: p.get("buy_mode", "") for p in base}
     snap = make_snapshot(r, dc, wl)
     snap["dc"] = dict(sorted(dc.items()))      # seed có thể chứa mã ngoài watchlist — giữ nguyên
-    snap["source"] = "bootstrap: rating_prev (rating_8l_forward_events.csv) + seed DC Book"
+    snap["source"] = src
     return snap
+
+
+class BusPostError(RuntimeError):
+    """Mùa ĐÃ xong và state ĐÃ ghi (bus_pending = mùa) — chỉ việc post bus lỗi; lượt sau post bù."""
+    def __init__(self, season, cause):
+        super().__init__(f"post bus mùa {season} lỗi: {type(cause).__name__}: {cause}")
+        self.season = season
+
+
+def describe_failure(exc):
+    """Thông điệp CLI: tách 'mùa đã xong, chỉ bus lỗi' khỏi 'lỗi TRƯỚC khi ghi state'."""
+    if isinstance(exc, BusPostError):
+        return (f"⚠️ newdeals_season: mùa {exc.season} ĐÃ xong (snapshot/queue/sổ DC/state đã ghi) — chỉ post bus "
+                f"lỗi ({exc}); state.bus_pending={exc.season} ⇒ lượt sau tự post bù, KHÔNG chạy lại cả vòng")
+    return f"❌ newdeals_season: {type(exc).__name__}: {exc} — mùa KHÔNG đánh dấu xong (lỗi trước khi ghi state)"
+
+
+def _call_bus(fn, season, q, changes):
+    try:
+        fn(season, q, changes)
+    except Exception as e:
+        raise BusPostError(season, e) from e
 
 
 def _post_bus(season, queue, changes):
@@ -383,7 +441,7 @@ def run_refresh(asof=None, dry=False, notify_bus=False, wl=None, fin_df=None, ra
     if not due and pend and notify_bus and not dry:
         q = _load_json(queue_path, {}).get("seasons", {}).get(pend)
         if q:
-            (bus_fn or _post_bus)(pend, q, q.get("changes", {}))
+            _call_bus(bus_fn or _post_bus, pend, q, q.get("changes", {}))
             state["bus_pending"] = None
             _atomic_write(state_path, state)
             out["bus_retry"] = pend
@@ -401,6 +459,12 @@ def run_refresh(asof=None, dry=False, notify_bus=False, wl=None, fin_df=None, ra
         _log(out, log_path, dry)
         return out
 
+    no_rating = sorted(t for t in wl if t not in ratings)
+    if no_rating:
+        out["reason"] = f"rating_missing {no_rating}"
+        _log(out, log_path, dry)
+        return out
+
     dc_set, sectors = (live_fn or _default_live)(a)
     paper = _load_json(paper_path, {})
     cur = make_snapshot(ratings, dc_set, wl)
@@ -415,7 +479,8 @@ def run_refresh(asof=None, dry=False, notify_bus=False, wl=None, fin_df=None, ra
         dd_entries = _load_json(DD_ZONES, {}).get("entries", [])
     qall = _load_json(queue_path, {"seasons": {}})
     prev_q = qall["seasons"].get(prev_season) if prev_season else None
-    queue = build_dd_queue(changes, cur, latest_dd_index(dd_entries), season, prev_q, mos)
+    queue = build_dd_queue(changes, cur, latest_dd_index(dd_entries), season, prev_q, mos,
+                           tq=ticker_quarters(fin_df, a))
     queue["changes"] = changes
     queue["created"] = a
     out.update({"changes": changes, "queue": queue["items"], "prev_source": prev.get("source", prev_season)})
@@ -437,7 +502,7 @@ def run_refresh(asof=None, dry=False, notify_bus=False, wl=None, fin_df=None, ra
     state["bus_pending"] = season if notify_bus else None
     _atomic_write(state_path, state)
     if notify_bus:
-        (bus_fn or _post_bus)(season, queue, changes)
+        _call_bus(bus_fn or _post_bus, season, queue, changes)
         state["bus_pending"] = None
         _atomic_write(state_path, state)
     _log(out, log_path, dry)
@@ -465,6 +530,6 @@ if __name__ == "__main__":
     try:
         res = run_refresh(asof=a.asof, dry=a.dry, notify_bus=a.notify_bus)
     except Exception as e:
-        print(f"❌ newdeals_season: {type(e).__name__}: {e} — mùa KHÔNG đánh dấu xong", file=sys.stderr)
+        print(describe_failure(e), file=sys.stderr)
         sys.exit(1)
     print(json.dumps(res, ensure_ascii=False, indent=1, default=str))

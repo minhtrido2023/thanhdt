@@ -115,8 +115,10 @@ def build_message():
     except Exception:
         pass
     label_set = {n for n, _, _ in slm.NAMES} | set(live_dc) | seed_tk
-    sector_md = nds.apply_dd_labels(sector_md, dd_index, latest_q, only=label_set)
-    converge_md = nds.apply_dd_labels(converge_md, dd_index, latest_q, only=label_set)
+    # so DD với quý BCTC mới nhất CỦA CHÍNH MÃ (PIT), không phải quý max toàn universe
+    own_q = nds.ticker_quarters_from_cache(today_ict) or latest_q
+    sector_md = nds.apply_dd_labels(sector_md, dd_index, own_q, only=label_set)
+    converge_md = nds.apply_dd_labels(converge_md, dd_index, own_q, only=label_set)
 
     if changed:
         header = f"🆕 **NEW DEALS — {today}**  ·  *research/monitor, not an order*"
