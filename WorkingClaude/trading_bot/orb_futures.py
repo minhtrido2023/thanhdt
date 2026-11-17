@@ -21,8 +21,8 @@ trạng thái, ghi lệnh DỰ KIẾN + khớp giả lập vào journal, KHÔNG 
 
 AN TOÀN (coding_guidelines §5/§5b/§12/§16/§27)
   • fcntl.flock không chặn: tiến trình thứ 2 thoát ngay (cron watchdog gọi lại an toàn).
-  • data/BOT_STOP ⇒ không vào lệnh mới. Đang có vị thế: KHÔNG đặt lệnh đóng (ORB_CLOSE_ALLOWED_UNDER_BOT_STOP
-    = False, chờ user quyết) nhưng VẪN theo dõi + báo ĐỎ lặp (Telegram+Discord) cho user đóng tay.
+  • data/BOT_STOP ⇒ không vào lệnh mới. Đang có vị thế: VẪN đặt lệnh ĐÓNG (stop/14:29) vì user chốt
+    ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = True (2026-11-17); hằng số False ⇒ chỉ theo dõi + báo ĐỎ lặp cho user đóng tay.
   • Mọi lần chạy, kể cả trạng thái kết thúc: đọc READ-ONLY positions phái sinh; còn vị thế ⇒ báo ĐỎ lặp.
   • Trạng thái lệnh: chỉ Cancelled/Rejected/Expired + khớp 0 mới là CHẾT; PendingCancel/lạ = SỐNG ⇒
     không đặt lệnh đóng thứ 2 khi lệnh đóng trước chưa chắc chết; lệnh vào không chắc chết ⇒ PAUSED.
@@ -77,8 +77,8 @@ POLL_S = 5
 # ---- an toàn (vòng 2 arch-review 16/11) ----
 # Kill-switch BOT_STOP khi đang có vị thế mở: False = bot KHÔNG đặt bất kỳ lệnh nào, kể cả lệnh ĐÓNG giảm
 # rủi ro, chỉ báo ĐỎ lặp lại cho user đóng tay. True = vẫn cho đặt lệnh ĐÓNG (stop/14:29), không bao giờ
-# cho lệnh VÀO. User CHƯA quyết ⇒ giữ False; đổi = quyết định của user.
-ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = False
+# cho lệnh VÀO. USER CHỐT True 2026-11-17 11:35 ICT (decided_by: user); đổi lại = quyết định của user.
+ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = True   # user chốt 2026-11-17 11:35 ICT: BOT_STOP cho phép bot tự đặt lệnh ĐÓNG (KHÔNG cho vào lệnh)
 ALERT_REPEAT_S = 60                # báo lặp (BOT_STOP+vị thế, còn vị thế sau 14:29…): tối đa 1 lần/60s/tiến trình;
                                    # mỗi lần watchdog gọi lại = 1 lần báo mới
 WATCH_ERR_ALERT_N = 3              # ≥N lỗi liên tiếp trong vòng giám sát ⇒ báo ĐỎ, tối đa 1 tin/ALERT_REPEAT_S (N-b)

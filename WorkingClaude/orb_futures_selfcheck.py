@@ -330,6 +330,8 @@ def open_bot(path=None, **kw):
     return ck, f, bot, ev, d
 
 
+print("20b. user chốt 17/11: mặc định ORB_CLOSE_ALLOWED_UNDER_BOT_STOP=True (đóng được, KHÔNG vào được dưới BOT_STOP)")
+check(OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP is True, "hằng số mặc định = True")
 print("21. B1 BOT_STOP khi OPEN, hằng số=False: nhiều vòng, chạm stop ⇒ 0 lệnh đóng, KHÔNG SKIPPED, báo ĐỎ lặp")
 OF.ORB_CLOSE_ALLOWED_UNDER_BOT_STOP = False
 ck, f, bot, ev, d = open_bot(path=lambda t: 1855.0 if t.time() < dt.time(10, 30) else 1800.0)
