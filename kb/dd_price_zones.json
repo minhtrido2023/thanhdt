@@ -4026,6 +4026,62 @@
    "expires_on": null,
    "expires_basis": "BCTC Q4/2026 (~30/01/2027) hoặc 120 ngày",
    "notes": "Nút kém chắc nhất: ROE di sản chuẩn hoá 8% (ước lượng, ±2pp ⇒ 8.291/11.293); vốn chủ NT3&4 9.000 (7.000–10.000); r 13,5% là Ke chung. Mốc: BCTC Q4/26 ~30/01/2027, kế hoạch vận hành LNG 2027 (hạn 15/01/2027), phải thu EPTC/EVN. Upside ngoài base: chênh lệch tỷ giá VA1 còn ~490 tỷ (+142 đ/cp)."
+  },
+  {
+   "ticker": "LLM",
+   "dd_date": "2026-11-18",
+   "rev": 1,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 3630,
+   "center": 24599,
+   "center_kind": "expected_weighted",
+   "center_desc": "giá trị kỳ vọng trọng số 25/50/25 (xấu/cơ sở/tốt; SOTP một phương pháp, biên gộp cơ sở 4,5% = trung vị TTM 2017Q3–2024Q4) SAU chiết khấu thanh khoản 10%; r 13,5% neo lãi huy động 12T hiệu dụng 7,4%; dự án đầu tư ghi sổ NPV=0 ở base, khoản mục con bị kiểm toán ngoại trừ không bake vào base (độ nhạy ở REPORT §8b); vòng 2",
+   "zone_high": 39728,
+   "center_range": null,
+   "center_alt": 27332,
+   "center_alt_kind": "expected_weighted",
+   "price_ref": 33300,
+   "price_date": "2026-11-18",
+   "verdict_label": "Giá 33.300 = 1,35× tâm 24.599: ĐẮT so với giá trị nội tại sau chiết khấu thanh khoản (vùng [3.630; 39.728] rất rộng; chỉ hợp lý nếu biên gộp bền ≥~10,3% vs trung vị 4,5%). WARNING: kiểm toán ngoại trừ 2023–2025 + soát xét H1/2026 ngoại trừ + nhấn mạnh quyết toán CPH chưa duyệt, HNX duy trì diện cảnh báo, vay quá hạn công ty con ~330 tỷ, Bộ Xây dựng 97,88%, thanh khoản ~0,45 tỷ/phiên.",
+   "skeptic_status": "fundamental-skeptic vòng 1 REFUTED (bỏ sót soát xét ngoại trừ, biên 7% lạc quan) → Taylor vòng 2 áp 13 đính chính, nhãn đổi 1,05×→1,35×; Mike rerun calc khớp byte; KHÔNG chạy skeptic vòng 2",
+   "source_file": "agents/Taylor/research/dd_LLM_20261118/REPORT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_LLM_20261118/REPORT.md",
+     "quote": "tâm giá trị 24.599 đ",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_LLM_20261118/REPORT.md",
+     "quote": "[3.630; 39.728]",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_LLM_20261118/REPORT.md",
+     "quote": "Giá 33.300 đ (18/11/2026)",
+     "fields": [
+      "price_ref"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_LLM_20261118/REPORT.md",
+     "quote": "27.332",
+     "fields": [
+      "center_alt"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_LLM_20261118/model/assumptions_LLM_20261118.json",
+   "assumptions_md5": "aaaeec2149986398055371ea535850ea",
+   "null_reason": null,
+   "expires_on": null,
+   "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc 120 ngày",
+   "notes": "center_alt 27.332 = cùng kỳ vọng trọng số TRƯỚC chiết khấu thanh khoản 10%. Nút kém chắc nhất: biên gộp cơ sở (4,5% vs 9T/26 31,3% quyết toán một lần), phần tiền 1.466 tỷ có dùng/chia theo sổ không (kịch bản xấu: tiền mắc kẹt → 4.996 ở v1), khoản mục con/liên kết bị ngoại trừ (xóa → 21.278; thêm liên kết về 0 → 17.573). Thanh khoản ADV ~0,45 tỷ. Moat NONE. Mốc: BCTC Q4/26, quyết toán CPH, ý kiến kiểm toán 2026."
   }
  ],
  "center_kinds": [

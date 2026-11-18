@@ -33,3 +33,5 @@
 - [2026-11-18T12:42:11Z] [lead-signal-runup 18/11] XONG job Taylor_20261118_122819: NO-GO 0/48 GO (15 informative nhung deu tre, net am); REPORT md5 14c49853 — CHO Mike quant-skeptic + ghi NO-GO vao ta-schools-vn
 - [2026-11-18T12:47:15Z] ĐANG DỞ: job Taylor_20261118_124655 DD LLM vong2 (ap skeptic_r1) | NEXT: doc skeptic_r1.md, render PDF, tai giai trinh, sua calc.py
 - [2026-11-18T12:55:42Z] [dd-llm r2 18/11] XONG job Taylor_20261118_124655: NHAN DOI 'quanh hop ly 1,05' -> 'DAT 1,35x', tam 24.599 (vung 3.630-39.728), bien co so 4,5% trung vi; ngoai tru KT 3 nam + canh bao HNX; md5 assumptions aaaeec21 — CHO Mike skeptic r2 + dung PDF
+- [2026-11-18T12:57:50Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM | NEXT: doc skill dd-investor-report, copy build tu dd_DBC investor_report
+- [2026-11-18T13:02:16Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM — assets xong (investor_report/src, figs/map) | NEXT: build_report.py figs + md + pdf + selfcheck
