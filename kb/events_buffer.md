@@ -583,3 +583,7 @@
 - [2026-11-18T05:45:07Z] Mike/status — ops-health-check-ZaloPay-2026-11-18: {"account": "ZaloPay", "label": "Trước phiên chiều", "warn_count": 5}
 - [2026-11-18T05:45:12Z] Mike/status — preflight-SpaceX-2026-11-18: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-11-18: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro), as_of 2026-11-17 (golive_state_today.json published 19:01)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 18.1h tuổi ≤ ngưỡng 21.3h theo phiên 2026-11-17)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-11-17 = phiên gần nhất, 201 mã ✓"]}
 - [2026-11-18T05:45:26Z] Mike/status — ops-health-check-SpaceX-2026-11-18: {"account": "SpaceX", "label": "Trước phiên chiều", "warn_count": 5}
+
+## Consolidation 2026-11-18T06:30:24Z
+- [2026-11-18T06:30:09Z] Wags/heartbeat — Wags_20261118_063003: {"status": "in_progress", "note": "reading tree"}
+- [2026-11-18T06:30:15Z] Wags/finding — work-tree-verify 18/11: {"closed": 0, "updated": 0, "kept_open": 0, "note": "attention.need_user and attention.overdue both empty; nothing to verify"}
