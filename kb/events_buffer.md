@@ -593,3 +593,11 @@
 
 ## Consolidation 2026-11-18T11:07:01Z
 - [2026-11-18T10:31:27Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54862}
+
+## Consolidation 2026-11-18T12:04:19Z
+- [2026-11-18T12:03:46Z] DollarBill/heartbeat — DollarBill_20261118_120337: {"status": "in_progress", "note": "bat dau plan ZaloPay 11-19"}
+- [2026-11-18T12:03:50Z] DollarBill/heartbeat — DollarBill_20261118_120339: {"status": "in_progress", "note": "bat dau plan SpaceX 11-19"}
+- [2026-11-18T12:04:11Z] DollarBill/decision — plan-ZaloPay-2026-11-19: {"decision": "HOLD ALL 0 lenh", "why": "LAG due_today rong; BAL TCH FLOOR_FAIL user loai 02/11; CAPIT khong; DISC VGS/NNC khong lap lenh", "dt5g": "NEUTRAL", "active_nav": 596361764, "approved": false}
+- [2026-11-18T11:16:00Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12995}
+- [2026-11-18T11:11:20Z] Winston/finding — new-listings-daily: {"date": "2026-11-18", "lookback_days": 90, "total_new": 3, "needs_manual_rating": 3, "fresh_ipo": 3, "research_queue": [{"ticker": "DTR", "listing_date": "2026-09-25", "exchange": NaN, "industry_name": "", "n_quarters": 2, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=DTR"}, {"ticker": "GTX", "listing_date": "2026-09-11", "exchange": NaN, "industry_name": "", "n_quarters": 1, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=GTX"}, {"ticker": "KAI", "listing_date": "2026-09-09", "exchange": NaN, "industry_name": "", "n_quarters": 1, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=KAI"}], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "3 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-11-18T11:40:07Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
