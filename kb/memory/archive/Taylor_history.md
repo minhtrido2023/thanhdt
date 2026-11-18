@@ -2456,3 +2456,6 @@
 
 ## Archived 2026-11-18 (keep=12 days=0 require_done=False)
 - [2026-11-17T04:23:55Z] ĐANG DỞ: job Taylor_20261117_042339 QTP investor report | NEXT: build_report.py o research/dd_QTP_20261117/investor_report
+
+## Archived 2026-11-18 (keep=12 days=0 require_done=False)
+- [2026-11-17T04:34:44Z] [dd-qtp investor report 17/11] XONG job Taylor_20261117_042339: PDF md5 5facf0a700b689d234322b4e5a3368ac, CHUA gui email — CHO user 'gui email' + Mike ghi dd_price_zones

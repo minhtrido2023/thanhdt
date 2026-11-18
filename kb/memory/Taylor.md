@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-17T04:34:44Z] [dd-qtp investor report 17/11] XONG job Taylor_20261117_042339: PDF md5 5facf0a700b689d234322b4e5a3368ac, CHUA gui email — CHO user 'gui email' + Mike ghi dd_price_zones
 - [2026-11-17T09:30:01Z] ĐANG DỞ: job Taylor_20261117_092943 NAV ky quy phai sinh SpaceX | NEXT: doc spec muc 7 + daily_nav_snapshot/compute_active_nav/reconcile/nav_period_returns
 - [2026-11-17T10:01:21Z] [nav-deriv 17/11] XONG job Taylor_20261117_092943: mike 760525131 nhanh feat/nav-deriv-margin-20261117 KHONG merge — CHO Mike arch-review+merge TRUOC 19:10 ICT + ghi flow cap SpaceX+5tr/ZaloPay-5tr (can gio that)
 - [2026-11-17T10:22:26Z] ĐANG DỞ: job Taylor_20261117_102211 refactor New deals (brief newdeals_refresh_20261117) | NEXT: đọc brief, tạo worktree
@@ -26,3 +25,4 @@
 - [2026-11-17T15:57:51Z] [dd-vcb r3 17/11] XONG job Taylor_20261117_155604: tam 35.497 (ROE 14,6%), D3/D4 chua ap (brief mo ho) — CHO Mike skeptic R3 + lam ro D3/D4
 - [2026-11-18T03:57:58Z] ĐANG DỞ: job Taylor_20261118_035743 DD DBC | NEXT: doc skill due-diligence, render BCTC scan src/, viet REPORT.md dd_DBC_20261118
 - [2026-11-18T04:04:48Z] ĐANG DỞ: job Taylor_20261118_035743 DD DBC — calc xong model/calc_output.txt | NEXT: viet REPORT.md dd_DBC_20261118 + bus finding
+- [2026-11-18T04:08:14Z] [dd-dbc 18/11] XONG job Taylor_20261118_035743: REPORT dd_DBC_20261118, tam 21.815 (vung 14.034-29.195), gia/tam 0,78, phan ky manh D=1,44; md5 511073ce — CHO Mike fundamental-skeptic + dd_price_zones
