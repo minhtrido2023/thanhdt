@@ -26,3 +26,7 @@
 - [2026-11-18T04:37:21Z] ĐANG DỞ: job Taylor_20261118_043658 investor report DBC | NEXT: doc skill dd-investor-report, copy build tu POW investor_report neu co
 - [2026-11-18T04:42:21Z] ĐANG DỞ: job Taylor_20261118_043658 investor report DBC — anh/logo/ban do/BQ/DNSE xong (investor_report/) | NEXT: build_report.py figs + md + pdf + selfcheck
 - [2026-11-18T04:47:56Z] [dd-dbc investor 18/11] XONG job Taylor_20261118_043658: PDF/HTML/md o dd_DBC_20261118/investor_report (10 trang, md5 d5a8515f) — CHO user bao 'gui email' + Mike ghi dd_price_zones
+- [2026-11-18T12:24:10Z] ĐANG DỞ: job Taylor_20261118_122349 DD LLM | NEXT: doc skill, render BCTC src/, viet REPORT dd_LLM_20261118
+- [2026-11-18T12:28:41Z] ĐANG DỞ: job Taylor_20261118_122819 lead-signal run-up TV1/VCP (paper) | NEXT: kb recall, PREREG, BQ pull, engine
+- [2026-11-18T12:35:01Z] ĐANG DỞ: job Taylor_20261118_122349 DD LLM — calc xong model/calc_output.txt (tam 31.589, vung 4.497-51.769) | NEXT: viet REPORT.md dd_LLM_20261118 + bus finding
+- [2026-11-18T12:38:40Z] [dd-llm 18/11] XONG vong1 job Taylor_20261118_122349: REPORT dd_LLM_20261118 tam 31.589 (vung 4.497-51.769) gia/tam 1,05, D=1,69 phan ky manh, RI tien mac ket 13.560; md5 assumptions dea9f474 — CHO Mike fundamental-skeptic
