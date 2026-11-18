@@ -95,3 +95,4 @@ last_update: 2026-11-14 (VAI THU HẸP — user duyệt; tắt forecast VNINDEX 
     - INVALIDATION: đóng <43.850; hoặc <44.300 KL>60k
 - note: giá trước ~24/08 có thể đã điều chỉnh ngược; sự kiện quyền 11–14/09 chưa kiểm.
 - outcome:
+SCORE|2026-10-21|d20=2026-11-18|close0=1738.67|close20=1703.01|ret=-0.0205|dir=UP|p_up=0.56|y=0|hit=0|brier=0.3136|dt5g_state=3|dt5g_hit=0|dt5g_brier=0.4900|due_drift_days=0
