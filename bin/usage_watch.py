@@ -8,7 +8,11 @@ in ~/.claude/projects over the last 5h (output tokens are the dominant cost), an
 calibration point you read off the Claude app's /usage panel.
 
 Calibrate: when the app shows P%, run this, note the token total T, and set
-USAGE_TOKENS_AT_100 = T / (P/100). Seeded from 2026-06-22: ~1.15M output ≈ 22% → ~5.2M = 100%.
+USAGE_TOKENS_AT_100 = T / (P/100). Seeded from 2026-06-22: ~1.15M output ≈ 22% → ~5.2M = 100% (on the OLD raw count).
+2026-11-18: transcripts repeat one message on several lines; we now DEDUPE by (message.id, requestId)
+(raw/dedup measured 2.10x, ccusage agrees within 0.4%), so the default is rescaled 5.2M → 2.5M to keep the
+same conservative % as before. Still NOT calibrated against the app: ccdb's five_hour utilization is 0.0
+until a warning threshold is crossed, so it is not a usable calibration point.
 Re-set it (env or the constant) whenever you read a fresh app value — it self-improves.
 
   usage_watch.py            → human summary (exit 1 if ≥ WARN%)
@@ -21,7 +25,7 @@ import sys, os, json, glob, time, datetime
 
 PROJ = os.path.expanduser("~/.claude/projects")
 WINDOW_H = float(os.environ.get("USAGE_WINDOW_H", "5"))
-AT_100 = float(os.environ.get("USAGE_TOKENS_AT_100", "5200000"))
+AT_100 = float(os.environ.get("USAGE_TOKENS_AT_100", "2500000"))
 WARN = float(os.environ.get("USAGE_WARN_PCT", "80"))
 
 
@@ -30,6 +34,7 @@ def collect(now):
     out = 0
     turns = 0
     earliest = None
+    seen = {}  # (message.id, requestId) -> max output_tokens: transcript ghi cung 1 message nhieu dong
     for f in glob.glob(os.path.join(PROJ, "**", "*.jsonl"), recursive=True):
         try:
             if os.path.getmtime(f) < cutoff:
@@ -57,8 +62,17 @@ def collect(now):
                     earliest = tt if earliest is None else min(earliest, tt)
                 except Exception:
                     pass
-            out += m["usage"].get("output_tokens", 0) or 0
-            turns += 1
+            k = (m.get("id"), e.get("requestId"))
+            o = m["usage"].get("output_tokens", 0) or 0
+            if k[0] is None:
+                out += o
+                turns += 1
+            elif k not in seen:
+                seen[k] = o
+                turns += 1
+            elif o > seen[k]:
+                seen[k] = o
+    out += sum(seen.values())
     return out, turns, earliest
 
 
