@@ -11,3 +11,5 @@
 - Mốc: LAG ADV checkpoint 2026-12-15; corp-action broker-primary xem lại 2026-12-15; measurement audit ~2026-12-27.
 
 - [2026-11-18T03:57:49Z] DD DBC (topic 1572457748526800986, 18/11): Bobby sector read xong (kb/data_registry/market-state/sector_read_chan_nuoi_heo_tacn_20261118.md); Taylor job Taylor_20261118_035743 đang chạy (dir agents/Taylor/research/dd_DBC_20261118). Kế: skeptic -> PDF dd-investor-report (CHƯA gửi email) -> dd_price_zones.json
+- [2026-11-18T04:14:08Z] [18/11] DD POW (topic 1572462081150685267): Bobby xong (kb/data_registry/market-state/sector_read_phat_dien_20261118.md), BCTC tải xong, Taylor_20261118_041402 đang DD (dir agents/Taylor/research/dd_POW_20261118). Kế: fundamental-skeptic -> PDF dd-investor-report (CHƯA gửi email) -> dd_price_zones.json
+- [2026-11-18T04:19:07Z] DBC: skeptic r1 REFUTED (văn bản) -> Taylor r2 đang áp (skeptic_r1.md trong dd_DBC_20261118). Sau r2: dựng PDF dd-investor-report, ghi zones+kb/projects/dbc-dd-20261118.md, trình user, KHÔNG email

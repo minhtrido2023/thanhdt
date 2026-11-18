@@ -14,9 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-17T09:30:01Z] ĐANG DỞ: job Taylor_20261117_092943 NAV ky quy phai sinh SpaceX | NEXT: doc spec muc 7 + daily_nav_snapshot/compute_active_nav/reconcile/nav_period_returns
-- [2026-11-17T10:01:21Z] [nav-deriv 17/11] XONG job Taylor_20261117_092943: mike 760525131 nhanh feat/nav-deriv-margin-20261117 KHONG merge — CHO Mike arch-review+merge TRUOC 19:10 ICT + ghi flow cap SpaceX+5tr/ZaloPay-5tr (can gio that)
-- [2026-11-17T10:22:26Z] ĐANG DỞ: job Taylor_20261117_102211 refactor New deals (brief newdeals_refresh_20261117) | NEXT: đọc brief, tạo worktree
 - [2026-11-17T10:31:59Z] [newdeals-season 17/11] XONG job Taylor_20261117_102211: nhanh feat/newdeals-season-20261117 d97339d1a, KHONG merge/cron — CHO Mike arch-review + cai cron 19:45 ICT; DD queue Q3 = VCB
 - [2026-11-17T10:44:36Z] [newdeals-season vong2 17/11] XONG job Taylor_20261117_103907: outer 530263674 (pushed), mike 3a0f92f0f gate + 0023d9367 registry, KHONG merge/cron — CHO Mike arch-review + merge cung dot + backup converge_portfolio_paper.json truoc cron 19:45 ICT
 - [2026-11-17T11:02:54Z] ĐANG DỞ: job Taylor_20261117_110239 DD VCB | NEXT: đọc brief + skill due-diligence, viết REPORT.md dd_VCB_20261117
@@ -26,3 +23,6 @@
 - [2026-11-18T03:57:58Z] ĐANG DỞ: job Taylor_20261118_035743 DD DBC | NEXT: doc skill due-diligence, render BCTC scan src/, viet REPORT.md dd_DBC_20261118
 - [2026-11-18T04:04:48Z] ĐANG DỞ: job Taylor_20261118_035743 DD DBC — calc xong model/calc_output.txt | NEXT: viet REPORT.md dd_DBC_20261118 + bus finding
 - [2026-11-18T04:08:14Z] [dd-dbc 18/11] XONG job Taylor_20261118_035743: REPORT dd_DBC_20261118, tam 21.815 (vung 14.034-29.195), gia/tam 0,78, phan ky manh D=1,44; md5 511073ce — CHO Mike fundamental-skeptic + dd_price_zones
+- [2026-11-18T04:14:25Z] ĐANG DỞ: job Taylor_20261118_041402 DD POW | NEXT: doc skill, render BCTC scan, viet REPORT dd_POW_20261118
+- [2026-11-18T04:21:06Z] ĐANG DỞ: job Taylor_20261118_041402 DD POW — calc xong model/calc_output.txt (tam 8.806) | NEXT: viet REPORT.md dd_POW_20261118 + bus finding
+- [2026-11-18T04:24:03Z] [dd-pow 18/11] XONG job Taylor_20261118_041402: REPORT dd_POW_20261118, tam 8.806 (vung 5.551-12.060), gia/tam 1,50; md5 c1054c74 — CHO Mike fundamental-skeptic + dd_price_zones

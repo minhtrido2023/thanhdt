@@ -2459,3 +2459,12 @@
 
 ## Archived 2026-11-18 (keep=12 days=0 require_done=False)
 - [2026-11-17T04:34:44Z] [dd-qtp investor report 17/11] XONG job Taylor_20261117_042339: PDF md5 5facf0a700b689d234322b4e5a3368ac, CHUA gui email — CHO user 'gui email' + Mike ghi dd_price_zones
+
+## Archived 2026-11-18 (keep=12 days=0 require_done=False)
+- [2026-11-17T09:30:01Z] ĐANG DỞ: job Taylor_20261117_092943 NAV ky quy phai sinh SpaceX | NEXT: doc spec muc 7 + daily_nav_snapshot/compute_active_nav/reconcile/nav_period_returns
+
+## Archived 2026-11-18 (keep=12 days=0 require_done=False)
+- [2026-11-17T10:01:21Z] [nav-deriv 17/11] XONG job Taylor_20261117_092943: mike 760525131 nhanh feat/nav-deriv-margin-20261117 KHONG merge — CHO Mike arch-review+merge TRUOC 19:10 ICT + ghi flow cap SpaceX+5tr/ZaloPay-5tr (can gio that)
+
+## Archived 2026-11-18 (keep=12 days=0 require_done=False)
+- [2026-11-17T10:22:26Z] ĐANG DỞ: job Taylor_20261117_102211 refactor New deals (brief newdeals_refresh_20261117) | NEXT: đọc brief, tạo worktree
