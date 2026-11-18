@@ -3977,6 +3977,55 @@
    "expires_on": null,
    "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc 120 ngày",
    "notes": "Nút kém chắc nhất: lựa chọn chuẩn hoá ROE (chọn sau khi biết giá — chiều lệch hai phía nêu ở REPORT §10), độ rộng kịch bản ±3,25 hẹp hơn phân tán dữ liệu, cách đọc XDCB NPV=0 (nếu ROE cùng mức cơ sở còn 15.291). Mốc: BCTC Q4/26 ≤ 30/01/2027; giá heo T1/27; đàn heo T3/27. Moat NARROW mỏng, không thưởng."
+  },
+  {
+   "ticker": "POW",
+   "dd_date": "2026-11-18",
+   "rev": 1,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 7166,
+   "center": 9792,
+   "center_kind": "expected_weighted",
+   "center_desc": "giá trị kỳ vọng trọng số kịch bản 25/50/25 (ROE mảng di sản 4,5%/8,0%/11,5%, mô hình thu nhập thặng dư vốn chủ) SAU chiết khấu thanh khoản 1% (trước 9.891); r 13,5% neo lãi huy động 12T hiệu dụng 7,4%, g 0; NT3&4 và dự án mới ghi sổ NPV=0; moat NONE (kinh tế), không thưởng/trừ; vòng 2",
+   "zone_high": 12419,
+   "center_range": null,
+   "center_alt": null,
+   "center_alt_kind": null,
+   "price_ref": 13250,
+   "price_date": "2026-11-17",
+   "verdict_label": "Giá 13.250 = 1,35× tâm 9.792, trên cận trên vùng giá trị hợp lý (12.419) ⇒ ĐẮT theo mô hình (DNSE 18/11 11:29 giá 13.500 = 1,38×); theo bội số trailing peer không đắt vì peer cũng ở năm đỉnh. Cổng 0,85×tâm (8.323) không đạt. Pháp lý chỉ WARNING (quyết toán cổ phần hoá chưa duyệt, hồi tố ~40% LNTT 9T, giao dịch bên liên quan dày).",
+   "skeptic_status": "fundamental-skeptic vòng 1 REFUTED (giả định g=2% và vốn dự án mới) đã áp ở vòng 2; chưa chạy vòng 2 của skeptic (thay đổi cơ học, nhãn ĐẮT đứng ở mọi biến thể)",
+   "source_file": "agents/Taylor/research/dd_POW_20261118/REPORT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_POW_20261118/REPORT.md",
+     "quote": "tâm = 9.792 đ/cp",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_POW_20261118/REPORT.md",
+     "quote": "Vùng [7.166; 12.419]",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_POW_20261118/REPORT.md",
+     "quote": "giá 13.250 đ (17/11/2026, BQ)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_POW_20261118/model/assumptions_POW_20261118_rev2.json",
+   "assumptions_md5": "721c5f28a97867749da9499ca68fa20e",
+   "null_reason": null,
+   "expires_on": null,
+   "expires_basis": "BCTC Q4/2026 (~30/01/2027) hoặc 120 ngày",
+   "notes": "Nút kém chắc nhất: ROE di sản chuẩn hoá 8% (ước lượng, ±2pp ⇒ 8.291/11.293); vốn chủ NT3&4 9.000 (7.000–10.000); r 13,5% là Ke chung. Mốc: BCTC Q4/26 ~30/01/2027, kế hoạch vận hành LNG 2027 (hạn 15/01/2027), phải thu EPTC/EVN. Upside ngoài base: chênh lệch tỷ giá VA1 còn ~490 tỷ (+142 đ/cp)."
   }
  ],
  "center_kinds": [

@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-17T15:57:51Z] [dd-vcb r3 17/11] XONG job Taylor_20261117_155604: tam 35.497 (ROE 14,6%), D3/D4 chua ap (brief mo ho) — CHO Mike skeptic R3 + lam ro D3/D4
 - [2026-11-18T03:57:58Z] ĐANG DỞ: job Taylor_20261118_035743 DD DBC | NEXT: doc skill due-diligence, render BCTC scan src/, viet REPORT.md dd_DBC_20261118
 - [2026-11-18T04:04:48Z] ĐANG DỞ: job Taylor_20261118_035743 DD DBC — calc xong model/calc_output.txt | NEXT: viet REPORT.md dd_DBC_20261118 + bus finding
 - [2026-11-18T04:08:14Z] [dd-dbc 18/11] XONG job Taylor_20261118_035743: REPORT dd_DBC_20261118, tam 21.815 (vung 14.034-29.195), gia/tam 0,78, phan ky manh D=1,44; md5 511073ce — CHO Mike fundamental-skeptic + dd_price_zones
@@ -26,3 +25,4 @@
 - [2026-11-18T04:35:46Z] [dd-dbc r3 18/11] XONG job Taylor_20261118_043114: tam 19.491 (vung 11.314-27.270), gia/tam 0,87 (dai hai truc 0,83-1,10), ROE 15q 11,42%, md5 207da8c9 — CHO Mike ghi dd_price_zones; khong con skeptic r4
 - [2026-11-18T04:37:21Z] ĐANG DỞ: job Taylor_20261118_043658 investor report DBC | NEXT: doc skill dd-investor-report, copy build tu POW investor_report neu co
 - [2026-11-18T04:42:21Z] ĐANG DỞ: job Taylor_20261118_043658 investor report DBC — anh/logo/ban do/BQ/DNSE xong (investor_report/) | NEXT: build_report.py figs + md + pdf + selfcheck
+- [2026-11-18T04:47:56Z] [dd-dbc investor 18/11] XONG job Taylor_20261118_043658: PDF/HTML/md o dd_DBC_20261118/investor_report (10 trang, md5 d5a8515f) — CHO user bao 'gui email' + Mike ghi dd_price_zones
