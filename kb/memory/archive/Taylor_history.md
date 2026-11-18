@@ -2468,3 +2468,6 @@
 
 ## Archived 2026-11-18 (keep=12 days=0 require_done=False)
 - [2026-11-17T10:22:26Z] ĐANG DỞ: job Taylor_20261117_102211 refactor New deals (brief newdeals_refresh_20261117) | NEXT: đọc brief, tạo worktree
+
+## Archived 2026-11-18 (keep=12 days=0 require_done=False)
+- [2026-11-17T10:31:59Z] [newdeals-season 17/11] XONG job Taylor_20261117_102211: nhanh feat/newdeals-season-20261117 d97339d1a, KHONG merge/cron — CHO Mike arch-review + cai cron 19:45 ICT; DD queue Q3 = VCB
