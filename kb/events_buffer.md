@@ -461,3 +461,6 @@
 
 ## Consolidation 2026-11-18T02:07:02Z
 - [2026-11-18T02:05:14Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-11-18", "elapsed_s": 11, "rc": 0}
+
+## Consolidation 2026-11-18T03:07:02Z
+- [2026-11-18T02:31:07Z] Mafee/status — orb_futures_entry: {"account": "SpaceX", "mode": "DRY", "contract": "41I1GB000", "side": "sell", "px": 1828.6, "stop": 1874.3, "fill_px_estimated": false}
