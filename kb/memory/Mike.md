@@ -10,3 +10,4 @@
 - Taylor có 1 bus question mở 17/11 (chưa đọc nội dung ở retro).
 - Mốc: LAG ADV checkpoint 2026-12-15; corp-action broker-primary xem lại 2026-12-15; measurement audit ~2026-12-27.
 
+- [2026-11-18T03:57:49Z] DD DBC (topic 1572457748526800986, 18/11): Bobby sector read xong (kb/data_registry/market-state/sector_read_chan_nuoi_heo_tacn_20261118.md); Taylor job Taylor_20261118_035743 đang chạy (dir agents/Taylor/research/dd_DBC_20261118). Kế: skeptic -> PDF dd-investor-report (CHƯA gửi email) -> dd_price_zones.json
