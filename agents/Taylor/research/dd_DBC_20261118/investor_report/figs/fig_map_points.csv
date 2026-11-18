@@ -1,0 +1,8 @@
+name,lat,lon,kind,dx,dy,note
+Trụ sở + NM TACN Khắc Niệm + giống Lạc Vệ,21.1425,106.0571,hq,0.25,0.38,OSM Nominatim 18/11/2026 (phường Khắc Niệm; Lạc Vệ 21.1198/106.0643 cách ~3 km)
+Lợn giống Lương Tài,21.0449,106.2903,plant,0.35,-0.3,OSM Nominatim 18/11/2026 (huyện Lương Tài cũ; gần đúng)
+Lợn giống Thuận Thành,21.0374,106.0846,plant,-0.3,-0.42,OSM Nominatim 18/11/2026 (huyện Thuận Thành cũ; gần đúng)
+Trại lợn CNC Thạch Thành,20.211,105.635,plant,0.15,0.12,OSM Nominatim 18/11/2026 (huyện Thạch Thành; website công ty)
+Dự án lợn CNC Ngọc Lặc,20.0681,105.3881,project,-1.6,-0.05,OSM Nominatim 18/11/2026 (huyện Ngọc Lặc; BCTC Q3/26 TM 8)
+Dự án Lam Sơn – Như Xuân,19.5976,105.398,project,0.15,-0.06,OSM Nominatim 18/11/2026 (huyện Như Xuân; BCTC Q3/26 TM 8; gần đúng)
+Hà Nội – thị trường tiêu thụ lớn,21.0283,105.854,market,-1.85,0.22,OSM Nominatim 18/11/2026 (trung tâm)

@@ -1,0 +1,5 @@
+name,lat,lon,kind,dx,dy,note
+Nhiệt điện khí Ô Môn I (gói EPC 2025),10.1337,105.6711,project,-0.05,0.13,OSM Nominatim 18/11/2026 (NM Nhiệt điện Ô Môn; P. Phước Thới)
+Nhiệt điện Sông Hậu 1 (chờ quyết toán),9.9515,105.8599,plant,0.06,0.06,OSM Nominatim 18/11/2026 (NM Nhiệt điện Sông Hậu; website: xã Phú Hữu A)
+Nhiệt điện Long Phú 1 (tạm ứng 2026),9.7105,106.0848,project,0.06,-0.12,OSM Nominatim 18/11/2026 (Long Phu 1 Power Plant)
+LNG Nhơn Trạch 3&4 (COD 01/2026),10.6420,106.8405,plant,-0.4,0.13,OSM Nominatim 18/11/2026 (cụm NM Nhơn Trạch; website: huyện Nhơn Trạch)

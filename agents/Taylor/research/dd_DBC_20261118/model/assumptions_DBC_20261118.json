@@ -1,0 +1,167 @@
+{
+ "ticker": "DBC",
+ "asof": "2026-11-18",
+ "job": "Taylor_20261118_043114 (vong 3 CUOI; vong 2 = Taylor_20261118_041902, file _v2: assumptions_DBC_20261118_v2.json md5 708441c3c673573b354d245a2428b0dc; vong 1 file _v1 md5 511073ce713239e5cf7d242491d07922)",
+ "units": "ty dong (bn VND) tru khi ghi khac",
+ "source_bctc": "src/q3_hopnhat.pdf (BCTC hop nhat Q3/2026, 21/10/2026); src/h1_d.pdf (BCTC hop nhat ban nien 2026 soat xet EY, 26/08/2026)",
+ "shares_m": 431.046499,
+ "equity_parent_q3": 8720.4096,
+ "nci_q3": 1.049,
+ "cip_q3": 1302.601,
+ "np_quarterly_bn": {
+  "2023Q4": 6.452,
+  "2024Q1": 72.608,
+  "2024Q2": 145.435,
+  "2024Q3": 312.17,
+  "2024Q4": 238.87,
+  "2025Q1": 508.26,
+  "2025Q2": 506.971,
+  "2025Q3": 342.956,
+  "2025Q4": 148.581,
+  "2026Q1": 374.038,
+  "2026Q2": 289.12,
+  "2026Q3": 200.169,
+  "2023Q1": -320.729,
+  "2023Q2": 326.82,
+  "2023Q3": 12.464
+ },
+ "np_source": "BQ tav2_bq.ticker_financial NP_P0 (so QUY); doi chieu: H1/26 374,0+289,1=663,2 khop BCTC soat xet 663,16; Q3/26 200,17 khop BCTC; 9T/25 1.358,19 khop",
+ "normalisation": "VONG 2: LNST chuan hoa = trung binh 15 quy lich Q1/23..Q3/26 x4 (moi quy tinh 1 lan; phu day 2023, dinh 2025, doan giam 2026; Bobby 6.12 yeu cau TB chu ky day du). Vong 1 = trung vi 12 TTM (1.083) -> chuyen thanh dong do nhay + kich ban tot",
+ "r_ke": 0.135,
+ "deposit_anchor_pct": 7.4,
+ "deposit_now_pct": 7.4,
+ "deposit_source": "deposit_rate_vn.effective_deposit_rate('2026-11-03') va ('2026-11-18') = 7,4% (cctg_12m 2026-11-02)",
+ "beta_passthrough": 1.0,
+ "g": 0.05,
+ "g_basis": "(uoc luong) tang truong danh nghia dai han nganh thit/TACN, < GDP danh nghia; do nhay 4-7%",
+ "cip_treatment": "XDCB do dang 1.302,6 ty ghi theo gia so sach (NPV=0, luat 2026-11-03); ROE chuan hoa ap len von chu tru XDCB",
+ "scenario_roe_total_equity": {
+  "bad": null,
+  "base": null,
+  "good": null,
+  "note": "tinh trong calc.py = base -/+ scenario_spread_pp"
+ },
+ "scenario_basis": {
+  "bad": "base - 3,25 diem % (doi xung)",
+  "good": "base + 3,25 diem %",
+  "spread": "3,25 diem % = do rong vong 1 (xau 9,0/base 12,4/tot 15,5 -> -3,4/+3,1) GIU NGUYEN, dat lai quanh base nhat quan; KHONG suy tu phan tan du lieu (do lech chuan ROE nam 2019-25 bo 2020 = 8,0 diem % va nua-IQR = 6,0 diem % (do trong calc_output.txt)) -> do nhay ±6,0 o muc 6b, anh huong chu yeu vung, tam gan khong doi (tuyen tinh theo ROE)"
+ },
+ "weights": {
+  "bad": 0.25,
+  "base": 0.5,
+  "good": 0.25
+ },
+ "liquidity_discount": 0.02,
+ "liquidity_basis": "ADV trung vi 3T 20,08 ty/phien (BQ ticker 2026-08-18..2026-11-17); vi the <=20 ty thoat <=10 phien o 10% tham gia; (uoc luong) chiet khau 2%, do nhay 0-5%",
+ "moat": {
+  "tier": "NARROW",
+  "reward_params": "KHONG (khong qua dieu kien (i): ROE_Min5Y 0,5%, ROIC_Min5Y 2,3% BQ)"
+ },
+ "cfo_3y_bn": {
+  "2023Q4": -536.321,
+  "2024": 1125.832,
+  "2025": 1292.393,
+  "9M2026": 1517.903
+ },
+ "capex_3y_bn": {
+  "2023Q4": 103.302,
+  "2024": 870.183,
+  "2025": 882.989,
+  "9M2026_cash": 1106.036,
+  "9M2026_finance_lease_added": 573.717697
+ },
+ "cfo_capex_source": "BQ CF_OA_P0/CF_Invest_P0 tong theo nam (CF_Invest_P0 Q3/26 = -338,4 khop chi capex BCTC 9T 1.106,0 - H1 767,6); 9M2026 lay BCTC Q3 (BQ Q2/26 -841,8 lech BCTC H1 329,1-744,4)",
+ "da_3y_bn_estimate": 2497,
+ "da_basis": "(uoc luong) 3 nam = TB(2025 uoc ~667 = H1/25 333,6 x2; 9T/26 quy nam 748,1/0,75 = 997) x 3 = 2.497",
+ "industry_capex_rev_median": 0.071,
+ "industry_capex_rev_basis": "trung vi TTM CF_Invest/Revenue BQ: HAG 29,1% BAF 40,4% MML 2,4% VLC 5,7% VSN 1,8% DBC 8,6%",
+ "rev_net_ttm_bn_estimate": 15774,
+ "rev": 2,
+ "np_norm_method": "roe_mean_15q",
+ "sens_norm_set_bn": {
+  "median_12TTM": null,
+  "mean_12TTM": null,
+  "ttm_after_Q4_26_est": null,
+  "calendar_mean_15q": null,
+  "annual_mean_2023_25": null
+ },
+ "q4_26_np_est_bn": {
+  "low": -50,
+  "mid": 35,
+  "high": 120,
+  "basis": "(uoc luong) REPORT muc 3; mid = trung diem"
+ },
+ "scenario_robust_alt": {
+  "bad_roe": 0.0573,
+  "bad_basis": "TB ROE 2022-2024 (3,2/0,5/13,5)",
+  "good_roe_ttm_median": 0.1242
+ },
+ "cip_pig_haircut_bad": {
+  "pig_cip_bn": 873.410237,
+  "pig_cip_open_bn": 204.547,
+  "projects": "Lon QN 360,156; Lao Cai 108,305; Ngoc Lac 244,250; Lam Son-Nhu Xuan 104,060; Quang Tri 56,639 (TM 8 q3h trang 13)",
+  "haircut": 0.4,
+  "haircut_range": [
+   0.3,
+   0.5
+  ],
+  "scope": "CHI kich ban xau; base giu NPV=0 (luat 03/11)",
+  "basis": "Bobby sector read 2b: lan song mo trai quy mo lon 2025-26, dan +5,4% YoY (T9/26) -> nhanh (-) cua skill: co du lieu doc lap ve nguon cung -> haircut 30-50% o kich ban xau"
+ },
+ "capex_note": "Vong 2: 9T/26 cong 573,7 ty TSCD thue tai chinh tang them (TM 11, q3h trang 17) = 1.679,7. Thue TC 2023Q4-2025 CHUA gom (chua co BCTC kiem toan 2025) -> capex/CFO la CAN DUOI",
+ "da_incl_biological_bn": {
+  "9M2026": 748.1,
+  "h1_2026": 479.7,
+  "q3_2026": 268.4,
+  "parts_9M": "TSCD huu hinh 482,1 + thue TC 74,0 + BDSDT 5,8 (=562,0 dong LCTT) + TS sinh hoc 186,1 (TM 12.2)",
+  "h1_2025": 333.6
+ },
+ "receivable_employees_bn": {
+  "2026Q3": 237.112,
+  "2025Q4": 208.846,
+  "gpmb_advances_h1": 178,
+  "np_9m26": 863.3
+ },
+ "price_for_comparison_only": {
+  "vnd": 16950,
+  "asof": "2026-11-17",
+  "src": "BQ tav2_bq.ticker (vong 1, lo gia trong phien da khai o muc 10)"
+ },
+ "equity_parent_q_bn": {
+  "2022Q4": 4786.129,
+  "2023Q1": 4320.499,
+  "2023Q2": 4647.319,
+  "2023Q3": 4659.783,
+  "2023Q4": 4666.235,
+  "2024Q1": 4738.843,
+  "2024Q2": 4885.278,
+  "2024Q3": 6527.209,
+  "2024Q4": 6766.08,
+  "2025Q1": 7234.39,
+  "2025Q2": 7577.526,
+  "2025Q3": 7920.482,
+  "2025Q4": 8069.062,
+  "2026Q1": 8443.101,
+  "2026Q2": 8521.241,
+  "2026Q3": 8721.41
+ },
+ "equity_q_source": "BQ ticker_financial BVPS x OShares (do trong phien 18/11, vong 3). HAI dong sua mau so: 2025Q2 BVPS 19.688,7 x 384,8667 tr cp = 7.577,5 (BQ OShares dong do = 334,67 tr, truoc co tuc co phieu 15% -> BVPS tinh tren co phieu sau chia; tong von chu 7.234,4+506,97-... khop xu huong); 2026Q1 BVPS 19.587,4 x 431,0465 = 8.443,1 (= 8.069,1 + 374,0 LNST ~ 8.443; BQ OShares dong do = 384,87 tr truoc co tuc 12%). Truoc sua: 6.589,2 va 7.538,6 (khong khop dong von chu 2 quy ke ben). Cac dong con lai khong sua.",
+ "roe_norm_basis": "VONG 3: chuan hoa ROE (khong chuan hoa muc LNST): ROE quy hoa (4 x LNST quy / von chu cuoi quy cung ky) trung binh 15 quy Q1/23..Q3/26, roi nhan voi von chu Q3/26. Ly do: mo hinh thu nhap thang du ap ROE len von HIEN TAI; von chu tang ~87% trong khung (4.320 -> 8.721) nen chia LNST danh nghia cho von cuoi ky ha ROE gia (vong 2: 9,7%). Doi chieu BQ ROE3Y 11,44% / ROE5Y 11,21% (ticker_financial 2026Q3).",
+ "roe_variants_measured": {
+  "mean_15q_end_equity": 0.11425,
+  "mean_15q_avg_equity": 0.11982,
+  "equity_weighted_15q": 0.12955,
+  "median_15q_end_equity": 0.13572,
+  "note": "chon bien the THAP NHAT trong ho nhat quan ROE (end-equity); skeptic vong 2 uoc 11,45%"
+ },
+ "scenario_spread_pp": 0.0325,
+ "scenario_old_fixed": {
+  "bad": 0.09,
+  "good": 0.155,
+  "note": "vong 1-2: TB ROE 2021-24 / TB ROE 2019-25 gom 2020; CHI dung cho ma tran tu phan bien"
+ },
+ "scenario_wide_spread_pp": 0.06,
+ "np_norm_alt_bn": {
+  "calendar_mean_15q": "tinh trong calc (843,8)"
+ }
+}

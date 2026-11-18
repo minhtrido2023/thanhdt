@@ -1,0 +1,70 @@
+ROE15q quy hoa/von cuoi ky: mean 0.1142 | avg-equity 0.1198 | equity-weighted 0.1295 | median 0.1357 | quarters 15
+ROE nam 2019-25 (BQ, uoc luong): sd(all)=0.134 sd(bo 2020)=0.080 half-IQR(bo 2020)=0.060
+quarters 15 TTM window: {'2023Q4': 25.0, '2024Q1': 418.3, '2024Q2': 237.0, '2024Q3': 536.7, '2024Q4': 769.1, '2025Q1': 1204.7, '2025Q2': 1566.3, '2025Q3': 1597.1, '2025Q4': 1506.8, '2026Q1': 1372.5, '2026Q2': 1154.7, '2026Q3': 1011.9}
+annual NP {'2023': 25.0, '2024': 769.1, '2025': 1506.8}
+NP_norm(roe_mean_15q)=996.3 EPS_norm=2311 BVPS=20231 ROE_tot=0.1142 ROE_op=0.1343
+scenario ROE tong von: xau 0.0817 / base 0.1142 / tot 0.1467 (spread ±0.0325)
+scen(value/cp): {'bad': 11545, 'base': 20091, 'good': 27826} | bad ROE_op 0.0961 good ROE_op 0.1725
+center_pre_liq=19888 center_post_liq=19491 zone_post_liq=[11314;27270]  P/E=8.4 P/B=0.96
+price 16950 / center = 0.87; 0.85*center=16567
+--- SENSITIVITY chuan hoa LNST (kich ban xau/tot DOI XUNG quanh base rieng, +/-3,25; haircut xau 40%) ---
+roe_mean_15q           NP=  996.3 ROE_tot=0.1142 base_val= 20091 center= 19491 price/center=0.87 V_ngan(all-equity)= 15291
+median_12TTM           NP= 1083.3 ROE_tot=0.1242 base_val= 22466 center= 21818 price/center=0.78 V_ngan(all-equity)= 17666
+mean_12TTM             NP=  950.0 ROE_tot=0.1089 base_val= 18828 center= 18253 price/center=0.93 V_ngan(all-equity)= 14028
+ttm_after_Q4_26_est    NP=  898.3 ROE_tot=0.1030 base_val= 17417 center= 16871 price/center=1.00 V_ngan(all-equity)= 12618
+calendar_mean_15q      NP=  843.8 ROE_tot=0.0968 base_val= 15929 center= 15412 price/center=1.10 V_ngan(all-equity)= 11129
+annual_mean_2023_25    NP=  767.0 ROE_tot=0.0879 base_val= 13832 center= 13357 price/center=1.27 V_ngan(all-equity)=  9032
+--- haircut XDCB trai heo o kich ban xau ---
+haircut 0%: bad=12356 center_post_liq=19689
+haircut 30%: bad=11748 center_post_liq=19540
+haircut 40%: bad=11545 center_post_liq=19491
+haircut 50%: bad=11342 center_post_liq=19441
+--- MA TRAN 2 TRUC (chuan hoa x kich ban) ---
+calendar_mean_15q  NP= 843.8 scen=cu 9,0/15,5  center= 18414 price/center=0.92
+calendar_mean_15q  NP= 843.8 scen=doi xung     center= 15412 price/center=1.10
+roe_mean_15q       NP= 996.3 scen=cu 9,0/15,5  center= 20453 price/center=0.83
+roe_mean_15q       NP= 996.3 scen=doi xung     center= 19491 price/center=0.87
+dai gia/tam theo ma tran: 0.83 - 1.10; tam 15412 - 20453
+--- do rong kich ban (tam chinh) ---
+spread ±0.0325: bad=11314 good=27270 center=19491 price/center=0.87
+spread ±0.0450: bad=8399 good=30185 center=19491 price/center=0.87
+spread ±0.0600: bad=4900 good=33684 center=19491 price/center=0.87
+--- ROBUST: kich ban xau/tot dat lai (khong dung lam tam) ---
+bad=TB ROE22-24 5,7%               base=calendar_mean_15q  center= 16026 price/center=1.06
+bad=TB ROE22-24 5,7%               base=roe_mean_15q       center= 18065 price/center=0.94
+good=TTM median 12,4% (bo 2020)    base=calendar_mean_15q  center= 16136 price/center=1.05
+good=TTM median 12,4% (bo 2020)    base=roe_mean_15q       center= 18176 price/center=0.93
+ca hai                             base=calendar_mean_15q  center= 14711 price/center=1.15
+ca hai                             base=roe_mean_15q       center= 16750 price/center=1.01
+--- r (beta=1 / 0.5) ---
+dep -100bp: r=0.1250 center=21721 (+11.4%) | beta0.5 20536
+dep -50bp: r=0.1300 center=20536 (+5.4%) | beta0.5 19997
+dep +0bp: r=0.1350 center=19491 (+0.0%) | beta0.5 19491
+dep +50bp: r=0.1400 center=18561 (-4.8%) | beta0.5 19013
+dep +100bp: r=0.1450 center=17730 (-9.0%) | beta0.5 18561
+g=0.04: center=19505
+g=0.05: center=19491
+g=0.06: center=19472
+g=0.07: center=19448
+liq 0: 19888
+liq 0.02: 19491
+liq 0.05: 18894
+all-equity (XDCB cung ROE) base=15291
+V_short=15291 (reinv 0.438) | CFO3y/yr=1133.3 capex_cash/yr=987.5 (capex/CFO 0.87) capex_incl_lease/yr=1178.7 capex/CFO=1.04 FCFE/yr=-45.5
+FCFE<=0 -> V_long khong xac dinh; BO V_dai, D, co phan ky
+D&A/yr (uoc luong, gom TSSH)=832 C4/yr=301 V_C4=8624
+D2/yr=13 V_D2=382
+depreciation Q3 incl TSSH = 268.4; 9T parts check 561.9 + 186.1 = 748.0
+receivable_employees/NP9M = 0.275
+--- TSSH trich lap (heo thit 1877,7 gia goc = thu hoi) ---
+lech gia tri thuan 5%: 93.9 ty = 218 d/cp; = 9% LNST chuan hoa
+lech gia tri thuan 10%: 187.8 ty = 436 d/cp; = 19% LNST chuan hoa
+--- MOC §9: them Q4/26 vao ROE trung binh, cua so MO RONG (khong bo Q1/23) ---
+Q4/26=-50: ROE mean16q=0.1057 center=17491 (-10.3%) price/center=0.97
+Q4/26=+35: ROE mean16q=0.1081 center=18059 (-7.3%) price/center=0.94
+Q4/26=+120: ROE mean16q=0.1105 center=18627 (-4.4%) price/center=0.91
+(tham chieu cua so TRUOT 15q, Q4/26=+35: ROE=0.1351 center=24358 -> nhay giả do roi quy lo Q1/23)
+--- MOC §9: doi trong so kich ban (xau/co so/tot) ---
+w=(0.15, 0.5, 0.35): center=21086 (+8.2%) price/center=0.80
+w=(0.35, 0.5, 0.15): center=17895 (-8.2%) price/center=0.95
+w=(0.4, 0.4, 0.2): center=17855 (-8.4%) price/center=0.95

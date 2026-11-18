@@ -1,0 +1,11 @@
+{
+ "lookahead_checks": 2790,
+ "lookahead_bad": 0,
+ "s21": "S21 d\u00f9ng rank c\u00f9ng ng\u00e0y + rolling shift(1) c\u1ee7a ch\u00ednh m\u00e3: ch\u1ec9 d\u1eef li\u1ec7u <= t theo c\u1ea5u tr\u00fac (groupby time rank; transform shift/rolling)",
+ "label_rows": 2000,
+ "label_err": 0,
+ "label_maxdiff": 0.0,
+ "trades": 500,
+ "sum_abs_vnd_diff": 0.0,
+ "PASS": true
+}

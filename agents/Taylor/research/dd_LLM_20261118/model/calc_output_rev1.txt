@@ -1,0 +1,57 @@
+BVPS_parent=27190  P/B_parent=1.22
+scen pre-liq {'bad': 4996, 'base': 15067, 'good': 25137}  HNA d/cp 968
+center_pre=15067 center_post=13560 zone_post=[4497;22623] 0.85xtam=11526 gia/tam=2.46
+dep -100bp beta1.0: r=0.1250 center=14575 (+7.5%)
+dep -100bp beta0.5: r=0.1300 center=14048 (+3.6%)
+dep -50bp beta1.0: r=0.1300 center=14048 (+3.6%)
+dep -50bp beta0.5: r=0.1325 center=13799 (+1.8%)
+dep +50bp beta1.0: r=0.1400 center=13107 (-3.3%)
+dep +50bp beta0.5: r=0.1375 center=13329 (-1.7%)
+dep +100bp beta1.0: r=0.1450 center=12685 (-6.5%)
+dep +100bp beta0.5: r=0.1400 center=13107 (-3.3%)
+liq 0: 15067
+liq 0.05: 14313
+liq 0.1: 13560
+liq 0.2: 12053
+g=0: 13560
+g=0.02: 11511
+g=0.04: 8599
+ROE all -0.02: 9935
+ROE all +0.02: 17185
+ROE all +0.05: 22623
+HNA=0: 12689
+r=0.12: 15146
+r=0.15: 12291
+implied ROE at price 33300 (post-liq): 0.1789; pre-liq: 0.1605
+post stock-div 31.7% equiv: center_post/1.317=10296, price/1.317=25285
+TTM {'2023Q4': 1.1, '2024Q1': 37.3, '2024Q2': 98.6, '2024Q3': 105.8, '2024Q4': 87.8, '2025Q1': 103.7, '2025Q2': 108.7, '2025Q3': 192.0, '2025Q4': 492.0, '2026Q1': 556.0, '2026Q2': 1008.8, '2026Q3': 1009.8}
+NP_norm(median TTM 12q)=107.2 ROE=0.0495 V_short=9965
+CFO/yr=595.6 capex/yr=12.1 capex/CFO=0.020 FCFE/yr=583.5 V_long=54216
+C4/yr=583.5 V_C4=54216 | D2/yr=523.1 V_D2=48600
+D=|ln(Vs/Vl)|=1.69 (ln2=0.69, ln3=1.10)
+9M one-offs PBT=290.5; core PBT=614.0; core NPAT~491 (thue 20%); nam hoa 655 => ROE 0.302 (van gom bien gop quyet toan 31%)
+
+SOTP: tien+tien gui=3576.4 net cash=2955.7 NWC van hanh=-1489.6 => vi the TC rong sau no van hanh=1466.2 (18390 d/cp); tam ung khach=1119.1
+SOTP per scen pre-liq {'bad': 21007, 'base': 38939, 'good': 57521}
+KICH BAN CHINH (xau=RI tien mac ket; co so/tot=SOTP) pre-liq {'bad': 4996, 'base': 38939, 'good': 57521}
+TAM pre=35099 post=31589 vung_post=[4497;51769] 0.85xtam=26850 gia/tam=1.05
+[chinh] dep -100bp beta1.0: 32678 (+3.4%)
+[chinh] dep -100bp beta0.5: 32112 (+1.7%)
+[chinh] dep -50bp beta1.0: 32112 (+1.7%)
+[chinh] dep -50bp beta0.5: 31846 (+0.8%)
+[chinh] dep +50bp beta1.0: 31102 (-1.5%)
+[chinh] dep +50bp beta0.5: 31341 (-0.8%)
+[chinh] dep +100bp beta1.0: 30650 (-3.0%)
+[chinh] dep +100bp beta0.5: 31102 (-1.5%)
+[chinh] liq 0: 35099
+[chinh] liq 0.05: 33344
+[chinh] liq 0.1: 31589
+[chinh] liq 0.2: 28079
+[chinh] cat 0% vi the TC rong (tien mac ket mot phan): 31589
+[chinh] cat 25% vi the TC rong (tien mac ket mot phan): 28485
+[chinh] cat 50% vi the TC rong (tien mac ket mot phan): 25382
+[chinh] HNA=0: 30717
+[chinh] trong so {'bad': 0.5, 'base': 0.4, 'good': 0.1}: 21443
+[chinh] trong so {'bad': 0.1, 'base': 0.5, 'good': 0.4}: 38680
+[chinh] sau co tuc CP 31,7%: tam/1,317=23985 gia/1,317=25285
+[doi chieu] RI ca 3 kich ban (tien mac ket moi kich ban) post-liq=13560

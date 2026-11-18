@@ -1,0 +1,4 @@
+{"livermore_pinned": 300438, "same_def_all_tickers_load2000": 300454, "only_mine": {"TLD": 35}, "only_livermore": {"VEA": 17, "GVR": 2},
+ "explanation": "cache refreshed after 2026-11-14 (data vintage), 3 tickers; symmetric diff 54/300438 = 0.018%",
+ "engine_count": 300140, "engine_minus_same_def": -314, "engine_gap_reason": "engine skips tickers with <260 rows total (PREREG: need >=250 prior rows) = 314 rows",
+ "verdict": "PASS (explained)"}

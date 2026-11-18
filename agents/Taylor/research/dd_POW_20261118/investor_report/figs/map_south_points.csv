@@ -1,0 +1,4 @@
+name,lat,lon,kind,dx,dy,note
+Cà Mau 1&2 (1.500 MW; khí),9.2566,105.0070,plant,0.08,0.10,OSM Nominatim 18/11/2026 xã Khánh An
+Nhơn Trạch 1-4 (2.074 MW; khí/LNG),10.7460,106.8391,plant,-1.55,0.12,OSM Nominatim 18/11/2026 xã Đại Phước
+TP.HCM — trung tâm tiêu thụ,10.7737,106.7166,market,-1.0,-0.28,OSM Nominatim (toạ độ trung tâm)

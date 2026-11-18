@@ -1,0 +1,20 @@
+TTM window: {'2023Q4': 25.0, '2024Q1': 418.3, '2024Q2': 237.0, '2024Q3': 536.7, '2024Q4': 769.1, '2025Q1': 1204.7, '2025Q2': 1566.3, '2025Q3': 1597.1, '2025Q4': 1506.8, '2026Q1': 1372.5, '2026Q2': 1154.7, '2026Q3': 1011.9}
+NP_norm=1083.3 EPS_norm=2513 BVPS=20231 ROE_tot=0.1242 ROE_op=0.1460
+scen {'bad': (0.09, 0.1058, 14320), 'base': (0.1242, 0.146, 22466), 'good': (0.155, 0.1822, 29791)}
+center_pre_liq=22261 center_post_liq=21815  zone_post_liq=[14034;29195]
+sens: all-equity ROE_tot (CIP not at book) base=17666
+dep -100bp: r=0.1250 center=24329 (+11.5%) | beta0.5 22994
+dep -50bp: r=0.1300 center=22994 (+5.4%) | beta0.5 22387
+dep +0bp: r=0.1350 center=21815 (+0.0%) | beta0.5 21815
+dep +50bp: r=0.1400 center=20768 (-4.8%) | beta0.5 21277
+dep +100bp: r=0.1450 center=19831 (-9.1%) | beta0.5 20768
+g=0.04: center=21606
+g=0.05: center=21815
+g=0.06: center=22081
+g=0.07: center=22428
+liq 0: 22261
+liq 0.02: 21815
+liq 0.05: 21148
+V_short=17666 (reinv 0.402) | CFO3y/yr=1133 capex/yr=988 capex/CFO=0.87 FCFE/yr=146 V_long=4177 D=1.44 (ln2=0.69 ln3=1.10)
+C4/yr=467 V_C4=13372 | D2/yr=13 V_D2=382
+PE_center=8.7 PB_center=1.08

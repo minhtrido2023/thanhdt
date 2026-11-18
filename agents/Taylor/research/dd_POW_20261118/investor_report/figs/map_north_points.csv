@@ -1,0 +1,4 @@
+name,lat,lon,kind,dx,dy,note
+Vũng Áng 1 (1.200 MW; than),18.0370,106.3765,plant,-1.55,0.08,OSM Nominatim 18/11/2026 phường Vũng Áng
+Hủa Na (180 MW) + Nậm Nơn (20 MW),19.7073,104.8485,plant,0.12,0.10,OSM Nominatim huyện Quế Phong (xã Thông Thụ thuộc huyện)
+Hà Nội — trung tâm tiêu thụ,21.0283,105.8540,market,0.12,-0.12,OSM Nominatim (toạ độ trung tâm)

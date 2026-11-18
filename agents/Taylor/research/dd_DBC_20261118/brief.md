@@ -1,0 +1,23 @@
+Làm DD mã DBC (CTCP Tập đoàn Dabaco Việt Nam: TACN, heo giống/heo thịt, chế biến thực phẩm, BĐS) — user yêu cầu 18/11/2026. Theo ĐÚNG skill `~/.claude/skills/due-diligence/SKILL.md` (đọc toàn bộ trước, đặc biệt: khung nội dung DD, luật 5F tầng b/moat ≤1 lần/năm, r gắn lãi huy động + chiết khấu thanh khoản, dự án mới NPV=0, hai nền V_ngắn/V_dài + dòng C4/D2 chỉ hiển thị, luật phân tích pháp lý chỉ WARNING, khoá `assumptions_md5`). Thư mục làm việc: agents/Taylor/research/dd_DBC_20261118/ . Template báo cáo: REPORT.md của DD mới nhất cùng thư mục cha (dd_QTP_20261117 hoặc dd_VCB_20261117) + dd_DDV_20261026/REPORT.md.
+
+NGUỒN BCTC GỐC (website dabaco.vn/quan-he-co-dong, tải từ Google Drive, ĐÃ LƯU) trong agents/Taylor/research/dd_DBC_20261118/src/ :
+- q3_hopnhat.pdf (24 trang) = BCTC HỢP NHẤT Q3/2026 + giải trình LNST; q3_congtyme.pdf (23 tr) = BCTC công ty mẹ Q3/2026.
+- h1_a.pdf..h1_d.pdf (67–69 tr) = 4 file BCTC soát xét bán niên 2026 (hợp nhất/riêng, VN/EN — tự xác định file nào là gì; ý kiến soát xét, ngoại trừ/nhấn mạnh).
+- q3.html / h1.html / ir.html = trang gốc (để dẫn nguồn). Cần thêm BCTC kiểm toán năm 2025 nếu tìm được trên dabaco.vn/quan-he-co-dong/page/2/ (hoặc HOSE CBTT).
+- TẤT CẢ PDF LÀ SCAN (0 ký tự text). Cách đọc: pymupdf ở /tmp/pdflib (`pip install --target /tmp/pdflib pymupdf` nếu mất), chạy python `-I` + `sys.path.insert(0,'/tmp/pdflib')`, render trang cần (BS, KQKD, LCTT, thuyết minh: phải thu, hàng tồn kho, tài sản sinh học/đàn heo, vay, các bên liên quan, phải trả/doanh thu theo bộ phận) ra PNG zoom ~1.6 rồi Read ảnh. Chỉ render trang cần.
+- BQ `tav2_bq.ticker_financial` có dòng quý mới nhất 2026-10-21 (Q3/26) — CHỈ để đối chiếu và ghi lệch; GPM_P0/NPM_P0/EBITM_P0 là TTM, Revenue_P0/NP_P0 là số QUÝ; Cash_P0 thiếu tiền gửi HTM. BCTC là nguồn chính.
+
+NGÀNH (Bobby đọc MÙ, đã xong 18/11, KHÔNG biết mã): kb/data_registry/market-state/sector_read_chan_nuoi_heo_tacn_20261118.md — tầng (a). Tóm tắt: giá heo hơi miền Bắc ~45–49k/kg (−40% từ T1), CYCLICAL 65% /12T (ambiguous ~55/45 ở 36T), có FORECAST khoá trước F1–F16 và mục §6 "DD cần kiểm gì". Bobby tự ghi nó chưa hoàn toàn mù (tên thư mục + 1 tiêu đề báo chí) — đã khai ở §0. Snapshot vĩ mô (DISPLAY-ONLY, bối cảnh cho mục "Điều thị trường chưa tính", đừng tự đổi giá trị nội tại theo nó): agents/Taylor/research/dd_DBC_20261118/macro_snapshot_20261118.md. Chỉ trích dòng cờ ok.
+
+TẦNG (b) 5F: bước 3c — tra /home/trido/thanhdt/WorkingClaude/data/moat_tags.csv và các DD cũ về DBC; nếu <12 tháng thì tái dùng, không thì làm đầy đủ theo /home/trido/thanhdt/WorkingClaude/5F.md. Moat chỉ thưởng khi bền (3 điều kiện) và mỗi tham số có cơ sở; NARROW/NONE không trừ. Chỉ ĐỀ XUẤT dòng moat_tags, KHÔNG sửa file.
+
+CÂU HỎI TRỌNG TÂM BẰNG SỐ (Mike chưa đọc BCTC — tự đọc, đừng tin gợi ý):
+1) Tách LN theo mảng (TACN / heo giống / heo thịt / chế biến / BĐS / khác): DT, GVHB, LN gộp; Q3 và 9T so cùng kỳ; một lần vs bền; doanh thu tài chính, liên kết.
+2) Chất lượng LN & bảng cân đối: net cash thật (hay nợ ròng), vay ngắn/dài, đòn bẩy, phải thu (khách đại lý TACN), tồn kho NVL (ngô/đậu tương) & tài sản sinh học (đàn heo — ghi nhận theo giá gì, đánh giá lại có làm LN ảo không), CFO thật vs LNST, capex trang trại mới, XDCB dở dang, BĐS tồn kho/ dự án.
+3) Heo hơi rớt −40% từ T1: DBC chịu mức nào ở Q3 và Q4/26–Q1/27 (độ nhạy giá heo → LNST: ước lượng bằng số heo xuất chuồng/ năm × biên); biên TACN phản ứng nhập nguyên liệu thế nào.
+4) Quản trị/pháp lý/giao dịch bên liên quan, thay đổi ĐKDN vừa công bố, insider mua (Phó chủ tịch HĐQT đăng ký mua 2.000.000 cp) — WARNING nếu có, vẫn phân tích bình thường; ý kiến kiểm toán; sử dụng vốn phát hành 2024; ASF/vaccine claim.
+5) Định giá: PE/PB/EV chuẩn hoá chu kỳ (LN trung vị 3 năm, KHÔNG dùng đỉnh/đáy giá heo), comp ngành có số (peer niêm yết VN chăn nuôi/TACN còn dùng được, ví dụ MML, DBC vs peer khu vực châu Á; BAF thuộc BANNED vĩnh viễn nên chỉ tham chiếu, không đề xuất; mã nào dùng phải nêu lý do chọn), kịch bản xấu/cơ sở/tốt có trọng số, vùng giá, r = 13,5% neo điều chỉnh theo lãi huy động 12T hiện hành (lấy từ deposit_rate_vn, ghi số + ngày), ADV/ chiết khấu thanh khoản, hai nền V_ngắn/V_dài + cờ D. Định giá MÙ giá thị trường (chỉ lấy giá hiện tại ở bước so sánh cuối).
+6) Mốc khoá trước + điều kiện đổi nhận định hai chiều; điểm yếu rõ nhất của chính báo cáo.
+Giá cổ phiếu/ADV/room ngoại: lấy từ BQ `ticker`/DNSE, nêu ngày.
+
+Đầu ra: REPORT.md trong agents/Taylor/research/dd_DBC_20261118/ (+ file nguồn giả định khoá md5 để ghi `kb/dd_price_zones.json` sau skeptic — chưa ghi sổ giá vào trước skeptic). KHÔNG đặt lệnh, KHÔNG sửa production, KHÔNG gửi email. Ghi 1 bus finding khi xong. Heartbeat mỗi 4–5 tool call. Nếu hết lượt, ghi tiến độ vào working memory để resume.

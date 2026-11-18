@@ -1,0 +1,98 @@
+{
+ "ticker": "POW",
+ "asof": "2026-11-18",
+ "job": "Taylor_20261118_043309",
+ "units": "ty dong (bn VND) tru khi ghi khac",
+ "source_bctc": "src/Q3_2026_BCTC_hopnhat.pdf (BCTC HN Q3/2026 ky 27/10/2026, cong bo 30/10/2026): BS tr.2-3, KQKD tr.5, LCTT tr.7, TM 6/20/21/23/24-29",
+ "shares_m": 3067.845688,
+ "shares_basis": "TM23: 3.067.845.688 cp luu hanh 30/09/2026 (dau nam 2.786.821.096 + 281.024.592 cp chao ban 10.000d, thu 2.810,25 ty, bao cao ket qua 30/01/2026)",
+ "equity_parent_q3": 43134.465,
+ "nci_q3": 3241.768,
+ "e_nt34_book_estimate": 9000,
+ "e_nt34_basis": "(uoc luong) FY25 BCDKT TSCD: nguyen gia 70.535 -> 94.835 (+24.300), XDCB 19.759 -> 909 (-18.850) => chi phi NT3&4 von hoa ~23-25 nghin ty - no du an Citi&ING 11.262 + SMBC 4.036 (TM21 Q3/26) = 15.298 => ~7.700-9.700; base 9.000 (giua dai 8.000-10.000), do nhay 7.000-10.000. Thay co so r1 (TMDT 32.487 x 30%). NPV=0: ghi theo so sach",
+ "np_parent_quarterly_bn": {
+  "2023Q1": 534.0,
+  "2023Q2": 125.9,
+  "2023Q3": 82.7,
+  "2023Q4": 332.5,
+  "2024Q1": 277.6,
+  "2024Q2": 391.8,
+  "2024Q3": 396.4,
+  "2024Q4": 45.8,
+  "2025Q1": 445.1,
+  "2025Q2": 602.4,
+  "2025Q3": 809.3,
+  "2025Q4": 569.8,
+  "2026Q1": 1199.6,
+  "2026Q2": 3375.3,
+  "2026Q3": 1859.6
+ },
+ "np_source": "BQ ticker_financial NP_P0 (LNST cong ty me, so QUY). Q3/26 1.859,6 & Q3/25 809,3 khop BCTC. 2026Q2 sua = 9T BCTC 6.434,5 - Q1 1.199,6 - Q3 1.859,6 = 3.375,3 (BQ ghi 3.518,6, lech 143,3)",
+ "one_offs_9m2026_pbt": {
+  "VA1_FX_2019_2021": 1103,
+  "CaMau_gas_price_settlement": 991,
+  "CaMau_OM_provision_reversal_H1": 381,
+  "Q3_CaMau_OM_receivable_provision_reversal_est": 280
+ },
+ "one_offs_basis": "H1: CBTT 03/08/2026 (hoi to 2.475,6 ty LNTT cong ty me). Q3: giai trinh Q3 (chi phi QLDN giam do hoan nhap du phong phai thu O&M Ca Mau); 280 = (uoc luong) QLDN Q3/25 211,8 - Q3/26 (-78,4) - ~10 binh thuong hoa",
+ "r_ke": 0.135,
+ "deposit_anchor_pct": 7.4,
+ "deposit_now_pct": 7.4,
+ "deposit_source": "deposit_rate_vn.effective_deposit_rate('2026-11-03') va ('2026-11-18') = 7,4% (cctg_12m 2026-11-02)",
+ "beta_passthrough": 1.0,
+ "g": 0.0,
+ "g_basis": "g base = 0: ROE di san 8% < r 13,5% => tai dau tu vao di san lam GIAM gia tri (luat user 2026-11-03: khong 'dau tu moi => giam gia tri'); tang truong moi qua du an NPV=0 (e_new_projects_book). g=2% chi la do nhay 'tai dau tu vao mang di san o ROE di san'",
+ "scenario_roe_legacy": {
+  "bad": 0.045,
+  "base": 0.08,
+  "good": 0.115
+ },
+ "scenario_basis": {
+  "bad": "~ ROE 2023-2024 (3,1-3,2% tren tong VCSH, ~4,5% neu loai von NT3&4 dang XDCB): nam it huy dong khi + NT3&4 Qm<Qc + EVN cham tra",
+  "base": "(uoc luong) ROE di san tren VCSH ME (khong phai tong VCSH gom NCI ~2.900-3.200): LNST me / VCSH me cuoi nam. 2025: 2.426,6/34.215,1 = 7,1% (do); skeptic tinh 2019-25: 9,3/7,8/6,1/6,3/3,4/3,5/7,1% TB 6,2%. Dieu chinh (i) bo von NT3&4 dang XDCB khoi mau so (XDCB 31/12/24 19.759) va (ii) cong lai hoi to thuoc cac nam truoc (LN bi don sang 2026) => 7-8%; base 8% o can tren cua dai. KHONG dung 2026 lam chuan",
+  "good": "~ dinh 2019 (8,4-9%) + thieu nguon cau truc 2027-30 (BCT: thieu 4.256 MW 2027), FMP cao"
+ },
+ "weights": {
+  "bad": 0.25,
+  "base": 0.5,
+  "good": 0.25
+ },
+ "liquidity_discount": 0.01,
+ "liquidity_basis": "ADV trung vi 62 phien (2026-08-19..2026-11-17) 63,3 ty/phien BQ ticker Price*Volume; vi the <=30 ty thoat <=5 phien o 10% tham gia; (uoc luong) 1%, do nhay 0-3%",
+ "moat": {
+  "tier": "NONE (kinh te)",
+  "structural": "rao can cau truc (giay phep, vi tri he thong) co that nhung KHONG chuyen thanh ROIC>Ke (ROIC5Y 5,0%, ROIC_Min5Y 2,0%, ROE<Ke moi nam; nguoi mua doc quyen chiem thang du)",
+  "reward_params": "KHONG"
+ },
+ "cfo_window_bn": {
+  "2023Q4": 2159.9,
+  "2024": 4343.9,
+  "2025": 2094.2,
+  "9M2026": 2738.981
+ },
+ "capex_window_bn": {
+  "2023Q4": 4116.4,
+  "2024": 9793.0,
+  "2025": 5180.0,
+  "9M2026": 2880.24
+ },
+ "cfo_capex_source": "2023Q4-2025: BQ CF_OA_P0/CF_Invest_P0 tong theo quy (CHUA doi chieu BCTC; BQ Q3/26 CF_OA 5.682,5 lech BCTC: 9T BCTC 2.739,0 - BQ Q1+Q2 2.874,2 = -135,2 => cot BQ CFO khong tin cay); 9M2026 = BCTC LCTT ma 20 va 21",
+ "da_window_bn_estimate": 8800,
+ "da_basis": "(uoc luong) khau hao 9T/26 2.915,0 (LCTT), 9T/25 2.133,1; nam 2024-2025 ~2.850/nam",
+ "industry_capex_rev_median": 0.018,
+ "industry_capex_rev_basis": "trung vi TTM Q4/25-Q3/26 -CF_Invest/Revenue BQ: PPC -0,1% QTP 0,1% NT2 0,1% HND 0,4% PGV 1,8% VSH 2,3% HDG 7,5% REE 35,4% GEG 58,1% (POW 4,7%)",
+ "rev_ttm_bn": 58307.4,
+ "rev_ttm_basis": "Q4/25 8.901,9 (BQ) + 9T/26 49.405,5 (BCTC)",
+ "rev": "r2 (sau fundamental-skeptic vong 1); r1 = assumptions_POW_20261118.json md5 c1054c74",
+ "e_new_projects_book": 2740,
+ "e_new_basis": "so sach, NPV=0 (luat 2026-11-03): XDCB 30/9/26 1.659,6 (BCDKT) + tien chao ban chua dung 1.080,1 (bao cao tien do 27/07/2026 so 1619/BC-DLDK: thu 2.810,2; da dung 1.730,1 = EPC NT3&4 1.729,2 + phi 0,9; con 1.080,1 gui co ky han) = 2.739,7. KHONG gom von chu mẹ KH 2026 cho du an 5.049 (NQ 90) vi chua do duoc phan da giai ngan ngoai XDCB => do nhay 5.000. Luu y: XDCB 1.659,6 co the gom phan quyet toan NT3&4 (chua tach duoc)",
+ "one_offs_9m2026_pbt_range_Q3": {
+  "low": 187.1,
+  "high": 280
+ },
+ "one_offs_Q3_note": "hoan nhap Q3: BCDKT DP kho doi giam 187,1 ca 9T (TM28) ... GT-Q3 noi QLDN giam ~290 => dai 187,1-280 (ket qua tinh voi ca 2 can)",
+ "upside_not_in_base": {
+  "VA1_FX_remaining_bn": 490,
+  "basis": "BCTN FY2025 TM36 tr.184-185: CLTG VA1 uoc tinh ~1.596 den 2025, da ghi 1.103 (2019-21) => con ~490; cung co che NT2/Dakdrinh + dieu chinh TMDT trong gia dien VA1 khi quyet toan (hai chieu)"
+ }
+}

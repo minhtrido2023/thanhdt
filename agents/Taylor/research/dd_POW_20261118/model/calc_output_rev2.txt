@@ -1,0 +1,45 @@
+BVPS_parent=14060 E_old=31394
+scen {'bad': 7238, 'base': 9891, 'good': 12544}
+center_pre=9891 center_post=9792 zone_post=[7166;12419] PB_center=0.70
+dep -100bp beta1.0: r=0.1250 center=10272 (+4.9%)
+dep -100bp beta0.5: r=0.1300 center=10023 (+2.4%)
+dep -50bp beta1.0: r=0.1300 center=10023 (+2.4%)
+dep -50bp beta0.5: r=0.1325 center=9905 (+1.2%)
+dep +50bp beta1.0: r=0.1400 center=9578 (-2.2%)
+dep +50bp beta0.5: r=0.1375 center=9683 (-1.1%)
+dep +100bp beta1.0: r=0.1450 center=9378 (-4.2%)
+dep +100bp beta0.5: r=0.1400 center=9578 (-2.2%)
+g=-0.02: 10325
+g=0: 9792
+g=0.01: 9462
+g=0.02: 9074
+g=0.03: 8613
+g=0.04: 8054
+E_NT34=7000: 9529
+E_NT34=8000: 9661
+E_NT34=9000: 9792
+E_NT34=10000: 9924
+r=0.11 (beta utility thap, chi do nhay): 11157
+r=0.12 (beta utility thap, chi do nhay): 10543
+liq 0: 9891
+liq 0.01: 9792
+liq 0.03: 9594
+E_new_book=0: 9432
+E_new_book=1660: 9650
+E_new_book=2740: 9792
+E_new_book=5000: 10089
+r=0.11 + g0 + new5000 + NT34 10000: 11443
+ROE all scen -0.02: 8291
+ROE all scen +0.02: 11293
+VA1 FX remaining upside d/cp: 142
+kich ban tot (ROE di san 11,5%, KHONG phai gia dinh moat) center=12419; kich ban xau (4,5%) 7166
+implied ROE_old at price 13250: 0.1261
+TTM {'2023Q4': 1075, '2024Q1': 819, '2024Q2': 1085, '2024Q3': 1398, '2024Q4': 1112, '2025Q1': 1279, '2025Q2': 1490, '2025Q3': 1903, '2025Q4': 2427, '2026Q1': 3181, '2026Q2': 5954, '2026Q3': 7004}
+NP_norm=1444 ROE=0.0335 reinv=0.000 V_short=3487
+CFO/yr=3779 capex/yr=7323 capex/CFO=1.94 FCFE/yr=-3544 V_long=-8558 (FCFE<=0 => chi V_ngan)
+C4/yr=846 V_C4=2042 | D2/yr=2729 V_D2=6590
+D(V_short vs V_D2, chi tham khao)=0.64
+Q3 hoan nhap 280: one-offs PBT=2755.0 core PBT=4989 taxrate=0.109 core parent = 6434.5 - one*(1-t) = 3980 (mot lan nam o cap me => 100% thuoc me, khong nhan 93,3%)
+Q3 hoan nhap 187,1: one-offs PBT=2662.1 core PBT=5081 taxrate=0.109 core parent = 6434.5 - one*(1-t) = 4063 (mot lan nam o cap me => 100% thuoc me, khong nhan 93,3%)
+(r1 sai: core NPAT HN 4444 x 93,3% = 4145)
+P/E core: EPS annualised 1730 => 7.7x

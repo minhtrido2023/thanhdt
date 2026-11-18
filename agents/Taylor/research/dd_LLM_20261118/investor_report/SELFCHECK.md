@@ -1,0 +1,16 @@
+# SELFCHECK — LLM investor report 18/11/2026 (nội bộ)
+
+- Nguồn số: ../REPORT.md (bản cuối, assumptions md5 aaaeec2149986398055371ea535850ea) + ../model/calc_output.txt khối REV2 + sector read epc_lap_may_20261118. Phụ lục E nội bộ (bảng đính chính) KHÔNG đưa vào; Phụ lục E bản NĐT chỉ mô tả quy trình trung tính. Không nhắc V_ngắn/V_dài/D, §2.5, nhãn vòng.
+- Kết luận khớp REPORT §0/§8e: tâm 24.599 (trước CK 27.332), vùng 3.630–39.728, giá/tâm 1,35 ĐẮT (diễn đạt "giá TRÊN vùng giá trị trung tâm"), 0,85×tâm 20.909, biên hoà vốn 10,3% (calc 0,1028), kịch bản 4.033/30.577/44.142 trước CK, lưới trọng số 16.795–30.013, lãi huy động ±50/100bp 25.024/24.803/24.409/24.233, CK 0/5/20% 27.332/25.965/21.866, tiền dùng được 75/50% 21.496/18.392, ngoại trừ 21.278/17.573/22.746, ROE ngầm định 17,9%, NFP 1.466,2 = 18.390 đ/cp, tâm biên 10% ~32.900 (§12), sau cổ tức CP 18.678/25.285.
+- Số chỉ để trình bày (không vào định giá): vùng giá 12 tháng 15.000–40.400 (BQ Close 18/11/2025–18/11/2026); "Khác −5,5" trong hình CFO = phần dư để khớp CFO 1.231,3; dòng r 12,5–14,5% = 13,5% ± bước lãi huy động (β=1).
+- ADV: dùng số REPORT (15.200 cp ≈ 0,45 tỷ, 90 phiên). Tự tính lại trên figs/price_raw.csv 90 phiên cuối cho 13.550 cp / 0,44 tỷ — lệch nhỏ do cửa sổ; không đổi kết luận.
+- Peer: giữ trung vị 10 mã của REPORT (~9,1 / 0,80); bảng thân chỉ hiện 6 mã + LLM (trần 10 hàng). PC1 nằm trong trung vị nhưng không hiện tên.
+- Giá: neo đóng cửa 18/11/2026 = 33.300 (BQ ticker). DNSE latest_trade 18/11/2026 14:59:55 khớp 33.300 (basicPrice 33.300; marketId UPX = UPCoM). Kết luận không đổi.
+- Lãi suất (luật 17): dcf_rate_display 2026-11-18 → r* 15,1% p75 (đỉnh 15,9% 2022, đáy 12,1%), TPCP 10Y 4,57% +0,57pp ("nguồn chưa đối chiếu độc lập"); nhãn DISPLAY-ONLY/UNVERIFIED chuyển lời thường. r 13,5% neo lãi huy động 12T hiệu dụng 7,4%.
+- Lịch sử DN: BCTC soát xét H1/2026 thuyết minh 1.1 (png/bn_p13): thành lập 1995 (QĐ 999/BXD), CPH QĐ 1036/QĐ-TTg 2015, CTCP 06/04/2016, VĐL 797,26 tỷ, 714 nhân viên mẹ; ngày lên UPCoM 16/08/2017 từ DNSE secdef listingDate.
+- Logo: lilama.com.vn/sites/default/files/anh_quang_cao/logo_1.png (95×63, bản lớn nhất site có). Ảnh: mục Dự án lilama.com.vn (tải 18/11/2026): Sông Hậu 1, Nhơn Trạch 3&4, NEOM, Vũng Áng 1, Cà Mau 1&2, Quảng Trạch II (phối cảnh), Lọc dầu Nghi Sơn; vai trò (tổng thầu/liên danh) lấy từ mô tả trên website.
+- Bản đồ: 2 bản đồ KHU VỰC (Bắc Trung Bộ, Nam Bộ), toạ độ OSM Nominatim 18/11 theo tên nhà máy (figs/fig_map_points_*.csv, cột note). tools/make_map_llm.py = bản sao make_map.py chỉ đổi nhãn chú giải. Nhơn Trạch dùng toạ độ NM Nhơn Trạch 1 (cùng cụm).
+- Grep (md + html bỏ base64): nội bộ RỖNG (chỉ "giá vốn" nghĩa giá vốn hàng bán); fear-buy/nhãn nội bộ RỖNG; luật 18 RỖNG trừ "R1–R7" (mã rủi ro). HTML: 12 <img>, alt banner đóng đúng (tiêu đề không có nháy kép).
+- Thân 1.014 từ (không tính bảng/hình/phụ lục); PDF 10 trang (thân 8 + phụ lục 2). Đã render toàn bộ trang ra PNG, xem trang 1 độ phân giải đầy đủ + contact sheet 1–10: dấu Việt đúng, bảng không tràn.
+- Email: send_dd_report_email.py --dry-run --html-out (DRY-RUN: không gửi; 12 ảnh, 10,3MB). CHƯA GỬI THẬT. Chưa ghi dd_price_zones.json.
+- PDF md5: cf86360ac039fb14105b5a43eb02ba9e
