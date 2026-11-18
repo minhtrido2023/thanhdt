@@ -690,3 +690,8 @@
 - [2026-11-18T13:04:57Z] Taylor/heartbeat — Taylor_20261118_125730: {"status": "in_progress", "note": "11 hinh xong; viet md + banner"}
 - [2026-11-18T13:05:32Z] Taylor/heartbeat — Taylor_20261118_125730: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261118_125730", "source": "watcher"}
 - [2026-11-18T13:06:32Z] Taylor/heartbeat — Taylor_20261118_125730: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261118_125730", "source": "watcher"}
+
+## Consolidation 2026-11-18T13:08:17Z
+- [2026-11-18T13:07:17Z] Taylor/heartbeat — Taylor_20261118_125730: {"status": "in_progress", "note": "PDF 10 trang dung xong; dang kiem bang mat + grep"}
+- [2026-11-18T13:07:32Z] Taylor/heartbeat — Taylor_20261118_125730: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261118_125730", "source": "watcher"}
+- [2026-11-18T13:08:00Z] Taylor/finding — dd-LLM-20261118 investor report dung xong (chua gui email): {"ticker": "LLM", "dir": "agents/Taylor/research/dd_LLM_20261118/investor_report", "pdf": "LLM_DD_investor_report_20261118.pdf", "pdf_md5": "cf86360ac039fb14105b5a43eb02ba9e", "pages": 10, "body_words": 1014, "verdict": "gia TREN vung gia tri trung tam (gia/tam 1,35)", "center_post_liq": 24599, "zone": [3630, 39728], "price_ref": 33300, "price_date": "2026-11-18", "dnse_last": "33300 @14:59:55", "gpm_breakeven_pct": 10.3, "grep_internal_fear_rule18": "rong (tru giá vốn=COGS, ma rui ro R1-R7)", "email": "dry-run only, chua gui", "dd_price_zones": "chua ghi (viec cua Mike)", "measured_by": "agents/Taylor/research/dd_LLM_20261118/investor_report/SELFCHECK.md; md5sum PDF; build_report.py all; send_dd_report_email.py --dry-run"}
