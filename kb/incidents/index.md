@@ -235,6 +235,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-11-18 | [RETRO — 2026-11-18: 1 sự cố (đóng sớm câu hỏi bus DD VCB, arch-reviewer REFUTED), 0 pattern mới escalate](retro/retro-2026-11-18.md) |
 | 2026-11-17 | [RETRO — 2026-11-17: 1 sự cố (2 job DollarBill usage_limited, tự resume), 0 pattern (pattern BQ-raw-gap ĐÃ ĐÓNG)](retro/retro-2026-11-17.md) |
 | 2026-11-16 | [RETRO — 2026-11-16: 3 sự cố (weekly 09–13/11 INCOMPLETE do lệch benchmark G5 hợp lệ — cứu hộ waiver Q9; G5 11/11 lệch +0,52 là lệch thật; EOD SpaceX report_v2_fallback do thiếu NAV 16/11), 1 pattern (nguồn BQ raw thủng ⇒ consumer bị chặn, lần 3, wire `[0b]` chưa merge). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-16.md) | logged |
 | 2026-11-15 | [RETRO — 2026-11-15: 4 sự cố (plan T+1 16/11 thiếu do raw ticker thủng 13/11 — cứu hộ CN; dispatch gate exit 8 chặn wrapper chạy tay; weekly report INCOMPLETE chờ wire `[0b]`; model M2 deepseek bị gỡ), 2 pattern (nguồn BQ thủng làm consumer chết lặng; công cụ chạy tay đụng gate headless). Wags: GAPS FOUND — đã sửa.](retro/retro-2026-11-15.md) | logged |
