@@ -84,3 +84,12 @@ trong trạng thái đó sẽ đếm 2 lần đúng 80 triệu (+8,15% NAV, lọ
 
 ## Chuyển nguyên văn từ current_ops.md (27/10) — chi tiết 4 call-site đã LIVE
   · **Việc 4 `report_return_gate.py:558-573` unmatched — APPROVED, LIVE, commit `569be662`.** · **Việc 3 `verify_account_snapshot.py:307` `broker_positions_from_raw()` — APPROVED vòng 2, LIVE, commit `96ee1bb8`+`7700582d`.** · **Việc 1 `discretionary_accumulation_inject.py` `broker_filled_qty()` — APPROVED vòng 2, LIVE, commit `5e6fb9af`+`642d4f5a`.** (⚠️ **Lưu ý docstring** (chưa sửa, không chặn): câu "tự khớp" chỉ ĐÚNG TUYỆT ĐỐI khi `baseline_qty_before_program=0` (đúng cả 2 state LIVE hôm nay); `baseline>0` thì thiếu `(r−1)×baseline` cp vĩnh viễn, hướng AN TOÀN (mua thiếu, không overbuy).) · **Việc 2 `discretionary_margin_gate.py` arm_price — APPROVED vòng 12, LIVE, merge `c5247def` (12 commit vòng 3→12, từ `26ef0c58` tới `bc22bed2`).** Chi tiết từng việc: `kb/projects/corp-action-nav-chain-20260922.md`.
+
+## Chuyển nguyên văn từ `kb/current_ops.md` (2026-11-19, gate kb-hot-size) — KL hưởng quyền neo bằng bằng chứng
+- **KL hưởng quyền neo bằng BẰNG CHỨNG, không bằng KL cuối ngày cum** (`bin/dividend_adjusted_return.py` — `qty_entitled`/`credit_frame`) — LIVE từ **2026-09-24**, commit `1608a267`, arch-review APPROVED. Call-site **thứ 3** cùng lớp lỗi corp-action, chạm SỐ CÔNG BỐ nhà đầu tư (§21).
+  · vá: neo theo bằng chứng KHỐI LƯỢNG (`classify_qty_residual`) + bằng chứng GIÁ (`verify_post_event_price`); thiếu bằng chứng ⇒ `status="unknown"` ⇒ **BỎ phương trình** (không coi như 0), fail-closed
+  · Chi tiết, Q1 (không số công bố nào bị ảnh hưởng) và VIỆC LÀM SAU (`broker_qty()` lấy lô cuối): `kb/projects/corp-action-nav-chain-20260922.md`.
+
+## Chuyển nguyên văn từ `kb/current_ops.md` (2026-11-19, gate kb-hot-size) — 4 call-site còn lại
+- **4 call-site còn lại của lớp lỗi corp-action — audit xong 2026-09-24 (dispatch `Taylor_20260924_064510`), arch-review theo TỪNG VIỆC — CẢ 4 ĐÃ LIVE, ĐÓNG HẲN CHUỖI AUDIT NÀY:**
+  · Chi tiết 4 việc (đều APPROVED+LIVE): `kb/projects/corp-action-nav-chain-20260922.md`.

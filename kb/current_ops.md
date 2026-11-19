@@ -64,6 +64,7 @@
 - **EXTREME-regime gate** (`extreme_regime_enabled=True`) — LIVE SpaceX+ZaloPay từ **2026-08-22** (account overrides `secrets/trading_bot_accounts.json`). Default config=False, override=True. Alert pipeline: `bin/extreme_regime_dd_alert.sh` hook trong `run_bot.sh`. Commit `07726527`.
 - **Vol-scale buy chase-cap** (`chase_cap_vol_scale_enabled=True`) — LIVE toàn bộ từ **2026-08-04** (`config.py:190`). k=2.0, ceil=4%, clamp static→ceil theo 20d rvol.
 - **fill_timing HYBRID** (`fill_timing_live_gate=False`, `fill_timing_hybrid_live_gate=False`) — LIVE từ **2026-08-26** (user duyệt option A). BUY blocks: 11:00/11:15/13:00/13:15/13:30. SELL blocks: 09:15/09:30/09:45/10:00. Monitoring: fill-vs-open mỗi ~10 phiên, rollback nếu mean >+22bps. Commit `9be375a4`.
+  🆕 Monitor cơ học cron 07:40 ICT T2-T6 từ 2026-11-19 (`bin/fill_timing_monitor.py`): chỉ CẢNH BÁO (BUY >+22bps khi đủ N ⇒ user quyết, KHÔNG tự rollback). `agents/Taylor/research/fill_timing_real_fills_20261119/README.md`.
 - **CAPIT margin lever** — **TẮT từ 2026-10-13** (LIVE 08-24→10-13), xem mục CAPIT đòn bẩy TẮT ở trên.
 - **Domain-constraint P1** (`filter_lag_rating_orders()`, 8L rating≤3 gate) — LIVE. 14/14+22/22 selfcheck.
 - **close_repair.py — Layer 2 self-computed back-adjustment khi vendor backfill kẹt vĩnh viễn** (`MIKE_CLOSE_REPAIR` mặc định ON) — LIVE từ **2026-09-28**, commit `3c55c249`. Tự tính hệ số (xác nhận 2 nguồn độc lập, lệch <0,006%), fail-closed khi không đủ bằng chứng. Vòng review + VND/VNM: `kb/projects/corp-action-nav-chain-20260922.md`.
@@ -77,9 +78,7 @@
   ⚠️ **CÙNG LỚP LỖI CÒN 4 CALL-SITE CHƯA VÁ** (xem `kb/memory/Mike.md`): `dividend_adjusted_return.py:473-478` (chạm SỐ CÔNG BỐ nhà đầu tư §21 — ưu tiên cao nhất), `discretionary_margin_gate.py:335` (sleeve margin tiền thật, latent), `report_return_gate.py` (lỗ hổng phủ im lặng), `discretionary_accumulation_inject.py:124`, + `due_diligence.py:173-202 adv_vnd()` (chiều an toàn). arch-reviewer nói rõ **KHÔNG khẳng định đã quét hết**.
   Selfcheck 38/0 + 64/0 + 8/0 qua 3 TZ. rc=5 là mã MỚI: `eod_trading_report.sh` không ghi marker, `nav_sync_retry.sh` không retry 2h, `nav_snapshot_daily.sh` escalate ngay. Runbook rc=5 ĐÃ LIVE ở `kb/ops_runbook.md` (mục 5, ~dòng 142).
 
-- **KL hưởng quyền neo bằng BẰNG CHỨNG, không bằng KL cuối ngày cum** (`bin/dividend_adjusted_return.py` — `qty_entitled`/`credit_frame`) — LIVE từ **2026-09-24**, commit `1608a267`, arch-review APPROVED. Call-site **thứ 3** cùng lớp lỗi corp-action, chạm SỐ CÔNG BỐ nhà đầu tư (§21).
-  · vá: neo theo bằng chứng KHỐI LƯỢNG (`classify_qty_residual`) + bằng chứng GIÁ (`verify_post_event_price`); thiếu bằng chứng ⇒ `status="unknown"` ⇒ **BỎ phương trình** (không coi như 0), fail-closed
-  · Chi tiết, Q1 (không số công bố nào bị ảnh hưởng) và VIỆC LÀM SAU (`broker_qty()` lấy lô cuối): `kb/projects/corp-action-nav-chain-20260922.md`.
+- **KL hưởng quyền neo bằng BẰNG CHỨNG** (`dividend_adjusted_return.py`) LIVE 2026-09-24, fail-closed khi thiếu bằng chứng → `kb/projects/corp-action-nav-chain-20260922.md`.
 
 - **LỆCH NGUỒN VENDOR ⇒ hạ UNVERIFIED + cảnh báo ĐÚNG NGƯỜI (Winston)** (`bin/dividend_adjusted_return.py` + `bin/report_return_gate.py` + `bin/vendor_mismatch_alert.sh` MỚI) — LIVE từ **2026-09-24**, commit `dc147859` và `6b751298` (nhánh con D1). Chỉ đạo user 2026-09-24: *"vendor mismatch thì hạ về unverified rồi raise warning lên để tôi kêu winston xử lý."* Nhánh D1, hợp đồng dòng máy đọc 7 trường, đường phát lại, selfcheck: `kb/projects/corp-action-nav-chain-20260922.md`.
   · broker vs `tav2_bq.corporate_action` lệch >1% hoặc >1đ/cp ⇒ `kind=UNVERIFIED`, lý do mang **CẢ HAI** số + gọi tên Winston (§21: UNVERIFIED thì CẤM công bố tỉ suất)
@@ -90,11 +89,11 @@
 - **Bẫy đường dẫn selfcheck — MỌI selfcheck import module qua `load_module()`/`sys.path.insert` phải TỰ ĐỔI theo worktree, không hardcode canonical** (phát hiện 2026-09-24 khi verify C2, commit `a56203f2`). Ca gốc + bản vá: `kb/projects/corp-action-nav-chain-20260922.md`.
   ⚠️ **CÒN MỞ — 3 file khác nghi cùng lớp bug, CHƯA vá** (Taylor quan sát, arch-reviewer xác nhận 3/3 nhưng lưu ý phạm vi khác nhau): `bin/paper_corp_action_selfcheck.py:28-31` và `bin/send_plan_report_park_jit_selfcheck.py:28-30` cắn **worktree `mike/`**; `bin/due_diligence_corp_flags_selfcheck.py:19-21` cắn **worktree ngoài `mike/`** (repo `WorkingClaude` gốc — `trading_bot/due_diligence.py`), KHÔNG cắn worktree `mike/` vì module đó không tồn tại trong `mike/`. arch-review vòng 4-site (2026-09-24) tìm thêm 1 file: `bin/nav_cum_dividend_selfcheck.py:32-35` (`WC_ROOT` đếm dirname sai trong worktree lồng, **crash** `FileNotFoundError` khi chạy ngoài canonical — CHƯA vá).
 
-- **4 call-site còn lại của lớp lỗi corp-action — audit xong 2026-09-24 (dispatch `Taylor_20260924_064510`), arch-review theo TỪNG VIỆC — CẢ 4 ĐÃ LIVE, ĐÓNG HẲN CHUỖI AUDIT NÀY:**
-  · Chi tiết 4 việc (đều APPROVED+LIVE): `kb/projects/corp-action-nav-chain-20260922.md`.
+- 4 call-site còn lại của lớp lỗi corp-action: CẢ 4 ĐÃ LIVE, chuỗi audit ĐÓNG (2026-09-24) → `kb/projects/corp-action-nav-chain-20260922.md`.
 
 ## R&D pipeline — PAPER-ONLY, chi tiết `kb/projects/rnd-pipeline-tracker.md`
 Fear-buy quét hàng tuần `bin/fearbuy_weekly_scan.sh` (Friday 08:10 ICT). Recon thuần, KHÔNG tự mua.
+🧊 **ĐÓNG BĂNG R&D intraday FZ (user 2026-11-19)**: KHÔNG thêm job nghiên cứu trên FZ-001/002, C-CEIL, C-NFLOOR(3), C-TAMIX, C-ONID tới khi user mở lại (audit cụm + rổ + #5 đều NO-GO). Sổ `intraday_fz_signal_ledger` = NGỦ (không cron, không xin thêm deals); mốc 2027-03-31 sổ rỗng ⇒ đề xuất ĐÓNG. `kb/projects/rnd-pipeline-tracker.md`.
 
 ## Measurement integrity audit — cadence định kỳ (mở 2026-09-27, sau retro custom30V double-count)
 Lý do: bug custom30V double-count (`mcap = Close_adj × OShares`, −4,48pp CAGR) sống trong production nhiều tháng, KHÔNG bị bắt bởi self-check 0 VND LẪN quant-skeptic → `kb/projects/measurement-integrity-audit-20260927.md`.
