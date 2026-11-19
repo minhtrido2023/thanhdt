@@ -38,3 +38,4 @@
 - [2026-11-19T09:58:47Z] [dna-macro-stress 19/11] XONG job Taylor_20261119_095526: commit 91b9a1ef1 repo ngoai nhanh session/dna-macro-stress-line-20261119 — CHO Mike review + quyet noi vao prompt ZaloPay-only (khong vao SpaceX report_v2)
 - [2026-11-19T10:05:01Z] [prereg5-hog 19/11] XONG job Taylor_20261119_095518: commit 9b8ddf032 PREREG5 họ 2 DBC — CHỜ Mike thêm registry entry + quyết cron; nowcast 2026Q4 đầu tiên ghi 05-20/01/2027 TRƯỚC khi DBC công bố
 - [2026-11-19T10:06:01Z] [bank-nodata 19/11] XONG job Taylor_20261119_095521: commit d0a14445e (wt-bank-nodata-20261119 sparse) — CHO Mike review + arch-reviewer; user quyết riêng có fail-closed fa_ratings_8l cho bank vắng lens không
+- [2026-11-19T14:53:23Z] ĐANG DỞ: job Taylor_20261119_145312 bank-nodata phương án B (wt-bank-nodata-20261119, rating_8l_history.py max-rule + cổng chặn) | NEXT: đọc rating_8l_history.py:430-580, sửa, selfcheck
