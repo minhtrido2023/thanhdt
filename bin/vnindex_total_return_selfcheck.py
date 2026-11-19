@@ -1287,6 +1287,9 @@ def t_g8_seal_and_alert(tmp):
     sealed_row = dict(next(x for x in rows3 if x["status"] == "sealed" and x["g8_new"]))
     e = V._g8_new_errs(sealed_row, set())
     ok(e and all("đã sealed" in x and "chờ BQ lấp" not in x for x in e), f"gs lỗi dòng sealed đúng lời: {e}")
+    er = V._g8_new_errs(sealed_row, set(), restating=True)
+    ok(er and all("đang --restate-sealed" in x and "hoặc --restate-sealed" not in x for x in er),
+       f"gs lỗi khi ĐANG restate không khuyên chạy lại restate: {er}")
 
 
 def t_g8_restate_window(tmp):
@@ -1335,7 +1338,7 @@ def t_g8_restate_window(tmp):
                "rw --update VERIFY_SEALED=0 vẫn giữ token G8_NEW")
         finally:
             V.VERIFY_SEALED = old_v
-    ok(V.G8_NEW_LOOKBACK_DAYS >= -(-V.G8_NEW_MIN_SESSIONS * 7 // 5) + V.G1_MAX_GAP_DAYS,
+    ok(V.G8_NEW_LOOKBACK_DAYS >= -(-V.G8_NEW_K * 7 // 5) + V.G1_MAX_GAP_DAYS,
        "rw ràng buộc: lookback phủ G8_NEW_MIN_SESSIONS phiên + khoảng trống dài nhất, độc lập VERIFY_SEALED")
     # fetch_bq thật dùng bq_panel_start (stub corp_action_lib.bq, ghi lại SQL)
     import corp_action_lib as cal
@@ -1377,6 +1380,42 @@ def t_g8_mutant_killers(tmp):
     ok(r[D[7]]["osh_missing_ticker"] == "MISS1", f"mk MISS1 vẫn là việc của G8 cũ: {r[D[7]]['osh_missing_ticker']!r}")
 
 
+def t_g8_window_independent():
+    """Điểm 3 vòng 3 (probe arch-reviewer): OShares mất ~42 ngày trước t; mốc dựng cách t 3/7/14/21 ngày ⇒ CÙNG
+    phân loại (token osh G8_NEW, không phải G8 cũ). OShares mất 3 phiên trước t ⇒ G8 cũ ở mọi mốc."""
+    import pandas as pd
+    n = 60
+    D = sessions(n)
+    rows = []
+    for i in range(n):
+        rows.append({"time": D[i].isoformat(), "ticker": "VNINDEX", "Price": 1000 + i, "Close": 1000 + i, "OShares": None})
+        rows.append({"time": D[i].isoformat(), "ticker": "BASE", "Price": 10000, "Close": 10000, "OShares": 1e6})
+        rows.append({"time": D[i].isoformat(), "ticker": "LOSTO", "Price": 8000, "Close": 8000,
+                     "OShares": 1e6 if i <= 15 else None})                   # mất ~30 phiên (~42 ngày) trước D45
+        rows.append({"time": D[i].isoformat(), "ticker": "RECENT", "Price": 8000, "Close": 8000,
+                     "OShares": 1e6 if i <= 41 else None})                   # mất 4 phiên trước D45
+    panel = pd.DataFrame(rows)
+    panel["time"] = pd.to_datetime(panel["time"])
+    far = dt.date(2000, 1, 1), dt.date(2100, 1, 1)
+    spells = {"BASE": [far], "LOSTO": [far], "RECENT": [far]}
+    divs = pd.DataFrame(columns=["ticker", "time", "div"])
+    t = D[45]
+    seen = set()
+    for back in (3, 7, 14, 21):
+        since = max(d for d in D if d <= t - dt.timedelta(days=back))
+        pn = panel[panel.time >= pd.Timestamp(V.bq_panel_start(since))]
+        pv = pn[pn.ticker == "VNINDEX"].set_index("time").Price
+        day = V.div_yield_daily(pn[pn.ticker != "VNINDEX"], spells, divs, pv[pv.index >= pd.Timestamp(since)],
+                                after=since, sess_full=pv)
+        r = day.loc[pd.Timestamp(t)]
+        seen.add((r.g8_new, r.osh_missing_ticker))
+        ok(r.g8_new == f"LOSTO:osh:{V.G8_NEW_K}", f"wi back={back}: LOSTO ⇒ token osh G8_NEW: {r.g8_new!r}")
+        ok(r.osh_missing_ticker == "RECENT", f"wi back={back}: RECENT ⇒ G8 cũ: {r.osh_missing_ticker!r}")
+    ok(len(seen) == 1, f"wi cùng phiên t ⇒ cùng phân loại ở mọi mốc dựng: {seen}")
+    # xa hơn K phiên ⇒ không còn là 'G8 cũ' (K cố định, không ffill từ đầu panel)
+    ok(V.G8_NEW_K == 11 and V.G8_NEW_K <= V.G8_NEW_LOOKBACK_DAYS * 5 // 7 - 1, "wi K cố định nằm gọn trong lookback panel")
+
+
 def t_drift_thresholds():
     """VERIFY_SEALED: chỉ báo khi mc lệch > 0,3% HOẶC n_members lệch >= 2% (đo replay 19/11)."""
     D = sessions(2)
@@ -1400,6 +1439,7 @@ def main() -> int:
         t_g8_new(tmp)
         t_sealed_drift(tmp)
         t_drift_thresholds()
+        t_g8_window_independent()
         t_g8_range_acks(tmp)
         t_g8_seal_and_alert(tmp)
         t_g8_restate_window(tmp)

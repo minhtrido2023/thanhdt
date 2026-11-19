@@ -124,6 +124,10 @@ SEALED_DRIFT_N_TOL = 0.02          # n_members lệch >= 2% ⇒ CẢNH BÁO
 # lập với cửa sổ dựng (--update dựng ~VERIFY_SEALED+ phiên, --restate-sealed có thể chỉ vài phiên cuối):
 # N phiên ≈ N·7/5 ngày lịch + khoảng trống dài nhất giữa 2 phiên (G1_MAX_GAP_DAYS, Tết).
 G8_NEW_LOOKBACK_DAYS = 30
+# Phân loại G8 cũ vs G8_NEW (osh) dùng MỘT cửa sổ K PHIÊN CHỈ SỐ cố định tính lùi từ t — KHÔNG phải "từ đầu panel":
+# OShares chỉ được ffill trong K phiên (quá K phiên ⇒ coi như rỗng), số phiên có giá đếm trong K phiên cuối tới t.
+# Cùng phiên t ⇒ cùng kết quả ở MỌI mốc dựng, miễn panel phủ K phiên trước mốc dựng (assert dưới).
+G8_NEW_K = 11
 G8_NEW_ACK_MAX_SPAN_DAYS = 90      # ack theo khoảng ngày: date_to − date_from tối đa (chống ack vĩnh viễn)
 G8_NEW_RANGE_TAG = "@G8_NEW_RANGE"
 
@@ -157,8 +161,9 @@ def bq_panel_start(since: dt.date) -> dt.date:
 G1_MAX_GAP_DAYS = 14               # khoảng trống giữa 2 dòng liền nhau; đo 2014→2026-10-13: dài nhất 11 ngày (Tết 2015)
 G1_CHAIN_TOL = 1e-9                # TR_t/TR_{t-1} phải = VNINDEX_t/VNINDEX_{t-1} + k·y_t (đo: lệch ≤ 9e-15)
 # nhánh osh G8_NEW đếm phiên từ panel, panel kéo lùi G8_NEW_LOOKBACK_DAYS ⇒ phải phủ N phiên + 1 khoảng trống dài nhất
-assert G8_NEW_LOOKBACK_DAYS >= -(-G8_NEW_MIN_SESSIONS * 7 // 5) + G1_MAX_GAP_DAYS, \
-    "G8_NEW_LOOKBACK_DAYS quá ngắn so với G8_NEW_MIN_SESSIONS"
+assert G8_NEW_MIN_SESSIONS <= G8_NEW_K, "G8_NEW_K phải >= G8_NEW_MIN_SESSIONS"
+assert G8_NEW_LOOKBACK_DAYS >= -(-G8_NEW_K * 7 // 5) + G1_MAX_GAP_DAYS, \
+    "G8_NEW_LOOKBACK_DAYS quá ngắn so với G8_NEW_K phiên + khoảng trống dài nhất"
 SESSION_CLOSE_ICT = dt.time(15, 0)  # sau giờ này DNSE/BQ đã có nến của ngày (ATC HOSE xong 14:45)
 
 COLUMNS = ["date", "vnindex", "vnindex_src2", "y_gross", "n_members", "mc_members_vnd",
@@ -232,14 +237,16 @@ def dividends(ca_df):
     return g
 
 
-def div_yield_daily(panel, spells: dict, divs, idx, after=None, first_seen: dict = None):
+def div_yield_daily(panel, spells: dict, divs, idx, after=None, first_seen: dict = None, sess_full=None):
     """Bảng theo phiên của chỉ số (index = Timestamp), cột: y, n, mc, div_cash, k2_synth_pr, max_dy,
     max_dy_ticker, osh_missing_max_pct, osh_missing_ticker, g8_new.
 
     `panel`: DataFrame[time, ticker, Price, Close, OShares] KHÔNG gồm VNINDEX; `idx`: Series giá
     VNINDEX theo time (định nghĩa tập phiên). `after`: chỉ trả các phiên > after. `first_seen`:
     {mã: ngày dòng ĐẦU TIÊN trong `ticker` toàn bảng} cho nhánh G8_NEW row; None ⇒ chỉ dựa vào `panel`
-    (dựng offline: panel phải phủ đủ lịch sử, nếu không mã ngừng giao dịch lâu bị báo oan)."""
+    (dựng offline: panel phải phủ đủ lịch sử, nếu không mã ngừng giao dịch lâu bị báo oan).
+    `sess_full`: chỉ số VNINDEX của TOÀN panel (gồm phiên trước mốc dựng) để đếm cửa sổ K phiên của nhánh osh;
+    None ⇒ dùng `idx` (idx bị cắt ở mốc dựng thì phiên trước mốc không có vị trí ⇒ cửa sổ bị cắt)."""
     import numpy as np
     import pandas as pd
     s = panel.copy()
@@ -250,8 +257,22 @@ def div_yield_daily(panel, spells: dict, divs, idx, after=None, first_seen: dict
     s["C1"] = g.Close.shift(1)
     s["S1"] = g.OShares.shift(1)
     s["t1"] = g.time.shift(1)
-    s["S1_ff"] = g.OShares.transform(lambda x: x.ffill()).groupby(s.ticker).shift(1)
-    s["npx"] = g.Price.transform(lambda x: x.gt(0).cumsum())       # số phiên có giá tới t (trong cửa sổ)
+    # S1_ff / npx theo cửa sổ K PHIÊN CHỈ SỐ cố định (G8_NEW_K) — không phụ thuộc đầu panel (điểm 3 vòng 3)
+    idx = idx.sort_index()
+    idx.index = pd.to_datetime(idx.index)
+    sf = pd.DatetimeIndex(pd.to_datetime((idx if sess_full is None else sess_full).index)).sort_values().unique()
+    pos_of = pd.Series(np.arange(len(sf)), index=sf)
+    s["pos"] = s.time.map(pos_of)
+    k = s.dropna(subset=["pos"]).copy()
+    k["pos"] = k.pos.astype(int)
+    full = pd.RangeIndex(int(k.pos.min()), int(k.pos.max()) + 1) if len(k) else pd.RangeIndex(0)
+    osh_w = k.groupby(["pos", "ticker"]).OShares.last().unstack().reindex(full)
+    px_w = k.groupby(["pos", "ticker"]).Price.last().unstack().reindex(full).gt(0)
+    ff = osh_w.ffill(limit=G8_NEW_K).shift(1)                       # OShares gần nhất trong K phiên tới t-1
+    npx = px_w.astype(float).rolling(G8_NEW_K, min_periods=1).sum()  # phiên có giá trong K phiên cuối tới t
+    key = pd.MultiIndex.from_frame(s[["pos", "ticker"]])
+    s["S1_ff"] = ff.stack(future_stack=True).reindex(key).values if len(k) else np.nan
+    s["npx"] = npx.stack(future_stack=True).reindex(key).fillna(0).values if len(k) else 0
     first_row = g.time.min()                                        # trước lọc `after`
     if after is not None:
         s = s[s.time > pd.Timestamp(after)].copy()
@@ -269,8 +290,6 @@ def div_yield_daily(panel, spells: dict, divs, idx, after=None, first_seen: dict
     dv["time"] = pd.to_datetime(dv["time"])
     s = s.merge(dv, on=["ticker", "time"], how="left")
     s["div"] = s["div"].fillna(0.0)
-    idx = idx.sort_index()
-    idx.index = pd.to_datetime(idx.index)
     prev_idx = pd.Series(idx.index[:-1], index=idx.index[1:])
     s["t1_ok"] = s.t1.values == s.time.map(prev_idx).values
     base = s.hose & s.t1_ok & s.P1.gt(0) & s.Price.gt(0)
@@ -738,7 +757,7 @@ def _g4_errs(pp, p: dict, r: dict, acks: set) -> list:
     return errs
 
 
-def _g8_new_errs(r: dict, acks: set) -> list:
+def _g8_new_errs(r: dict, acks: set, restating: bool = False) -> list:
     """G8_NEW của dòng r (đã parse): mã trong bảng sàn HOSE rơi khỏi rổ IM LẶNG, chưa ack. Thông báo theo
     status: dòng đã sealed không còn 'chờ BQ lấp' được (chỉ ack hoặc --restate-sealed)."""
     errs = []
@@ -747,7 +766,10 @@ def _g8_new_errs(r: dict, acks: set) -> list:
             continue
         why = (f"có giá {val} phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1"
                if cause == "osh" else f"niêm yết HOSE từ {val} nhưng `ticker` không có dòng nào tới phiên này")
-        fix = ("dòng đã sealed — BQ lấp KHÔNG xoá được token; cần người xác nhận hoặc --restate-sealed"
+        fix = ("đang --restate-sealed: dữ liệu BQ hiện tại VẪN thiếu mã này nên dựng lại không chữa được — cần ack "
+               "G8_NEW (ưu tiên theo khoảng ngày) rồi chạy lại, hoặc chờ BQ lấp dữ liệu rồi mới restate"
+               if restating else
+               "dòng đã sealed — BQ lấp KHÔNG xoá được token; cần người xác nhận hoặc --restate-sealed"
                if r.get("status") == "sealed" else "chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá "
                "token) hoặc người xác nhận")
         errs.append(f"G8: {r['date']} {tk} trong bảng sàn HOSE (vintage {r['membership_vintage']}) KHÔNG "
@@ -755,10 +777,10 @@ def _g8_new_errs(r: dict, acks: set) -> list:
     return errs
 
 
-def seal_blockers(pp, p: dict, r: dict, acks: set) -> list:
+def seal_blockers(pp, p: dict, r: dict, acks: set, restating: bool = False) -> list:
     """Lỗi cổng G1/G4/G8_NEW của CHÍNH dòng r — khác rỗng ⇒ r không được seal (C, vòng 2 ngày 21/10; G8_NEW
     vòng 2 ngày 19/11: dòng còn lỗ hổng chưa ack ở lại provisional để BQ lấp xoá được token)."""
-    return _g1_link_errs(p, r) + _g4_errs(pp, p, r, acks) + _g8_new_errs(r, acks)
+    return _g1_link_errs(p, r) + _g4_errs(pp, p, r, acks) + _g8_new_errs(r, acks, restating)
 
 
 def check_period(series: list, start_date, end_date, acks: set = None, today: dt.date = None) -> list:
@@ -1089,7 +1111,8 @@ def _rebuild(old: list, k, membership_path: str, inputs, src2, built_at, first_d
                            f"{[d.isoformat() for d in missing[:5]]} (BQ tới {sess[-1]}, đối chiếu tới {ct}) "
                            f"— không dựng chuỗi có lỗ")
     day = div_yield_daily(panel[panel.ticker != "VNINDEX"], spells, dividends(ca), idx, after=since,
-                          first_seen=inputs.get("first_seen"))
+                          first_seen=inputs.get("first_seen"),
+                          sess_full=panel[panel.ticker == "VNINDEX"].set_index("time").Price)
     day = day.join(idx.rename("vnindex"))
     # phiên chỉ số không có thành viên nào ⇒ không suy được y: từ chối thay vì bỏ qua im lặng
     lost = [t.date() for t in idx.index[1:] if t not in day.index]
@@ -1300,7 +1323,7 @@ def restate_sealed(dates, reason: str, confirmed_by: str, series_path: str = SER
         for i in range(npos[want[0]], len(nrows)):
             if nrows[i]["status"] != "sealed":
                 break
-            e = seal_blockers(nrows[i - 2] if i >= 2 else None, nrows[i - 1], nrows[i], acks)
+            e = seal_blockers(nrows[i - 2] if i >= 2 else None, nrows[i - 1], nrows[i], acks, restating=True)
             if e:
                 still[nrows[i]["date"].isoformat()] = e
         if still:
