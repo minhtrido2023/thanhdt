@@ -74,7 +74,13 @@ else
     SEAL="$(printf '%s' "$SEAL_LINE" | grep -o '"seal_blocked".*' | cut -c1-900)"
     # Cặp giá trị CẦN ACK (ngày + n_prev/n hoặc mc_prev/mc) đặt LÊN ĐẦU: cắt 900 byte ở cuối có thể làm mất nó.
     PAIRS="$(printf '%s' "$SEAL_LINE" | grep -oP 'G4: \K\d{4}-\d{2}-\d{2}(?=[^"]*\((?:mc_prev|n_prev)=\d+, (?:mc|n)=\d+\))|\((?:mc_prev|n_prev)=\d+, (?:mc|n)=\d+\)' | paste -d' ' - - | tr -d '()')"
-    notify "🔒 **Quỹ bước 4 — $JOB: seal bị chặn** — dòng chuỗi benchmark KHÔNG được niêm phong (G1/G4 nổ chưa ack); cần người xác nhận ở vnindex_tr_acks.json (mục G4 / G4_MC, đúng giá trị đã xem) hoặc chờ BQ lấp dữ liệu. Cảnh báo lặp mỗi ngày T3-T7 tới khi dòng được seal hoặc ack.
+    # Tên cổng + mục ack suy từ TIỀN TỐ lỗi thật trong seal_blocked (§29: không ghi cứng "G1/G4" — G8_NEW cũng chặn seal).
+    GATES="$(printf '%s' "$SEAL_LINE" | grep -oE 'G[0-9]+:' | sort -u | tr -d ':' | paste -sd/ -)"
+    ACKSEC=""
+    case "/$GATES/" in */G4/*) ACKSEC="G4 / G4_MC (đúng giá trị đã xem)" ;; esac
+    case "/$GATES/" in */G8/*) ACKSEC="${ACKSEC:+$ACKSEC ; }G8_NEW (ticker + cause osh|row + date_from/date_to, decided_by=user)" ;; esac
+    ACKSEC="${ACKSEC:-(không có mục ack cho cổng này — chờ BQ lấp hoặc xử lý theo bằng chứng)}"
+    notify "🔒 **Quỹ bước 4 — $JOB: seal bị chặn** — dòng chuỗi benchmark KHÔNG được niêm phong (${GATES:-cổng không rõ} nổ chưa ack); cần người xác nhận ở vnindex_tr_acks.json (mục ${ACKSEC}) hoặc chờ BQ lấp dữ liệu. Cảnh báo lặp mỗi ngày T3-T7 tới khi dòng được seal hoặc ack.
 Cặp cần ack (ngày + giá trị): ${PAIRS:-(không trích được — đọc bằng chứng bên dưới)}
 Bằng chứng (cắt 900 ký tự):
 \`\`\`

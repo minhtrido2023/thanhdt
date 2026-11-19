@@ -84,6 +84,14 @@ def main() -> int:
     ok("không trích được" in msg, f"lỗi G1 không có cặp ⇒ nói thẳng không trích được: {msg!r}")
     rc, _, _, msg = run("echo '{\"changed\": true, \"bytes\": 10}'")
     ok(rc == 0 and msg == "", f"rc=0 không seal_blocked ⇒ im lặng: {msg!r}")
+    # tin 🔒 suy cổng + mục ack từ tiền tố lỗi THẬT (§29), không ghi cứng 'G1/G4'
+    rc, _, _, msg = run("echo '{\"changed\": true, \"seal_blocked\": [{\"date\": \"2026-11-12\", \"errors\": [\"G8: 2026-11-12 CRV ticker không có dòng nào\"]}]}'")
+    ok("seal bị chặn" in msg and "(G8 nổ chưa ack)" in msg and "G8_NEW" in msg and "G1/G4" not in msg and "G4 / G4_MC" not in msg,
+       f"seal_blocked do G8 ⇒ tin nêu G8 + mục G8_NEW, không G1/G4: {msg!r}")
+    rc, _, _, msg = run("echo '{\"changed\": true, \"seal_blocked\": [{\"date\": \"2026-10-14\", \"errors\": [\"G4: 2026-10-14 x (n_prev=100, n=94)\"]}]}'")
+    ok("(G4 nổ chưa ack)" in msg and "G4 / G4_MC" in msg and "G8_NEW" not in msg, f"seal_blocked do G4 ⇒ mục G4/G4_MC: {msg!r}")
+    rc, _, _, msg = run("echo '{\"changed\": true, \"seal_blocked\": [{\"date\": \"2026-11-12\", \"errors\": [\"G1: link\", \"G8: x\", \"G4: y\"]}]}'")
+    ok("(G1/G4/G8 nổ chưa ack)" in msg and "G4 / G4_MC" in msg and "G8_NEW" in msg, f"nhiều cổng ⇒ liệt kê đủ: {msg!r}")
 
     # --- G8_NEW chưa ack + VERIFY_SEALED lệch: báo MỘT LẦN/ngày/tập mã (dedupe qua dấu trong FUND_BENCH_STATE_DIR)
     g8 = ('{"changed": true, "g8_new_open": [{"ticker": "CRV", "cause": "row", "sessions": 5, "first": "2026-11-12", '
@@ -100,6 +108,14 @@ def main() -> int:
     ok("HPA" in msg and "DMX" not in msg, f"tập mã khác ⇒ báo lại: {msg!r}")
     rc, _, _, msg = run(f"echo '{g8}'", state=tempfile.mkdtemp(prefix="fbc_state_"), stub_rc=1)
     ok(rc == 0, "gửi hỏng không đổi rc của lệnh")
+    # gửi HỎNG ⇒ KHÔNG ghi dấu đã-gửi ⇒ lần chạy sau cùng ngày, cùng tập mã PHẢI gửi lại (diệt mutant X9 'ghi dấu khi gửi hỏng')
+    st_f = tempfile.mkdtemp(prefix="fbc_state_")
+    rc, _, _, msg = run(f"echo '{g8}'", state=st_f, stub_rc=1)
+    ok("CRV" in msg, f"lần 1 (gửi hỏng) vẫn cố gửi: {msg!r}")
+    rc, _, _, msg = run(f"echo '{g8}'", state=st_f, stub_rc=0)
+    ok("CRV" in msg, f"gửi hỏng ⇒ không ghi dấu ⇒ lần sau cùng ngày gửi LẠI: {msg!r}")
+    rc, _, _, msg = run(f"echo '{g8}'", state=st_f, stub_rc=0)
+    ok(msg == "", f"gửi thành công ⇒ ghi dấu ⇒ lần kế KHÔNG gửi lại: {msg!r}")
     dr = '{"changed": true, "sealed_drift_warnings": ["2030-01-08: n_members 5 → 4 (-20.000%), mc_members_vnd 1 → 0.9 (-10.000%)"]}'
     rc, _, _, msg = run(f"echo '{dr}'", state=tempfile.mkdtemp(prefix="fbc_state_"))
     ok(rc == 0 and "VERIFY_SEALED lệch rổ" in msg and "2030-01-08" in msg and "n_members 5 → 4" in msg,
