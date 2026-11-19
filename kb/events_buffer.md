@@ -711,3 +711,11 @@
 - [2026-11-19T09:08:42Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20261119_090441", "source": "watcher"}
 - [2026-11-19T09:09:42Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20261119_090441", "source": "watcher"}
 - [2026-11-19T09:09:46Z] Winston/heartbeat — Winston_20261119_090441: {"status": "in_progress", "note": "selfcheck ALL PASS; chup vintage dau tien 19/11"}
+
+## Consolidation 2026-11-19T09:11:18Z
+- [2026-11-19T09:10:45Z] Taylor/heartbeat — Taylor_20261119_090443: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261119_090443", "source": "watcher"}
+- [2026-11-19T09:10:49Z] Taylor/heartbeat — Taylor_20261119_090446: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261119_090446", "source": "watcher"}
+- [2026-11-19T09:10:51Z] Taylor/heartbeat — Taylor_20261119_090443: {"status": "in_progress", "note": "chân đối chứng PASS (0,460 vs 0,450); dựng map_v2 A3"}
+- [2026-11-19T09:10:52Z] Taylor/heartbeat — Taylor_20261119_090450: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261119_090450", "source": "watcher"}
+- [2026-11-19T09:11:02Z] Taylor/finding — A5+B2b1+H8L3 decline-attribution 19/11: {"dir": "agents/Taylor/research/decline_attribution_a5_20261119", "prereg_md5": "530b795dab4da15a410e14f5d19e9723", "a5": {"labelled_sig_both_ends": "BAL×NGANHANG only, but n_early=1 (degenerate bootstrap) -> not evidence", "other_13": "khong phan biet duoc", "lag_bank_delta_pin0": -13.6, "lag_bank_ci90_pin0": [-26.6, 2.9]}, "b2": {"gate_flip_pairs": 9, "threshold": 30, "decision": "STOP", "pass_to_fail": 9, "fail_to_pass": 0, "deals_touched": 0, "by_ticker": {"CSM": 7, "DRC": 2}, "control_equals_current_csv": true}, "h8l3": {"hist_pairs_flip_if_default_4": 0, "live_rating3_nodata": 9, "in_universe_20261118": 7, "bought_pin0": ["BVB", "KLB", "NVB"], "bought_pin1M": ["ABB", "BVB", "NVB"], "stb_eib_ssb_rating5": "real ROE<8% but NP 2025Q4 am/thap dong thoi ca 3 ma -> can Winston doi chieu BCTC"}, "measured_by": "a5.py, b2/b2_count.py, b2/h8l3.py in dir; REPORT.md"}
+- [2026-11-19T09:10:43Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 6, "job_id": "Winston_20261119_090441", "source": "watcher"}
