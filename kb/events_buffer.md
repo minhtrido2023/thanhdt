@@ -569,3 +569,15 @@
 - [2026-11-19T05:35:12Z] Taylor/heartbeat — Taylor_20261119_052911: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261119_052911", "source": "watcher"}
 - [2026-11-19T05:36:09Z] Taylor/finding — fill-timing-real-fills-20261119: HYBRID khong dieu khien 73% BUY (truoc 08-26 layer tat); BUY HYBRID chi 78 lenh/10 ngay khong du N: {"pre_hybrid_buy": 207, "total_buy": 285, "buy_before_1100_all_pre_hybrid": 160, "hybrid_buy_orders": 78, "hybrid_buy_mean_bps": -56.1, "hybrid_buy_enough_N": false, "sell_in_block_bps": -6.1, "sell_ci95": [-17.9, 21.6], "rollback_22bps": "khong ket luan duoc", "measured_by": "python3 research/fill_timing_real_fills_20261119/build.py + analyze.py (results_bps.csv, orders_classification.csv)", "readme": "agents/Taylor/research/fill_timing_real_fills_20261119/README.md"}
 - [2026-11-19T05:36:13Z] Taylor/heartbeat — Taylor_20261119_052911: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261119_052911", "source": "watcher"}
+
+## Consolidation 2026-11-19T06:00:04Z
+- [2026-11-19T06:00:03Z] Mafee/status — bot-start: {"account": "ZaloPay", "plan_date": "2026-11-19", "auto_otp": true}
+- [2026-11-19T06:00:03Z] Mafee/status — bot-start: {"account": "SpaceX", "plan_date": "2026-11-19", "auto_otp": true}
+- [2026-11-19T06:00:03Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-11-19", "elapsed_s": 1, "rc": 0}
+- [2026-11-19T06:00:03Z] Mafee/status — bot-done: {"account": "SpaceX", "plan_date": "2026-11-19", "elapsed_s": 1, "rc": 0}
+- [2026-11-19T05:45:06Z] Mike/status — preflight-ZaloPay-2026-11-19: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan ZaloPay 2026-11-19: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 18.1h tuổi ≤ ngưỡng 21.3h theo phiên 2026-11-18)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-11-18 = phiên gần nhất, 201 mã ✓"]}
+- [2026-11-19T05:45:07Z] Mike/status — ops-health-check-ZaloPay-2026-11-19: {"account": "ZaloPay", "label": "Trước phiên chiều", "warn_count": 5}
+- [2026-11-19T05:45:12Z] Mike/status — preflight-SpaceX-2026-11-19: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan SpaceX 2026-11-19: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro), as_of 2026-11-18 (golive_state_today.json published 19:01)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 18.1h tuổi ≤ ngưỡng 21.3h theo phiên 2026-11-18)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-11-18 = phiên gần nhất, 201 mã ✓"]}
+- [2026-11-19T05:45:23Z] Mike/status — ops-health-check-SpaceX-2026-11-19: {"account": "SpaceX", "label": "Trước phiên chiều", "warn_count": 5}
+- [2026-11-19T05:58:13Z] Taylor/heartbeat — Taylor_20261119_055805: {"status": "in_progress", "note": "doc build.py, chuan bi worktree"}
+- [2026-11-19T05:59:06Z] Taylor/heartbeat — Taylor_20261119_055805: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261119_055805", "source": "watcher"}
