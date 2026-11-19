@@ -900,6 +900,41 @@
       },
       "review_short": "2027-03-31 checkpoint đầu (đếm cụm); 2028-06-30 đánh giá đủ N (>=20 cụm) · dừng sớm nếu 10 cụm mới có mean excess<=0",
       "notes": "Job Taylor_20261119_052906 (Mike #8 plan E). Hai mốc ngày là đề xuất. ĐÓNG BĂNG nghiên cứu mới trên FZ-001/FZ-002/C-CEIL/C-NFLOOR/C-NFLOOR3/C-TAMIX/C-ONID — xem kb/projects/rnd-pipeline-tracker.md. Ingest chạy tay. User chốt 2026-11-19: KHÔNG xin thêm deals từ nhóm kia (chiến lược chỉ để tham khảo) ⇒ chương trình NGỦ (dormant), không cron; sổ chỉ có dữ liệu nếu user tự cấp file hoặc mở lại. Tới mốc review mà sổ vẫn rỗng ⇒ đề xuất ĐÓNG chương trình, không gia hạn."
+    },
+    {
+      "id": "macro_stress_ledger",
+      "name": "Sổ cảnh báo căng thẳng vĩ mô C1 (USD/VND, TPCP 10Y Δ, liên NH−lãi điều hành, DXY) — đơn vị = cụm độc lập",
+      "owner": "Taylor",
+      "start": "2026-11-19",
+      "end": null,
+      "review_date": "2027-06-30",
+      "reporting": false,
+      "reporting_reason": "Sổ thưa (3–11 episode/13 năm mỗi trigger); dòng hiển thị 1 dòng trong báo cáo regime, không render riêng.",
+      "behavior_contract": "LOG_ONLY_NO_BROKER_PATH",
+      "feature_flag": "N/A — display + sổ append-only; không cap/sizing/gate, không đụng macro_state_live.py/w_LAG, không cron mặc định",
+      "objective": "Tích luỹ cụm căng thẳng vĩ mô độc lập (4 trigger PREREG 2026-11-19, ngưỡng REPORT arch_8l_dt5g §3.2) kèm state DT5G lúc đó. Chấp nhận trước rằng có thể mãi là hiển thị. Spec: kb/data_registry/market-state/macro_stress_ledger.md.",
+      "end_or_trigger": "LUẬT KHAI TRƯỚC: chỉ ĐƯỢC ĐỀ XUẤT cap khi >=10 cụm độc lập VÀ >=5 cụm khi DT5G>=NEUTRAL VÀ quant-skeptic CONFIRMED VÀ user duyệt riêng. Mốc xem lại 2027-06-30 là ĐỀ XUẤT của Taylor (đếm cụm); không tự đóng, không tự gia hạn — quá mốc ⇒ báo user.",
+      "gate_criteria": [
+        {
+          "status": "pending",
+          "text": "Sổ tích luỹ đúng luật: append-only, không trùng (fire_date,trigger), state qua get_gated_state (macro_stress_ledger_selfcheck.py PASS env -u TZ + TZ=Asia/Tokyo)"
+        },
+        {
+          "status": "pending",
+          "text": ">=10 cụm độc lập VÀ >=5 cụm DT5G>=NEUTRAL mới được đề xuất cap"
+        },
+        {
+          "status": "pending",
+          "text": "quant-skeptic CONFIRMED + user duyệt riêng trước mọi wire"
+        }
+      ],
+      "data_sources": [
+        "tav2_bq.macro_indicator (vn_usdvnd, vn_bond_10y, vn_interbank_3m, vn_policy_rate, us_dxy)",
+        "macro_state_live.get_gated_state"
+      ],
+      "today_activity": "agents/Taylor/macro_stress_ledger.py --print-line",
+      "review_short": "Đếm cụm/ngưỡng 10 & 5; chưa có cụm nào ghi tiến",
+      "notes": "Tạo 2026-11-19 job Taylor_20261119_090510."
     }
   ]
 }
