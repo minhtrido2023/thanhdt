@@ -35,3 +35,4 @@
 - [2026-11-19T09:25:32Z] [g8-gap r3 19/11] XONG job Taylor_20261119_091916: commit f7cdf9a22 (lib) + fd5c29454 (README) — CHO Mike arch-review vong 3, merge CUNG ack 6 ma; chua replay BQ that voi K=11
 - [2026-11-19T09:55:29Z] ĐANG DỞ: job Taylor_20261119_095518 PREREG-5 họ 2 (heo/DBC) paper forward | NEXT: đọc nowcast_kqkd_12fam, viết agents/Taylor/research/prereg5_hog_dbc_20261119/PREREG5.md
 - [2026-11-19T09:55:31Z] ĐANG DỞ: job Taylor_20261119_095521 bank-nodata 3->4 (worktree sparse session/bank-nodata-fail-closed-20261119) | NEXT: grep bank-nodata, sửa, selfcheck, regen tạm, tác động tiền
+- [2026-11-19T09:58:47Z] [dna-macro-stress 19/11] XONG job Taylor_20261119_095526: commit 91b9a1ef1 repo ngoai nhanh session/dna-macro-stress-line-20261119 — CHO Mike review + quyet noi vao prompt ZaloPay-only (khong vao SpaceX report_v2)
