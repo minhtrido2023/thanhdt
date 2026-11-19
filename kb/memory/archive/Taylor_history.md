@@ -2520,3 +2520,9 @@
 
 ## Archived 2026-11-19 (keep=12 days=0 require_done=False)
 - [2026-11-18T12:47:15Z] ĐANG DỞ: job Taylor_20261118_124655 DD LLM vong2 (ap skeptic_r1) | NEXT: doc skeptic_r1.md, render PDF, tai giai trinh, sua calc.py
+
+## Archived 2026-11-19 (keep=12 days=0 require_done=False)
+- [2026-11-18T12:55:42Z] [dd-llm r2 18/11] XONG job Taylor_20261118_124655: NHAN DOI 'quanh hop ly 1,05' -> 'DAT 1,35x', tam 24.599 (vung 3.630-39.728), bien co so 4,5% trung vi; ngoai tru KT 3 nam + canh bao HNX; md5 assumptions aaaeec21 — CHO Mike skeptic r2 + dung PDF
+
+## Archived 2026-11-19 (keep=12 days=0 require_done=False)
+- [2026-11-18T12:57:50Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM | NEXT: doc skill dd-investor-report, copy build tu dd_DBC investor_report

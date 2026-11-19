@@ -14,8 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-18T12:55:42Z] [dd-llm r2 18/11] XONG job Taylor_20261118_124655: NHAN DOI 'quanh hop ly 1,05' -> 'DAT 1,35x', tam 24.599 (vung 3.630-39.728), bien co so 4,5% trung vi; ngoai tru KT 3 nam + canh bao HNX; md5 assumptions aaaeec21 — CHO Mike skeptic r2 + dung PDF
-- [2026-11-18T12:57:50Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM | NEXT: doc skill dd-investor-report, copy build tu dd_DBC investor_report
 - [2026-11-18T13:02:16Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM — assets xong (investor_report/src, figs/map) | NEXT: build_report.py figs + md + pdf + selfcheck
 - [2026-11-18T13:08:00Z] [dd-llm investor 18/11] XONG job Taylor_20261118_125730: PDF/HTML/md o dd_LLM_20261118/investor_report (10 trang, md5 cf86360a) — CHO user bao 'gui email' + Mike ghi dd_price_zones
 - [2026-11-19T03:46:01Z] ĐANG DỞ: job Taylor_20261119_034548 vnindex-tr-g5-drift (read-only) | NEXT: doc vnindex_total_return.py, tr_build.py, phan tich lech synth vs official
@@ -26,3 +24,5 @@
 - [2026-11-19T05:20:56Z] [fill-timing OOS 19/11] XONG job Taylor_20261119_051519: BUY -12.0bps CI[-27.4,+2.8] khong PASS/khong rollback; SELL +1.2 - CHO Mike quant-skeptic
 - [2026-11-19T05:33:26Z] [2026-11-19] fz-signal-ledger XONG job Taylor_20261119_052906: commit 9b7dc051b nhanh session/fz-signal-ledger-20261119 (wt-fz-ledger-20261119) — CHO Mike duyet+merge; user phai xin nguon signal hang ngay moi cron
 - [2026-11-19T06:03:59Z] [2026-11-19] fill-timing-monitor XONG job Taylor_20261119_055805: commit d524f03ca nhánh session/fill-timing-monitor-20261119 — CHO Mike review diff + cài cron (đề xuất 07:40 ICT T2-T6)
+- [2026-11-19T08:01:33Z] ĐANG DỞ: job Taylor_20261119_080122 vnindex-tr G8 gap patch (worktree wt-vnindex-tr-g8-gap-20261119) | NEXT: đọc G8/VERIFY_SEALED
+- [2026-11-19T08:05:18Z] ĐANG DỞ: job Taylor_20261119_080508 arch review 8L+DT5G data-leverage plan (read-only) | NEXT: đọc data_registry + kiểm kê BQ, viết agents/Taylor/research/arch_8l_dt5g_data_leverage_20261119/REPORT.md
