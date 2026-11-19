@@ -1,6 +1,6 @@
 # Vá điểm mù G8 + kiểm dòng sealed rộng hơn — `vnindex_total_return.py` (job Taylor_20261119_080122)
 
-Commit hiện hành **`f7cdf9a22`** (vòng 3, lib + selfcheck; vòng 1 `48d4a8d07`, vòng 2 `905745fbb`; commit `ff130d986` của Mike
+Commit hiện hành **`60a54a051`** (vòng 4 do Mike vá, lib + selfcheck; trước đó `f7cdf9a22` vòng 3; vòng 1 `48d4a8d07`, vòng 2 `905745fbb`; commit `ff130d986` của Mike
 là `fund_bench_cron`), nhánh `session/vnindex-tr-g8-gap-20261119`, worktree `agents/Taylor/wt-vnindex-tr-g8-gap-20261119`.
 **CHƯA merge.** Tôi không chạy `--update` và không ghi gì vào
 `data/benchmark/`: md5 chuỗi canonical vẫn là `fe3fe42f…` trước và sau khi replay (`replay_result.json`).
@@ -108,7 +108,7 @@ nếu DMX được lấp OShares nhưng CRV vẫn trống thì chỉ ack row cò
    7. `kb/data_registry/price-volume/vnindex_total_return.md.proposed` (trong nhánh). 8. README này.
 Selfcheck: 342 assertion × 3 TZ; nav_period_benchmark 69, period_table_32 159, fund_bench_cron 27 — PASS.
 
-## Vòng 3 (19/11, job Taylor_20261119_091916) — điểm 3: phân loại KHÔNG phụ thuộc cửa sổ dựng
+## Vòng 3 (19/11, job Taylor_20261119_091916) — điểm 3: nhánh `osh`/G8 cũ KHÔNG phụ thuộc cửa sổ dựng (nhánh `row` xem vòng 4)
 Lỗi vòng 2: `S1_ff` ffill từ đầu panel ⇒ cùng phiên t, mốc dựng cách t 3–7 ngày ra token `XOSH:osh`, cách 14–21 ngày ra G8 cũ
 (`osh_missing_ticker=XOSH`) ⇒ dòng bị seal dạng G8 cũ và `--restate-sealed` sau đó bị từ chối.
 - Sửa (`div_yield_daily`): OShares ffill **tối đa `G8_NEW_K = 11` phiên chỉ số** (lưới phiên dày, `ffill(limit=K)`), số phiên có giá
@@ -124,8 +124,23 @@ Lỗi vòng 2: `S1_ff` ffill từ đầu panel ⇒ cùng phiên t, mốc dựng 
 - `mutate.py`: 20 mutant (thêm M15 ffill không giới hạn K, M16 npx cộng dồn, M17 `sess_full` bỏ, M18 thông báo restate), **0 sống sót**.
 - Thông báo lỗi G8_NEW khi ĐANG `--restate-sealed` (`seal_blockers(..., restating=True)`) không còn khuyên chạy chính lệnh đó: nói dữ liệu BQ
   hiện tại vẫn thiếu mã ⇒ cần ack G8_NEW (ưu tiên theo khoảng ngày) hoặc chờ BQ lấp rồi mới restate.
-- Chưa đo lại trên dữ liệu thật/BQ (không kéo BQ vòng này); số replay vòng 2 (6 mã × 5 phiên) chưa chạy lại với K cố định — **ước lượng**
-  không đổi vì cả 6 mã mất OShares cả năm, nhưng cần replay lại trước merge.
+- Replay trên dữ liệu thật đã chạy lại ở vòng 4 (xem dưới) — kết quả thay cho "ước lượng" của vòng 3.
+
+## Vòng 4 (19/11 16:54, Mike tự vá theo arch-review vòng 3, user duyệt phương án A)
+arch-reviewer vòng 3: NEEDS_CHANGES nhẹ. Đã xử lý (commit `60a54a051`):
+- **Nhánh `row` độc lập mốc dựng.** Trước: số phiên đã niêm yết đếm trên `idx` bị cắt ở mốc dựng ⇒ mã niêm yết trước mốc ⇒ `listed=None`
+  ⇒ nổ oan (thật: DVV 2026-11-05, mới niêm yết 4 phiên, ra token `row` ở mốc 11-04, không ra ở mốc khác; hại ở `--restate-sealed`
+  vì mốc = dòng liền trước). Nay đếm trên lưới phiên ĐẦY ĐỦ `sf` (`sess_full`): `listed = sf.searchsorted(t) − sf.searchsorted(st) + 1`.
+- **Selfcheck ranh giới K** (`t_g8_window_independent` mở rộng; mốc dựng cách t 1/3/7/14/21 ngày): `B_K` (OShares cuối ở D[44−K]) ⇒ G8 cũ,
+  `B_K1` (D[43−K]) ⇒ `osh`, `NEWT` (OShares chỉ TỪ t) ⇒ `osh` (S1_ff không nhìn t), `LATEL` (niêm yết 3 phiên) ⇒ KHÔNG nổ,
+  `LATEOK` (8 phiên) ⇒ nổ. Mutant kiểm tay: `ffill(limit=K−1)`, `ffill(limit=K+5)`, bỏ `shift(1)`, `row` theo `idx` cắt, `listed >= N → > N`
+  ⇒ 5/5 ĐỎ. **355 assertion** PASS × 3 TZ.
+- **Thông báo osh (§29)** sửa thành "có giá {val}/{K} phiên chỉ số cuối tới t nhưng OShares rỗng trong {K} phiên tới t-1".
+- **Replay dữ liệu thật** (cache `bq_inputs_20251103.pkl`, mốc dựng 2026-11-04, bản dựng trong `/tmp`, KHÔNG ghi `data/benchmark/`;
+  md5 chuỗi canonical vẫn `fe3fe42f…`): 6 mã × 5 phiên (CRV, GEL, HPA, DSH, DVV = `row`; DMX = `osh`, số phiên 68–72 → **11** do K cố định),
+  số lỗi G8 kỳ 11-12→11-18 = 24 và kỳ 11-06→11-18 = 31, **giống hệt vòng 2**; `seal_blocked` và `sealed_drift_warnings` đều rỗng.
+- **Hệ quả ngưỡng 5/11 phiên đã biết:** mã vừa quay lại giao dịch chưa đủ 5 phiên có giá trong 11 phiên cuối thì im lặng (vd TCD
+  2026-07-06→07-08, mã quay lại ngày 07-03); vòng 2 (cửa sổ dựng) có báo. Chấp nhận: đây là chống nhiễu mã nhỏ.
 
 ## Thứ tự triển khai (user duyệt 19/11 16:18)
 1. Merge nhánh **CÙNG LÚC với ack 6 mã** CRV/GEL/HPA/DSH/DVV/DMX, `date_from 2026-11-12` → `date_to 2026-12-27` (ack theo khoảng ngày,
@@ -135,7 +150,7 @@ Lỗi vòng 2: `S1_ff` ffill từ đầu panel ⇒ cùng phiên t, mốc dựng 
 
 ## Quyết định còn cần user
 Các mục 1/2/4 cũ đã đóng ở vòng 2 (ack khoảng ngày ĐÃ làm; ngưỡng VERIFY_SEALED đã đổi thành mc > 0,3% HOẶC n ≥ 2%).
-1. **Duyệt merge `f7cdf9a22`** (kèm commit `ff130d986` của Mike) theo thứ tự trên; ack 6 mã nạp vào `data/benchmark/vnindex_tr_acks.json`
+1. **User đã duyệt hướng 19/11 16:18 và duyệt phương án A (Mike vá) 16:54; đang chờ arch-review/audit xác nhận `60a54a051` rồi merge** (kèm `ff130d986`) theo thứ tự trên; ack 6 mã nạp vào `data/benchmark/vnindex_tr_acks.json`
    cùng lượt (tôi không sửa file thật).
 2. **Ngưỡng trọng yếu (chưa quyết):** chưa suy được vốn hoá mã thiếu OShares ⇒ mã nào cũng bị báo. Phương án: nối vốn hoá ngoài (VNDirect)
    để chỉ báo mã ≥ 0,5% rổ như G8 cũ. Cần quyết có nối nguồn ngoài không.
