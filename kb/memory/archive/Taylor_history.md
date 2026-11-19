@@ -2505,3 +2505,6 @@
 
 ## Archived 2026-11-19 (keep=12 days=0 require_done=False)
 - [2026-11-18T12:24:10Z] ĐANG DỞ: job Taylor_20261118_122349 DD LLM | NEXT: doc skill, render BCTC src/, viet REPORT dd_LLM_20261118
+
+## Archived 2026-11-19 (keep=12 days=0 require_done=False)
+- [2026-11-18T12:28:41Z] ĐANG DỞ: job Taylor_20261118_122819 lead-signal run-up TV1/VCP (paper) | NEXT: kb recall, PREREG, BQ pull, engine
