@@ -683,3 +683,31 @@
 - [2026-11-19T09:05:14Z] Winston/heartbeat — Winston_20261119_090441: {"status": "in_progress", "note": "doc REPORT+template; chuan bi worktree"}
 - [2026-11-19T09:05:42Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261119_090441", "source": "watcher"}
 - [2026-11-19T09:06:42Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 2, "job_id": "Winston_20261119_090441", "source": "watcher"}
+
+## Consolidation 2026-11-19T09:10:42Z
+- [2026-11-19T09:07:08Z] Taylor/heartbeat — Taylor_20261119_090450: {"status": "in_progress", "note": "viet PREREG sector leaders (9 trial, 4 ho co >=3 ma)"}
+- [2026-11-19T09:07:11Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261119_090510", "source": "watcher"}
+- [2026-11-19T09:07:24Z] Taylor/heartbeat — Taylor_20261119_090446: {"status": "in_progress", "note": "A5 xong (a5_results.csv); chay B2 control+treatment"}
+- [2026-11-19T09:07:31Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "in_progress", "note": "script viet xong, chay replay doi chieu"}
+- [2026-11-19T09:07:45Z] Taylor/heartbeat — Taylor_20261119_090443: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261119_090443", "source": "watcher"}
+- [2026-11-19T09:07:48Z] Taylor/heartbeat — Taylor_20261119_090446: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261119_090446", "source": "watcher"}
+- [2026-11-19T09:07:52Z] Taylor/heartbeat — Taylor_20261119_090450: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261119_090450", "source": "watcher"}
+- [2026-11-19T09:07:59Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "in_progress", "note": "script viet xong, chay replay"}
+- [2026-11-19T09:08:11Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261119_090510", "source": "watcher"}
+- [2026-11-19T09:08:21Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "in_progress", "note": "replay 6/4/3/10 vs REPORT 5/4/3/11; viet selfcheck+README+registry"}
+- [2026-11-19T09:08:45Z] Taylor/heartbeat — Taylor_20261119_090443: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261119_090443", "source": "watcher"}
+- [2026-11-19T09:08:48Z] Taylor/heartbeat — Taylor_20261119_090446: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261119_090446", "source": "watcher"}
+- [2026-11-19T09:08:52Z] Taylor/heartbeat — Taylor_20261119_090450: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261119_090450", "source": "watcher"}
+- [2026-11-19T09:09:10Z] Taylor/heartbeat — Taylor_20261119_090450: {"status": "in_progress", "note": "PREREG commit f485ae696; dang chay run.py"}
+- [2026-11-19T09:09:11Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261119_090510", "source": "watcher"}
+- [2026-11-19T09:09:45Z] Taylor/heartbeat — Taylor_20261119_090443: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261119_090443", "source": "watcher"}
+- [2026-11-19T09:09:49Z] Taylor/heartbeat — Taylor_20261119_090446: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261119_090446", "source": "watcher"}
+- [2026-11-19T09:09:52Z] Taylor/heartbeat — Taylor_20261119_090450: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261119_090450", "source": "watcher"}
+- [2026-11-19T09:10:11Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "in_progress", "note": "selfcheck PASS ca 2 TZ; viet README+registry"}
+- [2026-11-19T09:10:12Z] Taylor/heartbeat — Taylor_20261119_090510: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261119_090510", "source": "watcher"}
+- [2026-11-19T09:10:29Z] Taylor/finding — macro-stress-ledger C1 xong, cho Mike review diff: {"branch": "session/macro-stress-ledger-20261119", "worktree": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/wt-macro-stress-ledger-20261119", "commit": "e09a591a0", "files": ["agents/Taylor/macro_stress_ledger.py", "agents/Taylor/macro_stress_ledger_selfcheck.py", "kb/data_registry/market-state/macro_stress_ledger.md", "kb/paper_programs_registry.json (+1 entry macro_stress_ledger)"], "prereg_md5": {"spec_md": "c3b5e4d0f91b26a57cd6f51929ed4036", "script": "c945e95138324ac817310010aa66710f"}, "selfcheck": "macro_stress_ledger_selfcheck.py 12/12 PASS, env -u TZ va TZ=Asia/Tokyo", "replay_episodes_2014_2026": {"USDVND": 6, "TPCP10Y": 4, "INTERBANK_MINUS_POLICY": 3, "DXY": 10, "REPORT_3_2": "5/4/3/11 (lech lich quan sat)"}, "now_2026_11_19": {"USDVND_60d": "-1.58%", "TPCP10Y_d60": "+0.01pp", "INTERBANK_MINUS_POLICY": "+2.13pp", "DXY_60d": "+4.66%", "clusters": "0/10, >=NEUTRAL 0/5"}, "propose_wire": "dna_report.py them build_macro_stress_line() goi run() cho khoi Market regime weekly/monthly (khuon build_cap_signal_advisory_line, try/except fail-safe); cron khong cai; ledger chua co file CSV den khi co episode dau", "touched_outside_research": "chi trong worktree; KHONG sua macro_state_live/filter.json/trading_rules/crontab", "measured_by": "python3 agents/Taylor/macro_stress_ledger.py --replay / --dry-run; selfcheck 2 TZ; git show e09a591a0 --stat"}
+- [2026-11-19T09:07:42Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 3, "job_id": "Winston_20261119_090441", "source": "watcher"}
+- [2026-11-19T09:07:44Z] Winston/heartbeat — Winston_20261119_090441: {"status": "in_progress", "note": "script viet xong, dry-run"}
+- [2026-11-19T09:08:42Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 4, "job_id": "Winston_20261119_090441", "source": "watcher"}
+- [2026-11-19T09:09:42Z] Winston/heartbeat — Winston_20261119_090441: {"status": "still_running", "elapsed_min": 5, "job_id": "Winston_20261119_090441", "source": "watcher"}
+- [2026-11-19T09:09:46Z] Winston/heartbeat — Winston_20261119_090441: {"status": "in_progress", "note": "selfcheck ALL PASS; chup vintage dau tien 19/11"}
