@@ -460,3 +460,20 @@
 
 ## Consolidation 2026-11-19T03:07:02Z
 - [2026-11-19T02:31:12Z] Mafee/status — orb_futures_entry: {"account": "SpaceX", "mode": "DRY", "contract": "41I1GB000", "side": "sell", "px": 1808.4, "stop": 1853.6, "fill_px_estimated": false}
+
+## Consolidation 2026-11-19T03:54:30Z
+- [2026-11-19T03:46:29Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "in_progress", "note": "doc code vnindex_total_return.py; tr_i=Close/C1 (adj), trong so P1*S1"}
+- [2026-11-19T03:46:49Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:47:49Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:48:11Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "in_progress", "note": "dung lai cua so 60 phien tu BQ hom nay: G5 +0,26pp (CSV sealed +0,52); tach vintage vs BQ revision"}
+- [2026-11-19T03:48:50Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:49:06Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "in_progress", "note": "CM: LPS vang trong dong sealed 08-19..10-09 giai thich ~0,26pp; dang phan ra phan du 0,26pp"}
+- [2026-11-19T03:49:50Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:50:02Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "in_progress", "note": "phan du: hoi quy cho VIC thua trong so ~0,7-1,0pp (t 4,5), dong gop ~+0,2pp; kiem OShares VIC"}
+- [2026-11-19T03:50:50Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:51:10Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "in_progress", "note": "phat hien DMX (niem yet HOSE 06/08) OShares NULL -> vang khoi ro, G8 mu; tim so CP DMX/CRV/GEL"}
+- [2026-11-19T03:51:50Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:52:37Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "in_progress", "note": "phan thuc: +LPS +DMX +GEL +CRV -> G5 0,039pp; kiem phu y, lich su, gia ket"}
+- [2026-11-19T03:52:50Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:53:50Z] Taylor/heartbeat — Taylor_20261119_034548: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261119_034548", "source": "watcher"}
+- [2026-11-19T03:54:12Z] Taylor/finding — vnindex-tr-g5-drift: {"summary": "G5 11/11 +0,516pp = ro thieu von hoa, khong phai loi cong thuc. LPS (niem yet 18/08, -46%) vang trong dong sealed 19/08-09/10 vi OShares NULL toi 20/10 => -0,254pp; DMX (06/08, OShares NULL den nay) -0,160pp; GEL+CRV (khong co dong trong tav2_bq.ticker) -0,063pp; con lai +0,039pp. G8 mu voi ma moi chua tung co OShares; VERIFY_SEALED chi so y. Vintage khong anh huong. TR: phan gia dung VN-Index chinh thuc nen khong bi; y thieu co tuc DMX 4.000d GDKHQ 18/08 => TR gop thap ~5,6bp (uoc luong so CP DMX). Khuyen nghi: lap OShares DMX + nap GEL/CRV (Winston), va G8 cho ma moi + kiem sealed theo n/mc (can user duyet), KHONG doi G5_TOL (tu 2019 moi lan vuot truoc deu la gai 1-2 phien; ro du thi |G5|<=0,10).", "g5_csv_pp": 0.516, "g5_rebuild_pp": 0.262, "g5_rebuild_plus_DMX_GEL_CRV_pp": 0.039, "tr_y_error_bp": -5.6, "readme": "agents/Taylor/research/vnindex_tr_g5_drift_20261119/README.md", "measured_by": "python3 agents/Taylor/research/vnindex_tr_g5_drift_20261119/{decomp,counterfactual,wreg,missing}.py tren BQ keo 19/11 (pull.py)", "needs_user": ["restate-sealed 18/08 sau khi co OShares DMX", "doi code G8 + kiem sealed"]}

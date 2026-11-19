@@ -11,3 +11,4 @@
 ## Mốc
 - LAG ADV checkpoint + corp-action broker-primary xem lại 2026-12-15; measurement audit ~2026-12-27.
 
+- [2026-11-19T03:45:53Z] 19/11 10:47: dispatch Taylor_20261119_034548 (Opus/medium) tìm nguyên nhân trôi G5 VN-Index TR (rổ synth > chính thức +0,52pp/60 phiên); kết quả: agents/Taylor/research/vnindex_tr_g5_drift_20261119/README.md; KHÔNG đổi G5_TOL/chạm chuỗi sealed chờ user duyệt
