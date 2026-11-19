@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/pt_v22_dt5g.py

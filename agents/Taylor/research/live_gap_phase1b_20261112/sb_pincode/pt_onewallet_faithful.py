@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/pt_onewallet_faithful.py

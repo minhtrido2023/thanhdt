@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-p1c-1112/WorkingClaude/probe_route_eveb_h7.py

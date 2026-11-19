@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113-tb/WorkingClaude/run_branchC_decomp.sh

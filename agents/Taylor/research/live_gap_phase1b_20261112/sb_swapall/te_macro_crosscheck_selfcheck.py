@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/te_macro_crosscheck_selfcheck.py

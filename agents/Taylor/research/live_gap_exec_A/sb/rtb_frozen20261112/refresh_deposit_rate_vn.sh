@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rtb/WorkingClaude/refresh_deposit_rate_vn.sh

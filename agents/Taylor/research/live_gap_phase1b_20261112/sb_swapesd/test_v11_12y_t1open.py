@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_v11_12y_t1open.py

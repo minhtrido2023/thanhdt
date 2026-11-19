@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/backtest_qt_v3.py

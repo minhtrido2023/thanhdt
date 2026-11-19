@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113/WorkingClaude/qt_v4_eventstudy.py

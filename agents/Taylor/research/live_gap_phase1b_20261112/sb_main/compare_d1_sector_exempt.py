@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/compare_d1_sector_exempt.py

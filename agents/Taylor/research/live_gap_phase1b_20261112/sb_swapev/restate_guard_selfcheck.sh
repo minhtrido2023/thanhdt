@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/restate_guard_selfcheck.sh

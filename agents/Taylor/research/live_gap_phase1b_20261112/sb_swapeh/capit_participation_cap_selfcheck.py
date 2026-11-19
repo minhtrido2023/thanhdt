@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/capit_participation_cap_selfcheck.py

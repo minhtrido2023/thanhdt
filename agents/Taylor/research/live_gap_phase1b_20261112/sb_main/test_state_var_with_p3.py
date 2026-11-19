@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_state_var_with_p3.py

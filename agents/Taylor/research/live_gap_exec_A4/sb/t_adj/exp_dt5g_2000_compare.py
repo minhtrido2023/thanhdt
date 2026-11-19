@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113-tb/WorkingClaude/exp_dt5g_2000_compare.py

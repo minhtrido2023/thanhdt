@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rq/WorkingClaude/discretionary_rule_a_selfcheck.py

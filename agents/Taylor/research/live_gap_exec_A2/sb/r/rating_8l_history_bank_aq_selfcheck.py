@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113-r/WorkingClaude/rating_8l_history_bank_aq_selfcheck.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-p1-1112/WorkingClaude/simulation_v1_6.py

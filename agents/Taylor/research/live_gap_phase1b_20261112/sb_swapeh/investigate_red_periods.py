@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/investigate_red_periods.py

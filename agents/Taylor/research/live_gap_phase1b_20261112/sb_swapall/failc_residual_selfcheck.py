@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/failc_residual_selfcheck.py

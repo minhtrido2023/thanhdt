@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/extract_deals.py

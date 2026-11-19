@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113-tb/WorkingClaude/test_kelly_q2_heur_n100.py

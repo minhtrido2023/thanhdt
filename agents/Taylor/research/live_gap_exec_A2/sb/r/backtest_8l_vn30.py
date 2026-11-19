@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113-r/WorkingClaude/backtest_8l_vn30.py

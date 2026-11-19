@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113-r/WorkingClaude/export_journal_v6_extended.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/amh_cockpit.py

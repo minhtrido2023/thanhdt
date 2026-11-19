@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113-tb/WorkingClaude/vgc_energy.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/rating8l_icb_pit_selfcheck.py

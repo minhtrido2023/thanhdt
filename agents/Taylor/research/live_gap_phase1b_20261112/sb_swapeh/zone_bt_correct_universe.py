@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/zone_bt_correct_universe.py

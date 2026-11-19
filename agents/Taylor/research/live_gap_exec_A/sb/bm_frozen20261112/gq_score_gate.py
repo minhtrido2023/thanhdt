@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112/WorkingClaude/gq_score_gate.py

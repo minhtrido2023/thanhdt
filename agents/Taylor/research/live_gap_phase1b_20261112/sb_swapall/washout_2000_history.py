@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/washout_2000_history.py

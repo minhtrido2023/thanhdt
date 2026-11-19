@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/szl_cf_hist.sql

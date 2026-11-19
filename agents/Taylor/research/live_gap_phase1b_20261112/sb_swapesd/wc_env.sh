@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wc_env.sh

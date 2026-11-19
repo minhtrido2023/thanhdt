@@ -9,7 +9,7 @@ Câu hỏi user: sau mua LAG bao lâu / lỗ bao nhiêu % thì biết deal lỗ,
 - N: 668/663 deal, 88 cụm tháng vào, N_eff ~162 (ICC 0,47), N_trial 125; live 11 deal (2 đóng) chỉ mô tả. Không chạy NAV backtest (không luật nào qua mức deal).
 
 ## Artifact
-Nhánh `research/lag-early-exit-20261116` @`f037ad41f` (KHÔNG merge, giữ làm tham khảo); REPORT: `agents/Taylor/wt-lag-early-exit-20261116/agents/Taylor/research/lag_early_exit_bayes_20261116/REPORT.md`; ledger gốc `80f509ec` (pin0%).
+Nhánh `research/lag-early-exit-20261116` @`f037ad41f` (KHÔNG merge, giữ làm tham khảo); REPORT (worktree đã xoá 19/11, đọc từ nhánh): `git show research/lag-early-exit-20261116:agents/Taylor/research/lag_early_exit_bayes_20261116/REPORT.md`; ledger gốc `80f509ec` (pin0%).
 
 ## Đừng đề xuất lại trừ khi
 Có dữ liệu mới đáng kể (≥2-3 mùa BCTC live đóng đủ deal) hoặc PREREG riêng với feature ngoài giá (tin tức PIT, thay đổi dự báo). Liên quan: cổng DD ≤ tâm lúc MUA (`lag-dd-zone-gate-20261109.md`) là hướng khác, xử lý phía vào lệnh.

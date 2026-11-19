@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_kelly_q2_on_v121_ens.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rtb/WorkingClaude/sector_lens_monitor.py

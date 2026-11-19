@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/test_fa_v8c_subsectors.py

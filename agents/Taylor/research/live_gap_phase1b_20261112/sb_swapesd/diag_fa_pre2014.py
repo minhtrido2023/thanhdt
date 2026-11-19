@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/diag_fa_pre2014.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/remind_bc.py

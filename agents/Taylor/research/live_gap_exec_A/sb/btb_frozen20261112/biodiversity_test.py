@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/biodiversity_test.py

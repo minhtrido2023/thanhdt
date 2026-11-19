@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/validate_option1_walkforward.py

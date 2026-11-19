@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_beardvg_gate.py

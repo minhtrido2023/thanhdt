@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-D-1112/WorkingClaude/build_bank_npl_history.py

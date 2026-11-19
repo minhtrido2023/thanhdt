@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/idle_rate_proxy_selfcheck.py

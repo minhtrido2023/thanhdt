@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rm/WorkingClaude/t2_settlement_selfcheck.py

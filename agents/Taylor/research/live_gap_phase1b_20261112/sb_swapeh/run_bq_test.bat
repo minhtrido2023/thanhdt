@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/run_bq_test.bat

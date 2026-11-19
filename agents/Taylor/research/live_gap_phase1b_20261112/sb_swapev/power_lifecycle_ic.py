@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/power_lifecycle_ic.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA3-1113/WorkingClaude/fetch_new_listings_daily.sh

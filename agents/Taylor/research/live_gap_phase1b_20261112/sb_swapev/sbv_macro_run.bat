@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/sbv_macro_run.bat

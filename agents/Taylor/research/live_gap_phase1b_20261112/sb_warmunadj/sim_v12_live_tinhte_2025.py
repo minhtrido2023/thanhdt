@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-p1-1112/WorkingClaude/sim_v12_live_tinhte_2025.py

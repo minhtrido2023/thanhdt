@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rq/WorkingClaude/paper_main_window_selfcheck.py

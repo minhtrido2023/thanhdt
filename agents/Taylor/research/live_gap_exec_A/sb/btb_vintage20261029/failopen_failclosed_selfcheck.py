@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/failopen_failclosed_selfcheck.py

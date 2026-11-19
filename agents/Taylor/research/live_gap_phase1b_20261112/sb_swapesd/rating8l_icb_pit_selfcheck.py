@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/rating8l_icb_pit_selfcheck.py

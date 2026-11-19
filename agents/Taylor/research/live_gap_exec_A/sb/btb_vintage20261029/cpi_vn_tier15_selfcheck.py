@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/cpi_vn_tier15_selfcheck.py

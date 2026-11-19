@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/export_journal_v6_extended.py

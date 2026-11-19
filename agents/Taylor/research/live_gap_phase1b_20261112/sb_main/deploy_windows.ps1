@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/deploy_windows.ps1

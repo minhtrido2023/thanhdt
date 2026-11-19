@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-q/WorkingClaude/build_tam_quan_full_history.py

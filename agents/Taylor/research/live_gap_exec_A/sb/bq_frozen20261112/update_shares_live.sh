@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-q/WorkingClaude/update_shares_live.sh

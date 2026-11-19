@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/v22c_compare.py

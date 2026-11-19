@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_grind_arm_b.py

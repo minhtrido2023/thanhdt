@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/value_book_profile.py

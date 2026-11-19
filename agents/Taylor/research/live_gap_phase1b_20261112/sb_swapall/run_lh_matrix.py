@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/run_lh_matrix.py

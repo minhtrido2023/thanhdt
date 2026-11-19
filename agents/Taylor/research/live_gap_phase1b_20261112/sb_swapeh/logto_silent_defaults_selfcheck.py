@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/logto_silent_defaults_selfcheck.py

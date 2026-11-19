@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/loan_package_resolution_selfcheck.py

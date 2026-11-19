@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/v22_reverify_2014.py

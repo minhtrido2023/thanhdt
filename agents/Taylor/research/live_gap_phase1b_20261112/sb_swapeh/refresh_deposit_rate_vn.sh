@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/refresh_deposit_rate_vn.sh

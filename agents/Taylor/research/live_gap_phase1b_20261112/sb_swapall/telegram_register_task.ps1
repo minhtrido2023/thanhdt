@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/telegram_register_task.ps1

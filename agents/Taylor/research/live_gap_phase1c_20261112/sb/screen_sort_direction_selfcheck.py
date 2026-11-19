@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-p1c-1112/WorkingClaude/screen_sort_direction_selfcheck.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA3-1113-r/WorkingClaude/exp_beardvg_eventstudy.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/paper_trade_review_run.bat

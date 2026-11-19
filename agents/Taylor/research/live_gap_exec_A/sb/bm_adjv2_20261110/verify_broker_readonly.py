@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112/WorkingClaude/verify_broker_readonly.py

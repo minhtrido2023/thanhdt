@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-D-1112/WorkingClaude/compare_e4_d1_c1b.py

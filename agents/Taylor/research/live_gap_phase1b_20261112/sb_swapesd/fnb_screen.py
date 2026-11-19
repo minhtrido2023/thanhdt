@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/fnb_screen.py

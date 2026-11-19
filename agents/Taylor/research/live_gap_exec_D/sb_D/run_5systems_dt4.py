@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-D-1112/WorkingClaude/run_5systems_dt4.py

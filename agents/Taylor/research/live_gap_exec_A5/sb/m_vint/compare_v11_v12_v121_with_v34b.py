@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113/WorkingClaude/compare_v11_v12_v121_with_v34b.py

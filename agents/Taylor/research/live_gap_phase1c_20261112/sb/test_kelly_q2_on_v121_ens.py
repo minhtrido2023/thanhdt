@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-p1c-1112/WorkingClaude/test_kelly_q2_on_v121_ens.py

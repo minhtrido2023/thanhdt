@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/failc_sweep8_selfcheck.py

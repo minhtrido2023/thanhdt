@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/show_custom30.py

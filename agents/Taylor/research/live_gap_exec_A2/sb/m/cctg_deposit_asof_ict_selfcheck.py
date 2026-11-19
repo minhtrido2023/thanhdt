@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/cctg_deposit_asof_ict_selfcheck.py

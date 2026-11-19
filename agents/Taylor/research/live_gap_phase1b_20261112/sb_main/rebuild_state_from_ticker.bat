@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/rebuild_state_from_ticker.bat

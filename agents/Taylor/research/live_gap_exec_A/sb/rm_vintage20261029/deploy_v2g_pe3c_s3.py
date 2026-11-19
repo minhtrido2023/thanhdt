@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rm/WorkingClaude/deploy_v2g_pe3c_s3.py

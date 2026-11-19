@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/vgc_energy.py

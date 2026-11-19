@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/dna_report.py

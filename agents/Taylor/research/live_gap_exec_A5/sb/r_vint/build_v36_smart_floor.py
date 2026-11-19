@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113-r/WorkingClaude/build_v36_smart_floor.py

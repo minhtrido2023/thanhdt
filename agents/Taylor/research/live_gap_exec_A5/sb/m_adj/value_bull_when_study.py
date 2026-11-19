@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113/WorkingClaude/value_bull_when_study.py

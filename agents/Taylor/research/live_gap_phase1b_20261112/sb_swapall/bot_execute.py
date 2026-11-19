@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/bot_execute.py

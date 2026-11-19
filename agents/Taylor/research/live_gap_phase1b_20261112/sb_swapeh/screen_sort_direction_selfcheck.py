@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/screen_sort_direction_selfcheck.py

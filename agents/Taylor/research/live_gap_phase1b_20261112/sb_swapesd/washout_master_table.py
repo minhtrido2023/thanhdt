@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/washout_master_table.py

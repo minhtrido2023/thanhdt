@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/auto_update_commodity_wb.sh

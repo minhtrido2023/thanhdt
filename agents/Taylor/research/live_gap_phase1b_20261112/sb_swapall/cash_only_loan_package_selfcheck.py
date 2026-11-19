@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/cash_only_loan_package_selfcheck.py

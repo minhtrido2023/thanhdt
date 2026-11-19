@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/cctg_overlay_selfcheck.py

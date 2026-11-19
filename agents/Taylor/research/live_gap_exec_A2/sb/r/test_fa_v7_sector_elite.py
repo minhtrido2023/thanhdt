@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113-r/WorkingClaude/test_fa_v7_sector_elite.py

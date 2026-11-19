@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/append_deposit_rate.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/f_system_daily.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/steel_buildmat_screen.py

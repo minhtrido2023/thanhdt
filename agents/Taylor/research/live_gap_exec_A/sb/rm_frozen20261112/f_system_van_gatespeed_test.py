@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rm/WorkingClaude/f_system_van_gatespeed_test.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA3-1113-r/WorkingClaude/tz_anchor_gate_shim.sh

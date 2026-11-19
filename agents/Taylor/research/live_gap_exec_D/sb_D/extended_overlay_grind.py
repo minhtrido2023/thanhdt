@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-D-1112/WorkingClaude/extended_overlay_grind.py

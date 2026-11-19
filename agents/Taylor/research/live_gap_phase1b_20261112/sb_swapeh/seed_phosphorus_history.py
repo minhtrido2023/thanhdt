@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/seed_phosphorus_history.py

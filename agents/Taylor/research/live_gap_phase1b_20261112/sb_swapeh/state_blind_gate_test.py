@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/state_blind_gate_test.py

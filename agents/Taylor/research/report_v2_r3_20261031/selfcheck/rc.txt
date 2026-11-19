@@ -1,4 +1,0 @@
-default rc=1
-unsetTZ rc=1
-newyork rc=1
-DONE

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/cctg_deposit_wiring_selfcheck.py

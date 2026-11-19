@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/construction_screen.py

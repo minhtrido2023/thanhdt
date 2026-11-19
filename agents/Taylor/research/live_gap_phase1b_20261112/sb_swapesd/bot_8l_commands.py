@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/bot_8l_commands.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rq/WorkingClaude/quote_l2_logging_selfcheck.py

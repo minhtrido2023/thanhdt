@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/compare_ba_vn30.py

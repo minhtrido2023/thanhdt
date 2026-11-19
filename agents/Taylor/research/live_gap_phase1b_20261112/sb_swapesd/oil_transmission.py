@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/oil_transmission.py

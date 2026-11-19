@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/probe_route_eveb_h7.py

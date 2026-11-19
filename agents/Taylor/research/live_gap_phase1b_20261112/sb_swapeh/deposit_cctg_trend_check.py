@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/deposit_cctg_trend_check.py

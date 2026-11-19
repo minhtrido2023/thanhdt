@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113-r/WorkingClaude/probe_beta_cap_c30v.py

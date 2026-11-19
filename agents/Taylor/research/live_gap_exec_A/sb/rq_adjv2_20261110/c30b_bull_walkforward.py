@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rq/WorkingClaude/c30b_bull_walkforward.py

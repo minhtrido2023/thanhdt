@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113/WorkingClaude/simulate_lh_v2.py

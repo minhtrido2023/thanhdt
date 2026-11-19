@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/fetch_new_listings_daily.sh

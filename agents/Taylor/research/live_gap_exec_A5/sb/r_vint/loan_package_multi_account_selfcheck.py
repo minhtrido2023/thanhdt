@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA4-1113-r/WorkingClaude/loan_package_multi_account_selfcheck.py

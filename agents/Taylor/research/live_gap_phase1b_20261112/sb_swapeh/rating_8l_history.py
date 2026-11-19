@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/rating_8l_history.py

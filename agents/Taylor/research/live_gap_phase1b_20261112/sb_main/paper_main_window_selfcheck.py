@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/paper_main_window_selfcheck.py

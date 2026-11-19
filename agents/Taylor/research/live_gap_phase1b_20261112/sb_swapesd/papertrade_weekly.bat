@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/papertrade_weekly.bat

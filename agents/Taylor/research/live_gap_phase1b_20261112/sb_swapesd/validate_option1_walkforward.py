@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/validate_option1_walkforward.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/pharma_screen.py

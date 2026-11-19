@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/exbull_value_tilt.py

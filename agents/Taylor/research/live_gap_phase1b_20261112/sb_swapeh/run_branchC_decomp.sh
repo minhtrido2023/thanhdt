@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/run_branchC_decomp.sh

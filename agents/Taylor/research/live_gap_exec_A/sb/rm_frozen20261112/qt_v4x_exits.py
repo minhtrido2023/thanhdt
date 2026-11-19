@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rm/WorkingClaude/qt_v4x_exits.py

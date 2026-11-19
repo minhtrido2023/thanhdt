@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/pt_v4_capit_faithful.py

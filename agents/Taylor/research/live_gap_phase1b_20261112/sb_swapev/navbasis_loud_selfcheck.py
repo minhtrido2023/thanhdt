@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/navbasis_loud_selfcheck.py

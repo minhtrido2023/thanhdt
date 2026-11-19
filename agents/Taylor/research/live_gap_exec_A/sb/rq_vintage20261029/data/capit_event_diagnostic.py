@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/capit_event_diagnostic.py

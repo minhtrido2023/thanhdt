@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/pt_v6v2.py

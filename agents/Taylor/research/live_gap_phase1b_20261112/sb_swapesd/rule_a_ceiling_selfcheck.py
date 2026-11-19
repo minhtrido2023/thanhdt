@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/rule_a_ceiling_selfcheck.py

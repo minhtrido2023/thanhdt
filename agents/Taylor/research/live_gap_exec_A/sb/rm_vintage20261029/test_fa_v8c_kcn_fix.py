@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rm/WorkingClaude/test_fa_v8c_kcn_fix.py

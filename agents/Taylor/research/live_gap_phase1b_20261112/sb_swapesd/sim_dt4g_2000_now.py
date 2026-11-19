@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/sim_dt4g_2000_now.py

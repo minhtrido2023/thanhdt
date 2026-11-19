@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/golden_gate_test.py

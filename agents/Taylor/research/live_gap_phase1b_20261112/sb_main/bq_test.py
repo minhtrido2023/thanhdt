@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/bq_test.py

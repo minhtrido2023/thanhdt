@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/qt_v4_live_rank.py

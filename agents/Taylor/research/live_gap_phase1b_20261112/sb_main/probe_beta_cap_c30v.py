@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/probe_beta_cap_c30v.py

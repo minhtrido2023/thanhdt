@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/realistic_extended_overlay.py

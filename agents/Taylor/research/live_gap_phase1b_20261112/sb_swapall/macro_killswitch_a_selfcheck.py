@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/macro_killswitch_a_selfcheck.py

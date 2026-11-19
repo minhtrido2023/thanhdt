@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/tz_anchor_gate_shim.sh

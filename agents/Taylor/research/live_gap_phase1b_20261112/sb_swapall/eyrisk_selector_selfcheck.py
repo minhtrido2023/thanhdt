@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/eyrisk_selector_selfcheck.py

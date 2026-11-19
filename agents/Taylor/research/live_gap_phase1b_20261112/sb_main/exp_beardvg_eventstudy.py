@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/exp_beardvg_eventstudy.py

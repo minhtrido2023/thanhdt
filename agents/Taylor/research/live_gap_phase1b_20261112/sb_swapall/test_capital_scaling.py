@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_capital_scaling.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/rule_a_ref_guard_selfcheck.py

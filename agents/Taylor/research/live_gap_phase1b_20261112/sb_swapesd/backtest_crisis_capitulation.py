@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/backtest_crisis_capitulation.py

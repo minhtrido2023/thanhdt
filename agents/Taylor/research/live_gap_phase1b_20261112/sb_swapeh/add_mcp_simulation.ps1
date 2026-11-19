@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/add_mcp_simulation.ps1

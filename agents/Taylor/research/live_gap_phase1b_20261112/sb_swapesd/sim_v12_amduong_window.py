@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/sim_v12_amduong_window.py

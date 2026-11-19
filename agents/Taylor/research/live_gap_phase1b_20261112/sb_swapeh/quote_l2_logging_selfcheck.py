@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/quote_l2_logging_selfcheck.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/universe_scan.py

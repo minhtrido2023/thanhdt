@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/excluded_tickers_selfcheck.py

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/rubber_weekly.py

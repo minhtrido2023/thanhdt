@@ -1,8 +1,0 @@
-APC
-CCL
-KMR
-PGD
-QHD
-TDT
-VC3
-VGG

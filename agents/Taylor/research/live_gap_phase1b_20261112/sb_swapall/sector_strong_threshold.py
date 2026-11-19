@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/sector_strong_threshold.py

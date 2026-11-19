@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/_tmp_sig_dryrun.sql

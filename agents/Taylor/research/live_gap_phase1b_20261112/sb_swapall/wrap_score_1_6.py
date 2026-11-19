@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wrap_score_1_6.py

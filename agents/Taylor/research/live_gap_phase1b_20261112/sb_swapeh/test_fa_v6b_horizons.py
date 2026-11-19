@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_fa_v6b_horizons.py

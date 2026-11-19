@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/failopen_telegram_refresh_selfcheck.py

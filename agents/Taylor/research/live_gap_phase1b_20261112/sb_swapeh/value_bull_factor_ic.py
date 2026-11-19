@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/value_bull_factor_ic.py

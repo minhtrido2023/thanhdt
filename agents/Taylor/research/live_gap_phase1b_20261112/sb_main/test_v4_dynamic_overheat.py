@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_v4_dynamic_overheat.py

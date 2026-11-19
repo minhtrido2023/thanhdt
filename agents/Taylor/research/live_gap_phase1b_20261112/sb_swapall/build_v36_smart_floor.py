@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/build_v36_smart_floor.py

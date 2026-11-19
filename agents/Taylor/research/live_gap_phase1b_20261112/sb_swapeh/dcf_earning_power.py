@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/dcf_earning_power.py

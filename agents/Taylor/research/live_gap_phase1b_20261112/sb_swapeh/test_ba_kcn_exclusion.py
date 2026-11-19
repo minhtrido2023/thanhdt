@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/test_ba_kcn_exclusion.py

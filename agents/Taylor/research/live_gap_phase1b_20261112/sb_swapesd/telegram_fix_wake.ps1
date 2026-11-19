@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/telegram_fix_wake.ps1

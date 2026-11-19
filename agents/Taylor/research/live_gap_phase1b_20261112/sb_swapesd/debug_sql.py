@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/debug_sql.py

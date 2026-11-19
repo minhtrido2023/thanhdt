@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/post_sell_query.sql

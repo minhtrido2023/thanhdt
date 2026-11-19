@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/lag_rule_a_ceiling.py

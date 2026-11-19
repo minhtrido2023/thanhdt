@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/sim_v11_from_jun2025.py

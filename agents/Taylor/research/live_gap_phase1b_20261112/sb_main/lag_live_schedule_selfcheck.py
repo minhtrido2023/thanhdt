@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/lag_live_schedule_selfcheck.py
