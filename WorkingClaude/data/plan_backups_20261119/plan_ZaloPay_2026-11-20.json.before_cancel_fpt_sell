@@ -1,0 +1,216 @@
+{
+  "broker": "DNSE",
+  "account_no": "0001743768",
+  "mode": "live",
+  "strategy": "V2.4",
+  "strategy_version": "V2.4",
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "requires_user_approval": true,
+  "plan_date": "2026-11-20",
+  "account": "ZaloPay",
+  "signal_date": "2026-11-19",
+  "state_source": "DT5G_gated (source=DT5G_macro)",
+  "state_note": "DT5G NEUTRAL (state 3, as_of 2026-11-19, golive_state_today.json)",
+  "recommendations_file": "deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-11-19.csv",
+  "nav_basis": {
+    "source": "mike/bin/compute_active_nav.py --account ZaloPay (18/11 ~19:05 ICT, DNSE live)",
+    "computed_at": "2026-11-19",
+    "available_cash_vnd": 9280743.0,
+    "total_cash_minus_debt_vnd": 9283047.0,
+    "total_debt_vnd": 0.0,
+    "excluded_value_vnd": 313500000.0,
+    "egg_assets_vnd": 453920962.0,
+    "total_nav_vnd": 908599909.0,
+    "active_nav_vnd": 595099909.0,
+    "offbook_assets_vnd": 0.0,
+    "egg_note": "Egg đọc sống = tiền; ngân sách mua = cash + egg."
+  },
+  "lag_analysis": {
+    "signal_date": "2026-11-19",
+    "source_script": "mike/bin/filter_lag_entry_window.py",
+    "due_today": [],
+    "lag_upcoming_for_next_plans": [],
+    "note": "Script filter_lag_entry_window: due_today=[], upcoming=[] (calendar_check ok, plan_date 2026-11-20)."
+  },
+  "bal_analysis": {
+    "signal_date": "2026-11-19",
+    "n_bal": 0,
+    "bal_picks": [],
+    "note": "Recommend 19/11 chỉ có TCH (RE_BACKLOG_BUY) FLOOR_FAIL, ROE_Min3Y 3,0% — user loại 02/11 → 0 lệnh BAL."
+  },
+  "allocator": {
+    "w_lag_target": 0.5,
+    "note": "NEUTRAL, w_LAG 50% (ZaloPay); parking 0%. Không có mã LAG tới cửa sổ."
+  },
+  "capit_sizing": {
+    "capit_signal_today": false,
+    "note": "Không có lệnh CAPIT."
+  },
+  "discretionary_note": {
+    "TV1": "Đã bán hết, paused.",
+    "DRI": "Đã bán hết.",
+    "FPT": "Giữ 500cp, không bổ sung.",
+    "VGS": "Giữ 1500cp (~4,7% active_nav), dưới deadband 0,5% → không lệnh.",
+    "NNC": "Giữ 300cp, giá 47.800 trên trần no-chase 46.000 đã duyệt; không có quyết định mới → không lệnh."
+  },
+  "orders": [
+    {
+      "id": "SELL-FPT-AUTOEXIT-DISC-STOP",
+      "ticker": "FPT",
+      "side": "sell",
+      "qty": 500,
+      "ref_price": 45700.0,
+      "book": "DISCRETIONARY_SPECIAL",
+      "play_type": "DISCRETIONARY_AUTO_EXIT",
+      "priority": 1,
+      "urgency": "normal",
+      "note": "AUTO-EXIT DISCRETIONARY STOP — ⚠️ CẮT LỖ — ĐỀ XUẤT, user XÁC NHẬN khi duyệt plan (không tự bán): đóng 45,700 ≤ −10% giá vốn broker 51,160 (-10.67%) — ngưỡng cứng user 06/11 14:19 (discretionary_exit_rules.json)",
+      "dcf_check": null,
+      "dcf_override_reason": "",
+      "dd_check": null,
+      "dd_override_reason": "",
+      "cash_only": false,
+      "lever_f": null,
+      "loan_package_id": null,
+      "hard_no_chase_ceiling_vnd": null,
+      "ceiling_rule": null,
+      "ceiling_anchor_price": null,
+      "ceiling_anchor_date": null,
+      "ceiling_tau": null,
+      "hard_sell_floor_vnd": null,
+      "disc_exit": {
+        "triggers": [
+          "STOP"
+        ],
+        "pnl_pct": -0.106724,
+        "avg_cost_broker": 51160.0,
+        "close": 45700,
+        "sessions_held": 9,
+        "entry_date": "2026-11-06",
+        "requires_user_confirm": true,
+        "earliest_session": "MORNING",
+        "partial_fill_ok": false,
+        "rule_ref": "user 06/11/2026 14:19 ICT (decided_by: user) — mike/kb/projects/disc-fpt-nnc-approval-20261105.md mục CẬP NHẬT 06/11 14:19"
+      }
+    }
+  ],
+  "deferred_orders": [],
+  "notes": [
+    "Plan 20/11 (T6): HOLD ALL — recommend 19/11 không có LAG đến cửa sổ (due_today rỗng), BAL 0 (TCH FLOOR_FAIL, user loại 02/11), CAPIT không kích hoạt; 14 mã LAG có gói DD đều PACK_STALE. Σ mua = 0 → không cần chuyển Trứng vàng.",
+    "Park-trim: PARK 1,5tr vs target 0 — dưới ngưỡng 2,3tr → NO_TRIM.",
+    "⚠️ data/discretionary_exit_rules.json: VGS entry_date ghi 2026-11-11 nhưng khớp thật 12/11 — cần Mike/user sửa đồng hồ 25 phiên (tồn từ 19/11)."
+  ],
+  "decision": "HOLD ALL — 0 lệnh",
+  "park_trim_proposal": {
+    "account_label": "ZaloPay",
+    "asof": "2026-11-19",
+    "target_park": 0.0,
+    "trim_band": 0.005,
+    "orders": [],
+    "blocked": [],
+    "notes": [
+      "PARK 1.5tr vs target 0.0tr (pool 464.7tr) — vượt 1.5tr, chưa quá ngưỡng 2.3tr"
+    ],
+    "at_or_below_target": [],
+    "park_mv_vnd": 1481900.0,
+    "cash_available_vnd": 9280743.0,
+    "cash_total_vnd": 9283047.0,
+    "reconcile_ok": true,
+    "unverified_tickers": [],
+    "excluded_tickers": [
+      "DGC",
+      "PNJ"
+    ],
+    "state": {
+      "state": 3,
+      "state_name": "NEUTRAL",
+      "date": "2026-11-19",
+      "etf_park_frac_live": 0.0
+    },
+    "cash_basis": "total_cash",
+    "cash_dividend_receiving_vnd": 0.0,
+    "cash_debt_vnd": 0.0,
+    "egg_assets_vnd": 453920962.0,
+    "excluded_dividend_receivable_pending_vnd": 0.0,
+    "excluded_dividend_receivable_detail": [],
+    "pool_vnd": 464685909.0,
+    "target_park_vnd": 0.0,
+    "delta_vnd": -1481900.0,
+    "threshold_vnd": 2323429.545,
+    "decision": "NO_TRIM",
+    "_merged_into_orders": "⛔ KHÔNG merge vào orders[] — L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh."
+  },
+  "merge_park_orders": {
+    "owner": "park_merge_v1",
+    "layers": {
+      "L1": {
+        "accepted": false,
+        "reason": "L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh."
+      },
+      "L2": {
+        "accepted": false,
+        "reason": "L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+      }
+    },
+    "n_generated": 0,
+    "n_dropped_owned": 0,
+    "sell_gross_vnd": 0,
+    "sell_fee_est_vnd": 0,
+    "warnings": [
+      "L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh.",
+      "L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+    ],
+    "note": "orders[] phần bán PARK được DỰNG LẠI mỗi lần chạy (không cộng dồn). Chạy lại merge với artifact mới = kết quả mới đúng, không phải chồng lên."
+  },
+  "discretionary_inject_notes": [
+    {
+      "at": "2026-11-19T20:30:01+07:00",
+      "ticker": "TV1",
+      "action": "state_skipped",
+      "state_file": "data/trade_plans/discretionary/state_TV1_ZaloPay.json",
+      "note": "status=paused (≠ active) — chương trình KHÔNG sinh lệnh; đúng ý thì bỏ qua, không thì bật lại state"
+    }
+  ],
+  "auto_exit_inject_notes": [
+    {
+      "at": "2026-11-19T20:40:01+07:00",
+      "source": "auto_exit_inject",
+      "injected": [
+        {
+          "ticker": "FPT",
+          "book": "DISCRETIONARY_SPECIAL",
+          "sessions_held": "STOP pnl=-10.67% phiên=9"
+        }
+      ]
+    }
+  ],
+  "jit_unpark_proposal": {
+    "layer": "L2_JIT_UNPARK",
+    "account_label": "ZaloPay",
+    "asof": "2026-11-19",
+    "park_mv_vnd": 1481900.0,
+    "cash_available_vnd": 9280743.0,
+    "egg_assets_vnd": 453920962.0,
+    "reconcile_ok": true,
+    "unverified_tickers": [],
+    "excluded_tickers": [
+      "DGC",
+      "PNJ"
+    ],
+    "margin_room_vnd": 0.0,
+    "friction": 0.0015,
+    "orders": [],
+    "buy_amendments": [],
+    "blocked": [],
+    "notes": [
+      "không có lệnh MUA book BAL/LAG trong plan ⇒ L2 no-op (đúng thiết kế: L2 chỉ chạy khi có lệnh mua thật)"
+    ],
+    "plan_path": "plan_ZaloPay_2026-11-20.json",
+    "n_buy_orders_bal_lag": 0,
+    "decision": "NO_TRIGGER",
+    "_merged_into_orders": "⛔ KHÔNG merge vào orders[] — L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+  },
+  "approved_by": "user - Discord 19/11/2026 21:50 ICT: duyệt bán FPT (AUTO-EXIT STOP -10%); VGS hủy mua thêm; NNC không mua đuổi",
+  "approved_at": "2026-11-19T21:51:56+07:00"
+}
