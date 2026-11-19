@@ -441,6 +441,34 @@ def build_cap_signal_advisory_line(trace_id=None):
     return val
 
 
+_MSTRESS_CACHE = {"t": 0.0, "val": None}
+
+
+def build_macro_stress_line():
+    """Sổ cảnh báo căng thẳng vĩ mô C1 (USD/VND, TPCP10Y, liên NH−điều hành, DXY) — user duyệt wire
+    2026-11-19. Nguồn: `agents/Taylor/macro_stress_ledger.py::run()` (PREREG khoá 2026-11-19; tự
+    append-only ghi sổ khi có episode MỚI, idempotent theo (fire_date, trigger)). **THUẦN HIỂN THỊ,
+    GIẢ THUYẾT CHƯA KIỂM** — không cap/sizing/gate, không nối macro_state_live/get_gated_state/w_LAG;
+    nhãn "GIẢ THUYẾT CHƯA KIỂM" nằm sẵn trong chuỗi `run()` trả về, giữ nguyên. Cached 900s. Dữ liệu
+    cũ >7 ngày ⇒ chính `run()` trả dòng "không có dữ liệu tươi"; lỗi (BQ/import) ⇒ None, caller bỏ
+    dòng, không làm hỏng báo cáo (cùng khuôn build_cap_signal_advisory_line)."""
+    if _MSTRESS_CACHE["val"] is not None and (time.time() - _MSTRESS_CACHE["t"]) < 900:
+        return _MSTRESS_CACHE["val"]
+    val = None
+    try:
+        import sys
+        if _HAZ_DIR not in sys.path:
+            sys.path.insert(0, _HAZ_DIR)
+        from macro_stress_ledger import run as _msl_run
+        val = _msl_run()[0]
+    except Exception as e:
+        import sys as _sys
+        print(f"[dna_report] macro_stress skipped (fail-safe): {e}", file=_sys.stderr)
+        val = None
+    _MSTRESS_CACHE.update(t=time.time(), val=val)
+    return val
+
+
 _NBASE_CACHE = {"t": 0.0, "val": None}
 
 
