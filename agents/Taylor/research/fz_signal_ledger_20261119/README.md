@@ -32,7 +32,7 @@ Cụm dựng lúc đọc (`summary`), theo từng setup: 2 ngày signal liền n
 Thiếu cột bắt buộc, `signal_id` rỗng/trùng trong file, số NaN/≤0, tái dựng net lệch, lãi dep1m lỗi, cùng `signal_id` mà giá trị khác sổ ⇒ `rc=2`, **không ghi gì**. Ghi nguyên tử (tmp + `os.fsync` + `os.replace`), khoá `flock`, sổ cũ phải là tiền tố của sổ mới.
 
 ## KHÔNG làm (có chủ đích)
-- Không cron, không nối live. **Nguồn signal hằng ngày từ nhóm nghiên cứu kia CHƯA có** — hiện chỉ có file deal_export tĩnh (đến 2026-11-03). **Việc user phải xin:** nhóm kia xuất `deals_<setup>.csv` cùng định dạng mỗi phiên (hoặc mỗi tuần); có rồi mới thêm cron (đăng ký `kb/cron_registry.md`, §11).
+- Không cron, không nối live. **Nguồn signal hằng ngày từ nhóm nghiên cứu kia CHƯA có** — hiện chỉ có file deal_export tĩnh (đến 2026-11-03). **User chốt 2026-11-19: KHÔNG xin thêm deals từ nhóm kia** (chiến lược của họ chỉ để tham khảo) ⇒ chương trình NGỦ; sổ chỉ có dữ liệu nếu user tự cấp `deals_<setup>.csv` cùng định dạng. Muốn tự động thì mới thêm cron (đăng ký `kb/cron_registry.md`, §11).
 - Không mở job nghiên cứu mới trên các setup này — xem mục ĐÓNG BĂNG trong `kb/projects/rnd-pipeline-tracker.md`.
 
 ## Chạy

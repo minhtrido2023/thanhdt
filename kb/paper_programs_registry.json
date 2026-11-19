@@ -889,7 +889,7 @@
       ],
       "data_sources": [
         "mike/data/fz_signal_ledger.csv (append-only, bin/fz_signal_ledger.py ingest)",
-        "file deals_<setup>.csv định dạng deal_export của nhóm nghiên cứu kia (nguồn signal hằng ngày CHƯA có — user phải xin)",
+        "file deals_<setup>.csv định dạng deal_export của nhóm nghiên cứu kia (KHÔNG có nguồn signal hằng ngày — user chốt 2026-11-19: chiến lược nhóm kia chỉ để tham khảo, không xin thêm deals)",
         "agents/Taylor/research/fz_signal_ledger_20261119/README.md",
         "agents/Taylor/research/intraday_cluster_audit_20261119/README.md",
         "agents/Taylor/research/basket_vs_fz_capit_20261119/README.md"
@@ -899,7 +899,7 @@
         "reason": "Chương trình thuần quan sát: sản phẩm = sổ append-only; không sinh lệnh, không có sleeve NAV, chưa có cron/nguồn signal hằng ngày."
       },
       "review_short": "2027-03-31 checkpoint đầu (đếm cụm); 2028-06-30 đánh giá đủ N (>=20 cụm) · dừng sớm nếu 10 cụm mới có mean excess<=0",
-      "notes": "Job Taylor_20261119_052906 (Mike #8 plan E). Hai mốc ngày là đề xuất. ĐÓNG BĂNG nghiên cứu mới trên FZ-001/FZ-002/C-CEIL/C-NFLOOR/C-NFLOOR3/C-TAMIX/C-ONID — xem kb/projects/rnd-pipeline-tracker.md. Ingest chạy tay; muốn tự động phải xin nhóm kia xuất signal hằng ngày (user quyết) rồi mới thêm cron (§11 cron_registry)."
+      "notes": "Job Taylor_20261119_052906 (Mike #8 plan E). Hai mốc ngày là đề xuất. ĐÓNG BĂNG nghiên cứu mới trên FZ-001/FZ-002/C-CEIL/C-NFLOOR/C-NFLOOR3/C-TAMIX/C-ONID — xem kb/projects/rnd-pipeline-tracker.md. Ingest chạy tay. User chốt 2026-11-19: KHÔNG xin thêm deals từ nhóm kia (chiến lược chỉ để tham khảo) ⇒ chương trình NGỦ (dormant), không cron; sổ chỉ có dữ liệu nếu user tự cấp file hoặc mở lại. Tới mốc review mà sổ vẫn rỗng ⇒ đề xuất ĐÓNG chương trình, không gia hạn."
     }
   ]
 }
