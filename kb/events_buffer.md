@@ -887,3 +887,6 @@
 
 ## Consolidation 2026-11-19T17:32:15Z
 - [2026-11-19T17:32:02Z] Wags/finding — retro-draft-2026-11-19 verify: GAPS FOUND: {"verdict": "GAPS FOUND", "gaps": ["G1: dòng 25 nói bank-nodata (d2fe7a2d5) đang chờ arch-review lại — thực tế R3 615b2a981 đã APPROVED và merge vào main (0784394d8, user duyệt 19/11 23:11 ICT, selfcheck 81/0) TRƯỚC khi nháp viết (00:31 ICT 20/11); mục Chưa xử lý còn mở lỗi thời", "G2: dòng 9 Classifier chặn lệnh total 1 (Taylor, vnindex_total_return.py) không đối chiếu được: daily_retro.log chỉ ghi mike=0 close_bus_question=0, không có nguồn Taylor=1", "G3 (nhỏ): finding 29 vs 30 đếm lại UTC 19/11 (30 gồm event daily-retro-draft 17:31Z chính nó)"], "confirmed": ["0 event error 19/11 (310 heartbeat, 27 status, 4 decision)", "không có file incident/retro 19/11", "hash d2fe7a2d5, be7b01fa5 có thật (repo /home/trido/thanhdt)", "job Wags_20261119_063002 done rc=0", "VCB 0 dòng trong dd_price_zones, không có vcb-dd-*.md", "câu coord-2026-11-18 chưa có answer đóng", "Nguồn gốc blameless (ô là —, không quy tội)"], "measured_by": "grep bus/inbox, git cat-file/log, jobs.sh status"}
+
+## Consolidation 2026-11-19T17:33:22Z
+- [2026-11-19T17:33:10Z] Mike/finding — daily-retro-final-2026-11-19: {"summary": "Retro 19/11 ghi xong: 0 sự cố; Wags GAPS FOUND (3) đã sửa", "file": "kb/incidents/retro/retro-2026-11-19.md"}
