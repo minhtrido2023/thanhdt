@@ -170,7 +170,9 @@ def test_failsafe():
 
 
 # =====================================================================================
-# 4. FAIL-CLOSED override — a fabricated live grade must never reach the latest history row
+# 4. FAIL-CLOSED override — a fabricated live grade must never IMPROVE the latest history row.
+#    Phương án B (2026-11-19): nodata/noROE live ⇒ dòng mới nhất = max(proxy, live, 4) (chỉ hạ hạng);
+#    cổng chặn (lens đọc lỗi...) ⇒ giữ proxy. Chi tiết cổng: rating_8l_history_bank_nodata_gate_selfcheck.py
 # =====================================================================================
 def test_override_failclosed(tmp):
     def hist_frame():
@@ -179,37 +181,54 @@ def test_override_failclosed(tmp):
                  rating=4, core_score=0, tier="D"),
             dict(ticker="BBB", eff_date="2026-01-01", q_time="2025-09-30", route="BANK",
                  rating=5, core_score=0, tier="E"),
+            dict(ticker="CCC", eff_date="2026-01-01", q_time="2025-09-30", route="BANK",
+                 rating=2, core_score=0, tier="B"),
         ])
 
-    def run(live_rows, cols=("ticker", "route", "rating", "note")):
+    # mã lens giả L1..L4: lens đọc được (G1 tắt), tỉ lệ nodata <=45% (G3 tắt), snapshot vắng (G4 bỏ qua)
+    FILL = [dict(ticker=f"L{i}", route="BANK", rating=3, note="profitable (AQ-modulated)") for i in range(1, 5)]
+
+    def run(live_rows, cols=("ticker", "route", "rating", "note"), lens=True):
         d = os.path.join(tmp, "data"); os.makedirs(d, exist_ok=True)
-        pd.DataFrame(live_rows)[list(cols)].to_csv(os.path.join(d, "rating_8l.csv"), index=False)
-        old = H.WORKDIR
+        rows = list(live_rows) + (FILL if "note" in cols else [])
+        pd.DataFrame(rows)[list(cols)].to_csv(os.path.join(d, "rating_8l.csv"), index=False)
+        lp = os.path.join(d, "bank_lens_v3.csv")
+        if lens: pd.DataFrame({"ticker": ["L1", "L2", "L3", "L4"], "ROE": 0.15}).to_csv(lp, index=False)
+        elif os.path.exists(lp): os.unlink(lp)
+        old, _sn = H.WORKDIR, os.environ.get("R8L_BANK_LENS_SNAPSHOT")
+        os.environ["R8L_BANK_LENS_SNAPSHOT"] = os.path.join(d, "no_snapshot.json")
         try:
             H.WORKDIR = tmp
             return H.override_current_bank_aq(hist_frame())
         finally:
             H.WORKDIR = old
+            if _sn is None: os.environ.pop("R8L_BANK_LENS_SNAPSHOT", None)
+            else: os.environ["R8L_BANK_LENS_SNAPSHOT"] = _sn
 
-    out = run([dict(ticker="AAA", route="BANK", rating=3, note="bank-nodata"),
-               dict(ticker="BBB", route="BANK", rating=3, note="bank-noROE")])
-    ok(list(out["rating"]) == [4, 5],
-       "override REJECTS bank-nodata / bank-noROE (fail-closed)", str(list(out["rating"])))
-    ok(list(out["tier"]) == ["D", "E"], "override leaves tier alone when it rejects")
+    NOD = [dict(ticker="AAA", route="BANK", rating=3, note="bank-nodata"),
+           dict(ticker="BBB", route="BANK", rating=3, note="bank-noROE"),
+           dict(ticker="CCC", route="BANK", rating=3, note="bank-nodata")]
+    out = run(NOD)
+    ok(list(out["rating"]) == [4, 5, 4],
+       "override nodata/noROE = downgrade-only max(proxy, live, 4): 4/5 giữ, 2 -> 4", str(list(out["rating"])))
+    ok(list(out["tier"]) == ["D", "E", "D"], "override updates tier with the downgraded rating")
+    out = run(NOD, lens=False)
+    ok(list(out["rating"]) == [4, 5, 2],
+       "cổng chặn: lens đọc lỗi ⇒ KHÔNG hạ (giữ proxy, như trước phương án B)", str(list(out["rating"])))
 
     out = run([dict(ticker="AAA", route="BANK", rating=2, note="strong asset-quality"),
                dict(ticker="BBB", route="BANK", rating=1, note="elite asset-quality")])
-    ok(list(out["rating"]) == [2, 1], "override still APPLIES a real lens-backed grade",
+    ok(list(out["rating"]) == [2, 1, 2], "override still APPLIES a real lens-backed grade",
        str(list(out["rating"])))
-    ok(list(out["tier"]) == ["B", "A"], "override updates tier with the rating")
+    ok(list(out["tier"]) == ["B", "A", "B"], "override updates tier with the rating")
 
-    out = run([dict(ticker="AAA", route="BANK", rating=3, note="bank-nodata"),
+    out = run([dict(ticker="CCC", route="BANK", rating=3, note="bank-nodata"),
                dict(ticker="BBB", route="BANK", rating=1, note="elite asset-quality")])
-    ok(list(out["rating"]) == [4, 1], "rejection is per-row, not all-or-nothing", str(list(out["rating"])))
+    ok(list(out["rating"]) == [4, 1, 4], "nodata vs lens is per-row, not all-or-nothing", str(list(out["rating"])))
 
     out = run([dict(ticker="AAA", route="BANK", rating=3), dict(ticker="BBB", route="BANK", rating=1)],
               cols=("ticker", "route", "rating"))
-    ok(list(out["rating"]) == [4, 5],
+    ok(list(out["rating"]) == [4, 5, 2],
        "no `note` column -> reject EVERY override (never infer from absence, §28)", str(list(out["rating"])))
 
     # MUTATION KILL: revert the fix (accept every live row) and prove this test catches it
@@ -227,20 +246,19 @@ def test_override_failclosed(tmp):
         return out
     try:
         H.override_current_bank_aq = buggy
-        bad = run([dict(ticker="AAA", route="BANK", rating=3, note="bank-nodata"),
-                   dict(ticker="BBB", route="BANK", rating=3, note="bank-noROE")])
-        ok(list(bad["rating"]) == [3, 3],
-           "MUTATION: pre-fix fail-open code IS caught by this test (4,5 -> 3,3)", str(list(bad["rating"])))
+        bad = run(NOD)
+        ok(list(bad["rating"])[:3] != [4, 5, 4],
+           "MUTATION: pre-fix fail-open code IS caught by this test (-> 3,3,3)", str(list(bad["rating"])))
     finally:
         H.override_current_bank_aq = saved
-    print("  [4] fail-closed override: 6 assertions + 1 mutation kill")
+    print("  [4] fail-closed override: 8 assertions + 1 mutation kill")
 
     # the REAL live file: which banks does the fix now reject, and would the gate have moved?
     live = pd.read_csv(os.path.join(WORKDIR, "data", "rating_8l.csv"))
     lb = live[live["route"] == "BANK"]
     bad = lb[lb["note"].astype(str).str.contains("bank-nodata|bank-noROE", regex=True)]
     print(f"  [4] real data/rating_8l.csv: {len(bad)}/{len(lb)} BANK rows are fabricated "
-          f"({', '.join(sorted(bad['ticker']))}) -> now rejected")
+          f"({', '.join(sorted(bad['ticker']))}) -> now downgrade-only max(proxy, live, 4)")
     return sorted(bad["ticker"])
 
 
@@ -335,7 +353,7 @@ def main():
         print(f"  [FAIL] {f}")
     print(f"BANK panel        : {stats['rows']:,} rows, {stats['changed']:,} ratings changed, "
           f"{stats['gate_flips']} gate flips")
-    print(f"override rejected : {len(rejected)} fabricated live bank grade(s): {', '.join(rejected)}")
+    print(f"override nodata   : {len(rejected)} fabricated live bank grade(s): {', '.join(rejected)}")
     print("VERDICT           : " + ("PASS" if not FAILS else "FAIL"))
     sys.exit(0 if not FAILS else 1)
 

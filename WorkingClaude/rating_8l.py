@@ -417,7 +417,13 @@ def rate_bank(r):
     strong ROE+capital is still investable (VPB: NPL 3.6% but ROE 15.5%/CAR 14.3% → 3, not 5).
     Only a genuinely weak franchise (low ROE) → 5. (Replaces the old NPL>3%-AVOID cliff, user 2026-06-02.)"""
     b = BANKD.get(r["ticker"])
-    if not b: return 3, "bank-nodata"
+    # FAIL-CLOSED 2026-11-19 (user duyệt, job Taylor_20261119_095521): mã ngân hàng KHÔNG có trong
+    # data/bank_lens_v3.csv ⇒ 4 (trước đây 3 = điểm BỊA, lọt cổng ≤3 dù không có số liệu nào chống lưng).
+    # Phía fa_ratings_8l: rating_8l_history.override_current_bank_aq (phương án B 2026-11-19) đưa nhãn này
+    # vào dòng mới nhất dạng CHỈ HẠ HẠNG max(proxy, live, 4), có cổng chặn khi lens đọc lỗi.
+    # Giữ NGUYÊN chuỗi nhãn "bank-nodata": override history khớp theo chuỗi này. "bank-noROE" vẫn 3 ở đây
+    # (history áp sàn 4 cho nó ở dòng live).
+    if not b: return 4, "bank-nodata"
     roe, npl, cov = b.get("ROE"), b.get("NPL"), b.get("coverage")
     if pd.isna(roe): return 3, "bank-noROE"
     if roe < 0.08: return 5, "weak franchise (ROE<8%)"          # only genuine weakness -> 5

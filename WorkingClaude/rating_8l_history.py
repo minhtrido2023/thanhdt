@@ -524,7 +524,144 @@ def rate_row(r):
     return max(rating, eq_flag(r))              # earnings-quality gate (downgrade-only, post-moat)
 
 
-def override_current_bank_aq(out):
+# ---- bank-nodata DOWNGRADE-ONLY + cổng chặn (phương án B, user duyệt 2026-11-19 21:5x ICT,
+#      job Taylor_20261119_145312) -------------------------------------------------------------------
+NODATA_NOTES = ("bank-nodata", "bank-noROE")
+BANK_NODATA_FLOOR = 4            # mã bank thiếu lens ⇒ dòng live mới nhất KHÔNG được tốt hơn 4 (cổng ≤3 chặn)
+# Ngưỡng G3: tỉ lệ (nodata ∪ noROE)/số mã BANK trong rating_8l.csv. Đo 2026-11-19: 10/28 = 35,7% là
+# CẤU TRÚC (18 mã lens / 28 mã BANK). 45% chừa chỗ cho +2..3 mã bank mới niêm yết chưa có lens
+# (12/30=40,0%, 13/31=41,9%) mà vẫn bắt việc mất ≥3 mã lens (13/28=46,4%). Mất 1-2 mã lens (nodata) do G2/G4
+# bắt; mất ROE của 1-2 mã còn trong lens (noROE) do G4 bắt (G2 không áp được) — G3 chỉ là lưới cho mất hàng loạt.
+BANK_NODATA_MAX_FRAC = 0.45
+
+
+def _bank_gate_bus_event(reasons, notify_err):
+    """Dấu vết BỀN ngoài log (log cron không ai đọc): append bus event `warning` do Winston đứng tên. PHẠM VI THẬT
+    (đã kiểm 2026-11-19): event vào kb/events_buffer.md + tóm tắt Fleet Updates #mike; KHÔNG vào delta-append của
+    mike_json.py (chỉ finding/answer/decision/verification) và ops_health_check.sh KHÔNG quét `warning` ⇒ đây là
+    dấu vết để điều tra sau, KHÔNG phải kênh có người/checker chủ động đọc — kênh chủ động vẫn là Discord. Dedup: marker JSON = hash(reasons +
+    ngày ICT + notify_lỗi?) ⇒ cùng bộ lý do cùng ngày chỉ ghi 1 lần (GIỚI HẠN: ngày mới hoặc bộ lý do đổi thì
+    ghi lại; marker chỉ ghi SAU khi append rc=0 nên lỗi append sẽ được thử lại ở run sau). Chỉ gọi ở live_run."""
+    import json, hashlib
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    day = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%d")
+    key = hashlib.sha1(json.dumps([sorted(reasons), day, bool(notify_err)], ensure_ascii=False).encode()).hexdigest()
+    marker = os.environ.get("R8L_BANK_GATE_MARKER") or os.path.join(WORKDIR, "data", "bank_gate_alert_marker.json")
+    try:
+        with open(marker, encoding="utf-8") as f:
+            if json.load(f).get("key") == key:
+                print(f"  [bank-gate] bus event DEDUP (cùng bộ lý do trong ngày {day}, marker {marker})"); return
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"  [bank-gate] marker {marker} đọc lỗi ({type(e).__name__}: {e}) — ghi bus event lại")
+    bus = os.environ.get("R8L_BANK_GATE_BUS") or os.path.join(WORKDIR, "mike", "bin", "append_event.sh")
+    payload = {"reasons": reasons, "notify_error": notify_err, "day": day,
+               "measured_by": "rating_8l_history.bank_nodata_gate / override_current_bank_aq lúc chạy"}
+    try:
+        r = subprocess.run([bus, "Winston", "warning", "fa_ratings_8l-bank-nodata-gate",
+                            json.dumps(payload, ensure_ascii=False)], capture_output=True, text=True, timeout=60)
+        if r.returncode != 0:
+            print(f"  [bank-gate] append_event rc={r.returncode} — bus CHƯA có dấu vết. stderr thật: "
+                  f"{r.stderr.strip()[-500:]}"); return
+        tmp = marker + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f: json.dump({"key": key, "day": day}, f)
+        os.replace(tmp, marker)
+    except Exception as e:
+        print(f"  [bank-gate] gọi {bus} lỗi — bus CHƯA có dấu vết: {type(e).__name__}: {e}")
+
+
+def _bank_gate_alert(text, send, reasons=None):
+    """Cảnh báo TO khi cổng chặn bật: luôn in banner vào log; ghi R8L_BANK_GATE_ALERT_SINK nếu có (selfcheck);
+    gửi Trading Daily qua notify_thread.sh CHỈ khi `send` (run canonical/ép BQ) và không ở chế độ test; cùng
+    điều kiện đó ghi bus event bền (_bank_gate_bus_event), kèm lỗi notify nếu có.
+    Lỗi gửi ⇒ in rc + stderr THẬT (§29), không nuốt."""
+    print("!" * 100 + "\n" + text + "\n" + "!" * 100)
+    sink = os.environ.get("R8L_BANK_GATE_ALERT_SINK")
+    if sink:
+        with open(sink, "a", encoding="utf-8") as f: f.write(text + "\n---\n")
+    if not send or os.environ.get("MIKE_BOT_TEST_MODE") == "1":
+        print("  [bank-gate] alert KHÔNG gửi Discord (run thí nghiệm/test) — chỉ log"); return
+    notify = os.environ.get("R8L_BANK_GATE_NOTIFY") or os.path.join(WORKDIR, "mike", "bin", "notify_thread.sh")
+    notify_err = None
+    try:
+        r = subprocess.run([notify, text, "trading_daily"], capture_output=True, text=True, timeout=60)
+        if r.returncode != 0:
+            notify_err = f"notify_thread.sh rc={r.returncode} stderr={r.stderr.strip()[-500:]}"
+            print(f"  [bank-gate] {notify_err} — CẢNH BÁO CHƯA TỚI Discord")
+    except Exception as e:
+        notify_err = f"gọi {notify} lỗi: {type(e).__name__}: {e}"
+        print(f"  [bank-gate] {notify_err} — CẢNH BÁO CHƯA TỚI Discord")
+    _bank_gate_bus_event(reasons if reasons else [text], notify_err)
+
+
+def bank_nodata_gate(lb):
+    """Cổng chặn trước khi hạ hạng hàng loạt. Trả (lý do bật cổng [list str], tập ticker lens hiện tại|None).
+    Bất kỳ lý do nào ⇒ run này KHÔNG hạ hạng mã nodata nào (giữ proxy như trước phương án B) + cảnh báo.
+      G1 bank_lens_v3.csv đọc lỗi / rỗng (rating_8l.py:551-556 chỉ print ⇒ MỌI bank thành nodata).
+      G2 mã mang nhãn bank-nodata NHƯNG có trong lens file hiện tại (2 nguồn mâu thuẫn).
+      G3 tỉ lệ nodata trong BANK > BANK_NODATA_MAX_FRAC (hoặc không có dòng BANK nào).
+      G4 mã có hạng lens THẬT ở snapshot kỳ trước nay mang nhãn bank-nodata HOẶC bank-noROE (noROE = mã CÒN
+         trong lens nhưng ROE NaN ⇒ G2 không thấy được; snapshot đọc lỗi cũng bật cổng)."""
+    import json
+    reasons = []
+    lens_path = os.path.join(WORKDIR, "data", "bank_lens_v3.csv")
+    lens = None
+    try:
+        _ld = pd.read_csv(lens_path)
+        lens = set(_ld["ticker"].dropna().astype(str))
+        if not lens: reasons.append(f"G1 lens RỖNG: {lens_path} đọc được nhưng 0 mã")
+    except Exception as e:
+        reasons.append(f"G1 lens ĐỌC LỖI: {lens_path}: {type(e).__name__}: {e}")
+    tks = [str(t) for t in lb["ticker"]]
+    nodata = sorted(t for t, nt in zip(tks, lb["note"]) if "bank-nodata" in str(nt))
+    bad = sorted(t for t, nt in zip(tks, lb["note"]) if any(k in str(nt) for k in NODATA_NOTES))
+    n_all = len(set(tks))
+    if n_all == 0:
+        reasons.append("G3 rating_8l.csv không có dòng BANK nào")
+    elif len(bad) / n_all > BANK_NODATA_MAX_FRAC:
+        reasons.append(f"G3 tỉ lệ nodata {len(bad)}/{n_all} = {len(bad)/n_all:.1%} > ngưỡng "
+                       f"{BANK_NODATA_MAX_FRAC:.0%}: {', '.join(bad)}")
+    if lens:
+        inc = [t for t in nodata if t in lens]
+        if inc:
+            _lm = os.path.join(WORKDIR, "data", "rating_8l.csv")
+            _mt = lambda q: (pd.Timestamp(os.path.getmtime(q), unit="s", tz="UTC").tz_convert("Asia/Ho_Chi_Minh")
+                             .strftime("%Y-%m-%d %H:%M ICT") if os.path.exists(q) else "không có file")
+            reasons.append(f"G2 {len(inc)} mã gắn nhãn bank-nodata NHƯNG có trong {lens_path}: {', '.join(inc)} "
+                           f"(mtime rating_8l.csv {_mt(_lm)}, bank_lens_v3.csv {_mt(lens_path)}). Nguyên nhân CHƯA "
+                           f"xác định — kiểm log pt_8l_daily dòng 'bank lens load fail'")
+    snap = os.environ.get("R8L_BANK_LENS_SNAPSHOT") or os.path.join(WORKDIR, "data", "bank_lens_ticker_snapshot.json")
+    if os.path.exists(snap):
+        try:
+            with open(snap, encoding="utf-8") as f: prev = set(json.load(f)["lens_tickers"])
+            lost = [t for t in bad if t in prev]
+            if lost:
+                reasons.append(f"G4 {len(lost)} mã có hạng lens THẬT ở snapshot kỳ trước ({snap}) nay thành bank-nodata/bank-noROE: "
+                               f"{', '.join(lost)}. Nếu bỏ lens có chủ đích: sửa snapshot bằng tay rồi chạy lại")
+        except Exception as e:
+            reasons.append(f"G4 snapshot ĐỌC LỖI: {snap}: {type(e).__name__}: {e}")
+    else:
+        print(f"  [bank-gate] G4 chưa có snapshot {snap} (lần đầu) — G2 vẫn phủ ca lens đọc lỗi")
+    return reasons, lens
+
+
+def _write_lens_snapshot(lens):
+    """Ghi snapshot tập mã lens (atomic tmp + os.replace, §5) — CHỈ gọi ở run canonical khi cổng KHÔNG bật."""
+    import json
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    snap = os.environ.get("R8L_BANK_LENS_SNAPSHOT") or os.path.join(WORKDIR, "data", "bank_lens_ticker_snapshot.json")
+    tmp = snap + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"asof": datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%d %H:%M ICT"),
+                   "source": os.path.join(WORKDIR, "data", "bank_lens_v3.csv"),
+                   "lens_tickers": sorted(lens)}, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, snap)
+
+
+def override_current_bank_aq(out, live_run=False):
     """Override ONLY the CURRENT-snapshot bank rating with the live AQ-aware rate_bank value (NPL/coverage
     from data/bank_lens_v3.csv, via rating_8l.py -> data/rating_8l.csv) while leaving the entire historical
     proxy series untouched. Rationale (user 2026-06-16): the history publisher rates banks ROE-only because
@@ -533,43 +670,81 @@ def override_current_bank_aq(out):
     coverage<0.9). Only the single latest eff_date row per BANK ticker changes; all prior (backtest) rows keep
     the proxy -> no look-ahead introduced. Fail-safe: missing live file / ticker -> keep proxy.
 
-    FAIL-CLOSED on no-data (2026-09-27, H1 wire): rate_bank() returns a FABRICATED 3 ("bank-nodata"
-    when the ticker is absent from data/bank_lens_v3.csv, "bank-noROE" when its ROE is null). Importing
-    that 3 overwrote a ROE-derived grade with a constant and flipped the <=3 gate for 6 illiquid UPCoM
-    banks (BAB/BVB/PGB 4->3, NVB/SGB 5->3, KLB 1->4 pre-wire). Those notes are now REJECTED: the row
-    keeps this module's own AQ-aware/proxy value, which is grounded in ticker_financial ROE. Only a live
-    row whose rating actually came from real lens data may override. `note` absent from the CSV -> reject
-    EVERY override rather than guess (coding_guidelines §28: never infer from absence of evidence)."""
+    NO-DATA = CHỈ ĐƯỢC HẠ HẠNG (phương án B, user duyệt 2026-11-19; thay luật "loại bỏ" 2026-09-27):
+    dòng live mang nhãn "bank-nodata" (mã vắng data/bank_lens_v3.csv; rating_8l.py nay trả 4) hoặc
+    "bank-noROE" (lens có mã nhưng ROE trống; rating_8l.py vẫn trả 3) KHÔNG còn bị bỏ qua để giữ proxy
+    nữa: dòng MỚI NHẤT của mã đó nhận max(proxy, live, BANK_NODATA_FLOOR=4) ⇒ không bao giờ tốt hơn proxy,
+    không bao giờ lọt cổng ≤3 (LAG/BAL/custom30V đọc fa_ratings_8l). Chuỗi lịch sử (backtest) KHÔNG đổi.
+    Proxy noROE của chính module này (rate_bank_hist/proxy trả 3 khi ROE trống) KHÔNG đổi: đo 2026-11-19
+    0/1009 dòng BANK 2014-2026 dính (REPORT_B.md mục 3).
+    CỔNG CHẶN (bank_nodata_gate): lens đọc lỗi/rỗng, mâu thuẫn lens↔nhãn, tỉ lệ nodata > ngưỡng, hoặc mã có
+    lens kỳ trước nay nodata ⇒ run này KHÔNG hạ hạng mã nào (fail-OPEN về hành vi cũ = giữ proxy) + cảnh
+    báo Trading Daily — vì hạ hàng loạt khi lens hỏng sẽ chặn mua LAG cả mã đang giữ (MBB/VPB/VIB).
+    `note` absent from the CSV -> reject EVERY override rather than guess (§28).
+    live_run=True (chỉ main() ở run canonical/ép BQ): gửi cảnh báo Discord + cập nhật snapshot lens."""
     try:
         live = pd.read_csv(os.path.join(WORKDIR, "data", "rating_8l.csv"))
     except Exception as e:
-        print(f"  [bank-AQ override] SKIPPED (live rating_8l.csv unavailable -> keep proxy): {e}"); return out
+        _p = os.path.join(WORKDIR, "data", "rating_8l.csv")
+        _why = f"rating_8l.csv ĐỌC LỖI/KHÔNG CÓ: {_p}: {type(e).__name__}: {e}"
+        print(f"  [bank-AQ override] SKIPPED (live rating_8l.csv unavailable -> keep proxy): {e}")
+        _bank_gate_alert("[8L bank-nodata] CỔNG CHẶN BẬT (override BỎ QUA) — fa_ratings_8l run này KHÔNG hạ "
+                         "hạng mã ngân hàng thiếu lens, mã nodata giữ proxy cũ (có thể lọt cổng ≤3). Bằng chứng:\n- "
+                         + _why, send=live_run, reasons=["SKIPPED " + _why])
+        return out
     lb = live[live["route"] == "BANK"] if "route" in live.columns else live.iloc[0:0]
     if "note" not in lb.columns:
-        print("  [bank-AQ override] SKIPPED: live rating_8l.csv has no `note` column, so a fabricated "
-              "bank-nodata/bank-noROE grade cannot be told apart from a real one -> keep proxy")
+        _why = (f"rating_8l.csv KHÔNG có cột `note` (cột thật: {list(live.columns)}) ⇒ không phân biệt được "
+                "hạng bank-nodata/bank-noROE với hạng thật")
+        print(f"  [bank-AQ override] SKIPPED: {_why} -> keep proxy")
+        _bank_gate_alert("[8L bank-nodata] CỔNG CHẶN BẬT (override BỎ QUA) — fa_ratings_8l run này KHÔNG hạ "
+                         "hạng mã ngân hàng thiếu lens, mã nodata giữ proxy cũ (có thể lọt cổng ≤3). Bằng chứng:\n- "
+                         + _why, send=live_run, reasons=["SKIPPED " + _why])
         return out
-    NODATA_NOTES = ("bank-nodata", "bank-noROE")
-    live_map, rejected = {}, []
+    lb = lb[lb["rating"].notna()]
+    reasons, lens = bank_nodata_gate(lb)
+    live_map, nodata_map = {}, {}
     for _t, _r, _nt in zip(lb["ticker"], lb["rating"], lb["note"]):
-        if pd.isna(_r): continue
-        if any(k in str(_nt) for k in NODATA_NOTES):
-            rejected.append(f"{_t}({str(_nt).strip()})"); continue
-        live_map[_t] = int(_r)
-    if rejected:
-        print(f"  [bank-AQ override] REJECTED {len(rejected)} live row(s) with no real lens data "
-              f"(fail-closed, keep this module's ROE-grounded grade): {', '.join(sorted(rejected))}")
+        if any(k in str(_nt) for k in NODATA_NOTES): nodata_map[_t] = (int(_r), str(_nt).strip())
+        else: live_map[_t] = int(_r)
+    if reasons:
+        _bank_gate_alert(
+            "[8L bank-nodata] CỔNG CHẶN BẬT — fa_ratings_8l run này KHÔNG hạ hạng mã ngân hàng thiếu lens "
+            f"({len(nodata_map)} mã giữ proxy cũ, có thể lọt cổng ≤3). Bằng chứng:\n- " + "\n- ".join(reasons),
+            send=live_run, reasons=reasons)
     r2t = {1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
-    n = 0
+    n, moved = 0, []
     for tk in out.loc[out["route"] == "BANK", "ticker"].unique():
-        if tk not in live_map: continue
         sub = out.loc[(out["ticker"] == tk) & (out["route"] == "BANK")].sort_values("eff_date")
         if not len(sub): continue
-        i = sub.index[-1]; new_r = live_map[tk]
-        if int(out.at[i, "rating"]) != new_r:
+        i = sub.index[-1]; cur = int(out.at[i, "rating"])
+        if tk in live_map:
+            new_r = live_map[tk]
+        elif tk in nodata_map and not reasons:
+            new_r = max(cur, nodata_map[tk][0], BANK_NODATA_FLOOR)   # downgrade-only
+            if new_r != cur: moved.append(f"{tk} {cur}->{new_r}({nodata_map[tk][1]})")
+        else:
+            continue
+        if cur != new_r:
             out.at[i, "rating"] = new_r; out.at[i, "tier"] = r2t[new_r]; n += 1
-    print(f"  [bank-AQ override] current-snapshot bank rating set to live AQ for {n} bank(s); history proxy untouched")
+    if nodata_map:
+        print(f"  [bank-AQ override] {len(nodata_map)} live row(s) no-lens: "
+              + (f"GIỮ proxy (cổng chặn bật): {', '.join(sorted(nodata_map))}" if reasons else
+                 f"downgrade-only max(proxy,live,{BANK_NODATA_FLOOR}); đổi {len(moved)}: {', '.join(moved) or '-'}"))
+    if live_run and not reasons and lens:
+        # Snapshot = tập mã có hạng THẬT: live_map (csv chấm bằng lens thật) ∪ (lens hiện tại − mã nodata/noROE).
+        # (a) KHÔNG chỉ lens hiện tại: rating_8l.csv sinh 19:20 HÔM TRƯỚC còn chấm mã vừa mất khỏi lens bằng lens
+        # thật; snapshot = lens hôm nay làm mất mã đó đúng lúc csv ngày sau chuyển nó sang nodata ⇒ G4 điếc.
+        # (b) trừ nodata_map: mã nằm trong lens nhưng ROE NaN (noROE) dai dẳng không vào snapshot ⇒ không làm
+        # G4 dính vĩnh viễn; mã từng có hạng thật rồi mới thành noROE vẫn nằm trong live_map kỳ trước ⇒ G4 bắt.
+        _write_lens_snapshot(set(live_map) | (set(lens) - set(nodata_map)))
+    print(f"  [bank-AQ override] current-snapshot bank rating changed for {n} bank(s); history proxy untouched")
     return out
+
+
+def _is_live_run(path, canon, env):
+    """Run này có quyền gửi cảnh báo thật/ghi snapshot không? True ⇔ ghi đích canonical hoặc ép BQ tường minh."""
+    return env.get("R8L_HIST_BQ_REFRESH") == "1" or os.path.realpath(path) == os.path.realpath(canon)
 
 
 def refresh_bq_table(csv_path):
@@ -648,7 +823,11 @@ def main():
 
     out = df[["ticker","eff_date","q_time","route","rating","core_score","tier"]].copy()
     out["eff_date"] = out["eff_date"].dt.strftime("%Y-%m-%d")
-    out = override_current_bank_aq(out)   # latest-snapshot bank rating -> live AQ (history proxy untouched)
+    _canon = os.path.join(WORKDIR, "data", "rating_8l_history.csv")
+    path = os.environ.get("R8L_HIST_OUT") or _canon
+    _live_run = _is_live_run(path, _canon, os.environ)
+    # latest-snapshot bank rating -> live AQ (history proxy untouched); live_run: cảnh báo Discord + snapshot lens
+    out = override_current_bank_aq(out, live_run=_live_run)
     # FORENSIC EXCLUDE (2026-06-20, date-aware, NO hindsight): human-flagged 'exclude' (related-party/
     # manipulation, data/forensic_flags.csv). The flagged name's latest rating row predates the flag date,
     # so we APPEND an override row stamped at the flag date (rating 5/tier E) -> as-of-forward reads return 5
@@ -670,8 +849,6 @@ def main():
     # coding_guidelines §8: an A/B or selfcheck run must never be able to target the registry-pinned
     # data/rating_8l_history.csv nor REPLACE tav2_bq.fa_ratings_8l. Both are explicit opt-outs; with no
     # env set the canonical production invocation behaves byte-for-byte as before.
-    _canon = os.path.join(WORKDIR, "data", "rating_8l_history.csv")
-    path = os.environ.get("R8L_HIST_OUT") or _canon
     out.to_csv(path, index=False)
     print(f"wrote {path}  ({len(out)} rows)")
     # REFRESH BQ TU SUY THEO DICH ĐEN, khong con "mac dinh refresh tru khi nho bat co" (retro
