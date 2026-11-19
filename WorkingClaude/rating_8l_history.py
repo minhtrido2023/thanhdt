@@ -534,9 +534,45 @@ BANK_NODATA_FLOOR = 4            # mã bank thiếu lens ⇒ dòng live mới nh
 BANK_NODATA_MAX_FRAC = 0.45
 
 
-def _bank_gate_alert(text, send):
+def _bank_gate_bus_event(reasons, notify_err):
+    """Dấu vết BỀN ngoài log (log cron không ai đọc): append bus event `warning` do Winston đứng tên (bus là kênh
+    ops_health_check/Mike quét; đơn giản hơn dựng state file + sửa checker). Dedup: marker JSON = hash(reasons +
+    ngày ICT + notify_lỗi?) ⇒ cùng bộ lý do cùng ngày chỉ ghi 1 lần (GIỚI HẠN: ngày mới hoặc bộ lý do đổi thì
+    ghi lại; marker chỉ ghi SAU khi append rc=0 nên lỗi append sẽ được thử lại ở run sau). Chỉ gọi ở live_run."""
+    import json, hashlib
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    day = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime("%Y-%m-%d")
+    key = hashlib.sha1(json.dumps([sorted(reasons), day, bool(notify_err)], ensure_ascii=False).encode()).hexdigest()
+    marker = os.environ.get("R8L_BANK_GATE_MARKER") or os.path.join(WORKDIR, "data", "bank_gate_alert_marker.json")
+    try:
+        with open(marker, encoding="utf-8") as f:
+            if json.load(f).get("key") == key:
+                print(f"  [bank-gate] bus event DEDUP (cùng bộ lý do trong ngày {day}, marker {marker})"); return
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"  [bank-gate] marker {marker} đọc lỗi ({type(e).__name__}: {e}) — ghi bus event lại")
+    bus = os.environ.get("R8L_BANK_GATE_BUS") or os.path.join(WORKDIR, "mike", "bin", "append_event.sh")
+    payload = {"reasons": reasons, "notify_error": notify_err, "day": day,
+               "measured_by": "rating_8l_history.bank_nodata_gate / override_current_bank_aq lúc chạy"}
+    try:
+        r = subprocess.run([bus, "Winston", "warning", "fa_ratings_8l-bank-nodata-gate",
+                            json.dumps(payload, ensure_ascii=False)], capture_output=True, text=True, timeout=60)
+        if r.returncode != 0:
+            print(f"  [bank-gate] append_event rc={r.returncode} — bus CHƯA có dấu vết. stderr thật: "
+                  f"{r.stderr.strip()[-500:]}"); return
+        tmp = marker + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f: json.dump({"key": key, "day": day}, f)
+        os.replace(tmp, marker)
+    except Exception as e:
+        print(f"  [bank-gate] gọi {bus} lỗi — bus CHƯA có dấu vết: {type(e).__name__}: {e}")
+
+
+def _bank_gate_alert(text, send, reasons=None):
     """Cảnh báo TO khi cổng chặn bật: luôn in banner vào log; ghi R8L_BANK_GATE_ALERT_SINK nếu có (selfcheck);
-    gửi Trading Daily qua notify_thread.sh CHỈ khi `send` (run canonical/ép BQ) và không ở chế độ test.
+    gửi Trading Daily qua notify_thread.sh CHỈ khi `send` (run canonical/ép BQ) và không ở chế độ test; cùng
+    điều kiện đó ghi bus event bền (_bank_gate_bus_event), kèm lỗi notify nếu có.
     Lỗi gửi ⇒ in rc + stderr THẬT (§29), không nuốt."""
     print("!" * 100 + "\n" + text + "\n" + "!" * 100)
     sink = os.environ.get("R8L_BANK_GATE_ALERT_SINK")
@@ -545,13 +581,16 @@ def _bank_gate_alert(text, send):
     if not send or os.environ.get("MIKE_BOT_TEST_MODE") == "1":
         print("  [bank-gate] alert KHÔNG gửi Discord (run thí nghiệm/test) — chỉ log"); return
     notify = os.environ.get("R8L_BANK_GATE_NOTIFY") or os.path.join(WORKDIR, "mike", "bin", "notify_thread.sh")
+    notify_err = None
     try:
         r = subprocess.run([notify, text, "trading_daily"], capture_output=True, text=True, timeout=60)
         if r.returncode != 0:
-            print(f"  [bank-gate] notify_thread.sh rc={r.returncode} — CẢNH BÁO CHƯA TỚI Discord. "
-                  f"stderr thật: {r.stderr.strip()[-500:]}")
+            notify_err = f"notify_thread.sh rc={r.returncode} stderr={r.stderr.strip()[-500:]}"
+            print(f"  [bank-gate] {notify_err} — CẢNH BÁO CHƯA TỚI Discord")
     except Exception as e:
-        print(f"  [bank-gate] gọi {notify} lỗi — CẢNH BÁO CHƯA TỚI Discord: {type(e).__name__}: {e}")
+        notify_err = f"gọi {notify} lỗi: {type(e).__name__}: {e}"
+        print(f"  [bank-gate] {notify_err} — CẢNH BÁO CHƯA TỚI Discord")
+    _bank_gate_bus_event(reasons if reasons else [text], notify_err)
 
 
 def bank_nodata_gate(lb):
@@ -642,11 +681,21 @@ def override_current_bank_aq(out, live_run=False):
     try:
         live = pd.read_csv(os.path.join(WORKDIR, "data", "rating_8l.csv"))
     except Exception as e:
-        print(f"  [bank-AQ override] SKIPPED (live rating_8l.csv unavailable -> keep proxy): {e}"); return out
+        _p = os.path.join(WORKDIR, "data", "rating_8l.csv")
+        _why = f"rating_8l.csv ĐỌC LỖI/KHÔNG CÓ: {_p}: {type(e).__name__}: {e}"
+        print(f"  [bank-AQ override] SKIPPED (live rating_8l.csv unavailable -> keep proxy): {e}")
+        _bank_gate_alert("[8L bank-nodata] CỔNG CHẶN BẬT (override BỎ QUA) — fa_ratings_8l run này KHÔNG hạ "
+                         "hạng mã ngân hàng thiếu lens, mã nodata giữ proxy cũ (có thể lọt cổng ≤3). Bằng chứng:\n- "
+                         + _why, send=live_run, reasons=["SKIPPED " + _why])
+        return out
     lb = live[live["route"] == "BANK"] if "route" in live.columns else live.iloc[0:0]
     if "note" not in lb.columns:
-        print("  [bank-AQ override] SKIPPED: live rating_8l.csv has no `note` column, so a fabricated "
-              "bank-nodata/bank-noROE grade cannot be told apart from a real one -> keep proxy")
+        _why = (f"rating_8l.csv KHÔNG có cột `note` (cột thật: {list(live.columns)}) ⇒ không phân biệt được "
+                "hạng bank-nodata/bank-noROE với hạng thật")
+        print(f"  [bank-AQ override] SKIPPED: {_why} -> keep proxy")
+        _bank_gate_alert("[8L bank-nodata] CỔNG CHẶN BẬT (override BỎ QUA) — fa_ratings_8l run này KHÔNG hạ "
+                         "hạng mã ngân hàng thiếu lens, mã nodata giữ proxy cũ (có thể lọt cổng ≤3). Bằng chứng:\n- "
+                         + _why, send=live_run, reasons=["SKIPPED " + _why])
         return out
     lb = lb[lb["rating"].notna()]
     reasons, lens = bank_nodata_gate(lb)
@@ -658,7 +707,7 @@ def override_current_bank_aq(out, live_run=False):
         _bank_gate_alert(
             "[8L bank-nodata] CỔNG CHẶN BẬT — fa_ratings_8l run này KHÔNG hạ hạng mã ngân hàng thiếu lens "
             f"({len(nodata_map)} mã giữ proxy cũ, có thể lọt cổng ≤3). Bằng chứng:\n- " + "\n- ".join(reasons),
-            send=live_run)
+            send=live_run, reasons=reasons)
     r2t = {1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}
     n, moved = 0, []
     for tk in out.loc[out["route"] == "BANK", "ticker"].unique():
@@ -679,9 +728,17 @@ def override_current_bank_aq(out, live_run=False):
               + (f"GIỮ proxy (cổng chặn bật): {', '.join(sorted(nodata_map))}" if reasons else
                  f"downgrade-only max(proxy,live,{BANK_NODATA_FLOOR}); đổi {len(moved)}: {', '.join(moved) or '-'}"))
     if live_run and not reasons and lens:
-        _write_lens_snapshot(lens)
+        # Snapshot = mã csv chấm bằng lens THẬT (live_map) ∪ lens hiện tại — KHÔNG chỉ lens hiện tại: rating_8l.csv
+        # sinh 19:20 HÔM TRƯỚC còn chấm mã vừa mất khỏi lens bằng lens thật; ghi snapshot = lens hôm nay sẽ làm
+        # mất mã đó khỏi snapshot đúng lúc csv ngày sau chuyển nó sang nodata ⇒ G4 điếc (REPORT_R2 mục 1).
+        _write_lens_snapshot(set(lens) | set(live_map))
     print(f"  [bank-AQ override] current-snapshot bank rating changed for {n} bank(s); history proxy untouched")
     return out
+
+
+def _is_live_run(path, canon, env):
+    """Run này có quyền gửi cảnh báo thật/ghi snapshot không? True ⇔ ghi đích canonical hoặc ép BQ tường minh."""
+    return env.get("R8L_HIST_BQ_REFRESH") == "1" or os.path.realpath(path) == os.path.realpath(canon)
 
 
 def refresh_bq_table(csv_path):
@@ -762,8 +819,7 @@ def main():
     out["eff_date"] = out["eff_date"].dt.strftime("%Y-%m-%d")
     _canon = os.path.join(WORKDIR, "data", "rating_8l_history.csv")
     path = os.environ.get("R8L_HIST_OUT") or _canon
-    _live_run = (os.environ.get("R8L_HIST_BQ_REFRESH") == "1"
-                 or os.path.realpath(path) == os.path.realpath(_canon))
+    _live_run = _is_live_run(path, _canon, os.environ)
     # latest-snapshot bank rating -> live AQ (history proxy untouched); live_run: cảnh báo Discord + snapshot lens
     out = override_current_bank_aq(out, live_run=_live_run)
     # FORENSIC EXCLUDE (2026-06-20, date-aware, NO hindsight): human-flagged 'exclude' (related-party/
