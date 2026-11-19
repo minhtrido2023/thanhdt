@@ -21,14 +21,14 @@ def ok(cond, msg):
     N_OK += 1
 
 
-def run(cmd, stub_rc=0, job="vnindex_tr_update"):
+def run(cmd, stub_rc=0, job="vnindex_tr_update", state=None):
     d = tempfile.mkdtemp(prefix="fbc_")
     sent = os.path.join(d, "sent.txt")
     stub = os.path.join(d, "stub.sh")
     with open(stub, "w") as f:
         f.write(f'#!/usr/bin/env bash\nprintf "%s\\n--ch=%s\\n" "$1" "$2" >> "{sent}"\nexit {stub_rc}\n')
     os.chmod(stub, 0o755)
-    env = dict(os.environ, NOTIFY_CMD=stub)
+    env = dict(os.environ, NOTIFY_CMD=stub, FUND_BENCH_STATE_DIR=state or os.path.join(d, "state"))
     p = subprocess.run(["bash", SH, job, "bash", "-c", cmd], capture_output=True, text=True,
                        env=env)
     msg = open(sent).read() if os.path.exists(sent) else ""
@@ -84,6 +84,28 @@ def main() -> int:
     ok("không trích được" in msg, f"lỗi G1 không có cặp ⇒ nói thẳng không trích được: {msg!r}")
     rc, _, _, msg = run("echo '{\"changed\": true, \"bytes\": 10}'")
     ok(rc == 0 and msg == "", f"rc=0 không seal_blocked ⇒ im lặng: {msg!r}")
+
+    # --- G8_NEW chưa ack + VERIFY_SEALED lệch: báo MỘT LẦN/ngày/tập mã (dedupe qua dấu trong FUND_BENCH_STATE_DIR)
+    g8 = ('{"changed": true, "g8_new_open": [{"ticker": "CRV", "cause": "row", "sessions": 5, "first": "2026-11-12", '
+          '"last": "2026-11-18", "last_value": "2000-01-01"}, {"ticker": "DMX", "cause": "osh", "sessions": 5, '
+          '"first": "2026-11-12", "last": "2026-11-18", "last_value": "75"}]}')
+    st = tempfile.mkdtemp(prefix="fbc_state_")
+    rc, _, _, msg = run(f"echo '{g8}'", state=st)
+    ok(rc == 0 and "G8_NEW chưa ack" in msg and "CRV" in msg and "DMX" in msg and "5 phiên 2026-11-12→2026-11-18" in msg
+       and "--ch=trading_daily" in msg, f"g8_new_open ⇒ báo tên mã + nguyên nhân + số phiên: {msg!r}")
+    rc, _, _, msg = run(f"echo '{g8}'", state=st)
+    ok(rc == 0 and msg == "", f"cùng tập mã, cùng ngày ⇒ KHÔNG báo lại (dedupe): {msg!r}")
+    g8b = g8.replace('"ticker": "DMX"', '"ticker": "HPA"')
+    rc, _, _, msg = run(f"echo '{g8b}'", state=st)
+    ok("HPA" in msg and "DMX" not in msg, f"tập mã khác ⇒ báo lại: {msg!r}")
+    rc, _, _, msg = run(f"echo '{g8}'", state=tempfile.mkdtemp(prefix="fbc_state_"), stub_rc=1)
+    ok(rc == 0, "gửi hỏng không đổi rc của lệnh")
+    dr = '{"changed": true, "sealed_drift_warnings": ["2030-01-08: n_members 5 → 4 (-20.000%), mc_members_vnd 1 → 0.9 (-10.000%)"]}'
+    rc, _, _, msg = run(f"echo '{dr}'", state=tempfile.mkdtemp(prefix="fbc_state_"))
+    ok(rc == 0 and "VERIFY_SEALED lệch rổ" in msg and "2030-01-08" in msg and "n_members 5 → 4" in msg,
+       f"sealed_drift_warnings ⇒ báo kèm giá trị: {msg!r}")
+    rc, _, _, msg = run("echo '{\"changed\": true, \"g8_new_open\": []}'", state=tempfile.mkdtemp(prefix="fbc_state_"))
+    ok(msg == "", f"g8_new_open rỗng ⇒ im lặng: {msg!r}")
 
     rc, _, err, _ = run("exit 1", stub_rc=1)
     ok(rc == 1 and "NOTIFY_FAILED" in err, f"gửi lỗi ⇒ NOTIFY_FAILED, rc vẫn của lệnh: {rc} {err!r}")

@@ -1170,6 +1170,225 @@ def t_sealed_drift(tmp):
        f"drift CLI rc={cp.returncode} (phải 0 + cảnh báo stderr/stdout): {cp.stderr[-300:]} | {cp.stdout[-200:]}")
 
 
+# ───────────────────────────────────────── vòng 2 (19/11): ack khoảng ngày, G8_NEW chặn seal, restate, báo động
+
+def acks_file(tmp, name, entries):
+    p = os.path.join(tmp, name)
+    with open(p, "w", encoding="utf-8") as f:
+        json.dump({"G8_NEW": entries}, f)
+    return p
+
+
+def rng(tk, cause, lo, hi, **kw):
+    e = {"ticker": tk, "cause": cause, "date_from": lo.isoformat(), "date_to": hi.isoformat(),
+         "confirmed_by": "user selfcheck", "decided_by": "user", "reason": "selfcheck: chờ BQ lấp"}
+    e.update(kw)
+    return e
+
+
+def clip(inp, since):
+    """Mô phỏng cửa sổ panel của fetch_bq: chỉ từ bq_panel_start(since)."""
+    import pandas as pd
+    out = dict(inp)
+    out["panel"] = inp["panel"][pd.to_datetime(inp["panel"]["time"]) >= pd.Timestamp(V.bq_panel_start(since))]
+    return out
+
+
+def t_g8_range_acks(tmp):
+    D = sessions(14)
+    a, b = D[2], D[9]
+    ap = acks_file(tmp, "rg.json", [rng("NEWO", "osh", a, b)])
+    acks = V.load_acks(ap)
+    ok(V.g8_new_acked(acks, D[2], "NEWO", "osh") and V.g8_new_acked(acks, D[9], "NEWO", "osh"), "rg biên [from,to] có hiệu lực")
+    ok(V.g8_new_acked(acks, D[5], "NEWO", "osh"), "rg giữa khoảng")
+    ok(not V.g8_new_acked(acks, D[10], "NEWO", "osh"), "rg SAU date_to ⇒ hết hạn, cổng nổ lại")
+    ok(not V.g8_new_acked(acks, D[1], "NEWO", "osh"), "rg TRƯỚC date_from ⇒ không che")
+    ok(not V.g8_new_acked(acks, D[5], "NEWO", "row"), "rg nguyên nhân đổi (osh→row) ⇒ nổ lại")
+    ok(not V.g8_new_acked(acks, D[5], "NEWR", "osh") and not V.g8_new_acked(acks, D[5], "NEWOX", "osh"),
+       "rg không che mã khác (không wildcard)")
+    # `expires` thay date_to; cả hai ⇒ lấy sớm hơn
+    only_exp = {k_: v for k_, v in rng("NEWO", "osh", a, b).items() if k_ != "date_to"} | {"expires": D[4].isoformat()}
+    ok(V.g8_new_acked(V.load_acks(acks_file(tmp, "rg2.json", [only_exp])), D[4], "NEWO", "osh"), "rg expires = hạn")
+    ok(not V.g8_new_acked(V.load_acks(acks_file(tmp, "rg3.json", [rng("NEWO", "osh", a, b) | {"expires": D[4].isoformat()}])),
+       D[5], "NEWO", "osh"), "rg có cả date_to và expires ⇒ lấy sớm hơn")
+    # dạng từng ngày cũ vẫn chạy y nguyên
+    old = V.load_acks(acks_file(tmp, "rg4.json", [{"date": D[3].isoformat(), "ticker": "NEWO", "cause": "osh",
+                                                   "confirmed_by": "u", "reason": "r"}]))
+    ok(V.g8_new_acked(old, D[3], "NEWO", "osh") and not V.g8_new_acked(old, D[4], "NEWO", "osh"), "rg dạng (ngày) cũ giữ nguyên")
+    # fail-closed
+    bads = [rng("NEWO", "osh", a, b, decided_by="agent"), {k_: v for k_, v in rng("NEWO", "osh", a, b).items() if k_ != "decided_by"},
+            {k_: v for k_, v in rng("NEWO", "osh", a, b).items() if k_ != "confirmed_by"},
+            rng("NEWO", "osh", a, b, confirmed_by="  "), rng("*", "osh", a, b), rng("NEWO", "osh", D[0], D[0] + dt.timedelta(days=V.G8_NEW_ACK_MAX_SPAN_DAYS + 1)),
+            rng("NEWO", "osh", b, a), rng("NEWO", "xyz", a, b), {k_: v for k_, v in rng("NEWO", "osh", a, b).items() if k_ != "date_to"},
+            rng("NEWO", "osh", a, b) | {"date": a.isoformat()}, rng("NEWO", "osh", a, b, date_from="2030-13-01")]
+    for bd in bads:
+        try:
+            V.load_acks(acks_file(tmp, "rgbad.json", [bd]))
+            ok(False, f"rg ack hỏng phải ValueError: {bd}")
+        except ValueError:
+            ok(True, "")
+
+
+def t_g8_seal_and_alert(tmp):
+    """G8_NEW chặn seal (cùng cơ chế G1/G4); BQ lấp ⇒ token biến mất ở --update sau; ack ⇒ seal bình thường;
+    g8_new_open báo dòng provisional chưa ack; thông báo lỗi theo status."""
+    D, inp, mem, src2 = fixture_g8()
+    mp = write_mem(tmp, mem)
+    noack = os.path.join(tmp, "noack.json")
+    sp = os.path.join(tmp, "gs.csv")
+    with g4_loose():
+        res = V.update(sp, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                       first_date=D[0].isoformat(), acks_path=noack)
+        rows = V.read_series(sp)
+        sealed_tok = [x["date"] for x in rows if x["status"] == "sealed" and x["g8_new"]]
+        ok(not sealed_tok, f"gs dòng còn G8_NEW chưa ack KHÔNG được seal: {sealed_tok}")
+        first_tok = min(x["date"] for x in rows if x["g8_new"])
+        ok(all(x["status"] == "provisional" for x in rows if x["date"] >= first_tok), "gs từ dòng bị chặn trở đi provisional")
+        ok(any(b_["date"] == first_tok.isoformat() and any(e.startswith("G8:") for e in b_["errors"])
+               for b_ in res.get("seal_blocked", [])), f"gs seal_blocked nêu G8: {res.get('seal_blocked')}")
+        ok(any("chờ BQ lấp" in e for b_ in res["seal_blocked"] for e in b_["errors"]), "gs provisional ⇒ nói 'chờ BQ lấp'")
+        opn = {(e["ticker"], e["cause"]): e for e in res.get("g8_new_open", [])}
+        ok({"NEWO", "NEWR", "LATE"} <= {t for t, _ in opn} and opn[("NEWO", "osh")]["sessions"] >= 1
+           and opn[("NEWR", "row")]["first"] and opn[("NEWR", "row")]["last"] >= opn[("NEWR", "row")]["first"],
+           f"gs g8_new_open nêu mã + nguyên nhân + số phiên: {res.get('g8_new_open')}")
+        # BQ lấp (OShares cho NEWO, dòng cho NEWR/LATE) ⇒ lần --update sau KHÔNG còn token, dòng seal
+        import pandas as pd
+        fill = inp["panel"].copy()
+        fill.loc[fill.ticker == "NEWO", "OShares"] = 1e6
+        add = [{"time": D[i].isoformat(), "ticker": tk, "Price": 7000, "Close": 7000, "OShares": 1e6}
+               for tk in ("NEWR", "LATE") for i in range(14)]
+        fill = pd.concat([fill, pd.DataFrame(add)], ignore_index=True)
+        res2 = V.update(sp, mp, inputs={**inp, "panel": fill, "first_seen": {"NEWR": D[0].isoformat(), "LATE": D[0].isoformat()}},
+                        src2=src2, acks_path=noack)
+        rows2 = V.read_series(sp)
+        ok(not any(x["g8_new"] for x in rows2) and "g8_new_open" not in res2, "gs BQ lấp ⇒ token biến mất ở --update sau")
+        # (dựng lại từ đầu bằng mốc sealed cũ) ack theo khoảng ngày ⇒ dòng ĐÃ ack được seal bình thường
+    sp2 = os.path.join(tmp, "gs2.csv")
+    ap = acks_file(tmp, "gs_acks.json", [rng("NEWO", "osh", D[0], D[13]), rng("NEWR", "row", D[0], D[13]),
+                                         rng("LATE", "row", D[0], D[13])])
+    with g4_loose():
+        res3 = V.update(sp2, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                        first_date=D[0].isoformat(), acks_path=ap)
+    rows3 = V.read_series(sp2)
+    sealed3 = [x for x in rows3 if x["status"] == "sealed"]
+    ok(any(x["g8_new"] for x in sealed3) and "g8_new_open" not in res3 and "seal_blocked" not in res3,
+       f"gs đã ack ⇒ seal bình thường, không báo: {[x['status'] for x in rows3]} {res3}")
+    # ack hết hạn (date_to sớm) ⇒ các dòng sau date_to ở lại provisional + báo
+    sp3 = os.path.join(tmp, "gs3.csv")
+    ap2 = acks_file(tmp, "gs_acks2.json", [rng("NEWO", "osh", D[0], D[5]), rng("NEWR", "row", D[0], D[5]),
+                                           rng("LATE", "row", D[0], D[5])])
+    with g4_loose():
+        res4 = V.update(sp3, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                        first_date=D[0].isoformat(), acks_path=ap2)
+    r4 = V.read_series(sp3)
+    ok(all(x["status"] == "provisional" for x in r4 if x["date"] > D[5]) and res4.get("g8_new_open"),
+       f"gs ack hết hạn ⇒ cổng nổ lại: {[(x['date'].isoformat(), x['status']) for x in r4]}")
+    # thông báo lỗi theo status: dòng sealed không nói 'chờ BQ lấp'
+    sealed_row = dict(next(x for x in rows3 if x["status"] == "sealed" and x["g8_new"]))
+    e = V._g8_new_errs(sealed_row, set())
+    ok(e and all("đã sealed" in x and "chờ BQ lấp" not in x for x in e), f"gs lỗi dòng sealed đúng lời: {e}")
+
+
+def t_g8_restate_window(tmp):
+    """Nhánh osh độc lập cửa sổ dựng: panel kéo lùi G8_NEW_LOOKBACK_DAYS ⇒ --update (VERIFY_SEALED nhỏ) và
+    --restate-sealed (anchor sát cuối) không làm rơi token. fetch_bq dùng bq_panel_start."""
+    D, inp, mem, src2 = fixture_g8()
+    mp = write_mem(tmp, mem)
+    sp = os.path.join(tmp, "rw.csv")
+    log = os.path.join(tmp, "rw_log.jsonl")
+    ap = acks_file(tmp, "rw_acks.json", [rng("NEWO", "osh", D[0], D[13]), rng("NEWR", "row", D[0], D[13]),
+                                         rng("LATE", "row", D[0], D[13])])
+    with g4_loose():
+        V.update(sp, mp, inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00", first_date=D[0].isoformat(),
+                 acks_path=ap)
+        sealed = [x for x in V.read_series(sp) if x["status"] == "sealed"]
+        ok(len(sealed) >= 7, f"rw cần >=7 dòng sealed: {len(sealed)}")
+        tok_before = [x["g8_new"] for x in V.read_series(sp) if x["date"] == D[6]][0]
+        ok(("NEWO", "osh") in {(t[0], t[1]) for t in tok_before}, f"rw D6 có token NEWO: {tok_before}")
+        _, inp2, _, _ = fixture_g8(first_seen=None)
+        inp2["ca"] = __import__("pandas").concat([inp2["ca"], __import__("pandas").DataFrame(
+            [{"ticker": "BBB", "event_code": "DIV", "exright_date": D[6].isoformat(), "value_per_share": 100,
+              "dividend_year": 2030, "dividend_stage_vi": "Đợt 3", "event_status": "executed"}])], ignore_index=True)
+        inp2["first_seen"] = {"QUIET": D[0].isoformat(), "NEWO": D[0].isoformat()}     # như fetch_bq: MIN(time) toàn bảng
+        kw = dict(membership_path=mp, src2=src2, acks_path=ap, log_path=log, write=False)
+        since = D[5]                                                    # restate D6 ⇒ anchor = dòng liền trước
+        res = V.restate_sealed([D[6]], "selfcheck", "user selfcheck", sp, inputs=clip(inp2, since), **kw)
+        ok("NEWO:osh:" in res["rows_after"][D[6].isoformat()], f"rw restate bảo toàn token G8_NEW: {res['rows_after']}")
+        # cửa sổ lùi = 0 (hành vi cũ) ⇒ token rơi (chứng minh bài test có răng)
+        old_lb = V.G8_NEW_LOOKBACK_DAYS
+        V.G8_NEW_LOOKBACK_DAYS = 0
+        try:
+            res0 = V.restate_sealed([D[6]], "selfcheck", "user selfcheck", sp, inputs=clip(inp2, since), **kw)
+            ok("NEWO:osh:" not in res0["rows_after"][D[6].isoformat()], "rw lookback=0 ⇒ token rơi (đối chứng)")
+        finally:
+            V.G8_NEW_LOOKBACK_DAYS = old_lb
+        # --update với VERIFY_SEALED tối thiểu: token vẫn giữ (không phụ thuộc ngầm VERIFY_SEALED)
+        old_v = V.VERIFY_SEALED
+        V.VERIFY_SEALED = 0
+        try:
+            sp_b = os.path.join(tmp, "rw_b.csv")
+            with open(sp, "rb") as f, open(sp_b, "wb") as g:
+                g.write(f.read())
+            idx_last = [x["date"] for x in V.read_series(sp_b) if x["status"] == "sealed"][-1]
+            V.update(sp_b, mp, inputs=clip({**inp, "first_seen": inp2["first_seen"]}, idx_last), src2=src2, acks_path=ap, built_at="2030-01-01T00:00:00+07:00")
+            ok(any(x["g8_new"] for x in V.read_series(sp_b) if x["date"] > idx_last),
+               "rw --update VERIFY_SEALED=0 vẫn giữ token G8_NEW")
+        finally:
+            V.VERIFY_SEALED = old_v
+    ok(V.G8_NEW_LOOKBACK_DAYS >= -(-V.G8_NEW_MIN_SESSIONS * 7 // 5) + V.G1_MAX_GAP_DAYS,
+       "rw ràng buộc: lookback phủ G8_NEW_MIN_SESSIONS phiên + khoảng trống dài nhất, độc lập VERIFY_SEALED")
+    # fetch_bq thật dùng bq_panel_start (stub corp_action_lib.bq, ghi lại SQL)
+    import corp_action_lib as cal
+    sqls = []
+
+    def fake_bq(sql, *a, **k):
+        sqls.append(sql)
+        return [{"m": ""}] if "MAX(c.ingested_at)" in sql else []
+    real = cal.bq
+    cal.bq = fake_bq
+    try:
+        V.fetch_bq(dt.date(2030, 6, 30))
+    finally:
+        cal.bq = real
+    ok(any("FROM `" in q and "t.time >= '" + V.bq_panel_start(dt.date(2030, 6, 30)).isoformat() + "'" in q for q in sqls),
+       f"rw fetch_bq kéo panel từ bq_panel_start: {[q[:140] for q in sqls]}")
+
+
+def t_g8_mutant_killers(tmp):
+    """MB: mã có dòng ĐẦU đúng ngày t ⇒ KHÔNG báo row ở t (f <= t). MD: thiếu OShares 1 ngày khi từng có ⇒ chỉ
+    G8 cũ, KHÔNG G8_NEW (~S1_ff)."""
+    import pandas as pd
+    D, inp, mem, src2 = fixture_g8()
+    add = [{"time": D[i].isoformat(), "ticker": "FIRSTD", "Price": 6000, "Close": 6000, "OShares": 1e6} for i in range(3, 14)]
+    add += [{"time": D[i].isoformat(), "ticker": "MISS1", "Price": 6000, "Close": 6000, "OShares": None if i == 6 else 1e6}
+            for i in range(14)]
+    inp["panel"] = pd.concat([inp["panel"], pd.DataFrame(add)], ignore_index=True)
+    inp["first_seen"] = {"FIRSTD": D[3].isoformat(), "MISS1": D[0].isoformat()}
+    mem["spells"].update({"FIRSTD": [["2000-01-01", "2100-01-01", "t"]], "MISS1": [["2000-01-01", "2100-01-01", "t"]]})
+    sp = os.path.join(tmp, "mk.csv")
+    with g4_loose():
+        V.update(sp, write_mem(tmp, mem), inputs=inp, src2=src2, built_at="2030-01-01T00:00:00+07:00",
+                 first_date=D[0].isoformat(), acks_path=os.path.join(tmp, "noack.json"))
+    r = {x["date"]: x for x in V.read_series(sp)}
+    ok(any(t[0] == "FIRSTD" for t in r[D[2]]["g8_new"]), "mk FIRSTD chưa có dòng (D2) ⇒ báo row")
+    ok(not any(t[0] == "FIRSTD" for t in r[D[3]]["g8_new"]), "MB: dòng đầu ĐÚNG ngày t ⇒ KHÔNG báo ở t")
+    ok(not any(t[0] == "FIRSTD" for x in r.values() for t in x["g8_new"] if x["date"] > D[3]), "mk FIRSTD sau t không báo")
+    ok(not any(t[0] == "MISS1" for x in r.values() for t in x["g8_new"]), "MD: thiếu OShares 1 ngày ⇒ KHÔNG vào G8_NEW")
+    ok(r[D[7]]["osh_missing_ticker"] == "MISS1", f"mk MISS1 vẫn là việc của G8 cũ: {r[D[7]]['osh_missing_ticker']!r}")
+
+
+def t_drift_thresholds():
+    """VERIFY_SEALED: chỉ báo khi mc lệch > 0,3% HOẶC n_members lệch >= 2% (đo replay 19/11)."""
+    D = sessions(2)
+    old = {"date": D[0], "n_members": 363, "mc_members_vnd": 1e15}
+    ok(V._sealed_drift(old, {"n_members": "367", "mc_members_vnd": "1.002e15"}) == "", "drift 11/05: n +1,10% mc +0,2% ⇒ im")
+    ok(V._sealed_drift({**old, "n_members": 353}, {"n_members": "355", "mc_members_vnd": "1.001e15"}) == "", "drift 11/06 ⇒ im")
+    ok("mc_members_vnd" in V._sealed_drift(old, {"n_members": "363", "mc_members_vnd": "1.0031e15"}), "drift mc +0,31% ⇒ báo")
+    ok("n_members" in V._sealed_drift({**old, "n_members": 1000}, {"n_members": "1020", "mc_members_vnd": "1e15"}), "drift n +2% ⇒ báo")
+    ok(V._sealed_drift({**old, "n_members": 1000}, {"n_members": "1019", "mc_members_vnd": "1e15"}) == "", "drift n +1,9% ⇒ im")
+    ok("n_members" in V._sealed_drift({**old, "n_members": 1000}, {"n_members": "970", "mc_members_vnd": "1e15"}), "drift n −3% ⇒ báo")
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="vtr_sc_") as tmp:
         V.ACKS_PATH = os.path.join(tmp, "khong_co_acks.json")    # không đọc sổ ack thật của data/
@@ -1180,6 +1399,11 @@ def main() -> int:
             t_sealed(tmp)
         t_g8_new(tmp)
         t_sealed_drift(tmp)
+        t_drift_thresholds()
+        t_g8_range_acks(tmp)
+        t_g8_seal_and_alert(tmp)
+        t_g8_restate_window(tmp)
+        t_g8_mutant_killers(tmp)
         t_seal_guard(tmp)
         t_restate(tmp)
         t_undo_polish(tmp)

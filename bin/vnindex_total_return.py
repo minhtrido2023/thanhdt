@@ -114,18 +114,51 @@ G8_MAX_SHARE = 0.005
 G8_NEW_MIN_SESSIONS = 5
 G8_NEW_SEP = "|"                   # osh_missing_ticker = "<mã G8 cũ>|<mã>:<osh|row>:<giá trị đọc>;..."
 G8_NEW_ACK_PREFIX = "@G8_NEW"      # khoá ack: (date, "@G8_NEW:<mã>:<osh|row>")
-SEALED_DRIFT_TOL = 0.003           # VERIFY_SEALED: n_members/mc dựng lại lệch dòng sealed > 0,3% ⇒ CẢNH BÁO
+# VERIFY_SEALED cảnh báo lệch rổ (vòng 2, 19/11): CHỈ khi vốn hoá rổ lệch > 0,3% HOẶC số mã lệch >= 2%.
+# Lý do: đo replay 11/05 (n 363→367, +1,10%) và 11/06 (353→355, +0,57%) mc lệch < 0,3% = mã thanh khoản
+# thấp vào BQ muộn, không phải dấu vết kiểu LPS (mc −0,40…−0,65%); ngưỡng n 2% (~7 mã/360) vẫn bắt được
+# việc mất/thêm một cụm mã, còn 0,3% trên mc là ngưỡng đã chứng minh bắt được LPS.
+SEALED_DRIFT_TOL = 0.003           # mc_members_vnd dựng lại lệch dòng sealed > 0,3% ⇒ CẢNH BÁO
+SEALED_DRIFT_N_TOL = 0.02          # n_members lệch >= 2% ⇒ CẢNH BÁO
+# Panel BQ phải kéo LÙI trước mốc `since` đủ để đếm >= G8_NEW_MIN_SESSIONS phiên có giá cho nhánh osh, độc
+# lập với cửa sổ dựng (--update dựng ~VERIFY_SEALED+ phiên, --restate-sealed có thể chỉ vài phiên cuối):
+# N phiên ≈ N·7/5 ngày lịch + khoảng trống dài nhất giữa 2 phiên (G1_MAX_GAP_DAYS, Tết).
+G8_NEW_LOOKBACK_DAYS = 30
+G8_NEW_ACK_MAX_SPAN_DAYS = 90      # ack theo khoảng ngày: date_to − date_from tối đa (chống ack vĩnh viễn)
+G8_NEW_RANGE_TAG = "@G8_NEW_RANGE"
 
 
 def g8_new_ack_key(date, ticker: str, cause: str) -> tuple:
     """Khoá ack G8_NEW theo (ngày, mã, nguyên nhân): nguyên nhân đổi (vd row → osh khi BQ lấp giá
     nhưng chưa lấp OShares) ⇒ G8 nổ lại cho người xem lại."""
     return (date if isinstance(date, str) else date.isoformat(), f"{G8_NEW_ACK_PREFIX}:{ticker}:{cause}")
+
+
+def g8_new_range_key(ticker: str, cause: str, date_from: str, date_to: str) -> tuple:
+    """Khoá ack G8_NEW theo KHOẢNG NGÀY [date_from, date_to] cho đúng (mã, nguyên nhân) — không wildcard mã."""
+    return (G8_NEW_RANGE_TAG, ticker, cause, date_from, date_to)
+
+
+def g8_new_acked(acks: set, date, ticker: str, cause: str) -> bool:
+    d = date if isinstance(date, str) else date.isoformat()
+    if g8_new_ack_key(d, ticker, cause) in acks:
+        return True
+    return any(len(k) == 5 and k[0] == G8_NEW_RANGE_TAG and k[1] == ticker and k[2] == cause
+               and k[3] <= d <= k[4] for k in acks)
+
+
+def bq_panel_start(since: dt.date) -> dt.date:
+    """Ngày đầu của panel kéo từ BQ: lùi G8_NEW_LOOKBACK_DAYS trước `since` (xem hằng số)."""
+    return since - dt.timedelta(days=G8_NEW_LOOKBACK_DAYS)
+
 # G1 (vòng 2, B3): tập phiên = CHÍNH các dòng của chuỗi (mỗi dòng là phiên BQ VNINDEX, `--update` từ chối
 # khi DNSE có phiên BQ thiếu) — KHÔNG dùng bảng lễ nhập tay `trading_bot.vn_market` (chưa có Tết; 2025
 # thiếu 8 phiên ⇒ G1 báo oan, chặn mọi weekly/monthly từ Tết 2027). Hai lớp chống "dòng bị mất":
 G1_MAX_GAP_DAYS = 14               # khoảng trống giữa 2 dòng liền nhau; đo 2014→2026-10-13: dài nhất 11 ngày (Tết 2015)
 G1_CHAIN_TOL = 1e-9                # TR_t/TR_{t-1} phải = VNINDEX_t/VNINDEX_{t-1} + k·y_t (đo: lệch ≤ 9e-15)
+# nhánh osh G8_NEW đếm phiên từ panel, panel kéo lùi G8_NEW_LOOKBACK_DAYS ⇒ phải phủ N phiên + 1 khoảng trống dài nhất
+assert G8_NEW_LOOKBACK_DAYS >= -(-G8_NEW_MIN_SESSIONS * 7 // 5) + G1_MAX_GAP_DAYS, \
+    "G8_NEW_LOOKBACK_DAYS quá ngắn so với G8_NEW_MIN_SESSIONS"
 SESSION_CLOSE_ICT = dt.time(15, 0)  # sau giờ này DNSE/BQ đã có nến của ngày (ATC HOSE xong 14:45)
 
 COLUMNS = ["date", "vnindex", "vnindex_src2", "y_gross", "n_members", "mc_members_vnd",
@@ -391,15 +424,16 @@ def merge_rebuilt(path: str, rebuilt: list, acks: set = frozenset()) -> bytes:
 
 
 def _sealed_drift(r: dict, nr: dict) -> str:
-    """Cảnh báo (KHÔNG chặn) khi dòng sealed dựng lại có n_members / mc_members_vnd lệch > SEALED_DRIFT_TOL
+    """Cảnh báo (KHÔNG chặn) khi dòng sealed dựng lại có mc_members_vnd lệch > SEALED_DRIFT_TOL hoặc n_members lệch >= SEALED_DRIFT_N_TOL
     — dấu vết rổ đổi sau khi seal (ca LPS 19/08–09/10: mc −0,4…−0,65%) mà `y` chưa đổi. Rỗng = không lệch."""
     out = []
-    for col, new in (("n_members", nr.get("n_members")), ("mc_members_vnd", nr.get("mc_members_vnd"))):
+    for col, new, tol in (("n_members", nr.get("n_members"), SEALED_DRIFT_N_TOL),
+                          ("mc_members_vnd", nr.get("mc_members_vnd"), SEALED_DRIFT_TOL)):
         old = r.get(col)
         if old in (None, 0) or new in (None, ""):
             continue
         dev = float(new) / old - 1
-        if abs(dev) > SEALED_DRIFT_TOL:
+        if abs(dev) >= tol if col == "n_members" else abs(dev) > tol:
             out.append(f"{col} {old:.15g} → {float(new):.15g} ({100 * dev:+.3f}%)")
     return f"{r['date']}: " + ", ".join(out) if out else ""
 
@@ -474,6 +508,22 @@ def _load_acks_or_refuse(acks_path: str) -> set:
         raise BuildRefused(f"không đọc được sổ ack {acks_path}: {type(exc).__name__} ({exc})") from None
 
 
+def g8_new_open(rows: list, acks: set) -> list:
+    """G8_NEW CHƯA ack ở các dòng (đã parse) — gộp theo (mã, nguyên nhân): [{ticker, cause, sessions,
+    first, last, last_value}]. Dùng cho báo động (fund_bench_cron.sh): dòng provisional gần nhất chưa tới
+    tuổi seal không vào `seal_blocked`, nhưng người vận hành vẫn phải biết ô TR sắp thành 'chưa có số'."""
+    agg = {}
+    for r in rows:
+        for tk, cause, val in r.get("g8_new") or []:
+            if g8_new_acked(acks, r["date"], tk, cause):
+                continue
+            e = agg.setdefault((tk, cause), {"ticker": tk, "cause": cause, "sessions": 0,
+                                             "first": r["date"].isoformat()})
+            e["sessions"] += 1
+            e["last"], e["last_value"] = r["date"].isoformat(), val
+    return sorted(agg.values(), key=lambda e: (e["ticker"], e["cause"]))
+
+
 def append_series(path: str, rebuilt: list, write: bool = True, acks_path: str = None) -> dict:
     """Ghi chuỗi: khoá `flock` + file tạm + `os.replace`; phần sealed cũ không đổi byte."""
     acks = _load_acks_or_refuse(ACKS_PATH if acks_path is None else acks_path)
@@ -490,11 +540,14 @@ def append_series(path: str, rebuilt: list, write: bool = True, acks_path: str =
     res = {"changed": new != old, "bytes": len(new), "sealed_before": n_sealed_old}
     if blocked:
         res["seal_blocked"] = blocked
+    opn = g8_new_open(_parse_lines(new.decode("utf-8").splitlines(keepends=True), path), acks)
+    if opn:                         # báo động: KHÔNG chặn, KHÔNG đổi rc
+        res["g8_new_open"] = opn
     if drift:                       # KHÔNG chặn, KHÔNG đổi rc, KHÔNG viết lại sealed — chỉ báo
         res["sealed_drift_warnings"] = drift
         for w in drift:
-            print(f"CẢNH BÁO vnindex_total_return VERIFY_SEALED: dòng sealed dựng lại lệch rổ > "
-                  f"{100 * SEALED_DRIFT_TOL:g}% (giữ nguyên byte; xem --restate-sealed nếu cần): {w}",
+            print(f"CẢNH BÁO vnindex_total_return VERIFY_SEALED: dòng sealed dựng lại lệch rổ (mc > "
+                  f"{100 * SEALED_DRIFT_TOL:g}% hoặc số mã >= {100 * SEALED_DRIFT_N_TOL:g}%; giữ nguyên byte; xem --restate-sealed nếu cần): {w}",
                   file=sys.stderr)
     return res
 
@@ -575,7 +628,7 @@ def _ack_date(e: dict, path: str, sect: str) -> str:
 
 def load_acks(path: str = ACKS_PATH) -> set:
     """Tập khoá đã được NGƯỜI xác nhận: (date, ticker) cho G6; (date, '@G4_N:<n_prev>><n>') cho G4-số-mã;
-    (date, '@G4_MC:<mc_prev>><mc>') cho G4-vốn-hoá; (date, '@G8_NEW:<mã>:<osh|row>') cho G8_NEW.
+    (date, '@G4_MC:<mc_prev>><mc>') cho G4-vốn-hoá; (date, '@G8_NEW:<mã>:<osh|row>') hoặc ('@G8_NEW_RANGE', mã, cause, từ, đến) cho G8_NEW.
     Thiếu file = không có xác nhận nào. Mục hỏng ⇒ ValueError (không lặng lẽ bỏ qua)."""
     if not os.path.exists(path):
         return set()
@@ -612,13 +665,33 @@ def load_acks(path: str = ACKS_PATH) -> set:
                 raise ValueError(f"{path}: mục G4_MC thiếu/sai {k} (số dương: vốn hoá rổ VND đã xem): {e}")
         out.add(g4_mc_ack_key(d, e["mc_prev"], e["mc"]))
     # G8_NEW: "đã biết, đang chờ BQ lấp" cho đúng (ngày, mã, nguyên nhân osh|row) đã thấy trong lỗi G8.
+    # Hai dạng: (a) {date, ticker, cause, ...} từng ngày; (b) {ticker, cause, date_from, date_to|expires,
+    # confirmed_by, decided_by:"user", reason} theo KHOẢNG NGÀY cho lỗ hổng kéo dài (CRV vắng cả năm). Dạng (b)
+    # fail-closed: thiếu confirmed_by/decided_by!='user' ⇒ ValueError; khoảng <= G8_NEW_ACK_MAX_SPAN_DAYS;
+    # hết hạn = ngày sau date_to không còn được che (cổng nổ lại); không wildcard mã (ticker cụ thể).
     for e in _ack_section(a, "G8_NEW", path):
-        d = _ack_date(e, path, "G8_NEW")
         _ack_str(e, "confirmed_by", path, "G8_NEW")
         _ack_str(e, "reason", path, "G8_NEW")
         if not re.fullmatch(r"[A-Z0-9]{2,}", str(e.get("ticker"))) or e.get("cause") not in ("osh", "row"):
             raise ValueError(f"{path}: mục G8_NEW cần ticker hợp lệ + cause 'osh'|'row': {e}")
-        out.add(g8_new_ack_key(d, e["ticker"], e["cause"]))
+        has_range = any(k in e for k in ("date_from", "date_to", "expires"))
+        if has_range == ("date" in e):
+            raise ValueError(f"{path}: mục G8_NEW phải là MỘT trong hai dạng: 'date' (từng ngày) hoặc "
+                             f"'date_from' + 'date_to'/'expires' (khoảng ngày): {e}")
+        if not has_range:
+            out.add(g8_new_ack_key(_ack_date(e, path, "G8_NEW"), e["ticker"], e["cause"]))
+            continue
+        if e.get("decided_by") != "user":
+            raise ValueError(f"{path}: mục G8_NEW theo khoảng ngày cần decided_by == 'user': {e}")
+        lo = _ack_date({"date": e.get("date_from")}, path, "G8_NEW.date_from")
+        ends = [_ack_date({"date": e[k]}, path, f"G8_NEW.{k}") for k in ("date_to", "expires") if k in e]
+        if not ends:
+            raise ValueError(f"{path}: mục G8_NEW theo khoảng ngày thiếu date_to/expires: {e}")
+        hi = min(ends)
+        if hi < lo or (dt.date.fromisoformat(hi) - dt.date.fromisoformat(lo)).days > G8_NEW_ACK_MAX_SPAN_DAYS:
+            raise ValueError(f"{path}: mục G8_NEW khoảng ngày phải có date_from <= date_to và dài <= "
+                             f"{G8_NEW_ACK_MAX_SPAN_DAYS} ngày: {e}")
+        out.add(g8_new_range_key(e["ticker"], e["cause"], lo, hi))
     return out
 
 
@@ -665,9 +738,27 @@ def _g4_errs(pp, p: dict, r: dict, acks: set) -> list:
     return errs
 
 
+def _g8_new_errs(r: dict, acks: set) -> list:
+    """G8_NEW của dòng r (đã parse): mã trong bảng sàn HOSE rơi khỏi rổ IM LẶNG, chưa ack. Thông báo theo
+    status: dòng đã sealed không còn 'chờ BQ lấp' được (chỉ ack hoặc --restate-sealed)."""
+    errs = []
+    for tk, cause, val in r.get("g8_new") or []:
+        if g8_new_acked(acks, r["date"], tk, cause):
+            continue
+        why = (f"có giá {val} phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1"
+               if cause == "osh" else f"niêm yết HOSE từ {val} nhưng `ticker` không có dòng nào tới phiên này")
+        fix = ("dòng đã sealed — BQ lấp KHÔNG xoá được token; cần người xác nhận hoặc --restate-sealed"
+               if r.get("status") == "sealed" else "chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá "
+               "token) hoặc người xác nhận")
+        errs.append(f"G8: {r['date']} {tk} trong bảng sàn HOSE (vintage {r['membership_vintage']}) KHÔNG "
+                    f"vào rổ — {why} — {fix} (ticker={tk}, cause={cause}) ở vnindex_tr_acks.json mục G8_NEW")
+    return errs
+
+
 def seal_blockers(pp, p: dict, r: dict, acks: set) -> list:
-    """Lỗi cổng G1/G4 của CHÍNH dòng r — khác rỗng ⇒ r không được seal (C, vòng 2 ngày 21/10)."""
-    return _g1_link_errs(p, r) + _g4_errs(pp, p, r, acks)
+    """Lỗi cổng G1/G4/G8_NEW của CHÍNH dòng r — khác rỗng ⇒ r không được seal (C, vòng 2 ngày 21/10; G8_NEW
+    vòng 2 ngày 19/11: dòng còn lỗ hổng chưa ack ở lại provisional để BQ lấp xoá được token)."""
+    return _g1_link_errs(p, r) + _g4_errs(pp, p, r, acks) + _g8_new_errs(r, acks)
 
 
 def check_period(series: list, start_date, end_date, acks: set = None, today: dt.date = None) -> list:
@@ -736,14 +827,7 @@ def check_period(series: list, start_date, end_date, acks: set = None, today: dt
             errs.append(f"G8: {r['date']} {r['osh_missing_ticker']} thiếu OShares, ước "
                         f"{100 * r['osh_missing_max_pct']:.2f}% vốn hoá rổ (> {100 * G8_MAX_SHARE:g}%)")
         # G8_NEW — mã trong bảng sàn HOSE rơi khỏi rổ IM LẶNG (không ước được vốn hoá ⇒ báo theo mã)
-        for tk, cause, val in r.get("g8_new") or []:
-            if g8_new_ack_key(r["date"], tk, cause) in acks:
-                continue
-            why = (f"có giá {val} phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1"
-                   if cause == "osh" else f"niêm yết HOSE từ {val} nhưng `ticker` không có dòng nào tới phiên này")
-            errs.append(f"G8: {r['date']} {tk} trong bảng sàn HOSE (vintage {r['membership_vintage']}) KHÔNG "
-                        f"vào rổ — {why} — chờ BQ lấp hoặc người xác nhận (ticker={tk}, cause={cause}) "
-                        f"ở vnindex_tr_acks.json mục G8_NEW")
+        errs += _g8_new_errs(r, acks)
     return errs
 
 
@@ -900,14 +984,14 @@ def fetch_dnse_vnindex(start: dt.date, end: dt.date, timeout: int = 30) -> dict:
 
 
 def fetch_bq(since: dt.date) -> dict:
-    """panel (time, ticker, Price, Close, OShares) từ `since`, VNINDEX, DIV rows, MAX(ingested_at)."""
+    """panel (time, ticker, Price, Close, OShares) từ `bq_panel_start(since)` (lùi G8_NEW_LOOKBACK_DAYS), VNINDEX, DIV rows, MAX(ingested_at)."""
     import pandas as pd
     if WC_ROOT not in sys.path:
         sys.path.insert(0, WC_ROOT)
     from corp_action_lib import TABLE, bq
     proj = TABLE.split(".")[0]
     p = pd.DataFrame(bq(f"SELECT CAST(t.time AS STRING) time, t.ticker, t.Price, t.Close, t.OShares "
-                        f"FROM `{proj}.tav2_bq.ticker` AS t WHERE t.time >= '{since.isoformat()}'"))
+                        f"FROM `{proj}.tav2_bq.ticker` AS t WHERE t.time >= '{bq_panel_start(since).isoformat()}'"))
     ca = pd.DataFrame(bq(f"SELECT c.ticker, c.event_code, CAST(c.exright_date AS STRING) exright_date, "
                          f"c.value_per_share, c.dividend_year, c.dividend_stage_vi, c.event_status "
                          f"FROM `{TABLE}` AS c WHERE c.event_code = 'DIV' "
