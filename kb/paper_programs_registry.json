@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-11-01",
+  "updated": "2026-11-19",
   "description": "Registry các chương trình PAPER-TRADING đang active — nguồn duy nhất cho paper_programs_daily_report.py. Thêm sleeve mới = thêm 1 entry (không sửa code render). Probe types: command | journal_scan | alphalens. Field BẮT BUỘC cho entry mới (v3, redesign trình bày 2026-07-31): today_activity (mode journal|csv_row|static|none_available — thiếu field này thì report báo WATCH vì không phân biệt được 'không có giao dịch' với 'không đo được'), review_short (mốc nghiệm thu 1 dòng), và nên có headline (csv_row hoặc regex) để dòng đầu section có số. objective/end_or_trigger/gate_criteria/notes = phần TĨNH, KHÔNG in lại mỗi ngày nữa — tự sinh ra mike/kb/paper_programs_charter/<id>.md, report chỉ link tới.",
   "programs": [
     {
@@ -859,6 +859,47 @@
       },
       "notes": "Mốc 2027-04-06 chỉ đủ mô tả + futility (power: hiệu ứng nhỏ nhất phát hiện ≈6,6pp/quý @N=43 — RESULTS.md §3). Đăng ký vòng 3 job Taylor_20261101_135046.",
       "review_short": "2027-04-06 futility: trung vị (top-1 − rank 2-8) fwd 3M<0 & CI95<0 ⇒ bỏ trọng số — pha có E hoạt động"
+    },
+    {
+      "id": "intraday_fz_signal_ledger",
+      "name": "Sổ tín hiệu paper intraday FZ-001/FZ-002 (+ C-CEIL, C-NFLOOR theo dõi) — đơn vị = cụm ngày signal",
+      "owner": "Taylor",
+      "start": "2026-11-04",
+      "end": "2028-06-30",
+      "review_date": "2027-03-31",
+      "reporting": false,
+      "reporting_reason": "Sổ thưa (~15 ngày signal/năm); render hằng ngày là nhiễu. paper_checkpoint_escalation.sh vẫn bắt khi quá hạn.",
+      "behavior_contract": "LOG_ONLY_NO_BROKER_PATH",
+      "feature_flag": "N/A — paper-only; không plan/lệnh/sizing, không đường gọi broker, không cron, không nối live",
+      "objective": "GIÁM SÁT (không phải phép thử sắp có kết quả): sổ append-only mỗi dòng = 1 signal FZ-001/FZ-002/C-CEIL/C-NFLOOR từ ngày 2026-11-04 (sau holdout của nhóm nghiên cứu), ghi net_ret_total sau phí THẬT 0,097%/chiều + thuế bán 0,1%, excess vs rổ cùng ngày (cùng hệ số phí), excess vs lãi tiền gửi 1M (dep1m, PIT) pro-rata. Đơn vị thống kê = CỤM ngày signal (gap <=5 phiên, E5), KHÔNG phải book/vị thế (kết quả trong book lệ thuộc slot/tie-break: FZ-001 +1,19%/deal chạy riêng vs −6%/vị thế trong book). Nền: research/intraday_cluster_audit_20261119 (NO-GO, 0/5 setup PASS) + research/basket_vs_fz_capit_20261119 (FZ ≈ cược thời điểm hồi, excess CI90 chứa 0). User duyệt ghi sổ + ĐÓNG BĂNG nghiên cứu mới 2026-11-19. Chương trình không mở đường tiền thật.",
+      "end_or_trigger": "LUẬT KHAI TRƯỚC (khoá 2026-11-19): (1) DỪNG SỚM — sau 10 cụm MỚI của một setup, nếu trung bình excess_vs_basket <= 0 ⇒ BÁO USER (script chỉ gắn cờ STOP_EARLY, không tự tắt, không tự đóng). (2) Chỉ XÉT GO khi >=20 cụm mới + DSR(T=số cụm) >= 0,95 + quant-skeptic CONFIRMED + user duyệt; mở sleeve tiền thật còn cần cổng biodiversity. (3) Mốc xem lại CỤ THỂ: 2027-03-31 checkpoint đầu (đếm cụm, đọc --summary; N dự kiến còn rất thấp), 2028-06-30 đánh giá đủ N (dự kiến ~15 ngày signal/năm nên khó đủ N trước 2028). Hai mốc là ĐỀ XUẤT của Taylor — Mike/user chỉnh. Không gia hạn tự động: quá mốc mà chưa đủ N ⇒ báo user chọn kéo dài hay đóng.",
+      "gate_criteria": [
+        {
+          "status": "pending",
+          "text": "Sổ tích luỹ đúng luật: append-only, signal_id không trùng, phí thật 0,097%/chiều + thuế 0,1%, mọi dòng có excess vs rổ + vs dep1m (bin/fz_signal_ledger_selfcheck.py PASS)"
+        },
+        {
+          "status": "pending",
+          "text": "Sau 10 cụm MỚI/setup: mean excess_vs_basket > 0, nếu không ⇒ báo user (dừng sớm)"
+        },
+        {
+          "status": "pending",
+          "text": "Đủ >=20 cụm mới + DSR(T=cụm) >= 0,95 + quant-skeptic CONFIRMED + user duyệt mới xét GO"
+        }
+      ],
+      "data_sources": [
+        "mike/data/fz_signal_ledger.csv (append-only, bin/fz_signal_ledger.py ingest)",
+        "file deals_<setup>.csv định dạng deal_export của nhóm nghiên cứu kia (KHÔNG có nguồn signal hằng ngày — user chốt 2026-11-19: chiến lược nhóm kia chỉ để tham khảo, không xin thêm deals)",
+        "agents/Taylor/research/fz_signal_ledger_20261119/README.md",
+        "agents/Taylor/research/intraday_cluster_audit_20261119/README.md",
+        "agents/Taylor/research/basket_vs_fz_capit_20261119/README.md"
+      ],
+      "today_activity": {
+        "mode": "none_available",
+        "reason": "Chương trình thuần quan sát: sản phẩm = sổ append-only; không sinh lệnh, không có sleeve NAV, chưa có cron/nguồn signal hằng ngày."
+      },
+      "review_short": "2027-03-31 checkpoint đầu (đếm cụm); 2028-06-30 đánh giá đủ N (>=20 cụm) · dừng sớm nếu 10 cụm mới có mean excess<=0",
+      "notes": "Job Taylor_20261119_052906 (Mike #8 plan E). Hai mốc ngày là đề xuất. ĐÓNG BĂNG nghiên cứu mới trên FZ-001/FZ-002/C-CEIL/C-NFLOOR/C-NFLOOR3/C-TAMIX/C-ONID — xem kb/projects/rnd-pipeline-tracker.md. Ingest chạy tay. User chốt 2026-11-19: KHÔNG xin thêm deals từ nhóm kia (chiến lược chỉ để tham khảo) ⇒ chương trình NGỦ (dormant), không cron; sổ chỉ có dữ liệu nếu user tự cấp file hoặc mở lại. Tới mốc review mà sổ vẫn rỗng ⇒ đề xuất ĐÓNG chương trình, không gia hạn."
     }
   ]
 }
