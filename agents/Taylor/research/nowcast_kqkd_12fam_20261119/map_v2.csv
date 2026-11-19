@@ -1,0 +1,123 @@
+ticker,family,a4_family,key,source,sign,role,pit_lag_days,causal,status,note
+DRI,rubber_tsr20,,rubber,trading_economics,1,đầu ra,2,"Doanh thu mủ = sản lượng × giá bán, giá bán bám giá cao su TSR20 quốc tế.",IN,
+PHR,rubber_tsr20,,rubber,trading_economics,1,đầu ra,2,"Doanh thu mủ = sản lượng × giá bán, giá bán bám giá cao su TSR20 quốc tế.",IN,
+DPR,rubber_tsr20,,rubber,trading_economics,1,đầu ra,2,"Doanh thu mủ = sản lượng × giá bán, giá bán bám giá cao su TSR20 quốc tế.",IN,
+TRC,rubber_tsr20,,rubber,trading_economics,1,đầu ra,2,"Doanh thu mủ = sản lượng × giá bán, giá bán bám giá cao su TSR20 quốc tế.",IN,
+GVR,rubber_tsr20,,rubber,trading_economics,1,đầu ra,2,"Doanh thu mủ = sản lượng × giá bán, giá bán bám giá cao su TSR20 quốc tế.",IN,
+DRC,rubber_tsr20_cons,,rubber,trading_economics,-1,đầu vào,2,"Cao su tự nhiên là nguyên liệu chính của lốp, giá tăng ép biên khi giá lốp điều chỉnh chậm.",IN,
+CSM,rubber_tsr20_cons,,rubber,trading_economics,-1,đầu vào,2,"Cao su tự nhiên là nguyên liệu chính của lốp, giá tăng ép biên khi giá lốp điều chỉnh chậm.",IN,
+PVS,crude,,brent,trading_economics,1,đầu ra,2,Khối lượng và giá dịch vụ E&P đi theo chu kỳ đầu tư thượng nguồn do giá dầu dẫn dắt.,IN,"độ trễ hợp đồng; IC B2 0,03"
+PVD,crude,,brent,trading_economics,1,đầu ra,2,Khối lượng và giá dịch vụ E&P đi theo chu kỳ đầu tư thượng nguồn do giá dầu dẫn dắt.,IN,"độ trễ hợp đồng; IC B2 0,03"
+PVC,crude,,brent,trading_economics,1,đầu ra,2,Khối lượng và giá dịch vụ E&P đi theo chu kỳ đầu tư thượng nguồn do giá dầu dẫn dắt.,IN,"độ trễ hợp đồng; IC B2 0,03"
+PVB,crude,,brent,trading_economics,1,đầu ra,2,Khối lượng và giá dịch vụ E&P đi theo chu kỳ đầu tư thượng nguồn do giá dầu dẫn dắt.,IN,"độ trễ hợp đồng; IC B2 0,03"
+GAS,crude,,brent,trading_economics,1,đầu ra,2,Giá bán khí cho hộ công nghiệp/điện tính theo công thức gắn giá dầu.,IN,
+BSR,refining,,te_crack_spread_index,trading_economics,1,đầu ra,2,Biên lọc dầu xấp xỉ crack spread sản phẩm − dầu thô.,IN,
+DPM,urea,,urea,trading_economics,1,đầu ra,2,"Doanh thu phân đạm = sản lượng × giá urea, nguyên liệu khí giá tương đối cố định.",IN,
+DCM,urea,,urea,trading_economics,1,đầu ra,2,"Doanh thu phân đạm = sản lượng × giá urea, nguyên liệu khí giá tương đối cố định.",IN,
+DDV,dap,,di_ammonium,trading_economics,1,đầu ra,2,Giá bán DAP/lân bám giá DAP quốc tế.,IN,
+LAS,dap,,di_ammonium,trading_economics,1,đầu ra,2,Giá bán DAP/lân bám giá DAP quốc tế.,IN,
+DDV,sulfur,,sulfur,trading_economics,-1,đầu vào,2,Lưu huỳnh là nguyên liệu axit sunfuric để sản xuất DAP/axit photphoric.,IN,
+LAS,sulfur,,sulfur,trading_economics,-1,đầu vào,2,Lưu huỳnh là nguyên liệu axit sunfuric để sản xuất DAP/axit photphoric.,IN,
+DGC,sulfur,,sulfur,trading_economics,-1,đầu vào,2,Lưu huỳnh là nguyên liệu axit sunfuric để sản xuất DAP/axit photphoric.,IN,
+SBT,sugar,,sugar,trading_economics,1,đầu ra,2,Giá đường nội địa theo giá đường thế giới (biên mậu/nhập khẩu).,IN,QNS: đường là mảng phụ cạnh sữa đậu nành
+LSS,sugar,,sugar,trading_economics,1,đầu ra,2,Giá đường nội địa theo giá đường thế giới (biên mậu/nhập khẩu).,IN,QNS: đường là mảng phụ cạnh sữa đậu nành
+QNS,sugar,,sugar,trading_economics,1,đầu ra,2,Giá đường nội địa theo giá đường thế giới (biên mậu/nhập khẩu).,IN,QNS: đường là mảng phụ cạnh sữa đậu nành
+HPG,steel_cn,,steel,trading_economics,1,đầu ra,2,Giá thép VN bám giá thép Trung Quốc qua cạnh tranh nhập khẩu.,IN,
+TLH,steel_cn,,steel,trading_economics,1,đầu ra,2,Giá thép VN bám giá thép Trung Quốc qua cạnh tranh nhập khẩu.,IN,
+POM,steel_cn,,steel,trading_economics,1,đầu ra,2,Giá thép VN bám giá thép Trung Quốc qua cạnh tranh nhập khẩu.,IN,
+SMC,steel_cn,,steel,trading_economics,1,đầu ra,2,Giá thép VN bám giá thép Trung Quốc qua cạnh tranh nhập khẩu.,IN,
+HSG,steel_cn,,steel,trading_economics,1,đầu ra,2,Giá thép VN bám giá thép Trung Quốc qua cạnh tranh nhập khẩu.,IN,BANNED (chỉ đo KQKD)
+NKG,steel_cn,,steel,trading_economics,1,đầu ra,2,Giá thép VN bám giá thép Trung Quốc qua cạnh tranh nhập khẩu.,IN,BANNED (chỉ đo KQKD)
+HPG,iron_ore,,iron_ore,trading_economics,-1,đầu vào,2,Quặng sắt là đầu vào lớn nhất của lò cao HPG.,IN,
+HPG,coking_coal,,coking_coal,trading_economics,-1,đầu vào,2,Than mỡ/cốc là đầu vào thứ hai của lò cao HPG.,IN,
+VOS,dry_bulk,,baltic_dry,trading_economics,1,đầu ra,2,Giá cho thuê tàu hàng rời theo chỉ số cước BDI.,IN,
+HAH,container,,containerized_freight_index,trading_economics,1,đầu ra,2,Cước cho thuê tàu/vận tải container theo mặt bằng cước container.,IN,
+AAA,pe_pp,,polyethylene,trading_economics,-1,đầu vào,2,Hạt PE là nguyên liệu chính của màng/bao bì nhựa.,IN,tier D cũ; mô hình kinh doanh AAA đã đa ngành
+TCM,cotton,,cotton,trading_economics,-1,đầu vào,2,Bông là nguyên liệu kéo sợi của chuỗi sợi-dệt-may TCM.,IN,tier D cũ
+DDV,liquid_ammonia,,liquid_ammonia,sunsirs,-1,đầu vào,2,Amoniac là đầu vào sản xuất DAP cùng axit photphoric.,IN,"giá TQ, không phải Tampa; giả thuyết"
+MSR,tungsten,,tungsten_apt,sunsirs,1,đầu ra,2,Doanh thu chính của MSR là APT/vonfram bán theo giá thị trường.,IN,133 quan sát từ 2026-06-24: chỉ mô tả
+CTD,construction,,vn_gdp_construction,macro_indicator,1,hoạt động,60,Sản lượng xây dựng là khối lượng thi công/tiêu thụ xi măng.,IN,trễ công bố dài (giả định 60 ngày); không trong A4
+VCG,construction,,vn_gdp_construction,macro_indicator,1,hoạt động,60,Sản lượng xây dựng là khối lượng thi công/tiêu thụ xi măng.,IN,trễ công bố dài (giả định 60 ngày); không trong A4
+HT1,construction,,vn_gdp_construction,macro_indicator,1,hoạt động,60,Sản lượng xây dựng là khối lượng thi công/tiêu thụ xi măng.,IN,trễ công bố dài (giả định 60 ngày); không trong A4
+HPG,steel_spread,1,"steel − 1,6×iron_ore_cny − 0,5×coke",trading_economics+sunsirs,1,chênh lệch,2,Biên gộp lò cao ≈ giá thép − định mức quặng và cốc trên mỗi tấn thép.,IN,"hệ số 1,6/0,5 là GIẢ ĐỊNH định mức, khoá trước"
+DBC,hog_margin,2,"hog_vn − 2,8×(0,65×corn + 0,25×soybean_meal_cny) VND/kg",data/hog_price_vn.csv+trading_economics+sunsirs+macro_indicator(FX),1,chênh lệch,2,Biên chăn nuôi heo = giá heo hơi − chi phí thức ăn trên mỗi kg hơi.,IN,"FCR 2,8 và khẩu phần 65/25 là GIẢ ĐỊNH; BAF BANNED (chỉ đo KQKD)"
+BAF,hog_margin,2,"hog_vn − 2,8×(0,65×corn + 0,25×soybean_meal_cny) VND/kg",data/hog_price_vn.csv+trading_economics+sunsirs+macro_indicator(FX),1,chênh lệch,2,Biên chăn nuôi heo = giá heo hơi − chi phí thức ăn trên mỗi kg hơi.,IN,"FCR 2,8 và khẩu phần 65/25 là GIẢ ĐỊNH; BAF BANNED (chỉ đo KQKD)"
+DGC,yellow_phosphorus,3,yellow_phosphorus,sunsirs,1,đầu ra,2,Doanh thu chính bán phốt pho vàng/sản phẩm P4 theo giá thị trường TQ.,IN,
+PAT,yellow_phosphorus,3,yellow_phosphorus,sunsirs,1,đầu ra,2,Doanh thu chính bán phốt pho vàng/sản phẩm P4 theo giá thị trường TQ.,IN,
+CSV,caustic_soda,4,caustic_soda,sunsirs,1,đầu ra,2,"Xút là sản phẩm chính của CSV, giá bán theo mặt bằng khu vực.",IN,"lịch sử từ 2023-09 ⇒ CHỈ MÔ TẢ, không đủ điều kiện GO"
+STK,polyester_spread,5,"polyester_staple_fiber − 0,86×pta − 0,34×ethylene_glycol",sunsirs,1,chênh lệch,2,Biên sợi polyester ≈ giá xơ − định mức PTA và MEG.,IN,"định mức 0,86/0,34 là GIẢ ĐỊNH chuẩn ngành; lịch sử từ 2020-10"
+BMP,pvc_input,6,polyvinyl,trading_economics,-1,đầu vào,2,"Bột PVC chiếm phần lớn giá vốn ống nhựa, giá bán điều chỉnh chậm.",IN,
+NTP,pvc_input,6,polyvinyl,trading_economics,-1,đầu vào,2,"Bột PVC chiếm phần lớn giá vốn ống nhựa, giá bán điều chỉnh chậm.",IN,
+MWG,retail,7,vn_retail_sales_yoy (TB quý),macro_indicator,1,hoạt động,10,Doanh thu nhà bán lẻ/phân phối đi theo tổng mức bán lẻ toàn quốc.,IN,độ trễ +10 ngày GIẢ ĐỊNH (chưa có vintage)
+FRT,retail,7,vn_retail_sales_yoy (TB quý),macro_indicator,1,hoạt động,10,Doanh thu nhà bán lẻ/phân phối đi theo tổng mức bán lẻ toàn quốc.,IN,độ trễ +10 ngày GIẢ ĐỊNH (chưa có vintage)
+DGW,retail,7,vn_retail_sales_yoy (TB quý),macro_indicator,1,hoạt động,10,Doanh thu nhà bán lẻ/phân phối đi theo tổng mức bán lẻ toàn quốc.,IN,độ trễ +10 ngày GIẢ ĐỊNH (chưa có vintage)
+PNJ,retail,7,vn_retail_sales_yoy (TB quý),macro_indicator,1,hoạt động,10,Doanh thu nhà bán lẻ/phân phối đi theo tổng mức bán lẻ toàn quốc.,IN,độ trễ +10 ngày GIẢ ĐỊNH (chưa có vintage)
+PET,retail,7,vn_retail_sales_yoy (TB quý),macro_indicator,1,hoạt động,10,Doanh thu nhà bán lẻ/phân phối đi theo tổng mức bán lẻ toàn quốc.,IN,độ trễ +10 ngày GIẢ ĐỊNH (chưa có vintage)
+SSI,brokerage,8,GTGD toàn thị trường TB phiên trong quý (Σ Trading_Value),tav2_bq.ticker (tự tính),1,hoạt động,0,Doanh thu phí môi giới và cho vay ký quỹ tỷ lệ với giá trị giao dịch thị trường.,IN,
+VCI,brokerage,8,GTGD toàn thị trường TB phiên trong quý (Σ Trading_Value),tav2_bq.ticker (tự tính),1,hoạt động,0,Doanh thu phí môi giới và cho vay ký quỹ tỷ lệ với giá trị giao dịch thị trường.,IN,
+HCM,brokerage,8,GTGD toàn thị trường TB phiên trong quý (Σ Trading_Value),tav2_bq.ticker (tự tính),1,hoạt động,0,Doanh thu phí môi giới và cho vay ký quỹ tỷ lệ với giá trị giao dịch thị trường.,IN,
+VND,brokerage,8,GTGD toàn thị trường TB phiên trong quý (Σ Trading_Value),tav2_bq.ticker (tự tính),1,hoạt động,0,Doanh thu phí môi giới và cho vay ký quỹ tỷ lệ với giá trị giao dịch thị trường.,IN,
+SHS,brokerage,8,GTGD toàn thị trường TB phiên trong quý (Σ Trading_Value),tav2_bq.ticker (tự tính),1,hoạt động,0,Doanh thu phí môi giới và cho vay ký quỹ tỷ lệ với giá trị giao dịch thị trường.,IN,
+MBS,brokerage,8,GTGD toàn thị trường TB phiên trong quý (Σ Trading_Value),tav2_bq.ticker (tự tính),1,hoạt động,0,Doanh thu phí môi giới và cho vay ký quỹ tỷ lệ với giá trị giao dịch thị trường.,IN,
+ACV,aviation,9,vn_tourist_arrivals (Σ quý),macro_indicator,1,hoạt động,10,Doanh thu cảng hàng không/dịch vụ sân bay tỷ lệ với lượng khách quốc tế.,IN,độ trễ GIẢ ĐỊNH
+SCS,aviation,9,vn_tourist_arrivals (Σ quý),macro_indicator,1,hoạt động,10,Doanh thu cảng hàng không/dịch vụ sân bay tỷ lệ với lượng khách quốc tế.,IN,độ trễ GIẢ ĐỊNH
+SAS,aviation,9,vn_tourist_arrivals (Σ quý),macro_indicator,1,hoạt động,10,Doanh thu cảng hàng không/dịch vụ sân bay tỷ lệ với lượng khách quốc tế.,IN,độ trễ GIẢ ĐỊNH
+HVN,aviation_banned,9-mô tả,vn_tourist_arrivals (Σ quý),macro_indicator,1,hoạt động,10,Doanh thu hãng bay tỷ lệ với lượng khách.,IN,"BANNED; đo thêm chỉ mô tả, KHÔNG vào thống kê họ 9"
+VJC,aviation_banned,9-mô tả,vn_tourist_arrivals (Σ quý),macro_indicator,1,hoạt động,10,Doanh thu hãng bay tỷ lệ với lượng khách.,IN,"BANNED; đo thêm chỉ mô tả, KHÔNG vào thống kê họ 9"
+GMD,ports,10,vn_exports + vn_imports (Σ quý),macro_indicator,1,hoạt động,15,Sản lượng container qua cảng đi theo kim ngạch xuất nhập khẩu.,IN,độ trễ GIẢ ĐỊNH
+VSC,ports,10,vn_exports + vn_imports (Σ quý),macro_indicator,1,hoạt động,15,Sản lượng container qua cảng đi theo kim ngạch xuất nhập khẩu.,IN,độ trễ GIẢ ĐỊNH
+PHP,ports,10,vn_exports + vn_imports (Σ quý),macro_indicator,1,hoạt động,15,Sản lượng container qua cảng đi theo kim ngạch xuất nhập khẩu.,IN,độ trễ GIẢ ĐỊNH
+VEA,autos,11,vn_car_registrations (Σ quý),macro_indicator,1,hoạt động,20,Doanh thu/lãi liên doanh ô tô tỷ lệ với số xe bán ra.,IN,độ trễ GIẢ ĐỊNH
+HAX,autos,11,vn_car_registrations (Σ quý),macro_indicator,1,hoạt động,20,Doanh thu/lãi liên doanh ô tô tỷ lệ với số xe bán ra.,IN,độ trễ GIẢ ĐỊNH
+ABB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+ACB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+BAB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+BID,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+BVB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+CTG,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+EIB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+HDB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+KLB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+LPB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+MBB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+MSB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+NAB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+NVB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+OCB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+PCB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+PGB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+SGB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+SHB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+SSB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+STB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+TCB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+TPB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+VAB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+VBB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+VCB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+VIB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+VPB,bank_nim,12,"−[Δ4q(vn_interbank_3m − vn_policy_rate) + Δ4q vn_bond_10y] (pp, TB quý)",macro_indicator,1,chi phí vốn,0,Chi phí vốn liên ngân hàng/dài hạn tăng ép NIM trước khi lãi cho vay kịp điều chỉnh.,IN,28 mã ICB 8355 từng trong universe_pit (REPORT ghi 25); thành viên PIT kiểm tại ngày tín hiệu
+DGC,phosrock,,phosphorus→phosphate_rock_cny,trading_economics,,,,,EXCLUDED,"Khoá đổi thành QUẶNG photphat CNY (94% phiên đứng giá), không phải P4 — sai hàng"
+PAT,phosrock,,phosphorus→phosphate_rock_cny,trading_economics,,,,,EXCLUDED,"Khoá đổi thành QUẶNG photphat CNY (94% phiên đứng giá), không phải P4 — sai hàng"
+LAS,phosrock,,phosphorus→phosphate_rock_cny,trading_economics,,,,,EXCLUDED,"Khoá đổi thành QUẶNG photphat CNY (94% phiên đứng giá), không phải P4 — sai hàng"
+HPG,hrc_us,,hrc_steel,trading_economics,,,,,EXCLUDED,"HRC Mỹ, không phải HRC TQ/VN — sai hàng"
+HSG,hrc_us,,hrc_steel,trading_economics,,,,,EXCLUDED,"HRC Mỹ, không phải HRC TQ/VN — sai hàng"
+NKG,hrc_us,,hrc_steel,trading_economics,,,,,EXCLUDED,"HRC Mỹ, không phải HRC TQ/VN — sai hàng"
+NBC,coal,,coal,trading_economics,,,,,EXCLUDED,"Than TKV bán theo giá điều tiết/hợp đồng EVN, không theo Newcastle"
+TVD,coal,,coal,trading_economics,,,,,EXCLUDED,"Than TKV bán theo giá điều tiết/hợp đồng EVN, không theo Newcastle"
+THT,coal,,coal,trading_economics,,,,,EXCLUDED,"Than TKV bán theo giá điều tiết/hợp đồng EVN, không theo Newcastle"
+QTP,coal_power,,coal,trading_economics,,,,,EXCLUDED,"Nhiệt điện chuyển chi phí than qua hợp đồng EVN, dấu không xác định"
+PPC,coal_power,,coal,trading_economics,,,,,EXCLUDED,"Nhiệt điện chuyển chi phí than qua hợp đồng EVN, dấu không xác định"
+KSV,tin_copper,,tin,trading_economics,,,,,EXCLUDED,Thiếc không phải sản phẩm chính của KSV/MSR
+MSR,tin_copper,,tin,trading_economics,,,,,EXCLUDED,Thiếc không phải sản phẩm chính của KSV/MSR
+DBC,hog_us,,lean_hogs,trading_economics,,,,,EXCLUDED,Heo CME Mỹ không đồng pha heo hơi VN — sai hàng (thay bằng họ 2)
+MML,hog_us,,lean_hogs,trading_economics,,,,,EXCLUDED,Heo CME Mỹ không đồng pha heo hơi VN — sai hàng (thay bằng họ 2)
+DBC,feed,,corn,trading_economics,,,,,EXCLUDED,Đã gộp vào họ 2 (biên heo − TACN)
+PNJ,gold,,gold,trading_economics,,,,,EXCLUDED,Dấu không xác định (giá vàng tăng: tăng giá bán nhưng giảm sức mua trang sức)
+LTG,rice_us,,rice,trading_economics,,,,,EXCLUDED,"Gạo thô CBOT, không phải gạo VN 5% — sai hàng"
+TAR,rice_us,,rice,trading_economics,,,,,EXCLUDED,"Gạo thô CBOT, không phải gạo VN 5% — sai hàng"
+MSH,cotton_yarn,,cotton_yarn,sunsirs,,,,,EXCLUDED,"May mặc mua vải theo đơn FOB/CMT, không mua sợi trực tiếp"
+-,lpg,,lpg/propane,sunsirs,,,,,EXCLUDED,Biên phân phối LPG không có dấu một chiều theo giá
+-,kcn,,vn_fdi/vn_ind_production_yoy/vn_mfg_pmi,macro_indicator,,,,,EXCLUDED,Không viết được câu nhân quả trực tiếp tới doanh thu KCN theo quý
+-,enso,,ONI/ENSO,-,,,,,EXCLUDED,Chưa có ánh xạ nhân quả theo quý tới mã cụ thể
+-,coffee,,coffee,trading_economics,,,,,EXCLUDED,"Arabica, VN chủ yếu Robusta; không có mã niêm yết thuần"
