@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-18T12:42:11Z] [lead-signal-runup 18/11] XONG job Taylor_20261118_122819: NO-GO 0/48 GO (15 informative nhung deu tre, net am); REPORT md5 14c49853 — CHO Mike quant-skeptic + ghi NO-GO vao ta-schools-vn
 - [2026-11-18T12:47:15Z] ĐANG DỞ: job Taylor_20261118_124655 DD LLM vong2 (ap skeptic_r1) | NEXT: doc skeptic_r1.md, render PDF, tai giai trinh, sua calc.py
 - [2026-11-18T12:55:42Z] [dd-llm r2 18/11] XONG job Taylor_20261118_124655: NHAN DOI 'quanh hop ly 1,05' -> 'DAT 1,35x', tam 24.599 (vung 3.630-39.728), bien co so 4,5% trung vi; ngoai tru KT 3 nam + canh bao HNX; md5 assumptions aaaeec21 — CHO Mike skeptic r2 + dung PDF
 - [2026-11-18T12:57:50Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM | NEXT: doc skill dd-investor-report, copy build tu dd_DBC investor_report
@@ -26,3 +25,4 @@
 - [2026-11-19T05:05:58Z] [fill-timing recheck 19/11] XONG job Taylor_20261119_044040: BUY blocks -18bps PASS, SELL khong PASS, khoang trong du lieu sau 06-12 — CHO Mike quant-skeptic + user duyet keo intraday moi
 - [2026-11-19T05:18:02Z] [basket-vs-fz 19/11] XONG job Taylor_20261119_051521: FZ ~ cuoc thoi diem hoi (rổ 53%/69% loi nhuan, excess CI90 chua 0, 17/15 cum) — CHO Mike quant-skeptic + bao user
 - [2026-11-19T05:20:56Z] [fill-timing OOS 19/11] XONG job Taylor_20261119_051519: BUY -12.0bps CI[-27.4,+2.8] khong PASS/khong rollback; SELL +1.2 - CHO Mike quant-skeptic
+- [2026-11-19T05:33:26Z] [2026-11-19] fz-signal-ledger XONG job Taylor_20261119_052906: commit 9b7dc051b nhanh session/fz-signal-ledger-20261119 (wt-fz-ledger-20261119) — CHO Mike duyet+merge; user phai xin nguon signal hang ngay moi cron
