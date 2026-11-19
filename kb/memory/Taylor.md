@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-18T12:24:10Z] ĐANG DỞ: job Taylor_20261118_122349 DD LLM | NEXT: doc skill, render BCTC src/, viet REPORT dd_LLM_20261118
 - [2026-11-18T12:28:41Z] ĐANG DỞ: job Taylor_20261118_122819 lead-signal run-up TV1/VCP (paper) | NEXT: kb recall, PREREG, BQ pull, engine
 - [2026-11-18T12:35:01Z] ĐANG DỞ: job Taylor_20261118_122349 DD LLM — calc xong model/calc_output.txt (tam 31.589, vung 4.497-51.769) | NEXT: viet REPORT.md dd_LLM_20261118 + bus finding
 - [2026-11-18T12:38:40Z] [dd-llm 18/11] XONG vong1 job Taylor_20261118_122349: REPORT dd_LLM_20261118 tam 31.589 (vung 4.497-51.769) gia/tam 1,05, D=1,69 phan ky manh, RI tien mac ket 13.560; md5 assumptions dea9f474 — CHO Mike fundamental-skeptic
@@ -26,3 +25,4 @@
 - [2026-11-18T13:08:00Z] [dd-llm investor 18/11] XONG job Taylor_20261118_125730: PDF/HTML/md o dd_LLM_20261118/investor_report (10 trang, md5 cf86360a) — CHO user bao 'gui email' + Mike ghi dd_price_zones
 - [2026-11-19T03:46:01Z] ĐANG DỞ: job Taylor_20261119_034548 vnindex-tr-g5-drift (read-only) | NEXT: doc vnindex_total_return.py, tr_build.py, phan tich lech synth vs official
 - [2026-11-19T03:54:12Z] [g5-drift 19/11] XONG job Taylor_20261119_034548: G5 lech = ro thieu LPS/DMX/GEL/CRV (OShares NULL/khong co dong) — CHO Winston lap OShares DMX + GEL/CRV, user duyet restate 18/08 + va G8
+- [2026-11-19T04:49:20Z] [intraday-cluster-audit 19/11] XONG job Taylor_20261119_044412: NO-GO #1/#4, 0/5 setup PASS (cum FZ-001 17, FZ-002 15), holdout khong du N — CHO Mike quant-skeptic + gui user
