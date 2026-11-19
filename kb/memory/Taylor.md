@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-18T13:08:00Z] [dd-llm investor 18/11] XONG job Taylor_20261118_125730: PDF/HTML/md o dd_LLM_20261118/investor_report (10 trang, md5 cf86360a) — CHO user bao 'gui email' + Mike ghi dd_price_zones
 - [2026-11-19T03:46:01Z] ĐANG DỞ: job Taylor_20261119_034548 vnindex-tr-g5-drift (read-only) | NEXT: doc vnindex_total_return.py, tr_build.py, phan tich lech synth vs official
 - [2026-11-19T03:54:12Z] [g5-drift 19/11] XONG job Taylor_20261119_034548: G5 lech = ro thieu LPS/DMX/GEL/CRV (OShares NULL/khong co dong) — CHO Winston lap OShares DMX + GEL/CRV, user duyet restate 18/08 + va G8
 - [2026-11-19T04:49:20Z] [intraday-cluster-audit 19/11] XONG job Taylor_20261119_044412: NO-GO #1/#4, 0/5 setup PASS (cum FZ-001 17, FZ-002 15), holdout khong du N — CHO Mike quant-skeptic + gui user
@@ -26,3 +25,4 @@
 - [2026-11-19T08:01:33Z] ĐANG DỞ: job Taylor_20261119_080122 vnindex-tr G8 gap patch (worktree wt-vnindex-tr-g8-gap-20261119) | NEXT: đọc G8/VERIFY_SEALED
 - [2026-11-19T08:05:18Z] ĐANG DỞ: job Taylor_20261119_080508 arch review 8L+DT5G data-leverage plan (read-only) | NEXT: đọc data_registry + kiểm kê BQ, viết agents/Taylor/research/arch_8l_dt5g_data_leverage_20261119/REPORT.md
 - [2026-11-19T08:14:03Z] [g8-gap 19/11] XONG job Taylor_20261119_080122: commit 48d4a8d07 nhánh session/vnindex-tr-g8-gap-20261119 — CHO Mike duyet+arch-review; merge => o TR chua co so tu 11/12 (6 ma CRV/GEL/HPA/DSH/DVV/DMX)
+- [2026-11-19T08:26:16Z] [arch-8l-dt5g 19/11] XONG job Taylor_20261119_080508: REPORT o research/arch_8l_dt5g_data_leverage_20261119 — CHO user quyet 5 cau (A1 snapshot vintage, bq_admin, 12 trial A4, C1, ky vong) roi moi dispatch Wave A

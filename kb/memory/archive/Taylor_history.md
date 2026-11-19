@@ -2529,3 +2529,6 @@
 
 ## Archived 2026-11-19 (keep=12 days=0 require_done=False)
 - [2026-11-18T13:02:16Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM — assets xong (investor_report/src, figs/map) | NEXT: build_report.py figs + md + pdf + selfcheck
+
+## Archived 2026-11-19 (keep=12 days=0 require_done=False)
+- [2026-11-18T13:08:00Z] [dd-llm investor 18/11] XONG job Taylor_20261118_125730: PDF/HTML/md o dd_LLM_20261118/investor_report (10 trang, md5 cf86360a) — CHO user bao 'gui email' + Mike ghi dd_price_zones
