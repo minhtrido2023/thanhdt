@@ -2526,3 +2526,6 @@
 
 ## Archived 2026-11-19 (keep=12 days=0 require_done=False)
 - [2026-11-18T12:57:50Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM | NEXT: doc skill dd-investor-report, copy build tu dd_DBC investor_report
+
+## Archived 2026-11-19 (keep=12 days=0 require_done=False)
+- [2026-11-18T13:02:16Z] ĐANG DỞ: job Taylor_20261118_125730 investor report LLM — assets xong (investor_report/src, figs/map) | NEXT: build_report.py figs + md + pdf + selfcheck
