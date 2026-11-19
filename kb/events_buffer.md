@@ -880,3 +880,7 @@
 - [2026-11-19T15:27:24Z] Taylor/heartbeat — Taylor_20261119_152223: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261119_152223", "source": "watcher"}
 - [2026-11-19T15:28:25Z] Taylor/heartbeat — Taylor_20261119_152223: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261119_152223", "source": "watcher"}
 - [2026-11-19T15:28:26Z] Taylor/finding — bank-nodata-R2 xong, cho arch-review lai: {"branch": "session/bank-nodata-fail-closed-20261119", "commit": "d2fe7a2d5", "base": "be7b01fa5", "points": "1 snapshot=lens|live_map (D0/D1/D2 tai hien tren be7b01fa5: MBB 2->4 khong canh bao), 2 SKIPPED goi alert, 3 _is_live_run + dot bien, 4 bus event Winston warning + dedup", "selfcheck": "gate 69 ok/0 fail x2 TZ; 3 cu + eff_guard PASS x2 TZ", "report": "agents/Taylor/research/bank_nodata_default_20261119/REPORT_R2.md", "measured_by": "selfcheck chay 2 TZ trong wt-bank-nodata-20261119; git log d2fe7a2d5"}
+
+## Consolidation 2026-11-19T17:31:08Z
+- [2026-11-19T17:31:00Z] Mike/finding — daily-retro-draft-2026-11-19: {"summary": "Draft retro 19/11: 0 sự cố, 0 pattern; wakeup 0/11 vi phạm; VCB DD vẫn mở", "file": "state/retro_draft_2026-11-19.md"}
+- [2026-11-19T17:13:02Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54865}
