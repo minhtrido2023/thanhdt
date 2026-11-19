@@ -33,7 +33,19 @@ cat "$OUT"
 notify() {
   if ! "$NOTIFY_CMD" "$1" "$CHANNEL"; then
     echo "NOTIFY_FAILED: không gửi được cảnh báo $JOB lên $CHANNEL" >&2
+    return 1
   fi
+}
+
+# Báo MỘT LẦN/ngày (ICT) cho mỗi tập khoá: alert_once <khoá> <nội dung>. Dấu đã-gửi chỉ ghi khi notify thành công
+# (gửi hỏng ⇒ lần cron sau thử lại). Thư mục dấu ghi đè được bằng FUND_BENCH_STATE_DIR (selfcheck).
+alert_once() {
+  local dir="${FUND_BENCH_STATE_DIR:-$ROOT/state}" day h
+  day="$(TZ='Asia/Ho_Chi_Minh' date +%F)"
+  h="$(printf '%s' "$1" | md5sum | cut -c1-12)"
+  mkdir -p "$dir" 2>/dev/null
+  [ -e "$dir/fund_bench_alert_${JOB}_${day}_${h}" ] && return 0
+  if notify "$2"; then : >"$dir/fund_bench_alert_${JOB}_${day}_${h}" 2>/dev/null; fi
 }
 
 if [ "$RC" -ne 0 ]; then
@@ -62,12 +74,48 @@ else
     SEAL="$(printf '%s' "$SEAL_LINE" | grep -o '"seal_blocked".*' | cut -c1-900)"
     # Cặp giá trị CẦN ACK (ngày + n_prev/n hoặc mc_prev/mc) đặt LÊN ĐẦU: cắt 900 byte ở cuối có thể làm mất nó.
     PAIRS="$(printf '%s' "$SEAL_LINE" | grep -oP 'G4: \K\d{4}-\d{2}-\d{2}(?=[^"]*\((?:mc_prev|n_prev)=\d+, (?:mc|n)=\d+\))|\((?:mc_prev|n_prev)=\d+, (?:mc|n)=\d+\)' | paste -d' ' - - | tr -d '()')"
-    notify "🔒 **Quỹ bước 4 — $JOB: seal bị chặn** — dòng chuỗi benchmark KHÔNG được niêm phong (G1/G4 nổ chưa ack); cần người xác nhận ở vnindex_tr_acks.json (mục G4 / G4_MC, đúng giá trị đã xem) hoặc chờ BQ lấp dữ liệu. Cảnh báo lặp mỗi ngày T3-T7 tới khi dòng được seal hoặc ack.
+    # Tên cổng + mục ack suy từ TIỀN TỐ lỗi thật trong seal_blocked (§29: không ghi cứng "G1/G4" — G8_NEW cũng chặn seal).
+    GATES="$(printf '%s' "$SEAL_LINE" | grep -oE 'G[0-9]+:' | sort -u | tr -d ':' | paste -sd/ -)"
+    ACKSEC=""
+    case "/$GATES/" in */G4/*) ACKSEC="G4 / G4_MC (đúng giá trị đã xem)" ;; esac
+    case "/$GATES/" in */G8/*) ACKSEC="${ACKSEC:+$ACKSEC ; }G8_NEW (ticker + cause osh|row + date_from/date_to, decided_by=user)" ;; esac
+    ACKSEC="${ACKSEC:-(không có mục ack cho cổng này — chờ BQ lấp hoặc xử lý theo bằng chứng)}"
+    notify "🔒 **Quỹ bước 4 — $JOB: seal bị chặn** — dòng chuỗi benchmark KHÔNG được niêm phong (${GATES:-cổng không rõ} nổ chưa ack); cần người xác nhận ở vnindex_tr_acks.json (mục ${ACKSEC}) hoặc chờ BQ lấp dữ liệu. Cảnh báo lặp mỗi ngày T3-T7 tới khi dòng được seal hoặc ack.
 Cặp cần ack (ngày + giá trị): ${PAIRS:-(không trích được — đọc bằng chứng bên dưới)}
 Bằng chứng (cắt 900 ký tự):
 \`\`\`
 ${SEAL}
 \`\`\`"
+  fi
+  # G8_NEW chưa ack ở dòng provisional ("g8_new_open") và/hoặc VERIFY_SEALED lệch rổ ("sealed_drift_warnings"):
+  # --update vẫn rc=0 nhưng ô TR sắp/đã thành "chưa có số", hoặc dòng sealed lệch dữ liệu hiện tại. Một tin/ngày/tập
+  # mã (alert_once). Nội dung trích từ JSON của --update, không đoán nguyên nhân (§29).
+  JSON_LINE="$(grep -E '"(g8_new_open|sealed_drift_warnings)"' "$OUT" | head -n 1)"
+  if [ -n "$JSON_LINE" ]; then
+    ALERT="$(printf '%s' "$JSON_LINE" | python3 -I -c '
+import json, sys
+try:
+    r = json.loads(sys.stdin.read())
+except ValueError:
+    sys.exit(0)
+key, out = [], []
+for e in r.get("g8_new_open") or []:
+    key.append("%s:%s" % (e["ticker"], e["cause"]))
+    out.append("%s (%s, %s phiên %s→%s)" % (e["ticker"], "OShares rỗng" if e["cause"] == "osh" else "ticker không có dòng", e["sessions"], e["first"], e["last"]))
+if out:
+    msg = "⚠️ **Quỹ bước 4 — G8_NEW chưa ack:** " + "; ".join(out) + ". Kỳ báo cáo chứa các phiên này in \"chưa có số\" ở ô VN-Index có cổ tức; cần BQ lấp hoặc người xác nhận ở vnindex_tr_acks.json mục G8_NEW. Báo một lần/ngày/tập mã."
+else:
+    msg = ""
+dr = r.get("sealed_drift_warnings") or []
+if dr:
+    key.append("drift:" + ",".join(w.split(":")[0] for w in dr))
+    msg += ("\n" if msg else "") + "⚠️ **Quỹ bước 4 — VERIFY_SEALED lệch rổ (không chặn):** " + " | ".join(dr)[:600]
+if key:
+    print("\x1f".join(sorted(key)) + "\x1e" + msg)
+' 2>/dev/null)"
+    if [ -n "$ALERT" ]; then
+      alert_once "${ALERT%%$'\x1e'*}" "${ALERT#*$'\x1e'}"
+    fi
   fi
 fi
 exit "$RC"
