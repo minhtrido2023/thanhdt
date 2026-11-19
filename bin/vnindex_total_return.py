@@ -29,6 +29,9 @@ trước/sau, dòng cũ/mới, lý do, người xác nhận) TRƯỚC khi thay f
 
 CỔNG FAIL-CLOSED cho một kỳ (`check_period`, G1–G8 của SPEC §A4). Consumer KHÔNG được rơi im lặng về
 chỉ số giá: cổng hỏng ⇒ ô có cổ tức ghi `chưa có số (<lý do>)`, lý do trích đúng giá trị đã đọc (§29).
+G8 có thêm nhánh G8_NEW (19/11): mã trong bảng sàn HOSE rơi khỏi rổ vì thiếu OShares trong cả cửa sổ dựng
+hoặc `ticker` chưa từng có dòng — lưu sau dấu `|` của cột `osh_missing_ticker`, ack ở mục `G8_NEW`.
+VERIFY_SEALED còn CẢNH BÁO (không chặn) khi `n_members`/`mc_members_vnd` dòng sealed dựng lại lệch > 0,3%.
 
 Dùng:
   python3 mike/bin/vnindex_total_return.py --update                 # cron, sau corporate_action ~22:48
@@ -100,6 +103,24 @@ G5_TOL = 0.005                     # 0,5 điểm %
 G6_DY = 0.30
 G7_MAX_AGE_DAYS = 35
 G8_MAX_SHARE = 0.005
+# G8_NEW (vá điểm mù 19/11, job Taylor_20261119_080122): mã trong bảng sàn HOSE phiên t mà KHÔNG vào rổ vì
+# (osh) có giá t-1 và t nhưng KHÔNG có OShares nào trong cửa sổ dựng (G8 cũ cần OShares gần nhất để ước
+# vốn hoá ⇒ mù với mã này), hoặc (row) `ticker` không có dòng nào của mã tới t (`first_seen` toàn bảng).
+# Chống nhiễu: chỉ báo khi mã có >= G8_NEW_MIN_SESSIONS phiên có giá trong cửa sổ (osh) / đã niêm yết HOSE
+# >= G8_NEW_MIN_SESSIONS phiên của chỉ số (row). Mã nhỏ không khớp lệnh (không dòng t-1/t nhưng từng có
+# dòng) KHÔNG vào nhánh nào. ĐO 2026 (217 phiên, research/vnindex_tr_g8_gap_20261119/): osh = BCG, TCD,
+# VMD, DMX; row = CRV, GEL, HPA, DSH, DVV — 9 mã, đều là lỗ hổng dữ liệu thật. Biến thể "không dòng trong
+# cửa sổ 11 phiên" thay cho first_seen ra 22 mã (thêm BTT, LGC, TTE... ngừng giao dịch) ⇒ KHÔNG dùng.
+G8_NEW_MIN_SESSIONS = 5
+G8_NEW_SEP = "|"                   # osh_missing_ticker = "<mã G8 cũ>|<mã>:<osh|row>:<giá trị đọc>;..."
+G8_NEW_ACK_PREFIX = "@G8_NEW"      # khoá ack: (date, "@G8_NEW:<mã>:<osh|row>")
+SEALED_DRIFT_TOL = 0.003           # VERIFY_SEALED: n_members/mc dựng lại lệch dòng sealed > 0,3% ⇒ CẢNH BÁO
+
+
+def g8_new_ack_key(date, ticker: str, cause: str) -> tuple:
+    """Khoá ack G8_NEW theo (ngày, mã, nguyên nhân): nguyên nhân đổi (vd row → osh khi BQ lấp giá
+    nhưng chưa lấp OShares) ⇒ G8 nổ lại cho người xem lại."""
+    return (date if isinstance(date, str) else date.isoformat(), f"{G8_NEW_ACK_PREFIX}:{ticker}:{cause}")
 # G1 (vòng 2, B3): tập phiên = CHÍNH các dòng của chuỗi (mỗi dòng là phiên BQ VNINDEX, `--update` từ chối
 # khi DNSE có phiên BQ thiếu) — KHÔNG dùng bảng lễ nhập tay `trading_bot.vn_market` (chưa có Tết; 2025
 # thiếu 8 phiên ⇒ G1 báo oan, chặn mọi weekly/monthly từ Tết 2027). Hai lớp chống "dòng bị mất":
@@ -178,12 +199,14 @@ def dividends(ca_df):
     return g
 
 
-def div_yield_daily(panel, spells: dict, divs, idx, after=None):
+def div_yield_daily(panel, spells: dict, divs, idx, after=None, first_seen: dict = None):
     """Bảng theo phiên của chỉ số (index = Timestamp), cột: y, n, mc, div_cash, k2_synth_pr, max_dy,
-    max_dy_ticker, osh_missing_max_pct, osh_missing_ticker.
+    max_dy_ticker, osh_missing_max_pct, osh_missing_ticker, g8_new.
 
     `panel`: DataFrame[time, ticker, Price, Close, OShares] KHÔNG gồm VNINDEX; `idx`: Series giá
-    VNINDEX theo time (định nghĩa tập phiên). `after`: chỉ trả các phiên > after."""
+    VNINDEX theo time (định nghĩa tập phiên). `after`: chỉ trả các phiên > after. `first_seen`:
+    {mã: ngày dòng ĐẦU TIÊN trong `ticker` toàn bảng} cho nhánh G8_NEW row; None ⇒ chỉ dựa vào `panel`
+    (dựng offline: panel phải phủ đủ lịch sử, nếu không mã ngừng giao dịch lâu bị báo oan)."""
     import numpy as np
     import pandas as pd
     s = panel.copy()
@@ -195,6 +218,8 @@ def div_yield_daily(panel, spells: dict, divs, idx, after=None):
     s["S1"] = g.OShares.shift(1)
     s["t1"] = g.time.shift(1)
     s["S1_ff"] = g.OShares.transform(lambda x: x.ffill()).groupby(s.ticker).shift(1)
+    s["npx"] = g.Price.transform(lambda x: x.gt(0).cumsum())       # số phiên có giá tới t (trong cửa sổ)
+    first_row = g.time.min()                                        # trước lọc `after`
     if after is not None:
         s = s[s.time > pd.Timestamp(after)].copy()
     s["hose"] = False
@@ -240,6 +265,31 @@ def div_yield_daily(panel, spells: dict, divs, idx, after=None):
     else:
         day["osh_missing_max_pct"] = 0.0
         day["osh_missing_ticker"] = ""
+    # G8_NEW osh: có giá t-1/t (base) nhưng không OShares nào trong cửa sổ tới t-1 ⇒ G8 cũ không thấy
+    tok = {}
+    nosh = s[base & ~s.S1_ff.gt(0) & s.npx.ge(G8_NEW_MIN_SESSIONS)]
+    for t, tk, n in zip(nosh.time, nosh.ticker, nosh.npx):
+        tok.setdefault(t, []).append(f"{tk}:osh:{int(n)}")
+    # G8_NEW row: mã đang trong bảng sàn phiên t, niêm yết >= N phiên chỉ số, `ticker` chưa có dòng nào tới t
+    days = idx.index if after is None else idx.index[idx.index > pd.Timestamp(after)]
+    pos = {t: i for i, t in enumerate(idx.index)}
+    for code, sp in spells.items():
+        f = first_row.get(code)
+        if first_seen and first_seen.get(code) is not None:
+            fs = pd.Timestamp(first_seen[code])
+            f = fs if f is None or fs < f else f
+        for t in days:
+            if f is not None and f <= t:
+                break
+            st = next((a for a, b in sp if pd.Timestamp(a) <= t < pd.Timestamp(b)), None)
+            if st is None:
+                continue
+            st_ts = pd.Timestamp(st)
+            listed = pos[t] - int(idx.index.searchsorted(st_ts)) + 1 if st_ts >= idx.index[0] else None
+            if listed is None or listed >= G8_NEW_MIN_SESSIONS:
+                tok.setdefault(t, []).append(f"{code}:row:{st.isoformat()}")
+    day["g8_new"] = pd.Series({t: ";".join(sorted(v)) for t, v in tok.items()},
+                              dtype=object).reindex(day.index).fillna("")
     day = day[day.index.isin(idx.index)]
     return day.drop(columns=["tr_synth"])
 
@@ -269,6 +319,10 @@ def _parse_row(r: dict) -> dict:
         out[c] = float(r[c]) if r.get(c) not in (None, "") else None
     out["n_members"] = int(r["n_members"]) if r.get("n_members") not in (None, "") else None
     out["date"] = _d(r["date"])
+    # osh_missing_ticker = "<mã G8 cũ>" [+ "|<mã>:<osh|row>:<giá trị>;..."] (G8_NEW; dòng cũ không có "|")
+    old, _, new = (r.get("osh_missing_ticker") or "").partition(G8_NEW_SEP)
+    out["osh_missing_ticker"] = old
+    out["g8_new"] = [tuple(x.split(":", 2)) for x in new.split(";") if x]
     return out
 
 
@@ -307,7 +361,8 @@ def build_rows(day, anchor: dict, src2: dict, vintage: str, ca_max_ingested_at: 
             "membership_vintage": vintage, "ca_max_ingested_at": ca_max_ingested_at,
             "built_at_ict": built_at, "max_dy": _fmt(r.max_dy, 8),
             "max_dy_ticker": r.max_dy_ticker or "", "osh_missing_max_pct": _fmt(r.osh_missing_max_pct, 8),
-            "osh_missing_ticker": r.osh_missing_ticker or ""})
+            "osh_missing_ticker": (r.osh_missing_ticker or "") +
+            (G8_NEW_SEP + r.g8_new if getattr(r, "g8_new", "") else "")})
         prev = {"vnindex": float(rows[-1]["vnindex"]), "tr_gross": float(rows[-1]["tr_gross"]),
                 "tr_net": float(rows[-1]["tr_net"])}
     return rows
@@ -335,8 +390,23 @@ def merge_rebuilt(path: str, rebuilt: list, acks: set = frozenset()) -> bytes:
     return _merge_lines(_raw_lines(path), rebuilt, acks, path)[0]
 
 
-def _merge_lines(lines, rebuilt: list, acks: set, label: str = "chuỗi") -> tuple:
-    """(bytes file mới, danh sách dòng bị cổng G1/G4 giữ lại provisional) — xem merge_rebuilt."""
+def _sealed_drift(r: dict, nr: dict) -> str:
+    """Cảnh báo (KHÔNG chặn) khi dòng sealed dựng lại có n_members / mc_members_vnd lệch > SEALED_DRIFT_TOL
+    — dấu vết rổ đổi sau khi seal (ca LPS 19/08–09/10: mc −0,4…−0,65%) mà `y` chưa đổi. Rỗng = không lệch."""
+    out = []
+    for col, new in (("n_members", nr.get("n_members")), ("mc_members_vnd", nr.get("mc_members_vnd"))):
+        old = r.get(col)
+        if old in (None, 0) or new in (None, ""):
+            continue
+        dev = float(new) / old - 1
+        if abs(dev) > SEALED_DRIFT_TOL:
+            out.append(f"{col} {old:.15g} → {float(new):.15g} ({100 * dev:+.3f}%)")
+    return f"{r['date']}: " + ", ".join(out) if out else ""
+
+
+def _merge_lines(lines, rebuilt: list, acks: set, label: str = "chuỗi", warn: list = None) -> tuple:
+    """(bytes file mới, danh sách dòng bị cổng G1/G4 giữ lại provisional) — xem merge_rebuilt.
+    `warn` (list) nhận cảnh báo lệch n_members/mc của dòng sealed được dựng lại (không chặn, không ghi)."""
     old = _parse_lines(lines, label) if lines else []
     head = "".join(lines[:1]) if lines else _row_line(dict(zip(COLUMNS, COLUMNS)))
     by_date = {r["date"]: r for r in rebuilt}
@@ -352,6 +422,9 @@ def _merge_lines(lines, rebuilt: list, acks: set, label: str = "chuỗi") -> tup
                 diffs.append(f"{r['date']}: y_gross {r['y_gross']!r} → {nr['y_gross']!r} "
                              f"(|Δ|={dy:.3g} > {SEALED_Y_TOL:g}), vnindex {r['vnindex']!r} → "
                              f"{nr['vnindex']!r}")
+            drift = _sealed_drift(r, nr)
+            if drift and warn is not None:
+                warn.append(drift)
         keep.append(lines[1 + i])
     if diffs:
         raise SealedChanged("dựng lại dòng sealed ra số khác — KHÔNG ghi; dùng đường đính chính "
@@ -409,13 +482,20 @@ def append_series(path: str, rebuilt: list, write: bool = True, acks_path: str =
         fcntl.flock(lk, fcntl.LOCK_EX)
         lines = _raw_lines(path)
         old = "".join(lines or []).encode("utf-8")
-        new, blocked = _merge_lines(lines, rebuilt, acks, path)
+        drift = []
+        new, blocked = _merge_lines(lines, rebuilt, acks, path, warn=drift)
         n_sealed_old = sum(1 for r in (_parse_lines(lines, path) if lines else []) if r["status"] == "sealed")
         if write and new != old:
             _write_atomic(path, new)
     res = {"changed": new != old, "bytes": len(new), "sealed_before": n_sealed_old}
     if blocked:
         res["seal_blocked"] = blocked
+    if drift:                       # KHÔNG chặn, KHÔNG đổi rc, KHÔNG viết lại sealed — chỉ báo
+        res["sealed_drift_warnings"] = drift
+        for w in drift:
+            print(f"CẢNH BÁO vnindex_total_return VERIFY_SEALED: dòng sealed dựng lại lệch rổ > "
+                  f"{100 * SEALED_DRIFT_TOL:g}% (giữ nguyên byte; xem --restate-sealed nếu cần): {w}",
+                  file=sys.stderr)
     return res
 
 
@@ -495,7 +575,7 @@ def _ack_date(e: dict, path: str, sect: str) -> str:
 
 def load_acks(path: str = ACKS_PATH) -> set:
     """Tập khoá đã được NGƯỜI xác nhận: (date, ticker) cho G6; (date, '@G4_N:<n_prev>><n>') cho G4-số-mã;
-    (date, '@G4_MC:<mc_prev>><mc>') cho G4-vốn-hoá.
+    (date, '@G4_MC:<mc_prev>><mc>') cho G4-vốn-hoá; (date, '@G8_NEW:<mã>:<osh|row>') cho G8_NEW.
     Thiếu file = không có xác nhận nào. Mục hỏng ⇒ ValueError (không lặng lẽ bỏ qua)."""
     if not os.path.exists(path):
         return set()
@@ -531,6 +611,14 @@ def load_acks(path: str = ACKS_PATH) -> set:
             if type(v) not in (int, float) or not math.isfinite(v) or v <= 0:
                 raise ValueError(f"{path}: mục G4_MC thiếu/sai {k} (số dương: vốn hoá rổ VND đã xem): {e}")
         out.add(g4_mc_ack_key(d, e["mc_prev"], e["mc"]))
+    # G8_NEW: "đã biết, đang chờ BQ lấp" cho đúng (ngày, mã, nguyên nhân osh|row) đã thấy trong lỗi G8.
+    for e in _ack_section(a, "G8_NEW", path):
+        d = _ack_date(e, path, "G8_NEW")
+        _ack_str(e, "confirmed_by", path, "G8_NEW")
+        _ack_str(e, "reason", path, "G8_NEW")
+        if not re.fullmatch(r"[A-Z0-9]{2,}", str(e.get("ticker"))) or e.get("cause") not in ("osh", "row"):
+            raise ValueError(f"{path}: mục G8_NEW cần ticker hợp lệ + cause 'osh'|'row': {e}")
+        out.add(g8_new_ack_key(d, e["ticker"], e["cause"]))
     return out
 
 
@@ -647,6 +735,15 @@ def check_period(series: list, start_date, end_date, acks: set = None, today: dt
         if r["osh_missing_max_pct"] is not None and r["osh_missing_max_pct"] > G8_MAX_SHARE:
             errs.append(f"G8: {r['date']} {r['osh_missing_ticker']} thiếu OShares, ước "
                         f"{100 * r['osh_missing_max_pct']:.2f}% vốn hoá rổ (> {100 * G8_MAX_SHARE:g}%)")
+        # G8_NEW — mã trong bảng sàn HOSE rơi khỏi rổ IM LẶNG (không ước được vốn hoá ⇒ báo theo mã)
+        for tk, cause, val in r.get("g8_new") or []:
+            if g8_new_ack_key(r["date"], tk, cause) in acks:
+                continue
+            why = (f"có giá {val} phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1"
+                   if cause == "osh" else f"niêm yết HOSE từ {val} nhưng `ticker` không có dòng nào tới phiên này")
+            errs.append(f"G8: {r['date']} {tk} trong bảng sàn HOSE (vintage {r['membership_vintage']}) KHÔNG "
+                        f"vào rổ — {why} — chờ BQ lấp hoặc người xác nhận (ticker={tk}, cause={cause}) "
+                        f"ở vnindex_tr_acks.json mục G8_NEW")
     return errs
 
 
@@ -816,7 +913,12 @@ def fetch_bq(since: dt.date) -> dict:
                          f"FROM `{TABLE}` AS c WHERE c.event_code = 'DIV' "
                          f"AND c.exright_date >= '{since.isoformat()}'"))
     ing = bq(f"SELECT CAST(MAX(c.ingested_at) AS STRING) m FROM `{TABLE}` AS c")[0]["m"]
-    return {"panel": p, "ca": ca, "ca_max_ingested_utc": ing}
+    # G8_NEW row: dòng đầu tiên của mỗi mã trong TOÀN bảng (phân biệt "chưa từng có dòng" với "ngừng
+    # giao dịch trong cửa sổ") — chỉ quét cột ticker+time.
+    fs = {r["ticker"]: r["first_time"] for r in bq(
+        f"SELECT t.ticker, CAST(MIN(t.time) AS STRING) first_time FROM `{proj}.tav2_bq.ticker` AS t "
+        f"GROUP BY t.ticker")}
+    return {"panel": p, "ca": ca, "ca_max_ingested_utc": ing, "first_seen": fs}
 
 
 def _coerce_inputs(panel, ca):
@@ -902,7 +1004,8 @@ def _rebuild(old: list, k, membership_path: str, inputs, src2, built_at, first_d
         raise BuildRefused(f"DNSE có {len(missing)} phiên mà BQ VNINDEX không có: "
                            f"{[d.isoformat() for d in missing[:5]]} (BQ tới {sess[-1]}, đối chiếu tới {ct}) "
                            f"— không dựng chuỗi có lỗ")
-    day = div_yield_daily(panel[panel.ticker != "VNINDEX"], spells, dividends(ca), idx, after=since)
+    day = div_yield_daily(panel[panel.ticker != "VNINDEX"], spells, dividends(ca), idx, after=since,
+                          first_seen=inputs.get("first_seen"))
     day = day.join(idx.rename("vnindex"))
     # phiên chỉ số không có thành viên nào ⇒ không suy được y: từ chối thay vì bỏ qua im lặng
     lost = [t.date() for t in idx.index[1:] if t not in day.index]
