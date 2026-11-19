@@ -8,8 +8,8 @@ BẤT BIẾN:
   2. Mã BANK CÓ dữ liệu lens ⇒ KHÔNG đổi gì: so từng mã trong data/bank_lens_v3.csv thật với bản
      tham chiếu đóng băng của rate_bank ở HEAD trước khi sửa (chỉ khác nhánh nodata).
   3. "bank-noROE" giữ 3 (ngoài phạm vi duyệt lần này).
-  4. Phía history: dòng live rating 4 + "bank-nodata" VẪN bị override loại (giữ proxy) ⇒ đổi live
-     không làm lệch fa_ratings_8l.
+  4. Phía history (phương án B 2026-11-19): dòng live 4 + "bank-nodata" ⇒ dòng MỚI NHẤT của mã đó
+     = max(proxy, 4) (chỉ hạ hạng), dòng cũ hơn giữ proxy, mã có lens vẫn nhận hạng live.
   5. Mutation: trả lại 3 cho nhánh nodata ⇒ test 1 PHẢI bắt được.
 
 PHỤ THUỘC MÔI TRƯỜNG: TZ — không có (không gọi now()); vẫn chạy env -u TZ và TZ=Asia/Tokyo.
@@ -99,13 +99,24 @@ def t4_history_still_rejects():
     with tempfile.TemporaryDirectory() as tmp:
         os.makedirs(os.path.join(tmp, "data"))
         live.to_csv(os.path.join(tmp, "data", "rating_8l.csv"), index=False)
-        old = H.WORKDIR
+        # lens đọc được (BBB) ⇒ cổng chặn G1 không bật; snapshot vắng ⇒ G4 bỏ qua. 1/2 nodata = 50% > 45%
+        # ⇒ thêm 3 mã lens giả để tỉ lệ = 1/5 (cổng G3 không bật)
+        pd.DataFrame({"ticker": ["BBB", "C1", "C2", "C3"], "ROE": 0.15}).to_csv(
+            os.path.join(tmp, "data", "bank_lens_v3.csv"), index=False)
+        pd.concat([live, pd.DataFrame({"ticker": ["C1", "C2", "C3"], "route": "BANK", "rating": 3,
+                                       "note": "profitable (AQ-modulated)"})]).to_csv(
+            os.path.join(tmp, "data", "rating_8l.csv"), index=False)
+        old, _sn = H.WORKDIR, os.environ.get("R8L_BANK_LENS_SNAPSHOT")
+        os.environ["R8L_BANK_LENS_SNAPSHOT"] = os.path.join(tmp, "data", "no_snapshot.json")
         try:
             H.WORKDIR = tmp
             out = H.override_current_bank_aq(hist.copy())
         finally:
             H.WORKDIR = old
-    ok(list(out["rating"]) == [2, 2, 2], "history override bỏ dòng live 4/bank-nodata (giữ proxy 2), vẫn áp dòng có lens",
+            if _sn is None: os.environ.pop("R8L_BANK_LENS_SNAPSHOT", None)
+            else: os.environ["R8L_BANK_LENS_SNAPSHOT"] = _sn
+    ok(list(out["rating"]) == [2, 4, 2],
+       "history: dòng MỚI NHẤT AAA (proxy 2, live 4/bank-nodata) ⇒ 4; dòng cũ giữ 2; BBB có lens ⇒ 2",
        str(list(out["rating"])))
 
 
