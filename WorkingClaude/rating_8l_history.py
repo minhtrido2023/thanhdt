@@ -530,13 +530,16 @@ NODATA_NOTES = ("bank-nodata", "bank-noROE")
 BANK_NODATA_FLOOR = 4            # mã bank thiếu lens ⇒ dòng live mới nhất KHÔNG được tốt hơn 4 (cổng ≤3 chặn)
 # Ngưỡng G3: tỉ lệ (nodata ∪ noROE)/số mã BANK trong rating_8l.csv. Đo 2026-11-19: 10/28 = 35,7% là
 # CẤU TRÚC (18 mã lens / 28 mã BANK). 45% chừa chỗ cho +2..3 mã bank mới niêm yết chưa có lens
-# (12/30=40,0%, 13/31=41,9%) mà vẫn bắt việc mất ≥3 mã lens (13/28=46,4%). Mất 1-2 mã lens do G2/G4 bắt.
+# (12/30=40,0%, 13/31=41,9%) mà vẫn bắt việc mất ≥3 mã lens (13/28=46,4%). Mất 1-2 mã lens (nodata) do G2/G4
+# bắt; mất ROE của 1-2 mã còn trong lens (noROE) do G4 bắt (G2 không áp được) — G3 chỉ là lưới cho mất hàng loạt.
 BANK_NODATA_MAX_FRAC = 0.45
 
 
 def _bank_gate_bus_event(reasons, notify_err):
-    """Dấu vết BỀN ngoài log (log cron không ai đọc): append bus event `warning` do Winston đứng tên (bus là kênh
-    ops_health_check/Mike quét; đơn giản hơn dựng state file + sửa checker). Dedup: marker JSON = hash(reasons +
+    """Dấu vết BỀN ngoài log (log cron không ai đọc): append bus event `warning` do Winston đứng tên. PHẠM VI THẬT
+    (đã kiểm 2026-11-19): event vào kb/events_buffer.md + tóm tắt Fleet Updates #mike; KHÔNG vào delta-append của
+    mike_json.py (chỉ finding/answer/decision/verification) và ops_health_check.sh KHÔNG quét `warning` ⇒ đây là
+    dấu vết để điều tra sau, KHÔNG phải kênh có người/checker chủ động đọc — kênh chủ động vẫn là Discord. Dedup: marker JSON = hash(reasons +
     ngày ICT + notify_lỗi?) ⇒ cùng bộ lý do cùng ngày chỉ ghi 1 lần (GIỚI HẠN: ngày mới hoặc bộ lý do đổi thì
     ghi lại; marker chỉ ghi SAU khi append rc=0 nên lỗi append sẽ được thử lại ở run sau). Chỉ gọi ở live_run."""
     import json, hashlib
@@ -599,7 +602,8 @@ def bank_nodata_gate(lb):
       G1 bank_lens_v3.csv đọc lỗi / rỗng (rating_8l.py:551-556 chỉ print ⇒ MỌI bank thành nodata).
       G2 mã mang nhãn bank-nodata NHƯNG có trong lens file hiện tại (2 nguồn mâu thuẫn).
       G3 tỉ lệ nodata trong BANK > BANK_NODATA_MAX_FRAC (hoặc không có dòng BANK nào).
-      G4 mã có lens ở snapshot kỳ trước nay mang nhãn bank-nodata (snapshot đọc lỗi cũng bật cổng)."""
+      G4 mã có hạng lens THẬT ở snapshot kỳ trước nay mang nhãn bank-nodata HOẶC bank-noROE (noROE = mã CÒN
+         trong lens nhưng ROE NaN ⇒ G2 không thấy được; snapshot đọc lỗi cũng bật cổng)."""
     import json
     reasons = []
     lens_path = os.path.join(WORKDIR, "data", "bank_lens_v3.csv")
@@ -632,9 +636,9 @@ def bank_nodata_gate(lb):
     if os.path.exists(snap):
         try:
             with open(snap, encoding="utf-8") as f: prev = set(json.load(f)["lens_tickers"])
-            lost = [t for t in nodata if t in prev]
+            lost = [t for t in bad if t in prev]
             if lost:
-                reasons.append(f"G4 {len(lost)} mã có lens ở snapshot kỳ trước ({snap}) nay thành bank-nodata: "
+                reasons.append(f"G4 {len(lost)} mã có hạng lens THẬT ở snapshot kỳ trước ({snap}) nay thành bank-nodata/bank-noROE: "
                                f"{', '.join(lost)}. Nếu bỏ lens có chủ đích: sửa snapshot bằng tay rồi chạy lại")
         except Exception as e:
             reasons.append(f"G4 snapshot ĐỌC LỖI: {snap}: {type(e).__name__}: {e}")
@@ -728,10 +732,12 @@ def override_current_bank_aq(out, live_run=False):
               + (f"GIỮ proxy (cổng chặn bật): {', '.join(sorted(nodata_map))}" if reasons else
                  f"downgrade-only max(proxy,live,{BANK_NODATA_FLOOR}); đổi {len(moved)}: {', '.join(moved) or '-'}"))
     if live_run and not reasons and lens:
-        # Snapshot = mã csv chấm bằng lens THẬT (live_map) ∪ lens hiện tại — KHÔNG chỉ lens hiện tại: rating_8l.csv
-        # sinh 19:20 HÔM TRƯỚC còn chấm mã vừa mất khỏi lens bằng lens thật; ghi snapshot = lens hôm nay sẽ làm
-        # mất mã đó khỏi snapshot đúng lúc csv ngày sau chuyển nó sang nodata ⇒ G4 điếc (REPORT_R2 mục 1).
-        _write_lens_snapshot(set(lens) | set(live_map))
+        # Snapshot = tập mã có hạng THẬT: live_map (csv chấm bằng lens thật) ∪ (lens hiện tại − mã nodata/noROE).
+        # (a) KHÔNG chỉ lens hiện tại: rating_8l.csv sinh 19:20 HÔM TRƯỚC còn chấm mã vừa mất khỏi lens bằng lens
+        # thật; snapshot = lens hôm nay làm mất mã đó đúng lúc csv ngày sau chuyển nó sang nodata ⇒ G4 điếc.
+        # (b) trừ nodata_map: mã nằm trong lens nhưng ROE NaN (noROE) dai dẳng không vào snapshot ⇒ không làm
+        # G4 dính vĩnh viễn; mã từng có hạng thật rồi mới thành noROE vẫn nằm trong live_map kỳ trước ⇒ G4 bắt.
+        _write_lens_snapshot(set(live_map) | (set(lens) - set(nodata_map)))
     print(f"  [bank-AQ override] current-snapshot bank rating changed for {n} bank(s); history proxy untouched")
     return out
 

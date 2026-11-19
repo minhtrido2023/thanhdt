@@ -367,7 +367,7 @@ def t9_mutations():
 
 def t10_mutation():
     """Bản be7b01fa5: snapshot = lens-only. T10 PHẢI fail trên bản đó."""
-    m = mutant("_write_lens_snapshot(set(lens) | set(live_map))", "_write_lens_snapshot(lens)", "mut_snap_lens_only")
+    m = mutant("_write_lens_snapshot(set(live_map) | (set(lens) - set(nodata_map)))", "_write_lens_snapshot(lens)", "mut_snap_lens_only")
     n0 = len(FAILS); n_ok0 = N_OK
     t10_three_days(m)
     caught = len(FAILS) - n0
@@ -376,13 +376,65 @@ def t10_mutation():
     print(f"  [T10] mutation snapshot=lens-only: {caught} assertion(s) FAIL như mong đợi")
 
 
+def t14_noroe_three_days(M):
+    """noROE = mã CÒN trong lens nhưng ROE NaN ⇒ G2 không thấy. D0 MBB thật / D1 lens vẫn có MBB (ROE NaN),
+    csv cũ còn chấm thật / D2 csv gắn MBB bank-noROE ⇒ G4 PHẢI bật, MBB giữ 2; snapshot KHÔNG bị ghi đè khi cổng bật."""
+    h = hist(H3 + [("MBB", "2026-10-01", 2)])
+    shared = os.path.join(tempfile.mkdtemp(dir=TMP), "snap.json")
+    L5 = ("L1", "L2", "L3", "L4", "L5")
+    live_ok = [("MBB", "BANK", 2, "strong asset-quality")] + LENS_LIVE
+    out, alert, _, _ = run(M, h, live_ok, lens=("MBB",) + L5, live_run=True, snap_file=shared)       # D0
+    ok(alert == "" and latest(out, "MBB") == 2, "T14 D0 lành: cổng tắt, MBB giữ 2", alert[:200])
+    out, alert, _, _ = run(M, h, live_ok, lens=("MBB",) + L5, live_run=True, snap_file=shared)       # D1 (csv cũ vẫn thật)
+    ok(alert == "" and latest(out, "MBB") == 2, "T14 D1 lens còn MBB, csv cũ thật: cổng tắt", alert[:200])
+    snap_before = open(shared).read()
+    live_d2 = [("MBB", "BANK", 4, "bank-noROE")] + LENS_LIVE
+    out, alert, _, _ = run(M, h, live_d2, lens=("MBB",) + L5, live_run=True, snap_file=shared)       # D2
+    ok("G4" in alert and "MBB" in alert and "noROE" in alert, "T14 D2 csv noROE MBB (MBB VẪN trong lens) ⇒ G4 BẬT, nêu MBB",
+       alert[:300])
+    ok(latest(out, "MBB") == 2, "T14 D2 MBB KHÔNG bị hạ 2→4 âm thầm", str(latest(out, "MBB")))
+    ok(open(shared).read() == snap_before, "T14 D2 cổng bật ⇒ snapshot KHÔNG bị ghi đè (không đầu độc baseline G4)")
+
+
+def t15_chronic_noroe(M):
+    """Mã X nằm trong lens nhưng noROE DAI DẲNG từ đầu (chưa từng có hạng thật): KHÔNG vào snapshot ⇒ G4 không dính
+    vĩnh viễn; cổng tắt, X bị hạ ≥4 như thiết kế."""
+    h = hist(H3 + [("XNR", "2026-10-01", 2)])
+    shared = os.path.join(tempfile.mkdtemp(dir=TMP), "snap.json")
+    L5 = ("L1", "L2", "L3", "L4", "L5")
+    live = [("XNR", "BANK", 4, "bank-noROE")] + LENS_LIVE
+    for day in ("D0", "D1"):
+        out, alert, _, snap = run(M, h, live, lens=("XNR",) + L5, live_run=True, snap_file=shared)
+        ok(alert == "", f"T15 {day} noROE dai dẳng: cổng KHÔNG dính", alert[:300])
+    ok(snap is not None and "XNR" not in snap["lens_tickers"], "T15 XNR (chưa từng có hạng thật) KHÔNG nằm trong snapshot",
+       str(snap))
+    ok(latest(out, "XNR") == 4, "T15 XNR bị hạ xuống 4 (downgrade-only)", str(latest(out, "XNR")))
+
+
+def t14_mutations():
+    for label, a, b, tests in (
+        ("G4 chỉ dùng nodata", "lost = [t for t in bad if t in prev]", "lost = [t for t in nodata if t in prev]", (t14_noroe_three_days,)),
+        ("snapshot ghi cả khi cổng bật", "if live_run and not reasons and lens:", "if live_run and lens:", (t14_noroe_three_days,)),
+        ("snapshot không trừ nodata_map", "_write_lens_snapshot(set(live_map) | (set(lens) - set(nodata_map)))",
+         "_write_lens_snapshot(set(live_map) | set(lens))", (t15_chronic_noroe,))):
+        m = mutant(a, b, "mut14_" + str(abs(hash(label))))
+        n0 = len(FAILS); n_ok0 = N_OK
+        for t in tests: t(m)
+        caught = len(FAILS) - n0
+        del FAILS[n0:]
+        globals()["N_OK"] = n_ok0
+        ok(caught >= 1, f"T14 ĐỘT BIẾN '{label}' BỊ bắt ({caught} assertion fail)", f"caught={caught}")
+        print(f"  [T14] mutation {label}: {caught} assertion(s) FAIL như mong đợi")
+
+
 if __name__ == "__main__":
     print(f"TZ={os.environ.get('TZ', '<unset>')}  WORKDIR_8L={CANON}")
     t1_max(H); t2_lens_fail(H); t3_ratio(H); t4_inconsistent(H); t5_snapshot(H); t6_history_bytes(H); t7_live_run(H)
     t8_end_to_end()
-    t10_three_days(H); t11_skipped_branches(H); t12_live_run(); t12_wiring_and_mutation(); t13_bus(H)
+    t10_three_days(H); t14_noroe_three_days(H); t15_chronic_noroe(H); t11_skipped_branches(H); t12_live_run(); t12_wiring_and_mutation(); t13_bus(H)
     t9_mutations()
     t10_mutation()
+    t14_mutations()
     import shutil; shutil.rmtree(TMP, ignore_errors=True)
     for f in FAILS: print("FAIL:", f)
     print(f"{'PASS' if not FAILS else 'FAIL'}: {N_OK} ok, {len(FAILS)} fail")
