@@ -1,0 +1,2 @@
+# Danh sách GIỮ cho bin/weekly_orphan_review.py — mỗi dòng 1 tên thư mục research (hoặc đường dẫn tương đối repo mike).
+# Ghi vào đây TRƯỚC khi hết grace 7 ngày nếu muốn giữ một mục mồ côi; kèm lý do sau dấu #. dd_* luôn được bảo vệ.

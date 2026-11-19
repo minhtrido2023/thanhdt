@@ -200,3 +200,8 @@ Làm mới cache r* cho dòng hiển thị DCF (display-only). Đề xuất + ru
 
 ## mbb_rights_tradeable_watch — ĐÃ CÀI 2026-11-19 (user duyệt A1 22:04 ICT)
 | **19:15 ICT T2–T6** (`15 12 * * 1-5` UTC; backup `state/crontab_backup_pre_mbbwatch_20261119.txt`) | `mike/bin/mbb_rights_tradeable_watch.py` — CHỈ ĐỌC dnse_raw, cảnh báo Trading Daily 1 lần khi MBB quyền mua (SpaceX 110cp/ZaloPay 20cp) bán được, nhắc 1 lần từ 28/11 nếu còn kẹt. Sau cảnh báo: chuyển nhãn CORP_ACTION→PARK (nhánh `session/15727-a`, cần xử lý arch-review NEEDS_CHANGES) + trình plan bán MBB. Gỡ khi xong. |
+
+## weekly_orphan_review — ĐÃ CÀI 2026-11-19 (user chỉ đạo 22:08 ICT; Mike dựng + selfcheck 2 TZ)
+| Lịch | Script | Đọc | Ghi | Phụ thuộc | Kiểm |
+|---|---|---|---|---|---|
+| **10:30 ICT Chủ nhật** (`30 3 * * 0` UTC; backup `state/crontab_backup_pre_orphanreview_20261119.txt`; lệch 30' sau `code_quality_weekly` 10:00) | `mike/bin/weekly_orphan_review.py --apply` (flock + timeout 1800) | file local (mtime thư mục research, /tmp), crontab + code (tham chiếu), `kb/cleanup_keep.txt`; không BQ | xoá research mồ côi sau grace 7 ngày + `/tmp` cũ; `state/orphan_review_state.json`, `logs/orphan_review/<ngày>.md`, digest `notify.sh` | độc lập mọi job khác; không động `data/`, `dd_*`, `pinned_ledgers` | `logs/orphan_review.log` |
