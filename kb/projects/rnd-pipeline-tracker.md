@@ -116,3 +116,8 @@ Chi tiết đầy đủ từng mục: bus finding của Taylor + `kb/incidents/i
 
 ## Chuyển nguyên văn từ `kb/current_ops.md` (2026-10-10, dòng dự án đã đóng)
 - **AlphaLens Paper**: FPT/ACB/MBB/HDB — **ĐÃ ĐÓNG 2026-10-01** (user chọn A: không wire live) → `kb/projects/rnd-pipeline-tracker.md`.
+
+## ĐÓNG BĂNG nghiên cứu intraday FZ — 2026-11-19 (user duyệt, job Taylor_20261119_052906)
+- **Không thêm job nghiên cứu** trên FZ-001 / FZ-002 / C-CEIL / C-NFLOOR / C-NFLOOR3 / C-TAMIX / C-ONID cho tới khi có **≥10 cụm MỚI** (sau 2026-11-03) trong sổ hoặc **user mở lại**.
+- Lý do: `intraday_cluster_audit_20261119` NO-GO (0/5 setup PASS, FZ-001 17 cụm / FZ-002 15 cụm, holdout không đủ N) và `basket_vs_fz_capit_20261119` (FZ ≈ cược thời điểm hồi: rổ chiếm 53%/69% lợi nhuận, excess CI90 chứa 0). Chạy thêm trên cùng mẫu chỉ tăng trial ẩn.
+- Thay bằng GIÁM SÁT paper: chương trình `intraday_fz_signal_ledger` (registry; mốc 2027-03-31 / 2028-06-30 đề xuất), sổ `data/fz_signal_ledger.csv`, README `agents/Taylor/research/fz_signal_ledger_20261119/README.md`. Không tiền thật.
