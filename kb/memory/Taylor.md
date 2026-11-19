@@ -27,3 +27,5 @@
 - [2026-11-19T08:14:03Z] [g8-gap 19/11] XONG job Taylor_20261119_080122: commit 48d4a8d07 nhánh session/vnindex-tr-g8-gap-20261119 — CHO Mike duyet+arch-review; merge => o TR chua co so tu 11/12 (6 ma CRV/GEL/HPA/DSH/DVV/DMX)
 - [2026-11-19T08:26:16Z] [arch-8l-dt5g 19/11] XONG job Taylor_20261119_080508: REPORT o research/arch_8l_dt5g_data_leverage_20261119 — CHO user quyet 5 cau (A1 snapshot vintage, bq_admin, 12 trial A4, C1, ky vong) roi moi dispatch Wave A
 - [2026-11-19T08:57:22Z] [g8-gap r2 19/11] XONG job Taylor_20261119_084930: commit 905745fbb — CHO Mike arch-review lại + user duyệt ack đề xuất (6 mã, đến 12-27) rồi mới merge
+- [2026-11-19T09:04:55Z] ĐANG DỞ: job Taylor_20261119_090443 A3 bản đồ v2 + A4 nowcast 12 họ | NEXT: đọc REPORT §0,5,6,7,8; code B2 commodity_cycle_te_20261026
+- [2026-11-19T09:05:03Z] ĐANG DỞ: job Taylor_20261119_090450 sector-leaders-nowcast (việc 5) | NEXT: đọc REPORT arch_8l + commodity_cycle_te, viết PREREG, chạy
