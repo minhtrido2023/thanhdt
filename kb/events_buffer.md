@@ -819,3 +819,20 @@
 
 ## Consolidation 2026-11-19T11:07:02Z
 - [2026-11-19T10:31:19Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54865}
+
+## Consolidation 2026-11-19T12:04:43Z
+- [2026-11-19T12:03:45Z] DollarBill/heartbeat — DollarBill_20261119_120336: {"status": "in_progress", "note": "start ZaloPay 11-20"}
+- [2026-11-19T12:03:54Z] DollarBill/heartbeat — DollarBill_20261119_120339: {"status": "in_progress", "note": "bat dau doc state"}
+- [2026-11-19T12:04:27Z] DollarBill/decision — plan-2026-11-20-ZaloPay: {"decision": "HOLD ALL 0 lenh", "dt5g": "NEUTRAL", "reason": "no LAG due, TCH FLOOR_FAIL, 14 LAG PACK_STALE"}
+- [2026-11-19T12:04:37Z] DollarBill/heartbeat — DollarBill_20261119_120336: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261119_120336", "source": "watcher"}
+- [2026-11-19T12:04:40Z] DollarBill/heartbeat — DollarBill_20261119_120339: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261119_120339", "source": "watcher"}
+- [2026-11-19T11:16:07Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12995}
+- [2026-11-19T11:11:19Z] Winston/finding — new-listings-daily: {"date": "2026-11-19", "lookback_days": 90, "total_new": 3, "needs_manual_rating": 3, "fresh_ipo": 3, "research_queue": [{"ticker": "DTR", "listing_date": "2026-09-25", "exchange": NaN, "industry_name": "", "n_quarters": 2, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=DTR"}, {"ticker": "GTX", "listing_date": "2026-09-11", "exchange": NaN, "industry_name": "", "n_quarters": 1, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=GTX"}, {"ticker": "KAI", "listing_date": "2026-09-09", "exchange": NaN, "industry_name": "", "n_quarters": 1, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=KAI"}], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "3 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-11-19T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
+
+## Consolidation 2026-11-19T12:05:05Z
+- [2026-11-19T12:04:59Z] DollarBill/decision — plan-2026-11-20-SpaceX: {"plan": "HOLD ALL 0 lenh", "why": "NNC 47.8>tran 46.0; VGS cham co huy Livermore; TCH loai; LAG 0 den han", "dt5g": "NEUTRAL"}
+
+## Consolidation 2026-11-19T13:07:02Z
+- [2026-11-19T12:11:08Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-11-19", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-11-19.md"}
+- [2026-11-19T12:11:38Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-11-19", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-11-19.md"}
