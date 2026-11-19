@@ -324,7 +324,6 @@ def div_yield_daily(panel, spells: dict, divs, idx, after=None, first_seen: dict
         tok.setdefault(t, []).append(f"{tk}:osh:{int(n)}")
     # G8_NEW row: mã đang trong bảng sàn phiên t, niêm yết >= N phiên chỉ số, `ticker` chưa có dòng nào tới t
     days = idx.index if after is None else idx.index[idx.index > pd.Timestamp(after)]
-    pos = {t: i for i, t in enumerate(idx.index)}
     for code, sp in spells.items():
         f = first_row.get(code)
         if first_seen and first_seen.get(code) is not None:
@@ -337,7 +336,9 @@ def div_yield_daily(panel, spells: dict, divs, idx, after=None, first_seen: dict
             if st is None:
                 continue
             st_ts = pd.Timestamp(st)
-            listed = pos[t] - int(idx.index.searchsorted(st_ts)) + 1 if st_ts >= idx.index[0] else None
+            # số phiên chỉ số đã niêm yết đếm trên lưới phiên ĐẦY ĐỦ (sf), không phải `idx` cắt ở mốc dựng — nếu không,
+            # mã niêm yết trước mốc dựng bị coi 'không biết' ⇒ nổ oan và phụ thuộc mốc (vòng 3, arch-review)
+            listed = int(sf.searchsorted(t)) - int(sf.searchsorted(st_ts)) + 1 if st_ts >= sf[0] else None
             if listed is None or listed >= G8_NEW_MIN_SESSIONS:
                 tok.setdefault(t, []).append(f"{code}:row:{st.isoformat()}")
     day["g8_new"] = pd.Series({t: ";".join(sorted(v)) for t, v in tok.items()},
@@ -764,7 +765,7 @@ def _g8_new_errs(r: dict, acks: set, restating: bool = False) -> list:
     for tk, cause, val in r.get("g8_new") or []:
         if g8_new_acked(acks, r["date"], tk, cause):
             continue
-        why = (f"có giá {val} phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1"
+        why = (f"có giá {val}/{G8_NEW_K} phiên chỉ số cuối tới t nhưng OShares rỗng trong {G8_NEW_K} phiên tới t-1"
                if cause == "osh" else f"niêm yết HOSE từ {val} nhưng `ticker` không có dòng nào tới phiên này")
         fix = ("đang --restate-sealed: dữ liệu BQ hiện tại VẪN thiếu mã này nên dựng lại không chữa được — cần ack "
                "G8_NEW (ưu tiên theo khoảng ngày) rồi chạy lại, hoặc chờ BQ lấp dữ liệu rồi mới restate"

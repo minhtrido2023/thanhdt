@@ -1060,7 +1060,7 @@ def t_g8_new(tmp):
     ok(("NEWO", "osh", str(k)) in r[D[k - 1]]["g8_new"], f"g8a NEWO osh từ D{k - 1}: {r[D[k - 1]]['g8_new']}")
     ok(not any(t[0] == "NEWO" for t in r[D[k - 2]]["g8_new"]), f"g8a NEWO chưa đủ phiên D{k - 2}")
     e = g8_errs(rows, D[k - 1], D[k])
-    ok(any("NEWO" in x and "OShares rỗng" in x and f"có giá {k + 1} phiên" in x for x in e),
+    ok(any("NEWO" in x and "OShares rỗng" in x and f"có giá {k + 1}/{V.G8_NEW_K} phiên" in x for x in e),
        f"g8a lỗi G8 trích tên mã + nguyên nhân + giá trị đọc: {e}")
     # (b) mã không dòng nào ⇒ nổ mọi phiên; LATE niêm yết D8 ⇒ chỉ nổ từ D8+N-1
     ok(("NEWR", "row", "2000-01-01") in r[D[1]]["g8_new"], f"g8b NEWR row D1: {r[D[1]]['g8_new']}")
@@ -1393,15 +1393,28 @@ def t_g8_window_independent():
         rows.append({"time": D[i].isoformat(), "ticker": "LOSTO", "Price": 8000, "Close": 8000,
                      "OShares": 1e6 if i <= 15 else None})                   # mất ~30 phiên (~42 ngày) trước D45
         rows.append({"time": D[i].isoformat(), "ticker": "RECENT", "Price": 8000, "Close": 8000,
-                     "OShares": 1e6 if i <= 41 else None})                   # mất 4 phiên trước D45
+                     "OShares": 3e6 if i <= 41 else None})                   # mất 4 phiên trước D45 (vốn hoá lớn nhất)
+        # ranh giới K (diệt mutant ffill(limit=K±) / bỏ shift(1)): OShares cuối ở D[44-K] ⇒ còn trong K phiên ⇒ G8 cũ;
+        # ở D[43-K] ⇒ ngoài K ⇒ osh; NEWT chỉ có OShares TỪ t (D45) trở đi ⇒ vẫn osh (S1_ff không nhìn t)
+        rows.append({"time": D[i].isoformat(), "ticker": "B_K", "Price": 8000, "Close": 8000,
+                     "OShares": 1.5e6 if i <= 44 - V.G8_NEW_K else None})
+        rows.append({"time": D[i].isoformat(), "ticker": "B_K1", "Price": 8000, "Close": 8000,
+                     "OShares": 1e6 if i <= 43 - V.G8_NEW_K else None})
+        rows.append({"time": D[i].isoformat(), "ticker": "NEWT", "Price": 8000, "Close": 8000,
+                     "OShares": 1e6 if i >= 45 else None})
     panel = pd.DataFrame(rows)
     panel["time"] = pd.to_datetime(panel["time"])
     far = dt.date(2000, 1, 1), dt.date(2100, 1, 1)
-    spells = {"BASE": [far], "LOSTO": [far], "RECENT": [far]}
+    # row: LATEL niêm yết 3 phiên trước t (< N ⇒ KHÔNG nổ), LATEOK 8 phiên (>= N ⇒ nổ) — ở MỌI mốc dựng, kể cả
+    # mốc cách t 1-3 ngày (idx cắt ở mốc dựng không được làm LATEL 'không biết số phiên' ⇒ nổ oan)
+    spells = {"BASE": [far], "LOSTO": [far], "RECENT": [far], "B_K": [far], "B_K1": [far], "NEWT": [far],
+              "LATEL": [(D[43], far[1])], "LATEOK": [(D[38], far[1])]}
     divs = pd.DataFrame(columns=["ticker", "time", "div"])
     t = D[45]
     seen = set()
-    for back in (3, 7, 14, 21):
+    exp_tok = ";".join(sorted([f"B_K1:osh:{V.G8_NEW_K}", f"LATEOK:row:{D[38].isoformat()}",
+                               f"LOSTO:osh:{V.G8_NEW_K}", f"NEWT:osh:{V.G8_NEW_K}"]))
+    for back in (1, 3, 7, 14, 21):
         since = max(d for d in D if d <= t - dt.timedelta(days=back))
         pn = panel[panel.time >= pd.Timestamp(V.bq_panel_start(since))]
         pv = pn[pn.ticker == "VNINDEX"].set_index("time").Price
@@ -1409,7 +1422,7 @@ def t_g8_window_independent():
                                 after=since, sess_full=pv)
         r = day.loc[pd.Timestamp(t)]
         seen.add((r.g8_new, r.osh_missing_ticker))
-        ok(r.g8_new == f"LOSTO:osh:{V.G8_NEW_K}", f"wi back={back}: LOSTO ⇒ token osh G8_NEW: {r.g8_new!r}")
+        ok(r.g8_new == exp_tok, f"wi back={back}: token đúng (osh ngoài K / NEWT / row đủ N; KHÔNG B_K, LATEL): {r.g8_new!r}")
         ok(r.osh_missing_ticker == "RECENT", f"wi back={back}: RECENT ⇒ G8 cũ: {r.osh_missing_ticker!r}")
     ok(len(seen) == 1, f"wi cùng phiên t ⇒ cùng phân loại ở mọi mốc dựng: {seen}")
     # xa hơn K phiên ⇒ không còn là 'G8 cũ' (K cố định, không ffill từ đầu panel)
