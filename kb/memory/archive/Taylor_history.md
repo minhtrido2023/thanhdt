@@ -2517,3 +2517,6 @@
 
 ## Archived 2026-11-19 (keep=12 days=0 require_done=False)
 - [2026-11-18T12:42:11Z] [lead-signal-runup 18/11] XONG job Taylor_20261118_122819: NO-GO 0/48 GO (15 informative nhung deu tre, net am); REPORT md5 14c49853 — CHO Mike quant-skeptic + ghi NO-GO vao ta-schools-vn
+
+## Archived 2026-11-19 (keep=12 days=0 require_done=False)
+- [2026-11-18T12:47:15Z] ĐANG DỞ: job Taylor_20261118_124655 DD LLM vong2 (ap skeptic_r1) | NEXT: doc skeptic_r1.md, render PDF, tai giai trinh, sua calc.py
