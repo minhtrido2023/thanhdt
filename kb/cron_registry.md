@@ -187,3 +187,8 @@ Làm mới cache r* cho dòng hiển thị DCF (display-only). Đề xuất + ru
 | Lịch | Script | Đọc | Ghi | Phụ thuộc | Kiểm |
 |---|---|---|---|---|---|
 | **07:30 + 13:30 ICT hằng ngày** (`30 0` + `30 6` UTC) | `mike/bin/work_tree_verify_daily.sh` (build → dispatch Wags xác minh mục "chờ quyết"/"quá hạn" với git/crontab/bus → build lại) | `state/work_tree/merged.json`, git, crontab, bus | `kb/work_ledger.jsonl` (close/note), marker `state/work_tree/verified_<ngày>_<AM\|PM>` + `verified_<ngày>` | trước build 07:50 / bản tin 08:00; slot PM không phụ thuộc gì | marker slot hôm nay tồn tại + `logs/work_tree_verify.log` không có `dispatch rc=`. Gốc lỗi: script có từ 11/07 nhưng KHÔNG ai cài cron (chỉ chạy tay 1 lần). |
+
+## fill_timing_monitor — ĐỀ XUẤT (CHƯA CÀI; Taylor 2026-11-19, job Taylor_20261119_055805; Mike review rồi tự cài)
+| Lịch | Script | Đọc | Ghi | Phụ thuộc | Kiểm |
+|---|---|---|---|---|---|
+| **07:40 ICT T2–T6** (`40 0 * * 1-5` UTC, hoặc `40 7 * * 1-5` khi crontab có `TZ=Asia/Ho_Chi_Minh`) | `. wc_env.sh; $DNA_PYEXE mike/bin/fill_timing_monitor.py >> mike/logs/fill_timing_monitor.log 2>&1` | `data/execution_logs/dnse_raw_*.jsonl` + `exec_*_journal.csv`, BQ `tav2_bq.ticker` (sau sync 23:45 ICT) | `state/fill_timing_monitor.json` (nguyên tử); post `trading_daily` chỉ: tiến độ thứ Hai, CẢNH BÁO rollback, lỗi | BQ sync xong (script tự dùng MAX(time) BQ + chỉ tính (mã,ngày) đã có dòng, ngày<hôm nay ICT) | `state/fill_timing_monitor.json` → `last_run.today` = hôm nay; exit 0 bình thường / 2 alert / 1 lỗi (đã post lý do). Luật: `agents/Taylor/research/fill_timing_monitor_20261119/PREREG.md`. |
