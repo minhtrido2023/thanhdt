@@ -2508,3 +2508,6 @@
 
 ## Archived 2026-11-19 (keep=12 days=0 require_done=False)
 - [2026-11-18T12:28:41Z] ĐANG DỞ: job Taylor_20261118_122819 lead-signal run-up TV1/VCP (paper) | NEXT: kb recall, PREREG, BQ pull, engine
+
+## Archived 2026-11-19 (keep=12 days=0 require_done=False)
+- [2026-11-18T12:35:01Z] ĐANG DỞ: job Taylor_20261118_122349 DD LLM — calc xong model/calc_output.txt (tam 31.589, vung 4.497-51.769) | NEXT: viet REPORT.md dd_LLM_20261118 + bus finding
