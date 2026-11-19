@@ -33,3 +33,5 @@
 - [2026-11-19T09:17:15Z] [A4 nowcast 19/11] XONG job Taylor_20261119_090443: 5/12 họ GO (heo, môi giới, sân bay, cảng, ô tô), commit 3469ad3dc — CHO Mike gọi quant-skeptic rồi mới viết PREREG-5 (B1)
 - [2026-11-19T09:22:39Z] [sector-leaders 19/11] XONG job Taylor_20261119_090450: KHONG sleeve; T2 display dat, T9 ung vien PREREG-5 paper (commit 19a9944b9) — CHO Mike goi quant-skeptic + user duyet
 - [2026-11-19T09:25:32Z] [g8-gap r3 19/11] XONG job Taylor_20261119_091916: commit f7cdf9a22 (lib) + fd5c29454 (README) — CHO Mike arch-review vong 3, merge CUNG ack 6 ma; chua replay BQ that voi K=11
+- [2026-11-19T09:55:29Z] ĐANG DỞ: job Taylor_20261119_095518 PREREG-5 họ 2 (heo/DBC) paper forward | NEXT: đọc nowcast_kqkd_12fam, viết agents/Taylor/research/prereg5_hog_dbc_20261119/PREREG5.md
+- [2026-11-19T09:55:31Z] ĐANG DỞ: job Taylor_20261119_095521 bank-nodata 3->4 (worktree sparse session/bank-nodata-fail-closed-20261119) | NEXT: grep bank-nodata, sửa, selfcheck, regen tạm, tác động tiền
