@@ -1,0 +1,10 @@
+ticker,eff_date,q_time,route_c,rating_c,core_score_c,tier_c,route_t,rating_t,core_score_t,tier_t,_merge,pc,pt,flip,rating_changed
+CSM,2014-08-01,2014-08-01,COMPOUNDER,2,4,C,CYCLICAL,5,4,E,both,True,False,True,True
+CSM,2014-11-03,2014-11-03,COMPOUNDER,2,4,C,CYCLICAL,5,4,E,both,True,False,True,True
+CSM,2015-02-02,2015-02-02,COMPOUNDER,2,6,B,CYCLICAL,5,6,E,both,True,False,True,True
+CSM,2016-10-20,2016-10-20,COMPOUNDER,3,5,C,CYCLICAL,5,5,E,both,True,False,True,True
+CSM,2019-08-01,2019-08-01,COMPOUNDER,3,4,C,CYCLICAL,5,4,E,both,True,False,True,True
+CSM,2020-04-20,2020-04-20,COMPOUNDER,3,4,C,CYCLICAL,5,4,E,both,True,False,True,True
+CSM,2020-10-22,2020-10-22,COMPOUNDER,3,4,D,CYCLICAL,5,4,E,both,True,False,True,True
+DRC,2014-08-01,2014-08-01,COMPOUNDER,2,5,B,CYCLICAL,5,5,E,both,True,False,True,True
+DRC,2014-11-03,2014-11-03,COMPOUNDER,2,6,B,CYCLICAL,5,6,E,both,True,False,True,True

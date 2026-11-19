@@ -1,0 +1,41 @@
+pin0% deals in 10 banks: {('BVB', 'BAL'): 1, ('KLB', 'LAG'): 1, ('NVB', 'LAG'): 1} | any ledger incl. abandoned/mtm: 8
+pin1M deals in 10 banks: {('ABB', 'BAL'): 1, ('BVB', 'BAL'): 1, ('NVB', 'LAG'): 1} | any ledger incl. abandoned/mtm: 10
+hist rows for 10 banks 286 by rating {2: 4, 3: 35, 4: 88, 5: 159} | routes <ArrowStringArray>
+['BANK']
+Length: 1, dtype: str
+unmatched to ticker_financial: 1 of 286
+ROE all-NaN rows 1 with rating<=3 (default branch): 0 {'KLB': 1}
+rating==3 rows total 35 | of which ROE in [12%,..) etc: roe-derived 35
+PAIRS flipping if default 3->4 in history (ROE NaN & rating 3): 0
+  ticker  d_in  d_all    first_in     last_in
+0    ABB  1409   1468  2021-03-29  2026-11-18
+1    BAB   438   2213  2018-03-29  2022-06-13
+2    BVB  1522   1581  2020-10-01  2026-11-18
+3    KLB   928   2341  2021-01-12  2026-11-18
+4    NVB  2319   4040  2017-08-08  2026-11-18
+5    PCB     9     19  2026-11-06  2026-11-18
+6    PGB   809   1470  2021-03-25  2026-03-30
+7    SGB   420   1520  2021-01-07  2022-09-15
+8    VAB  1264   1323  2021-10-13  2026-11-18
+9    VBB   586   1815  2021-05-31  2026-11-18
+STB
+quarter  ROE_Trailing  ROE5Y  ROE3Y
+ 2025Q3        0.2102 0.1454 0.1738
+ 2025Q4        0.0987 0.1468 0.1622
+ 2026Q1        0.0744 0.1468 0.1622
+ 2026Q2        0.0475 0.1468 0.1622
+ 2026Q3        0.0222 0.1468 0.1622
+EIB
+quarter  ROE_Trailing  ROE5Y  ROE3Y
+ 2025Q3        0.1189 0.1034 0.1316
+ 2025Q4        0.0436 0.0991 0.0951
+ 2026Q1        0.0282 0.0991 0.0951
+ 2026Q2        0.0182 0.0991 0.0951
+ 2026Q3        0.0069 0.0991 0.0951
+SSB
+quarter  ROE_Trailing  ROE5Y  ROE3Y
+ 2025Q3        0.1734 0.1499 0.1529
+ 2025Q4        0.1411 0.1540 0.1413
+ 2026Q1        0.0774 0.1540 0.1413
+ 2026Q2        0.0722 0.1540 0.1413
+ 2026Q3        0.0772 0.1540 0.1413

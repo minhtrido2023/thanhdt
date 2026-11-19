@@ -1,0 +1,18 @@
+control vs existing csv: rows 54867 54867 identical frame: True
+{'both': 54867, 'left_only': 0, 'right_only': 0}
+non-X rows changed: 0 route chg in X: {('COMPOUNDER', 'CYCLICAL'): 13}
+X rows 634 tickers 13 | rating changed rows 255 | GATE flips (mã,quý) 9 | pass->fail 9 | fail->pass 0
+ticker
+CSM    7
+DRC    2
+            deals  flip
+end   book             
+pin0% BAL      12     0
+      LAG      18     0
+pin1M BAL      12     0
+      LAG      18     0
+Empty DataFrame
+Columns: [end, book, ticker, signal_date, eff, q, rating_c, rating_t, flip, ret, year]
+Index: []
+pin0% distinct flipped (mã,quý) with deals: 0
+pin1M distinct flipped (mã,quý) with deals: 0

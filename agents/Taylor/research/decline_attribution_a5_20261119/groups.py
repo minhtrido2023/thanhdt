@@ -1,5 +1,5 @@
 import pandas as pd
-MAP='commodity_cycle_te_20261026/commodity_map_te.csv'
+import os; MAP=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','commodity_cycle_te_20261026','commodity_map_te.csv')  # path-only edit after PREREG
 def hh_set():
     m=pd.read_csv(MAP); return set(m[m.tier.isin(['A','B'])].ticker)
 def grp(icb,tk,hh):
