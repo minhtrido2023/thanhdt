@@ -20,7 +20,8 @@ with tempfile.TemporaryDirectory() as t:
         p = os.path.join(R, d, name); os.makedirs(os.path.dirname(p), exist_ok=True)
         open(p, "wb").write(os.urandom(size)); os.utime(p, (old, old))
     mk("old_exp", "panel.csv", 5000); mk("old_exp", "REPORT.md", 100)
-    mk("dd_X_1", "src/a.pdf", 5000)
+    mk("dd_X_1", "src/a.pdf", 5000); mk("dd_X_1", "REPORT.md", 100); mk("dd_X_1", "build.py", 200)
+    mk("dd_Y_2", "src/b.pdf", 5000); os.utime(os.path.join(R, "dd_Y_2", "src/b.pdf"), None)   # DD còn đang làm (mới sửa)
     mk("ref_exp", "big.csv", 5000)
     mk("keep_exp", "big.csv", 5000)
     mk("orphan_all", "x.pkl", 5000)
@@ -44,7 +45,8 @@ with tempfile.TemporaryDirectory() as t:
     st = json.load(open(os.path.join(root, "state/orphan_review_state.json")))
     ok("R:old_exp:TRIM" in st, "old_exp (KB nhắc, không code) = TRIM")
     ok("R:orphan_all:REMOVE_DIR" in st, "orphan_all (không md/KB/code) = REMOVE_DIR")
-    ok(not any(k.startswith(("R:dd_X_1", "R:ref_exp", "R:keep_exp", "R:young")) for k in st), "dd_/code-ref/keep/young KHÔNG là ứng viên")
+    ok("R:dd_X_1:TRIM_DD" in st, "DD im >3d = TRIM_DD")
+    ok(not any(k.startswith(("R:dd_Y_2", "R:ref_exp", "R:keep_exp", "R:young")) for k in st), "DD đang làm/code-ref/keep/young KHÔNG là ứng viên")
     ok("T:old.bin" in st and "T:new.bin" not in st, "/tmp: chỉ mục cũ")
     ok(os.path.exists(os.path.join(R, "old_exp/panel.csv")), "dry-run không xoá")
     # 2) --apply lần 1: grace chặn R, T xoá ngay
@@ -55,7 +57,8 @@ with tempfile.TemporaryDirectory() as t:
     w.main(common + ["--apply", "--now", str(now + 8 * 86400)])
     ok(not os.path.exists(os.path.join(R, "old_exp/panel.csv")) and os.path.exists(os.path.join(R, "old_exp/REPORT.md")), "TRIM xoá file nặng, GIỮ .md")
     ok(not os.path.exists(os.path.join(R, "orphan_all")), "REMOVE_DIR xoá cả thư mục")
-    for d in ("dd_X_1/src/a.pdf", "ref_exp/big.csv", "keep_exp/big.csv", "young/big.csv"):
+    ok(not os.path.exists(os.path.join(R, "dd_X_1/src/a.pdf")) and os.path.exists(os.path.join(R, "dd_X_1/REPORT.md")) and os.path.exists(os.path.join(R, "dd_X_1/build.py")), "TRIM_DD: bỏ pdf tạm, GIỮ .md và .py")
+    for d in ("dd_Y_2/src/b.pdf", "ref_exp/big.csv", "keep_exp/big.csv", "young/big.csv"):
         ok(os.path.exists(os.path.join(R, d)), f"giữ nguyên {d}")
     log = run("git", "log", "--oneline", cwd=root).stdout
     ok("weekly-orphan-review" in log and run("git", "status", "--porcelain", "--", "agents", cwd=root).stdout.strip() == "", "xoá tracked được commit theo pathspec, tree sạch")

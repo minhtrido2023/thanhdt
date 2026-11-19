@@ -5,13 +5,13 @@ User chỉ đạo 2026-11-19 22:08 ICT: "bất cứ thứ gì để quá lâu kh
 dọn dẹp; đưa vào lịch dọn dẹp hàng tuần". Kế hoạch + luật: kb/projects/weekly-orphan-review-plan-20261119.md.
 
 Mặc định DRY-RUN (chỉ báo cáo). `--apply` mới xoá, và CHỈ những mục bên dưới:
-  R  research/*  (agents/Taylor/research, trừ dd_* và mục trong kb/cleanup_keep.txt)
+  R  research/*  (agents/Taylor/research, trừ mục trong kb/cleanup_keep.txt; dd_* = TRIM_DD: giữ .md + .py/.sh, bỏ file tạm)
      - TRIM: thư mục im > R_IDLE_DAYS, KHÔNG bị code/cron tham chiếu ⇒ xoá file không-.md (tracked: git rm
        + commit theo pathspec, khôi phục được từ lịch sử; untracked: chỉ xoá khi md5 không khớp mục pin/registry/code)
      - REMOVE_DIR: như trên + không .md + không KB nào nhắc + im > R_ORPHAN_DAYS ⇒ xoá cả thư mục
      GRACE: mục phải xuất hiện ở ≥ GRACE_DAYS ngày TRƯỚC (state) mới được xoá — cho người kịp ghi vào cleanup_keep.txt.
   T  /tmp/*  top-level của chính user, im > T_IDLE_DAYS, không tiến trình nào nhắc tới ⇒ rm -rf (không grace).
-CHỈ BÁO, KHÔNG BAO GIỜ XOÁ: dd_* (nguồn DD), data/bq_cache_asof*, data/pinned_ledgers, worktree chưa merge,
+CHỈ BÁO, KHÔNG BAO GIỜ XOÁ: data/bq_cache_asof*, data/pinned_ledgers, worktree chưa merge,
 file ignored lớn trong data/ (liệt kê top để người quyết).
 Thoát: 0 luôn (cron). Đầu ra: logs/orphan_review/<ngày>.md + digest 1 tin qua bin/notify.sh khi có việc.
 """
@@ -22,6 +22,7 @@ R_ORPHAN_DAYS = 14
 T_IDLE_DAYS = 7
 GRACE_DAYS = 7
 MIN_HEAVY = 1 << 20
+DD_KEEP_EXT = (".py", ".sh")   # DD đã xong: giữ .md (nguồn dùng lại) + script nhỏ; bỏ nguồn tải về/ảnh/pdf/csv tạm (user duyệt 2026-11-19 22:18)
 BIG_FILE = 50 << 20
 BIG_FILE_AGE = 30
 NEVER = ("bq_cache", "pinned_ledgers")
@@ -94,8 +95,9 @@ def scan_research(root, now, code, kb, keep, min_heavy):
         if not os.path.isdir(p):
             continue
         rel = f"agents/Taylor/research/{d}"
-        if d.startswith("dd_") or any(rel == k or rel.startswith(k + "/") or d == k for k in keep):
-            protected.append((d, "dd/keep"))
+        is_dd = d.startswith("dd_")
+        if any(rel == k or rel.startswith(k + "/") or d == k for k in keep):
+            protected.append((d, "keep"))
             continue
         age = (now - newest_mtime(p)) / 86400
         if age < R_IDLE_DAYS:
@@ -110,13 +112,20 @@ def scan_research(root, now, code, kb, keep, min_heavy):
                 if f.lower().endswith(".md"):
                     has_md = True
                     continue
+                if is_dd and f.lower().endswith(DD_KEEP_EXT):
+                    continue
                 try:
                     heavy.append((fp, os.lstat(fp).st_size))
                 except OSError:
                     pass
         hb = sum(s for _, s in heavy)
         kb_ref = d in kb
-        if not kb_ref and not has_md and age > R_ORPHAN_DAYS:
+        if is_dd:
+            if hb >= min_heavy:
+                items.append({"key": f"R:{d}:TRIM_DD", "kind": "R", "action": "TRIM_DD", "name": d, "bytes": hb,
+                              "age": round(age), "why": f"DD im {round(age)}d, giữ .md+script, bỏ file tạm (src/png/pdf/csv…)",
+                              "tracked": 0})
+        elif not kb_ref and not has_md and age > R_ORPHAN_DAYS:
             allb = hb + sum(os.lstat(os.path.join(r, f)).st_size for r, _, fs in os.walk(p) for f in fs if f.lower().endswith(".md"))
             items.append({"key": f"R:{d}:REMOVE_DIR", "kind": "R", "action": "REMOVE_DIR", "name": d, "bytes": allb,
                           "age": round(age), "why": "không .md, không KB nhắc, không code tham chiếu"})
@@ -211,7 +220,8 @@ def apply_item(root, it, text, now):
     if it["action"] == "REMOVE_DIR":
         files = [os.path.join(r, f) for r, _, fs in os.walk(d) for f in fs]
     else:
-        files = [os.path.join(r, f) for r, _, fs in os.walk(d) for f in fs if not f.lower().endswith(".md")]
+        skip = (".md",) + (DD_KEEP_EXT if it["action"] == "TRIM_DD" else ())
+        files = [os.path.join(r, f) for r, _, fs in os.walk(d) for f in fs if not f.lower().endswith(skip)]
     tracked = set(sh(["git", "ls-files", "-z", rel], cwd=root).stdout.split("\0"))
     trk = [f for f in files if os.path.relpath(f, root) in tracked]
     unt = md5_guard([f for f in files if os.path.relpath(f, root) not in tracked], text)
@@ -249,6 +259,8 @@ def main(argv=None):
     ap.add_argument("--min-tmp", type=int, default=MIN_HEAVY)
     ap.add_argument("--no-notify", action="store_true")
     ap.add_argument("--no-report-only", action="store_true")
+    ap.add_argument("--grace-days", type=int, default=GRACE_DAYS)
+    ap.add_argument("--only", help="chỉ xử lý mục có tiền tố key này (vd R:dd_)")
     a = ap.parse_args(argv)
     root = os.path.abspath(a.root)
     now = a.now if a.now is not None else time.time()
@@ -263,11 +275,13 @@ def main(argv=None):
     items += scan_tmp(a.tmp, now, a.min_tmp)
     info = [] if a.no_report_only else scan_report_only(root, now)
     new_state, applied, pending = {}, [], []
+    if a.only:
+        items = [i for i in items if i["key"].startswith(a.only)]
     for it in items:
         first = state.get(it["key"], today.isoformat())
         new_state[it["key"]] = first
         it["first_seen"] = first
-        grace_ok = it["kind"] == "T" or (today - dt.date.fromisoformat(first)).days >= GRACE_DAYS
+        grace_ok = it["kind"] == "T" or (today - dt.date.fromisoformat(first)).days >= a.grace_days
         if a.apply and grace_ok:
             it["freed"] = apply_item(root, it, code, now)
             applied.append(it)
@@ -286,7 +300,7 @@ def main(argv=None):
     L += [f"- {i['action']} {i['name']} — {mb(i['bytes'])} — {i['why']} — thấy lần đầu {i['first_seen']}" for i in pending] or ["- (không)"]
     L.append("\n## Chỉ báo (không tự xoá)")
     L += [f"- {x}" for x in info] or ["- (không)"]
-    L.append(f"\n## Được bảo vệ (không xoá): {len(protected)} thư mục (dd_*/keep/có code tham chiếu)")
+    L.append(f"\n## Được bảo vệ (không xoá): {len(protected)} thư mục (keep/có code tham chiếu)")
     rep = "\n".join(L)
     od = os.path.join(root, "logs", "orphan_review")
     os.makedirs(od, exist_ok=True)
