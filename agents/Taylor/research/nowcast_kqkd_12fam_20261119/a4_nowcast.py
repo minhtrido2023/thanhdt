@@ -22,7 +22,7 @@ sig[1]=(S-S.shift(4))/st.shift(4)
 h=pd.read_csv(f'{W}/data/hog_price_vn.csv'); h['date']=pd.to_datetime(h.date); hog=h.groupby('date').price_vnd_kg.mean().sort_index()
 d=pd.DataFrame({'corn':C.corn,'sbm':C.soybean_meal_cny}).join(fx,how='outer').ffill(limit=7)
 feed=0.65*d.corn/100/25.4*d.vn_usdvnd+0.25*d.sbm/1000*d.vn_usdvnd/d.cn_usdcny
-hq=qmean(hog,10)  # PREREG_ADDENDUM A1: giá heo tuần trước 2024; fq=qmean(feed,40); Mg=hq-2.8*fq
+hq=qmean(hog,10); fq=qmean(feed,40); Mg=hq-2.8*fq  # PREREG_ADDENDUM A1: giá heo tuần trước 2024
 sig[2]=(Mg-Mg.shift(4))/hq.shift(4)
 # 3, 4
 for k,key in [(3,'yellow_phosphorus'),(4,'caustic_soda')]:
