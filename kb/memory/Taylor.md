@@ -27,3 +27,4 @@
 - [2026-11-20T09:35:54Z] [qtp-investor 20/11] XONG job Taylor_20261120_092932: investor_report_20261120 11 trang dry-run, chưa gửi email — CHỜ Mike kiểm + user lệnh gửi; dd_price_zones QTP Mike ghi
 - [2026-11-20T09:37:01Z] ĐANG DỞ: job Taylor_20261120_093005 selfcheck sweep — 3 CLOSED (981a0a3c7); restore research 37952c0bb (branch fix/restore-dcf-research-20261120) chờ arch-reviewer | NEXT: merge pathspec vào mike master, chạy dcf_rate_frame + dcf_rstar_refresh selfcheck, đóng, ghi finding
 - [2026-11-20T09:42:24Z] [sweep 20/11] XONG job Taylor_20261120_093005: 5/6 selfcheck-red CLOSED; phs_flash OPEN (de xuat manual_only cho Wags) — sweep sau: neu van OPEN => CAN USER + post Architecture
+- [2026-11-20T14:45:50Z] [ddz-perf 20/11] XONG job Taylor_20261120_143220: nhánh perf/ddzone-watch-20261120 commit 108f7b220 (wt-ddzone-perf-20261120) — CHỜ Mike review+merge
