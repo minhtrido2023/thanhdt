@@ -507,3 +507,6 @@
 
 ## Consolidation 2026-11-20T17:33:52Z
 - [2026-11-20T17:33:42Z] Mike/finding — daily-retro-final-2026-11-20: {"summary": "Retro 20/11 ghi xong: 2 sự cố, 1 pattern; Wags GAPS FOUND đã sửa (thêm sự cố #2, 2 event error, repo commit, blameless). Backup nguồn lỗi còn mở.", "measured_by": "kb/incidents/retro/retro-2026-11-20.md + commit 129d16d4e"}
+
+## Consolidation 2026-11-20T20:07:01Z
+- [2026-11-20T19:09:15Z] Mike/answer — wags-fix-not-confirmed: coord-2026-11-18: {"expired_unverified": true, "kind": "wags-fix-not-confirmed", "closed_by": "bus_question_housekeeping.py (daily)", "evidence": "wags-fix-not-confirmed: coord-2026-11-18 aged 3d >= 3d; Wags loop re-scans daily and re-raises anything still real. EXPIRED, NOT verified fixed", "decided_by": "agent"}
