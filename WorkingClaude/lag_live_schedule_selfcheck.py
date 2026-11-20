@@ -76,8 +76,25 @@ old = old_walk(CSV, PKL)
 new = live_lag_candidates()   # no start filter: full parity surface
 key = ["ticker", "quarter", "Release_Date"]
 mrg = old.merge(new, on=key, how="left", suffixes=("_old", "_new"))
-check("A1 every old event found in new source", int(mrg["qualify_new"].isna().sum()) == 0,
-      f"{int(mrg['qualify_new'].isna().sum())} missing of {len(old):,}")
+# Vintage gap (sweep 2026-11-21): the CSV is rebuilt at 15:30 from the overnight cache, but
+# bq_freshness_check [pipeline-1d] re-pulls the pkl from LIVE BQ at ~19:00. A vendor revision in
+# between (e.g. a placeholder `2026Q3 @ 2026-08-07` row replaced by the real `2026Q3 @ 2026-11-06`)
+# leaves an old CSV key that NO LONGER EXISTS in the pkl the new module reads. Such a key is
+# excused ONLY if the pkl still has that ticker+quarter under a DIFFERENT Release_Date (a revision,
+# not a dropped event). A key still present in the pkl but missing from the new source = real FAIL.
+_fin = pickle.load(open(PKL, "rb"))[["ticker", "quarter", "Release_Date"]].copy()
+_fin["Release_Date"] = pd.to_datetime(_fin["Release_Date"])
+_miss = mrg.loc[mrg["qualify_new"].isna(), key].merge(_fin.assign(_in_pkl=True), on=key, how="left")
+_revised = _miss[_miss["_in_pkl"].isna()].merge(
+    _fin.drop_duplicates(["ticker", "quarter"]).rename(columns={"Release_Date": "rd_pkl"}),
+    on=["ticker", "quarter"], how="left")
+_n_revised = int((_revised["rd_pkl"].notna() & (_revised["rd_pkl"] != _revised["Release_Date"])).sum())
+_n_miss = len(_miss)
+check("A1 every old event found in new source (except pkl-revised keys)", _n_miss - _n_revised == 0,
+      f"{_n_miss} missing of {len(old):,}, {_n_revised} excused as pkl-vintage revision"
+      + (": " + ", ".join(f"{r.ticker} {r.quarter} {r.Release_Date.date()}→{r.rd_pkl.date()}"
+                          for r in _revised.itertuples() if pd.notna(r.rd_pkl)) if _n_revised else ""))
+check("A1b vintage-excused keys stay rare (≤ 20)", _n_revised <= 20, f"{_n_revised}")
 mrg = mrg[mrg["qualify_new"].notna()]
 # same-day siblings (one ticker, two quarters released the same date): the old walk counted
 # the sibling as "prior" using its post_ret — a release+30 look-ahead, CSV-row-order-dependent,
