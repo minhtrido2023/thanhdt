@@ -242,7 +242,8 @@ if [ "$ACCOUNT" = "ZaloPay" ]; then
   if [ -n "${SEND_PLAN_DDZONE_CMD:-}" ]; then
     DDZONE_CMD="$SEND_PLAN_DDZONE_CMD"
   elif [ -z "${SEND_PLAN_WORKDIR_OVERRIDE:-}" ]; then
-    DDZONE_CMD="$ROOT/bin/dd_price_zone_watch.py"
+    # CHỈ ĐỌC file do cron dd_zone_candidates_daily.sh (19:45) làm mới — không chạy lại watch (~2m20s > timeout 75s). User duyệt 2026-11-20.
+    DDZONE_CMD="$ROOT/bin/dd_zone_candidates_block.py"
   fi
 fi
 if [ -n "$DDZONE_CMD" ]; then
