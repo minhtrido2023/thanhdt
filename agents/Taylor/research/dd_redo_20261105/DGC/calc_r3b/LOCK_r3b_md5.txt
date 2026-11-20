@@ -1,0 +1,26 @@
+# LOCK r3b DGC — ghi 2026-11-09T00:54:10+0700 TRUOC khi chay compare_r3b.py (so gia). job Taylor_20261108_175121
+b1a44b72cb52b200b8bac89701bebb18  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc_r3b/model_r3b.py
+a8fa8dac3439d64f3bffdfd4429fbd73  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc_r3b/model_r3b_out.json
+fd22654a5e990c8bd835aaf26b37ef64  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc_r3b/compare_r3b.py
+ba91265ff8014116f6e4b9179a73d0fa  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/model_r3_out.json
+a86b591616edafd9c25e01801d4eb3be  mike/agents/Taylor/research/dd_redo_20261105/DGC/SUMMARY_r3.json
+d076b8ac64e2d09961877a1dc573a988  mike/agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3.md
+a6a38309532a4c146a48483eb8080519  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/model_r3.py
+e951b6fde1b50cd674d22771c0bcbe48  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/model_r2.py
+99ff32c92d864a70220a81005aa9cf2b  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/model.py
+60b495ceab994b1503a135502ac77872  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/model_r2_out.json
+39c92392589e26f2a56339ea02bb8087  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/r3data/px_dgc_20261106.csv
+fc7a452960c655c6d9fe9b6870b484d9  mike/agents/Taylor/research/dd_redo_20261105/DGC/calc/r3data/px_dgc_r3.sql
+24943cb1a1d35d91bee6ca1fab9d7202  mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common.py
+95da3038b3710b57e66747acfcd95722  mike/agents/Taylor/research/dd_redo_20261105/_common_014127/common_r2.py
+4597bc083f0d64d8873141b12fbfb3a6  mike/agents/Taylor/research/dd_redo_20261105/_shared/wpct.py
+13dac039539fb91fc8f7256c03a71e5d  deposit_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  data/deposit_rate_vn_events.csv
+4edd3d973ae5e1ce28c75c59d3bd8162  mike/agents/Taylor/research/dgc_valuation_20261029_r12/out_A_forecast.csv
+0e8288ee53d4fd906e56f469457ab4da  mike/agents/Taylor/research/dgc_valuation_20261029_r12/MIKE_EXTRACT_BCTC_Q3_2026.md
+7736471239b3a5e2b21ba39944ebf838  mike/agents/Taylor/research/dgc_valuation_20261029_r12/r9_calc.py
+dccacdda803888454211ba068da61e62  mike/agents/Taylor/research/dd_redo_20261105/DGC/ADDENDUM_5F_r2.md
+517b35d2fce9dbb0b094a0352d976828  mike/agents/Taylor/research/dd_redo_20261105/TOP5C_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  mike/agents/Taylor/research/dd_redo_20261105/STANDARD_r2.md
+# src (file live, chi khai nguon, khong assert): 37619a92d0f62a51fe37e73abfdc1447  data/execution_logs/nav_history_ZaloPay.csv
+# src (file live, chi khai nguon, khong assert): 27fbabc744e3fb85fc4d3584364365bd  data/execution_logs/dnse_raw_2026-11-08.jsonl

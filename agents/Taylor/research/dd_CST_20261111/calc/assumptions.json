@@ -1,0 +1,23 @@
+{
+ "ticker": "CST", "asof": "2026-11-11", "price": 14900, "shares": 42846773,
+ "sources": {
+  "Q3_2026": "src_q3/000000016954303_VI_BaoCaoTaiChinh_Q3_2026.pdf (HNX CBTT 22/10/2026, chua soat xet); img_q3/vi_pNN.png",
+  "H1_2026": "src/VI_BaoCaoTaiChinh_SauSoatXet_6T_2026.pdf (PKF-TTG soat xet, chap nhan toan phan)",
+  "FY2025": "src/VI_BaoCaoTaiChinh_KiemToan_2025.pdf (AASC, chap nhan toan phan)",
+  "BQ": "tav2_bq.ticker_financial (lich su quy; NP_P0/Revenue_P0 = so QUY; GPM/EBITDA_P0 = TTM), tav2_bq.ticker (gia/KL)"
+ },
+ "basis": "Book B0 = VCSH 30/09/2026; LN = LNST nam (kiem toan) hoac TTM 4 quy; khong dung GPM_P0 BQ",
+ "B0_bn": 961.322,
+ "life_years": 19, "life_basis": "GP khai thac 280/GP-BTNMT 07/08/2023, hoat dong toi 08/2045 (KT2025 tr.19)",
+ "book_recovery_at_end": 0.5, "book_recovery_note": "(uoc luong) TSCD gan het khau hao khi dong mo",
+ "r": 0.135, "r_anchor": "13,5% @ dep12T 7,40% = effective_deposit_rate('2026-11-11') cctg_12m(2026-11-02); beta=1",
+ "g": 0.0, "g_note": "mo huu han, khong g vinh vien (Bobby §6)",
+ "scenarios": {
+  "bear": {"N": 35, "w": 0.30, "basis": "KH LNST 2026 ~36 ty (bao chi thoibaotaichinh, chua co NQ goc)"},
+  "base": {"N": 75, "w": 0.45, "basis": "LNST TTM Q4/25-Q3/26 = 59,35+15,88 = 75,2 (BCTC); ~ trung vi TTM 3 nam"},
+  "bull": {"N": 130, "w": 0.25, "basis": "LNST 2024 kiem toan 130,0 = trung vi nam 2023-25 (293,1/130,0/82,7)"}
+ },
+ "moat": {"tier": "NONE", "params_added": "none", "note": "khong thuong, khong tru"},
+ "liquidity": {"method": "sigma_d*sqrt(Q/ADV), giong dd_VGS r2", "sizes_bn": [1.0, 0.3, 0.1]},
+ "peer_capex_rev_median": "4,83% (HLC/MDC/NBC/THT/TVD 2023-25, BQ CF_Invest/Revenue; calc/peer_capex.csv)"
+}

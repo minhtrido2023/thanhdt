@@ -17,7 +17,7 @@ HAI CHẾ ĐỘ, chạy cùng bộ ca:
                 (bản ghi balance phiên trước có phải bản cuối ngày không).
 Hai chế độ PHẢI ra cùng kết quả — nếu lệch, một trong hai đường suy luận sai.
 
-Phụ: kiểm bất biến nav == mtm_stock + cash − margin_debt + offbook_assets + egg_assets trên TOÀN BỘ
+Phụ: kiểm bất biến nav == mtm_stock + cash − margin_debt + offbook_assets + egg_assets + derivative_assets trên TOÀN BỘ
 nav_history_{account}.csv.
 
     python3 mike/bin/nav_cum_dividend_selfcheck.py
@@ -126,7 +126,7 @@ def run_cases():
 
 
 def run_invariant():
-    """nav == mtm_stock + cash − margin_debt + offbook_assets + egg_assets trên TOÀN BỘ file lịch sử.
+    """nav == mtm_stock + cash − margin_debt + offbook_assets + egg_assets + derivative_assets trên TOÀN BỘ file lịch sử.
 
     `egg_assets` (Trứng vàng, field `egg.totalValue`) thêm vào CSV từ 2026-08-18/19 (§25
     coding_guidelines) — cột có thể RỖNG ở các dòng cũ hơn (chưa wire), `num()` coi rỗng = 0 nên
@@ -143,13 +143,13 @@ def run_invariant():
                 return float(r.get(k) or 0)
             lhs = num("nav")
             rhs = num("mtm_stock") + num("cash") - num("margin_debt") + num("offbook_assets") \
-                + num("egg_assets")
+                + num("egg_assets") + num("derivative_assets")  # ký quỹ phái sinh, cột cuối từ 17/11/2026 (daily_nav_snapshot.py)
             if abs(lhs - rhs) >= 1:
                 bad.append((r["date"], lhs, rhs))
         ok = not bad
         print(f"  [{'PASS' if ok else 'FAIL'}] {account}: bất biến NAV trên {len(rows)} dòng")
         for d, lhs, rhs in bad:
-            print(f"           ✗ {d}: nav={lhs:,.0f} nhưng mtm+cash−nợ+offbook+egg={rhs:,.0f}")
+            print(f"           ✗ {d}: nav={lhs:,.0f} nhưng mtm+cash−nợ+offbook+egg+deriv={rhs:,.0f}")
         passed, failed = passed + ok, failed + (not ok)
     return passed, failed
 
@@ -157,7 +157,7 @@ def run_invariant():
 def main():
     print("=== 1) Cổ tức phải thu chưa qua ex-date (dữ liệu thật, 2 chế độ) ===")
     p1, f1 = run_cases()
-    print("\n=== 2) Bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + egg_assets ===")
+    print("\n=== 2) Bất biến nav = mtm_stock + cash − margin_debt + offbook_assets + egg_assets + derivative_assets ===")
     p2, f2 = run_invariant()
     print(f"\n=== SELFCHECK: {p1 + p2} PASS / {f1 + f2} FAIL ===")
     return 1 if (f1 + f2) else 0

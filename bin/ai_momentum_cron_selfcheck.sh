@@ -64,6 +64,10 @@ cases() {   # $1 = wrapper path ; in ket qua tung ca
   run "$W" STUB_RC=0; chk "dang co luot khac: exit 0, python khong chay, im lang" "$?/$(wc -c < "$SB/mark" | tr -d ' ')/$(alerts)" "0/0/0"; wait
   run "$W" STUB_RC=0 STUB_JSON='{"m1_fail":0,"m2_fail_streak":0}'; chk "sau khi nha khoa: chay lai duoc" "$(wc -l < "$SB/mark" | tr -d ' ')" 1
 }
+# Mutant "bo export TZ" chi chet khi TZ goi KHAC ICT: runner selfcheck_weekly (source wc_env.sh) + crontab deu
+# dat TZ=Asia/Ho_Chi_Minh => mutant song => do gia (sweep selfcheck-red 20/11/2026). TZ goi = ICT => ep UTC
+# (host that); TZ khac (UTC/New_York chay tay) giu nguyen.
+case "${TZ:-}" in Asia/Ho_Chi_Minh|Asia/Saigon) export TZ=UTC ;; esac
 echo "TZ env=${TZ:-<unset>}"; echo "== wrapper that"; cases "$WRAP_SRC"
 real_fail=$fail; n_real=$n
 echo "== mutant (moi mutant PHAI lam it nhat 1 ca FAIL; target phai ton tai)"

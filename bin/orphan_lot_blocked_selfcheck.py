@@ -89,6 +89,10 @@ def run_inner():
     import auto_exit_inject_selfcheck as S   # helper sandbox + stub cổng quyền mua (mã giả)
     import auto_exit_inject as aei
     import portfolio_status as ps
+    import park_holdings as ph
+    # Neo "hôm nay" NGOÀI mọi ngày fixture: asof == today_ict() ⇒ park_holdings gọi DNSE LIVE (tài khoản giả ⇒
+    # HTTP 404). Fixture có ngày cứng/suy từ lịch trùng hôm nay ⇒ đỏ đúng ngày đó (sweep selfcheck-red 20/11/2026).
+    ph.today_ict = lambda: "2099-12-31"
     mut = os.environ.get("X2_MUT")
     if mut:
         fname, old, new = json.loads(mut)

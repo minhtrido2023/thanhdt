@@ -145,6 +145,16 @@ ROOT_TIER = {
     # GĐ3 clearing (2026-11-05): apply_book_transfers ghi journal BOOK_TRANSFER + sửa plan TRƯỚC bot_execute
     # (run_bot.sh/autoheal) ⇒ money-path T0; book_clearing là lõi dùng chung của nó + clear_books --apply.
     "apply_book_transfers.py": T0, "book_clearing.py": T0, "book_transfers_gate.sh": T0,
+    # Thêm 2026-11-20 (selfcheck-red owner sweep, job Wags_20261120_093002): 9 gốc cron mới 11-16..11-19.
+    # Kiểm CƠ HỌC: grep `place_order|PlannedOrder|trade_plans|nav_history|send_report|report_delivery` ⇒ 0 hit
+    # trên cả 9 file gốc; phân theo VAI TRÒ (docstring + comment crontab). orb_futures_run.sh bọc executor ORB
+    # VN30F (trading_bot/orb_futures.py, place_order khi live) ⇒ T0. T0 chỉ CHẶT hơn, không nới ranh giới tự-sửa.
+    "orb_futures_run.sh": T0,              # executor ORB phái sinh VN30F (live/dry theo cờ) + funding-alert
+    "fill_timing_monitor.py": T1,          # READ-ONLY: đọc dnse_raw/journal/BQ, monitor fill-vs-open HYBRID
+    "mbb_rights_tradeable_watch.py": T1,   # READ-ONLY: đọc dnse_raw, chỉ cảnh báo khi lô quyền MBB bán được
+    "ai_momentum_cron.sh": T1,             # vỏ cron ai_momentum_daily (paper P1), chỉ ghi ledger riêng + alert
+    "snapshot_macro_commodity_vintage.py": T1,  # vintage append-only macro_indicator/commodity_prices
+    "newdeals_season.py": T1,              # RESEARCH/MONITOR topic New deals theo mùa BCTC, không lệnh
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
@@ -161,6 +171,9 @@ ROOT_TIER = {
     # Work-Tree dashboard (2026-11-01, 695aaae03/b6572ea8b): cây việc fleet chỉ-đọc + sổ cái công việc;
     # không đọc/ghi plan, lệnh, NAV ⇒ T2 như daily_decision_topic.py (thêm 2026-11-06, sweep selfcheck-red).
     "work_tree_build.py": T2,
+    "work_tree_verify_daily.sh": T2,  # verify cây việc hằng ngày (dispatch Wags), không plan/lệnh/NAV (thêm 2026-11-20)
+    "disk_guard_daily.sh": T2,        # dọn cache tái tạo được + cảnh báo đĩa (thêm 2026-11-20)
+    "weekly_orphan_review.py": T2,    # rà/dọn mồ côi research+/tmp hằng tuần (thêm 2026-11-20)
     "unit:mike-work-tree.service": T2, "unit:mike-work-tree-tunnel.service": T2,
     "pkill": T0,  # dừng bot giờ trưa — không có file
 }

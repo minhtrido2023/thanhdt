@@ -250,7 +250,11 @@ def group_e():
         with tempfile.TemporaryDirectory() as t:
             with open(os.path.join(t, "dnse_raw_2026-11-17.jsonl"), "w") as f:
                 f.write(json.dumps({"kind": "positions", "ts": "2026-11-17T19:00:00",
-                                    "account_no": "0002023347", "payload": {"positions": []}}) + "\n")
+                                    "account_no": "0002023347", "payload": {"positions": [
+                                        # ≥1 dòng: positions rỗng ⇒ read_broker_snapshot SystemExit "không có bản ghi
+                                        # positions" (thiết kế fail-closed) — E3 đo cash/meta, không đo vị thế.
+                                        {"accountNo": "0002023347", "symbol": "VPB", "openQuantity": 100,
+                                         "tradeQuantity": 100, "marketPrice": 20000}]}}) + "\n")
                 f.write(json.dumps({"kind": "balances", "ts": "2026-11-17T19:00:01",
                                     "account_no": "0002023347", "payload": payload}) + "\n")
             try:

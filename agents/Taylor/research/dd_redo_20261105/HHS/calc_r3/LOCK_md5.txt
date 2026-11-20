@@ -1,0 +1,23 @@
+# LOCK_md5 HHS r3 — ghi TRUOC khi chay mo hinh/doc ket qua so gia; ghi bang lenh shell rieng (khong phai hhs_r3.py). 2026-11-09T01:08:22+0700 job Taylor_20261108_180130 | SUMMARY_r2.json = backup byte-identical cua SUMMARY.json r2 (01:09, truoc khi chay)
+9832b26e13e2a3af3a3d8cccf872b290  HHS/calc_r3/hhs_r3.py
+feeb4342598444d2b9c608e5abd5845f  HHS/calc_r3/assumptions_r3.json
+192375d5961bcfb034fe0641db19f6ea  HHS/calc_r3/summary_r3_extra.json
+b6737e762620835cf8c57d584b33238e  HHS/calc_r3/px_hhs_r3.sql
+77e9f6833fd318cfe5201f159493299c  HHS/calc_r3/px_hhs_r3_20261106.csv
+b664ec37b7728c5ccaa06b0a77d7d76c  _common_014125/r2common.py
+442f39a3d556f43f75fa5f3f5519c2e9  _common_014125/bq_px_liq_20261104.csv
+4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py
+b386c537b1d288dcfba3a39e253bcbd0  HHS/calc/hhs_r2.py
+ea4b14d14be090b7dcc602e772ce624e  HHS/calc/hhs_redo.py
+1e186b58d867600efc51e9418c6461e3  HHS/SUMMARY_r2.json
+ac36a1f97bebe510bbb0534b608727fc  TOP5D_CORRECTIONS_20261108.md
+bf37f53ba652850301f152badd7d7831  STANDARD_r2.md
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+f9605983ad3b66b47ed80179bcad81da  /home/trido/thanhdt/WorkingClaude/cctg_rate_vn.py
+1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+fc06e3a866142684d87a43b34e0f17d2  /home/trido/thanhdt/WorkingClaude/data/cctg_rate_vn_events.csv
+bd26d58c256421911b8da7c52f4fe45e  ../dd_TCH_20261031/calc/tch_valuation_v2.py
+e295138b98abe918c14e43855c72ba3e  ../dd_TCH_20261031/REPORT.md
+cddef9301c144a540cc4e2f8f871b069  ../dd_HHS_20261101/SKEPTIC_20261101.md
+407ec95dccf703defc91b880763fbd9e  ../dd_HHS_20261101/REPORT.md
+# PHU LUC 2026-11-09T01:09:05+0700: sau lan chay 1 (run_v1_prefix/) sua MOT loi don vi dong do nhay o to (thieu x1e3, in +0 d/cp). Khong doi gia dinh, luoi, tam, ban song song (chi dong in + truong sens_auto). md5 hhs_r3.py moi: cf5420d86989f25b4070697b38347c52

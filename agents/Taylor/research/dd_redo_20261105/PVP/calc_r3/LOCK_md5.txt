@@ -1,0 +1,33 @@
+# LOCK r3 PVP (job Taylor_20261108_164335) — chot TRUOC khi so voi gia; model chay 2 lan trung byte (run1.md5 = run2.md5)
+## outputs model (chua doc gia)
+3e9fc88cf203cd3f0d0b2bd47770358d  pvp_r3_out.json
+014b9a9e697ff9e22991a49410dcc676  pvp_r3_out.txt
+3389ef44f030714cc613168d40706117  grid_pvp_r3.csv
+## upstream (pvp_r3.py doc/thuc thi + pvp_r3_compare.py se doc)
+LOCK ea8c9944b846b6fa5ac1a35468ec674a PVP/calc_r3/pvp_r3.py
+LOCK 1d0b7c672690f6aa729126d70851f1b9 PVP/calc_r3/assumptions_r3.json
+LOCK e8d0333cb78473522e571ca1457df5f6 PVP/calc_r3/px_pvp_r3.sql
+LOCK 3ed85327caeb066d662a328dc275691c PVP/calc_r3/px_pvp_r3_20261106.csv
+LOCK 4e89831fad57543af5990bc2e8c33658 PVP/calc/model.py
+LOCK c7b2bf794ca4a8f523b962a942addbaa PVP/calc/model_r2_out.json
+LOCK 24943cb1a1d35d91bee6ca1fab9d7202 _common_014127/common.py
+LOCK 4597bc083f0d64d8873141b12fbfb3a6 _shared/wpct.py
+LOCK 13dac039539fb91fc8f7256c03a71e5d ../../../../../deposit_rate_vn.py
+LOCK f9605983ad3b66b47ed80179bcad81da ../../../../../cctg_rate_vn.py
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4 ../../../../../data/deposit_rate_vn_events.csv
+LOCK fc06e3a866142684d87a43b34e0f17d2 ../../../../../data/cctg_rate_vn_events.csv
+LOCK e8ad25db9be4976f48ba850ef5aa8b0b ../dd_PVP_20261029/src/bctc_q3_2026.pdf
+LOCK 32ccb1b72338073669228fc644fbf304 ../dd_PVP_20261029/src/bctc_banien_2026_kiemtoan.pdf
+LOCK 0373e073c6bb5ffc2728eb2551f5e170 ../dd_PVP_20261029/src/agm2026_nq_bienban.pdf
+LOCK 6d64839e3356a34e2a17ea3fd4000ba4 ../dd_PVP_20261029/REPORT.md
+LOCK 517b35d2fce9dbb0b094a0352d976828 TOP5C_CORRECTIONS_20261108.md
+LOCK bf37f53ba652850301f152badd7d7831 STANDARD_r2.md
+LOCK e50fa3e1b81d5209c542483be71fe415 PVP/REPORT_r2.md
+LOCK 22d0e4b8f7502a1dd9813d42a924bc43 PVP/SUMMARY_r2.json
+LOCK 344c78c3864100328ef83fb323e2a17a PVP/SUMMARY_5F.json
+## sau khoa (doc gia) — compare chay 2 lan trung byte (cmp1.md5 = cmp2.md5)
+POST 099defe343558cd091c5b51e05109e43  calc_r3/pvp_r3_compare.py
+POST a73f345139a090bffcdd49841a880975  calc_r3/compare_r3_out.txt
+POST 088698b02d1c7f81171fa7483c238398  SUMMARY.json
+POST 22d0e4b8f7502a1dd9813d42a924bc43  SUMMARY_r2.json
+POST 5070503f6e5078281144cef121fe3c38  REPORT_r3.md

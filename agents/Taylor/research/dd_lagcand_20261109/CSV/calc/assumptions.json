@@ -1,0 +1,94 @@
+{
+ "ticker": "CSV",
+ "job": "Taylor_20261109_073602",
+ "asof_bctc": "BCTC hop nhat Q3/2026 (30/09/2026), CBTT 22/10/2026, nguon goc ezir.fpts.com.vn (IR chinh thuc tu sochemvn.com/quan-he-co-dong) -> src/q3_2026_HN.pdf",
+ "shares": 110499910,
+ "bs_30_09_2026_ty": {
+  "cash_110": 154.627,
+  "st_deposit_121": 630.598,
+  "st_debt_321": 259.617,
+  "lt_debt": 0.0,
+  "nci_429": 49.958,
+  "equity_parent": 1818.926,
+  "source": "src/q3_2026_HN.pdf p1-p2 (ma 110/121/321/429/400)"
+ },
+ "interest_income_9T_ty": 30.612,
+ "interest_income_source": "src/q3_2026_HN.pdf p21 thuyet minh VI.4 'Lai tien gui, tien cho vay'",
+ "tax_rate": 0.2,
+ "norm_np": {
+  "method": "LN cong ty me nam, tu BQ ticker_financial NP_P0 (so QUY, tong 4 quy theo nam) 2019-2025; doi chieu 9T/2026 = 258,318 ty (BCTC p3 ma 61) va Q3/26 85,405",
+  "XAU": "min nam 2019-2025",
+  "CO_SO": "trung binh nam 2019-2025",
+  "TOT": "TTM Q4/25-Q3/26 (gom phan loi bat thuong axit/phot pho; gia dinh duy tri)",
+  "weights": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "weights_tag": "[UL] doi xung (tien le FPT r3 D1)",
+  "dE_axis": [
+   -0.1,
+   0.0,
+   0.1
+  ],
+  "dE_w": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "dE_tag": "[UL]"
+ },
+ "ronic": "= Ke (moat NARROW, khong thuong); dong tien vo han tang truong 0 thuc chat (g khong tao gia tri khi RONIC=Ke). ROE_Min5Y BQ 13,66% ~ Ke nen RONIC=ROE_min5Y cho cung ket qua. Do nhay 'RONIC = ROE5Y 18,3%, g 4%' chi la thong tin.",
+ "r_rule": "r = 13,5% + 1,0 x (dep12T - 7,40%); dep12T(06/11) = cctg_12m(2026-11-02) 7,40% -> r = 13,50%",
+ "net_cash": "tien + tien gui ngan han - vay (100%), tru loi ich CDKKS theo so; lai tien gui sau thue (9T x 4/3 x 0,8) tru khoi LN chuan hoa de khong dem 2 lan",
+ "nhon_trach": {
+  "capex_total_ty": 1840,
+  "equity_ty": 632,
+  "debt_ty": 1208,
+  "source": "baodauthau.vn 03/07/2025 (DHDCD BT 21/07/2025); danchuphapluat.vn 18/08/2026 (~1.844 ty; 307.900 t/nam quy 100%)",
+  "base": "NPV = 0 (luat 03/11): phan da chi = tai san theo gia von; phan con chi doi ung gia tri tuong duong | r2: + phan da chi 346,484 ty gia von (spent_book_ty).",
+  "axis_npv_frac": [
+   -0.2,
+   0.0,
+   0.2
+  ],
+  "axis_w": [
+   0.2,
+   0.6,
+   0.2
+  ],
+  "axis_basis": "(-) Bobby sector read 09/11 [DK]: cong suat xut noi dia co the 230 -> 430-500 nghin t 2028-30, rang buoc clo, xut TQ day 3 nam; (+) cong suat 307.900 t > nha may cu, cau alumina dai han. Do lon 20% la [UL], doi xung, ky vong 0",
+  "spent_book_ty": 346.484,
+  "spent_book_basis": "E1 (luat NPV=0): phan DA CHI la tai san theo gia von, cong lai vi tien rong 525,6 do SAU khi chi. BCTC Q3/26 p16: TM9b tien thue dat + ha tang KCN Nhon Trach 294,484 ty; TM8 XDCB du an Nhon Trach 52,000 ty => 346,484 ty (da doc o r1 REPORT:46,44). Cach (a) cua errata; (b) khong dung.",
+  "advance_suspected_ty": 200.0,
+  "advance_basis": "Tra truoc nguoi ban tang 213,3 ty (29,1->242,4); CF ma 21 capex 265,7 vs XDCB +59,1 => ~200 ty o ung truoc, NGHI Nhon Trach. G2 CHUA xac nhan => CHI DO NHAY, KHONG vao base."
+ },
+ "disruption": {
+  "axis_frac_of_1y_Ecore": [
+   0.0
+  ],
+  "w": [
+   1.0
+  ],
+  "basis": "QD 1122/QD-HDQT 31/07/2026 dung toan bo NM Tan Binh 2 den 15/08/2026; QD 2408/QD-UBND 07/07/2026 cuong che thao do tai san BH1 (CBTT 13/07/2026); di doi 'cuon chieu' 'han che toi da' anh huong (danchuphapluat 18/08/2026) -> khong cam ket khong gian doan. Do lon [UL]",
+  "source": "src/dung_TB2_20260731.pdf, src/cuongche_BH1_20260713.pdf",
+  "status_r2": "E2: CHUYEN KHOI BASE (phap ly chi WARNING, para 9). Base = 0. Truc 0/-25/-50% giu lam DO NHAY mot chieu (disruption_sens) va hai chieu (kem boi thuong).",
+  "axis_frac_of_1y_Ecore_sens": [
+   0.0,
+   -0.25,
+   -0.5
+  ],
+  "w_sens": [
+   0.4,
+   0.4,
+   0.2
+  ]
+ },
+ "compensation_BH1": "0 trong base (khong co so tien cong bo; dat thue lai cua Sonadezi). Do nhay +100 ty.",
+ "liquidity": "CK = sigma_d x sqrt(Q/ADV250 trung vi gia tri Price x Volume), tien le FPT/SZL r3; co 5 ty / 40 tr / 10 tr",
+ "price_source": "BQ tav2_bq.ticker Price, calc/px_csv.csv (truy van calc/px_csv.sql)",
+ "label_rule": "DUOI vung neu gia < P10; TREN neu > P90; con lai TRONG; luat 4 dat khi gia <= 0,85 x tam (sau CK)",
+ "rev": "r2 (ap errata skeptic r1 E1-E6, 09/11/2026)",
+ "job_r2": "Taylor_20261109_083124",
+ "dividend_9T26_note": "E5: co tuc da tra 9T/26 21,17 ty - CHUA kiem co phai tra CDKKS (chua doc TM chi tiet). Khong anh huong mo hinh (net cash do sau khi tra)."
+}

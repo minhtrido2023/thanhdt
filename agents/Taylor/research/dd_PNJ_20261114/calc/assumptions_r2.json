@@ -1,0 +1,153 @@
+{
+ "_doc": "Gia dinh khoa cho DD PNJ 14/11/2026 (job Taylor_20261114_014836). Nguon: src/*.pdf (BCTC Q3/2026 HN ky 29/10, soat xet ban nien HN PwC 03/09, tai lieu DHDCD bat thuong 21/10, ban cap nhat Q3 20/10). Don vi: ty dong, trieu cp. '(uoc luong)' = gia dinh nhom nghien cuu.",
+ "asof": "2026-11-14",
+ "r_ke": 0.135,
+ "r_anchor": "13,5% @ lai huy dong 12T hieu dung 7,40% (cctg_12m 2026-11-02, deposit_rate_vn.effective_deposit_rate asof 2026-11-14 = 7,40%, khong doi so voi neo 03/11)",
+ "g_terminal": 0.05,
+ "g_note": "(uoc luong) <= GDP danh nghia dai han; ban le trang suc truong thanh",
+ "n0_shares_m": 511.72,
+ "n0_src": "BQ ticker_financial OShares 2026Q3 (VDL 511,89tr - quy 0,34 ty cp quy)",
+ "equity_parent_930": 13182.31,
+ "equity_src": "BCTC HN Q3 ma 400 13.198,67 - ma 421 16,36",
+ "npat_9m_2026_parent": 471.66,
+ "npat_2026_plan": -6270.0,
+ "npat_2026_plan_src": "IR Q3 trang 4 'lo 6.270 ty theo KHKD dieu chinh'; DHDCD 21/10 (TM27 BCTC Q3)",
+ "provision_plan_total": 7071.137,
+ "provision_booked_9m_increase": 2236.76,
+ "provision_balance_930": 821.39,
+ "exchange_value_remaining": 21057.93,
+ "exchange_assumed_rate_plan": 0.8,
+ "recap_max_shares_m": 550.0,
+ "recap_target_bn": 8000.0,
+ "recap_price_rule": ">= max(TB 30 phien dong cua, BVPS BCTC kiem toan/soat xet gan nhat)",
+ "plan_npat": {
+  "2027": 100.0,
+  "2028": 1200.0,
+  "2029": 1600.0
+ },
+ "plan_rev": {
+  "2027": 43400.0,
+  "2028": 50600.0,
+  "2029": 57700.0
+ },
+ "scenarios": {
+  "bull": {
+   "N2029": 2500.0,
+   "roe": 0.18,
+   "note": "(uoc luong) thuong hieu hoi phuc ve kinh te TB 2023-25 (LNST 1.971/2.113/2.828 BQ)"
+  },
+  "base": {
+   "N2029": 1600.0,
+   "roe": 0.1,
+   "note": "KHKD cong ty 2029; ROE ~10% = 1,6k / VCSH ~15,8k (6,44k + 8k phat hanh + 1,3k LN giu lai 2027-28) (uoc luong)"
+  },
+  "bear": {
+   "N2029": 800.0,
+   "roe": 0.06,
+   "note": "(uoc luong) phuc hoi nua chung + pha loang toi da; ty le thu doi > 80%"
+  }
+ },
+ "extra_loss_if_exercise_100pct": 1767.8,
+ "extra_loss_src": "7.071 x (1,00-0,80)/0,80 (uoc luong tuyen tinh)",
+ "reinvest_cap": [
+  0.0,
+  0.8
+ ],
+ "liquidity": {
+  "adv20_med_bn": 141.3,
+  "adv60_med_bn": 156.5,
+  "src": "BQ ticker Price*Volume den 2026-11-13",
+  "liq_discount": 0.0
+ },
+ "weights": {
+  "bull": 0.2,
+  "base": 0.5,
+  "bear": 0.3,
+  "note": "(uoc luong, xac suat chu quan) gan voi Bobby 14/11: nganh 12T CYC 0,40/ADMIN 0,40 (khong cuu duoc cu soc niem tin rieng DN); 36T STRUCTURAL 0,45 thuan chuoi tuan thu => bull 0,20; bear gom rui ro phat hanh that bai"
+ },
+ "cfo_ttm": {
+  "Q3_2024": 1418.0,
+  "Q3_2025": 140.6,
+  "Q3_2026": -2579.5,
+  "src": "BQ CF_OA_P0 cong 4 quy"
+ },
+ "_doc_r2": "R2 14/11/2026 job Taylor_20261114_021336 (sua theo fundamental-skeptic). Ke thua r1 nguyen ven; them cac khoa *_r2 duoi day. Trong so r1 (weights) duoc them SAU thong bao 'khoa' r1 -> r2 KHONG dung trong so lam tam. Bear r1 (800/6%) khong co co so du lieu -> thay bang 'KH tre 1 nam' (N2029 = KH 2028 cua DN).",
+ "r2": {
+  "gross_profit_q3_2026": 609.1,
+  "rev_net_q3_2026": 6994.7,
+  "gpm_q3_2025": 0.198,
+  "lctt03_prov_9m_2026": 2987.92,
+  "lctt03_prov_h1_2026": 2667.25,
+  "lctt_src": "HN Q3 LCTT ma 03 (p5 in) ; SX H1 LCTT ma 03 (p9 in)",
+  "inv_prov_3006": 1416.84,
+  "inv_prov_3009": 2228.97,
+  "inv_prov_src": "SX TM8 bien dong du phong (p29 in) ; HN Q3 TM7 (p19 in)",
+  "equity_total_3006": 13456.53,
+  "nci_3006": 17.36,
+  "bs_src_3006": "SX BS ma 440 nguon von / ma 429 (p7 in)",
+  "bank_loans_3112": 4223.39,
+  "bank_loans_3009": 3616.87,
+  "bank_src": "HN Q3 TM16 (p24-25 in)",
+  "bank_moves": {
+   "ACB": [
+    499.86,
+    0.0
+   ],
+   "HSBC": [
+    12.07,
+    0.0
+   ],
+   "Shinhan": [
+    0.0,
+    0.0
+   ],
+   "Kasikorn": [
+    0.0,
+    0.0
+   ],
+   "SCB": [
+    0.0,
+    0.0
+   ],
+   "VCB": [
+    1799.2,
+    997.71
+   ],
+   "VietinBank": [
+    571.26,
+    1278.16
+   ],
+   "BIDV": [
+    1000.0,
+    1000.0
+   ],
+   "Woori": [
+    161.0,
+    161.0
+   ],
+   "KEB_Hana": [
+    180.0,
+    180.0
+   ]
+  },
+  "tm17_text_q3_provision": 6104.276,
+  "tm17_text_ytd_provision": 6783.266,
+  "tm17_balance_3009": 821.39,
+  "cfo_q4_2025": -1695.0,
+  "cfo_q4_2025_src": "BQ ticker_financial CF_OA_P0 2025Q4 = -1.695,0 (2024Q4 -1.573,3) — Q4 am theo mua vu Tet",
+  "bear_alt": {
+   "N2029": 1200.0,
+   "roe": 0.076,
+   "note": "KH LNST 2028 cua DN lam muc ben 2029 (tre 1 nam); ROE = 1,2k/~15,8k VCSH (uoc luong)"
+  },
+  "level_grid": [
+   1200.0,
+   1600.0,
+   2112.9,
+   2828.5
+  ],
+  "level_grid_note": "KH2028 / KH2029 / trung vi 2023-25 BQ / 2025 BQ; ROE = N/15.8k VCSH (uoc luong)",
+  "equity_post_recap_est": 15800.0,
+  "npm_9m_2025": "1610.4/25353.1 HN"
+ }
+}

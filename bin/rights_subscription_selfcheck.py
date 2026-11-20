@@ -165,6 +165,9 @@ import wc_paths  # noqa: E402
 sys.path.insert(0, wc_paths.find_wc_root(__file__))
 import rights_subscription as RS  # noqa: E402
 import park_holdings as ph  # noqa: E402
+# Neo "hôm nay" NGOÀI mọi ngày fixture: asof == today_ict() ⇒ park_holdings gọi DNSE LIVE (tài khoản giả ⇒
+# HTTP 404). Fixture có ngày cứng/suy từ lịch trùng hôm nay ⇒ đỏ đúng ngày đó (sweep selfcheck-red 20/11/2026).
+ph.today_ict = lambda: "2099-12-31"
 import portfolio_status as ps  # noqa: E402
 import auto_exit_inject as aei  # noqa: E402
 import capit_episode  # noqa: E402

@@ -119,9 +119,12 @@ def run_e2e(td):
         f.write(json.dumps({"ts": "2026-11-20T20:30:01", "kind": "positions", "account_no": ACCOUNT_NO,
                             "payload": {"positions": pos}}) + "\n")
     reg = write_reg(td, [RIGHTS])
-    orig = (ph.load_corp_actions, ph.account_profile)
+    orig = (ph.load_corp_actions, ph.account_profile, ph.today_ict)
     ph.load_corp_actions = lambda *a, **k: CA.load_corp_actions(reg)
     ph.account_profile = lambda label: {"account_id": ACCOUNT_NO, "excluded_tickers": []}
+    # Neo "hôm nay" NGOÀI mọi ngày fixture: asof == today_ict() ⇒ park_holdings gọi DNSE LIVE (tài khoản giả ⇒
+    # HTTP 404). Fixture có ngày cứng/suy từ lịch trùng hôm nay ⇒ đỏ đúng ngày đó (sweep selfcheck-red 20/11/2026).
+    ph.today_ict = lambda: "2099-12-31"
     try:
         with contextlib.redirect_stderr(io.StringIO()):
             lag = ps.book_lot_snapshot(ACCOUNT, "LAG", asof="2026-11-20", plan_dir=pl, exec_dir=ex)
@@ -129,7 +132,7 @@ def run_e2e(td):
             err = raises(lambda: ph.park_holdings(ACCOUNT, asof="2026-11-20", plan_dir=pl, exec_dir=ex,
                                                   price_fn=lambda t, d: {k: 1.0 for k in t}))
     finally:
-        ph.load_corp_actions, ph.account_profile = orig
+        ph.load_corp_actions, ph.account_profile, ph.today_ict = orig
     ck("E1 sổ có RIGHTS PROPOSED ⇒ park_holdings KHÔNG raise (audit F5: CorpActionError)", err is None, err)
     ck("E2 book_lot_snapshot LAG ok=True, SCL 14.000", lag[1] and lag[0].get("SCL", {}).get("qty") == 14000, lag)
     ck("E3 book_lot_snapshot BAL ok=True (không còn chặn cả book)", bal[1], bal)

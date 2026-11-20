@@ -46,7 +46,9 @@ def newest_mtime(path):
 def corpus(root):
     """Văn bản mà tham chiếu 'sống' có thể nằm: code, cron, registry. Không gồm chính thư mục research."""
     parent = os.path.dirname(root)
-    pats = ["bin/*.py", "bin/*.sh", "*.py", "data/*.json", "kb/projects/paper_programs_registry.json",
+    # kb/*.json: sổ production trỏ thẳng vào file research (kb/dd_price_zones.json ⇒ calc/assumptions*.json,
+    # LOCK_*.txt — khoá giả định §DD). Thiếu nó, TRIM_DD 19/11 xoá 28 file khoá ⇒ dd_price_zones_selfcheck đỏ.
+    pats = ["bin/*.py", "bin/*.sh", "*.py", "data/*.json", "kb/*.json", "kb/projects/paper_programs_registry.json",
             os.path.join(parent, "*.py"), os.path.join(parent, "trading_bot", "*.py"),
             os.path.join(parent, "data", "results_registry.md"),
             os.path.join(parent, "data", "pinned_ledgers", "PINS.jsonl")]

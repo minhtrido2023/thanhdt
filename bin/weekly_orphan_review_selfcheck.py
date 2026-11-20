@@ -32,6 +32,9 @@ with tempfile.TemporaryDirectory() as t:
     os.makedirs(os.path.join(root, "kb/projects"), exist_ok=True)
     open(os.path.join(root, "kb/projects/n.md"), "w").write("old_exp: NO-GO\n")
     open(os.path.join(root, "kb/cleanup_keep.txt"), "w").write("keep_exp  # lý do\n")
+    # DD chỉ được sổ production kb/*.json trỏ tới (ca 19/11: TRIM_DD xoá calc/assumptions*.json mà kb/dd_price_zones.json khoá md5)
+    mk("dd_Z_3", "calc/assumptions.json", 5000); mk("dd_Z_3", "REPORT.md", 100)
+    open(os.path.join(root, "kb/dd_price_zones.json"), "w").write('{"entries":[{"assumptions_file":"agents/Taylor/research/dd_Z_3/calc/assumptions.json"}]}')
     # old_exp/panel.csv tracked; orphan_all/x.pkl untracked
     run("git", "add", "-f", "agents", "bin", "kb", cwd=root); run("git", "reset", "-q", "agents/Taylor/research/orphan_all", cwd=root)
     run("git", "commit", "-q", "-m", "init", cwd=root)
@@ -47,6 +50,7 @@ with tempfile.TemporaryDirectory() as t:
     ok("R:orphan_all:REMOVE_DIR" in st, "orphan_all (không md/KB/code) = REMOVE_DIR")
     ok("R:dd_X_1:TRIM_DD" in st, "DD im >3d = TRIM_DD")
     ok(not any(k.startswith(("R:dd_Y_2", "R:ref_exp", "R:keep_exp", "R:young")) for k in st), "DD đang làm/code-ref/keep/young KHÔNG là ứng viên")
+    ok(not any(k.startswith("R:dd_Z_3") for k in st), "DD được kb/*.json (sổ dd_price_zones) trỏ tới KHÔNG là ứng viên")
     ok("T:old.bin" in st and "T:new.bin" not in st, "/tmp: chỉ mục cũ")
     ok(os.path.exists(os.path.join(R, "old_exp/panel.csv")), "dry-run không xoá")
     # 2) --apply lần 1: grace chặn R, T xoá ngay
@@ -58,7 +62,7 @@ with tempfile.TemporaryDirectory() as t:
     ok(not os.path.exists(os.path.join(R, "old_exp/panel.csv")) and os.path.exists(os.path.join(R, "old_exp/REPORT.md")), "TRIM xoá file nặng, GIỮ .md")
     ok(not os.path.exists(os.path.join(R, "orphan_all")), "REMOVE_DIR xoá cả thư mục")
     ok(not os.path.exists(os.path.join(R, "dd_X_1/src/a.pdf")) and os.path.exists(os.path.join(R, "dd_X_1/REPORT.md")) and os.path.exists(os.path.join(R, "dd_X_1/build.py")), "TRIM_DD: bỏ pdf tạm, GIỮ .md và .py")
-    for d in ("dd_Y_2/src/b.pdf", "ref_exp/big.csv", "keep_exp/big.csv", "young/big.csv"):
+    for d in ("dd_Y_2/src/b.pdf", "dd_Z_3/calc/assumptions.json", "ref_exp/big.csv", "keep_exp/big.csv", "young/big.csv"):
         ok(os.path.exists(os.path.join(R, d)), f"giữ nguyên {d}")
     log = run("git", "log", "--oneline", cwd=root).stdout
     ok("weekly-orphan-review" in log and run("git", "status", "--porcelain", "--", "agents", cwd=root).stdout.strip() == "", "xoá tracked được commit theo pathspec, tree sạch")
