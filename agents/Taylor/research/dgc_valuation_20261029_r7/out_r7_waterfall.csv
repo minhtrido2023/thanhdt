@@ -1,0 +1,9 @@
+tier,step,ev,thuan,coso,nghich,delta
+A,r6 (tái lập),29817,41474,31216,19714,
+A,"1 Nghi Sơn XDCB 1.408,8 (note 11) thay 1.352,9",29980,41636,31380,19875,163.0
+A,2 PE peer áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj,31040,42880,32537,20651,1060.0
+A,3 PE DGC 10y áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj,32182,44213,33778,21501,1142.0
+B,r6 (tái lập),34695,54268,35855,19714,
+B,"1 Nghi Sơn XDCB 1.408,8 (note 11) thay 1.352,9",34858,54435,36017,19875,163.0
+B,2 PE peer áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj,35918,55679,37174,20651,1060.0
+B,3 PE DGC 10y áp LNST LÕI (bỏ lãi tiền gửi) + cash_adj,37060,57012,38414,21501,1142.0

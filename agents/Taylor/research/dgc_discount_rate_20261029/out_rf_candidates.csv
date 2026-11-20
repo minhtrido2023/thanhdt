@@ -1,0 +1,13 @@
+cand,rf,note
+a TPCP 10Y hiện tại,4.467,ADB 28/10/2026 [SRC]
+b TPCP 10Y trung vị 2016-25,3.7,TB 3.95; [UL phần lớn — xem data/tpcp10y_annual.csv]
+b' TPCP 10Y trung vị 2017-26,3.7,[UL]
+b TPCP 10Y trung vị 2011-25,4.8,[UL]
+c building-block thấp,6.0,"lạm phát 4,0 + thực 2,0"
+c building-block giữa,6.75,"4,25 + 2,5"
+c building-block cao,7.5,"4,5 + 3,0"
+c' Damodaran-literal (TPCP − default spread),1.907,"4,467 − 2,56: THỰC ÂM so lạm phát ⇒ vi phạm K3"
+d Big-4 12M TB 10 năm,6.014,"deposit_rate_vn.py, caveat hindsight (b)"
+d Big-4 12M TB 15 năm,6.61,như trên
+e GDP danh nghĩa CAGR 2021-2025,11.248,"mốc TRẦN g, không phải rf"
+f hiện hành (đối chứng),7.4,"max(Big-4 12M 6,8 ; CCTG 12M 7,4)"

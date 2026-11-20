@@ -1,0 +1,10 @@
+TZ md5 IDENTICAL (default / env -u TZ / America/New_York)
+!!!!! [dcf_valuation] dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP) !!!!!
+dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP)
+(1) FV analysis.fv vs level.fv (VND/cp) max|Δ| = 0.000e+00
+(2) %RẺ (a) 0.659864 vs V0 0.659864; n 147 vs 147
+(3) r*: max|median log P/FV| tại r* = 7.83e-06 trên 155 tháng (r* làm tròn 4 số ⇒ dung sai 1e-3)
+SELFCHECK PASS
+!!!!! [dcf_valuation] dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP) !!!!!
+dcf_vn_calibration: OSHARES_SOURCE='live' bi EP ve 'fin' (output khong co hau to nguon so CP)
+SELFCHECK PASS

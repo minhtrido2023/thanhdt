@@ -1,0 +1,5 @@
+tier,ev,thuan,coso,nghich,vs_px,vs_px5
+"A gốc thuần: biên r4, w r4, không uplift, trừ dự phòng+quỹ KTPL 100%, bỏ WC300",29817,41474,31216,19714,-0.094,-0.099
+B = A + uplift khai trường 500 (độ nhạy tách riêng),34695,54268,35855,19714,0.055,0.049
+"C = B + biên cao r5 18,0/18,5% (KHÔNG có cầu nối ⇒ chỉ độ nhạy)",36663,58029,37562,20920,0.114,0.108
+D r5 cũ (để so),40302,59873,39406,22524,0.225,0.218
