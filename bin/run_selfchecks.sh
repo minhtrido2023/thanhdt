@@ -149,6 +149,9 @@ for f in "${FILES[@]}"; do
     # (máy có 2 bản chạy song song lúc đo ⇒ số đo bi quan).
     *due_diligence_corp_flags_selfcheck.py) t=300 ;;
     *report_v2_selfcheck.py) t=1800 ;;
+    # sweep selfcheck-red 20/11 (Wags_20261120_093002): ai_momentum_cron 159-160s rc=0 (TZ=ICT/UTC) —
+    # đồng bộ với kb/selfcheck_baseline.json slow_files (runner selfcheck_weekly_baseline_check.sh).
+    *ai_momentum_cron_selfcheck.sh) t=360 ;;
   esac
   # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
   # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
