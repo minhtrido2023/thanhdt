@@ -34,6 +34,8 @@ import glob
 import json
 import logging
 import os
+import threading
+import time
 from zoneinfo import ZoneInfo
 
 from .config import WORKDIR, DATA_DIR
@@ -117,6 +119,66 @@ def _in_prune(ticker, asof):
     return bool((pd.Timestamp(asof) - last).days <= 30), str(last)[:10], None
 
 
+# Dựng BQ client tốn ~0 khi có credential nhưng ~12s khi KHÔNG có: google.auth.default() dò GCE
+# metadata 169.254.169.254 (3 lần × 3s + backoff) trước khi chịu thua. Trước 20/11 chỉ client
+# THÀNH CÔNG được cache ⇒ mất cred thì MỖI mã dò lại (đo 20/11: 11 mã = 132s). Nay cache cả lỗi
+# trong _BQCLIENT_FAIL_TTL_S giây: lỗi cred tốn 1 lần/lượt (và 0 lần dò khi _adc_missing_reason chắc chắn
+# không có nguồn ADC), các mã sau raise ngay KÈM lỗi gốc
+# (§29) ⇒ _in_universe vẫn trả None ("n/a"), KHÔNG fallback ticker_prune (§4.3). Lock: dd_flag_map
+# gọi 8 luồng song song — không có lock thì 8 luồng cùng dò metadata cùng lúc trước khi ai kịp ghi.
+_BQCLIENT_FAIL_TTL_S = 300
+_BQCLIENT_LOCK = threading.Lock()
+
+
+def _adc_missing_reason():
+    """Lý do (chuỗi) khi CHẮC CHẮN không có nguồn credential ADC nào ⇒ bỏ qua lần dò GCE metadata
+    ~12s mà google.auth.default() sẽ làm rồi cũng thất bại. Mọi nghi ngờ ⇒ None (để google.auth
+    tự đi đường chuẩn — chậm nhưng đúng): có GOOGLE_APPLICATION_CREDENTIALS, có file ADC của gcloud
+    (theo CLOUDSDK_CONFIG), có GCE_METADATA_HOST/ROOT, máy khai DMI là Google, hoặc không đọc được gì."""
+    for k in ("GOOGLE_APPLICATION_CREDENTIALS", "GCE_METADATA_HOST", "GCE_METADATA_ROOT"):
+        if os.environ.get(k):
+            return None
+    try:
+        from google.auth import _cloud_sdk
+        adc = _cloud_sdk.get_application_default_credentials_path()
+        if os.path.exists(adc):
+            return None
+        with open("/sys/class/dmi/id/product_name", encoding="utf-8") as f:
+            prod = f.read().strip()
+    except Exception:  # noqa: BLE001 — không chắc ⇒ không đoán, để google.auth tự dò
+        return None
+    if "google" in prod.lower():
+        return None
+    return f"GOOGLE_APPLICATION_CREDENTIALS trong, khong co {adc}, may khong phai GCE (DMI '{prod}')"
+
+
+def _bq_client():
+    """BigQuery client dùng chung (cache trong _CACHE). Raise RuntimeError nếu lần dựng gần nhất
+    (≤ _BQCLIENT_FAIL_TTL_S giây) đã lỗi — không dò lại credential/metadata cho từng mã."""
+    client = _CACHE.get("_bqclient")
+    if client is not None:
+        return client
+    with _BQCLIENT_LOCK:
+        client = _CACHE.get("_bqclient")
+        if client is not None:
+            return client
+        fail = _CACHE.get("_bqclient_fail")          # (monotonic_ts, "Type: msg")
+        if fail is not None and time.monotonic() - fail[0] < _BQCLIENT_FAIL_TTL_S:
+            raise RuntimeError(f"BQ client loi (cache {_BQCLIENT_FAIL_TTL_S}s, khong do lai): {fail[1]}")
+        from google.cloud import bigquery
+        try:
+            why = _adc_missing_reason()
+            if why:
+                raise RuntimeError(f"khong co nguon credential ADC — {why} (chua source wc_env.sh?)")
+            client = bigquery.Client(project="lithe-record-440915-m9", location="asia-southeast1")
+        except Exception as exc:
+            _CACHE["_bqclient_fail"] = (time.monotonic(), f"{type(exc).__name__}: {str(exc)[:300]}")
+            raise
+        _CACHE.pop("_bqclient_fail", None)
+        _CACHE["_bqclient"] = client
+        return client
+
+
 def _in_universe_pit(ticker, asof):
     """Nhánh MỚI (P1, §4.2): membership + cờ chất lượng từ `tav2_mike.universe_pit_q`.
 
@@ -125,10 +187,7 @@ def _in_universe_pit(ticker, asof):
     im lặng tái nhập đúng cái drift ta đang bỏ chạy. Nhãn sẽ hiện "n/a", không hiện "NGOÀI".
     """
     from google.cloud import bigquery
-    client = _CACHE.get("_bqclient")
-    if client is None:
-        client = bigquery.Client(project="lithe-record-440915-m9", location="asia-southeast1")
-        _CACHE["_bqclient"] = client
+    client = _bq_client()
     # `latest` = trạng thái mới nhất <= asof; `last_in` = lần cuối THỰC SỰ ở trong universe
     # (hai thứ khác nhau khi mã vừa bị loại — nhãn cần nói đúng cái sau).
     sql = """
