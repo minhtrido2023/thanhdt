@@ -13,3 +13,4 @@
 ## Mốc
 - LAG ADV + corp-action broker-primary xem lại 2026-12-15; measurement audit ~2026-12-27.
 
+- [2026-11-20T04:19:42Z] 20/11 11:2x: DD TTA (Taylor_20261120_041933, brief dd_TTA_20261120) + QTP r3 sửa lỗi khí thải 3.485 tỷ không trừ (Taylor_20261120_041936). Bobby sector read mặt trời/thuỷ điện nhỏ xong; legal-vn: không tự bù giá PPA. Sau Taylor: fundamental-skeptic cả 2, PDF TTA (chưa email), QTP email 17/11 đã gửi bản sai → hỏi user gửi bản sửa; ghi dd_price_zones TTA + QTP rev3 sau skeptic.
