@@ -738,3 +738,13 @@
 
 ## Consolidation 2026-11-20T11:07:02Z
 - [2026-11-20T10:31:26Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54873}
+
+## Consolidation 2026-11-20T12:04:41Z
+- [2026-11-20T12:03:37Z] DollarBill/heartbeat — DollarBill_20261120_120327: {"status": "in_progress", "note": "bat dau doc state"}
+- [2026-11-20T12:03:38Z] DollarBill/heartbeat — DollarBill_20261120_120324: {"status": "in_progress", "note": "bat dau plan ZaloPay 11-23"}
+- [2026-11-20T12:04:10Z] DollarBill/decision — plan-2026-11-23-ZaloPay: {"plan": "ZaloPay 2026-11-23 HOLD ALL 0 lenh", "why": "LAG due_today rong (PACK_STALE), BAL TCH FLOOR_FAIL, CAPIT khong", "dt5g": "NEUTRAL", "egg_transfer": "0"}
+- [2026-11-20T12:04:25Z] DollarBill/heartbeat — DollarBill_20261120_120324: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261120_120324", "source": "watcher"}
+- [2026-11-20T12:04:27Z] DollarBill/heartbeat — DollarBill_20261120_120327: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261120_120327", "source": "watcher"}
+- [2026-11-20T11:15:56Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12995}
+- [2026-11-20T11:11:20Z] Winston/finding — new-listings-daily: {"date": "2026-11-20", "lookback_days": 90, "total_new": 3, "needs_manual_rating": 3, "fresh_ipo": 3, "research_queue": [{"ticker": "DTR", "listing_date": "2026-09-25", "exchange": NaN, "industry_name": "", "n_quarters": 2, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=DTR"}, {"ticker": "GTX", "listing_date": "2026-09-11", "exchange": NaN, "industry_name": "", "n_quarters": 1, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=GTX"}, {"ticker": "KAI", "listing_date": "2026-09-09", "exchange": NaN, "industry_name": "", "n_quarters": 1, "is_fresh_ipo": true, "prospectus_search_url": "https://upcom.vn/en-gb/home/directory/overview.aspx?StockSymbol=KAI"}], "snapshot": "/home/trido/thanhdt/WorkingClaude/data/new_listings.csv", "note": "3 mã mới < 20Q lịch sử → cần 8L manual rating. Taylor flag để đọc bản cáo bạch + tạo override documented reason+expiry."}
+- [2026-11-20T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
