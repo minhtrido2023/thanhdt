@@ -152,6 +152,11 @@ for f in "${FILES[@]}"; do
     # sweep selfcheck-red 20/11 (Wags_20261120_093002): ai_momentum_cron 159-160s rc=0 (TZ=ICT/UTC) —
     # đồng bộ với kb/selfcheck_baseline.json slow_files (runner selfcheck_weekly_baseline_check.sh).
     *ai_momentum_cron_selfcheck.sh) t=360 ;;
+    # weekly ops audit 2026-11-21 (job Mike_20261120_222134): đo tay cpi_vn_tier15 81s (assertions
+    # FAILED 0, PASS), snapshot_macro_commodity_vintage 74s (26 PASS, ALL PASS, chạm BQ thật) —
+    # rc=124 dưới trần 60s là giả.
+    *cpi_vn_tier15_selfcheck.py) t=240 ;;
+    *snapshot_macro_commodity_vintage_selfcheck.py) t=240 ;;
   esac
   # Ngoại lệ thứ 2 — ĐO THẬT (weekly ops audit 2026-09-19): report_return_gate_selfcheck.py
   # tự khai trong docstring "~8-10 phút, chạm BQ" cho bộ 4 test, nên dưới trần 60s nó rc=124
