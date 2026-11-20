@@ -4082,6 +4082,116 @@
    "expires_on": "2027-03-18",
    "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc 120 ngày",
    "notes": "center_alt 27.332 = cùng kỳ vọng trọng số TRƯỚC chiết khấu thanh khoản 10%. Nút kém chắc nhất: biên gộp cơ sở (4,5% vs 9T/26 31,3% quyết toán một lần), phần tiền 1.466 tỷ có dùng/chia theo sổ không (kịch bản xấu: tiền mắc kẹt → 4.996 ở v1), khoản mục con/liên kết bị ngoại trừ (xóa → 21.278; thêm liên kết về 0 → 17.573). Thanh khoản ADV ~0,45 tỷ. Moat NONE. Mốc: BCTC Q4/26, quyết toán CPH, ý kiến kiểm toán 2026."
+  },
+  {
+   "ticker": "QTP",
+   "dd_date": "2026-11-17",
+   "rev": 3,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 6300,
+   "center": 7701,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số 3 kịch bản bù giá dự án khí thải (P0 không bù / P50 / P100 = 0,40/0,36/0,24) cộng vào DCF FCFE r2 vòng đời tới 2047, SAU chiết khấu thanh khoản 10%; r 13,5% @ lãi huy động 12T 7,40%; mù giá",
+   "zone_high": 8900,
+   "center_range": null,
+   "center_alt": 8557,
+   "center_alt_kind": "expected_weighted",
+   "price_ref": 10200,
+   "price_date": "2026-11-19",
+   "verdict_label": "Giá 10.200 = 1,32–1,34× tâm sau chiết khấu thanh khoản: ĐẮT theo DCF có điều chỉnh dự án xử lý khí thải ~3.485 tỷ + opex ~572 tỷ/năm không được bù giá tự động (TT07/2024 Đ27.4 đã bị TT12/2025 bãi bỏ; còn Luật Điện lực 2024 Đ52.4 tranh cãi; 0 tiền lệ). Giá còn trên 1,10× kể cả điểm thuận lợi nhất (9.240). Nhãn ĐẮT chỉ đảo khi xác suất không-bù về ~0.",
+   "skeptic_status": "fundamental-skeptic vòng 1 (r3): INCONCLUSIVE; vòng 2 (r3b): CONFIRMED, độ tin cậy trung bình; đã áp đính chính (r3c: lỗi bù FOM+VC 2030–31, điều kiện huỷ có ngày, EVN bên mua bị ép biên). Chưa vào sleeve discretionary.",
+   "source_file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_r3c.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_r3c.md",
+     "quote": "Tâm r3b: 7.701 sau CK (8.557 trước CK)",
+     "fields": [
+      "center",
+      "center_alt"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_r3c.md",
+     "quote": "Vùng giá trị cạnh tâm: 6.300 … 8.900",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_r3c.md",
+     "quote": "Giá 10.200–10.300 = **1,32–1,34× tâm**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/qtp_r3_envcapex_20261120/qtp_model_r3c.py",
+   "assumptions_md5": "6d80cb978eb340fec7c9c26eaf0ec2a5",
+   "null_reason": null,
+   "expires_on": "2027-03-17",
+   "expires_basis": "BCTC Q4/2026 (~21/01/2027) hoặc thoả thuận/văn bản bù giá PPA hoặc EVN/BCT từ chối bằng văn bản hoặc 120 ngày",
+   "notes": "Sửa lớn so với rev2 (tâm 13.140 → 7.701): rev2 không có dòng chi/vay/opex của dự án khí thải (user chỉ ra 20/11) và ghi 'NPV=0' do áp sai luật 03/11. Trọng số P0 0,2…0,6 ⇒ tâm sau CK 9.000…6.400 (giá/tâm 1,13…1,59). PHÂN KỲ MẠNH (V_ngắn vs V_dài D=2,89 > ln3) ⇒ luật 0,85×tâm KHÔNG tự kích hoạt. Điều kiện huỷ: chưa ký thoả thuận bổ sung giá PPA trước COD (~12/2029) hoặc EVN/BCT từ chối bằng văn bản; tiền ròng<0 chỉ là chỉ báo trễ (~2032 nếu giữ cổ tức 900đ); tăng vốn/vay mới tài trợ thâm hụt dự án. Lãi suất/kỳ hạn vay dự án chưa công bố (giả định 9%). Thanh khoản mỏng ⇒ sizing ≤0,5% NAV. Chỉ cơ sở nghiên cứu, không phải tín hiệu mua.",
+   "supersedes": "QTP@2026-11-17#2",
+   "correction_reason": "Mô hình r2 bỏ sót dự án xử lý khí thải (vốn+lãi+gốc −4.745đ/cp và opex 572 tỷ/năm −5.733đ/cp ở kịch bản không bù); luật NPV=0 áp sai cho capex tuân thủ; skeptic r3b CONFIRMED 20/11.",
+   "recorded_at": "2026-11-20T11:50:56+07:00"
+  },
+  {
+   "ticker": "TTA",
+   "dd_date": "2026-11-20",
+   "rev": 1,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 5235,
+   "center": 6159,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số 4 kịch bản giá FIT mặt trời (A giữ FIT 0,15 / B Bầu Ngứ về FIT2 0,25 / B′ Bầu Ngứ FIT2 + Núi Một 1 trần chuyển tiếp 0,35 / C cả hai về trần + thuỷ văn xấu 0,25; bù trừ hồi tố ngay V1) SAU chiết khấu thanh khoản 2,89% (σ·√(Q/ADV)+nửa spread @5 tỷ); r 13,5% @ lãi huy động 12T hiệu dụng 7,40%; mù giá",
+   "zone_high": 7083,
+   "center_range": null,
+   "center_alt": 6342,
+   "center_alt_kind": "expected_weighted",
+   "price_ref": 10250,
+   "price_date": "2026-11-19",
+   "verdict_label": "Giá 10.250 = 1,66× tâm sau chiết khấu thanh khoản (1,62× trước): KHÔNG RẺ — nằm TRÊN vùng hợp lý 5.235–7.083 ở cả hai nền; chỉ hợp lý nếu giá FIT được giữ (thị trường ngầm định P(A)≈0,45 nếu chỉ cân A/B). ~51% doanh thu từ 2 trang trại mặt trời bị Thanh tra Chính phủ kết luận hưởng FIT sai đối tượng; EPTC trả ~49% hoá đơn 9T/2026. Moat NONE. Pháp lý: WARNING (FIT; quản trị/giao dịch bên liên quan).",
+   "skeptic_status": "fundamental-skeptic vòng 1 REFUTED (thiếu B′, trọng số mượn nhóm CCA, hồi tố) → r2; vòng 2 REFUTED nhẹ (chiết khấu thanh khoản phẳng 10%, so sánh không cùng kỳ, DSCR, bằng chứng quản trị) → r3 cơ học đã áp; CHƯA chạy vòng 3. Hướng KHÔNG RẺ được xác nhận ở cả hai vòng (mọi ô lưới ≤8.110 < giá). Chưa vào sleeve discretionary.",
+   "source_file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r3.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r3.md",
+     "quote": "Tâm có trọng số SAU thanh khoản (expected_weighted)** | **6.159",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r3.md",
+     "quote": "Tâm có trọng số **trước** chiết khấu thanh khoản | **6.342",
+     "fields": [
+      "center_alt"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r3.md",
+     "quote": "Hợp lý (0,85× … 1,15× tâm) | **5.235 – 7.083",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r3.md",
+     "quote": "KHÔNG RẺ ở 10.250 đ (đóng cửa 19/11/2026, BQ)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_TTA_20261120/model/dcf_tta_r3.py",
+   "assumptions_md5": "5ff89722e26d04ad7f808cd170285a19",
+   "null_reason": null,
+   "expires_on": "2027-03-20",
+   "expires_basis": "BCTC Q4/2026 (~tháng 1-2/2027) hoặc văn bản chốt xử lý giá FIT Bầu Ngứ/Núi Một 1 hoặc EPTC thanh toán bù/ngừng trả thêm hoặc 120 ngày",
+   "notes": "Trọng số A/B/B′/C là phán đoán (N=2 quan sát EPTC, 1 bên mua), không phải xác suất đo; lưới P(A) 0–0,35 × P(C) 0,10–0,40 sau TK ≤8.110. Độ nhạy r ±100bp: 6.612…5.751; Phước Hoà =0 → 5.666. DSCR 2027: A 1,25 / B 1,12 / B′ 1,00 / C 0,73 ⇒ HARD ABANDON #3 neo ~1,00. Phải thu EPTC 77,1→399,6 tỷ; điều kiện đổi nhận định hai chiều trong REPORT_r3 §4/§7. Quản trị WARNING: 96,64 tỷ chi trả nợ vay cựu Chủ tịch qua Chủ tịch hiện tại (KT25 tr.26), free float ~17–20%. Thanh khoản ADV 1,07–2,2 tỷ/phiên ⇒ sizing ≤0,5% NAV. KHÔNG phải tín hiệu mua; TTA không qua khung discretionary (xem hồ sơ nội bộ).",
+   "recorded_at": "2026-11-20T12:13:34+07:00"
   }
  ],
  "center_kinds": [

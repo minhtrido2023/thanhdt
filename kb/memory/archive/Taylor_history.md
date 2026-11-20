@@ -2565,3 +2565,21 @@
 
 ## Archived 2026-11-20 (keep=12 days=0 require_done=False)
 - [2026-11-19T09:55:31Z] ĐANG DỞ: job Taylor_20261119_095521 bank-nodata 3->4 (worktree sparse session/bank-nodata-fail-closed-20261119) | NEXT: grep bank-nodata, sửa, selfcheck, regen tạm, tác động tiền
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T09:58:47Z] [dna-macro-stress 19/11] XONG job Taylor_20261119_095526: commit 91b9a1ef1 repo ngoai nhanh session/dna-macro-stress-line-20261119 — CHO Mike review + quyet noi vao prompt ZaloPay-only (khong vao SpaceX report_v2)
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T10:05:01Z] [prereg5-hog 19/11] XONG job Taylor_20261119_095518: commit 9b8ddf032 PREREG5 họ 2 DBC — CHỜ Mike thêm registry entry + quyết cron; nowcast 2026Q4 đầu tiên ghi 05-20/01/2027 TRƯỚC khi DBC công bố
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T10:06:01Z] [bank-nodata 19/11] XONG job Taylor_20261119_095521: commit d0a14445e (wt-bank-nodata-20261119 sparse) — CHO Mike review + arch-reviewer; user quyết riêng có fail-closed fa_ratings_8l cho bank vắng lens không
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T14:53:23Z] ĐANG DỞ: job Taylor_20261119_145312 bank-nodata phương án B (wt-bank-nodata-20261119, rating_8l_history.py max-rule + cổng chặn) | NEXT: đọc rating_8l_history.py:430-580, sửa, selfcheck
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T15:07:41Z] [bank-nodata B 19/11] XONG job Taylor_20261119_145312: commit be7b01fa5 (wt-bank-nodata-20261119 sparse) — CHO quant-skeptic + arch-reviewer + user duyet; merge phai chay pre-commit + tao snapshot lens o run dau
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T15:28:26Z] [bank-nodata R2 19/11] XONG job Taylor_20261119_152223: commit d2fe7a2d5 (wt-bank-nodata-20261119) — CHO arch-reviewer vong 3 + user duyet; merge can tao snapshot lens o run live dau
