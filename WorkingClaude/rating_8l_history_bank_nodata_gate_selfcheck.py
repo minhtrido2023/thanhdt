@@ -56,6 +56,9 @@ with open(FAKE_BUS, "w") as f:
 os.chmod(FAKE_BUS, os.stat(FAKE_BUS).st_mode | stat.S_IEXEC)
 os.environ["R8L_BANK_GATE_BUS"] = FAKE_BUS                # KHÔNG BAO GIỜ ghi bus thật
 os.environ["R8L_BANK_GATE_MARKER"] = os.path.join(TMP, "global_marker.json")   # mặc định: không đụng data/ thật
+# Runner selfcheck_weekly export MIKE_BOT_TEST_MODE=1 ⇒ T13 gọi thẳng _bank_gate_alert bị chặn ⇒ đỏ giả.
+# Bus/notify ở trên đã là script giả; selfcheck tự bật/tắt biến này đúng chỗ cần kiểm (T13).
+os.environ.pop("MIKE_BOT_TEST_MODE", None)
 
 
 def bus_calls():

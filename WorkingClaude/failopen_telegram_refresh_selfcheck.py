@@ -130,6 +130,11 @@ def _run_refresh_block(ref, out_env, env_extra=None):
     g = {"os": os, "WORKDIR": d, "out": _Out(), "len": len,
          "refresh_bq_table": lambda p: called.append(p),
          "print": lambda *a, **k: printed.append(" ".join(str(x) for x in a))}
+    # Từ d2fe7a2d5 (19/11, bank-nodata) khối gọi thêm `_is_live_run` (lấy bản THẬT cùng ref) và
+    # `override_current_bank_aq` (stub đi thẳng — đã có rating_8l_history_bank_nodata_gate_selfcheck).
+    if "def _is_live_run(" in text:
+        exec(fn_src(text, "_is_live_run", f"rating_8l_history @{ref or 'HEAD'}"), g)
+    g["override_current_bank_aq"] = lambda o, live_run=False: o
     try:
         exec(block, g)
     finally:
