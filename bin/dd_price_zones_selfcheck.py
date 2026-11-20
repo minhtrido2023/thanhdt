@@ -17,6 +17,7 @@ Dùng: python3 bin/dd_price_zones_selfcheck.py [--ledger PATH]   (rc 0 = PASS)
 """
 import argparse
 import json
+import datetime as dt
 import hashlib
 import os
 import re
@@ -101,6 +102,7 @@ def check(ledger_path, src_root=SRC_ROOT):
         cr = e.get("center_range")
         if cr is not None and (len(cr) != 2 or cr[0] != e.get("center") or cr[0] > cr[1]):
             errs.append(f"{tag}: center_range phải [center, hi] tăng dần")
+        errs += _expiry_errs(tag, e)
         errs += _lock_errs(tag, e, src_root)
         for fld in ("source_file",):
             if not os.path.exists(os.path.join(src_root, e[fld])):
@@ -120,6 +122,19 @@ def _lock_errs(tag, e, src_root):
     except OSError as x:
         return [f"{tag}: không đọc được nguồn khoá giả định: {x}"]
     return [] if got == want else [f"{tag}: md5 nguồn lệch khoá giả định ({got[:8]}≠{want[:8]}) — nguồn bị sửa sau khi ghi sổ, thêm rev mới"]
+
+
+def _expiry_errs(tag, e):
+    """expires_on BẮT BUỘC là chuỗi ngày ISO hợp lệ — dd_price_zone_watch.expiry_of() đọc thẳng trường này;
+    null ⇒ TypeError ⇒ cả lượt làm mới ứng viên sleeve chết (sự cố 16–19/11/2026, 11 entry null)."""
+    v = e.get("expires_on")
+    if not isinstance(v, str):
+        return [f"{tag}: expires_on={v!r} phải là chuỗi ngày YYYY-MM-DD (null làm sập dd_price_zone_watch)"]
+    try:
+        dt.date.fromisoformat(v)
+    except ValueError:
+        return [f"{tag}: expires_on={v!r} không phải ngày ISO hợp lệ"]
+    return []
 
 
 def _rev_errs(tag, e, rev, prior):
@@ -156,6 +171,10 @@ def _self_tests():
     r.append(("rev=3 nhảy cóc bị bắt", bool(_rev_errs("t", dict(base, rev=3, supersedes="AAA@2026-01-01#2", correction_reason="x"), 3, [r1]))))
     r.append(("rev=2 thiếu correction_reason bị bắt", bool(_rev_errs("t", dict(base, rev=2, supersedes="AAA@2026-01-01#1"), 2, [r1]))))
     r.append(("quote_numbers: token ≥1000 không bị ×1000", 9950000 not in quote_numbers("tâm 9.950") and 9950 in quote_numbers("tâm 9.950")))
+    r.append(("expires_on hợp lệ → sạch", not _expiry_errs("t", {"expires_on": "2027-03-19"})))
+    r.append(("expires_on null bị bắt", bool(_expiry_errs("t", {"expires_on": None}))))
+    r.append(("expires_on thiếu bị bắt", bool(_expiry_errs("t", {}))))
+    r.append(("expires_on sai định dạng bị bắt", bool(_expiry_errs("t", {"expires_on": "19/03/2027"}))))
     import tempfile
     with tempfile.TemporaryDirectory() as td:
         open(os.path.join(td, "s.md"), "w").write("giả định A")
