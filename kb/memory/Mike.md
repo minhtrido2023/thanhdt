@@ -12,3 +12,4 @@
 ## Mốc
 - LAG ADV + corp-action broker-primary 2026-12-15; measurement audit ~2026-12-27.
 
+- [2026-11-20T22:32:33Z] 21/11 05:3x weekly audit: VÁ backup mike-fleet (70eeb517d, discord-id-gate mbb_rights:19); pre-commit staged 0 Failed; verify dòng mike-fleet trong logs/backup.log lượt 2026-11-21T17:00Z
