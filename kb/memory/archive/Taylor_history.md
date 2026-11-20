@@ -2559,3 +2559,6 @@
 
 ## Archived 2026-11-20 (keep=12 days=0 require_done=False)
 - [2026-11-19T09:25:32Z] [g8-gap r3 19/11] XONG job Taylor_20261119_091916: commit f7cdf9a22 (lib) + fd5c29454 (README) — CHO Mike arch-review vong 3, merge CUNG ack 6 ma; chua replay BQ that voi K=11
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T09:55:29Z] ĐANG DỞ: job Taylor_20261119_095518 PREREG-5 họ 2 (heo/DBC) paper forward | NEXT: đọc nowcast_kqkd_12fam, viết agents/Taylor/research/prereg5_hog_dbc_20261119/PREREG5.md
