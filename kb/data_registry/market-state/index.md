@@ -18,6 +18,7 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`capit_episode.md`](capit_episode.md) — data/capit_episode.json | CANONICAL (quan sát thuần) — trả lời "**có đang giữ CAPIT không**" |
 | [`cap_signal_advisory_log.md`](cap_signal_advisory_log.md) — kb/data_registry/market-state/cap_signal_advisory_log.csv | CANONICAL (advisory-only, không consumer tự động) |
 | [`livermore_reads.md`](livermore_reads.md) — sổ append-only các lần đọc kỹ thuật VNINDEX của Livermore (FORECAST khoá trước, chấm +20 phiên) | CANONICAL (DISPLAY-ONLY, không sizing/gate) |
+| [`macro_stress_ledger.md`](macro_stress_ledger.md) — sổ append-only cụm căng thẳng vĩ mô C1 (USDVND/TPCP10Y/liên NH−điều hành/DXY), writer `agents/Taylor/macro_stress_ledger.py`, chưa cron | DISPLAY-ONLY |
 | [`pt_v12_live_logs.md`](pt_v12_live_logs.md) — data/pt_v12_live_logs.csv | DEAD |
 | [`dt5g_ext_2008_research.md`](dt5g_ext_2008_research.md) — agents/Taylor/research/dt5g_ext_2008_20260904/dt5g_ext_2008_full.csv (chuỗi DT5G mở rộng về 2008, ad-hoc KHÔNG cron) | RESEARCH-ONLY |
 | [`pt_v12_macro.md`](pt_v12_macro.md) — data/pt_v12_macro*.csv | RESEARCH |
@@ -52,6 +53,9 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`sector_read_chan_nuoi_heo_tacn_20261118.md`](sector_read_chan_nuoi_heo_tacn_20261118.md) — sector read BLIND chăn nuôi heo + TACN VN (chu kỳ giá heo hơi 80k→45-49k, đàn +5,4%, thịt nhập +27%, ASF/vaccine, ngô/khô đậu qua đỉnh T9, RMI, biên TACN), Bobby 2026-11-18 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_phat_dien_20261118.md`](sector_read_phat_dien_20261118.md) — sector read BLIND phát điện VN đa nguồn (khí nội/LNG + than + thuỷ + tái tạo; Qc/CfD, NĐ 100/2025 + dự thảo Qc 75%, khung CCGT 2026 3.410,64, merit order LNG ≫ trần SMP, cung khí 6,4 tỷ Sm³, Lô B Q3/2027, FIT/CCA, giá bán lẻ −2%), Bobby 2026-11-18 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_epc_lap_may_20261118.md`](sector_read_epc_lap_may_20261118.md) — sector read BLIND tổng thầu EPC + lắp máy cơ khí công nghiệp VN (gói EPC đã trao QT II/Ô Môn IV/Long Phú 1/Dung Quất, lead TQ/Hàn vs nhà thầu nội, dự toán NN thấp 40%, VAS 15 POC, bảo lãnh/vốn lưu động, đầu tư công 74,1% 10T), Bobby 2026-11-18 (parent `vn_macro_regime_history.md`) | CANONICAL |
+| [`sector_read_phot_pho_20261114.md`](sector_read_phot_pho_20261114.md) — sector read BLIND phốt pho vàng P4 + hoá chất phốt pho hạ nguồn từ apatit VN, Bobby 2026-11-14 (parent `vn_macro_regime_history.md`) | CANONICAL |
+| [`sector_read_ngan_hang_quoc_doanh_20261117.md`](sector_read_ngan_hang_quoc_doanh_20261117.md) — sector read BLIND ngân hàng thương mại quốc doanh VN, Bobby 2026-11-17 (parent `vn_macro_regime_history.md`) | CANONICAL |
+| [`sector_read_dien_mat_troi_thuy_dien_nho_20261120.md`](sector_read_dien_mat_troi_thuy_dien_nho_20261120.md) — sector read BLIND điện mặt trời + thuỷ điện nhỏ, Bobby 2026-11-20 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`vnindex_5state.md`](vnindex_5state.md) — tav2_bq.vnindex_5state | TRAP |
 | [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_bq.vnindex_5state_staging / _archive_* / _v2g_* / _tam_quan_v31/v33b_clean / _baseline_* | ARCHIVE |
 | [`vnindex_5state_csv_local.md`](vnindex_5state_csv_local.md) — data/vnindex_5state.csv | TRAP |
