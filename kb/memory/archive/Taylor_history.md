@@ -2562,3 +2562,6 @@
 
 ## Archived 2026-11-20 (keep=12 days=0 require_done=False)
 - [2026-11-19T09:55:29Z] ĐANG DỞ: job Taylor_20261119_095518 PREREG-5 họ 2 (heo/DBC) paper forward | NEXT: đọc nowcast_kqkd_12fam, viết agents/Taylor/research/prereg5_hog_dbc_20261119/PREREG5.md
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T09:55:31Z] ĐANG DỞ: job Taylor_20261119_095521 bank-nodata 3->4 (worktree sparse session/bank-nodata-fail-closed-20261119) | NEXT: grep bank-nodata, sửa, selfcheck, regen tạm, tác động tiền
