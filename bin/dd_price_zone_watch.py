@@ -37,6 +37,7 @@ import json
 import os
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from zoneinfo import ZoneInfo
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +53,7 @@ DD_ALERT_BASIS = "center"   # cơ sở ngưỡng: "center" (tâm) | "zone_low" (
 PRICE_RATIO_OK = (0.3, 3.0)  # close/price_ref ngoài khoảng này ⇒ nghi sai đơn vị, không báo động
 CENTER_KINDS = ("expected_weighted", "base_scenario", "blend", "median", "zone_midpoint", "point")
 KEEP_MD_DAYS = 60           # retention data/dd_price_zone/*.md
+DD_FLAG_WORKERS = 8         # trần luồng song song của dd_flag_map (mỗi luồng ~1 truy vấn BQ)
 CLOSE_READY = dt.time(15, 5)  # trước giờ này bar 1D của hôm nay chưa phải giá đóng cửa
 LEDGER = os.path.join(MIKE, "kb", "dd_price_zones.json")
 STATE = os.environ.get("DDZ_STATE") or os.path.join(WC, "data", "dd_price_zone_watch_state.json")
@@ -337,14 +339,25 @@ def dd_flag_map(tickers, asof):
                     for t in tickers}
     except Exception as e:  # noqa: BLE001
         return {t: ("UNKNOWN", [], f"không nạp được due_diligence ({type(e).__name__})") for t in tickers}
-    out = {}
-    for t in tickers:
+
+    def one(t):
         try:
-            out[t] = verdict(ddm.run_due_diligence(
+            return verdict(ddm.run_due_diligence(
                 t, "DISCRETIONARY", {"asof": asof.isoformat(), "skip_dcf": True, "skip_corp_flags": True},
                 as_dict=True))
         except Exception as e:  # noqa: BLE001
-            out[t] = ("UNKNOWN", [], f"{type(e).__name__}")
+            return ("UNKNOWN", [], f"{type(e).__name__}")
+    # Mỗi mã = 1 truy vấn BQ universe_pit (~1s, đo 20/11) ⇒ tuần tự 11 mã ≈ 11-13s; mất credential thì
+    # mỗi mã còn tự dò GCE metadata ≈ 12s (≈ 2m20 cả lượt). Mã đầu chạy TUẦN TỰ để nạp cache parquet +
+    # BQ client dùng chung của due_diligence đúng 1 lần; các mã còn lại song song có giới hạn.
+    tickers = list(tickers)
+    out = {}
+    if tickers:
+        out[tickers[0]] = one(tickers[0])
+    rest = tickers[1:]
+    if rest:
+        with ThreadPoolExecutor(max_workers=min(DD_FLAG_WORKERS, len(rest))) as ex:
+            out.update(zip(rest, ex.map(one, rest)))
     return out
 
 

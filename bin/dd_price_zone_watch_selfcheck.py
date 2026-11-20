@@ -390,6 +390,16 @@ def cases(m):
         u = m.dd_flag_map(["AAA"], D(2026, 11, 3))
         fk.dd_flag_verdict = lambda d: ("FLAGGED", ["QF:X"], "x") if d["q"] == "AAA" else ("CLEAN", [], "")
         v = m.dd_flag_map(["AAA", "BBB"], D(2026, 11, 3))
+        # nhánh song song (perf 20/11): >DD_FLAG_WORKERS mã ⇒ mỗi mã đúng verdict CỦA NÓ, đủ mã, 1 mã raise ⇒ UNKNOWN
+        many = [f"M{i:02d}" for i in range(12)]
+
+        def _rdd(t, b, c, as_dict=False):
+            if t == "M05":
+                raise ValueError("boom")
+            return {"q": t}
+        fk.run_due_diligence = _rdd
+        fk.dd_flag_verdict = lambda d: ("FLAGGED", [d["q"]], d["q"])
+        w = m.dd_flag_map(many, D(2026, 11, 3))
     finally:
         if _sv_mod is None:
             sys.modules.pop("trading_bot.due_diligence", None)
@@ -403,6 +413,9 @@ def cases(m):
     ok("dd_flag_map: dùng dd_flag_verdict, run_due_diligence(book DISCRETIONARY, skip_dcf+skip_corp, as_dict, asof)",
        v["AAA"][0] == "FLAGGED" and v["BBB"][0] == "CLEAN" and calls and all(
            c[1] == "DISCRETIONARY" and c[2]["skip_dcf"] and c[2]["skip_corp_flags"] and c[3] and c[2]["asof"] == "2026-11-03" for c in calls))
+    ok("dd_flag_map song song: đủ 12/12 mã, mỗi mã đúng verdict của nó, mã raise ⇒ UNKNOWN (tên lỗi)",
+       sorted(w) == many and w["M05"] == ("UNKNOWN", [], "ValueError")
+       and all(w[t] == ("FLAGGED", [t], t) for t in many if t != "M05"))
     # file máy đọc: run() ghi, không lùi asof, '' = không ghi
     with tempfile.TemporaryDirectory() as td:
         lp = os.path.join(td, "l.json")
@@ -501,6 +514,9 @@ MUTANTS = [
     ("C12 khối không lọc theo ứng viên", 'shown = al if cmap is None else [r for r in al if r["ticker"] in cmap]', 'shown = al'),
     ("C13 nhãn quay về ghi chú", '"ỨNG VIÊN sleeve discretionary — xét, user duyệt từng lần, KHÔNG tự mua; "', '"GHI CHÚ ĐỂ ANH CÂN NHẮC; "'),
     ("C14 dd_flag_map sai book", 't, "DISCRETIONARY", {"asof"', 't, "BAL", {"asof"'),
+    ("C15 dd_flag_map song song bỏ sót mã đầu", 'out[tickers[0]] = one(tickers[0])', 'pass'),
+    ("C16 dd_flag_map song song lệch mã↔verdict", 'out.update(zip(rest, ex.map(one, rest)))',
+     'out.update(zip(rest, ex.map(one, rest[::-1])))'),
     ("nit: bỏ câu tâm<đáy ở khối", 'e["center"] < e["zone_low"]:\n            notes', 'False:\n            notes'),
 ]
 
