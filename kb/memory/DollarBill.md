@@ -1,7 +1,6 @@
 # Working memory — DollarBill
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của DollarBill.
 
-- [2026-11-10T16:32:51Z] [2026-11-10 23:4x ICT] Plan 11/11 rev2 ca 2 acct: BUY DISC VGS (SpaceX 2400/ZaloPay 1500, tran 19.879) + NNC bo sung (900/500, tran 48.616); egg SpaceX>=42,4tr ZaloPay>=18,2tr truoc 09:00; CHUA approved (Mike trinh user). DANG CHO: Mike/user chot max_sessions VGS -> moi ghi discretionary_exit_rules.json (job DollarBill_20261110_162859)
 - [2026-11-15T12:44:58Z] [2026-11-15 19:5x ICT] Plan ZaloPay 11-16 XONG HOLD ALL 0 lenh (vong CN toi); cho duyet truoc 08:45 16/11 (job DollarBill_20261115_124425)
 - [2026-11-15T12:45:39Z] [2026-11-15 19:5x ICT] Plan SpaceX 11-16 XONG (vong CN toi): BUY NNC 700cp tran 46000, egg>=32,3tr; cho duyet truoc 08:45 16/11 (job DollarBill_20261115_124427)
 - [2026-11-16T12:03:57Z] [2026-11-16 19:xx ICT] Plan ZaloPay 11-17 XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 17/11 (job DollarBill_20261116_120325)
@@ -13,3 +12,4 @@
 - [2026-11-19T12:04:27Z] [2026-11-19 19:1x ICT] Plan ZaloPay 11-20 XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 20/11 (job DollarBill_20261119_120336)
 - [2026-11-19T12:04:59Z] [2026-11-19 19:2x ICT] Plan SpaceX 11-20 XONG HOLD ALL 0 lenh; VGS co huy cho user quyet; cho duyet truoc 08:45 20/11 (job DollarBill_20261119_120339)
 - [2026-11-20T12:04:10Z] [2026-11-20 19:1x ICT] Plan ZaloPay 11-23 XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 23/11 (job DollarBill_20261120_120324)
+- [2026-11-20T12:04:45Z] [2026-11-20 19:xx ICT] Plan SpaceX 11-23 XONG HOLD ALL 0 lenh; FPT -12% STOP se duoc injector chen SELL 20:40, user quyet; cho duyet truoc 08:45 23/11 (job DollarBill_20261120_120327)
