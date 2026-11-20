@@ -1571,6 +1571,20 @@
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
    "via": "import"
   },
+  "dd_bqclient_failcache_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "trading_bot/__init__.py",
+    "trading_bot/due_diligence.py"
+   ],
+   "depth": null,
+   "parent": "trading_bot/__init__.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
   "dd_flag_order_gate_selfcheck.py": {
    "blast_tier": "T3",
    "covers": [
@@ -5446,8 +5460,8 @@
   },
   "mike/bin/dd_price_zone_watch.py": {
    "blast_tier": "T0",
-   "depth": 1,
-   "parent": "mike/bin/send_plan_report.sh",
+   "depth": 2,
+   "parent": "mike/bin/dd_zone_candidates_block.py",
    "roots": [
     "cron `*/15 1-15 * * *` gate_block_question.py",
     "cron `*/15 12-14 * * 1-5` nav_sync_retry.sh",
@@ -5500,7 +5514,7 @@
    "tier": "T0",
    "tier_parent": "trading_bot/plan.py",
    "tier_root": "cron `0 12 * * 1-5` bq_freshness_check.sh",
-   "via": "exec"
+   "via": "import"
   },
   "mike/bin/dd_price_zone_watch_selfcheck.py": {
    "blast_tier": "T3",
@@ -5512,6 +5526,60 @@
    ],
    "depth": null,
    "parent": "corp_action_lib.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/dd_zone_candidates_block.py": {
+   "blast_tier": "T0",
+   "depth": 1,
+   "parent": "mike/bin/send_plan_report.sh",
+   "roots": [
+    "cron `0 14 * * 1-5` send_plan_report.sh",
+    "cron `0 16 * * 1-5` send_plan_report.sh"
+   ],
+   "tier": "T0",
+   "tier_parent": "mike/bin/send_plan_report.sh",
+   "tier_root": "cron `0 14 * * 1-5` send_plan_report.sh",
+   "via": "exec"
+  },
+  "mike/bin/dd_zone_candidates_block_selfcheck.py": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/dd_price_zone_watch.py",
+    "mike/bin/dd_zone_candidates_block.py"
+   ],
+   "depth": null,
+   "parent": "mike/bin/dd_price_zone_watch.py",
+   "roots": [],
+   "tier": "T3",
+   "tier_parent": null,
+   "tier_root": null,
+   "via": "selfcheck"
+  },
+  "mike/bin/dd_zone_candidates_daily.sh": {
+   "blast_tier": "T1",
+   "depth": 0,
+   "parent": "(root)",
+   "roots": [
+    "cron `45 12 * * 1-5` dd_zone_candidates_daily.sh"
+   ],
+   "tier": "T1",
+   "tier_parent": "(root)",
+   "tier_root": "cron `45 12 * * 1-5` dd_zone_candidates_daily.sh",
+   "via": "exec"
+  },
+  "mike/bin/dd_zone_candidates_daily_selfcheck.sh": {
+   "blast_tier": "T3",
+   "covers": [
+    "mike/bin/dd_price_zone_watch.py",
+    "mike/bin/dd_zone_candidates_daily.sh",
+    "mike/bin/notify.sh"
+   ],
+   "depth": null,
+   "parent": "mike/bin/dd_price_zone_watch.py",
    "roots": [],
    "tier": "T3",
    "tier_parent": null,
@@ -5993,7 +6061,7 @@
    "via": "selfcheck"
   },
   "mike/bin/discretionary_candidate_funnel.py": {
-   "blast_tier": "T1",
+   "blast_tier": "T0",
    "depth": 0,
    "parent": "(root)",
    "roots": [
@@ -6021,7 +6089,7 @@
    "via": "selfcheck"
   },
   "mike/bin/discretionary_dd_pick.py": {
-   "blast_tier": "T1",
+   "blast_tier": "T0",
    "depth": 1,
    "parent": "mike/bin/discretionary_candidate_funnel.py",
    "roots": [
@@ -6882,7 +6950,7 @@
    "via": "selfcheck"
   },
   "mike/bin/fa_ratings_earnings_window_daily.sh": {
-   "blast_tier": "T1",
+   "blast_tier": "T0",
    "depth": 0,
    "parent": "(root)",
    "roots": [
@@ -8100,7 +8168,7 @@
    "via": "selfcheck"
   },
   "mike/bin/marginability_check.py": {
-   "blast_tier": "T1",
+   "blast_tier": "T0",
    "depth": 1,
    "parent": "mike/bin/discretionary_candidate_funnel.py",
    "roots": [
@@ -9304,6 +9372,7 @@
    "blast_tier": "T3",
    "covers": [
     "mike/bin/auto_exit_inject.py",
+    "mike/bin/park_holdings.py",
     "mike/bin/portfolio_status.py"
    ],
    "depth": null,
@@ -15256,6 +15325,7 @@
     "cron `40 13 * * 1-5` auto_exit_inject_daily.sh",
     "cron `45 1 * * 1-5` preflight_check.sh",
     "cron `45 12 * * *` newdeals_season.py",
+    "cron `45 12 * * 1-5` dd_zone_candidates_daily.sh",
     "cron `45 12 * * 1-5` livermore_trigger_check.py",
     "cron `45 14 * * 1-5` late_plan_catchup.sh",
     "cron `45 16 * * 1-5` sync_bq_cache_daily.sh",
@@ -15282,7 +15352,7 @@
    "via": "exec"
   }
  },
- "generated_at": "2026-11-20T09:49:05Z",
+ "generated_at": "2026-11-20T22:26:31Z",
  "generated_by": "python3 mike/bin/production_manifest.py",
  "roots": [
   {
@@ -16828,6 +16898,16 @@
    "schedule": "30 3 * * 0",
    "script": "weekly_orphan_review.py",
    "tier": "T2"
+  },
+  {
+   "command": "/home/trido/thanhdt/WorkingClaude/mike/bin/dd_zone_candidates_daily.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/dd_zone_candidates_daily.log 2>&1",
+   "in_repo_files": [
+    "mike/bin/dd_zone_candidates_daily.sh"
+   ],
+   "kind": "cron",
+   "schedule": "45 12 * * 1-5",
+   "script": "dd_zone_candidates_daily.sh",
+   "tier": "T1"
   },
   {
    "command": "/workspace/claude-code-discord-bridge/.venv/bin/python -m claude_discord.main",

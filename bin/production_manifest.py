@@ -155,6 +155,7 @@ ROOT_TIER = {
     "ai_momentum_cron.sh": T1,             # vỏ cron ai_momentum_daily (paper P1), chỉ ghi ledger riêng + alert
     "snapshot_macro_commodity_vintage.py": T1,  # vintage append-only macro_indicator/commodity_prices
     "newdeals_season.py": T1,              # RESEARCH/MONITOR topic New deals theo mùa BCTC, không lệnh
+    "dd_zone_candidates_daily.sh": T1,     # CHỈ ĐỌC DNSE ohlc + sổ dd_price_zones, làm mới file ứng viên + alert (cron 20/11)
     # T2 — fleet-ops (dispatch/bus/consolidate/health/backup/audit/hook)
     "consolidate.sh": T2, "watchdog.sh": T2, "discover_sessions.py": T2,
     "resume_pending.py": T2, "fleet_backup.sh": T2, "start.sh": T2,
