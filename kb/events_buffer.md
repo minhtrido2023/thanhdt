@@ -751,3 +751,13 @@
 
 ## Consolidation 2026-11-20T12:04:58Z
 - [2026-11-20T12:04:45Z] DollarBill/decision — plan-2026-11-23: {"account": "SpaceX", "decision": "HOLD ALL 0 lenh", "dt5g": "NEUTRAL", "note": "FPT -12% cham STOP, injector 20:40 se chen SELL de xuat; VGS/NNC khong mua them; LAG 0 den han", "egg": 753011985}
+
+## Consolidation 2026-11-20T12:12:09Z
+- [2026-11-20T12:10:41Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-11-20", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-11-20.md"}
+- [2026-11-20T12:11:10Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-11-20", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-11-20.md"}
+- [2026-11-20T12:09:13Z] Taylor/heartbeat — Taylor_20261120_120902: {"status": "in_progress", "note": "doc registry CCTG + deposit"}
+- [2026-11-20T12:09:52Z] Taylor/heartbeat — Taylor_20261120_120902: {"status": "in_progress", "note": "search CCTG Big-4 lich su: tim thay VCB online CCTG 2026 (7.9% 12M thang4, 6% cu); dang fetch bai goc"}
+- [2026-11-20T12:10:03Z] Taylor/heartbeat — Taylor_20261120_120902: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261120_120902", "source": "watcher"}
+- [2026-11-20T12:11:03Z] Taylor/heartbeat — Taylor_20261120_120902: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261120_120902", "source": "watcher"}
+- [2026-11-20T12:11:54Z] Taylor/finding — cctg-gap-hist: chi co du lieu 2026, N=6, spread median 0.6pp: {"coverage": "CCTG Big-4 chi tim duoc 2026-01..11 (+VietinBank 2009); 2011-2025 khong co du lieu", "big4_spread_pp": {"N": 6, "median": 0.6, "min": 0.0, "max": 1.9, "latest": 0.6}, "stat_claim": "none - mo ta", "killswitch_A": "CCTG12M 7.4<7.5 chua armed; khong chinh nguong", "tier2": "MB +0.3 ACB +0.4 TCB +0.8 VPB +2.2 vs dep 6.8", "measured_by": "python3 -I agents/Taylor/research/cctg_gap_hist_20261120/spread.py; WebSearch+web-fetch 9 URL", "dir": "mike/agents/Taylor/research/cctg_gap_hist_20261120"}
+- [2026-11-20T12:12:03Z] Taylor/heartbeat — Taylor_20261120_120902: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261120_120902", "source": "watcher"}
