@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-19T09:25:32Z] [g8-gap r3 19/11] XONG job Taylor_20261119_091916: commit f7cdf9a22 (lib) + fd5c29454 (README) — CHO Mike arch-review vong 3, merge CUNG ack 6 ma; chua replay BQ that voi K=11
 - [2026-11-19T09:55:29Z] ĐANG DỞ: job Taylor_20261119_095518 PREREG-5 họ 2 (heo/DBC) paper forward | NEXT: đọc nowcast_kqkd_12fam, viết agents/Taylor/research/prereg5_hog_dbc_20261119/PREREG5.md
 - [2026-11-19T09:55:31Z] ĐANG DỞ: job Taylor_20261119_095521 bank-nodata 3->4 (worktree sparse session/bank-nodata-fail-closed-20261119) | NEXT: grep bank-nodata, sửa, selfcheck, regen tạm, tác động tiền
 - [2026-11-19T09:58:47Z] [dna-macro-stress 19/11] XONG job Taylor_20261119_095526: commit 91b9a1ef1 repo ngoai nhanh session/dna-macro-stress-line-20261119 — CHO Mike review + quyet noi vao prompt ZaloPay-only (khong vao SpaceX report_v2)
@@ -26,3 +25,4 @@
 - [2026-11-20T04:19:46Z] ĐANG DỞ: job Taylor_20261120_041933 DD TTA | NEXT: tải BCTC Q3/2026 vào agents/Taylor/research/dd_TTA_20261120/src
 - [2026-11-20T04:19:47Z] ĐANG DỞ: job Taylor_20261120_041936 QTP r3 envcapex | NEXT: đọc dd_QTP_20261117/model/qtp_model.py + REPORT, dựng qtp_model_r3.py ở research/qtp_r3_envcapex_20261120
 - [2026-11-20T04:27:42Z] [qtp-r3 20/11] XONG job Taylor_20261120_041936: tam QTP r3 sau CK ~7053 (DAT, gia/tam 1,45) do opex 572 ty/nam + von du an khi thai — CHO Mike skeptic + Wendy soat TT57 D20.3 tuong duong trong TT12/2025; Mike sua REPORT/investor/dd_price_zones
+- [2026-11-20T04:29:34Z] [dd-tta 20/11] XONG job Taylor_20261120_041933: REPORT dd_TTA_20261120, tam 8.040 (sau TK 7.240), KHONG RE — CHO Mike goi fundamental-skeptic + ghi dd_price_zones

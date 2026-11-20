@@ -2556,3 +2556,6 @@
 
 ## Archived 2026-11-20 (keep=12 days=0 require_done=False)
 - [2026-11-19T09:22:39Z] [sector-leaders 19/11] XONG job Taylor_20261119_090450: KHONG sleeve; T2 display dat, T9 ung vien PREREG-5 paper (commit 19a9944b9) — CHO Mike goi quant-skeptic + user duyet
+
+## Archived 2026-11-20 (keep=12 days=0 require_done=False)
+- [2026-11-19T09:25:32Z] [g8-gap r3 19/11] XONG job Taylor_20261119_091916: commit f7cdf9a22 (lib) + fd5c29454 (README) — CHO Mike arch-review vong 3, merge CUNG ack 6 ma; chua replay BQ that voi K=11
