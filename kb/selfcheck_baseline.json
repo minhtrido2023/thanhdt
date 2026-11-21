@@ -51,16 +51,6 @@
       "triaged_utc": "2026-09-29T08:45:00Z",
       "triaged_by": "Taylor"
     },
-    "mike/bin/production_manifest_selfcheck.sh": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-11-15T23:28:08Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/production_manifest_selfcheck.sh",
-      "escalated_utc": "2026-11-15T23:28:08Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "phs_flash_api_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-11-17T23:31:46Z",
@@ -71,13 +61,13 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "lag_live_schedule_selfcheck.py": {
+    "expected_volume_pacing_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-11-20T21:18:44Z",
-      "status": "FAIL",
+      "since": "2026-11-20T23:38:42Z",
+      "status": "TIMEOUT",
       "auto": true,
-      "topic": "selfcheck-red: lag_live_schedule_selfcheck.py",
-      "escalated_utc": "2026-11-20T21:18:44Z",
+      "topic": "selfcheck-red: expected_volume_pacing_selfcheck.py",
+      "escalated_utc": "2026-11-20T23:38:42Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
