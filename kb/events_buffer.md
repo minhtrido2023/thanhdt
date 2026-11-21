@@ -612,3 +612,8 @@
 
 ## Consolidation 2026-11-21T06:30:19Z
 - [2026-11-21T06:30:14Z] Wags/finding — work-tree-verify 2026-11-21: {"need_user": 0, "overdue": 0, "closed": 0, "updated": 0, "kept_open": 0, "note": "attention.need_user và overdue rỗng; work_tree_build rc=0"}
+
+## Consolidation 2026-11-21T17:31:23Z
+- [2026-11-21T17:30:48Z] Mike/heartbeat — Mike_20261121_173017: {"status": "in_progress", "note": "retro: doc incident + verify backup"}
+- [2026-11-21T17:31:14Z] Mike/finding — daily-retro-draft-2026-11-21: {"summary": "Retro draft 21/11: 1 sự cố (backup mike-fleet discord-id-gate) ĐÃ ĐÓNG có bằng chứng (ls-remote d7f67955d, backup.log 17:00Z không FAIL); Pattern 1 residual prevention chưa làm; không escalate; wakeup 0/0, time-claim 0, classifier 0", "draft": "state/retro_draft_2026-11-21.md"}
+- [2026-11-21T17:31:17Z] Mike/heartbeat — Mike_20261121_173017: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261121_173017", "source": "watcher"}
