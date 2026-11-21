@@ -19,3 +19,7 @@ SEAL_MD5 ZaloPay 76a1ee1550018df73dfe21b8d099db38 da1f1949b0d548e2ef207d26e21203
 SEAL_MD5 SpaceX a66fc4b3a77278b43850a016fb0d2595 d46e3c888d6fc3a9fcf54c219f06e292
 # 2026-11-14 07:30 ICT — chốt tuần tự động (ledger_seal_weekly.py) ZaloPay tới 2026-11-06
 SEAL_MD5 ZaloPay eb0adaaea8b104ec0c80cebabc2f81ff e5f91cbff5ce0dee12fe2b4d509ed860
+# 2026-11-21 07:30 ICT — chốt tuần tự động (ledger_seal_weekly.py) SpaceX tới 2026-11-13
+SEAL_MD5 SpaceX b0a3e71d7760b8dc7fb7c0baf2449ffa 973deb044a59d7ddb6766383cd89972c
+# 2026-11-21 07:30 ICT — chốt tuần tự động (ledger_seal_weekly.py) ZaloPay tới 2026-11-13
+SEAL_MD5 ZaloPay 3a01e175ca38b1d3b6c1b7fbc33fa6c0 a5ecbd8dbdcaf0b6dc7facea6f27b1c2
