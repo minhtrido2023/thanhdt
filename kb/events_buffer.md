@@ -609,3 +609,6 @@
 
 ## Consolidation 2026-11-21T03:07:02Z
 - [2026-11-21T02:15:54Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12995}
+
+## Consolidation 2026-11-21T06:30:19Z
+- [2026-11-21T06:30:14Z] Wags/finding — work-tree-verify 2026-11-21: {"need_user": 0, "overdue": 0, "closed": 0, "updated": 0, "kept_open": 0, "note": "attention.need_user và overdue rỗng; work_tree_build rc=0"}
