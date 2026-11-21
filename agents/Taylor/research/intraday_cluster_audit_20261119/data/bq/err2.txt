@@ -1,0 +1,1 @@
+Waiting on bqjob_r61a682df1d5447c1_000001a1f2210c6a_1 ... (0s) Current status: RUNNING                                                                                      Waiting on bqjob_r61a682df1d5447c1_000001a1f2210c6a_1 ... (0s) Current status: DONE   

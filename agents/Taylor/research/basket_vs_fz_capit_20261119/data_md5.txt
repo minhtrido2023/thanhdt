@@ -1,0 +1,6 @@
+81eeb8dcf8514d072d1df4d2baae4837  ../intraday_cluster_audit_20261119/data/bq/capit_breadth.csv
+22a8f89f0f0e498e2ae997ecc30d9001  ../intraday_cluster_audit_20261119/data/bq/daily_ohlc.csv
+3acc42d147ab1c21cbef710b30fb35dd  ../intraday_cluster_audit_20261119/data/holdout/deals_fz-001.csv
+a9a44d9a42530d37de90fff940f88ac2  ../intraday_cluster_audit_20261119/data/holdout/deals_fz-002.csv
+95fbe1fcc79497a8c8f441a8f70176c5  ../intraday_cluster_audit_20261119/data/insample/deals_fz-001.csv
+c9f6f14a87bd41e28def7a51fab97bda  ../intraday_cluster_audit_20261119/data/insample/deals_fz-002.csv

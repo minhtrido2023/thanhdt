@@ -1,0 +1,86 @@
+r2 tam truoc CK 14599 (pin 14.599)
+VC tach: amoniac 317.4 + dien tu dung 37.6 + du CHUA thuyet minh 115.3 = 470.29
+P0/co so (r3 tai lap) -10478; bo phan du 115 (vc_abs=355.0): -9237
+TAM r3 (0,5/0,3/0,2) truoc 7836 sau 7053 | bo du 115: truoc 8576 sau 7718
+
+=== (2) Quyen tu bo: dung cuoi 2031 (hop dong EPC da ky -> CHI nhan nhan, khong vao tam) ===
+ base/P0: chay den STOP 4722 | dung 2031 6360 | chenh +1639 d/cp truoc CK
+ base/P50: chay den STOP 10269 | dung 2031 7816 | chenh -2453 d/cp truoc CK
+ base/P100: chay den STOP 15014 | dung 2031 8999 | chenh -6015 d/cp truoc CK
+ (so voi quyen tu bo 2031, P0 CO SO: 6360 d/cp truoc CK -> sau CK 5724; cap tren cho P0)
+ r2 thuan dung 2031 (khong du an) 13562 vs r2 co so 15200
+
+=== (2b) Dong tien TOAN CONG TY o P0, co so (ty) ===
+ nam | FCFE nen | dFCFE P0 | FCFE toan cty | tien rong luy ke (chua tra co tuc)
+ 2027 |    907 |   -247 |   +660 |    2202
+ 2028 |    907 |   -445 |   +462 |    2663
+ 2029 |    844 |   -394 |   +450 |    3114
+ 2030 |    844 |   -963 |   -119 |    2994
+ 2031 |    641 |   -938 |   -298 |    2697
+ 2032 |    489 |   -913 |   -424 |    2272
+ 2033 |    489 |   -888 |   -399 |    1873
+ 2034 |    489 |   -863 |   -374 |    1498
+ 2035 |    489 |   -838 |   -349 |    1149
+ 2036 |    489 |   -813 |   -324 |     825
+ 2037 |    489 |   -788 |   -299 |     526
+ 2038 |    489 |   -763 |   -274 |     252
+ 2039 |    489 |   -738 |   -249 |       3
+ 2040 |    489 |   -446 |    +42 |      46
+ 2041 |    489 |   -446 |    +42 |      88
+ tien rong dau ky (30/9/26) 1541; cong don FCFE toan cty 2030-39 -3110 ty; tien thap nhat 3 ty nam 2039
+ nam dau tien tien rong < 0 (CHUA tra co tuc): khong
+ P50: tien thap nhat 2202 ty nam 2027
+
+=== (3) Do nhay trong so (truoc/sau CK; P50:P100 = 60:40) ===
+ P0=0.0: truoc 11437 sau 10293   w={'P0': 0, 'P50': 0.6, 'P100': 0.4}
+ P0=0.2: truoc 9997 sau 8997   w={'P0': 0.2, 'P50': 0.48, 'P100': 0.32}
+ P0=0.3: truoc 9277 sau 8349   w={'P0': 0.3, 'P50': 0.42, 'P100': 0.28}
+ P0=0.4: truoc 8557 sau 7701   w={'P0': 0.4, 'P50': 0.36, 'P100': 0.24}
+ P0=0.5: truoc 7836 sau 7053   w={'P0': 0.5, 'P50': 0.3, 'P100': 0.2}
+
+ TAM r3b (W_F {'P0': 0.4, 'P50': 0.36, 'P100': 0.24}): truoc CK 8557 | sau CK 7701 | delta vs r2 -6042 | vs r3 +720
+  thuan P0: truoc 4236 sau 3813
+  thuan P50: truoc 9576 sau 8618
+  thuan P100: truoc 14228 sau 12805
+
+ Bien the tren W_F (truoc CK / sau CK):
+  bo phan du 115 cua VC     :   9208 /   8287  (+7.6%)
+  opex tu 2032 (QCVN19)     :   9398 /   8458  (+9.8%)
+  bu cham tu 2033           :   7017 /   6315  (-18.0%)
+  P50 chi bu FC             :   7598 /   6838  (-11.2%)
+  khau hao 18 nam           :   8446 /   7601  (-1.3%)
+  TMDT 3.300 (vay 80%)      :   8832 /   7949  (+3.2%)
+  gia bu 164,25 d/kWh       :   8436 /   7593  (-1.4%)
+  lai vay 7%                :   8958 /   8062  (+4.7%)
+  lai vay 11%               :   8152 /   7337  (-4.7%)
+  VC 50%                    :   9882 /   8894  (+15.5%)
+
+ Bien the tren tung kich ban (co so r2, truoc CK, delta PV):
+  bo phan du 115 cua VC     : P0 -9237 | P50 -4434 | P100 -186
+  opex tu 2032 (QCVN19)     : P0 -8951 | P50 -4316 | P100 -186
+  bu cham tu 2033           : P0 -10478 | P50 -6842 | P100 -3654
+  khau hao 18 nam           : P0 -10478 | P50 -5134 | P100 -390
+  TMDT 3.300 (vay 80%)      : P0 -10177 | P50 -4678 | P100 +66
+  gia bu 164,25 d/kWh       : P0 -10478 | P50 -5079 | P100 -476
+  lai vay 7%                : P0 -10039 | P50 -4564 | P100 +181
+  lai vay 11%               : P0 -10917 | P50 -5312 | P100 -552
+  VC 50%                    : P0 -7951 | P50 -3917 | P100 -186
+  P50 chi bu FC: -7652
+
+ vung theo trong so P0 0..0,5: sau CK 7053..10293; theo bien the: 6315..8894
+ gia 10200 / tam sau CK = 1.325; / nguong tren vung bien the 1.147
+ gia 10300 / tam sau CK = 1.338; / nguong tren vung bien the 1.158
+ V_ngan (W_F) 512 | V_dai co so 9189
+
+ Do nhay lai huy dong (W_F):
+  -100bp: truoc 9031 sau 8128 (+5.5%)
+  +100bp: truoc 8130 sau 7317 (-5.0%)
+
+=== (4) Bo sung: quyen tu bo co dieu kien, tien rong co co tuc, bien the ket hop ===
+ (chi cho co so) plain 9189 | co quyen tu bo 2031 (chon sau khi biet P) 9844 | +655 truoc CK = +590 sau CK [KHONG vao tam]
+ P0, co tuc 0 d/cp/nam (tu 2027): tien rong am dau tien nam None
+ P0, co tuc 500 d/cp/nam (tu 2027): tien rong am dau tien nam 2034
+ P0, co tuc 900 d/cp/nam (tu 2027): tien rong am dau tien nam 2032
+ ket hop [bo du 115 + opex tu 2032]: truoc 9877 sau 8890
+ ket hop [bo du 115 + opex 2032 + lai 7%]: truoc 10267 sau 9240
+ ket hop [bu cham 2033 + khau hao 18 + lai 11%]: truoc 6541 sau 5887

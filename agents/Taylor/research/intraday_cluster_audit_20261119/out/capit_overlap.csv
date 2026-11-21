@@ -1,0 +1,3 @@
+set,days,days_fire_same_D,frac_days,frac_days_5sess,clusters,frac_clusters_same,frac_clusters_5sess
+all candidates,54,12,0.2222222222222222,0.24074074074074073,20,0.3,0.3
+in_stats,52,10,0.19230769230769232,0.21153846153846154,19,0.2631578947368421,0.2631578947368421

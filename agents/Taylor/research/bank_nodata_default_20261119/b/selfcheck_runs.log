@@ -1,0 +1,14 @@
+== TZ=UNSET rating_8l_history_bank_nodata_gate_selfcheck.py rc=0 :: PASS: 33 ok, 0 fail 
+== TZ=UNSET rating_8l_bank_nodata_selfcheck.py rc=0 :: PASS: 14 ok, 0 fail 
+== TZ=UNSET rating_8l_history_bank_aq_selfcheck.py rc=0 :: assertions PASSED : 34 assertions FAILED : 0 VERDICT           : PASS 
+== TZ=UNSET rating8l_eff_guard_selfcheck.py rc=0 :: PASS G1 BGE 2026Q1: co + eff=time 2026-05-04 PASS G1 BGE quy truoc khong bi danh dau, eff=RD PASS G1 BOT 2026Q1: co + eff=time 2026-05-04 PASS G1 BOT quy truoc khong bi danh dau, eff=RD PASS G1 DGT 2026Q1: co + eff=time 2026-05-04 PASS G1 DGT quy truoc khong bi danh dau, eff=RD PASS G1 HVA 2026Q1: co + eff=time 2026-05-04 PASS G1 HVA quy truoc khong bi danh dau, eff=RD PASS G1 VNE 2026Q1: co + eff
+== TZ=UNSET rating8l_icb_pit_selfcheck.py rc=1 :: 
+== TZ=Asia/Tokyo rating_8l_history_bank_nodata_gate_selfcheck.py rc=0 :: PASS: 33 ok, 0 fail 
+== TZ=Asia/Tokyo rating_8l_bank_nodata_selfcheck.py rc=0 :: PASS: 14 ok, 0 fail 
+== TZ=Asia/Tokyo rating_8l_history_bank_aq_selfcheck.py rc=0 :: assertions PASSED : 34 assertions FAILED : 0 VERDICT           : PASS 
+== TZ=Asia/Tokyo rating8l_eff_guard_selfcheck.py rc=0 :: PASS G1 BGE 2026Q1: co + eff=time 2026-05-04 PASS G1 BGE quy truoc khong bi danh dau, eff=RD PASS G1 BOT 2026Q1: co + eff=time 2026-05-04 PASS G1 BOT quy truoc khong bi danh dau, eff=RD PASS G1 DGT 2026Q1: co + eff=time 2026-05-04 PASS G1 DGT quy truoc khong bi danh dau, eff=RD PASS G1 HVA 2026Q1: co + eff=time 2026-05-04 PASS G1 HVA quy truoc khong bi danh dau, eff=RD PASS G1 VNE 2026Q1: co + eff
+== TZ=Asia/Tokyo rating8l_icb_pit_selfcheck.py rc=1 :: 
+== [venv] TZ=UNSET rating8l_icb_pit_selfcheck.py rc=0 :: SKIP BQ integration block (BQ1-BQ4) — pass --bq to run (needs bq CLI + network)  16 PASS / 0 FAIL / 2 SKIP 
+== [venv] TZ=UNSET rating_8l_history_bank_nodata_gate_selfcheck.py rc=0 ::   [bank-AQ override] current-snapshot bank rating changed for 2 bank(s); history proxy untouched   [T9] mutation bỏ cổng chặn: 14 assertion(s) FAIL như mong đợi PASS: 33 ok, 0 fail 
+== [venv] TZ=Asia/Tokyo rating8l_icb_pit_selfcheck.py rc=0 :: SKIP BQ integration block (BQ1-BQ4) — pass --bq to run (needs bq CLI + network)  16 PASS / 0 FAIL / 2 SKIP 
+== [venv] TZ=Asia/Tokyo rating_8l_history_bank_nodata_gate_selfcheck.py rc=0 ::   [bank-AQ override] current-snapshot bank rating changed for 2 bank(s); history proxy untouched   [T9] mutation bỏ cổng chặn: 14 assertion(s) FAIL như mong đợi PASS: 33 ok, 0 fail 

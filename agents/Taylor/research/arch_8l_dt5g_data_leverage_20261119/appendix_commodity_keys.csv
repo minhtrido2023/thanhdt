@@ -1,0 +1,257 @@
+metric_key,source,cadence,unit,name_en,n,d0,d1,age_d,n_90d,n_distinct_val_90d
+gdt_milk_powder,global_dairy_trade,event,USD/MT,,15,2026-04-21,2026-11-17,2,6,5
+benzene,sunsirs,daily,CNY/T,Pure benzene,332,2025-07-08,2026-11-18,1,58,52
+butadiene_rubber,sunsirs,daily,CNY/T,Butadiene rubber,800,2023-07-28,2026-11-18,1,58,43
+caustic_soda,sunsirs,daily,CNY/T,Caustic soda,765,2023-09-15,2026-11-18,1,58,14
+coke,sunsirs,daily,CNY/T,Coke,3364,2013-01-07,2026-11-18,1,58,12
+cotton_yarn,sunsirs,daily,CNY/T,Cotton yarn,2241,2017-08-18,2026-11-18,1,58,10
+ethylene_glycol,sunsirs,daily,CNY/T,Ethylene glycol (MEG),1923,2018-12-10,2026-11-18,1,58,46
+ferrosilicon,sunsirs,daily,CNY/T,Ferrosilicon,2966,2014-08-08,2026-11-18,1,58,42
+fuel_oil,sunsirs,daily,CNY/T,Fuel oil,3353,2013-01-07,2026-11-18,1,58,40
+glass,sunsirs,daily,CNY/m2,Glass,3362,2013-01-07,2026-11-18,1,58,14
+liquid_ammonia,sunsirs,daily,CNY/T,Liquid ammonia (NH3),2315,2018-01-02,2026-11-18,1,63,39
+live_hog_cny,sunsirs,daily,CNY/kg,Live pig (China),1417,2021-01-08,2026-11-18,1,58,48
+lpg,sunsirs,daily,CNY/T,LPG,1608,2020-03-30,2026-11-18,1,58,46
+paraxylene,sunsirs,daily,CNY/T,Paraxylene,765,2023-09-15,2026-11-18,1,58,7
+pet,sunsirs,daily,CNY/T,PET bottle chips,523,2024-09-18,2026-11-18,1,58,56
+polyester_staple_fiber,sunsirs,daily,CNY/T,Polyester staple fiber,1480,2020-10-12,2026-11-18,1,58,56
+polysilicon,sunsirs,daily,CNY/T,Polysilicon,457,2024-12-26,2026-11-18,1,58,4
+propylene,sunsirs,daily,CNY/T,Propylene,322,2025-07-22,2026-11-18,1,58,51
+pta,sunsirs,daily,CNY/T,PTA,3362,2013-01-07,2026-11-18,1,58,58
+rapeseed_meal,sunsirs,daily,CNY/T,Rapeseed meal,3362,2013-01-07,2026-11-18,1,58,36
+silicomanganese,sunsirs,daily,CNY/T,Silicomanganese,2966,2014-08-08,2026-11-18,1,58,30
+soybean_meal_cny,sunsirs,daily,CNY/T,Soybean meal (China),3364,2013-01-07,2026-11-18,1,58,48
+soybean_oil,sunsirs,daily,CNY/T,Soybean oil,3364,2013-01-07,2026-11-18,1,58,53
+stainless_steel,sunsirs,daily,CNY/T,Stainless steel plate,1730,2019-09-25,2026-11-18,1,58,19
+tungsten_apt,sunsirs,daily,CNY/T,Ammonium paratungstate (APT),133,2026-06-24,2026-11-18,1,84,22
+tungsten_concentrate,sunsirs,daily,CNY/T,Tungsten concentrate,133,2026-06-24,2026-11-18,1,84,24
+wire_rod,sunsirs,daily,CNY/T,Wire rod,3340,2013-01-07,2026-11-18,1,58,34
+yellow_phosphorus,sunsirs,daily,CNY/T,Yellow phosphorus (P4),2420,2012-06-11,2026-11-18,1,84,21
+aluminum,trading_economics,daily,USD/T,Aluminum,2547,2016-10-25,2026-11-18,1,62,61
+aluminum_alloy,trading_economics,daily,CNY/T,Aluminum Alloy,350,2025-06-10,2026-11-18,1,56,54
+baltic_dry,trading_economics,daily,Index Points,Baltic Dry,2522,2016-10-28,2026-11-18,1,63,62
+barley,trading_economics,daily,INR/T,Barley,2506,2016-10-25,2026-11-17,2,58,45
+beef,trading_economics,daily,BRL/15KG,Beef,2595,2016-10-25,2026-11-17,2,57,51
+bitumen,trading_economics,daily,CNY/T,Bitumen,2411,2016-10-25,2026-11-18,1,56,55
+brent,trading_economics,daily,USD/Bbl,Brent,2740,2016-10-25,2026-11-18,1,62,62
+butter,trading_economics,daily,EUR/T,Butter,2485,2016-10-25,2026-11-17,2,62,32
+canola,trading_economics,daily,CAD/T,Canola,2534,2016-10-25,2026-11-18,1,61,57
+carbon,trading_economics,daily,EUR,EU Carbon Permits,2589,2016-10-25,2026-11-18,1,63,60
+cheese,trading_economics,daily,USD/Lbs,Cheese,2548,2016-10-25,2026-11-18,1,61,49
+coal,trading_economics,daily,USD/T,Coal,2419,2016-10-25,2026-11-17,2,61,53
+cobalt,trading_economics,daily,USD/T,Cobalt,2602,2016-10-25,2026-11-17,2,61,23
+cobalt_hydroxide,trading_economics,daily,USD/MT,Cobalt Hydroxide,514,2024-11-20,2026-11-17,2,63,45
+cocoa,trading_economics,daily,USD/T,Cocoa,2531,2016-10-25,2026-11-18,1,62,60
+coffee,trading_economics,daily,USd/Lbs,Coffee,2534,2016-10-25,2026-11-18,1,62,60
+coking_coal,trading_economics,daily,USD/T,Coking Coal,1797,2019-11-26,2026-11-18,1,60,33
+consume_commodity_index,trading_economics,daily,Index Points,SSE Commodity Index,2444,2016-10-25,2026-11-18,1,56,56
+containerized_freight_index,trading_economics,daily,Points,Containerized Freight Index,2619,2016-10-25,2026-11-18,1,62,13
+copper,trading_economics,daily,USD/Lbs,Copper,2587,2016-10-25,2026-11-18,1,61,59
+corn,trading_economics,daily,USd/BU,Corn,2592,2016-10-25,2026-11-18,1,61,59
+cotton,trading_economics,daily,USd/Lbs,Cotton,2559,2016-10-25,2026-11-18,1,61,60
+crb,trading_economics,daily,Index Points,CRB Index,2613,2016-10-25,2026-11-17,2,62,62
+crude_oil,trading_economics,daily,USD/Bbl,Crude Oil,2745,2016-10-25,2026-11-18,1,61,60
+di_ammonium,trading_economics,daily,USD/T,Di-ammonium,1841,2019-06-07,2026-11-17,2,61,7
+eggs_ch,trading_economics,daily,CNY/T,Eggs CH,2420,2016-10-25,2026-11-18,1,59,55
+eggs_us,trading_economics,daily,USD/Dozen,Eggs US,2594,2016-10-25,2026-11-17,2,59,56
+ethanol,trading_economics,daily,USD/Gal,Ethanol,2695,2016-10-25,2026-11-17,2,61,37
+eu_natural_gas,trading_economics,daily,EUR/MWh,EU Gas,2591,2016-10-25,2026-11-18,1,62,62
+feeder_cattle,trading_economics,daily,USd/Lbs,Feeder Cattle,2554,2016-10-25,2026-11-18,1,62,62
+gallium,trading_economics,daily,CNY/Kg,Gallium,2080,2018-09-21,2026-11-18,1,57,9
+gasoline,trading_economics,daily,USD/Gal,Gasoline,2603,2016-10-25,2026-11-18,1,61,59
+germanium,trading_economics,daily,CNY/Kg,Germanium,2222,2018-03-06,2026-11-18,1,57,14
+germany_natural_gas_the,trading_economics,daily,EUR/MWh,German Gas,612,2024-06-26,2026-11-18,1,57,57
+gold,trading_economics,daily,USD/t.oz,Gold,2629,2016-10-25,2026-11-18,1,62,62
+gsci,trading_economics,daily,Index Points,Commodity Index,2638,2016-10-25,2026-11-18,1,63,63
+heating_oil,trading_economics,daily,USD/Gal,Heating Oil,2616,2016-10-25,2026-11-18,1,61,59
+hrc_steel,trading_economics,daily,USD/T,HRC Steel,2452,2016-10-25,2026-11-18,1,62,55
+indium,trading_economics,daily,CNY/Kg,Indium,2295,2017-11-24,2026-11-18,1,57,15
+iron_ore,trading_economics,daily,USD/T,Iron Ore,2531,2016-10-25,2026-11-17,2,60,56
+iron_ore_cny,trading_economics,daily,CNY/T,Iron Ore CNY,2453,2016-10-25,2026-11-18,1,56,45
+kraft_pulp,trading_economics,daily,CNY/T,Kraft Pulp,1934,2018-11-27,2026-11-18,1,58,49
+lead,trading_economics,daily,USD/T,Lead,2606,2016-10-25,2026-11-18,1,61,61
+lean_hogs,trading_economics,daily,USd/Lbs,Lean Hogs,2542,2016-10-25,2026-11-18,1,62,62
+liquefied_natural_gas_japan_korea,trading_economics,daily,USD/MMBTU,LNG JKM,2530,2016-10-25,2026-11-17,2,60,59
+lithium,trading_economics,daily,CNY/T,Lithium,2344,2017-05-10,2026-11-18,1,57,55
+live_cattle,trading_economics,daily,USd/Lbs,Live Cattle,2546,2016-10-25,2026-11-18,1,62,61
+lumber,trading_economics,daily,USD/1000 board feet,Lumber,2533,2016-10-25,2026-11-18,1,62,52
+magnesium,trading_economics,daily,CNY/T,Magnesium,2577,2016-10-25,2026-11-18,1,56,14
+manganese,trading_economics,daily,CNY/mtu,Manganese,2576,2016-10-25,2026-11-18,1,57,6
+methanol,trading_economics,daily,CNY/T,Methanol,2444,2016-10-25,2026-11-18,1,57,52
+milk,trading_economics,daily,USD/CWT,Milk,2582,2016-10-25,2026-11-18,1,63,45
+molybden,trading_economics,daily,CNY/Kg,Molybdenum,2577,2016-10-25,2026-11-18,1,57,12
+naphtha,trading_economics,daily,USD/T,Naphtha,2531,2016-10-25,2026-11-17,2,61,61
+natural_gas,trading_economics,daily,USD/MMBtu,Natural gas,2604,2016-10-25,2026-11-18,1,61,59
+neodymium,trading_economics,daily,CNY/T,Neodymium,2577,2016-10-25,2026-11-18,1,57,10
+nickel,trading_economics,daily,USD/T,Nickel,2622,2016-10-25,2026-11-18,1,62,58
+nuclear,trading_economics,daily,USD,Nuclear Energy Index,2548,2016-10-25,2026-11-18,1,62,60
+oat,trading_economics,daily,USd/Bu,Oat,2568,2016-10-25,2026-11-18,1,61,59
+orange_juice,trading_economics,daily,USd/Lbs,Orange Juice,2538,2016-10-25,2026-11-18,1,62,60
+palladium,trading_economics,daily,USD/t.oz,Palladium,2627,2016-10-25,2026-11-18,1,62,62
+palm_oil,trading_economics,daily,MYR/T,Palm Oil,2481,2016-10-25,2026-11-18,1,59,56
+phosphate_rock_cny,trading_economics,daily,CNY/T,Phosphate rock (China),1026,2022-08-19,2026-11-18,1,57,5
+platinum,trading_economics,daily,USD/t.oz,Platinum,2631,2016-10-25,2026-11-18,1,62,62
+polyethylene,trading_economics,daily,CNY/T,Polyethylene,2422,2016-10-25,2026-11-18,1,61,48
+polypropylene,trading_economics,daily,CNY/T,Polypropylene,2423,2016-10-25,2026-11-18,1,61,52
+polyvinyl,trading_economics,daily,CNY/T,Polyvinyl,2418,2016-10-25,2026-11-18,1,61,49
+poultry,trading_economics,daily,BRL/Kgs,Poultry,2596,2016-10-25,2026-11-17,2,57,34
+propane,trading_economics,daily,USD/Gal,Propane,2529,2016-10-25,2026-11-17,2,60,56
+rapeseed_oil,trading_economics,daily,EUR/T,Rapeseed,2587,2016-10-25,2026-11-18,1,63,51
+rhodium,trading_economics,daily,USD/t oz.,Rhodium,2581,2016-10-25,2026-11-18,1,62,24
+rice,trading_economics,daily,USD/cwt,Rice,2564,2016-10-25,2026-11-18,1,61,60
+rubber,trading_economics,daily,USD Cents / Kg,Rubber,2528,2016-10-25,2026-11-18,1,62,54
+salmon,trading_economics,daily,NOK/KG,Salmon,525,2016-10-28,2026-11-13,6,13,13
+scrap_aluminum,trading_economics,daily,USD/T,Scrap Aluminum,1333,2021-07-27,2026-11-17,2,57,45
+scrap_steel,trading_economics,daily,USD/T,Scrap Steel,443,2025-02-17,2026-11-17,2,61,34
+silicon,trading_economics,daily,CNY/T,Silicon,522,2024-09-18,2026-11-18,1,56,43
+silver,trading_economics,daily,USD/t.oz,Silver,2629,2016-10-25,2026-11-18,1,62,62
+soda_ash,trading_economics,daily,CNY/T,Soda Ash,2630,2016-10-25,2026-11-18,1,63,5
+solar,trading_economics,daily,USD,Solar Energy Index,2544,2016-10-25,2026-11-18,1,62,60
+soybeans,trading_economics,daily,USd/Bu,Soybeans,2584,2016-10-25,2026-11-18,1,61,60
+steel,trading_economics,daily,CNY/T,Steel,2497,2016-10-25,2026-11-18,1,56,48
+styrene,trading_economics,daily,CNY/MT,Styrene,2305,2018-01-02,2026-11-18,1,63,44
+sugar,trading_economics,daily,USd/Lbs,Sugar,2549,2016-10-25,2026-11-18,1,62,55
+sulfur,trading_economics,daily,CNY/T,Sulfur,1794,2020-01-02,2026-11-18,1,63,46
+sunflower_oil,trading_economics,daily,INR/10 kg,Sunflower Oil,2583,2016-10-25,2026-11-17,2,58,58
+synthetic_rubber,trading_economics,daily,CNY/T,Synthetic Rubber,1793,2020-01-02,2026-11-18,1,63,44
+te_crack_spread_index,trading_economics,daily,Index Points,TE Crack Spread Index,2579,2016-10-25,2026-11-18,1,62,60
+te_grains_index,trading_economics,daily,Index Points,TE Grains Index,2519,2016-10-25,2026-11-18,1,62,62
+te_metals_index,trading_economics,daily,Index Points,TE Metals Index,2516,2016-10-25,2026-11-18,1,62,62
+te_soft_index,trading_economics,daily,Index Points,TE Soft Index,2495,2016-10-25,2026-11-18,1,62,58
+tea,trading_economics,daily,INR/Kgs,Tea,513,2016-10-29,2026-10-31,19,8,8
+tellurium,trading_economics,daily,CNY/Kg,Tellurium,2294,2017-11-24,2026-11-18,1,57,5
+tin,trading_economics,daily,USD/T,Tin,2542,2016-10-25,2026-11-17,2,61,61
+titanium,trading_economics,daily,CNY/KG,Titanium,2413,2017-06-08,2026-11-18,1,57,5
+uk_natural_gas,trading_economics,daily,GBp/thm,UK Gas,2574,2016-10-25,2026-11-18,1,62,62
+urals_oil,trading_economics,daily,USD/Bbl,Urals Oil,2606,2016-10-25,2026-11-17,2,60,60
+uranium,trading_economics,daily,USD/Lbs,Uranium,2383,2016-10-25,2026-11-17,2,61,30
+urea,trading_economics,daily,USD/T,Urea,1772,2019-06-07,2026-11-17,2,61,43
+wheat,trading_economics,daily,USd/Bu,Wheat,2564,2016-10-25,2026-11-18,1,61,61
+wind,trading_economics,daily,USD,Wind Energy Index,2533,2016-10-25,2026-11-18,1,62,56
+wool,trading_economics,daily,AUD/100Kg,Wool,2611,2016-10-25,2026-11-18,1,62,13
+zinc,trading_economics,daily,USD/T,Zinc,2546,2016-10-25,2026-11-18,1,61,61
+aluminum,trading_economics,monthly,USD/T,Aluminum,432,1990-11-01,2026-10-01,49,2,2
+aluminum_alloy,trading_economics,monthly,CNY/T,Aluminum Alloy,333,2025-06-10,2026-10-22,28,39,37
+baltic_dry,trading_economics,monthly,Index Points,Baltic Dry,502,1985-01-01,2026-10-01,49,2,2
+barley,trading_economics,monthly,INR/T,Barley,239,2006-12-01,2026-10-01,49,2,2
+beef,trading_economics,monthly,BRL/15KG,Beef,310,2001-01-01,2026-10-01,49,2,2
+bitumen,trading_economics,monthly,CNY/T,Bitumen,130,2016-01-01,2026-10-01,49,2,2
+brent,trading_economics,monthly,USD/Bbl,Brent,638,1970-05-01,2026-10-01,49,2,2
+butter,trading_economics,monthly,EUR/T,Butter,138,2015-05-01,2026-10-01,49,2,1
+canola,trading_economics,monthly,CAD/T,Canola,562,1980-01-01,2026-10-01,49,2,2
+carbon,trading_economics,monthly,EUR,EU Carbon Permits,259,2005-04-01,2026-10-01,49,2,2
+cheese,trading_economics,monthly,USD/Lbs,Cheese,197,2010-06-01,2026-10-01,49,2,2
+coal,trading_economics,monthly,USD/T,Coal,215,2008-12-01,2026-10-01,49,2,2
+cobalt,trading_economics,monthly,USD/T,Cobalt,201,2010-02-01,2026-10-01,49,2,2
+cobalt_hydroxide,trading_economics,monthly,USD/MT,Cobalt Hydroxide,495,2024-11-20,2026-10-21,29,44,33
+cocoa,trading_economics,monthly,USD/T,Cocoa,808,1959-07-01,2026-10-01,49,2,2
+coffee,trading_economics,monthly,USd/Lbs,Coffee,651,1972-08-01,2026-10-01,49,2,2
+coking_coal,trading_economics,monthly,USD/T,Coking Coal,361,2019-11-25,2026-10-19,31,9,8
+consume_commodity_index,trading_economics,monthly,Index Points,SSE Commodity Index,262,2005-01-01,2026-10-01,49,2,2
+containerized_freight_index,trading_economics,monthly,Points,Containerized Freight Index,158,2013-09-01,2026-10-01,49,2,2
+copper,trading_economics,monthly,USD/Lbs,Copper,459,1988-08-01,2026-10-01,49,2,2
+corn,trading_economics,monthly,USd/BU,Corn,1182,1912-05-01,2026-10-01,49,2,2
+cotton,trading_economics,monthly,USd/Lbs,Cotton,939,1913-09-01,2026-10-01,49,2,2
+crb,trading_economics,monthly,Index Points,CRB Index,394,1994-01-01,2026-10-01,49,2,2
+crude_oil,trading_economics,monthly,USD/Bbl,Crude Oil,524,1983-03-01,2026-10-01,49,2,2
+di_ammonium,trading_economics,monthly,USD/T,Di-ammonium,379,2019-07-08,2026-10-19,31,9,4
+eggs_ch,trading_economics,monthly,CNY/T,Eggs CH,156,2013-11-01,2026-10-01,49,2,2
+eggs_us,trading_economics,monthly,USD/Dozen,Eggs US,174,2012-05-01,2026-10-01,49,2,2
+ethanol,trading_economics,monthly,USD/Gal,Ethanol,259,2005-04-01,2026-10-01,49,2,2
+eu_natural_gas,trading_economics,monthly,EUR/MWh,EU Gas,200,2010-03-01,2026-10-01,49,2,2
+feeder_cattle,trading_economics,monthly,USd/Lbs,Feeder Cattle,580,1978-07-01,2026-10-01,49,2,2
+gallium,trading_economics,monthly,CNY/Kg,Gallium,421,2018-09-24,2026-10-19,31,9,5
+gasoline,trading_economics,monthly,USD/Gal,Gasoline,253,2005-10-01,2026-10-01,49,2,2
+germanium,trading_economics,monthly,CNY/Kg,Germanium,450,2018-03-05,2026-10-19,31,9,6
+germany_natural_gas_the,trading_economics,monthly,EUR/MWh,German Gas,598,2024-06-26,2026-10-21,29,43,43
+gold,trading_economics,monthly,USD/t.oz,Gold,706,1968-01-01,2026-10-01,49,2,2
+gsci,trading_economics,monthly,Index Points,Commodity Index,682,1970-01-01,2026-10-01,49,2,2
+heating_oil,trading_economics,monthly,USD/Gal,Heating Oil,562,1980-01-01,2026-10-01,49,2,2
+hrc_steel,trading_economics,monthly,USD/T,HRC Steel,217,2008-10-01,2026-10-01,49,2,2
+indium,trading_economics,monthly,CNY/Kg,Indium,464,2017-11-27,2026-10-19,31,9,7
+iron_ore,trading_economics,monthly,USD/T,Iron Ore,193,2010-10-01,2026-10-01,49,2,2
+iron_ore_cny,trading_economics,monthly,CNY/T,Iron Ore CNY,157,2013-10-01,2026-10-01,49,2,2
+kraft_pulp,trading_economics,monthly,CNY/T,Kraft Pulp,405,2018-11-26,2026-10-19,31,9,9
+lead,trading_economics,monthly,USD/T,Lead,400,1993-07-01,2026-10-01,49,2,2
+lean_hogs,trading_economics,monthly,USd/Lbs,Lean Hogs,591,1977-08-01,2026-10-01,49,2,2
+liquefied_natural_gas_japan_korea,trading_economics,monthly,USD/MMBTU,LNG JKM,153,2012-09-01,2026-10-01,49,2,2
+lithium,trading_economics,monthly,CNY/T,Lithium,482,2017-05-08,2026-10-19,31,9,9
+live_cattle,trading_economics,monthly,USd/Lbs,Live Cattle,562,1980-01-01,2026-10-01,49,2,2
+lumber,trading_economics,monthly,USD/1000 board feet,Lumber,580,1978-07-01,2026-10-01,49,2,2
+magnesium,trading_economics,monthly,CNY/T,Magnesium,173,2012-06-01,2026-10-01,49,2,2
+manganese,trading_economics,monthly,CNY/mtu,Manganese,169,2012-10-01,2026-10-01,49,2,1
+methanol,trading_economics,monthly,CNY/T,Methanol,149,2014-06-01,2026-10-01,49,2,2
+milk,trading_economics,monthly,USD/CWT,Milk,333,1998-02-01,2026-10-01,49,2,2
+molybden,trading_economics,monthly,CNY/Kg,Molybdenum,254,2005-09-01,2026-10-01,49,2,2
+naphtha,trading_economics,monthly,USD/T,Naphtha,253,2005-10-01,2026-10-01,49,2,2
+natural_gas,trading_economics,monthly,USD/MMBtu,Natural gas,439,1990-04-01,2026-10-01,49,2,2
+neodymium,trading_economics,monthly,CNY/T,Neodymium,173,2012-06-01,2026-10-01,49,2,2
+nickel,trading_economics,monthly,USD/T,Nickel,400,1993-07-01,2026-10-01,49,2,2
+nuclear,trading_economics,monthly,USD,Nuclear Energy Index,192,2010-11-01,2026-10-01,49,2,2
+oat,trading_economics,monthly,USd/Bu,Oat,574,1979-01-01,2026-10-01,49,2,2
+orange_juice,trading_economics,monthly,USd/Lbs,Orange Juice,593,1977-06-01,2026-10-01,49,2,2
+palladium,trading_economics,monthly,USD/t.oz,Palladium,508,1984-07-01,2026-10-01,49,2,2
+palm_oil,trading_economics,monthly,MYR/T,Palm Oil,552,1980-10-01,2026-10-01,49,2,2
+phosphate_rock_cny,trading_economics,monthly,CNY/T,Phosphate rock (China),1008,2022-08-19,2026-10-22,28,39,4
+platinum,trading_economics,monthly,USD/t.oz,Platinum,704,1968-03-01,2026-10-01,49,2,2
+polyethylene,trading_economics,monthly,CNY/T,Polyethylene,231,2007-08-01,2026-10-01,49,2,2
+polypropylene,trading_economics,monthly,CNY/T,Polypropylene,153,2014-02-01,2026-10-01,49,2,2
+polyvinyl,trading_economics,monthly,CNY/T,Polyvinyl,210,2009-05-01,2026-10-01,49,2,2
+poultry,trading_economics,monthly,BRL/Kgs,Poultry,206,2009-09-01,2026-10-01,49,2,2
+propane,trading_economics,monthly,USD/Gal,Propane,205,2009-10-01,2026-10-01,49,2,2
+rapeseed_oil,trading_economics,monthly,EUR/T,Rapeseed,384,1994-11-01,2026-10-01,49,2,2
+rhodium,trading_economics,monthly,USD/t oz.,Rhodium,169,2012-10-01,2026-10-01,49,2,1
+rice,trading_economics,monthly,USD/cwt,Rice,547,1981-04-01,2026-10-01,49,2,2
+rubber,trading_economics,monthly,USD Cents / Kg,Rubber,352,1997-07-01,2026-10-01,49,2,2
+salmon,trading_economics,monthly,NOK/KG,Salmon,322,2000-01-01,2026-10-01,49,2,2
+scrap_aluminum,trading_economics,monthly,USD/T,Scrap Aluminum,274,2021-07-26,2026-10-19,31,9,9
+scrap_steel,trading_economics,monthly,USD/T,Scrap Steel,425,2025-02-17,2026-10-21,29,43,26
+silicon,trading_economics,monthly,CNY/T,Silicon,505,2024-09-18,2026-10-22,28,39,35
+silver,trading_economics,monthly,USD/t.oz,Silver,622,1975-01-01,2026-10-01,49,2,2
+soda_ash,trading_economics,monthly,CNY/T,Soda Ash,128,2016-01-01,2026-10-01,49,2,2
+solar,trading_economics,monthly,USD,Solar Energy Index,223,2008-04-01,2026-10-01,49,2,2
+soybeans,trading_economics,monthly,USd/Bu,Soybeans,590,1977-09-01,2026-10-01,49,2,2
+steel,trading_economics,monthly,CNY/T,Steel,212,2009-03-01,2026-10-01,49,2,2
+styrene,trading_economics,monthly,CNY/MT,Styrene,460,2018-01-01,2026-10-19,31,9,8
+sugar,trading_economics,monthly,USd/Lbs,Sugar,1206,1912-05-01,2026-10-01,49,2,2
+sulfur,trading_economics,monthly,CNY/T,Sulfur,356,2019-12-30,2026-10-19,31,9,9
+sunflower_oil,trading_economics,monthly,INR/10 kg,Sunflower Oil,174,2012-05-01,2026-10-01,49,2,2
+synthetic_rubber,trading_economics,monthly,CNY/T,Synthetic Rubber,356,2019-12-30,2026-10-19,31,9,9
+te_crack_spread_index,trading_economics,monthly,Index Points,TE Crack Spread Index,253,2005-10-01,2026-10-01,49,2,2
+te_grains_index,trading_economics,monthly,Index Points,TE Grains Index,547,1981-04-01,2026-10-01,49,2,2
+te_metals_index,trading_economics,monthly,Index Points,TE Metals Index,400,1993-07-01,2026-10-01,49,2,2
+te_soft_index,trading_economics,monthly,Index Points,TE Soft Index,593,1977-06-01,2026-10-01,49,2,2
+tea,trading_economics,monthly,INR/Kgs,Tea,226,2008-01-01,2026-10-01,49,2,2
+tellurium,trading_economics,monthly,CNY/Kg,Tellurium,464,2017-11-27,2026-10-19,31,9,2
+tin,trading_economics,monthly,USD/T,Tin,802,1960-01-01,2026-10-01,49,2,2
+titanium,trading_economics,monthly,CNY/KG,Titanium,489,2017-06-05,2026-10-19,31,9,2
+uk_natural_gas,trading_economics,monthly,GBp/thm,UK Gas,358,1997-01-01,2026-10-01,49,2,2
+urals_oil,trading_economics,monthly,USD/Bbl,Urals Oil,173,2012-06-01,2026-10-01,49,2,2
+uranium,trading_economics,monthly,USD/Lbs,Uranium,462,1988-01-01,2026-10-01,49,2,2
+urea,trading_economics,monthly,USD/T,Urea,368,2019-06-24,2026-10-19,31,9,9
+wheat,trading_economics,monthly,USd/Bu,Wheat,590,1977-09-01,2026-10-01,49,2,2
+wind,trading_economics,monthly,USD,Wind Energy Index,221,2008-06-01,2026-10-01,49,2,2
+wool,trading_economics,monthly,AUD/100Kg,Wool,496,1985-07-01,2026-10-01,49,2,2
+zinc,trading_economics,monthly,USD/T,Zinc,802,1960-01-01,2026-10-01,49,2,2
+brent,worldbank_cmo,monthly,$/bbl,,801,1960-01-01,2026-09-01,79,1,1
+coffee,worldbank_cmo,monthly,$/kg,,801,1960-01-01,2026-09-01,79,1,1
+coffee_arabica,worldbank_cmo,monthly,$/kg,,802,1960-01-01,2026-10-01,49,2,2
+copper,worldbank_cmo,monthly,$/mt,,801,1960-01-01,2026-09-01,79,1,1
+corn,worldbank_cmo,monthly,$/mt,,801,1960-01-01,2026-09-01,79,1,1
+cotton,worldbank_cmo,monthly,$/kg,,801,1960-01-01,2026-09-01,79,1,1
+crude_oil,worldbank_cmo,monthly,$/bbl,,537,1982-01-01,2026-09-01,79,1,1
+dap,worldbank_cmo,monthly,$/mt,,718,1967-01-01,2026-10-01,49,2,2
+eu_natural_gas,worldbank_cmo,monthly,$/mmbtu,,801,1960-01-01,2026-09-01,79,1,1
+gold,worldbank_cmo,monthly,$/troy oz,,801,1960-01-01,2026-09-01,79,1,1
+iron_ore,worldbank_cmo,monthly,$/dmtu,,801,1960-01-01,2026-09-01,79,1,1
+lng_japan,worldbank_cmo,monthly,$/mmbtu,,598,1977-01-01,2026-10-01,49,2,2
+natural_gas,worldbank_cmo,monthly,$/mmbtu,,801,1960-01-01,2026-09-01,79,1,1
+phosphate_rock,worldbank_cmo,monthly,$/mt,,802,1960-01-01,2026-10-01,49,2,1
+potassium_chloride,worldbank_cmo,monthly,$/mt,,802,1960-01-01,2026-10-01,49,2,2
+rice,worldbank_cmo,monthly,$/mt,,263,2003-12-01,2026-09-01,79,1,1
+rubber,worldbank_cmo,monthly,$/kg,,801,1960-01-01,2026-09-01,79,1,1
+soybean_meal,worldbank_cmo,monthly,$/mt,,802,1960-01-01,2026-10-01,49,2,2
+soybeans,worldbank_cmo,monthly,$/mt,,801,1960-01-01,2026-09-01,79,1,1
+sugar,worldbank_cmo,monthly,$/kg,,801,1960-01-01,2026-09-01,79,1,1
+tsp,worldbank_cmo,monthly,$/mt,,802,1960-01-01,2026-10-01,49,2,2
+urea,worldbank_cmo,monthly,$/mt,,801,1960-01-01,2026-09-01,79,1,1

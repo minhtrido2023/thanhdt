@@ -1,0 +1,3 @@
+SELECT t.time, t.ticker, t.Open, t.High, t.Low, t.Close, t.Price, t.D_RSI, t.Close_T1, u.in_universe
+FROM tav2_bq.ticker t LEFT JOIN `lithe-record-440915-m9.tav2_mike.universe_pit_q` u ON u.ticker=t.ticker AND u.time=t.time
+WHERE t.ticker IN ('ACB','BCM','BID','BSR','BVH','CTG','DGC','EIB','FPT','FRT','GAS','GEE','GEX','GMD','GVR','HDB','HPG','HVN','KBC','KDH','LPB','MBB','MCH','MSB','MSN','MWG','NVL','OCB','PLX','PNJ','POW','REE','SAB','SHB','SSB','SSI','STB','TCB','TCX','TPB','VCB','VCI','VCK','VGC','VHM','VIB','VIC','VIX','VJC','VND','VNM','VPB','VPL','VPX','VRE') AND t.time BETWEEN DATE '2023-05-01' AND DATE '2026-11-06'

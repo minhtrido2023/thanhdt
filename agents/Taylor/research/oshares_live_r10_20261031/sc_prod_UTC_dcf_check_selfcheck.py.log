@@ -2,7 +2,7 @@
 DCF_OSHARES_SOURCE=live FPT asof=2026-06-30: KHONG khoa duoc khung ex-date gia<->so CP (caller khong khai price_date -> khong biet gia o he quy chieu ex-date nao) -> FALLBACK so quy (fin) [canh bao nay in 1 lan/tien trinh]
 log_dcf_history lỗi cho FPT: [Errno 2] No such file or directory: '/proc/definitely-not-writable'
 ----------------------------------------------------------------------
-Ran 21 tests in 0.600s
+Ran 21 tests in 0.589s
 
 OK
 === dcf_check_selfcheck.py ===

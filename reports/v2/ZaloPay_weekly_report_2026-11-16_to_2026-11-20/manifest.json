@@ -1,0 +1,147 @@
+{
+ "version": 1,
+ "stem": "ZaloPay_weekly_report_2026-11-16_to_2026-11-20",
+ "cadence": "weekly",
+ "account": "ZaloPay",
+ "pdf": "ZaloPay_weekly_report_2026-11-16_to_2026-11-20.pdf",
+ "pdf_sha256": "04fca592d4e6a9e1538ab612834d775a4a55ebbdc12ccfaaa8cedf67933b292f",
+ "html": "ZaloPay_weekly_report_2026-11-16_to_2026-11-20_email.html",
+ "html_sha256": "a16a1fe1ee0caaa4924f0ef20a88ec079ed6426841485266c7c5e6c30f539d46",
+ "cid": {
+  "banner": {
+   "file": "00_banner.png",
+   "sha256": "13609b57ef585747099222056111338de5d99c473f257caba85faac2ae88564a"
+  },
+  "fig1": {
+   "file": "01_nav_vs_vni.png",
+   "sha256": "3b73943c81b29dc4b73447a415e1c10c7b90d04ae3e392de654bc56cf96e4c31"
+  },
+  "fig5": {
+   "file": "02_bridge.png",
+   "sha256": "fd2f433cb90c4a36b21f9fda9bda1ef8f9c6acca9c59f66f1404ce64a76d1e25"
+  },
+  "fig17": {
+   "file": "03_attribution.png",
+   "sha256": "8723171b078f0b1dc246341133a4656172d94002217c755b57f725f7b7bb9752"
+  },
+  "fig25": {
+   "file": "04_allocation.png",
+   "sha256": "5b1949fc7159491324780b293014ea297bf1311589672483c37d005751b061d7"
+  }
+ },
+ "pages": 4,
+ "page_cap": 5,
+ "lint": {
+  "pages": 4,
+  "words_total": 1417,
+  "raw_markdown_hits": [],
+  "fonts": [
+   "Be Vietnam Pro Bold",
+   "Be Vietnam Pro Regular"
+  ],
+  "non_bvp_fonts": []
+ },
+ "recon": [
+  [
+   "Cầu NAV: đầu kỳ + lãi/lỗ + nạp/rút so với NAV cuối kỳ",
+   904952158.0,
+   904952158.0,
+   0.0
+  ],
+  [
+   "Giá trị cổ phiếu đầu kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   463035750.00000006,
+   463035750.0,
+   5.960464477539063e-08
+  ],
+  [
+   "Giá trị cổ phiếu cuối kỳ theo giá đóng cửa sàn so với định giá CTCK (tham khảo)",
+   441642650.0,
+   441642650.0,
+   0.0
+  ]
+ ],
+ "positions": [
+  [
+   "VGS",
+   1500.0,
+   "−4,00%"
+  ],
+  [
+   "MCH",
+   200.0,
+   "−3,15%"
+  ],
+  [
+   "FPT",
+   500.0,
+   "−12,04%"
+  ],
+  [
+   "HT1",
+   1600.0,
+   "−9,79%"
+  ],
+  [
+   "VPB",
+   930.0,
+   "−10,54%"
+  ],
+  [
+   "NNC",
+   300.0,
+   "+1,06%"
+  ],
+  [
+   "MBB",
+   52.0,
+   "−11,02%"
+  ],
+  [
+   "VIB",
+   19.0,
+   "−1,89%"
+  ]
+ ],
+ "period": "2026-11-16_to_2026-11-20",
+ "report_date": "2026-11-20",
+ "nav_date": "2026-11-20",
+ "market_block": {
+  "md": "/home/trido/thanhdt/WorkingClaude/mike/data/livermore/report_block_2026-11-20_weekly.md",
+  "block_sha256": "e08839c88e8007a157466ebf799a98daf67f1cc60139473a62afaf6b8f498962"
+ },
+ "market_facts_error": null,
+ "regime_error": null,
+ "attribution_error": null,
+ "numbers": {
+  "wtd_pct": -2.23,
+  "mtd_pct": -3.189,
+  "inception_pct": -9.666,
+  "nav1": 904952158.0,
+  "pnl_vnd": -20655300.0,
+  "flow_vnd": -5000000.0
+ },
+ "daily_rows": [
+  [
+   "16/11",
+   "−0,01%"
+  ],
+  [
+   "17/11",
+   "−0,36%"
+  ],
+  [
+   "18/11",
+   "−0,85%"
+  ],
+  [
+   "19/11",
+   "−0,63%"
+  ],
+  [
+   "20/11",
+   "−0,40%"
+  ]
+ ],
+ "narrative": true
+}

@@ -1,0 +1,21 @@
+ĐỎ (tốt) rc=1 M1 bỏ token osh: AssertionError: g8a NEWO osh từ D4: [('NEWR', 'row', '2000-01-01')]
+ĐỎ (tốt) rc=1 M2 bỏ token row: AssertionError: g8b NEWR row D1: []
+ĐỎ (tốt) rc=1 M3 cổng bỏ qua g8_new: AssertionError: g8a lỗi G8 trích tên mã + nguyên nhân + giá trị đọc: []
+ĐỎ (tốt) rc=1 M4 bỏ ngưỡng N phiên (osh): AssertionError: g8a NEWO chưa đủ phiên D3
+ĐỎ (tốt) rc=1 M5 bỏ first_seen (row dùng cửa sổ): AssertionError: g8c2 first_seen trước cửa sổ ⇒ NEWR không nổ
+ĐỎ (tốt) rc=1 M6 bỏ ack G8_NEW: AssertionError: g8e ack ⇒ hết nổ: ['G8: 2030-03-11 NEWO trong bảng sàn HOSE (vintage 2030-03-04) KHÔNG vào rổ — có giá 6 phiên trong cửa sổ dựng nhưng OShares r
+ĐỎ (tốt) rc=1 M7 bỏ cảnh báo sealed drift: AssertionError: drift cảnh báo trích giá trị: []
+ĐỎ (tốt) rc=1 MB f<=t -> f<t (dòng đầu đúng ngày t): vnindex_total_return.RestateRefused: sau đính chính dòng vẫn nổ cổng (ack trước, hoặc chờ BQ lấp): {'2030-03-12': ['G8: 2030-03-12 FFF trong bảng sàn HOSE (vint
+ĐỎ (tốt) rc=1 MD ~S1_ff -> ~S1 (thiếu OShares 1 ngày): AssertionError: wi back=3: LOSTO ⇒ token osh G8_NEW: 'LOSTO:osh:11;RECENT:osh:11'
+ĐỎ (tốt) rc=1 M8 G8_NEW không vào seal_blockers: AssertionError: gs dòng còn G8_NEW chưa ack KHÔNG được seal: [datetime.date(2030, 3, 5), datetime.date(2030, 3, 6), datetime.date(2030, 3, 7), datetime.date(203
+ĐỎ (tốt) rc=1 M9 bỏ lookback panel: AssertionError: wi back=3: LOSTO ⇒ token osh G8_NEW: ''
+ĐỎ (tốt) rc=1 M10 fetch_bq không dùng bq_panel_start: AssertionError: rw fetch_bq kéo panel từ bq_panel_start: ['SELECT CAST(t.time AS STRING) time, t.ticker, t.Price, t.Close, t.OShares FROM `lithe-record-440915-m
+ĐỎ (tốt) rc=1 M11 ack khoảng ngày bỏ cận date_to: AssertionError: rg SAU date_to ⇒ hết hạn, cổng nổ lại
+ĐỎ (tốt) rc=1 M12 ack khoảng ngày bỏ decided_by: AssertionError: rg ack hỏng phải ValueError: {'ticker': 'NEWO', 'cause': 'osh', 'date_from': '2030-03-06', 'date_to': '2030-03-15', 'confirmed_by': 'user selfch
+ĐỎ (tốt) rc=1 M13 drift n tol thành mc-only: AssertionError: drift cảnh báo trích giá trị: ['2030-03-14: mc_members_vnd 99600000000 → 94600000000 (-5.020%)']
+ĐỎ (tốt) rc=1 M15 ffill OShares không giới hạn K (từ đầu panel): AssertionError: wi back=14: LOSTO ⇒ token osh G8_NEW: ''
+ĐỎ (tốt) rc=1 M16 npx cộng dồn từ đầu panel (không cửa sổ K): AssertionError: wi back=3: LOSTO ⇒ token osh G8_NEW: 'LOSTO:osh:24'
+ĐỎ (tốt) rc=1 M17 vị trí phiên từ idx cắt ở mốc dựng: AssertionError: rw restate bảo toàn token G8_NEW: {'2030-03-12': '2030-03-12,1000,1000,0.00191204588910134,5,104600000000,200000000,1023.95330133752,1022.747430
+ĐỎ (tốt) rc=1 M18 thông báo restate không phân biệt ngữ cảnh: AssertionError: gs lỗi khi ĐANG restate không khuyên chạy lại restate: ['G8: 2030-03-05 NEWR trong bảng sàn HOSE (vintage 2030-03-04) KHÔNG vào rổ — niêm yết HO
+ĐỎ (tốt) rc=1 M14 g8_new_open không xuất: AssertionError: gs g8_new_open nêu mã + nguyên nhân + số phiên: None
+mutant sống sót: 0

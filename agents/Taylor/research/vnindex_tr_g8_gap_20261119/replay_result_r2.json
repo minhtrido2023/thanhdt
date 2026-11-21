@@ -1,0 +1,275 @@
+{
+ "anchor": "2026-11-04",
+ "rebuilt": 10,
+ "seal_blocked": [],
+ "sealed_drift_warnings": [],
+ "g8_new_by_date": {
+  "2026-11-12": [
+   "CRV:row:2025-10-10",
+   "DMX:osh:68",
+   "DSH:row:2026-10-26",
+   "DVV:row:2026-11-02",
+   "GEL:row:2026-02-06",
+   "HPA:row:2026-02-06"
+  ],
+  "2026-11-13": [
+   "CRV:row:2025-10-10",
+   "DMX:osh:69",
+   "DSH:row:2026-10-26",
+   "DVV:row:2026-11-02",
+   "GEL:row:2026-02-06",
+   "HPA:row:2026-02-06"
+  ],
+  "2026-11-16": [
+   "CRV:row:2025-10-10",
+   "DMX:osh:70",
+   "DSH:row:2026-10-26",
+   "DVV:row:2026-11-02",
+   "GEL:row:2026-02-06",
+   "HPA:row:2026-02-06"
+  ],
+  "2026-11-17": [
+   "CRV:row:2025-10-10",
+   "DMX:osh:71",
+   "DSH:row:2026-10-26",
+   "DVV:row:2026-11-02",
+   "GEL:row:2026-02-06",
+   "HPA:row:2026-02-06"
+  ],
+  "2026-11-18": [
+   "CRV:row:2025-10-10",
+   "DMX:osh:72",
+   "DSH:row:2026-10-26",
+   "DVV:row:2026-11-02",
+   "GEL:row:2026-02-06",
+   "HPA:row:2026-02-06"
+  ]
+ },
+ "2026-11-06->2026-11-18": {
+  "old_errs": [
+   "G5: 2026-11-11 60 phiên rổ +1.55% vs VN-Index +1.03% (lệch +0.52 điểm %, > 0.5)"
+  ],
+  "new_errs": [
+   "G5: 2026-11-11 60 phiên rổ +1.55% vs VN-Index +1.03% (lệch +0.52 điểm %, > 0.5)",
+   "G8: 2026-11-12 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 68 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 69 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 70 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 71 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 72 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW"
+  ],
+  "G5_old": [
+   "G5: 2026-11-11 60 phiên rổ +1.55% vs VN-Index +1.03% (lệch +0.52 điểm %, > 0.5)"
+  ],
+  "G5_new": [
+   "G5: 2026-11-11 60 phiên rổ +1.55% vs VN-Index +1.03% (lệch +0.52 điểm %, > 0.5)"
+  ],
+  "G8_new_only": [
+   "G8: 2026-11-12 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 68 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-12 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 69 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 70 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 71 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 72 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW"
+  ],
+  "bench_old": {
+   "status": "unavailable",
+   "vnindex_price_pct": -1.295,
+   "vnindex_tr_net_pct": null
+  },
+  "bench_new": {
+   "status": "unavailable",
+   "vnindex_price_pct": -1.295,
+   "vnindex_tr_net_pct": null
+  }
+ },
+ "2026-11-12->2026-11-18": {
+  "old_errs": [],
+  "new_errs": [
+   "G8: 2026-11-13 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 69 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 70 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 71 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 72 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW"
+  ],
+  "G5_old": [],
+  "G5_new": [],
+  "G8_new_only": [
+   "G8: 2026-11-13 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 69 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-13 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 70 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-16 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 71 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-17 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 CRV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2025-10-10 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=CRV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DMX trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — có giá 72 phiên trong cửa sổ dựng nhưng OShares rỗng mọi phiên tới t-1 — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DMX, cause=osh) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DSH trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-10-26 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DSH, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 DVV trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-11-02 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=DVV, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 GEL trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=GEL, cause=row) ở vnindex_tr_acks.json mục G8_NEW",
+   "G8: 2026-11-18 HPA trong bảng sàn HOSE (vintage 2026-11-14) KHÔNG vào rổ — niêm yết HOSE từ 2026-02-06 nhưng `ticker` không có dòng nào tới phiên này — chờ BQ lấp (dòng còn provisional, lần --update sau tự xoá token) hoặc người xác nhận (ticker=HPA, cause=row) ở vnindex_tr_acks.json mục G8_NEW"
+  ],
+  "bench_old": {
+   "status": "ok",
+   "vnindex_price_pct": -1.83,
+   "vnindex_tr_net_pct": -1.82
+  },
+  "bench_new": {
+   "status": "unavailable",
+   "vnindex_price_pct": -1.83,
+   "vnindex_tr_net_pct": null
+  }
+ },
+ "with_proposed_acks_tmpfile": {
+  "2026-11-06->2026-11-18": {
+   "G8_errs_with_ack": [],
+   "all_gates_with_ack": [
+    "G5"
+   ],
+   "bench": {
+    "status": "unavailable",
+    "vnindex_price_pct": -1.295,
+    "vnindex_tr_net_pct": null
+   }
+  },
+  "2026-11-12->2026-11-18": {
+   "G8_errs_with_ack": [],
+   "all_gates_with_ack": [],
+   "bench": {
+    "status": "ok",
+    "vnindex_price_pct": -1.83,
+    "vnindex_tr_net_pct": -1.82
+   }
+  }
+ },
+ "g8_new_open_no_ack": [
+  {
+   "ticker": "CRV",
+   "cause": "row",
+   "sessions": 5,
+   "first": "2026-11-12",
+   "last": "2026-11-18",
+   "last_value": "2025-10-10"
+  },
+  {
+   "ticker": "DMX",
+   "cause": "osh",
+   "sessions": 5,
+   "first": "2026-11-12",
+   "last": "2026-11-18",
+   "last_value": "72"
+  },
+  {
+   "ticker": "DSH",
+   "cause": "row",
+   "sessions": 5,
+   "first": "2026-11-12",
+   "last": "2026-11-18",
+   "last_value": "2026-10-26"
+  },
+  {
+   "ticker": "DVV",
+   "cause": "row",
+   "sessions": 5,
+   "first": "2026-11-12",
+   "last": "2026-11-18",
+   "last_value": "2026-11-02"
+  },
+  {
+   "ticker": "GEL",
+   "cause": "row",
+   "sessions": 5,
+   "first": "2026-11-12",
+   "last": "2026-11-18",
+   "last_value": "2026-02-06"
+  },
+  {
+   "ticker": "HPA",
+   "cause": "row",
+   "sessions": 5,
+   "first": "2026-11-12",
+   "last": "2026-11-18",
+   "last_value": "2026-02-06"
+  }
+ ],
+ "g8_new_open_with_ack": [],
+ "canonical_md5_unchanged": "fe3fe42fe86fa1c3b1d0095d6f1bd0b3"
+}

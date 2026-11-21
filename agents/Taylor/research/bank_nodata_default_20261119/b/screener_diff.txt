@@ -1,0 +1,7 @@
+value_yield_pct differ by route: {'BANK': 14, 'POWER': 1, 'INSURANCE': 1}
+   ticker    route_o  value_yield_pct_o  value_yield_pct_n
+30    NT2      POWER               0.91            0.90625
+76    BVH  INSURANCE               0.20            0.18750
+value_pct |delta| max 0.063 median 0.010
+zone changes: [{'ticker': 'HAH', 'zone_o': '1_BUY-NOW', 'zone_n': '2_ACCUMULATE', 'value_pct_o': 0.701, 'value_pct_n': 0.683}]
+KLB live old: [{'rating': 4, 'note': 'bank-nodata'}]

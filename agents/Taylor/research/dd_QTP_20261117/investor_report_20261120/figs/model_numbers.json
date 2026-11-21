@@ -1,0 +1,1066 @@
+{
+ "center_pre": 8556.50372504114,
+ "center_post": 7700.853352537027,
+ "rate": {
+  "-100": 9030.585491037182,
+  "-50": 8787.172419225657,
+  "0": 8556.50372504114,
+  "50": 8337.59775879394,
+  "100": 8129.592054730486
+ },
+ "P_pure_pre": {
+  "P0": 4236.322879988985,
+  "P50": 9575.96876511048,
+  "P100": 14227.607573357396
+ },
+ "grid_pre": {
+  "bad": {
+   "P0": 1281.1976715648761,
+   "P50": 6247.150779485961,
+   "P100": 10618.27271294494
+  },
+  "base": {
+   "P0": 4721.748340166874,
+   "P50": 10268.88384739797,
+   "P100": 15014.146100894926
+  },
+  "good": {
+   "P0": 8468.870409892974,
+   "P50": 13394.06569430307,
+   "P100": 18138.444295394595
+  }
+ },
+ "W_R2": {
+  "bad": 0.25,
+  "base": 0.65,
+  "good": 0.1
+ },
+ "wgrid_post": {
+  "0": 10292.96185956832,
+  "0.1": 9644.9347328105,
+  "0.2": 8996.907606052677,
+  "0.3": 8348.880479294852,
+  "0.4": 7700.853352537027,
+  "0.5": 7052.826225779204,
+  "0.6": 6404.79909902138
+ },
+ "cf": {
+  "P0": [
+   {
+    "y": 2027,
+    "dps": 0,
+    "fcfe_base": 907,
+    "dfcfe": -247,
+    "total": 660,
+    "cash": 2202
+   },
+   {
+    "y": 2028,
+    "dps": 0,
+    "fcfe_base": 907,
+    "dfcfe": -445,
+    "total": 462,
+    "cash": 2663
+   },
+   {
+    "y": 2029,
+    "dps": 0,
+    "fcfe_base": 844,
+    "dfcfe": -394,
+    "total": 450,
+    "cash": 3114
+   },
+   {
+    "y": 2030,
+    "dps": 0,
+    "fcfe_base": 844,
+    "dfcfe": -963,
+    "total": -119,
+    "cash": 2994
+   },
+   {
+    "y": 2031,
+    "dps": 0,
+    "fcfe_base": 641,
+    "dfcfe": -938,
+    "total": -298,
+    "cash": 2697
+   },
+   {
+    "y": 2032,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -913,
+    "total": -424,
+    "cash": 2272
+   },
+   {
+    "y": 2033,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -888,
+    "total": -399,
+    "cash": 1873
+   },
+   {
+    "y": 2034,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -863,
+    "total": -374,
+    "cash": 1498
+   },
+   {
+    "y": 2035,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -838,
+    "total": -349,
+    "cash": 1149
+   },
+   {
+    "y": 2036,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -813,
+    "total": -324,
+    "cash": 825
+   },
+   {
+    "y": 2037,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -788,
+    "total": -299,
+    "cash": 526
+   },
+   {
+    "y": 2038,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -763,
+    "total": -274,
+    "cash": 252
+   },
+   {
+    "y": 2039,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -738,
+    "total": -249,
+    "cash": 3
+   },
+   {
+    "y": 2040,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 46
+   },
+   {
+    "y": 2041,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 88
+   },
+   {
+    "y": 2042,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 131
+   },
+   {
+    "y": 2043,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 173
+   },
+   {
+    "y": 2044,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 216
+   },
+   {
+    "y": 2045,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 258
+   },
+   {
+    "y": 2046,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 301
+   },
+   {
+    "y": 2047,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": 343
+   },
+   {
+    "y": 2027,
+    "dps": 900,
+    "fcfe_base": 907,
+    "dfcfe": -247,
+    "total": 660,
+    "cash": 1797
+   },
+   {
+    "y": 2028,
+    "dps": 900,
+    "fcfe_base": 907,
+    "dfcfe": -445,
+    "total": 462,
+    "cash": 1853
+   },
+   {
+    "y": 2029,
+    "dps": 900,
+    "fcfe_base": 844,
+    "dfcfe": -394,
+    "total": 450,
+    "cash": 1899
+   },
+   {
+    "y": 2030,
+    "dps": 900,
+    "fcfe_base": 844,
+    "dfcfe": -963,
+    "total": -119,
+    "cash": 1374
+   },
+   {
+    "y": 2031,
+    "dps": 900,
+    "fcfe_base": 641,
+    "dfcfe": -938,
+    "total": -298,
+    "cash": 672
+   },
+   {
+    "y": 2032,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -913,
+    "total": -424,
+    "cash": -158
+   },
+   {
+    "y": 2033,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -888,
+    "total": -399,
+    "cash": -962
+   },
+   {
+    "y": 2034,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -863,
+    "total": -374,
+    "cash": -1742
+   },
+   {
+    "y": 2035,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -838,
+    "total": -349,
+    "cash": -2496
+   },
+   {
+    "y": 2036,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -813,
+    "total": -324,
+    "cash": -3225
+   },
+   {
+    "y": 2037,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -788,
+    "total": -299,
+    "cash": -3929
+   },
+   {
+    "y": 2038,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -763,
+    "total": -274,
+    "cash": -4608
+   },
+   {
+    "y": 2039,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -738,
+    "total": -249,
+    "cash": -5262
+   },
+   {
+    "y": 2040,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -5624
+   },
+   {
+    "y": 2041,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -5987
+   },
+   {
+    "y": 2042,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -6349
+   },
+   {
+    "y": 2043,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -6712
+   },
+   {
+    "y": 2044,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -7074
+   },
+   {
+    "y": 2045,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -7437
+   },
+   {
+    "y": 2046,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -7799
+   },
+   {
+    "y": 2047,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -446,
+    "total": 42,
+    "cash": -8162
+   }
+  ],
+  "P50": [
+   {
+    "y": 2027,
+    "dps": 0,
+    "fcfe_base": 907,
+    "dfcfe": -247,
+    "total": 660,
+    "cash": 2202
+   },
+   {
+    "y": 2028,
+    "dps": 0,
+    "fcfe_base": 907,
+    "dfcfe": -445,
+    "total": 462,
+    "cash": 2663
+   },
+   {
+    "y": 2029,
+    "dps": 0,
+    "fcfe_base": 844,
+    "dfcfe": -394,
+    "total": 450,
+    "cash": 3114
+   },
+   {
+    "y": 2030,
+    "dps": 0,
+    "fcfe_base": 844,
+    "dfcfe": -413,
+    "total": 432,
+    "cash": 3545
+   },
+   {
+    "y": 2031,
+    "dps": 0,
+    "fcfe_base": 641,
+    "dfcfe": -388,
+    "total": 253,
+    "cash": 3798
+   },
+   {
+    "y": 2032,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -367,
+    "total": 122,
+    "cash": 3920
+   },
+   {
+    "y": 2033,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -349,
+    "total": 140,
+    "cash": 4060
+   },
+   {
+    "y": 2034,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -329,
+    "total": 160,
+    "cash": 4220
+   },
+   {
+    "y": 2035,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -309,
+    "total": 180,
+    "cash": 4400
+   },
+   {
+    "y": 2036,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -289,
+    "total": 200,
+    "cash": 4600
+   },
+   {
+    "y": 2037,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -269,
+    "total": 220,
+    "cash": 4820
+   },
+   {
+    "y": 2038,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -249,
+    "total": 240,
+    "cash": 5060
+   },
+   {
+    "y": 2039,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -229,
+    "total": 260,
+    "cash": 5320
+   },
+   {
+    "y": 2040,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 5792
+   },
+   {
+    "y": 2041,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 6264
+   },
+   {
+    "y": 2042,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 6735
+   },
+   {
+    "y": 2043,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 7207
+   },
+   {
+    "y": 2044,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 7679
+   },
+   {
+    "y": 2045,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 8150
+   },
+   {
+    "y": 2046,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 8622
+   },
+   {
+    "y": 2047,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 9094
+   },
+   {
+    "y": 2027,
+    "dps": 900,
+    "fcfe_base": 907,
+    "dfcfe": -247,
+    "total": 660,
+    "cash": 1797
+   },
+   {
+    "y": 2028,
+    "dps": 900,
+    "fcfe_base": 907,
+    "dfcfe": -445,
+    "total": 462,
+    "cash": 1853
+   },
+   {
+    "y": 2029,
+    "dps": 900,
+    "fcfe_base": 844,
+    "dfcfe": -394,
+    "total": 450,
+    "cash": 1899
+   },
+   {
+    "y": 2030,
+    "dps": 900,
+    "fcfe_base": 844,
+    "dfcfe": -413,
+    "total": 432,
+    "cash": 1925
+   },
+   {
+    "y": 2031,
+    "dps": 900,
+    "fcfe_base": 641,
+    "dfcfe": -388,
+    "total": 253,
+    "cash": 1773
+   },
+   {
+    "y": 2032,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -367,
+    "total": 122,
+    "cash": 1490
+   },
+   {
+    "y": 2033,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -349,
+    "total": 140,
+    "cash": 1225
+   },
+   {
+    "y": 2034,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -329,
+    "total": 160,
+    "cash": 980
+   },
+   {
+    "y": 2035,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -309,
+    "total": 180,
+    "cash": 755
+   },
+   {
+    "y": 2036,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -289,
+    "total": 200,
+    "cash": 550
+   },
+   {
+    "y": 2037,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -269,
+    "total": 220,
+    "cash": 365
+   },
+   {
+    "y": 2038,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -249,
+    "total": 240,
+    "cash": 200
+   },
+   {
+    "y": 2039,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -229,
+    "total": 260,
+    "cash": 55
+   },
+   {
+    "y": 2040,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 122
+   },
+   {
+    "y": 2041,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 189
+   },
+   {
+    "y": 2042,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 255
+   },
+   {
+    "y": 2043,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 322
+   },
+   {
+    "y": 2044,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 389
+   },
+   {
+    "y": 2045,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 455
+   },
+   {
+    "y": 2046,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 522
+   },
+   {
+    "y": 2047,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": -17,
+    "total": 472,
+    "cash": 589
+   }
+  ],
+  "P100": [
+   {
+    "y": 2027,
+    "dps": 0,
+    "fcfe_base": 907,
+    "dfcfe": -247,
+    "total": 660,
+    "cash": 2202
+   },
+   {
+    "y": 2028,
+    "dps": 0,
+    "fcfe_base": 907,
+    "dfcfe": -445,
+    "total": 462,
+    "cash": 2663
+   },
+   {
+    "y": 2029,
+    "dps": 0,
+    "fcfe_base": 844,
+    "dfcfe": -394,
+    "total": 450,
+    "cash": 3114
+   },
+   {
+    "y": 2030,
+    "dps": 0,
+    "fcfe_base": 844,
+    "dfcfe": 31,
+    "total": 876,
+    "cash": 3989
+   },
+   {
+    "y": 2031,
+    "dps": 0,
+    "fcfe_base": 641,
+    "dfcfe": 52,
+    "total": 692,
+    "cash": 4681
+   },
+   {
+    "y": 2032,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 72,
+    "total": 560,
+    "cash": 5242
+   },
+   {
+    "y": 2033,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 92,
+    "total": 581,
+    "cash": 5822
+   },
+   {
+    "y": 2034,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 112,
+    "total": 601,
+    "cash": 6423
+   },
+   {
+    "y": 2035,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 132,
+    "total": 621,
+    "cash": 7044
+   },
+   {
+    "y": 2036,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 152,
+    "total": 641,
+    "cash": 7684
+   },
+   {
+    "y": 2037,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 172,
+    "total": 661,
+    "cash": 8345
+   },
+   {
+    "y": 2038,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 192,
+    "total": 681,
+    "cash": 9026
+   },
+   {
+    "y": 2039,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 212,
+    "total": 701,
+    "cash": 9727
+   },
+   {
+    "y": 2040,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 10639
+   },
+   {
+    "y": 2041,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 11552
+   },
+   {
+    "y": 2042,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 12464
+   },
+   {
+    "y": 2043,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 13376
+   },
+   {
+    "y": 2044,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 14289
+   },
+   {
+    "y": 2045,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 15201
+   },
+   {
+    "y": 2046,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 16113
+   },
+   {
+    "y": 2047,
+    "dps": 0,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 17026
+   },
+   {
+    "y": 2027,
+    "dps": 900,
+    "fcfe_base": 907,
+    "dfcfe": -247,
+    "total": 660,
+    "cash": 1797
+   },
+   {
+    "y": 2028,
+    "dps": 900,
+    "fcfe_base": 907,
+    "dfcfe": -445,
+    "total": 462,
+    "cash": 1853
+   },
+   {
+    "y": 2029,
+    "dps": 900,
+    "fcfe_base": 844,
+    "dfcfe": -394,
+    "total": 450,
+    "cash": 1899
+   },
+   {
+    "y": 2030,
+    "dps": 900,
+    "fcfe_base": 844,
+    "dfcfe": 31,
+    "total": 876,
+    "cash": 2369
+   },
+   {
+    "y": 2031,
+    "dps": 900,
+    "fcfe_base": 641,
+    "dfcfe": 52,
+    "total": 692,
+    "cash": 2656
+   },
+   {
+    "y": 2032,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 72,
+    "total": 560,
+    "cash": 2812
+   },
+   {
+    "y": 2033,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 92,
+    "total": 581,
+    "cash": 2987
+   },
+   {
+    "y": 2034,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 112,
+    "total": 601,
+    "cash": 3183
+   },
+   {
+    "y": 2035,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 132,
+    "total": 621,
+    "cash": 3399
+   },
+   {
+    "y": 2036,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 152,
+    "total": 641,
+    "cash": 3634
+   },
+   {
+    "y": 2037,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 172,
+    "total": 661,
+    "cash": 3890
+   },
+   {
+    "y": 2038,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 192,
+    "total": 681,
+    "cash": 4166
+   },
+   {
+    "y": 2039,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 212,
+    "total": 701,
+    "cash": 4462
+   },
+   {
+    "y": 2040,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 4969
+   },
+   {
+    "y": 2041,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 5477
+   },
+   {
+    "y": 2042,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 5984
+   },
+   {
+    "y": 2043,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 6491
+   },
+   {
+    "y": 2044,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 6999
+   },
+   {
+    "y": 2045,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 7506
+   },
+   {
+    "y": 2046,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 8013
+   },
+   {
+    "y": 2047,
+    "dps": 900,
+    "fcfe_base": 489,
+    "dfcfe": 423,
+    "total": 912,
+    "cash": 8521
+   }
+  ]
+ },
+ "R0": 0.135,
+ "SH": 450.0,
+ "netcash": 1541.29
+}

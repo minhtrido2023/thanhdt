@@ -1,0 +1,12 @@
+# SELFCHECK — TTA investor report 20/11/2026
+- PDF: TTA_DD_investor_report_20261120.pdf, 7 trang (fitz), md5 43e813529cc1c51267f5f62879c95ed5. MD md5 3bbae7ad7efc049db018755684c85313.
+- HTML: send_dd_report_email.py --dry-run --html-out (KHÔNG gửi): to=<địa chỉ user trong secrets>, 11 ảnh, 12,5MB. <img> thiếu alt: 0.
+- Số từ thân (trừ bảng/hình/phụ lục): 734 (≤1.800 ✔).
+- grep tên nội bộ (SpaceX|ZaloPay|NAV|Taylor|Bobby|Mike|skeptic|Wendy|Spyros): rỗng ✔ (md + html bỏ base64).
+- grep nhãn (QUALIFY|AMBIGUOUS|\bNON\b|§2.5|fear|sợ hãi|kiểm định|xung đột lợi ích|đang nắm giữ): rỗng ✔; "NON" phân biệt hoa: 0.
+- grep luật 18 (đính chính|thay bản|trước đây|đã sửa|vòng [0-9]|\br[0-9]\b|sai sót): rỗng ✔.
+- Render trang 1, 3, 5 xem bằng mắt: dấu tiếng Việt đúng, bảng không tràn; banner logo website, hero ảnh website, khung 4 ảnh nhà máy, 2 bản đồ khu vực.
+- Số khớp model/out_r3.json (REPORT_r3.md): tâm 6.342 → 6.159 sau CK 2,89%; vùng 5.235–7.083; kịch bản sau CK A 12.285 / B 8.566 / C(=B′ nội bộ) 5.398 / D(=C nội bộ) 1.141.
+- Giá: đóng cửa 19/11/2026 = 10.250 (tav2_bq.ticker). DNSE latest_trade không gọi được trong phiên headless (DNSEClient cần credential) ⇒ dùng đóng cửa 19/11 theo brief. Kết luận TRÊN vùng ở cả hai mức trước/sau CK (1,62× / 1,66×).
+- Bản đồ: bản sao cục bộ make_map_power.py (chỉ đổi nhãn chú giải "Nhà máy điện/Trụ sở/Bên mua điện"; nhãn gốc "Cơ sở chế biến" sai cho ngành điện). Toạ độ OSM Nominatim 20/11/2026.
+- Giới hạn: Ngòi Hút 2 bán cho đơn vị nào của EVN không công bố; sản lượng từng NM ước lượng; tỷ giá hồi tố chưa xác minh.

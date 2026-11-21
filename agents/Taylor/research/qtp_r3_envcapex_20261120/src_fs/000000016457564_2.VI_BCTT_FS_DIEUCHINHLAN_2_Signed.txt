@@ -1,0 +1,5710 @@
+TẬP ĐOÀN ĐIỆN LỰC VIỆT NAM 
+CÔNG TY CỔ PHẦN  
+TƯ VẤN XÂY DỰNG ĐIỆN 1 
+CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM 
+Độc lập - Tự do - Hạnh phúc 
+ 
+             
+Số:                /BC-TVĐ1 
+Hà Nội, ngày       tháng        năm 2026 
+V/v báo cáo kết quả thẩm tra Báo cáo 
+nghiên cứu khả thi dự án nâng cấp, cải 
+tạo hệ thống xử lý khí thải Nhà máy 
+nhiệt điện Quảng Ninh (Lần 7) 
+ 
+ 
+BÁO CÁO KẾT QUẢ THẨM TRA BÁO CÁO NGHIÊN CỨU KHẢ THI 
+(Dự án nâng cấp, cải tạo hệ thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh) 
+ 
+Kính gửi : Công ty Cổ phần Nhiệt điện Quảng Ninh 
+Căn cứ Luật Xây dựng số 50/2014/QH13 đã được sửa đổi, bổ sung một số điều 
+theo Luật số 03/2016/QH14, Luật số 35/2018/QH14, Luật số 40/2019/QH14 và Luật 
+số 62/2020/QH14; 
+Căn cứ Nghị định số 175/2024/NĐ-CP ngày 30/12/2024 của Chính phủ về Quy 
+định chi tiết một số điều và biện pháp thi hành Luật Xây dựng về quản lý hoạt động 
+xây dựng; 
+Căn cứ Hợp đồng Tư vấn số 28/2024/HĐ-DVTV ngày 06/03/2024 được ký kết 
+giữa Công ty Cổ phần Nhiệt điện Quảng Ninh và Công ty Cổ phần Tư vấn Xây dựng 
+Điện 1 về việc Tư vấn thẩm tra Báo cáo nghiên cứu khả thi và Thiết kế cơ sở điều 
+chỉnh của Dự án nâng cấp, cải tạo hệ thống xử lý khí thải Nhà máy nhiệt điện Quảng 
+Ninh; 
+Căn cứ công văn số 360/NĐQN-KHVT ngày 10/03/2026 của Công ty Cổ phần 
+Nhiệt điện Quảng Ninh gửi Công ty Cổ phần Tư vấn Xây dựng Điện 1 về việc giao tài 
+liệu BCNCKT/TKCS để thực hiện thẩm tra. 
+Căn cứ công văn số 614/NĐQN-KHVT ngày 15/04/2026 của Công ty Cổ phần 
+Nhiệt điện Quảng Ninh gửi Công ty Cổ phần Tư vấn Xây dựng Điện 1 về Giao tài liệu 
+BCNCKT/TKCS điều chỉnh để thực hiện thẩm tra. 
+Căn cứ công văn số 886/NĐQN-KHVT ngày 21/05/2026 của Công ty Cổ phần 
+Nhiệt điện Quảng Ninh gửi Công ty Cổ phần Tư vấn Xây dựng Điện 1 về Giao tài liệu 
+BCNCKT/TKCS điều chỉnh và HSMT sửa đổi để thực hiện thẩm tra/thẩm định. 
+Số: 2985/TVĐ1-NĐNLM
+Hà Nội, ngày 22 tháng 5 năm 2026
+CÔNG TY CỔ PHẦN NHIỆT 
+ĐIỆN QUẢNG NINH
+Digitally signed by CÔNG TY CỔ 
+PHẦN NHIỆT ĐIỆN QUẢNG NINH 
+Date: 2026.06.09 17:03:03 +07'00'
+2 
+ 
+Sau khi xem xét hồ sơ dự án phiên bản tháng 05/2026, Công ty Cổ phần Tư vấn 
+Xây dựng Điện 1 (PECC1) thông báo kết quả thẩm tra Báo cáo nghiên cứu khả thi Dự 
+án nâng cấp, cải tạo hệ thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh như sau: 
+I. THÔNG TIN CHUNG VỀ DỰ ÁN  
+1.1. Các thông tin chung 
+1. Tên dự án: Dự án nâng cấp, cải tạo hệ thống xử lý khí thải Nhà máy nhiệt điện 
+Quảng Ninh 
+2. Nhóm dự án, loại, cấp, quy mô công trình: Dự án nhóm B, Công trình năng 
+lượng cấp II; 
+3. Người quyết định chủ trương đầu tư:  
+4. Tên chủ đầu tư và các thông tin để liên hệ: Công ty Cổ phần Nhiệt điện Quảng 
+Ninh; 
+- 
+Địa chỉ trụ sở chính: Địa chỉ: Tổ 33, khu phố Hà Khánh 5 , Phường Cao Xanh, 
+Tỉnh Quảng Ninh, Việt Nam; 
+- 
+Điện thoại: Điện thoại (0203) 3657539    Fax: (0203) 3657540; 
+5. Địa điểm xây dựng: Tại mặt bằng thiết bị hệ thống lò hơi, ESP, khu FGD của 
+NMNĐ Quảng Ninh thuộc Tổ 33, khu phố Hà Khánh 5 , Phường Cao Xanh, Tỉnh 
+Quảng Ninh. 
+6. Giá trị tổng mức đầu tư, nguồn vốn đầu tư: Giá trị tổng mức đầu tư (sau thuế) 
+của Dự án là   3.799.188.678.178 VNĐ . 
+7. Nguồn vốn đầu tư: Gồm nguồn vốn tự có của Chủ đầu tư và vốn vay từ các tổ 
+chức tín dụng/ ngân hàng thương mại. 
+8. Hình thức đầu tư: Nguồn vốn tự có của chủ đầu tư (vốn đầu tư Dự án thuộc 
+quỹ đầu tư phát triển, vốn khấu hao cơ bản của Công ty Cổ phần Nhiệt điện Quảng 
+Ninh) và vốn vay từ các tổ chức tín dụng/ ngân hàng thương mại. 
+9. Thời gian thực hiện dự án: từ năm 2023 đến hết năm 2027. 
+10. Nhà thầu lập Báo cáo nghiên cứu khả thi và khảo sát xây dựng: Viện Năng 
+lượng (IE) 
+1.2. Lý do thực hiện  
+Nhà máy nhiệt điện Quảng Ninh (NMNĐ Quảng Ninh) do Công ty Cổ phần 
+Nhiệt điện Quảng Ninh (QNTPJSC) thực hiện đầu tư và quản lý vận hành, có quy mô 
+công suất phát điện 4x300MW, cấu hình tổ máy gồm 1 lò hơi và 1 tuabin hơi - máy 
+phát điện, sử dụng than nội địa cấp từ khu vực vùng mỏ Quảng Ninh. Vị trí Nhà máy 
+3 
+ 
+thuộc Tổ 33, khu phố Hà Khánh 5 , Phường Cao Xanh, Tỉnh Quảng Ninh. Thời gian 
+các tổ máy bắt đầu phát điện thương mại như sau:  
+- 
+Tổ máy số 1: 08/7/2011; 
+- 
+Tổ máy số 2: 28/4/2011; 
+- 
+Tổ máy số 3: 01/1/2014; 
+- 
+Tổ máy số 4: 16/3/2014. 
+Nhiên liệu chính sử dụng cho các lò hơi của NMNĐ Quảng Ninh là than cám 5 
+cấp chủ yếu từ các khu vực Hòn Gai, Cẩm Phả, tỉnh Quảng Ninh. Nhiên liệu dùng cho 
+khởi động lò hơi và đốt kèm khi phụ tải thấp là dầu FO. 
+Theo Quyết định số 767/QĐ-BTNMT của Bộ Tài nguyên và Môi trường ngày 18 
+tháng 6 năm 2003 về việc “Phê chuẩn báo cáo đánh giá tác động môi trường Dự án 
+NMNĐ Quảng Ninh” các nguồn khí thải của Nhà máy phải được xử lý đạt các tiêu 
+chuẩn môi trường TCVN 5937:1995, TCVN 5939:1995 và TCVN 6991:2001 ứng với 
+lưu lượng thải Q3, trình độ công nghệ cấp A, hệ số vùng Kv=1 trước khi thải ra môi 
+trường. Ngoài ra, theo văn bản số 1765/CP-CN của Thủ tướng Chính phủ ngày 23 
+tháng 11 năm 2004 về việc “gói thầu EPC dự án NMNĐ Quảng Ninh”, cho phép nhà 
+máy áp dụng theo tiêu chuẩn mức phát thải NOx=1000 mg/Nm3 tương tự như dự án 
+NMNĐ Hải Phòng.  
+- 
+Nồng độ bụi (tại 6%O2) ≤ 400 mg/Nm3; 
+- 
+Nồng độ NOx (tại 6%O2) ≤ 1000 mg/Nm3; 
+- 
+Nồng độ SO2 (tại 6%O2) ≤ 150 mg/Nm3. 
+NMNĐ Quảng Ninh đã được trang bị các hệ thống xử lý khí thải như sau để đạt 
+được các giá trị nồng độ phát thải như trên:  
+- 
+Hệ thống khử bụi tĩnh điện (Hệ thống ESP); 
+- 
+Hệ thống vòi đốt NOx thấp và tối ưu hóa quá trình cháy để hạn chế sự hình thành 
+NOx đáp ứng quy định; 
+- 
+Hệ thống khử SO2 (Hệ thống FGD).  
+Trong quá trình chạy thử, vận hành thương mại chính thức đến nay và đo đạc 
+định kỳ các thông số phát thải bụi, NOx và SO2 của Nhà máy luôn đáp ứng được chỉ 
+tiêu thiết kế này (ghi chú: Các thông số thiết kế của nhà máy ở trên cũng là các thông 
+số bảo hành của nhà thầu EPC, tuy nhiên thông số bảo hành là thông số đo đạc tại đầu 
+ra của ống khói sau đó được quy đổi về thông số bảo hành theo các thông số thiết kế 
+của nhà máy như biến đổi về chất lượng than thiết kế, điều kiện khí tượng thuỷ văn, 
+điều kiện địa chất địa hình, chất lượng nước, chất lượng đá vôi.. vv trong khi theo 
+QCVN quy định thì các thông số phát thải đầu ra của ống khói chỉ quy đổi về tiêu 
+chuẩn 6% O2) 
+4 
+ 
+Cùng với sự phát triển kinh tế xã hội, hội nhập quốc tế và các cam kết bảo vệ môi 
+trường của Việt Nam, năm 2009 Bộ Tài nguyên và Môi trường đã có thông tư số 
+25/2009/TT-BTNMT ban hành QCVN 22:2009/BTNMT trong đó quy định các 
+ngưỡng giá trị bụi, NOx, SO2, trong khí thải lò hơi bắt buộc các NMNĐ phải đáp ứng 
+thay thế cho Tiêu chuẩn Việt Nam TCVN 7440: 2005. 
+Theo hướng dẫn áp dụng tính toán thông số phát thải trong khí thải nhiệt điện 
+quy định tại QCVN 22:2009/BTNMT, đối với NMNĐ Quảng Ninh phải áp dụng các 
+hệ số Kp = 0,85; Kv = 0,8 và nồng độ C cơ sở tại cột B cho nhiên liệu là than kể từ 
+ngày 1/1/2015. Mức phát thải tương ứng sẽ là: 
+- 
+Nồng độ bụi (tại 6% O2) ≤   136 mg/Nm3; 
+- 
+Nồng độ NOx (tại 6% O2) ≤ 680 mg/Nm3; 
+- 
+Nồng độ SO2 (tại 6% O2) ≤ 320 mg/Nm3. 
+Mặt khác, theo Quyết định số 1838/QĐ-TTg ngày 10/10/2013 của Thủ tướng 
+Chính phủ, công nhận thành phố Hạ Long là đô thị loại I trực thuộc tỉnh Quảng Ninh. 
+Do đó, trong tương lai gần khu vực đặt nhà máy sẽ trở thành khu vực nội đô đô thị loại 
+I với hệ số khu vực áp dụng cho nhà máy là Kv = 0,6 và các thông số phát thải yêu cầu 
+nghiêm ngặt hơn. Cụ thể như sau: 
+- 
+Nồng độ bụi (tại 6% O2) ≤   102 mg/Nm3; 
+- 
+Nồng độ NOx (tại 6% O2) ≤ 510 mg/Nm3; 
+- 
+Nồng độ SO2 (tại 6% O2) ≤ 255 mg/Nm3. 
+Đối chiếu các thông số thiết kế, thông số vận hành thực tế với thông số cho phép 
+theo quy định hiện hành mức phát thải bụi, NOx từ khí thải của Nhà máy chưa đáp 
+ứng hoàn toàn yêu cầu QCVN 22:2009/BTNMT trong các chế độ vận hành.  
+Để đảm bảo đưa các thông số phát thải bụi, NOx về mức đáp ứng quy định trong 
+mọi chế độ vận hành, cần thiết phải có các giải pháp nâng cấp, cải tạo hiệu suất khử 
+bụi ESP, và đầu tư mới giải pháp/hệ thống khử NOx tại lò hơi. 
+Ngoài ra, việc chuyển đổi hệ thống dầu nhiên liệu của nhà máy từ sử dụng dầu 
+nặng (FO) sang dầu DO cũng rất cần thiết nhằm tăng độ tin cậy vận hành, tránh hiện 
+tượng mồ hóng bám trên bộ sấy không khí làm giảm hiệu suất trao đổi nhiệt của bộ 
+sấy không khí, bảo vệ lớp xúc tác khử NOx sau này khi lắp đặt bộ SCR, bảo vệ các 
+tấm điện cực của lọc bụi tĩnh điện, loại bỏ hiện tượng khói đen từ ống khói khi đốt dầu 
+khởi động lò hơi, đặc biệt là giảm ô nhiễm môi trường, giảm lượng điện và hơi tự dùng 
+(hệ thống dầu FO cần hơi để gia nhiệt dầu DO không cần, lượng điện dùng cho bơm 
+dầu FO cao hơn dầu DO vì độ nhớt của dầu FO cao hơn DO) v.v… cũng cần được 
+nghiên cứu thực hiện.  
+Ngày 31/12/2020, Bộ Công Thương ban hành Thông tư số 57/2020/TT-BCT về 
+việc quy định phương pháp xác định giá phát điện, hợp đồng mua bán, trong đó mục 3 
+5 
+ 
+điều 20 quy định “Trường hợp các nhà máy điện đang vận hành cần thiết phải đầu tư 
+cải tạo, nâng cấp thiết bị để đáp ứng các quy chuẩn kỹ thuật quốc gia về môi trường, 
+bên bán và bên mua thỏa thuận bổ sung các chi phí này vào giá điện của nhà máy điện. 
+Việc tính toán giá điện được thực hiện theo phương pháp tính toán giá điện đã được 
+bên mua và bên bán thống nhất trong bợp đồng mua bán điện đã ký, báo cáo Bộ Công 
+Thương, Cục Điều tiết điện lực xem xét.”. 
+Trên cơ sở Thông tư số 57/2020/TT-BCT, Công ty CPNĐ Quảng Ninh muốn tiếp 
+tục đầu tư nâng cấp, cải tạo hệ thống xử lý khí thải của NMNĐ Quảng Ninh để đáp 
+ứng các quy định về môi trường (QCVN 19:2024/BTNMT). 
+Ngày 08/06/2021, Công ty CPNĐ Quảng Ninh và Viện Năng lượng đã ký Hợp 
+đồng số 47/2023/HĐ-DV về việc tư vấn lập điều chỉnh Báo cáo NCKT/TKCS Dự án 
+nâng cấp, cải tạo hệ thống xử lý khí thải NMNĐ Quảng Ninh. 
+Ngày 30/12/2024, Bộ Tài nguyên và Môi trường đã có Thông tư số 45/2024/TT-
+BTNMT về việc Ban hành QCVN 19:2024/BTNMT quy chuẩn kỹ thuật quốc gia về 
+khí thải công nghiệp. Theo đó, các thông số ô nhiễm áp dụng cho Nhà máy Nhiệt điện 
+Quảng Ninh sau ngày 31/12/2031 như sau: 
+TT Thông 
+số 
+Đơn vị 
+Quy định áp 
+dụng cho 
+NMNĐ 
+Quảng Ninh 
+Ghi chú 
+1 
+Bụi 
+PM 
+mg/Nm3 
+20 
+2.2.2. Tổng công suất trên 300 MW 
+đến 1.200 MW 
+2 
+NOx 
+mg/Nm3 
+120 
+2.2.2. Tổng công suất trên 300 MW 
+đến 1.200 MW 
+3 
+SOx 
+mg/Nm3 
+120 
+2.2.2. Tổng công suất trên 300 MW 
+đến 1.200 MW 
+4 
+CO 
+mg/Nm3 
+200 
+1.1.1. Thiết bị có công suất hơi từ 20 
+tấn/giờ trở lên hoặc có nhiệt lượng từ 
+12.380.000 Kcal/giờ trở lên. 
+5 
+NH3 
+mg/Nm3 
+15 
+6. Hệ thống xử lý khí thải khử chọn 
+lọc có xúc tác (SCR) hoặc khử chọn 
+lọc không xúc tác (SNCR) của các 
+thiết bị xả thải khác với 5 loại thiết bị 
+nêu trên 
+7. Các thiết bị xả thải khác 
+6 
+ 
+6 
+Độ 
+khói 
+Giá 
+trị 
+Ringelmann 
+2 
+Tất cả các thiết bị xả thải 
+7 
+Hg 
+mg/Nm3 
+0,04 
+2. Thiết bị phát điện sử dụng nhiên 
+liệu rắn (nhà máy, cơ sở phát điện) 
+8 
+Pb 
+mg/Nm3 
+0,8 
+3. Các thiết bị xả thải khác (trừ đốt 
+chất thải và đồng xử lý chất thải được 
+tính theo tổng kim loại) 
+9 
+Cd 
+mg/Nm3 
+0,2 
+3. Các thiết bị xả thải khác (trừ đốt 
+chất thải và đồng xử lý chất thải được 
+tính theo tổng kim loại) 
+Căn cứ theo Công văn số 711/NĐQN-ATMT ngày 05/05/2025 của Công ty Cổ 
+phần Nhiệt điện Quảng Ninh về việc kết quả đánh giá về khả năng đáp ứng đối với các 
+thông số khí thải yêu cầu trong QCVN 19:2024/BTNMT. 
+TT 
+Chỉ tiêu 
+Đơn vị 
+Tính 
+QCVN 
+19:2024/BTNMT 
+Đánh giá 
+1 
+Amoniac 
+mg/Nm3 
+15 
+Đáp ứng 
+2 
+Cacbon monoxit 
+mg/Nm3 
+200 
+Đáp ứng 
+3 
+Lưu huỳnh đioxit 
+mg/Nm3 
+120 
+Không đáp ứng 
+4 
+Nitơ oxit 
+mg/Nm3 
+120 
+Không đáp ứng 
+5 
+Thủy ngân và hợp 
+chất Hg 
+mg/Nm3 
+0,04 
+Đáp ứng 
+6 
+Asen và hợp chất 
+mg/Nm3 
+2 
+Đáp ứng 
+7 
+Formaldehyt 
+mg/Nm3 
+10 
+Đáp ứng 
+8 
+Bụi 
+mg/Nm3 
+20 
+Không đáp ứng 
+9 
+Chì (Pb) và hợp chất 
+Pb 
+mg/Nm3 
+0,8 
+Đáp ứng 
+10 
+Cadmi và hợp chất 
+Cd 
+mg/Nm3 
+0,2 
+Đáp ứng 
+11 
+Hydrocacbon thơm 
+đa vòng 
+mg/Nm3 
+0,05 
+Đáp ứng 
+12 
+Độ khói 
+Giá trị 
+2 
+Không đáp ứng 
+7 
+ 
+Ringelmann 
+Đối chiếu các thông số thiết kế, thông số vận hành thực tế với thông số cho phép 
+theo quy định hiện hành mức phát thải bụi, NOx, SO2 từ khí thải của Nhà máy chưa 
+đáp ứng hoàn toàn yêu cầu QCVN 19:2024/BTNMT trong các chế độ vận hành, ngoài 
+ra độ khói (Ringlemann) cũng không đáp ứng. Các thông số khác theo QCVN 
+19:2024/BTNMT quy định cho NMNĐ Quảng Ninh được đánh giá là không phát 
+hiện/không có do nhiên liệu đốt chính là than/dầu trong thành phần không có. 
+Để đảm bảo đưa các thông số phát thải bụi, NOx, SO2 về mức đáp ứng quy định 
+trong mọi chế độ vận hành, cần thiết phải có các giải pháp nâng cấp, cải tạo hiệu suất 
+khử bụi ESP, FGD và đầu tư mới giải pháp/hệ thống khử NOx tại lò hơi. 
+II. 
+THÀNH PHẦN HỒ SƠ DỰ ÁN TRÌNH THẨM TRA 
+2.1. Các căn cứ pháp lý lập dự án 
+a) Các căn cứ pháp lý lập BCNCKT 
+Báo cáo nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ thống xử lý khí thải Nhà 
+máy nhiệt điện Quảng Ninh được lập dựa trên các cơ sở pháp lý sau:  
+- 
+Nghị quyết số 55-NQ/TW ngày 11 tháng 02 năm 2020 về định hướng Chiến lược 
+phát triển năng lượng quốc gia của Việt Nam đến năm 2030, tầm nhìn đến năm 2045. 
+- 
+Luật Bảo vệ Môi trường số 72/2020/QH14 ngày 17/11/2021. 
+- 
+Luật Xây dựng số 50/2014/QH13 ngày 18/6/2014 và Luật số 62/2020/QH14 
+ngày 17/6/2020 sửa đổi, bổ sung một số điều của Luật Xây dựng. 
+- 
+Luật Điện lực số 28/2004/QH11 ngày 03/12/2004; Luật Sửa đổi, bổ sung một số 
+điều của Luật Điện lực số 24/2012/QH13 ngày 20/11/2012. 
+- 
+Nghị định số 137/2013/NĐ-CP ngày 21/10/2013 của Chính phủ quy định chi tiết 
+thi hành một số điều của Luật Điện lực và Luật sửa đổi bổ sung một số điều Luật Điện 
+lực. 
+- 
+Nghị định số 06/2021/NĐ-CP của Chính phủ ngày 26/01/2021 quy định chi tiết 
+một số nội dung về quản lý chất lượng, thi công xây dựng và bảo trì công trình xây 
+dựng. 
+- 
+Nghị định số 10/2021/NĐ-CP của Chính phủ ngày 09/2/2021 về quản lý chi phí 
+đầu tư xây dựng. 
+- 
+Nghị định số 175/2024/NĐ-CP của Chính phủ ngày 30/12/2024 quy định chi tiết 
+một số điều và biện pháp thi hành luật xây dựng về quản lý hoạt động xây dựng 
+- 
+Nghị định 05/2024/NĐ-CP ngày 6/1/2024 Sửa đổi, bổ sung một số điều của ghị 
+định 08/2022/NĐ-CP ngày 10/01/2022 của Chính phủ quy định chi tiết thi hành một số 
+8 
+ 
+điều của Luật Bảo vệ môi trường. 
+- 
+Quyết định số 1838/QĐ-TTg của Thủ tướng Chính phủ ngày 10 tháng 10 năm 
+2013 về việc công nhận thành phố Hạ Long là đô thị loại I thuộc tỉnh Quảng Ninh. 
+- 
+Quyết định số 767/QĐ-BTNMT của Bộ Tài nguyên và Môi trường ngày 18 tháng 
+6 năm 2003 về việc “Phê duyệt báo cáo đánh giá tác động môi trường Dự án NMNĐ 
+Quảng Ninh”. 
+- 
+Công văn số 2346/BTNMT-MT của Bộ Tài nguyên và Môi trường ngày 17 tháng 
+9 năm 2003 về việc tiêu chuẩn khí thải NOx của nhà máy nhiệt điện Quảng Ninh. 
+- 
+Văn bản số 1765/CP-CN ngày 23 tháng 11 năm 2004 của Chính phủ về việc “gói 
+thầu EPC dự án Nhà máy Nhiệt điện Quảng Ninh”. 
+- 
+Thông tư số 25/2009/TT-BTNMT của Bộ Tài nguyên và Môi trường ban hành 
+Quy chuẩn quốc gia về khí thải công nghiệp nhiệt điện QCVN 22:2009/BTNMT. 
+- 
+Văn bản số 492/EVN-KTSX-KHCN&MT ngày 05/02/2016 của EVN chỉ đạo 
+GENCO 1, 2, 3 và các công ty quản lý vận hành các NMNĐ than thuộc EVN rà soát, 
+kiểm tra, đánh giá và thực hiện các công việc liên quan để đáp ứng Quy chuẩn quốc 
+gia về khí thải công nghiệp nhiệt điện QCVN 22:2009/BTNMT. 
+- 
+Công văn số 2151/EVNGENCO1-KTSX ngày 15 tháng 8 năm 2016 của Tổng 
+Công ty Phát điện 1 về việc đẩy nhanh tiến độ lập báo cáo nghiên cứu khả thi dự án 
+đầu tư thiết bị giảm nồng độ NOx trong khí thải nhiệt điện.  
+- 
+Công văn số 3406/EVN-KHCN&MT ngày 17 tháng 8 năm 2016 của Tập đoàn 
+Điện lực Việt Nam về việc thực hiện các dự án đầu tư, cải tạo thiết bị nhằm đáp ứng 
+QCVN về môi trường. 
+- 
+Nghị quyết số 101/NQ-NĐQN-HĐQT ngày 07 tháng 10 năm 2016 của Hội đồng 
+quản trị Công ty Cổ phần Nhiệt điện Quảng Ninh về việc chủ trương đầu tư dự án cải 
+tạo, nâng cấp hệ thống xử lý khói thải nhà máy nhiệt điện Quảng Ninh. 
+- 
+Văn bản số 3419/TCNL-NĐ&ĐHN ngày 12/12/2016, của Tổng cục Năng lượng 
+(nay là Cục Điện lực và Năng lượng tái tạo) về việc thông báo kết quả thẩm định 
+TKCS dự án nâng cấp, cải tạo hệ thống xử lý khí thải NMNĐ Quảng Ninh. 
+- 
+Quyết định số 358/QĐ-NĐQN ngày 03/04/2017 của HĐQT về việc phê duyệt 
+Báo cáo NCKT, TKCS và Quyết định đầu tư Dự án Nâng cấp, cải tạo hệ thống xử lý 
+khí thải Nhà máy nhiệt điện Quảng Ninh. 
+- 
+Thông báo số 384/TB-VPCP ngày 02/10/2018 của Văn phòng Chính phủ về việc 
+kết luận của Phó Thủ tướng Vương Đình Huệ tại cuộc họp về phương án điều chỉnh 
+giá điện khi nâng cấp, cải tạo, hệ thống xử lý khí thải của các nhà máy nhiệt điện. 
+9 
+ 
+- 
+Văn bản số 5289/EVN-ĐT ngày 18/10/2018 của Tập đoàn Điện lực Việt Nam về 
+việc các dự án nâng cấp, cải tạo hệ thống xử lý khí thải các NMNĐ EVN. 
+- 
+Tờ trình 4690/TTr-EVN ngày 10/7/2020 của Tập đoàn Điện lực Việt Nam về 
+việc báo cáo Thủ tướng Chính phủ các khó khăn, vướng mắc trong quá trình triển khai 
+các dự án cải tạo, nâng cấp các hệ thống xử lý khí thải của NMNĐ than. 
+- 
+Công văn số 5301/EVN-TH ngày 06/8/2020 của Tập đoàn Điện lực Việt Nam về 
+việc triển khai dự án cải tạo nâng cấp các hệ thống xử lý khí thải NMNĐ than. 
+- 
+Công văn số 524/NĐQN-HCLĐ ngày 05/05/2021 về việc lập đề cương nhiệm vụ 
+hiệu chỉnh Báo cáo NCKT và TKCS Dự án nâng cấp hệ thống xử lý khí NMNĐ 
+Quảng Ninh. 
+- 
+Hợp đồng dịch vụ số 30/2016/HĐ-XD này 23 tháng 8 năm 2016 tư vấn lập 
+Nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ thống xử lý khói thải Nhà máy nhiệt 
+điện Quảng Ninh giữa Công ty cổ phần nhiệt điện Quảng Ninh và Viện Năng lượng – 
+Bộ Công Thương. 
+- 
+Hợp đồng số 47/2023/HĐ-DV ngày 08/06/2023 giữa Công ty CPNĐ Quảng Ninh 
+và Viện Năng lượng về việc Tư vấn lập điều chỉnh Báo cáo NCKT và TKCS Dự án 
+nâng cấp, cải tạo hệ thống xử lý khí thải NMNĐ Quảng Ninh.  
+- 
+Hợp đồng số 28/2024/HĐ-DVTV ngày 06/3/2024 về việc Tư vấn thẩm tra Báo 
+cáo nghiên cứu khả thi và Thiết kế cơ sở điều chỉnh của Dự án nâng cấp, cải tạo hệ 
+thống xử lý khí thải NMNĐ Quảng Ninh. 
+- 
+Các văn bản pháp lý khác có liên quan. 
+2.2. Hồ sơ, tài liệu dự án, khảo sát, thiết kế 
+a) Hồ sơ dự án 
+Báo cáo Nghiên cứu Khả thi (BCNCKT) của dự án được biên chế và gồm có 03 
+quyển như sau:  
+Quyển 1: Thuyết minh Nghiên cứu khả thi 
+Phần 1: Thuyết minh 
+Chương 1: Tổng quan. 
+Chương 2: Tóm tắt các thông tin chính về Dự án. 
+Chương 3: Sự cần thiết của Dự án. 
+Chương 4: Lựa chọn giải pháp cải tạo, nâng cấp. 
+Chương 5: Giải pháp xây dựng và tổ chức thi công. 
+10 
+ 
+Chương 6: Kế hoạch bảo vệ môi trường. 
+Chương 7: Tổng mức đầu tư và hình thức thực hiện Dự án, tiến độ thực hiện 
+Chương 8: Đánh giá và phân tích hiệu quả kinh tế - xã hội của Dự án. 
+Chương 9: Kết luận - kiến nghị. 
+Phần 2: Phụ lục 
+Phụ lục 1: Các văn bản pháp lý. 
+Phụ lục 2: Tổng mức đầu tư và phân tích kinh tế tài chính 
+Quyển 2: Thiết kế cơ sở 
+Phần 2.1 Thuyết minh TKCS 
+Chương 1: Tổng quan 
+Chương 2: Mô tả các yêu cầu kỹ thuật các hệ thống 
+Chương 3: Mô tả xây dựng 
+Chương 4: PCCC và giảm thiểu tác động môi trường 
+Phần 2.2 Bản vẽ TKCS 
+Phần 2.3 Các phụ lục  
+Phụ lục 1: Tính toán hệ thống ESP 
+Phụ lục 2: Tính toán hệ thống giải pháp khử NOx 
+Phụ lục 3: Tính toán giải pháp liên quan đến hệ thống FGD 
+Phụ lục 4: Tính toán xây dựng 
+Quyển 3: Báo cáo khảo sát NMNĐ Quảng Ninh 
+Quyển 4: Báo cáo điều kiện địa chất công trình 
+2.3. Hồ sơ năng lực của các nhà thầu 
+a) Nhà thầu thiết kế  
+ 
+Nhà thầu lập báo cáo nghiên cứu khả thi là Viện Năng lượng (IE). 
+- 
+Địa chỉ:  Số 6 Phố Tôn Thất Tùng, phường Kim Liên, thành phố Hà Nội, Việt 
+Nam. 
+- 
+Giấy chứng nhận đăng ký kinh doanh và đăng ký thuế của tổ chức khoa học và 
+công nghệ: 
++ Mã số doanh nghiệp: 0100101227. 
+11 
+ 
++ Đăng ký lần đầu ngày: 06/08/2007. 
++ Đăng ký thay đổi lần thứ 2, ngày 26/03/2020. 
++ Đăng ký thay đổi lần thứ 3, ngày 26/01/2026 
++ Người đại diện: ông Tô Xuân Bảo 
++ Chức danh: Viện trưởng. 
+- Giấy phép hoạt động điện lực số: 64/GP-ĐTĐL. 
++ Ngày cấp: 15-06-2022. 
++ Ngày hết hạn: 14-06-2027 
+Viện Năng lượng có các chứng chỉ hoạt động xây dựng sau: 
+(1) Chứng chỉ hoạt động xây dựng: BXD-00049599 
+- 
+Ngày có hiệu lực: 09/08/2022. 
+- 
+Ngày hết hạn: 09/08/2032  
+Căn cứ theo Chứng chỉ năng lực hoạt động xây dựng BXD-00049599, phạm vi 
+hoạt động xây dựng của Viện Năng lượng (IE) bao gồm: 
+- 
+Khảo sát xây dựng: Hạng I. 
+- 
+Thiết kế, thẩm tra thiết kế công trình: Hạng I. 
+- 
+Tư vấn giám sát thi công xây dựng công trình: Hạng I. 
+(2) Chứng chỉ hoạt động xây dựng HAN – 00049599 
+- 
+Ngày có hiệu lực: 18/12/2020. 
+- 
+Ngày hết hạn: 14/12/2030. 
+Căn cứ theo Chứng chỉ năng lực hoạt động xây dựng HAN-00049599, phạm vi 
+hoạt động xây dựng của Viện Năng lượng (IE) bao gồm:  
+- 
+Thiết kế, thẩm tra TK/dân dụng: Hạng III 
+- 
+Thiết kế, thẩm tra TK/Công nghiệp (Nhẹ): Hạng III 
+- 
+Thiết kế, thảm tra TK/Hạ tầng kỹ thuật: Hạng III 
+- 
+Khảo sát địa chất, địa hình: Hạng II 
+Viện Năng lượng là cơ quan nghiên cứu khoa học công nghệ, quy hoạch tổng thể 
+phát triển năng lượng và điện lực cũng như có nhiều kinh nghiệm về lĩnh vực tư vấn 
+thiết kế các công trình điện như nhiệt điện than và năng lượng mới. 
+b) Nhà thầu khảo sát  
+Trong Báo cáo nghiên cứu khả thi, gồm báo cáo khảo sát hiện trạng nhà máy và 
+báo cáo điều kiện địa chất công trình do IE lập, sử dụng số liệu đã được thực hiện 
+trong giai đoạn xây dựng kết hợp số liệu khảo sát thực tế nhà máy nhiệt điện Quảng 
+Ninh để phục vụ lập báo cáo đầu tư của Dự án. 
+12 
+ 
+III. NỘI DUNG HỒ SƠ DỰ ÁN TRÌNH THẨM TRA 
+3.1  Nội dung chủ yếu của hồ sơ dự án 
+Các thông tin chung về dự án theo hồ sơ Báo cáo nghiên cứu khả thi (NCKT) do 
+IE lập tháng 05/2026 như sau: 
+3.1.1 Phần công nghệ 
+3.1.1.1. Hệ thống khử bụi tĩnh điện (ESP) 
+Thông số thiết kế ESP: 
+a) Hệ thống xử lý NOx 
+Số lượng bộ lọc bụi tĩnh điện:   
+ 
+2 /1 lò hơi 
+- 
+Lưu lượng khói vào ESP (chế độ BMCR):  Vk = 1.642.000 m3/hr  
+- 
+Nhiệt độ khói thiết kế :  
+ 
+ 
+ 
+121oC 
+- 
+Nồng độ bụi đầu vào ESP:  
+ 
+ 
+Cv ≤ 37.600mg/Nm3 
+- 
+Nồng độ bụi đầu ra ESP lớn nhất:  
+ 
+Cr ≤ 20 mg/Nm3 (Yêu cầu thiết kế 
+giai đoạn lựa chọn nhà thầu EPC để dự phòng trong trường hợp thiết bị xuống cấp, hư 
+hỏng chưa kịp sửa chữa) 
+- 
+Hiệu suất khử bụi yêu cầu (tối thiểu):  
+η ≥ 99,92%  
+- 
+Nồng độ bụi đầu ra ống khói lớn nhất:  
+Cr ≤ 20 mg/Nm3 (Quy định của 
+QCVN 19:2024/BTNMT áp dụng cho NMNĐ Quảng Ninh) 
+- 
+Số trường lọc bụi:  
+ 
+ 
+ 
+ 
+16/1 tổ máy 
+- 
+Kích thức cơ bản của một trường: 
++ Chiều dài hữu ích:   
+ 
+ 
+L ≥ 3 m; 
++ Chiều rộng hữu ích:  
+ 
+ 
+R = 19,2 m; 
++ Chiều cao hữu ích:  
+ 
+ 
+H = 15,06 m. 
+- 
+Khoảng cách điện cực phóng và lắng ở 2 trường (8 dãy) đầu: y= 0,225m 
+- 
+Khoảng cách điện cực phóng và thu ở 2 trường (8 dãy) sau: y= 0,200 m 
+- 
+Số lượng bộ điện cực lắng 2 trường (8 dãy) đầu: 88 điện cực (44 cho 1 bộ) 
+- 
+Số lượng bộ điện cực lắng 2 trường (8 dãy) sau: 100 điện cực (50 cho 1 bộ) 
+- 
+Thông số máy biến áp chỉnh lưu cao tần/máy biến áp xung tương đương: 
+ 
+Chỉnh lưu cao tần 
+Máy biến áp xung 
+Dải chức năng 
+0,85 – 1,1 Udanh định 
+ 
+Dải vận hành tại Pdanh định 
+(380 V) 
+0,95 – 1,1 Udanh định 
+ 
+13 
+ 
+ 
+Chỉnh lưu cao tần 
+Máy biến áp xung 
+Hệ số công suất  
+0.9 (sóng sin chuẩn) 
+ 
+Thời gian ngắt điện áp lớn 
+nhất 
+mà 
+không khởi động lại hệ điều 
+khiển 
+<100ms 
+ 
+Hiệu suất 
+> 95% ở mức tải danh định 
+ 
+Đầu vào số trên bộ điều 
+khiển 
+24 V AC/ DC, tải 20mA, 
+opto-coupler 
+ 
+Đầu ra rơ le trên bộ điều 
+khiển 
+50 V AC/ DC, 1A hoặc 230 
+V AC, 0.5A. 
+ 
+Trọng lượng 
+<600 kg 
+ 
+Dung dịch làm mát 
+Dầu 
+ 
+Nguồn điện vào 3 pha 
+380±2 V, 50 Hz, 180 A 
+ 
+Nguồn điện ra (cao áp 1 
+chiều) 
+80 kV, 20 kHz, 1200mA 
+ 
+Nhiệt độ làm việc 
+-40 oC đến +40oC 
+ 
+Nhiệt độ làm việc tối đa 
+(khi giảm 50% dòng đầu ra 
+danh định) 
++50 oC 
+ 
+Độ ẩm không khí làm việc 
+tối đa 
+100% 
+ 
+Kiểu làm mát 
+Chất lỏng/khí 
+ 
+Chuẩn EMC 
+EN 55 011, IEC 61 000-4-2, 
+IEC 61 000-4-3,IEC 61 000-
+4-4, IEC 61 000-4-5, IEC 61 
+000-4-6, IEC61 000-4-8, 
+IEC 61 000-4-11 
+ 
+Chuẩn hạ áp 
+EN 50178, EN/IEC 61010-1 
+ 
+Cấp độ bảo vệ theo tiêu 
+chuẩn EN/IEC 60529 
+55 
+ 
+Kết nối 
+Mạng Ethernet 
+ 
+14 
+ 
+ 
+Chỉnh lưu cao tần 
+Máy biến áp xung 
+Tủ điều khiển động cơ 
+Riêng biệt 
+ 
+Cấp nguồn từ bộ biến áp 
+chỉnh lưu cao tần trong tủ 
+điều khiển động cơ 
+Tùy chọn 
+ 
+Phần mềm tối ưu hóa Lọc 
+bụi 
+OPOQ, OPOPT 
+ 
+3.1.1.2. Hệ thống xử lý NOx 
+Yêu cầu thiết kế hệ thống SCR: 
+- 
+Nồng độ NOx trong khói thải đầu vào bộ SCR: 1000 mg/Nm3. 
+- 
+Nồng độ NOx trong khói thải ra khỏi bộ SCR ≤ 120 mg/Nm3, theo 
+QCVN19:2024/BTNMT (trong yêu cầu hồ sơ mời thầu yêu cầu nhà thầu có thiết kế dự 
+phòng khi thiết bị xuống cấp)) 
+- 
+Nồng độ ammonia dư trong khói thải < 3ppm. 
+- 
+Tỷ lệ biến đổi SO2/SO3: 0,1% 
+Danh mục thiết bị hệ thống khử NOx 
+Bảng: Danh sách các thiết bị chính trong hệ thống khử NOx 
+TT 
+Tên thiết bị 
+Thông số 
+Đơn vị 
+Ghi chú 
+I 
+Thiết bị cho 2 tổ 
+ 
+ 
+ 
+1 
+Bể dự trữ NH3 
+ 
+ 
+ 
+ 
+Số lượng 
+4 
+chiếc 
+2 cho 2 tổ 
+ 
+Thể tích 
+156 
+m3 
+ 
+ 
+Áp lực thiết kế 
+17,335 
+mmH2O 
+ 
+2 
+Máy nén Ammonia 
+ 
+ 
+ 
+ 
+Số lượng 
+4 
+chiếc 
+2 cho 2 tổ 
+ 
+Công suất 
+1,04 
+m3/phút 
+ 
+ 
+Cột áp 
+25,493 
+mmH2O 
+ 
+ 
+Công suất động cơ 
+7,5 
+kW 
+ 
+3 
+Bơm Ammonia 
+ 
+ 
+ 
+ 
+Số lượng 
+4 
+chiếc 
+2 cho 2 tổ 
+ 
+Công suất 
+1,46 
+m3/h 
+ 
+15 
+ 
+TT 
+Tên thiết bị 
+Thông số 
+Đơn vị 
+Ghi chú 
+ 
+Cột áp 
+3.569 
+mmH2O 
+ 
+ 
+Công suất động cơ 
+1,23 
+kW 
+ 
+4 
+Bình bốc hơi 
+ 
+ 
+ 
+ 
+Số lượng 
+5 
+chiếc 
+5 cho 4 tổ 
+ 
+Thể tích 
+2 
+m3 
+ 
+5 
+Bình chứa 
+ 
+ 
+ 
+ 
+Số lượng 
+5 
+chiếc 
+5 cho 4 tổ 
+ 
+Thể tích 
+2 
+m3 
+ 
+6 
+Quạt  hoà trộn 
+không khí  
+(Dilution air fan) 
+ 
+ 
+ 
+ 
+Số lượng 
+8 
+chiếc 
+2 cho 1 tổ 
+ 
+Công suất 
+5500 
+m3/h 
+ 
+ 
+Cột áp 
+128 
+mmH2O 
+ 
+ 
+Công suất động cơ 
+26,06 
+kW 
+ 
+7 
+Bộ SCR 
+ 
+ 
+ 
+ 
+Số lượng 
+8 
+bộ 
+2 bộ cho 1 
+tổ 
+ 
+Kích thước 
+ 
+ 
+ 
+ 
+Rộng 
+6,8 
+m 
+ 
+ 
+dài 
+10,8 
+m 
+ 
+ 
+Cao 
+13,50 
+m 
+ 
+3.1.1.3. Hệ thống xử lý SOx 
+Yêu cầu thiết kế hệ thống xử lý SOx 
+- 
+Nồng độ SO2 đầu vào lớn nhất: 1504 mg/Nm3 
+- 
+Nồng độ SO2 tại ống khói yêu cầu ≤ 120 mg/Nm3, do đó hiệu suất khử SO2 tối 
+thiểu phải đạt 92% ứng với hàm lượng lưu huỳnh trong than lớn nhất 0,66% (theo than 
+thiết kế). 
+Danh sách các thiết bị chính trong hệ thống khử SOx sau cải tạo cho 04 tổ máy: 
+ 
+16 
+ 
+ 
+ 
+ 
+TT 
+Tên thiết bị 
+Số lượng 
+Đặc tính 
+I 
+Giàn phun và vòi 
+phun (thay thế) 
+16 giàn 
+ 
+ 
+Ống nhánh nối ống 
+góp và vòi phun 
+ 
+4”, FRP 
+ 
+Vòi phun 
+4x68x4 
+Nón đôi, 120o, vật liệu SiC 
+=1088 cái 
+II 
+Bơm tuần hoàn tháp 
+hấp thụ (thay thế) 
+ 
+ 
+Số bơm 
+16 bơm 
++ Năng suất: 6100 m3/h; 
++ Cột áp: 18,5/21/23,5/26 m; 
++ Công suất điện: 310/345/385/430 kW. 
+III 
+Khay chia khói 
+ 
+ 
+Số lượng 
+04 cái 
+Kiểu đục lỗ, vật liệu  thép hợp kim cường độ 
+cao (hard alloy); 
+ 
+Vật liệu 
+ 
+Thép hợp kim cường độ cao 
+ 
+Vị trí 
+ 
+Lắp đặt ở trong tháp hấp thụ, sau cửa vào 
+của khói, trước dàn ống phun bùn vôi dưới 
+cùng 
+ 
+Khối lượng 
+12 Tấn 
+12 
+IV 
+Vành chắn khói 
+ 
+ 
+ 
+Số lượng 
+12 cái 
+ 
+ 
+Vị trí 
+ 
+tương ứng với các mức lắp đặt 04 giàn phun 
+ 
+Khối lượng 
+3,6 Tấn 
+ 
+V 
+Thiết bị khử ẩm (thay 
+thế) 
+ 
+ 
+Số giàn khử ẩm 
+8 giàn 
+Kiểu mái, vật liệu thép hợp kim  hoặc nhựa 
+17 
+ 
+TT 
+Tên thiết bị 
+Số lượng 
+Đặc tính 
+PP Polypropylene) 
+ 
+Số vòi rửa 
+1680 vòi 
+ 
+VI 
+Quạt sục ô-xi (Thay 
+thế) 
+ 
+ 
+ 
+Số lượng 
+06 cái 
++Năng suất: 5.900 m3/h; 
++Động cơ: 160 kW. 
+V 
+Bộ GGH 
+4 
+1. Phần tử trao đổi nhiệt GGH 30,5 V-
+SMRC 
+- Biên dạng: HC12e 
+- Chiều cao phần tử trao đổi nhiệt: 800mm 
+- Độ dày tấm trao đổi nhiệt: 0.75mm + 
+0.3mm lớp phủ enamel 
+- Vật liệu tấm trao đổi nhiệt: Dercarburized 
+steel + Enamel 
+- Vật liệu khung: Corten A 
+- Quy cách phủ (enamel): phủ tĩnh điện bột 
+khô (Electrostatic Dry 
+Powder method) 
++ Quy trình nén phần tử trao đổi nhiệt: 
+Surepack Elements 
++ Loại Khung: Mark 3 (MK3) 
+Số lượng: 01 bộ cho 01 GGH: 36 x 4 = 144 
+chiếc 
+2. Hộp giảm tốc SGW29-100D (CW) GGH, 
+số lượng: 4 bộ. 
+3. Quạt chèn trục, Model ZSC 63-4N-LG125 
+(Bao gồm động cơ), số lượng: 4 bộ 
+3.1.2 Phần Điện  
+Các nội dung liên quan đến phần hệ thống điện dự án được trình bày chủ yếu ở 
+các tài liệu thuyết minh sau: 
+- 
+Thuyết minh Báo cáo khả thi bao gồm: Chương 4 – Lựa chọn giải pháp công 
+nghệ - kỹ thuật; mục 4.4 – Hệ thống điện. 
+18 
+ 
+- 
+Thuyết minh Thiết kế cơ sở bao gồm: Chương 2 – Thuyết minh kỹ thuật; mục 2.4 
+– Hệ thống điện. 
+- 
+Các bản vẽ phần điện được thể hiện trong tập bản vẽ của hồ sơ Thiết kế cơ sở. 
+- 
+Các Phụ lục tính toán phần Điện tại TKCS. 
+Nội dung phần điện trong hồ sơ dự án đã thể hiện các nội dung liên quan bao 
+gồm: 
+- 
+Các điều kiện thiết kế. 
+- 
+Các sơ đồ cấp điện. 
+- 
+Các giải pháp xây dựng và lắp đặt thiết bị phục vụ nâng cấp, cải tạo hệ thống xử 
+lý khí thải. 
+Trong phần thuyết minh của hồ sơ dự án đã mô tả thông số kỹ thuật các phụ tải 
+điện của hệ thống xử lý khí thải, cùng với đó là giải pháp nâng cấp, thay thế và tái sử 
+dụng một số thiết bị phục vụ trong quá trình cải tạo. Các giải pháp nâng cấp, cải tạo 
+như sau: 
+a) 
+Hệ thống lọc bụi tĩnh điện ESP 
+Hệ thống lọc bụi tĩnh điện sẽ được cải tạo với việc thay thế các máy biến áp 
+chỉnh lưu thường hiện tại bởi máy biến áp xung hoặc máy biến áp chỉnh lưu cao tần, 
+hoặc kết hợp các trường đầu dùng máy biến áp cao tần, các trường sau dùng máy biến 
+áp xung. Các tủ điện nguồn và cáp cấp nguồn đề xuất thay thế mới để phù hợp với 
+công nghệ máy biến áp xung hoặc chỉnh lưu cao tần hoặc kết hợp cả hai loại. 
+b) 
+Hệ thống xử lý NOx 
+Hệ thống cấp điện cho hệ thống khử NOx (SCR) bao gồm: 
+- 
+Trung tâm điều khiển động cơ (MCC) đặt tại khu vực cấp và lưu trữ Ammonia: 
+Ammonia MCC (cấp điện cho các phụ tải hệ thống cấp Amonia chung cho cả bốn tổ 
+máy của NMNĐ Quảng Ninh 1&2). 
+- 
+MCC đặt tại gần khu vực lắp đặt bộ SCR của các tổ máy: #1 SCR MCC, #2 SCR 
+MCC, #3 SCR MCC, #4 SCR MCC. 
+Hệ thống điện hiện tại trong nhà máy, với nhu cầu công suất tăng thêm như dự 
+kiến ở các mục trên (khoảng 430kW phụ tải hạ áp), việc cấp nguồn cho hệ thống khử 
+NOx và SO2 từ các ngăn dự phòng của các tủ phân phối 0,4kV hiện hữu là khả thi. 
+c) 
+Hệ thống khử lưu huỳnh FGD 
+Thay thế 02 quạt khói hiện hữu của một tổ máy (mỗi quạt khói có công suất đặt 
+động cơ 1.400kW) bằng 02 quạt khói mới (mỗi quạt khói mới có công suất đặt của 
+động cơ khoảng 1.800kW) và kết hợp biến tần.  
+19 
+ 
+Các công việc tính toán kiểm tra sau sẽ được nhà thầu thực hiện trong giai đoạn 
+thực hiện dự án:  
+- 
+Điều kiện thông gió và làm mát của các phòng điện hiện có; 
+- 
+Tác động sóng hài lên hệ thống điện hiện có của nhà máy; 
+- 
+Không gian có sẵn để lắp đặt thêm thiết bị điện. 
+d) 
+Thiết bị điện 
+ 
+Tủ điện hạ thế 
+Yêu cầu chung đối với các tủ điện hạ thế 400V: 
+- 
+Tiêu chuẩn:  
+ 
+ 
+ 
+ 
+IEC60439.1, IEC60947, IEC60408 
+- 
+Điện áp:  
+ 
+ 
+ 
+ 
+400V 
+- 
+Số pha: 
+ 
+ 
+ 
+ 
+ 
+3 pha 
+- 
+Tần số: 
+ 
+ 
+ 
+ 
+ 
+50Hz 
+- 
+Dòng điện định mức:  
+ 
+ 
+250A/ 100A 
+- 
+Dòng ngắn mạch định mức:  
+ 
+50kA 
+- 
+Điện áp điều khiển:  
+ 
+ 
+220VDC 
+- 
+Điện áp chịu đựng tần số công nghiệp: 
+3kV 
+- 
+Điện áp chịu đựng xung sét: 
+ 
+theo IEC 60439 
+- 
+Cấp bảo vệ:  
+ 
+ 
+ 
+ 
+IP54 (khu vực có thông gió), IP55 (khu 
+vực không có thông gió) hoặc IP56 (đối với khu vực nhiễm bụi). 
+ 
+Cáp điện 
+Cáp lực trung áp 6/10kV sử dụng cho dự án sẽ là loại cáp cách điện XLPE, cáp 
+sẽ được yêu cầu tuân thủ các yêu cầu sau: 
+- 
+Cáp được sản xuất theo tiêu chuẩn IEC 60502 bao gồm lõi đồng bện, cách điện 
+cháy chậm XLPE vỏ cáp làm bằng vật liệu PVC tuân thủ tiêu chuẩn IEC 60502 và IEC 
+60332-3 nhóm C. Màng chống nhiễu sẽ là loại băng đồng. Trường hợp cáp phải chịu 
+đựng các ứng lực cơ khí có khả năng làm hỏng lớp vỏ ví dụ như chôn trực tiếp trong 
+đất thì giáp cáp được sử dụng. 
+- 
+Sự liên kết giữa lớp cách điện bán dẫn và lớp cách điện phải được thiết kế để có 
+thể gỡ ra bằng tay mà không cần các yêu cầu khác (không cần gia nhiệt). 
+- 
+Màng chắn chống nhiễu đồng phải là loại có kích cỡ mảnh, nhẹ. Nếu sử dụng cáp 
+cao áp 3 lõi thì các lõi này sẽ là chống nhiễu riêng lẻ. 
+Cáp lực hạ áp sử dụng được chế tạo phù hợp với yêu cầu của tiêu chuẩn IEC 
+60502, bao gồm các lớp, phần dẫn điện bằng đồng bện, cách điện cháy chậm XLPE có 
+giáp thép bảo vệ, cấp điện áp 0,6/1kV, lớp bọc bằng PVC tách riêng cho các phần dẫn 
+điện. Các lõi cáp và các dây nối đất được định màu theo các tiêu chuẩn hiện hành của 
+20 
+ 
+Việt Nam. Dây dẫn điện cho hệ thống chiếu sáng sử dụng loại dây đồng bọc cách điện 
+PVC, 2 lõi, cấp điện áp 0,6/1kV tuân thủ theo tiêu chuẩn TCVN 5935-1/IEC 60502-1. 
+Cáp điện cấp tới các thiết bị sẽ đi trong các hệ thống mương cáp/giá cáp hiện có 
+hoặc xây mới hoặc trong các ống luồn cáp điện. 
+ 
+Thiết bị nối đất 
+Việc nối đất các thiết bị được thực hiện nhằm đảm bảo an toàn cho thiết bị và cho 
+người vận hành.  
+Khu vực ammonia sẽ được lắp đặt lưới nối đất mới, sử dụng các cọc nối đất bằng 
+đồng φ25 và các thanh nối đất ngang bằng dây đồng 120mm2. Các khu vực ESP, SCR, 
+FGD sẽ tận dụng lưới nối đất hiện hữu của nhà máy. 
+Các thiết bị sẽ được nối với hệ thống lưới nối đất chung tại ít nhất hai điểm. Tất 
+cả các thành phần kim loại không mang điện, các thành phần thiết bị, vỏ thiết bị … mà 
+có thể trở thành vật mang điện với điện áp nguy hiểm sẽ được nối với hệ thống lưới 
+nối đất chính. 
+- 
+Vỏ kim loại của các thiết bị điện sẽ được tiếp địa tại 2 điểm riêng biệt. 
+- 
+Các máng cáp kim loại sẽ được nối đất với lưới nối đất chung tại 2 điểm. 
+- 
+Vật liệu cho hệ tiếp địa như sau: 
+- 
+Các thanh dẫn trên mặt đất  
+: Dây đồng bọc PVC/thép mạ kẽm 
+- 
+Các thanh dẫn chôn ngầm  
+: Dây đồng trần 
+- 
+Cọc tiếp đất 
+ 
+ 
+ 
+: Cọc thép bọc đồng 
+ 
+Thiết bị chiếu sáng 
+Các thiết bị chiếu sáng sẽ được trang bị nhằm đảm bảo an toàn cho vận hành tại 
+các khu vực lắp đặt thiết bị bao gồm: 
+- 
+Thiết bị chiếu sáng làm việc: nhận điện từ các tủ chiếu sáng được cấp điện từ các 
+MCC tương ứng. 
+- 
+Thiết bị chiếu sáng sự cố (tại các khu vực quan trọng nếu cần thiết): nhận điện từ 
+nguồn điện khẩn cấp hiện tại của nhà máy. 
+- 
+Các loại đèn được trang bị phù hợp trong phạm vi nâng cấp, cải tạo như sau: 
+- 
+Đèn LED IP54: Được dùng cho các khu vực trong nhà tuabin. 
+- 
+Đèn LED highbay, đèn LED chiếu pha loại chống cháy/nổ và chống nước/bụi 
+theo IP65: Được dùng cho các khu vực trạm ammonia, phòng ắc qui và các khu vực 
+cần thiết khác. 
+Đèn LED loại chống nước/bụi theo IP66, IK08: Được sử dụng chiếu sáng các 
+khu vực ngoài trời. 
+3.1.3 Đo lường & Điều khiển  
+21 
+ 
+a) 
+Hệ thống đo lường điều khiển cho hệ thống khử bụi tĩnh điện ESP 
+Với việc thay các máy biến áp cũ sang máy biến áp xung, hệ thống điều khiển 
+ESP cũng sẽ được thay thế phần cứng và phần mềm, tích hợp các chức năng tiên tiến. 
+Hệ thống điều khiển ESP mới của NMNĐ Quảng Ninh phải thuộc UCMS và chế 
+độ điều khiển tuân thủ theo như chế độ điều khiển cũ như sau: 
+- 
+Chế độ điều khiển tự động tại phòng điều khiển trung tâm; 
+- 
+Chế độ điều khiển tự động tại phòng điều khiển ESP; 
+- 
+Chế độ điều khiển bằng tay tại các tủ điều khiển tại chỗ. 
+Bên cạnh việc cung cấp thiết bị và thiết kế, lắp đặt hệ thống điều khiển ESP đáp 
+ứng các chế độ điều khiển như trên, nhà thầu cung cấp hệ thống điều khiển cho máy 
+biến áp chỉnh lưu xung cho hệ thống ESP còn phải có trách nhiệm lắp đặt, tích hợp 
+toàn bộ hệ thống điều khiển mới của ESP vào DCS của nhà máy. 
+b) 
+Hệ thống đo lường điều khiển cho hệ thống xử lý NOx 
+Hệ thống điều khiển và giám sát được cung cấp nhằm kiểm soát toàn bộ quá trình 
+của hệ thống khử NOx đồng thời có các liên động khác đến các hệ thống khác của lò 
+hơi nhà máy. Hệ thống điểu khiển và giám sát quá trình khử NOx sẽ được xem xét 
+thiết kế như là một chức năng trên UCMS (hệ thống điều khiển và giám sát tổ máy). 
+Một số đối tượng điều khiển trong hệ thống điều khiển SCR bao gồm: 
+- 
+Nhiệt độ hỗn hợp NH3/không khí và giới hạn về tỉ lệ; 
+- 
+Kiểm soát lưu lượng NH3; 
+- 
+Kiểm soát quạt gió; 
+- 
+Kiểm soát lượng không khí phun vào. 
+Các mức điều khiển riêng của hệ thống khử NOx phải được cung cấp như sau: 
+- 
+Mức 1: Giám sát và điều khiển từ các bàn điều khiển MMI trong phòng điều 
+khiển trung tâm. 
+- 
+Mức 2: Vận hành bằng tay tại chỗ (điều khiển chuyển động tại chỗ). 
+- 
+Đối với các nhà máy được lắp thêm hệ thống SCR cần phải thực hiện theo các 
+quy định của NFPA 85 (tiêu chuẩn nguy hiểm về hệ thống lò đốt và lò hơi). Theo các 
+yêu cầu được quy định trong NFPA 85, các hệ thống SCR được lựa chọn cho việc 
+kiểm soát phát thải NOx thì hệ thống này phải được tích hợp vào trong thiết kế của hệ 
+thống lò hơi. Ngoài ra để đảm bảo an toàn cho lò hơi, NFPA 85 cũng quy định các 
+trường hợp khóa liên động sau sẽ phải khởi tạo một ngắt (trip) để ngăn việc vận hành 
+cấp NH3 cho SCR khi có sự cố: 
+- 
+MFT (ngắt nhiên liệu chính); 
+- 
+SCR được cách ly ra khỏi dòng khói thải (bypass). 
+22 
+ 
+c) 
+Hệ thống đo lường điều khiển cho hệ thống khử lưu huỳnh FGD 
+Hệ thống FGD chỉ thực hiện các cải tạo về mặt cơ khí, do vậy các thiết bị đo 
+lường điều khiển sẽ được giữ nguyên như hiện trạng. Đối với các tủ biến tần lắp đặt 
+mới cho các quạt khói sẽ được nhà thầu khảo sát và đưa ra phương án điều khiển tích 
+hợp với hệ thống DCS trong giai đoạn thực hiện dự án. 
+3.1.4 Phần Xây dựng & Kiến trúc  
+a) Phạm vi công việc 
+Công tác cải tạo, sửa chữa nâng cấp hệ thống xử lý khí thải SO2, NOx dự án 
+NMNĐ Quảng Ninh, bao gồm nhưng không hạn chế các công việc: 
+- 
+Lắp dựng mới thiết bị SCR xử lý NOx 
+- 
+Gia cố hệ khung đỡ, cải tạo, di chuyển đường ống dẫn khói từ đuôi lò hơi tới bộ 
+lọc bụi tĩnh điện. 
+- 
+Xây mới nhà kho Amonia 
+- 
+Xây mới Nhà điện cho nhà Amonia và bộ xử lý SCR 
+- 
+Bố trí vị trí dự kiến đặt Tủ biến tần (Container) phục vụ đường khói; 
+- 
+Cải tạo hệ thống FGD. 
+- 
+Cải tạo, nâng cấp hệ thống ESP 
+- 
+Lắp đặt bổ sung 1 trường lọc bụi cho hệ thống ESP hiện hữu 
+- 
+Nâng cấp/thay thế một số quạt hút/đẩy khói. 
+b) Các điều kiện thiết kế 
+- 
+Đặc điểm khí tượng: NMNĐ Quảng Ninh nằm ở phường Hà Khánh, thành phố 
+Hạ Long, tỉnh Quảng Ninh thuộc vùng khí hậu ven biển, mỗi năm có 2 mùa rõ rệt, 
+mùa đông từ tháng 11 đến tháng 4 năm sau, mùa hè từ tháng 5 đến tháng 10. Nhiệt độ 
+trung bình hằng năm là 23,0oC, biên độ dao động không lớn nằm trong khoảng từ 
+16,1oC đến 28,5oC. Về mùa hè, nhiệt độ trung bình cao là 33,9oC, nóng nhất lên đến 
+39oC. Về mùa đông, nhiệt độ trung bình thấp là 12,6oC, nhiệt độ thấp nhất là 5oC. Độ 
+ẩm trung bình tương đối hằng năm vào khoảng 83%. Độ ẩm bình thường là 77% 
+(tháng 10, tháng 11, tháng 12). Độ ẩm cao nhất có tháng lên tới 88%. Tháng có lượng 
+mưa cao nhất là tháng 8 (442,2mm). Tháng mưa nhiều nhất là tháng 7- 8. Lượng mưa 
+trung bình năm: 1912mm. Lượng mưa năm cao nhất năm 1973 là 2916mm. Tổng số 
+ngày mưa năm: 142 ngày. Bão thường xuất hiện vào tháng 6, 7, 8 ảnh hưởng của bão 
+là mưa lớn, gió lớn và kéo dài. Bão thường đổ bộ theo hướng Nam và Đông Nam. 
+23 
+ 
+- 
+Đặc điểm thủy văn: Khu đất dự kiến xây dựng nhà máy nằm bên bờ sông Diễn 
+Vọng thông qua Vịnh Hạ Long bằng Vịnh Cửa Lục tại bến phà Bãi Cháy. Khu đất dự 
+kiến xây dựng nhà máy nằm bên bờ sông Diễn Vọng thông qua Vịnh Hạ Long bằng 
+Vịnh Cửa Lục tại bến phà Bãi Cháy. Chế độ thuỷ triều của Vịnh Cửa Lục hoàn toàn 
+phụ thuộc vào thuỷ triều của Vịnh Hạ Long. Khi mức nước trong Vịnh Cửa Lục bằng 
+với mức nước trong Vịnh Hạ Long thì mực sâu mức nước tại bến phà Bãi Cháy là 
+18m. Chế độ thuỷ triều của Vịnh Hạ Long là chế độ nhật triều. Mực nước đỉnh triều 
+ứng với tần suất 1% là 4,54 m. Mức nước chân triều tần suất 95% là - 1,66 m. 
+- 
+Đặc điểm địa chất bao gồm các lớp như sau: Lớp bùn (amQiv-2a) dày từ 2-26m; 
+Lớp á sét, sét (amQiv-2b) có chiều dày thay đổi từ 1-2 đến 5m; Lớp cát hạt nhỏ 
+(amQiv-2c) có chiều dày từ 1-2m đến 6,7m; Lớp cát hạt trung, hạt thô có lẫn ít cuội 
+sỏi (amQiv-2d) có chiều dày từ 2-12,6m; Lớp đất sườn tàn tích (edQ-lớp3) có chiều 
+dày từ 1 đến 4-5m; Trầm tích Neogen (N1đh-lớp 4) có cường độ kháng nén thấp. 
+- 
+Tải trọng gió: Giá trị tải trọng gió được xác định theo “Tải trọng và tác động - 
+Tiêu chuẩn thiết kế TCVN 2737-2020”. Dự án Nhà máy nhiệt điện Quảng Ninh thuộc 
+phường Hà Khánh, thành phố Hạ Long, tỉnh Quảng Ninh nên thuộc vùng IV, có Wo = 
+155daN/m2. 
+- 
+Tải trọng động đất: Theo số liệu quan trắc về mạng địa chấn Việt Nam và Quốc 
+tế của Viện Vật lý địa cầu, từ năm 1955 đến 1995 trong thời gian trên khu vực xây 
+dựng nhà máy và lân cận (trong vùng 100km) đã xẩy ra 64 trận động đất, cấp độ mạnh 
+tại các tâm động đất I = 7. Ngoài ra trên bản đồ kiến tạo địa chất tỷ lệ 1:1000.000, khu 
+vực xây dựng trong vùng phát sinh động đất với Mmax = 5,6 - 6 độ Richter. Độ sâu 
+tiêu chấn h = 25 - 30km, cấp độ mạnh tại tâm chấn Imax = 7 (theo thang Quốc tế MSK 
+- 64).Tính toán thiết kế chống động đất cho các hạng mục của dự án tuân thủ theo quy 
+chuẩn QCVN 02:2022/BXD – Quy chuẩn kỹ thuật quốc gia – Số liệu điều kiện tự 
+nhiên dùng trong xây dựng.Theo bảng 6.1 của quy chuẩn QCVN 02:2022/BXD – Quy 
+chuẩn kỹ thuật quốc gia – Số liệu điều kiện tự nhiên dùng trong xây dựng, Dự án có 
+đỉnh gia tốc nền tham chiếu trên nền loại A là: agR = 0,10.g (m/s2). Quy đổi đỉnh gia 
+tốc nền sang cấp động đất theo thang MSK-64 thì Dự án có cấp động đất là cấp VIII 
+(Bảng 6.4 – QCVN 02:2022/BXD). 
+c) Các loại vật liệu chủ yếu 
+- 
+Tường gạch: Gạch không nung thông thường có kích thước 210x100x60mm. 
+Gạch dùng xây tường trong các hạng mục của nhà máy nhiệt điện là loại có mác từ 
+M75 đến M100. 
+- 
+Tấm tôn lợp mái và tường bao che: Tôn được sản xuất bằng vật liệu nền là thép 
+24 
+ 
+G550 (giới hạn chảy là 550MPa) có độ dày 0,5mm (cho các khu vực phụ trợ). Tôn 
+được mạ hợp kim nhôm kẽm với trọng lượng tối tiểu là 150g/m2 và được sơn bảo vệ 
+bên ngoài một lớp sơn PVF trên một lớp phủ chống ăn mòn. Với các khu vực có yêu 
+cầu cách âm, cách nhiệt thì cấu tạo mái hoặc tường tôn phải có thêm lớp bảo ôn với 
+chiều dày tối thiểu là 50mm. 
+- 
+Cửa đi, cửa sổ: Cửa đi trong các hạng mục nhà khép kín bao gồm các loại: Cửa 
+khung nhôm kính (chủ yếu sử dụng cho các phòng làm việc dạng văn phòng), cửa thép 
+1 tấm, cửa thép 2 tấm có rỗng ở giữa, cửa chống cháy. Đối với cửa chống cháy có yêu 
+cầu khả năng chống cháy tối thiểu là 2 giờ (và tối thiểu bằng giới hạn chống cháy yêu 
+cầu của tường). Cửa khung nhôm (cửa đi, cửa sổ) là loại có tiết diện khung với chiều 
+dày tối thiểu là 1,6mm. 
+- 
+Bê tông: Mác bê tông có thể sử dụng như sau: Bê tông lót: B10; Bê tông phần 
+cọc: tối thiểu mác M350 (B25); Bê tông móng và phần trên móng: B25. 
+- 
+Cốt thép: là các loại được sản xuất trên thị trường Việt Nam, thông thường được 
+sản xuất theo các tiêu chuẩn ASTM, JIS hoặc TCVN. Mác thép bao gồm: CB 240-T; 
+CB 300-T, CB 300-V, CB 400-V theo TCVN hoặc SR 295, SD 390 theo JIS hoặc 
+tương đương. 
+- 
+Kết cấu thép: Thép kết cấu: JIS G3101 SS400, ASTM A36 hoặc tương đương; 
+Bu lông cường độ cao: JIS B1186 F10T, ASTM A325 loại 1, hoặc tương đương; Bu 
+lông neo: JIS G3101 SS400, ASTM A36 hoặc tương đương; Bu lông thường: JIS 
+B1180 hoặc tương đương. 
+3.1.5 Phần Môi trường  
+Hồ sơ thẩm tra bao gồm các phần chính: 
+- 
+Hiện trạng môi trường khu vực dự án: Trong đó có hiện trạng các thành phần môi 
+trường tự nhiên và hiện trạng hệ thống xử lý chất thải của nhà máy. 
+- 
+Mô tả các tác động và biện pháp giảm thiểu tác động do các hoạt động cải tạo 
+nhà máy. Các tác động này được phân theo 2 giai đoạn: Giai đoạn thi công xây dựng 
+và giai đoạn vận hành. 
+- 
+Kiểm tra sự khuếch tán khí thải của ống khói nhà máy đáp ứng quy chuẩn QCVN 
+05:2023/BTNMT. 
+3.1.6 Phần TMĐT  
+a) Cơ sở lập tổng mức đầu tư 
+25 
+ 
+Dự án nâng cấp, cải tạo hệ thống khử xử lý khí thải cho NMNĐ Quảng Ninh 
+được tính toán dựa trên các cơ sở pháp lý sau: 
+- 
+Luật xây dựng số 50/2014/QH13 ngày 18/6/2014 của Quốc hội; 
+- 
+Luật xây dựng số 62/2020/QH14 ngày 17/6/2020 của Quốc hội sửa đổi, bổ sung 
+một số điều của Luật xây dựng; 
+- 
+Luật Đầu tư số 61/2020/QH14 ngày 17/06/2020; 
+- 
+Luật thuế VAT số 48/2024/QH15 ngày 26/11/2024; 
+- 
+Nghị quyết số 204/2025/QH15 ngày 17/6/2025 về giảm thuế giá trị gia tăng; 
+- 
+Nghị định số 31/2021/NĐ-CP ngày 26/03/2021 của Chính phủ quy định chi tiết 
+và hướng dẫn thi hành một số điều của Luật Đầu tư; 
+- 
+Nghị định 06/2021/NĐ-CP ngày 26/01/2021 của Chính Phủ quy định chi tiết một 
+số nội dung về quản lý chất lượng, thi công xây dựng và bảo trì công trình xây dựng. 
+- 
+Nghị định số 10/2021/NĐ-CP ngày 09/02/2021 của Chính phủ về quản lý chi phí 
+đầu tư xây dựng; 
+- 
+Nghị định 181/2025/NĐ-CP ngày 01/7/2025 của Chính phủ quy định chi tiết thi 
+hành một số điều của Luật thuế giá trị gia tăng; 
+- 
+Thông tư 11/2021/TT-BXD ngày 31/08/2021 của Bộ Xây dựng, hướng dẫn một 
+số nội dung xác định và quản lý chi phí đầu tư xây dựng; 
+- 
+Thông tư số 06/2021/TT-BXD ngày 30/06/2021 của Bộ Xây dựng quy định về 
+phân cấp công trình xây dựng và hướng dẫn áp dụng trong quản lý hoạt động đầu tư 
+xây dựng; 
+- 
+Thông tư 12/2021/TT-BXD ngày 31/08/2021 của Bộ Xây dựng, ban hành Định 
+mức xây dựng; 
+- 
+Thông tư 13/2021/TT-BXD ngày 31/08/2021 của Bộ Xây dựng, hướng dẫn 
+phương pháp xác định các chỉ tiêu kinh tế kỹ thuật và đo bóc khối lượng công trình; 
+- 
+Thông tư số 28/2023/TT-BTC ngày 12/5/2023 của Bộ Tài chính quy định mức 
+thu, chế độ thu nộp quản lý và sử dụng phí thẩm định dự án đầu tư xây dựng; 
+- 
+Thông tư 258/2016/TT-BTC ngày 11/11/2016 của Bộ Tài Chính quy định mức 
+thu, chế độ thu, nộp, quản lý và sử dụng phí thẩm định phê duyệt thiết kế phòng cháy 
+và chữa cháy; 
+- 
+Thông tư số 50/2022/TT-BTC ngày 11/08/2022 hướng dẫn thực hiện một số điều 
+của Nghị định số 119/2015/NĐ-CP ngày 13/11/2015 của Chính phủ quy định bảo 
+hiểm bắt buộc trong hoạt động đầu tư xây dựng và Nghị định số 20/2022/NĐ-CP ngày 
+10/03/2022 sửa đổi, bổ sung một số điều của Nghị định số 119/2015/NĐ-CP; 
+- 
+Thông tư số 69/2025/TT-BTC do Bộ Tài chính ban hành ngày 1/7/2025, có hiệu 
+lực từ ngày 1/7/2025. Thông tư này quy định chi tiết một số điều của Luật Thuế giá trị 
+26 
+ 
+gia tăng số 48/2024/QH15 và hướng dẫn thực hiện Nghị định 181/2025/NĐ-CP của 
+Chính phủ; 
+- 
+Công bố 9796/CBG-SXD năm 2025 thông tin một số giá vật liệu xây dựng trên 
+địa bàn tỉnh Quảng Ninh thời điểm Quý IV/2025 
+- 
+Quyết định số 4745/QĐ-SXD ngày 15/11/2024 của tỉnh Quảng Ninh về đơn giá 
+nhân công. 
+Tỷ giá USD/VNĐ: 26.388 (tỷ giá Ngân hàng ngoại thương ngày 19/01/2026) 
+Phương pháp xác định:  
+Tổng mức đầu tư là phương pháp xác định từ khối lượng xây dựng tính theo thiết 
+kế bản vẽ thi công và các yêu cầu cần thiết khác của dự án quy định tại Điểm a, Khoản 
+1, Điều 6, Nghị định 10/2021/NĐ-CP và hướng dẫn tại Thông tư 11/2021/TT-BXD 
+ngày 31/08/2021 của Bộ Xây dựng và Thông tư số 14/2023/TT-BXD của Bộ Xây 
+dựng. 
+Giá trị Tổng mức đầu tư 
+Phương án thi công nâng cấp, cải tạo hệ thống xử lý khí thải cho NMNĐ Quảng 
+Ninh với thời gian thi công các tổ máy cụ thể như sau: 
+Tổng chi phí Nâng cấp, cải tạo hệ thống FGD, hệ thống khử NOx và lọc bụi tĩnh 
+điện cho NMNĐ Quảng Ninh được thể hiện trong bảng dưới đây: 
+TT 
+Hạng mục 
+Giá trị trước 
+thuế  
+(109VNĐ) 
+VAT 
+(109VNĐ) 
+Giá trị sau 
+thuế 
+(109VNĐ) 
+Quy đổi ra 
+106 USD 
+1 
+Chi phí xây 
+dựng 
+150,06 
+14,105 
+164,16 
+6,22 
+2 
+Chi phí thiết bị  
+2.941,05 
+276,46 
+3.217,51 
+121,93 
+3 
+Chi phí quản lý 
+dự án 
+23,96 
+ 
+23,96 
+0,91 
+4 
+Chi phí tư vấn 
+26,62 
+2,234 
+28,858 
+1,09 
+5 
+Chi phí khác 
+142,42 
+3,057 
+145,478 
+5,51 
+6 
+Chi phí dự 
+phòng 
+200,77 
+18,449 
+219,217 
+8,307 
+  
+Tổng mức đầu 
+tư 
+3.484,88 
+314,305 
+3.799,188 
+143,97 
+3.1.7 Kinh tế - Tài chính  
+Dự án nâng cấp, cải tạo hệ thống xử lý khí thải NMNĐ Quảng Ninh được hình 
+thành từ 20% nguồn vốn đầu tư phát triển của Chủ đầu tư và 80% nguồn vốn vay 
+thương mại trong nước. 
+27 
+ 
+Thuế thu nhập doanh nghiệp: Dự án sẽ chịu mức thuế thu nhập doanh nghiệp như 
+mức mà NMNĐ Quảng Ninh đang thực hiện. 
+Các thông số kĩ thuật và kinh tế - tài chính của dự án: 
+Danh mục 
+Đơn vị 
+Giá trị 
+Công suất đặt 
+MW 
+1.200 
+Tỷ lệ điện năng tự dùng 
+% 
+9,61% 
+Công suất tinh 
+MW 
+1.085 
+Điện năng sản xuất 
+GWh/năm 
+7.200,00 
+Điện năng tự dùng 
+GWh/năm 
+691,92 
+Điện năng thương phẩm 
+GWh/năm 
+6.501,57 
+Số giờ vận hành (theo thực tế nhà máy đang vận hành) 
+h/năm 
+6.000,00 
+Hệ số suy giảm công suất 
+hàng năm 
+0,10% 
+Tuổi thọ dự án 
+năm 
+10 
+Thời gian khấu hao 
+năm 
+10,00 
+Chi phí O&M 
+Tỷ VNĐ/MW 
+102,01 
+Chi phí điện, nước, hoá chất 
+Tỷ VNĐ/năm 
+470,29 
+Lượng amoniac tiêu hao 
+kg/năm 
+12.045.120 
+Lượng điện tiêu hao 
+kWh/năm 
+18.470.400 
+Giá amonia 
+VNĐ/kg 
+26.350,00 
+Giá mua điện phục vụ chạy thử 
+VNĐ/kWh 
+2.036 
+ 
+ 
+* Dòng chi phí của dự án bao gồm: 
+Chi phí vốn đầu tư cho dự án theo các năm (tính theo chi phí vốn tài chính của dự 
+án) 
+Chi phí O&M 
+28 
+ 
+Chi phí nhiên liệu như nước, điện, hoá chất 
+* Dòng thu của dự án bao gồm: 
+Doanh thu do bán điện 
+Với giá bán điện tăng thêm là 164,25 VNĐ/kWh thì kết quả phân tích kinh tế và 
+tài chính của dự án như sau: 
+ 
+Kết quả phân tích kinh tế dự án 
+Các chỉ tiêu kinh tế đạt được 
+Giá trị đạt được 
+Hệ số chiết khấu kinh tế (ik) (%) 
+7,48% 
+EIRR (%) 
+9,91% 
+NPV (tr.VNĐ) 
+377.795 
+B/C 
+1,122 
+Thời gian hoàn vốn (năm) 
+10,00 
+ 
+Kết quả phân tích tài chính dự án 
+Các chỉ tiêu tài chính đạt được 
+Giá trị đạt được 
+Hệ số chiết khấu tài chính (if) (%) 
+7,48% 
+FIRR (%) 
+11,00% 
+NPV (tr.VNĐ) 
+156.800 
+B/C 
+1,07 
+Thời gian hoàn vốn (năm) 
+11,00 
+Mức thu hồi qua giá bán điện (đ/kWh) 
+169,44 
+Tương đương (Uscent/kWh) 
+0,64 
+3.2 Quy chuẩn, tiêu chuẩn chủ yếu áp dụng 
+3.2.1 Phần Công nghệ  
+Tiêu chuẩn thiết kế liên quan đến hệ thống thiết bị ammonia và khử NOx trong 
+khí thải lò hơi: 
+ CGA G-2 Anhydrous Ammonia: Code of Federal Regulation 
+ ANSI K61.1: Safety Requirement for the Storage and Handling of Anhydrous 
+Ammonia 
+ OSHA: 1910.111: Storage and handling of anhydrous ammonia 
+29 
+ 
+Hiệp hội các kỹ sư cơ khí (ASME) 
+ ASME Phần IX: Máy hàn & cấp hàn 
+ ASME Phần IX: Máy hàn 
+Viện tiêu chuẩn quốc gia Mỹ 
+ ASME B13.5: Mặt bích ống và phụ kiện bích 
+ ASME B 13.9: Phụ kiện hàn 
+ ASME B 13.1: Hàn socket và phụ kiệm 
+ ASME B 31.1: Quy chuẩn ống nhà máy điện 
+Tiêu chuẩn Công nghiệp 
+ Hiệp hội Kiểm nghiệm và Vật liệu (ASTM) 
+ Hiệp hội Công trình nước Mỹ (AWWA) 
+ Hiệp hội hàn Mỹ (AWS), Kết cấu hàn (AWSD1.1) 
+ Viện tháp làm mát (CTI) 
+ Viện trao đổi nhiệt (HEI) 
+ Viện thủy lực (HI) 
+ Viện Kỹ sư Điện và Điện tử (IEEE) 
+ Society of America (ISA) 
+ Viện nghiên cứu công trình sử dụng kết cấu thép (AISC ASD and LRFD 
+AISC) 
+ Thiết kế ứng suất cho phép (ASD) 
+ Hiệp hội PCCC (NFPA) 
+ Viện chế tạo ống (PFI) 
+ Hiệp hội các nhà sản xuất trao đổi hình ống (Tema) 
+Tiêu chuẩn Anh 
+ BS 4592: Kim loại công nghiệp, lối đi và cầu thang 
+ BS 5395: Cầu thang, và các lối đi 
+ BS: 2573: Cầu trục 
+BS: 466: Cầu trục để sử dụng chung trong các nhà máy, công xưởng và kho 
+hàng. 
+3.2.2 Phần Điện và Đo lường & Điều khiển 
+30 
+ 
+Tất cả các thiết bị điện, hệ thống nối đất và hệ thống chiếu sáng được cung cấp 
+theo Hợp đồng này phải tuân thủ các tiêu chuẩn, quy chuẩn và quy định hiện hành của 
+Việt Nam, bao gồm nhưng không giới hạn ở các nội dung sau: 
+Các Tiêu chuẩn Việt Nam (TCVN) áp dụng liên quan đến: 
+- 
+Lắp đặt hệ thống điện hạ áp; 
+- 
+Hệ thống nối đất và chống sét; 
+- 
+An toàn điện trong các nhà máy công nghiệp; 
+- 
+Quy định của Việt Nam về nhận dạng màu dây dẫn (dây pha và dây trung tính); 
+- 
+Các Quy chuẩn kỹ thuật quốc gia (QCVN) liên quan đến an toàn điện và phòng 
+cháy chữa cháy (nếu áp dụng); 
+- 
+Các yêu cầu và quy định kỹ thuật hiện hành của EVN và Chủ đầu tư đối với thiết 
+kế và lắp đặt hệ thống điện trong nhà máy nhiệt điện. 
+Trường hợp có sự khác biệt giữa tiêu chuẩn Việt Nam và tiêu chuẩn quốc tế, Nhà 
+thầu phải thông báo cho Chủ đầu tư để xem xét và quyết định trước khi triển khai thực 
+hiện. 
+Hệ thống đo lường điều khiển sẽ tuân thủ các tiêu chuẩn quốc tế có liên quan và 
+đặc biệt là các tiêu chuẩn tham khảo dưới đây: 
+- 
+Hiệp hội PCCC Quốc gia Hoa kỳ (NFPA) 
+NFPA 85: Tiêu chuẩn bảo vệ lò hơi và các hệ thống cháy. 
+- 
+Viện các Kỹ sư Điện - Điện tử (IEEE) 
+IEEE 502: Hướng dẫn bảo vệ, liên động và điều khiển tổ máy dùng nhiên liệu 
+hóa thạch. 
+IEEE Std 91a-1991 & IEEE Std 91-1984: Các ký hiệu đồ họa cho các chức 
+năng logic. 
+- 
+Hiệp hội đo lường Hoa Kỳ (ISA). 
+ISA S-20: Biểu mẫu đặc tính kỹ thuật cho đo lường quá trình và các phần tử đo 
+lường điều khiển sơ cấp và van điều khiển. 
+ISA S5.1: Đánh số nhận dạng và ký hiệu thiết bị đo lường. 
+ISA 7.0.0.1: 
+Tiêu chuẩn chất lượng cho khí dùng trong đo lường. 
+- 
+Hiệp hội các nhà sản xuất thiết bị kỹ thuật (SAMA) 
+SAMA RC 22.11: 
+Sơ đồ chức năng của các hệ thống đo lường và điều khiển. 
+Viện tiêu chuẩn quốc gia Hoa Kỳ (ANSI): 
+ANSI C37.1: 
+Tiêu chuẩn nhiễu và tiếng ồn EMI; 
+ANSI S5.1: 
+Đánh số nhận dạng và ký hiệu thiết bị đo lường; 
+ANSI S5.3: 
+Ký hiệu đồ họa cho điều khiển phân tán; 
+31 
+ 
+ANSI C37.90a: Hướng dẫn kiểm tra khả năng chống sét; 
+ANSI MC 96.1: Thiết bị đo nhiệt độ – Cặp nhiệt. 
+- 
+Uỷ ban kỹ thuật điện quốc tế IEC 
+IEC 60478: 
+Các bộ cấp điện, bộ nguồn một chiều. 
+- 
+NEMA  
+IEC 60529: 
+Cấp bảo vệ của các vở tủ điện (IP Code). 
+IEC 60083: 
+Ổ cắm và phích điện cho mục đích trang trí và các ứng dụng 
+thông thường trong các nước thành viên IEC. 
+IEC 61508: 
+Chức năng an toàn của các hệ thống điện/điện tử/điện tử khả 
+trình. 
+IEC 60848 : 
+Ngôn ngữ GRAFCET của các sơ đồ chức năng tuần tự. 
+IEC 61131: 
+Tiêu chuẩn của các bộ điều khiển logic khả trình. 
+IEC 61000 : 
+Tương thích điện từ (EMC) 
+IEC 60617: 
+Biểu tượng đồ họa cho các sơ đồ 
+IEC 60034: 
+Các máy điện cơ cấu quay. 
+IEC 60079: 
+Bộ phận thiết bị điện tại các môi trường khi dễ cháy nổ. 
+IEC 1207:  
+Thực hiện sang chiết tại các bộ phân tích khí. 
+3.2.3 Phần Xây dựng & Kiến trúc 
+Một số Quy chuẩn Việt Nam chính sau đây được áp dụng cho quá trình thiết kế 
+các hạng mục công tình của Dự án, bao gồm: 
+- 
+Quy phạm trang bị điện, ban hành theo quyết định số 19/2006/QĐ-BCN; 
+- 
+QCVN 01:2021/BXD - Quy chuẩn kỹ thuật Quốc Gia về Quy hoạch xây dựng; 
+- 
+QCVN 02:2022/BXD - Quy chuẩn kỹ thuật quốc gia về số liệu điều kiện tự nhiên 
+dùng trong xây dựng; 
+- 
+QCVN 03:2022/BXD - Quy chuẩn kỹ thuật quốc gia về phân loại, phân cấp công 
+trình xây dựng dân dụng, công nghiệp và hạ tầng kỹ thuật đô thị; 
+- 
+QCVN 05:2008/BXD - Quy chuẩn kỹ thuật quốc gia về nhà ở và công trình công 
+cộng- An toàn sinh mạng và sức khỏe; 
+- 
+QCVN 06:2022/BXD - Quy chuẩn kỹ thuật quốc gia về an toàn cháy cho nhà và 
+công trình; 
+- 
+QCVN 07:2023/BXD - Quy chuẩn kỹ thuật quốc gia về các công trình hạ tầng kỹ 
+thuật; 
+32 
+ 
+- 
+QCVN 07:2019/BKHCN - Quy chuẩn kỹ thuật quốc gia về thép làm cốt bê tông; 
+- 
+Và các quy chuẩn khác có liên quan. 
+Tiêu chuẩn: 
+- 
+TCVN 2737:2023 – Tải trọng và tác động – Tiêu chuẩn thiết kế; 
+- 
+TCVN 5574:2018 - Thiết kế kết cấu bê tông và bê tông cốt thép; 
+- 
+TCVN 5575:2024 - Kết cấu thép - Tiêu chuẩn thiết kế; 
+- 
+TCVN 10304: 2014 – Móng cọc – Tiêu chuẩn thiết kế; 
+- 
+TCVN 9386:2012 – Thiết kế công trình chịu động đất; 
+- 
+TCVN 9393:2012 – Cọc – Phương pháp thử nghiệm tại hiện trường bằng ép tĩnh 
+dọc trục; 
+- 
+TCVN 9362:2012 - Tiêu chuẩn thiết kế nền nhà và công trình; 
+- 
+TCVN 4604:2012 - Xí nghiệp công nghiệp – Nhà sản xuất – Tiêu chuẩn thiết; 
+- 
+TCVN 4371: 1986 - Nhà kho – nguyên tắc cơ bản để thiết kế; 
+- 
+TCVN 9346:2012: Kết cấu bê tông và bê tông cốt thép - yêu cầu bảo vệ chống ăn 
+mòn trong môi trường biển; 
+- 
+TCVN 1651 -1 :2018 - Thép cốt cho bê tông – Phần 1: Thép thanh tròn trơn; 
+- 
+TCVN 1651 -2:2018 - Thép cốt cho bê tông – Phần 2: Thép thanh vằn; 
+- 
+TCVN 3108:1993 - Hỗn hợp bê tông nặng – Phương pháp xác định khối lượng 
+thể tích; 
+- 
+TCVN 12251:2018 - Bảo vệ chống ăn mòn cho kết cấu xây dựng; 
+- 
+TCVN 10307:2014 về Kết cấu cầu thép - Yêu cầu kỹ thuật chung về chế tạo, lắp 
+ráp và nghiệm thu 
+- 
+TCVN 7888:2014 – Cọc bê tông ly tâm dự ứng lực; 
+- 
+TCVN 6477:2016 – Gạch bê tông; 
+- 
+TCVN 7959:2011 – Bê tông nhẹ, Block bê tông khí chưng áp (AAC); 
+- 
+TCVN 9028:2011 – Vữa cho bê tông nhẹ; 
+- 
+TCVN 9029:2011 – Bê tông nhẹ – Gạch Bê tông bọt, khí không chưng áp – Yêu 
+cầu kỹ thuật; 
+- 
+TCVN 9030:2011 – Bê tông nhẹ – Gạch Bê tông bọt, khí không chưng áp – 
+Phương pháp thử; 
+- 
+ Và các tiêu chuẩn khác có liên quan.  
+3.2.4 Phần Môi trường 
+- 
+QCVN 19:2024/BTNMT - Quy chuẩn kỹ thuật quốc gia về khí thải công nghiệp. 
+- 
+QCVN 05:2023/BTNMT – Quy chuẩn kỹ thuật quốc gia về chất lượng không khí  
+33 
+ 
+IV. NHẬN XÉT VỀ CHẤT LƯỢNG HỒ SƠ ĐỀ NGHỊ THẨM TRA  
+Sau khi xem xét hồ sơ Dự án nâng cấp, cải tạo hệ thống xử lý khí thải Nhà máy 
+nhiệt điện Quảng Ninh, PECC1 báo cáo về chất lượng hồ sơ đề nghị thẩm tra như sau: 
+4.1 Quy cách và danh mục hồ sơ thực hiện thẩm tra (nhận xét về quy cách, 
+tính hợp lệ, thiếu/đủ hồ sơ theo quy định)  
+Hồ sơ Báo cáo Nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ thống xử lý khí 
+thải Nhà máy nhiệt điện Quảng Ninh do Viện Năng lượng lập tháng 05/2026 gồm các 
+Quyển, trong đó: 
+- 
+Quyển 1: Báo cáo Nghiên cứu khả thi gồm Phần 1.1 Thuyết minh báo cáo và 
+Phần 1.2. Các phụ lục (các văn bản pháp lý, TMĐT, PT KT-TC); 
+- 
+Quyển 2: Thiết kế cơ sở gồm Phần 2.1. Thuyết minh Thiết kế cơ sở (TKCS), 
+Phần 2.2. Bản vẽ TKCS và Phần 2.3. Các phụ lục. 
+- 
+Quyển 3: Báo cáo khảo sát 
+Hồ sơ Báo cáo Nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ thống xử lý khí 
+thải Nhà máy nhiệt điện Quảng Ninh được lập phù hợp với quy định tại Điều 59, Luật 
+Xây dựng năm 2014 được sửa đổi, bổ sung tại khoản 12 Điều 1 của Luật số 
+62/2020/QH14 về nội dung Báo cáo Nghiên cứu khả thi. Trong hồ sơ Tư vấn thiết kế 
+sử dụng số liệu khảo sát đã được thực hiện trong giai đoạn xây dựng nhà máy nhiệt 
+điện Quảng Ninh trước đây do nhà máy cung cấp. 
+ 
+Nhận xét, đánh giá về các nội dung Báo cáo nghiên cứu khả thi 
+Qua công tác thẩm tra Báo cáo nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ 
+thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh, Tư vấn thẩm tra nhận thấy: 
+Nội dung BCNCKT trình bày tương đối đầy đủ các nội dung theo Điều 17, Nghị 
+định 175/2021/NĐ-CP và Điều 54 của Luật Xây dựng năm 2014, bao gồm: 
+- 
+Vị trí xây dựng, quy mô, loại, cấp công trình thuộc tổng mặt bằng xây dựng; 
+- 
+Phương án công nghệ về lựa chọn công nghệ hệ thống khử bụi tĩnh điện ESP, hệ 
+thống FGD; 
+- 
+Giải pháp về kiến trúc, mặt bằng, mặt cắt, mặt đứng công trình, các kích thước, 
+kết cấu chính của công trình xây dựng; 
+- 
+Giải pháp về xây dựng, vật liệu chủ yếu được sử dụng, ước tính chi phí xây dựng 
+cho từng công trình; 
+- 
+Tiêu chuẩn, quy chuẩn kỹ thuật được áp dụng để lập thiết kế cơ sở. 
+Các giải pháp nêu ra trong báo cáo nghiên cứu khả thi phù hợp với hiện trạng của 
+34 
+ 
+nhà máy Nhiệt điện Quảng Ninh và có khả năng kết nối vận hành đồng bộ giữa hệ 
+thống xử lý khí thải xây dựng mới với các công trình, hệ thống thiết bị và hạ tầng kỹ 
+thuật hiện hữu của nhà máy.  
+4.2 Kết luận của đơn vị thẩm tra về việc đủ điều kiện để thực hiện thẩm tra 
+Căn cứ theo các quy định hiện hành, Hồ sơ Báo cáo NCKT Dự án nâng cấp, cải 
+tạo hệ thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh đủ điều kiện để thực hiện 
+thẩm tra. 
+V. KẾT QUẢ THẨM TRA DỰ ÁN 
+1. Sự tuân thủ quy định của pháp luật về lập dự án đầu tư xây dựng, thiết 
+kế cơ sở  
+1.1. Sự tuân thủ quy định của pháp luật về lập dự án đầu tư xây dựng, thiết 
+kế cơ sở  
+Nội dung và kết cấu của Báo cáo nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ 
+thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh do Viện Năng lượng lập đã tuân 
+thủ các quy định của Luật Xây dựng số 50/2014/QH13 ngày 18/06/2014 và Luật số 
+62/2020/QH14 ngày 17/6/2020 sửa đổi, bổ sung một số điều của Luật Xây dựng; tuân 
+thủ theo quy định về các nội dung liên quan đến lập và thẩm định Báo cáo nghiên cứu 
+khả theo theo quy định của Nghị định 175/2024/NĐ-CP ngày 30 tháng 12 năm 2024 
+của Thủ tướng Chính phủ. Công tác lập tổng mức đầu tư của dự án tuân thủ Nghị định 
+số 10/2021/NĐ-CP ngày 09/02/2021 của Chính Phủ về quản lý chi phí đầu tư xây 
+dựng. Các giải pháp về bảo vệ môi trường và các thông số phát thải được thiết kế dựa 
+theo các Quy chuẩn và quy định hiện hành về pháp luật bảo vệ môi trường. Các giải 
+pháp thiết kế hệ thống PCCC được thiết kế tuân theo các tiêu chuẩn và quy định hiện 
+hành về PCCC.. 
+1.2. Điều kiện năng lực của tổ chức, cá nhân tham gia thực hiện 
+1.2.1. Phần Công nghệ  
+Tư vấn thực hiện lập Báo cáo nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ 
+thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh là Viện Năng lượng. Căn cứ trên 
+hồ sơ năng lực của tổ chức cũng như chứng chỉ hành nghề của các Chủ nhiệm, Chủ trì, 
+thiết kế phần công nghệ. TVTT đánh giá IE là đơn vị có nhiều kinh nghiệm thiết kế 
+các công trình nhiệt điện, đáp ứng theo quy định tại Điều 14, Nghị định 175/2024/NĐ-
+CP.  
+Chủ nhiệm dự án là ông Nguyễn Văn Thạo có chứng chỉ hành nghề thiết kế cơ – 
+điện công trình số BXD – 00130053, có hạn tới 21/01/2027. 
+35 
+ 
+Đối với nhân sự thực hiện công tác thiết kế phần công nghệ là ông Lê Nhuận Vĩ 
+có chứng chỉ thiết kế số HAN-00109430 có hạn tới 06/11/2035 phù hợp với quy định 
+tại Nghị định 175/2024/NĐ-CP. 
+1.2.2. Phần Xây dựng và Kiến trúc  
+Tư vấn thực hiện lập Báo cáo nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ 
+thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh là Viện Năng lượng, năng lực 
+đáp ứng theo quy định tại Nghị định 175/2024/NĐ-CP.  
+Đối với nhân sự thực hiện công tác thiết kế phần xây dựng là ông Nguyễn Huy 
+Thắng có chứng chỉ thiết kế số BXD - 00136203 có hạn tới 01/4/2027 phù hợp với quy 
+định tại Nghị định 175/2024/NĐ-CP. 
+1.2.3. Phần Điện, Đo lường và điều khiển  
+Tư vấn thực hiện lập Báo cáo nghiên cứu khả thi Dự án nâng cấp, cải tạo hệ 
+thống xử lý khí thải Nhà máy nhiệt điện Quảng Ninh là Viện Năng lượng có đủ năng 
+lực thiết kế đối với dự án. 
+Đối với nhân sự thực hiện công tác thiết kế phần Điện, Đo lường và điều khiển là 
+ông Phạm Minh Quân có chứng chỉ thiết kế số HAN - 00170208 có hạn tới 
+06/10/2035 là phù hợp với quy định tại Nghị định 175/2024/NĐ-CP. 
+2. Sự phù hợp của thiết kế cơ sở với quy hoạch của nhà máy 
+2.1 Sự phù hợp về mặt Quy hoạch xây dựng 
+Dự án nâng cấp cải tạo hệ thống xử lý khí thải nhà máy Nhiệt điện Quảng Ninh 
+là dự án cải tạo nâng cấp một số thiết bị hiện hữu bên trong nhà máy, không phát sinh 
+nhu cầu sử dụng đất bên ngoài ranh giới của nhà máy do đó không làm thay đổi quy 
+hoạch xây dựng chung của khu vực.  
+2.2 Sự phù hợp về Quy hoạch, kế hoạch bảo vệ môi trường 
+Dự án về phù hơp với Chiến lược bảo vệ môi trường quốc gia quốc gia đến năm 
+2030, tầm nhìn đến năm 2050 ban hành theo Quyết định số 450/QĐ-TTg ngày 
+13/4/2022 của Thủ tướng Chính phủ và Quy hoạch bảo vệ môi trường quốc gia thời kỳ 
+2021 - 2030, tầm nhìn đến năm 2050 theo Quyết định số 611/QĐ-TTg ngày 8/7/2024 
+của Thủ tướng Chính phủ.  
+Việc thực hiện nâng cấp, cải tạo hệ thống xử lý khi thải cả nhà máy nhiệt điện 
+Quảng Ninh góp phần giảm thiểu nồng độ phát thải các khí ô nhiễm môi trường nhằm 
+đáp úng mục tiêu tổng quát của Chiến lược và quy hoạch bảo vệ môi trường là ngăn 
+chặn xu hướng gia tăng ô nhiễm, suy thoái môi trường; giải quyết các vấn đề môi 
+36 
+ 
+trường cấp bách; từng bước cải thiện, phục hồi chất lượng môi trường; ngăn chặn sự 
+suy giảm đa dạng sinh học; góp phần nâng cao năng lực chủ động ứng phó với biến 
+đổi khí hậu; bảo đảm an ninh môi trường, xây dựng và phát triển các mô hình kinh tế 
+tuần hoàn, kinh tế xanh, carbon thấp, phấn đấu đạt được các mục tiêu phát triển bền 
+vững 2030 của đất nước.  
+3. Sự phù hợp của dự án với chủ trương đầu tư; với chương trình, kế hoạch 
+thực hiện khác 
+Thực hiện chủ trương của Đảng, chính sách pháp luật của Nhà nước, Công ty Cổ 
+phần Nhiệt điện Quảng Ninh luôn đề cao các biện pháp bảo vệ môi trường, phấn đấu 
+trở thành một doanh nghiệp thân thiện với môi trường. Trong suốt quá trình hoạt động 
+sản xuất thương mại từ năm 2011 đến nay, Công ty đã duy tu, bảo dưỡng theo đúng 
+định kỳ các hệ thống bảo vệ môi trường. 
+Theo Quyết định số 767/QĐ-BTNMT của Bộ Tài nguyên và Môi trường ngày 18 
+tháng 6 năm 2003 về việc “Phê chuẩn báo cáo đánh giá tác động môi trường Dự án 
+NMNĐ Quảng Ninh” các nguồn khí thải của Nhà máy phải được xử lý đạt các tiêu 
+chuẩn môi trường TCVN 5937:1995, TCVN 5939:1995 và TCVN 6991:2001 ứng với 
+lưu lượng thải Q3, trình độ công nghệ cấp A, hệ số vùng Kv=1 trước khi thải ra môi 
+trường. 
+Thông số phát thải bảo hành (thiết kế) của nhà máy NMNĐ Quảng Ninh như sau: 
+- 
+Bụi ≤ 400 mg/Nm3(tại 6%O2), áp dụng TCVN 5939 – 1995; 
+- 
+SOx ≤ 150mg/Nm3 (tại 6%O2), áp dụng TCVN 5939 – 1995; 
+- 
+NOx ≤ 1000 mg/Nm3(tại 6%O2), áp dụng  văn bản 1765/CP-CN của Chính 
+phủ (phù hợp với TCVN 5939 – 1995) 
+Tuy nhiên yêu cầu về bảo vệ môi trường ngày càng được nâng cao, kiểm soát 
+ngày càng chặt chẽ, nhận thức của người dân về vấn đề môi trường cũng ngày càng 
+nâng cao. Theo quy định của QCVN 19:2024/BTNMT, nồng độ phát thải được yêu 
+cầu như sau: 
+- 
+Nồng độ SO2 (điều kiện tiêu chuẩn, 6%O2) ≤ 120 mg/Nm3, 
+- 
+Nồng độ NOx (điều kiện tiêu chuẩn, 6%O2) ≤ 120 mg/Nm3,  
+- 
+Nồng độ bụi (điều kiện tiêu chuẩn, 6%O2) ≤ 20 mg/Nm3. 
+ So sánh các thông số bụi, SO2 và NOx thiết kế theo TCVN 5939 – 1995 với quy 
+định mức phải thải bụi, NOx, SO2 của QCVN 19:2024/BTNMT, phát thải bụi, SO2 và 
+NOx từ khí thải từ các lò hơi NMNĐ Quảng Ninh chưa đáp ứng hoàn toàn quy định. 
+Để đảm bảo đưa các thông số phát thải bụi, SO2, NOx, đáp ứng hoàn toàn theo 
+37 
+ 
+quy định trong tương lai, cần thiết phải có các giải pháp nâng cấp, cải tạo hiệu suất 
+khử của hệ thống ESP, FGD và đầu tư mới hệ thống khử NOx để kiểm soát và giảm 
+mức phát thải bụi, SO2, NOx, đáp ứng hoàn toàn quy định trong QCVN 
+19:2024/BTNMT.  
+ . 
+4. Khả năng kết nối với hạ tầng kỹ thuật khu vực 
+4.1 Kết nối giao thông 
+- 
+Kết nối đường bộ: Các hạng mục thuộc dự án nâng cấp, cải tạo nằm trong nhà 
+máy hiện hữu đặt tại vị trí cách Quốc lộ 18 khoảng 7 km, nằm sát cầu Bang, tiếp giáp 
+với tuyến đường Thành phố Hạ Long - Cao Xanh - Khu công nghiệp Hoành Bồ. Từ 
+nhà máy có thể kết nối với các khu vực lân cận bằng đường bộ hết sức thuận lợi 
+- 
+Kết nối đường thủy: Các hạng mục thuộc dự án nâng cấp, cải tạo nằm trong nhà 
+máy hiện hữu nằm bên trái cửa sông Diễn Vọng giáp Vịnh Cửa Lục thông với Vịnh 
+Bãi Cháy, cách cảng Cái Lân (nằm trong Vịnh Cửa Lục) khoảng 6,0 km. Tạo điều kiện 
+thuận lợi cho việc cung cấp vật tư thiết bị và nguyên vật liệu cho vận hành nhà máy. 
+Với hệ thống cảng trong Vịnh Cửa Lục cho phép xà lan từ 200 đến 500 tấn cập cảng.  
+4.2 Kết nối cấp nước  
+Nhu cầu sử dụng nước thi công chủ yếu là phục vụ công tác thi công bê tông, 
+xây, trát, vệ sinh máy móc, thiết bị. Lượng nước này được lấy từ các họng nước cấp 
+của nhà máy vì nhu cầu không đáng kể. 
+Lượng nước dịch vụ phục vụ vận hành các hệ thống sau cải tạo được lấy từ hệ 
+thống cung cấp và xử lý nước của nhà máy hiện hữu. 
+Lượng nước PCCC được lấy từ lượng nước dự phòng cho PCCC của nhà máy 
+hiện hữu. 
+TVTT đánh giá là phù hợp, đảm bảo tính dự phòng cũng như kết nối với khả 
+năng cũng cấp nước hiện hữu của nhà máy. 
+4.3 Kết nối thoát nước  
+Hệ thống kênh, mương, rãnh hiện hữu sẽ thu gom nước mưa, nước mặt từ các 
+triền núi phía Nam nhà máy và nước trong khuôn viên mặt bằng nhà máy. Các loại 
+nước này được dẫn vào hệ thống thu gom chung của nhà máy hiện hữu, xử lý đạt yêu 
+cầu môi trường rồi dẫn xả ra sông Diễn Vọng. Đối với nước thải của nhà máy sẽ được 
+thu gom riêng và tiến hành xử lý trước khi thải ra sông, hoặc tái sử dụng vào các chu 
+trình công nghệ của nhà máy. 
+38 
+ 
+4.4 Kết nối điện và điều khiển 
+Hệ thống cấp điện cho các phụ tải hệ thống xử lý khí thải của dự án được lấy từ 
+các nguồn điện hiện có của nhà máy, không lấy điện từ nguồn bên ngoài, do vậy việc 
+kết nối điện là đảm bảo. 
+Các bộ điều khiển máy biến áp chỉnh lưu cao tần và hệ thống điều khiển cho hệ 
+thống thu hồi nhiệt của hệ thống ESP mới sẽ được kết nối, tích hợp vào DCS phục vụ 
+giám sát, điều khiển. 
+Hệ thống điểu khiển và giám sát quá trình khử NOx sẽ được xem xét thiết kế như 
+là một chức năng trên UCMS và ưu tiên sử dụng bộ vi xử lý dựa trên nền tảng phần 
+cứng DCS hiện hữu, đảm tích hợp liên mạch hệ thống mới với khả năng điều khiển và 
+giám sát đầy đủ từ phòng điều khiển trung tâm. 
+5. Sự phù hợp của giải pháp thiết kế cơ sở 
+Căn cứ trên Báo cáo nghiên cứu khả thi ấn bản tháng 05/2026, TVTT đánh giá 
+như sau: 
+5.1 Phương án bố trí tổng mặt bằng 
+Phương án bố trí tổng mặt bằng được biên chế trong mục 3.1. Mặt bằng bố trí hệ 
+thống thiết bị của TKCS và bản vẽ F387-FSR-TT3-GP-01 trong tập bản vẽ. Đây là hệ 
+thống cải tạo, nâng cấp, trong đó chỉ đầu tư xây dựng mới hệ thống xử lý NOx (SCR), 
+SCR được lắp đặt ở phía đuôi lò là phù hợp với công nghệ chung và phù hợp với lò 
+hơi hiện hữu của nhà máy. Bên cạnh SCR, dự án có đầu tư xây dựng mới hai công 
+trình là nhà Ammoniac và Nhà điện, hai công trình này được bố trí ở khu đất trống, 
+không ảnh hưởng đến các công trình lân cận, vị trí này cũng gần với khu vực lò hơi 
+nên khả năng kết nối dễ dàng. TVTT đánh giá phương án bố trí đã phù hợp với dự án 
+nâng cấp, cải tạo hệ thống xử lý khí thải nhà máy nhiệt điện Quảng Ninh.  
+5.2 Phương án kỹ thuật và thiết kế cơ sở phần Công nghệ  
+5.2.1 Phương án kỹ thuật và thiết kế cơ sở Hệ thống khử bụi tĩnh điện (ESP) 
+Phương án kỹ thuật và thiết kế cơ sở Hệ thống khử bụi tĩnh điện (ESP) được biên 
+chế trong mục 4.1. Hệ thống khử bụi tĩnh điện ESP của BCNCKT, mục 2.1 Hệ thống 
+khử bụi tĩnh điện (ESP) của TKCS, phụ lục tính toán và bản vẽ tương ứng. Thông qua 
+quá trình đánh giá hồ sơ phiên bản tháng 05/2026, phương án kỹ thuật và thiết kế cơ 
+sở Hệ thống khử bụi tĩnh điện (ESP) đã phù hợp với dự án nâng cấp, cải tạo hệ thống 
+xử lý khí thải nhà máy nhiệt điện. Cụ thể, nồng độ bụi phát thải đã theo quy định mới 
+của QCVN 19:2024 đã được ban hành kèm theo thông tư 45/2024/TT-BTNMT ngày 
+39 
+ 
+30/12/2024 với nồng độ bụi phát thải ≤20 mg/Nm3 và trong hồ sơ TVTK đã đưa ra 
+các giải pháp cải tạo, nâng cấp để nồng độ phát thải của nhà máy đạt yêu cầu trên. 
+5.2.2 Phương án kỹ thuật và thiết kế cơ sở Hệ thống xử lý NOx 
+ Phương án kỹ thuật và thiết kế cơ sở hệ thống xử lý NOx được biên chế tại mục 
+4.2 Thuyết minh báo cáo nghiên cứu khả thi và mục 2.2 Thiết kế cơ sở. 
+Tư vấn thiết kế đã đưa ra giải pháp lắp mới hệ thống xử lý NOx bằng amoniac, 
+đây là phương pháp xử lý phổ biến trong các nhà máy nhiệt điện than hiện nay. Tư vấn 
+thẩm tra đánh giá giải pháp tư vấn thiết kế đưa ra trong thiết kế cơ sở phù hợp với 
+công nghệ chung của nhà máy và đáp ứng được yêu cầu về nồng độ phát thải NOx 
+theo yêu cầu của QCVN 19:2024/BTNMT với yêu cầu cụ thể là NOx đầu ra nhà máy 
+≤ 120mg/Nm3. 
+Các ý kiến thẩm tra đã được TVTK giải trình, hiệu chỉnh, chi tiết ý kiến như tại 
+Phụ lục thẩm tra. 
+5.2.3 Phương án kỹ thuật và thiết kế cơ sở Hệ thống khử SO2 
+ Phương án kỹ thuật và thiết kế cơ sở Hệ thống xử lý SO2 được biên chế trong 
+mục 4.3 Hệ thống xử lý SO2 của BCNCKT, mục 2.3 Hệ thống khử SO2 của TKCS, 
+phụ lục tính toán và bản vẽ tương ứng. Thông qua quá trình đánh giá hồ sơ phiên bản 
+tháng 05/2026, phương án kỹ thuật và thiết kế cơ sở Hệ thống xử lý SO2 đã phù hợp 
+với dự án nâng cấp, cải tạo hệ thống xử lý khí thải nhà máy nhiệt điện. Theo tính toán 
+TVTK sau khi nâng cấp cải tạo hệ thống, nồng độ SOx khói thải ≤120 mg/Nm3 như 
+yêu cầu QCVN 19:2024 đã được ban hành kèm theo thông tư 45/2024/TT-BTNMT 
+ngày 30/12/2024. 
+5.2.4 Hệ thống phòng chống cháy nổ  
+Thông qua quá trình đánh giá hồ sơ và nội dung thiết kế hiệu chỉnh, TVTK đã bổ 
+sung đầy đủ và làm rõ các nội dung thuyết minh và bản vẽ theo ý kiến thẩm tra. TVTT 
+đánh giá thiết kế của TVTK đáp ứng phù hợp với yêu cầu thiết kế, đảm bảo an toàn 
+cho công trình hạng mục của dự án. Chi tiết các ý kiến thẩm tra trong quá trình thẩm 
+tra xem tại Phụ lục thẩm tra của báo cáo. 
+5.3 Phương án kỹ thuật và thiết kế cơ sở phần Điện  
+Nội dung thiết kế cơ sở phần Điện dự án nâng cấp, cải tạo hệ thống xử lý khí thải 
+Nhà máy nhiệt điện Quảng Ninh đáp ứng các tiêu chuẩn, quy chuẩn, quy định về hệ 
+thống điện. Sơ đồ hệ thống điện, thông số và đặc tính kỹ thuật các phụ tải điện trong 
+nhà máy, giải pháp kỹ thuật của dự án phù hợp các yêu cầu kỹ thuật và mục tiêu của 
+40 
+ 
+dự án.  
+Chi tiết được thể hiện trong phụ lục báo cáo thẩm tra. 
+5.4 Phương án kỹ thuật và thiết kế cơ sở phần Đo lường và điều khiển  
+Các giải pháp kỹ thuật đưa ra được áp dụng phổ biến cho các hệ thống ESP, FGD 
+và hệ thống xử lý NOx trong các nhà máy nhiệt điện hiện đại, đồng thời cũng tuân thủ 
+theo các tiêu chuẩn Quốc tế hiện hành được áp dụng phổ biến tại Việt Nam. 
+Chi tiết được thể hiện trong phụ lục báo cáo thẩm tra. 
+5.5 Phương án kỹ thuật và thiết kế cơ sở phần Xây dựng và Kiến trúc  
+5.5.1. Lựa chọn cao độ mặt bằng 
+Cao độ mặt bằng cho các khu vực nâng cấp, cải tạo các công trình trong dự án 
+thuộc nhà máy được lựa chọn là +5,6m phù hợp với cao độ nhà máy hiện trạng.   
+5.5.2. Báo cáo chuyên ngành 
+Nội dung về các điều kiện địa hình, địa chất, khí tượng thủy văn được TVTK kế 
+thừa từ các báo cáo chuyên ngành phù hợp với các nội dung thuộc báo cáo khảo sát địa 
+chất, địa hình, khí tượng thủy văn được lập và sử dụng phục vụ thiết kế nhà máy hiện 
+trạng.  
+5.5.3. Giải pháp kiến trúc 
+Giải pháp kiến trúc: Các giải pháp kiến trúc được TVTK lựa chọn cho các hạng 
+mục công trình của Dự án nhìn chung thích dụng, bền đẹp, kinh tế, mỹ quan, thoả mãn 
+các yêu cầu kỹ thuật của Dự án; Màu sắc hài hòa, phù hợp với công năng; Phù hợp với 
+cảnh quan và khí hậu khu vực, môi trường khu vực. 
+5.5.4. Giải pháp xây dựng 
+Kết cấu bên trên: sử dụng 2 giải pháp chính là Kết cấu thép và kết cấu bê tông 
+cốt thép. Giải pháp kết cấu bên trên được TVTK lựa chọn là phù hợp với tính chất, quy 
+mô và điều kiện làm việc của công trình; đảm bảo an toàn cho công trình lân cận hạng 
+mục, dự án. 
+Giải pháp kết cấu móng: TVTK sử dụng Báo cáo khảo sát thực hiện trong hồ sơ . 
+Giải pháp móng TVTK đưa ra phù hợp với kết cấu hạng mục của công trình. 
+Các vật liệu chính: được lựa chọn phù hợp với từng công trình, phù hợp với khả 
+năng cung cấp của địa phương và đơn vị cung cấp nước ngoài (nếu cần). 
+5.6 Giải pháp bảo vệ môi trường 
+41 
+ 
+Các giải pháp bảo vệ môi trường được TVTK nêu trong chương 6  – Thuyết 
+minh Điều chỉnh báo cáo NCKT và chương 4 – Thuyết minh TKCS . Trong phần này, 
+TVTK đã nêu được các phương pháp, giải pháp thiết kế tuân thủ theo quy trình quy 
+phạm về bảo vệ môi trường.  
+6. Sự phù hợp của giải pháp thiết kế về đảm bảo an toàn xây dựng, bảo vệ 
+môi trường, phòng, chống cháy nổ 
+6.1 Kết luận về đảm bảo an toàn xây dựng của giải pháp thiết kế  
+6.1.1 Sự phù hợp của giải pháp thiết kế 
+Các giải pháp thiết kế kết cấu và kiến trúc cho các công trình phù hợp với công 
+nghệ dự kiến lựa chọn cho dự án và đảm bảo kỹ thuật. 
+6.1.2 Về công năng sử dụng 
+Các giải pháp thiết kế kết cấu và kiến trúc cho các công trình phù hợp với công 
+năng sử dụng của công trình. 
+6.1.3 Khả năng chịu lực của kết cấu công trình 
+Đối với công trình sửa chữa, cải tạo như kết cấu đỡ Hệ thống xử lý NOx, TVTK 
+đã tiến hành kiểm tra, đánh giá khả năng chịu lực của kết cấu móng đỡ, bao gồm cả 
+phần kết cấu hiện hữu phía dưới và phần kết cấu xây dựng mới, nhằm đảm bảo đáp 
+ứng yêu cầu chịu lực theo quy định. Phần kết cấu mới được thiết kế tách biệt với kết 
+cấu nhà hiện hữu, không gây ảnh hưởng đến khả năng làm việc và an toàn của kết cấu 
+cũ khi đưa vào vận hành. TVTK đã xây dựng mô hình phân tích kết cấu để tính toán, 
+kiểm tra và đánh giá, đảm bảo an toàn xây dựng cho giải pháp thiết kế đề xuất. 
+6.2 Kiểm tra sự phù hợp của giải pháp thiết kế với các giải pháp bảo vệ 
+môi trường, an toàn phòng chống cháy nổ  
+TVTK áp dụng các tiêu chuẩn quy chuẩn thiết kế phù hợp với yêu cầu về bảo vệ 
+môi trường, đáp ứng yêu cầu trong QCVN 19:2024/BTNMT. 
+Về khoảng cách phòng cháy, chữa cháy giữa các công trình, hạng mục công trình 
+trong cùng lô đất; khoảng cách phòng cháy, chữa cháy từ công trình, hạng mục công 
+trình đến công trình tiếp giáp hoặc ranh giới khu đất; khoảng cách phòng cháy, chữa 
+cháy từ công trình, hạng mục công trình đến các đối tượng tiếp giáp theo quy định của 
+pháp luật chuyên ngành. TVTK đã bổ sung khoảng cách phòng cháy, chữa cháy giữa 
+các công trình xây dựng mới với các công trình hiện có của nhà máy; phương án dự 
+kiến bậc chịu lửa của công trình xây dựng mới để tính toán khoảng cách phòng cháy, 
+chữa cháy theo đúng quy định. 
+42 
+ 
+Đối với đường, bãi đỗ, vị trí, lối vào để tiếp cận và tổ chức các hoạt động chữa 
+cháy, cứu nạn, cứu hộ, TVTK đã bổ sung thêm vào bản vẽ thể hiện vị trí và chiều rộng 
+đường cho xe chữa cháy tiếp cận; bán kính quay. Ngoài ra, đường tiếp giáp với hạng 
+mục chính cho bề rộng 8m, và đường chính có độ rộng 10m đảm bảo việc xe chữa 
+cháy trực tiếp đến từng hạng mục công trình, bảo đảm thuận tiện cho công tác triển 
+khai chữa cháy, cứu nạn, cứu hộ khi có sự cố. 
+Trong hồ sơ TVTK có đề cập đến việc áp dụng các tiêu chuẩn NFPA và một số 
+tiêu chuẩn nước ngoài khác để áp dụng cho dự án, trong trường hợp các tiêu chuẩn 
+nước ngoài nằm ngoài danh mục tiêu chuẩn đã được chấp thuận theo Quyết định 
+4158/QĐ-BCA-PCCC&CNCH năm 2023 của Bộ Công An thì cần phải xin phép áp 
+dụng. 
+Qua rà soát, giải pháp thiết kế với các giải pháp bảo vệ môi trường, an toàn 
+phòng chống cháy nổ đảm bảo với các quy định hiện hành. Giải pháp an toàn phòng 
+chống cháy nổ sẽ được tiếp tục hoàn thiện trong giai đoạn triển khai tiếp theo.  
+7. Sự tuân thủ các tiêu chuẩn, quy chuẩn kỹ thuật trong thiết kế cơ sở 
+7.1. Đánh giá về danh mục tiêu chuẩn, quy chuẩn kỹ thuật phù hợp với quy 
+định hiện hành  
+a. Phần công nghệ:  
+Danh mục tiêu chuẩn, quy chuẩn kỹ thuật được TVTK trình bày trong chương 1 
+mục 1.5 của TKCS.  
+Trong phần này, TVTK chỉ liệt kê thứ tự ưu tiên trong việc áp dụng tiêu chuẩn 
+dùng trong tính toán, thiết kế, chế tạo dự án theo thứ tự ưu tiên sau: 
+- Các tiêu chuẩn Việt Nam, quy chuẩn và tiêu chuẩn ngành; 
+- Các tiêu chuẩn IEC, ISO; 
+- Các tiêu chuẩn, quy phạm của các quốc gia được Bộ Xây dựng chấp thuận áp 
+dụng như Mỹ, Đức, Anh, Pháp, Nhật,… 
+- Các tiêu chuẩn, quy phạm của các tổ chức quốc tế công nhận như ASTM, 
+ASME,… 
+b. Phần điện và đo lường điều khiển:  
+Các tiêu chuẩn áp dụng cho phần đo lường điều khiển của dự án là phù hợp với 
+quy định hiện hành.  
+c. Phần xây dựng và kiến trúc 
+43 
+ 
+Tiêu chuẩn xây dựng và kiến trúc tuân thủ việc áp dụng các tiêu chuẩn, quy 
+chuẩn kỹ thuật phù hợp với quy định hiện hành. 
+d. Phần môi trường 
+Danh mục tiêu chuẩn về môi trường áp dụng cho dự án đã được TVTK cập nhật 
+phù hợp với quy định hiện hành, bao gồm các quy chuẩn kỹ thuật về khí thải của Việt 
+Nam, quy chuẩn về chất lượng không khí xung quanh... 
+7.2. Đánh giá sự tuân thủ trong việc áp dụng các tiêu chuẩn, quy chuẩn kỹ 
+thuật phù hợp với quy định hiện hành  
+a. 
+Phần Công nghệ 
+Đối với phần công nghệ, về cơ bản đã tuân thủ tiêu chuẩn và quy chuẩn kỹ thuật 
+áp dụng. 
+Đối với hệ thống PCCC: Đã tuân thủ tiêu chuẩn quy chuẩn áp dụng cho hệ thống 
+PCCC nêu ra tại mục 4.1.2, chương 4 , thuyết minh TKCS. 
+b. 
+Phần điện và đo lường điều khiển: 
+Thiết kế phần điện và đo lường điều khiển của dự án tuân thủ việc áp dụng các 
+tiêu chuẩn, quy chuẩn kỹ thuật phù hợp với quy định hiện hành. 
+c. 
+Phần xây dựng và kiến trúc 
+Tiêu chuẩn xây dựng và kiến trúc tuân thủ việc áp dụng các tiêu chuẩn, quy 
+chuẩn kỹ thuật phù hợp với quy định hiện hành. 
+d. 
+Phần môi trường 
+TVTK đã tuân thủ theo yêu cầu về môi trường, các thông số phát thải đáp ứng 
+được yêu cầu của QCVN 19:2024. 
+Qua rà soát trên, TVTT đã kiểm tra tính đầy đủ, toàn diện hồ sơ dự án theo quy 
+định. Trên cơ sở đó, TVTT đánh giá hồ sơ Thiết kế cơ sở do TVTK lập đã tuân thủ 
+quy chuẩn kỹ thuật và áp dụng tiêu chuẩn theo đúng quy định của pháp luật về tiêu 
+chuẩn, quy chuẩn kỹ thuật đối với phần công nghệ thuộc dự án.  
+8. Sự tuân thủ quy định của pháp luật về xác định tổng mức đầu tư   
+8.1. Phương pháp lập tổng mức đầu tư 
+Tổng mức đầu tư của Dự án nâng cấp, cải tạo hệ thống xử lý khí thải Nhà máy 
+nhiệt điện Quảng Ninh được lập trên cơ sở các văn bản hướng dẫn của Chính phủ và 
+các Bộ ban hành. Tổng mức đầu tư được lập theo phương pháp kết hợp, phù hợp với 
+44 
+ 
+quy định tại khoản 1 Điều 6, Nghị định số 10/2021/NĐ-CP ngày 9/2/2021 của Chính 
+phủ về quản lý chi phí đầu tư xây dựng và Thông tư số 11/2021/TT-BXD ngày 
+31/08/2021 của Bộ Xây dựng về hướng dẫn xác định và quản lý chi phí đầu tư xây 
+dựng và thông tư 14/2023/TT-BXD ngày 29/2/2023 và thông tư 01/2025/BXD ngày 
+22/1/2025 về sửa đổi bổ sung một số điều của thông tư 11 và 13/2021/TT-BXD.  
+TVTT nhận xét về phương pháp lập TMĐT dự án nâng cấp, cải tạo hệ thống xử 
+lý khí thải Nhà máy nhiệt điện Quảng Ninh là phù hợp với quy định hiện hành. 
+8.2. Đánh giá nội dung cơ cấu tổng mức đầu tư đề nghị thẩm tra 
+Cơ cấu nội dung các khoản mục chi phí trong TMĐT bao gồm: 
+Chi phí xây dựng 
+Chi phí xây dựng: được tính toán trên cơ sở sau: 
+- 
+Khối lượng xây dựng: bóc tách từ bản vẽ thiết kế cơ sở 
+- 
+Định mức: được xác định căn cứ theo Phụ lục 2- Thông tư số 12/2021/TT-BXD 
+ngày 31/8/2021 về việc hướng dẫn phương pháp xác định định mức dự toán xây dựng 
+công trình. 
+- 
+Đơn giá xây dựng: chiết tính theo giá hiện tại, cụ thể: 
++ Nhân công: Quyết định số 4745/QĐ-SXD ngày 15/11/2024 của tỉnh Quảng 
+Ninh về đơn giá nhân công. 
++ Ca máy: tính theo Phụ lục 5-Thông tư 13/2021/TT-BXD ngày 31/8/2021 về 
+việc hướng dẫn phương pháp xác định đơn giá ca máy xây dựng 
++ Giá vật liệu: Công bố 9796/CBG-SXD năm 2025 thông tin một số giá vật liệu 
+xây dựng trên địa bàn tỉnh Quảng Ninh thời điểm Quý IV/2025. 
+Chi phí thiết bị 
+Chi phí thiết bị bao gồm: Chi phí mua sắm thiết bị công nghệ (gồm cả thiết bị phi 
+tiêu chuẩn cần sản xuất, gia công), chi phí vận chuyển từ nơi mua đến công trình, chi 
+phí lưu kho, lưu bãi, chi phí bảo quản, bảo dưỡng tại kho bãi ở hiện trường, thuế và phí 
+bảo hiểm thiết bị công trình; Chi phí lắp đặt, thí nghiệm và hiệu chỉnh. 
+- 
+Giá thiết bị hệ thống SOx: Tham khảo giá thấp nhất của 3 báo giá Andritz, 
+Babcock&Wilcox và Tổng công ty lắp máy Việt Nam cho hệ thống SOx. 
+- 
+Giá thiết bị hệ thống NOx: Tính theo hiệu suất và công suất, tham khảo suất đầu 
+tư của nhà máy nhiệt điện Duyên Hải 1 có tính trượt giá đến thời điểm lập báo 
+cáo. 
+45 
+ 
+- 
+Giá thiết bị cải tạo hệ thống ESP: Tham khảo giá thiết bị dây chuyền 2 của dự án 
+NMNĐ Phả Lại đã thi công và giá HĐ EPC của các dự án Hải Phòng, Vũng Áng 
+1, Thái Bình 2, Vĩnh Tân 2, Nghi Sơn 1 và Thăng Long có tính trượt giá đến thời 
+điểm lập báo cáo. 
+- 
+Giá thiết bị hệ thống thu hồi nhiệt tham khảo báo giá nhà cung cấp. 
+- 
+Các đơn giá thiết bị khác bao gồm hệ thống phòng cháy chữa cháy: tham khảo 
+giá thị trường trong nước. 
+- 
+Chi phí lắp đặt, thí nghiệm hiệu chỉnh, chi phí đào tạo: ước tính bằng 15% chi phí 
+mua sắm thiết bị, tham khảo các dự án nâng cấp, cải tạo hệ thống khí thải của các 
+nhà máy nhiệt điện. 
+Chi phí quản lý dự án 
+Chi phí quản lý dự án bao gồm: Chi phí để tổ chức thực hiện các công việc quản 
+lý dự án từ giai đoạn chuẩn bị dự án, thực hiện dự án và kết thúc dự án. 
+Giá trị chi phí QLDA được tính toán theo định mức tại Phụ lục VIII- Thông tư số 
+12/2021/TT-BXD ngày 31/8/2021 của Bộ Xây dựng về việc công bố Định mức chi phí 
+quản lý dự án và tư vấn đầu tư xây dựng công trình. 
+Chi phí tư vấn 
+- 
+Chi phí tư vấn lập dự án nâng cấp hệ thống xử lý khí thải NMNĐ Quảng Ninh và 
+Chi phí tư vấn lập báo cáo điều chỉnh báo cáo NCKT căn cứ theo hợp đồng đã ký 
+giữa Viện Năng lượng và CTCP Nhiệt điện Quảng Ninh. 
+- 
+Chi phí thẩm tra báo cáo NCKT và TKCS dự án nâng cấp hệ thống xử lý khí thải 
+NMNĐ Quảng Ninh và Chi phí tư vấn thẩm tra điều chỉnh BCNCKT/TKCS lập 
+báo cáo thẩm tra căn cứ theo hợp đồng đã ký. 
+- 
+Chi phí thẩm tra Báo cáo điều chỉnh báo cáo NCKT và thiết kế cơ sở dự án nâng 
+cấp hệ thống xử lý khí thải NMNĐ Quảng Ninh được xác định căn cứ theo 
+Thông tư số 11/2021/TT-BXD ngày 31/8/2021 của Bộ Xây dựng hướng dẫn một 
+số nội dung xác định và quản lý chi phí đầu tư xây dựng. 
+- 
+Chi phí thiết kế kỹ thuật và dự toán, chi phí thẩm tra thiết kế kỹ thuật và thẩm tra 
+dự toán. 
+- 
+Chi phí lập Thiết kế bản vẽ thi công, chi phí thẩm tra Thiết kế Bản vẽ thi công 
+- 
+Chi phí lập hồ sơ mời thầu, đánh giá hồ sơ dự thầu thi công xây dựng, chi phí lập 
+hồ sơ mời thầu, đánh giá hồ sơ dự thầu mua sắm thiết bị, chi phí giám sát thi 
+công xây dựng, và chi phí giám sát lắp đặt thiết bị được tính theo Phụ lục VIII- 
+Thông tư số 12/2021/TT-BXD ngày 31/8/2021 về định mức chi phí quản lý dự 
+án và tư vấn đầu tư xây dựng. 
+46 
+ 
+- 
+Chi phí dịch tài liệu hồ sơ mời thầu, đánh giá hồ sơ dự thầu và chi phí thực hiện 
+các công việc tư vấn khác... 
+Chi phí khác 
+Chi phí khác bao gồm: 
+- 
+Lãi vay trong thời gian xây dựng: được tính tham khảo Thông tư số 12/2025/TT-
+BCT ngày 1/2/2025 quy định phương pháp xác định giá dịch vụ phát điện, 
+nguyên tắc tính giá điện để thực hiện dự án điện lực, nội dung chính của hợp 
+đồng mua bán điện . 
+- 
+Phí bảo hiểm công trình, chi phí vệ sinh trong quá trình xây dựng, chi phí bảo vệ, 
+an ninh công trình, chi phí nghiệm thu chất lượng công trình: ước tính trên cơ sở 
+tham khảo các dự án tương tự. 
+- 
+Chi phí thẩm tra, phê duyệt quyết toán, chi phí kiểm toán độc lập: được tính theo 
+Nghị định số 99/2021/NĐ-CP ngày 11/11/2021 của Chính phủ quy định về quản 
+lý, thanh toán, quyết toán dự án sử dụng vốn đầu tư công. 
+- 
+Lệ phí thẩm định dự án đầu tư: được tính toán căn cứ theo Thông tư số 
+209/2016/TT-BTC ngày 10/11/2016 quy định mức thu, chế độ thu, nộp; quản lý 
+và sử dụng phí thẩm định dự án đầu tư xây dựng, phí thẩm định thiết kế cơ sở. 
+- 
+Chi phí thẩm duyệt phòng cháy chữa cháy: được tính toán căn cứ theo Thông tư 
+số 150/2014/TT-BTC ngày 10/10/2014 quy định mức thu, chế độ thu, nộp, quản 
+lý và sử dựng phí thẩm định duyệt thiết kế về phòng cháy và chữa cháy. 
+- 
+Chi phí chạy thử: được tính toán chi tiết dựa trên tiêu hao nguyên, vật liệu; nhân 
+công và các chi phí khác. 
+- 
+Một số chi phí khác được ước tính theo dự toán. 
+Chi phí dự phòng 
+- 
+Chi phí dự phòng cho khối lượng công việc phát sinh được tính bằng 5% của 
+tổng các chi phí sau: chi phí xây dựng, chi phí thiết bị, chi phí quản lý dự án, chi 
+phí tư vấn, và chi phí khác. 
+- 
+Chi phí dự phòng cho yếu tố trượt giá trong thời gian thực hiện dự: không tính 
+toán chi phí này do thời gian xây dựng dưới 1 năm. 
+TVTT đánh giá cơ cấu tổng mức đầu tư là phù hợp với hướng dẫn hiện nay về 
+lập TMĐT xây dựng công trình. 
+8.3. Kiểm tra sự phù hợp trong việc áp dụng, vận dụng định mức, đơn giá 
+và chế độ chính sách liên quan trong công tác lập và quản lý chi phí đầu tư xây 
+dựng 
+47 
+ 
+Tổng mức đầu tư đã được lập dựa trên Thông tư 11/2021 và 12/2021/TT-BXD 
+ngày 31 tháng 8 năm 2021 về “Hướng dẫn một số nội dung xác định và quản lý chi phí 
+đầu tư xây dựng”, thông tư 14/2023/TT-BXD ngày 29/12/2023 về sửa đổi bổ sung một 
+số điều của thông tư 11/2021. Điều này là phù hợp. 
+8.4. Kiểm tra sự phù hợp khối lượng công việc trong tổng mức đầu tư 
+Chi phí xây dựng được tính toán dựa trên khối lượng bóc từ bản vẽ thiết kế cơ sở.   
+Giá thiết bị hệ thống SOx: Tham khảo giá chào thầu của các nhà thầu cho dự án 
+NOx, SOx nhiệt điện Hải Phòng. 
+Giá thiết bị hệ thống NOx: Tính theo hiệu suất và công suất, tham khảo suất đầu 
+tư của nhà máy nhiệt điện Duyên Hải 1 có tính trượt giá đến thời điểm lập báo cáo.  
+Giá thiết bị cải tạo hệ thống ESP: Tham khảo giá thiết bị dây chuyền 2 của dự án 
+NMNĐ Phả Lại đã thi công và giá HĐ EPC của các dự án Hải Phòng, Vũng Áng 1, 
+Thái Bình 2, Vĩnh Tân 2, Nghi Sơn 1 và Thăng Long có tính trượt giá đến thời điểm 
+lập báo cáo 
+Giá thiết bị hệ thống thu hồi nhiệt tham khảo báo giá nhà cung cấp. 
+Giá thiết bị máy biến tần tham khảo dự án đầu tư máy biến tần cho quạt khói, 
+quạt gió Nghi Sơn 1 đã phê duyệt. 
+Giá thiết bị bộ sấy khói GGH tham khảo báo giá nhà cung cấp. 
+Các đơn giá thiết bị khác bao gồm hệ thống phòng cháy chữa cháy: tham khảo 
+giá thị trường trong nước. 
+TVTK đã thực hiện dựa trên Thông tư 13/2021/TT-BXD ngày 31 tháng 8 năm 
+2021 “hướng dẫn phương pháp xác định các chỉ tiêu kinh tế kỹ thuật và đo bóc khối 
+lượng công trình” và thông tư 01/2025/TT-BXD ngày 22/1/2025 về việc sửa đổi và bổ 
+sung một số điểu của Thông tư 13/2021/TT-BXD là phù hợp. 
+8.5. Kiểm tra tính đúng đắn, hợp lý của nội dung chi phí trong tổng mức 
+đầu tư 
+Tổng mức đầu tư đã được lập dựa trên Thông tư 11/2021 và 12/2021/TT-BXD 
+ngày 31 tháng 8 năm 2021 về “Hướng dẫn một số nội dung xác định và quản lý chi phí 
+đầu tư xây dựng” và thông tư 14/2023/TT-BXD ngày 29/2/2023 và thông tư 
+01/2025/BXD ngày 22/1/2025 về sửa đổi bổ sung một số điều của thông tư 11 và 
+13/2021/TT-BXD. Điều này là phù hợp. 
+Qua rà soát, TVTK đã lập giá ca máy theo hướng dẫn tại Thông tư số 
+13/2021/TT-BXD là đúng theo hướng dẫn của pháp luật quy định hiện hành. Đồng 
+48 
+ 
+thời, TVTK đã bổ sung các Báo giá VTTB ở các Dự án, Hợp đồng tương tự vào phần 
+Tổng mức đầu tư của Báo cáo nghiên cứu khả thi Dự án, do đó cơ bản đã tuân thủ quy 
+định của pháp luật về việc lập giá VTTB để xác định Tổng mức đầu tư của dự án. 
+8.6. Giá trị tổng mức đầu tư sau thẩm tra 
+Giá trị tổng mức đầu tư của dự án như sau: 
+TT Hạng mục 
+Giá trị TMĐT sau 
+thẩm tra phiên bản 
+T5/2025 
+(bao gồm VAT) 
+Giá trị TMĐT sau 
+thẩm tra phiên bản 
+T5/2026 
+(bao gồm VAT) 
+Chênh lệch 
+(+) Tăng 
+(-) Giảm 
+1 
+Chi 
+phí 
+xây 
+dựng 
+151.482.511.206 
+164.161.467.329 
+12.678.956.123 
+2 
+Chi phí thiết bị  
+2.519.188.110.183 
+3.217.510.643.550 
+698.322.533.367 
+3 
+Chi phí quản lý 
+dự án 
+20.394.212.018 
+23.962.268.925 
+3.568.056.907 
+4 
+Chi phí tư vấn 
+24.591.614.029 
+ 28.858.236.767  
+4.266.622.738 
+5 
+Chi phí khác 
+166.150.430.029 
+ 145.478.970.755  
+-20.671.459.274 
+6 
+Chi 
+phí 
+dự 
+phòng 
+276.783.798.417 
+ 219.217.090.853  
+-57.566.707.564 
+  
+Tổng mức đầu 
+tư 
+3.158.590.675.882 
+         
+3.799.188.678.178  
+ 
+640.598.002.296 
+- 
+Chi phí xây dựng: tăng 12,678 tỷ đồng. Nguyên nhân: cập nhật lại giá vật 
+liệu xây dựng giá thép ở phần hệ thống cột đỡ tăng. Bổ sung thêm hạng mục tủ biến 
+tần (container).  
+- 
+Chi phí thiết bị: tăng 698,32 tỷ đồng. Nguyên nhân: cập nhật tỷ giá, bổ sung 
+một số thiết bị còn thiếu so với phiên bản tháng 4/2026 như tủ biến tần, bộ sấy khói 
+GGH. Hiệu chỉnh các điểm chưa phù hợp về ứng dụng, cách sử dụng định mức, đơn 
+giá, khối lượng công việc, tính đúng đắn của nội dung chi phí. 
+- 
+Chi phí quản lý dự án: tăng 3,56 tỷ đồng. Nguyên nhân: do thay đổi chi phí 
+xây dựng và thiết bị. 
+- 
+Chi phí tư vấn đầu tư xây dựng: tăng 4,266 tỷ đồng. Nguyên nhân: do thay 
+đổi chi phí xây dựng và thiết bị và hiệu chỉnh lại một số chi phí chưa phù hợp với việc 
+áp dụng định mức. 
+- 
+Chi phí khác: giảm 20,671 tỷ đồng. Nguyên nhân: do thay đổi chi phí xây 
+dựng và thiết bị. Hiệu chỉnh lại lãi vay do thời gian thi công giảm. 
+49 
+ 
+- 
+Chi phí dự phòng: giảm 57,566 tỷ đồng. Nguyên nhân: do thay đổi chi phí 
+xây dựng và thiết bị. Không tính chi phí dự phòng trượt giá do thời gian thi công dưới 
+1 năm. 
+9. Đánh giá tiến độ thực hiện dự án  
+Tiến độ thực hiện dự án (phương án đề xuất) được biên chế tại mục 2.2  chương 
+2 và mục 3.6.5 của Chương 3 trong BCNCKT và mục 5.3.7 của Chương 5 trong 
+TKCS. Qua ra soát phiên bản tháng 05/2026, tiến độ đã được điều chỉnh  Thực hiện 
+thiết kế, mua sắm, thi công, lắp đặt, chạy thử, nghiệm thu từ Quý II-IV/2026 sang Quý 
+III/2026-III/2027. Như vậy, tiến độ thực hiện chưa phù hợp với với chỉ đạo của EVN 
+tại văn bản số 1613/EVN-ĐTXD ngày 23/3/2026. 
+Căn cứ biên bản hội nghị tiền đấu thầu lần 2 giữa các EVN, EVNGENCO1, 
+Công ty cổ phần Nhiệt điện Quảng Ninh, tư vấn lập HSMT Viện Năng Lượng và 08 
+nhà thầu/ đơn vị ngày 14/05/2026, về tiến độ, 04 Nhà thầu ý kiến tiến độ thi công: Là 
+quá ngắn, không khả thi, đề nghị Chủ đầu tư xem xét lại vì một số thiết bị có thời gian 
+chế tạo và giao hàng lâu do vận chuyển từ nước ngoài về. Đề xuất tổng thời gian thực 
+hiện gói thầu từ 14 - 18 tháng (trong đó thời gian ngừng tổ máy để đấu nối thiết bị 
+được phân chia thành hai giai đoạn: giai đoạn đầu cho 2 tổ máy, giai đoạn sau cho 2 tổ 
+máy còn lại). Chủ đầu tư nhận thấy yêu cầu về thời gian thực hiện gói thầu được rất 
+nhiều nhà thầu quan tâm, ý kiến là quá ngắn, là một rào cản rất lớn khiến các nhà thầu 
+chưa thực sự tham gia gói thầu. Chủ đầu tư yêu cầu thời gian thực hiện gói thầu trong 
+HSMT theo chỉ đạo của cấp thẩm quyền, phải hoàn thành và đưa vào sử dụng trước 
+31/12/2026. Với yêu cầu của các Nhà thầu, Chủ đầu tư sẽ báo cáo cấp có thẩm quyền 
+xem xét điều chỉnh tiến độ thực hiện gói thầu với thời gian hợp lý trong HSMT nếu có. 
+ 
+TVTT nhận thấy đề xuất kéo dài thời gian thực hiện gói thầu lên khoảng 14–18 
+tháng của các nhà thầu/đơn vị, đồng thời kết hợp phân chia thời gian ngừng tổ máy để 
+thực hiện đấu nối thiết bị theo từng giai đoạn là có cơ sở thực tế, phù hợp với đặc điểm 
+cung cấp thiết bị nhập khẩu, công tác thi công lắp đặt. Đối với nội dung điều chỉnh tiến 
+độ thực hiện gói thầu/dự án, kính đề nghị Chủ đầu tư tiếp tục hoàn thiện hồ sơ pháp lý 
+liên quan khi triển khai các bước tiếp theo. 
+10. Khả năng huy động vốn theo tiến độ, phân tích rủi ro, hiệu quả tài 
+chính và hiệu quả kinh tế - xã hội của dự án  
+10.1. Các thông số đầu vào: 
+- 
+Các thông số về kỹ thuật trong tính toán hiệu quả đầu tư phù hợp với thiết kế cơ 
+sở của Dự án. 
+50 
+ 
+- 
+Các thông số về kinh tế - tài chính phù hợp với các quy định hiện hành. 
+10.2. Về giá bán điện phần tăng thêm (mức thu hồi qua giá bán điện): 
+TVTK đang tính giá FC là 81,42 đ/kWh, giá vận hành bảo dưỡng cố định là 
+15,69 đ/kWh, giá biến đổi là 72,33  đ/kWh. Như vậy, tổng giá bán điện phần tăng 
+thêm là 169,44 đ/kWh. Phương pháp tính toán về đã theo đúng các thông tư hướng dẫn 
+hiện hành. Các ý kiến của TVTT đã được TVTK hiệu chỉnh trong hồ sơ phiên bản 
+tháng 05/2026. 
+10.3. Đánh giá hiệu quả kinh tế - xã hội: 
+Ở mục 8.2 – chương 8 thuộc BCNCKT dự án, TVTK đã nêu được lợi ích về mặt 
+môi trường và xã hội do dự án mang lại. 
+ 
+Ở mục 8.3.2 – chương 8 thuộc BCNCKT dự án, TVTK đã nêu được lợi ích về 
+mặt kinh tế - xã hội mà dự án sẽ mang lại ở giai đoạn lập báo cáo này. 
+10.4. Đánh giá tài chính: 
+Ở mục 8.3.3 – chương 8 thuộc BCNCKT dự án, TVTK đã nêu được mục đích 
+của phân tích tài chính ở giai đoạn lập báo cáo này, cũng như cho thấy để dự án khả thi 
+với FIRR = 11,00% thì mức thu hồi qua giá bán điện tăng thêm là 169,44 VNĐ/kWh 
+tương đương 0,64 Uscent/kWh thì dự án khả thi với các chỉ tiêu đáp ứng như sau: 
+FIRR=11,00%>if = 7,48%, lợi nhuận thuần NPV= 156.800 triệu đồng > 0 và 
+B/C=1,07> 1.  
+Các ý kiến của TVTT đã được TVTK giải trình làm rõ và hiệu chỉnh trong hồ sơ 
+phiên bản tháng 05/2026. 
+VI. KẾT LUẬN VÀ KIẾN NGHỊ  
+ 
+Ngày 30/12/2024 Bộ Tài nguyên và Môi trường đã ban hành thông tư số 
+45/2024/TT-BTNMT Ban hành quy chuẩn kỹ thuật quốc gia về khí thải công nghiệp 
+(QCVN 19:2024/BTNMT). Căn cứ theo khoản 1, Điều 3 của thông tư này quy định 
+“Cơ sở đã đi vào vận hành, dự án đầu tư đã có quyết định phê duyệt kết quả thẩm 
+định báo cáo đánh giá tác động môi trường hoặc đã được cơ quan nhà nước có thẩm 
+quyền tiếp nhận hồ sơ đầy đủ, hợp lệ đề nghị thẩm định báo cáo đánh giá tác động 
+môi trường, cấp giấy phép môi trường hoặc đăng ký môi trường (sau đây gọi chung là 
+dự án đầu tư đang triển khai) trước ngày Thông tư này có hiệu lực thi hành được tiếp 
+tục áp dụng quy chuẩn kỹ thuật môi trường quốc gia về khí thải theo loại hình sản 
+xuất, kinh doanh, dịch vụ tương ứng và quy định của chính quyền địa phương (bao 
+gồm cả quy chuẩn kỹ thuật môi trường địa phương về khí thải) cho đến hết ngày 31 
+51 
+ 
+tháng 12 năm 2031” 
+ 
+Khoản 2, Điều 4 quy định “Kể từ ngày 01 tháng 01 năm 2032, các trường hợp 
+quy định tại khoản 1 Điều 3 Thông tư này phải đáp ứng yêu cầu quy định tại QCVN 
+19:2024/BTNMT, trừ trường hợp Ủy ban nhân dân cấp tỉnh ban hành lộ trình thực 
+hiện sớm hơn.” Như vậy theo quy định trên, kể từ ngày 01/01/2032 Nhà máy nhiệt 
+điện Quảng Ninh bắt buộc phải tuân theo các giới hạn về nồng độ các chất phát thải 
+theo QCVN 19:2024/BTNMT. Do đó, Dự án nâng cấp, cải tạo hệ thống xử lý khí thải 
+NMNĐ Quảng Ninh là cần thiết. 
+ 
+Các giá trị giới hạn về nồng độ các chất phát thải của NMNĐ Quảng Ninh xác 
+định theo QCVN 19:2024/BTNMT như sau: 
+- 
+Nồng độ bụi (tại 6% O2) ≤   20 mg/Nm3 
+- 
+Nồng độ NOx (tại 6% O2) ≤ 120 mg/Nm3 
+- 
+Nồng độ SO2 (tại 6% O2) ≤ 120 mg/Nm3 
+ 
+Trong hồ sơ báo cáo, TVTK đã đưa ra các giải pháp cải tạo, nâng cấp và lắp mới 
+các hệ thống sau:  
+ 
+ESP: Cải tạo và nâng cấp hệ thống lọc bụi tĩnh điện (ESP) bằng các giải pháp 
+gồm Thay thế 16 máy biến áp hiện tại bằng 16 máy biến áp xung/máy biến áp chỉnh 
+lưu cao tần, máy biến áp xung có điện áp xung định mức 80 kV, điện áp đỉnh 140kV 
+cho 1 tổ máy; Thay thế toàn bộ các dây điện cực phóng của ESP bằng điện cực phóng 
+có dạng thanh gai cho 3 trường đầu (12 dãy) và dây xoắn cho 01 trường (4 dãy) cuối; 
+Thay thế toàn bộ các tấm điện cực thu của ESP bằng các điện cực thu này có kết cấu 
+dạng tấm loại chữ ∑ được làm bằng thép SPCC cán ủ nguội, ngâm dầu (ASTM 366 ) 
+và dày ≥1,25 mm; Thay mới các bộ cách điện của lọc bụi tĩnh điện; Thiết kế, cải tạo 
+mới hệ thống búa gõ rung rũ bụi của các điện cực thu và điện cực phóng; Thay thế vỏ 
+lọc bụi, hệ thống chia khói đầu vào; nâng cấp hệ thống điều khiển lọc bụi tĩnh 
+điện...Trong hồ sơ cũng đề cập đến các giải pháp kỹ thuật bổ sung để đảm bảo nồng độ 
+bụi đầu ra của lọc bụi nhỏ hơn 20mg/Nm3 như giải pháp lắp đặt thêm trường thứ 5 
+hoặc giải pháp lắp đặt bộ thu hồi nhiệt tại đầu vào lọc bụi để giảm nhiệt độ khói và 
+nâng cao hiệu suất khử bụi. 
+ 
+SCR: Lắp đặt thêm hệ thống khử NOx bằng ammoniac (SCR) cho các lò hơi của 
+nhà máy, đầu tư xây dựng mới các công trình lưu trữ và cung cấp ammoniac cho các 
+SCR của các lò hơi. 
+ 
+FGD: Nâng cấp, cải tạo hệ thống thiết bị xử lý SOx cho các tổ máy gồm các giải 
+pháp: Thay thế giàn phun và vòi phun; Lắp mới khay phân phối khói; Lắp mới vành 
+chắn khói; Thay thế thiết bị khử ẩm, thay thế bơm tuần hoàn FGD, quạt sục ô xy để 
+52 
+ 
+đáp ứng nhu cầu về lưu lượng. 
+ 
+Ngoài ra, trong báo cáo cũng đề xuất thay thế 02 quạt khói hiện hữu của một tổ 
+máy (mỗi quạt khói có công suất đặt động cơ 1.400kW) bằng 02 quạt khói mới (mỗi 
+quạt khói mới có công suất đặt của động cơ khoảng 1.800kW do quạt đã vận hành lâu 
+ngày dẫn đến mài mòn, độ hở giữa cãnh tĩnh và cánh động tăng cao không đáp ứng về 
+lưu lượng và khắc phục trở lực khi lắp đặt thêm SCR. 
+ 
+Kết quả đạt được sau khi áp dụng các giải pháp nâng cấp, cải tạo trên theo tính 
+toán của tư vấn thiết kế như sau:  
+- 
+Nồng độ bụi sau ESP (tại 6% O2) ≤ 20 mg/Nm3. 
+- 
+Nồng độ NOx sau SCR (tại 6% O2) ≤ 120 mg/Nm3 
+- 
+Nồng độ SO2 sau FGD (tại 6% O2) ≤ 120 mg/Nm3 
+ 
+Đối với NMNĐ Quảng Ninh khi nâng cấp, cải tạo hệ thống ESP, nâng cấp cải tạo 
+hệ thống FGD, chuyển đổi từ đốt dầu FO sang DO cũng là các giải pháp để giảm độ 
+khói. 
+ 
+Với kết quả trên có thể thấy rằng, các giải pháp nâng cấp, cải tạo FGD và lắp mới 
+hệ thống SCR là hợp lý và phù hợp với hiện trạng thực tế của nhà máy. Các kết quả về 
+nồng độ phát thải NOx và SOx của nhà máy sau khi áp dụng các biện pháp cải tạo 
+nâng cấp đáp ứng yêu cầu theo quy định trong QCVN 19:2024/BTNMT.  
+ 
+Đối với giải pháp cải tạo hệ thống lọc bụi tĩnh điện, TVTK đã đưa ra các giải 
+pháp thay thế các bộ phận thiết bị bên trong lọc bụi và vỏ lọc bụi với nồng độ bụi đầu 
+ra ESP dưới 20mg/Nm3 và có bổ sung các giải pháp như lắp thêm trường thứ 5 hoặc 
+giảm nhiệt độ khói đầu vào ESP để dự phòng cho nhà máy trong trường hợp hiệu suất 
+thiết bị sau này suy giảm hoặc sự cố thiết bị tư vấn thẩm tra đánh giá là hợp lý.      
+  
+Trong quá trình thẩm tra, đơn vị tư vấn thiết kế đã giải trình và hiệu chỉnh báo 
+cáo theo các ý kiến của tư vấn thẩm tra. Hồ sơ Báo cáo nghiên cứu khả thi đủ điều 
+kiện để triển khai các bước tiếp theo (nội dung này được quy định tại Mẫu số 02, Phụ 
+lục I ban hành kèm theo Nghị định số 175/2024/NĐ-CP ngày 30 tháng 12 năm 2024 
+của Chính phủ). Nội dung chi tiết quá trình thẩm tra đã được nêu trong phụ lục đính 
+kèm báo cáo này. 
+53 
+ 
+CHỦ NHIỆM, CHỦ TRÌ THẨM TRA DỰ ÁN 
+TT 
+Chức danh 
+Họ và tên 
+Số chứng chỉ 
+hành nghề 
+Chữ ký 
+1 
+Chủ nhiệm thẩm tra 
+Nguyễn Thanh 
+Tùng 
+BXD-00005863 
+ 
+2 
+Chủ trì thẩm tra phần 
+công nghệ 
+Lê Anh Đức 
+BXD - 00024189 
+ 
+3 
+Chủ trì thẩm tra phần 
+xây dựng và kiến trúc 
+Nguyễn Hoàng Hải 
+BXD-00013938 
+ 
+4 
+Chủ trì thẩm tra phần 
+điện và CI 
+Dương Quốc Thắng 
+BXD-00000142 
+ 
+5 
+Chủ trì thẩm tra phần 
+môi trường 
+Lưu Quốc Việt 
+ 
+ 
+6 
+Chủ trì thẩm tra phần 
+dự toán 
+Tô Phương Anh 
+BXD-00005902 
+ 
+ 
+Công ty Cổ phần Tư vấn Xây dựng Điện 1 trân trọng thông báo./. 
+Nơi nhận: 
+- Như trên; 
+- Lưu: VT, NĐNLM. 
+KT. TỔNG GIÁM ĐỐC 
+PHÓ TỔNG GIÁM ĐỐC 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Trần Thái Hải 
+ 
+                   
+ 
+       
+ 
+54 
+ 
+ 
+PHỤ LỤC CÁC Ý KIẾN THẨM TRA CHI TIẾT 
+ 
+Phụ lục B1 - Ý kiến thẩm tra phần Thuyết minh BCNCKT 
+Phụ lục B2 - Ý kiến thẩm tra phần Các văn bản pháp lý 
+Phụ lục B3 - Ý kiến thẩm tra phần TMĐT 
+Phụ lục B4 - Ý kiến thẩm tra phần Tài liệu khảo sát 
+Phụ lục B5 - Ý kiến thẩm tra phần Thuyết minh TKCS 
+Phụ lục B6 - Ý kiến thẩm tra phần Phụ lục tính toán công nghệ 
+Phụ lục B7- Ý kiến thẩm tra phần bản vẽ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Stt
+Chươn
+g
+Mục
+Trang
+Nội dung chính 
+Ý kiến TVTT lần 1
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 2
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 3
+Ý kiến TVTT lần 4
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 5
+1
+1,1
+- Do QCVN 22:2009/BTNMT đã được thay thế 
+bởi QCVN 19:2024/BTNMT Quy chuẩn kỹ thuật 
+Quốc gia về khí thải công nghiệp, vì vậy kiến nghị 
+Tư vấn thiết kế cập nhật lại các yêu cầu tiêu chuẩn 
+phù hợp.
+- Hiệu chỉnh lại một số lỗi chính tả, dấu cách và 
+lỗi trình bày văn bản.
+TVTK đồng ý hiệu chỉnh Đồng ý với hiệu chỉnh của 
+TVTK. Đóng
+1
+1,2
+Tư vấn thẩm tra kiến nghị Tu vấn thiết kế cập 
+nhật một số văn bản pháp lý đã được thay thế 
+hoặc bổ sung như Luật Điện lực số 
+61/2024/QH15 ngày 30/11/2024 (có hiệu lực từ 
+01/02/2025); Nghị định 175/2024/NĐ-CP ngày 
+30/12/2024 quy định chi tiết một số điều và biện 
+pháp thi hành Luật xây dựng về quản lý hoạt động 
+xây dựng; Thông tư 45/2024/TT-BTNMT ngày 
+30/12/2024 ban hàn chính thức QCVN 
+19:2024/BTNMT Quy chuẩn kỹ thuật Quốc gia về 
+khí thải công nghiệp thay thế cho QCVN 
+22:2009/BTNMT
+TVTK đồng ý hiệu chỉnh Đồng ý với hiệu chỉnh của TVTK.
+1
+1,4
+Căn cứ vào Điều 17, Nghị định 175/2024/NĐ-CP 
+quy định hồ sơ trình thẩm định Báo cáo nghiên 
+cứu khả thi đầu tư xây dựng tại cơ quan chuyên 
+môn về xây dựng “n) Đối với dự án sửa chữa, cải 
+tạo, hồ sơ trình thẩm định còn phải có các nội 
+dụng: Hồ sơ khảo sát hiện trạng, Báo cáo kiểm 
+định của tổ chức kiểm định xây dựng đánh giá về 
+khả năng chịu lực của công trình (trường hợp nội 
+dung sửa chữa, cải tạo có liên quan” . Vì vậy, Tư 
+vấn thẩm tra kiến nghị Tư vấn thiết kế bổ sung 
+các hồ sơ báo cáo trên vào Biên chế hồ sơ 
+BCNCKT để đáp ứng yêu cầu nêu trên. 
+TVTK và chủ đầu tư cần lưu ý 
+đánh giá và kiểm định về khả 
+năng chịu lực của công trình hiện 
+hữu trước khi lắp đặt thêm các 
+thiết bị mới để đảm bảo an toàn 
+về mặt kết cấu.
+Đồng ý với hiệu chỉnh của 
+TVTK. Đóng
+3
+3.1.2 
+8/21
+Hệ thống khử bụi tĩnh điện ESP
+1. Tiêu chuẩn môi trường TCVN 5939-1995 đã bị hết 
+hạn. Quản lý về bụi nhà máy nhiệt điện cần xem xét 
+tới QCVN 19:2024/BTNMT có hiệu lực từ tháng 
+7/2025. Do vậy, TVTK nên viết trích dẫn báo cáo báo 
+cáo đánh giá tác động môi trường Dự án NMNĐ 
+Quảng Ninh phê duyệt năm 2003 
+TVTK thống nhất hiệu 
+chỉnh
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+3
+3.1.4 
+9/21
+Hệ thống xử lý SO2 (FGD)
+1. "tại hệ thống FGD một phần nhỏ hàm lượng bụi 
+cũng được giữ lại do quá trình phun dung dịch thạch 
+cao vào trong dòng khí nên hàm lượng phát thải bụi ra 
+khỏi ống khói của Nhà máy luôn đáp ứng tiêu chuẩn 
+môi trường quy định. " TVTK nên sửa đổi mô tả " 
+luôn đáp ứng tiêu chuẩn môi trường quy định" cho 
+hợp lý hơn vì tiêu chuẩn môi trường hiện hành QCVN 
+22:2009/BTNMT thì nồng độ bụi ≤102mg/Nm3 và từ 
+tháng 07/2025 QCVN 19:2024/BTNMT ≤20 mg/Nm3.
+2. Hình 3.1.1: Sơ đồ FGD kiểu ướt áp dụng cho 
+NMNĐ Quảng Ninh nên để ra 1 trang quay ngang để 
+thể hiện rõ hơn
+TVTK thống nhất hiệu 
+chỉnh
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+3
+3.2.1
+12/21
+ Hệ thống khử bụi ESP
+1. TVTK nên giới thiệu cách thức vận hành hiện hữu, 
+phòng điều khiển của Hệ thống khử bụi ESP
+2. Bổ sung thông số phát thải bụi thực tế những tháng 
+gần đây, đánh giá hiệu suất của ESP hiện hữu
+TVTK thống nhất bổ sung 
+hiệu chỉnh.
+Đề nghị CĐT cung cấp tài 
+liệu vận hành và kết quả 
+phát thải bụi thực tế gần 
+đây
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+CHƯƠNG 1: TỔNG QUAN 
+CHƯƠNG 2: TÓM TẮT CÁC THÔNG TIN CHÍNH VỀ DỰ ÁN 
+CHƯƠNG 3: SỰ CẦN THIẾT CỦA DỰ ÁN
+PHỤ LỤC BÁO CÁO THẨM TRA
+BẢNG 1: Ý KIẾN THẨM TRA THUYẾT MINH BCNCKT
+BÁO CÁO NGHIÊN CỨU KHẢ THI DỰ ÁN NÂNG CẤP, CẢI TẠO HỆ THỐNG XỬ LÝ KHÍ THẢI NHÀ MÁY NHIỆT ĐIỆN QUẢNG NINH
+1
+3
+3.2.3 
+13/21
+Hệ thống khử SO2 (FGD)
+1. TVTK nên giới thiệu cách thức vận hành hiện hữu, 
+phòng điều khiển của hệ thống khử SO2 (FGD)
+2. Bổ sung  thông số phát thải SOx thực tế những 
+tháng gần đây, đánh giá hiệu suất của FGD hiện hữu
+TVTK thống nhất hiệu 
+chỉnh, bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+3
+3.2.3.1 13/21
+ Hệ thống vận chuyển tro bay
+1. Nên bổ sung giới thiệu hệ thống vận chuyển tro bay 
+vào mục 3.1. Giới thiệu chung
+2. "Mỗi lò hơi (lò hơi 1 và 2) bao gồm hai hệ thống 
+thải tro ở áp suất âm. Bốn hệ thống riêng lẻ (1A, 1B, 
+2A và 2B) có thể vận hành tự động (hoặc bằng tay) và 
+tro bay trong các phễu tro", 
+"Hai kho chứa tro bay có thể đồng thời nhận tro bay từ 
+bốn hệ thống thải tro bay (mỗi lò hơi có hai hệ thống). 
+Hệ thống thải tro bay bao gồm một ống dẫn riêng lẻ và 
+một ống dẫn chuyên dụng nối với các kho chứa tro 
+bay tương ứng và mỗi lò hơi bao gồm cả hai ống 
+dẫn..". TVTK nên mô tả lại dễ hiểu hơn vì NMNĐ 
+Quảng Ninh gồm 4 lò hơi.
+3. TVTK nên bổ sung các tồn tại sự cố liên quan tới 
+hệ thống vận chuyển tro bay 
+Thống nhất bổ sung hiệu 
+chỉnh. Đề nghị chủ đầu tư 
+cung cấp các tài liệu vận 
+hàng và thống kê sự cố như 
+yêu cầu cảu TVTK
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+3
+3.2.3.2 15/21
+Hệ thống quạt khói
+1. Nên bổ sung giới thiệu hệ thống quạt khói bay vào 
+mục 3.1. Giới thiệu chung
+2. Ngoài hiện tượng cướp công suất, TVTK hệ thống 
+quạt khói còn tồn tại vấn đề gì nữa không?  
+1. Đồng ý
+2. Sẽ kiến nghị nhờ CĐT 
+cung cấp thêm để đưa vào 
+mô tả
+Đóng
+3
+3.3.1
+16/21
+Tiêu chuẩn môi trường hiện hành
+ 1. Trong mục này, TVTK chưa đề cập đến QCĐP 5: 
+2020/QN "QUY CHUẨN KỸ THUẬT ĐỊA 
+PHƯƠNG VỀ KHÍ THẢI CÔNG NGHIỆP ĐỐI VỚI 
+BỤI VÀ CÁC CHẤT VÔ CƠ TỈNH QUẢNG NINH".
+2. TVTK vui lòng Cập nhật QCVN 19:2024/BTNMT
+Đồng ý, TVTK sẽ hiệu 
+chỉnh bổ sung. Qua rà soát 
+và kiểm tra Quy chuẩn địa 
+phương theo Quết định 
+2476/QĐ-UBND tỉnh hiện 
+đang áp dụng theo các cũ 
+nên giới hạn cho phép (giá 
+trị) cao hơn QCVN 
+19:2024/BTNMT
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+3
+3.3.4
+18/21
+Mục tiêu  của dự án
+1. Theo QĐ 2476/QĐ-UBND " BAN HÀNH QUY 
+CHUẨN KỸ THUẬT ĐỊA PHƯƠNG VỀ MÔI 
+TRƯỜNG TRÊN ĐỊA BÀN TỈNH QUẢNG NINH"  
+phát thải không khí dự án công nghiệp trong địa bàn 
+tỉnh phải đảm bảo theo QCĐP 5: 2020/QN. TVTK vui 
+lòng làm rõ đã tính toán và đối chiếu với QCĐP chưa.
+2. TVTK vui lòng cập nhật phát thải Bụi mịn theo 
+QCVN 19:2024/BTNMT.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+3
+3.4
+21/21
+Đánh giá hiện trạng và xu hướng yêu cầu bảo vệ môi trường
+Cần bổ sung các tiêu chuẩn địa phương theo QĐ 
+2476/QĐ-UBND của tỉnh Quảng Ninh.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh bổ sung
+Tại bảng 3.4, hiện nay QCVN 
+19:2024 đã được ban hành chứ 
+không còn dự thảo, vui lòng hiệu 
+chỉnh.
+Đồng ý với hiệu chỉnh của 
+TVTK. Đóng
+3
+3.4
+21
+Đánh giá hiện trạng và xu hướng yêu cầu quy định bảo vệ môi 
+trường
+Đề nghị TVTK cập nhật thông tư 45/2024/TT-
+BTNMT ngày 30/12/2024 về việc ban hành quy 
+chuẩn kỹ thuật quốc gia về khí thải (QCVN 
+19/2024/BTNMT)
+Đồng ý, TVTK sẽ hiệu 
+chỉnh bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+4
+4.1.1
+3/126
+Lựa chọn giải pháp công nghệ
+1. Báo cáo không nên đánh giá theo QCVN 22:2009 
+nữa vì QCVN này tháng 7/2025 sẽ hết hiệu lực
+Đồng ý, TVTK sẽ hiệu 
+chỉnh bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+4
+4.1.2. 
+5/126
+Lựa chọn giải pháp cải tạo, nâng cấp cho Dự án
+1. "theo yêu cầu của QCVN…2024/BTNMT  (nồng 
+độ bụi yêu cầu ≤10 mg/Nm3) ". TVTK cần cập nhật 
+lại theo QCVN 19:2024 nồng độ bụi yêu cầu ≤20 
+mg/Nm3
+Đồng ý, TVTK sẽ hiệu 
+chỉnh bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+CHƯƠNG 4: LỰA CHỌN GIẢI PHÁP CÔNG NGHỆ - KỸ THUẬT
+2
+4
+4.1.4. 
+11/126
+Lựa chọn phương án kỹ thuật
+1. TVTK bổ sung phương án có lắp hệ thống thu hồi 
+nhiệt để có cơ sở triển khai cho phần sau
+2. Việc hạ nhiệt độ khói xuống dưới điểm đọng sương 
+axit sẽ dẫn đến ăn mòn thiết bị và đường ống tiếp xúc 
+trực tiếp với khói. Đề nghị TVTK bổ sung đánh giá về 
+khả năng ăn mòn trong đường khói trong trường hợp 
+áp dụng bộ thu hồi nhiệt để hạ nhiệt độ khói trước khi 
+vào ESP. Liệt kê các thiết bị có thể bị ăn mòn do tiếp 
+xúc với dòng khói có nhiệt độ thấp (tính từ sau bộ thu 
+hồi nhiệt đầu vào ESP ra đến ống khói) và bổ sung 
+các giải pháp chống ăn mòn cho các thiết bị này.
+1. Thống nhất
+2. Thống nhất 
+Để nghị TVTK làm rõ mối liên hệ 
+điện áp xung đầu ra định mức (Rated 
+output pulse Voltage) 100kV vào 
+trong SteamPro để ra được Hình 
+4.2.5. Tính toán kiểm tra nồng độ 
+phát thải cuối cùng tại ống khói
+Đồng ý với hiệu chỉnh của 
+TVTK. Đóng
+4
+4.1.5.
+18/126
+ Mô tả kỹ thuật phương án chọn
+1. TVTK cần cập nhật lại theo QCVN 19:2024 nồng 
+độ bụi yêu cầu ≤20 mg/Nm3
+2. TVTK chưa mô tả hệ thống hệ thống thu hồi nhiệt 
+theo mô tả ở mục 4.1.4  "Hệ thống lọc bụi tĩnh điện 
+nhiệt độ thấp có thể thu hồi nhiệt khi sử dụng thiết bị 
+thu hồi nhiệt, có tác dụng tiết kiệm năng lượng"
+3. TVTK kiến nghị thay đổi vật liệu của tấm phóng và 
+tấm thu khi chuyển sang Hệ thống lọc bụi tĩnh điện 
+nhiệt độ thấp. Tuy nhiên, phần vật liệu của vỏ và 
+khung đỡ ESP chưa thấy đánh giá cũng như đưa ra 
+giải pháp chống ăn mòn ở nhiệt độ thấp. 
+1. Thống nhất
+2. Chưa rõ ý kiến của 
+TVTT
+3. Thống nhất sẽ bổ sung 
+đánh giá
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+4
+4.2.2
+59/126
+Mô tả sơ đồ công nghệ và các thiết bị chính
+Trong mục 4.2.2, chương 4 Thuyết minh BCNCKT. 
+Thể tích bể dự trữ NH3 là 155m3. Tuy nhiên trong 
+TKCS là 154m3. Vui lòng chuẫn xác lại số liệu. 
+Đồng ý, TVTK sẽ chuẩn 
+xác và thống nhất lại số liệu
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+4
+4.2.2.3
+66/126
+Bảng: 4.2.15: Thông số cơ bản của quạt khói 
+TVTK vui lòng giải thích tại sao khi nhà máy chạy ở 
+chế độ BMCR thì các thông số lưu lượng đầu vào quạt 
+khói cũng như áp lực lại thấp hơn so với điều kiện 
+trung bình.
+TVTK giải trình như sau: 
+trong bảng 4.2.15, TB là 
+viết tắt của TEST BLOCK, 
+không phải là Trung Bình 
+vì vậy các thông số lớn sẽ 
+lớn hơn BMCR
+Đồng ý với giải trình của TVTK. 
+Đóng
+4
+4.3.2.
+94/126
+ Lựa chọn giải pháp công nghệ nâng cao hiệu suất của hệ thống 
+FGD
+1. "than sử dụng tại các tổ máy ở NMNĐ Quảng Ninh 
+có hàm lượng lưu huỳnh khá thấp, dẫn đến nồng độ 
+phát thải SO2 cũng tương đối nhỏ, đáp ứng được yêu 
+cầu của Hồ sơ mời thầu." TVTK nên bổ sung mẫu 
+than thiết kế của nhà máy
+TVTK thống nhất hiệu 
+chỉnh
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+1. " Với phương án nâng cấp, cải tạo bộ ESP như trên, 
+điện cực phóng và lắng được thay thế bằng loại mới 
+vật liệu Inox". Tuy nhiên tại mục 4.1.5 thì tấm điện 
+cực thu làm bằng thép SPCC. TVTK kiểm tra lại vật 
+liệu của tấm lắng.
+2. Cơ sở nào đề suất điện cực phóng và lắng được 
+thay thế bằng loại mới vật liệu Inox là sẽ tốt hơn so 
+với vật liệu SPCC. Vì thường vật liệu inox rất trơn và 
+khó bám bụi trên đó.
+3. Hiện tượng búa gõ hiện hữu ở trong ESP có hiện 
+tượng bị kẹt không tác động được tấm thu. Do đó 
+giảm hiệu suất của ESP. Hiện nay, có công nghệ mới 
+búa lắp đặt trên đỉnh ESP có ưu điểm hơn so với búa 
+hiện hữu. TVTK nên phân tích thêm.
+4. Đối phần cuối tấm thu bụi khi mỗi lần búa tác động 
+đều phát thải ra rất nhiều bụi bị cuống theo dòng khói 
+mà không rơi xuống phễu tro. TVTK bổ sung thêm 
+giải pháp để khắc phục tình trạng này
+5. Hiện tượng bị lọt khói xuống phễu tro dẫn đến đi 
+tắt dòng khói, không đi qua các tấm thu bụi dẫn đến 
+suy giảm hiệu suất khử bụi. TVTK nên bổ sung thêm 
+giải pháp để khắc phục tình trạng này.
+1. TVTK sẽ hiệu chỉnh cho 
+phù hợp
+2. TVTK sẽ hiệu chỉnh lại 
+rõ hơn, cực phóng đề  xuất 
+vật liệu Inox cực lắng đễ 
+xuất vật liệu SPC
+3. Búa trên đỉnh cũng có 
+nhược điểm không gõ bụi 
+đồng đều, nên chưa chứng 
+minh được ưu điểm hơn.
+4. Tác động này là không 
+liên tục, hơn nữa trường 
+cuối chủ yếu là bụi mịn, 
+được thu giữ một phần qua 
+FGD.
+5. Hiện tượng lọt khói 
+xuống là có nhưng không 
+nhiều do bản chất khói là 
+đi lên trên.
+4
+4.1.6. 
+23/126
+Vấn đề vận hành các bộ ESP khi khởi động lò hơi
+3
+4
+4.3.3. 
+108/126
+Mô tả kỹ thuật giải pháp cải tạo, nâng cấp cho Dự án
+1." trở lực của khay phân phối khói khoảng 300Pa 
+(được lắp đặt bên trong tháp hấp thụ của hệ thống 
+FGD kiểu ướt cho tổ máy 600MW). ". Tuy nhiên công 
+suất tổ máy Quảng Ninh chỉ 300MW do đó tham khảo 
+trở lực của tổ máy 600MW là chưa có cơ sở. Đề nghị 
+TVTK kiểm tra lại
+2. Đề nghị TVTK bổ sung tính trở lực cho phần bộ 
+thu hồi nhiệt trước ESP và thiết bị khử ẩm mới trong 
+bộ FGD 
+1. Đối với nội dung này, 
+TVTK đã tham khảo từ nhà 
+sản xuất. Trở lực của khay 
+phân phối vào khoảng 
+300Pa. TVTK sẽ hiệu 
+chỉnh nội dung cho phù 
+hợp.
+2. TVTK đề xuất thay thế 
+bộ khử ẩm mới giống như 
+bộ cũ. Do đó, TVTK cho 
+rằng không cần thiết tính 
+thêm về trở lực.
+Đồng ý với giải trình của TVTK. 
+Đóng
+4
+4,4
+110/126
+Hệ thống điện
+Đề nghị TVTK bổ sung mã hiệu của thanh cái cấp 
+nguồn dự kiến vào các bảng thông số phụ tải điện.
+VD: Thanh cái 400V Boiler PC A (1BFC06GS001)
+Thanh cái 400V Boiler PC A (1BFD06GS001)
+Đồng ý, TVTK sẽ bổ sung. Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+4
+4,4
+110/126
+Hệ thống điện
+Đề nghị TVTK bổ sung thông số phụ tải điện hệ 
+thống bơm tuần hoàn của các tổ máy còn lại (2A, 2B, 
+3A, 3B, 4A, 4B)
+Đồng ý, TVTK sẽ bổ sung.
+Đóng ý kiến.
+4
+4,4
+110/126
+Hệ thống điện
+Đề nghị TVTK bổ sung thông số phụ tải điện hệ 
+thống thu hồi nhiệt (HRS) của các tổ máy còn lại (2A, 
+2B, 3A, 3B, 4A, 4B)
+Đồng ý, TVTK sẽ bổ sung.
+Đóng ý kiến.
+4
+4,4
+110/126
+Hệ thống điện
+Đề nghị TVTK bổ sung thông số máy cắt sử dụng 
+trong hệ thống cấp nguồn từ thanh cái
+Đồng ý, TVTK sẽ bổ sung.
+Đóng ý kiến.
+4
+4,4
+110/126
+Hệ thống điện
+Đề nghị TVTK bổ sung hiện trạng hệ thống và thiết bị 
+điện của nhà máy (bao gồm tủ điện, cáp nguồn, máy 
+cắt...) và đánh giá khả năng cấp điện cho các phụ tải 
+điện thuộc hệ thống xử lý khí thải được nâng cấp của 
+dự án.
+Đồng ý, TVTK sẽ bổ sung. Đồng ý với hiệu chỉnh của TVTK.
+4
+4,4
+110/126
+Hệ thống điện
+Đề nghị TVTK bổ sung các tính toán liên quan để làm 
+cơ sở lựa chọn thiết bị điện, cũng như khả năng cấp 
+điện của hệ thống hiện tại.
+Đồng ý, TVTK sẽ bổ sung. Đồng ý với hiệu chỉnh của TVTK.
+4
+4.4.3.3
+114/126
+Thiết bị nối đất
+Đề nghị TVTK bổ sung các tiết diện dây tiếp địa, cách 
+bố trí hệ thống tiếp địa đối với từng loại thiết bị xử lý 
+khí thải được cung cấp trong dự án.
+Đồng ý, TVTK sẽ bổ sung. Đồng ý với hiệu chỉnh của TVTK.
+4
+4.4.3.4
+115/126
+Hệ thống điện
+Đề nghị TVTK thay thế các đèn huỳnh quang, sodium 
+thành loại đèn LED có IP phù hợp với môi trường 
+ngoài trời
+Đồng ý, TVTK sẽ hiệu 
+chỉnh.
+Đồng ý với hiệu chỉnh của TVTK.
+4
+4.5.1.1.
+115/126
+Các thay đổi chính trong hệ thống điều khiển ESP
+TVTK làm rõ bộ điều khiển tích hợp bên trong của 
+máy biến áp chỉnh lưu cao tần có thay thế hoàn toàn 
+cho hệ thống điều khiển PLC cũ không và PLC sẽ 
+đóng vai trò gì trong hệ thống mới.
+Bộ điều khiển tích hợp bên 
+trong MBA chỉnh lưu cao 
+tần sẽ thay thế hoàn toàn 
+hệ thống PLC cũ. TVTK sẽ 
+hiệu chỉnh bản vẽ cho phù 
+hợp thuyết minh.
+Đóng
+4
+4.5.4
+120/126
+Quy phạm và các tiêu chuẩn áp dụng cho hệ thống
+Đề nghị TVTK rà soát và thay thế các tiêu chuẩn hết 
+hạn bằng các tiêu chuẩn hiện hành tương đương.
+Đồng ý, TVTK sẽ rà soát 
+lại.
+Đồng ý với hiệu chỉnh của TVTK.
+4.6.1
+122
+Đánh giá nguy cơ cháy nổ trong phạm vi Dự án và giải pháp 
+PCCC
+ TVTK vui lòng bổ sung: 
+ - Danh sách các tiêu chuẩn áp dụng cho dự án.
+- Hiện trạng hệ thống PCCC đã lắp đặt của hệ các hệ 
+thốn SCR,ESP, Nox, hệ thống cấp nước chữa cháy 
+(nguồn nước, bể và trạm bơm chữa cháy...) 
+ TVTK thống nhất bổ sung
+Đóng
+4.6.2
+124
+Các giải pháp kỹ thuật cụ thể về PCCC
+Tại bảng 4.6.1, đề nghị TVTK bổ sung các đầu báo rò 
+rỉ khí NH3 như được đề xuất tại mục  "Nguy cơ xảy ra 
+cháy nổ tại khu vực lò hơi/ bộ phản hấp thụ SCR và 
+giải pháp đề xuất"
+ TVTK thống nhất bổ sung
+TVTT đồng ý hiệu chỉnh của TVTK. 
+Đóng
+4.2.2.3
+80/155
+Biến tần quạt khói
+Đề nghị TVTK bổ sung
+- Hiện trạng vận hành và 
+phương thức điều khiển hiện 
+hữu của các quạt khói trong 
+nhà máy, bao gồm chế độ điều 
+chỉnh lưu lượng, cấu hình 
+điều khiển, các liên động và 
+bảo vệ đang áp dụng.
+-  Theo thuyết minh dự án sử 
+dụng biến tần dạng container, 
+đề nghị TVTK rà soát trong 
+thuyết minh vẫn trình bày 
+"nhà biến tần" để tránh nhầm 
+lẫn.
+- Đề nghị TVTK bổ sung giải 
+pháp PCCC cho biến tần vì 
+đây là thiết bị công suất có 
+khả năng phát nhiệt cần được 
+trang hệ thống PCCC.
+- TVTK sẽ bổ sung
+- Đồng ý rà soát toàn bộ dự án
+- TVTK đã tham khảo các nhà 
+cung cấp biến tần họ nói sẽ 
+thiết kế tích hợp về PCCC và 
+điều hoà thông gió trong tủ 
+biến tần/ Về điều hoà trong 
+báo cáo cũng đã đưa ra giải 
+pháp sơ bộ lắp 04 điều hoà 
+cho 01 tủ biến tần/
+Đóng.
+CHƯƠNG 5: GIẢI PHÁP XÂY DỰNG VÀ TỔ CHỨC THI CÔNG
+4
+5
+5.1.1
+9/40 và 
+10/40
+"Tổng hợp thông tin từ báo cáo khảo sát địa chất công trình 
+của địa điểm trong giai đoạn lập: (i) Báo cáo nghiên cứu 
+khả thi dự án NMNĐ Quảng Ninh do Công ty Tư vấn Xây 
+dựng điện 1 lập tháng 12/2002, giải trình bổ sung tháng 
+5/2003; (ii) Báo cáo thiết kế kỹ thuật NMNĐ Quảng Ninh 
+do Công ty Tư vấn Xây dựng điện 1 lập năm 2004; ... Điều 
+kiện địa chất của địa điểm xây dựng nhà máy được tóm tắt 
+như sau:
+"- Theo phụ lục E - TCVN 9386:2012,.., hệ số mức độ tầm 
+quan trọng của công trình là gI = 1,0 và Theo phụ lục H - 
+TCVN 9386:2012, hệ số đỉnh gia tốc nền của khu vực 
+Thành phố Hạ Long, tỉnh Quảng Ninh agR = 0,0882g .
+- Cũng theo bảng 6.1 của quy chuẩn QCVN 02:2022/BXD 
+–.... Dự án có đỉnh gia tốc nền tham chiếu trên nền loại A 
+là: agR = 0,10.g (m/s2). Quy đổi đỉnh gia tốc nền sang cấp 
+động đất theo thang MSK-64 thì Dự án có cấp động đất là 
+cấp VIII (Bảng 6.4 – QCVN 02:2022/BXD).
+Trong giai đoạn thi công xây dựng nhà máy tổng thầu EPC 
+nhà thầu Thượng Hải Trung Quốc đã tính toán thiết kế đối 
+với các hạng mục phụ trợ, có tải trọng nhẹ của nhà máy 
+với cấp VII (thang MSK-64), riêng đối với các hạng mục 
+chính như tuabin, máy phát, nhà lò và các hạng mục phụ 
+trợ, ống khói với cấp VIII (thang MSK-64)."
+1. Trong nội dung tóm tắt lại đặc điểm động đất 
+cho các công trình hiện hữu của dự án, TVTK có 
+nêu cả thông số động đất theo QCVN 
+02:2022/BXD là chưa phù hợp vì giá trị đỉnh gia 
+tốc nền thời điểm thực hiện dự án hiện hữu (năm 
+2006-2014) là 0,0882g khác với giá trị đỉnh gia 
+tốc nền áp dụng cho tính toán thiết kế công trình 
+cho thời điểm hiện tại  (2025) là 0,1g. Kiến nghị 
+TVTK trong phần tóm tắt nội dung số liệu cho 
+công trình hiện hữu thì không đưa số liệu theo 
+quy định của hiện tại cho các công trình thực hiện 
+mới tránh gây thiếu thống nhất về mặt nội dung.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+5
+5.1.1
+12/40
+Theo qui phạm tải trọng và tác động TCVN - 2737 - 1995 
+thì khu vực đặt nhà máy nằm trong vùng III.B
+1. Tiêu chuẩn TCVN 2737:1995 đã hết hiệu lực, 
+TVTK vui lòng không áp dụng tiêu chuẩn này cho 
+dự án
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+5
+5.1.2
+14/40
+Theo phụ lục E - TCVN 9386:2012, hệ số mức độ tầm 
+quan trọng của dự án là gI = 1,25 (Công trình có tầm quan 
+trọng sống còn với việc bảo vệ cộng đồng, chức năng 
+không được gián đoạn trong quá trình xảy ra động đất).
+Theo phụ lục H - TCVN 9386:2012, hệ số đỉnh gia tốc nền 
+của khu vực Thành phố Hạ Long, tỉnh Quảng Ninh có giá 
+trị đỉnh gia tốc nền là agR = 0,0882 m/s2, quy đổi từ đỉnh 
+gia tốc nền sang cấp động đất VII (Thang MSK-64) tại phụ 
+lục 1 TCVN 9386:2012 thì khu vực xây dựng dự án được 
+tính toán đối với cấp động đất là cấp VII.
+Cũng theo bảng 6.1 của quy chuẩn QCVN 02:2022/BXD – 
+Quy chuẩn kỹ thuật quốc gia – Số liệu điều kiện tự nhiên 
+dùng trong xây dựng, Dự án có đỉnh gia tốc nền tham 
+chiếu trên nền loại A là: agR = 0,10.g (m/s2).
+Quy đổi đỉnh gia tốc nền sang cấp động đất theo thang 
+MSK-64 thì Dự án có cấp động đất là cấp VIII (Bảng 6.4 – 
+QCVN 02:2022/BXD).
+1. TVTK đề xuất 02 giá trị đỉnh gia tốc nền và 02 
+giá trị quy đổi đỉnh gia tốc nền sang cấp động đất 
+để áp dụng chung cho dự án nhưng chưa đưa ra 
+kết luận chọn giá trị nào. Kiến nghị TVTK phải có 
+kết luận lựa chọn giá trị đỉnh gia tốc nền áp dụng 
+cho dự án.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+5
+5.2.5
+22/40
+Theo Dự thảo QCVN năm 2024
+1. TVTK đề xuất 02 giá trị đỉnh gia tốc nền và 02 
+giá trị quy đổi đỉnh gia tốc nền sang cấp động đất 
+để áp dụng chung cho dự án nhưng chưa đưa ra 
+kết luận chọn giá trị nào. Kiến nghị TVTK phải có 
+kết luận lựa chọn giá trị đỉnh gia tốc nền áp dụng 
+cho dựán.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+5
+5.3.1
+24/40
+- Nghị định số 15/2021/NĐ-CP ngày 03/03/2021 của 
+Chính phủ quy định chi tiết một số nội dung về Quản lý dự 
+án đầu tư xây dựng;
+1. Nghị định đã hết hạn. TVTK vui lòng cập nhật 
+văn bản pháp luật mới phù hợp.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+5
+5.3.1
+24/40
+-      Nghị định số 10/202021/NĐ-CP ngày 09 tháng 02 năm 
+2021 của Chính phủ về Quản lý chi phí đầu tư xây dựng;
+1. Lỗi chính tả.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+5
+5.3.2
+28/40
+TCVN 7888-2008 - Cọc bê tông ly tâm dự ứng lực
+1. Tiêu chuẩn đã hết hạn, TVTK vui lòng cập nhật 
+tiêu chuẩn phù hợp
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+5
+5.3.3
+30/40
+Theo Dự thảo QCVN năm 2024
+1. TVTK vui lòng chỉ rõ số hiệu QCVN, và lưu ý 
+rằng các văn bản pháp lý dự thảo thì không có 
+hiệu lực áp dụng 
+Đồng ý, TVTK sẽ hiệu 
+chỉnh trong phiên bản sau
+TVTK đã chỉnh sửa. Đóng
+6
+6.2. 
+3/25
+Hiện trạng môi trường khu vực dự án
+1. Nghị định 18/2015/NĐ-CP, QCVN 
+05:2013/BTNMT, QCVN 26:2010, QCVN 
+27:2010/BTNMT,  QCVN 10:2008, QCVN 
+40:2011/BTNMT  …  đã hết hạn. Đề nghị TVTK rà 
+soát và cập nhật tất cả các tiêu chuẩn hết hạn
+2. TVTK nên bổ sung xem xét đánh giá thêm quy 
+chuẩn kỹ thuật địa phương về môi trường trên địa bàn 
+tỉnh Quảng Ninh theo Quyết định 2476/QĐ-UBND 
+Đồng ý, TVTK sẽ hiệu 
+chỉnh lại
+TVTK chưa hiệu chỉnh hết ý kiến 
+lần 1 của TVTT, Trong báo cáo vẫn 
+còn 1 số tiêu chuẩn, quy chuẩn đã 
+hết hiệu lực như QCVN 
+05:2013/BTNMT, QCVN 26:2010, 
+QCVN 10-MT:2015/BTNMT. Quy 
+chuẩn QCVN 14-MT:2015/BTNMT 
+và QCVN 40:2021/BTNMT  không 
+được ban hành nên việc áp dụng 2 
+quy chuẩn này là không chính xác
+CHƯƠNG 6: KẾ HOẠCH BẢO VỆ MÔI TRƯỜNG VÀ QUẢN LÝ VẬN HÀNH
+5
+6
+6.3
+19/25
+Các tác động và biện pháp giảm thiểu tác động do các hoạt 
+động cải tạo của nhà máy
+Đề nghị TVTK làm rõ khối lượng nước thải, chất thải 
+rắn, chất thải nguy hại gia tăng cần phải xử lý
+Với số lượng nhân công 
+không nhiều, nước thải 
+phát sinh sẽ được thu gom 
+và xử lý trong hệ thống xử 
+lý nước thải hiện hữu của 
+nhà máy, chất thải nguy hại 
+sẽ được thu gom, thuê đơn 
+vị có chức năng xử lý (nếu 
+cần thiết)
+Đóng ý kiến.
+6
+6.4. 
+22/25
+Kiểm tra khuếch tán khí thải của ống khói đáp ứng QCVN 05: 
+2013
+1. QCVN 05: 2013 đã hết hạn. Đề nghị TVTK cập 
+nhật lại
+2. Đối với QCVN 22: 2009 sẽ hết hạn vào tháng 
+07/2025 và được thay thế bởi QCVN 19:2024. Do 
+vậy, TVTK cần cập nhật theo quy chuẩn mới.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh lại
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+6
+6.4
+22/25
+Kiểm tra khuếch tán khí thải của ống khói đáp ứng QCVN 05: 
+2013
+Đề nghị TVTK bổ sung các thông số phát thải của nhà 
+máy: các nguồn phát thải, nồng độ, tải lượng, lưu 
+lượng, nhiệt độ khí thải…trước và sau khi nâng cấp, 
+cải tạo hệ thống xử lý khí thải
+Các thông số phát thải của 
+nhà máy: các nguồn phát 
+thải, nồng độ, tải lượng, 
+lưu lượng, nhiệt độ khí 
+thải…trước và sau khi 
+nâng cấp, cải tạo hệ thống 
+xử lý khí thải đã được 
+TVTK nêu chi tiết trong 
+NCKT-Chương 4 và 
+TKCS-Chương 2
+Đóng ý kiến.
+6
+6.4
+22/25
+Kiểm tra khuếch tán khí thải của ống khói đáp ứng QCVN 05: 
+2013
+Đề nghị TVTK bổ sung, định lượng tác động từ việc 
+phát thải khí trước và sau khi nâng cấp, cải tạo hệ 
+thống xử lý khí thải tới môi trường xung quanh theo 
+các quy chuẩn hiện hành.
+TVTK đã hiệu chỉnh bổ 
+sung
+TVTK chưa hiệu chỉnh theo ý kiến 
+lần 1 của TVTT
+Đóng ý kiến.
+6
+6.5.1. 
+23/25
+Vận hành
+Lắp đặt hệ thống SCR, nâng cấp một số bộ phận FGD, 
+ESP là hệ thống mới đối với nhà máy, TVTK nên bổ 
+sung quy trình đào tạo, chuyển giao công nghệ từ nhà 
+thầu cung cấp 
+Đồng ý, TVTK sẽ bổ sung 
+thêm, tuy nhiên trong giai 
+đoạn sau, khi đã xác định 
+được nhà cung cấp thiết bị, 
+tư vấn sẽ bổ sung chi tiết 
+hơn các quy trình đạo tạo 
+vận hành, chuyển giao 
+công nghệ của thiết bị
+Đồng ý với giải trình của TVTK. 
+Đóng
+6
+6.5.2. 
+24/25
+Bảo dưỡng và sửa chữa
+TVTK nên xem xét bổ sung cập nhật những hạng mục 
+nâng cấp, bổ sung mới
+Đồng ý, TVTK sẽ bổ sung 
+thêm, tuy nhiên trong giai 
+đoạn sau, khi đã xác định 
+nhà cung cấp thiết bị, tư 
+vấn sẽ bổ sung chi tiết các 
+quy trình bảo dưỡng, sửa 
+chữa của thiết bị do nhà 
+thầu cung cấp
+Đồng ý với giải trình của TVTK. 
+Đóng
+6
+6.5.3. 
+25/25
+Quy trình bảo dưỡng
+TVTK nên xem xét bổ sung cập nhật những hạng mục 
+nâng cấp, bổ sung mới
+Đồng ý, TVTK sẽ bổ sung 
+thêm, tuy nhiên trong giai 
+đoạn sau, khi đã xác định 
+rõ nhà cung cấp thiết bị, tư 
+vấn sẽ bổ sung chi tiết quy 
+trình bảo dưỡng của thiết 
+bị do nhà thầu cung cấp
+Đồng ý với giải trình của TVTK. 
+Đóng
+7
+7,6
+9/9
+Không thấy TVTK đề cập đến tiến độ thực hiện dự án 
+như trong tiêu đề của Chương.
+TVTK sẽ bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+8
+8,4
+7/7
+Dự án Nâng cấp, cải tạo hệ thống khử bụi ESP, NOx, cải 
+tạo hệ thống dầu nhiên liệu FO sang DO cho NMNĐ 
+Quảng Ninh được đầu tư để đáp ứng các quy định hiện 
+hành về bảo vệ môi trường
+TVTK cần kiểm tra lại phạm vi dự án này có bao gồm 
+việc cải tao hệ thống dầu nhiên liệu FO sang DO hay 
+không?
+Không bao gồm hệ thống 
+dầu nhiên liệu FO sang DO
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+9
+9,1
+3/3
+Sự cần thiết đầu tư
+Cần bổ sung các giá trị phát thải về NOx, SOx, Bụi 
+theo quy định của QCVN 19:2024/BTNMT là như thế 
+nào?
+TVTK đồng ý bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+9
+9,1
+3/3
+Kết luận
+Cần bổ sung thông tin về kết quả đạt được sau cải tạo 
+nâng cấp, các giá trị phát thải của nhà máy sau khi áp 
+dụng các giải pháp cải tạo thì đã đạt giá trị nào?
+TVTK đồng ý bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+CHƯƠNG 7: TỔNG MỨC ĐẦU TƯ VÀ HÌNH THỨC THỰC HIỆN DỰ ÁN, TIẾN ĐỘ THỰC HIỆN 
+CHƯƠNG 8: ĐÁNH GIÁ VÀ PHÂN TÍCH HIỆU QUẢ KINH TẾ - TÀI CHÍNH DỰ ÁN
+CHƯƠNG 9: KẾT LUẬN, KIẾN NGHỊ 
+6
+9
+9,1
+3/3
+Kết luận
+Cần bổ sung đánh giá hiệu quả của dự án cải tạo nâng 
+cấp, sau khi áp dụng các giải pháp kỹ thuật để giảm 
+phát thải thì nhà máy thu được lợi ích gì về mặt tài 
+chính?
+TVTK đồng ý bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+9
+9,1
+3/3
+Kết luận
+Cần có kết luận về tính khả thi của dự án.
+TVTK đồng ý bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+9
+9.1.4
+3/3
+Tiến độ dự án
+Cần cập nhật lại tiến độ vì hiện tại đã bước sang 2025
+TVTK đồng ý bổ sung
+Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+7
+BÁO 
+Stt
+Chương
+Mục
+Trang
+Nội dung chính 
+Ý kiến TVTT lần 1
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 2
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 3
+1
+Các VBPL
+2
+HSNL
+Kiến nghị Tư vấn thiết kế bổ sung 
+HSNL của tổ chức tư vấn và năng lực 
+nhân sự thực hiện dự án để Tư vấn 
+thẩm tra có cơ sở đánh giá.
+TVTK đồng ý bổ sung
+TVTK đã bổ sung. Đóng 
+ Một số chứng chỉ  hết hạn đề 
+nghị TVTK gửi lại chứng chỉ để 
+PECC1 kiểm tra, đánh giá
+TVTK đồng ý bổ sung
+Đóng
+BẢNG 2: Ý KIẾN THẨM TRA PL1 - CÁC VĂN BẢN PHÁP LÝ
+1
+Stt
+Chương
+Mục
+Trang
+Nội dung chính 
+Ý kiến TVTT lần 1
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 2
+Ý kiến TVTT lần 3
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 4
+Chương 
+7: 
+Dự toán xây dựng
+Giá vật liệu, nhiên 
+liệu
+TVTK đang áp giá vật liệu quý 
+3/2024
+Đề nghị cập nhật giá vật liệu, nhiên liệu 
+mới nhất. 
+Đồng ý cập nhật theo YKTT
+Đơn giá định mức, 
+khối lượng
+Hạng mục: Hệ khung 
+cột đỡ bộ xử lý NOx 
+Phần khối lượng
+Hạng mục này có bản vẽ móng nhưng 
+TVTK chưa tính. Đề nghị TVTK tính 
+khối lượng phần móng
+Các cột lắp mới được đặt lên trên đỉnh móng hiện hữu nên không cần kể đến khối lượng móng
+Đồng ý với giải trình 
+của TVTK. Đóng
+Cầu thang
+B.vẽ chưa có thống kê KL cầu thang
+Bản vẽ đã thể hiện phù hợp với gđ này, bảng thống kê khối lượng chỉ thể hiện cho các cấu kiện 
+chính, khối lượng cầu thang tư vấn lập sẽ bổ sung cách tính ở trong bài tính
+Đồng ý với giải trình 
+của TVTK. Đóng
+Mái tôn
+B.vẽ chưa thể hiện chi tiết chỗ nào là 
+tôn, chưa có kích thước tôn
+Mái tôn và tường tôn chỉ có ở nhà điện đặt ở Level 4b. Kích thước tôn tư vấn đã thể hiện ở bảng khối 
+lượng được xuất từ phần mềm, TVTK sẽ gửi bảng khối lượng này cho TVTT
+Đồng ý với giải trình 
+của TVTK. Đóng
+Lan can
+B.vẽ chưa có thống kê KL lan can
+Chiều dài lan can đã thể hiện trên bản vẽ, TVTK sẽ gửi bảng khối lượng lan can cho TVTT
+Đồng ý với giải trình 
+của TVTK. Đóng
+Sàn Grating
+B.vẽ chưa có ghi chú chỉ phạm vi sàn 
+grating
+Đây là giai đoạn TKCS, TVTK đã thể hiện được cơ bản kích thước của các cấu kiện chính, chi tiết sẽ 
+được thể hiện ở giai đoạn sau
+Đồng ý với giải trình 
+của TVTK. Đóng
+Cửa đi
+Chưa có b.vẽ chi tiết cửa; dự toán chưa 
+có lắp dựng cửa
+Đây là giai đoạn TKCS, TVTK kiến nghị Chi tiết cửa sẽ được thể hiện phù hợp ở giai đoạn sau. Tư 
+vấn lập đồng ý bổ sung lắp dựng cửa
+Đồng ý với giải trình 
+của TVTK. Đóng
+Cửa sổ
+Chưa có b.vẽ chi tiết cửa; dự toán chưa 
+có lắp dựng cửa
+Đây là giai đoạn TKCS, TVTK kiến nghị Chi tiết cửa sẽ được thể hiện phù hợp ở giai đoạn sau. Tư 
+vấn lập đồng ý bổ sung lắp dựng cửa
+Đồng ý với giải trình 
+của TVTK. Đóng
+Sơn sắt thép bằng sơn các loại, 1 
+nước lót, 2 nước phủ
+TVTK bố sung ghi chú sơn cột, dầm 
+thép
+Đồng ý với ý kiến thẩm tra
+TVTK đã sửa. Đóng
+AI.21141: Gia công cấu kiện dầm 
+thép dàn kín. Gia công dầm dọc
+TVTK đang để mã AI.21141 dùng cho 
+cầu thép là chưa chính xác. Đề nghị đổi 
+sang mã AI.11311: Gia công dầm 
+tường, dầm dưới vì kèo.
+Đồng ý với ý kiến thẩm tra
+TVTK đã sửa. Đóng
+Phần đường khói 
+(11x2,4x5) -(Mỗi bộ 1 
+hệ đường khói) 
+(NMNĐ Quảng Ninh 
+có 4x2 tuyến đường 
+khói)
+Chưa có b.vẽ chi tiết phần đường khói
+TVTK sẽ bổ sung các kích thước cơ bản của đường khói trên các bản vẽ
+Đồng ý với giải trình 
+của TVTK. Đóng
+AI.11131: Gia công và chế tạo thép 
+hình làm hộp đường khói
+TVTK đang sử dụng mã AI.11131 dùng 
+cho thép hình là chưa chính xác. Đề 
+nghị đổi sang mã AI.11132: Gia công 
+thép tấm.
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+BẢNG 3: Ý KIẾN THẨM TRA PL2 - TỔNG MỨC ĐẦU TƯ và PTTC
+BÁO CÁO NGHIÊN CỨU KHẢ THI DỰ ÁN NÂNG CẤP, CẢI TẠO HỆ THỐNG XỬ LÝ KHÍ THẢI NHÀ MÁY NHIỆT ĐIỆN QUẢNG NINH
+1
+BC.12202: Bảo ôn thiết bị thông 
+gió bằng bông thuỷ tinh, độ dầy lớp 
+bông thủy tinh 50mm
+Đề nghị đưa ra cơ sở tính lớp bảo ôn 
+dày 50mm?
+Tư vấn lập sẽ chỉnh lại giá theo giá thị trường
+TVTK đã sửa. Đóng
+Bộ xử lý khí thải 
+SCR- (NMNĐ Quảng 
+Ninh có 4x2 bộ SCR)
+Chưa có b.vẽ chi tiết, thống kê KL thép 
+tấm làm hộp bao SCR
+TVTK sẽ bổ sung các kích thước cơ bản của bộ SCR, khối lượng thép tấm TVTT vui lòng xem 
+trong dự toán
+Đồng ý với giải trình 
+của TVTK. Đóng
+Hạng mục: Kho chứa 
+và chuẩn bị Ammonia
+Phần khối lượng bê tông móng
+TVTT tính khối lượng móng F1: 
+12*2*1*0,9=21,6m3, móng F2: 
+2*1,5*1,5*0,9= 4,05m3. Đề nghị 
+TVTK Kiểm tra lại
+Tư vấn lập sẽ chuẩn xác lại theo bản vẽ
+TVTK đã sửa. Đóng
+Cọc BTCT DUL D300, dài L=12m  TVTK bổ sung b.vẽ mặt bằng cọc
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+Nối cọc
+Chưa có b.vẽ chi tiết cọc
+Bản vẽ chi tiết cọc sẽ được thể hiện ở giai đoạn thiết kế chi tiết
+TVTK đã sửa. Đóng
+AI.11131-Gia công cột thép
+TVTK giải thích KL này bóc từ bản vẽ 
+nào
+Bản vẽ F332-CDNL-TT3-CA-05.06
+Thiếu công tác gia công cốt thép cọc, 
+công tác ván khuôn cọc
+Tư vấn lập đồng ý bổ sung
+TVTK đã sửa. Đóng
+ AF.31124 - Đổ bê tông bằng máy, 
+đổ bằng máy bơm bê tông, bê tông 
+móng, chiều rộng móng >250 cm, 
+đá 1x2, mác 300
+Vận dụng công tác BT móng cho công 
+tác đổ BT cọc dự ứng lực D300 thì để 
+chiều rộng >250cm có được ko?
+Tư vấn lập bảo lưu kết quả
+TVTK đã sửa. Đóng
+Công tác đất  
+Đào móng
+Đề nghị TVTK tính đào móng cho từng 
+thể tích móng; không tính cho toàn bộ 
+mặt bằng móng
+Tư vấn lập sẽ chuẩn xác lại theo bản vẽ
+TVTK đã sửa. Đóng
+San đầm đất bằng máy lu bánh thép 
+16T, độ chặt yêu cầu K=0,90
+B.vẽ đang ghi chú đất nền đầm chặt 
+k=0,95 (STT b.vẽ QNTPJSC-FSR-TT3-
+C&A-AR-05.04)
+Tư vấn lập sẽ chuẩn xác lại theo bản vẽ
+TVTK đã sửa. Đóng
+Vận chuyển đất
+Đào đất cấp IV nhưng đang vận chuyển 
+đất cấp III => đề nghị thống nhất lại
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
++) Giằng
+Có 2 giằng trục 1,5 dài (26-2*1)
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+1 giằng trục 3 dài (2,6-1-1,5)
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
++) Móng F1, F2
+K.tra lại KL móng
+Tư vấn lập đồng ý kiểm tra lại
+TVTK đã sửa. Đóng
++) Giằng
+K.tra lại KL giằng
+Tư vấn lập đồng ý kiểm tra lại
+TVTK đã sửa. Đóng
++) Cột bê tông móng
+Chưa có b.vẽ chi tiết
+Trong bản vẽ đã thể hiện kích thước dài, rộng, cao. Thể hiện ở bản vẽ số QNTPJSC-FSR-TT3-C&A-
+AR-05.08
+TVTT đồng ý với 
+TVTK. Đóng
+AF.81111 - Ván khuôn móng
+Đề nghị TVTK chuyển sang dùng ván 
+khuôn thép
+Tư vấn lập bảo lưu kết quả
+Đóng
++) Giằng
+K.tra lại KL giằng
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+Công tác nền  
+Bổ sung thêm mác BT, mác vữa ở lớp 
+cấu tạo nền F (STT b.vẽ QNTPJSC-
+FSR-TT3-C&A-AR-05.04)
+Tư vấn lập đồng ý bổ sung
+TVTK đã sửa. Đóng
+2
+Chưa có ván khuôn cho BT lót dày 
+100mm
+Tư vấn lập đồng ý bổ sung
+TVTK đã sửa. Đóng
+AK.94121-polyethylene film - Quét 
+Polyethylene film nền
+Nhầm mã công tác => ktra lại
+Tư vấn lập đồng ý kiểm tra lại
+TVTK đã sửa. Đóng
+Bê tông nền dày 300mm
+B.vẽ cần bổ sung kích thước phạm vi 
+nền BTCT dày 300mm
+Tư vấn lập đồng ý kiểm tra lại
+TVTK đã sửa. Đóng
+Chưa có công tác cốt thép cho lớp 
+BTCT dày 300mm
+Tư vấn lập đồng ý bổ sung
+TVTK đã sửa. Đóng
+AF.81111 - Ván khuôn gỗ. Ván 
+khuôn móng băng, móng bè, bệ máy
+Đề nghị TVTK chuyển sang dùng ván 
+khuôn thép
+Tư vấn lập bảo lưu kết quả
+Đóng
+Láng nền sàn không đánh mầu, dày 
+3cm, vữa XM mác 100
+B.vẽ ghi lớp vữa dày 5cm => đề nghị 
+TVTK thống nhất lại, bổ sung ghi chú 
+vữa mác bao nhiêu trong bản vẽ
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+Gia công cột bằng thép hình
+B.vẽ QNTPJSC-FSR-TT3-C&A-AR-
+05.04 thể hiện cột thép cao nhất cao 
+8,4m. B.vẽ QNTPJSC-FSR-TT3-C&A-
+AR-05.06 thống kê tất cả cột thép cao 
+18m => cần thống nhất lại
+Tư vấn lập đồng ý kiểm tra lại
+TVTK đã sửa. Đóng
+Gia công dầm mái
+TVTK diễn giải công thức tính KL dầm 
+thép
+Tư vấn lập sẽ kiểm tra và chuẩn xác lại khối lượng
+TVTK đã sửa. Đóng
+Tôn mái dày 0,54 mm
+Bổ sung kích thước mái tôn trong b.vẽ
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+Gia công hàng rào lưới thép
+Bổ sung kích thước hàng rào trong b.vẽ
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+Sơn 02 lớp sơn lót sơn chống ăn 
+mòn kiềm Jotun 
+TVTK Bổ sung ghi chú sơn cột dầm 
+thép thế nào trong bản vẽ. TVTK giải 
+thích công thức tính diện tích sơn
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+AF.31124: Đổ bê tông bằng máy, 
+đổ bằng máy bơm bê tông, bê tông 
+móng, chiều rộng móng >250 cm, 
+đá 1x2, mác 300
+TVTK đang sử dụng mã AF.31124 cho 
+móng >250cm là chưa chính xác. Do 
+chiều rộng móng F1 là 1m và F2 là 
+1,5m nên đề nghị đổi sang mã AF.31114
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+AF.11111: Đổ bê tông lót móng 
+M100 bằng thủ công
+TVTK đang sử dụng mã AF.11111 đổ 
+bê tông thủ công cho phần bê tông lót là 
+chưa hợp lý. Đề nghị sử dụng đổ bê 
+tông bằng máy và chuyển sang mã 
+AF.31111
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+AF.61321: Cốt thép bê tông móng, 
+cột, tường
+TVTK đang sử dụng mã AF.61321 là 
+chưa chính xác. Cốt thép móng đề nghị 
+sử dụng mã AF.61120
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+AE.22213: Xây gạch đất sét nung 
+6,5x10,5x22, xây tường thẳng, 
+chiều dày <= 33cm, chiều cao <= 
+6m, vữa XM mác 75
+TVTK đang sử dụng mã xây gạch cho 
+tường là không chính xác. Theo thiết kế 
+đây là tường bê tông dày 200mm, cao 
+1,5m đề nghị sử dụng mã định mức đổ 
+bê tông tường.
+Đồng ý sửa theo YKTT
+TVTK đã sửa. Đóng
+Nhà điện nhà 
+AMONIA
+Cọc BTCT DUL D300, dài L=12m  Bổ sung b.vẽ mặt bằng cọc, chi tiết cọc
+Tư vấn lập sẽ bỏ phần cọc trong dự toán
+TVTK đã sửa. Đóng
+Gia công cột thép
+TVTK giải thích KL này bóc từ bản vẽ 
+nào
+Tư vấn lập sẽ chuẩn xác lại phần cột là bê tông
+TVTK đã sửa. Đóng
+3
+AF.31124 - Đổ bê tông bằng máy, 
+đổ bằng máy bơm bê tông, bê tông 
+móng, chiều rộng móng >250 cm, 
+đá 1x2, mác 300
+Vận dụng công tác BT móng cho công 
+tác đổ BT cọc dự ứng lực D300 thì để 
+chiều rộng >250cm có được ko?
+Tư vấn lập sẽ bỏ phần cọc trong dự toán
+TVTK đã sửa. Đóng
+Công tác đất  
+Đào móng công trình, chiều rộng 
+móng <= 6m, bằng máy đào 
+1,25m3, đất cấp III
+B.vẽ chưa có kích thước giằng móng
+Tư vấn sẽ bổ sung 
+TVTK đã sửa. Đóng
+Dự toán k.tra lại KL móng PL1, chiều 
+dài giằng chưa đúng
+Tư vấn lập sẽ kiểm tra và chuẩn xác lại khối lượng
+TVTK đã sửa. Đóng
+San đầm đất bằng máy lu bánh thép 
+16T, độ chặt yêu cầu K=0,90
+B.vẽ ghi đất đầm chặt k>0,98 (b.vẽ 
+F387-FSR-TT3-C&A-AR-03.03)
+Tư vấn sẽ chỉnh sửa lại đầm đất với hệ số k=0,95
+TVTK đã sửa. Đóng
+Công tác bê tông   
+AF.11111 - Đổ bê tông lót móng 
+M100
+K.tra lại dự toán, KL móng PL1, chiều 
+dài giằng chưa đúng. Dự toán đang 
+dùng mã đổ thủ công => đề nghị chuyển 
+sang đổ bằng máy bơm BT
+Tư vấn lập sẽ kiểm tra lại và chỉnh sửa theo bản vẽ
+TVTK đã sửa. Đóng
+Dự toán chưa tính ván khuôn BT lót
+Tư vấn lập sẽ bổ sung
+TVTK đã sửa. Đóng
+AF.31125 - Đổ bê tông bằng máy, 
+đổ bằng máy bơm bê tông, bê tông 
+móng, chiều rộng móng >250 cm, 
+đá 1x2, mác 350
+Dự toán đang dùng mã này cho công tác 
+BT cột, dầm, sàn => k.tra lại. Bổ sung 
+b.vẽ chi tiết cột, dầm, sàn mái
+Đồng ý với ý kiến thẩm tra
+TVTK đã sửa. Đóng
+8=8
+TVTK Diễn giải rõ KL BT móng PL1 
+và giằng móng
+Tư vấn lập sẽ kiểm tra lại và chỉnh sửa theo bản vẽ
+TVTK đã sửa. Đóng
+AF.81111 - Ván khuôn móng
+B.vẽ chưa có kích thước giằng móng => 
+bổ sung. Đề nghị TVTK chuyển sang 
+ván khuôn thép
+Tư vấn sẽ bổ sung.  Phần ván khuôn tư vấn bảo lưu
+TVTK đã sửa. Đóng
+12,48
+10,4
+2,96
+25,84
+AF.81132 - Ván khuôn gỗ. Ván 
+khuôn cột, cột vuông, chữ nhật
+Đề nghị TVTK chuyển sang ván khuôn 
+thép. B.vẽ ghi cột 220x220 => k.tra lại 
+KL
+Tư vấn lập bảo lưu dùng ván khuôn gỗ
+Đồng ý với giải trình 
+của TVTK. Đóng
+AF.81141 - Ván khuôn gỗ. Ván 
+khuôn xà dầm, giằng
+Đề nghị TVTK chuyển sang ván khuôn 
+thép. B.vẽ chưa có chi tiết dầm => bổ 
+sung
+Tư vấn lập bảo lưu dùng ván khuôn gỗ
+Đồng ý với giải trình 
+của TVTK. Đóng
+AF.61321 - Cốt thép bê tông móng, 
+cổ cột, tường
+Bố sung b.vẽ bố trí thép cột, dầm, sàn. 
+Dự toán đang dùng 1 mã công tác thép 
+cho cả cột, dầm, sàn => k.tra lại
+Tư vấn lập sẽ tách ra từng cốt thép cho từng loại bê tông. Giai đoạn này chưa cần thiết phải có bản 
+vẽ bố trí thép cột, dầm , sàn
+TVTK đã sửa. Đóng
+Lợp mái che tường bằng tôn múi 
+B.vẽ không thể hiện mái tôn => k.tra lại Tư vấn sẽ bỏ phần mái tôn và thay bằng  mái bê tông
+TVTK đã sửa. Đóng
+Cửa đi, cửa sổ
+Dự toán k.tra lại số lượng cửa, chưa có 
+công tác lắp dựng cửa
+Tư vấn lập sẽ bổ sung
+TVTK đã sửa. Đóng
+Công tác nền  
+Dự toán k.tra lại kích thước nền
+Tư vấn sẽ kiểm tra lại
+TVTK đã sửa. Đóng
+Đổ bê tông thủ công bằng máy trộn, 
+bê tông lót móng, chiều rộng > 250 
+cm, đá 4x6, vữa mác 150
+Dự toán Nhầm mã công tác => k.tra lại
+Tư vấn lập sẽ kiểm tra lại
+TVTK đã sửa. Đóng
+4
+Dự toán chưa tính công tác Ván khuôn 
+BT nền => đề nghị bổ sung
+Tư vấn lập sẽ bổ sung
+TVTK đã sửa. Đóng
+Đổ bê tông thủ công bằng máy trộn, 
+bê tông lót móng, chiều rộng > 250 
+cm, đá 4x6, vữa mác 100
+Dự toán Thừa công tác => k.tra lại
+Tư vấn sẽ thay bằng công tác láng nền
+TVTK đã sửa. Đóng
+Lát nền, sàn, kích thước gạch 
+<=0,06m2, vữa XM mác 75
+Dự toán k.tra lại KL. B.vẽ bố sung kích 
+thước gạch
+Giai đoạn này chưa cần chi tiết cụ thể, tư vấn sẽ bổ sung chi tiết ở giai đoạn sau 
+TVTK đã sửa. Đóng
+Dự toán chưa tính tường xây gạch => 
+k.tra lại
+Tư vấn lập sẽ bổ sung
+TVTK đã sửa. Đóng
+B.vẽ chưa có lanh tô cửa, chưa có chi 
+tiết ô văng cửa đi
+Tư vấn sẽ bổ sung 
+TVTK đã sửa. Đóng
+Công tác mái  
+B.vẽ bổ sung kích thước mái
+Tư vấn đồng ý bổ sung
+TVTK đã sửa. Đóng
+Đổ bê tông bằng máy, đổ bằng máy 
+bơm bê tông, bê tông xà dầm, 
+giằng, sàn mái, đá 1x2, mác 300
+B.vẽ đang ghi sàn mái BTCT B20 => 
+thống nhất lại mác BT
+Tư vấn lập sẽ kiểm tra lại và chỉnh sửa theo bản vẽ
+TVTK đã sửa. Đóng
+Dự toán chưa tính công tác Ván khuôn 
+BT sàn mái => đề nghị bổ sung
+Tư vấn lập sẽ bổ sung
+TVTK đã sửa. Đóng
+AK.41124 - Vữa tạo dốc
+B.vẽ ghi lớp vữa dày 2cm => đề nghị 
+thống nhất lại
+Tư vấn lập sẽ xem lại
+TVTK đã sửa. Đóng
+AK.41124 - Vữa bê tông
+Công tác AK.51280 - lát gạch mái: đã 
+bao gồm lớp vữa => thừa công tác vữa 
+=> ktra lại
+Tư vấn lập đồng ý bỏ phần láng vữa.
+TVTK đã sửa. Đóng
+AK.51280 - lát gạch mái
+TVTK ghi chú kích thước gạch trong 
+b.vẽ
+Giai đoạn này chưa cần chi tiết cụ thể , tư vấn sẽ bổ sung chi tiết ở giai đoạn sau 
+TVTK đã sửa. Đóng
+TVTK đang tính Chi phí Tháo dỡ 
+kết cấu thép cũ của hệ thống dầu, 
+điện cực phóng điện cực thu, máy 
+biến áp,... 1324,8 tấn 
+Đề nghị đưa cơ sở tính cho phần khối 
+lượng công việc này
+Nguyên tắc, cơ sở tính toán và giá trị  của hạng mục này đã được EVN thẩm định và phê duyệt theo 
+QĐ số 358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh.
+Do chưa có định mức cho các dự án cải tạo nâng cấp, vì vậy ở giai đoạn lập TMĐT có thể dự tính 
+chi phí này
+Đồng ý với giải trình 
+của TVTK. Đóng
+PHẦN THIẾT BỊ 
+ Hệ thống khử SO2: Tham khảo giá 
+của các thiết bị/bộ phận chi tiết của 
+hệ thống khử SO2  trong biểu giá 
+hợp đồng EPC dự án NMNĐ Thái 
+Bình 2  
+Đề nghị TVTK cung cấp thêm tài liệu 
+tham khảo giá (cơ sở pháp lý như quyết 
+định phê duyệt hoặc hợp đồng…)
+TVTK sẽ hiệu chỉnh ghi chú này
+Đồng ý với giải trình 
+của TVTK. Đóng
+Giàn phun và vòi phun (thay thế)
+TVTK bổ sung thêm hệ 
+thống này 
+'- Ống nhánh nối ống góp và 
+vòi phun: TVTK đang tính 
+đơn giá là 189.000USD là 
+không đúng. Đề nghị TVTK 
+hiệu chỉnh về giá thấp hơn là 
+89.000USD theo bảng lựa 
+chọn giá.
+Tư vấn sẽ kiểm tra lại
+TVTK đã hiệu chỉnh theo ý 
+kiến của TVTT. Đóng
+Bảng 2.1: Bảng tổng 
+hợp chi phí mua sắm 
+TB
+5
+Thiết bị khử ẩm
+- Giàn khử ẩm: TVTK đang 
+tính đơn giá là 189.000USD 
+là không đúng. Đề nghị 
+TVTK hiệu chỉnh về giá 
+thấp hơn là 89.000USD theo 
+bảng lựa chọn giá.
+- Số vòi rửa: TVTK đang 
+tính là 1680 vòi nhưng chưa 
+có giá trị. Đề nghị TVTK bổ 
+sung giá
+Tư vấn sẽ kiểm tra lại
+TVTK đã hiệu chỉnh theo ý 
+kiến của TVTT. Đóng
+Mã định mức NĐ-64: Chế tạo bộ 
+tách khí-nước theo định mức 
+2572/QĐ-BCT
+Đề nghị TVTK hiệu chỉnh 
+lại chi phí theo đuôi gồm chi 
+phí trực tiếp, chi phí chung, 
+chi phí chế tạo… theo đúng 
+bảng tổng hợp chi phí
+Tư vấn sẽ kiểm tra lại
+TVTK đã hiệu chỉnh theo ý 
+kiến của TVTT. Đóng
+Giàn khử ẩm Tham khảo giá chào 
+thầu của các nhà thầu cho dự án 
+NOx, SOx NMNĐ Hải Phòng
+Đề nghị TVTK cung cấp thêm tài liệu 
+tham khảo giá (cơ sở pháp lý như quyết 
+định phê duyệt hoặc hợp đồng…)
+Tham khảo giá chào thầu của các nhà thầu cho dự án NOx, SOx NMNĐ Hải Phòng. TVTK sẽ cung 
+cấp cơ sở tính toán
+Đồng ý với giải trình 
+của TVTK. Đóng
+Hệ thống khử NOx: Tham khảo giá 
+hệ thống khử NOx trong biểu giá 
+hợp đồng EPC dự án  NMNĐ 
+Duyên Hải 1 
+Đề nghị TVTK cung cấp thêm tài liệu 
+tham khảo giá (cơ sở pháp lý như quyết 
+định phê duyệt hoặc hợp đồng…)
+Nguyên tắc và cơ sở tính toán của dự án đã được Evn thẩm định và được phê duyệt theo QĐ số 
+358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh. TVTK sẽ cung cấp 
+file tính xác định chi phí này
+Đồng ý với giải trình 
+của TVTK. Đóng
+Bình cứu hỏa, Hệ thống chữa cháy 
+tự động Sprinkler: Tham khảo giá 
+trị trường
+Đề nghị TVTK cung cấp thêm tài liệu 
+tham khảo giá hoặc đường link lấy giá
+TVTK sẽ cập nhật lại báo giá mới và sẽ cung cấp đường link cho TVTT
+Đồng ý với giải trình 
+của TVTK. Đóng
+Thiết bị cải tạo hệ thống ESP Tham 
+khảo giá quyết toán của dự án 
+NMĐ Phả Lại đã thi công và biểu 
+giá HĐ EPC của các dự án Hải 
+Phòng, Vũng Áng 1, Thái Bình 2, 
+Vĩnh Tân 2, Nghi Sơn 1 và Thăng 
+Long
+Đề nghị TVTK cung cấp thêm tài liệu 
+tham khảo giá (cơ sở pháp lý như quyết 
+định phê duyệt hoặc hợp đồng…)
+Nguyên tắc và cơ sở tính toán của dự án đã được EVN thẩm định và được phê duyệt theo QĐ số 
+358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh. TVTK sẽ cung cấp 
+file tính xác định chi phí này
+Đồng ý với giải trình 
+của TVTK. Đóng
+Từ mục 4.1.1 đến 4.1.27 liệt kê giá 
+của các thiết bị nhưng không ghi rõ 
+nguồn tham khảo lấy giá
+Đề nghị TVTK cung cấp thêm tài liệu 
+tham khảo giá (cơ sở pháp lý như quyết 
+định phê duyệt hoặc hợp đồng…)
+Mục 4.1.1 đến 4.1.27 thuộc mục 4.1 và mục 4.1 đã nêu cơ sở tham khảo giá.
+Nguyên tắc và cơ sở tính toán của dự án đã được EVN thẩm định và được phê duyệt theo QĐ số 
+358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh. TVTK sẽ cung cấp 
+file tính xác định chi phí này
+Đồng ý với giải trình 
+của TVTK. Đóng
+Thiết bị lắp mới hệ thống thu hồi 
+nhiệt lấy giá theo bản chào của nhà 
+cung cấp
+Đề nghị TVTK cung cấp thêm tài liệu 
+tham khảo giá (cơ sở pháp lý như quyết 
+định phê duyệt hoặc hợp đồng…)
+Theo chào giá của nhà cung cấp Longking. TVTK sẽ cung cấp báo giá
+Đồng ý với giải trình 
+của TVTK. Đóng
+Bảng 2.2: Bảng TH 
+chi phí lắp đặt, thí 
+nghiệm hiệu chỉnh 
+thiết bị 
+Chi phí lắp đặt, thí nghiệm và hiệu 
+chỉnh thiết bị  tính = 15% giá trị TB
+- Đề nghị TVTK bổ sung cơ sở xác 
+định tỷ lệ 15% này.
+- Đề nghị TVTK lắp đặt thiết bị theo 
+định mức hiện hành .
+Nguyên tắc và cơ sở tính toán của dự án đã được EVN thẩm định và được phê duyệt theo QĐ số 
+358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh.
+Do chưa có định mức cho các dự án cải tạo nâng cấp, vì vậy ở giai đoạn lập TMĐT có thể dự tính 
+chi phí này
+Đồng ý với giải trình 
+của TVTK. Đóng
+6
+ 
+Chi phí tư vấn
+ 
+Chi phí lập dự án đầu 
+tư
+Hợp đồng số 30/2016/HĐ-XD ngày 
+23/8/2016 ký giữa VNL và CTCP 
+Nhiệt điện Quảng Ninh và giá trị 
+quyết toán
+TVTK sẽ cung cấp hợp đồng này
+Chi phí dự án đầu tư đã được thực hiện và đã có quyết định phê duyệt dự án. 
+TVTK đã cung cấp tài 
+liệu liên quan. Đóng
+Chi phí thẩm tra dự án 
+đầu tư
+HĐ số 31/2016/HĐ-XD ngày 
+31/8/2016 giữa CTCP NĐ Quảng 
+Ninh và VTA và giá trị quyết toán
+Nguyên tắc và cơ sở tính toán và giá trị của cho phí này đã được thẩm định và được phê duyệt theo 
+QĐ số 358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh. 
+TVTK đã cung cấp tài 
+liệu liên quan. Đóng
+Chi phí bán HSMT
+Nguyên tắc và cơ sở tính toán và giá trị của cho phí này đã được thẩm định và được phê duyệt theo 
+QĐ số 358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh. 
+TVTK đã cung cấp tài 
+liệu liên quan. Đóng
+Tư vấn TKBVTC và 
+đánh giá HSDT
+Hợp đồng số 46/2016/HĐ-XD ngày 
+09/11/2016 và giá trị quyết toán
+Nguyên tắc và cơ sở tính toán và giá trị của cho phí này đã được thẩm định và được phê duyệt theo 
+QĐ số 358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh. 
+TVTK đã cung cấp tài 
+liệu liên quan. Đóng
+Tư vấn thẩm định kết 
+quả lựa chọn nhà thầu
+Số liệu thực tế đã thực hiện
+Nguyên tắc và cơ sở tính toán và giá trị của cho phí này đã được thẩm định và được phê duyệt theo 
+QĐ số 358/QĐ-NĐQN ngày 03/4/2017 bởi Công ty Cổ phần nhiệt điện Quảng Ninh. 
+TVTK đã cung cấp tài 
+liệu liên quan. Đóng
+Chi phí Tư vấn lập 
+điều chỉnh Báo cáo 
+nghiên cứu khả thi và 
+Thiết kế cơ sở Dự án 
+nâng cấp cải tạo hệ 
+thống xử lý khí thải 
+Nhà máy nhiệt điện 
+Quảng Ninh
+Hợp đồng đã ký giữa VNL và 
+CTCP Nhiệt điện Quảng Ninh
+TVTK sẽ cung cấp hợp đồng này
+Dự án đang thực hiện điều chỉnh dự án và trình phê duyệt. 
+TVTK đã cung cấp tài 
+liệu liên quan. Đóng
+Chi phí thẩm tra báo 
+cáo điều chỉnh Báo 
+cáo nghiên cứu khả thi 
+và Thiết kế cơ sở Dự 
+án nâng cấp cải tạo hệ 
+thống xử lý khí thải 
+Nhà máy nhiệt điện 
+Quảng Ninh
+Hợp đồng đã ký giữa VNL và 
+CTCP Nhiệt điện Quảng Ninh
+Đính chính "Hợp đồng đã ký giữa CT cổ phần Tư vấn  xây dựng điện 1 và CTCP Nhiệt điện Quảng 
+Ninh
+Đồng ý với giải trình 
+của TVTK. Đóng
+Chi phí lập thiết kế kỹ 
+thuật
+TVTK đang tính theo hệ số đm của 
+TT12
+Đề nghị bổ sung hệ số k = 1,15 với 
+những công trình cải tạo mở rộng có 
+tính toán kết nối với dây chuyền công 
+nghệ của công trình hiện có. (theo 
+TT12/2021) 
+TVTK sẽ bổ sung hệ số k=1,15 vào chi phí này
+TVTK đã sửa. Đóng
+Chi phí chạy thử
+TVTK đang để hao phí của đá vôi, 
+nước bằng 0. 
+Đề nghị làm rõ vì sao tính hao phí bằng 
+0 do trên thực tế mục này chiếm khá 
+nhiều nhiên liệu. 
+TVTK sẽ bổ sung tiêu hao đá vôi và nước
+Tiêu hao này sẽ để bằng 
+0, do khong sử dụng tới 
+đá vôi. Đóng
+Đề nghị cung cấp các hợp đồng để làm 
+cơ sở thẩm tra các chi phí này. Sau giai 
+đoạn ký hợp đồng lập dự án đầu tư dự 
+án đã được thực hiện chưa? Đề nghị 
+làm rõ. 
+7
+Giá bán điện đang tính theo giá bán 
+điện bình quân.
+Nhà máy đã đi vào hoạt động sẽ có giá 
+điện nhà máy ký với mua bán điện vì 
+sao không tính theo giá bán này, đề 
+nghị làm rõ.
+Giá bán điện của nhà máy lên lưới là theo HĐ mua bán điện, còn giá nhà máy mua từ lưới về  tính 
+theo giá bán lẻ theo khung giờ cao thấp điểm. Vì vậy TVTK tính giá bình quân theo giờ cao thấp 
+điểm là phù hợp
+Đồng ý với giải trình 
+của TVTK. Đóng
+chương 8 Phân tích Kinh tế - 
+tài chính
+ 
+Thuyết minh
+TVTK đang căn cứ Thông tư 
+57/2020/TT-BCT ngày 31/12/2020 
+để thực hiện phân tích KT TC
+Đề nghị căn cứ theo Thông tư 
+07/2024/TT-BCT ngày 12/04/2024 để 
+thực hiện
+TVTK sẽ cập nhật theo văn bản mới
+TVTK đã sửa. Đóng
+Thuyết minh
+TVTK có nêu giá điện của dự án sẽ 
+là 83,04 VNĐ/kWh tương đương 
+0,349 Uscent/kWh (đối với PA1), 
+và 99,79 VNĐ/kWh tương đương 
+0,419 Uscent/kWh (đối với PA2)
+TVTT chỉ thấy có file tính cho Phương 
+án giá điện 102,02 đ/kWh; đề nghị làm 
+rõ
+Chỉ có 1 phương án ứng với giá điện là 102,02đ/kWh. TVTK sẽ hiệu chỉnh
+TVTK đã sửa. Đóng
+Bảng 1 - Tính toán 
+hiệu quả kinh tế tài 
+chính
+Lãi vay
+TVTK đang lấy biên độ lãi suất là 
+3,5%; đề nghị hiệu chỉnh lại là 3% theo 
+07/2024/TT-BCT
+TVTK sẽ cập nhật theo văn bản mới
+TVTK đã sửa. Đóng
+Bảng 1 - Tính toán 
+hiệu quả kinh tế tài 
+chính
+Thuế thu nhập doanh nghiệp
+"-Thực hiện như mức  NMNĐ QN đang 
+thực hiện - đề nghị cung cấp tài liệu 
+tham chiếu
+- Thuế thu nhập doanh nghiệp trong các 
+bảng tính không đồng nhất
+Căn cứ Quyết định số 1727/QĐ-UBND ngày 21/06/2006 về việc cấp ưu đãi đầu tư cho Công ty Cổ 
+phần Nhiệt điện Quảng Ninh
+Căn cứ Điều 15, chương 6 Nghị định 124/2008/CP-NĐ ngày 11/12/2008 của Chính phủ thì Công ty 
+CP nhiệt điện Quảng Ninh thuộc doanh nghiệp thành lập mới từ dự án thuộc lĩnh vực đầu tư phát 
+triển nhà máy điện nên được hưởng đồng thời 2 mức ưu đãi về thuế TNDN như sau:
+- Được giảm 50% so với mức thuế TNDN hiện hành  trong thời hạn là 15 năm kể từ năm đầu tiên 
+doanh nghiệp có doanh thu từ hoạt động được hưởng ưu đãi thuế  (gọi tắt là “mức 1”)
+- Được miễn thuế TNDN 4 năm kể từ năm đầu tiên có lợi nhuận chịu thuế, được giảm 50% số thuế 
+phải nộp trong 9 năm tiếp theo  (gọi tắt là “mức 2”)
+Công ty cổ phần nhiệt điện Quảng Ninh có doanh thu từ hoạt động sản xuất điện bắt đầu từ năm 
+2010, có lợi nhuận chịu thuế từ năm 2011. Như vậy tổng hợp 2 mức ưu đãi nêu trên, với mức thuế 
+TNDN hiện hành là 20%, Công ty thực hiện nộp thuế TNDN theo các mức thuế suất cụ thể hàng 
+năm như sau:
+- Năm 2010: thuế suất 10% (hưởng ưu đãi mức 1)
+- Từ năm 2011 đến hết 2014: thuế suất 0% (hưởng đồng thời ưu đãi mức 1 và mức 2)
+- Từ năm 2015 đến hết năm 2023: thuế suất 5% (hưởng đồng thời ưu đãi mức 1 và mức 2)
+- Năm 2024: thuế suất 10% (hưởng ưu đãi mức 1)
+- Từ năm 2025 trở đi: thuế suất 20% (không được hưởng ưu đãi thuế)
+TVTK đã sửa. Đóng
+Bảng 1 - Tính toán 
+hiệu quả kinh tế tài 
+chính
+Tuổi thọ dự án
+Đề nghị diễn giải cách tính ra tuổi thọ 
+dự án 18 năm
+Tổ máy 1 và 2 vận hành năm 2011, tổ máy 3 và 3 vận hành năm 2014. Tính trung bình nhà máy đã 
+vận hành được 12 năm, tuổi thọ còn lại của dự án là 18 năm. Tuy nhiên, đến thời điểm hiện tại thì 
+nhà máy sẽ còn 17 năm và TVTK sẽ hiệu chỉnh tuổi thọ còn lại tới thời điểm hiện tại
+TVTK đã sửa. Đóng
+8
+Bảng 1 - Tính toán 
+hiệu quả kinh tế tài 
+chính
+Thời gian xây dựng 2 năm; COD tổ 
+máy 1 và 2 vào năm xây dựng thứ 2
+Tại mục 2.2 chương 2 thuyết minh dự 
+án có nêu: Nhà thầu EPC thiết kế, chế 
+tạo, cung cấp vật tư thiết bị đến công 
+trường; chuẩn bị mặt bằng, Thi công 
+công trình; chạy thử, kiểm tra thử 
+nghiệm và nghiệm thu – bàn giao các tổ 
+máy từ 01/2026- 11/2029; Đề nghị chi 
+tiết tiến độ cụ thể hơn
+Tại mục 9.1.4 có nêu chi tiết cụ thể nội dung này
+Đồng ý với giải trình 
+của TVTK. Đóng
+Bảng 1 - Tính toán 
+hiệu quả kinh tế tài 
+chính
+Hệ số triết khấu tài chính
+- Tính chưa chính xác`bình quân thuế 
+thu nhập doanh nghiệp;
+- Công thức tính tỷ suất chiết khấu tài 
+chính chưa đúng theo 2014/QĐ-BCN
+TVTK sẽ rà soát và hiệu chỉnh cho phù hợp với quy định
+TVTK đã sửa. Đóng
+Bảng 2 - báo cáo kết 
+quả kinh doanh
+Công thức tính khấu hao tại năm 
+XD2: TMĐT/10 năm x 50% x 2/4
+Đề nghị giải thích cách tính
+TVTK đang dự kiến  năm XD thứ 2 sẽ có 2 tổ máy đi vào vận hành thương mại, TVTK đang tính lặp 
+lại 2 lần, TVTK sẽ hiệu chỉnh
+TVTK đã sửa. Đóng
+Bảng 2 - báo cáo kết 
+quả kinh doanh
+Chi phí lãi vay
+- TVTK đang cộng lãi vay của năm từ 
+bảng 5 - vay thương mại lệch dòng 
+khiến giá trị lãi vay trong năm chưa 
+chính xác 
+- Cần làm rõ tiến độ để xác định giá trị 
+lãi vay trong thời gian xây dựng
+TVTK sẽ kiểm tra và hiệu chỉnh cho phù hợp
+Tiến độ của dự án sẽ dự kiến ký hợp đồng, thiết kế, chế tạo, cung cấp vật tư thiết bị đến công trường 
+và thi công công chạy thử, kiểm tra thử nghiệm và nghiệm thu- bàn giao trong 2 năm từ 2025 đến 
+2027
+TVTK đã sửa. Đóng
+Bảng 2 - báo cáo kết 
+quả kinh doanh
+Thuế thu nhập doanh nghiệp
+TVTK đang tính ko đồng nhất với cách 
+tính nêu tại bảng 1
+TVTK sẽ hiệu chỉnh lại bảng 1 phù hợp với thuế suất hiện tại nhà máy đang áp dụng
+TVTK đã sửa. Đóng
+Bảng 3 - Chỉ tiêu kinh 
+tế
+Tích luỹ kinh tế triết khấu luỹ kế
+năm XD1 chưa luỹ kế của năm chuẩn bịTVTK sẽ kiểm tra và hiệu chỉnh cho phù hợp
+TVTK đã sửa. Đóng
+BẢNG 8: GIÁ ĐIỆN
+Giá FC
+đề nghị tính theo quy định trong TT 
+07/2024/TT-BCT
+TVTK sẽ rà soát và hiệu chỉnh cho phù hợp với quy định
+TVTK đã sửa. Đóng
+BẢNG 8: GIÁ ĐIỆN
+Giá vận hành và bảo dưỡng
+đề nghị tính theo quy định trong TT 
+07/2024/TT-BCT (hiện tại đang tính 
+thiếu tỷ lệ điện tự dùng, hệ số suy giảm 
+công suất...)
+Chi phí O&M chia cho sản lượng điện thương phẩm đã tính đến tỷ lệ điện tự dùng của nhà máy. 
+TVTK sẽ bổ sung hệ số suy giảm công suất theo hợp đồng mua bán điện của nhà máy với EVN
+TVTK đã sửa. Đóng
+BẢNG 8: GIÁ ĐIỆN
+Giá nhiên liệu
+- Đề nghị làm rõ Chi phí điện, nước, 
+hoá chất (giá nhiên liệu, khối lượng tiêu 
+hao)
+- TVTK đang sử dụng công suất thô để 
+tính giá trên 1MW; đề nghị xem lại sử 
+dụng tỷ lệ điện tự dùng, hệ số suy giảm 
+công suất theo hướng dẫn tại TT 
+07/2024/TT-BCT
+Chi phí O&M chia cho sản lượng điện thương phẩm đã tính đến tỷ lệ điện tự dùng của nhà máy. 
+TVTK sẽ bổ sung hệ số suy giảm công suất theo hợp đồng mua bán điện của nhà máy với EVN
+TVTK đã sửa. Đóng
+9
+Stt
+Chương
+Mục
+Trang
+Nội dung chính 
+Ý kiến TVTT lần 1
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 2
+Ý kiến TVTT lần 3
+Trong hồ sơ chưa có báo cáo khảo sát
+Trong hồ sơ đã có báo cáo khảo sát hiện trạng và 
+báo cáo khảo sát địa chất công trình. TVTT đồng ý 
+việc sử dụng báo cáo khảo sát địa chất đã thực hiện 
+trong giai đoạn xây dựng nhà máy trước đây để 
+phục vụ cho tính toán các công trình cải tạo mới. 
+Tuy nhiên cần có trích xuất vị trí hố khoan và mặt 
+cắt trụ hố khoan tại các vị trí có công trình xây 
+dựng mới như vị trí SCR, nhà điện.
+Đồng ý với bổ sung của TVTK. 
+Đóng
+BẢNG 4: Ý KIẾN THẨM TRA PL3 - TÀI LIỆU KHẢO SÁT
+BÁO CÁO NGHIÊN CỨU KHẢ THI DỰ ÁN NÂNG CẤP, CẢI TẠO HỆ THỐNG XỬ LÝ KHÍ THẢI NHÀ MÁY NHIỆT ĐIỆN QUẢNG NINH
+1
+Stt
+Chương
+Mục
+Trang
+Nội dung chính 
+Ý kiến TVTT lần 1
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 2
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 3
+Ý kiến TVTT lần 4
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 5
+1
+1.4.2 Điều kiện địa 
+chất
+10/23
+-/-
+Đề nghị TVTK bổ sung Báo cáo KSĐC
+Đồng ý, TVTK sẽ bổ 
+sung phiên bản sau
+TVTK lưu ý, cần trích xuất từ báo cáo khảo 
+sát trong giai đoạn xây dựng nhà máy và bổ 
+sung mặt bằng hố khoan, hình trụ hố khoan 
+tại vị trí xây dựng công trình cải tạo.
+Đồng ý với bổ sung của TVTK. Đóng ý kiến.
+1
+1.4.3 Động đất 
+14/23
+Theo phụ lục H - TCVN 
+9386:2012, hệ số đỉnh gia tốc 
+nền của khu vực Thành phố 
+Hạ Long, tỉnh Quảng Ninh 
+agR = 0,0882g 
+Đề nghị TVTK sử dụng giá trị gia tốc nền theo 
+QCVN 02/2022.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đồng ý. Đóng ý kiến.
+1
+1.4.4 Tải trọng và 
+tác động
+16/23
+17/23
+- Tải trọng gió sẽ được xác 
+định theo tiêu chuẩn: TCVN 
+2737-1995-Tải trọng và tác 
+động - Tiêu chuẩn thiết kế.
+- Tải trọng được tổ hợp theo 
+tiêu chuẩn: TCVN 2737: 1995 
+-Tải trọng và tác động - Tiêu 
+chuẩn thiết kế. Ngoài ra có thể 
+xem xét tổ hợp tải trọng theo 
+ứng suất cho phép hoặc theo 
+trạng thái giới hạn cuối cùng.
+Tải trọng gió và tổ hợp tải trọng , Đề nghị TVTK 
+cập nhật theo TCVN 2737:2023
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đồng ý. Đóng ý kiến. 
+1.4.6 Yêu cầu bảo 
+vệ môi trường 
+Phòng Môi trường
+1
+1.5
+21/24
+ 
+1.5.1 Tiêu chuẩn áp dụng
+1. TVTK cần bổ sung các tiêu chuẩn địa phương 
+của tỉnh Quảng Ninh theo QĐ 2476/QĐ-UBND " 
+BAN HÀNH QUY CHUẨN KỸ THUẬT ĐỊA 
+PHƯƠNG VỀ MÔI TRƯỜNG TRÊN ĐỊA BÀN 
+TỈNH QUẢNG
+2. Các tiêu chuẩn quy chuẩn cần biên chế theo 
+các phần như: Công nghệ, Xây dựng, môi 
+trường...
+3. TVTK vui lòng Cập nhật QCVN 
+19:2024/BTNMT
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đề nghị TVTK bổ sung QCVN 
+19:2024/BTNMT vào mục quy chuẩn phần 
+môi trường. Ngoài ra cần bổ sung Quy chuẩn 
+địa phương về môi trường vào mục này
+Đóng ý kiến
+2
+2.1.1 
+3/59
+Thông số thiết kế ESP .
+1. "Nồng độ bụi đầu ra ESP lớn nhất: Cr = 
+62mg/Nm3 (khi không có hệ thống thu hồi 
+nhiệt)" Để đạt được nồng độ 62.1 mg/Nm3 thì 
+điện áp sử dụng 83kV. Do vậy TVTK nên bổ 
+sung theo phương án số mấy ( tăng điện áp 
+83kV) để rõ ràng hơn.
+2. "- Nồng độ bụi đầu ra ESP lớn nhất: Cr = 30 
+mg/Nm3 (khi có hệ thống thu hồi nhiệt)
+-Hiệu suất khử bụi yêu cầu (tối thiểu): η ≥ 
+99,92%(khi có hệ thống thu hồi nhiệt)" 
+Để có cơ sở TVTK cần bổ sung phương án có sử 
+dụng hệ thống thu hồi nhiệt vào mục 4.1.4. Lựa 
+chọn phương án kỹ thuật của BCNCKT
+3. TVTT chưa thấy nội dung nào tính toán phát 
+thải bụi để chứng minh đáp ứng phát thải bụi ≤ 
+20mg/Nm3 theo QCVN 19:2024
+1. Thống nhất
+2. Thống nhất
+3. Tư vấn sẽ bổ sung
+Đồng ý với hiệu chỉnh. Đóng
+2
+2.1.2 
+4/59
+Phương án cải tạo hệ thống 
+khử bụi tĩnh điện
+ 
+4. "6.Hệ thống thu hồi nhiệt (Heat recovery 
+system)" TVTK nên bổ sung mô tả số lượng  hệ 
+thống thu hồi nhiệt trên 1 tổ máy.
+Thống nhất
+Đồng ý với hiệu chỉnh. Đóng
+2
+2.1.3 
+14/59
+Thông số hệ thống ESP sau 
+cải tạo
+1. TVTK bổ sung khối lượng thiết bị Hệ thống 
+thu hồi nhiệt vào Bảng 2.1.3: Tổng hợp khối 
+lượng thiết bị cải tạo hệ thống ESP cho (01) một 
+tổ máy
+2. Trong hồ sơ thiết kế TVTK có miêu tả nước 
+cấp cho bộ thu hồi nhiệt được lấy từ hệ thống 
+bơm nước ngưng, đề nghị TVTK đánh giá về 
+mức độ đáp ứng của bơm ngưng hiện hữu trong 
+trường hợp áp dụng bộ thu hồi nhiệt. Bổ sung 
+miêu tả, khối lượng của hệ thống đường ống cấp 
+nước cho bộ thu hồi nhiệt.
+TVTK sẽ  hiệu chỉnh bổ 
+sung
+Đồng ý với hiệu chỉnh. Đóng
+2
+2.2.1
+15/59
+Yêu cầu thiết kế hệ thống SCR Trong mục này, TVTK đưa ra Nồng độ ammonia 
+dư trong khói thải < 3ppm. Tuy nhiên tại PLTT 
+là 3mg/Nm3. Vui lòng chuẩn xác lại thông số.
+Đồng ý, TVTK sẽ chuẩn 
+xác lại thông số
+Đồng ý với hiệu chỉnh của TVTK. Đóng
+BẢNG 5: Ý KIẾN THẨM TRA THUYẾT MINH TKCS
+BÁO CÁO NGHIÊN CỨU KHẢ THI DỰ ÁN NÂNG CẤP, CẢI TẠO HỆ THỐNG XỬ LÝ KHÍ THẢI NHÀ MÁY NHIỆT ĐIỆN QUẢNG NINH
+CHƯƠNG 1: TỔNG QUAN 
+CHƯƠNG 2: THUYẾT MINH KỸ THUẬT 
+1
+2
+2.2.3
+23/59
+Danh mục thiết bị hệ thống 
+khử NOx
+TVTK Vui lòng kiểm tra lại số lượng cho 2 tổ 
+máy hay cho 4 tổ máy.
+TVTK đã ghi chú rõ cho 
+2 tổ hoặc cho 4 tổ tại cột 
+Ghi chú của Bảng 2.2.7
+Đồng ý với hiệu chỉnh của TVTK. Đóng
+2
+2.2.3
+23/59
+Danh mục thiết bị hệ thống 
+khử NOx
+Trong mục 4.2.2, chương 4 Thuyết minh 
+BCNCKT. Thể tích bể dự trữ NH3 là 155m3. 
+Tuy nhiên trong TKCS là 154m3. Vui lòng 
+chuẫn xác lại số liệu. Ngoài ra, Theo PLTT thể 
+tích bình lưu trữ NH3 thiết kế là 155,66m3, vậy 
+tại sao không lựa chọn là 156m3 mà lại lựa chọn 
+nhỏ hơn.
+Đồng ý, TVTK sẽ chuẩn 
+xác lại thông số
+Đồng ý với hiệu chỉnh của TVTK. Đóng
+2
+2,3
+24/59
+ Hệ thống khử SO2
+1. Cập nhật lại các nội dung liên quan tới QCVN 
+19:2024
+2. Khi nhiệt độ giảm xuống 90 độ do lắp đặt bộ 
+thu hồi nhiệt, qua FGD thì nhiệt độ khói là bao 
+nhiêu? Có cần phải lắp đặt hệ thống gia nhiệt 
+khói không?
+- TVTK thống nhất bổ 
+sung
+-  Bộ gia nhiệt khói đã 
+được lắp đặt trong dây 
+chuyền công nghệ của 
+NMNĐ Quảng Ninh.
+Đồng ý với hiệu chỉnh. Đóng
+2
+2.4
+37/59
+Hệ thống điện
+Đề nghị TVTK bổ sung mã hiệu của thanh cái 
+cấp nguồn dự kiến vào các bảng thông số phụ tải 
+điện.
+VD: Thanh cái 400V Boiler PC A 
+(1BFC06GS001)
+Thanh cái 400V Boiler PC A (1BFD06GS001)
+Đồng ý, TVTK sẽ bổ 
+sung.
+Đồng ý với hiệu chỉnh của TVTK.
+Đóng
+2
+2.4
+37/59
+Hệ thống điện
+Đề nghị TVTK bổ sung thông số phụ tải điện hệ 
+thống bơm tuần hoàn của các tổ máy còn lại (2A, 
+2B, 3A, 3B, 4A, 4B)
+Đồng ý, TVTK sẽ bổ 
+sung.
+Đề nghị TVTK làm rõ về thuyết minh phụ tải 
+điện hệ thống thu hồi nhiệt ( gồm bơm tuần 
+hoàn hệ thống thu hồi nhiệt, chiếu sáng...) đã 
+bỏ không thể hiện ở ấn bản lần 2, trong khi 
+đó ở bản vẽ F387-QN-KT-EL-01 vẫn thể hiện 
+có sơ đồ cấp điện cho 2 bơm tuần hoàn 1A và 
+1B công suất mỗi bơm 100kW. 
+Đóng ý kiến
+2
+2.4
+37/59
+Hệ thống điện
+Đề nghị TVTK bổ sung thông số phụ tải điện hệ 
+thống thu hồi nhiệt (HRS) của các tổ máy còn lại 
+(2A, 2B, 3A, 3B, 4A, 4B)
+Đồng ý, TVTK sẽ bổ 
+sung.
+Đề nghị TVTK làm rõ về thuyết minh phụ tải 
+điện hệ thống thu hồi nhiệt ( gồm bơm tuần 
+hoàn hệ thống thu hồi nhiệt, chiếu sáng...) đã 
+bỏ không thể hiện ở ấn bản lần 2, trong khi 
+đó ở bản vẽ F387-QN-KT-EL-01 vẫn thể hiện 
+có sơ đồ cấp điện cho 2 bơm tuần hoàn 1A và 
+1B công suất mỗi bơm 100kW. 
+Đóng
+2
+2.4
+37/59
+Hệ thống điện
+Đề nghị TVTK bổ sung thông số máy cắt sử 
+dụng trong hệ thống cấp nguồn từ thanh cái
+Đồng ý, TVTK sẽ bổ 
+sung.
+Đề nghị TVTK thêm thông số máy cắt vào 
+các thiết bị lắp mới ( ví dụ máy cắt các bơm 
+tuần hoàn hệ thống thu hồi nhiệt,...)
+Đóng
+2
+2.4
+37/59
+Hệ thống điện
+Đề nghị TVTK bổ sung hiện trạng thiết bị điện 
+(tủ điện, cáp nguồn) và đánh giá khả năng cấp 
+điện cho các phụ tải điện của hệ thống xử lý khí 
+thải được nâng cấp của dự án
+Đồng ý, TVTK sẽ bổ 
+sung.
+Đồng ý với hiệu chỉnh của TVTK.
+Đóng
+2
+2.4
+37/59
+Hệ thống điện
+Đề nghị TVTK bổ sung các tính toán liên quan 
+để làm cơ sở lựa chọn thiết bị điện, cũng như khả 
+năng cấp điện của hệ thống hiện tại.
+Đồng ý, TVTK sẽ bổ 
+sung.
+Đồng ý với hiệu chỉnh của TVTK.
+Đóng
+2
+2.4.3.3
+42/59
+Thiết bị nối đất
+Đề nghị TVTK bổ sung các tiết diện dây tiếp địa, 
+cách bố trí hệ thống tiếp địa đối với từng loại 
+thiết bị xử lý khí thải được cung cấp trong dự án.
+Đồng ý với hiệu chỉnh của TVTK.
+Đóng
+2
+2.4.3.4
+42/59
+Hệ thống điện
+Đề nghị TVTK thay thế các đèn huỳnh quang, 
+sodium thành loại đèn LED có IP phù hợp với 
+môi trường ngoài trời
+Đồng ý, TVTK sẽ hiệu 
+chỉnh.
+Đồng ý với hiệu chỉnh của TVTK.
+Đóng
+2
+2.5.1.1
+43/59
+Các thay đổi chính trong hệ 
+thống điều khiển ESP
+TVTK làm rõ bộ điều khiển tích hợp bên trong 
+của máy biến áp chỉnh lưu cao tần có thay thế 
+hoàn toàn cho hệ thống điều khiển PLC cũ 
+không và PLC sẽ đóng vai trò gì trong hệ thống 
+mới.
+- TVTK chưa hiệu chỉnh bản vẽ. 
+- Đề nghị TVTK ghi rõ các thay đổi chính 
+trong hệ thống điều khiển ESP như: bổ sung 
+bộ điều khiển tích hợp bên trong MBA chỉnh 
+lưu cao tần, bộ điều khiển hệ thống thu hồi 
+nhiệt thay thế hoàn toàn hệ thống PLC cũ.
+Đóng
+2
+2.5.2.3
+50/59
+Danh mục thiết bị hệ thống đo 
+lường điều khiển khử NOx
+1, Đề nghị TVTK rà soát và điều chỉnh thống 
+nhất danh mục thiết bị hệ thống đo lường điều 
+khiển khử NOx với mục "2.6 Danh sách các thiết 
+bị chính trong dự án": máy tính trạm điều khiển 
+có thuộc phạm vi cung cấp của nhà thầu không 
+và thống nhất số lượng thiết bị đo và van điều 
+khiển.
+2, Đề nghị bổ sung thiết bị điều khiển khu vực 
+amoniac.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh.
+1. Đề nghị TVTK xác nhận lại máy tính trạm 
+vận hành và máy tính trạmkỹ thuật có thuộc 
+phạm vị cung cấp mới không, đề nghị điều 
+chỉnh thống nhất với các bản vẽ F387-FSR-
+TT3-I&C-03 và F387-FSR-TT3-I&C-04.
+2. Đề nghị TVTK bổ sung danh sách thiết bị 
+C&I hệ thống ESP.
+Đóng
+2
+2.5.4
+50/59
+Quy phạm và các tiêu chuẩn 
+áp dụng cho hệ thống
+Đề nghị TVTK rà soát và thay thế các tiêu chuẩn 
+hết hạn bằng các tiêu chuẩn hiện hành tương 
+đương.
+Đồng ý, TVTK sẽ rà soát 
+lại.
+Đồng ý với hiệu chỉnh của TVTK.
+Đóng
+2
+2.6
+55/59
+Danh sách các thiết bị chính 
+trong dự án: 
+Tại hệ thống khử Nox, TVTK vui lòng làm rõ, 
+nếu là 3/2 tổ thì tổng có 4 tổ máy thì phải là 6 
+bình bốc hơi cũng như 6 bình chứa.
+TVTK sẽ hiệu chỉnh số 
+bình bốc hơi là 5, mỗi tổ 
+máy sẽ có 1 bình và có 1 
+bình dự phòng toàn bộ 
+nhà máy
+TVTK vui lòng kiểm tra thể thích bình lưu 
+trữ NH3, TVTK vẫn để là 154m3.
+Đồng ý với hiệu chỉnh của TVTK.
+2
+2
+Biến tần cho quạt khói
+Đề nghị TVTK bổ sung
+- Hiện trạng vận hành và phương thức điều 
+khiển hiện hữu của các quạt khói trong nhà 
+máy, bao gồm chế độ điều chỉnh lưu lượng, 
+cấu hình điều khiển, các liên động và bảo vệ 
+đang áp dụng.
+-  Theo thuyết minh dự án sử dụng biến tần 
+dạng container, đề nghị TVTK rà soát trong 
+thuyết minh vẫn trình bày "nhà biến tần" để 
+tránh nhầm lẫn.
+- Đề nghị TVTK bổ sung giải pháp PCCC 
+cho biến tần vì đây là thiết bị công suất có 
+khả năng phát nhiệt cần được trang hệ thống 
+PCCC.
+- TVTK sẽ bổ sung
+- Đồng ý rà soát toàn bộ dự án
+- TVTK đã tham khảo các nhà cung cấp biến 
+tần họ nói sẽ thiết kế tích hợp về PCCC và 
+điều hoà thông gió trong tủ biến tần/ Về điều 
+hoà trong báo cáo cũng đã đưa ra giải pháp 
+sơ bộ lắp 04 điều hoà cho 01 tủ biến tần/
+Đóng.
+3
+3.3.1. Đặc điểm 
+khí tượng thủy 
+văn, địa chất công 
+trình
+05/42
+-/-
+Xem ý kiến trong chương 5 - Báo cáo NCKT
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đồng ý. Đóng ý kiến. 
+3
+3.3.2. Đặc điểm 
+động đất
+12/42
+- Theo phụ lục E - TCVN 
+9386:2012, hệ số mức độ tầm 
+quan trọng của dự án là I = 
+1,25 (Công trình có tầm quan 
+trọng sống còn với việc bảo vệ 
+cộng đồng, chức năng không 
+được gián đoạn trong quá trình 
+xảy ra động đất).
+Hệ số tầm quan trọng đang không thống nhất với 
+chương 1 - TKCS, Đề nghị TVTK làm rõ.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đồng ý. Đóng ý kiến.
+3
+3.3.3. Tải trọng và 
+tác động
+13/42
+- Giá trị tải trọng gió được xác 
+định theo “Tải trọng và tác 
+động - Tiêu chuẩn thiết kế 
+TCVN 2737-2020”. Dự án 
+Nhà máy nhiệt điện Quảng 
+Ninh thuộc phường Hà Khánh, 
+thành phố Hạ Long, tỉnh 
+Quảng Ninh nên thuộc vùng 
+IV, có Wo = 155daN/m2.
+- Đề nghị TVTK cập nhật tải trọng gió theo 
+TCVN 2737-2023 mới nhất.
+-Đề nghị TVTK làm rõ thuật ngữ "Tải trọng 
+động" . Đây là giá trị hoạt tải sàn hay tải trọng 
+sinh ra do máy móc trong quá trình vận hành.
+- Đề nghị TVTK bổ sung đơn vị cho giá trị tải 
+trọng,
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đồng ý. Đóng ý kiến.
+3
+3.4.3. Quy chuẩn, 
+tiêu chuẩn áp dụng
+17/42
+- TCVN 5575:2012 - Kết cấu 
+thép - Tiêu chuẩn thiết kế;
+Đề nghị TVTK cập nhật tiêu chuẩn kết cấu thép 
+TCVN 5575:2024
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đồng ý. Đóng ý kiến.
+3
+3.6.2. Biện pháp 
+thi công
+30/42
+TCVN 7888-2008 - Cọc bê 
+tông ly tâm dự ứng lực;
+Đề nghị TVTK cập nhật tiêu chuẩn cọc PHC.
+Đồng ý, TVTK sẽ hiệu 
+chỉnh phiên bản sau
+Đồng ý. Đóng ý kiến.
+4
+1
+Đánh giá nguy cơ cháy nổ 
+trong phạm vi Dự án và giải 
+pháp PCCC
+ Theo Điều 11 Nghị định 136/2020/NĐ-CP Quy 
+định chi tiết một số điều và biện pháp thi hành 
+luật phòng cháy và chữa cháy và luật sửa đổi, bổ 
+sung một số điều của luật phòng cháy và chữa 
+cháy, nội dung thì TVTK phải bổ sung:
+- Khoảng cách an toàn về PCCC đối với các 
+công trình xung quanh
+- Xác định làm rõ hạng sản xuất của các thiết bị 
+xây lắp mới như SCR…
+TVTK sẽ xem xét, bổ sung TVTT Đồng ý với hiệu chỉnh của TVTK. 
+Đóng
+CHƯƠNG 3: THUYẾT MINH XÂY DỰNG 
+CHƯƠNG 4: PHÒNG CHÁY CHỮA CHÁY VÀ GIẢM THIỂU TÁC ĐỘNG MÔI TRƯỜNG
+Các tiêu chuẩn áp dụng cho hệ 1. Đề nghị TVTK bổ sung các quy chuẩn, tiêu 
+3
+4
+4.1.2
+5
+2. Khu vực dự trữ và xử lý 
+chất phản ứng Ammonia
+Đề nghị TVTK bổ sung các đầu báo rò rỉ khí 
+NH3
+TVTK thống nhất bổ sung TVTT Đồng ý  hiệu chỉnh của TVTK. Đóng
+4
+4.1.4
+8
+Các giải pháp kỹ thuật cụ thể 
+về PCCC
+1.Đề nghị bổ sung thuyết minh trạm bơm và bể 
+nước chữa cháy hiện hữu của nhà máy làm cơ sở 
+thiết kế.
+2.Đề nghị bổ sung tính toán lưu lượng nước chữa 
+cháy cho các hạng mục xây mới và  đối chiếu 
+tính đảm bảo cung cấp lượng nước này của trạm 
+bơm và bể nước chữa cháy hiện hữu.
+TVTK thống nhất bổ sung
+1. TVTT chưa bổ sung đầy đủ thông tin về 
+hiện trạng trạm bơm và bể chữa cháy. Đề 
+nghị vui lòng bổ sung thêm.
+2. Đồng ý với bổ sung của TVTK
+TVTT Đồng ý  hiệu chỉnh của TVTK. Đóng
+4
+4.2
+10/25
+Giảm thiểu tác động môi 
+trường
+Đề nghị TVTK cập nhật các quy chuẩn đã hết 
+hiệu lực.
+TVTK thống nhất bổ sung Đóng
+4
+4.2
+10/25
+Giảm thiểu tác động môi 
+trường
+Đề nghị TVTK tập chung vào các biện pháp 
+giảm thiểu tác động môi trường
+TVTK sẽ rà soát, kiểm tra Đóng
+4
+4.2
+12/25
+Giảm thiểu tác động môi 
+trường
+Đề nghị TVTK rà soát, phân chia biện pháp giảm 
+thiểu tác động tại Bảng 4.1 trong các giai đoạn 
+xây dựng và vận hành tại các mục tương ứng 
+TVTK sẽ rà soát, kiểm tra
+Đóng
+TVTK thống nhất xem 
+xét, hiệu chỉnh
+TVTT Đồng ý  hiệu chỉnh của TVTK. Đóng
+4
+4.1.2
+5
+thống chữa cháy 
+chuẩn Việt Nam hiện hành như 
+- QCVN 06-2022/BXD Quy chuẩn kỹ thuật quốc 
+gia về an to
+ 
+àn cháy cho nhà và công trình
+-QCVN 06:2022/BXD và sửa đổi 1:2023 Quy 
+chuẩn kỹ thuật quốc gia về an toàn cháy cho nhà 
+ 
+và công trình
+- TCVN 6102 - 2020 (ISO 7202:2018) Phòng 
+cháy, ch
+ 
+ữa cháy-chất chữa cháy- bột
+- TCVN 6610-1:2014 và TCVN 6612:2007
+- TCVN 7336 – 2021 Phòng cháy chữa cháy - Hệ 
+thống Sprinkler tự động – Yêu cầu thiết kế và lắp 
+đặt
+- TCVN 7435:2004  Phòng cháy, chữa cháy - 
+Bình chữa cháy xách tay và xe đ
+ 
+ẩy chữa cháy
+- TCVN 3890-2023 Phương tiện phòng cháy và 
+chữa cháy cho nhà và công trình – trang b
+ 
+ị, bố trí
+2. Đề nghị TVTK xem xét xin cấp phép áp dụng 
+các tiêu chuẩn NFPA chưa được phép áp dụng 
+theo Quyết định 4158/QĐ-BCA-PCCC&CNCH 
+năm 2023
+4
+Stt
+Chương
+Mục
+Trang
+Nội dung chính 
+Ý kiến TVTT lần 1
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 2
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 3
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 4
+Ý kiến giải trình của 
+TVTK
+Ý kiến TVTT lần 5
+1. TVTK giải thích cơ sở đầu vào của "Nồng độ bụi đầu ra ESP lớn nhất: Cr ≤ 
+102mg/Nm3". Trong khi đó, TVTK chưa thấy nội dung nào tính toán phát thải 
+bụi để chứng minh đáp ứng phát thải bụi ≤ 20mg/Nm3 theo QCVN 19:2024
+2.Theo mô tả thuyết minh thì  " Nước làm mát khói thải sẽ được trích sau bơm 
+ngưng, lưu lượng nước làm mát, điện tích bề mặt trao đổi nhiệt củ bộ thu hồi 
+nhiệt được tính toán để có thể giảm nhiệt độ khói xuống khoảng 90oC trước khi 
+vào ESP. " Tuy nhiên trong bảng tính nhiệt độ khói thiết kế : 121oC
+ 
+3. -Nồng độ bụi đầu ra ESP lớn nhất: Cr = 30 mg/Nm3 (khi có hệ thống thu 
+hồi nhiệt) chưa có trong bảng tính. TVTK bổ sung thêm
+4. Đề nghị làm rõ cơ sở đưa ra thông số Kích thước hạt bụi, Đường kính trung 
+bình của hạt, Phần trăm theo khối lượng trong bảng tính
+5. Theo thuyết minh, nhiệt độ sau khi dùng bộ thu hồi nhiệt, nhiệt độ khói xuống 
+khoảng 90oC khi đó điện trở của hạt bụi tăng lên dẫn đến dễ thu hồi bụi, tuy 
+nhiên TVTT chưa thấy thông số điện trở bụi trong tính toán.
+TVTK sẽ  hiệu chỉnh bổ sung 
+Theo QCVN 19:2025/BTNMT phát thải bụi áp dụng 
+cho NMNĐ Quảng Ninh dưới 20 mg/Nm3 (ra khỏi 
+ống khói). Trong báo cáo, TVTK đã tính toán và đưa 
+ra giải pháp thiết kế đáp ứng quy định trên. Tuy nhiên 
+tại cuộc họp ngày 14/2/2025, Chủ đầu tư yêu cầu dưới 
+20 mg/Nm3 sau ESP. Vì vậy, TVTK lưu ý và yêu cầu 
+nhà cung cấp đáp ứng yêu cầu này trong thiết kế ở 
+giai đoạn sau.
+Đồng ý với hiệu chỉnh. Đóng
+Số liệu đầu vào
+TVTK kiểm tra lại đơn vị Lượng Ammonia dư chấp thuận, là mg/Nm3 hay ppm.
+TVTK sẽ hiệu chỉnh thống nhất
+Đồng ý với hiệu chỉnh của TVTK. Đóng
+Tính thể tích bình 
+chưa cho 1 tổ máy
+TVTK làm rõ thời gian dự trữ là 7 ngày, vậy mục đích lưu trữ 7 ngày ở đây là 
+làm gì.
+7 ngày dự trữ theo kinh nghiệm là tư vấn là phù 
+hợp và đã tham khảo từ các nhà thầu trong giai 
+đoạn chấm thầu đã thực hiện trước đó
+Đồng ý với giải trình của TVTK. Đóng
+1. TVTK làm rõ cơ sở lựa chọn Thông số vận hành hiện tại (theo kết quả đo) đối 
+Nồng độ SOx trong khói thải, Nồng độ SOx sau FGD giống với Thông số thiết 
+kế
+2. TVTK kiểm tra lại dự án "NHÀ MÁY NHIỆT ĐIỆN HẢI PHÒNG"
+3. TẠI BẢNG THÔNG SỐ THIẾT KẾ HỆ THỐNG VÀ THIẾT BỊ FGD CỦA 
+MỘT TỔ MÁY, Nồng độ SOx lớn nhất tại ống khói 150 mg/Nm3 như vậy 
+không đạt Nồng độ SOx trong khói thải ≤ 120 mg/Nm3 của QCVN 19:2024
+4. Kiểu vòi phun Nón đơn, hướng xuống 80o sang Nón đôi, 120o thì trở lực là 
+bao nhiêu, kiểm tra trở lực so với cột áp bơm hiện hữu.
+5. Trở lực - 300Pa chưa có cơ sở
+1,2,3. TVTK sẽ kiểm tra và hiệu chỉnh phù hợp
+4. So với vòi phun nón đơn, vòi phun nón đôi 
+tạo ra trở lực nhỏ hơn do dung dịch bùn vôi 
+được hóa mù tốt hơn (hạt dung dịch nhỏ hơn).
+5. Đối với nội dung này, TVTK đã tham khảo từ 
+nhà sản xuất. Trở lực của khay phân phối vào 
+khoảng 300Pa. TVTK sẽ hiệu chỉnh nội dung 
+cho phù hợp.
+Đồng ý với hiệu chỉnh. Đóng
+Ý kiến 
+chung 
+cho 
+PLTT 
+Xây dựng
+Đề nghị TVTK xóa bớt các trang xuất ra từ phần mềm, chỉ cần xuất ra những nội 
+lực phục vụ tính toán. 
+PLTT khung đỡ SCR vẫn dài hơn 6500 trang
+Đóng ý kiến. Đóng
+- Đề nghị TVTK bổ sung thuyết minh phương án kết cấu phần thân , phần móng.
+- Đề nghị TVTK bổ sung trường hợp tải trọng, tổ hợp tải trọng sử dụng. 
+- Đề nghị TVTK bổ sung kiểm tra chuyển vị công trình
+1. Chưa có kiếm tra chuyển 
+vị công trình. Đề nghị 
+TVTK bổ sung.
+2. Chưa có tính toán kiếm 
+tra móng. Đề nghị TVTK bổ 
+sung
+TVTK đã bổ sung
+Đóng
+Đóng
+- Đề nghị TVTK bổ sung PLTT Nhà Amonia; nhà điện theo đúng quy định của 
+NĐ 175-2024.
+Do các hạng mục này quy mô nhỏ (cấp 4) nên 
+TVTK kiến nghị là thực hiện tính toán trong giai 
+đoạn thiết kế chi tiết
+Đồng ý. Đóng ý kiến.
+Đồng ý. Đóng ý kiến.
+- Đề nghị TVTK bổ sung tính toán đánh giá an toàn chịu lực của các kết cấu hiện 
+hữu dưới tải trọng bổ sung do hệ khung đỡ SCR đặt l
+ 
+ên. 
+TVTK đã kiểm tra ổn định cho toàn bộ kết cấu 
+mới và cũ tại "Phần C mục 3. kiểm tra kết cấu" 
+trang 17/47 của phụ lục tính toán.
+TVTK đang đề cập đến khả năng chịu lực, chứ không 
+phải ổn định công trình.
+Đồng ý. Đóng ý kiến. 
+1/27
+- Đề nghị TVTK ghi rõ tên hạng mục đang tính toán trong trang đầu của Phụ lục. Đồng ý, TVTK sẽ hiệu chỉnh
+Đồng ý. Đóng ý kiến. 
+Đồng ý. Đóng ý kiến. 
+Hạng 
+mục thiết 
+kế
+3/27
+- Đề nghị TVTK bổ sung tài liệu chứng minh SCT cọc đưa ra trong tính toán 
+(2500kN) .
+Đồng ý, TVTK sẽ bổ sung
+TVTK chưa bổ sung.
+Đóng ý kiến.
+Tiêu 
+chuẩn và 
+tài liệu 
+thiết kế
+5/27
+- Đề nghị TVTK cập nhật tính toán kết cấu thép theo tiêu chuẩn mới TCVN 
+5575:2024.
+Do Báo cáo được lập trước ngày TCVN 
+5575:2024 có hiệu lực 24/12/2024, nên TVTK 
+kiến nghị vẫn áp dụng tiêu chuẩn 5575:2012 có 
+dự án.
+Nhất trí với TVTK, nhưng TVTK đang tính toán kết 
+cấu thép theo tiêu chuẩn Mỹ, Đề nghị TVTK tính toán 
+theo TCVN.
+Đóng ý kiến.
+Tiêu 
+chuẩn và 
+tài liệu 
+thiết kế
+5/27
+- Đề nghị TVTK cập nhật tiêu chuẩn tải trọng - tác động TCVN 2737-2023 mới 
+nhất.
+Đồng ý, TVTK sẽ kiểm tra lại và hiệu chỉnh
+Đồng ý. Đóng ý kiến. 
+Đồng ý. Đóng ý kiến. 
+Phụ lục 4: Tính toán xây dựng
+PLTT khung đỡ SCR
+PLTT nhà kho chứa amoni
+Phụ lục 1: Tính toán hệ thống ESP
+Phụ lục 2: Tính toán hệ thống giải pháp khử Nox
+Phụ lục 3: Tính toán giải pháp liên quan đến hệ thống FGD
+BẢNG 6: Ý KIẾN THẨM TRA PHỤ LỤC TÍNH TOÁN 
+BÁO CÁO NGHIÊN CỨU KHẢ THI DỰ ÁN NÂNG CẤP, CẢI TẠO HỆ THỐNG XỬ LÝ KHÍ THẢI NHÀ MÁY NHIỆT ĐIỆN QUẢNG NINH
+1
+Tiêu 
+chuẩn và 
+tài liệu 
+thiết kế
+5/27
+- Đề nghị TVTK ghi rõ tên tiêu chuẩn áp dụng (số hiệu + tên tiêu chuẩn).
+Đồng ý, TVTK sẽ kiểm tra lại và hiệu chỉnh
+Đồng ý. Đóng ý kiến. 
+Đồng ý. Đóng ý kiến. 
+Tiêu 
+chuẩn và 
+tài liệu 
+thiết kế
+5/27
+- Tiêu chuẩn Mỹ không nằm trong danh mục tiêu chuẩn áp dụng theo chương 3 - 
+TKCS. Đề nghị TVTK tính toán lại kết cấu theo TCVN mới nhất.
+Đồng ý, TVTK sẽ kiểm tra lại và hiệu chỉnh
+Đề nghị TVTK kiểm tra hiệu chỉnh
+Đồng ý. Đóng ý kiến. 
+Thông số 
+vật liệu
+5/27
+- Mác bê tông, cốt thép sử dụng trong PLTT đang không trùng khớp với vật liệu 
+ghi trong chương 3 - TKCS. Đề nghị TVTK làm rõ.
+Đồng ý, TVTK sẽ kiểm tra lại và hiệu chỉnh
+Đề nghị TVTK kiểm tra hiệu chỉnh
+Đồng ý. Đóng ý kiến. 
+- Đề nghị TVTK thể hiện rõ các tải trọng tác động lên công trình.
+Đồng ý, TVTK sẽ bổ sung
+- Đề nghị TVTK ghi rõ tên trường hợp tải trọng.
+Đồng ý. Đóng ý kiến. 
+- Đề nghị TVTK bổ sung bảng tổng hợp kết quả nội lực các cấu kiện chịu lực 
+chính.
+Đồng ý, TVTK sẽ bổ sung
+Đồng ý. Đóng ý kiến.
+Đồng ý. Đóng ý kiến. 
+- Đề nghị TVTK bổ sung bảng tổng hợp kết quả nội lực chân cột
+Đồng ý, TVTK sẽ bổ sung
+Đồng ý. Đóng ý kiến. 
+Đồng ý. Đóng ý kiến. 
+- Đề nghị TVTK  bổ sung bảng tổng hợp kết quả thiết kế các cấu kiện chịu lực 
+chính.
+Đồng ý, TVTK sẽ bổ sung
+Đồng ý. Đóng ý kiến. 
+Đồng ý. Đóng ý kiến. 
+- Đề nghị TVTK bổ sung tính toán ổn định, biến dạng nền móng.
+Đồng ý, TVTK sẽ bổ sung
+Đồng ý. Đóng ý kiến. 
+Đồng ý. Đóng ý kiến. 
+- Do kết cấu đặt lên móng công trình hiện hữu, nên khi tính toán móng phải kể 
+đến nội lực sinh ra do kết cấu hiện hữu ban đầu. Đề nghị TVTK bổ sung nội lực 
+do kết cấu hiệu hữu đặt lên móng, kết hợp với nội lực bổ sung do kết cấu hệ 
+khung SCR gây ra.
+Trong phụ lục tính toán "Mục 4. Tải trọng tác 
+dụng "Tư vấn đã liệt kê tải trọng các thiết bị 
+chính bao gồm các thiết bị cũ còn sử dụng và các 
+thiết bị mới thay thế.
+Đồng ý. Đóng ý kiến. 
+Đồng ý. Đóng ý kiến. 
+TVTK vẫn chưa bổ sung hết phần kết cấu cũ vào mô 
+hình tính toán. Đề nghị TVTK bổ sung. 
+Đồng ý. Đóng ý kiến. 
+Đề nghị TVTK bổ sung các tính toán liên quan để làm cơ sở lựa chọn thiết bị 
+điện, cũng như khả năng cấp điện của hệ thống hiện tại.
+Đồng ý, TVTK sẽ bổ sung.
+TVTK chưa bổ sung
+Đồng ý. Đóng ý kiến. 
+Biến tần
++ Theo thuyết minh dự án sử dụng 
+biến tần dạng container, đề nghị 
+TVTK rà soát trong thuyết minh 
+vẫn trình bày "nhà biến tần" để 
+tránh nhầm lẫn.
++Đề nghị TVTK bổ sung giải pháp 
+PCCC cho biến tần vì đây là thiết bị 
+công suất có khả năng phát nhiệt 
+cần được trang hệ thống PCCC.
++ Đề nghị TVTK xem xét với 
+phương án thay mới toàn bộ 8 quạt 
+khói có cần giữ lại hệ thống điều 
+khiển bằng cánh hương như hiện 
+hữu khi mà đã kết hợp biến tần.
+Đồng ý, TVTK sẽ bổ sung.
+Đồng ý. Đóng ý kiến. 
+Lưu ý Chủ đầu tư trong giai đoạn 
+sau của  dự án cần yêu cầu các bên 
+liên quan thực hiện các nội dung 
+sau:
+- Tính toán kiểm tra, rà soát phối 
+hợp bảo vệ và chế độ làm việc của 
+động cơ sau khi lắp đặt biến tần;
+- Đánh giá sự phù hợp của hệ thống 
+cáp động lực hiện hữu đối với chế 
+độ vận hành biến tần (bao gồm ảnh 
+hưởng dv/dt);
+Nhất trí ý kiến TVTT
+Đồng ý. Đóng ý kiến. 
+Phụ lục : Tính toán phần điện
+2
+Stt
+Chươ
+ng
+Mục
+Trang
+Nội dung chính 
+Ý kiến TVTT lần 1
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 2
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 3
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 4
+Ý kiến giải trình của TVTK
+Ý kiến TVTT lần 5
+F387-FSR-TT3-GP-01
+1. Bản vẽ cần thể hiện hoa gió
+2. Kiểm tra các nét vẽ của ESP đang bị 
+thiếu
+3. TVTK nên bổ sung mô tả FGD, ESP 
+vào trong bảng vẽ 
+1, Đồng ý với ý kiến của TVTT
+2, Đồng ý với ý kiến của TVTT
+3, Đây là bản vẽ mặt bằng thể hiện tổng 
+thể các hạng mục cần cải tạo, Thuyết 
+minh mô tả TVTT vui lòng xem trong 
+thuyết minh.
+Đồng ý hiệu chỉnh. Đóng
+F387-FSR-TT3-GP-01
+1. TVTK cần bổ sung hệ thống thu hồi 
+nhiệt vào bản vẽ
+1, Bản vẽ tổng mặt bằng TVTK đã thể 
+hiện phù hợp với giai đoạn này, kiến nghị 
+sẽ thể hiện hệ thống thu hồi nhiệt ở giai 
+đoạn sau
+Đồng ý hiệu chỉnh. Đóng
+1. Hệ khung đỡ SCR
+F387-FSR-TT3-C&A-AR-02.02~Các bản vẽ mặt bằng
+- Đề nghị TVTK ghi rõ giá trị cao độ 
+mặt bằng.
+Đồng ý với ý kiến TVTT
+- Đề nghị TVTK ghi rõ giá 
+trị cao độ mặt bằng.
+Đồng ý. Đóng ý kiến.
+Các bản vẽ mặt bằng, m- Đề nghị TVTK bổ sung thể hiện rõ 
+tiết diện cấu kiện thép đang sử dụng 
+trong các bản vẽ mặt bằng, mặt đứng.
+Đồng ý với ý kiến TVTT
+Đồng ý. Đóng ý kiến.
+Đồng ý. Đóng ý kiến.
+F387-FSR-TT3-C&A-CI-02.01Bản vẽ móng
+- Đề nghị TVTK bổ sung tên móng, chi 
+tiết móng, chi tiết cọc, chiều dài cọc, số 
+lượng cọc.
+Dự án đã tận dụng kết cấu móng hiện 
+hữu, không phải là kết cấu mới, các thông 
+tin này đề nghị TVTT xem trong hồ sơ 
+hoàn công của dự án
+Dù lấy theo bản vẽ hoàn 
+công, TVTK cũng cần bổ 
+sung để đảm bảo nội dung 
+thể hiện của bản vẽ xây dụng.
+Đồng ý. Đóng ý kiến.
+F387-FSR-TT3-C&A-AR-02.0Bản vẽ mặt bằng mái
+- Đề nghị TVTK bổ sung độ dốc mái, 
+ghi chú vật liệu kết cấu bao che.
+Đây là bản thể bộ SCR, vật liệu và kết 
+cấu bảo che thuộc phạm vi phần thiết bị, 
+không phải phạm vi phần xây dựng
+Đồng ý. Đóng ý kiến.
+Đồng ý. Đóng ý kiến.
+3. Nhà điện
+-Đề nghị TVTK bổ sung bản vẽ thể 
+hiện phương án kết cấu phần thân
+TVTK đã thể hiện giải pháp kết cấu ở bản 
+vẽ AR.03.04 phù hợp với giai đoạn này
+Đồng ý. Đóng ý kiến.
+Đồng ý. Đóng ý kiến.
+F387-FSR-TT3-C&A-AR-03.0Bản vẽ mặt bằng và chi-Đề nghị TVTK bổ sung kích thước 
+dầm móng
+Đồng ý với ý kiến TVTT
+Đồng ý. Đóng ý kiến.
+Đồng ý. Đóng ý kiến.
+ BV Điện & C& I
+QNTPJSC-NO-CN-01.01
+TVTK vui lòng kiểm tra và hiệu chỉnh 
+lại đường dẫn bản vẽ, là QNTPJSC-
+NO-CN-01.02 chứ không phải là 
+QNTPJSC-NO-CN-01.01
+đồng ý, TVTK sẽ hiệu chỉnh
+Đồng ý với hiệu chỉnh của 
+TVTK. Đóng
+QNTPJSC-NO-CN-01.01
+Bản vẽ đang bị thiếu nét kết nối giữa 
+các bình chứa, TVTK vui lòng bổ sung.
+đồng ý, TVTK sẽ hiệu chỉnh
+Đồng ý với hiệu chỉnh của 
+TVTK. Đóng
+QNTPJSC-NO-CN-01.03
+TVTK vui lòng cho to cỡ chữ trong 
+bản vẽ.
+đồng ý, TVTK sẽ hiệu chỉnh
+Bản vẽ TMB
+Bản vẽ xây dựng
+BV Công nghệ
+BẢNG 7: Ý KIẾN THẨM TRA BẢN VẼ
+BÁO CÁO NGHIÊN CỨU KHẢ THI DỰ ÁN NÂNG CẤP, CẢI TẠO HỆ THỐNG XỬ LÝ KHÍ THẢI NHÀ MÁY NHIỆT ĐIỆN QUẢNG NINH
+1
+- TVTK vui lòng bổ sung bản vẽ sơ đồ 
+nguyên lý kết nối báo cháy các khu vực 
+xây mới như kho chứa amoniac và khu 
+vực bộ SCR tới hệ thống báo cháy hiện 
+hữu của nhà máy làm cơ sở thiết kế
+- TVTK bổ sung bản vẽ nguyên lý kết 
+nối đường ống khu SCR với  trạm bơm 
+cấp nước chữa cháy hiện hữu của nhà 
+máy
+TVTK thống nhất bổ sung
+Đóng
+QNTPJSC-PCCC-01.01
+1. TVTK vui lòng bổ sung khoảng cách 
+giữa các đầu phun nước tự động
+2.Vui lòng bổ sung đầy đủ các chú 
+thích và ký hiệu vào bản vẽ liên quan. 
+Ví dụ:
+TVTK thống nhất bổ sung
+Đóng
+- Đề nghị TVTK bổ sung các bản vẽ sơ 
+đồ nối điện tổng thể và nối điện tự 
+dùng (400V) nhà máy, thể hiện vị trí 
+đấu nối cấp nguồn cho các phụ tải điện 
+của hệ thống xử lý khí thải (Hệ thống 
+lọc bụi tĩnh điện ESP, hệ thống xử lý 
+khí NOx, hệ thống xử lý lưu huỳnh 
+SOx).
+- Đề nghị TVTK bổ sung bản vẽ mặt 
+bằng bố trí các phần thiết bị cung cấp 
+điện cho các hệ thống xử lý khí thải, 
+được lắp mới của dự án.
+- Đề nghị TVTK bổ sung các bản vẽ về 
+hệ thống nối đất, hệ thống chiếu sáng 
+được cung cấp trong dự án này.
+1. Đồng ý, TVTK sẽ bổ sung.
+2. Đồng ý, TVTK sẽ bổ sung.
+3. Các bản vẽ chi tiết hệ thống nối đất, 
+chiếu sáng đề xuất thực hiện ở giai đoạn 
+sau.
+1, TVTK chưa hiệu chỉnh.
+2, TVTK chưa hiệu chỉnh
+3, Đề nghị TVTK bổ sung 
+trong gia đoạn này
+Đồng ý. Đóng ý kiến.
+F387-FSR-TT3-EL-01
+Đề nghị TVTK bổ sung thông số máy 
+cắt (dòng làm việc, dòng cắt, số cực...) 
+sử dụng trong hệ thống cấp nguồn từ 
+thanh cái
+Đồng ý, TVTK sẽ bổ sung.
+Đề nghị TVTK thêm thông 
+số máy cắt vào các thiết bị 
+lắp mới ( ví dụ máy cắt các 
+bơm tuần hoàn hệ thống thu 
+hồi nhiệt trong bản vẽ F387-
+QN-KT-EL-01)
+Đóng
+F387-FSR-TT3-I&C-01
+F387-FSR-TT3-I&C-02
+1, Đề nghị TVTK làm rõ hệ thống điều 
+khiển DCS nước làm mát kín có đủ dự 
+phòng để tích hợp bổ sung điều khiển 
+các bơm tuần hoàn của hệ thống thu 
+hồi nhiệt không.
+2, Đề nghị TVTK sử dụng các ký hiệu 
+khác nhau để phân biệt kết nối 
+hardwire và commnunication link 
+(ethernet).
+1. TVTK sẽ rà soát lại.
+2. Đồng ý, TVTK sẽ hiệu chỉnh.
+1, Đề nghị TVTK bổ sung 
+hiện trạng của hệ thống điều 
+khiển DCS nước làm mát 
+kín vào thuyết minh và bổ 
+sung các modun I/O nếu cẩn 
+thiết.
+2, TVTK chưa hiệu chỉnh.
+Đóng
+F387-FSR-TT3-I&C-03
+F387-FSR-TT3-I&C-04
+1, Tham chi
+ 
+ếu mục "2.6Danh sách các 
+thiết bị chính trong dự án" TVTK làm 
+rõ  máy tính trạm điều khiển có thuộc 
+phạm vi thiết bị lắp đặt mới không, nếu 
+có đề nghị TVTK điều chỉnh bản vẽ 
+cho phù hợp.
+2, Đề nghị TVTK sử dụng các ký hiệu 
+khác nhau để phân biệt kết nối 
+hardwire và commnunication link 
+(ethernet).
+3, Đề nghị bổ sung bản vẽ bố trí các tủ 
+điều khiển mới.
+1. Đồng ý, TVTK sẽ rà soát lại.
+2. Đồng ý, TVTK sẽ hiệu chỉnh.
+2. Đồng ý, TVTK sẽ bổ sung.
+1, TVTK chưa rà soát và 
+hiệu chỉnh.
+2, TVTK chưa hiệu chỉnh
+3, TVTK chưa bổ sung
+Đóng
+BV Điện
+2
+Đề nghị TVTK bổ sung bản 
+vẽ F387-FSR-TT3-EL-SCR-
+03 trong  thuyết minh có để 
+đến, trong phần bản vẽ 
+không có
+Đóng. TVTK đã bổ sung
+Biến tần
+Đề nghị TVTK bổ sung bản 
+vẽ ''Sơ đồ khối tích hợp DCS''
+Nhất trí ý kiến TVTT
+Đóng. TVTK đã bổ sung
+3

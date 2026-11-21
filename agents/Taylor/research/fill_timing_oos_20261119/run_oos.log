@@ -1,0 +1,60 @@
+control 06-12 |Δ| bps: max 5.46 mean 0.43 n_tk 13
+tk    DXG  GEX  HPG   HT1  MSN   MWG   PHR   PVD   SSI  STB   VEA   VIX   VPB
+buy   0.0  0.0  0.0  0.49  0.0  0.00  0.91  0.03  0.11  0.0  0.75  1.20  1.19
+sell  0.0  0.0  0.0  0.25  0.0  0.25  0.63  0.03  0.05  0.0  0.56  1.66  0.76
+OOS days 110 tickers 16 tk-days 1475 weeks 23
+low5 ['D2D', 'NNC', 'DHA', 'HT1', 'VEA']
+            set  metric     subset  mean_bps  ci_lo  ci_hi  n_days  n_weeks
+0           OOS     buy        all    -12.00 -27.42   2.77     110       23
+1           OOS     buy  down_days    -52.93 -71.91 -35.72      55       23
+2           OOS     buy    up_days     28.93   8.80  49.67      55       23
+3           OOS    sell        all      1.24  -4.22   7.06     110       23
+4           OOS    sell  down_days    -14.63 -20.32  -8.54      55       23
+5           OOS    sell    up_days     17.10  10.22  24.60      55       23
+6           OOS  p11:00        all     -9.36 -23.57   4.77     110       23
+7           OOS  p11:00  down_days    -43.40 -57.81 -29.42      55       23
+8           OOS  p11:00    up_days     24.67   4.97  44.27      55       23
+9           OOS  p11:15        all    -13.17 -29.21   2.24     110       23
+10          OOS  p11:15  down_days    -47.38 -63.42 -32.16      55       23
+11          OOS  p11:15    up_days     21.03  -0.29  42.13      55       23
+12          OOS  p13:00        all    -16.75 -34.53  -0.77     110       23
+13          OOS  p13:00  down_days    -54.75 -73.76 -37.76      55       23
+14          OOS  p13:00    up_days     21.25   0.05  42.78      55       23
+15          OOS  p13:15        all    -11.04 -25.80   4.09     110       23
+16          OOS  p13:15  down_days    -57.54 -78.76 -38.18      55       23
+17          OOS  p13:15    up_days     35.46  14.38  59.06      55       23
+18          OOS  p13:30        all     -9.66 -26.50   6.19     110       23
+19          OOS  p13:30  down_days    -61.57 -87.81 -38.60      55       23
+20          OOS  p13:30    up_days     42.24  18.81  65.75      55       23
+21          OOS  p09:15        all      0.61  -0.16   1.37     110       23
+22          OOS  p09:15  down_days      0.97  -0.24   2.22      55       23
+23          OOS  p09:15    up_days      0.25  -0.65   1.26      55       23
+24          OOS  p09:30        all      6.28   0.29  12.91     110       23
+25          OOS  p09:30  down_days     -7.10 -14.29   1.17      55       23
+26          OOS  p09:30    up_days     19.66  11.01  28.85      55       23
+27          OOS  p09:45        all      1.32  -6.49   9.76     110       23
+28          OOS  p09:45  down_days    -21.32 -29.46 -12.97      55       23
+29          OOS  p09:45    up_days     23.95  13.08  35.61      55       23
+30          OOS  p10:00        all     -3.26 -12.64   6.30     110       23
+31          OOS  p10:00  down_days    -31.07 -39.37 -22.21      55       23
+32          OOS  p10:00    up_days     24.55  13.24  36.09      55       23
+33  OOS|lowliq5     buy        all    -10.07 -23.87   3.71     110       23
+34  OOS|lowliq5     buy  down_days    -53.88 -68.93 -37.37      50       21
+35  OOS|lowliq5     buy    up_days     26.43   9.08  43.49      60       23
+36  OOS|lowliq5    sell        all      4.55  -3.90  13.20     110       23
+37  OOS|lowliq5    sell  down_days    -11.16 -21.26  -0.45      50       21
+38  OOS|lowliq5    sell    up_days     17.63   5.03  30.90      60       23
+39       OOS_H1     buy        all    -13.27 -40.09   9.93      55       11
+40       OOS_H1     buy  down_days    -57.15 -88.69 -28.86      27       11
+41       OOS_H1     buy    up_days     29.03  -3.41  61.40      28       11
+42       OOS_H1    sell        all      2.78  -3.87   9.30      55       11
+43       OOS_H1    sell  down_days    -14.67 -22.42  -8.11      27       11
+44       OOS_H1    sell    up_days     19.61  10.60  28.63      28       11
+45       OOS_H2     buy        all    -10.72 -25.88   8.02      55       12
+46       OOS_H2     buy  down_days    -48.86 -69.78 -29.83      28       12
+47       OOS_H2     buy    up_days     28.83   6.66  54.40      27       12
+48       OOS_H2    sell        all     -0.31  -8.86   9.24      55       12
+49       OOS_H2    sell  down_days    -14.59 -23.15  -4.65      28       12
+50       OOS_H2    sell    up_days     14.50   5.12  26.68      27       12
+down-day share 0.500 (n=110)
+tickers n per day min/max 12 16

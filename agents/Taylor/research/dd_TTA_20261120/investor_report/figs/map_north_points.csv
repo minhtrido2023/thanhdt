@@ -1,0 +1,5 @@
+name,lat,lon,kind,dx,dy,note
+"Ngòi Hút 2 (48 MW) + 2A (8,4 MW)",21.8516,104.0896,plant,0.06,0.07,OSM Nominatim 20/11/2026 xã Mù Cang Chải (website công ty: huyện Mù Cang Chải)
+Pá Hu (26 MW),21.4691,104.3781,plant,0.06,-0.08,OSM Nominatim 20/11/2026 Trạm Tấu (website công ty: huyện Trạm Tấu)
+Trụ sở (xã Gia Hội),21.7346,104.4205,hq,0.06,-0.12,OSM Nominatim 20/11/2026 xã Gia Hội (địa chỉ BCTC)
+Hà Nội — EVN/EPTC (bên mua),21.0283,105.8540,market,-0.75,0.12,OSM Nominatim (toạ độ trung tâm)

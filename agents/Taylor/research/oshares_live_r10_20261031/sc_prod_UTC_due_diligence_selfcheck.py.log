@@ -80,6 +80,6 @@ test_73_div_growth_banking_is_na (__main__.YieldFloor.test_73_div_growth_banking
 Ngân hàng đủ điều kiện stable + div3>0 vẫn bị ép về N/A (giống yield_floor_note). ... ok
 
 ----------------------------------------------------------------------
-Ran 49 tests in 90.484s
+Ran 49 tests in 87.059s
 
 OK
