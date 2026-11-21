@@ -606,3 +606,6 @@
 - [2026-11-21T02:13:11Z] Taylor/heartbeat — Taylor_20261121_020007: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261121_020007", "source": "watcher"}
 - [2026-11-21T02:14:07Z] Taylor/finding — weekly-2026-11-16_to_2026-11-20 INCOMPLETE: chặn Q9 G5: {"files": ["reports/SpaceX_weekly_report_2026-11-16_to_2026-11-20.md", "reports/ZaloPay_weekly_report_2026-11-16_to_2026-11-20.md"], "nav_end": {"SpaceX": 940103013, "ZaloPay": 904952158}, "wtd_pct": {"SpaceX": -0.75, "ZaloPay": -2.23, "VNINDEX": -2.66}, "outlook": "VNINDEX 1688.79 dưới MA20/50/200, hỗ trợ 1666.41, kháng cự 1753.01; 2 kịch bản trung bình", "gap": "cột VN-Index có cổ tức MTD/inception 'chưa có số': G5 2026-11-11 lệch +0.52pp >0.5; delivery gate BLOCK (Q9), chưa gửi Discord/email, không waiver", "delivery_gate": "INCOMPLETE cả 2 file", "sha256_prefix": {"SpaceX": "23c159dde39260c3", "ZaloPay": "a3386f447491c7b0"}, "need": "user duyệt waiver q9_waivers.json hoặc Winston sửa G5 rồi chạy lại gate", "measured_by": "report_delivery_gate.py output + sha256sum"}
 - [2026-11-21T02:14:11Z] Taylor/heartbeat — Taylor_20261121_020007: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261121_020007", "source": "watcher"}
+
+## Consolidation 2026-11-21T03:07:02Z
+- [2026-11-21T02:15:54Z] Taylor/status — fa_ratings-refresh-ok: {"rows": 12995}
