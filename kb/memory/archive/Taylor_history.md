@@ -2583,3 +2583,10 @@
 
 ## Archived 2026-11-20 (keep=12 days=0 require_done=False)
 - [2026-11-19T15:28:26Z] [bank-nodata R2 19/11] XONG job Taylor_20261119_152223: commit d2fe7a2d5 (wt-bank-nodata-20261119) — CHO arch-reviewer vong 3 + user duyet; merge can tao snapshot lens o run live dau
+
+## Archived 2026-11-21 (keep=12 days=0 require_done=False)
+- [2026-11-20T04:19:46Z] ĐANG DỞ: job Taylor_20261120_041933 DD TTA | NEXT: tải BCTC Q3/2026 vào agents/Taylor/research/dd_TTA_20261120/src
+- [2026-11-20T04:19:47Z] ĐANG DỞ: job Taylor_20261120_041936 QTP r3 envcapex | NEXT: đọc dd_QTP_20261117/model/qtp_model.py + REPORT, dựng qtp_model_r3.py ở research/qtp_r3_envcapex_20261120
+- [2026-11-20T04:27:42Z] [qtp-r3 20/11] XONG job Taylor_20261120_041936: tam QTP r3 sau CK ~7053 (DAT, gia/tam 1,45) do opex 572 ty/nam + von du an khi thai — CHO Mike skeptic + Wendy soat TT57 D20.3 tuong duong trong TT12/2025; Mike sua REPORT/investor/dd_price_zones
+- [2026-11-20T04:29:34Z] [dd-tta 20/11] XONG job Taylor_20261120_041933: REPORT dd_TTA_20261120, tam 8.040 (sau TK 7.240), KHONG RE — CHO Mike goi fundamental-skeptic + ghi dd_price_zones
+- [2026-11-20T04:40:15Z] [qtp-r3b 20/11] XONG job Taylor_20261120_043725: tam 7.701 sau CK (P0 0,4), DAT; CHO Mike sua REPORT r2/investor/dd_price_zones

@@ -14,11 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-20T04:19:46Z] ĐANG DỞ: job Taylor_20261120_041933 DD TTA | NEXT: tải BCTC Q3/2026 vào agents/Taylor/research/dd_TTA_20261120/src
-- [2026-11-20T04:19:47Z] ĐANG DỞ: job Taylor_20261120_041936 QTP r3 envcapex | NEXT: đọc dd_QTP_20261117/model/qtp_model.py + REPORT, dựng qtp_model_r3.py ở research/qtp_r3_envcapex_20261120
-- [2026-11-20T04:27:42Z] [qtp-r3 20/11] XONG job Taylor_20261120_041936: tam QTP r3 sau CK ~7053 (DAT, gia/tam 1,45) do opex 572 ty/nam + von du an khi thai — CHO Mike skeptic + Wendy soat TT57 D20.3 tuong duong trong TT12/2025; Mike sua REPORT/investor/dd_price_zones
-- [2026-11-20T04:29:34Z] [dd-tta 20/11] XONG job Taylor_20261120_041933: REPORT dd_TTA_20261120, tam 8.040 (sau TK 7.240), KHONG RE — CHO Mike goi fundamental-skeptic + ghi dd_price_zones
-- [2026-11-20T04:40:15Z] [qtp-r3b 20/11] XONG job Taylor_20261120_043725: tam 7.701 sau CK (P0 0,4), DAT; CHO Mike sua REPORT r2/investor/dd_price_zones
 - [2026-11-20T04:49:53Z] [qtp-r3c 20/11] XONG job Taylor_20261120_044905: REPORT_r3c, tam 7.701 giu nguyen, opex2032=8.458, thuan loi=9.240 — CHO Mike ap vao REPORT r2/investor; con thieu GPMT 517 PL2 (can xin ban)
 - [2026-11-20T04:52:47Z] [dd-tta-r2 20/11] XONG job Taylor_20261120_044902: tam 6.342 / sau TK 5.708 (B' trung tam), NON §2/§2.5, KHONG RE giu — CHO Mike goi fundamental-skeptic r2 + ghi dd_price_zones (chua ghi, khong email)
 - [2026-11-20T05:00:49Z] ĐANG DỞ: job Taylor_20261120_050035 TTA r3 + investor report | NEXT: REPORT_r3.md + model/dcf_tta_r3.py rồi investor_report/
@@ -30,3 +25,4 @@
 - [2026-11-20T14:45:50Z] [ddz-perf 20/11] XONG job Taylor_20261120_143220: nhánh perf/ddzone-watch-20261120 commit 108f7b220 (wt-ddzone-perf-20261120) — CHỜ Mike review+merge
 - [2026-11-20T16:05:56Z] [dd-bqclient 20/11] XONG job Taylor_20261120_154910: commit 57c554c2c nhanh fix/dd-bqclient-failcache-20261120 (outer repo) — CHO Mike review+cherry-pick
 - [2026-11-20T21:57:00Z] [sweep 21/11] XONG job Taylor_20261120_214941: lag_live CLOSED 0f5de5b6d; phs_flash OPEN 2 sweep -> CAN USER (da post Architecture): duyet manual_only hay cho PHS sandbox
+- [2026-11-21T02:14:07Z] ĐANG DỞ: weekly 16-20/11 đã promote nhưng gate BLOCK Q9 (G5 cột có cổ tức) | NEXT: sau khi G5 sửa/user waiver chạy lại report_delivery_gate 2 file
