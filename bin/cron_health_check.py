@@ -125,6 +125,11 @@ def cadence_bucket(schedule):
         return "unknown", 3 * 86400
     minute, hour, dom, month, dow = parts
     if minute.startswith("*/") or hour == "*":
+        # Job tần suất cao nhưng CHỈ chạy ngày làm việc (dow != "*", vd `*/5 2-7 * * 1-5`): log
+        # nằm yên suốt cuối tuần + Thứ Hai sáng sớm là BÌNH THƯỜNG — ngưỡng 2h gắn cờ STALE giả
+        # cả T7/CN (rà 2026-11-22: 5 job). 3,5 ngày phủ T6 cuối phiên → T2 trước giờ chạy.
+        if dow != "*":
+            return "frequent_wd", int(3.5 * 86400)
         return "frequent", 2 * 3600
     if dom != "*" or month != "*":
         return "monthly", 33 * 86400
@@ -226,6 +231,47 @@ def load_acks():
     return live
 
 
+def load_quiet_ok():
+    """Job ĐƯỢC THIẾT KẾ im lặng khi rảnh (chỉ ghi log khi có việc/đổi trạng thái) hoặc tự ghi
+    log ở file khác — checker không thể phân biệt "im lặng đúng thiết kế" với "chết" chỉ bằng
+    mtime. Mỗi mục trong `state/cron_health_ack.json` → `quiet_ok` PHẢI có `reason` (bằng chứng
+    job vẫn sống) và hết hạn sau `expires_days` rồi hiện lại để xác minh lại — là SNOOZE có lý
+    do, không phải im lặng vĩnh viễn. Chỉ áp cho STALE / LOG_MISSING / NO_LOG_REDIRECT; KHÔNG che ERRORS_FOUND."""
+    try:
+        with open(ACK_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return []
+    live = []
+    for a in data.get("quiet_ok", []):
+        try:
+            acked_ts = time.mktime(time.strptime(a["acked_at"], "%Y-%m-%dT%H:%M:%SZ")) - time.timezone
+        except Exception:
+            continue
+        if NOW - acked_ts > a.get("expires_days", 30) * 86400:
+            continue
+        if not a.get("reason"):
+            continue  # không có lý do = không có hiệu lực (ack không bằng chứng bị loại)
+        live.append(a)
+    return live
+
+
+def find_quiet_ok(script, schedule, log_path, quiet):
+    """Khớp theo: `script` (chuỗi con của đường dẫn script) VÀ/HOẶC `log` (chuỗi con của đường
+    dẫn log) VÀ/HOẶC `schedule` (chuỗi con của 5 trường lịch) — cần ≥1 khoá, mọi khoá có mặt
+    phải khớp. `for_each_live_account.sh` dùng chung cho nhiều cron nên phải khớp thêm theo log."""
+    for a in quiet:
+        keys = [k for k in ("script", "log", "schedule") if a.get(k)]
+        if not keys:
+            continue
+        if ("script" in keys and a["script"] not in script) \
+                or ("log" in keys and a["log"] not in (log_path or "")) \
+                or ("schedule" in keys and a["schedule"] not in schedule):
+            continue
+        return a
+    return None
+
+
 def find_job_ack(script, errs, acks):
     """One stack trace produces several distinct hit lines (the generic 'Traceback (most
     recent call last):' header, file/line frames, the terminal exception message) — acking
@@ -246,6 +292,7 @@ def find_job_ack(script, errs, acks):
 def main():
     jobs = parse_crontab()
     acks = load_acks()
+    quiet = load_quiet_ok()
     rows = []
     for j in jobs:
         bucket, max_age = cadence_bucket(j["schedule"])
@@ -255,10 +302,13 @@ def main():
         script_m = re.search(r"(/\S+\.(?:sh|py))", j["cmd"])
         script = script_m.group(1) if script_m else j["cmd"][:60]
         if log_target is None:
+            q = find_quiet_ok(script, j["schedule"], "", quiet)
             rows.append({
                 "script": script, "schedule": j["schedule"], "bucket": bucket,
-                "status": "NO_LOG_REDIRECT",
-                "detail": "Không có `>> logfile 2>&1` — output đi vào cron mail mặc định "
+                "status": "ACKED" if q else "NO_LOG_REDIRECT",
+                "detail": (f"quiet_ok ({q.get('acked_by', '?')} {str(q.get('acked_at', ''))[:10]}, "
+                           f"hết hạn {q.get('expires_days', 30)}d): {str(q['reason'])[:180]}") if q else
+                          "Không có `>> logfile 2>&1` — output đi vào cron mail mặc định "
                           "(im lặng mất nếu không có MTA cấu hình), không thể verify freshness/lỗi.",
             })
             continue
@@ -272,10 +322,13 @@ def main():
             log_target = os.path.join(base, log_target)
         paths = resolve_log_paths(log_target)
         if not paths:
+            q = find_quiet_ok(script, j["schedule"], log_target, quiet)
             rows.append({
                 "script": script, "schedule": j["schedule"], "bucket": bucket,
-                "status": "LOG_MISSING",
-                "detail": f"Log target khai báo ({log_target}) nhưng không tìm thấy file nào khớp.",
+                "status": "ACKED" if q else "LOG_MISSING",
+                "detail": (f"quiet_ok ({q.get('acked_by', '?')} {str(q.get('acked_at', ''))[:10]}, "
+                           f"hết hạn {q.get('expires_days', 30)}d): {str(q['reason'])[:180]}") if q else
+                          f"Log target khai báo ({log_target}) nhưng không tìm thấy file nào khớp.",
             })
             continue
         p = paths[0]
@@ -284,6 +337,15 @@ def main():
         errs = scan_errors(p)
         job_ack = find_job_ack(script, errs, acks) if errs else None
         if age_s > max_age:
+            q = find_quiet_ok(script, j["schedule"], p, quiet)
+            if q:
+                rows.append({
+                    "script": script, "schedule": j["schedule"], "bucket": bucket,
+                    "status": "ACKED",
+                    "detail": f"quiet_ok ({q.get('acked_by', '?')} {str(q.get('acked_at', ''))[:10]}, "
+                              f"hết hạn {q.get('expires_days', 30)}d): {str(q['reason'])[:180]}",
+                })
+                continue
             rows.append({
                 "script": script, "schedule": j["schedule"], "bucket": bucket,
                 "status": "STALE",
