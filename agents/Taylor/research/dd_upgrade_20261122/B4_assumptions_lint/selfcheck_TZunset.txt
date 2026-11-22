@@ -1,0 +1,89 @@
+PASS fixture đúng (sản xuất): 0 vi phạm []
+PASS fixture đúng (ngân hàng): 0 vi phạm []
+PASS bank thiếu casa ⇒ S ["S: sector: 'casa' is a required property"]
+PASS mo_giay_phep thiếu license_expiry ⇒ S
+PASS dien_ppa thiếu ppa_expiry ⇒ S
+PASS bds_kcn thiếu land_bank ⇒ S
+PASS dien_ppa đủ (ppa_price khong_cong_bo có nguồn đã tìm) ⇒ 0 vi phạm []; ppa_price không bị L9
+PASS r lệch có override_reason ⇒ không L3
+PASS lệch có asymmetry_reason ⇒ 0 vi phạm []
+PASS dd 03/11 + M20261103A hợp lệ, D4 chưa áp ['L14: deposit_rate_date 2026-11-20 cách dd_date 2026-11-03 -17 ngày (phải 0–14 ngày trước)']
+PASS audited_fy_missing ⇒ 0 vi phạm + ghi chú D5 []
+PASS mutation 'thiếu khoá welfare_fund' ⇒ S: (bắn: ['S:'])
+PASS mutation 'thiếu cam kết vốn' ⇒ S: (bắn: ['S:'])
+PASS mutation 'khong_cong_bo không kèm nguồn đã tìm' ⇒ S: (bắn: ['S:'])
+PASS mutation 'one_offs rỗng không lý do' ⇒ S: (bắn: ['S:'])
+PASS mutation 'loai_hinh lạ' ⇒ S: (bắn: ['S:'])
+PASS mutation 'audit enum lạ' ⇒ S: (bắn: ['S:'])
+PASS mutation 'ngoại trừ không nêu cơ sở' ⇒ S: (bắn: ['S:'])
+PASS mutation 'WIDE thiếu cơ chế' ⇒ S: (bắn: ['S:'])
+PASS mutation 'tổng trọng số 0,95' ⇒ L1: (bắn: ['L1:', 'L2:'])
+PASS mutation 'lệch 30/50/20 không lý do' ⇒ L2: (bắn: ['L2:'])
+PASS mutation 'r 13% không ghi đè' ⇒ L3: (bắn: ['L3:'])
+PASS mutation 'lãi huy động +50bp mà r giữ 13,5%' ⇒ L3: (bắn: ['L3:'])
+PASS mutation 'thiếu độ nhạy ±100bp' ⇒ L4: (bắn: ['L4:'])
+PASS mutation 'không báo hai đầu dải' ⇒ L5: (bắn: ['L5:'])
+PASS mutation 'NARROW mà RONIC>Ke' ⇒ L6: (bắn: ['L6:', 'S:'])
+PASS mutation 'capex tuân thủ ghi NPV0 (ca QTP)' ⇒ L7: (bắn: ['L7:'])
+PASS mutation 'bắt buộc không doanh thu, nhãn growth' ⇒ L7: (bắn: ['L7:'])
+PASS mutation 'growth âm không cơ sở (ca MVC r4)' ⇒ L7: (bắn: ['L7:'])
+PASS mutation 'method_version cũ' ⇒ L8: (bắn: ['L8:'])
+PASS mutation 'khoá adv_60d' ⇒ L9: (bắn: ['L9:', 'S:'])
+PASS mutation 'khoá pe' ⇒ L9: (bắn: ['L9:'])
+PASS mutation 'chuỗi có ADV' ⇒ L9: (bắn: ['L9:'])
+PASS mutation 'chuỗi có P/E' ⇒ L9: (bắn: ['L9:'])
+PASS mutation 'BCTC kiểm toán cũ FY2024' ⇒ L10: (bắn: ['L10:'])
+PASS jsonschema có sẵn (schema được kiểm thật)
+PASS B1 dd_date='TBD' ⇒ rc=0(0) + cảnh báo định dạng
+PASS B1 dd_date='chua_ro' ⇒ rc=0(0) + cảnh báo định dạng
+PASS B1 dd_date='9999-99-99x' ⇒ rc=0(0) + cảnh báo định dạng
+PASS B1 thiếu dd_date ⇒ rc=0(0)
+PASS B2 lệch 6bp bắn L3
+PASS B2 lệch 4bp KHÔNG bắn
+PASS B2 β=0, lãi 6%, r=13,5% ⇒ bắn L3 lệch công thức (tính β MẶC ĐỊNH)
+PASS B2 β=0,5 (r khớp neo) không override ⇒ bắn L3 riêng cho β
+PASS B2 β=0,5 + override ⇒ không bắn
+PASS B2 β=0 + override_reason ⇒ không bắn
+PASS B2 lệch 2bp không bắn
+PASS QTP#1 mandatory=false (còn compliance) ⇒ L7 bắn
+PASS QTP#2 generates_revenue=true (còn compliance) ⇒ L7 bắn
+PASS QTP#3 growth + mandatory=false (không doanh thu) ⇒ L7 bắn
+PASS QTP#4 bỏ dự án (none_reason) mà cam kết vốn còn ⇒ L7 bắn
+PASS QTP#5 capital_commitments ghi vay 2.787,9 tỷ mà projects rỗng ⇒ L7 bắn
+PASS fixture đúng: L7 không bắn (không báo giả)
+PASS ca chỉ khai classification=compliance, cờ khác ngược ⇒ L7 bắn
+PASS B5 file rỗng ruột ⇒ 13 vi phạm (≥1)
+PASS B5 rỗng ruột bắn L12 (1 kịch bản p=1)
+PASS B5 rỗng ruột bắn L11 (quá nhiều khong_cong_bo)
+PASS B5 rỗng ruột bắn S (searched/none_reason ngắn)
+PASS B5 sensitivity_only với pct≠null ⇒ S
+PASS B5 none_reason ngắn ⇒ S
+PASS B5 searched=['x'] ⇒ S
+PASS L9 mô tả phương pháp 'ADV trung vị 60 phiên… SAU khoá' KHÔNG bị bắt
+PASS L9 'ADV = 175 tỷ/phiên' bị bắt
+PASS L9 khoá 'price' bị bắt
+PASS L9 khoá 'adv60' bị bắt
+PASS L9 khoá 'marketcap' bị bắt
+PASS L9 khoá 'khoi_luong_tb' bị bắt
+PASS L9 khoá 'pe_ttm' bị bắt
+PASS L9 khoá 'market_price' bị bắt
+PASS additionalProperties=false: khoá lạ trong tax ⇒ S
+PASS L10 DD 15/02/2027 với FY2025 KT ⇒ không báo giả
+PASS L10 DD 15/05/2027 với FY2025 ⇒ bắn
+PASS thiếu method_version ⇒ gate D3 vẫn bật ⇒ L7 bắn
+PASS L3 gate: mv M20261030 ⇒ không áp
+PASS L7-D3 gate: mv M20261030 ⇒ không áp
+PASS L8 ngày 03/11 khai mốc M20261030 (trước đó) ⇒ bắn
+PASS L8 ngày 03/11 khai M20261102 (mốc ngày trước) ⇒ bắn
+PASS L8 ngày 03/11 khai M20261103B ⇒ không bắn
+PASS L13 có tỉ lệ trích mà applied_to_cashflow=false ⇒ bắn
+PASS L14 lãi huy động cũ 83 ngày ⇒ bắn
+PASS L14 deposit_rate_date SAU dd_date ⇒ bắn
+PASS rc cảnh báo=0 (kỳ vọng 0), --strict=1 (kỳ vọng 1)
+[LỖI] L3: r=0.1300 lệch công thức neo 0.1350 (0.135+1.0×(0.074−0.074)) 50bp > 5bp (tham số tự đặt của B4) mà thiếu override_reason
+dd_assumptions_lint: /tmp/tmprxlrwfjp.json: 1 vi phạm · chế độ strict
+PASS dd_date ≥ ENFORCE_FROM ⇒ rc=1 (kỳ vọng 1)
+PASS hằng ENFORCE_FROM giao hàng = 9999-12-31
+PASS fixture đúng --strict rc=0
+
+TZ=<unset> · 85 PASS / 0 FAIL

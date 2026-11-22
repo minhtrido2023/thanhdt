@@ -1,0 +1,85 @@
+$ /usr/bin/python3 bin/dd_assumptions_lint.py trial/MVC_r4_20261103.json
+[CẢNH BÁO] S: (gốc): 'method_version' is a required property
+[CẢNH BÁO] S: (gốc): 'share_base' is a required property
+[CẢNH BÁO] S: (gốc): 'welfare_fund' is a required property
+[CẢNH BÁO] S: (gốc): 'tax' is a required property
+[CẢNH BÁO] S: (gốc): 'working_capital' is a required property
+[CẢNH BÁO] S: (gốc): 'terminal' is a required property
+[CẢNH BÁO] S: (gốc): 'liquidity_discount' is a required property
+[CẢNH BÁO] S: (gốc): 'audit_opinion' is a required property
+[CẢNH BÁO] S: (gốc): 'related_parties' is a required property
+[CẢNH BÁO] S: (gốc): 'one_offs' is a required property
+[CẢNH BÁO] S: (gốc): 'capital_commitments_12m' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_now' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_date' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_source' is a required property
+[CẢNH BÁO] S: discount_rate: 'beta_passthrough' is a required property
+[CẢNH BÁO] S: sector: 'reserves' is a required property
+[CẢNH BÁO] S: sector: 'license_expiry' is a required property
+[CẢNH BÁO] L4: thiếu độ nhạy lãi huy động [-100, -50, 50, 100]bp
+[CẢNH BÁO] L5: method_version None ≥ M20261122 (D4) ⇒ phải báo hai đầu dải Ke 0.123–0.134 (band_ends_reported=true)
+[CẢNH BÁO] L7: dự án growth 'Chương trình mỏ mới (2 mỏ đấu giá)' lệch NPV=0 (CASH_OUTFLOW) mà thiếu independent_basis (luật 03/11 17:06)
+dd_assumptions_lint: agents/Taylor/research/dd_upgrade_20261122/B4_assumptions_lint/trial/MVC_r4_20261103.json: 20 vi phạm · chế độ cảnh báo (rc=0)
+rc=0
+$ /usr/bin/python3 bin/dd_assumptions_lint.py trial/PAT_rev1_20261114.json
+[CẢNH BÁO] S: (gốc): 'method_version' is a required property
+[CẢNH BÁO] S: (gốc): 'related_parties' is a required property
+[CẢNH BÁO] S: (gốc): 'capital_commitments_12m' is a required property
+[CẢNH BÁO] S: audit_opinion: 'emphasis_or_basis' is a required property
+[CẢNH BÁO] S: liquidity_discount/pct: 0.1 is not of type 'null'
+[CẢNH BÁO] S: share_base: 'bonus_esop' is a required property
+[CẢNH BÁO] S: welfare_fund: 'annual_appropriation_pct_of_npat' is a required property
+[CẢNH BÁO] L4: thiếu độ nhạy lãi huy động [-100, -50, 50, 100]bp
+[CẢNH BÁO] L5: method_version None ≥ M20261122 (D4) ⇒ phải báo hai đầu dải Ke 0.123–0.134 (band_ends_reported=true)
+dd_assumptions_lint: agents/Taylor/research/dd_upgrade_20261122/B4_assumptions_lint/trial/PAT_rev1_20261114.json: 9 vi phạm · chế độ cảnh báo (rc=0)
+rc=0
+$ /usr/bin/python3 bin/dd_assumptions_lint.py trial/QTP_v1_20261117.json
+[CẢNH BÁO] S: (gốc): 'method_version' is a required property
+[CẢNH BÁO] S: (gốc): 'welfare_fund' is a required property
+[CẢNH BÁO] S: (gốc): 'related_parties' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_now' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_date' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_source' is a required property
+[CẢNH BÁO] S: discount_rate: 'beta_passthrough' is a required property
+[CẢNH BÁO] S: projects/items/0: 'classification' is a required property
+[CẢNH BÁO] S: sector: 'ppa_expiry' is a required property
+[CẢNH BÁO] S: sector: 'ppa_price' is a required property
+[CẢNH BÁO] S: share_base: 'bonus_esop' is a required property
+[CẢNH BÁO] S: terminal: 'moat_tier' is a required property
+[CẢNH BÁO] L5: method_version None ≥ M20261122 (D4) ⇒ phải báo hai đầu dải Ke 0.123–0.134 (band_ends_reported=true)
+[CẢNH BÁO] L7: dự án 'Nâng cấp hệ thống xử lý khí thải (QĐ 917)' (3,485 tỷ) là chi tuân thủ/bắt buộc không tạo doanh thu ⇒ treatment phải CASH_OUTFLOW (D3), đang NPV0_BOOK
+dd_assumptions_lint: agents/Taylor/research/dd_upgrade_20261122/B4_assumptions_lint/trial/QTP_v1_20261117.json: 14 vi phạm · chế độ cảnh báo (rc=0)
+rc=0
+$ /usr/bin/python3 bin/dd_assumptions_lint.py trial/VCB_r1_20261117.json
+[CẢNH BÁO] S: (gốc): 'method_version' is a required property
+[CẢNH BÁO] S: (gốc): 'welfare_fund' is a required property
+[CẢNH BÁO] S: (gốc): 'tax' is a required property
+[CẢNH BÁO] S: (gốc): 'related_parties' is a required property
+[CẢNH BÁO] S: audit_opinion: 'auditor' is a required property
+[CẢNH BÁO] S: discount_rate: 'sensitivity_bp' is a required property
+[CẢNH BÁO] S: terminal: 'terminal_ronic' is a required property
+[CẢNH BÁO] L4: thiếu độ nhạy lãi huy động [-100, -50, 50, 100]bp
+[CẢNH BÁO] L5: method_version None ≥ M20261122 (D4) ⇒ phải báo hai đầu dải Ke 0.123–0.134 (band_ends_reported=true)
+[CẢNH BÁO] L7: capital_commitments_12m có 1 cam kết (0 tỷ) mà projects.items rỗng (none_reason='ngân hàng — không có dự án XDCB trong kh') ⇒ đối chiếu chéo thất bại
+[CẢNH BÁO] L9: chuỗi chứa dữ liệu thị trường 'ADV trung vi 3 nam = 175 ty' tại /liquidity_discount/source: …ADV trung vi 3 nam = 175 ty/phien (BQ Price x Volume, 17/11/2026; 1…
+dd_assumptions_lint: agents/Taylor/research/dd_upgrade_20261122/B4_assumptions_lint/trial/VCB_r1_20261117.json: 11 vi phạm · chế độ cảnh báo (rc=0)
+rc=0
+$ /usr/bin/python3 bin/dd_assumptions_lint.py trial/VLB_r1_20261122.json
+[CẢNH BÁO] S: (gốc): 'method_version' is a required property
+[CẢNH BÁO] S: (gốc): 'projects' is a required property
+[CẢNH BÁO] S: (gốc): 'audit_opinion' is a required property
+[CẢNH BÁO] S: (gốc): 'related_parties' is a required property
+[CẢNH BÁO] S: (gốc): 'capital_commitments_12m' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_now' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_date' is a required property
+[CẢNH BÁO] S: discount_rate: 'deposit_rate_source' is a required property
+[CẢNH BÁO] S: discount_rate: 'beta_passthrough' is a required property
+[CẢNH BÁO] S: discount_rate: 'sensitivity_bp' is a required property
+[CẢNH BÁO] S: sector: 'license_expiry' is a required property
+[CẢNH BÁO] S: share_base: 'bonus_esop' is a required property
+[CẢNH BÁO] S: terminal: 'moat_tier' is a required property
+[CẢNH BÁO] S: welfare_fund: 'annual_appropriation_pct_of_npat' is a required property
+[CẢNH BÁO] L4: thiếu độ nhạy lãi huy động [-100, -50, 50, 100]bp
+[CẢNH BÁO] L5: method_version None ≥ M20261122 (D4) ⇒ phải báo hai đầu dải Ke 0.123–0.134 (band_ends_reported=true)
+dd_assumptions_lint: agents/Taylor/research/dd_upgrade_20261122/B4_assumptions_lint/trial/VLB_r1_20261122.json: 16 vi phạm · chế độ cảnh báo (rc=0)
+rc=0

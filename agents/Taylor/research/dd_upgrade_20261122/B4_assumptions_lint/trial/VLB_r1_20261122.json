@@ -1,0 +1,13 @@
+{"_mapped_from": "agents/Taylor/research/dd_VLB_20261122/model/dcf_vlb_r1.py.bak + REPORT_r1.md (vòng 1). Khoá vắng = r1 không có.",
+ "schema_version": "dd_assumptions_v1", "ticker": "VLB", "dd_date": "2026-11-22", "rev": 1, "loai_hinh": "mo_giay_phep",
+ "share_base": {"shares_m": 46.72056, "source": "dcf_vlb_r1.py:8 [Q3 p22 23c]", "as_of_date": "2026-09-30"},
+ "welfare_fund": {"balance_deducted": {"value": 107.466, "source": "dcf_vlb_r1.py:12 [Q3 p2-3]"}, "source": "REPORT_r1.md:99"},
+ "tax": {"rate_path": [{"from_year": 2026, "rate": 0.2}], "source": "REPORT_r1.md:20 TNDN 20%"},
+ "working_capital": {"method": "balance_sheet_point", "nwc_bn": -64.3, "source": "dcf_vlb_r1.py:16-18 [Q3 p2-3]"},
+ "scenarios": {"items": [{"name": "xau", "side": "down", "p": 0.25}, {"name": "co_so", "side": "base", "p": 0.5}, {"name": "tot", "side": "up", "p": 0.25}]},
+ "discount_rate": {"r": 0.135, "band_ends_reported": false},
+ "terminal": {"terminal_ronic": "NOT_APPLICABLE_FINITE_LIFE"},
+ "liquidity_discount": {"basis": "independent_data_documented", "pct": null, "source": "dcf_vlb_r1.py:47-48 đọc px_vlb.csv (giá+KL 250 phiên) TRONG mô hình khoá để tính ADV — quy ước fleet SCL r3/TTA r3"},
+ "one_offs": {"items": [{"desc": "hoàn tiền cấp quyền nộp thừa (phi tiền mặt) ghi nhận Q2/26", "amount_bn": 343.93, "source": "REPORT_r1.md:66"}]},
+ "sector": {"reserves": {"value": "mỏ còn ~12–18 năm (ước lượng)", "source": "REPORT_r1.md:14 chưa có bảng giấy phép"}}
+}
