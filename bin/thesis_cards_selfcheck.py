@@ -30,9 +30,15 @@ print("held:", held)
 check("held non-empty (không im lặng rỗng)", bool(held))
 e1 = T.validate(doc, led, held)
 check("every held DISCRETIONARY_SPECIAL ticker has active card", not e1, "; ".join(e1[:3]))
-check("FPT,NNC,VGS đều có thẻ active+draft", all(
-    T.latest_cards(doc).get(t, {}).get("status") == "active" and T.latest_cards(doc)[t].get("draft_pending_user_review")
+# 22/11 23:28 user duyệt thẻ nháp (6) ⇒ rev2 active, KHÔNG còn cờ draft, có approved_by; NNC/VGS = value_long/user_decides
+check("FPT,NNC,VGS đều có thẻ active đã duyệt (không draft, có approved_by)", all(
+    T.latest_cards(doc).get(t, {}).get("status") == "active"
+    and not T.latest_cards(doc)[t].get("draft_pending_user_review")
+    and "decided_by: user" in str(T.latest_cards(doc)[t].get("approved_by"))
     for t in ("FPT", "NNC", "VGS")))
+check("NNC,VGS rev mới = value_long/user_decides", all(
+    T.latest_cards(doc)[t]["deal_type"] == "value_long" and T.latest_cards(doc)[t]["exit_policy"]["kind"] == "user_decides"
+    for t in ("NNC", "VGS")))
 
 
 def mut(name, fn, expect, held_=None):
@@ -43,7 +49,8 @@ def mut(name, fn, expect, held_=None):
 
 
 def c0(d, t="FPT"):
-    return next(c for c in d["cards"] if c["ticker"] == t)
+    # thẻ rev CAO NHẤT của mã (bản thắng) — mutation phải đánh vào bản đang hiệu lực
+    return max((c for c in d["cards"] if c["ticker"] == t), key=lambda c: c["rev"])
 
 
 mut("deal_type lạ", lambda d: c0(d).__setitem__("deal_type", "yolo"), "deal_type")
@@ -58,8 +65,8 @@ mut("dd_ref center lệch sổ giá", lambda d: c0(d)["dd_ref"].__setitem__("cen
 mut("dd_ref rev lệch sổ giá", lambda d: c0(d)["dd_ref"].__setitem__("rev", 1), "dd_ref.rev")
 mut("thesis >3 dòng", lambda d: c0(d).__setitem__("thesis", ["a", "b", "c", "d"]), "thesis")
 mut("drawdown pct≠15", lambda d: c0(d)["drawdown_review"].__setitem__("pct", 10), "drawdown_review")
-mut("rev nhảy cóc (append-only)", lambda d: c0(d).__setitem__("rev", 3), "rev không liên tục")
-mut("mã đang giữ không có thẻ", lambda d: d["cards"].remove(c0(d, "VGS")), "KHÔNG có thẻ active", held)
+mut("rev nhảy cóc (append-only)", lambda d: c0(d).__setitem__("rev", 9), "rev không liên tục")
+mut("mã đang giữ không có thẻ", lambda d: d.__setitem__("cards", [c for c in d["cards"] if c["ticker"] != "VGS"]), "KHÔNG có thẻ active", held)
 mut("thẻ closed ⇒ không tính active", lambda d: c0(d, "NNC").__setitem__("status", "closed"), "KHÔNG có thẻ active", held)
 # dd_ref lệch nhưng có stale_reason ⇒ qua
 d2 = copy.deepcopy(doc)
@@ -69,9 +76,9 @@ check("dd_ref lệch + stale_reason ⇒ qua", not any("dd_ref.center" in x for x
 # append rev2 hợp lệ ⇒ latest = rev2
 d3 = copy.deepcopy(doc)
 n = copy.deepcopy(c0(d3))
-n["rev"] = 2
+n["rev"] = c0(d3)["rev"] + 1
 d3["cards"].append(n)
-check("append rev2 ⇒ hợp lệ & thắng", not T.validate(d3, led, None) and T.latest_cards(d3)["FPT"]["rev"] == 2)
+check("append rev kế tiếp ⇒ hợp lệ & thắng", not T.validate(d3, led, None) and T.latest_cards(d3)["FPT"]["rev"] == n["rev"])
 # sổ lô lỗi ⇒ fallback degraded có nêu lý do thật
 def boom(a, b):
     raise RuntimeError("broker down")
