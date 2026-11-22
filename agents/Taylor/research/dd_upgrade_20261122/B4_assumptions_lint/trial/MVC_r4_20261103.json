@@ -1,0 +1,58 @@
+{
+ "_mapped_from": "agents/Taylor/research/dd_MVC_20261103/REPORT_r4_20261103.md (rev4 sổ, trước luật 03/11 17:06). Lớp trọng số = 3 đường giá (W 25/50/20/5 là lớp kịch bản NNC, không ánh xạ). Khoá vắng = r4 không có.",
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "MVC",
+ "dd_date": "2026-11-03",
+ "rev": 4,
+ "loai_hinh": "mo_giay_phep",
+ "projects": {
+  "items": [
+   {
+    "name": "Chương trình mỏ mới (2 mỏ đấu giá)",
+    "total_bn": {
+     "value": 1500,
+     "source": "REPORT_r4:114 vốn mỏ mới ≤1.500 tỷ"
+    },
+    "spent_bn": {
+     "value": 431.9,
+     "source": "REPORT_r4:47 chi phí chìm"
+    },
+    "remaining_bn": {
+     "value": 1068.1,
+     "source": "tính 1.500 − 431,9"
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "CASH_OUTFLOW",
+    "source": "sổ rev4→5: r4 tính chương trình mỏ mới −495…−745 tỷ ở base"
+   }
+  ]
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "flat",
+    "side": "down",
+    "p": 0.1
+   },
+   {
+    "name": "g2031",
+    "side": "base",
+    "p": 0.5
+   },
+   {
+    "name": "real",
+    "side": "up",
+    "p": 0.4
+   }
+  ],
+  "asymmetry_reason": "REPORT_r4:64-66: flat 10% = gấp đôi tần suất thực nghiệm 5%; real 40% thấp hơn g2031 vì đỉnh 2026 cao"
+ },
+ "discount_rate": {
+  "r": 0.13,
+  "sensitivity_bp": [],
+  "band_ends_reported": false
+ },
+ "sector": {}
+}

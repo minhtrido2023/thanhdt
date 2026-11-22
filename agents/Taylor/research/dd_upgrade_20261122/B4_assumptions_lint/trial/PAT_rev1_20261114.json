@@ -1,0 +1,16 @@
+{"_mapped_from": "agents/Taylor/research/dd_PAT_20261114/assumptions_PAT.md mục A–E (rev1; REV2 bỏ qua). Khoá vắng = rev1 không có.",
+ "schema_version": "dd_assumptions_v1", "ticker": "PAT", "dd_date": "2026-11-14", "rev": 1, "loai_hinh": "san_xuat_khac",
+ "share_base": {"shares_m": 25.0, "source": "assumptions_PAT.md A3 (TM17)", "as_of_date": "2026-09-30"},
+ "projects": {"items": [], "none_reason": "B8: không có dự án mới (XDCB dở 4,26 tỷ)"},
+ "welfare_fund": {"balance_deducted": {"value": 76.69, "source": "C3 tiền ròng trừ quỹ KTPL"}, "source": "assumptions_PAT.md C3"},
+ "tax": {"rate_path": [{"from_year": 2026, "rate": 0.05}, {"from_year": 2031, "rate": 0.10}, {"from_year": 2033, "rate": 0.20}], "source": "assumptions_PAT.md B4 (TM27)"},
+ "working_capital": {"method": "zero_change_base", "nwc_bn": 53, "source": "assumptions_PAT.md B6 (BCĐKT 30/9)"},
+ "scenarios": {"items": [{"name": "xau", "side": "down", "p": 0.30}, {"name": "co_so", "side": "base", "p": 0.50}, {"name": "tot", "side": "up", "p": 0.20}],
+   "asymmetry_reason": "D1: P4 đang ở p90 chế độ 2023+, Bobby P(giảm 12T)=0,66; nguồn quặng ADMIN_GATED"},
+ "discount_rate": {"r": 0.135, "deposit_rate_now": 0.074, "deposit_rate_date": "2026-11-14", "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate('2026-11-14') (C1)", "beta_passthrough": 1.0, "sensitivity_bp": [], "band_ends_reported": false},
+ "terminal": {"moat_tier": "NARROW", "terminal_ronic": "EQUALS_KE", "g": 0.02},
+ "liquidity_discount": {"basis": "sensitivity_only", "pct": 0.10, "source": "C2: 10% ước lượng, không có mô hình Amihud; A2: BQ dùng NP/Revenue, ADV, giá P4"},
+ "audit_opinion": {"status": "qualified", "fy": 2025, "auditor": "UHY", "interim_review": "reviewed_qualified", "source": "assumptions_PAT.md A1"},
+ "one_offs": {"items": [], "none_reason": "B1: không có (LN khác ≈ 0; truy thu thuế 2025 6,79 tỷ nhỏ)", "searched": ["KQKD 12 quý"]},
+ "sector": {}
+}

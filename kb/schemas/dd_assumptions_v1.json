@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dd_assumptions_v1",
+  "title": "DD assumptions lock v1 (B4, 22/11/2026)",
+  "description": "File khoá giả định MÙ GIÁ cho 1 lượt DD. Khoá bắt buộc theo đúng các lớp lỗi lặp (dd-process-review-20261122.md F11/F13/F16, P1-1, P1-4). KHÔNG chứa dữ liệu thị trường (giá, PE/PB, ADV, KL) — thanh khoản/Hard Gate chạy ở bước riêng sau khoá. Hằng Ke đọc từ kb/config/dd_ke_bands.json; method_version từ kb/config/dd_method_versions.json. Giá trị không công bố ⇒ {\"value\":\"khong_cong_bo\",\"searched\":[...]}, không bịa.",
+  "type": "object",
+  "required": ["schema_version", "ticker", "dd_date", "rev", "loai_hinh", "method_version",
+               "share_base", "projects", "welfare_fund", "tax", "working_capital", "scenarios",
+               "discount_rate", "terminal", "liquidity_discount", "audit_opinion",
+               "related_parties", "one_offs", "capital_commitments_12m", "sector"],
+  "properties": {
+    "schema_version": {"const": "dd_assumptions_v1"},
+    "ticker": {"type": "string", "pattern": "^[A-Z0-9]{3}$"},
+    "dd_date": {"type": "string", "pattern": "^20[0-9]{2}-[01][0-9]-[0-3][0-9]$"},
+    "rev": {"type": "integer", "minimum": 1},
+    "loai_hinh": {"enum": ["bank", "bds_kcn", "dien_ppa", "mo_giay_phep", "san_xuat_khac"]},
+    "method_version": {"type": "string", "pattern": "^M[0-9]{8}[A-Z]?$"},
+    "units": {"type": "string"},
+    "sources": {"type": "object", "description": "khoá ngắn → đường dẫn file nguồn (BCTC, NQ, CBTT)", "additionalProperties": {"type": "string"}},
+
+    "share_base": {
+      "type": "object",
+      "required": ["shares_m", "source", "as_of_date", "bonus_esop"],
+      "properties": {
+        "shares_m": {"type": "number", "exclusiveMinimum": 0},
+        "source": {"$ref": "#/$defs/src"},
+        "as_of_date": {"$ref": "#/$defs/date"},
+        "treasury_excluded": {"type": "boolean"},
+        "bonus_esop": {
+          "type": "object",
+          "required": ["status", "source"],
+          "properties": {
+            "status": {"enum": ["none", "pending_not_in_base", "pending_in_base", "applied", "khong_cong_bo"]},
+            "ratio": {"type": "number", "minimum": 0},
+            "source": {"$ref": "#/$defs/src"},
+            "note": {"type": "string"}
+          }
+        }
+      }
+    },
+
+    "projects": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "items": {"type": "array", "items": {"$ref": "#/$defs/project"}},
+        "none_reason": {"type": "string", "minLength": 3}
+      },
+      "if": {"properties": {"items": {"maxItems": 0}}},
+      "then": {"required": ["none_reason"]}
+    },
+
+    "welfare_fund": {
+      "type": "object",
+      "description": "Quỹ khen thưởng phúc lợi: (a) số dư trừ khỏi vốn chủ/tiền ròng; (b) tỉ lệ trích hằng năm trừ khỏi LNST khi tính dòng tiền cổ đông (lỗi PAT r1, VLB r1).",
+      "required": ["balance_deducted", "annual_appropriation_pct_of_npat", "source"],
+      "properties": {
+        "balance_deducted": {"$ref": "#/$defs/num_or_kcb"},
+        "annual_appropriation_pct_of_npat": {"$ref": "#/$defs/num_or_kcb"},
+        "applied_to_cashflow": {"type": "boolean"},
+        "source": {"$ref": "#/$defs/src"}
+      }
+    },
+
+    "tax": {
+      "type": "object",
+      "required": ["rate_path", "source"],
+      "properties": {
+        "rate_path": {"type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["from_year", "rate"],
+          "properties": {"from_year": {"type": "integer"}, "rate": {"type": "number", "minimum": 0, "maximum": 0.5}}}},
+        "source": {"$ref": "#/$defs/src"},
+        "note": {"type": "string"}
+      }
+    },
+
+    "working_capital": {
+      "type": "object",
+      "required": ["method", "source"],
+      "properties": {
+        "method": {"enum": ["normalized_pct_revenue", "normalized_days", "balance_sheet_point", "zero_change_base", "not_applicable_bank"]},
+        "nwc_bn": {"type": "number"},
+        "normalization_window": {"type": "string"},
+        "source": {"$ref": "#/$defs/src"}
+      }
+    },
+
+    "scenarios": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "items": {"type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["name", "side", "p"],
+          "properties": {"name": {"type": "string"}, "side": {"enum": ["down", "base", "up"]},
+                         "p": {"type": "number", "minimum": 0, "maximum": 1}, "basis": {"type": "string"}}}},
+        "asymmetry_reason": {"type": "string", "minLength": 10}
+      }
+    },
+
+    "discount_rate": {
+      "type": "object",
+      "required": ["r", "deposit_rate_now", "deposit_rate_date", "deposit_rate_source", "beta_passthrough", "sensitivity_bp", "band_ends_reported"],
+      "properties": {
+        "r": {"type": "number", "minimum": 0.05, "maximum": 0.25},
+        "deposit_rate_now": {"type": "number", "minimum": 0, "maximum": 0.2},
+        "deposit_rate_date": {"$ref": "#/$defs/date"},
+        "deposit_rate_source": {"$ref": "#/$defs/src"},
+        "beta_passthrough": {"type": "number", "minimum": 0, "maximum": 1.5},
+        "sensitivity_bp": {"type": "array", "items": {"type": "integer"}},
+        "band_ends_reported": {"type": "boolean"},
+        "override_reason": {"type": "string", "minLength": 10},
+        "finite_life_rate_note": {"type": "string"}
+      }
+    },
+
+    "terminal": {
+      "type": "object",
+      "required": ["moat_tier", "terminal_ronic"],
+      "properties": {
+        "moat_tier": {"enum": ["WIDE", "NARROW", "NONE"]},
+        "terminal_ronic": {"enum": ["EQUALS_KE", "MOAT_WIDE_WITH_MECHANISM", "NOT_APPLICABLE_FINITE_LIFE"]},
+        "mechanism_reason": {"type": "string", "minLength": 10},
+        "g": {"type": "number", "minimum": -0.05, "maximum": 0.12}
+      },
+      "allOf": [
+        {"if": {"required": ["terminal_ronic"], "properties": {"terminal_ronic": {"const": "MOAT_WIDE_WITH_MECHANISM"}}},
+         "then": {"required": ["mechanism_reason"], "properties": {"moat_tier": {"const": "WIDE"}}}}
+      ]
+    },
+
+    "liquidity_discount": {
+      "type": "object",
+      "description": "Chỉ khai CƠ SỞ (phương pháp + nguồn). Số ADV/KL/giá KHÔNG được nằm trong file khoá mù giá — tính ở bước riêng sau khoá (chỉnh (1) của Mike).",
+      "required": ["basis", "source"],
+      "properties": {
+        "basis": {"enum": ["computed_after_lock", "independent_data_documented", "sensitivity_only"]},
+        "pct": {"type": ["number", "null"], "minimum": 0, "maximum": 0.5},
+        "position_size_note": {"type": "string"},
+        "source": {"$ref": "#/$defs/src"}
+      }
+    },
+
+    "audit_opinion": {
+      "type": "object",
+      "required": ["status", "source"],
+      "properties": {
+        "status": {"enum": ["unqualified", "unqualified_with_emphasis", "qualified", "adverse", "disclaimer", "audited_fy_missing"]},
+        "fy": {"type": "integer"},
+        "auditor": {"type": "string"},
+        "emphasis_or_basis": {"type": "string"},
+        "interim_review": {"enum": ["none", "reviewed_unqualified", "reviewed_qualified", "not_reviewed"]},
+        "source": {"$ref": "#/$defs/src"}
+      },
+      "allOf": [
+        {"if": {"required": ["status"], "properties": {"status": {"not": {"const": "audited_fy_missing"}}}}, "then": {"required": ["fy", "auditor"]}},
+        {"if": {"required": ["status"], "properties": {"status": {"enum": ["unqualified_with_emphasis", "qualified", "adverse", "disclaimer"]}}}, "then": {"required": ["emphasis_or_basis"]}}
+      ]
+    },
+
+    "related_parties": {"$ref": "#/$defs/list_or_none"},
+    "one_offs": {"$ref": "#/$defs/list_or_none"},
+    "capital_commitments_12m": {
+      "allOf": [{"$ref": "#/$defs/list_or_none"}],
+      "description": "Cam kết vốn 12 tháng theo NQ ĐHĐCĐ/HĐQT/CBTT (nguồn văn bản). Rỗng ⇒ none_reason + searched."
+    },
+
+    "sector": {"type": "object"}
+  },
+
+  "allOf": [
+    {"if": {"required": ["loai_hinh"], "properties": {"loai_hinh": {"const": "bank"}}},
+     "then": {"properties": {"sector": {"$ref": "#/$defs/sector_bank"}}}},
+    {"if": {"required": ["loai_hinh"], "properties": {"loai_hinh": {"const": "mo_giay_phep"}}},
+     "then": {"properties": {"sector": {"$ref": "#/$defs/sector_mo"}}}},
+    {"if": {"required": ["loai_hinh"], "properties": {"loai_hinh": {"const": "dien_ppa"}}},
+     "then": {"properties": {"sector": {"$ref": "#/$defs/sector_dien"}}}},
+    {"if": {"required": ["loai_hinh"], "properties": {"loai_hinh": {"const": "bds_kcn"}}},
+     "then": {"properties": {"sector": {"$ref": "#/$defs/sector_bds"}}}}
+  ],
+
+  "$defs": {
+    "date": {"type": "string", "pattern": "^20[0-9]{2}-[01][0-9]-[0-3][0-9]$"},
+    "src": {"type": "string", "minLength": 3},
+    "kcb": {
+      "type": "object", "required": ["value", "searched"],
+      "properties": {"value": {"const": "khong_cong_bo"}, "searched": {"type": "array", "minItems": 1, "items": {"type": "string"}}}
+    },
+    "num_or_kcb": {"oneOf": [
+      {"type": "number"},
+      {"type": "object", "required": ["value", "source"], "properties": {"value": {"type": "number"}, "source": {"type": "string", "minLength": 3}}},
+      {"$ref": "#/$defs/kcb"}
+    ]},
+    "str_or_kcb": {"oneOf": [
+      {"type": "object", "required": ["value", "source"], "properties": {"value": {"type": ["string", "number"]}, "source": {"type": "string", "minLength": 3}}},
+      {"$ref": "#/$defs/kcb"}
+    ]},
+    "project": {
+      "type": "object",
+      "required": ["name", "spent_bn", "remaining_bn", "generates_revenue", "mandatory", "classification", "treatment", "source"],
+      "properties": {
+        "name": {"type": "string"},
+        "total_bn": {"$ref": "#/$defs/num_or_kcb"},
+        "spent_bn": {"$ref": "#/$defs/num_or_kcb"},
+        "remaining_bn": {"$ref": "#/$defs/num_or_kcb"},
+        "generates_revenue": {"type": "boolean"},
+        "mandatory": {"type": "boolean", "description": "bắt buộc theo luật/giấy phép/quy chuẩn (môi trường, an toàn)"},
+        "classification": {"enum": ["growth", "compliance", "maintenance"]},
+        "treatment": {"enum": ["NPV0_BOOK", "CASH_OUTFLOW", "SCENARIO_ONLY"]},
+        "independent_basis": {"type": "string", "description": "bắt buộc nếu treatment lệch NPV=0 cho dự án growth"},
+        "source": {"type": "string", "minLength": 3}
+      }
+    },
+    "list_or_none": {
+      "type": "object", "required": ["items"],
+      "properties": {
+        "items": {"type": "array", "items": {"type": "object", "required": ["desc", "source"],
+                  "properties": {"desc": {"type": "string"}, "amount_bn": {"type": "number"}, "source": {"type": "string", "minLength": 3}}}},
+        "none_reason": {"type": "string", "minLength": 3},
+        "searched": {"type": "array", "items": {"type": "string"}}
+      },
+      "if": {"properties": {"items": {"maxItems": 0}}},
+      "then": {"required": ["none_reason", "searched"], "properties": {"searched": {"minItems": 1}}}
+    },
+    "sector_bank": {"type": "object", "required": ["car", "npl_group2_ratio", "npl_coverage", "ldr", "casa"],
+      "properties": {"car": {"$ref": "#/$defs/num_or_kcb"}, "npl_group2_ratio": {"$ref": "#/$defs/num_or_kcb"},
+                     "npl_coverage": {"$ref": "#/$defs/num_or_kcb"}, "ldr": {"$ref": "#/$defs/num_or_kcb"}, "casa": {"$ref": "#/$defs/num_or_kcb"}}},
+    "sector_mo": {"type": "object", "required": ["reserves", "license_expiry"],
+      "properties": {"reserves": {"$ref": "#/$defs/str_or_kcb"}, "license_expiry": {"$ref": "#/$defs/str_or_kcb"}}},
+    "sector_dien": {"type": "object", "required": ["ppa_expiry", "ppa_price"],
+      "properties": {"ppa_expiry": {"$ref": "#/$defs/str_or_kcb"}, "ppa_price": {"$ref": "#/$defs/str_or_kcb"}}},
+    "sector_bds": {"type": "object", "required": ["land_bank", "commitments"],
+      "properties": {"land_bank": {"$ref": "#/$defs/str_or_kcb"}, "commitments": {"$ref": "#/$defs/str_or_kcb"}}}
+  }
+}

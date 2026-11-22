@@ -1,0 +1,17 @@
+{"_mapped_from": "agents/Taylor/research/dd_QTP_20261117/model/qtp_model_v1.py + REPORT_v1.md (vòng 1, trước khi user chỉ ra dự án khí thải). Chỉ điền khoá CÓ trong nguồn; khoá vắng = khoá gốc không có.",
+ "schema_version": "dd_assumptions_v1", "ticker": "QTP", "dd_date": "2026-11-17", "rev": 1, "loai_hinh": "dien_ppa",
+ "share_base": {"shares_m": 450.0, "source": "qtp_model_v1.py:3 SH=450.0 (không dẫn TM)", "as_of_date": "2026-09-30"},
+ "projects": {"items": [{"name": "Nâng cấp hệ thống xử lý khí thải (QĐ 917)", "total_bn": {"value": 3485, "source": "REPORT_v1.md:107 vay 2.787,9 = 80% TMĐT"},
+   "spent_bn": 0, "remaining_bn": {"value": 3485, "source": "REPORT_v1.md:107"}, "generates_revenue": false, "mandatory": true,
+   "treatment": "NPV0_BOOK", "source": "REPORT_v1.md:105-107,242 — mô hình capex=15/năm phẳng, dự án không vào dòng tiền; vượt dự toán chỉ ở kịch bản tiêu cực"}]},
+ "tax": {"rate_path": [{"from_year": 2027, "rate": 0.2}], "source": "qtp_model_v1.py:9 TAX_ADJ quy về 20% (ước lượng)"},
+ "working_capital": {"method": "balance_sheet_point", "nwc_bn": 2259, "source": "qtp_model_v1.py:21 AR+inv+16,66−liab (BCTC 30/9)"},
+ "scenarios": {"items": [{"name": "bad", "side": "down", "p": 0.25}, {"name": "base", "side": "base", "p": 0.5}, {"name": "good", "side": "up", "p": 0.25}]},
+ "discount_rate": {"r": 0.135, "sensitivity_bp": [-100, -50, 50, 100], "band_ends_reported": false},
+ "terminal": {"terminal_ronic": "NOT_APPLICABLE_FINITE_LIFE"},
+ "liquidity_discount": {"basis": "sensitivity_only", "pct": null, "source": "qtp_model_v1.py:50 CK 5/10/15%"},
+ "audit_opinion": {"status": "unqualified", "fy": 2025, "auditor": "UHY", "source": "REPORT_v1.md:39 fy2025_kt_vi.pdf"},
+ "one_offs": {"items": [{"desc": "chênh lệch tỷ giá FY25 663 − lỗ CLTG 71,3, sau thuế", "amount_bn": 473.4, "source": "qtp_model_v1.py:7 (giải trình FY25)"}]},
+ "capital_commitments_12m": {"items": [{"desc": "vay 2.787,9 tỷ dự án khí thải 2027–29", "amount_bn": 2787.9, "source": "QĐ 917 15/6/2026 (REPORT_v1.md:21,107)"}]},
+ "sector": {}
+}

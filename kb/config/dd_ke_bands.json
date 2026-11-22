@@ -1,0 +1,20 @@
+{
+  "_doc": "Hằng chi phí vốn DD — dd_assumptions_lint.py đọc ở đây, KHÔNG hardcode trong từng assumptions.json (chỉnh (2) của Mike, dd-process-upgrade-plan-20261122.md). Đổi số ở đây = đổi luật ⇒ cần user duyệt + thêm mốc vào dd_method_versions.json.",
+  "version": "2026-11-22",
+  "anchor": {
+    "r": 0.135,
+    "date": "2026-11-03",
+    "deposit_rate_12m_effective": 0.074,
+    "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate = max(Big-4 12M, CCTG 12M) = 7,40% (CCTG 12M 02/11) tại 03/11 — ghi ở agents/Taylor/research/dd_VCB_20261117/assumptions_VCB_20261117.json valuation.Ke_anchor_note và dd_PAT_20261114/assumptions_PAT.md C1",
+    "rule_source": "~/.claude/skills/due-diligence/SKILL.md dòng 36 (luật user 2026-11-03 22:27 ICT)"
+  },
+  "beta_passthrough_default": 1.0,
+  "beta_passthrough_sensitivity": [0.5, 1.0],
+  "r_tolerance_bp": 5,
+  "required_sensitivity_bp": [-100, -50, 50, 100],
+  "ke_band_low": 0.123,
+  "ke_band_high": 0.134,
+  "ke_band_wide": [0.105, 0.140],
+  "ke_band_source": "SKILL.md dòng 35 (user chỉnh 2026-10-30, nghiên cứu erp_domestic_20261030: Ke nội địa β1,1 = 12,3–13,4%, dải rộng 10,5–14,0%)",
+  "band_ends_rule_source": "D4 user duyệt 22/11/2026 19:07 (kb/projects/dd-upgrade-final-action-20261122.md dòng 70): giữ r 13,5% + báo thêm hai đầu dải 12,3–13,4%"
+}

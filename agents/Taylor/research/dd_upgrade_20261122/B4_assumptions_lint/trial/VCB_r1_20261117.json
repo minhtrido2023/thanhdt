@@ -1,0 +1,106 @@
+{
+ "_mapped_from": "agents/Taylor/research/dd_VCB_20261117/assumptions_VCB_20261117.json (khoá md5 85d41e08f8 theo sổ). Tỉ số ngành TÍNH từ bs_30_09_2026 trong khoá; chuỗi Ke/liquidity chép nguyên văn note khoá. Khoá vắng = khoá gốc không có.",
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "VCB",
+ "dd_date": "2026-11-17",
+ "rev": 1,
+ "loai_hinh": "bank",
+ "share_base": {
+  "shares_m": 8355.675094,
+  "source": "src/VCB_BCTC_Q3_2026_HN.pdf (BCTC hop nhat Q3/2026, ky 30/10",
+  "as_of_date": "2026-09-30",
+  "bonus_esop": {
+   "status": "pending_not_in_base",
+   "ratio": 0.1279,
+   "source": "bao chi DHDCD 24/04/2026 (baodautu, nhadautu, doanhnhan.baophapluat) - CHUA doi chieu nghi quyet goc"
+  }
+ },
+ "projects": {
+  "items": [],
+  "none_reason": "ngân hàng — không có dự án XDCB trong khoá"
+ },
+ "working_capital": {
+  "method": "not_applicable_bank",
+  "source": "ngân hàng"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "bear",
+    "side": "down",
+    "p": 0.25
+   },
+   {
+    "name": "base",
+    "side": "base",
+    "p": 0.5
+   },
+   {
+    "name": "bull",
+    "side": "up",
+    "p": 0.25
+   }
+  ]
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-17",
+  "deposit_rate_source": "r 13,5% neo 03/11/2026 (luat user 2026-11-03); lai huy dong 12T hieu dung deposit_rate_vn.effective_deposit_rate = 7,40% (CCTG 12M 02/11) tai 03/11 va 17/11 => khong dieu chinh; beta pass-through 1",
+  "beta_passthrough": 1.0,
+  "band_ends_reported": false
+ },
+ "terminal": {
+  "moat_tier": "NARROW",
+  "g": 0.07
+ },
+ "liquidity_discount": {
+  "basis": "independent_data_documented",
+  "pct": 0.0,
+  "source": "ADV trung vi 3 nam = 175 ty/phien (BQ Price x Volume, 17/11/2026; 153 neu Close x Volume; 281 trung vi 1 nam); tham gia 5% ~ 8,75 ty/phien => chiet khau 0"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "source": "BCTC kiem toan 2025 hop nhat (theo dispatch Mike 22/11, chua render lai tu src/VCB_BCTC_2025_KT_HN.pdf)"
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "lãi đánh giá lại khi hợp nhất",
+    "amount_bn": 3171.282,
+    "source": "Lai thuan HD khac 9T tang 3.171 ty do danh gia lai gia tri hop ly khi hop nhat k"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "phát hành riêng lẻ tối đa 6,5%",
+    "source": "bao chi DHDCD 24/04/2026 (baodautu, nhadautu, doanhnhan.baophapluat) - CHUA doi chieu nghi quyet goc"
+   }
+  ]
+ },
+ "sector": {
+  "car": {
+   "value": 0.111,
+   "source": "cet1_target_note: báo chí 1 nguồn"
+  },
+  "npl_group2_ratio": {
+   "value": 0.00275,
+   "source": "tính group2/loans_gross"
+  },
+  "npl_coverage": {
+   "value": 2.432,
+   "source": "tính loan_prov_total/(g3+g4+g5)"
+  },
+  "ldr": {
+   "value": 1.019,
+   "source": "tính loans_gross/cust_deposits (thô, không theo TT22)"
+  },
+  "casa": {
+   "value": 0.318,
+   "source": "tính casa_nonterm/cust_deposits"
+  }
+ }
+}
