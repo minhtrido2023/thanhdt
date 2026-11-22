@@ -25,7 +25,7 @@ def run(args, bin_, extra=None):
     return subprocess.run([sys.executable, RUN] + args, capture_output=True, text=True, env=env)
 
 
-GOOD = 'echo "phan tich..."\ncat <<\'X\'\n<<<VERDICT_JSON>>>\n{"case_topic":"T","verdict":"REFUTED","confidence":"medium","summary":"ket luan thu",}\n<<<END_VERDICT>>>\nX\n'
+GOOD = 'cat <<\'X\'\n{"type":"result","result":"phan tich...\\n<<<VERDICT_JSON>>>\\n{\\"case_topic\\":\\"T\\",\\"verdict\\":\\"REFUTED\\",\\"confidence\\":\\"medium\\",\\"summary\\":\\"ket luan thu\\",}\\n<<<END_VERDICT>>>","total_cost_usd":0.12}\nX\n'
 with tempfile.TemporaryDirectory() as td:
     AGDEF = os.path.join(td, "agent.md")
     open(AGDEF, "w").write("---\nname: x\n---\nVai tro skeptic.\n")
@@ -39,9 +39,15 @@ with tempfile.TemporaryDirectory() as td:
     chk("verdict/round/md5 đúng", rec.get("verdict") == "REFUTED" and rec.get("round") == 1
         and rec.get("report_md5") == hashlib.md5(b"# bao cao\n").hexdigest() and len(rec.get("brief_md5", "")) == 32
         and rec.get("started_at_ict", "").endswith("+07:00") and rec.get("verdict_raw_path", "").endswith("r1_raw.md"))
+    chk("cost_usd=0.12 lấy từ total_cost_usd của JSON envelope", rec.get("cost_usd") == 0.12)
     chk("không còn file .tmp_ sót", not [f for f in os.listdir(os.path.join(d, "skeptic")) if f.startswith(".tmp_")])
     r = run(["--dir", d, "--report", rep], good)
     chk("lần 2 ⇒ round tăng r2.json", r.returncode == 0 and os.path.isfile(os.path.join(d, "skeptic", "r2.json")))
+    plain = stub(td, "plain.sh", "cat <<'X'\n<<<VERDICT_JSON>>>\n{\"verdict\":\"CONFIRMED\"}\n<<<END_VERDICT>>>\nX\n")
+    r = run(["--dir", d, "--report", rep, "--round", "7"], plain)
+    rp = json.load(open(os.path.join(d, "skeptic", "r7.json"))) if r.returncode == 0 else {}
+    chk("stdout text thô (không envelope) vẫn parse, cost_usd=null", rp.get("verdict") == "CONFIRMED" and rp.get("cost_usd") is None and "cost_usd" in rp)
+    os.remove(os.path.join(d, "skeptic", "r7.json")); os.remove(os.path.join(d, "skeptic", "r7_raw.md"))
     r = run(["--dir", d, "--report", rep, "--round", "1"], good)
     chk("--round trùng file có sẵn bị từ chối (rc=2), không ghi đè", r.returncode == 2)
     before = sorted(os.listdir(os.path.join(d, "skeptic")))
