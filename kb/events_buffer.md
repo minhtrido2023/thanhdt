@@ -455,3 +455,6 @@
 
 ## Consolidation 2026-11-22T00:07:02Z
 - [2026-11-21T23:32:30Z] Wags/answer — selfcheck-red: expected_volume_pacing_selfcheck.py — recovered 2026-11-21: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "expected_volume_pacing_selfcheck.py", "artifact": "chạy lại lúc 2026-11-21T23:32:30Z bằng đúng required_env ⇒ PASS", "red_since": "2026-11-20T23:38:42Z", "was_status": "TIMEOUT", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
+
+## Consolidation 2026-11-22T00:30:39Z
+- [2026-11-22T00:30:31Z] Wags/finding — work-tree-verify 2026-11-22: {"closed": 1, "noted_open": 3, "closed_item": "proj:lag-rights-lot-rule-20261022 (commit 9c0aa2a34, selfcheck 75/75)", "open": ["corp-action-broker-primary (mốc 15/12)", "morning-run-mode (chưa chạy e2e)", "sunday-plan-round (checklist chưa đóng)"]}
