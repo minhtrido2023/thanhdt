@@ -84,5 +84,17 @@ def boom(a, b):
     raise RuntimeError("broker down")
 h2, s2, er2 = T.held_discretionary(lot_fn=boom)
 check("sổ lô lỗi ⇒ degraded + lý do thật", s2.startswith("degraded") and any("broker down" in x for x in er2), s2)
+# fallback degraded KHÔNG phụ thuộc exit-rules (file có thể rỗng từ 22/11): trỏ EXIT_RULES vào file positions=[]
+import json as _json, tempfile as _tf
+with _tf.NamedTemporaryFile("w", suffix=".json", delete=False) as _f:
+    _json.dump({"positions": []}, _f)
+_old = T.EXIT_RULES
+T.EXIT_RULES = _f.name
+try:
+    h3, s3, er3 = T.held_discretionary(lot_fn=boom)
+finally:
+    T.EXIT_RULES = _old
+    os.unlink(_f.name)
+check("degraded + exit-rules RỖNG ⇒ held vẫn có FPT/NNC/VGS (nguồn tên = thẻ)", all(t in h3 for t in ("FPT", "NNC", "VGS")), f"{sorted(h3)} | {s3}")
 print(f"\n{'ALL PASS' if not fails else 'FAILED: ' + str(fails)}  (TZ={os.environ.get('TZ')!r})")
 sys.exit(1 if fails else 0)

@@ -533,6 +533,22 @@ def test_executor():
     check("E6b ATC: không sàn ⇒ tới bước đặt ATC (chứng minh ngược)", res0 == "REACHED")
 
 
+def test_empty_positions():
+    """22/11/2026: mọi mã DISC được miễn exit cố định ⇒ rules file có positions=[] — KHÔNG phải lỗi, không chặn gì."""
+    print("== positions=[] (sleeve miễn exit cố định) ==")
+    import tempfile
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+        json.dump({"version": 1, "positions": []}, f)
+    old = aei.DISC_RULES_PATH
+    aei.DISC_RULES_PATH = f.name
+    try:
+        ents, errs = aei._load_disc_rules(ACCOUNT)
+    finally:
+        aei.DISC_RULES_PATH = old
+        os.unlink(f.name)
+    check("positions=[] ⇒ ([], []) không lỗi, không chặn", ents == [] and errs == [], f"{ents} {errs}")
+
+
 def run_mutants():
     print("== MUTANTS: mỗi đột biến phải làm selfcheck ĐỎ ==")
     for mid in MUTANTS:
@@ -547,6 +563,7 @@ def main():
     test_rules()
     test_injector()
     test_null_max_sessions()
+    test_empty_positions()
     test_executor()
     if not os.environ.get("DISC_MUTANT") and not os.environ.get("DISC_NO_MUTANTS"):
         run_mutants()

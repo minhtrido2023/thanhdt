@@ -17,7 +17,7 @@ WC = "/home/trido/thanhdt/WorkingClaude"
 CARDS = os.path.join(MIKE, "kb", "thesis_cards.json")
 LEDGER = os.path.join(MIKE, "kb", "dd_price_zones.json")
 EXEC_DIR = os.environ.get("TC_EXEC_DIR") or os.path.join(WC, "data", "execution_logs")
-EXIT_RULES = os.path.join(WC, "data", "discretionary_exit_rules.json")
+EXIT_RULES = os.environ.get("TC_EXIT_RULES") or os.path.join(WC, "data", "discretionary_exit_rules.json")
 DEAL_TYPES = ("value_long", "event_trade", "fixed_rules")
 MS_STATUS = ("pending", "checked_ok", "checked_bad", "waived")
 ACCOUNTS = ("SpaceX", "ZaloPay")
@@ -218,6 +218,11 @@ def held_discretionary(lot_fn=None, fallback_tickers=None):
         errs.append(f"book_lot_snapshot lỗi: {type(e).__name__}: {e}")
     pos, _, fname = raw_positions()
     names = set(fallback_tickers or [])
+    # nguồn tên THỨ HAI = thẻ active (file exit-rules có thể RỖNG từ 22/11 khi mọi mã được miễn exit cố định)
+    try:
+        names |= set(latest_cards(read_json(CARDS)))
+    except Exception as e:  # noqa: BLE001
+        errs.append(f"không đọc sổ thẻ cho fallback: {type(e).__name__}: {e}")
     try:
         names |= {p["ticker"] for p in read_json(EXIT_RULES).get("positions", [])}
     except Exception as e:  # noqa: BLE001
