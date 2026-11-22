@@ -430,8 +430,11 @@ def run():
            "QQ6": {"qty": 200.0, "marketPrice": 8300.0, "avg_cost": 10000.0, "sellable": 200},
            "QQ7": {"qty": 100.0, "marketPrice": 8100.0, "avg_cost": 10000.0, "sellable": 100},
            "QQ8": {"qty": 100.0, "marketPrice": 20000.0, "avg_cost": None, "sellable": 100},
-           "QQ9": {"qty": 100.0, "marketPrice": 5000.0, "avg_cost": None, "sellable": 100}}
-    journal = {"QQ5": "CAPIT", "QQ6": "DISCRETIONARY_SPECIAL", "QQ8": "LAG"}     # còn lại: BAL / PARK
+           "QQ9": {"qty": 100.0, "marketPrice": 5000.0, "avg_cost": None, "sellable": 100},
+           # QQA (CAPIT, §21 −18,5% nhưng sổ broker −17,0%): thay vai QQ6 cũ — fixture DUY NHẤT phân biệt cơ sở §21
+           # vs sổ broker cho sleeve CÓ ngưỡng nhưng KHÔNG có lệnh tự động (Discretionary đã gỡ ngưỡng 22/11/2026)
+           "QQA": {"qty": 100.0, "marketPrice": 8300.0, "avg_cost": 10000.0, "sellable": 100}}
+    journal = {"QQ5": "CAPIT", "QQ6": "DISCRETIONARY_SPECIAL", "QQ8": "LAG", "QQA": "CAPIT"}     # còn lại: BAL / PARK
 
     def row(qty, raw, pct, **kw):
         # `cost_price` (giá vốn broker, ĐÃ trừ cổ tức) KHÁC `raw_cost` (giá vốn thô): mẫu số tổng
@@ -453,7 +456,8 @@ def run():
             "QQ6": row(200.0, 10000.0, -18.5),
             "QQ7": no("no_price", "giá đóng cửa phiên 2026-10-09 CHƯA có trên BQ"),
             "QQ8": no("no_cost", "sổ broker không có giá vốn (costPrice ≤ 0) cho vị thế này"),
-            "QQ9": row(100.0, 5100.0, 2.0)}
+            "QQ9": row(100.0, 5100.0, 2.0),
+            "QQA": row(100.0, 10000.0, -18.5)}
 
     def safe(fn, *a):
         """Kết quả của `fn(*a)`; SẬP ⇒ NaN (so sánh nào cũng sai ⇒ ca ĐỎ, không cắt ngang)."""
@@ -521,16 +525,22 @@ def run():
                   "lỗ tự động — cân nhắc xử lý sớm" in out
               and "🔴 QQ4 (BAL): lỗ 20.0% trên giá vốn sổ công ty chứng khoán, còn 0.0pp đến ngưỡng cắt "
                   "lỗ tự động — cân nhắc xử lý sớm" in out, out)
+        qq6_line = next(ln for ln in out.splitlines() if "QQ6 1.7M" in ln)
         check("F2 (22/11/2026): Discretionary KHÔNG còn ngưỡng xử lý −20% — QQ6 (−18,50%, từng vào vùng đỏ) vẫn hiện "
-              "dòng vị thế + 'chờ ý kiến PM về exit' nhưng KHÔNG có dòng 'còn …pp đến ngưỡng' nào (cả dòng vị thế lẫn "
-              "'Cờ theo dõi'); sleeve có ngưỡng khác (BAL/CAPIT) KHÔNG đổi (kiểm ở các ca F2 liền trên/dưới)",
-              "QQ6 1.7M, -18.50% — ⚠️ ngày vào không rõ — chờ ý kiến PM về exit" in out
-              and "QQ6" not in "".join(ln for ln in out.splitlines() if "ngưỡng" in ln)
-              and "(−20%)" not in out and "ngưỡng xử lý" not in out.replace(
-                  "KHÔNG đánh giá được khoảng cách tới ngưỡng xử lý: QQ5", "")
+              "dòng vị thế + 'chờ ý kiến PM về exit' nhưng KHÔNG có chữ 'ngưỡng' nào trên dòng đó và KHÔNG có dòng "
+              "'Cờ theo dõi' nào của QQ6; `risk_warning(DISCRETIONARY_SPECIAL, −25%)` = None, BAL vẫn có",
+              "QQ6 1.7M, -18.50% — ⚠️ ngày vào không rõ — chờ ý kiến PM về exit" in qq6_line
+              and "ngưỡng" not in qq6_line
               and "🔴 QQ6" not in out
-              and "DISCRETIONARY_SPECIAL" not in ps.STOP_LOSS_PCT_BY_SLEEVE and ps.risk_warning("DISCRETIONARY_SPECIAL", -25.0) is None
+              and "DISCRETIONARY_SPECIAL" not in ps.STOP_LOSS_PCT_BY_SLEEVE
+              and ps.risk_warning("DISCRETIONARY_SPECIAL", -25.0) is None
               and ps.risk_warning("BAL", -18.5) is not None, out)
+        check("F2: sleeve CÓ ngưỡng nhưng KHÔNG có lệnh tự động (CAPIT QQA, §21 −18,50%, sổ broker −17,0%) đo trên tỉ "
+              "suất §21 ⇒ còn 1,5pp (nếu đo nhầm cơ sở broker = 3,0pp và KHÔNG vào vùng đỏ); dòng cờ giữ dạng "
+              "'MÃ ±x.xx%' cổng đọc được — neo dương cho PROSE_RE, và là ví dụ duy nhất bắt đột biến "
+              "'mọi sleeve đo trên sổ broker' (total_return_mutants F2_every_sleeve_on_broker_basis)",
+              "🔴 QQA -18.50% (CAPIT): còn 1.5pp → ngưỡng, cân nhắc xử lý sớm" in out
+              and "🔴 còn 1.5pp đến ngưỡng xử lý (−20%)" in out, out)
         flag_lines = [ln for ln in out.splitlines() if "KHÔNG đánh giá được khoảng cách" in ln]
         check("F2: 'không đánh giá được' nói đúng TỪNG lý do: sleeve không lệnh tự động thiếu tỉ suất "
               "(QQ5 CAPIT) — không kể BAL (đã đo trên sổ broker) hay LAG (không ngưỡng); BAL thiếu giá "
@@ -580,14 +590,14 @@ def run():
         check("HỢP ĐỒNG với cổng: `parse_position_bits` đọc lại ĐÚNG và ĐỦ các dòng có tỉ suất, kể cả "
               "dòng giá trị '?' (đổi định dạng dòng mà cổng không đọc được = PASS trên 0 dòng, lỗi K1)",
               sorted(bits) == [("QQ0", 1.0), ("QQ1", 12.34), ("QQ4", -19.2), ("QQ6", -18.5),
-                               ("QQ9", 2.0)] and "QQ0 ?, +1.00%" in out, str(bits))
+                               ("QQ9", 2.0), ("QQA", -18.5)] and "QQ0 ?, +1.00%" in out, str(bits))
         check("HỢP ĐỒNG với cổng: mỗi mục 'Chi tiết … (n mã)' có đủ n vị thế cổng đọc được hoặc ghi "
               "'(chưa có tỉ suất)' (dây bẫy `position_line_gaps` không nổ trên báo cáo đúng dạng)",
               gaps == [] and ps.RETURN_UNAVAILABLE and rrg.NO_RETURN_MARK in out, str(gaps))
-        check("HỢP ĐỒNG với cổng: văn xuôi KHÔNG còn tỉ suất 'MÃ ±x%' nào (từ 22/11/2026 dòng cờ Discretionary "
-              "'🔴 QQ6 -18.50% … ngưỡng' đã gỡ — trước đó prose == [('QQ6', -18.5)]). Cờ của BAL (số đo trên sổ "
-              "broker) và dòng chú thích KHÔNG bị đọc thành tỉ suất của mã",
-              prose == [], str(prose))
+        check("HỢP ĐỒNG với cổng: văn xuôi chỉ có MỘT tỉ suất 'MÃ ±x%' — dòng cờ CAPIT QQA (số §21; từ 22/11/2026 "
+              "thay cho dòng Discretionary QQ6 đã gỡ). Cờ của BAL (số đo trên sổ broker) và dòng chú thích KHÔNG "
+              "bị đọc thành tỉ suất của mã",
+              prose == [("QQA", -18.5)], str(prose))
         check("HỢP ĐỒNG với cổng: mã không có tỉ suất KHÔNG bị cổng thấy 'có tỉ suất đứng cạnh' — kể cả "
               "QQ7 đang mang cờ gần ngưỡng (nếu thấy, cổng sẽ chặn oan báo cáo đã cố ý không in số)",
               all(mention[tk]["pub"] == [] for tk in mention), str(mention))

@@ -91,7 +91,8 @@ LAG_EXIT_SESSIONS_FIXED = 25
 # comment đây là "kỷ luật live BỔ SUNG", không được gắn vào backtest.
 # ⚠️ DISCRETIONARY_SPECIAL CỐ Ý KHÔNG có trong bảng (user chốt 22/11/2026 23:28, `decided_by: user`, câu 3):
 # sleeve discretionary KHÔNG có "ngưỡng xử lý −20%" — thoát do user quyết, không có ngưỡng cứng nào để đếm
-# khoảng cách; dòng "còn Xpp đến ngưỡng xử lý (−20%)" trong báo cáo (gửi NĐT ngoài) bị gỡ. Book khác giữ nguyên.
+# khoảng cách (HIỆN TẠI `data/discretionary_exit_rules.json` có positions=[]; nếu sau này thêm lại entry, báo cáo vẫn KHÔNG
+# hiển thị khoảng cách — chỉ lệnh auto-exit đề xuất). Dòng "còn Xpp đến ngưỡng xử lý (−20%)" trong báo cáo (gửi NĐT ngoài) bị gỡ. Book khác giữ nguyên.
 # Hệ quả: `risk_warning` trả None, không vào vùng đỏ/"Cờ theo dõi", không vào cờ "không đánh giá được khoảng cách".
 STOP_LOSS_PCT_BY_SLEEVE = {
     "BAL": 20.0,
