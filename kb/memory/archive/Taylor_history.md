@@ -2617,3 +2617,9 @@
 
 ## Archived 2026-11-22 (keep=12 days=0 require_done=False)
 - [2026-11-20T14:45:50Z] [ddz-perf 20/11] XONG job Taylor_20261120_143220: nhánh perf/ddzone-watch-20261120 commit 108f7b220 (wt-ddzone-perf-20261120) — CHỜ Mike review+merge
+
+## Archived 2026-11-22 (keep=12 days=0 require_done=False)
+- [2026-11-20T16:05:56Z] [dd-bqclient 20/11] XONG job Taylor_20261120_154910: commit 57c554c2c nhanh fix/dd-bqclient-failcache-20261120 (outer repo) — CHO Mike review+cherry-pick
+
+## Archived 2026-11-22 (keep=12 days=0 require_done=False)
+- [2026-11-20T21:57:00Z] [sweep 21/11] XONG job Taylor_20261120_214941: lag_live CLOSED 0f5de5b6d; phs_flash OPEN 2 sweep -> CAN USER (da post Architecture): duyet manual_only hay cho PHS sandbox
