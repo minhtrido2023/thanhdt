@@ -28,6 +28,8 @@ SRC_ROOT = os.environ.get("MIKE_SRC_ROOT", "/home/trido/thanhdt/WorkingClaude/mi
 NUM_FIELDS = ("zone_low", "center", "zone_high", "price_ref")
 CENTER_KINDS = ("expected_weighted", "base_scenario", "blend", "median", "zone_midpoint", "point")
 LOCK_REQUIRED_FROM = "2026-11-08"  # entry ghi từ ngày này BẮT BUỘC có assumptions_md5 (user chốt B, 08/11); cũ được miễn
+SKEPTIC_FINAL_REQUIRED_FROM = "2026-11-23"  # entry ghi từ ngày này BẮT BUỘC có skeptic_final + audited_fy_missing (A2, 22/11); cũ được miễn
+SKEPTIC_FINAL_ENUM = ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN", "NONE")
 _TOK = re.compile(r"\d+(?:[.,]\d+)*")
 
 
@@ -104,6 +106,7 @@ def check(ledger_path, src_root=SRC_ROOT):
             errs.append(f"{tag}: center_range phải [center, hi] tăng dần")
         errs += _expiry_errs(tag, e)
         errs += _lock_errs(tag, e, src_root)
+        errs += _skeptic_final_errs(tag, e, src_root)
         for fld in ("source_file",):
             if not os.path.exists(os.path.join(src_root, e[fld])):
                 errs.append(f"{tag}: source_file không tồn tại {e[fld]}")
@@ -122,6 +125,24 @@ def _lock_errs(tag, e, src_root):
     except OSError as x:
         return [f"{tag}: không đọc được nguồn khoá giả định: {x}"]
     return [] if got == want else [f"{tag}: md5 nguồn lệch khoá giả định ({got[:8]}≠{want[:8]}) — nguồn bị sửa sau khi ghi sổ, thêm rev mới"]
+
+
+def _skeptic_final_errs(tag, e, src_root):
+    """A2: skeptic_final ∈ enum (bắt buộc từ SKEPTIC_FINAL_REQUIRED_FROM; entry cũ chỉ bị kiểm nếu CÓ trường);
+    audited_fy_missing phải bool; skeptic_verdict_path null được, khác null thì file phải tồn tại."""
+    new = str(e.get("recorded_at", ""))[:10] >= SKEPTIC_FINAL_REQUIRED_FROM
+    errs = []
+    if "skeptic_final" in e or new:
+        if e.get("skeptic_final") not in SKEPTIC_FINAL_ENUM:
+            errs.append(f"{tag}: skeptic_final={e.get('skeptic_final')!r} ngoài enum {SKEPTIC_FINAL_ENUM}"
+                        + (f" (entry ghi từ {SKEPTIC_FINAL_REQUIRED_FROM} bắt buộc)" if new else ""))
+    if "audited_fy_missing" in e or new:
+        if not isinstance(e.get("audited_fy_missing"), bool):
+            errs.append(f"{tag}: audited_fy_missing={e.get('audited_fy_missing')!r} phải là bool")
+    vp = e.get("skeptic_verdict_path")
+    if vp is not None and not os.path.exists(os.path.join(src_root, str(vp))):
+        errs.append(f"{tag}: skeptic_verdict_path không tồn tại {vp}")
+    return errs
 
 
 def _expiry_errs(tag, e):
@@ -187,6 +208,16 @@ def _self_tests():
         nolock = {k: v for k, v in ok_e.items() if k != "assumptions_md5"}
         r.append(("entry mới thiếu khoá bị bắt", bool(_lock_errs("t", nolock, td))))
         r.append(("entry cũ (trước 08/11) thiếu khoá được miễn", not _lock_errs("t", dict(nolock, recorded_at="2026-11-02T00:00:00+07:00"), td)))
+    ne = {"ticker": "AAA", "recorded_at": "2026-11-23T09:00:00+07:00", "skeptic_final": "NONE", "audited_fy_missing": False}
+    r.append(("skeptic_final: entry mới đủ trường → sạch", not _skeptic_final_errs("t", ne, SRC_ROOT)))
+    r.append(("skeptic_final: entry mới thiếu skeptic_final bị bắt", bool(_skeptic_final_errs("t", {k: v for k, v in ne.items() if k != "skeptic_final"}, SRC_ROOT))))
+    r.append(("skeptic_final: enum sai bị bắt", bool(_skeptic_final_errs("t", dict(ne, skeptic_final="DONE"), SRC_ROOT))))
+    old = {"ticker": "AAA", "recorded_at": "2026-11-20T09:00:00+07:00"}
+    r.append(("skeptic_final: entry cũ thiếu trường được miễn", not _skeptic_final_errs("t", old, SRC_ROOT)))
+    r.append(("skeptic_final: entry cũ có enum sai vẫn bị bắt", bool(_skeptic_final_errs("t", dict(old, skeptic_final="X"), SRC_ROOT))))
+    r.append(("audited_fy_missing không phải bool bị bắt", bool(_skeptic_final_errs("t", dict(ne, audited_fy_missing="false"), SRC_ROOT))))
+    r.append(("skeptic_verdict_path null được phép", not _skeptic_final_errs("t", dict(ne, skeptic_verdict_path=None), SRC_ROOT)))
+    r.append(("skeptic_verdict_path trỏ file không tồn tại bị bắt", bool(_skeptic_final_errs("t", dict(ne, skeptic_verdict_path="no/such/SKEPTIC.md"), SRC_ROOT))))
     return r
 
 
