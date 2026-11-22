@@ -2614,3 +2614,6 @@
 
 ## Archived 2026-11-22 (keep=12 days=0 require_done=False)
 - [2026-11-20T09:42:24Z] [sweep 20/11] XONG job Taylor_20261120_093005: 5/6 selfcheck-red CLOSED; phs_flash OPEN (de xuat manual_only cho Wags) — sweep sau: neu van OPEN => CAN USER + post Architecture
+
+## Archived 2026-11-22 (keep=12 days=0 require_done=False)
+- [2026-11-20T14:45:50Z] [ddz-perf 20/11] XONG job Taylor_20261120_143220: nhánh perf/ddzone-watch-20261120 commit 108f7b220 (wt-ddzone-perf-20261120) — CHỜ Mike review+merge

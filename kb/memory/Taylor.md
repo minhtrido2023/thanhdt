@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-20T14:45:50Z] [ddz-perf 20/11] XONG job Taylor_20261120_143220: nhánh perf/ddzone-watch-20261120 commit 108f7b220 (wt-ddzone-perf-20261120) — CHỜ Mike review+merge
 - [2026-11-20T16:05:56Z] [dd-bqclient 20/11] XONG job Taylor_20261120_154910: commit 57c554c2c nhanh fix/dd-bqclient-failcache-20261120 (outer repo) — CHO Mike review+cherry-pick
 - [2026-11-20T21:57:00Z] [sweep 21/11] XONG job Taylor_20261120_214941: lag_live CLOSED 0f5de5b6d; phs_flash OPEN 2 sweep -> CAN USER (da post Architecture): duyet manual_only hay cho PHS sandbox
 - [2026-11-21T02:14:07Z] ĐANG DỞ: weekly 16-20/11 đã promote nhưng gate BLOCK Q9 (G5 cột có cổ tức) | NEXT: sau khi G5 sửa/user waiver chạy lại report_delivery_gate 2 file
@@ -26,3 +25,4 @@
 - [2026-11-22T10:06:04Z] [dd-vlb r2 22/11] XONG job Taylor_20261122_100129: tam 51.163 sau CK (r1 61.798), 48.100=0,94 TRUNG TINH (md5 93e0ec77…) — CHO Mike goi skeptic xac nhan lai + ghi dd_price_zones
 - [2026-11-22T10:08:03Z] ĐANG DỞ: job Taylor_20261122_100749 VLB investor report | NEXT: copy khuôn VCB investor_report/build_report.py, dựng dd_VLB_20261122/investor_report/
 - [2026-11-22T10:19:06Z] [vlb-investor 22/11] XONG job Taylor_20261122_100749: PDF 8 trang dry-run, chưa gửi email; phát hiện cổ tức 2.500đ ex 19/11 -> giá/tâm 0,99 cùng cơ sở (r2 0,94) — CHỜ Mike ghi dd_price_zones + user lệnh gửi
+- [2026-11-22T12:51:20Z] [A6 22/11] XONG job Taylor_20261122_124816: lint email DD commit ffeae621e (wt-dd-a6, chưa merge); file skill ngoài git đã sửa, bak_20261122 — CHỜ Mike duyệt, bật DD_LINT_BLOCK=True sau khi có số báo giả
