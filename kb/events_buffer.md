@@ -704,3 +704,7 @@
 
 ## Consolidation 2026-11-22T15:07:02Z
 - [2026-11-22T15:00:19Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 289, "deleted_bytes": 10630100, "archived_items": 192, "archived_bytes": 2677687, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
+
+## Consolidation 2026-11-22T16:15:01Z
+- [2026-11-22T16:14:45Z] Taylor/heartbeat — Taylor_20261122_161344: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261122_161344", "source": "watcher"}
+- [2026-11-22T16:14:47Z] Taylor/finding — B5 vòng 2 xong: áp ARCH_REVIEW_R1 (4 blocking + 7 non-blocking): {"commit": "232ce19bf", "branch": "session/1574033826936660078-b5", "bytes": {"DD_core": 16853, "IR_core": 12936, "DD_ext": 35085, "IR_ext": 40615}, "mech_check": "0 dòng thân thiếu (DD 48, IR 183); 17 tiêu đề chỉ đổi định dạng", "not_installed": true, "open": ["sizing Q4", "B6 .proposed", "watch chưa đọc audited_fy_missing"], "measured_by": "wc -c new/*/*; python3 /tmp/arch_b5/chk.py <skill cũ> <ext>"}
