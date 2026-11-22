@@ -113,11 +113,26 @@ def check(ledger_path, src_root=SRC_ROOT):
     return d, errs
 
 
+def _ict_date(e):
+    """Ngày ghi sổ theo ICT (UTC+7). recorded_at thiếu ⇒ dùng dd_date; không parse được / cũng thiếu dd_date ⇒ '9999-12-31'
+    (fail-closed: coi là entry mới, phải đủ trường)."""
+    ra = e.get("recorded_at")
+    if not ra:
+        return str(e.get("dd_date") or "9999-12-31")[:10]
+    try:
+        t = dt.datetime.fromisoformat(str(ra).replace("Z", "+00:00"))
+    except ValueError:
+        return "9999-12-31"
+    if t.tzinfo is None:
+        return t.date().isoformat()  # naive = đã là giờ ICT (quy ước sổ)
+    return t.astimezone(dt.timezone(dt.timedelta(hours=7))).date().isoformat()
+
+
 def _lock_errs(tag, e, src_root):
     """Khoá giả định: md5 nguồn phải khớp; entry mới (recorded_at ≥ LOCK_REQUIRED_FROM) bắt buộc có khoá."""
     want = e.get("assumptions_md5")
     if not want:
-        if str(e.get("recorded_at", ""))[:10] >= LOCK_REQUIRED_FROM:
+        if _ict_date(e) >= LOCK_REQUIRED_FROM:
             return [f"{tag}: thiếu assumptions_md5 (entry ghi từ {LOCK_REQUIRED_FROM} bắt buộc khoá giả định)"]
         return []
     try:
@@ -130,7 +145,7 @@ def _lock_errs(tag, e, src_root):
 def _skeptic_final_errs(tag, e, src_root):
     """A2: skeptic_final ∈ enum (bắt buộc từ SKEPTIC_FINAL_REQUIRED_FROM; entry cũ chỉ bị kiểm nếu CÓ trường);
     audited_fy_missing phải bool; skeptic_verdict_path null được, khác null thì file phải tồn tại."""
-    new = str(e.get("recorded_at", ""))[:10] >= SKEPTIC_FINAL_REQUIRED_FROM
+    new = _ict_date(e) >= SKEPTIC_FINAL_REQUIRED_FROM
     errs = []
     if "skeptic_final" in e or new:
         if e.get("skeptic_final") not in SKEPTIC_FINAL_ENUM:
@@ -140,7 +155,7 @@ def _skeptic_final_errs(tag, e, src_root):
         if not isinstance(e.get("audited_fy_missing"), bool):
             errs.append(f"{tag}: audited_fy_missing={e.get('audited_fy_missing')!r} phải là bool")
     vp = e.get("skeptic_verdict_path")
-    if vp is not None and not os.path.exists(os.path.join(src_root, str(vp))):
+    if vp is not None and not os.path.isfile(os.path.join(src_root, str(vp))):
         errs.append(f"{tag}: skeptic_verdict_path không tồn tại {vp}")
     return errs
 
@@ -213,10 +228,19 @@ def _self_tests():
     r.append(("skeptic_final: entry mới thiếu skeptic_final bị bắt", bool(_skeptic_final_errs("t", {k: v for k, v in ne.items() if k != "skeptic_final"}, SRC_ROOT))))
     r.append(("skeptic_final: enum sai bị bắt", bool(_skeptic_final_errs("t", dict(ne, skeptic_final="DONE"), SRC_ROOT))))
     old = {"ticker": "AAA", "recorded_at": "2026-11-20T09:00:00+07:00"}
+    nr = {k: v for k, v in ne.items() if k != "recorded_at"}
+    r.append(("skeptic_final: thiếu recorded_at, dd_date ≥23/11 ⇒ bị bắt", bool(_skeptic_final_errs("t", dict({k: v for k, v in nr.items() if k != "skeptic_final"}, dd_date="2026-11-23"), SRC_ROOT))))
+    r.append(("skeptic_final: thiếu recorded_at + thiếu dd_date ⇒ fail-closed bị bắt", bool(_skeptic_final_errs("t", {"ticker": "AAA"}, SRC_ROOT))))
+    r.append(("skeptic_final: thiếu recorded_at, dd_date 18/11 (DBC/POW/LLM) được miễn", not _skeptic_final_errs("t", {"ticker": "AAA", "dd_date": "2026-11-18"}, SRC_ROOT)))
+    utc = {"ticker": "AAA", "recorded_at": "2026-11-22T18:00:00Z"}  # = 23/11 01:00 ICT
+    r.append(("skeptic_final: recorded_at UTC sang ngày 23 ICT bị bắt", bool(_skeptic_final_errs("t", utc, SRC_ROOT))))
+    r.append(("skeptic_final: recorded_at UTC 22/11 16:59Z (=23:59 ICT 22/11) được miễn", not _skeptic_final_errs("t", dict(utc, recorded_at="2026-11-22T16:59:00Z"), SRC_ROOT)))
+    r.append(("lock: recorded_at UTC sang ngày ≥08/11 ICT thiếu khoá bị bắt", bool(_lock_errs("t", {"ticker": "A", "source_file": "x", "recorded_at": "2026-11-07T18:00:00Z"}, SRC_ROOT))))
     r.append(("skeptic_final: entry cũ thiếu trường được miễn", not _skeptic_final_errs("t", old, SRC_ROOT)))
     r.append(("skeptic_final: entry cũ có enum sai vẫn bị bắt", bool(_skeptic_final_errs("t", dict(old, skeptic_final="X"), SRC_ROOT))))
     r.append(("audited_fy_missing không phải bool bị bắt", bool(_skeptic_final_errs("t", dict(ne, audited_fy_missing="false"), SRC_ROOT))))
     r.append(("skeptic_verdict_path null được phép", not _skeptic_final_errs("t", dict(ne, skeptic_verdict_path=None), SRC_ROOT)))
+    r.append(("skeptic_verdict_path trỏ THƯ MỤC bị bắt", bool(_skeptic_final_errs("t", dict(ne, skeptic_verdict_path="agents"), SRC_ROOT))))
     r.append(("skeptic_verdict_path trỏ file không tồn tại bị bắt", bool(_skeptic_final_errs("t", dict(ne, skeptic_verdict_path="no/such/SKEPTIC.md"), SRC_ROOT))))
     return r
 
