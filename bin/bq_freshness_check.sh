@@ -982,7 +982,7 @@ if [ "$_lagcf_rc" -eq 0 ] && [ "$_lagcf_n" -eq 1 ] && [[ "$_lagcf_hits" =~ ^LAG_
   LAG_ZONE_NOTE="${LAG_ZONE_NOTE} ⚠️ BỔ SUNG LUẬT USER 22/11/2026 (D1+D5 — cổng LAG_DD_REQUIRE_CONFIRMED đang BẬT trong trading_bot/plan.py): ngoài các điều kiện trên, entry DD mới nhất của mã còn phải có skeptic_final == 'CONFIRMED' (FIXED_UNVERIFIED / REFUTED_OPEN / NONE / thiếu trường đều KHÔNG đạt) VÀ audited_fy_missing không phải true (thiếu BCTC kiểm toán năm gần nhất ⇒ coi như chưa có DD). Không đạt thì KHÔNG đưa lệnh MUA LAG vào plan — ghi vào notes: 'LAG <MÃ> bị loại theo luật 22/11: skeptic_final=<NHÃN> rev<R> dd_date <D>' hoặc 'LAG <MÃ> bị loại theo luật 22/11: thiếu BCTC kiểm toán năm gần nhất'. Executor 09:05 cũng loại cứng các lệnh này."
 elif [ "$_lagcf_rc" -eq 0 ] && [ "$_lagcf_n" -eq 1 ] && [[ "$_lagcf_hits" =~ ^LAG_DD_REQUIRE_CONFIRMED[[:space:]]*=[[:space:]]*False[[:space:]]*(#.*)?$ ]]; then
   :   # tắt ⇒ prompt y như trước B1
-elif [ "$_lagcf_rc" -eq 1 ]; then
+elif [ "$_lagcf_rc" -eq 1 ] && ! grep -q 'LAG_DD_REQUIRE_CONFIRMED' "$_lagcf_file" 2>/dev/null; then
   :   # chưa có hằng trong plan.py ⇒ cổng con chưa tồn tại ở executor ⇒ prompt y như trước B1
 else
   echo "  [WARN] không xác định được LAG_DD_REQUIRE_CONFIRMED trong $_lagcf_file (grep rc=$_lagcf_rc, $_lagcf_n dòng khớp) — Khớp/lỗi thật: $(printf '%s' "$_lagcf_hits" | head -3 | tr '\n' ' ')"
