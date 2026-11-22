@@ -79,4 +79,4 @@ Tổng tuần 1 ≈ 3 ngày công agent. Chỉ A2 và A6 chạm file dùng chung
 - A6, A8, B5, B6 sửa file ngoài git: rollback chỉ bằng bản sao lưu.
 - Lint/schema mới có thể tự thành accretion: mỗi cổng mới chạy chế độ cảnh báo 2 tuần và phải có số báo giả trước khi chặn.
 - Không kiểm tính đúng của định giá nào; không đọc transcript phản biện; không truy vấn BigQuery; không kiểm crontab.
-- D1–D6 chưa có `decided_by: user`; mọi mục Nhóm B đứng yên tới khi có.
+- D1–D6 ĐÃ có `decided_by: user` (22/11/2026 19:07 ICT, "theo khuyến nghị"); Nhóm B chạy tuần tự.
