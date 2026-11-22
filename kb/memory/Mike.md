@@ -11,3 +11,4 @@
 ## Mốc
 - LAG ADV + corp-action broker-primary 2026-12-15; measurement audit ~2026-12-27; review quý Bobby ~11-26.
 
+- [2026-11-22T18:14:04Z] [23/11 01:2x] GĐ2 DD: A–D, E, G xong+merged master (72dc4d3bd). CHỜ user: F sizing a/b/c; chọn ca dựng lại rev từ RECONFIRM_RESULTS. Cron thesis_card_watch 01:33 UTC đã cài; chạy 08:33 ICT 23/11 lần đầu — kiểm log mike/logs/thesis_card_watch.log.

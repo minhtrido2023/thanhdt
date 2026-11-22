@@ -411,3 +411,7 @@
 ## Archived 2026-11-21 (keep=6 days=5 require_done=True)
 - [2026-11-15T12:44:58Z] [2026-11-15 19:5x ICT] Plan ZaloPay 11-16 XONG HOLD ALL 0 lenh (vong CN toi); cho duyet truoc 08:45 16/11 (job DollarBill_20261115_124425)
 - [2026-11-15T12:45:39Z] [2026-11-15 19:5x ICT] Plan SpaceX 11-16 XONG (vong CN toi): BUY NNC 700cp tran 46000, egg>=32,3tr; cho duyet truoc 08:45 16/11 (job DollarBill_20261115_124427)
+
+## Archived 2026-11-22 (keep=6 days=5 require_done=True)
+- [2026-11-16T12:03:57Z] [2026-11-16 19:xx ICT] Plan ZaloPay 11-17 XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 17/11 (job DollarBill_20261116_120325)
+- [2026-11-16T12:04:21Z] [2026-11-16 19:xx ICT] Plan SpaceX 11-17 XONG: BUY DISC NNC 600cp tran 46000, egg>=27,7tr; 0 LAG/BAL; cho duyet truoc 08:45 17/11 (job DollarBill_20261116_120326)
