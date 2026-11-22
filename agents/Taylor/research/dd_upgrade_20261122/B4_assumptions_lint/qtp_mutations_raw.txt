@@ -1,0 +1,15 @@
+## QTP#1 mandatory=false
+   L7: dự án 'Xử lý khí thải' không nhất quán: classification=compliance ⇔ mandatory ∧ ¬generates_revenue (đang classification=compliance, mandatory=False, generates_revenue
+  => L7 bắn
+## QTP#2 generates_revenue=true
+   L7: dự án 'Xử lý khí thải' không nhất quán: classification=compliance ⇔ mandatory ∧ ¬generates_revenue (đang classification=compliance, mandatory=True, generates_revenue=
+  => L7 bắn
+## QTP#3 growth + mandatory=false
+   L7: dự án growth 'Xử lý khí thải' mà generates_revenue=false — growth phải tạo doanh thu
+  => L7 bắn
+## QTP#4 bỏ dự án có none_reason (cam kết vốn còn)
+   L7: capital_commitments_12m có 1 cam kết (300 tỷ) mà projects.items rỗng (none_reason='không có dự án nào đáng kể') ⇒ đối chiếu chéo thất bại
+  => L7 bắn
+## QTP#5 capital_commitments ghi vay 2.787,9 tỷ, projects rỗng
+   L7: capital_commitments_12m có 1 cam kết (2,788 tỷ) mà projects.items rỗng (none_reason='không có dự án nào đáng kể') ⇒ đối chiếu chéo thất bại
+  => L7 bắn

@@ -1,0 +1,17 @@
+GIẾT  L3 dung sai ×10  FAIL B2 lệch 6bp bắn L3
+GIẾT  L3 bỏ qua β mặc định (dùng β khai)  FAIL B2 β=0, lãi 6%, r=13,5% ⇒ bắn L3 lệch công thức (tính β MẶC ĐỊNH)
+GIẾT  L3 bỏ kiểm β khác mặc định  FAIL B2 β=0,5 (r khớp neo) không override ⇒ bắn L3 riêng cho β
+GIẾT  enforce không kiểm định dạng dd_date  FAIL B1 dd_date='TBD' ⇒ rc=1(0) + cảnh báo định dạng
+GIẾT  L1 dung sai rộng  FAIL mutation 'tổng trọng số 0,95' ⇒ L1: (bắn: ['L2:'])
+GIẾT  L12 chỉ đòi có ≥1 phía  FAIL B5 rỗng ruột bắn L12 (1 kịch bản p=1)
+GIẾT  L7 bỏ kiểm nhất quán  FAIL QTP#1 mandatory=false (còn compliance) ⇒ L7 bắn
+GIẾT  L7 bỏ đối chiếu cam kết vốn  FAIL QTP#4 bỏ dự án (none_reason) mà cam kết vốn còn ⇒ L7 bắn
+GIẾT  L11 ngưỡng khong_cong_bo vô hạn  FAIL B5 rỗng ruột bắn L11 (quá nhiều khong_cong_bo)
+GIẾT  L10 bỏ neo hạn công bố  FAIL L10 DD 15/02/2027 với FY2025 KT ⇒ không báo giả
+GIẾT  L13 bỏ kiểm trích quỹ  FAIL L13 có tỉ lệ trích mà applied_to_cashflow=false ⇒ bắn
+GIẾT  L14 bỏ chặn ngày sau dd_date  FAIL L14 deposit_rate_date SAU dd_date ⇒ bắn
+GIẾT  L8 cho khai mốc trước cùng ngày  FAIL L8 ngày 03/11 khai M20261102 (mốc ngày trước) ⇒ bắn
+GIẾT  L9 bắt chữ ADV trần  FAIL L9 mô tả phương pháp 'ADV trung vị 60 phiên… SAU khoá' KHÔNG bị bắt
+GIẾT  gate D3 luôn bật→tắt  FAIL mutation 'capex tuân thủ ghi NPV0 (ca QTP)' ⇒ L7: (bắn: [])
+
+15/15 mutant bị giết

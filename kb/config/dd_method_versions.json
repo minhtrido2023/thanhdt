@@ -1,21 +1,104 @@
 {
-  "_doc": "Bảng mốc đổi LUẬT ĐỊNH GIÁ do user chốt. method_version của 1 assumptions.json = id mốc mới nhất có date ≤ dd_date (mốc cùng ngày dd_date: chấp nhận mọi id trong ngày đó, vì luật trong ngày có giờ). Chỉ liệt kê luật làm ĐỔI SỐ định giá; luật quy trình (phản biện, email, snapshot vĩ mô) nằm ở process_rules_excluded để minh bạch. Không bịa mốc: mỗi mốc trỏ đúng dòng SKILL.md.",
-  "skill_file": "~/.claude/skills/due-diligence/SKILL.md (bản 2026-11-22, 27.160 byte)",
+  "_doc": "Bảng mốc đổi LUẬT ĐỊNH GIÁ do user chốt. method_version của 1 assumptions.json = id mốc mới nhất có date ≤ dd_date (ngày dd_date CÓ mốc: chỉ chấp nhận id của chính ngày đó — không cho khai mốc trước đó để né luật mới trong ngày). Chỉ liệt kê luật làm ĐỔI SỐ định giá; luật quy trình (phản biện, email, snapshot vĩ mô) nằm ở process_rules_excluded để minh bạch. Không bịa mốc: mỗi mốc trỏ đúng dòng SKILL.md.",
+  "skill_file": "~/.claude/skills/due-diligence/SKILL.md (bản 2026-11-22, 27.856 byte — đo `wc -c` 22/11 phiên vòng 2)",
   "milestones": [
-    {"id": "M20261029", "date": "2026-10-29", "time_ict": null, "rule": "Khung Ke cho DCF vô hạn: rf chuẩn hoá ~6,75% (6,0–7,5), không dùng lãi huy động/TPCP 10Y thô làm rf; β ~1,1 Blume", "source": "SKILL.md:35 'khung user duyệt 2026-10-29'"},
-    {"id": "M20261030", "date": "2026-10-30", "time_ict": null, "rule": "ERP nội địa, không cộng CRP Damodaran; Ke β1,1 báo theo dải 12,3–13,4% (rộng 10,5–14,0)", "source": "SKILL.md:35 'ERP (user chỉnh 2026-10-30)'"},
-    {"id": "M20261103A", "date": "2026-11-03", "time_ict": "17:06", "rule": "Dự án mới/cam kết vốn: base = giá trị sổ sách (NPV=0); lệch chỉ khi có cơ sở độc lập", "source": "SKILL.md:37 'luật user 2026-11-03 17:06 ICT'"},
-    {"id": "M20261103B", "date": "2026-11-03", "time_ict": "22:27", "rule": "r = 13,5% neo lãi huy động 12T, r_mới = 13,5% + β×Δ, độ nhạy ±50/±100bp; chiết khấu thanh khoản trước/sau", "source": "SKILL.md:36 'luật user 2026-11-03 22:27 ICT'"},
-    {"id": "M20261106", "date": "2026-11-06", "time_ict": "20:23", "rule": "Vị thế doanh nghiệp trong ngành (5F tầng b); tần suất moat/5F tối đa 1 năm/lần (23:28)", "source": "SKILL.md:20-21 'user chốt 2026-11-06 20:23 ICT' / '23:28 ICT'"},
-    {"id": "M20261108", "date": "2026-11-08", "time_ict": "10:50", "rule": "Moat bền đưa vào mô hình (chỉ thêm moat effect, không ép biên/ROE/RONIC về trung bình)", "source": "SKILL.md:22 'user chốt 2026-11-08 10:50'"},
-    {"id": "M20261111", "date": "2026-11-11", "time_ict": "11:37", "rule": "Hai nền giá trị + cờ phân kỳ, dòng C4/D2 — chỉ HIỂN THỊ, không đổi tâm (11:37, 12:09, 12:59, 17:23)", "source": "SKILL.md:38-40"},
-    {"id": "M20261122", "date": "2026-11-22", "time_ict": "19:07", "rule": "D3 capex tuân thủ (bắt buộc, không tạo doanh thu) = dòng tiền ra; D4 báo hai đầu dải Ke + terminal RONIC = Ke cho moat NARROW/NONE; D5 thiếu BCTC kiểm toán năm gần nhất ⇒ audited_fy_missing", "source": "kb/projects/dd-upgrade-final-action-20261122.md:69-71 + B4 SPEC.md dòng 2 (decided_by user 22/11 19:07)", "in_skill": false, "in_skill_note": "CHƯA vào SKILL.md — B5 viết lại skill sẽ thêm"}
+    {
+      "id": "M20261029",
+      "date": "2026-10-29",
+      "time_ict": null,
+      "rule": "Khung Ke cho DCF vô hạn: rf chuẩn hoá ~6,75% (6,0–7,5), không dùng lãi huy động/TPCP 10Y thô làm rf; β ~1,1 Blume",
+      "source": "SKILL.md:35 'khung user duyệt 2026-10-29'"
+    },
+    {
+      "id": "M20261030",
+      "date": "2026-10-30",
+      "time_ict": null,
+      "rule": "ERP nội địa, không cộng CRP Damodaran; Ke β1,1 báo theo dải 12,3–13,4% (rộng 10,5–14,0)",
+      "source": "SKILL.md:35 'ERP (user chỉnh 2026-10-30)'"
+    },
+    {
+      "id": "M20261102",
+      "date": "2026-11-02",
+      "time_ict": null,
+      "rule": "Định giá MÙ GIÁ thị trường (không dùng giá/PE/ADV làm đầu vào định giá; thanh khoản tính ở bước riêng sau khoá)",
+      "source": "SKILL.md:19 'định giá vẫn mù giá thị trường (luật 2026-11-02)'",
+      "note": "Thêm vòng 2 B4 theo skeptic R1; số định giá đổi nên là mốc luật định giá"
+    },
+    {
+      "id": "M20261103A",
+      "date": "2026-11-03",
+      "time_ict": "17:06",
+      "rule": "Dự án mới/cam kết vốn: base = giá trị sổ sách (NPV=0); lệch chỉ khi có cơ sở độc lập",
+      "source": "SKILL.md:37 'luật user 2026-11-03 17:06 ICT'"
+    },
+    {
+      "id": "M20261103B",
+      "date": "2026-11-03",
+      "time_ict": "22:27",
+      "rule": "r = 13,5% neo lãi huy động 12T, r_mới = 13,5% + β×Δ, độ nhạy ±50/±100bp; chiết khấu thanh khoản trước/sau",
+      "source": "SKILL.md:36 'luật user 2026-11-03 22:27 ICT'"
+    },
+    {
+      "id": "M20261106",
+      "date": "2026-11-06",
+      "time_ict": "20:23",
+      "rule": "Vị thế doanh nghiệp trong ngành (5F tầng b); tần suất moat/5F tối đa 1 năm/lần (23:28)",
+      "source": "SKILL.md:20-21 'user chốt 2026-11-06 20:23 ICT' / '23:28 ICT'"
+    },
+    {
+      "id": "M20261108",
+      "date": "2026-11-08",
+      "time_ict": "10:50",
+      "rule": "Moat bền đưa vào mô hình (chỉ thêm moat effect, không ép biên/ROE/RONIC về trung bình)",
+      "source": "SKILL.md:22 'user chốt 2026-11-08 10:50'"
+    },
+    {
+      "id": "M20261111",
+      "date": "2026-11-11",
+      "time_ict": "11:37",
+      "rule": "Hai nền giá trị + cờ phân kỳ, dòng C4/D2 — chỉ HIỂN THỊ, không đổi tâm (11:37, 12:09, 12:59, 17:23)",
+      "source": "SKILL.md:38-40"
+    },
+    {
+      "id": "M20261122",
+      "date": "2026-11-22",
+      "time_ict": "19:07",
+      "rule": "D3 capex tuân thủ (bắt buộc, không tạo doanh thu) = dòng tiền ra; D4 báo hai đầu dải Ke + terminal RONIC = Ke cho moat NARROW/NONE; D5 thiếu BCTC kiểm toán năm gần nhất ⇒ audited_fy_missing",
+      "source": "kb/projects/dd-upgrade-final-action-20261122.md:69-71 (D3/D4/D5) + dòng 82 'D1–D6 ĐÃ có decided_by: user (22/11/2026 19:07 ICT, theo khuyến nghị)' + B4 SPEC.md (copy trong nhánh này: agents/Taylor/research/dd_upgrade_20261122/B4_assumptions_lint/SPEC.md)",
+      "in_skill": false,
+      "in_skill_note": "CHƯA vào SKILL.md — B5 viết lại skill sẽ thêm"
+    }
   ],
   "process_rules_excluded": [
-    {"date": "2026-11-01", "time_ict": "11:08", "rule": "fundamental-skeptic bắt buộc mọi DD", "source": "SKILL.md:24"},
-    {"date": "2026-11-03", "time_ict": "15:23", "rule": "email chỉ gửi khi user báo", "source": "SKILL.md:25"},
-    {"date": "2026-11-05", "time_ict": "09:19", "rule": "snapshot vĩ mô trước khi dispatch Bobby", "source": "SKILL.md:18"},
-    {"date": "2026-11-08", "time_ict": null, "rule": "chống làm đi làm lại (option B)", "source": "SKILL.md:53"},
-    {"date": "2026-11-23", "time_ict": null, "rule": "trường sổ skeptic_final bắt buộc (A2)", "source": "SKILL.md:55"}
+    {
+      "date": "2026-11-01",
+      "time_ict": "11:08",
+      "rule": "fundamental-skeptic bắt buộc mọi DD",
+      "source": "SKILL.md:24"
+    },
+    {
+      "date": "2026-11-03",
+      "time_ict": "15:23",
+      "rule": "email chỉ gửi khi user báo",
+      "source": "SKILL.md:25"
+    },
+    {
+      "date": "2026-11-05",
+      "time_ict": "09:19",
+      "rule": "snapshot vĩ mô trước khi dispatch Bobby",
+      "source": "SKILL.md:18"
+    },
+    {
+      "date": "2026-11-08",
+      "time_ict": null,
+      "rule": "chống làm đi làm lại (option B)",
+      "source": "SKILL.md:53"
+    },
+    {
+      "date": "2026-11-23",
+      "time_ict": null,
+      "rule": "trường sổ skeptic_final bắt buộc (A2)",
+      "source": "SKILL.md:55"
+    }
   ]
 }

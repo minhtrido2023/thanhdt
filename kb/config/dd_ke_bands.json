@@ -9,12 +9,30 @@
     "rule_source": "~/.claude/skills/due-diligence/SKILL.md dòng 36 (luật user 2026-11-03 22:27 ICT)"
   },
   "beta_passthrough_default": 1.0,
-  "beta_passthrough_sensitivity": [0.5, 1.0],
+  "beta_passthrough_sensitivity": [
+    0.5,
+    1.0
+  ],
   "r_tolerance_bp": 5,
-  "required_sensitivity_bp": [-100, -50, 50, 100],
+  "required_sensitivity_bp": [
+    -100,
+    -50,
+    50,
+    100
+  ],
   "ke_band_low": 0.123,
   "ke_band_high": 0.134,
-  "ke_band_wide": [0.105, 0.140],
+  "ke_band_wide": [
+    0.105,
+    0.14
+  ],
   "ke_band_source": "SKILL.md dòng 35 (user chỉnh 2026-10-30, nghiên cứu erp_domestic_20261030: Ke nội địa β1,1 = 12,3–13,4%, dải rộng 10,5–14,0%)",
-  "band_ends_rule_source": "D4 user duyệt 22/11/2026 19:07 (kb/projects/dd-upgrade-final-action-20261122.md dòng 70): giữ r 13,5% + báo thêm hai đầu dải 12,3–13,4%"
+  "band_ends_rule_source": "D4 user duyệt 22/11/2026 19:07 (kb/projects/dd-upgrade-final-action-20261122.md dòng 70): giữ r 13,5% + báo thêm hai đầu dải 12,3–13,4%",
+  "r_tolerance_note": "5bp là tham số TỰ ĐẶT của B4 (bù làm tròn r ở 1 chữ số thập phân của %), KHÔNG có trong SKILL.md; đổi cần Mike duyệt.",
+  "deposit_rate_max_age_days": 14,
+  "deposit_rate_max_age_note": "tham số tự đặt B4: deposit_rate_date phải nằm 0–14 ngày trước dd_date",
+  "max_khong_cong_bo": 3,
+  "max_khong_cong_bo_note": "tham số tự đặt B4: >3 trường khong_cong_bo trong 1 file ⇒ cảnh báo rỗng-ruột (L11)",
+  "audited_fy_deadline_mmdd": "03-31",
+  "audited_fy_deadline_note": "hạn công bố BCTC kiểm toán năm của công ty đại chúng = 90 ngày sau kết thúc năm ⇒ trước 31/03 chưa đòi FY vừa qua (L10); tham số B4, Wendy chưa xác nhận từng loại hình"
 }

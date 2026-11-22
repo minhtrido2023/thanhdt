@@ -65,3 +65,25 @@ QTP/VCB 17/11 → `M20261111`; PAT 14/11 → `M20261111`; VLB 22/11 → `M202611
 8. **Mốc M20261122 chưa có trong SKILL.md** (B5 sẽ thêm) — ghi `in_skill:false` trong config.
 9. Số tỉ số ngân hàng VCB do tôi TÍNH từ số dư trong khoá (LDR thô, không theo TT22) — biến thể bank có nên
    bắt buộc nguồn thuyết minh trực tiếp thay vì tự tính?
+
+
+---
+## VÒNG 2 (22/11/2026, theo `SKEPTIC_R1_REQUIRED_CHANGES.md`) — ĐIỀU CHỈNH CÁCH ĐỌC KẾT QUẢ Ở TRÊN
+
+**B3 — Giới hạn của "bắt được lỗi cũ".** Bảng trên là **TRONG MẪU và HỒI TỐ**: luật D3 sinh ra từ ca QTP, và L7 áp
+hồi tố lên file QTP không có cổng `method_version` thật (vòng 2 đã gate theo mốc nhưng file thiếu `method_version`
+nay được coi là mốc MỚI NHẤT, nên QTP vẫn bị bắt); kết quả L7 còn **phụ thuộc cờ tự khai** (`mandatory`,
+`generates_revenue`, `classification`) — người lập khai sai cả ba thì lint không biết. Số "10/22 bắt đủ" KHÔNG phải
+tỉ lệ bắt ngoài mẫu. Vòng 2 chỉ vá những cách né cơ học đã biết (ràng buộc chéo, file rỗng-ruột), không vá khai sai.
+
+**Tiêu chí bật chặn (sửa).** Bật chặn (đặt `DD_ASSUMPTIONS_LINT_ENFORCE_FROM`) khi **CẢ HAI**:
+(a) báo giả ≤ 10% trên DD thật 2 tuần; (b) **tỉ lệ PHỦ**: trong bộ ca né-khoá/rỗng-ruột do người KHÁC (skeptic) dựng,
+lint bắt ≥ 90%. Số hiện có (do chính tác giả dựng nên chỉ là sàn, không phải đo độc lập): file rỗng-ruột 1/1 bắt
+(≥1 vi phạm; trước vòng 2: 0), 5/5 đột biến QTP bắn L7 (`qtp_mutations_raw.txt`; trước vòng 2: 0/4 lọt).
+Đột biến MÃ lint: 15/15 bị selfcheck giết (`mutants_raw.txt`).
+
+**Số liệu chạy lại 5 ca sau vòng 2** (`trial/lint_output_raw.txt`, `/usr/bin/python3`, cảnh báo rc=0 cả 5):
+MVC 20 · PAT 9 · QTP 14 · VCB 11 · VLB 16 vi phạm (trước: 19/8/13/9/16 theo skeptic tái lập). Tăng là do luật mới
+(S chặt hơn, L7 chéo, L14). Báo giả tiềm năng đã thấy: VCB bank khai 1 `capital_commitments_12m` không có `amount_bn`
+(ánh xạ ngược của tôi) + `projects` rỗng ⇒ L7 chéo bắn "0 tỷ" — có thể đúng (cam kết ngoại bảng bị bỏ quên) hoặc
+báo giả do ánh xạ; chưa phân xử.

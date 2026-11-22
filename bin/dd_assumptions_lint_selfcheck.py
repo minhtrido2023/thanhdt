@@ -44,17 +44,19 @@ def good():
         "liquidity_discount": {"basis": "computed_after_lock", "pct": None, "source": "bước riêng sau khoá"},
         "audit_opinion": {"status": "unqualified", "fy": 2025, "auditor": "UHY", "source": "src/fy2025_kt.pdf p4"},
         "related_parties": {"items": [{"desc": "bán hàng cho công ty mẹ", "amount_bn": 120, "source": "TM35"}]},
-        "one_offs": {"items": [], "none_reason": "không có", "searched": ["TM KQKD 9T26"]},
-        "capital_commitments_12m": {"items": [{"desc": "góp vốn dự án", "amount_bn": 300, "source": "NQ HĐQT 05/2026"}]},
+        "one_offs": {"items": [], "none_reason": "không phát sinh khoản một lần trong 9T26", "searched": ["TM KQKD 9T26"]},
+        "capital_commitments_12m": {"items": [{"desc": "xử lý khí thải (dự án Xử lý khí thải)", "amount_bn": 300, "source": "NQ HĐQT 05/2026"}]},
         "sector": {},
     }
 
 
 def bank():
     d = good()
-    d.update(loai_hinh="bank", projects={"items": [], "none_reason": "ngân hàng"},
+    d.update(loai_hinh="bank", projects={"items": [], "none_reason": "ngân hàng không có dự án vốn riêng"},
              working_capital={"method": "not_applicable_bank", "source": "không áp dụng cho ngân hàng"})
     kcb = {"value": "khong_cong_bo", "searched": ["BCTC Q3 TM", "BC thường niên 2025"]}
+    d["capital_commitments_12m"] = {"items": [], "none_reason": "không có cam kết vốn ngoài kế hoạch kinh doanh",
+                                    "searched": ["NQ ĐHĐCĐ 2026", "CBTT 2026"]}
     d["sector"] = {"car": {"value": 0.115, "source": "báo chí 1 nguồn"}, "npl_group2_ratio": 0.0028,
                    "npl_coverage": 2.3, "ldr": 0.82, "casa": kcb}
     return d
@@ -179,6 +181,133 @@ def main():
         v, _, p = run_doc(mut(fn))
         check(code in codes(v), f"mutation '{name}' ⇒ {code} (bắn: {sorted(codes(v))})")
         os.unlink(p)
+
+
+    # ---------- vòng 2 (skeptic R1) ----------
+    try:
+        import jsonschema  # noqa: F401
+        check(True, "jsonschema có sẵn (schema được kiểm thật)")
+    except ImportError:
+        check(False, "jsonschema THIẾU ⇒ S không chạy; chạy bằng /usr/bin/python3")
+
+    def viols(fn, base=good):
+        d = base()
+        fn(d)
+        v, _, p = run_doc(d)
+        os.unlink(p)
+        return v
+
+    def has(v, code, sub=""):
+        return any(x.startswith(code) and sub in x for x in v)
+
+    # B1: dd_date lạ ⇒ rc=0 ở chế độ cảnh báo + cảnh báo định dạng
+    for bad_dd in ("TBD", "chua_ro", "9999-99-99x"):
+        d = good()
+        d["dd_date"] = bad_dd
+        _, _, p = run_doc(d)
+        out = subprocess.run([sys.executable, os.path.join(HERE, "dd_assumptions_lint.py"), p], capture_output=True, text=True)
+        check(out.returncode == 0 and "dd_date" in out.stdout and "định dạng" in out.stdout,
+              f"B1 dd_date={bad_dd!r} ⇒ rc={out.returncode}(0) + cảnh báo định dạng")
+        os.unlink(p)
+    d = good()
+    d.pop("dd_date")
+    _, _, p = run_doc(d)
+    out = subprocess.run([sys.executable, os.path.join(HERE, "dd_assumptions_lint.py"), p], capture_output=True, text=True)
+    check(out.returncode == 0, f"B1 thiếu dd_date ⇒ rc={out.returncode}(0)")
+    os.unlink(p)
+    # B2: tolerance + beta
+    check(has(viols(lambda d: d["discount_rate"].update(r=0.1356)), "L3"), "B2 lệch 6bp bắn L3")
+    check(not has(viols(lambda d: d["discount_rate"].update(r=0.1354)), "L3"), "B2 lệch 4bp KHÔNG bắn")
+    check(has(viols(lambda d: d["discount_rate"].update(r=0.135, deposit_rate_now=0.06, beta_passthrough=0.0)), "L3", "lệch công thức neo"),
+          "B2 β=0, lãi 6%, r=13,5% ⇒ bắn L3 lệch công thức (tính β MẶC ĐỊNH)")
+    check(has(viols(lambda d: d["discount_rate"].update(r=0.135, beta_passthrough=0.5)), "L3", "beta_passthrough"),
+          "B2 β=0,5 (r khớp neo) không override ⇒ bắn L3 riêng cho β")
+    check(not has(viols(lambda d: d["discount_rate"].update(r=0.135, beta_passthrough=0.5, override_reason="lãi kỳ hạn ngắn trả một phần")), "L3"),
+          "B2 β=0,5 + override ⇒ không bắn")
+    check(not has(viols(lambda d: d["discount_rate"].update(
+        r=0.135, deposit_rate_now=0.06, beta_passthrough=0.0, override_reason="khớp kỳ hạn hợp đồng dài, không nhạy lãi")), "L3"),
+        "B2 β=0 + override_reason ⇒ không bắn")
+    check(not has(viols(lambda d: d["discount_rate"].update(r=0.1352)), "L3"), "B2 lệch 2bp không bắn")
+    # B4: 4 đột biến QTP của skeptic (+1 phiên bản capital_commitments)
+    def qtp_mut(fn):
+        def f(d):
+            d["projects"]["items"] = [d["projects"]["items"][1]]
+            fn(d)
+        return f
+    q1 = viols(qtp_mut(lambda d: d["projects"]["items"][0].update(mandatory=False)))
+    check(has(q1, "L7", "không nhất quán"), "QTP#1 mandatory=false (còn compliance) ⇒ L7 bắn")
+    q2 = viols(qtp_mut(lambda d: d["projects"]["items"][0].update(generates_revenue=True)))
+    check(has(q2, "L7", "không nhất quán"), "QTP#2 generates_revenue=true (còn compliance) ⇒ L7 bắn")
+    q3 = viols(qtp_mut(lambda d: d["projects"]["items"][0].update(classification="growth", mandatory=False, treatment="NPV0_BOOK")))
+    check(has(q3, "L7", "growth phải tạo doanh thu"), "QTP#3 growth + mandatory=false (không doanh thu) ⇒ L7 bắn")
+    q4 = viols(lambda d: d.update(projects={"items": [], "none_reason": "không có dự án nào đáng kể"}))
+    check(has(q4, "L7", "capital_commitments_12m"), "QTP#4 bỏ dự án (none_reason) mà cam kết vốn còn ⇒ L7 bắn")
+    q5 = viols(lambda d: (d.update(projects={"items": [], "none_reason": "không có dự án nào đáng kể"}),
+                          d["capital_commitments_12m"]["items"].__setitem__(0, {"desc": "vay 2.787,9 tỷ dự án khí thải 2027–29", "amount_bn": 2787.9, "source": "QĐ 917"})))
+    check(has(q5, "L7", "2,788") or has(q5, "L7", "2,787") or has(q5, "L7", "capital_commitments_12m"),
+          "QTP#5 capital_commitments ghi vay 2.787,9 tỷ mà projects rỗng ⇒ L7 bắn")
+    check(not has(viols(lambda d: None), "L7"), "fixture đúng: L7 không bắn (không báo giả)")
+    # ca chỉ có cờ compliance
+    check(has(viols(lambda d: d["projects"]["items"][1].update(mandatory=False, generates_revenue=True, treatment="NPV0_BOOK")), "L7"),
+          "ca chỉ khai classification=compliance, cờ khác ngược ⇒ L7 bắn")
+
+    # B5: file rỗng ruột
+    def hollow():
+        d = good()
+        kc = {"value": "khong_cong_bo", "searched": ["x"]}
+        d["share_base"]["shares_m"] = 1
+        d["tax"] = {"rate_path": [{"from_year": 2027, "rate": 0}], "source": "xxx"}
+        d["welfare_fund"] = {"balance_deducted": kc, "annual_appropriation_pct_of_npat": kc, "source": "xxx"}
+        d["working_capital"] = {"method": "zero_change_base", "source": "xxx"}
+        d["scenarios"] = {"items": [{"name": "a", "side": "base", "p": 1.0}]}
+        d["terminal"] = {"moat_tier": "NONE", "terminal_ronic": "NOT_APPLICABLE_FINITE_LIFE"}
+        d["liquidity_discount"] = {"basis": "sensitivity_only", "pct": 0.5, "source": "xxx"}
+        d["projects"] = {"items": [], "none_reason": "a"}
+        d["related_parties"] = {"items": [], "none_reason": "a", "searched": ["x"]}
+        d["one_offs"] = {"items": [], "none_reason": "a", "searched": ["x"]}
+        d["capital_commitments_12m"] = {"items": [], "none_reason": "a", "searched": ["x"]}
+        d["sector"] = {"k": kc, "k2": kc}
+        return d
+    hv, _, hp = run_doc(hollow())
+    os.unlink(hp)
+    check(len(hv) >= 1, f"B5 file rỗng ruột ⇒ {len(hv)} vi phạm (≥1)")
+    for need, why in (("L12", "1 kịch bản p=1"), ("L11", "quá nhiều khong_cong_bo"), ("S", "searched/none_reason ngắn")):
+        check(has(hv, need), f"B5 rỗng ruột bắn {need} ({why})")
+    check(has(viols(lambda d: d["liquidity_discount"].update(basis="sensitivity_only", pct=0.1)), "S", "pct"),
+          "B5 sensitivity_only với pct≠null ⇒ S")
+    check(has(viols(lambda d: d["one_offs"].update(items=[], none_reason="ngắn", searched=["abcdefgh"])), "S"), "B5 none_reason ngắn ⇒ S")
+    check(has(viols(lambda d: d["one_offs"].update(items=[], none_reason="không phát sinh khoản một lần", searched=["x"])), "S"),
+          "B5 searched=['x'] ⇒ S")
+
+    # L9 báo giả + các khoá mới
+    check(not has(viols(lambda d: d["liquidity_discount"].update(
+        position_size_note="chiết khấu theo ADV trung vị 60 phiên, tính ở bước Hard Gate SAU khoá")), "L9"),
+        "L9 mô tả phương pháp 'ADV trung vị 60 phiên… SAU khoá' KHÔNG bị bắt")
+    check(has(viols(lambda d: d["liquidity_discount"].update(position_size_note="ADV = 175 tỷ/phiên")), "L9"), "L9 'ADV = 175 tỷ/phiên' bị bắt")
+    for k in ("price", "adv60", "marketcap", "khoi_luong_tb", "pe_ttm", "market_price"):
+        check(has(viols(lambda d, k=k: d.update({k: 1})), "L9"), f"L9 khoá '{k}' bị bắt")
+    check(has(viols(lambda d: d["tax"].update(foo=1)), "S", "foo"), "additionalProperties=false: khoá lạ trong tax ⇒ S")
+    # L10 neo hạn công bố
+    check(not has(viols(lambda d: (d.update(dd_date="2027-02-15", method_version="M20261122"), d["discount_rate"].update(deposit_rate_date="2027-02-10"))), "L10"),
+          "L10 DD 15/02/2027 với FY2025 KT ⇒ không báo giả")
+    check(has(viols(lambda d: (d.update(dd_date="2027-05-15", method_version="M20261122"), d["discount_rate"].update(deposit_rate_date="2027-05-10"))), "L10"),
+          "L10 DD 15/05/2027 với FY2025 ⇒ bắn")
+    # gate mv: thiếu method_version ⇒ gate BẬT (không né luật bằng cách bỏ trống)
+    check(has(viols(lambda d: (d.pop("method_version"), d["projects"]["items"][1].update(treatment="NPV0_BOOK"))), "L7"),
+          "thiếu method_version ⇒ gate D3 vẫn bật ⇒ L7 bắn")
+    # gate mv
+    old = lambda d: d.update(method_version="M20261030", dd_date="2026-11-01")
+    check(not has(viols(lambda d: (old(d), d["discount_rate"].update(r=0.13, deposit_rate_date="2026-10-30"))), "L3"), "L3 gate: mv M20261030 ⇒ không áp")
+    check(not has(viols(lambda d: (old(d), d["projects"]["items"][1].update(treatment="NPV0_BOOK"), d["discount_rate"].update(deposit_rate_date="2026-10-30"))), "L7"),
+          "L7-D3 gate: mv M20261030 ⇒ không áp")
+    # method_version né luật cùng ngày
+    check(has(viols(lambda d: d.update(dd_date="2026-11-03", method_version="M20261030")), "L8"), "L8 ngày 03/11 khai mốc M20261030 (trước đó) ⇒ bắn")
+    check(has(viols(lambda d: d.update(dd_date="2026-11-03", method_version="M20261102")), "L8"), "L8 ngày 03/11 khai M20261102 (mốc ngày trước) ⇒ bắn")
+    check(not has(viols(lambda d: d.update(dd_date="2026-11-03", method_version="M20261103B")), "L8"), "L8 ngày 03/11 khai M20261103B ⇒ không bắn")
+    # L13, L14
+    check(has(viols(lambda d: d["welfare_fund"].update(applied_to_cashflow=False)), "L13"), "L13 có tỉ lệ trích mà applied_to_cashflow=false ⇒ bắn")
+    check(has(viols(lambda d: d["discount_rate"].update(deposit_rate_date="2026-09-01")), "L14"), "L14 lãi huy động cũ 83 ngày ⇒ bắn")
+    check(has(viols(lambda d: d["discount_rate"].update(deposit_rate_date="2026-11-30")), "L14"), "L14 deposit_rate_date SAU dd_date ⇒ bắn")
 
     # rc: cảnh báo rc=0, --strict rc=1, ENFORCE_FROM đã qua ⇒ rc=1
     bad = mut(lambda d: d["discount_rate"].update(r=0.13))
