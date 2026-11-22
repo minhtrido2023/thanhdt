@@ -45,8 +45,19 @@ out['roe_anchors']={r:pb(r,ke,0.07)*bvps for r in (0.132,0.146,0.16)}
 out['g_sens']={g:pb(base['roe'],ke,g)*bvps for g in (0.06,0.07,0.08)}
 px=52100; out['px']=px; out['pb_px']=px/bvps; out['implied_roe_at_px']=0.07+px/bvps*(ke-0.07)
 out['implied_ke_at_px']=0.07+(base['roe']-0.07)/(px/bvps)
-# VCSH dau ky 2025 = 196.112,9 (r3 muc D; nguon skeptic R2; CHUA tu doi chieu BCTC kiem toan 2025 do thieu cong cu doc PDF) (skeptic r1 muc 6 - xem skeptic_r1_applied.md: khong doc duoc PDF, thieu cong cu)
+# r4: VCSH dau ky 2025 = 196.112,9 (BCTC kiem toan 2025; dispatch Mike 22/11, chua render lai tu PDF scan)
 out['np25']=np25; out['roe_2025']=np25/((eq0+196112.9)/2)
+# r4: ROE 2025 chuan hoa CC 0,8% tinh tu du lieu BCTC kiem toan 2025
+a=A['is_2025_audited']; avg_l25=(a['loans_end_2024']+b0['loans_gross'])/2; avg_e25=(a['equity_end_2025']+a['equity_end_2024'])/2
+out['roe_2025_norm_cc8']=(a['ppop']-a['credit_cost_target']*avg_l25)*0.8/avg_e25
+out['cc_loans_9m_ann']=6190/avg_loans*12/9  # TM6: du phong cho vay 9T 6.190
+# r4: co tuc tien 2025
+d=A['dividend_cash_2025']; out['cash_div_per_share']=d['profit_bn']/d['shares_m']*1000
+# gia tri/cp (tren so cp hien hanh) sau GDKHQ co tuc tien = P/B base x (BVPS - co tuc tien/cp); tong cho co dong = + co tuc tien
+pbb=pb(base['roe'],ke,base['g']); out['val_post_gdkhq']=pbb*(bvps-out['cash_div_per_share'])
+out['div_haircut_vnd']=out['scen']['base']-out['val_post_gdkhq']; out['div_haircut_pct']=out['val_post_gdkhq']/out['scen']['base']-1
+out['val_total_holder']=out['val_post_gdkhq']+out['cash_div_per_share']; out['total_vs_base']=out['val_total_holder']/out['scen']['base']-1
+out['implied_div_payout_roe146']=1-0.07/0.146
 # skeptic r1 muc 4: 2 giai doan, 5 nam tang truong BV g1, ROE 16%, chia = (ROE-g1)*BV dau ky, sau do P/B Gordon (ROE-g)/(Ke-g). HIEN THI, khong doi tam.
 def two(roe,ke,g1,g,n=5):
     b=bvps;pv=0

@@ -5,15 +5,15 @@
 > Nguồn: **[BCTC]** = BCTC hợp nhất Q3/2026 + giải trình biến động LNST + Phụ lục II điều chỉnh hồi tố 2025 theo KTNN, CV
 > 22146/VCB-CSTCKT ký 30/10/2026 (`src/VCB_BCTC_Q3_2026_HN.pdf`, 66 trang scan, tôi đọc trực tiếp từng trang). Site
 > vietcombank.com.vn tải danh mục bằng AJAX (trang BCTC trả 404) ⇒ lấy bản PDF CBTT y nguyên từ `static2.vietstock.vn`
-> (trang 1 có chữ ký số VCB 30/10/2026 16:03). `src/VCB_BCTC_2025_KT_HN.pdf` = BCTC kiểm toán 2025 (đã tải; **chưa đọc được** — môi trường không có công cụ đọc PDF, xem §10).
+> (trang 1 có chữ ký số VCB 30/10/2026 16:03). `src/VCB_BCTC_2025_KT_HN.pdf` = BCTC kiểm toán 2025 (đã tải; nguồn cho VCSH đầu kỳ 2025, PPOP 2025, dư nợ cuối 2024, tên cũ CBBank; ý kiến kiểm toán EY: chấp nhận toàn phần, không ngoại trừ, không nhấn mạnh — xem §10).
 > **[BQ]** = `tav2_bq.ticker_financial` / `tav2_bq.ticker` · **[Bobby]** = `kb/data_registry/market-state/sector_read_ngan_hang_quoc_doanh_20261117.md`
 > (đọc mù) · **[Báo]** = báo chí, ghi rõ cạnh số. Mọi phép tính: `calc.py` trên `assumptions_VCB_20261117.json`
-> (md5 `55731df5d9c0c9292b5695cc5d6c4cce`). Số tự đặt gắn **(ước lượng)**.
+> (md5 `85d41e08f834127e57cd740ed88dd931`). Số tự đặt gắn **(ước lượng)**.
 
 ## 0. Kết luận
 
 **Ngân hàng tốt nhất hệ thống về chất lượng tài sản và chi phí vốn. Ở mức r 13,5% của fleet, giá trị cơ sở (tâm ROE 14,6%) là 35.500 đ/cp (có trọng số
-39.100; ba mốc ROE 13,2% / 14,6% / 16% ⇒ 29.000 / 35.500 / 42.000), dưới giá 52.100 (17/11/2026).** Toàn bộ chênh lệch nằm ở **chi phí vốn**, không nằm ở lợi nhuận. Giá hiện tại hàm ý hoặc
+38.800; ba mốc ROE 13,2% / 14,6% / 16% ⇒ 29.000 / 35.500 / 42.000), dưới giá 52.100 (17/11/2026).** Khoảng chênh 35.500 → 52.100 đến từ **hai nguồn**: (i) **ROE bền** (tâm 14,6% so với ROE lõi quan sát 16,65% ⇒ 45.071 ở Ke 13,5%, tức ROE giải thích ~58% khoảng chênh) và (ii) **chi phí vốn Ke** (phần còn lại). Giá hiện tại hàm ý hoặc
 ROE bền **18,2%** (ở Ke 13,5%), hoặc Ke **11,4%** (ở ROE 14,6%). Ke 11,4% nằm trong dải CAPM cho ra với β thật của VCB (0,76 thô,
 0,84 sau hiệu chỉnh Blume), không phải β 1,1 mặc định.
 
@@ -23,13 +23,13 @@ ROE bền **18,2%** (ở Ke 13,5%), hoặc Ke **11,4%** (ở ROE 14,6%). Ke 11,4
 | Lợi nhuận 9T, headline vs lõi | +24,4% headline; **+12,5% lõi** sau khi bỏ lãi đánh giá lại khi hợp nhất, không chịu thuế (ước lượng) | [BCTC], §2 |
 | Q3/2026 | Lợi nhuận trước dự phòng (PPOP) **+44,8% YoY**, nhưng LNTT **−0,2%** vì dự phòng 6.184 tỷ (Q3/25: 776 tỷ) | [BCTC] |
 | Nợ xấu / bao phủ | NPL **0,71%** (từ 0,58%); bao phủ **243%**; nhóm 2 **+85% YTD** trong khi cho vay +8,5% | [BCTC] |
-| Tâm định giá ở r 13,5% (ROE 14,6%) | **35.500** (P/B 1,169); có trọng số **39.100**; vùng Ke ±100bp **30.800–42.000**; mốc ROE 13,2% / 16% ⇒ **29.000 / 42.000** | `calc.py` |
+| Tâm định giá ở r 13,5% (ROE 14,6%) | **35.500** (P/B 1,169); có trọng số **38.800**; vùng Ke ±100bp **30.800–42.000**; mốc ROE 13,2% / 16% ⇒ **29.000 / 42.000** | `calc.py` |
 | Ở Ke theo β thật 12% (ROE 14,6%) | **46.100** (dưới giá 52.100) | `calc.py` |
 | Thanh khoản | ADV trung vị 3 năm **175 tỷ/phiên** (Price×Volume, BQ; 153 nếu Close×Volume; trung vị 1 năm 281) ⇒ chiết khấu thanh khoản 0 (giá trị trước = sau) | [BQ] |
 | Moat (5F tầng b) | **NARROW**: hào chi phí vốn + chất lượng tài sản; không thưởng và không trừ vào mô hình | §6 |
 | Pháp lý | WARNING nhẹ: KTNN điều chỉnh hồi tố 2025 (nhỏ); thanh tra cấp chi nhánh; không có vụ án | §8 |
 
-**Đọc nhanh:** đây là ca **"tốt nhưng không rẻ ở r của fleet"**. Quyết định chủ yếu là chọn Ke. Báo cáo này giữ tâm ở r 13,5% đúng luật
+**Đọc nhanh:** đây là ca **"tốt nhưng không rẻ ở r của fleet"**. Kết quả phụ thuộc vào hai lựa chọn: ROE bền (14,6% so với lõi 16,65%) và Ke. Báo cáo này giữ tâm ở r 13,5% đúng luật
 user 03/11, và in mốc β thật cạnh đó, không lấy mốc β thật làm tâm. Rủi ro thật cho lợi nhuận 2027 là áp lực NIM do chỉ đạo và tầng
 nợ sớm (nhóm 2) tăng nhanh. Rủi ro này đã một phần lộ ra ở Q3: dự phòng tăng gấp 8 lần.
 
@@ -78,7 +78,7 @@ nợ sớm (nhóm 2) tăng nhanh. Rủi ro này đã một phần lộ ra ở Q3
 | Bao phủ NPL | **243%** | 257% |
 | Xoá nợ bằng dự phòng 9T | **0** | 7.288 (cả năm 2025) |
 | Hình thành NPL 9T (Δ NPL + xoá) | **3.104** ≈ 0,18% dư nợ BQ (≈ 0,24% năm hoá) | — |
-| Chi phí tín dụng CHO VAY 9T năm hoá | **0,47%** dư nợ BQ (6.190 ÷ dư nợ BQ × 12/9; tổng gồm TPDN 0,70%) | — |
+| Chi phí tín dụng CHO VAY 9T năm hoá | **0,473%** dư nợ BQ (6.190 ÷ dư nợ BQ × 12/9; tổng gồm TPDN 0,70%) | — |
 
 **Đọc:** cờ của Bobby (§7.12, "nhóm 2 tăng > 2 lần tốc độ cho vay") **CHẠM**: nhóm 2 +85% so với cho vay +8,5%. Nợ chuyển xuống
 **nhóm 3–4** (tăng từ 1.063 lên 4.229 tỷ), chưa xuống nhóm 5. Đây là pha sớm. Nhưng quy mô tuyệt đối vẫn nhỏ so với đệm: dự phòng
@@ -86,8 +86,8 @@ nợ sớm (nhóm 2) tăng nhanh. Rủi ro này đã một phần lộ ra ở Q3
 dự phòng 2026 > 2025) với riêng VCB gần như chắc chắn **CÓ**: 9T đã 9.180 tỷ, trong khi 9T/25 chỉ 2.338 tỷ.
 **Cơ cấu 9.180:** cho vay 6.190 + TPDN chưa niêm yết 2.997. Nguồn kéo LN này **gần cạn**: dự phòng TPDN đã trích 97% gốc còn lại (6.304/6.501) ⇒ chiều tốt cho dự phòng 2027 nếu không có mã mới. Chưa thấy chênh lệch dự phòng so với chuẩn bao phủ 100% ⇒ **không điều chỉnh trừ BVPS**.
 
-Chưa kiểm trong lượt này: top-10 khách hàng / VCSH, dư nợ BĐS, ý kiến kiểm toán 2025 — **cần kiểm** ở BCTC kiểm toán 2025 (đã tải nhưng chưa đọc được, §10) hoặc Pillar 3.
-Ngoại bảng (BCTC Q3 tr.18): bảo lãnh khác **+38% YTD**, cam kết khác **+88% YTD** ⇒ WARNING nhẹ, chưa định lượng rủi ro; không điều chỉnh BVPS.
+Dư nợ ngành Xây dựng 2025 tăng 90,5 → 155,3 nghìn tỷ (**+72%**) trong khi tổng dư nợ +15,5% (theo kiểm tra độc lập, chưa render lại từ src/). Top-10 khách hàng **không công bố** trong BCTC VAS. Dư nợ BĐS chưa kiểm (Pillar 3).
+Ngoại bảng (BCTC Q3 tr.18): bảo lãnh khác **+38% YTD**, cam kết khác **+88% YTD**. ⚠️ **WARNING ngoại bảng (không nhân vào đại lượng mô hình nào):** bảo lãnh vay vốn 287 → 5.885 → 9.549 tỷ; tổng bảo lãnh (vay vốn + khác) 30/09/2026 so 31/12/2024 = 138.449 / 58.339 = **×2,37** (~55% VCSH) (theo kiểm tra độc lập, chưa render lại từ src/). Không điều chỉnh BVPS.
 
 ## 4. Nguồn vốn, thanh khoản, vốn
 
@@ -99,7 +99,7 @@ Ngoại bảng (BCTC Q3 tr.18): bảo lãnh khác **+38% YTD**, cam kết khác 
 | Giấy tờ có giá phát hành | 47.392 (CCTG 31.937, trái phiếu dài hạn 11.455) | 27.101 | +20,3 nghìn tỷ, chủ yếu CCTG ngắn hạn ⇒ chi phí biên đắt hơn (đúng cơ chế Bobby §1b) |
 | Vay NHNN | 282 | 24.127 | Đã trả hết vay cầm cố GTCG |
 | LDR thô (cho vay / (TG KH + GTCG)) | 99,3% | — | **Không phải** định nghĩa TT22/TT50; LDR theo quy định **chưa có số** |
-| CAR | Basel III ~11,1–11,6% (30/06/2026) | — | [Báo, 1 nguồn — chưa đối chiếu Pillar 3]; CET1 chưa có số |
+| CAR | Basel III ~11,1–11,6% (30/06/2026) | — | [Báo, 1 nguồn — chưa đối chiếu Pillar 3]; CET1 chưa có số. CAR chưa gồm ngân hàng con được loại trừ (CBBank) |
 
 **Độ nhạy KBNN (ước lượng):** nếu KBNN rút về mức cuối 2025 (−35,6 nghìn tỷ) và được thay bằng CCTG đắt hơn khoảng 2pp, NII giảm
 khoảng 0,7 nghìn tỷ/năm ≈ 1% NII năm hoá. Tác động nhỏ với VCB. Cờ vẫn chạm, nhưng không phải biến số lớn.
@@ -110,13 +110,11 @@ quyết gốc**]:
 (a) phát hành từ nguồn vốn chủ khoảng 10.687 tỷ (≈ **+12,8%** số cp, ước lượng);
 (b) cổ tức từ LN 2025 là 20.331 tỷ, **chưa rõ** tiền hay cổ phiếu, đang trình cơ quan nhà nước (nếu bằng cổ phiếu ≈ +24,3% số cp);
 (c) phát hành riêng lẻ **tối đa 6,5%** (~543 triệu cp, ≤55 nhà đầu tư), Chủ tịch nói "cố gắng trong 2026".
-⇒ (a) và (b) **không đổi giá trị**, chỉ chia nhỏ cổ phiếu. Mọi giá trị/cp trong báo cáo này là **trên số cp hiện hành**, so được
-trực tiếp với giá 52.100 (chưa qua ngày giao dịch không hưởng quyền). Sau khi (a) và (b) thực hiện, chia cho (1 + tỷ lệ).
+⇒ Cổ phiếu (a) và cổ tức cổ phiếu (b): chia (1 + 24,3%), **không đổi giá trị**. **Cổ tức tiền** 2.433 đ/cp (= 20.331 tỷ / 8.355,7 triệu cp, `calc.py`): giá trị/cp sau ngày GDKHQ ≈ 1,169 × (30.359 − 2.433) ≈ **32.650 (−8,0%)**; tổng giá trị cho cổ đông (gồm tiền nhận) ≈ **35.085 (−1,2%)**. ⚠️ **Mọi vùng giá trong báo cáo này phải trừ ~2.850 đ sau ngày GDKHQ cổ tức tiền.** Mọi giá trị/cp ở đây là **trên số cp hiện hành, trước GDKHQ**, so được trực tiếp với giá 52.100.
 (c) chỉ tăng BVPS nếu giá phát hành > BVPS; hướng có lợi, nhưng chưa đưa vào base.
 
 **Nghĩa vụ chính sách (Bobby §7.15):** công ty con 100% "**Ngân hàng TNHH MTV Ngoại thương Công nghệ số**" (giấy phép 15/GP-NHNN
-27/03/2026, TM1(d)). Đây là ngân hàng nhận chuyển giao bắt buộc **[NỀN — chưa đối chiếu tên cũ trong BCTC]**. Theo skeptic R2 (chưa tự đối chiếu văn bản gốc),
-ngân hàng này **được miễn hợp nhất và bị loại khỏi tính CAR** ⇒ lỗ của nó **không chảy qua LN hợp nhất/BVPS hay CAR** của VCB; rủi ro còn lại là
+27/03/2026, TM1(d)). Đây là ngân hàng nhận chuyển giao bắt buộc . Tên cũ: NH TM TNHH MTV Xây dựng Việt Nam (CBBank), đổi tên thành NH TNHH MTV Ngoại thương Công nghệ số. Nguồn: BCTC kiểm toán 2025 (B02 tr.7; TM1 tr.15); QĐ 2299/QĐ-NHNN 17/10/2024; QĐ 30/QĐ-TTGSNH1 17/01/2025. Ngân hàng này **được miễn hợp nhất và bị loại khỏi tính CAR** ⇒ lỗ của nó **không chảy qua LN hợp nhất/BVPS hay CAR** của VCB; rủi ro còn lại là
 quyết định hỗ trợ vốn/thanh khoản và khả năng bỏ miễn trừ. BCTC Q3 không có thuyết minh riêng về quy mô, lỗ luỹ kế hay hỗ trợ ⇒ **WARNING: chưa định lượng được**. 
 
 ## 5. Định giá — P/B = (ROE bền − g)/(Ke − g); MÙ giá thị trường
@@ -130,23 +128,23 @@ biến động tiền gửi/cho vay. Không in số.
 **12%** làm MỐC ĐỌC, không làm tâm.
 
 **ROE bền (không dùng ROE năm có khoản một lần / năm giảm dự phòng):**
-- Lịch sử [BQ ROE_Trailing]: 2019 23,5% → 2022 23,6% → 2024 18,3% → 2025 16,3%; `ROE_Min5Y` 16,7%. ROE 2025 tự tính 16,7% (VCSH đầu kỳ ước từ BQ, ước lượng). Xu hướng giảm vì vốn tích luỹ nhanh hơn lợi nhuận.
+- Lịch sử [BQ ROE_Trailing]: 2019 23,5% → 2022 23,6% → 2024 18,3% → 2025 16,3%; `ROE_Min5Y` 16,7%. ROE 2025 tự tính 16,7% (VCSH đầu kỳ 196.112,9 theo BCTC kiểm toán 2025). ROE 2025 chuẩn hoá CC 0,8% = **13,2%** (`calc.py`, khối is_2025: PPOP 47.211,8; dư nợ cuối 2024 1.449.198,9; VCSH 224.487,2 / 196.112,9). Xu hướng giảm vì vốn tích luỹ nhanh hơn lợi nhuận.
 - ROE lõi 9T/26 năm hoá: **16,65%** (LN lõi 29.861 tỷ, lãi đánh giá lại không chịu thuế). Theo chi phí tín dụng chuẩn hoá trên PPOP lõi: CC 0,4% → 18,4% · 0,6% → 17,2% · 0,8% → **16,0%** · 1,0% → 14,9%.
 - **Ba mốc ROE bền (minh bạch, cùng g 7%, Ke 13,5%):**
   - **13,2%** = ROE 2025 chuẩn hoá chi phí tín dụng 0,8% (sức sinh lời năm nền, trước đợt tăng NIM 2026) ⇒ **29.000**.
   - **16,0%** = PPOP lõi 9T/26 năm hoá với CC 0,8% (≈ 1,7× CC cho vay hiện tại 0,47%) ⇒ **42.000**. **KHÔNG phải mốc thận trọng**: nó dùng PPOP ở đỉnh NIM, đúng mức mà §9 và §7 cảnh báo chịu áp lực chỉ đạo giảm lãi.
   - **14,6%** = trung điểm hai mốc trên ⇒ **35.500**. **Chọn làm TÂM** vì (i) 13,2% bỏ qua tăng trưởng PPOP có thật của 2026, (ii) 16,0% giả định đỉnh NIM tồn tại vĩnh viễn; trung điểm không tựa vào một trong hai giả định cực. Lựa chọn tâm là phán đoán (ước lượng), không suy ra từ dữ liệu; bảng 3 mốc để người đọc tự chọn.
-- **ROE ở CET1 mục tiêu:** CAR ~11,35% (giữa khoảng báo chí) so với mục tiêu ~12% (10,5% + D-SIB giả định 1–2%) ⇒ ROE 14,6% × 11,35/12 = **13,8%** ⇒ giá trị **31.800**. Chỉ là thông tin rủi ro (D-SIB chưa ban hành; Bobby Q11 P=0,25), không đổi headline.
+- **ROE ở CET1 mục tiêu:** CAR ~11,35% (giữa khoảng báo chí; CAR chưa gồm ngân hàng con được loại trừ CBBank) so với mục tiêu ~12% (10,5% + D-SIB giả định 1–2%) ⇒ ROE 14,6% × 11,35/12 = **13,8%** ⇒ giá trị **31.800**. Chỉ là thông tin rủi ro (D-SIB chưa ban hành; Bobby Q11 P=0,25), không đổi headline.
 - **g = 7%** (ước lượng; ≤ GDP danh nghĩa dài hạn; ≪ ROE × (1 − tỷ lệ cổ tức tiền ~10%)).
 
 **Kịch bản (tâm theo luật = base):**
 
 | Kịch bản | P | Giả định | P/B | Giá trị/cp |
 |---|---|---|---|---|
-| Xấu | 0,25 | ROE 13,5% = Ke (NIM −30bp theo chỉ đạo + CC 1,0% + gánh nặng NH chuyển giao) | 1,00 | **30.400** |
+| Xấu | 0,25 | ROE 13,2% (NIM −30bp theo chỉ đạo + CC 1,0% hàm ý ~12,3%; lấy 13,2% = ROE 2025 chuẩn hoá làm trần trên) | 0,95 | **29.000** |
 | Cơ sở | 0,50 | ROE 14,6% (tâm, xem ba mốc), g 7% | 1,169 | **35.500** |
 | Tốt | 0,25 | ROE 18% (NIM giữ, CC 0,4–0,6%), g 8% | 1,82 | **55.200** |
-| **Có trọng số** | | | | **39.100** |
+| **Có trọng số** | | | | **38.800** |
 
 **Độ nhạy theo lãi huy động** (ROE 14,6%, g 7%; β pass-through 1 / 0,5):
 
@@ -157,11 +155,12 @@ biến động tiền gửi/cho vay. Không in số.
 
 g 6% / 8% ⇒ 34.800 / 36.400. Chiết khấu thanh khoản: **0%** (ADV trung vị 3 năm 175 tỷ/phiên, Price×Volume BQ [153 nếu Close×Volume; 281 trung vị 1 năm]; tham gia 5% ≈ **8,75 tỷ/phiên**, vị thế ≤10 tỷ thoát trong ≤2 phiên) ⇒ giá trị trước = sau. Free float 10% là giới hạn cho quỹ lớn, không phải cho quy mô fleet.
 
+**Sau GDKHQ cổ tức tiền (2.433 đ/cp) mọi vùng dưới đây trừ ~2.850 đ (§4).**
 **Vùng đọc:** rẻ ≤ **30.200** (0,85 × tâm) · hợp lý **30.800–42.000** (Ke ±100bp) · trên **42.000** = đắt theo r 13,5% (**độ nhạy theo r/Ke**: giá 52.100 chỉ đạt khi Ke ≈ 11,4% hoặc ROE ≈ 18,2%; xem hai giai đoạn bên dưới).
 Đối chiếu sau khi định giá xong (không dùng để suy ngược): giá 52.100 = P/B 1,72 ⇒ hàm ý ROE 18,2% ở Ke 13,5%, hoặc Ke 11,4% ở ROE 14,6%.
 
 **Độ nhạy mô hình hai giai đoạn (HIỂN THỊ, không đổi tâm):** 5 năm BV tăng g1, ROE 14,6%, chia = (ROE − g1) × BV đầu kỳ, sau đó P/B Gordon g 7%
-(`calc.py`, khối `two_stage`). Gordon một giai đoạn ngầm chia cổ tức 56% lợi nhuận, trong khi VCB chia tiền thực tế ~10%.
+(`calc.py`, khối `two_stage`). Gordon một giai đoạn ngầm chia cổ tức 52% lợi nhuận (1 − g/ROE ở ROE 14,6%), trong khi VCB chia tiền thực tế ~10%.
 
 | Ke | g1 13% | g1 10% |
 |---|---|---|
@@ -205,7 +204,7 @@ Loại hình: NHTM Nhà nước chi phối, bán buôn + bán lẻ, đầu mối
 tín dụng (NPL thấp nhất). (iii) Đồng hồ cắt hào: CASA đang giảm (33,7% → 31,8% trong 9T), KBNN là đặc quyền có thể đổi, Basel
 III/D-SIB pha loãng ROE.
 ⇒ **moat_tier = NARROW** (không phải WIDE: chênh ROE so với Ke nhỏ và đang co; hai trụ hào có công tắc hành chính).
-**Tham số moat trong mô hình: KHÔNG có** (không thưởng, không trừ — luật 08/11). Tâm ROE 14,6% < ROE_Min5Y (16,7%), không ngầm thưởng.
+**Tham số moat trong mô hình: KHÔNG có** (không thưởng, không trừ — luật 08/11). Lưu ý: ROE chuẩn hoá 2025 là 13,2% < Ke 13,5% ⇒ điều kiện (i) ở trên yếu đi (chỉ đúng với ROE chưa chuẩn hoá).
 
 **Độ nhạy theo moat:** WIDE (ROE 18%) **51.400** · NARROW (base) **35.500** · NONE (ROE → Ke) **30.400**.
 
@@ -220,7 +219,7 @@ III/D-SIB pha loãng ROE.
 
 ## 8. Pháp lý / quản trị — chỉ WARNING (luật 27/09)
 
-- ⚠️ **KTNN điều chỉnh hồi tố số liệu 2025** (dự phòng, TSCĐ, phải thu, lãi phải thu, chi phí, thuế), trình bày lại từ BCTC Q3/2026. Quy mô nhỏ: VCSH riêng lẻ +29 tỷ; LN trước dự phòng 2025 hợp nhất +46,9 tỷ [BCTC Phụ lục II]. Ý kiến kiểm toán BCTC 2025: chưa đọc trong lượt này (file đã tải) — **cần kiểm**.
+- ⚠️ **KTNN điều chỉnh hồi tố số liệu 2025** (dự phòng, TSCĐ, phải thu, lãi phải thu, chi phí, thuế), trình bày lại từ BCTC Q3/2026. Quy mô nhỏ: VCSH riêng lẻ +29 tỷ; LN trước dự phòng 2025 hợp nhất +46,9 tỷ [BCTC Phụ lục II]. Ý kiến kiểm toán EY về BCTC 2025: **chấp nhận toàn phần**, không ngoại trừ, không nhấn mạnh.
 - ⚠️ Kết luận thanh tra NHNN cấp chi nhánh 2026 (Đà Nẵng 228/KL-TTNH, "chưa đến mức xử lý hành chính"; Bình Phước 78/KL-TTRA.BP 12/08) [Báo/DNSE]. Không tìm thấy vụ khởi tố cán bộ VCB năm 2026 (tìm kiếm báo chí, chưa tra UBCKNN/HOSE).
 - ⚠️ Nghĩa vụ chính sách: ngân hàng con nhận chuyển giao (§4); chỉ thị giảm lãi suất cho vay; quyết định tăng vốn và hình thức cổ tức cần cơ quan chủ sở hữu duyệt (biến hành chính, Bobby §2c).
 - ⚠️ BCTC Q3 **không** soát xét; CV CBTT đánh dấu "Signature Not Verified" trên bản tải (do trình đọc PDF, không phải dấu hiệu giả mạo).
@@ -235,7 +234,7 @@ chi phí tín dụng cả năm ≤ 0,8%; **hoặc** lãi huy động 12T hiệu 
 **Theo dõi:** BCTC Q4 (KBNN, nhóm 2, NIM tự tính — Bobby Q1/Q4/Q5); ngày chốt quyền phát hành thưởng và cổ tức; CBTT riêng lẻ; Pillar 3 / CAR.
 
 ## 10. Việc chưa làm (cho skeptic / Mike)
-- **Chưa đọc được BCTC kiểm toán 2025** (`src/VCB_BCTC_2025_KT_HN.pdf`; môi trường không có poppler/PyMuPDF, cài đặt bị chặn): ý kiến kiểm toán, VCSH đầu kỳ 2025 (hiện là **196.112,9** (nguồn skeptic R2, chưa tự đối chiếu) trong `calc.py`:48, chỉ ảnh hưởng ROE 2025 tự tính 16,7%, không ảnh hưởng tâm), top khách hàng, BĐS. Cần ai đó có công cụ đọc PDF. Chưa có CET1/LDR theo TT22, chưa có CASA theo cá nhân/DN.
+- **Nguồn BCTC kiểm toán 2025** (`src/VCB_BCTC_2025_KT_HN.pdf`, B02 tr.7; TM1 tr.15): VCSH đầu kỳ 2025 196.112,9, PPOP 47.211,8, dư nợ cuối 2024 1.449.198,9 lấy theo dispatch Mike 22/11 từ kiểm tra độc lập, **chưa render lại từ PDF scan trong phiên này**. Ý kiến kiểm toán EY 2025: chấp nhận toàn phần, không ngoại trừ, không nhấn mạnh. Chưa có CET1/LDR theo TT22, chưa có CASA theo cá nhân/DN, chưa có dư nợ BĐS.
 - Số cổ phiếu sau phát hành và hình thức cổ tức: báo chí mâu thuẫn, **chưa đối chiếu nghị quyết ĐHĐCĐ gốc**.
 - Khoản một lần 3.171 tỷ: dùng phần chênh của HĐ khác làm proxy; thuyết minh hợp nhất kinh doanh chi tiết không có trong BCTC quý.
 

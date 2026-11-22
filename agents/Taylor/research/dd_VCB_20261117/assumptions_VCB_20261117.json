@@ -14,11 +14,13 @@
     "Ke_anchor": 0.135, "Ke_anchor_note": "r 13,5% neo 03/11/2026 (luat user 2026-11-03); lai huy dong 12T hieu dung deposit_rate_vn.effective_deposit_rate = 7,40% (CCTG 12M 02/11) tai 03/11 va 17/11 => khong dieu chinh; beta pass-through 1",
     "Ke_beta_real": 0.12, "Ke_beta_real_note": "beta tuan VCB vs VNINDEX 06/2021-11/2026 = 0,763 (n=282, corr 0,60) => Blume 0,84; rf 6,75% + 0,84 x ERP 5,0-6,1% = 10,9-11,9%; lam tron 12% lam moc doc, KHONG lam tam",
     "g": 0.07, "g_note": "uoc luong; <= GDP danh nghia dai han; << ROE x (1 - ti le co tuc tien ~10%)",
-    "scenarios": {"bear": {"p": 0.25, "roe": 0.135, "g": 0.07}, "base": {"p": 0.50, "roe": 0.146, "g": 0.07}, "bull": {"p": 0.25, "roe": 0.18, "g": 0.08}},
+    "scenarios": {"bear": {"p": 0.25, "roe": 0.132, "g": 0.07}, "base": {"p": 0.50, "roe": 0.146, "g": 0.07}, "bull": {"p": 0.25, "roe": 0.18, "g": 0.08}},
     "roe_anchors": {"low_roe2025_norm_cc0.8": 0.132, "mid_tam": 0.146, "high_roe2026_core_norm_cc0.8": 0.16, "note": "r3: tam = trung diem 14,6%; 16% KHONG phai than trong (dung PPOP dinh NIM 2026); 13,2% = ROE 2025 chuan hoa CC 0,8% (skeptic R2)"},
     "moat_tier": "NARROW", "moat_param": "khong thuong khong tru (luat 2026-11-08)",
     "cet1_target_note": "CAR Basel III 30/06/2026 ~11,1-11,6% (bao chi, 1 nguon); muc tieu 10,5% + D-SIB gia dinh 1-2% => ~12,0%",
     "liquidity_discount": 0.0, "liquidity_note": "ADV trung vi 3 nam = 175 ty/phien (BQ Price x Volume, 17/11/2026; 153 neu Close x Volume; 281 trung vi 1 nam); tham gia 5% ~ 8,75 ty/phien => chiet khau 0"
   },
+  "is_2025_audited": {"source": "BCTC kiem toan 2025 hop nhat (theo dispatch Mike 22/11, chua render lai tu src/VCB_BCTC_2025_KT_HN.pdf)", "ppop": 47211.8, "loans_end_2024": 1449198.9, "equity_end_2025": 224487.2, "equity_end_2024": 196112.9, "credit_cost_target": 0.008},
+  "dividend_cash_2025": {"profit_bn": 20331, "shares_m": 8355.675094, "stock_div_ratio": 0.243, "note": "co tuc co phieu chia (1+24,3%) khong doi gia tri; co tuc tien/cp = 20331/8355,7 trieu cp"},
   "share_actions_pending": {"bonus_from_reserve_bn": 10687, "bonus_ratio_est": 0.1279, "dividend_2025_profit_bn": 20331, "dividend_form": "chua ro (tien/co phieu) - cho phe duyet co quan nha nuoc", "private_placement_max": "6,5% (~543,1 trieu cp, <=55 NDT)", "source": "bao chi DHDCD 24/04/2026 (baodautu, nhadautu, doanhnhan.baophapluat) - CHUA doi chieu nghi quyet goc"}
 }
