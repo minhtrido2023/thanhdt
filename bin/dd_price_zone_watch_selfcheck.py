@@ -466,6 +466,52 @@ def cases(m):
                    not os.path.exists(dflt))
         finally:
             m.CAND_JSON = _sv_cj
+    # 11. A7 — bậc hiển thị (chỉ nhãn): Bậc 1 / Bậc 2, mã có cờ vẫn hiện, không mất mã
+    def trow(t="AAA", close=17000, sk="CONFIRMED", flags=(), notes=()):
+        e2 = ent(t, c=20000, lo=18000, hi=24000)
+        e2["skeptic_final"] = sk
+        return {"ticker": t, "entry": e2, "close": close, "flags": list(flags), "frame_notes": list(notes)}
+    CLEAN = ("CLEAN", [], "")
+    ADV = (1e9, None)            # vị thế 77,5tr / (10% × 1 tỷ) = 0,775 phiên
+    POS, PART = 1.55e9 * 0.05, 0.10
+    ok("Bậc 1: dưới đáy ∧ CONFIRMED ∧ sạch cờ ∧ thoát ≤3 phiên", m.tier_of(trow(), CLEAN, ADV, POS, PART) == (1, []))
+    ok("Bậc 2: giá = đáy vùng (chưa DƯỚI)", m.tier_of(trow(close=18000), CLEAN, ADV, POS, PART)[0] == 2)
+    ok("Bậc 2: skeptic FIXED_UNVERIFIED nêu lý do", "skeptic FIXED_UNVERIFIED" in m.tier_of(trow(sk="FIXED_UNVERIFIED"), CLEAN, ADV, POS, PART)[1])
+    ok("Bậc 2: skeptic_final thiếu ⇒ '?'", "skeptic ?" in m.tier_of(trow(sk=None), CLEAN, ADV, POS, PART)[1])
+    ok("Bậc 2: cờ DD FLAGGED nêu mã", any("QF:X" in w for w in m.tier_of(trow(), ("FLAGGED", ["QF:X"], ""), ADV, POS, PART)[1]))
+    ok("Bậc 2: cờ DD chưa kiểm (None) / UNKNOWN KHÔNG im lặng Bậc 1",
+       m.tier_of(trow(), None, ADV, POS, PART)[0] == 2 and m.tier_of(trow(), ("UNKNOWN", [], "x"), ADV, POS, PART)[0] == 2)
+    ok("Bậc 2: cờ tĩnh BANNED/forensic", m.tier_of(trow(flags=["BANNED"]), CLEAN, ADV, POS, PART)[0] == 2)
+    ok("'đang giữ' không phải cờ DD", m.tier_of(trow(flags=["đang giữ ZaloPay 100"]), CLEAN, ADV, POS, PART)[0] == 1)
+    ok("Bậc 2: sự kiện quyền sau DD (hệ giá lệch)", m.tier_of(trow(notes=["cổ tức"]), CLEAN, ADV, POS, PART)[0] == 2)
+    # biên thanh khoản: 77,5tr / (0,1×A) = 3 ⇒ A = 258,33tr; 3,0 phiên qua, >3 rớt
+    ok("thoát đúng 3,0 phiên ⇒ Bậc 1; hơn một chút ⇒ Bậc 2",
+       m.tier_of(trow(), CLEAN, (POS / (PART * 3), None), POS, PART)[0] == 1
+       and m.tier_of(trow(), CLEAN, (POS / (PART * 3) * 0.99, None), POS, PART)[0] == 2)
+    ok("Bậc 2: ADV không đo được (None/lỗi) KHÔNG im lặng Bậc 1",
+       m.tier_of(trow(), CLEAN, (None, "no row"), POS, PART)[0] == 2 and m.tier_of(trow(), CLEAN, None, POS, PART)[0] == 2
+       and m.tier_of(trow(), CLEAN, ADV, POS, None)[0] == 2)
+    ok("giả định vị thế = 5% × 1,55 tỷ = 77,5 triệu", abs(m.POS_NAV_VND * m.POS_PCT - 77.5e6) < 1 and m.TIER1_EXIT_SESSIONS == 3)
+    ok("tier_of không đổi row", (lambda r: (m.tier_of(r, CLEAN, ADV, POS, PART), r)[1] == trow())(trow()))
+    # end-to-end qua evaluate/build_candidates/render: mã có cờ VẪN hiện (Bậc 2), tập mã không đổi
+    led2 = {"entries": [dict(ent("OKK"), skeptic_final="CONFIRMED"), dict(ent("FLG"), skeptic_final="CONFIRMED")]}
+    rws, exp2, _ = m.evaluate(led2, D(2026, 11, 2), {"OKK": {"close": 15000}, "FLG": {"close": 15000}},
+                              {"FLG": ["BANNED"]}, None, {})
+    held0 = {"held": {}, "err": []}
+    cands2, _x = m.build_candidates(rws, held0, {"OKK": CLEAN, "FLG": CLEAN})
+    tickers_before = sorted(r["ticker"] for r in rws)
+    blk_before = m.render_block(rws, exp2, D(2026, 11, 2), "t", "/tmp/x.md", cands2, _x)
+    m.apply_tiers(rws, cands2, {"OKK": CLEAN, "FLG": CLEAN}, {"OKK": ADV, "FLG": ADV}, POS, PART)
+    byt = {r["ticker"]: r["tier"] for r in rws}
+    blk = m.render_block(rws, exp2, D(2026, 11, 2), "t", "/tmp/x.md", cands2, _x)
+    ok("e2e: OKK Bậc 1, FLG (cờ BANNED) Bậc 2 nhưng VẪN trong ứng viên", byt == {"OKK": 1, "FLG": 2}
+       and sorted(c["ticker"] for c in cands2) == ["FLG", "OKK"] and "• FLG" in blk and "BẬC 2 (thiếu: cờ: BANNED)" in blk and "BẬC 1" in blk)
+    ok("e2e: tập mã + payload ứng viên không đổi vì bậc", tickers_before == sorted(r["ticker"] for r in rws)
+       and all("tier" not in c for c in cands2)
+       and blk.replace(" · BẬC 1", "").replace(" · BẬC 2 (thiếu: cờ: BANNED)", "").replace(" · ngành ?", "") == blk_before.replace(" · ngành ?", "").replace(" · ngành ICB?", ""))
+    ok("sector_of: nhóm đá NNC/MVC/VLB cùng nhãn, mã lạ ⇒ '?'",
+       {m.sector_of(t) for t in ("NNC", "MVC", "VLB")} == {"ICB2353·đá"} and m.sector_of("ZZZ") == "?")
+    ok("bảng đầy đủ có cột Ngành + Bậc", "| Ngành |" in m.render_table(rws, exp2, D(2026, 11, 2), "t") and "BẬC 1" in m.render_table(rws, exp2, D(2026, 11, 2), "t"))
     # 10. không đụng Notifier/Telegram/plan
     src = open(SRC, encoding="utf-8").read()
     ok("module không gọi notify/Notifier/ghi plan", not any(k in src for k in ("notify_telegram", "Notifier(", "trade_plans", "place_order(", "send_telegram")))
@@ -526,6 +572,19 @@ MUTANTS = [
     ("C15 dd_flag_map song song bỏ sót mã đầu", 'out[tickers[0]] = one(tickers[0])', 'pass'),
     ("C16 dd_flag_map song song lệch mã↔verdict", 'out.update(zip(rest, ex.map(one, rest)))',
      'out.update(zip(rest, ex.map(one, rest[::-1])))'),
+    ("A7-1 Bậc 1 không cần dưới đáy", 'if c is None or lo is None or not c < lo:', 'if False:'),
+    ("A7-2 Bậc 1 không cần CONFIRMED", 'if sk != "CONFIRMED":', 'if False:'),
+    ("A7-3 bỏ kiểm cờ tĩnh", 'if fl:\n        why.append("cờ: "', 'if False:\n        why.append("cờ: "'),
+    ("A7-4 cờ DD chưa kiểm ⇒ im lặng Bậc 1", 'if dd_flag is None:', 'if False:'),
+    ("A7-5 FLAGGED không hạ bậc", 'elif dd_flag[0] == "FLAGGED":', 'elif False:'),
+    ("A7-6 bỏ kiểm thanh khoản", 'if n > max_sessions + 1e-9:', 'if False:'),
+    ("A7-7 ngưỡng 3→4 phiên", 'TIER1_EXIT_SESSIONS = 3 ', 'TIER1_EXIT_SESSIONS = 4 '),
+    ("A7-8 ADV None ⇒ qua", 'if not a or not part:', 'if False:'),
+    ("A7-9 bỏ kiểm hệ giá lệch", 'if row.get("frame_notes"):\n        why.append("sự kiện quyền', 'if False:\n        why.append("sự kiện quyền'),
+    ("A7-10 mã có cờ bị ẩn khỏi khối", 'shown = al if cmap is None else [r for r in al if r["ticker"] in cmap]',
+     'shown = [r for r in al if r["ticker"] in (cmap or {}) and not r["flags"]]'),
+    ("A7-11 bỏ nhóm đá", 'ICB{c}·đá" if t.upper() in STONE_GROUP else', 'ICB{c}" if False else'),
+    ("A7-12 vị thế 5%→50% NAV", 'POS_PCT = 0.05 ', 'POS_PCT = 0.50 '),
     ("nit: bỏ câu tâm<đáy ở khối", 'e["center"] < e["zone_low"]:\n            notes', 'False:\n            notes'),
 ]
 

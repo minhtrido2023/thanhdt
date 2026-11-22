@@ -73,6 +73,82 @@ ST_ALERT = f"DƯỚI {'TÂM' if DD_ALERT_BASIS == 'center' else 'ĐÁY VÙNG'} �
 ST_FRAME = "CẦN DD/ĐIỀU CHỈNH TÂM (sự kiện quyền sau DD)"
 BASIS_VN = {"center": "tâm", "zone_low": "đáy vùng"}
 
+# --- A7 (22/11): phân BẬC hiển thị — CHỈ NHÃN, không lọc/xếp hạng/đổi ngưỡng/payload. Mã có cờ KHÔNG bị ẩn (user 03/11).
+TIER1_EXIT_SESSIONS = 3          # Bậc 1 cần thoát ≤3 phiên ở tỷ lệ tham gia 10% ADV (luật user 03/11)
+POS_NAV_VND = 1.55e9             # GIẢ ĐỊNH: NAV account nhỏ nhất ~1,55 tỷ (số KB, chưa đọc nav_history)
+POS_PCT = 0.05                   # GIẢ ĐỊNH: khối lượng vị thế = 5% NAV (≈77,5 triệu)
+# Tỷ lệ tham gia lấy từ trading_bot.due_diligence.ORDER_ADV_WARN (=0,10) lúc chạy; ADV = due_diligence.adv_vnd
+# (trung vị 3 tháng × giá thô) — KHÔNG viết lại công thức ADV ở đây.
+# Ngành: sổ DD chưa có trường ngành ⇒ bảng ánh xạ tường minh = ICB_Code (bq_cache/ticker) tại 2026-11-20, đo bằng
+# due_diligence._icb_code. Nhóm ĐÁ: NNC–MVC–VLB (cùng ICB 2353; SCL cùng mã ICB nhưng không thuộc nhóm đá của user).
+# Mã không có trong bảng ⇒ "?".
+SECTOR_ICB = {
+    "BSR": "0533", "CST": "1771", "CSV": "1357", "DBC": "3573", "DCM": "1357", "DDV": "1357", "DGC": "1357",
+    "DRI": "1353", "FPT": "9537", "GAS": "7573", "HHS": "3353", "HPG": "1757", "LLM": "2757", "MBB": "8355",
+    "MSB": "8355", "MVC": "2353", "NNC": "2353", "NT2": "7535", "PAT": "1357", "PNJ": "3767", "POW": "7535",
+    "PVP": "2779", "PVT": "2773", "QTP": "7535", "SAS": "5379", "SCL": "2353", "SIP": "8633", "SZL": "8633",
+    "TCH": "8633", "TTA": "7535", "TV1": "2791", "TV2": "2791", "VCB": "8355", "VCP": "7535", "VGS": "1757",
+    "VLB": "2353",
+}
+STONE_GROUP = {"NNC", "MVC", "VLB"}
+
+
+def sector_of(t):
+    """'ICB2353·đá' (nhóm NNC–MVC–VLB) | 'ICB1357' | '?'."""
+    c = SECTOR_ICB.get(t.upper())
+    if not c:
+        return "?"
+    return f"ICB{c}·đá" if t.upper() in STONE_GROUP else f"ICB{c}"
+
+
+def tier_of(row, dd_flag, adv, pos_vnd, part, max_sessions=TIER1_EXIT_SESSIONS):
+    """→ (1|2, [lý do thiếu]). Bậc 1 = giá < zone_low ∧ skeptic_final==CONFIRMED ∧ không cờ ∧ thoát ≤max_sessions
+    phiên (pos_vnd / (part×adv)). Thiếu dữ liệu ⇒ Bậc 2 kèm lý do (không im lặng Bậc 1). dd_flag = (status,codes,why)|None;
+    adv = (adv_vnd|None, err|None)|None."""
+    e, why = row["entry"], []
+    lo, c = e.get("zone_low"), row.get("close")
+    if c is None or lo is None or not c < lo:
+        why.append("giá chưa dưới đáy vùng")
+    sk = e.get("skeptic_final")
+    if sk != "CONFIRMED":
+        why.append(f"skeptic {sk or '?'}")
+    fl = [f for f in row.get("flags", []) if not f.startswith("đang giữ")]
+    if fl:
+        why.append("cờ: " + "; ".join(fl))
+    if dd_flag is None:
+        why.append("cờ DD chưa kiểm")
+    elif dd_flag[0] == "FLAGGED":
+        why.append("cờ DD " + ", ".join(dd_flag[1]))
+    elif dd_flag[0] != "CLEAN":
+        why.append("cờ DD không kết luận")
+    if row.get("frame_notes"):
+        why.append("sự kiện quyền sau DD (hệ giá lệch)")
+    a = adv[0] if adv else None
+    if not a or not part:
+        why.append("thanh khoản không đo được" + (f" ({adv[1]})" if adv and adv[1] else ""))
+    else:
+        n = pos_vnd / (part * a)
+        if n > max_sessions + 1e-9:        # dung sai float: đúng 3,0 phiên vẫn qua
+            why.append(f"thoát {n:.1f} phiên >{max_sessions} (ADV3M {a / 1e9:.2f} tỷ)")
+    return (2 if why else 1), why
+
+
+def apply_tiers(rows, cands, dd_flags, advs, pos_vnd, part):
+    """Gắn row['tier'], row['tier_why'] cho dòng đang in ở mục ỨNG VIÊN hoặc 'Dưới đáy vùng'. Không đổi gì khác."""
+    cset = {c["ticker"] for c in cands}
+    for r in rows:
+        r["tier"] = r["tier_why"] = None
+        if r["ticker"] in cset or (not r.get("alert") and r.get("zone_status") == ST_BELOW):
+            r["tier"], r["tier_why"] = tier_of(r, (dd_flags or {}).get(r["ticker"]), (advs or {}).get(r["ticker"]),
+                                               pos_vnd, part)
+
+
+def _tier_txt(r):
+    t = r.get("tier")
+    if t is None:
+        return ""
+    return "BẬC 1" if t == 1 else "BẬC 2 (thiếu: " + "; ".join(r["tier_why"]) + ")"
+
 
 # ------------------------------------------------------------------ logic thuần (selfcheck)
 def latest_entries(ledger, asof=None):
@@ -333,6 +409,22 @@ def build_candidates(rows, held, dd_flags):
     return cands, excl
 
 
+def adv3m_map(tickers, asof):
+    """{t: (adv_vnd|None, err|None)} qua trading_bot.due_diligence.adv_vnd; thêm part = ORDER_ADV_WARN (None nếu không nạp được)."""
+    try:
+        from trading_bot import due_diligence as ddm
+    except Exception as e:  # noqa: BLE001
+        return {t: (None, f"không nạp được due_diligence ({type(e).__name__})") for t in tickers}, None
+    out = {}
+    for t in tickers:
+        try:
+            a, _d, err = ddm.adv_vnd(t, asof.isoformat())
+        except Exception as e:  # noqa: BLE001
+            a, err = None, type(e).__name__
+        out[t] = (a, err)
+    return out, getattr(ddm, "ORDER_ADV_WARN", None)
+
+
 def dd_flag_map(tickers, asof):
     """{t: (status, codes, why)} qua trading_bot.due_diligence.dd_flag_verdict (định nghĩa "cờ" DUY NHẤT,
     luật 02/11 — không tính lại ở đây). Thiếu hàm/lỗi ⇒ UNKNOWN có lý do, không im lặng CLEAN."""
@@ -392,15 +484,15 @@ def render_table(rows, expired, asof, src):
     L = [f"# Mã DD so với vùng giá hợp lý — đóng cửa {asof:%d/%m/%Y}", "",
          f"> {NOTE}", f"> Giá: {src}. Cơ sở ngưỡng: {bv}. Ngưỡng: ≤ {bv}×(1−{THRESHOLD_PCT}%) bật, tắt khi > {bv}×(1−{RELEASE_PCT}%).",
          f"> KIỂM ĐƯỢC {n}/{m} mã.", "",
-         f"| Mã | DD | Giá | Vùng | Tâm (loại) | % so tâm | % so đáy | Mức −{THRESHOLD_PCT}% {bv} | Trạng thái | ADV20 (tỷ) | Cờ / ghi chú |",
-         "|---|---|---|---|---|---|---|---|---|---|---|"]
+         f"| Mã | Ngành | DD | Giá | Vùng | Tâm (loại) | % so tâm | % so đáy | Mức −{THRESHOLD_PCT}% {bv} | Trạng thái | Bậc | ADV20 (tỷ) | Cờ / ghi chú |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         e = r["entry"]
         z = f"{_f(e.get('zone_low'))}–{_f(e.get('zone_high'))}" if e.get("zone_low") else "—"
         ck = f" ({e['center_kind']})" if e.get("center_kind") else ""
-        L.append(f"| {r['ticker']} | {e['dd_date']} ({_sk(e)}) | {_f(r.get('close'))} | {z} | {_f(e.get('center'))}{ck} | "
+        L.append(f"| {r['ticker']} | {sector_of(r['ticker'])} | {e['dd_date']} ({_sk(e)}) | {_f(r.get('close'))} | {z} | {_f(e.get('center'))}{ck} | "
                  f"{_pct(r.get('pct_center'))} | {_pct(r.get('pct_low'))} | {_f(_lvl(e))} | {_label(r)} | "
-                 f"{_adv(r.get('adv20'))} | "
+                 f"{_tier_txt(r) or '—'} | {_adv(r.get('adv20'))} | "
                  f"{'; '.join(r['flags'] + r.get('frame_notes', []) + ([_center_note(e)] if _center_note(e) else [])) or ''} |")
     if expired:
         L += ["", "**DD hết hạn — cần DD lại (KHÔNG báo như mức giá hiện hành):**"]
@@ -429,9 +521,10 @@ def render_block(rows, expired, asof, src, table_path, cands=None, excl=None):
             notes = [x for x in cmap[r["ticker"]]["warnings"] if x not in notes] + notes
         fl = f" · {'; '.join(notes)}" if notes else ""
         adv = "" if r.get("adv20") is None else f" · ADV20 {r['adv20'] / 1e9:.1f} tỷ".replace(".", ",")
+        tt = f" · ngành {sector_of(r['ticker'])}" + (f" · {_tier_txt(r)}" if r.get("tier") is not None else "")
         return (f"  • {r['ticker']} {_f(r['close'])} — {_label(r)}; tâm {_f(e.get('center'))} ({_pct(r.get('pct_center'))})"
                 f", vùng {_f(e.get('zone_low'))}–{_f(e.get('zone_high'))} ({_pct(r.get('pct_low'))} so đáy)"
-                f"{adv}{fl} · DD {e['dd_date']} · {_sk(e)}")
+                f"{adv}{fl} · DD {e['dd_date']} · {_sk(e)}{tt}")
     shown = al if cmap is None else [r for r in al if r["ticker"] in cmap]
     if shown:
         L.append(f"  ỨNG VIÊN (dưới {bv} ≥{THRESHOLD_PCT}%; cờ = CẢNH BÁO, không loại):")
@@ -690,6 +783,14 @@ def run(args, now=None):
     alert_t = [r["ticker"] for r in rows if r.get("alert") and not r.get("frame_block")]
     dflags = None if (args.no_bq or not alert_t) else dd_flag_map(alert_t, asof)
     cands, excl = build_candidates(rows, held, dflags)
+    # A7: bậc hiển thị. Cờ DD của mã "dưới đáy vùng" chưa-cảnh-báo tính riêng (không đổi dflags dùng cho ứng viên).
+    below_t = [r["ticker"] for r in rows if not r.get("alert") and r.get("zone_status") == ST_BELOW]
+    tflags = dict(dflags or {})
+    if below_t and not args.no_bq:
+        tflags.update(dd_flag_map(below_t, asof))
+    tier_t = sorted({c["ticker"] for c in cands} | set(below_t))
+    advs, part = adv3m_map(tier_t, asof) if tier_t else ({}, None)
+    apply_tiers(rows, cands, tflags if not args.no_bq else None, advs, POS_NAV_VND * POS_PCT, part)
     cjson = getattr(args, "candidates_json", None)
     if cjson is None:
         # Mặc định CHỈ ghi file máy đọc khi là lượt chạy THẬT: --no-state (thử/selfcheck) hoặc
