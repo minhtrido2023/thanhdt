@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_lagcand_20261109/CSV/REPORT.md",
+  "report_md5": "a9c5e182de13ce72585e95b32f2d175b",
+  "brief_md5": "baa15051fcf71fb17b04fdbe3f093436",
+  "model": "opus",
+  "cost_usd": 0.7832184,
+  "started_at_ict": "2026-11-22T23:41:16+07:00",
+  "summary": "Các số BCTC và BQ của báo cáo CSV r2 đều khớp (tôi đã tính lại LN mẹ 2019-25 và tâm kịch bản CƠ SỞ 21.005 so với 21.002). Lỗi nằm ở cách ghép mô hình: lợi nhuận lịch sử của nhà máy BH1, vốn đang bị cưỡng chế tháo dỡ, được vốn hoá vĩnh viễn (~1.499 tỷ), trong khi nhà máy thay thế Nhơn Trạch 1.840 tỷ lại được tính NPV=0 cộng phần đã chi, bỏ qua ~1.494 tỷ capex còn lại. Phần capex thay công suất cũ là capex tuân thủ/duy trì và phải là dòng tiền ra (D3, bài học QTP). Bỏ sót nó làm tâm cao thêm ~4.500 đến ~13.500 đ/cp tuỳ tỷ lệ thay thế, vượt xa ngưỡng 5%. Chiều ngược lại, bồi thường BH1, đất HCM và phần công suất tăng thêm bị đặt bằng 0 hoặc chưa định lượng, nên bù được một phần nhưng không đủ. Ngoài ra không tái lập được vì src/, file dữ liệu và file khoá đã mất, và r2 chưa từng qua phản biện. Tâm 20.717 và nhãn r2 không đứng được; cần dựng lại theo cách (b) sau khi có công suất BH1 cũ.",
+  "verdict_raw_path": "agents/Taylor/research/dd_lagcand_20261109/CSV/skeptic/r1_raw.md"
+}

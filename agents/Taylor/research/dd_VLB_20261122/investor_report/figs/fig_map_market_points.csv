@@ -1,0 +1,8 @@
+name,lat,lon,kind,dx,dy,note
+Cụm mỏ VLB,10.96,106.88,mine,0.08,0.12,trung bình toạ độ 3 mỏ chủ lực (gần đúng)
+TP.HCM,10.7737,106.7166,market,-0.30,-0.06,OSM Nominatim (trung tâm)
+Thủ Dầu Một (Bình Dương cũ),11.0242,106.6506,market,-0.55,0.14,OSM Nominatim 22/11/2026
+Vũng Tàu (BR–VT cũ),10.4022,107.1385,market,0.05,-0.08,OSM Nominatim 22/11/2026
+Tây Ninh,11.3137,106.0967,market,0.06,0.06,OSM Nominatim 22/11/2026 (phường Tân Ninh)
+Cần Thơ (ĐBSCL – sà lan),10.0362,105.7873,market,0.08,0.10,OSM Nominatim 22/11/2026
+Sân bay Long Thành,10.7403,106.9918,project,0.06,-0.04,OSM Nominatim 22/11/2026

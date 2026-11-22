@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_dilution_update_20261110/SCL_r4.md",
+  "report_md5": "9df35c415b967b200056df97741e6c50",
+  "brief_md5": "c293899e0413feff058043b1ab1b5fab",
+  "model": "opus",
+  "cost_usd": 0.7510185999999999,
+  "started_at_ict": "2026-11-22T23:54:14+07:00",
+  "summary": "The dilution arithmetic in SCL r4 checks out. I recomputed the post-rights centre (21.339 at the 5bn liquidity discount) from r3's cum distribution and the NQ 1363 terms, and the pre-rights share count 38.836.815 matches BQ, the AIS and charter capital. But r4 is a mechanical transform on the r3 core and inherits its open gaps. On the high side: the project-interest add-back (~7%, unsupported), the possible ESOP-2 (−1,1%), cash added at par against debt valued below par (~−0,9%), and offering costs. On the low side: the 4,45% 5bn discount is an extrapolation (40m size gives +3,8%), and rate sensitivity is large (±10%). The decisive missing item is the ash/gypsum supply contract (term/price), which is material and unquantifiable; remaining Phả Lại capex (~72bn) is also unmodelled. The input JSON r4 depends on has also gone missing from the repo (only a /tmp copy exists), and the BQ share count is now pre-booked at 44.84M on the cum date. Not refuted, not confirmable as written.",
+  "verdict_raw_path": "agents/Taylor/research/dd_dilution_update_20261110/SCL/skeptic/r1_raw.md"
+}

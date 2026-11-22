@@ -1,0 +1,17 @@
+📌 **Sổ DD vs giá đóng cửa** (ứng viên khi giá ≤ tâm −15%; đóng cửa 20/11, DNSE ohlc 1D) — KIỂM ĐƯỢC 34/34 mã. ỨNG VIÊN sleeve discretionary — xét, user duyệt từng lần, KHÔNG tự mua; không phải tín hiệu mua; không tự đưa vào plan.
+  ỨNG VIÊN (dưới tâm ≥15%; cờ = CẢNH BÁO, không loại):
+  • HHS 9.700 — DƯỚI TÂM ≥15% (NGƯỠNG CẢNH BÁO) 🆕 VỪA VÀO; tâm 13.969 (-30,6%), vùng 12.422–15.564 (-21,9% so đáy) · ADV20 13,8 tỷ · ⚠ cờ DD QF:RATING_FAIL (sleeve discretionary: chỉ cảnh báo); forensic exclude (20/06/2026) · DD 2026-11-01 · skeptic FIXED_UNVERIFIED r4
+  • PVP 16.750 — DƯỚI TÂM ≥15% (NGƯỠNG CẢNH BÁO) 🆕 VỪA VÀO; tâm 23.099 (-27,5%), vùng 13.799–30.338 (+21,4% so đáy) · ADV20 19,3 tỷ · DD 2026-10-29 · skeptic CONFIRMED r2
+  • SIP 43.000 — DƯỚI TÂM ≥15% (NGƯỠNG CẢNH BÁO) 🆕 VỪA VÀO; tâm 54.466 (-21,1%), vùng 43.257–69.818 (-0,6% so đáy) · ADV20 6,5 tỷ · cổ tức tiền 4.500đ ex 19/11: hệ giá sổ trước ex, % so tâm CHƯA điều chỉnh · DD 2026-11-01 · skeptic CONFIRMED r3
+  • DRI 12.600 — DƯỚI TÂM ≥15% (NGƯỠNG CẢNH BÁO) 🆕 VỪA VÀO; tâm 15.257 (-17,4%), vùng 12.908–17.549 (-2,4% so đáy) · ADV20 12,8 tỷ · DD 2026-11-03 · skeptic CONFIRMED r3
+  • DBC 16.300 — DƯỚI TÂM ≥15% (NGƯỠNG CẢNH BÁO) 🆕 VỪA VÀO; tâm 19.491 (-16,4%), vùng 11.314–27.270 (+44,1% so đáy) · ADV20 34,4 tỷ · ⚠ cờ DD QF:RATING_FAIL (sleeve discretionary: chỉ cảnh báo) · DD 2026-11-18 · skeptic FIXED_UNVERIFIED r1
+  • MVC 13.600 — DƯỚI TÂM ≥15% (NGƯỠNG CẢNH BÁO) 🆕 VỪA VÀO; tâm 16.241 (-16,3%), vùng 9.940–23.471 (+36,8% so đáy) · ADV20 0,9 tỷ · ⚠ cờ DD NGOAI_UNIVERSE (sleeve discretionary: chỉ cảnh báo) · DD 2026-11-03 · skeptic CONFIRMED r9
+  Dưới tâm ≥15% nhưng KHÔNG xét: DGC (đang giữ ZaloPay); FPT (đang giữ ZaloPay, SpaceX); NNC (đang giữ ZaloPay, SpaceX); VGS (đang giữ ZaloPay, SpaceX)
+  Sự kiện quyền sau DD — cần DD/điều chỉnh tâm (không gắn nhãn ngưỡng):
+  • SCL 25.100 — CẦN DD/ĐIỀU CHỈNH TÂM (sự kiện quyền sau DD); tâm 21.339 (+17,6%), vùng 17.445–25.681 (+43,9% so đáy) · ADV20 3,9 tỷ · Quyền mua CP cho Cổ đông hiện hữu ex 09/11: hệ giá sổ trước ex, % so tâm CHƯA điều chỉnh ⇒ cần DD/điều chỉnh tâm · DD 2026-10-29 · skeptic FIXED_UNVERIFIED r5
+  Dưới đáy vùng (chưa tới ngưỡng):
+  • TCH 13.900 — DƯỚI vùng; tâm 15.864 (-12,4%), vùng 14.563–17.325 (-4,6% so đáy) · ADV20 128,1 tỷ · DD 2026-10-31 · skeptic FIXED_UNVERIFIED r3
+  Còn lại: 13 trong vùng, 9 trên vùng.
+  Ghi chú hệ giá (cổ tức tiền sau DD): NT2: cổ tức tiền 1.000đ ex 29/10: hệ giá sổ trước ex, % so tâm CHƯA điều chỉnh | SIP: cổ tức tiền 4.500đ ex 19/11: hệ giá sổ trước ex, % so tâm CHƯA điều chỉnh
+  Cần DD lại (BCTC mới hơn/quá hạn): PAT.
+  Bảng đầy đủ: /tmp/a7/before_md/2026-11-20.md

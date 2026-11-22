@@ -1,0 +1,7 @@
+name,lat,lon,kind,dx,dy,note
+Mỏ Thạnh Phú 1 (Vĩnh Cửu),11.0027,106.8229,mine,-0.17,0.03,OSM Nominatim 22/11/2026 (khu phố Thạnh Phú; gần đúng)
+Mỏ Thiện Tân 2 (Vĩnh Cửu),11.0170,106.8735,mine,0.02,0.03,OSM Nominatim 22/11/2026 (khu phố Thiện Tân; gần đúng)
+Cụm mỏ Tân Cang 1 (Biên Hòa),10.8955,106.9305,mine,0.02,-0.03,OSM Nominatim 22/11/2026 (Mỏ đá Tân Cang; gần đúng)
+Mỏ Soklu 2 và 5 (Thống Nhất),10.9746,107.1572,mine,-0.10,0.035,OSM Nominatim 22/11/2026 (huyện Thống Nhất cũ; gần đúng)
+Trụ sở (Biên Hòa),10.9142,106.8916,hq,-0.17,-0.035,OSM Nominatim 22/11/2026 (TP Biên Hòa; gần đúng)
+Sân bay Long Thành,10.7403,106.9918,project,0.02,-0.03,OSM Nominatim 22/11/2026

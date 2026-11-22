@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT.md",
+  "report_md5": "da1aa220b68aedf27aeb265b94742caf",
+  "brief_md5": "565a06df7a788a6a7295d909f17c7b05",
+  "model": "opus",
+  "cost_usd": 0.7966964000000001,
+  "started_at_ict": "2026-11-22T23:38:02+07:00",
+  "summary": "The rev2 BSR model is arithmetically sound: every BQ-traceable input (annual NP, share count) and every recomputed component (net cash 9.012, interest strip 890/1.292, plant value 5.592, GRM sensitivity) matches. Two-sided biases are small and roughly offset: BASE core sits ~10% above the historical anchor (toward high), while the turnaround is over-weighted in the window and double-counted in 2027 (toward low). The decisive gap is a missing item: the 39.004,5 bn expansion is valued at NPV zero with no growth-vs-compliance classification. If it is largely a compliance upgrade, the centre could fall 20-40%. Provenance is also weakened because the cited source PDFs and output files are absent from the folder and the errata figures were never re-read from the filings. Not refuted on the numbers present, but not confirmable until the expansion is classified and the sources are restored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/skeptic/r1_raw.md"
+}

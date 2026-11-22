@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_TTA_20261120/REPORT_r3.md",
+  "report_md5": "c2d3ac7934ce1357a45882040165d9c7",
+  "brief_md5": "d6355cb27c354707035775c17cd42bb3",
+  "model": "opus",
+  "cost_usd": 1.5739448,
+  "started_at_ict": "2026-11-22T23:47:01+07:00",
+  "summary": "Số liệu nguồn của r3 trung thực: phải thu EPTC, tiền gửi, HTKD, quỹ khen thưởng phúc lợi và cổ tức khớp với ảnh BCTC/NQ ĐHĐCĐ, mô hình tái lập đúng 6.342. Nhưng mô hình có một thiên lệch có hệ thống theo chiều QUÁ THẤP chưa được khai báo ở vòng nào: doanh thu thuỷ điện cố định danh nghĩa tới 2060 trong khi chi phí tăng 3%/năm, và FIT theo USD bị khoá tỷ giá. Chỉ số hoá thuỷ điện 2%/năm đẩy tâm +22%, tỷ giá 2%/năm cho FIT +8%. Chiều ngược lại có các lỗi nhỏ hơn: phải thu vượt gồm VAT (−2%), Phương Mai để giá sổ sách chưa kiểm (~9% tâm), tiền gửi đang cầm cố, cơ sở thuỷ văn năm thuận. Rủi ro giấy phép Bầu Ngứ và cam kết vốn Phước Hoà vẫn chưa định lượng. Mục thiếu đã định lượng >5% tâm ⇒ REFUTED về mức số và ngưỡng vùng; hướng 'tâm thấp hơn nhiều so với các vùng nêu' có thể vẫn đúng nhưng phải tính lại.",
+  "verdict_raw_path": "agents/Taylor/research/dd_TTA_20261120/skeptic/r1_raw.md"
+}

@@ -1,0 +1,14 @@
+r1 reproduce (life 12/15/18, no fund, nc 527.5, off 205.7): 63691
+1. offset 47,6->19,4 tỷ/năm (life 12/15/18, PV theo đời mỏ): truoc CK 62,378; sau CK 60,522
+2a. + net cash: phải thu KH 2,76 ĐỒNG & trừ trích 35,9: truoc CK 61,551; sau CK 59,720
+2b. + trích quỹ 14,84% vào LN vận hành: truoc CK 54,266; sau CK 52,651
+5. + đời mỏ 11/14/16 (=r2): truoc CK 52,732; sau CK 51,163
+tam sau CK 51163 mcap 2390.4
+LN van hanh TTM sau trich 312.5 ; PE van hanh (bo net cash + offset co so 119.4): 5.7
+PB tam/VCSH loi 906.6: 2.64 ; ROE loi sau trich 0.368
+vung: RE<= 43489 dat> 58838 ; 48100/tam 0.94 ; fund-LO tam 52304 -> 0.92
+RE theo fund-LO 44458
+52w: last 48100.0 max 51460.0 dd -0.065
++10 ty np1 co so -> 1230 d/cp co so; tam: 615
+co so life17  56981 vs 53604 delta tam 1689
+mat offset co so 2556 d/cp

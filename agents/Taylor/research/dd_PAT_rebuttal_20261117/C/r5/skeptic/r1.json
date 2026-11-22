@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/VALUATION_r5.md",
+  "report_md5": "64aa2b2df2fa2c2a46e4c54f9407a91e",
+  "brief_md5": "70238ce5d27faa75c0a43db150764c7a",
+  "model": "opus",
+  "cost_usd": 1.291057,
+  "started_at_ict": "2026-11-22T20:18:55+07:00",
+  "summary": "Phần cơ học của mô hình r5 sạch: tiền ròng, quỹ phúc lợi, số cổ phiếu và ý kiến ngoại trừ của UHY đều truy được về BCTC và khớp khi tự tính lại; self-check cây vs đường độc lập đạt. Nhưng con số tâm 66.470 không đứng vững. Bước lớn nhất (+4.800, ô O2) là đọc lại thông tin cũ và mâu thuẫn với ghi chú của chính fleet: Q1/26 còn quặng tự khai thác đến ~17/03, và kho quặng nằm ở DLC chứ không phải PAT. Trong khi đó cùng tiêu chuẩn 'không có bằng chứng mới' lại được dùng để gỡ tồn kho theo chiều xuống. Áp nhất quán thì tâm là 62.578 trước / 56.320 sau chiết khấu (−5,9%). Theo mục thiếu, mô hình chưa có capex tuân thủ môi trường cho xỉ P4 dù có cáo buộc đổ thải tại chính KCN của PAT. Thời hạn thuê đất có dấu hiệu kết thúc khoảng 2042, nằm trong tầm dự báo (tới ~18% giá trị hoạt động). Mức cầm cố tiền gửi lớn hơn độ nhạy đang dùng. Ở chiều ngược lại, tồn kho dư 44 tỷ và vốn lưu động cao tại 30/09 có thể làm tâm bị thấp tới vài nghìn đồng. Kết luận 'không có biên an toàn' không bị lật, nhưng tâm và cổng phải hạ hoặc phải có bằng chứng mới cho ô O2.",
+  "verdict_raw_path": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/skeptic/r1_raw.md"
+}

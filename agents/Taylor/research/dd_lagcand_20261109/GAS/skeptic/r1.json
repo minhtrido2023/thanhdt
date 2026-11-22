@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_lagcand_20261109/GAS/REPORT.md",
+  "report_md5": "935738320c413c071482f1c2d52bcfb0",
+  "brief_md5": "dfbbabc31456a05d9ec96ba8971b3412",
+  "model": "opus",
+  "cost_usd": 0.9416538,
+  "started_at_ict": "2026-11-22T23:44:02+07:00",
+  "summary": "The GAS r2 model is internally sound: all source numbers I traced (BQ and notes) match, and I reproduced the base-case 50,168 đ/cp by hand. Price-blind and two-sided review finds only small biases each way: depreciation decline counted as durable residual and unbridged liabilities push the centre down, while year-end discounting and possibly non-operating unclassified assets push it up. Each is under 5% individually. The verdict is INCONCLUSIVE rather than CONFIRMED because attack 8 leaves material, unquantifiable gaps: unclassified balance-sheet items (~10.2k bn assets), untested NPV-zero on committed Lô B capex, the FY2025 audit opinion not cited, and an unread provision note. Separately, the report's cited artefacts were removed from the working tree by a TRIM commit.",
+  "verdict_raw_path": "agents/Taylor/research/dd_lagcand_20261109/GAS/skeptic/r1_raw.md"
+}

@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_VCB_20261117/REPORT.md",
+  "report_md5": "f2a69a699e6024018e9aefcd10e432d2",
+  "brief_md5": "0104e64ea2e66125218f5da0418d044f",
+  "model": "opus",
+  "cost_usd": 1.0344264,
+  "started_at_ict": "2026-11-22T23:47:01+07:00",
+  "summary": "The arithmetic is correct and BVPS (30.359) matches BQ (30.370). But the centre of 35.500 hinges on an unsourced 0,8% credit cost applied to both ROE anchors, while VCB's realised figures are 0,47% (9M26) and about 0,2% in 2025. A 0,6% assumption gives about 41.100 (+16%), so the downward haircut lacks the independent evidence the user's two-sided rule requires, and the r1→r3 cut (42.035→35.497) came from reinterpretation, not new filings. On the high side, the CBBank transfer-bank obligation is unquantified, CAR/CET1/LDR rest on one press source, and the early credit stress (group-2 +85%, guarantees ×2,37) is not modelled. The unconditional −8% post-dividend cut also conflicts with VCB's cash-dividend history (450 VND), which points to a stock dividend. Fix the credit-cost basis with history, verify the 2025 inputs from the PDF, confirm the dividend form from the AGM resolution and size CBBank before treating any centre as final.",
+  "verdict_raw_path": "agents/Taylor/research/dd_VCB_20261117/skeptic/r1_raw.md"
+}

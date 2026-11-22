@@ -1,0 +1,97 @@
+"""DD VLB 2026-11-22 — mô hình định giá MÙ GIÁ (assumptions_file). Chạy: python3 -I dcf_vlb.py
+Mọi số tỷ VND. Nguồn: BCTC Q3/2026 [Q3 p.x], BCTC bán niên [H1 p.x], NQ ĐHĐCĐ 2026, BQ ticker/ticker_financial.
+Giá thị trường CHỈ dùng cho thanh khoản (px_vlb.csv) và so sánh cuối — không vào giá trị.
+"""
+import csv, math, os, statistics as st
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SH = 46.720560  # triệu CP lưu hành [Q3 p22 23c]
+
+# ---------- 1. Net cash THẬT 30/9/2026 [Q3 p2-3] ----------
+cash, htm = 27.576, 785.008
+kt_pl = 107.466          # quỹ KTPL (tiền của NLĐ)
+tax_pay = 61.748         # thuế phải nộp
+adv_cust = 76.938        # người mua trả trước
+gm_9t = 407.320 / 1233.930
+adv_cost = adv_cust * (1 - gm_9t)  # phần ứng trước phải tiêu để giao hàng (giá vốn)
+wc_liab = 37.560 + 54.215 + 0.377  # phải trả NB + NLĐ + phải trả khác
+wc_asset = 20.130 + 2.762 + 4.164 + 0.793  # tồn kho + phải thu KH + trả trước NB + phải thu khác
+net_cash = cash + htm - kt_pl - tax_pay - adv_cost - (wc_liab - wc_asset)
+
+# ---------- 2. Khoản bù trừ tiền cấp quyền (non-cash, 163) ----------
+offset_bal = 329.363          # [Q3 p2 mã 163; p19 V.17]
+offset_use = (341.256 - 329.363) * 4  # tốc độ cấn trừ Q3 annualize [H1 p8 vs Q3 p2]
+def pv_offset(r):
+    n = offset_bal / offset_use
+    return offset_use * (1 - (1 + r) ** -n) / r, n
+
+# ---------- 3. Kịch bản LN vận hành sau thuế (loại lãi tiền gửi + loại 343,93 một lần) ----------
+# TTM core: Q4/25 100,73 (NQ 2026: 301,44 − 9T/25 200,71) + 9T/26 565,97 − 343,93×0,8
+ttm_core = 100.73 + 565.97 - 343.929 * 0.8
+SCEN = {  # LN vận hành năm 1 (ước lượng), đời mỏ còn lại (năm, ước lượng), g danh nghĩa, xác suất, giữ khoản bù trừ?
+    'xau':   dict(np1=250, life=12, g=0.00, w=0.25, offset=False),
+    'co_so': dict(np1=330, life=15, g=0.02, w=0.50, offset=True),
+    'tot':   dict(np1=400, life=18, g=0.03, w=0.25, offset=True),
+}
+
+def pv_finite(x, r, g, n):
+    q = (1 + g) / (1 + r)
+    return x * (1 - q ** n) / (r - g)
+
+def value(s, r):
+    op = pv_finite(s['np1'], r, s['g'], s['life'])
+    off = pv_offset(r)[0] if s['offset'] else 0.0
+    return op, off, (op + off + net_cash) / SH * 1000  # đ/cp
+
+# ---------- 4. Thanh khoản — quy ước fleet (SCL r3/TTA r3) ----------
+rows = list(csv.DictReader(open(os.path.join(HERE, 'px_vlb.csv'))))
+rows = rows[-250:]
+tv = [float(r['Price']) * float(r['Volume']) / 1e9 for r in rows]
+adv250 = st.median(tv); adv68 = st.median(tv[-68:])
+cl = [float(r['Close']) for r in rows]
+lr = [math.log(cl[i] / cl[i - 1]) for i in range(1, len(cl))]
+sig = st.pstdev(lr)
+def cs_spread(rs):  # Corwin-Schultz, 120 phiên
+    out = []
+    for a, b in zip(rs[:-1], rs[1:]):
+        h1, l1, h2, l2 = map(float, (a['High'], a['Low'], b['High'], b['Low']))
+        if min(l1, l2) <= 0: continue
+        beta = math.log(h1 / l1) ** 2 + math.log(h2 / l2) ** 2
+        gam = math.log(max(h1, h2) / min(l1, l2)) ** 2
+        k = 3 - 2 * math.sqrt(2)
+        al = (math.sqrt(2 * beta) - math.sqrt(beta)) / k - math.sqrt(gam / k)
+        s = 2 * (math.exp(al) - 1) / (1 + math.exp(al))
+        out.append(max(s, 0.0))
+    return st.mean(out)
+spread = cs_spread(rows[-120:])
+def d_liq(q, adv): return spread / 2 + 1.0 * sig * math.sqrt(q / adv)
+
+if __name__ == '__main__':
+    R = 0.135
+    print(f"net_cash_that={net_cash:.1f} ty = {net_cash/SH*1000:,.0f} d/cp (adv_cost {adv_cost:.1f}; WC rong {wc_liab-wc_asset:.1f})")
+    pv, n = pv_offset(R); print(f"offset: su dung {offset_use:.1f} ty/nam, {n:.1f} nam, PV@13.5% {pv:.1f} ty ({pv/SH*1000:,.0f} d/cp); PV@7% {pv_offset(0.07)[0]:.1f}")
+    print(f"ttm_core_LNST={ttm_core:.1f}")
+    tot = 0
+    for k, s in SCEN.items():
+        op, off, v = value(s, R); tot += s['w'] * v
+        print(f"{k:6s} op_PV={op:7.1f} off={off:6.1f} -> {v:9,.0f} d/cp (w {s['w']})")
+    print(f"TAM co trong so (truoc CK thanh khoan) = {tot:,.0f}")
+    for dr in (-0.01, -0.005, 0.005, 0.01):
+        t2 = sum(s['w'] * value(s, R + dr)[2] for s in SCEN.values())
+        print(f"  lai huy dong {dr*1e4:+.0f}bp (beta1): {t2:,.0f} ({t2/tot-1:+.1%}); beta0.5: {sum(s['w']*value(s,R+dr/2)[2] for s in SCEN.values()):,.0f}")
+    print(f"thanh khoan: ADV250 {adv250:.2f} ty, ADV68 {adv68:.2f}, sigma {sig:.3%}, CS spread {spread:.2%}")
+    for q in (0.5, 1, 5):
+        print(f"  Q={q} ty: d={d_liq(q,adv250):.2%} (ADV68 {d_liq(q,adv68):.2%}); phien thoat @20%ADV {q/(0.2*adv250):.1f}/{q/(0.2*adv68):.1f}")
+    d5 = d_liq(5, adv250); print(f"TAM sau CK (Q=5 ty) = {tot*(1-d5):,.0f}; Q=1 ty: {tot*(1-d_liq(1,adv250)):,.0f}")
+    # Hai nen + C4 + D2 (hien thi)
+    g = 0.02; roe = 0.40; reinv = min(max(g / roe, 0), 0.8)
+    np_norm = st.median([218.0, 301.44, ttm_core])
+    v_short = np_norm * (1 - reinv) / (R - g) / SH * 1000
+    v_long = value(SCEN['co_so'], R)[2]
+    cfo3 = st.mean([300.4, 253.6, 345.6 + 343.929 * 0.2])  # 2024, 2025, TTM + thue da nop tren khoan mot lan
+    c4 = (cfo3 - 2.0) / (R - g) / SH * 1000
+    d2 = (cfo3 - 0.1126 * 1614.4) / (R - g) / SH * 1000
+    print(f"V_ngan={v_short:,.0f} (NP_norm {np_norm:.1f}) V_dai={v_long:,.0f} D={abs(math.log(v_short/v_long)):.3f} | C4={c4:,.0f} D2={d2:,.0f} (CFO3 {cfo3:.1f})")
+    for tag, f in (('NONE: doi mo -3 nam', 3),):
+        s = dict(SCEN['co_so']); s['life'] -= f
+        print(f"  do nhay {tag}: co_so {value(s,R)[2]:,.0f}")

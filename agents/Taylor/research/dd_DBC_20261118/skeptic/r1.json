@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_DBC_20261118/REPORT.md",
+  "report_md5": "d8108612df22d2f6b2e7d7691069e057",
+  "brief_md5": "41628af9f909cc8e562d1855ac3adba1",
+  "model": "opus",
+  "cost_usd": 1.4082223999999999,
+  "started_at_ict": "2026-11-22T23:41:16+07:00",
+  "summary": "The figures and calculations hold up: the 15-quarter ROE 11,42% recomputes exactly from BQ, and the base, V_ngắn and good-case values reproduce. The model's weakness is judgment, not arithmetic. Upward, the window starting with the Q1/23 loss holds ROE down; without it ROE is 14,4% and the centre about +35%. BQ ROE3Y is not independent support, since it averages the same trough years. Downward, the bonus/welfare fund is missing (−7% to −14% at 5–10% of profit), and the XDCB treatment adds 31% that depends on an unmeasured history (≈16.0k if XDCB earned nothing in the past). The FY2025 audited statements and farm environmental compliance capex are also absent. Since one missing item is material but its size is unknown, the verdict is INCONCLUSIVE, not CONFIRMED. Market prices in the report were ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_DBC_20261118/skeptic/r1_raw.md"
+}

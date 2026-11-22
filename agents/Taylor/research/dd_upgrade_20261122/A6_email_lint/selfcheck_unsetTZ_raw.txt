@@ -1,0 +1,53 @@
+PASS sạch: 0 vi phạm
+PASS sạch: không cảnh báo
+PASS L18 bắt 'BẢN ĐÍNH CHÍNH'
+PASS L18 bắt 'thay bản gửi trước'
+PASS L18 bắt 'trước đây'
+PASS L18 bắt 'đã sửa'
+PASS L18 bắt 'sai sót'
+PASS L18 bắt 'vòng 2'
+PASS L18 bắt 'bản r4'
+PASS L18 bắt 'kết luận đổi từ A sang B'
+PASS L18 bắt 'lỗi phương pháp'
+PASS L18 không bắt 'R3' hoa/'rn3'
+PASS L18 bắt subject
+PASS NỘI BỘ bắt 'Taylor'
+PASS NỘI BỘ bắt 'Bobby'
+PASS NỘI BỘ bắt 'Mike'
+PASS NỘI BỘ bắt 'Livermore'
+PASS NỘI BỘ bắt 'skeptic'
+PASS NỘI BỘ bắt 'agents/Taylor'
+PASS NỘI BỘ bắt 'kb/x.json'
+PASS NỘI BỘ bắt 'build_report.py'
+PASS NỘI BỘ bắt 'Taylor_20261122_124816'
+PASS NỘI BỘ bắt 'QUALIFY'
+PASS NỘI BỘ bắt 'NON'
+PASS NỘI BỘ bắt 'fear-buy'
+PASS NỘI BỘ bắt 'discretionary sleeve'
+PASS NỘI BỘ bắt 'SpaceX'
+PASS NỘI BỘ không bắt 'non'/'mike' thường
+PASS MD↔sổ: tâm cũ (rev1 50.000) bị bắt vì sổ rev cao nhất = 52.000
+PASS MD↔sổ: vùng cũ bị bắt
+PASS MD↔sổ: định dạng 'k' khớp, không báo giả
+PASS MD↔sổ: lệch 1,3% (<3%) không báo
+PASS MD↔sổ: năm/số có dấu không bị coi là tâm
+PASS mã không có trong sổ: cảnh báo, không lỗi
+PASS skeptic_final≠CONFIRMED: chỉ cảnh báo
+PASS skeptic CONFIRMED: không cảnh báo skeptic
+LINT AAA_DD_investor_report_20261120.md:7: LUAT18_NHAC_LOI: …Bản đính chính.…
+LINT: 1 vi phạm, 0 cảnh báo
+PASS rc dry-run có vi phạm = 3
+LINT AAA_DD_investor_report_20261120.md:7: LUAT18_NHAC_LOI: …Bản đính chính.…
+LINT: 1 vi phạm, 0 cảnh báo
+LINT-WARN: DD_LINT_BLOCK=False ⇒ vẫn gửi (chỉ cảnh báo)
+PASS rc gửi thật + DD_LINT_BLOCK=False = 0 (chỉ cảnh báo)
+LINT AAA_DD_investor_report_20261120.md:7: LUAT18_NHAC_LOI: …Bản đính chính.…
+LINT: 1 vi phạm, 0 cảnh báo
+PASS rc gửi thật + DD_LINT_BLOCK=True = 3
+LINT: 0 vi phạm, 0 cảnh báo
+PASS rc sạch = 0
+PASS hằng DD_LINT_BLOCK mặc định False
+PASS CLI --dry-run có vi phạm: rc=3, in LINT, không gửi
+PASS CLI --skip-lint ghi cảnh báo, rc=0
+
+KẾT QUẢ: OK

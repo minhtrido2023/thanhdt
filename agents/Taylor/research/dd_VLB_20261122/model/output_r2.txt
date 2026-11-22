@@ -1,0 +1,25 @@
+net_cash_that=488.8 ty = 10,463 d/cp (adv_cost 51.5; WC rong 67.1)
+offset: su dung 19.42 ty/nam, het sau 17.0 nam; PV(14 nam)@13.5% 119.4 ty (2,556 d/cp); PV@7% 169.8; du chua dung khi mo het doi: life14 57.5 / life16 18.6 ty
+fund: HI 14.84% LO 12.35%; trich tam 9T tru khoi net cash 35.93 ty
+EPS loi TTM truoc trich 8,381; sau trich (HI) 7,137; (LO) 7,346
+ttm_core_LNST=391.6
+       fund-LO 12.4%: 36,576
+xau    op_PV= 1185.4 off=   0.0 ->    35,836 d/cp (w 0.25)
+       fund-LO 12.4%: 54,787
+co_so  op_PV= 1896.1 off= 119.4 ->    53,604 d/cp (w 0.5)
+       fund-LO 12.4%: 69,482
+tot    op_PV= 2557.9 off= 124.9 ->    67,885 d/cp (w 0.25)
+TAM co trong so (truoc CK thanh khoan) = 52,732
+  lai huy dong -100bp (beta1): 55,019 (+4.3%); beta0.5: 53,851
+  lai huy dong -50bp (beta1): 53,851 (+2.1%); beta0.5: 53,286
+  lai huy dong +50bp (beta1): 51,659 (-2.0%); beta0.5: 52,190
+  lai huy dong +100bp (beta1): 50,629 (-4.0%); beta0.5: 51,659
+thanh khoan: ADV250 1.14 ty, ADV68 0.92, sigma 1.340%, CS spread 0.35%
+  Q=0.5 ty: d=1.06% (ADV68 1.16%); phien thoat @20%ADV 2.2/2.7
+  Q=1 ty: d=1.43% (ADV68 1.57%); phien thoat @20%ADV 4.4/5.4
+  Q=5 ty: d=2.98% (ADV68 3.30%); phien thoat @20%ADV 21.8/27.2
+TAM fund-LO truoc CK 53,908 sau CK(5ty) 52,304
+PE loi ham y: tam sau CK / EPS loi sau trich = 7.2x ; truoc trich 6.1x
+TAM sau CK (Q=5 ty) = 51,163; Q=1 ty: 51,979
+V_ngan=45,391 (NP_norm 301.4) V_dai=53,604 D=0.166 | C4=50,793 D2=17,332 (CFO3 274.9)
+  do nhay NONE: doi mo -3 nam: co_so 48,933

@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "high",
+  "report_path": "agents/Taylor/research/dd_CST_20261111/REPORT.md",
+  "report_md5": "5dc793752790b9c0816fcb0d16f45ee2",
+  "brief_md5": "411dcc7a5464a3905634f4179d0be988",
+  "model": "opus",
+  "cost_usd": 0.8837196,
+  "started_at_ict": "2026-11-22T23:41:16+07:00",
+  "summary": "Mô hình thu nhập thặng dư của CST tái lập chính xác, và các số VCSH khớp BQ. Nhưng báo cáo bỏ sót một mục bắt buộc trong checklist: lợi nhuận bị trích ra khỏi VCSH ngoài cổ tức (quỹ khen thưởng phúc lợi). Chuỗi VCSH trên BQ cho thấy 46–92 tỷ/năm rời VCSH như vậy, và chính số liệu 9T/26 của báo cáo cũng xác nhận: phân phối 82,8 tỷ, cổ tức chỉ 29,9. Mô hình lại dùng LNST gộp làm N, nên tâm bị đẩy lên khoảng 34–72%. Chiều rẻ có thật nhưng nhỏ hơn: r=13,5% có thể cao cho đơn vị cost-plus (+19% nếu r=11%), kịch bản bi quan dựa trên báo chí. Hai điểm này không bù được khoản bỏ sót. Kết luận 'giá trên tâm' có lẽ còn mạnh hơn, nhưng tâm, vùng và ngưỡng 10.779 phải tính lại. BCTC gốc đã bị dọn khỏi thư mục nên chưa kiểm lại được tận gốc.",
+  "verdict_raw_path": "agents/Taylor/research/dd_CST_20261111/skeptic/r1_raw.md"
+}

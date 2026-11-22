@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_PNJ_20261114/REPORT.md",
+  "report_md5": "0ecbc539064726534c3d0b24e4bf8ac0",
+  "brief_md5": "e1b06eb55c4d16b539e46a0178b1902b",
+  "model": "opus",
+  "cost_usd": 0.7514310000000001,
+  "started_at_ict": "2026-11-22T23:54:14+07:00",
+  "summary": "The NON (keep-excluded) verdict holds up, and the BQ figures (quarterly profit, shares, operating cash flow) match my recompute. The valuation block does not. The model says post-raise PNJ is worth ~6.76k bn in the base case, yet requires 8,000 bn of new money that goes entirely to trade-in obligations. Dividing by 550m new shares assumes new investors pay ≥14,545 per share for something the model values at 6,366. With a consistent issue price, existing holders' value is ~0 in the base case. So the 6,370–7,640 range is materially too HIGH. On the other side, capitalising the 2029 plan year (net margin 2.8%) forever and ignoring cash freed from excess inventory biases it LOW. Missing items: the extra loss if 100% of customers redeem (~26% of F) is outside the centre; the FY2025 audit, the gold-bar licence and the share-count history were not checked. The source PDFs (src/) are not on disk, so every figure taken from the filings is untraceable.",
+  "verdict_raw_path": "agents/Taylor/research/dd_PNJ_20261114/skeptic/r1_raw.md"
+}

@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT.md",
+  "report_md5": "dfb6cab10d9a334dba58a6ae3893d50a",
+  "brief_md5": "2ee8d22eeb83e3022265a3b2b2344577",
+  "model": "opus",
+  "cost_usd": 1.1229651999999999,
+  "started_at_ict": "2026-11-22T23:50:47+07:00",
+  "summary": "Số học của mô hình RI đúng: tự tính lại khớp từng đồng với 13.018, và các số bảng cân đối/KQKD đã đối chiếu BQ đều khớp. Tuy nhiên có một lỗi định nghĩa làm lệch tâm theo chiều THẤP: ROE 14% lấy từ ROE_Trailing BQ (vốn chủ bình quân) nhưng được nhân trên vốn chủ đầu kỳ, nên ROE dài hạn của kịch bản CƠ SỞ thực chất ≈13,1% < Ke, tức ngầm ép ROE về Ke. Theo cùng cách tính đầu kỳ, ROE quan sát là 14,4–15,3%, và sửa lại đẩy tâm lên khoảng +6–10% (>5% ⇒ REFUTED). Ở chiều ĐẮT có các khoản chưa định lượng (lãi dồn tích tăng nhanh hơn dư nợ, LC miễn truy đòi và phải thu khác lớn với dự phòng 38 tỷ, bên liên quan/TPDN/CET1 chưa kiểm, kiểm toán FY2025 chưa đọc gốc) có thể bù trừ một phần. Truy nguồn còn yếu vì file gốc và output không có trong thư mục. Đã bỏ qua mọi số thị giá có trong báo cáo khi chấm.",
+  "verdict_raw_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/skeptic/r1_raw.md"
+}

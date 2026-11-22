@@ -1,0 +1,14 @@
+name,lat,lon,kind,dx,dy,note
+Mỏ Thạnh Phú 1 (Vĩnh Cửu),11.0027,106.8229,mine,-0.17,0.03,OSM Nominatim 22/11/2026 (khu phố Thạnh Phú; gần đúng)
+Mỏ Thiện Tân 2 (Vĩnh Cửu),11.017,106.8735,mine,0.02,0.03,OSM Nominatim 22/11/2026 (khu phố Thiện Tân; gần đúng)
+Cụm mỏ Tân Cang 1 (Biên Hòa),10.8955,106.9305,mine,0.02,-0.03,OSM Nominatim 22/11/2026 (Mỏ đá Tân Cang; gần đúng)
+Mỏ Soklu 2 và 5 (Thống Nhất),10.9746,107.1572,mine,-0.1,0.035,OSM Nominatim 22/11/2026 (huyện Thống Nhất cũ; gần đúng)
+Trụ sở (Biên Hòa),10.9142,106.8916,hq,-0.17,-0.035,OSM Nominatim 22/11/2026 (TP Biên Hòa; gần đúng)
+Sân bay Long Thành,10.7403,106.9918,project,0.02,-0.03,OSM Nominatim 22/11/2026
+Cụm mỏ VLB,10.96,106.88,mine,0.08,0.12,trung bình toạ độ 3 mỏ chủ lực (gần đúng)
+TP.HCM,10.7737,106.7166,market,-0.3,-0.06,OSM Nominatim (trung tâm)
+Thủ Dầu Một (Bình Dương cũ),11.0242,106.6506,market,-0.55,0.14,OSM Nominatim 22/11/2026
+Vũng Tàu (BR–VT cũ),10.4022,107.1385,market,0.05,-0.08,OSM Nominatim 22/11/2026
+Tây Ninh,11.3137,106.0967,market,0.06,0.06,OSM Nominatim 22/11/2026 (phường Tân Ninh)
+Cần Thơ (ĐBSCL – sà lan),10.0362,105.7873,market,0.08,0.1,OSM Nominatim 22/11/2026
+Sân bay Long Thành,10.7403,106.9918,project,0.06,-0.04,OSM Nominatim 22/11/2026

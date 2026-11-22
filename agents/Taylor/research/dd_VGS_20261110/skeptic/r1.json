@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_VGS_20261110/REPORT.md",
+  "report_md5": "aa88380cf65db522660c72c903fd18ba",
+  "brief_md5": "ccd8f6fac3207912b0ac4d3aaced8bc2",
+  "model": "opus",
+  "cost_usd": 2.0825275999999997,
+  "started_at_ict": "2026-11-22T20:18:55+07:00",
+  "summary": "Dữ kiện trong báo cáo VGS chính xác: 14 số then chốt khớp BCTC gốc khôi phục từ git, tính lại SOTP ra đúng. Nhưng theo checklist khoản thiếu, mô hình bỏ qua cam kết vốn tương lai và tiền sử dụng đất của Legend City (ĐHĐCĐ 2026 vừa điều chỉnh chủ trương đầu tư, tờ trình không có trong hồ sơ), nhu cầu thay thế tài sản của nhà máy đã khấu hao 82%, quỹ khen thưởng phúc lợi (≈5,9 tỷ/năm), thuê đất hết hạn 2051, và một khoản dự phòng −21,1 tỷ chưa rõ có phải lãi một lần không. Cộng lại, chiều xuống ước khoảng −14…−16% so với chiều lên khoảng +2…+5% (ứng trước Vinaconex, biên cấu trúc khi tỷ trọng hàng thương mại giảm, cách đọc W2-b). Liên kết được định giá 1,65 lần sổ mà không có BCTC, không nhất quán với nhãn moat NONE của lõi. Không khoản đơn lẻ nào đo chắc vượt 5% nên không kết luận REFUTED; khoản lớn nhất (cam kết Legend City) không lượng hoá được ⇒ INCONCLUSIVE cho đến khi có tờ trình 05/2026 và tình trạng tiền sử dụng đất.",
+  "verdict_raw_path": "agents/Taylor/research/dd_VGS_20261110/skeptic/r1_raw.md"
+}

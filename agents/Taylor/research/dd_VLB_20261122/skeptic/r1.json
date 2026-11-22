@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_VLB_20261122/investor_report/VLB_DD_investor_report_20261122.md",
+  "report_md5": "c0994fc3f5e704bf7647c80367a5fcae",
+  "brief_md5": "105d092025949a307aadbeaaae9ad540",
+  "model": "opus",
+  "cost_usd": 0.9179920000000001,
+  "started_at_ict": "2026-11-22T23:38:02+07:00",
+  "summary": "The VLB r2 report is arithmetically correct: net cash of 488.84 bn and the pre-discount centre of 52,732 reproduce exactly from the statements and the model, and the r1→r2 corrections each trace to scanned pages. Two-sided, the base profit of 330 bn sits above the report's own normalised figure, and the good case pairs more volume with a longer life. Against that, the offset is discounted at too high a rate and the excess deposits are not counted. Each of these is under 5% and they roughly cancel, so there is no one-sided bias. The decisive weakness is attack 8 (missing items): mine life and reserves, which carry most of the value, come only from the press. There is no licence register, no licence-fee approval decision and no audited FY2025 report, and part of Tân Cang 1 has expired yet is fully counted in the base case. These gaps are material but cannot be quantified, so the verdict is INCONCLUSIVE rather than CONFIRMED. The market prices in the report were ignored when judging the model.",
+  "verdict_raw_path": "agents/Taylor/research/dd_VLB_20261122/skeptic/r1_raw.md"
+}

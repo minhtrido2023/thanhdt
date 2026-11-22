@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_redo_20261105/TCH/REPORT_r3b.md",
+  "report_md5": "1bf1cf0721089ec1c6ba5d4637bd7709",
+  "brief_md5": "1f1ca5160828333ca979a00f4c821649",
+  "model": "opus",
+  "cost_usd": 1.2502546,
+  "started_at_ict": "2026-11-22T20:18:55+07:00",
+  "summary": "The r3b arithmetic is correct: I rebuilt the NAV from the locked notes and got 15.895 before the 0,63% liquidity discount, matching the 15.864 headline, and every inventory and backlog figure traces to notes_read.md. The weakness is in the inputs, not the math. About 1.500 đ/cp of the 3.800 đ surplus over book comes from applying an unreviewed half-year 51,9% gross margin to all future project spend implied by legal TMĐT. Yet Green River's remaining construction is visibly social housing (441 NOXH units, margin legally capped), and NC-II's NOXH share is unknown and never modelled. Stressing that removes roughly 3–6% of the centre, and the audited 42,7% margin removes about 14%. Two of the three TMĐT figures driving k cannot be traced, because the BCTN25 text and audited PDF are missing from the repo. There are real upside items too: exact cost form +578, earlier presale collection, and new land at zero NPV. So the evidence does not show the centre is wrong in one direction, but the 'DƯỚI vùng' label rests on unreviewed and partly untraceable inputs plus an unmodelled sector obligation. TCH is already excluded by FLOOR_FAIL regardless.",
+  "verdict_raw_path": "agents/Taylor/research/dd_redo_20261105/TCH/skeptic/r1_raw.md"
+}
