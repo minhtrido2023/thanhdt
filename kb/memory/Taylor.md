@@ -30,3 +30,6 @@
 - [2026-11-22T13:24:54Z] [B4 22/11] XONG job Taylor_20261122_131400: lint assumptions v1 commit 41b5d6dd2 (wt-dd-b4, chưa merge), cảnh báo — CHỜ quant-skeptic soát + Mike đặt ENFORCE_FROM sau 2 tuần
 - [2026-11-22T13:36:20Z] [B3 22/11] XONG job Taylor_20261122_133237: thẻ luận điểm commit (wt-dd-b3, chưa merge) — CHỜ arch-review + Mike merge + user duyệt thẻ nháp FPT/NNC/VGS + user duyệt cron
 - [2026-11-22T13:37:41Z] [B4 vòng 2 22/11] XONG job Taylor_20261122_133206: commit b242e616e (wt-dd-b4, chưa merge) — CHỜ quant-skeptic vòng 2 + Mike; còn tồn: kiểm quỹ KT-PL trên BCTC thật
+- [2026-11-22T13:38:59Z] ĐANG DỞ: job Taylor_20261122_133837 B5 skill rewrite | NEXT: viết new/ trong wt-dd-b5
+- [2026-11-22T13:49:07Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
+- [2026-11-22T13:49:18Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
