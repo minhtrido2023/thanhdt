@@ -23,7 +23,7 @@ RUN = os.path.join(ROOT, "bin", "dd_skeptic_run.py")
 
 def last_entry(t):
     es = [e for e in json.load(open(ZONES, encoding="utf-8"))["entries"] if e["ticker"] == t]
-    return max(es, key=lambda e: (e["dd_date"], e["rev"])) if es else None
+    return es[-1] if es else None  # sổ append-only ⇒ entry cuối = hiệu lực
 
 
 def dir_for(t, report_rel):
