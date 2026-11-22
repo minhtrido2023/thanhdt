@@ -1309,6 +1309,9 @@ class DNSEBroker(BrokerBase):
         Old order bị Canceled, new order_id xuất hiện với price/qty mới.
 
         Returns: new_oid (str) nếu tìm được, None nếu không (caller dùng cancel+replace).
+        None = trạng thái MƠ HỒ (modify có thể đã thành công mà lệnh mới chưa hiện trong sổ):
+        caller phải poll lại / dừng an toàn (§5), không cancel+replace mù — dễ đặt lệnh lần hai.
+        Lệnh mới chỉ được nhận khi CÙNG mã (và cùng chiều nếu biết) với lệnh cũ.
         """
         from dnse_api import DNSEError as _DNSEError
         try:
@@ -1330,9 +1333,27 @@ class DNSEBroker(BrokerBase):
                 old = updates.get(str(order_id))
                 if old and not old.is_dead:
                     return None  # modify thực ra chưa xong
-                # Tìm order mới nhất còn sống (heuristic: id số lớn nhất)
+                # Tìm order mới nhất còn sống (heuristic: id số lớn nhất) — CHỈ trong cùng
+                # mã (và cùng chiều nếu cả hai biết) với lệnh cũ. Trước 2026-11-22 lấy id lớn
+                # nhất của MỌI mã còn sống ⇒ có thể trả order_id của mã khác (caller sẽ coi
+                # lệnh sai là lệnh đã sửa). Không xác định được mã của lệnh cũ (không còn
+                # trong sổ / thiếu field symbol) ⇒ fail-safe: None ⇒ caller cancel+replace.
+                old_raw = (old.raw if old else None) or {}
+                sym = qget(old_raw, "symbol", "instrument", "code", "sym")
+                if not sym:
+                    self._log_raw("modify_order_new_oid", {
+                        "old_oid": order_id, "new_oid": None,
+                        "note": "không xác định được mã lệnh cũ ⇒ không đoán lệnh mới"})
+                    return None
+                side = qget(old_raw, "side", "orderside")
+                def _same(u):
+                    r = u.raw or {}
+                    if str(qget(r, "symbol", "instrument", "code", "sym") or "") != str(sym):
+                        return False
+                    s2 = qget(r, "side", "orderside")
+                    return not (side and s2) or str(side) == str(s2)
                 candidates = [(int(k), k) for k, u in updates.items()
-                              if not u.is_dead and k != str(order_id)]
+                              if not u.is_dead and k != str(order_id) and _same(u)]
                 if candidates:
                     new_oid = str(max(candidates)[1])
                     self._log_raw("modify_order_new_oid", {

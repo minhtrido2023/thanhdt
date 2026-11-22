@@ -73,7 +73,7 @@ def detect_today():
            'SELECT l.*, h.hi252 FROM latest l, hi h')
     out = _q(sql).strip().split('\n')
     if len(out) < 2:
-        return {'date': str(datetime.today().date()), 'error': 'no_data'}
+        return {'date': str(datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()), 'error': 'no_data'}
     header = out[0].split(','); row = out[1].split(',')
     rec = dict(zip(header, row))
 
