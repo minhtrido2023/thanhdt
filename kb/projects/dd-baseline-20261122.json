@@ -1,0 +1,89 @@
+{
+  "chi_phi_job_DD_usd": {
+    "ghi_chu": "lọc từ khoá prompt_summary; chưa gồm agent gọi trực tiếp (Opus/skeptic inline)",
+    "n_job": 205,
+    "tong": 760.9,
+    "trung_vi": 3.27
+  },
+  "generated_for": "A0 nâng cấp DD 22/11/2026 (decided_by user 19:07)",
+  "lenh_tai_lap": "python3 bin/dd_baseline_snapshot.py --out kb/projects/dd-baseline-20261122.json",
+  "rev_moi_ma": {
+    "phan_bo": {
+      "1": 13,
+      "2": 9,
+      "3": 6,
+      "4": 3,
+      "5": 1,
+      "6": 2,
+      "8": 1,
+      "9": 1
+    },
+    "tong": 95,
+    "top": [
+      [
+        "MVC",
+        9
+      ],
+      [
+        "NNC",
+        8
+      ],
+      [
+        "TV1",
+        6
+      ],
+      [
+        "PAT",
+        6
+      ],
+      [
+        "SCL",
+        5
+      ]
+    ],
+    "trung_binh": 2.639
+  },
+  "skeptic_status_moi_entry": {
+    "CONFIRMED": 34,
+    "NONE": 18,
+    "OTHER": 5,
+    "REFUTED": 38
+  },
+  "skeptic_status_rev_cuoi_moi_ma": {
+    "CONFIRMED": 19,
+    "OTHER": 1,
+    "REFUTED": 16
+  },
+  "so_entries": 95,
+  "so_lan_gui_lai_email": {
+    "dang": "manual",
+    "gia_tri": 1,
+    "nguon": "thủ công: ca QTP 17/11 gửi lần 2 (kb/projects/qtp-dd-20261117.md; review F13). Không có ledger máy đọc cho email DD — số này phải cập nhật tay."
+  },
+  "so_ma": 36,
+  "ti_le_qua_vong1_cohort_tu_2026-11-09": {
+    "n_tickers": 16,
+    "pass": 2,
+    "passed": [
+      "MSB",
+      "PNJ"
+    ],
+    "rate": 0.125
+  },
+  "ti_le_qua_vong1_toan_so": {
+    "n_tickers": 36,
+    "pass": 9,
+    "passed": [
+      "DGC",
+      "DRI",
+      "HPG",
+      "MBB",
+      "MSB",
+      "MVC",
+      "PNJ",
+      "PVP",
+      "PVT"
+    ],
+    "rate": 0.25
+  }
+}
