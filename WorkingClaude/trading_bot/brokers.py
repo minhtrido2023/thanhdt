@@ -666,6 +666,16 @@ class DNSEBroker(BrokerBase):
         # là ngày go-live, một bản ghi có totalCash âm — ở đó chặn là đúng.
         return tc - td
 
+    def _log_ppse_error(self, fn, symbol, price, exc):
+        """Ghi bằng chứng lỗi ppse vào raw log mà KHÔNG BAO GIỜ ném ra: caller (executor.py:2163)
+        không bọc try, nên log lỗi mà tự ném (vd UnicodeEncodeError do surrogate lẻ trong message —
+        `_log_raw` chỉ bắt OSError) sẽ biến `return None` thành STEP_FAIL cả lượt step()."""
+        try:
+            self._log_raw("ppse_error", {"fn": fn, "symbol": symbol, "price": price,
+                                         "error": f"{type(exc).__name__}: {exc}"})
+        except Exception:
+            pass
+
     def get_max_buy_qty(self, symbol, price, loan_package_id=None):
         """Sức mua tối đa theo mã+giá qua GET /accounts/{acc}/ppse (qmaxBuy). ppse đã tính
         cả tiền bán chờ về T+0 — availableCash thì chưa (xem BrokerBase docstring). Mọi
@@ -683,8 +693,7 @@ class DNSEBroker(BrokerBase):
         except Exception as e:
             # §29: vẫn trả None (caller fail-safe như cũ) nhưng ghi BẰNG CHỨNG — trước đây lỗi
             # API ppse nhìn y hệt "hết tiền" vì không để lại dấu vết nào.
-            self._log_raw("ppse_error", {"fn": "get_max_buy_qty", "symbol": symbol, "price": price,
-                                         "error": f"{type(e).__name__}: {e}"})
+            self._log_ppse_error("get_max_buy_qty", symbol, price, e)
             return None
 
     def get_buying_power(self, symbol, price, loan_package_id=None):
@@ -703,8 +712,7 @@ class DNSEBroker(BrokerBase):
             v = _fnum(qget(r, "pp0Buy", "pp0buy"))
             return float(v) if v is not None and v >= 0 else None
         except Exception as e:
-            self._log_raw("ppse_error", {"fn": "get_buying_power", "symbol": symbol, "price": price,
-                                         "error": f"{type(e).__name__}: {e}"})
+            self._log_ppse_error("get_buying_power", symbol, price, e)
             return None
 
     def positions_raw(self):
