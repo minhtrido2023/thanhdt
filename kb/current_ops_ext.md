@@ -63,3 +63,10 @@ Audit cron C1/H2 (07-12), BQ cache monolith (07-13), cross-account contamination
 "Research OpenCode" đọc từ đó). KHÔNG merge, KHÔNG xoá, KHÔNG đồng bộ về master, KHÔNG dispatch/cron
 từ đó. Đã loại khỏi `run_selfchecks.sh` (incident 2026-09-12) và `.gitignore` repo ngoài (09-08). Ai
 thấy nó "tụt commit" hay "git hỏng" ⇒ đó là trạng thái mong đợi, không phải việc cần sửa.
+
+## Nâng cấp quy trình DD — mốc theo dõi (user duyệt kế hoạch 22/11/2026 19:07; chi tiết `kb/projects/dd-upgrade-final-action-20261122.md`)
+- 29/11: hạn Mike xác nhận tay 20 ca `skeptic_final` mơ hồ (`kb/projects/dd-ledger-ambiguous-queue-20261122.md`).
+- ~06/12: đo báo giả `bin/dd_assumptions_lint.py` trên DD thật (≤10% + chỉ số né khoá) ⇒ đề xuất bật chặn (`DD_ASSUMPTIONS_LINT_ENFORCE_FROM`).
+- 15/12: user xem lại cổng LAG; B1 hằng `LAG_DD_REQUIRE_CONFIRMED` (trading_bot/plan.py:1150) mặc định False — bật tay trước 19:00; replay A3: chặn thêm 0 lệnh lịch sử, 21/36 mã FIXED_UNVERIFIED.
+- 22/12 và 22/02/2027: đo lại so `kb/projects/dd-baseline-20261122.json` (`bin/dd_baseline_snapshot.py`): qua vòng 1 (nền 2/16 cohort 09/11; 9/36 toàn sổ), số lần gửi lại email (nền 1), CONFIRMED rev cuối (nền 15/36).
+- Chờ user: thay `~/.claude/agents/fundamental-skeptic.md` bằng `.proposed` (DD_GENERAL; test QTP bắt capex 3.485 tỷ); cron thesis_card_watch; NNC/VGS miễn exit; sizing Q4.
