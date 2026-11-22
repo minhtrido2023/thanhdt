@@ -105,7 +105,8 @@ def main(argv=None):
     ap.add_argument("--report", required=True)
     ap.add_argument("--round", type=int)
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--mode", choices=("FEAR_BUY", "DD_GENERAL"), help="chèn dòng đầu brief 'MODE: …' (chỉ có tác dụng khi định nghĩa agent hỗ trợ chế độ — B6 .proposed)")
+    ap.add_argument("--mode", choices=("FEAR_BUY", "DD_GENERAL"), default="DD_GENERAL",
+                    help="chế độ skeptic, chèn dòng đầu brief 'MODE: …'. Mặc định DD_GENERAL (user duyệt 22/11/2026 23:28); FEAR_BUY CHỈ khi truyền tường minh")
     try:
         a = ap.parse_args(argv)
     except SystemExit as e:

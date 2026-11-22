@@ -57,6 +57,10 @@ with tempfile.TemporaryDirectory() as td:
         chk("%s ⇒ rc=4, không ghi file, có lý do thật" % nm, r.returncode == 4 and sorted(os.listdir(os.path.join(d, "skeptic"))) == before and "LỖI" in r.stderr)
     r = run(["--dir", d, "--report", rep, "--dry-run"], os.path.join(td, "khong_ton_tai"))
     chk("--dry-run không gọi claude (bin không tồn tại vẫn rc=0), không ghi", r.returncode == 0 and "BRIEF" in r.stdout and sorted(os.listdir(os.path.join(d, "skeptic"))) == before)
+    r = run(["--dir", d, "--report", rep, "--dry-run"], os.path.join(td, "khong_ton_tai"))
+    chk("mặc định --mode = DD_GENERAL (dòng đầu brief)", r.returncode == 0 and r.stdout.split("=== BRIEF ===\n", 1)[1].startswith("MODE: DD_GENERAL\n"))
+    r = run(["--dir", d, "--report", rep, "--dry-run", "--mode", "FEAR_BUY"], os.path.join(td, "khong_ton_tai"))
+    chk("--mode FEAR_BUY tường minh ⇒ MODE: FEAR_BUY", r.returncode == 0 and r.stdout.split("=== BRIEF ===\n", 1)[1].startswith("MODE: FEAR_BUY\n"))
     # brief chứa giá ⇒ lint chặn
     sys.path.insert(0, HERE)
     import importlib; m = importlib.import_module("dd_skeptic_run")
