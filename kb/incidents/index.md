@@ -236,6 +236,7 @@ bài (mục "còn hở/residual/Prevention"). Đừng dùng trường này làm 
 | 2026-06-22 | [2026-06-22 — Mafee ZOMBIE: systemd reports healthy, agent isn't actually serving](2026-06/2026-06-22-mafee-zombie-systemd-healthy.md) | logged |
 
 ## RETRO hằng ngày (mới nhất trước)
+| 2026-11-22 | [RETRO — 2026-11-22: 2 sự cố (backup freshness, báo cáo tuần — cả 2 đã đóng), 1 pattern, 1 wakeup thiếu](retro/retro-2026-11-22.md) |
 | 2026-11-21 | [RETRO — 2026-11-21: 1 sự cố (backup mike-fleet, đã đóng), 1 pattern, 1 mục mở (báo cáo tuần INCOMPLETE)](retro/retro-2026-11-21.md) |
 | 2026-11-20 | [RETRO — 2026-11-20: 2 sự cố, 1 pattern xuyên suốt](retro/retro-2026-11-20.md) |
 | 2026-11-19 | [RETRO — 2026-11-19: 0 sự cố, 0 pattern xuyên suốt](retro/retro-2026-11-19.md) |
