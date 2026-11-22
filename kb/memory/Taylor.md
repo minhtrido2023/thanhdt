@@ -29,3 +29,4 @@
 - [2026-11-22T13:17:22Z] [B2 22/11] XONG job Taylor_20261122_131331: commit 270c0231a (wt-dd-b2, chưa merge) — CHỜ arch-review + Mike merge; PLAN: FULL 4 (TCH DCM PAT VLB), ? 12, MECH 5 (HHH MSB PNJ QTP SCL)
 - [2026-11-22T13:24:54Z] [B4 22/11] XONG job Taylor_20261122_131400: lint assumptions v1 commit 41b5d6dd2 (wt-dd-b4, chưa merge), cảnh báo — CHỜ quant-skeptic soát + Mike đặt ENFORCE_FROM sau 2 tuần
 - [2026-11-22T13:36:20Z] [B3 22/11] XONG job Taylor_20261122_133237: thẻ luận điểm commit (wt-dd-b3, chưa merge) — CHỜ arch-review + Mike merge + user duyệt thẻ nháp FPT/NNC/VGS + user duyệt cron
+- [2026-11-22T13:37:41Z] [B4 vòng 2 22/11] XONG job Taylor_20261122_133206: commit b242e616e (wt-dd-b4, chưa merge) — CHỜ quant-skeptic vòng 2 + Mike; còn tồn: kiểm quỹ KT-PL trên BCTC thật
