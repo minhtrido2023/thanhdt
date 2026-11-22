@@ -12,7 +12,7 @@ rc=0: brief 0/26, sector_read 7/27.
 |---|---|---|
 | dd_PAT_20261114/brief.md | PRICE_TOKEN (Giá đóng cửa 72.700), TICKER, PATH_LEAK, VERDICT (vùng giá) | ĐÁNG báo (bắt buộc bắt: có giá) |
 | dd_PAT_20261114/brief_r2.md | PRICE_TOKEN ×2 (72.700; 24,5k), MULTIPLE (P/B ~2), REFUTED, PATH | ĐÁNG báo (bắt buộc bắt: giá + P/B) |
-| sector_read_da_xay_dung_dnb_20261122.md | PATH_LEAK `dd_VLB_20261122` (dòng 289), FORWARD_RETURN?, TICKER | ĐÁNG báo — ca F7 gốc (PATH_LEAK bắt đúng) |
+| sector_read_da_xay_dung_dnb_20261122.md | PATH_LEAK `dd_VLB_20261122` (dòng 289), TICKER VCB (dòng 163-164, nguồn lãi suất) | ĐÁNG báo — ca F7 gốc (PATH_LEAK bắt đúng) |
 | sector_read_fertilizer_dap_20261028.md | không | sạch ✔ (đúng) |
 | sector_read_gach_nung_icd_binhduong_20261103.md | không | sạch ✔ |
 | sector_read_hoa_chat_xut_clo_20261109.md | không | sạch ✔ |
