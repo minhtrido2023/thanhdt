@@ -130,7 +130,7 @@ Ký hiệu vị trí: **C:** core `SKILL.md` (mục) · **E:** ext (§). DD = du
 | N-01 | Pha MÙ GIÁ → khoá → pha SAU KHOÁ trong thứ tự bước (F8) | review F8, P0-2; L19 | C (DD): bước 5–6 |
 | N-02 | Snapshot ra thư mục trung tính không chứa mã (A8) | A8 22/11 | C (DD): bước 3 |
 | N-03 | `dd_blind_lint.py` cho brief sector/valuation/skeptic (A5; chỉ cảnh báo, chưa nối dispatch) | A5 | C (DD): bước 4, 5, 7 |
-| N-04 | `assumptions.json` v1 + `dd_assumptions_lint.py` CẢNH BÁO 2 tuần (B4, chưa merge 22/11) | B4, D3–D5 | C (DD): bước 5 · E: §E6, §E7 |
+| N-04 | `assumptions.json` v1 + `dd_assumptions_lint.py` CẢNH BÁO 2 tuần (B4, ĐÃ merge master `b242e616e`; schema `kb/schemas/dd_assumptions_v1.json`, ENFORCE_FROM 9999-12-31) | B4, D3–D5 | C (DD): bước 5 · E: §E6, §E7 |
 | N-05 | Runner `dd_skeptic_run.py` → `skeptic/rN.json`; `DD_GENERAL` chỉ sau khi user duyệt `.proposed` (A4/B6) | A4, B6 | C (DD): bước 7 |
 | N-06 | B2 phản biện lại >5%/đổi nhãn (đã có ở skill cũ :56) | B2/D1 | C (DD): bước 8 |
 | N-07 | Ghi sổ sau áp đính chính, một câu (F22-c) | review F22 | C (DD): bước 9 |
@@ -145,7 +145,9 @@ Ký hiệu vị trí: **C:** core `SKILL.md` (mục) · **E:** ext (§). DD = du
 
 ## D. Đếm
 - Cũ: **106 luật** (DD 60 + IR 46; IR-21b tính trong IR-21). Có vị trí trong bản mới: **106/106** (105 hiệu lực ở core hoặc ext; 1 câu chết IR-21b giữ ở ext có nhãn ĐÃ THAY).
-- Dòng nguyên văn: 100% dòng không rỗng của 2 file cũ có trong ext (kiểm cơ học).
+- Dòng nguyên văn: mọi dòng THÂN không rỗng của 2 file cũ có trong ext (kiểm cơ học `/tmp/arch_b5/chk.py`: 0 dòng thân thiếu; DD 48, IR 183 dòng). 17 dòng TIÊU ĐỀ (DD 4, IR 13) chỉ đổi định dạng (`## X` → `#### (tiêu đề cũ) X`), nội dung giữ.
+- Kích thước sau vòng 2 (byte): DD core 16.853 (vượt 14KB mục tiêu vì vòng 2 khôi phục hệ quả cờ V6, ngưỡng 10–20% V3, phép thử Ke>15%, giờ ICT, hiện trạng skeptic; trong trần ~16KB reviewer cho phép ±), IR core 12.936.
+- D6 (Quick/Full) đã duyệt, thí điểm tháng 2–3 (B7) — chưa nằm trong core.
 - Luật mới thêm vào core: 15 (N-01…N-15).
 
 ## E. Mâu thuẫn
@@ -154,5 +156,7 @@ Ký hiệu vị trí: **C:** core `SKILL.md` (mục) · **E:** ext (§). DD = du
 1. **F22-d sizing** 0,5–1,0% vs 2–4% vs 5% — chờ user (Q4).
 2. **D5 vs code (mới phát hiện)**: `bin/dd_price_zone_watch.py` không đọc `audited_fy_missing` (grep 22/11: 0 dòng) ⇒ "không vào Bậc 1" chưa được cưỡng chế; cổng LAG chỉ chặn khi bật `LAG_DD_REQUIRE_CONFIRMED`. Cần vá code (ngoài B5).
 3. **`--claim`**: dùng hay gỡ — Mike/user.
-4. **Phụ thuộc chưa merge**: B4 (`dd_assumptions_lint.py`, nhánh `-b4`); `DD_GENERAL` chờ user duyệt `fundamental-skeptic.md.proposed` (B6); thẻ FPT/NNC/VGS + cron B3 chờ user duyệt. Core ghi đúng điều kiện, không tuyên bố đang chạy.
+4. **Phụ thuộc**: B2, B3, B4 ĐÃ merge master (B4 `b242e616e`; B3 `kb/thesis_cards.json`, cron chờ user duyệt). Còn chờ user: `DD_GENERAL` cần duyệt `fundamental-skeptic.md.proposed` (B6); thẻ FPT/NNC/VGS + cron B3. Core ghi đúng điều kiện, không tuyên bố đang chạy.
+6. **Skeptic brief (R1 #2)**: `bin/dd_skeptic_run.py` brief = template cố định fear-buy; `fundamental-skeptic.md` thuần fear-buy, không có "moat" ⇒ phạm vi moat/cân bằng/thiếu hạng mục KHÔNG truyền tới khi duyệt `.proposed`. Cách tạm: CHƯA THỐNG NHẤT — chờ user (đề xuất Mike tự thêm câu kiểm moat vào brief chạy tay).
+7. **IR bước 4**: grep fear-buy chỉ có ở ext (§X12); lint A6 chưa phủ "xung đột lợi ích", "đang nắm giữ", "kiểm định", "sợ hãi", "NAV" (`send_dd_report_email.py:30-37`) — việc riêng, không sửa lint ở B5.
 5. Frontmatter IR vẫn "Viết và gửi email…" (giữ trigger theo SPEC mục 6); luật thân là "chỉ gửi khi user báo" — không trái nhau về hành vi nhưng mô tả có thể đọc nhầm; đổi mô tả cần Mike quyết.
