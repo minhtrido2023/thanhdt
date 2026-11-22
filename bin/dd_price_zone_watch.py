@@ -347,9 +347,10 @@ def dd_flag_map(tickers, asof):
                 as_dict=True))
         except Exception as e:  # noqa: BLE001
             return ("UNKNOWN", [], f"{type(e).__name__}")
-    # Mỗi mã = 1 truy vấn BQ universe_pit (~1s, đo 20/11) ⇒ tuần tự 11 mã ≈ 11-13s; mất credential thì
-    # mỗi mã còn tự dò GCE metadata ≈ 12s (≈ 2m20 cả lượt). Mã đầu chạy TUẦN TỰ để nạp cache parquet +
-    # BQ client dùng chung của due_diligence đúng 1 lần; các mã còn lại song song có giới hạn.
+    # Mỗi mã = 1 truy vấn BQ universe_pit (~1s, đo 20/11) ⇒ tuần tự 11 mã ≈ 11-13s. Mất credential: từ
+    # 20/11 (45e87fee5) due_diligence._bq_client cache LỖI 300s + precheck ADC ⇒ cả lượt ≈ 6s, 0 lần dò
+    # GCE metadata (trước đó ≈ 12s/mã ≈ 2m20). Mã đầu chạy TUẦN TỰ để nạp cache parquet + BQ client
+    # dùng chung của due_diligence đúng 1 lần; các mã còn lại song song có giới hạn.
     tickers = list(tickers)
     out = {}
     if tickers:
