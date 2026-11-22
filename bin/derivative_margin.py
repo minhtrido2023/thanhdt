@@ -24,6 +24,7 @@ KHÔNG dùng cho mẫu số sizing cổ phiếu (`compute_active_nav.py`) — ti
 sleeve ORB, không mua được cổ phiếu (xem docstring compute_active_nav §derivative).
 """
 import math
+import sys
 
 VERIFIED_FIELD = "remainSecure"
 UNVERIFIED_FIELDS = ("usedSecure", "pendingSecure", "holdTaxAndFee", "totalLoanDebt",
@@ -84,7 +85,10 @@ def read_derivative_positions(client, account_no):
     """Vị thế DERIVATIVE từ DNSE (read-only). → list, hoặc None nếu lỗi (caller fail-closed)."""
     try:
         r = client.positions(account_no, market_type="DERIVATIVE")
-    except Exception:
+    except Exception as e:
+        # §29: caller chỉ nhận None (fail-closed) — in lý do thật ra stderr để dấu vết không mất.
+        print(f"[derivative_margin] read_derivative_positions lỗi: {type(e).__name__}: {e}",
+              file=sys.stderr)
         return None
     if isinstance(r, dict) and isinstance(r.get("positions"), list):
         return r["positions"]
