@@ -1,0 +1,560 @@
+{
+  "schema": "thesis_cards/v1",
+  "doc": "Sổ THẺ LUẬN ĐIỂM vị thế discretionary — CHỈ HIỂN THỊ/NHẮC, không đổi lệnh/luật thoát. Append-only theo (ticker, rev): đổi nội dung = THÊM thẻ rev+1 (supersedes). Bản rev cao nhất của mã thắng. SPEC B3 22/11/2026.",
+  "deal_types": [
+    "value_long",
+    "event_trade",
+    "fixed_rules"
+  ],
+  "cards": [
+    {
+      "ticker": "FPT",
+      "rev": 1,
+      "accounts": [
+        "SpaceX",
+        "ZaloPay"
+      ],
+      "deal_type": "value_long",
+      "exit_policy": {
+        "kind": "user_decides",
+        "approval_ref": "user 22/11/2026 19:27 ICT (decided_by: user): \"Discretionary sleeve không cần quy tắc thoát cố định\" — SPEC B3; kb/projects/dd-upgrade-final-action-20261122.md mục B3",
+        "note": "value_long: thoát do user quyết; KHÔNG stop/TIME/target cố định. Thẻ chỉ hiển thị/nhắc.",
+        "legacy_rules_note": "FPT đã gỡ khỏi data/discretionary_exit_rules.json 22/11 (bak_20261122_fpt_exempt). Plan nháp 23/11 có STOP SELL 800/500 chưa duyệt — user quyết."
+      },
+      "entry": {
+        "date": "2026-11-06",
+        "cost": {
+          "SpaceX": {
+            "qty": 800,
+            "cost_price": 51137.5
+          },
+          "ZaloPay": {
+            "qty": 500,
+            "cost_price": 51160.0
+          }
+        },
+        "source": "data/execution_logs/dnse_raw_2026-11-20.jsonl positions costPrice (DNSE)"
+      },
+      "thesis": [
+        "Kỳ vọng trọng số 57.312, vùng P10–P90 45.270–68.466 (rev3, skeptic CONFIRMED 09/11); §2.5 fear-buy KHÔNG đủ điều kiện.",
+        "Chân trời DD 5 năm ≠ deal 25 phiên; giá 20/11 = 45.000 ≈ trung bình nhánh XẤU.",
+        "Nguồn: agents/Taylor/research/dd_upgrade_20261122/A1_fpt_thesis_audit/THESIS_CARD.md (v2 qua skeptic)."
+      ],
+      "dd_ref": {
+        "ticker": "FPT",
+        "dd_date": "2026-11-01",
+        "rev": 3,
+        "center": 57312,
+        "zone_low": 45270,
+        "zone_high": 68466,
+        "source": "kb/dd_price_zones.json (đọc từ sổ lúc dựng thẻ)"
+      },
+      "milestones": [
+        {
+          "id": "FPT-M1",
+          "date": "2026-11-27",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "GDKHQ cổ tức 1.000đ",
+          "threshold": "DNSE điều chỉnh giá từ tối 26/11 ⇒ P&L đọc thấp thêm ≈2pp cơ học",
+          "direction": "info",
+          "source": "THESIS_CARD §0 (corporate_action BQ)",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "FPT-M2",
+          "date": "2026-11-30",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Ngày chốt quyền cổ tức",
+          "threshold": "—",
+          "direction": "info",
+          "source": "THESIS_CARD §4",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "FPT-M3",
+          "date": "2026-12-10",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Trả cổ tức 1.000đ (cổ tức đã hứa không bị huỷ)",
+          "threshold": "trả đúng hạn",
+          "direction": "abandon_if_cancelled",
+          "source": "THESIS_CARD §2/§4",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "FPT-M4",
+          "date": "2026-12-10",
+          "date_basis": "ước lượng (chưa có lịch công bố; cửa sổ giữa 11 và 12/2026)",
+          "metric": "KQKD tháng 10–11: ký mới NN luỹ kế",
+          "threshold": "<+15% ⇒ hạ nhận định",
+          "direction": "lower_if_below",
+          "source": "REPORT.md:166, r2 §8 (THESIS_CARD §2)",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": "chưa kiểm số tháng 10"
+        },
+        {
+          "id": "FPT-M5",
+          "date": "2026-12-10",
+          "date_basis": "ước lượng (mốc rà trước khi quyết)",
+          "metric": "Tin pháp lý/CBTT FTEL, FOX (thu hồi/chuyển giao ngoài giá thị trường, pha loãng)",
+          "threshold": "có tin bất lợi ⇒ hạ",
+          "direction": "lower_if_bad_news",
+          "source": "THESIS_CARD §2; cần legal-vn/web quét sau 01/11",
+          "owner": "legal-vn",
+          "status": "pending",
+          "checked_at": null,
+          "note": "chưa quét pháp lý sau 01/11"
+        },
+        {
+          "id": "FPT-M6",
+          "date": "2026-12-10",
+          "date_basis": "liên tục — ngày = mốc rà",
+          "metric": "Lãi huy động 12T (effective_deposit_rate)",
+          "threshold": "+100bp so hiện 7,4% hiệu dụng ⇒ hạ",
+          "direction": "lower_if_above",
+          "source": "r2 §8; cctg 02/11, Big-4 12M 6,8% (16/11)",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": "chưa xảy ra"
+        },
+        {
+          "id": "FPT-M7",
+          "date": "2027-01-31",
+          "date_basis": "ước lượng (≈cuối 01/2027)",
+          "metric": "BCTC Q4/2026 (kiểm toán, khoản 618,8 tỷ, CFO 2026)",
+          "threshold": "xem abandon_triggers",
+          "direction": "info",
+          "source": "THESIS_CARD §2",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        }
+      ],
+      "abandon_triggers": [
+        {
+          "id": "FPT-A1",
+          "condition": "Kiểm toán ngoại trừ/từ chối",
+          "how_measured": "BCTC kiểm toán 2026 (≈cuối 01/2027) — THESIS_CARD §2; HARD ABANDON r3 §9",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "FPT-A2",
+          "condition": "Khoản 618,8 tỷ không thu hồi lớn hơn đã ghi",
+          "how_measured": "BCTC Q4/2026 thuyết minh — THESIS_CARD §2",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "FPT-A3",
+          "condition": "CFO 2026 âm cả năm",
+          "how_measured": "BCTC năm 2026 (≈Q1/2027) — THESIS_CARD §2",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "FPT-A4",
+          "condition": "Cổ tức đã hứa bị huỷ",
+          "how_measured": "CBTT FPT trước 10/12/2026 — THESIS_CARD §2 (§3 #4)",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "FPT-A5",
+          "condition": "FTEL thu hồi/chuyển giao ngoài giá thị trường; FTEL pha loãng/FOX mất tư cách đại chúng",
+          "how_measured": "quét CBTT + legal-vn/web (chưa quét sau 01/11) — THESIS_CARD §2",
+          "current_status": "chưa kiểm"
+        }
+      ],
+      "open_items": [
+        "Giá giảm 16–20/11 kèm KL 1,4–1,7× Volume_1M: chưa tách được yếu tố cổ phiếu thưởng 171,4M (giao dịch từ 12/11) — THESIS_CARD §3",
+        "Tin/CBTT FPT ngoài corporate_action: chưa kiểm"
+      ],
+      "drawdown_review": {
+        "pct": 15,
+        "protocol": "rà 48 giờ theo thẻ — KHÔNG phải lệnh bán, KHÔNG phải stop",
+        "reviewer": "user (Mike nhắc)"
+      },
+      "last_review_at": "2026-11-22",
+      "status": "active",
+      "draft_pending_user_review": true,
+      "recorded_at": "2026-11-22T20:50:00+07:00"
+    },
+    {
+      "ticker": "NNC",
+      "rev": 1,
+      "accounts": [
+        "SpaceX",
+        "ZaloPay"
+      ],
+      "deal_type": "fixed_rules",
+      "exit_policy": {
+        "kind": "fixed_rules",
+        "approval_ref": "user 06/11/2026 14:19 ICT (decided_by: user) — mike/kb/projects/disc-fpt-nnc-approval-20261105.md mục CẬP NHẬT 06/11 14:19",
+        "note": "Quy tắc cố định HIỆN HÀNH trong data/discretionary_exit_rules.json (+10%/−10%/25 phiên). Chỉ đạo 22/11 19:27 \"sleeve không cần quy tắc thoát cố định\" mới áp cho FPT; NNC/VGS CHỜ user xác nhận — khi xác nhận đổi sang value_long/user_decides (rev mới)."
+      },
+      "entry": {
+        "date": "2026-11-06",
+        "cost": {
+          "SpaceX": {
+            "qty": 400,
+            "cost_price": 46675.0
+          },
+          "ZaloPay": {
+            "qty": 300,
+            "cost_price": 46950.0
+          }
+        },
+        "source": "data/execution_logs/dnse_raw_2026-11-20.jsonl positions costPrice (DNSE)"
+      },
+      "thesis": [
+        "Tâm kỳ vọng 61.273 (r3, skeptic CONFIRMED 08/11), vùng P10–P90 30.375–95.341; điểm yếu chính: tâm hàm ý ROE bền ≈24% (biên đá ở đỉnh 15 năm).",
+        "Biên an toàn CÓ ĐIỀU KIỆN: giá đá cụm từ 2028 giữ; thanh khoản mỏng (~1,4–1,5 tỷ/phiên).",
+        "Nguồn: agents/Taylor/research/dd_redo_20261105/NNC/REPORT_r3.md (+REPORT_r2.md §7–§8)."
+      ],
+      "dd_ref": {
+        "ticker": "NNC",
+        "dd_date": "2026-11-03",
+        "rev": 5,
+        "center": 61273,
+        "zone_low": 30375,
+        "zone_high": 95341,
+        "source": "kb/dd_price_zones.json (đọc từ sổ lúc dựng thẻ)"
+      },
+      "milestones": [
+        {
+          "id": "NNC-M1",
+          "date": "2027-01-20",
+          "date_basis": "ước lượng (~20/01/2027)",
+          "metric": "BCTC Q4/2026: biên gộp",
+          "threshold": "≥55% tích cực; <45% khi doanh thu đi ngang ⇒ tiêu cực",
+          "direction": "two_sided",
+          "source": "REPORT_r2.md §8",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "NNC-M2",
+          "date": "2027-01-20",
+          "date_basis": "ước lượng (khi có thuyết minh; r3 §8a)",
+          "metric": "Hợp đồng thuê Núi Nhỏ (thuyết minh)",
+          "threshold": "bên thứ ba tới 2043 = tích cực; tới 2030/bên liên quan, giá dưới thị trường = tiêu cực",
+          "direction": "two_sided",
+          "source": "REPORT_r2.md §8 + §7 (NHC bên liên quan)",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "NNC-M3",
+          "date": "2027-04-20",
+          "date_basis": "ước lượng (~20/04/2027)",
+          "metric": "BCTC Q1/2027: biên gộp",
+          "threshold": "≥55% / <45%",
+          "direction": "two_sided",
+          "source": "REPORT_r2.md §8",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "NNC-M4",
+          "date": "2027-06-30",
+          "date_basis": "ước lượng (cuối Q2/2027)",
+          "metric": "Giá đá Sở XD Q2/2027",
+          "threshold": "> Q3/2026 +7% tích cực; < −7% tiêu cực",
+          "direction": "two_sided",
+          "source": "REPORT_r2.md §8",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "NNC-M5",
+          "date": "2027-06-30",
+          "date_basis": "hạn theo nguồn (tới 30/06/2027)",
+          "metric": "Vành đai 4 / mỏ đấu giá trong cụm",
+          "threshold": "≥20% khối lượng tích cực; <20% (mỏ mới cấp sớm) tiêu cực",
+          "direction": "two_sided",
+          "source": "REPORT_r2.md §8",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "NNC-M6",
+          "date": "2026-12-31",
+          "date_basis": "ước lượng (mốc rà, chưa có hạn công bố)",
+          "metric": "legal-vn xác minh: MVC ≥51% NNC ⇒ Luật DN Đ195 buộc thoái 10,3% MVC (≈142 tỷ)?",
+          "threshold": "xác minh được/không",
+          "direction": "open_item",
+          "source": "REPORT_r2.md §7 (cần legal-vn)",
+          "owner": "legal-vn",
+          "status": "pending",
+          "checked_at": null,
+          "note": "chưa kiểm"
+        }
+      ],
+      "abandon_triggers": [
+        {
+          "id": "NNC-A1",
+          "condition": "Thu hồi/đình chỉ giấy phép Mũi Tàu",
+          "how_measured": "CBTT NNC + UBND TP.HCM — REPORT_r2.md §8 HARD ABANDON (1)",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "NNC-A2",
+          "condition": "Truy thu mới làm tổng truy thu tăng vật chất (> +20 tỷ ≈ +900 đ/cp)",
+          "how_measured": "BCTC/CBTT — REPORT_r2.md §8 (2); hiện tổng ≈42 tỷ ≈1.900 đ/cp (§7)",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "NNC-A3",
+          "condition": "MVC ≥51% kéo theo buộc thoái sở hữu chéo với giá bất lợi cho cổ đông thiểu số",
+          "how_measured": "CBTT MVC/NNC + legal-vn — REPORT_r2.md §8 (3)",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "NNC-A4",
+          "condition": "Dồn tiền giữ lại vào BĐS (nghị quyết đầu tư > 30% tiền ròng)",
+          "how_measured": "NQ ĐHĐCĐ/HĐQT — REPORT_r2.md §8 (4)",
+          "current_status": "chưa kiểm"
+        }
+      ],
+      "open_items": [
+        "CBTT 17/04/2026 NNC trúng đấu giá quyền khai thác khoáng sản (UBND TP.HCM): chưa đối chiếu mỏ nào/giá/hạn — REPORT_r2.md §7",
+        "Cờ E12 truy thu mỏ Mũi Tàu CHƯA ĐÓNG (dd_NNC_20261030/SKEPTIC_20261031.md)"
+      ],
+      "drawdown_review": {
+        "pct": 15,
+        "protocol": "rà 48 giờ theo thẻ — KHÔNG phải lệnh bán, KHÔNG phải stop",
+        "reviewer": "user (Mike nhắc)"
+      },
+      "last_review_at": "2026-11-22",
+      "status": "active",
+      "draft_pending_user_review": true,
+      "recorded_at": "2026-11-22T20:50:00+07:00"
+    },
+    {
+      "ticker": "VGS",
+      "rev": 1,
+      "accounts": [
+        "SpaceX",
+        "ZaloPay"
+      ],
+      "deal_type": "fixed_rules",
+      "exit_policy": {
+        "kind": "fixed_rules",
+        "approval_ref": "user 10/11-11/11/2026 (decided_by: user) — Discord: mua VGS 5% NAV, +15% bán, -10% cắt lỗ (đề xuất, user xác nhận); max_sessions=25: user chọn phương án A (Discord 11/11 08:04 ICT). Phương án B (null) đã được wire nhầm lúc 10:45 rồi hoàn tác — user chưa bao giờ chọn B",
+        "note": "Quy tắc cố định HIỆN HÀNH trong data/discretionary_exit_rules.json (+15%/−10%/25 phiên). Chỉ đạo 22/11 19:27 \"sleeve không cần quy tắc thoát cố định\" mới áp cho FPT; NNC/VGS CHỜ user xác nhận — khi xác nhận đổi sang value_long/user_decides (rev mới)."
+      },
+      "entry": {
+        "date": "2026-11-12",
+        "cost": {
+          "SpaceX": {
+            "qty": 2300,
+            "cost_price": 20000.0
+          },
+          "ZaloPay": {
+            "qty": 1500,
+            "cost_price": 20000.0
+          }
+        },
+        "source": "data/execution_logs/dnse_raw_2026-11-20.jsonl positions costPrice (DNSE)"
+      },
+      "thesis": [
+        "Tâm 26.526 (r2, kỳ vọng trọng số 18 kết cục), vùng 19.393–34.722; giá vào ≈ sát P10 ở cỡ ≤1 tỷ (MONG MANH).",
+        "Skeptic r1 INCONCLUSIVE (medium, 22/11): số khớp BCTC nhưng thiếu Legend City/capex thay thế/quỹ khen thưởng…; chiều xuống ≈−14…−16% (ước lượng) vs lên +2…+5%.",
+        "Nguồn: agents/Taylor/research/dd_VGS_20261110/REPORT.md + skeptic/r1.json."
+      ],
+      "dd_ref": {
+        "ticker": "VGS",
+        "dd_date": "2026-11-10",
+        "rev": 1,
+        "center": 26526,
+        "zone_low": 19393,
+        "zone_high": 34722,
+        "source": "kb/dd_price_zones.json (đọc từ sổ lúc dựng thẻ)"
+      },
+      "milestones": [
+        {
+          "id": "VGS-M1",
+          "date": "2027-01-31",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Lãi liên kết Q4/2026",
+          "threshold": "≥35 tỷ tích cực; <25 tỷ hai quý liền (Q4/26,Q1/27) hoặc <22,8 ⇒ xấu; <10 tỷ nặng",
+          "direction": "two_sided",
+          "source": "REPORT.md §8 M1 (ngưỡng là ước lượng)",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "VGS-M2",
+          "date": "2027-01-31",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Biên gộp hợp nhất Q4/2026",
+          "threshold": "≥4,5% hai quý liền / <3,0% hai quý liền",
+          "direction": "two_sided",
+          "source": "REPORT.md §8 M2",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "VGS-M3",
+          "date": "2027-03-31",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Phải thu KH 31/12/2026",
+          "threshold": "≤400 tỷ không dự phòng / >800 tỷ hoặc trích dự phòng 2 khách lớn",
+          "direction": "two_sided",
+          "source": "REPORT.md §8 M3",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "VGS-M4",
+          "date": "2027-12-31",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Legend City: CBTT mở bán / doanh thu NOXH GĐ1",
+          "threshold": "có giá bán kiểm được / XDCB tăng tiếp không bán ⇒ base ×0,85",
+          "direction": "two_sided",
+          "source": "REPORT.md §8 M4",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "VGS-M5",
+          "date": "2027-03-31",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Ý kiến kiểm toán BCTC 2026 + giải trình cổ tức liên kết 2025 (W2)",
+          "threshold": "chấp nhận toàn phần / ngoại trừ-điều chỉnh hồi tố",
+          "direction": "two_sided",
+          "source": "REPORT.md §8 M5",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "VGS-M6",
+          "date": "2026-12-31",
+          "date_basis": "liên tục — ngày = mốc rà",
+          "metric": "Lãi huy động 12T (effective_deposit_rate)",
+          "threshold": "−50bp tích cực / +50bp tiêu cực",
+          "direction": "two_sided",
+          "source": "REPORT.md §8 M6",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "VGS-M7",
+          "date": "2027-03-31",
+          "date_basis": "công bố/hạn theo nguồn",
+          "metric": "Thuế AD HRC TQ còn hiệu lực (Bobby F8, P 0,90)",
+          "threshold": "bị huỷ ⇒ kịch bản xấu nặng hơn",
+          "direction": "lower_if_cancelled",
+          "source": "REPORT.md §8 M7",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": ""
+        },
+        {
+          "id": "VGS-O1",
+          "date": "2026-12-31",
+          "date_basis": "ước lượng (mốc rà)",
+          "metric": "Lấy Tờ trình 05/2026/TT-ĐHĐCĐ-VGP (Legend City: tổng mức đầu tư, tiến độ) + Tờ trình 02/2026 (trích quỹ)",
+          "threshold": "đã có/chưa",
+          "direction": "open_item",
+          "source": "skeptic/r1.json recommended_followups[0]",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": "chưa kiểm"
+        },
+        {
+          "id": "VGS-O2",
+          "date": "2026-12-31",
+          "date_basis": "ước lượng (mốc rà)",
+          "metric": "Tình trạng tiền sử dụng đất QĐ 1829/2020, 2954/2021, 341/2024",
+          "threshold": "đã nộp/treo",
+          "direction": "open_item",
+          "source": "skeptic/r1.json recommended_followups[1]",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": "chưa kiểm"
+        },
+        {
+          "id": "VGS-O3",
+          "date": "2026-12-31",
+          "date_basis": "ước lượng (mốc rà)",
+          "metric": "Thuyết minh dự phòng phải trả (31,4→10,0): −21,1 tỷ là hoàn nhập vào lãi lỗ?",
+          "threshold": "nếu hoàn nhập ⇒ GPM kịch bản tốt về ≈4,05%",
+          "direction": "open_item",
+          "source": "skeptic/r1.json recommended_followups[2]",
+          "owner": "Taylor",
+          "status": "pending",
+          "checked_at": null,
+          "note": "chưa kiểm"
+        }
+      ],
+      "abandon_triggers": [
+        {
+          "id": "VGS-A1",
+          "condition": "Kiểm toán ngoại trừ/điều chỉnh hồi tố cổ tức liên kết 2025",
+          "how_measured": "BCTC kiểm toán 2026 (31/03/2027) — REPORT.md §8 M5",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "VGS-A2",
+          "condition": "Thuế AD HRC TQ bị huỷ",
+          "how_measured": "CBTT Bộ Công Thương — REPORT.md §8 M7",
+          "current_status": "chưa kiểm"
+        },
+        {
+          "id": "VGS-A3",
+          "condition": "Legend City: XDCB tăng tiếp, không bán, không xong GPMB",
+          "how_measured": "BCTC + CBTT dự án — REPORT.md §8 M4",
+          "current_status": "chưa kiểm"
+        }
+      ],
+      "open_items": [
+        "Skeptic r1 INCONCLUSIVE: Legend City cam kết vốn/tiền sử dụng đất không lượng hoá được; nhà máy ống khấu hao 82%; quỹ khen thưởng ≈5,9 tỷ/năm; thuê đất tới 2051 — skeptic/r1.json missing_items",
+        "Liên kết 28,6% định giá 1,65× sổ không có BCTC liên kết; TTM đếm Q4/25 hai lần"
+      ],
+      "drawdown_review": {
+        "pct": 15,
+        "protocol": "rà 48 giờ theo thẻ — KHÔNG phải lệnh bán, KHÔNG phải stop",
+        "reviewer": "user (Mike nhắc)"
+      },
+      "last_review_at": "2026-11-22",
+      "status": "active",
+      "draft_pending_user_review": true,
+      "recorded_at": "2026-11-22T20:50:00+07:00"
+    }
+  ]
+}
