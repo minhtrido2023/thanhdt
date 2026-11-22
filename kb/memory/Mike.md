@@ -13,3 +13,4 @@
 ## Mốc
 - LAG ADV + corp-action broker-primary 2026-12-15; measurement audit ~2026-12-27.
 
+- [2026-11-22T04:28:18Z] Báo cáo tuần 16-20/11 bị chặn bởi G5 (11-11 lệch +0,52>0,5, 1 điểm duy nhất, nay +0,10) — chờ user duyệt waiver Q9 2 file + hướng sửa cấu trúc (G5 nằm vĩnh viễn trong MTD/inception); chưa sửa gì
