@@ -3,7 +3,7 @@
 
   python3 bin/dd_skeptic_run.py --dir agents/Taylor/research/dd_<MÃ>_<ngày> --report <REPORT.md> [--round N] [--dry-run]
 
-Đầu ra: <dir>/skeptic/rN.json (+ rN_raw.md). N mặc định = max(rN.json hiện có)+1; --round trùng file có sẵn ⇒ từ chối.
+Đầu ra: <dir>/skeptic/rN.json (+ rN_raw.md; có cost_usd lấy từ total_cost_usd của claude --output-format json, null nếu thiếu). N mặc định = max(rN.json hiện có)+1; --round trùng file có sẵn ⇒ từ chối.
 Brief dựng từ template cố định (mù giá) và PHẢI qua bin/dd_blind_lint.py --mode skeptic: rc≠0 ⇒ không chạy.
 rc: 0 ok · 2 lỗi dùng/đầu vào · 3 brief bị lint chặn · 4 claude lỗi/verdict không parse được (KHÔNG ghi rN.json; thô lưu logs/).
 Env: DD_SKEPTIC_CLAUDE_BIN (stub test) · DD_SKEPTIC_AGENT_DEF · DD_SKEPTIC_MODEL (mặc định opus) · DD_SKEPTIC_WORKDIR · DD_SKEPTIC_TIMEOUT_S.
@@ -140,13 +140,20 @@ def main(argv=None):
     prompt = sysdef + "\n\n--- NHIỆM VỤ ---\n" + brief
     started = dt.datetime.now(ICT).isoformat(timespec="seconds")
     cmd = [CLAUDE, "-p", prompt, "--model", MODEL, "--permission-mode", "auto",
-           "--allowedTools", "Bash Read Grep Glob", "--max-turns", "50"]
+           "--allowedTools", "Bash Read Grep Glob", "--max-turns", "50", "--output-format", "json"]
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, cwd=WORKDIR if os.path.isdir(WORKDIR) else None, timeout=TIMEOUT_S)
     except (OSError, subprocess.TimeoutExpired) as e:
         print("LỖI: gọi claude thất bại: %s" % e, file=sys.stderr)
         return 4
-    txt = p.stdout
+    txt, cost = p.stdout, None
+    if p.returncode == 0:  # --output-format json: {"result": "<text>", "total_cost_usd": N}
+        try:
+            env_ = json.loads(p.stdout)
+            if isinstance(env_, dict) and isinstance(env_.get("result"), str):
+                txt, cost = env_["result"], env_.get("total_cost_usd")
+        except ValueError:
+            pass  # không phải JSON envelope ⇒ coi stdout là text thô như trước, cost_usd=null
     obj, why = (None, "claude rc=%d, stderr: %s" % (p.returncode, p.stderr[-300:])) if p.returncode != 0 else parse_verdict(txt)
     if obj is None:
         os.makedirs(os.path.join(ROOT, "logs"), exist_ok=True)
@@ -157,7 +164,7 @@ def main(argv=None):
     atomic_write(out_raw, txt)
     rec = {"round": n, "verdict": obj["verdict"], "confidence": obj.get("confidence"),
            "report_path": rel(report), "report_md5": md5_of(rbytes), "brief_md5": md5_of(brief.encode("utf-8")),
-           "model": MODEL, "started_at_ict": started, "summary": obj.get("summary"),
+           "model": MODEL, "cost_usd": cost, "started_at_ict": started, "summary": obj.get("summary"),
            "verdict_raw_path": rel(out_raw)}
     atomic_write(out_json, json.dumps(rec, ensure_ascii=False, indent=2) + "\n")
     print("OK r%d verdict=%s -> %s" % (n, rec["verdict"], rel(out_json)))
