@@ -2089,3 +2089,6 @@ Brent 06/11 từ ICE; số NH niêm yết ≥7%; mã số/văn bản gốc CV 96
 trungtamwto.vn 33105 (07/2026) · thitruongtaichinhtiente.vn 86006 (GDP, 03/10) · energyconnects.com (20/10) · Cboe
 "Week of 11/2/2026" · CSV nội bộ `deposit_rate_vn_events.csv`, `cctg_rate_vn*_events.csv`, `vcb_fx_rate.csv`,
 `te_cpi_yoy_snapshot.csv`; BQ `tav2_bq.ticker` VNINDEX ≤2026-11-10.
+
+## Pointer cho Bobby — DD VCB đã hoàn tất vòng 4 (22/11/2026)
+- DD VCB (ngân hàng quốc doanh, Q3/2026): giá 52.100 (17/11) TRÊN vùng hợp lý 30.800–42.000 ở r 13,5%; hai biến quyết định = ROE bền (14,6% vs lõi 16,65%) và Ke; cờ Bobby §7.12 (nhóm 2 > 2× tốc độ cho vay) CHẠM (+85% vs +8,5%); cổ tức tiền 2.433 đ/cp sắp có GDKHQ. Hồ sơ: `kb/projects/vcb-dd-20261117.md`. Khi refresh review quý ~2026-11-26 cho ngành ngân hàng: đối chiếu lại KBNN, nhóm 2, NIM với BCTC Q4 (không có lượt đọc mù mới nào cần làm cho VCB trước đó).

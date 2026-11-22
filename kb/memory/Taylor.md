@@ -14,15 +14,15 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-20T04:52:47Z] [dd-tta-r2 20/11] XONG job Taylor_20261120_044902: tam 6.342 / sau TK 5.708 (B' trung tam), NON §2/§2.5, KHONG RE giu — CHO Mike goi fundamental-skeptic r2 + ghi dd_price_zones (chua ghi, khong email)
-- [2026-11-20T05:00:49Z] ĐANG DỞ: job Taylor_20261120_050035 TTA r3 + investor report | NEXT: REPORT_r3.md + model/dcf_tta_r3.py rồi investor_report/
-- [2026-11-20T05:11:53Z] [dd-tta-r3+NDT 20/11] XONG job Taylor_20261120_050035: REPORT_r3 tam 6.159 sau CK 2,89% (md5 model 5ff89722…), investor_report 7 trang dry-run — CHO Mike ghi dd_price_zones + user bao gui email
-- [2026-11-20T09:29:45Z] ĐANG DỞ: job Taylor_20261120_092932 QTP investor report 20/11 | NEXT: dựng investor_report_20261120 từ REPORT_r3c + investor_report r2
-- [2026-11-20T09:35:54Z] [qtp-investor 20/11] XONG job Taylor_20261120_092932: investor_report_20261120 11 trang dry-run, chưa gửi email — CHỜ Mike kiểm + user lệnh gửi; dd_price_zones QTP Mike ghi
-- [2026-11-20T09:37:01Z] ĐANG DỞ: job Taylor_20261120_093005 selfcheck sweep — 3 CLOSED (981a0a3c7); restore research 37952c0bb (branch fix/restore-dcf-research-20261120) chờ arch-reviewer | NEXT: merge pathspec vào mike master, chạy dcf_rate_frame + dcf_rstar_refresh selfcheck, đóng, ghi finding
-- [2026-11-20T09:42:24Z] [sweep 20/11] XONG job Taylor_20261120_093005: 5/6 selfcheck-red CLOSED; phs_flash OPEN (de xuat manual_only cho Wags) — sweep sau: neu van OPEN => CAN USER + post Architecture
 - [2026-11-20T14:45:50Z] [ddz-perf 20/11] XONG job Taylor_20261120_143220: nhánh perf/ddzone-watch-20261120 commit 108f7b220 (wt-ddzone-perf-20261120) — CHỜ Mike review+merge
 - [2026-11-20T16:05:56Z] [dd-bqclient 20/11] XONG job Taylor_20261120_154910: commit 57c554c2c nhanh fix/dd-bqclient-failcache-20261120 (outer repo) — CHO Mike review+cherry-pick
 - [2026-11-20T21:57:00Z] [sweep 21/11] XONG job Taylor_20261120_214941: lag_live CLOSED 0f5de5b6d; phs_flash OPEN 2 sweep -> CAN USER (da post Architecture): duyet manual_only hay cho PHS sandbox
 - [2026-11-21T02:14:07Z] ĐANG DỞ: weekly 16-20/11 đã promote nhưng gate BLOCK Q9 (G5 cột có cổ tức) | NEXT: sau khi G5 sửa/user waiver chạy lại report_delivery_gate 2 file
 - [2026-11-22T09:45:11Z] ĐANG DỞ: job Taylor_20261122_094500 DD VLB | NEXT: đọc skill+BCTC scan, ghi REPORT.md từng phần
+- [2026-11-22T09:50:02Z] ĐANG DỞ: job Taylor_20261122_094949 VCB investor report | NEXT: đọc skill, dựng investor_report/ trong dd_VCB_20261117
+- [2026-11-22T09:51:02Z] [PAT r5 22/11] XONG job Taylor_20261122_094714: tam 66.470 trước CK / 59.823 sau CK / cong 50.850; tam phu thuoc cach doc H1/26 (62.578 neu 'nhieu') — CHO Mike goi skeptic r5 + ghi dd_price_zones (chua ghi, khong email)
+- [2026-11-22T09:54:25Z] [dd-vlb 22/11] XONG job Taylor_20261122_094500: REPORT tam 61.798 sau CK (md5 f80cd48a…), RE ≤52.500 — CHO Mike goi fundamental-skeptic + ghi dd_price_zones; con thieu BCTC 2025 KT + bang giay phep
+- [2026-11-22T09:59:41Z] [vcb-investor 22/11] XONG job Taylor_20261122_094949: investor_report VCB 12 trang dry-run, chưa gửi email — CHỜ Mike kiểm + ghi dd_price_zones + user lệnh gửi
+- [2026-11-22T10:06:04Z] [dd-vlb r2 22/11] XONG job Taylor_20261122_100129: tam 51.163 sau CK (r1 61.798), 48.100=0,94 TRUNG TINH (md5 93e0ec77…) — CHO Mike goi skeptic xac nhan lai + ghi dd_price_zones
+- [2026-11-22T10:08:03Z] ĐANG DỞ: job Taylor_20261122_100749 VLB investor report | NEXT: copy khuôn VCB investor_report/build_report.py, dựng dd_VLB_20261122/investor_report/
+- [2026-11-22T10:19:06Z] [vlb-investor 22/11] XONG job Taylor_20261122_100749: PDF 8 trang dry-run, chưa gửi email; phát hiện cổ tức 2.500đ ex 19/11 -> giá/tâm 0,99 cùng cơ sở (r2 0,94) — CHỜ Mike ghi dd_price_zones + user lệnh gửi

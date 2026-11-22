@@ -28,3 +28,12 @@ Artifact: `agents/Taylor/research/dd_PAT_rebuttal_20261117/` (A/ 3 báo cáo d�
 - Email: KHÔNG gửi (chờ user báo).
 
 Giá đóng cửa 17/11/2026 = 70.200 (BQ ticker, ORDER BY time DESC; so SAU khi khoá r4).
+
+## r5 (22/11/2026, user duyệt; job `Taylor_20261122_094714`) — Mike đối soát
+- Hồ sơ: `agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/{VALUATION_r5.md,assumptions_objective_r5.md,r5_applied.md,ledger_notes_r5.md,calc_r5/}`. Khoá `lock_r5.txt` md5 assumptions `872a9b82…`.
+- **Tâm r5: trước CK thanh khoản 66.470 · SAU CK 10% 59.823 · cổng 0,85×tâm sau CK = 50.850** (r4: 66.318 / 59.686 / 50.733). P25–P75 sau CK 41.000–74.900; P10–P90 33.800–87.500. Giá 70.200 (17/11) > cả hai tâm ⇒ không biên an toàn, không mua.
+- Đối soát Mike: md5 khớp lock; chạy lại `model_r5.py` + `bridge_sens_r5.py` + `selfcheck_r5.py` ⇒ cùng số (JSON chỉ chênh nhiễu float), đường độc lập 66.475 (+0,0079%).
+- ⚠️ **Tâm phụ thuộc MỘT lựa chọn đọc H1/26**: đọc "sạch" (base r5) 66.470/59.823; đọc "nhiễu" 62.578/56.320. Dispatch KHÔNG chỉ định chiều ⇒ Taylor chọn "sạch" cho cả hai phía; trộn q_B ra 66.470 chứ không phải ~64.000 vì lựa chọn này (bắc cầu: −1.538 / +4.800 / −3.111). **CHƯA skeptic r5** — nên bác/xác nhận lựa chọn này nếu muốn dùng tâm.
+- Số lấy theo dispatch, Taylor CHƯA tự đo: 39,4 + "UHY ngoại trừ", GTGD 1,01/0,60 tỷ (64 phiên), PAT +1% vs P4 Trung Quốc +19,5%, số skeptic r4 −4.826/+6.409.
+- Sổ giá: `kb/dd_price_zones.json` PAT@2026-11-17 **rev2** (supersedes #1): center 59.823 (expected_weighted, sau CK), center_alt 66.470, vùng 41.000–74.900, giá 70.200; selfcheck 0 lỗi; hết hạn 2027-03-17.
+- Sizing ≤0,5% NAV (ADV ~1 tỷ). HARD ABANDON §3, đặc biệt #4 (mẹ DLC 51% rút giá trị qua giá chuyển giao). Chưa đủ điều kiện discretionary (cần hồ sơ §2/§2.5; trượt §2 trụ #2). Mốc: BCTC Q4/2026, KT25/KT19B (~cuối 2026), F7 31/05/2027, tờ trình GD bên liên quan ĐHĐCĐ 2027. Không email.
