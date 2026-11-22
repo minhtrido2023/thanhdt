@@ -22,6 +22,7 @@ import subprocess
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 WORKDIR = Path(__file__).parent
 STATE_PATH = WORKDIR / 'bull_div_boost_state.json'
@@ -230,7 +231,7 @@ def get_current_max_positions():
         return MAX_POS_NORMAL
     # Check window not expired
     fire_d = datetime.strptime(st['current_window']['fire_date'], '%Y-%m-%d').date()
-    today_d = datetime.today().date()
+    today_d = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()  # §16: neo ICT, không tin TZ host
     cal_days = (today_d - fire_d).days
     if cal_days >= int(HOLD_DAYS * 1.4):
         return MAX_POS_NORMAL

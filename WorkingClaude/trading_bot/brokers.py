@@ -680,7 +680,11 @@ class DNSEBroker(BrokerBase):
                                    "loan_package_id_sent": lp_sent, "resp": r})
             v = _fnum(qget(r, "qmaxBuy", "qmaxbuy"))
             return int(v) if v is not None and v >= 0 else None
-        except Exception:
+        except Exception as e:
+            # §29: vẫn trả None (caller fail-safe như cũ) nhưng ghi BẰNG CHỨNG — trước đây lỗi
+            # API ppse nhìn y hệt "hết tiền" vì không để lại dấu vết nào.
+            self._log_raw("ppse_error", {"fn": "get_max_buy_qty", "symbol": symbol, "price": price,
+                                         "error": f"{type(e).__name__}: {e}"})
             return None
 
     def get_buying_power(self, symbol, price, loan_package_id=None):
@@ -698,7 +702,9 @@ class DNSEBroker(BrokerBase):
                                    "loan_package_id_sent": lp_sent, "resp": r})
             v = _fnum(qget(r, "pp0Buy", "pp0buy"))
             return float(v) if v is not None and v >= 0 else None
-        except Exception:
+        except Exception as e:
+            self._log_raw("ppse_error", {"fn": "get_buying_power", "symbol": symbol, "price": price,
+                                         "error": f"{type(e).__name__}: {e}"})
             return None
 
     def positions_raw(self):
