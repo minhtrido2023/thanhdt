@@ -12,7 +12,6 @@ import argparse
 import json
 import os
 import re
-import datetime as dt
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC_ROOT = os.environ.get("MIKE_SRC_ROOT", "/home/trido/thanhdt/WorkingClaude/mike")
@@ -72,16 +71,10 @@ def audited_fy_missing(e):
     return any(RE_FY_MISSING.search(e.get(k) or "") for k in ("skeptic_status", "notes", "correction_reason"))
 
 
-def _epoch(ts):
-    try:
-        return dt.datetime.fromisoformat(str(ts)).timestamp()
-    except ValueError:
-        return None
-
-
 def verdict_path(e, final, root=SRC_ROOT):
-    """File verdict thật; KHÔNG ĐOÁN. Trả (path|None, ứng viên sau lọc). Lọc: bỏ file mtime SAU recorded_at;
-    entry CONFIRMED chỉ nhận file chứa chữ CONFIRMED. Còn ≠ 1 ứng viên ⇒ null (danh sách ứng viên được báo ra)."""
+    """File verdict thật; KHÔNG ĐOÁN. Trả (path|None, ứng viên sau lọc). Lọc DUY NHẤT theo nội dung: entry CONFIRMED
+    chỉ nhận file chứa chữ CONFIRMED (KHÔNG lọc theo mtime — phụ thuộc TZ/checkout, arch-review R2 22/11).
+    Còn ≠ 1 ứng viên ⇒ null (danh sách ứng viên được báo ra)."""
     if final == "NONE":
         return None, []
     parts = e["source_file"].split("/")
@@ -90,14 +83,11 @@ def verdict_path(e, final, root=SRC_ROOT):
     i = parts.index("research")
     sub = parts[i + 1:i + 3] if len(parts) - i - 1 >= 3 and parts[i + 1].startswith(("dd_redo_", "dd_lagcand_")) else parts[i + 1:i + 2]
     base = "/".join(parts[:i + 1] + sub)
-    rec = _epoch(e.get("recorded_at") or e.get("dd_date"))
     cands = []
     for dp, _dn, fn in os.walk(os.path.join(root, base)):
         for f in fn:
             low, full = f.lower(), os.path.join(dp, f)
             if not (low.endswith(".md") and ("skeptic" in low or "verdict" in low) and e["ticker"].lower() in full.lower()):
-                continue
-            if rec is not None and os.path.getmtime(full) > rec:
                 continue
             if final == "CONFIRMED" and "CONFIRMED" not in open(full, encoding="utf-8", errors="replace").read():
                 continue

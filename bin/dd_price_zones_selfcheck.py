@@ -142,6 +142,10 @@ def _lock_errs(tag, e, src_root):
     return [] if got == want else [f"{tag}: md5 nguồn lệch khoá giả định ({got[:8]}≠{want[:8]}) — nguồn bị sửa sau khi ghi sổ, thêm rev mới"]
 
 
+SKEPTIC_BASIS_ENUM = ("rule_backfill_20261122", "ambiguous_backfill", "skeptic_run", "user_confirmed")
+_RE_NOT_CONFIRMED = re.compile(r"REFUTED|INCONCLUSIVE|CHƯA (?:qua|chạy)", re.I)
+
+
 def _skeptic_final_errs(tag, e, src_root):
     """A2: skeptic_final ∈ enum (bắt buộc từ SKEPTIC_FINAL_REQUIRED_FROM; entry cũ chỉ bị kiểm nếu CÓ trường);
     audited_fy_missing phải bool; skeptic_verdict_path null được, khác null thì file phải tồn tại."""
@@ -157,6 +161,18 @@ def _skeptic_final_errs(tag, e, src_root):
     vp = e.get("skeptic_verdict_path")
     if vp is not None and not os.path.isfile(os.path.join(src_root, str(vp))):
         errs.append(f"{tag}: skeptic_verdict_path không tồn tại {vp}")
+    if "skeptic_final_basis" in e and e["skeptic_final_basis"] not in SKEPTIC_BASIS_ENUM:
+        errs.append(f"{tag}: skeptic_final_basis={e['skeptic_final_basis']!r} ngoài enum {SKEPTIC_BASIS_ENUM}")
+    # entry mới: nhãn CONFIRMED không được tự khai mâu thuẫn skeptic_status — hoặc có file verdict chứa chữ CONFIRMED
+    if new and e.get("skeptic_final") == "CONFIRMED" and _RE_NOT_CONFIRMED.search(e.get("skeptic_status") or ""):
+        ok = False
+        if vp is not None:
+            try:
+                ok = "CONFIRMED" in open(os.path.join(src_root, str(vp)), encoding="utf-8", errors="replace").read()
+            except OSError:
+                ok = False
+        if not ok:
+            errs.append(f"{tag}: skeptic_final=CONFIRMED mâu thuẫn skeptic_status (có REFUTED/INCONCLUSIVE/CHƯA) và không có skeptic_verdict_path tới file chứa CONFIRMED")
     return errs
 
 
@@ -232,6 +248,10 @@ def _self_tests():
     r.append(("skeptic_final: thiếu recorded_at, dd_date ≥23/11 ⇒ bị bắt", bool(_skeptic_final_errs("t", dict({k: v for k, v in nr.items() if k != "skeptic_final"}, dd_date="2026-11-23"), SRC_ROOT))))
     r.append(("skeptic_final: thiếu recorded_at + thiếu dd_date ⇒ fail-closed bị bắt", bool(_skeptic_final_errs("t", {"ticker": "AAA"}, SRC_ROOT))))
     r.append(("skeptic_final: thiếu recorded_at, dd_date 18/11 (DBC/POW/LLM) được miễn", not _skeptic_final_errs("t", {"ticker": "AAA", "dd_date": "2026-11-18"}, SRC_ROOT)))
+    bad = {"ticker": "AAA", "recorded_at": "2026-11-23T09:00:00+07:00", "skeptic_final": "CONFIRMED", "audited_fy_missing": False, "skeptic_status": "vòng 1 REFUTED; chưa chạy lại"}
+    r.append(("skeptic_final: CONFIRMED mâu thuẫn skeptic_status (entry mới) bị bắt", bool(_skeptic_final_errs("t", bad, SRC_ROOT))))
+    r.append(("skeptic_final: CONFIRMED khớp skeptic_status sạch (entry mới) qua", not _skeptic_final_errs("t", dict(bad, skeptic_status="vòng 2 CONFIRMED (medium)"), SRC_ROOT)))
+    r.append(("skeptic_final_basis ngoài enum bị bắt", bool(_skeptic_final_errs("t", {"ticker": "AAA", "recorded_at": "2026-11-20T09:00:00+07:00", "skeptic_final": "NONE", "skeptic_final_basis": "tự_bịa"}, SRC_ROOT))))
     utc = {"ticker": "AAA", "recorded_at": "2026-11-22T18:00:00Z"}  # = 23/11 01:00 ICT
     r.append(("skeptic_final: recorded_at UTC sang ngày 23 ICT bị bắt", bool(_skeptic_final_errs("t", utc, SRC_ROOT))))
     r.append(("skeptic_final: recorded_at UTC 22/11 16:59Z (=23:59 ICT 22/11) được miễn", not _skeptic_final_errs("t", dict(utc, recorded_at="2026-11-22T16:59:00Z"), SRC_ROOT)))
