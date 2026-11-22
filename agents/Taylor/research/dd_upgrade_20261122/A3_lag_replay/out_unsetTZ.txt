@@ -1,0 +1,92 @@
+# replay — chạy 2026-11-22 19:47 ICT · sổ /home/trido/thanhdt/wt-dd-a3/kb/dd_price_zones.json (95 entry)
+> CAVEAT: nhãn skeptic_final của entry mới nhất = BACKFILL 22/11 (xấp xỉ), không phải verdict gốc.
+
+## 1. Lệnh MUA LAG (orders + cancelled_orders): 33 dòng / 33 cặp (plan_date,account,ticker)
+
+| plan_date | acct | list | approved | tk | qty | px | DD(dd_date) | skeptic_final | (a) cổng nay | (b) CONFIRMED | chặn THÊM |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-08-07 | SpaceX | orders | Y | DRI | 3500 | 13,100 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | SpaceX | orders | Y | DRI | 2900 | 13,000 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | SpaceX | orders | Y | POW | 2800 | 13,400 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | SpaceX | orders | Y | SCL | 1500 | 24,200 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | SpaceX | orders | Y | SSI | 1200 | 24,450 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-26 | SpaceX | orders | Y | HT1 | 2700 | 13,550 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-26 | SpaceX | orders | Y | SCL | 1100 | 31,100 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-26 | SpaceX | orders | Y | VPB | 1500 | 24,100 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-27 | SpaceX | orders | Y | SCL | 300 | 32,600 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-28 | SpaceX | orders | Y | SCL | 300 | 33,300 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-29 | SpaceX | orders | Y | MCH | 200 | 139,800 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-11-09 | SpaceX | orders | N | BSR | 1600 | 26,500 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 26,500 > tâm/đỉnh vùng 17,496 | chặn |  |
+| 2026-11-09 | SpaceX | orders | N | CSV | 1500 | 22,900 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 22,900 > tâm/đỉnh vùng 20,717 | chặn |  |
+| 2026-11-09 | SpaceX | orders | N | GAS | 400 | 74,600 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 74,600 > tâm/đỉnh vùng 50,146 | chặn |  |
+| 2026-11-09 | SpaceX | orders | N | MSB | 2100 | 16,450 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 16,450 > tâm/đỉnh vùng 13,018 | chặn |  |
+| 2026-07-27 | ZaloPay | orders | Y | VPB | 700 | - | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-07-28 | ZaloPay | orders | Y | CSV | 1000 | - | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-07 | ZaloPay | orders | Y | DRI | 1800 | 13,100 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | ZaloPay | orders | Y | DRI | 1900 | 13,000 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | ZaloPay | orders | Y | POW | 1800 | 13,400 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | ZaloPay | orders | Y | SCL | 1000 | 24,200 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-08-10 | ZaloPay | orders | Y | SSI | 800 | 24,450 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-26 | ZaloPay | orders | Y | HT1 | 1600 | 13,550 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-26 | ZaloPay | orders | Y | SCL | 700 | 31,100 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-26 | ZaloPay | orders | Y | VPB | 900 | 24,100 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-27 | ZaloPay | orders | Y | SCL | 200 | 32,600 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-27 | ZaloPay | orders | Y | VPB | 200 | 23,600 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-28 | ZaloPay | orders | Y | SCL | 200 | 33,300 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-10-29 | ZaloPay | orders | Y | MCH | 200 | 139,800 | - | NO_DD | chặn: chưa có DD trong sổ | chặn |  |
+| 2026-11-09 | ZaloPay | orders | N | BSR | 1200 | 26,250 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 26,250 > tâm/đỉnh vùng 17,496 | chặn |  |
+| 2026-11-09 | ZaloPay | orders | N | CSV | 1100 | 22,600 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 22,600 > tâm/đỉnh vùng 20,717 | chặn |  |
+| 2026-11-09 | ZaloPay | orders | N | GAS | 300 | 74,100 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 74,100 > tâm/đỉnh vùng 50,146 | chặn |  |
+| 2026-11-09 | ZaloPay | orders | N | MSB | 1500 | 16,350 | 2026-11-09 | FIXED_UNVERIFIED | chặn: giá 16,350 > tâm/đỉnh vùng 13,018 | chặn |  |
+
+**Chặn THÊM: 0 dòng lệnh / 0 cặp (plan,acct,mã) trên tổng 33 dòng / 33 cặp; mã riêng biệt bị chặn thêm: []**
+(a) qua: 0 dòng · (b) qua: 0 dòng
+
+Lệnh MUA LAG theo tháng (dòng): {'2026-07': 2, '2026-08': 10, '2026-10': 13, '2026-11': 8}
+Ngày plan có lệnh MUA LAG từ 10/2026: ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29', '2026-11-09']
+Lệnh MUA LAG plan_date >= 2026-11-10: 0 dòng
+
+## 2. Sổ hôm nay (2026-11-22): 36 mã
+
+| mã | dd_date | rev | skeptic_final | basis | path | ambiguous_backfill | tâm |
+|---|---|---|---|---|---|---|---|
+| BSR | 2026-11-09 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | agents/Taylor/research/dd_lagcand_20261109/BSR/ERRATA_r1_skeptic.md | N | 17496 |
+| CST | 2026-11-11 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | - | N | 12681 |
+| CSV | 2026-11-09 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | agents/Taylor/research/dd_lagcand_20261109/CSV/ERRATA_r1_skeptic.md | N | 20717 |
+| DBC | 2026-11-18 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | agents/Taylor/research/dd_DBC_20261118/skeptic_r2.md | N | 19491 |
+| DCM | 2026-11-04 | 2 | FIXED_UNVERIFIED | rule_backfill_20261122 | - | N | 24326 |
+| DDV | 2026-10-28 | 2 | CONFIRMED | rule_backfill_20261122 | - | N | 15911 |
+| DGC | 2026-10-30 | 2 | CONFIRMED | rule_backfill_20261122 | agents/Taylor/research/dd_redo_20261105/DGC/ERRATA_r3b_skeptic_final_20261109.md | N | 41849 |
+| DRI | 2026-11-03 | 3 | CONFIRMED | rule_backfill_20261122 | - | N | 15257 |
+| FPT | 2026-11-01 | 3 | CONFIRMED | rule_backfill_20261122 | agents/Taylor/research/dd_redo_20261105/FPT/ERRATA_final_skeptic_20261109.md | N | 57312 |
+| GAS | 2026-11-09 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | agents/Taylor/research/dd_lagcand_20261109/GAS/ERRATA_r1_skeptic.md | N | 50146 |
+| HHS | 2026-11-01 | 4 | FIXED_UNVERIFIED | ambiguous_backfill | - | Y | 13969 |
+| HPG | 2026-10-31 | 4 | CONFIRMED | rule_backfill_20261122 | - | N | 21338 |
+| LLM | 2026-11-18 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | agents/Taylor/research/dd_LLM_20261118/skeptic_r1.md | N | 24599 |
+| MBB | 2026-10-31 | 3 | CONFIRMED | rule_backfill_20261122 | agents/Taylor/research/dd_redo_20261105/MBB/ERRATA_r3_skeptic_final_20261108.md | N | 21069 |
+| MSB | 2026-11-09 | 1 | FIXED_UNVERIFIED | ambiguous_backfill | agents/Taylor/research/dd_lagcand_20261109/MSB/ERRATA_r1_skeptic.md | Y | 13018 |
+| MVC | 2026-11-03 | 9 | CONFIRMED | rule_backfill_20261122 | agents/Taylor/research/dd_redo_20261105/MVC/ERRATA_final_skeptic_20261109.md | N | 16241 |
+| NNC | 2026-11-03 | 5 | CONFIRMED | rule_backfill_20261122 | agents/Taylor/research/dd_redo_20261105/NNC/ERRATA_r3_skeptic_final_20261108.md | N | 61273 |
+| NT2 | 2026-10-26 | 2 | CONFIRMED | rule_backfill_20261122 | - | N | 24003 |
+| PAT | 2026-11-17 | 2 | FIXED_UNVERIFIED | ambiguous_backfill | agents/Taylor/research/dd_PAT_rebuttal_20261117/C/skeptic/skeptic_pessimistic_r3.md | Y | 59823 |
+| PNJ | 2026-11-14 | 1 | FIXED_UNVERIFIED | ambiguous_backfill | - | Y | None |
+| POW | 2026-11-18 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | agents/Taylor/research/dd_POW_20261118/skeptic_r1.md | N | 9792 |
+| PVP | 2026-10-29 | 2 | CONFIRMED | rule_backfill_20261122 | agents/Taylor/research/dd_redo_20261105/PVP/ERRATA_r3_skeptic_final_20261108.md | N | 23099 |
+| PVT | 2026-10-29 | 2 | CONFIRMED | rule_backfill_20261122 | - | N | 18841 |
+| QTP | 2026-11-17 | 3 | FIXED_UNVERIFIED | ambiguous_backfill | - | Y | 7701 |
+| SAS | 2026-10-26 | 2 | CONFIRMED | rule_backfill_20261122 | - | N | 31658 |
+| SCL | 2026-10-29 | 5 | FIXED_UNVERIFIED | ambiguous_backfill | - | Y | 21339 |
+| SIP | 2026-11-01 | 3 | CONFIRMED | rule_backfill_20261122 | agents/Taylor/research/dd_redo_20261105/SIP/ERRATA_final_skeptic_20261109.md | N | 54466 |
+| SZL | 2026-10-26 | 2 | FIXED_UNVERIFIED | ambiguous_backfill | agents/Taylor/research/dd_redo_20261105/SZL/ERRATA_final_skeptic_20261109.md | Y | 25165 |
+| TCH | 2026-10-31 | 3 | FIXED_UNVERIFIED | rule_backfill_20261122 | - | N | 15864 |
+| TTA | 2026-11-20 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | - | N | 6159 |
+| TV1 | 2026-11-02 | 6 | CONFIRMED | rule_backfill_20261122 | - | N | 16740 |
+| TV2 | 2026-11-01 | 2 | CONFIRMED | rule_backfill_20261122 | - | N | 17491 |
+| VCB | 2026-11-17 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | agents/Taylor/research/dd_VCB_20261117/skeptic_r1_corrections.md | N | 38800 |
+| VCP | 2026-11-12 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | - | N | 40273 |
+| VGS | 2026-11-10 | 1 | FIXED_UNVERIFIED | rule_backfill_20261122 | - | N | 26526 |
+| VLB | 2026-11-22 | 2 | FIXED_UNVERIFIED | rule_backfill_20261122 | - | N | 48735 |
+
+Đếm: {'CONFIRMED': 15, 'FIXED_UNVERIFIED': 21}
+CONFIRMED mà basis=ambiguous_backfill: []
+basis=ambiguous_backfill (mọi nhãn): ['HHS', 'MSB', 'PAT', 'PNJ', 'QTP', 'SCL', 'SZL']
