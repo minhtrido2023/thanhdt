@@ -477,6 +477,8 @@ def cases(m):
     ok("Bậc 1: dưới đáy ∧ CONFIRMED ∧ sạch cờ ∧ thoát ≤3 phiên", m.tier_of(trow(), CLEAN, ADV, POS, PART) == (1, []))
     ok("Bậc 2: giá = đáy vùng (chưa DƯỚI)", m.tier_of(trow(close=18000), CLEAN, ADV, POS, PART)[0] == 2)
     ok("Bậc 2: skeptic FIXED_UNVERIFIED nêu lý do", "skeptic FIXED_UNVERIFIED" in m.tier_of(trow(sk="FIXED_UNVERIFIED"), CLEAN, ADV, POS, PART)[1])
+    _r = trow(); _r["entry"] = dict(_r["entry"], audited_fy_missing=True)
+    ok("Bậc 2: audited_fy_missing=True (D5) không vào Bậc 1", any("D5" in w for w in m.tier_of(_r, CLEAN, ADV, POS, PART)[1]) and m.tier_of(_r, CLEAN, ADV, POS, PART)[0] == 2)
     ok("Bậc 2: skeptic_final thiếu ⇒ '?'", "skeptic ?" in m.tier_of(trow(sk=None), CLEAN, ADV, POS, PART)[1])
     ok("Bậc 2: cờ DD FLAGGED nêu mã", any("QF:X" in w for w in m.tier_of(trow(), ("FLAGGED", ["QF:X"], ""), ADV, POS, PART)[1]))
     ok("Bậc 2: cờ DD chưa kiểm (None) / UNKNOWN KHÔNG im lặng Bậc 1",

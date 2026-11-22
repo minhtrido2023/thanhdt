@@ -112,6 +112,8 @@ def tier_of(row, dd_flag, adv, pos_vnd, part, max_sessions=TIER1_EXIT_SESSIONS):
     sk = e.get("skeptic_final")
     if sk != "CONFIRMED":
         why.append(f"skeptic {sk or '?'}")
+    if e.get("audited_fy_missing") is True:   # D5 (user 22/11): thiếu BCTC kiểm toán năm gần nhất ⇒ không vào Bậc 1
+        why.append("thiếu BCTC kiểm toán năm gần nhất (D5)")
     fl = [f for f in row.get("flags", []) if not f.startswith("đang giữ")]
     if fl:
         why.append("cờ: " + "; ".join(fl))
