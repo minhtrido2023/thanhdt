@@ -29,6 +29,7 @@ NUM_FIELDS = ("zone_low", "center", "zone_high", "price_ref")
 CENTER_KINDS = ("expected_weighted", "base_scenario", "blend", "median", "zone_midpoint", "point")
 LOCK_REQUIRED_FROM = "2026-11-08"  # entry ghi từ ngày này BẮT BUỘC có assumptions_md5 (user chốt B, 08/11); cũ được miễn
 SKEPTIC_FINAL_REQUIRED_FROM = "2026-11-23"  # entry ghi từ ngày này BẮT BUỘC có skeptic_final + audited_fy_missing (A2, 22/11); cũ được miễn
+SKEPTIC_PATH_REQUIRED_FROM = "9999-12-31"  # entry ghi từ ngày này BẮT BUỘC có skeptic_verdict_path → file rN.json do bin/dd_skeptic_run.py ghi (A4; Mike đặt ngày bật SAU khi 2 DD kế tiếp có file)
 SKEPTIC_FINAL_ENUM = ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN", "NONE")
 _TOK = re.compile(r"\d+(?:[.,]\d+)*")
 
@@ -107,6 +108,7 @@ def check(ledger_path, src_root=SRC_ROOT):
         errs += _expiry_errs(tag, e)
         errs += _lock_errs(tag, e, src_root)
         errs += _skeptic_final_errs(tag, e, src_root)
+        errs += _skeptic_path_errs(tag, e, src_root)
         for fld in ("source_file",):
             if not os.path.exists(os.path.join(src_root, e[fld])):
                 errs.append(f"{tag}: source_file không tồn tại {e[fld]}")
@@ -174,6 +176,29 @@ def _skeptic_final_errs(tag, e, src_root):
         if not ok:
             errs.append(f"{tag}: skeptic_final=CONFIRMED mâu thuẫn skeptic_status (có REFUTED/INCONCLUSIVE/CHƯA) và không có skeptic_verdict_path tới file chứa CONFIRMED")
     return errs
+
+
+def _skeptic_path_errs(tag, e, src_root, required_from=None):
+    """A4: entry ghi từ SKEPTIC_PATH_REQUIRED_FROM (ICT) bắt buộc skeptic_verdict_path ≠ null, file tồn tại, JSON hợp lệ,
+    verdict ∈ enum, và skeptic_final==CONFIRMED ⇔ verdict==CONFIRMED."""
+    if _ict_date(e) < (required_from or SKEPTIC_PATH_REQUIRED_FROM):
+        return []
+    vp = e.get("skeptic_verdict_path")
+    if vp is None:
+        return [f"{tag}: skeptic_verdict_path=null — entry ghi từ {required_from or SKEPTIC_PATH_REQUIRED_FROM} bắt buộc có file verdict (chạy bin/dd_skeptic_run.py)"]
+    fp = os.path.join(src_root, str(vp))
+    if not os.path.isfile(fp):
+        return []  # _skeptic_final_errs đã báo "không tồn tại"
+    try:
+        with open(fp, encoding="utf-8") as f:
+            v = json.load(f).get("verdict")
+    except (OSError, ValueError, AttributeError) as ex:
+        return [f"{tag}: skeptic_verdict_path {vp} không phải JSON hợp lệ ({ex})"]
+    if v not in ("CONFIRMED", "REFUTED", "INCONCLUSIVE"):
+        return [f"{tag}: verdict={v!r} trong {vp} ngoài enum CONFIRMED/REFUTED/INCONCLUSIVE"]
+    if (e.get("skeptic_final") == "CONFIRMED") != (v == "CONFIRMED"):
+        return [f"{tag}: skeptic_final={e.get('skeptic_final')!r} không khớp verdict={v} trong {vp}"]
+    return []
 
 
 def _expiry_errs(tag, e):
@@ -262,6 +287,24 @@ def _self_tests():
     r.append(("skeptic_verdict_path null được phép", not _skeptic_final_errs("t", dict(ne, skeptic_verdict_path=None), SRC_ROOT)))
     r.append(("skeptic_verdict_path trỏ THƯ MỤC bị bắt", bool(_skeptic_final_errs("t", dict(ne, skeptic_verdict_path="agents"), SRC_ROOT))))
     r.append(("skeptic_verdict_path trỏ file không tồn tại bị bắt", bool(_skeptic_final_errs("t", dict(ne, skeptic_verdict_path="no/such/SKEPTIC.md"), SRC_ROOT))))
+    # A4: cổng skeptic_verdict_path (đặt ngày bật thấp để test đột biến)
+    with tempfile.TemporaryDirectory() as td2:
+        def _w(name, obj):
+            with open(os.path.join(td2, name), "w", encoding="utf-8") as f:
+                f.write(obj if isinstance(obj, str) else json.dumps(obj))
+        _w("ok.json", {"verdict": "CONFIRMED"}); _w("ref.json", {"verdict": "REFUTED"})
+        _w("bad.json", "{not json"); _w("enum.json", {"verdict": "MAYBE"})
+        pe = {"ticker": "AAA", "recorded_at": "2026-11-23T09:00:00+07:00", "skeptic_final": "CONFIRMED", "skeptic_verdict_path": "ok.json"}
+        F = "2026-11-01"
+        r.append(("A4: entry mới, path hợp lệ + CONFIRMED khớp ⇒ sạch", not _skeptic_path_errs("t", pe, td2, F)))
+        r.append(("A4: entry mới path=null bị bắt", bool(_skeptic_path_errs("t", dict(pe, skeptic_verdict_path=None), td2, F))))
+        r.append(("A4: JSON hỏng bị bắt", bool(_skeptic_path_errs("t", dict(pe, skeptic_verdict_path="bad.json"), td2, F))))
+        r.append(("A4: verdict ngoài enum bị bắt", bool(_skeptic_path_errs("t", dict(pe, skeptic_verdict_path="enum.json"), td2, F))))
+        r.append(("A4: skeptic_final=CONFIRMED nhưng verdict REFUTED bị bắt", bool(_skeptic_path_errs("t", dict(pe, skeptic_verdict_path="ref.json"), td2, F))))
+        r.append(("A4: verdict CONFIRMED nhưng skeptic_final=NONE bị bắt", bool(_skeptic_path_errs("t", dict(pe, skeptic_final="NONE"), td2, F))))
+        r.append(("A4: REFUTED + skeptic_final=REFUTED_OPEN sạch", not _skeptic_path_errs("t", dict(pe, skeptic_final="REFUTED_OPEN", skeptic_verdict_path="ref.json"), td2, F)))
+        r.append(("A4: entry cũ (trước ngày bật) path=null được miễn", not _skeptic_path_errs("t", dict(pe, recorded_at="2026-10-30T09:00:00+07:00", skeptic_verdict_path=None), td2, F)))
+        r.append(("A4: mặc định 9999-12-31 ⇒ chưa bật, path=null qua", not _skeptic_path_errs("t", dict(pe, skeptic_verdict_path=None), td2)))
     return r
 
 
