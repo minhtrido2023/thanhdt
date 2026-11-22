@@ -525,7 +525,7 @@ def run():
                   "lỗ tự động — cân nhắc xử lý sớm" in out
               and "🔴 QQ4 (BAL): lỗ 20.0% trên giá vốn sổ công ty chứng khoán, còn 0.0pp đến ngưỡng cắt "
                   "lỗ tự động — cân nhắc xử lý sớm" in out, out)
-        qq6_line = next(ln for ln in out.splitlines() if "QQ6 1.7M" in ln)
+        qq6_line = next((ln for ln in out.splitlines() if "QQ6 1.7M" in ln), "")   # build() sập ⇒ out="EXC:…" ⇒ ca ĐỎ có tên, không StopIteration
         check("F2 (22/11/2026): Discretionary KHÔNG còn ngưỡng xử lý −20% — QQ6 (−18,50%, từng vào vùng đỏ) vẫn hiện "
               "dòng vị thế + 'chờ ý kiến PM về exit' nhưng KHÔNG có chữ 'ngưỡng' nào trên dòng đó và KHÔNG có dòng "
               "'Cờ theo dõi' nào của QQ6; `risk_warning(DISCRETIONARY_SPECIAL, −25%)` = None, BAL vẫn có",
