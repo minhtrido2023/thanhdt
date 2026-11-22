@@ -136,13 +136,17 @@
 > 
 29a165
 >     ap.add_argument("--skip-lint", action="store_true", help="CHỈ cho thử nghiệm — bỏ lint (ghi cảnh báo)")
-35a172,178
+35a172,182
 >     lint_rc = 0
 >     if a.skip_lint:
 >         print("LINT-WARN: --skip-lint — bỏ qua lint (chỉ dùng cho thử nghiệm)")
 >     else:
->         lint_rc = run_lint(md_path, md, a.subject, a.dry_run)
+>         try:
+>             lint_rc = run_lint(md_path, md, a.subject, a.dry_run)
+>         except Exception as _e:  # lint hỏng KHÔNG được làm hỏng đường gửi (DD_LINT_BLOCK=False = chỉ cảnh báo)
+>             print(f"LINT-WARN: lint lỗi nội bộ, bỏ qua: {_e!r}")
+>             lint_rc = 3 if DD_LINT_BLOCK else 0
 >         if lint_rc and not a.dry_run:
 >             sys.exit(f"❌ LINT chặn gửi (DD_LINT_BLOCK=True) — sửa các vi phạm ở trên")
-74a218
+74a222
 >         sys.exit(lint_rc) if lint_rc else None
