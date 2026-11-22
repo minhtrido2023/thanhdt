@@ -143,7 +143,8 @@ def main() -> int:
     blocks(tsub, mkcli(g4, None), ("KHÔNG thay bằng số khác",))
 
     # 4c. Ngoại lệ Q9 HẸP theo tên file (user 16/11/2026): chỉ G5 + đúng tên + còn hạn + decided_by user
-    G5R = "G5: 2030-06-04 60 phiên rổ +1.55% vs VN-Index +1.03% (lệch +0.52 điểm %, > 0.5)"
+    G5R = ("G5: 2030-06-04 60 phiên rổ +1.55% vs VN-Index +1.03% (lệch +0.52 điểm %, > 0.5) — chờ người xác nhận "
+           "(diff_bp=52) ở vnindex_tr_acks.json mục G5")
 
     def with_reason(j, reason):
         j = copy.deepcopy(j)
@@ -202,14 +203,19 @@ def main() -> int:
         # waiver không đụng cột giá: ô giá sai vẫn CHẶN
         tpx = replace_cell(tg5, "Từ khi bắt đầu", pt.COL_PRICE, "+99,00%")
         wblock(tpx, g5, good, (pt.COL_PRICE, "lệch"))
-    # file waiver THẬT trong repo: đúng 2 báo cáo 09-13/11, decided_by user, hết hạn 2026-11-20; tên khác ⇒ None
+    # file waiver THẬT trong repo: đúng 4 báo cáo (tuần 09-13/11 hạn 20/11; tuần 16-20/11 hạn 25/11), decided_by user
     real = json.loads(Path(pt.Q9_WAIVERS_PATH).read_text(encoding="utf-8"))["waivers"]
-    ok(sorted(w["report"] for w in real) == [f"{x}_weekly_report_2026-11-09_to_2026-11-13.md" for x in ("SpaceX", "ZaloPay")]
-       and all(w["decided_by"] == "user" and w["expires"] == "2026-11-20" for w in real), f"waiver thật: {real}")
-    ok(pt._q9_waiver("SpaceX_weekly_report_2026-11-16_to_2026-11-20.md", today=datetime.date(2026, 11, 16))[0] is None
+    want = {f"{x}_weekly_report_{w}.md": e for w, e in (("2026-11-09_to_2026-11-13", "2026-11-20"),
+                                                         ("2026-11-16_to_2026-11-20", "2026-11-25"))
+            for x in ("SpaceX", "ZaloPay")}
+    ok({w["report"]: w["expires"] for w in real} == want and all(w["decided_by"] == "user" for w in real),
+       f"waiver thật: {real}")
+    ok(pt._q9_waiver("SpaceX_weekly_report_2026-11-16_to_2026-11-20.md", today=datetime.date(2026, 11, 25))[0]
+       and pt._q9_waiver("SpaceX_weekly_report_2026-11-16_to_2026-11-20.md", today=datetime.date(2026, 11, 26))[0] is None
        and pt._q9_waiver("SpaceX_weekly_report_2026-11-09_to_2026-11-13.md", today=datetime.date(2026, 11, 21))[0] is None
-       and pt._q9_waiver("ZaloPay_weekly_report_2026-11-09_to_2026-11-13.md", today=datetime.date(2026, 11, 20))[0],
-       "waiver thật: chỉ đúng tên + tới 20/11")
+       and pt._q9_waiver("ZaloPay_weekly_report_2026-11-09_to_2026-11-13.md", today=datetime.date(2026, 11, 20))[0]
+       and pt._q9_waiver("SpaceX_weekly_report_2026-11-23_to_2026-11-27.md", today=datetime.date(2026, 11, 24))[0] is None,
+       "waiver thật: chỉ đúng tên + tới hạn của từng báo cáo")
 
     # 5. chuỗi b: CLI rc=3 unavailable ⇒ dòng b 'chưa có số' qua; dòng b ghi số ⇒ chặn
     un = {"account": "ZaloPay", "report_date": rd.isoformat(), "series": "bot", "status": "unavailable",
