@@ -124,7 +124,7 @@ Cơ chế code: `bin/dd_price_zones_selfcheck.py` (`SKEPTIC_FINAL_REQUIRED_FROM 
 - **d** Sizing 0,5–1,0% (skill) vs 2–4% (fundamental-skeptic.md) vs 5% thực tế: CHƯA CÓ ĐÁP ÁN USER (Q4) — KHÔNG giải; ghi cả ba ở core V8, nhãn "CHƯA THỐNG NHẤT — chờ user".
 - **e** Template: đã trỏ `dd_redo_20261105/DDV/REPORT_r3.md` + `FPT/REPORT_r3.md` (A8); kiểm 22/11: cả hai file tồn tại.
 - **f** Cổng `discretionary_dd_pick.py --claim` (docstring :15–17): `data/discretionary_dd_ledger.jsonl` không tồn tại (kiểm 22/11) ⇒ chưa từng dùng; core ghi đúng hiện trạng, không tuyên bố đang dùng. Dùng hay gỡ: chờ Mike/user.
-- **g** (mới, B5 phát hiện) D5 "không vào Bậc 1": `bin/dd_price_zone_watch.py` (Bậc 1 = giá < zone_low ∧ skeptic_final==CONFIRMED ∧ không cờ ∧ thoát ≤3 phiên) KHÔNG đọc trường `audited_fy_missing` (grep 22/11: 0 dòng) ⇒ mã thiếu BCTC KT nhưng CONFIRMED vẫn có thể lên Bậc 1. Cổng LAG chỉ chặn khi `LAG_DD_REQUIRE_CONFIRMED=True`. CÒN MỞ — cần vá code (không thuộc B5).
+- **g** (B5 phát hiện, ĐÃ VÁ 22/11 23:14 ICT bằng A7 `468b75384`) D5 "không vào Bậc 1": `bin/dd_price_zone_watch.py:115` nay loại mã có `audited_fy_missing=true` khỏi Bậc 1 (selfcheck 124/0). Cổng LAG chỉ chặn khi `LAG_DD_REQUIRE_CONFIRMED=True` (mặc định False).
 
 ## §E13 Nguồn
 Kế hoạch: `kb/projects/dd-upgrade-final-action-20261122.md` (B1–B5, D1–D6). Review: `kb/projects/dd-process-review-20261122.md` (F8, F22, P0-5).

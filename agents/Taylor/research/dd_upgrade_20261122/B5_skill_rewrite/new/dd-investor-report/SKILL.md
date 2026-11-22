@@ -44,7 +44,7 @@ Core chỉ chứa luật đang áp. Nguyên văn luật user (L1–L21), lý do,
 3. Chờ Taylor (~15–20 phút; ScheduleWakeup CHỈ khi đang có job nền này).
 4. **Mike kiểm trước khi trình**: đọc cả .md; 2 grep tên nội bộ + nhãn fear-buy phải rỗng (§X12); có ≥1 bản đồ + ≥1 khung ảnh sản phẩm có nguồn; HTML mọi `<img` có alt đóng đúng; render trang 1, trang định giá, 1 trang hình ra PNG xem bằng mắt; số khớp REPORT đã phản biện và rev mới nhất của sổ; đính chính không tái xuất hiện.
 5. **Dry-run**: `python3 -I ~/.claude/skills/dd-investor-report/scripts/send_dd_report_email.py <md> --pdf <pdf> --banner <title_banner.png> [--subject "..."] --dry-run --html-out f.html`. Lint email (A6) chạy trong script: dry-run chặn khi có vi phạm; gửi thật hiện chỉ IN cảnh báo (`DD_LINT_BLOCK = False`, Mike bật sau khi có số báo giả).
-6. **DỪNG — trình user** theo due-diligence bước 11 (PDF lên Discord qua `.ccdb-attachments-<thread>`, nói "chưa gửi email").
+6. **DỪNG — trình user** theo due-diligence bước 11 (PDF lên Discord qua `.ccdb-attachments-<thread>`, nói "chưa gửi email", TRỪ khi rơi vào ngoại lệ "DD <mã> rồi gửi email" của due-diligence bước 10 ⇒ báo đã gửi + địa chỉ + hash PDF).
 
 ## Gửi email (user chốt 03/11 15:23, thay luật "email tự động" 01/11)
 - Chỉ gửi khi user báo "gửi email". User đã nói "DD X rồi gửi email" trong cùng yêu cầu = lệnh gửi (một lần, sau skeptic).

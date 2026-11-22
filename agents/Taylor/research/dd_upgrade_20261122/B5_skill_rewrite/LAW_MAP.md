@@ -145,7 +145,7 @@ Ký hiệu vị trí: **C:** core `SKILL.md` (mục) · **E:** ext (§). DD = du
 
 ## D. Đếm
 - Cũ: **106 luật** (DD 60 + IR 46; IR-21b tính trong IR-21). Có vị trí trong bản mới: **106/106** (105 hiệu lực ở core hoặc ext; 1 câu chết IR-21b giữ ở ext có nhãn ĐÃ THAY).
-- Dòng nguyên văn: mọi dòng THÂN không rỗng của 2 file cũ có trong ext (kiểm cơ học `/tmp/arch_b5/chk.py`: 0 dòng thân thiếu; DD 48, IR 183 dòng). 17 dòng TIÊU ĐỀ (DD 4, IR 13) chỉ đổi định dạng (`## X` → `#### (tiêu đề cũ) X`), nội dung giữ.
+- Dòng nguyên văn: mọi dòng THÂN không rỗng của 2 file cũ có trong ext (kiểm cơ học `B5_skill_rewrite/check_lines.py` — bản sao script của arch-reviewer: 0 dòng thân thiếu SAU KHI bỏ 17 chú thích ⟨…⟩ chèn trong 7 dòng (DD 8, IR 9); DD 48, IR 183 dòng). 17 dòng TIÊU ĐỀ (DD 4, IR 13) chỉ đổi định dạng (`## X` → `#### (tiêu đề cũ) X`), nội dung giữ.
 - Kích thước sau vòng 2 (byte): DD core 16.853 (vượt 14KB mục tiêu vì vòng 2 khôi phục hệ quả cờ V6, ngưỡng 10–20% V3, phép thử Ke>15%, giờ ICT, hiện trạng skeptic; trong trần ~16KB reviewer cho phép ±), IR core 12.936.
 - D6 (Quick/Full) đã duyệt, thí điểm tháng 2–3 (B7) — chưa nằm trong core.
 - Luật mới thêm vào core: 15 (N-01…N-15).
@@ -154,9 +154,9 @@ Ký hiệu vị trí: **C:** core `SKILL.md` (mục) · **E:** ext (§). DD = du
 **Đã giải:** F22-a (câu skeptic chết) · F22-b (RONIC: dự báo vs cuối kỳ, theo D4) · F22-c (thứ tự ghi sổ) · F22-e (template → DDV/FPT r3, file tồn tại) · F22-f (ghi đúng hiện trạng `--claim`) · F8 (pha mù vào thứ tự) · IR bước gửi đứng trước luật "chỉ gửi khi user báo" · brief "L1–15" → "L1–21" · poll ScheduleWakeup chỉ khi có job nền.
 **Còn lại (không tự giải):**
 1. **F22-d sizing** 0,5–1,0% vs 2–4% vs 5% — chờ user (Q4).
-2. **D5 vs code (mới phát hiện)**: `bin/dd_price_zone_watch.py` không đọc `audited_fy_missing` (grep 22/11: 0 dòng) ⇒ "không vào Bậc 1" chưa được cưỡng chế; cổng LAG chỉ chặn khi bật `LAG_DD_REQUIRE_CONFIRMED`. Cần vá code (ngoài B5).
+2. **D5 vs code — ĐÃ VÁ 22/11 23:14 ICT (A7 `468b75384`)**: `bin/dd_price_zone_watch.py:115` nay loại mã `audited_fy_missing=true` khỏi Bậc 1 (selfcheck 124/0); cổng LAG chỉ chặn khi bật `LAG_DD_REQUIRE_CONFIRMED` (mặc định False).
 3. **`--claim`**: dùng hay gỡ — Mike/user.
 4. **Phụ thuộc**: B2, B3, B4 ĐÃ merge master (B4 `b242e616e`; B3 `kb/thesis_cards.json`, cron chờ user duyệt). Còn chờ user: `DD_GENERAL` cần duyệt `fundamental-skeptic.md.proposed` (B6); thẻ FPT/NNC/VGS + cron B3. Core ghi đúng điều kiện, không tuyên bố đang chạy.
+5. Frontmatter IR vẫn "Viết và gửi email…" (giữ trigger theo SPEC mục 6); luật thân là "chỉ gửi khi user báo" — không trái nhau về hành vi nhưng mô tả có thể đọc nhầm; đổi mô tả cần Mike quyết.
 6. **Skeptic brief (R1 #2)**: `bin/dd_skeptic_run.py` brief = template cố định fear-buy; `fundamental-skeptic.md` thuần fear-buy, không có "moat" ⇒ phạm vi moat/cân bằng/thiếu hạng mục KHÔNG truyền tới khi duyệt `.proposed`. Cách tạm: CHƯA THỐNG NHẤT — chờ user (đề xuất Mike tự thêm câu kiểm moat vào brief chạy tay).
 7. **IR bước 4**: grep fear-buy chỉ có ở ext (§X12); lint A6 chưa phủ "xung đột lợi ích", "đang nắm giữ", "kiểm định", "sợ hãi", "NAV" (`send_dd_report_email.py:30-37`) — việc riêng, không sửa lint ở B5.
-5. Frontmatter IR vẫn "Viết và gửi email…" (giữ trigger theo SPEC mục 6); luật thân là "chỉ gửi khi user báo" — không trái nhau về hành vi nhưng mô tả có thể đọc nhầm; đổi mô tả cần Mike quyết.
