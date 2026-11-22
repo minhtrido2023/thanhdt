@@ -268,6 +268,11 @@ def _label(r):
 CENTER_BELOW_LOW = "tâm nằm dưới đáy vùng cơ sở: tâm là kỳ vọng gồm kịch bản xấu"
 
 
+def _sk(e):
+    """Nhãn hiển thị: vòng skeptic cuối + số rev (A2, chỉ in thêm; không dùng để lọc/xếp hạng)."""
+    return f"skeptic {e.get('skeptic_final') or '?'} r{e.get('rev', 1)}"
+
+
 def _center_note(e):
     """Nit: tâm < đáy vùng (vd FPT: kỳ vọng trọng số 54,8k < đáy 55,0k) ⇒ nói rõ + ghi chú sổ (field notes)."""
     c, lo = e.get("center"), e.get("zone_low")
@@ -393,7 +398,7 @@ def render_table(rows, expired, asof, src):
         e = r["entry"]
         z = f"{_f(e.get('zone_low'))}–{_f(e.get('zone_high'))}" if e.get("zone_low") else "—"
         ck = f" ({e['center_kind']})" if e.get("center_kind") else ""
-        L.append(f"| {r['ticker']} | {e['dd_date']} | {_f(r.get('close'))} | {z} | {_f(e.get('center'))}{ck} | "
+        L.append(f"| {r['ticker']} | {e['dd_date']} ({_sk(e)}) | {_f(r.get('close'))} | {z} | {_f(e.get('center'))}{ck} | "
                  f"{_pct(r.get('pct_center'))} | {_pct(r.get('pct_low'))} | {_f(_lvl(e))} | {_label(r)} | "
                  f"{_adv(r.get('adv20'))} | "
                  f"{'; '.join(r['flags'] + r.get('frame_notes', []) + ([_center_note(e)] if _center_note(e) else [])) or ''} |")
@@ -426,7 +431,7 @@ def render_block(rows, expired, asof, src, table_path, cands=None, excl=None):
         adv = "" if r.get("adv20") is None else f" · ADV20 {r['adv20'] / 1e9:.1f} tỷ".replace(".", ",")
         return (f"  • {r['ticker']} {_f(r['close'])} — {_label(r)}; tâm {_f(e.get('center'))} ({_pct(r.get('pct_center'))})"
                 f", vùng {_f(e.get('zone_low'))}–{_f(e.get('zone_high'))} ({_pct(r.get('pct_low'))} so đáy)"
-                f"{adv}{fl} · DD {e['dd_date']}")
+                f"{adv}{fl} · DD {e['dd_date']} · {_sk(e)}")
     shown = al if cmap is None else [r for r in al if r["ticker"] in cmap]
     if shown:
         L.append(f"  ỨNG VIÊN (dưới {bv} ≥{THRESHOLD_PCT}%; cờ = CẢNH BÁO, không loại):")

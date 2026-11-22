@@ -325,6 +325,15 @@ def cases(m):
        m.CENTER_BELOW_LOW in m.render_block(rFp, [], D(2026, 11, 2), "t", "/tmp/x") and m.CENTER_BELOW_LOW in m.render_table(rFp, [], D(2026, 11, 2), "t"))
     rOk, _, _ = m.evaluate({"entries": [ent("AAA")]}, D(2026, 11, 2), {"AAA": {"close": 19000.0}}, {}, None, {})
     ok("tâm>đáy: không in câu đó", m.CENTER_BELOW_LOW not in m.render_block(rOk, [], D(2026, 11, 2), "t", "/tmp/x"))
+    # 29b. (A2 22/11) nhãn skeptic_final + rev chỉ HIỂN THỊ: có trong khối + bảng, không đổi phân loại ngưỡng
+    eS = dict(ent("AAA"), skeptic_final="FIXED_UNVERIFIED", rev=3)
+    rS, _, _ = m.evaluate({"entries": [eS]}, D(2026, 11, 2), {"AAA": {"close": 16000.0}}, {}, None, {})
+    rS0, _, _ = m.evaluate({"entries": [ent("AAA")]}, D(2026, 11, 2), {"AAA": {"close": 16000.0}}, {}, None, {})
+    ok("A2 hiển thị skeptic_final + rev ở khối và bảng; thiếu trường ⇒ '?' ; phân loại ngưỡng KHÔNG đổi",
+       "skeptic FIXED_UNVERIFIED r3" in m.render_block(rS, [], D(2026, 11, 2), "t", "/tmp/x")
+       and "skeptic FIXED_UNVERIFIED r3" in m.render_table(rS, [], D(2026, 11, 2), "t")
+       and "skeptic ? r1" in m.render_block(rS0, [], D(2026, 11, 2), "t", "/tmp/x")
+       and rS[0]["zone_status"] == rS0[0]["zone_status"] and m._label(rS[0]) == m._label(rS0[0]))
     # 30. (02/11 quy tắc 4) ỨNG VIÊN sleeve discretionary: lọc + cờ cảnh báo + file máy đọc
     cl = {"entries": [ent("AAA"), ent("BBB"), ent("TV1", dd="2026-11-02"), ent("DRI", dd="2026-10-27"),
                       ent("HHH"), ent("CCC"), ent("TVN", dd="2026-11-02")]}
