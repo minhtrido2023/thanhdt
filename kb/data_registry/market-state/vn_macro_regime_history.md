@@ -37,6 +37,7 @@ last_update_24: 2026-11-17 (Bobby — SECTOR READ real-time BLIND nhiệt điệ
 last_update_25: 2026-11-18 (Bobby — SECTOR READ real-time BLIND chăn nuôi heo + TACN VN: 12T CYCLICAL ~0,65 / STRUCTURAL ~0,25 / ADMIN_GATED ~0,10 (clean-leaning ~65/35); 36T STRUCTURAL ~0,45 / CYCLICAL ~0,40 / ADMIN ~0,15 (ambiguous ~55/45); giá heo hơi đỉnh ~80k T1 → đáy 45-49k cuối T10-giữa T11 (lặp hình dạng 2025), đàn T9 +5,4% trên nền ASF 2025, thịt nhập 7T +27% lượng giá −38%, heo TQ 9 CNY/kg −24%; nguyên liệu qua đỉnh T9 (RMI T11 0,912) ⇒ biên TACN MỞ 6T, trung tính 12T; snapshot 20261118 không tồn tại, dùng 20261117; rò rỉ danh tính ghi ở §0; FORECAST F1-F16 tới 2027-12-05; chi tiết ở file con sector_read_chan_nuoi_heo_tacn_20261118.md)
 last_update_26: 2026-11-18 (Bobby — SECTOR READ real-time BLIND phát điện VN đa nguồn (khí nội + LNG + than + thuỷ + tái tạo): 12T ADMIN_GATED ~0,45 / CYCLICAL ~0,40 / STRUCTURAL ~0,15; 36T ADMIN ~0,45 / STRUCTURAL ~0,35 / CYCLICAL ~0,20; ambiguous ~60/40; theo phân khúc LNG ADMIN ~0,65, tái tạo ADMIN ~0,60 (FIT/CCA), khí nội ADMIN ~0,45; merit order tự tính: LNG 3.100-5.550 đ/kWh ≫ trần SMP 1.725 ⇒ LNG sống nhờ Qc 65% + khớp take-or-pay; khung CCGT 2026 3.410,64 (+11%); bán lẻ −2% từ 01/11; pha: khối lượng nhiệt điện ĐỈNH tới mùa khô 2027, nhiên liệu vừa qua đỉnh; rò rỉ danh tính qua tên thư mục ghi ở §0; FORECAST G1-G4 tới 2027-09-30; chi tiết ở file con sector_read_phat_dien_20261118.md)
 last_update_27: 2026-11-18 (Bobby — SECTOR READ real-time BLIND tổng thầu EPC + lắp máy cơ khí công nghiệp VN: 12T ADMIN_GATED ~0,45 / CYCLICAL ~0,30 / STRUCTURAL ~0,25; 36T STRUCTURAL ~0,40 / ADMIN ~0,40 / CYCLICAL ~0,20; ambiguous ~60/40; biên nhà thầu nội 'mỏng cấu trúc' ~0,65 (lead EPC lớn là TQ/Hàn: PowerChina QT II, Doosan Ô Môn IV, Chengda–BPE Dung Quất −18% dự toán; Long Phú T08 chênh −28%; dự toán NN thấp hơn thị trường 40-42%); khối lượng lắp đặt 2027-28 phần lớn đã trao, 2029+ cổng hành chính (45% PDP8 chưa chủ trương, than mới 5.300 MW vướng vốn, ĐGNK 0); rò rỉ danh tính qua tên thư mục + web ghi ở §0; FORECAST E1-E11 tới 2028-06-30; chi tiết ở file con sector_read_epc_lap_may_20261118.md)
+last_update_28: 2026-11-22 (Bobby — SECTOR READ real-time BLIND đá xây dựng ĐNB, BẢN CẬP NHẬT của 30/10: 12T ADMIN_GATED ~0,45 / CYCLICAL ~0,30 / STRUCTURAL ~0,25; 36T STRUCTURAL ~0,40 / ADMIN ~0,40 / CYCLICAL ~0,20; ambiguous ~60/40; pha sửa từ 'đỉnh → bình nguyên' thành 'giữa-muộn nhịp tăng, khối lượng đổi chỗ'; đính chính giá Q3 (Bộ XD +3,89-5,83% QoQ) + bỏ sót NĐ 21/2026; FORECAST G1-G12 tới 2027-12-31; file con sector_read_da_xay_dung_dnb_20261122.md)
 ---
 
 # VN Macro Regime History — sổ phân loại nguyên nhân vĩ mô từng episode khủng hoảng
@@ -1628,6 +1629,25 @@ và pháp lý mỏ, mốc giá, chi phí, 10 forecast, 21 mục DD, nguồn): **
   ≥1 mỏ đấu giá 2025-26 có GP khai thác ≤30/06/2027 P=0,30; NĐ sửa NĐ 193 (không đấu giá cho dự án trọng điểm) ≤31/03/2027
   P=0,55; VĐ4 ≥20% sản lượng ≤30/06/2027 P=0,35; heating oil T3/2027 <4,0 P=0,55; giải ngân ĐTC 2026 ≥85% P=0,50.
   **Không phải khuyến nghị mua/bán.**
+
+---
+
+## SECTOR READ (cập nhật) — Đá xây dựng Đông Nam Bộ, as-of 22/11/2026 (Bobby, real-time BLIND)
+
+**Dispatch từ thư mục DD của Taylor.** Bobby KHÔNG tra mã, giá, BCTC của DN nào (tên thư mục dispatch chứa 1 mã 3 ký tự, không tra; kiểm toán
+blind ở mục 0 file con). Bản đầy đủ: **`sector_read_da_xay_dung_dnb_20261122.md`** (file con; thay một phần file 30/10, F1-F10 cũ giữ nguyên).
+- **12T: `ADMIN_GATED` 0,45 / `CYCLICAL` 0,30 / `STRUCTURAL` 0,25. 36T: `STRUCTURAL` 0,40 / `ADMIN_GATED` 0,40 / `CYCLICAL` 0,20. `ambiguous` ~60/40.**
+  Pha: giữa-muộn nhịp tăng; khối lượng dự án đổi chỗ (Long Thành GĐ1 khai thác thương mại 24/12, VĐ3/BH–VT rút → VĐ4, Mộc Bài, Tây Bắc,
+  ĐBSCL), chưa trũng. NQ 27/2026 ĐTC 2026-30 8,22 triệu tỷ (2,7 lần). TP.HCM 2026 thiếu 4,5 tr m³ đá (cầu 28,16 so với công suất 23,66).
+  Giá đá Bộ XD (cả nước) Q3 +3,89-5,83% QoQ, T10 618.324 đ/m³ (+1,04% MoM) ⇒ đính chính "Q3 ổn định" của file 30/10. Van xả hành chính: NĐ
+  21/2026 (cấp lại GP sau hết hạn), khu không đấu giá (Tây Ninh 59 khu, 2 khu đá 20,3 tr m³), nâng 50% chỉ cho dự án chỉ định, kiến nghị
+  kiểm soát giá tại mỏ. Tiền cấp quyền NĐ 193: T = Q×G×R, quyết toán theo sản lượng thực. Bảng 5 tầng: LNH 3M 7,66% (18/11) phân kỳ lên
+  so với niêm yết đứng.
+- **FORECAST khoá 22/11 (G1-G12):** giá đá BQ Q4/26 > +3% so Q3 P=0,50; Q2/27 ≥ Q4/26 P=0,65; Long Thành khai thác thương mại thường lệ
+  ≤31/12/26 P=0,80; VĐ4 mọi DATP có gói xây lắp ≤31/03/27 P=0,55; ≥1 khu đá không đấu giá ĐNB có GP ≤30/06/27 P=0,40; ≥1/13 khu đá Đồng Nai
+  có kết quả đấu giá ≤30/06/27 P=0,75; TP.HCM 2027 thiếu đá P=0,70; Đồng Nai 2026 ≥20 tr m³ P=0,45; trần giá đá tại mỏ cấp TW ≤30/06/27
+  P=0,15; ĐSTĐC khởi công ≤2027 P=0,45; Thủ Thiêm–Long Thành/BD–Suối Tiên khởi công ≤30/06/27 P=0,50; IIP khai khoáng khác 2026 >0 P=0,75.
+  F1/F7 của 30/10 bị định nghĩa lỏng, cách chấm làm rõ ở mục 5.1 file con. **Không phải khuyến nghị mua/bán.**
 
 ---
 

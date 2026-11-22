@@ -11,6 +11,9 @@ as_of: 2026-10-30 (tin web ≤ 2026-10-15; BQ commodity_prices truy vấn 30/10)
 
 # SECTOR READ: Đá xây dựng Đông Nam Bộ, as-of 30/10/2026 (Bobby, real-time BLIND)
 
+> **Cập nhật 2026-11-22:** xem `sector_read_da_xay_dung_dnb_20261122.md`. Bản đó đính chính mục 3 ("Q3/2026 ổn định" sai với đá theo Bộ XD),
+> mục 2 (NĐ 21/2026 đã ban hành 16/01/2026, không phải dự thảo), pha và xác suất mục 4; làm rõ cách chấm F1, F7. F1-F10 giữ nguyên P.
+
 Đây không phải episode VNINDEX và không vào N_effective. Nhãn dùng trong file: **[DK]** là dữ kiện có nguồn và ngày;
 **[UĐ]** là ước đoán hoặc suy luận của Bobby; **[NỀN]** là hiểu biết nền chưa kiểm lại trong lượt này (có thể sai, không
 dùng làm số pin). Số nào không đo được trực tiếp thì ghi **(ước lượng)**.

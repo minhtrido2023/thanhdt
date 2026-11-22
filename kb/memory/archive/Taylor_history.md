@@ -2590,3 +2590,6 @@
 - [2026-11-20T04:27:42Z] [qtp-r3 20/11] XONG job Taylor_20261120_041936: tam QTP r3 sau CK ~7053 (DAT, gia/tam 1,45) do opex 572 ty/nam + von du an khi thai — CHO Mike skeptic + Wendy soat TT57 D20.3 tuong duong trong TT12/2025; Mike sua REPORT/investor/dd_price_zones
 - [2026-11-20T04:29:34Z] [dd-tta 20/11] XONG job Taylor_20261120_041933: REPORT dd_TTA_20261120, tam 8.040 (sau TK 7.240), KHONG RE — CHO Mike goi fundamental-skeptic + ghi dd_price_zones
 - [2026-11-20T04:40:15Z] [qtp-r3b 20/11] XONG job Taylor_20261120_043725: tam 7.701 sau CK (P0 0,4), DAT; CHO Mike sua REPORT r2/investor/dd_price_zones
+
+## Archived 2026-11-22 (keep=12 days=0 require_done=False)
+- [2026-11-20T04:49:53Z] [qtp-r3c 20/11] XONG job Taylor_20261120_044905: REPORT_r3c, tam 7.701 giu nguyen, opex2032=8.458, thuan loi=9.240 — CHO Mike ap vao REPORT r2/investor; con thieu GPMT 517 PL2 (can xin ban)
