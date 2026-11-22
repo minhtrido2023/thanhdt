@@ -223,6 +223,7 @@ Quy tắc CỨNG:
    ngồi: `bin/dispatch.sh <agent> "<prompt>" --thread <thread_id>`. Không có `--thread` thì thứ tự
    tự động: per-agent override (Wags→Architecture, DollarBill→plan) → topic phiên hiện tại → con
    trỏ global.
+5. **Mở topic mới (user nói "mở/đổi topic") ⇒ `bin/new_topic.py "<tên>"`** — thread mới nằm trong ĐÚNG channel cha của topic hiện tại (user chốt 2026-11-22), KHÔNG tự POST `/api/notify` vào #mikefleet. Không dò được channel ⇒ exit 3, dùng `--channel`.
 4. Agent một-topic-cố-định (Wags, DollarBill) LUÔN về topic của mình, bất kể dispatch từ đâu — muốn khác
    phải truyền `--thread` tường minh.
 
