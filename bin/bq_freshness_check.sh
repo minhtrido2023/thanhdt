@@ -969,6 +969,26 @@ rm -f "$_lagdd_err"
 # Chi tiết: kb/projects/lag-dd-zone-gate-20261109.md. Tắt: LAG_DD_ZONE_GATE_ENABLED trong code (sửa cả dòng này).
 LAG_ZONE_NOTE=" ⚠️ LUẬT USER 09/11/2026 (tạm, tới khi edge LAG bình thường): MỖI lệnh MUA book LAG chỉ được vào plan khi mã CÓ DD trong mike/kb/dd_price_zones.json (bản dd_date/rev mới nhất, chưa quá expires_on) VÀ ref_price <= min(center, zone_high) của DD đó. Mã LAG trong recommend không đạt (chưa có DD, hoặc giá trên tâm) thì KHÔNG đưa lệnh MUA vào plan — ghi vào notes: 'LAG <MÃ> bị loại theo luật 09/11: giá <X> > tâm <Y>' hoặc 'chưa có DD'. Bước loại này CHẠY TRƯỚC khi tính tiền cần chuyển từ Trứng vàng. (Executor 09:05 cũng loại cứng các lệnh này; plan phải khớp để ngân sách/egg không tính thừa.)"
 
+# D1+D5 (user duyệt 22/11/2026 19:07, B1 kb/projects/dd-upgrade-final-action-20261122.md): cổng con
+# LAG_DD_REQUIRE_CONFIRMED trong $WORKDIR/trading_bot/plan.py. Prompt đọc ĐÚNG hằng đó (grep có kiểm, không
+# import để khỏi dính .pth): False hoặc chưa có hằng (main chưa merge B1) ⇒ LAG_ZONE_NOTE giữ NGUYÊN từng byte;
+# True ⇒ nối thêm câu luật; khớp không rõ (≠1 dòng / giá trị lạ / grep lỗi) ⇒ in bằng chứng thật (§29) + nhắc
+# DollarBill tự kiểm. Selfcheck: bin/lag_require_confirmed_prompt_selfcheck.sh.
+_lagcf_file="$WORKDIR/trading_bot/plan.py"
+_lagcf_hits="$(grep -E '^LAG_DD_REQUIRE_CONFIRMED[[:space:]]*=' "$_lagcf_file" 2>&1)"
+_lagcf_rc=$?
+_lagcf_n="$(printf '%s' "$_lagcf_hits" | grep -c '')"
+if [ "$_lagcf_rc" -eq 0 ] && [ "$_lagcf_n" -eq 1 ] && [[ "$_lagcf_hits" =~ ^LAG_DD_REQUIRE_CONFIRMED[[:space:]]*=[[:space:]]*True[[:space:]]*(#.*)?$ ]]; then
+  LAG_ZONE_NOTE="${LAG_ZONE_NOTE} ⚠️ BỔ SUNG LUẬT USER 22/11/2026 (D1+D5 — cổng LAG_DD_REQUIRE_CONFIRMED đang BẬT trong trading_bot/plan.py): ngoài các điều kiện trên, entry DD mới nhất của mã còn phải có skeptic_final == 'CONFIRMED' (FIXED_UNVERIFIED / REFUTED_OPEN / NONE / thiếu trường đều KHÔNG đạt) VÀ audited_fy_missing không phải true (thiếu BCTC kiểm toán năm gần nhất ⇒ coi như chưa có DD). Không đạt thì KHÔNG đưa lệnh MUA LAG vào plan — ghi vào notes: 'LAG <MÃ> bị loại theo luật 22/11: skeptic_final=<NHÃN> rev<R> dd_date <D>' hoặc 'LAG <MÃ> bị loại theo luật 22/11: thiếu BCTC kiểm toán năm gần nhất'. Executor 09:05 cũng loại cứng các lệnh này."
+elif [ "$_lagcf_rc" -eq 0 ] && [ "$_lagcf_n" -eq 1 ] && [[ "$_lagcf_hits" =~ ^LAG_DD_REQUIRE_CONFIRMED[[:space:]]*=[[:space:]]*False[[:space:]]*(#.*)?$ ]]; then
+  :   # tắt ⇒ prompt y như trước B1
+elif [ "$_lagcf_rc" -eq 1 ] && ! grep -q 'LAG_DD_REQUIRE_CONFIRMED' "$_lagcf_file" 2>/dev/null; then
+  :   # chưa có hằng trong plan.py ⇒ cổng con chưa tồn tại ở executor ⇒ prompt y như trước B1
+else
+  echo "  [WARN] không xác định được LAG_DD_REQUIRE_CONFIRMED trong $_lagcf_file (grep rc=$_lagcf_rc, $_lagcf_n dòng khớp) — Khớp/lỗi thật: $(printf '%s' "$_lagcf_hits" | head -3 | tr '\n' ' ')"
+  LAG_ZONE_NOTE="${LAG_ZONE_NOTE} ⚠️ KHÔNG đọc được trạng thái cổng LAG_DD_REQUIRE_CONFIRMED (luật D1+D5 22/11) trong trading_bot/plan.py — mở file đó kiểm tay: nếu hằng = True thì lệnh MUA LAG còn phải có skeptic_final == 'CONFIRMED' và audited_fy_missing không phải true."
+fi
+
 MORNING_NOTE=""
 if [ "${MORNING:-0}" = "1" ]; then
   MORNING_NOTE=" ⚠️ CHẠY TAY BUỔI SÁNG (MIKE_MORNING_RUN=1): dữ liệu/DT5G/recommend là của PHIÊN $TODAY (không phải ngày lịch ${CAL_TODAY}); plan này dành cho CHÍNH ngày $NEXT_TRADING_DAY. ${MIKE_MORNING_NOTE_TAIL:-BẮT BUỘC đặt requires_user_approval=true cho mọi lệnh và nói rõ trong summary rằng đây là plan chạy tay buổi sáng cần user duyệt trước 08:45 ICT; chuỗi inject lệnh thoát theo thời gian (auto_exit_inject) và gửi plan có thể CHƯA chạy cho ngày này.}"
