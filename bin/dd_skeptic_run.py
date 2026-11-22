@@ -105,6 +105,7 @@ def main(argv=None):
     ap.add_argument("--report", required=True)
     ap.add_argument("--round", type=int)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--mode", choices=("FEAR_BUY", "DD_GENERAL"), help="chèn dòng đầu brief 'MODE: …' (chỉ có tác dụng khi định nghĩa agent hỗ trợ chế độ — B6 .proposed)")
     try:
         a = ap.parse_args(argv)
     except SystemExit as e:
@@ -126,6 +127,8 @@ def main(argv=None):
         return 2
     out_json, out_raw = os.path.join(skdir, "r%d.json" % n), os.path.join(skdir, "r%d_raw.md" % n)
     brief = BRIEF.format(report=os.path.abspath(report), framework=FRAMEWORK)
+    if a.mode:
+        brief = "MODE: %s\n" % a.mode + brief
     rc, msg = lint_brief(brief)
     if rc != 0:
         print("LỖI: brief bị dd_blind_lint chặn (rc=%d), KHÔNG chạy skeptic:\n%s" % (rc, msg), file=sys.stderr)
