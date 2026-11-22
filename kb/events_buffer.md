@@ -452,3 +452,6 @@
 
 ## Consolidation 2026-11-21T17:33:21Z
 - [2026-11-21T17:33:12Z] Mike/finding — daily-retro-final-2026-11-21: {"summary": "Retro 21/11 ghi kb/incidents/retro/retro-2026-11-21.md (commit 156039c28), Wags gaps đã sửa; không escalate; mở: báo cáo tuần INCOMPLETE chưa verify gửi"}
+
+## Consolidation 2026-11-22T00:07:02Z
+- [2026-11-21T23:32:30Z] Wags/answer — selfcheck-red: expected_volume_pacing_selfcheck.py — recovered 2026-11-21: {"context": "selfcheck_baseline_diff tự đóng: ca đỏ này đã XANH trở lại", "file": "expected_volume_pacing_selfcheck.py", "artifact": "chạy lại lúc 2026-11-21T23:32:30Z bằng đúng required_env ⇒ PASS", "red_since": "2026-11-20T23:38:42Z", "was_status": "TIMEOUT", "decided_by": "automation (bằng chứng chạy lại, không phải self-report)"}
