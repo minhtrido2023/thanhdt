@@ -592,3 +592,13 @@
 - [2026-11-22T12:46:36Z] Taylor/heartbeat — Taylor_20261122_124535: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261122_124535", "source": "watcher"}
 - [2026-11-22T12:47:36Z] Taylor/heartbeat — Taylor_20261122_124535: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261122_124535", "source": "watcher"}
 - [2026-11-22T12:47:49Z] Taylor/finding — A3 replay LAG-CONFIRMED: chặn thêm 0 lệnh: {"extra_blocked_orders": 0, "extra_blocked_tickers": 0, "lag_buy_lines": 33, "gate_a_pass": 0, "ledger_today": {"CONFIRMED": 15, "FIXED_UNVERIFIED": 21, "REFUTED_OPEN": 0, "NONE": 0}, "lag_buys_since_1110": 0, "caveat": "nhãn skeptic_final là backfill 22/11", "branch": "session/1574033826936660078-a3", "worktree": "/home/trido/thanhdt/wt-dd-a3", "measured_by": "python3 mike/bin/dd_lag_confirmed_replay.py (out_unsetTZ.txt, TZ-invariant)"}
+
+## Consolidation 2026-11-22T12:50:01Z
+- [2026-11-22T12:48:22Z] Taylor/heartbeat — Taylor_20261122_124816: {"status": "in_progress", "note": "A6 đọc SPEC"}
+- [2026-11-22T12:48:26Z] Taylor/heartbeat — Taylor_20261122_124818: {"status": "in_progress", "note": "A7 doc spec, doc code"}
+- [2026-11-22T12:48:39Z] Taylor/heartbeat — Taylor_20261122_124816: {"status": "in_progress", "note": "A6 backup+worktree xong, viết lint"}
+- [2026-11-22T12:48:58Z] Taylor/heartbeat — Taylor_20261122_124818: {"status": "in_progress", "note": "A7 viet code bac 1/2"}
+- [2026-11-22T12:49:15Z] Taylor/heartbeat — Taylor_20261122_124814: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261122_124814", "source": "watcher"}
+- [2026-11-22T12:49:17Z] Taylor/heartbeat — Taylor_20261122_124816: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261122_124816", "source": "watcher"}
+- [2026-11-22T12:49:19Z] Taylor/heartbeat — Taylor_20261122_124818: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261122_124818", "source": "watcher"}
+- [2026-11-22T12:49:46Z] Taylor/finding — A4 dd_skeptic_run xong, chờ review: {"branch": "session/1574033826936660078-a4", "worktree": "/home/trido/thanhdt/wt-dd-a4", "commit": "01c7557ab", "files": ["bin/dd_skeptic_run.py", "bin/dd_skeptic_run_selfcheck.py", "bin/dd_price_zones_selfcheck.py"], "selfcheck": "dd_skeptic_run_selfcheck 12/12 PASS rc=0 (env -u TZ và TZ=Pacific/Kiritimati); dd_price_zones_selfcheck rc=0 cả 2 TZ, 9 test A4", "note": "SKEPTIC_PATH_REQUIRED_FROM=9999-12-31 (Mike đặt ngày); chưa chạy skeptic thật, không email, không merge", "measured_by": "python3 bin/dd_skeptic_run_selfcheck.py; python3 bin/dd_price_zones_selfcheck.py (dưới env -u TZ và TZ=Pacific/Kiritimati)"}
