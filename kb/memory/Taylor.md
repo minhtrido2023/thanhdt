@@ -34,3 +34,12 @@
 - [2026-11-22T13:49:07Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
 - [2026-11-22T13:49:18Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
 - [2026-11-22T16:14:47Z] [B5 r2 22/11] XONG job Taylor_20261122_161344: commit 232ce19bf (wt-dd-b5, chưa merge/cài) — CHỜ Mike merge + cài .bak
+- [2026-11-22T23:44:15Z] ĐANG DỞ: job Taylor_20261122_234402 DD DCM rebuild rev3 | NEXT: đọc skeptic r1 + report rev2
+- [2026-11-22T23:44:33Z] ĐANG DỞ: job Taylor_20261122_234424 DD TTA rebuild rev mới | NEXT: đọc skeptic r1 + REPORT_r3
+- [2026-11-22T23:44:35Z] ĐANG DỞ: job Taylor_20261122_234422 DD DCM rebuild (job 234402 bị cancel) | NEXT: đọc skeptic r1 + report, viết REPORT_rev7.md
+- [2026-11-22T23:44:43Z] ĐANG DỞ: job Taylor_20261122_234426 DD PNJ rebuild rev2 | NEXT: đọc skeptic r1 + REPORT.md dd_PNJ_20261114
+- [2026-11-22T23:44:43Z] ĐANG DỞ: job Taylor_20261122_234428 DD VCB rebuild rev2 | NEXT: đọc skeptic r1 + REPORT.md
+- [2026-11-22T23:44:47Z] ĐANG DỞ: job Taylor_20261122_234430 DD MSB rebuild rev2 | NEXT: đọc skeptic r1 + REPORT.md
+- [2026-11-22T23:53:17Z] ĐANG DỞ: job Taylor_20261122_234428 VCB rev2 viết xong REPORT_rev2.md | NEXT: skeptic r2 → LEDGER_PROPOSAL_VCB.json → bus+notify
+- [2026-11-22T23:55:37Z] ĐANG DỞ: job Taylor_20261122_234422 DCM rev7 (REPORT_rev7.md tâm 24.822 TRÊN vùng) | NEXT: skeptic r2 → LEDGER_PROPOSAL_DCM.json → bus+notify
+- [2026-11-22T23:56:35Z] [dd-TTA r4 23/11] XONG job Taylor_20261122_234424: tâm sau TK 8.548 (r3 6.159), skeptic r2 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_TTA.json (REFUTED_OPEN)

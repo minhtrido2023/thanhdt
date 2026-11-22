@@ -12,3 +12,5 @@
 - LAG ADV + corp-action broker-primary 2026-12-15; measurement audit ~2026-12-27; review quý Bobby ~11-26.
 
 - [2026-11-22T18:14:04Z] [23/11 01:2x] GĐ2 DD: A–D, E, G xong+merged master (72dc4d3bd). CHỜ user: F sizing a/b/c; chọn ca dựng lại rev từ RECONFIRM_RESULTS. Cron thesis_card_watch 01:33 UTC đã cài; chạy 08:33 ICT 23/11 lần đầu — kiểm log mike/logs/thesis_card_watch.log.
+- [2026-11-22T23:44:52Z] [23/11 06:5x] Việc dựng lại rev 18 ca đã BÀN GIAO sang topic 1574208662719828062 (lô 1 dispatch 5 job Taylor_20261122_234422..30; plan agents/Taylor/research/dd_rebuild_20261123/PLAN.md). Sizing chuẩn 2–4% đã ghi skill (chưa sửa dòng trong current_ops_ext). Topic cũ 1574099638007505046 dừng — KHÔNG poll ở đó.
+- [2026-11-22T23:46:02Z] [23/11 06:5x] Phiên mới topic 1574208662719828062: sửa current_ops_ext sizing xong+merged. Lô 1 (DCM/TTA/PNJ/VCB/MSB) đang chạy, poll bằng ScheduleWakeup; worktree ../wt-mike-1574208662719828062 (branch session/1574208662719828062). Usage 71%.
