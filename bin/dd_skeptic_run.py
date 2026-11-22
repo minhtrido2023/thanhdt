@@ -6,7 +6,7 @@
 Đầu ra: <dir>/skeptic/rN.json (+ rN_raw.md; có cost_usd lấy từ total_cost_usd của claude --output-format json, null nếu thiếu). N mặc định = max(rN.json hiện có)+1; --round trùng file có sẵn ⇒ từ chối.
 Brief dựng từ template cố định (mù giá) và PHẢI qua bin/dd_blind_lint.py --mode skeptic: rc≠0 ⇒ không chạy.
 rc: 0 ok · 2 lỗi dùng/đầu vào · 3 brief bị lint chặn · 4 claude lỗi/verdict không parse được (KHÔNG ghi rN.json; thô lưu logs/).
-Env: DD_SKEPTIC_CLAUDE_BIN (stub test) · DD_SKEPTIC_AGENT_DEF · DD_SKEPTIC_MODEL (mặc định opus) · DD_SKEPTIC_WORKDIR · DD_SKEPTIC_TIMEOUT_S.
+Env: DD_SKEPTIC_CLAUDE_BIN (stub test) · DD_SKEPTIC_AGENT_DEF · DD_SKEPTIC_MODEL (mặc định opus) · DD_SKEPTIC_WORKDIR · DD_SKEPTIC_TIMEOUT_S · DD_SKEPTIC_MAX_USD (trần USD/ca, mặc định 3).
 """
 import argparse
 import datetime as dt
@@ -26,6 +26,7 @@ AGENT_DEF = os.environ.get("DD_SKEPTIC_AGENT_DEF", os.path.expanduser("~/.claude
 MODEL = os.environ.get("DD_SKEPTIC_MODEL", "opus")
 WORKDIR = os.environ.get("DD_SKEPTIC_WORKDIR", "/home/trido/thanhdt/WorkingClaude")
 TIMEOUT_S = int(os.environ.get("DD_SKEPTIC_TIMEOUT_S", "1500"))
+MAX_USD = os.environ.get("DD_SKEPTIC_MAX_USD", "3")  # trần chi phí/ca (user 22/11: dừng nếu >3 USD); "0" = tắt
 FRAMEWORK = "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/calculated_fear_state_backstop.md"
 
 # Template CỐ ĐỊNH — không giá thị trường / PE / sổ giá-tâm. Dòng đường dẫn có blind-ok vì tên thư mục DD chứa mã (bắt buộc để skeptic mở được file).
@@ -145,6 +146,8 @@ def main(argv=None):
     started = dt.datetime.now(ICT).isoformat(timespec="seconds")
     cmd = [CLAUDE, "-p", prompt, "--model", MODEL, "--permission-mode", "auto",
            "--allowedTools", "Bash Read Grep Glob", "--max-turns", "50", "--output-format", "json"]
+    if MAX_USD not in ("", "0"):
+        cmd += ["--max-budget-usd", MAX_USD]
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, cwd=WORKDIR if os.path.isdir(WORKDIR) else None, timeout=TIMEOUT_S)
     except (OSError, subprocess.TimeoutExpired) as e:
