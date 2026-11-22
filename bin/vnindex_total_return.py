@@ -100,6 +100,14 @@ def g4_mc_ack_key(date, mc_prev, mc) -> tuple:
 
 G5_WINDOW = 60
 G5_TOL = 0.005                     # 0,5 điểm %
+G5_ACK_PREFIX = "@G5"              # khoá ack G5: (date, "@G5:<lệch tính bằng 0,01 điểm %>") — ràng GIÁ TRỊ đã xem
+
+
+def g5_ack_key(date, diff_bp: int) -> tuple:
+    """Khoá ack G5. Ràng cả độ lệch (đơn vị 0,01 điểm %: +0,52 điểm % = 52): dòng bị dựng lại ra độ lệch
+    khác số người đã xem ⇒ ack không còn hiệu lực, G5 nổ lại. Ngưỡng G5_TOL KHÔNG đổi."""
+    return (date if isinstance(date, str) else date.isoformat(), f"{G5_ACK_PREFIX}:{diff_bp}")
+
 G6_DY = 0.30
 G7_MAX_AGE_DAYS = 35
 G8_MAX_SHARE = 0.005
@@ -648,7 +656,7 @@ def _ack_date(e: dict, path: str, sect: str) -> str:
 
 def load_acks(path: str = ACKS_PATH) -> set:
     """Tập khoá đã được NGƯỜI xác nhận: (date, ticker) cho G6; (date, '@G4_N:<n_prev>><n>') cho G4-số-mã;
-    (date, '@G4_MC:<mc_prev>><mc>') cho G4-vốn-hoá; (date, '@G8_NEW:<mã>:<osh|row>') hoặc ('@G8_NEW_RANGE', mã, cause, từ, đến) cho G8_NEW.
+    (date, '@G4_MC:<mc_prev>><mc>') cho G4-vốn-hoá; (date, '@G5:<diff_bp>') cho G5; (date, '@G8_NEW:<mã>:<osh|row>') hoặc ('@G8_NEW_RANGE', mã, cause, từ, đến) cho G8_NEW.
     Thiếu file = không có xác nhận nào. Mục hỏng ⇒ ValueError (không lặng lẽ bỏ qua)."""
     if not os.path.exists(path):
         return set()
@@ -684,6 +692,17 @@ def load_acks(path: str = ACKS_PATH) -> set:
             if type(v) not in (int, float) or not math.isfinite(v) or v <= 0:
                 raise ValueError(f"{path}: mục G4_MC thiếu/sai {k} (số dương: vốn hoá rổ VND đã xem): {e}")
         out.add(g4_mc_ack_key(d, e["mc_prev"], e["mc"]))
+    # G5: lệch rổ-vs-chỉ-số 60 phiên > G5_TOL đã có NGƯỜI xác nhận là lệch thật (không phải lỗi ETL) cho đúng
+    # (ngày, độ lệch). decided_by == "user" bắt buộc; không wildcard ngày; độ lệch đổi ⇒ ack mất hiệu lực.
+    for e in _ack_section(a, "G5", path):
+        d = _ack_date(e, path, "G5")
+        _ack_str(e, "confirmed_by", path, "G5")
+        _ack_str(e, "reason", path, "G5")
+        if e.get("decided_by") != "user":
+            raise ValueError(f"{path}: mục G5 cần decided_by == 'user': {e}")
+        if type(e.get("diff_bp")) is not int:
+            raise ValueError(f"{path}: mục G5 thiếu/sai diff_bp (số nguyên, đơn vị 0,01 điểm %: +0,52 → 52): {e}")
+        out.add(g5_ack_key(d, e["diff_bp"]))
     # G8_NEW: "đã biết, đang chờ BQ lấp" cho đúng (ngày, mã, nguyên nhân osh|row) đã thấy trong lỗi G8.
     # Hai dạng: (a) {date, ticker, cause, ...} từng ngày; (b) {ticker, cause, date_from, date_to|expires,
     # confirmed_by, decided_by:"user", reason} theo KHOẢNG NGÀY cho lỗ hổng kéo dài (CRV vắng cả năm). Dạng (b)
@@ -831,10 +850,12 @@ def check_period(series: list, start_date, end_date, acks: set = None, today: dt
             if all(x["k2_synth_pr"] is not None for x in w):
                 synth = math.prod(1 + x["k2_synth_pr"] for x in w) - 1
                 off = series[j]["vnindex"] / series[j - G5_WINDOW]["vnindex"] - 1
-                if abs(synth - off) > G5_TOL:
+                g5_bp = int(round(10000 * (synth - off)))
+                if abs(synth - off) > G5_TOL and g5_ack_key(r["date"], g5_bp) not in acks:
                     errs.append(f"G5: {r['date']} 60 phiên rổ {100 * synth:+.2f}% vs VN-Index "
                                 f"{100 * off:+.2f}% (lệch {100 * (synth - off):+.2f} điểm %, > "
-                                f"{100 * G5_TOL:g})")
+                                f"{100 * G5_TOL:g}) — chờ người xác nhận (diff_bp={g5_bp}) "
+                                f"ở vnindex_tr_acks.json mục G5")
         # G6 — cổ tức bất thường chưa có người xác nhận
         if r["max_dy"] is not None and r["max_dy"] > G6_DY and \
                 (r["date"].isoformat(), r["max_dy_ticker"]) not in acks:

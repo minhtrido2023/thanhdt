@@ -292,6 +292,34 @@ def t_gates():
         return mod(64, k2_synth_pr=(1 + k) * (1 + off + delta) / (1 + off) - 1)
     one(g5(0.0051), "G5", ("+0.51",))
     none(g5(0.0049), "G5")
+    # G5 ack: ràng (ngày, độ lệch). Đúng ⇒ qua; sai độ lệch / sai ngày / không ack ⇒ vẫn nổ.
+    r5 = g5(0.0052)
+    e5 = [x for x in gates(r5, a, b) if x.startswith("G5") and D[64].isoformat() in x]
+    ok(len(e5) == 1 and "diff_bp=52" in e5[0] and "mục G5" in e5[0], f"G5 lỗi nêu đúng số cần ack: {e5}")
+    d64 = D[64].isoformat()
+
+    def g5d(acks):                      # lỗi G5 của ĐÚNG phiên D64 (cửa sổ các phiên sau cũng chứa dòng bị sửa)
+        return [x for x in gates(r5, a, b, acks) if x.startswith("G5") and d64 in x]
+    ok(not g5d({V.g5_ack_key(D[64], 52)}), "G5 ack đúng ⇒ qua")
+    ok(g5d({V.g5_ack_key(D[64], 53)}), "G5 ack sai độ lệch ⇒ vẫn nổ")
+    ok(g5d({V.g5_ack_key(D[63], 52)}), "G5 ack sai ngày ⇒ vẫn nổ")
+    import tempfile as _tf
+    with _tf.TemporaryDirectory() as _d:
+        _p = os.path.join(_d, "a.json")
+        good = {"date": "2026-11-11", "diff_bp": 52, "confirmed_by": "u", "decided_by": "user", "reason": "r"}
+        json.dump({"G5": [good]}, open(_p, "w"))
+        ok(V.g5_ack_key("2026-11-11", 52) in V.load_acks(_p), "G5 load_acks đọc đúng")
+        for tag, bad in (("thiếu decided_by", {k: v for k, v in good.items() if k != "decided_by"}),
+                         ("decided_by agent", dict(good, decided_by="agent")),
+                         ("diff_bp là chuỗi", dict(good, diff_bp="52")),
+                         ("thiếu diff_bp", {k: v for k, v in good.items() if k != "diff_bp"}),
+                         ("thiếu confirmed_by", {k: v for k, v in good.items() if k != "confirmed_by"})):
+            json.dump({"G5": [bad]}, open(_p, "w"))
+            try:
+                V.load_acks(_p)
+                ok(False, f"G5 mục {tag} phải ValueError")
+            except ValueError:
+                ok(True, f"G5 {tag}")
     # G6 — cổ tức > 30% giá; có xác nhận thì qua
     one(mod(64, max_dy=0.31, max_dy_ticker="ZZZ"), "G6", ("ZZZ", "31.0%"))
     none(mod(64, max_dy=0.29, max_dy_ticker="ZZZ"), "G6")
