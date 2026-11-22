@@ -481,6 +481,9 @@ def run():
         ps.sleeve_map_from_journal = lambda a: dict(journal)
         ps.current_park_basket = lambda: ({"QQ0"}, None)
         out, err = build(lambda a, d: tool)
+        if os.environ.get("PS_DUMP_RENDER"):   # chụp bản render fixture (so trước/sau) — không ảnh hưởng kiểm tra
+            with open(os.environ["PS_DUMP_RENDER"], "w", encoding="utf-8") as _fh:
+                _fh.write(out)
         check("K1: mã CÓ tỉ suất công cụ ⇒ in đúng số đó, 2 chữ số, dạng 'MÃ <giá trị>M, ±x.xx%'",
               "QQ1 12.0M, +12.34%" in out and "QQ4 1.6M, -19.20%" in out
               and "QQ6 1.7M, -18.50%" in out, out)
@@ -518,11 +521,16 @@ def run():
                   "lỗ tự động — cân nhắc xử lý sớm" in out
               and "🔴 QQ4 (BAL): lỗ 20.0% trên giá vốn sổ công ty chứng khoán, còn 0.0pp đến ngưỡng cắt "
                   "lỗ tự động — cân nhắc xử lý sớm" in out, out)
-        check("F2: sleeve KHÔNG có lệnh tự động (Discretionary) vẫn đo trên tỉ suất công bố, dòng cờ "
-              "giữ dạng 'MÃ ±x.xx%' cổng kiểm được (QQ6 −18,50% ⇒ còn 1,5pp; sổ broker của nó −17,0% "
-              "⇒ nếu đo nhầm cơ sở sẽ ra 3,0pp và không vào vùng đỏ)",
-              "🔴 QQ6 -18.50% (Discretionary): còn 1.5pp → ngưỡng" in out
-              and "🔴 còn 1.5pp đến ngưỡng xử lý (−20%)" in out, out)
+        check("F2 (22/11/2026): Discretionary KHÔNG còn ngưỡng xử lý −20% — QQ6 (−18,50%, từng vào vùng đỏ) vẫn hiện "
+              "dòng vị thế + 'chờ ý kiến PM về exit' nhưng KHÔNG có dòng 'còn …pp đến ngưỡng' nào (cả dòng vị thế lẫn "
+              "'Cờ theo dõi'); sleeve có ngưỡng khác (BAL/CAPIT) KHÔNG đổi (kiểm ở các ca F2 liền trên/dưới)",
+              "QQ6 1.7M, -18.50% — ⚠️ ngày vào không rõ — chờ ý kiến PM về exit" in out
+              and "QQ6" not in "".join(ln for ln in out.splitlines() if "ngưỡng" in ln)
+              and "(−20%)" not in out and "ngưỡng xử lý" not in out.replace(
+                  "KHÔNG đánh giá được khoảng cách tới ngưỡng xử lý: QQ5", "")
+              and "🔴 QQ6" not in out
+              and "DISCRETIONARY_SPECIAL" not in ps.STOP_LOSS_PCT_BY_SLEEVE and ps.risk_warning("DISCRETIONARY_SPECIAL", -25.0) is None
+              and ps.risk_warning("BAL", -18.5) is not None, out)
         flag_lines = [ln for ln in out.splitlines() if "KHÔNG đánh giá được khoảng cách" in ln]
         check("F2: 'không đánh giá được' nói đúng TỪNG lý do: sleeve không lệnh tự động thiếu tỉ suất "
               "(QQ5 CAPIT) — không kể BAL (đã đo trên sổ broker) hay LAG (không ngưỡng); BAL thiếu giá "
@@ -576,9 +584,10 @@ def run():
         check("HỢP ĐỒNG với cổng: mỗi mục 'Chi tiết … (n mã)' có đủ n vị thế cổng đọc được hoặc ghi "
               "'(chưa có tỉ suất)' (dây bẫy `position_line_gaps` không nổ trên báo cáo đúng dạng)",
               gaps == [] and ps.RETURN_UNAVAILABLE and rrg.NO_RETURN_MARK in out, str(gaps))
-        check("HỢP ĐỒNG với cổng: văn xuôi chỉ có MỘT tỉ suất 'MÃ ±x%' — dòng cờ Discretionary (số §21). "
-              "Cờ của BAL (số đo trên sổ broker) và dòng chú thích KHÔNG bị đọc thành tỉ suất của mã",
-              prose == [("QQ6", -18.5)], str(prose))
+        check("HỢP ĐỒNG với cổng: văn xuôi KHÔNG còn tỉ suất 'MÃ ±x%' nào (từ 22/11/2026 dòng cờ Discretionary "
+              "'🔴 QQ6 -18.50% … ngưỡng' đã gỡ — trước đó prose == [('QQ6', -18.5)]). Cờ của BAL (số đo trên sổ "
+              "broker) và dòng chú thích KHÔNG bị đọc thành tỉ suất của mã",
+              prose == [], str(prose))
         check("HỢP ĐỒNG với cổng: mã không có tỉ suất KHÔNG bị cổng thấy 'có tỉ suất đứng cạnh' — kể cả "
               "QQ7 đang mang cờ gần ngưỡng (nếu thấy, cổng sẽ chặn oan báo cáo đã cố ý không in số)",
               all(mention[tk]["pub"] == [] for tk in mention), str(mention))

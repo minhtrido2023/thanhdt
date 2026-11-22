@@ -89,10 +89,13 @@ LAG_EXIT_SESSIONS_FIXED = 25
 # ở trên. Bảng cũ từng ghi "LAG": 15.0 như thể đó là số từ backtest — SAI, không có nguồn nào.
 # Nếu sau này muốn thêm 1 ngưỡng an toàn RIÊNG cho live (khác backtest), phải ghi rõ trong
 # comment đây là "kỷ luật live BỔ SUNG", không được gắn vào backtest.
+# ⚠️ DISCRETIONARY_SPECIAL CỐ Ý KHÔNG có trong bảng (user chốt 22/11/2026 23:28, `decided_by: user`, câu 3):
+# sleeve discretionary KHÔNG có "ngưỡng xử lý −20%" — thoát do user quyết, không có ngưỡng cứng nào để đếm
+# khoảng cách; dòng "còn Xpp đến ngưỡng xử lý (−20%)" trong báo cáo (gửi NĐT ngoài) bị gỡ. Book khác giữ nguyên.
+# Hệ quả: `risk_warning` trả None, không vào vùng đỏ/"Cờ theo dõi", không vào cờ "không đánh giá được khoảng cách".
 STOP_LOSS_PCT_BY_SLEEVE = {
     "BAL": 20.0,
     "CAPIT": 20.0,
-    "DISCRETIONARY_SPECIAL": 20.0,
 }
 RISK_WARN_DISPLAY_FLOOR_PCT = 15.0  # bắt đầu in cảnh báo từ mức lỗ này
 RISK_WARN_RED_ZONE_PCT = 18.0  # đưa vào "Cờ theo dõi" từ mức lỗ này
