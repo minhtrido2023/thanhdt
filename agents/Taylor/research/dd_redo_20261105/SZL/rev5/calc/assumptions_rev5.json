@@ -1,0 +1,102 @@
+{
+ "round": "rev5",
+ "job": "Taylor_20261123_100922 (vong 3, user duyet 23/11 17:03)",
+ "inherits": "rev4/calc_b/assumptions_rev4b.json + xu ly skeptic r3 (skeptic/r3.json REFUTED)",
+ "price_blind_note": "Gia 27.700 (06/11) DA BIET tu r3/r3c. rev5 KHONG truy van gia moi; file gia rev4/restored/calc_r3/px_szl_r3_20261106.csv chi dung cho CK thanh khoan + nhan. Gia dinh khoa TRUOC lan chay dau (LOCK_rev5_prerun.txt).",
+ "sources_restored": "src/Q3_2026_hopnhat.pdf, src/H1_2026_soatxet.pdf, calc*/ khoi phuc tu git fc5bd02d9 vao rev4/restored/ (md5 trong LOCK_rev4_prerun.txt)",
+ "bds_dt_new": {
+  "cost_ty": 166.886910119,
+  "basis": "TM10 BCTC Q3/2026 tr.20 (png q3_p24): nguyen gia BDS dau tu tang 166,887 ty trong 9T (Nha 166,225 + CSHT 0,662), giam 0,012. Mot phan chuyen tu XDCB (TM8 tr.18: Nha xuong KCN Chau Duc 60,55 -> 6,09). Tranche: H1 101,7 / Q3 65,2 (doc phien truoc tu BCTC soat xet H1). Tai san DA VAN HANH (dang khau hao) va tien da chi nam trong no rong => luat 'du an moi base = so sach / NPV 0'. Kiem lai: TM5.10 H1 soat xet tr.23 (png h1_p26) tang trong ky 101,677 => Q3 = 65,210. BDS DT con lai 327,4 ty dang the chap cho khoan vay (TM5.10 H1).",
+  "double_count": "phan loi nhuan cua tai san moi DA NAM trong N0 (9T x 4/3) phai tru de khong dem 2 lan. Uoc luong: tai san sinh LN = r x gia von (NPV 0), thoi diem dua vao dong deu trong ky => ty le thoi gian trong 9T: H1 6/9, Q3 1,5/9 => DC = 101,7x6/9 + 65,2x1,5/9 = 78,7 ty (uoc luong, bo qua he so (1-nc-k) => thien ve tru nhieu)",
+  "axis": {
+   "values_ty": [
+    0.0,
+    "166,887 - 78,7 = 88,2",
+    166.887
+   ],
+   "weights": [
+    0.25,
+    0.5,
+    0.25
+   ],
+   "basis": "[UL] 0 = toan bo da sinh LN o muc r tu 01/01 (da nam het trong N0); 166,9 = chua dong gop gi vao N0. Trung = uoc luong dong deu."
+  }
+ },
+ "deposit_lt": {
+  "face_ty": 146.987107831,
+  "basis": "TM17 tr.23 (png q3_p27): 'Nhan ky quy, ky cuoc dai han' = ky quy khach thue (tang 134,97 -> 146,99 trong 9T). Khong co dieu khoan hoan tra/ky han cong bo. Hoan tra khi het hop dong thue, tran 2053 (NQ 76/2020).",
+  "axis": {
+   "values": [
+    "menh gia",
+    "PV 27 nam @ lai huy dong 12T"
+   ],
+   "weights": [
+    0.5,
+    0.5
+   ],
+   "basis": "rev4b: KHONG co dieu khoan hoan tra cong bo => trong so TRUNG LAP 0,5/0,5 (skeptic r2 FU#4); bo nhanh PV@r; phan tang trong nam gan nha xuong (hop dong ngan hon)"
+  }
+ },
+ "n0_level": {
+  "n0_9m_ty": "(NP_9M - DT TC 9T + 0,8 x CP TC 9T) x 4/3 - NQ76 5,846 x 4/3 x 0,8. rev4b tro lai 0,8: DT TC chu yeu co tuc mien thue, lai vay co la chan thue 20% (skeptic r2).",
+  "n0_cycle": "N0_9M - (Revenue_9M x (GPM_9M - GPM_cycle)) x (1-20%) x 4/3; GPM_cycle = TB GPM 2017Q1-2024Q4 (32 quy, truoc giai doan bien cao 2025Q3+), nguon calc/szl_gpm_hist_20261123.csv (BQ ticker_financial)",
+  "weights": [
+   0.5,
+   0.5
+  ],
+  "basis": "[UL] co so doc lap cho chieu GIAM = lich su bien cua chinh SZL 8 nam (GPM 26-37%) vs 5 quy gan nhat >=38%; co so cho chieu GIU = co cau doanh thu chuyen sang nha xuong (BDS DT +16%). Khong co thong tin phan dinh => 50/50.",
+  "multiplier_axis": "giu r3c: -12/-6/0/+6/+12% (0,1/0,2/0,4/0,2/0,1) quanh MOI muc"
+ },
+ "land_rent_44_3": {
+  "value_ty": 44.265169191,
+  "basis": "TM16 tr.23: 'Trich bo sung chi phi thue dat tai KCN Long Thanh' 44,265 ty CUOI KY = DAU NAM => KHONG ghi chi phi trong 9T/2026 => N0 khong bi x4/3 khoan mot lan. Giu tru o base (nghia vu chua quyet toan)."
+ },
+ "land_rent_annual": {
+  "value_9m_ty": 13.73688864,
+  "basis": "TM15 Q3 tr.22 + TM5.15 H1 tr.25: tien thue dat phat sinh H1 = 9T = 13,737 ty => ghi nhan 1 lan/nam ~13,74 ty/nam (POST-FIX sau lan chay dau: ban dau x4/3 = 18,3, chi anh huong do nhay, khong vao base). Rui ro don gia tang theo bang gia dat moi (Luat Dat dai 2024): KHONG co thong bao don gia moi => KHONG vao base; do nhay +25%/+50% (sau thue 20%).",
+  "x43_note": "TM15 cho 'phat sinh' H1 = 9T = 13,74 (nghia vu thue), KHONG chung minh chi phi P&L ghi 1 lan (co the phan bo theo thang) => KHONG sua N0 o base; do nhay 'bo x4/3' (+). Do nhay don gia x2 them (skeptic r2)."
+ },
+ "long_phuoc": {
+  "basis": "XDCB CCN Long Phuoc 344,66 (TM8). Tong muc 920 / con ~513 chi [bao chi] — KHONG co NQ HDQT/DHDCD trong src => khong kiem chung duoc; NPV 0 nen phan con phai chi khong vao base. Do nhay vuot von 20% phan con lai (-102,6 ty)."
+ },
+ "env_capex": {
+  "basis": "TM TSCD H1 tr.22 (png h1_p25): Nha may xu ly nuoc thai Giai doan 4 KCN Long Thanh nguyen gia 116,34 ty, con lai 93,06, con 192 thang => capex moi truong lon gan nhat DA dau tu va dang khau hao trong N0. Capex tuan thu moi chua cong bo => khong kiem chung duoc phan tuong lai; nam trong truc capex duy tri/KH (+-45/nam)."
+ },
+ "audit_fy2025": {
+  "basis": "BCTC kiem toan 2025 KHONG co trong src => y kien kiem toan FY2025 KHONG kiem chung duoc trong phien. Thay the gan nhat co trong src: Bao cao soat xet H1/2026 so 16/2026/BCSX-RSMHCM ngay 10/08/2026 (RSM Viet Nam, png h1_p06-07): ket luan CHAP NHAN TOAN PHAN, khong co doan 'van de can nhan manh'/ngoai tru."
+ },
+ "unchanged": [
+  "r = 13,5% + 1,0 x (lai huy dong 12T hieu dung - 7,40%)",
+  "nc 20/10/0%",
+  "T 27 nam / vinh vien 3/4-1/4",
+  "holdco 0% base",
+  "XDCB 407 theo gia von",
+  "chua niem yet theo so 113,25",
+  "CK thanh khoan sigma*sqrt(Q/ADV250)"
+ ],
+ "nq76": {
+  "value_ty_per_year": 5.845686,
+  "basis": "Bang bien dong von chu tr.25 (png q3_p29): dong 'Phan bo loi nhuan giu lai de chia co tuc nam 2026' 5.845.686.000 ghi THANG vao LNST chua phan phoi; thu nhap khac 9T chi 1,578 => KHONG nam trong NP/N0. rev4b tru -708 la sai => bo. Khoan 151,988 con lai khong tinh la no trong val() (von-chu-so-huu-tre)."
+ },
+ "shares": {
+  "post_bonus_mn": 48.198884,
+  "basis": "TM21d tr.26: 30/09 dang ky 29.114.840, luu hanh 28.352.340 (quy 762.500). Bang von chu tr.25: von khac 198.465.440.000 = 19.846.544 cp x 10.000 (co phieu thuong 70% chua dang ky von). Co so dinh gia = SAU THUONG 28,352340 + 19,846544 = 48,198884 (= so rev4b; skeptic ghi 19,8465 la lam tron) tr. Ngay dang ky cuoi cung 17/09/2026 (bao chi: cafef/stockbiz/baophapluat, khop but toan von khac truoc 30/09) => GDKHQ truoc 06/11 => gia 27.700 (06/11) cung co so sau thuong. Ngay GDKHQ chinh xac tu HOSE: khong kiem chung duoc trong phien."
+ },
+ "ktpl_2026": {
+  "num_ty": 13.97934435,
+  "den_ty": 69.89672175,
+  "basis": "TM21e BCTC Q3/2026 tr.26 (png q3_p30): Trich quy KTPL (*) 13.979.344.350 / LNST co dong Q3/2026 69.896.721.750 = 20,0%; Q3/2025 cung bang 3.839.085.670/34.231.704.592 = 11,2%. Ty le 2026 = co so doc lap moi nhat => BASE 20%. Ty le cac nam sau khong cong bo => do nhay 11,215% (muc 2025)."
+ },
+ "tan_duc_prepaid": {
+  "book_ty": 69.899649788,
+  "basis": "TM11b tr.20 (png q3_p24): Tien thue dat tai KCN Tan Duc 69,900 (dau nam 71,084, phan bo -1,185 trong 9T). TM VI.1 tr.27: KHONG co dong doanh thu Tan Duc => quy dat chua khai thac => luat 'du an moi base = so sach/NPV 0' => cong so sach 69,9. Chi phi phan bo ~1,58/nam van nam trong N0 (khong cong lai => than trong). Do nhay = 0."
+ },
+ "chau_duc_prepaid": {
+  "book_ty": 154.201049318,
+  "basis": "TM11 tr.20: dai han 147,306 + ngan han 6,895. Dang sinh doanh thu (TM VI.1 tr.27: cho thue nha xuong KCN Chau Duc 4,544 Q3/2026) va phan bo vao gia von => gia tri DA nam trong N0 + truc BDS DT moi => KHONG cong rieng (tranh dem 2 lan). Hai chieu, khong dinh luong them."
+ },
+ "g_axis": "BO: val() khong dung g (skeptic r3) => bo truc, ket qua khong doi, n giam 3 lan.",
+ "capex_maint": {
+  "basis": "BQ szl_cf_hist.csv: CF_Invest 2019-2024 140-314/nam gom ca dau tu mo rong (nha xuong, Long Phuoc, BDS DT) — BCTC khong tach duy tri/mo rong => KHONG co co so doc lap doi base 1,0x KH; giu truc do nhay +-45/nam va nguong."
+ }
+}

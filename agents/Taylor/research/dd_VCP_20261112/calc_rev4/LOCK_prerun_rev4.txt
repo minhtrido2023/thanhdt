@@ -1,0 +1,4 @@
+LOCK rev4 2026-11-23T17:18:29+0700 — khoa truoc pha sau-khoa (khong truy van gia moi; gia/ADV doc tu calc_rev3/px_vcp_post_lock.csv)
+1cf0ebd3e759c13e8900fa62a380c755  calc_rev4/assumptions_rev4.json
+865887c2b475fe52303b5af1d93fbb3d  calc_rev4/model_rev4.py
+5e162e0494f88fc268b42afdbc867b8c  calc_rev4/model_out_rev4.json

@@ -1,0 +1,113 @@
+{
+ "compare": {
+  "center_x085": 23284,
+  "label": "TRONG vùng P10–P90",
+  "price": 30400.0,
+  "price_date": "2026-11-20",
+  "px_vs_center_post": 0.1098,
+  "px_vs_p10": 0.3777,
+  "px_vs_p90": -0.0665,
+  "rule_015": "KHÔNG đạt (giá > 0,85×tâm)",
+  "source": "DNSE /price/ohlc 1D (close 14:45 ATC)"
+ },
+ "d_liq_used": 0.00585,
+ "headline": {
+  "center_post": 27393,
+  "center_pre": 27554,
+  "n": 2430,
+  "p10_post": 22065,
+  "p25_post": 24385,
+  "p50_post": 27441,
+  "p75_post": 30479,
+  "p90_post": 32564,
+  "pct_weight_below_price": 0.7451
+ },
+ "implied_lr_margin_usd_t": 211.1,
+ "liquidity": {
+  "adv250_ty": 89.0,
+  "adv60_ty": 73.7,
+  "d_5ty_adv250": 0.00585,
+  "d_5ty_adv60": 0.00643,
+  "n": 250,
+  "sigma_d": 0.02467,
+  "sizes": {
+   "0.5ty": {
+    "d_adv250": 0.00185,
+    "pct_adv": 0.0056,
+    "sessions_at_15pct": 0.04
+   },
+   "1ty": {
+    "d_adv250": 0.00261,
+    "pct_adv": 0.0112,
+    "sessions_at_15pct": 0.07
+   },
+   "2ty": {
+    "d_adv250": 0.0037,
+    "pct_adv": 0.0225,
+    "sessions_at_15pct": 0.15
+   },
+   "5ty": {
+    "d_adv250": 0.00585,
+    "pct_adv": 0.0561,
+    "sessions_at_15pct": 0.37
+   }
+  },
+  "window": "2025-11-19..2026-11-20"
+ },
+ "variants_post": {
+  "V_4windows": {
+   "below_px": 0.5807,
+   "center_post": 29405,
+   "p10": 23675,
+   "p90": 34648
+  },
+  "V_M342": {
+   "below_px": 0.6713,
+   "center_post": 28282,
+   "p10": 23023,
+   "p90": 33364
+  },
+  "V_M540": {
+   "below_px": 0.8398,
+   "center_post": 26230,
+   "p10": 20973,
+   "p90": 31241
+  },
+  "V_M738": {
+   "below_px": 0.9602,
+   "center_post": 24178,
+   "p10": 18940,
+   "p90": 29122
+  },
+  "V_late_axis": {
+   "below_px": 0.8725,
+   "center_post": 22574,
+   "p10": 13902,
+   "p90": 31086
+  },
+  "V_nolag": {
+   "below_px": 0.7083,
+   "center_post": 27865,
+   "p10": 22481,
+   "p90": 33118
+  },
+  "V_policy055": {
+   "below_px": 0.6636,
+   "center_post": 28423,
+   "p10": 23088,
+   "p90": 33620
+  },
+  "V_rev7_reading_100pct": {
+   "below_px": 0.921,
+   "center_post": 25009,
+   "p10": 19891,
+   "p90": 30011
+  },
+  "V_rev8_hybrid": {
+   "below_px": 0.804,
+   "center_post": 26780,
+   "p10": 21662,
+   "p90": 31782
+  }
+ }
+}

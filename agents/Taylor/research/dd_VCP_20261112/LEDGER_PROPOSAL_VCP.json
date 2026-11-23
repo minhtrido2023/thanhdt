@@ -1,81 +1,59 @@
 {
  "proposal_for": "kb/dd_price_zones.json",
- "job": "Taylor_20261123_063642",
+ "job": "Taylor_20261123_100924",
  "entry": {
   "ticker": "VCP",
   "dd_date": "2026-11-12",
-  "rev": 2,
+  "rev": 3,
   "valuation_asof": "2026-11-23",
   "bctc_quarter": "2026Q3",
   "skeptic_final": "REFUTED_OPEN",
   "skeptic_final_basis": "skeptic_run",
-  "skeptic_verdict_path": "agents/Taylor/research/dd_VCP_20261112/skeptic/r3.json",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_VCP_20261112/skeptic/r4.json",
   "audited_fy_missing": false,
-  "zone_low": 21037,
-  "center": 32605,
+  "zone_low": 17729,
+  "center": 29686,
   "center_kind": "expected_weighted",
-  "center_desc": "kỳ vọng trọng số 3 kịch bản (bear 30% / base 45% N 332,8 tỷ chuẩn hoá thuỷ văn k=1,127×Etb, thuế KH2026 15,3%, KT-PL 1,84% / bull 25% N 531,5), V=N/r (RONIC=Ke) + ΔB 427,9 giá sổ (base/bear), r 13,5% (lãi huy động 12T 7,40% @23/11), sau chiết khấu thanh khoản 1 tỷ 3,64%; trước CK 33.837",
-  "zone_high": 45280,
+  "center_desc": "kỳ vọng trọng số 3 kịch bản (bear 30% / base 45% N 282,5 tỷ chuẩn hoá thuỷ văn k=1,0×Etb, thuế KH2026 15,3%, KT-PL 1,84% / bull 25% N 531,5), V=N/r (RONIC=Ke) + ΔB 427,9 giá sổ (base/bear), r 13,5% (lãi huy động 12T 7,40% @23/11), sau chiết khấu thanh khoản 1 tỷ 3,63%; trước CK 30.805",
+  "zone_high": 45282,
   "center_range": null,
   "price_ref": 37400,
   "price_date": "2026-11-20",
-  "verdict_label": "TRONG vùng, TRÊN tâm: giá 37.400 cao hơn tâm sau CK 32.605 14,7%; trên 0,85×tâm = 27.715 ⇒ không có biên an toàn. Tâm nhạy lựa chọn thuỷ văn bình thường (k=1,0 ⇒ 30.501 trước CK) và hạn PPA Cửa Đạt (Pc −20% ⇒ 29.043). Rủi ro số 1: phân bổ vốn (cho vay cá nhân 823 tỷ, ~1.000 tỷ góp vốn 9T/26 chưa thuyết minh). Moat NARROW (định lượng ≈ NONE). Sizing V8: không đề xuất vị thế; thanh khoản ≲0,3 tỷ (ADV60 0,37 tỷ)",
-  "skeptic_status": "skeptic DD_GENERAL r1 INCONCLUSIVE (REPORT.md) → rev3 chuẩn hoá thuỷ văn BCTN25, thuế KH2026, KT-PL, RONIC=Ke, ΔB V4a; r2 INCONCLUSIVE (REPORT_rev3.md: pool 1.000 tỷ chưa haircut, bull đếm trùng ΔB) → rev3b bear −50% pool, bull bỏ ΔB, k 4 năm, sở hữu Đak Glun 41,43%; r3 INCONCLUSIVE medium (REPORT_rev3b.md): killer = chọn k=1,127 vs Etb (KH2025 ≈1,0×Etb) −9,9%, hạn PPA Cửa Đạt chưa rõ, bảo lãnh vay Đak Lô 1-3 của công ty mẹ chưa nêu; sửa r3 CHƯA áp (hết 2 vòng/ca)",
-  "source_file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
-  "report_md5": "a6bf4fcc5ecf7259a1e94601ac102188",
+  "verdict_label": "TRONG vùng, TRÊN tâm: giá 37.400 cao hơn tâm sau CK 29.686 26,0%; trên 0,85×tâm = 25.233 ⇒ không có biên an toàn. Tâm nhạy k thuỷ văn (k=1,061 đo 2021–25 ⇒ 32.412 trước CK) và hạn PPA Cửa Đạt (Pc −20% ⇒ 26.551). Rủi ro số 1: phân bổ vốn (cho vay cá nhân 823 tỷ, ~1.000 tỷ góp vốn 9T/26 chưa thuyết minh). Moat NARROW (định lượng ≈ NONE). Sizing V8 (2–4% NAV): không đề xuất vị thế; thanh khoản ≲0,3 tỷ (ADV60 0,37 tỷ)",
+  "skeptic_status": "r1 INCONCLUSIVE (REPORT.md) → r2 INCONCLUSIVE (REPORT_rev3.md) → r3 INCONCLUSIVE (REPORT_rev3b.md, killer k=1,127) → rev4 k=1,0 + chuỗi đo 2020–25, NQ ĐHĐCĐ 2026, bảo lãnh Đak Lô (nợ hợp nhất), thuế tài nguyên trong chi phí → r4 INCONCLUSIVE medium (REPORT_rev4.md, vòng cuối user duyệt): killer = k=1,0 nằm DƯỚI khoảng đo [1,009;1,061], Cửa Đạt 6 năm 1,06 ⇒ tâm có thể thấp 2,7–5,2%; bull nhân TTM năm ướt; PPA/pool/giấy phép chưa kiểm chứng. Sửa r4 CHƯA áp (hết vòng).",
+  "source_file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev4.md",
+  "report_md5": "404bd547c436bd7a41eef7452c09e1b5",
   "evidence": [
    {
-    "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
-    "quote": "**Tâm 33.837 đ/cp trước chiết khấu thanh khoản; 32.605 đ/cp sau chiết khấu (vị thế 1 tỷ, 3,64%).**",
+    "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev4.md",
+    "quote": "**Tâm 30.805 đ/cp trước chiết khấu thanh khoản; 29.686 đ/cp sau chiết khấu (vị thế 1 tỷ, 3,63%).**",
     "fields": [
      "center"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
-    "quote": "**Vùng [21.832 ; 46.990]** trước CK = bear/bull; **sau CK [21.037 ; 45.280]**. r = 13,5%, terminal RONIC = Ke.",
+    "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev4.md",
+    "quote": "**Vùng [18.398 ; 46.990]** trước CK = bear/bull; **sau CK [17.729 ; 45.282]**. r = 13,5%, terminal RONIC = Ke.",
     "fields": [
      "zone_low",
      "zone_high"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
-    "quote": "**Giá 37.400 (đóng cửa 20/11/2026, đọc SAU khoá) = +14,7% so với tâm sau CK**",
+    "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev4.md",
+    "quote": "**Giá 37.400 (đóng cửa 20/11/2026) = +26,0% so với tâm sau CK** ⇒ **TRONG VÙNG, TRÊN TÂM — không có biên an toàn** (0,85 × tâm = 25.233).",
     "fields": [
-     "price_ref",
-     "price_date"
+     "price_ref"
     ]
    }
   ],
-  "assumptions_file": "agents/Taylor/research/dd_VCP_20261112/calc_rev3/assumptions_rev3b.json",
-  "assumptions_md5": "8d93c85bd812d4841090ca0c80f40dac",
-  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "assumptions_file": "agents/Taylor/research/dd_VCP_20261112/calc_rev4/assumptions_rev4.json",
+  "assumptions_md5": "1cf0ebd3e759c13e8900fa62a380c755",
+  "null_reason": "center_range: nguồn không cho khoảng tâm bắt đầu từ center (độ nhạy k 32.412–34.749 là trước CK)",
   "expires_on": "2027-03-12",
   "expires_basis": "dd_date+120 (mặc định); BCTC Q4/2026 sớm hơn thì hết hạn sớm hơn",
-  "correction_reason": "rebuild sau skeptic DD_GENERAL r1 INCONCLUSIVE: 2025 là năm thuỷ văn đỉnh (SL 1.009,6 tr kWh =132% KH; thuỷ điện 1,32×Etb, BCTN25) ⇒ chuẩn hoá k=1,127 (−85,7 tỷ); thuế KH2026 15,3%; quỹ KT-PL 1,84%; terminal RONIC=Ke; tài sản 2026 NPV0 giá sổ; bear = El Niño 2 năm + lỗ cho vay 401,9 + lỗ 50% pool 1.000 tỷ chưa thuyết minh; bull bỏ ΔB. Tâm sau CK 40.273→32.605 (−19,0%); nhãn đổi 'TRONG vùng, sát tâm (giá dưới tâm 5,9%)' → 'TRONG vùng, TRÊN tâm 14,7%'",
-  "supersedes": "VCP@2026-11-12#1",
-  "notes": "UPCoM. CK 3,64% @1 tỷ (ADV60 trung vị 0,37 tỷ, σ250 2,22%). BCTC KT 2025 AASC chấp nhận toàn phần. Nguồn src/ khôi phục từ git ff5fe27cd^ (RESTORED_MD5_20261123.txt) + BCTN 2023/2025 (src_rev3/MD5.txt). WARNING pháp lý: phạt thuế 102 triệu (hoá đơn đơn vị không hoạt động), 46,8% cp cầm cố TP. Mở: hạn PPA Cửa Đạt, ngày hết ưu đãi thuế, nhượng quyền NSX, bảo lãnh vay Đak Lô 1-3, NQ ĐHĐCĐ 2026, bản chất pool 1.000 tỷ. Sizing V8: không đề xuất."
- },
- "skeptic_verdict_path": "agents/Taylor/research/dd_VCP_20261112/skeptic/r3.json",
- "skeptic_verdict": "INCONCLUSIVE",
- "skeptic_confidence": "medium",
- "report_md5_in_verdict": "a6bf4fcc5ecf7259a1e94601ac102188",
- "md5_match": true,
- "skeptic_rounds_this_job": [
-  "r2 INCONCLUSIVE (REPORT_rev3.md, 1,03 USD)",
-  "r3 INCONCLUSIVE (REPORT_rev3b.md, 0,93 USD)"
- ],
- "label_note": "skeptic_final=REFUTED_OPEN theo định nghĩa §E10 (INCONCLUSIVE ở vòng cuối, các sửa r3 CHƯA áp). Brief dispatch ghi 'ngược lại FIXED_UNVERIFIED' — nhãn FIXED_UNVERIFIED chỉ đúng nếu đã áp sửa sau vòng cuối; ở đây chưa áp ⇒ REFUTED_OPEN. KHÔNG tự nâng nhãn.",
- "apply_mechanics": "Append trực tiếp `entry` (rev 2, supersedes rev 1) rồi `python3 bin/dd_price_zones_selfcheck.py`. Không dùng dd_ledger_append_confirmed.py (không CONFIRMED).",
- "remaining_items": [
-  "k thuỷ văn bình thường: 1,127 (4 năm 2022–25, 1 năm ước lượng) vs Etb 1,0 (KH2025 công ty ≈0,99×Etb) — tâm −9,9% nếu k=1",
-  "hạn PPA Cửa Đạt + giá sau trả nợ (độ nhạy −7,5…−14,2%)",
-  "bảo lãnh/hỗ trợ tài chính công ty mẹ cho khoản vay MB Đak Lô 1-3 (NQ HĐQT 05/2025, 11/2025) chưa định lượng",
-  "NQ ĐHĐCĐ 2026 chưa đọc (phát hành/ESOP/trần vay) — website chỉ có trang HTML, PDF chưa tải được",
-  "tiền cấp quyền khai thác tài nguyên nước, giấy phép nhà máy đang chạy",
-  "ΔB 427,9 giá sổ chứa biên phế liệu Q3 + lãi dồn tích mà bull đã loại (<2% tâm)",
-  "bản chất ~1.000 tỷ góp vốn 9T/26 + TS ngắn hạn khác 696,5 (bear đã trừ 50%)"
- ],
- "cost_usd_this_job": 1.97
+  "correction_reason": "rebuild vòng 3 sau skeptic r3 INCONCLUSIVE: k thuỷ văn 1,127→1,0 (Etb; chuỗi đo BCTN 2020/2021/2022/2024; KH công ty năm thường ≈Etb) ⇒ N base 332,8→282,5; xác minh bảo lãnh Đak Lô 1-3 là nợ hợp nhất (KT25 PL04), NQ ĐHĐCĐ 2026 không phát hành, thuế tài nguyên 107,9 tỷ trong chi phí (KT25 PL05). Tâm sau CK 32.605→29.686 (−9,0%); nhãn giữ 'TRONG vùng, TRÊN tâm' (+14,7% → +26,0%)",
+  "supersedes": "VCP@2026-11-12#2",
+  "notes": "UPCoM. CK 3,63% @1 tỷ (ADV60 0,37 tỷ, σ250 2,21%). Nguồn mới src_rev4/MD5.txt. WARNING pháp lý: phạt thuế 102 triệu, 46,8% cp cầm cố TP. Mở (r4): k base vs chuỗi đo (độ nhạy +5,2% @1,061), bull chưa chuẩn hoá thuỷ văn, hạn PPA Cửa Đạt, giấy phép/tiền cấp quyền TNN, pool 1.000 tỷ, ngày hết ưu đãi thuế. Sizing V8: không đề xuất."
+ }
 }

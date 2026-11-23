@@ -1,0 +1,205 @@
+{
+ "ticker": "VCP",
+ "dd_date": "2026-11-12",
+ "rev": "4",
+ "asof": "2026-11-23",
+ "units": "ty dong, trieu kWh, dong/kWh",
+ "blind": "KHOA truoc pha sau-khoa. Thay doi rev4 chi dua tren nguon (BCTN 2020/2021/2022/2024, NQ DHDCD 2026, KT25 PL04/PL05) theo phan bien r3; khong truy van gia moi. Gia/ADV sau khoa doc lai tu calc_rev3/px_vcp_post_lock.csv (da doc o rev3b).",
+ "sources": {
+  "KT25": "src/bctc_hn_2025_audited.pdf (khoi phuc git ff5fe27cd^; anh img2/kt25_p08.png KQKD, kt25_p09.png LCTT; trang PDF 19-20 chinh sach thue 2.25, EPS 2.26)",
+  "H1": "src/bctc_hn_h1_2026_reviewed.pdf",
+  "Q3": "src/bctc_hn_q3_2026.pdf",
+  "BCTN25": "src_rev3/bctn_2025_vn.pdf (vcpholdings.com.vn/Pic/files/BCTN 2025-Vn.pdf, tai 23/11/2026, md5 72ae0e11a278c7044362203c87e8b481; text src_rev3/bctn_2025_vn.txt)",
+  "BCTN23": "src_rev3/bctn_2023_vn.pdf (vcpholdings.com.vn/pic/FileLibrary2/bctn-vcp-2023-final_8923.pdf, md5 86d84c13aa7934f965ed9628ac347f9c)",
+  "BQ": "tav2_bq.ticker_financial NP_P0 (skeptic r1 da doi chieu 2024=306,5; 2025=441,4; TTM Q3/26=700,8)",
+  "BCTN20": "src_rev4/10-baocaothuongniennam2020_9384.pdf (scan; tr.13: Cua Dat 2020 = 311,609 trieu kWh, 74,62% KH, 'thap nhat ke tu khi phat dien'; anh img4/b20_p13_top.png)",
+  "BCTN21": "src_rev4/bctn-vcp-2021-final_7248.pdf (text; bang SL 2021: 6 nha may 614.816.689 kWh, Cua Dat 396.472.368)",
+  "BCTN22": "src_rev4/bao-cao-thuong-nien-nam-2022_3956.pdf (scan tr.16; 6 nha may TH 863.691.001 kWh, KH 686.445.014; Cua Dat 541.978.929; anh img4/b22_p16_tbl.png, b22_p16_tot.png)",
+  "BCTN24": "src_rev4/bctn_2024_vn.pdf (text; tong SL 779 trieu kWh; NSX 22.613.831; Nam La+TN 138.968.319; 64.189.843; 62.266.698; Bai Thuong 24.001.248; Dak Robaye 24.367.135)",
+  "NQ26": "src_rev4/nq_dhdcd_2026_vn.pdf (01/2026/NQ-DHDCD 11/5/2026, 10 dieu; anh img4/nqdh26_p1-2.png) + src_rev4/tl_dhdcd_2026_vn.pdf (chuong trinh 9 noi dung, img4/tl26_p4-5.png)",
+  "KT25_PL04_PL05": "src/bctc_hn_2025_audited.pdf trang PDF 48 (PL04 vay dai han: (12) MB CN Dien Bien Phu, (9) VCB Bac Ha Noi 192 thang tai tro Dak Lo 1/3) va 50 (PL05: thue tai nguyen phai nop trong nam 107.887.265.406, da nop 103.250.280.769); anh img4/kt25_pl05.png, kt25_pl04_mb.png",
+  "src_rev4_md5": "src_rev4/MD5.txt"
+ },
+ "shares_m": 83.789658,
+ "book": {
+  "B_parent_2025end": 2146.8,
+  "B_parent_after_div_20260930": 2574.7,
+  "src": "KT25 BCDKT; Q3 VCSH me 2.650,1 tru co tuc 75,4 chi 06/11/2026"
+ },
+ "N_2025_parent": 441.461,
+ "N_2025_src": "KT25 KQKD ma 61 = 441.460.952.457 d",
+ "hydro": {
+  "desc": "Chuan hoa thuy van 2025 ve muc san luong binh thuong = Etb thiet ke x k. REV4: k = 1,0 (Etb) co co so doc lap; 1,061 / 1,127 / 1,15 la do nhay",
+  "plants": [
+   {
+    "name": "Cua Dat",
+    "etb": 417.0,
+    "actual_2025": 591.419,
+    "rev_per_kwh": 725.5,
+    "tax": 0.15,
+    "own": 1.0,
+    "src": "BCTN25 tr.37: SL 591.418.950 kWh, DT ban dien 429.065 trd, thue 36,54/242,88; Etb BCTN23 tr.18"
+   },
+   {
+    "name": "Nam La + Tat Ngoang",
+    "etb": 129.26,
+    "actual_2025": 159.719,
+    "rev_per_kwh": 1225.4,
+    "tax": 0.047,
+    "own": 0.8276,
+    "src": "BCTN25 tr.35 bang 4 (SL 159.719.120; DT 195,72 ty; LNTT 89,01/LNST 84,81); so huu 82,76% BCTN25 lich su"
+   },
+   {
+    "name": "Xuan Minh (bang 1, gan theo Etb 66,10 — uoc luong)",
+    "etb": 66.1,
+    "actual_2025": 80.663,
+    "rev_per_kwh": 1032.1,
+    "tax": 0.1,
+    "own": 0.51,
+    "src": "BCTN25 tr.35 bang 1; Xuan Minh so huu 51% (BCTN25 tr.10); thue 52% trong bang bat thuong => 10% (uoc luong)"
+   },
+   {
+    "name": "Dak Glun (bang 2, Etb 75,81)",
+    "etb": 75.81,
+    "actual_2025": 73.99,
+    "rev_per_kwh": 1091.2,
+    "tax": 0.044,
+    "own": 0.4143,
+    "src": "BCTN25 tr.35 bang 2; Dak Glun thuoc CTCP Thiet bi phu tung Sai Gon, Nam La so huu 50,06% (BCTN25 tr.14) x VCP 82,76% = 41,43%"
+   },
+   {
+    "name": "Bai Thuong",
+    "etb": 24.72,
+    "actual_2025": 30.524,
+    "rev_per_kwh": 1058.7,
+    "tax": 0.05,
+    "own": 0.51,
+    "src": "BCTN25 tr.35 bang 3; so huu 51%"
+   },
+   {
+    "name": "Dak Robaye",
+    "etb": 35.4,
+    "actual_2025": 51.699,
+    "rev_per_kwh": 1102.3,
+    "tax": 0.04,
+    "own": 1.0,
+    "src": "BCTN25 tr.36; COD 2024; so huu 100%"
+   }
+  ],
+  "ratio_history": {
+   "2020_cuadat_only": 0.7473,
+   "2021": 0.8624,
+   "2022": 1.2115,
+   "2023": 0.8845,
+   "2024": 1.0268,
+   "2025": null,
+   "note": "2020: Cua Dat 311,609/417 (BCTN20 tr.13, he thong khong cong bo — chi Cua Dat). 2021: 614,817/712,9 (BCTN21). 2022: 863,691/712,9 (BCTN22 tr.16, thay 1,264 suy tu '70%' lam tron o rev3b). 2023: 630,58/712,9 (BCTN23). 2024: (779 - NSX 22,614 - Dak Robaye 24,367)/712,9 (BCTN24; 779 la so lam tron trieu kWh => sai so +-0,1%). 2025 tinh trong model."
+  },
+  "marginal_cost_ratio": 0.146,
+  "marginal_cost_src": "Cua Dat KH vs TH 2025 (BCTN25 tr.34): DT +132,94 ty, chi phi +19,39 ty => 14,6%; ap cho moi nha may (uoc luong)",
+  "nsx_power_excluded": "NSX 21,58 trieu kWh khong chuan hoa (dien rac, khong phu thuoc thuy van)",
+  "k_base": 1.0,
+  "k_basis": "Etb = san luong trung binh nhieu nam THIET KE (cong bo BCTN23/25). Doc lap xac nhan: (i) KH cong ty o nam khong sau nam uot ~ Etb: KH2020 Cua Dat = 311,609/0,7462 = 417,6 = 1,00 x Etb Cua Dat (BCTN20); KH2022 he thong 686,4/712,9 = 0,963 (BCTN22); KH2025 762,1 gom NSX/Robaye ~0,99 (BCTN25); (ii) chuoi do 2020-2025 gom 1 nam thap ky luc (2020), 1 El Nino (2023), 2 nam uot (2022, 2025): trung binh 5 nam he thong 2021-25 = 1,061; neu tinh 2020 (Cua Dat lam dai dien) = 1,009. Chon Etb (giua hai uoc luong thi nghieng ve thiet ke) — KH2026 1,15 chi dat sau 1 nam uot.",
+  "k_sens": [
+   1.0613,
+   1.1269,
+   1.15
+  ]
+ },
+ "tax_step": {
+  "eff_2025": 0.1115,
+  "eff_plan_2026": 0.1531,
+  "src": "KT25 KQKD 60,374/541,477; BCTN25 tr.38 KH hop nhat 2026: thue 86,043 / LNTT 562,184; Cua Dat KH2026 thue 29,90/149,50 = 20%",
+  "base_factor": "(1-0.1531)/(1-0.1115)",
+  "long_run_20pct": "chi do nhay: ngay het uu dai tung nha may KHONG kiem chung duoc (BCTC/BCTN khong cong bo)"
+ },
+ "welfare_fund": {
+  "pct_of_npat": 0.0184,
+  "src": "BCTN23 tr.47 (PL06): phan phoi LN 2022 tai cong ty me: quy KT-PL 7,184 ty + phu cap HDQT/BKS 0,336 ty tren LNST me 2022 408,6 (BQ) = 1,84%; KT25 2.26: EPS tinh sau trich quy KT-PL va quy khen thuong BDH (KT25 chua uoc tinh => EPS 5.269 = 441,46/83,79)",
+  "balance_note": "so du quy KT-PL la no phai tra, khong tru them khoi von chu"
+ },
+ "accrued_interest": {
+  "fin_income_2025": 54.289,
+  "cash_interest_2025": 23.246,
+  "src": "KT25 KQKD ma 21; LCTT ma 27",
+  "treatment": "chi do nhay (chua thu != ton that; ton that goc o bear)"
+ },
+ "projects_npv0": {
+  "delta_B": 427.9,
+  "items": "Dak Lo 1-3 (mua 11/12/2025; TMDT DL1 426 + DL3 787, COD Q1/2027, Q2/2028), Dak Lo 4 (TMDT 373), Thac Ba (TMDT 634), Linh Linh 51% (mua 03/2026, 545,7), BCC Hiep Hoa 523,2, dien mat troi mai NSX 9,7",
+  "src": "BCTN25 tr.28-29; H1 TM3; KT25 TM9b",
+  "remaining_capex_est": "TMDT 4 du an 2.220 - XDCB 540,1 (Q3) = ~1.680 (uoc luong, XDCB co the chua khoan khac) — du an TANG TRUONG => NPV0 (V4a), tai tro bang vay (BCTN25: vay MB cho Dak Lo 1-3)",
+  "treatment": "B cuoi 2025 sinh N chuan hoa; Delta B = 2.574,7 - 2.146,8 cong theo gia so (NPV0, V4a)"
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_12m": 0.074,
+  "deposit_src": "effective_deposit_rate('2026-11-23') = 7,40% (cctg_12m 2026-11-02); neo 03/11 7,40% => delta 0",
+  "g": 0.02
+ },
+ "terminal": {
+  "ronic": "Ke (D4, user 22/11)",
+  "formula": "V_core = N/r (RONIC=Ke => gia tri tang truong = 0); g chi anh huong neu RONIC != Ke"
+ },
+ "scenarios": {
+  "weights": {
+   "bear": 0.3,
+   "base": 0.45,
+   "bull": 0.25
+  },
+  "weights_note": "giu nguyen rev1/rev2 (uoc luong, khong co co so dinh luong)",
+  "bear": "base - PV El Nino 2 nam - lo cho vay 401,9 - lo 50% pool 1.000 chua thuyet minh",
+  "base": "N_2025 chuan hoa thuy van x thue KH2026 x (1 - KT-PL)",
+  "bull": "N = (700,8 - 74,9 - 57,8) x thue KH2026 x (1-KT-PL); TTM da gom LN tai san 2026 => KHONG cong Delta B (tranh dem trung, skeptic r2)"
+ },
+ "el_nino": {
+  "years": 2,
+  "ratio": 0.8845,
+  "src": "BCTN23 2023 = 88,45% Etb; Bobby El Nino 2026-27 60-65%"
+ },
+ "loan_loss_bear": 401.9,
+ "liquidity": {
+  "position_bn": 1.0,
+  "method": "sigma*sqrt(Q/ADV60) — tinh SAU khoa tu calc/px_vcp.csv"
+ },
+ "unexplained_pool": {
+  "amount": 1000.0,
+  "bear_haircut": 0.5,
+  "src": "Q3 LCTT 9T 'gop von vao don vi khac' -1.545,7 tru Linh Linh 545,7 (H1 TM3) = ~1.000 chua thuyet minh; TS ngan han khac 696,5 (Q3 BS ma 155) nam trong pool nay (rev2 §3: 70,5 lien ket + 696,5 + ~233), KHONG cong rieng",
+  "treatment": "bear: lo 50% (uoc luong, cung ty le lo cho vay); base: giu gia so (V4a NPV0 — luat user 03/11, khong phai thong tin moi)"
+ },
+ "project_term": {
+  "years": 50,
+  "src": "BCTN23 tr.35 TM11: Thac Ba, Dak Robaye, Dak Lo 4 thoi han du an 50 nam",
+  "treatment": "bo qua trong base (50 nam o r 13,5% = 99,8% gia tri vinh vien)"
+ },
+ "dB_consistency": {
+  "bull_exclusions": [
+   74.9,
+   57.8
+  ],
+  "treatment": "giu dB = gia so (stock): LN mot lan da thu = tai san that; lai don tich = phai thu (rui ro thu hoi nam o bear). Chi do nhay tru toan bo 132,7 khoi dB."
+ },
+ "dak_lo_guarantee": {
+  "src": "BCTN25 tr.16 (cong ty con 99,27%, VDL 500 ty); BCTN25 NQ HDQT 05/2025, 11/2025; KT25 PL04 vay dai han (9),(12) tai tro du an Dak Lo 1/3 = no HOP NHAT",
+  "treatment": "bao lanh cua cong ty me cho cong ty con hop nhat 99,27% => no vay da nam trong no hop nhat; khong tao nghia vu tang them o cap hop nhat => base 0. Du an tang truong NPV0 (V4a); khong co tin hieu rui ro cu the (khoi cong 03/2025, dung KH) => chi do nhay vuot du toan 20% TMDT 1.213 x 99,27% mat trang.",
+  "overrun_sens_bn": 240.8
+ },
+ "water_rights": {
+  "src": "KT25 PL05: thue tai nguyen phai nop 2025 = 107,887 ty (da nop 103,250); BCTN23 PL05 (*) 'tinh can cu tren san luong dien'; BCTN23 TM20 phai tra phi DVMTR, thue tai nguyen nuoc",
+  "treatment": "cac khoan thu theo san luong da hach toan chi phi hang nam => nam trong N_2025 (a). Tien cap quyen khai thac TNN khong trinh bay rieng trong KT25/BCTN => truy thu (neu co): KHONG kiem chung duoc (c)."
+ },
+ "agm_2026": {
+  "src": "NQ 01/2026/NQ-DHDCD 11/5/2026",
+  "finding": "10 dieu: bao cao, BCTC 2025, kiem toan 2026, phan phoi LN 2025, thu lao, bao cao su dung von trai phieu. KHONG co phat hanh/ESOP/co tuc co phieu/tran bao lanh/danh muc dau tu => so co phieu 83.789.658 giu nguyen (b).",
+  "treatment": "0"
+ },
+ "cuadat_price_history": {
+  "2020": 702.0,
+  "2021": 873.1,
+  "2023": 829.2,
+  "2025": 725.5,
+  "src": "BCTN20 tr.13 (DT ban dien 218,746 ty), BCTN21 (346,171 ty), BCTN23 tr.18 (304,656 ty), BCTN25 tr.37",
+  "note": "Cua Dat chao gia thi truong dien (BCTN21: 'bam sat thi truong, phuong an chao gia'; BCTN23: gia thi truong giam) => Pc 2025 725,5 da o vung thap cua chuoi do; han PPA/gia sau tra no van khong kiem chung duoc (c)."
+ }
+}

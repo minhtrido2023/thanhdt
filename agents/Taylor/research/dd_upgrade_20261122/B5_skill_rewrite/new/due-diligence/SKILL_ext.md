@@ -45,7 +45,7 @@ Bẫy liên quan (nguyên văn):
 - **Chất lượng lợi nhuận**: tách DT/GVHB/LN gộp theo mảng, doanh thu tài chính (trên số dư nào), lãi/lỗ liên kết, một lần vs bền; Q và 9T vs cùng kỳ.
 - **Bảng cân đối**: net cash THẬT (tiền + tiền gửi HTM − vay − phần tiền ứng khách phải tiêu để thực hiện hợp đồng), phải thu/dở dang/trả trước/chi phí phải trả đột biến, CFO thật.
 - **Ghi nhận doanh thu** (POC vs nghiệm thu), tỷ trọng Q4, backlog thật vs MoU.
-- **Khách hàng/cổ đông lớn**, room ngoại, thanh khoản/ADV, sizing (tiền lệ ≤0,5–1,0% NAV). ⟨B5: CHƯA THỐNG NHẤT với 2–4% (fundamental-skeptic.md) và 5% thực tế — chờ user Q4, §E12-d⟩
+- **Khách hàng/cổ đông lớn**, room ngoại, thanh khoản/ADV, sizing (CHUẨN 2–4% NAV/mã — user chốt 23/11/2026; 5% FPT/NNC/VGS là ngoại lệ duyệt riêng; xem core V8).
 - **Pháp lý/quản trị**: WARNING + rủi ro "scandal di cư" (sang hợp đồng/pháp nhân/kế toán), kiểm toán có ngoại trừ không.
 - **Định giá**: PE chuẩn hoá chu kỳ, PB, EV, comp ngành có số, kịch bản xấu/cơ sở/tốt có trọng số, vùng giá, giả định tự đặt gắn "(ước lượng)". Phản ứng giá quanh các sự kiện. ⟨B5/F8: phần dùng giá thị trường (PE/PB hiện tại, phản ứng giá, ADV) làm ở pha SAU KHOÁ, core bước 6⟩
 - **Vị thế & lợi thế cạnh tranh (5F tầng b)** — bước 3c: moat_tier + bằng chứng định lượng + tham số moat tường minh trong mô hình (chỉ khi bền), độ nhạy WIDE/NARROW/NONE.
@@ -121,10 +121,23 @@ Cơ chế code: `bin/dd_price_zones_selfcheck.py` (`SKEPTIC_FINAL_REQUIRED_FROM 
 - **a** "skeptic chỉ khi xét mua" (dd-investor-report luật 12 gạch cuối, viết 29/10) đã bị luật 01/11 11:08 thay ⇒ XOÁ khỏi core cả 2 skill; nguyên văn còn ở dd-investor-report ext có nhãn ⟨ĐÃ THAY⟩.
 - **b** Cùng đoạn cũ vừa "còn lại RONIC = Ke" vừa "KHÔNG ép … RONIC về … Ke". Giải theo D4 (user 22/11 19:07): terminal RONIC = Ke cho NARROW/NONE là giả định CUỐI KỲ; luật 08/11 10:50 "không bị trừ" = không ép biên/ROE GIAI ĐOẠN DỰ BÁO về TB ngành/Ke. Core chỉ còn một cách đọc.
 - **c** "ghi sổ ngay sau skeptic" (bước 6 cũ) vs "Sau khi báo cáo đã qua skeptic + áp đính chính" (sổ giá) ⇒ một câu: ghi sổ ngay sau khi áp đính chính của vòng skeptic cuối (bản SAU phản biện), không đợi báo cáo NĐT/email.
-- **d** Sizing 0,5–1,0% (skill) vs 2–4% (fundamental-skeptic.md) vs 5% thực tế: CHƯA CÓ ĐÁP ÁN USER (Q4) — KHÔNG giải; ghi cả ba ở core V8, nhãn "CHƯA THỐNG NHẤT — chờ user".
+- **d** Sizing: ĐÃ THỐNG NHẤT 23/11/2026 (user chốt phương án b) — chuẩn 2–4% NAV/mã; 0,5–1,0% (skill cũ) bị thay; 5% thực tế FPT/NNC/VGS = ngoại lệ duyệt riêng từng mã.
 - **e** Template: đã trỏ `dd_redo_20261105/DDV/REPORT_r3.md` + `FPT/REPORT_r3.md` (A8); kiểm 22/11: cả hai file tồn tại.
 - **f** Cổng `discretionary_dd_pick.py --claim` (docstring :15–17): `data/discretionary_dd_ledger.jsonl` không tồn tại (kiểm 22/11) ⇒ chưa từng dùng; core ghi đúng hiện trạng, không tuyên bố đang dùng. Dùng hay gỡ: chờ Mike/user.
 - **g** (B5 phát hiện, ĐÃ VÁ 22/11 23:14 ICT bằng A7 `468b75384`) D5 "không vào Bậc 1": `bin/dd_price_zone_watch.py:115` nay loại mã có `audited_fy_missing=true` khỏi Bậc 1 (selfcheck 124/0). Cổng LAG chỉ chặn khi `LAG_DD_REQUIRE_CONFIRMED=True` (mặc định False).
+
+## §E14 Đặc tả LEDGER_PROPOSAL — 9 lỗi định dạng ĐÃ chặn selfcheck/áp sổ ở lô 1–4 (23/11/2026, user duyệt 17:03)
+Taylor chạy song song KHÔNG ghi `kb/dd_price_zones.json`; chỉ ghi `LEDGER_PROPOSAL_<MÃ>.json` = `{"entry": {…}}` (thống nhất dạng này) trong thư mục DD. Mike áp sổ tuần tự. Trước khi báo xong: chép sổ ra bản tạm, chèn entry, chạy `python3 bin/dd_price_zones_selfcheck.py --ledger <bản tạm>` ⇒ **0 lỗi**. Chín điểm (mỗi điểm = một lỗi thật):
+1. **dd_date / rev / supersedes / expires_on**: đính chính cùng DD ⇒ GIỮ NGUYÊN `dd_date` của entry cuối sổ; `rev` = rev cuối + 1; `supersedes` = `TICKER@dd_date#rev_cuối`; `expires_on` + `expires_basis` = của entry cuối (null làm sập `dd_price_zone_watch`). KHÔNG đặt dd_date = ngày làm rev (HHS, SZL bị chặn: "rev=5 cần supersedes=…#4", "expires_on=None").
+2. **evidence.quote = CHUỖI NGUYÊN VĂN có trong `source_file`** (chép nguyên dòng, kể cả `**`, `|`); mỗi số trong `fields` phải xuất hiện trong CHÍNH quote đó. Quote tự tóm tắt ("Vùng [7.284; 21.857]") là sai (DBC) — lấy dòng thật bằng `grep -n`.
+3. **evidence.fields chỉ chứa trường SỐ**: `zone_low, center, zone_high, price_ref, center_alt, center_range`. KHÔNG đưa `price_date` (chuỗi) hay trường dict (`ex_basis_pending`) vào `fields` — làm selfcheck crash (ValueError/TypeError).
+4. **`center_alt` ⇒ bắt buộc `center_alt_kind`** ∈ {expected_weighted, base_scenario, blend, median, zone_midpoint, point} (không tự đặt tên như `expected_weighted_pre_liquidity`) **và** một evidence phủ `center_alt` (BSR, MSB bị chặn).
+5. **`center_range` = [center, hi] tăng dần, bắt đầu ĐÚNG `center`**. Khung độ nhạy không bắt đầu từ center ⇒ `center_range: null` và ghi khung vào `notes` (SCL bị chặn: [16558, 22868] vs center 16883).
+6. **`price_ref` cần evidence phủ** (quote chứa đúng số giá) — GAS thiếu.
+7. **Zone = nguyên con số của nguồn**: quote chứa 44.760 thì `zone_low=44760`, không làm tròn 44.800 (GAS).
+8. **Nhãn `skeptic_final`**: vòng cuối REFUTED/INCONCLUSIVE & bản sửa chưa áp ⇒ `REFUTED_OPEN` (KHÔNG phải `FIXED_UNVERIFIED` — dispatch cũ ghi sai; `FIXED_UNVERIFIED` chỉ khi bản sửa ĐÃ áp mà chưa có vòng nào chạy lại). `CONFIRMED` CHỈ qua `bin/dd_ledger_append_confirmed.py` (2 bước: entry `FIXED_UNVERIFIED` trỏ REPORT mới vào sổ trước, vì tool so md5 `source_file` của entry CUỐI sổ với `report_md5` trong `skeptic/rN.json`). Taylor KHÔNG tự nâng nhãn.
+9. **Không ghi sổ khi chạy song song** (đua ghi) — chỉ LEDGER_PROPOSAL; áp sổ là việc của Mike trong worktree riêng.
+Sau vòng skeptic CUỐI (vòng 3 của một rev): không CONFIRMED ⇒ DỪNG, báo user; KHÔNG chạy thêm vòng.
 
 ## §E13 Nguồn
 Kế hoạch: `kb/projects/dd-upgrade-final-action-20261122.md` (B1–B5, D1–D6). Review: `kb/projects/dd-process-review-20261122.md` (F8, F22, P0-5).
