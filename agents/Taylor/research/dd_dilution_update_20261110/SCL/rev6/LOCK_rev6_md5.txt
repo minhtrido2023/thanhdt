@@ -1,0 +1,5 @@
+f59e25ea086fb4a7262c6095fdd030e7  assumptions_SCL_rev6.json
+17e07b308b65165ebb0a4d73b4cb2395  calc/calc_rev6.py
+b63d63104e7314dff4187ec6db25aab3  calc/calc_rev6_out.json
+73a849830b66393d4120d69d2479a42d  inputs/model_scl_r3_out.json
+# khoá lần đầu 2026-11-23 13:45:18 ICT (trước khi đọc giá). Khoá lại 2026-11-23 13:52:01 ICT sau skeptic r2: chỉ thêm biến thể, base/tham số không đổi

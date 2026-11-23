@@ -1,0 +1,84 @@
+{
+ "_doc": "ĐỀ XUẤT sổ giá cho Mike áp tuần tự — Taylor KHÔNG ghi kb/dd_price_zones.json (job Taylor_20261123_063644).",
+ "skeptic_verdict_path": "agents/Taylor/research/qtp_r3_envcapex_20261120/skeptic/r3.json",
+ "skeptic_verdict": "INCONCLUSIVE",
+ "skeptic_confidence": "medium",
+ "report_path": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+ "report_md5": "72d3cca2920571d86dbbc74b22e00683",
+ "report_md5_in_verdict": "72d3cca2920571d86dbbc74b22e00683",
+ "md5_match": true,
+ "label_rule": "Vòng cuối r3 INCONCLUSIVE ⇒ KHÔNG CONFIRMED. Dispatch ghi 'ngược lại FIXED_UNVERIFIED'; theo enum §E10 các mục r3 CHƯA áp (hết 2 vòng/ca: r2, r3) ⇒ REFUTED_OPEN (giống POW/LLM/PNJ/DCM). Mike chọn; Taylor không tự nâng nhãn.",
+ "open_items_r3": [
+  "Chi phí hạn ngạch ETS/carbon nhiệt điện than 2029–2047 + có chuyển vào giá PPA không — VẮNG; skeptic ước PV 100–400 tỷ (ngưỡng 5% ≈157 tỷ) ⇒ có thể kéo tâm xuống ~3–13% (ước lượng: 100–400 tỷ / 3.147 tỷ vốn chủ trước CK)",
+  "Nghĩa vụ hoàn trả mặt bằng/đóng bãi xỉ khi hết thuê đất 2047 — VẮNG",
+  "Thời hạn + giá PPA hiện hữu — không kiểm chứng được (bọc bằng kịch bản xấu r2 dừng 2040)",
+  "Pha loãng khi tài trợ thiếu hụt P0 (−3.163 tỷ 2030–39) — chưa mô hình hoá (giả định ngầm FCFE âm = bơm vốn theo giá trị nội tại)"
+ ],
+ "cost_usd_rounds": {
+  "r2": 1.196,
+  "r3": 1.218
+ },
+ "entry": {
+  "ticker": "QTP",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/qtp_r3_envcapex_20261120/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-17",
+  "rev": 4,
+  "valuation_asof": "2026-11-23",
+  "bctc_quarter": "2026Q3",
+  "zone_low": 5159,
+  "center": 6294,
+  "center_kind": "expected_weighted",
+  "zone_high": 7139,
+  "center_desc": "kỳ vọng trọng số P0/P50/P100 0,50/0,30/0,20 (bù giá dự án khí thải 3.485 tỷ) × r2 xấu/cơ sở/tốt 0,25/0,65/0,10, SAU chiết khấu thanh khoản 10%; r 13,5% (lãi huy động 7,40% = neo); capex+opex tuân thủ QCVN19 là dòng tiền ra (V4b); quỹ KTPL 10,35% LNST + số dư 148,64 tỷ trừ; Cvlp amoniac qua giá = kịch bản ngoài tâm",
+  "center_range": null,
+  "center_alt": 6993,
+  "center_alt_kind": "expected_weighted_pre_liquidity",
+  "price_ref": 10200,
+  "price_date": "2026-11-20",
+  "verdict_label": "Giá 10.200 (BQ đóng cửa 20/11) = 1,62× tâm 6.294, trên cận trên vùng 7.139 và trên cả P0=0 (9.413) ⇒ ĐẮT (không đổi). Cổng 0,85×tâm 5.350 không đạt. Upside có điều kiện: Cvlp amoniac qua giá (q=1 +32%), SCR từ 2032 (+13%). WARNING: P0 tiền ròng −230 tỷ 2039 kể cả không cổ tức; V6 V_ngắn âm (D không xác định) ⇒ phân kỳ, 0,85×tâm không tự kích hoạt.",
+  "skeptic_status": "DD_GENERAL: r1 (22/11, REPORT_r3c md5 639f0a5c) INCONCLUSIVE → REPORT_rev4; r2 (23/11, REPORT_rev4 md5 582e5c7e) INCONCLUSIVE → REPORT_rev4b; r3 (23/11, REPORT_rev4b md5 72d3cca2) INCONCLUSIVE medium — hết 2 vòng/ca, mục r3 chưa áp",
+  "correction_reason": "rebuild sau skeptic DD_GENERAL INCONCLUSIVE: thêm quỹ KTPL (KT25 TM19.1/TM30, Q3/26 V.27 + mã 323) −871 trước CK; trọng số P0 về 0,5 (r3; r3b hạ 0,4 không có dữ kiện mới) −693; Cvlp (legal-vn: TT12 Đ7.3/Đ18 cần sửa PPA) thành kịch bản ngoài tâm; thêm biến thể tỷ giá EPC, sản lượng, xúc tác SCR, FC 10 năm",
+  "supersedes": "QTP@2026-11-17#3",
+  "source_file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+    "quote": "Tâm rev4b: 6.294 đ/cp",
+    "fields": [
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+    "quote": "Vùng biến thể đơn lẻ, sau CK: 5.159 … 7.139",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+    "quote": "giá tham chiếu là 10.200",
+    "fields": [
+     "price_ref"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+    "quote": "(6.993 trước CK)",
+    "fields": [
+     "center_alt"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/qtp_r3_envcapex_20261120/assumptions_QTP_rev4b.json",
+  "assumptions_md5": "91add83223d20aa7ec4880a145259334",
+  "null_reason": null,
+  "expires_on": "2027-03-17",
+  "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc 120 ngày từ dd_date",
+  "notes": "Sizing V8: không mở ở giá hiện tại (trên mọi biến thể); nếu ≤5.350 tối đa 2–4% NAV theo khung. Moat NARROW (5F tái dùng <12 tháng). Model qtp_model_rev4b.py md5 7fc3969b."
+ }
+}

@@ -1,0 +1,188 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "SCL",
+ "dd_date": "2026-11-23",
+ "rev": 6,
+ "loai_hinh": "san_xuat_khac",
+ "method_version": "M20261122",
+ "units": "tỷ VND trừ khi ghi khác",
+ "sources": {
+  "model": "calc/calc_rev6.py (md5 17e07b308b65165ebb0a4d73b4cb2395) → calc/calc_rev6_out.json (b63d63104e7314dff4187ec6db25aab3, chạy 2 lần trùng). Sửa sau skeptic r2: CHỈ thêm biến thể/độ nhạy, base không đổi (tâm 16.883)",
+  "core_r3": "dd_redo_20261105/SCL/calc/scl_r3_core_5Ffix.py (d3a7d936…, khớp LOCK_r3) + _common_g2r2/ddr2.py (95d8fe38…, khớp LOCK_r3)",
+  "r3_out": "inputs/model_scl_r3_out.json (73a849830b66393d4120d69d2479a42d = md5 r3 công bố; khôi phục từ /tmp/fpt_r3)",
+  "q3_26_hn": "src/bctc_hopnhat_q3_2026.pdf (1f75c8d69ce88c60400ec414397cda11) tr.2-6, 19",
+  "h1_26_hn_reviewed": "src/dl/bannien_2026_hn_vn.pdf (7b69c2985d6ec998aa1ab9ba3ff154f9) tr.27-28 V.18-19",
+  "fy25_hn_audited": "src/dl/bctc2025_hn_vn.pdf (bee980a80e068a08a635cc258ac2a9ac) tr.5, 27",
+  "nq_1191": "src/nq_1191.pdf (63842ae7002554c259e61a1ff42f22af) tr.2, 4",
+  "nq_1363": "src/nq_1363_chotquyen_27102026.pdf (0796721c9b510ae93be3e273c2251912)",
+  "restored_from": "git 0090c758e^ (TRIM_DD 19/11 đã xoá dd_SCL_20261029/src)"
+ },
+ "share_base": {
+  "shares_m": 45.516815,
+  "source": "38.836.815 (NQ 1191 tr.2: đã phát hành = đang lưu hành 21/09/2026) + 6.000.000 quyền mua (NQ 1191/1363, giả định bán đủ) + 680.000 ESOP-2 từ LNST (6,8 tỷ / 10.000, BCTC 6T/2026 V.19.1, chưa phát hành tới 21/09)",
+  "as_of_date": "2026-11-23",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "pending_in_base",
+   "source": "BCTC soát xét 6T/2026 V.19.1 'Phát hành ESOP từ LNST 6.800.000.000' theo NQ 486/NQ-ĐHĐCĐ 24/04/2026; 680.000/32.407.875 cp đầu 2026 = 2,10% = dòng BQ ISS 07/05/2026 ratio 0,021"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Nhà máy Panel, gạch nhẹ chưng áp, vữa khô, keo dán gạch Phả Lại (TMĐT 262,926 tỷ, NQ 1642/NQ-HĐQT 12/12/2025)",
+    "spent_bn": {
+     "value": 190.652,
+     "source": "BCTC Q3 tr.19 V.9: 177,9997 + CP XDCB Phả Lại 12,6518"
+    },
+    "remaining_bn": {
+     "value": 72.274,
+     "source": "262,926 − 190,652 (ước lượng; không có tiến độ giải ngân công bố)"
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "V4a: phần đã chi = tài sản theo giá vốn; phần còn chi đối ứng giá trị tương đương. Không có cơ sở độc lập cho IRR ≠ Ke; suy giảm 50/100% chỉ là kịch bản"
+   },
+   {
+    "name": "Dây chuyền phân tách tro xỉ GĐ2 Vĩnh Hảo + thí nghiệm Vĩnh Tân",
+    "spent_bn": {
+     "value": 15.733,
+     "source": "BCTC Q3 tr.19 V.9: 14,8169 + 0,9161"
+    },
+    "remaining_bn": {
+     "value": 0,
+     "source": "không công bố"
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "V4a"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": {
+   "value": 15.766,
+   "source": "số dư quỹ KTPL 30/9 6,3295 (BCTC Q3 mã 323) + trích tạm 10% × LNST 9T 94,362 (mã 61, chưa phân phối)"
+  },
+  "annual_appropriation_pct_of_npat": 0.09998,
+  "applied_to_cashflow": true,
+  "source": "NQ 486 (qua BCTC 6T/2026 V.19.1): phúc lợi 3,2142 + khen thưởng 3,2142 / LNST 2025 64,2999. Độ nhạy TB 3 lần phân phối 2024–26 = 16,1% (BCTC KT2025 tr.27: 21,3% / 17,0%)"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.2
+   }
+  ],
+  "source": "BCTC Q3 tr.3: thuế TNDN 9,5517 / LNTT 47,6566 = 20,0%"
+ },
+ "working_capital": {
+  "method": "zero_change_base",
+  "source": "Bội số trên LN ròng chuẩn hoá, không mô hình hoá VLĐ; CFO 9T 9,86 vs LNST 94,37 (phải thu +68,2, tồn kho +33,4) để ở WARNING + mốc"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "CYCLICAL — biên quay hẳn về TB chu kỳ",
+    "side": "down",
+    "p": 0.5,
+    "basis": "sector read VLXD nhẹ 29/10 (Bobby, đọc mù); giữ nguyên r3, không re-tune"
+   },
+   {
+    "name": "ADMIN_GATED — quay về một nửa",
+    "side": "base",
+    "p": 0.3,
+    "basis": "như trên"
+   },
+   {
+    "name": "STRUCTURAL — giữ biên TTM",
+    "side": "up",
+    "p": 0.2,
+    "basis": "như trên"
+   }
+  ],
+  "asymmetry_reason": "Trọng số chế độ ngành 0,5/0,3/0,2 từ sector read (không phải chọn theo mã); nghiêng xuống vì biên TTM là đỉnh 7 năm"
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-16",
+  "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate('2026-11-23'): cctg_12m(2026-11-02) 7,40%, Big-4 6,80%, last_update 2026-11-16 (neo 03/11 = 7,40%)",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true
+ },
+ "terminal": {
+  "moat_tier": "NONE",
+  "terminal_ronic": "EQUALS_KE",
+  "g": 0.04
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "position_size_note": "ghi sổ ở Q = 5 tỷ (CK 4,454%, ngoại suy ngoài vùng √); sleeve 40 tr (0,843%) báo song song; V8 2–4% NAV",
+  "source": "inputs/model_scl_r3_out.json disc_5ty/disc_40tr (ddr2.liquidity, ADV120 tới 06/11/2026) — tái dùng, không đọc lại giá"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "AVA (Công ty TNHH Kiểm toán và Thẩm định giá Việt Nam), báo cáo 245/BCKT-TC/AVA.NV5 ngày 20/03/2026",
+  "interim_review": "reviewed_unqualified",
+  "source": "src/dl/bctc2025_hn_vn.pdf tr.4-5; src/dl/bannien_2026_hn_vn.pdf tr.4-5 (báo cáo soát xét AVA 590/BCKT-TC/AVA 06/08/2026, kết luận không ngoại trừ)"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "Vay CTCP Công nghiệp – Dịch vụ Cao Cường (cổ đông 12,81%) HĐ 268/HĐV/SCL-DVCC, lãi 10%/năm, hạn 05/02/2028",
+    "amount_bn": 28.0,
+    "source": "BCTC 6T/2026 V.17.2 (30/06/2026)"
+   },
+   {
+    "desc": "Phải trả người bán bên liên quan (Cao Cường)",
+    "amount_bn": 0.23,
+    "source": "BCTC 6T/2026 V.11"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "Thu nhập khác 9T 4,763 tỷ (thu hồi nợ đã xoá 4,65 tỷ H1) — nằm trong LNST TTM, không tách khỏi lõi biên chuẩn hoá (≈4% LNST 9T)",
+    "amount_bn": 4.763,
+    "source": "BCTC Q3 tr.3 mã 31; 6T/2026 VI.7"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "Phả Lại còn phải chi (ước lượng)",
+    "amount_bn": 72.274,
+    "source": "TMĐT 262,926 (NQ 1642) − đã chi 190,652; HĐTD BIDV 01/2026/1605829/HĐTD 12/03/2026 hạn mức 184 tỷ, 68 tháng (BCTC 6T/2026 V.18 (2.3))"
+   }
+  ]
+ },
+ "sector": {
+  "ash_gypsum_supply_contract": {
+   "value": "KHÔNG KIỂM CHỨNG ĐƯỢC — không tìm thấy HĐ mua tro/thạch cao với NĐ Phả Lại (thời hạn, giá) trong BCTC Q3/6T/KT2025 và WebSearch 23/11; tham chiếu duy nhất: HĐ xử lý tro xỉ Vĩnh Tân 4 thời hạn 3 năm (viettimes)",
+   "source": "ADDENDUM_5F (HĐ đấu giá tro ~3 năm); WebSearch 23/11/2026"
+  },
+  "land_lease_phalai": {
+   "value": "48.009 m² tới 18/03/2059 (nhà máy AAC) + 24.698 m² HĐ 2928/HĐTĐ 21/06/2025 (nhà máy gạch)",
+   "source": "BCTC 6T/2026 V.20.1"
+  },
+  "ash_supply_contract_scenario": {
+   "value": "Kịch bản tái đấu giá nguồn tro (không vào base, không kiểm chứng được): biên ròng lõi −2/−4 điểm (ước lượng = ½ / toàn bộ khoảng NPM TTM 12,7% − TB 2020–TTM 8,3%)",
+   "source": "calc/calc_rev6_out.json variants.ash_rebid_*; npm_ref"
+  }
+ }
+}
