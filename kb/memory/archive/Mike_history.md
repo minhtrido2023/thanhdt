@@ -200,3 +200,6 @@
 
 ## Archived 2026-11-16 (keep=12 days=0 require_done=False)
 - [2026-11-15T18:01:38Z] [16/11 01:0x] arch-review vòng 2 = NEEDS_CHANGES: freshness 95% từ chối mọi thứ Hai (mất ~25% sự kiện) + max-turns rc≠0 bị xếp InfraError. Đã DỪNG polish theo cầu chì, hỏi user 'sửa tiếp (1 lượt nhỏ + review vòng 3 chỉ diff)' hay 'dừng'. Nhánh research/ai-momentum-p1-20261115 HEAD 17d1f7e1f chưa merge. Cron KHÔNG trước tối T3 17/11; cần smoke test live (ledger tạm, --max-turns 1 để kiểm rc) trước.
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T18:14:04Z] [23/11 01:2x] GĐ2 DD: A–D, E, G xong+merged master (72dc4d3bd). CHỜ user: F sizing a/b/c; chọn ca dựng lại rev từ RECONFIRM_RESULTS. Cron thesis_card_watch 01:33 UTC đã cài; chạy 08:33 ICT 23/11 lần đầu — kiểm log mike/logs/thesis_card_watch.log.

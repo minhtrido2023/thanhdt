@@ -75,3 +75,6 @@
 - [2026-11-23T10:19:20Z] [HHS rebuild v3 23/11] XONG job Taylor_20261123_100926: REPORT_rev6 tâm 13.969, skeptic r4 CONFIRMED — CHỜ Mike áp LEDGER_PROPOSAL_HHS (FIXED_UNVERIFIED bước 1) + dd_ledger_append_confirmed.py
 - [2026-11-23T10:23:49Z] [VCP DD vòng3 23/11] XONG job Taylor_20261123_100924: REPORT_rev4 tâm 29.686 sau CK, skeptic r4 INCONCLUSIVE (hết vòng) — CHỜ Mike áp LEDGER_PROPOSAL_VCP.json (rev3 REFUTED_OPEN)
 - [2026-11-23T10:32:18Z] [DD DCM vòng 3 23/11] XONG job Taylor_20261123_100914: REPORT_rev9 tâm 27.393, skeptic r4 INCONCLUSIVE (cuối) — CHỜ Mike áp LEDGER_PROPOSAL_DCM.json (rev4 REFUTED_OPEN)
+- [2026-11-23T12:03:14Z] ĐANG DỞ: job Taylor_20261123_120256 DD LLM rev mới (vòng cuối, r4) | NEXT: đọc r3 + REPORT_rev4
+- [2026-11-23T12:03:19Z] ĐANG DỞ: job Taylor_20261123_120250 DD BSR rev5 | NEXT: đọc r3_raw + REPORT_rev4, xử lý VAT 6.373
+- [2026-11-23T12:04:25Z] ĐANG DỞ: job Taylor_20261123_120407 CK holding VN (A) + HHS rev7 (B) | NEXT: xem research/ck_holding_vn_20261123/ (đã có sẵn?)
