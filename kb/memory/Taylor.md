@@ -72,3 +72,4 @@
 - [2026-11-23T06:59:29Z] [dd-VCP rebuild 23/11] XONG job Taylor_20261123_063642: REPORT_rev3b tâm 32.605 (rev2 40.273), skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_VCP.json (REFUTED_OPEN) / user quyết vòng 3
 - [2026-11-23T10:17:24Z] [SZL DD v3 23/11] XONG job Taylor_20261123_100922: REPORT_rev5 tâm 26.183 (vùng 22.740–29.700), skeptic r4 INCONCLUSIVE (vòng cuối) — CHỜ Mike áp LEDGER_PROPOSAL_SZL.json (REFUTED_OPEN)
 - [2026-11-23T10:18:57Z] [DD DBC vong 3 23/11] XONG job Taylor_20261123_100916: REPORT_rev4 tam 17.673, skeptic r4 REFUTED (qua cao: tai tro XDCB+BDS 100% von chu) — CHO Mike ap LEDGER_PROPOSAL_DBC.json (REFUTED_OPEN rev3) / user quyet
+- [2026-11-23T10:19:20Z] [HHS rebuild v3 23/11] XONG job Taylor_20261123_100926: REPORT_rev6 tâm 13.969, skeptic r4 CONFIRMED — CHỜ Mike áp LEDGER_PROPOSAL_HHS (FIXED_UNVERIFIED bước 1) + dd_ledger_append_confirmed.py
