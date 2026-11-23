@@ -2650,3 +2650,6 @@
 
 ## Archived 2026-11-23 (keep=12 days=0 require_done=False)
 - [2026-11-22T16:14:47Z] [B5 r2 22/11] XONG job Taylor_20261122_161344: commit 232ce19bf (wt-dd-b5, chưa merge/cài) — CHỜ Mike merge + cài .bak
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:44:15Z] ĐANG DỞ: job Taylor_20261122_234402 DD DCM rebuild rev3 | NEXT: đọc skeptic r1 + report rev2
