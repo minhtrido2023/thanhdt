@@ -41,3 +41,12 @@
 - [2026-11-23T00:35:14Z] ĐANG DỞ: job Taylor_20261123_003458 DD POW rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_POW_20261118
 - [2026-11-23T00:35:20Z] ĐANG DỞ: job Taylor_20261123_003503 DD SZL rebuild | NEXT: đọc skeptic r1 + REPORT_r3c.md dd_redo_20261105/SZL
 - [2026-11-23T05:01:21Z] ĐANG DỞ: job Taylor_20261123_050007 POW rev3: đã đọc skeptic r1; QCVN19 thầu tư vấn 2,98 tỷ (CBTT 19/10) | NEXT: định lượng capex VA1 từ tiền lệ QTP → calc_rev3 → REPORT_rev3.md → skeptic r2
+- [2026-11-23T05:07:19Z] ĐANG DỞ: job Taylor_20261123_050001 BSR REPORT_rev3 (tâm 16.112) skeptic r2 chạy | NEXT: LEDGER_PROPOSAL_BSR.json → bus+notify
+- [2026-11-23T05:07:42Z] ĐANG DỞ: job Taylor_20261123_050009 SZL REPORT_rev4 (tâm 27.397) skeptic r2 chạy nền log /tmp/szl_sk_r2.log | NEXT: LEDGER_PROPOSAL_SZL.json → bus+notify
+- [2026-11-23T05:09:02Z] ĐANG DỞ: job Taylor_20261123_050007 POW REPORT_rev3 (tâm 9.064, lock md5 858632b7) — skeptic r2 đang chạy | NEXT: đọc skeptic/r2.json → LEDGER_PROPOSAL_POW.json → bus+notify
+- [2026-11-23T05:11:48Z] ĐANG DỞ: job Taylor_20261123_050005 DBC REPORT_rev2 (tâm 17.317, md5 khoá 25d2e305) skeptic r2 chạy nền log /tmp/dbc_sk_r2.log | NEXT: LEDGER_PROPOSAL_DBC.json → bus+notify
+- [2026-11-23T05:12:59Z] ĐANG DỞ: job Taylor_20261123_050001 BSR REPORT_rev4 (tâm 16.886) skeptic r3 vòng cuối | NEXT: LEDGER_PROPOSAL_BSR.json → bus+notify
+- [2026-11-23T05:14:23Z] ĐANG DỞ: job Taylor_20261123_050003 GAS REPORT_rev3 (tâm 50.651) skeptic r2 đang chạy, log /tmp/gas_sk_r2.log | NEXT: LEDGER_PROPOSAL_GAS.json → bus+notify
+- [2026-11-23T05:15:06Z] ĐANG DỞ: job Taylor_20261123_050007 POW REPORT_rev4 (tâm 9.387, lock 820f22c0) skeptic r3 vòng cuối | NEXT: LEDGER_PROPOSAL_POW.json → bus+notify
+- [2026-11-23T05:15:23Z] ĐANG DỞ: job Taylor_20261123_050009 SZL REPORT_rev4b (tâm 25.852) skeptic r3 vòng cuối log /tmp/szl_sk_r3.log | NEXT: LEDGER_PROPOSAL_SZL.json → bus+notify
+- [2026-11-23T05:16:39Z] [dd-BSR rebuild 23/11] XONG job Taylor_20261123_050001: REPORT_rev4 tâm 16.886, skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_BSR.json (REFUTED_OPEN) / user quyết VAT + V4a hydrotreating
