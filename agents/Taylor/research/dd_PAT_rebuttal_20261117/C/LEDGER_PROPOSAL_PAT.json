@@ -1,0 +1,65 @@
+{
+ "entry": {
+  "ticker": "PAT",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/skeptic/r1.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-17",
+  "rev": 3,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 41000,
+  "center": 59823,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng cây kịch bản r5 (9.072 lá; q_B trộn {0; 0,25; 0,40}, giải phóng tồn kho về r2, H1/26 đọc 'sạch' cho cả hai phía, mua DLC H1 ≈ 2025) SAU chiết khấu thanh khoản 10% (GTGD bq 1,01 tỷ/phiên, trung vị 0,60; 64 phiên); r 13,5%, g 2%; mù giá thật; trước chiết khấu 66.470",
+  "zone_high": 74900,
+  "center_range": null,
+  "center_alt": 66470,
+  "center_alt_kind": "expected_weighted",
+  "price_ref": 70200,
+  "price_date": "2026-11-17",
+  "verdict_label": "Giá 70.200 cao hơn tâm sau chiết khấu thanh khoản 59.823 (+17%) và cao hơn cả tâm trước chiết khấu 66.470; cổng 0,85×tâm sau chiết khấu = 50.850 không đạt ⇒ KHÔNG biên an toàn, không mua. Tâm phụ thuộc MỘT lựa chọn đọc H1/26: đọc 'nhiễu' ⇒ 62.578 trước / 56.320 sau chiết khấu. Pháp lý chỉ WARNING (mẹ DLC 51% nằm trong nhóm bị điều tra; CT/GĐ/KTT bị khởi tố vi phạm kế toán).",
+  "skeptic_status": "Skeptic r1 (24/11, DD_GENERAL, opus, 0,98 USD) trên r5 (md5 64aa2b2d): REFUTED/medium. Killer: bước +4.800 đọc H1/26 'sạch' mâu thuẫn A1 (KT25 còn khai thác tới ~đầu 2026–17/03) ⇒ tâm gần 62.578 trước / 56.320 sau CK (−5,9%), cổng ~47.870. Thiếu: hạn thuê đất KCN (2034 vs 2042, mô hình Gordon vĩnh viễn), capex môi trường, cầm cố ACB 130 tỷ (≈−5.200). Tính toán r5 sạch (selfcheck 66.475 vs 66.470). Báo cáo KHÔNG đổi; chưa dựng rev mới.",
+  "source_file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/VALUATION_r5.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/VALUATION_r5.md",
+    "quote": "SAU chiết khấu thanh khoản 10% = 59.823 đ/cp",
+    "fields": [
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/VALUATION_r5.md",
+    "quote": "Tâm r5 TRƯỚC chiết khấu thanh khoản = 66.470 đ/cp",
+    "fields": [
+     "center_alt"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/VALUATION_r5.md",
+    "quote": "P25–P75 = 41.000 – 74.900",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/VALUATION_r5.md",
+    "quote": "giá tham chiếu 70.200",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/assumptions_objective_r5.md",
+  "assumptions_md5": "872a9b82c9aaff679ea392beb4419123",
+  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "expires_on": "2027-03-17",
+  "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc tờ trình GD bên liên quan DLC–PAT hoặc 120 ngày",
+  "notes": "CỔNG 0,85×tâm sau CK = 50.850 (không phải 56.500). Sizing ≤0,5% NAV nếu có vị thế (ADV ~1 tỷ). HARD ABANDON §3 (calculated_fear_state_backstop.md), đặc biệt #4: công ty mẹ DLC (51%) rút giá trị qua giá chuyển giao (2026 PAT +1% vs P4 TQ +19,5%, theo dispatch); nút T (giá DLC trả) là biến lớn nhất. Chưa đủ điều kiện xét discretionary: cần hồ sơ §2/§2.5 riêng; PAT trượt §2 trụ #2. KHÔNG phải tín hiệu mua. Khoảng tâm theo cách đọc H1/26: 62.578–66.470 trước CK; 56.320–59.823 sau CK. Chồng bi quan cùng cơ sở r5 63.913 (r4 60.354). Mốc: BCTC Q4/2026 (cuối 01/2027: cước/DT ≈4,7%; tồn kho 31/12/26), quyết định KT25/KT19B (~cuối 2026), F7 31/05/2027, tờ trình GD bên liên quan ĐHĐCĐ 2027.",
+  "supersedes": "PAT@2026-11-17#2",
+  "correction_reason": "Chạy skeptic r1 trên r5 (số không đổi): REFUTED ⇒ REFUTED_OPEN.",
+  "recorded_at": "2026-11-24T00:20:00+07:00"
+ }
+}

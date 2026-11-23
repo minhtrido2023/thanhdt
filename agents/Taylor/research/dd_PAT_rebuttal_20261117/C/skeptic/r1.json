@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/VALUATION_r5.md",
+  "report_md5": "64aa2b2df2fa2c2a46e4c54f9407a91e",
+  "brief_md5": "70238ce5d27faa75c0a43db150764c7a",
+  "model": "opus",
+  "cost_usd": 0.9835887999999999,
+  "started_at_ict": "2026-11-24T00:03:21+07:00",
+  "summary": "Phần tính toán của r5 sạch: self-check tái lập được, hệ số cước và phép chiết khấu thanh khoản khớp. Nhưng tâm 66.470 phụ thuộc vào bước +4.800 đọc H1/26 là quan sát 'sạch' không có mỏ DGC, trong khi tài liệu A1 của fleet ghi KT25 còn khai thác tới khoảng ~đầu 2026 đến 17/03 và kho quặng nằm ở DLC chứ không phải PAT. Gỡ bước này thì tâm về 62.578 trước / 56.320 sau chiết khấu (−5,9%). Theo mục thiếu, mô hình định giá vĩnh viễn mà chưa kiểm hạn thuê đất KCN (blind_val đặt 2034, r1 ước 2042), và không có capex tuân thủ môi trường dù vụ án có tội danh đổ thải tại chính KCN. Ở chiều ngược lại, tồn kho dư và ΔVLĐ=0 có thể làm tâm thấp đi vài nghìn đồng, nhưng tồn kho nền đã bị UHY ngoại trừ. Kết luận 'không có biên an toàn, không mua' giữ nguyên; tâm và cổng cần hạ hoặc phải có bằng chứng mới cho ô O2.",
+  "verdict_raw_path": "agents/Taylor/research/dd_PAT_rebuttal_20261117/C/skeptic/r1_raw.md"
+}

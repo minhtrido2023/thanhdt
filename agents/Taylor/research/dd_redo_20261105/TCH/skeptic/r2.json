@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_redo_20261105/TCH/REPORT_r3b.md",
+  "report_md5": "1bf1cf0721089ec1c6ba5d4637bd7709",
+  "brief_md5": "1f1ca5160828333ca979a00f4c821649",
+  "model": "opus",
+  "cost_usd": 1.060788,
+  "started_at_ict": "2026-11-24T00:03:26+07:00",
+  "summary": "The r3b model is mechanically sound and reproducible: I rebuilt the core formula from the BCTC and TMĐT numbers and got exactly 15.894,9 đ (central parameters, before trading cost), and every k and margin input matches its source. Nothing quantifiable above 5% is missing. Small adjustments run both ways: downward from H2's k (−2,5%), possible VAT/contingency in TMĐT (−1,4%) and backlog timing (−1%); upward from the exact form (+3,6%), NC-II collection timing and investment property. These roughly cancel. The decisive weak point is the margin input. The base uses 51,9% from unreviewed 6T FY26 statements while both audited years show 42,7%, which would give a 14% lower centre and flip the label. The P10–P90 band leaves this scenario out. I am not refuting the centre, but the label cannot be confirmed until AASC's review report for 6T FY26 confirms the margin.",
+  "verdict_raw_path": "agents/Taylor/research/dd_redo_20261105/TCH/skeptic/r2_raw.md"
+}
