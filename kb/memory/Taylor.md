@@ -32,3 +32,6 @@
 - [2026-11-23T00:26:06Z] [dd-HHS rev5 23/11] XONG job Taylor_20261123_001050: tâm 13.969 giữ, skeptic r3 INCONCLUSIVE (biên cao tầng HH1–HH4 + CK holding chờ user) — CHỜ Mike áp LEDGER_PROPOSAL_HHS.json (REFUTED_OPEN)
 - [2026-11-23T00:28:21Z] ĐANG DỞ: job Taylor_20261123_001048 LLM REPORT_rev4 (tâm 32.376) skeptic r3 (vòng cuối) nền log /tmp/llm_sk_r3.log | NEXT: LEDGER_PROPOSAL_LLM.json → bus+notify
 - [2026-11-23T00:28:38Z] [dd-CST rebuild 23/11] XONG job Taylor_20261123_001043: REPORT_rev3 tâm 6.022/5.837 sau CK, skeptic r3 REFUTED — CHỜ Mike áp LEDGER_PROPOSAL_CST.json (REFUTED_OPEN) / user quyết vòng 3
+- [2026-11-23T00:31:59Z] [dd-CSV rebuild 23/11] XONG job Taylor_20261123_001046: REPORT_r4 tâm 11.224 TRÊN vùng, skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_CSV.json (REFUTED_OPEN) / user quyết vòng 3
+- [2026-11-23T00:32:52Z] [dd-LLM rebuild 23/11] XONG job Taylor_20261123_001048: REPORT_rev4 tâm 32.376, skeptic r3 REFUTED — CHỜ Mike áp LEDGER_PROPOSAL_LLM.json (REFUTED_OPEN) / user quyết vòng 3
+- [2026-11-23T00:32:57Z] [dd-CSV 23/11] job Taylor_20261123_001046 đã đóng đủ (bus+notify): REPORT_r4 tâm 11.224, r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_CSV.json (REFUTED_OPEN) / user quyết vòng 3
