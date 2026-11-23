@@ -818,3 +818,22 @@
 
 ## Consolidation 2026-11-23T03:07:01Z
 - [2026-11-23T02:32:02Z] Mafee/status — orb_futures_entry: {"account": "SpaceX", "mode": "DRY", "contract": "41I1GC000", "side": "sell", "px": 1766.5, "stop": 1810.7, "fill_px_estimated": false}
+
+## Consolidation 2026-11-23T05:01:35Z
+- [2026-11-23T05:01:12Z] Mike/status — preflight-ZaloPay-2026-11-23: {"result": "GREEN", "checks": ["✅ BOT_STOP: CLEAR", "✅ Plan ZaloPay 2026-11-23: 0 lệnh, ~0.000B VND, state=NEUTRAL (DT5G_gated (source=DT5G_macro)), approved=None mafee=False", "✅ macro_health: HEALTHY (DT5G_macro, file 65.4h tuổi ≤ ngưỡng 68.5h theo phiên 2026-11-20)", "✅ Gmail OAuth: có refresh_token (tự refresh khi cần)", "✅ BQ ticker_prune: 2026-11-20 = phiên gần nhất, 200 mã ✓"]}
+- [2026-11-23T05:00:23Z] Taylor/heartbeat — Taylor_20261123_050001: {"status": "in_progress", "note": "resume BSR: kiem tra trang thai thu muc"}
+- [2026-11-23T05:00:36Z] Taylor/heartbeat — Taylor_20261123_050003: {"status": "in_progress", "note": "resume: đọc lại REPORT r2 + model_r2 + skeptic r1"}
+- [2026-11-23T05:00:40Z] Taylor/heartbeat — Taylor_20261123_050007: {"status": "in_progress", "note": "resume POW: kiểm tra tiến độ phiên trước"}
+- [2026-11-23T05:00:40Z] Taylor/heartbeat — Taylor_20261123_050009: {"status": "in_progress", "note": "resume: rev4/restored có sẵn, đọc skeptic r1 + r3c để dựng model rev4"}
+- [2026-11-23T05:00:46Z] Taylor/heartbeat — Taylor_20261123_050005: {"status": "in_progress", "note": "resume: doc skeptic r1 + calc.py, da co BCTC KT25"}
+- [2026-11-23T05:01:01Z] Taylor/heartbeat — Taylor_20261123_050001: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_050001", "source": "watcher"}
+- [2026-11-23T05:01:04Z] Taylor/heartbeat — Taylor_20261123_050003: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_050003", "source": "watcher"}
+- [2026-11-23T05:01:06Z] Taylor/heartbeat — Taylor_20261123_050005: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_050005", "source": "watcher"}
+- [2026-11-23T05:01:08Z] Taylor/heartbeat — Taylor_20261123_050007: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_050007", "source": "watcher"}
+- [2026-11-23T05:01:10Z] Taylor/heartbeat — Taylor_20261123_050009: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_050009", "source": "watcher"}
+- [2026-11-23T05:01:21Z] Taylor/heartbeat — Taylor_20261123_050007: {"status": "in_progress", "note": "POW: da doc skeptic r1 + REPORT; dang tim co so capex QCVN19 (tien le QTP)"}
+- [2026-11-23T05:00:26Z] Winston/heartbeat — Winston_20261123_050011: {"status": "in_progress", "note": "resume: starting web search chuoi 1-3"}
+- [2026-11-23T05:00:59Z] Winston/heartbeat — Winston_20261123_050013: {"status": "in_progress", "note": "rejected idx33 doi chieu xong voi 56e88c25, dang danh dau"}
+- [2026-11-23T05:01:12Z] Winston/heartbeat — Winston_20261123_050011: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261123_050011", "source": "watcher"}
+- [2026-11-23T05:01:14Z] Winston/heartbeat — Winston_20261123_050013: {"status": "still_running", "elapsed_min": 1, "job_id": "Winston_20261123_050013", "source": "watcher"}
+- [2026-11-23T05:01:21Z] Winston/finding — ops-autofix-done: ops-health-ZaloPay: {"root_cause": "Taylor append_event finding 2026-11-22T13:49:07Z argc=8: payload boc nhay don chua cum co dau nhay don ben trong (Viet va gui email) -> bash word-split. Call site Bash ad-hoc, khong co script committed de va.", "fix": "Khong mat event: Taylor tu retry +11s event 56e88c25 cung trace Taylor_20261122_133837, doi chieu tung field khop (ban ASCII). Da danh dau bus_rejected_resolve.py --index 33 --by Winston.", "verify": "ops_health_check.sh --account ZaloPay (dry-run JOB_ID) -> Hang doi cach ly: 24h qua khong co ca CHUA XU LY (1 ca moi da danh dau). rc=0", "note": "idx29 (2026-10-31 Taylor dd-TCH-gaps) van CHUA danh dau nhung ngoai cua so 24h, khong gay bao dong"}

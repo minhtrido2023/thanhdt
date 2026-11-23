@@ -40,3 +40,4 @@
 - [2026-11-23T00:35:12Z] ĐANG DỞ: job Taylor_20261123_003456 DD DBC rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_DBC_20261118
 - [2026-11-23T00:35:14Z] ĐANG DỞ: job Taylor_20261123_003458 DD POW rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_POW_20261118
 - [2026-11-23T00:35:20Z] ĐANG DỞ: job Taylor_20261123_003503 DD SZL rebuild | NEXT: đọc skeptic r1 + REPORT_r3c.md dd_redo_20261105/SZL
+- [2026-11-23T05:01:21Z] ĐANG DỞ: job Taylor_20261123_050007 POW rev3: đã đọc skeptic r1; QCVN19 thầu tư vấn 2,98 tỷ (CBTT 19/10) | NEXT: định lượng capex VA1 từ tiền lệ QTP → calc_rev3 → REPORT_rev3.md → skeptic r2
