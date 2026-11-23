@@ -82,3 +82,5 @@
 - [2026-11-23T12:11:12Z] [dd-PNJ vong cuoi 23/11] XONG job Taylor_20261123_120259: REPORT_rev5 tam 7.395 (vung 6.488-8.303), skeptic r4 REFUTED (VLD tang truong) — CHO Mike ap LEDGER_PROPOSAL_PNJ (rev3 REFUTED_OPEN); het vong
 - [2026-11-23T12:11:22Z] [VCB DD 23/11] XONG job Taylor_20261123_120305: REPORT_rev4 tâm 35.600 (vùng 30.900–42.100), r4 INCONCLUSIVE (vòng cuối) — CHỜ Mike áp LEDGER_PROPOSAL_VCB.json (REFUTED_OPEN) / user quyết
 - [2026-11-23T12:11:56Z] [SCL rev7 23/11] XONG job Taylor_20261123_120301: REPORT_rev7 tâm 16.237, skeptic r4 INCONCLUSIVE (HĐ nguồn tro) — vòng cuối, CHỜ Mike áp LEDGER_PROPOSAL_SCL.json (REFUTED_OPEN)
+- [2026-11-23T12:14:43Z] [DD CSV vòng cuối 23/11] XONG job Taylor_20261123_120254: REPORT_r5 tâm 10.447, skeptic r4 INCONCLUSIVE ⇒ DỪNG — CHỜ Mike áp LEDGER_PROPOSAL_CSV.json (rev3 REFUTED_OPEN)
+- [2026-11-23T12:14:49Z] [DD LLM rev5 23/11] XONG job Taylor_20261123_120256: tâm 20.978 (đắt, 1,59×), r4 REFUTED vòng cuối — CHỜ Mike áp LEDGER_PROPOSAL_LLM (rev3 REFUTED_OPEN) / user quyết
