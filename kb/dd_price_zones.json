@@ -6885,6 +6885,91 @@
    "report_md5": "3bb1f0649139ab826ad6799a15c77eea",
    "supersedes": "VLB@2026-11-22#3",
    "recorded_at": "2026-11-23T19:22:02+07:00"
+  },
+  {
+   "ticker": "HHS",
+   "dd_date": "2026-11-01",
+   "rev": 7,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 9634,
+   "center": 10805,
+   "zone_high": 12012,
+   "center_range": null,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới r3 với CK holding ĐO 26,63% (trung vị N=6 holding niêm yết VN, độ phủ ≥60%; ck_holding_vn_20261123) áp phần HHS×CRV, sau CK 5 tỷ; cơ sở CUM 431.985.968 cp — quyền mua 60% + cổ tức CP 7% CHƯA thực hiện",
+   "price_ref": 9700,
+   "price_date": "2026-11-20",
+   "ex_basis_pending": {
+    "trigger": "GDKHQ quyền 5:3 @10.000 (chưa có GCN UBCKNN/ĐKCC tại 23/11) rồi cổ tức CP 7%",
+    "n_shares_final": 739559976,
+    "zone_low": 8162,
+    "center": 8846,
+    "zone_high": 9551,
+    "k": 0.734,
+    "rule4_threshold": 7519,
+    "terp_div_at_ref": 9171,
+    "k1_center": 9767,
+    "note": "EX base dùng k=1−CK=0,734 (REPORT_rev7 §0); skeptic r5 phản bác: assumptions k_base=1,0 ⇒ k=1 cho tâm 9.767 (chưa có P10/P90 k=1). Bản sửa CHƯA áp."
+   },
+   "verdict_label": "TRONG vùng (sát đáy: giá 9.700 BQ 20/11 vs P10 9.634) với CK holding đo 26,63% (độ tin thấp–trung bình); luật 4 KHÔNG đạt (ngưỡng 9.184). Đối chiếu CK 0% rev6: DƯỚI vùng; IQR thấp 19,98%: DƯỚI; IQR cao 38,83%: TRONG. forensic_flags EXCLUDE ⇒ loại khỏi candidate plan. WARNING tăng vốn 60% + NQ 10 lấy ý kiến 14–25/12 (nội dung chưa công bố) + TB 2124/TB-TTCP, KL 08/KL-TTTP.",
+   "skeptic_status": "rev7: dd_skeptic_run DD_GENERAL r5 = REFUTED medium (report_md5 afe93ea4 khớp source_file). Lỗi: (1) EX base k=0,734 trái assumptions k_base=1 (−9,4% EX); (2) phạm vi áp CK không nhất quán CUM (chừa OTHER/ô tô) vs EX (áp lên tiền mới); (3) tham số mong manh N=6, bootstrap −110…+42%, ngưỡng độ phủ/tập so sánh dịch tâm +2,8…+8,8% / −5,1…−16,9%. CUM 10.805 tái lập đúng. Bản sửa CHƯA áp (không chạy thêm vòng theo brief).",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_dilution_update_20261110/HHS/skeptic/r5.json",
+   "audited_fy_missing": false,
+   "source_file": "agents/Taylor/research/dd_dilution_update_20261110/HHS/REPORT_rev7.md",
+   "report_md5": "afe93ea4699823a0479575eaa4725a56",
+   "assumptions_file": "agents/Taylor/research/dd_dilution_update_20261110/HHS/rev7/calc/assumptions.json",
+   "assumptions_md5": "3afcd113013fad82acfa5ea35c5bce1d",
+   "correction_reason": "rev mới: thay CK holding 0%/27% (không nguồn) bằng CK ĐO 26,63% (N=6 holding niêm yết VN, ck_holding_vn_20261123, độ tin thấp–trung bình) áp phần HHS×CRV ⇒ tâm CUM 13.969→10.805, nhãn DƯỚI→TRONG; khôi phục WARNING TB 2124 + KL 08; sửa mô tả PPA (không phải định giá độc lập). Skeptic r5 REFUTED (EX k, phạm vi CK) — CHỜ user.",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_dilution_update_20261110/HHS/REPORT_rev7.md",
+     "quote": "| **CUM — BASE rev7** | **26,63% (đo, N = 6)** | **10.805** | **9.634** | 10.765 | **12.012** | 9.700 (BQ 20/11/2026) | **TRONG vùng** | KHÔNG (ngưỡng 9.184) |",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high",
+      "price_ref"
+     ]
+    }
+   ],
+   "supersedes": "HHS@2026-11-01#6",
+   "expires_on": "2027-03-01",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-24T00:02:25+07:00",
+   "parallel_ck_holding": {
+    "zero_rev6": {
+     "zone_low": 12422,
+     "center": 13969,
+     "zone_high": 15564,
+     "label": "DƯỚI vùng"
+    },
+    "iqr_low_19_98": {
+     "zone_low": 10324,
+     "center": 11595,
+     "zone_high": 12879,
+     "label": "DƯỚI vùng"
+    },
+    "iqr_high_38_83": {
+     "zone_low": 8365,
+     "center": 9355,
+     "zone_high": 10409,
+     "label": "TRONG vùng"
+    },
+    "control_N5_24_06": {
+     "zone_low": 9901,
+     "center": 11110,
+     "zone_high": 12346,
+     "label": "DƯỚI vùng"
+    },
+    "r2_axis_27_no_source": {
+     "zone_low": 8624,
+     "center": 10761,
+     "zone_high": 13207,
+     "label": "TRONG vùng"
+    }
+   }
   }
  ],
  "center_kinds": [
