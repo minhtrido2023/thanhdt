@@ -1,0 +1,145 @@
+{
+ "ticker": "VCB",
+ "rev": 3,
+ "asof": "2026-11-23",
+ "units": "ty VND tru khi ghi khac",
+ "base_from_rev1": "assumptions_VCB_20261117.json (md5 85d41e08f834127e57cd740ed88dd931): bs_30_09_2026, bs_31_12_2025_restated, is_9m, one_off giu nguyen",
+ "credit_cost_history": {
+  "source": "B03 'Chi phi du phong rui ro tin dung' + B02 'Cho vay khach hang' (goc), BCTC hop nhat kiem toan: 2017 (KPMG, tr.6/9), 2019 (KPMG, tr.6/9), 2021 (KPMG, tr.6/9), 2023 (EY, tr.6/9), 2025 (EY, tr.6/9); tai static2.vietstock.vn/data/HOSE/<nam>/BCTC/VN/NAM/VCB_Baocaotaichinh_<nam>_Kiemtoan_Hopnhat.pdf, doc anh scan tung trang 23/11/2026",
+  "loans_end": {
+   "2016": 460808.44,
+   "2017": 543434.46,
+   "2018": 631866.758,
+   "2019": 734706.891,
+   "2020": 839788.261,
+   "2021": 960749.955,
+   "2022": 1145066.25,
+   "2023": 1270359.018,
+   "2024": 1449198.899,
+   "2025": 1673525.675
+  },
+  "provision_expense": {
+   "2016": 6368.707,
+   "2017": 6198.415,
+   "2018": 7398.113,
+   "2019": 6790.429,
+   "2020": 9974.73,
+   "2021": 11760.801,
+   "2022": 9464.218,
+   "2023": 4564.876,
+   "2024": 3314.998,
+   "2025": 3192.186
+  },
+  "ppop": {
+   "2017": 17539.776,
+   "2018": 25667.339,
+   "2019": 29912.806,
+   "2020": 33024.291,
+   "2021": 39149.381,
+   "2022": 46832.309,
+   "2023": 45808.563,
+   "2024": 45551.133,
+   "2025": 47211.823
+  },
+  "nii": {
+   "2022": 53246.478,
+   "2023": 53620.869,
+   "2024": 55405.735,
+   "2025": 58771.41
+  },
+  "loan_prov_balance": {
+   "2016": 8086.753,
+   "2025": 24975.679
+  },
+  "inv_sec_prov_balance": {
+   "2016": 180.127,
+   "2025": 3361.615
+  },
+  "interbank_prov_balance": {
+   "2016": 0.0,
+   "2025": 0.0
+  }
+ },
+ "is_2025_audited_verified": {
+  "source": "src/VCB_BCTC_2025_KT_HN.pdf trang PDF 8/9/11/12 (B02 tr.6-8, B03 tr.9-10), doc lai 23/11/2026",
+  "ppop": 47211.823,
+  "pbt": 44019.637,
+  "tax": 8821.697,
+  "np_parent": 35177.663,
+  "equity_parent_end_2025": 224487.205,
+  "equity_parent_end_2024": 196112.907,
+  "guarantee_loan_2024": 286.899,
+  "guarantee_other_2024": 58052.47,
+  "guarantee_loan_2025": 5884.776,
+  "guarantee_other_2025": 93208.941,
+  "construction_loans_2024": 90512.98,
+  "construction_loans_2025": 155288.015,
+  "specific_prov_2024": 20495.176,
+  "specific_prov_2025": 12552.995
+ },
+ "q3_2026_offbalance_verified": {
+  "source": "src/VCB_BCTC_Q3_2026_HN.pdf trang PDF 18 (B02a tr.5)",
+  "guarantee_loan": 9549.855,
+  "guarantee_other": 128899.826,
+  "written_off_offbal_30_09": 83482.756,
+  "written_off_offbal_31_12_25": 83546.262
+ },
+ "normalization": {
+  "cc_method": "ton that thuc 2017-2025 = tong chi phi du phong - tang so du du phong (cho vay + CK dau tu; lien NH 0->0) chia tong du no BQ; + duy tri ty le du phong/du no 2025 (1,49%) khi du no tang g_loans",
+  "g_loans_for_maint": 0.09,
+  "cc_bear_source": "TB 9 nam 2017-2025 chi phi du phong/du no BQ (gom pha tich luy bao phu)",
+  "cc_bull_source": "TB 2023-2025",
+  "m_base_source": "PPOP loi 9T/26 nam hoa / du no BQ 9T/26 (bo mot lan 3.171)",
+  "m_bear_source": "PPOP 2025 kiem toan / du no BQ 2025 (day 5 nam)",
+  "m_bull_source": "TB 5 nam PPOP/du no BQ 2022-2026 (2026 = loi nam hoa)",
+  "lev_basis": "du no BQ 9T/26 / VCSH me BQ 9T/26",
+  "tax": 0.2,
+  "tax_source": "ETR 2025 kiem toan 8.821,7/44.019,6 = 20,04%; ETR 9T/26 18,3% thap vi lai danh gia lai khong chiu thue",
+  "pairing": "rev3: bien PPOP va CC CUNG KY trong moi kich ban (skeptic r2). Co so = 9T/26 (bien loi 3,55%, CC tong 9T nam hoa); Tot = cua so 2022-2026 (TB bien 5 nam, TB CC 5 nam); Xau = kich ban stress (bien day 2025 + CC TB 9 nam 2017-25)",
+  "cc_base_source": "9T/26 tong chi phi du phong 9.179,836 x 12/9 / du no BQ 9T/26 (cung ky voi bien); kiem cheo ton that+duy tri 0,62% thap hon"
+ },
+ "valuation": {
+  "Ke_anchor": 0.135,
+  "Ke_note": "V1: r 13,5% tai neo 03/11/2026; lai huy dong 12T hieu dung 7,40% (rev1, 17/11) => khong dieu chinh; beta pass-through 1 (do nhay 0,5)",
+  "Ke_band_D4": [
+   0.123,
+   0.134
+  ],
+  "Ke_beta_real_read": 0.12,
+  "g": 0.07,
+  "probs": {
+   "bear": 0.25,
+   "base": 0.5,
+   "bull": 0.25
+  },
+  "liquidity_discount": 0.0,
+  "liquidity_note": "chiet khau thanh khoan xac dinh o pha SAU KHOA (REPORT_rev2 muc V3), khong nam trong file khoa"
+ },
+ "sensitivities_not_base": {
+  "cbbank_equity_hit_bn": [
+   5000,
+   10000,
+   20000
+  ],
+  "cbbank_note": "KHONG KIEM CHUNG DUOC quy mo/lo luy ke/cam ket ho tro VCBNeo (ex-CBBank); muc ton that la gia dinh minh hoa (uoc luong)",
+  "car_now": 0.1114,
+  "car_now_source": "bao chi nhieu nguon CAR hop nhat 30/06/2026 11,14% (vcci, 24hmoney, ACBS 07/08/2026) - chua doi chieu Pillar 3; CET1, LDR TT22 khong co",
+  "car_target": 0.12,
+  "dividend_2025_profit_bn": 20331,
+  "dividend_cash_paid_bn": 3760,
+  "dividend_cash_paid_vnd_ps": 450,
+  "dividend_cash_paid_note": "450 d/cp tu LN 2025, GDKHQ truoc 24/07/2026, tra 27/08/2026 (vietnamplus 10/07/2026) => da tru trong VCSH 30/09",
+  "dividend_residual_form": "CHUA RO (HDQT trinh co quan nha nuoc; baodautu 24/04/2026); tien le 2025: chia co phieu 49,5% (von dieu le 55.890,9 -> 83.556,8 ty, B02 2025 tr.7) => nghieng co phieu"
+ },
+ "welfare_fund": {
+  "source": "src/VCB_BCTC_2025_KT_HN.pdf TM34(a) tr.61 (trang PDF 63): trich lap quy khen thuong phuc loi 2025 2.975,811 ty / LN 35.177,663; 2024 2.692,912 / 33.831,386; tam trich cuoi nam",
+  "fwf_2025": 2975.811,
+  "np_2025": 35177.663,
+  "fwf_2024": 2692.912,
+  "np_2024": 33831.386,
+  "haircut_used": "ty le 2025",
+  "equity_roll_check": "196.112,9 + 35.177,7 - co tuc tien 3.760 - KTPL 2.975,8 = 224.554,8 vs 224.487,2 (lech 67,6 ~ KTNN/chenh lech TGHD)"
+ },
+ "g_note": "g 7% (uoc luong) = tang truong dai han <= GDP danh nghia; Gordon P/B dung khi von giu lai sinh loi ROE; ty le giu lai thuc ~89% (co tuc tien 450d/co phieu) => xem mo hinh hai giai doan (g1 10-13%) chi hien thi",
+ "vamc_note": "chua kiem: chi phi du phong 2017-19 co gom du phong trai phieu dac biet VAMC hay khong (anh huong ca hai chieu toi ty le ton that 0,49%)"
+}

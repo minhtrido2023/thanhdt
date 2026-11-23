@@ -1,0 +1,78 @@
+{
+ "proposal_for": "kb/dd_price_zones.json",
+ "job": "Taylor_20261122_234422",
+ "written_at": "2026-11-23T07:07:08+07:00",
+ "apply_note": "skeptic_final=REFUTED_OPEN (vòng cuối r3 REFUTED, bản sửa CHƯA áp) ⇒ KHÔNG dùng dd_ledger_append_confirmed.py; Mike áp tay rev3 (điền recorded_at lúc ghi) rồi chạy bin/dd_price_zones_selfcheck.py. report_md5 khớp skeptic/r3.json.",
+ "open_items_from_r3": [
+  "Quỹ KH&CN: dòng trích hằng năm (~95–250 tỷ trước thuế) đang coi mất 100% trong LN hồi quy vs số dư chỉ trừ 11% — làm lại theo 1 quy tắc (tâm +0,95…+2,49k nếu áp S2 nhất quán)",
+  "Kiểm NĐ 320/2025 + TT 20/2026 từ nguồn gốc",
+  "Hạn thuê đất/giấy phép nhà máy Cà Mau vs chân trời vĩnh viễn",
+  "Đối chiếu chi từ quỹ với capex LCTT mã 21 (trừ trùng M)",
+  "Tra lại tin pháp lý sau 05/11"
+ ],
+ "skeptic_verdict_path": "agents/Taylor/research/dd_DCM_20261104/skeptic/r3.json",
+ "entry": {
+  "ticker": "DCM",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_DCM_20261104/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-04",
+  "rev": 3,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 23891,
+  "center": 26780,
+  "zone_high": 29732,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng lưới 2.430 kết cục (2 cửa sổ hồi quy 2021+ trên LN trước khấu hao, capex duy trì M 342/401/540, r 13,5%±100bp, biên DH 138/179/220, năm 1 170/222/285, khí A/B, I_C 20/22/25) SAU chiết khấu thanh khoản 0,585% @5 tỷ; quỹ KTPL trừ đủ, quỹ KH&CN trừ 11% (hoàn thuế kỳ trích); khí 2035+ = cấu trúc HĐ 3918 Đ9.1 hiện hành; mù giá (LOCK_r8)",
+  "center_alt": 26776,
+  "center_alt_kind": "point",
+  "center_range": null,
+  "price_ref": 30400,
+  "price_date": "2026-11-20",
+  "verdict_label": "Giá 30.400 TRONG vùng P10–P90 (21.662–31.782), +13,5% so tâm 26.780; KHÔNG đạt luật 0,85×tâm (22.763). Biến thể khí 2035+ khai trọng số (tâm 21.961, P10 13.410) ⇒ TRÊN vùng — vùng đọc mở rộng [13.410…31.782]. 'Không rẻ' chắc chắn ở mọi biến thể. Skeptic r3 REFUTED: xử lý quỹ KH&CN không nhất quán (số dư 11% vs dòng trích hằng năm 100% trong LN hồi quy) ⇒ tâm có thể thấp ~+1–2,5k, hoặc +1.781 của S2 sai nếu quy định mới buộc chi",
+  "skeptic_status": "r1 22/11 REFUTED (D&A, capex duy trì, quỹ KH&CN, CSV mất) → rev7; r2 23/11 INCONCLUSIVE (2021Q4 BQ chép, cơ sở pháp lý quỹ, khí 2035+, VAT 5%) → rev8; r3 23/11 REFUTED (quỹ KH&CN dòng trích vs số dư không nhất quán; hạn thuê đất chưa nêu). Đã chạy đủ 2 vòng/ca trong job — vòng tiếp theo chờ user",
+  "source_file": "agents/Taylor/research/dd_DCM_20261104/REPORT_rev8.md",
+  "assumptions_file": "agents/Taylor/research/dd_DCM_20261104/assumptions_r8.json",
+  "assumptions_md5": "79ddbcdb7f403bf27c61ebd68ea857e2",
+  "report_md5": "ce95d772d35cccc7506dba86311a1396",
+  "evidence": [
+   {
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ],
+    "file": "agents/Taylor/research/dd_DCM_20261104/REPORT_rev8.md",
+    "quote": "**P10 21.662 · P25 23.891 · P50 26.831 · P75 29.732 · P90 31.782** (sau CK, mức kết cục)."
+   },
+   {
+    "fields": [
+     "center"
+    ],
+    "file": "agents/Taylor/research/dd_DCM_20261104/REPORT_rev8.md",
+    "quote": "- **Tâm 26.780 đ/cp sau CK thanh khoản** (26.937 trước CK), kỳ vọng lưới 2.430 kết cục."
+   },
+   {
+    "fields": [
+     "price_ref"
+    ],
+    "file": "agents/Taylor/research/dd_DCM_20261104/REPORT_rev8.md",
+    "quote": "- **Giá 30.400 (đóng cửa 20/11/2026, DNSE) ⇒ TRONG vùng P10–P90.**"
+   },
+   {
+    "fields": [
+     "center_alt"
+    ],
+    "file": "agents/Taylor/research/dd_DCM_20261104/REPORT_rev8.md",
+    "quote": "| S2 quỹ KH&CN chỉ trừ 11% | **26.776** | +1.781 |"
+   }
+  ],
+  "notes": "Vùng = P25–P75 lưới (quy ước rev2); P10–P90 21.662–31.782 sau CK. center_range=null (schema chỉ nhận [center, hi] tăng dần): biến thể khí 2035+ khai trọng số 0,5/0,25/0,25 cho tâm THẤP HƠN 21.961 — xem REPORT_rev8.md. Độ nhạy r ±100bp β1: −958/+1.122; Ke 12,3/13,4: +1.369/+104. Capex duy trì −1.056/100 tỷ/năm. Khí 2035+ phẳng −7.606, leo thang −11.364. Số: calc/model_r8_out.txt, calc/compare_px_r8_out.json; khoá calc/LOCK_r8_md5.txt.",
+  "null_reason": null,
+  "expires_on": "2027-03-04",
+  "expires_basis": "dd_date+120 (giữ theo DD gốc); thay bằng ngày công bố BCTC Q4/2026 nếu sớm hơn",
+  "recorded_at": null,
+  "supersedes": "DCM@2026-11-04#2",
+  "correction_reason": "Rebuild sau skeptic DD_GENERAL r1 REFUTED (22/11): nền LN theo chế độ khấu hao (D&A KT 2024–25 + BQ 2018–23), capex duy trì M, quỹ KH&CN, khôi phục CSV đầu vào; r2 sửa dòng BQ 2021Q4 chép, quỹ KH&CN theo Luật thuế TNDN 67/2025 Đ17 (legal-vn). Tâm 24.326 → 26.780; nhãn TRÊN → TRONG vùng."
+ }
+}

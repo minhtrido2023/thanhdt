@@ -1,0 +1,13 @@
+{
+  "round": 3,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev4.md",
+  "report_md5": "87db0f9ba9f96720784a607858dc6d63",
+  "brief_md5": "d14b03a74f38bb58cb08860752bd19a6",
+  "model": "opus",
+  "cost_usd": 1.0483818,
+  "started_at_ict": "2026-11-23T06:58:21+07:00",
+  "summary": "Rev4 fixes the identity error from r2, and every number I could trace matches the source (IRQ3 p7/p9 on page images, BVPS floor, share base, the full model). The outcome tree is still wrong. O2 penalises twice: it downgrades the economics because no capital is raised, then also deducts the full 8.000 plus bridge as if it were borrowed. It also counts 1.600 of debt refinancing as new need. Fixing this lifts the centre from 4.205 to ~5.4–5.5k. On the other side, p=0,5 contradicts the model itself: O1 requires investors to pay ≥12.586 for a share the model values at ~6–7.6k, which argues for a lower p (2.212 at p=0,25). There is also no liquidation/default branch, retained earnings 2027–28 are omitted, and ESOP dilution is unquantified. Errors run in both directions by >5% of the centre, so the zone needs rebuilding.",
+  "verdict_raw_path": "agents/Taylor/research/dd_PNJ_20261114/skeptic/r3_raw.md"
+}

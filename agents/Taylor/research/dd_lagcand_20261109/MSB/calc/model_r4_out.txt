@@ -1,0 +1,33 @@
+== Kich ban (tham so trung tam, truoc CK) ==
+  XAU w=0.275: 9,628 d/cp (P/B ngu y tren BVPS 30/09 0.77x)
+  CO_SO w=0.45: 13,393 d/cp (P/B ngu y tren BVPS 30/09 1.07x)
+  TOT w=0.275: 17,125 d/cp (P/B ngu y tren BVPS 30/09 1.37x)
+BVPS 30/09 12,515; LNST TTM 6,265
+PHAN PHOI truoc CK: {'center': 13090, 'p10': 9178, 'p25': 10795, 'p50': 13167, 'p75': 15018, 'p90': 17125, 'min': 7415, 'max': 18865, 'n': 81}
+== Do nhay tam (truoc CK) ==
+Tuong duong SAU QUYEN: tam 12,472 P10 9,342 P90 15,700
+  dep-100bp_beta0.5: 13,926 (+6.4%)
+  dep-100bp_beta1.0: 14,834 (+13.3%)
+  dep-50bp_beta0.5: 13,499 (+3.1%)
+  dep-50bp_beta1.0: 13,926 (+6.4%)
+  dep+50bp_beta0.5: 12,696 (-3.0%)
+  dep+50bp_beta1.0: 12,317 (-5.9%)
+  dep+100bp_beta0.5: 12,317 (-5.9%)
+  dep+100bp_beta1.0: 11,601 (-11.4%)
+  Ke_0.123: 15,219 (+16.3%)
+  Ke_0.134: 13,251 (+1.2%)
+  khong_quyen_mua: 12,993 (-0.7%)
+  bao_phu_80: 12,637 (-3.5%)
+  terminal_g6_RONIC=ROE_T: 13,809 (+5.5%)
+  ROE_nua_duong_ve_Ke: 12,696 (-3.0%)
+  LC_ccredit_0.89pct_1nam: 13,072 (-0.1%)
+  LC_ton_that_5pct: 12,991 (-0.8%)
+  phai_thu_khac_Q3_4620_ton_that_25pct: 12,843 (-1.9%)
+  r3_path_doi_chung(khong lam sach): 14,660 (+12.0%)
+  toc_do_lai_du_thu_2025_(-1,1pp): 11,439 (-12.6%)
+  r2_quy_uoc_ROE_binh_quan(doi chung): 12,974 (-0.9%)
+  khong_truc_lai_du_thu: 13,247 (+1.2%)
+== Gordon P/B (kiem co tu dong) ==
+  ROE5Y BQ 17.2% Ke 13,5% g 6%: P/B 1.50x -> 18,739
+  CO_SO ROE_T dau ky 14.1% Ke 13,5% g 6%: P/B 1.08x -> 13,516
+  ROE_Trailing BQ (binh quan) 14.1% Ke 13,5% g 6%: P/B 1.08x -> 13,500

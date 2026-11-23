@@ -1,0 +1,107 @@
+{
+ "compare": {
+  "center_x085": 22763,
+  "label": "TRONG vùng P10–P90",
+  "price": 30400.0,
+  "price_date": "2026-11-20",
+  "px_vs_center_post": 0.1352,
+  "px_vs_p10": 0.4034,
+  "px_vs_p90": -0.0435,
+  "rule_015": "KHÔNG đạt (giá > 0,85×tâm)",
+  "source": "DNSE /price/ohlc 1D (close 14:45 ATC)"
+ },
+ "d_liq_used": 0.00585,
+ "headline": {
+  "center_post": 26780,
+  "center_pre": 26937,
+  "n": 2430,
+  "p10_post": 21662,
+  "p25_post": 23891,
+  "p50_post": 26831,
+  "p75_post": 29732,
+  "p90_post": 31782,
+  "pct_weight_below_price": 0.804
+ },
+ "implied_lr_margin_usd_t": 218.7,
+ "liquidity": {
+  "adv250_ty": 89.0,
+  "adv60_ty": 73.7,
+  "d_5ty_adv250": 0.00585,
+  "d_5ty_adv60": 0.00643,
+  "n": 250,
+  "sigma_d": 0.02467,
+  "sizes": {
+   "0.5ty": {
+    "d_adv250": 0.00185,
+    "pct_adv": 0.0056,
+    "sessions_at_15pct": 0.04
+   },
+   "1ty": {
+    "d_adv250": 0.00261,
+    "pct_adv": 0.0112,
+    "sessions_at_15pct": 0.07
+   },
+   "2ty": {
+    "d_adv250": 0.0037,
+    "pct_adv": 0.0225,
+    "sessions_at_15pct": 0.15
+   },
+   "5ty": {
+    "d_adv250": 0.00585,
+    "pct_adv": 0.0561,
+    "sessions_at_15pct": 0.37
+   }
+  },
+  "window": "2025-11-19..2026-11-20"
+ },
+ "variants_post": {
+  "V_4windows": {
+   "below_px": 0.644,
+   "center_post": 28811,
+   "p10": 23247,
+   "p90": 33899
+  },
+  "V_M342": {
+   "below_px": 0.7278,
+   "center_post": 27683,
+   "p10": 22619,
+   "p90": 32525
+  },
+  "V_M540": {
+   "below_px": 0.9019,
+   "center_post": 25599,
+   "p10": 20537,
+   "p90": 30381
+  },
+  "V_M738": {
+   "below_px": 0.9833,
+   "center_post": 23514,
+   "p10": 18428,
+   "p90": 28251
+  },
+  "V_khcn0": {
+   "below_px": 0.7883,
+   "center_post": 26998,
+   "p10": 21881,
+   "p90": 32001
+  },
+  "V_khcn100": {
+   "below_px": 0.921,
+   "center_post": 25009,
+   "p10": 19891,
+   "p90": 30011
+  },
+  "V_late_axis": {
+   "below_px": 0.902,
+   "center_post": 21961,
+   "p10": 13410,
+   "p90": 30345
+  },
+  "V_policy055": {
+   "below_px": 0.7222,
+   "center_post": 27810,
+   "p10": 22661,
+   "p90": 32828
+  }
+ }
+}

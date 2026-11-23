@@ -1,0 +1,56 @@
+{
+ "ticker": "MSB", "rev": 3, "asof": "2026-11-23", "valuation_date": "2026-11-23",
+ "units": "ty dong; per-share dong",
+ "MU_GIA": "file nay KHONG chua gia/PB/ADV cua MSB; thanh khoan + nhan tinh o postlock_r3.py SAU khi khoa md5",
+ "sources": {
+  "HN_Q3": "BCTC HN Q3/2026 (ky 29/10/2026) - so doc anh 09/11 o calc/notes_read.md; PDF goc KHONG con trong src/ (tai lai bi chan 23/11); doi chieu BQ ticker_financial 2026Q3 + bao chi (vnba, cafef, mekongasean)",
+  "KT_2025": "src/bctn_2025.pdf (Bao cao thuong nien 2025 tai tu msb.com.vn/msb-website/BAO-CAO-THUONG-NIEN-MSB-2025.pdf 23/11/2026; gom BCTC HN 2025 kiem toan EY, P73+); text: src/bctn_2025.txt",
+  "SX6T": "BCTC HN 6T/2026 soat xet KPMG - so doc anh 09/11 o calc/notes_read.md (PDF goc khong con)",
+  "BQ": "tav2_bq.ticker_financial MSB 2022Q4-2026Q3 (BVPS*OShares, NP_P0) - calc/bq_msb_fin_r3.csv"
+ },
+ "BV_0930": 46857.045,
+ "shares_now_m": 3744.0,
+ "NI_9T26": 4414.028, "NI_Q4_25": 1851.246,
+ "r": {"Ke": 0.135, "rule": "r = 13,5% + 1,0 x (dep12T - 7,40%) (neo 03/11/2026)", "dep12T": 0.074,
+       "dep_src": "deposit_rate_vn.effective_deposit_rate('2026-11-23') = cctg_12m(2026-11-02) 7,40% (last_update 2026-11-16)",
+       "beta_pass": [0.5, 1.0], "band_ends": [0.123, 0.134]},
+ "rights": {"new_shares_m": 936.0, "price": 10000, "cash_bn": 9360.0, "t_years": 0.104,
+            "basis": "vnba 12/10/2026 + IR-Q3 p4 (NHNN chap thuan VDL 46.800); co thuc hien, nop tien; tru PV tien nop (38/365 nam toi 31/12/2026)"},
+ "roe_convention": {
+  "basis": "ROE tren VCSH DAU KY (model nhan ROE x BV dau nam) - r3 SUA loi r2 (skeptic r1 22/11): r2 lay ROE 14% theo ROE_Trailing BQ (VCSH binh quan) roi nhan tren VCSH dau ky => ngam ep ROE ve ~13,1% < Ke",
+  "conversion": "ROE_dau_ky = ROE_binh_quan / (1 - ROE_binh_quan/2) ap co hoc len moi diem r2, lam tron 0,1pp",
+  "observed_beginning_basis": {"2023": 0.174, "2024": 0.176, "2025": 0.153, "TTM_Q3_26_on_BV_30_09_25": 0.154, "2026E_CO_SO_on_BV_31_12_25": 0.144},
+  "observed_src": "BQ ticker_financial: LNST nam 2023 4.645 / VCSH 31/12/22 26.654; 2024 5.519 / 31.298; 2025 5.628 / 36.818; TTM 6.265 / VCSH 30/09/25 40.556; 2026E (4.414+1.700)/42.446. Doi chieu BCTN 2025 bang chi tieu (LNST 2024 5.519, 2025 5.629; VCSH 2023 31.298, 2024 36.818, 2025 42.446)"
+ },
+ "scenarios": {
+  "weights": {"XAU": 0.275, "CO_SO": 0.45, "TOT": 0.275},
+  "weights_basis": "doi xung (tien le MBB/FPT D1); khong co du lieu doc lap cho nghieng",
+  "Q4_26_NI": {"XAU": 1350, "CO_SO": 1700, "TOT": 1950},
+  "Q4_basis": "Q3/26 LNST 1.649; Q4/25 1.851 (mua vu Q4); XAU = DP Q4 ~900 xay lai bao phu (uoc luong). Giu nguyen r2.",
+  "ROE_path_27_29": {"XAU": [0.105, 0.111, 0.116], "CO_SO": [0.133, 0.145, 0.151], "TOT": [0.151, 0.168, 0.174]},
+  "ROE_T": {"XAU": 0.128, "CO_SO": 0.151, "TOT": 0.174},
+  "ROE_basis": "= r2 (binh quan 10/10,5/11->12 | 12,5/13,5/14->14 | 14/15,5/16->16) quy doi sang dau ky. CO_SO 15,1% nam giua 2025 thuc te 15,3% va 2026E 14,4% (dau ky); TOT 17,4% = vung 2023-24 (17,4-17,6%); XAU 12,8% = chi phi tin dung + NIM nen. 2027 thap hon do VCSH +20% tu quyen mua. Tat ca (uoc luong)."
+ },
+ "payout": 0.0,
+ "payout_basis": "MSB chi CP thuong, khong tra tien mat 2025-26; skeptic r1 kiem: dVCSH 2025 = LNST 5.628, 9T26 4.411 ~ 4.414 => khong ro quy KTPL khoi VCSH",
+ "terminal": {"RONIC": "Ke", "formula": "TV_N = (ROE_T - Ke) * BV_N / Ke", "basis": "moat NONE (5F 09/11, <12 thang tai dung) => khong thuong RONIC>Ke; KHONG ep ROE_T ve Ke"},
+ "axes": {
+  "roe_shift": {"values": [-0.01, 0.0, 0.01], "w": [0.25, 0.5, 0.25], "tag": "[UL] sai so duong ROE"},
+  "recv_haircut": {"values": [0.0, 0.25, 0.5], "w": [0.5, 0.3, 0.2], "base_amount_bn": 4101.159, "tax": 0.2,
+     "tag": "[UL] phai thu co tinh chat tin dung (ban no cho doi tac) 4.101 tai 30/09; 5.786 (31/12/24) -> 4.001 (31/12/25, EY TM 15.1) -> 4.001 (30/06) -> 4.101 (30/09); DP chung 38 ty. Rui ro cu the => kich ban xac suat, khong vao tham so trung tam"},
+  "accrual_haircut": {"values": [0.0, 0.25, 0.5], "w": [0.5, 0.3, 0.2], "base_amount_bn": 3830.6, "tax": 0.2,
+     "basis": "lai phai thu TIN DUNG vuot ty le 2024: 1,854% du no (3.272,7/176.493,5, EY 31/12/24) x du no 30/06/26 230.420 = 4.272,7; thuc 8.103,3 (SX6T TM 15.2) => vuot 3.830,6 ty. Chung cu: lai thu thuc/ghi nhan 2025 = 16.497/21.601 = 76% (2024: 101%), 9T26 20.394/22.349 = 91%. Du no 230.420 la so ngan hang me (IR-Q3 p9) trong khi 8.103 hop nhat => vuot hoi cao (than trong). Moi lan haircut = huy lai du thu sau thue.",
+     "tag": "[UL] r3 MOI theo skeptic r1 muc (2)"}
+ },
+ "sensitivities_only": {
+  "LC_forfaiting": {"amount_bn": 9229.281, "src": "SX6T TM 15.1.2 (30/06/26); 2.382,6 tai 31/12/25 (EY)", "test": "chi phi tin dung 0,89%/nam (9T26 tu tinh) x 1 nam, sau thue; va 5% ton that 1 lan", "why_not_base": "mua mien truy doi bo chung tu L/C DO MSB PHAT HANH => rui ro la KH nhap khau cua chinh MSB; khong co so lieu ton that doc lap"},
+  "other_recv_Q3_unsplit": {"amount_bn": 4620, "status": "khong kiem chung duoc (BCTC Q3 khong tach phai thu khac; 30/06 13.881 -> 30/09 18.501)"},
+  "coverage_80": true, "no_rights": true, "terminal_growth_g6": true, "roe_half_to_ke": true
+ },
+ "audit": {"FY2025": "EY Viet Nam, chap nhan toan phan, khong doan nhan manh, ky 26/03/2026, so tham chieu 11635584/E-69214045-HN (src/bctn_2025.txt P73)", "H1_2026": "KPMG soat xet chap nhan toan phan 14/08/2026 (notes_read.md)", "auditor_change_reason": "khong kiem chung duoc (NQ DHDCD 2026 khong tai duoc)"},
+ "related_parties_FY2025": "EY TM 42: cho vay HDQT/BTGD/BKS + nguoi lien quan 142,6 ty (2024: 273,1); ROX/FamilyMart/ROX Living vay <0,1 ty; VNPT gui CKH 4.230 ty (nguon von, khong phai tai san rui ro) => khong trong yeu (0,07% du no)",
+ "corp_bonds_FY2025": "EY TM 11.1: CK no TCKT trong nuoc 1.961,3 ty (2024: 900,4) = 4,6% VCSH, LS 9,45-12,85%; DP chung 14,7 ty. 30/09/26 chua tach (Q3 PDF khong con)",
+ "capital_FY2025": "BCTN 2025 bang chi tieu: CAR 12,49%, CAR cap 1 11,87%, VCSH/TTS 10,41%; Q3/26 CAR HN 11,67% (IR-Q3)",
+ "esop": "BCTN 2025 chi nhac ESOP 2022; KH 2026 = thuong 20% + quyen mua 25%; khong thay ESOP 2026 (NQ DHDCD chua doc) => khong vao model",
+ "liquidity": {"method": "CK = sigma_ngay x sqrt(Q/ADV_median) (tien le FPT r3)", "sizes_vnd": [5000000000.0, 40000000.0], "computed": "postlock_r3.py (sau khoa)"}
+}

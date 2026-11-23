@@ -1,0 +1,83 @@
+{
+ "ticker": "DCM",
+ "asof": "2026-11-07",
+ "job": "Taylor_20261107_120603",
+ "base_report": "REPORT_r5.md",
+ "moat_tier": "NARROW",
+ "moat_type": "COST/LOCATION",
+ "risk1": "Gia/khoi luong khi (nguon PSC PM3-CAA toi 31/12/2047 nen khong mat nguon; gia/khoi luong bo sung khong cong bo) sau 2027 va sau 2032, do nha cung cap nha nuoc quyet dinh",
+ "reused": false,
+ "reuse_reason": "khong co dong DCM trong data/moat_tags.csv, khong co muc 5F trong REPORT r1-r5 / kb/projects/dcm-dd-20261104.md",
+ "source_asof": "2026-11-07",
+ "moat_durable": false,
+ "durability_tests": {
+  "i_excess_through_cycle": false,
+  "ii_named_mechanism": "partial",
+  "iii_no_clock": false
+ },
+ "evidence": {
+  "ROE_avg_2016_20": 0.098,
+  "ROE_avg_2021_25": 0.229,
+  "ROE_Min5Y_2025": 0.108,
+  "ROIC_Min5Y_2025": 0.063,
+  "ROIC5Y_2025": 0.17,
+  "Ke": 0.135,
+  "roic_op_book_at_spread179": 0.221,
+  "spread_roic_op_eq_ke": 131.9,
+  "ROIC10Y": 0.116,
+  "ROIC_Min10Y": 0.0199,
+  "ROE10Y": 0.162,
+  "ROE_median_Q4_2016_25": 0.1055,
+  "GPM_4Q_DCM_below_DPM_2016_20": "5/5",
+  "GPM_4Q_DCM_below_DPM_2016_25": "8/10",
+  "GPM_diff_pp_2023_25": [
+   -2.3,
+   5.0,
+   5.7
+  ],
+  "ROE_DCM_above_DPM": "4/5 (2016-20), 8/10 (2016-25)",
+  "peer_coal_DHB": {
+   "ROIC_Min5Y_2025": -0.076,
+   "ROIC_Min10Y": -0.098,
+   "GPM_4Q_2024": 1.9
+  },
+  "psc_pm3_caa_to": "2047-12-31 (REPORT_r5.md:127; src/dl_1844450.txt:435)"
+ },
+ "model_changed": false,
+ "model_review": "terminal g=0, RONIC=r, bien TB chu ky 2016-25=179 (proxy chung nganh), 2035+ ve proxy => khong co premium moat, nhat quan voi NARROW khong ben",
+ "centre": 24326,
+ "centre_range_AB": [
+  24192,
+  24459
+ ],
+ "sensitivity": {
+  "WIDE": {
+   "spread": 220,
+   "value": 27330,
+   "delta": 3004
+  },
+  "WIDE_strong": {
+   "spread": 277.2,
+   "value": 31534,
+   "delta": 7208
+  },
+  "NARROW": {
+   "spread": 179,
+   "value": 24314,
+   "delta": -12
+  },
+  "gas_clock_ref_S4": 16719,
+  "label_at_33000": "tren vung gia tri o moi kich ban (so diem, chua chay luoi); WIDE_strong 31534 thap hon 33000 4.4%",
+  "stress_lower_bound": {
+   "fade_from_2035": 22886,
+   "delta_fade_from_2035": -1428,
+   "fade_now": 20850,
+   "delta_fade_now": -3476,
+   "note": "ROIC so sach tren nha may da khau hao != moat; deferred discount ^-(t-2) (r1 ^-(t-1) = 23056)"
+  }
+ },
+ "proposed_moat_tag_row": "DCM,NARROW,COST/LOCATION,L,\"Cost edge = pipeline PM3 gas vs coal-based northern peers, but gas is set by state supplier PVN/PV GAS (Petronas ends 2027, committed volume ends 2032-04-25, Nam Du 10.39 USD/MMBtu +2.25%/y fixed); not through-cycle: ROE avg 2016-20 9.8% < Ke 13.5%, ROE_Min5Y 10.8%, ROIC_Min5Y 6.3%, ROIC10Y 11.6% < Ke, ROE10Y 16.2% (2022 peak; median 10.55%); GPM TB4Q below DPM 8/10y; coal peer DHB ROIC_Min5Y -7.6%; PSC to 2047; sector oversupplied 0.6-1.0 Mt/y\",2026-11-07,5f_taylor_dd_addendum,N",
+ "measured_by": "calc/moat_sens_5f.py -> calc/moat_sens_5f_out_r2.txt (2 runs identical); calc/gpm_4q_5f.sql -> gpm_4q_5f_out.csv (2 runs identical); bq ticker_financial DCM/DPM/DHB ROIC10Y/ROE10Y/ROIC_Min5Y/Min10Y 2026Q3; REPORT_r5.md §4",
+ "non_pit": true,
+ "job_r2": "Taylor_20261107_122448"
+}

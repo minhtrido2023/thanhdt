@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev3.md",
+  "report_md5": "19e23aa470536ee9ca79c5c1576c5640",
+  "brief_md5": "577ce0650bb0107a774dbb6297aa7c03",
+  "model": "opus",
+  "cost_usd": 1.0888913999999998,
+  "started_at_ict": "2026-11-23T06:52:46+07:00",
+  "summary": "Rev3 fixes r1's arithmetic error, and every number I could recompute (model outputs, BVPS floor, share base, 9M NPAT, inventory, debt, TTM CFO) matches BQ and the locked model. The centre 4.780 still is not trustworthy. It assumes new investors pay exactly fair value, yet the report's own check shows that price is below the legal floor in scenarios carrying 80% weight. Realistic outcomes are either a transfer to existing holders (~8.665, higher) or a failed/shrunk raise (unquantified, not necessarily catastrophic), so the error can run either way. The recap-timing assumption flatters the centre by ~22% with no bridge cost. The load-bearing plan input N=1.600 is untraceable on disk. Attack 8 also finds three gaps: an undiscussed PwC H1 emphasis-of-matter, an unexplained Q2 profit revision, and a 2025 dividend document absent from the report. The NON label itself is not challenged here (price-blind); the valuation zone needs the outcome-tree rebuild before it can be confirmed.",
+  "verdict_raw_path": "agents/Taylor/research/dd_PNJ_20261114/skeptic/r2_raw.md"
+}

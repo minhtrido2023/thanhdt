@@ -1,0 +1,17 @@
+LOCK_r7 2026-11-23 06:53:17 ICT — job Taylor_20261122_234422 — khoá TRƯỚC khi đọc giá
+c5899d71a44a0cff937bd9525e911bec  calc/model_r7.py
+d394f256e99356159951e3ed49b9d81b  calc/model_r6.py
+df0e56541d3ea593e82cfe87c2e14879  calc/model_r5.py
+019593798a0814db939f05e65cb738b3  calc/model_r2.py
+d8f1bd5e8c993b7dcc39845673b8359c  calc/model.py
+4597bc083f0d64d8873141b12fbfb3a6  ../dd_redo_20261105/_shared/wpct.py
+1b4fb5fc8f33123f4ff4e1ff310cc59f  calc/bq_np_hist_out.csv
+49afc18eba7b6ca9b9f73f58a506e406  calc/bq_commod_out.csv
+5cc9a64c6fd71bc2cd53565f7667321c  calc/bq_da_r7.sql
+b7e29efbce6a0db2739c7a51b3afec85  calc/bq_da_r7_out.csv
+67398cc1805c4b0ac418f71ea7bcf36b  calc/model_r7_out.txt
+988c3627721401ae9a554ef7a5026e40  calc/model_r7_out.json
+62febba3482d0109275e22208dc563a1  assumptions_r7.json
+ce6191bcec07db3ec2f61e1daa8a4702  src/web/DCM_Baocaotaichinh_2025_Kiemtoan_Hopnhat.pdf
+4022b9283a6b45184e4dadf37192b49e  src/web/DCM_Baocaotaichinh_Q3_2026_Hopnhat.pdf
+# bq_np_hist_out.csv + bq_commod_out.csv khôi phục từ git 906dfecd0^ (TRIM_DD), md5 khớp LOCK_r6

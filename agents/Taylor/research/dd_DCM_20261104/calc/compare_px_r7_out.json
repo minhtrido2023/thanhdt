@@ -1,0 +1,101 @@
+{
+ "compare": {
+  "center_x085": 21099,
+  "label": "TRÊN vùng (>P90)",
+  "price": 30400.0,
+  "price_date": "2026-11-20",
+  "px_vs_center_post": 0.2247,
+  "px_vs_p10": 0.5382,
+  "px_vs_p90": 0.0255,
+  "rule_015": "KHÔNG đạt (giá > 0,85×tâm)",
+  "source": "DNSE /price/ohlc 1D (close 14:45 ATC)"
+ },
+ "d_liq_used": 0.00585,
+ "headline": {
+  "center_post": 24822,
+  "center_pre": 24968,
+  "n": 2430,
+  "p10_post": 19763,
+  "p25_post": 22124,
+  "p50_post": 24919,
+  "p75_post": 27627,
+  "p90_post": 29644,
+  "pct_weight_below_price": 0.9398
+ },
+ "implied_lr_margin_usd_t": 242.6,
+ "liquidity": {
+  "adv250_ty": 89.0,
+  "adv60_ty": 73.7,
+  "d_5ty_adv250": 0.00585,
+  "d_5ty_adv60": 0.00643,
+  "n": 250,
+  "sigma_d": 0.02467,
+  "sizes": {
+   "0.5ty": {
+    "d_adv250": 0.00185,
+    "pct_adv": 0.0056,
+    "sessions_at_15pct": 0.04
+   },
+   "1ty": {
+    "d_adv250": 0.00261,
+    "pct_adv": 0.0112,
+    "sessions_at_15pct": 0.07
+   },
+   "2ty": {
+    "d_adv250": 0.0037,
+    "pct_adv": 0.0225,
+    "sessions_at_15pct": 0.15
+   },
+   "5ty": {
+    "d_adv250": 0.00585,
+    "pct_adv": 0.0561,
+    "sessions_at_15pct": 0.37
+   }
+  },
+  "window": "2025-11-19..2026-11-20"
+ },
+ "variants_post": {
+  "V_4windows": {
+   "below_px": 0.8276,
+   "center_post": 26787,
+   "p10": 21415,
+   "p90": 31768
+  },
+  "V_M342": {
+   "below_px": 0.8991,
+   "center_post": 25725,
+   "p10": 20808,
+   "p90": 30408
+  },
+  "V_M540": {
+   "below_px": 0.9824,
+   "center_post": 23641,
+   "p10": 18669,
+   "p90": 28262
+  },
+  "V_M738": {
+   "below_px": 0.9991,
+   "center_post": 21556,
+   "p10": 16553,
+   "p90": 26107
+  },
+  "V_da_cal": {
+   "below_px": 0.8765,
+   "center_post": 25755,
+   "p10": 20482,
+   "p90": 30797
+  },
+  "V_khcn0": {
+   "below_px": 0.8167,
+   "center_post": 26811,
+   "p10": 21752,
+   "p90": 31634
+  },
+  "V_policy055": {
+   "below_px": 0.883,
+   "center_post": 25852,
+   "p10": 20821,
+   "p90": 30686
+  }
+ }
+}

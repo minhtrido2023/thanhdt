@@ -1,0 +1,7 @@
+Thanh khoan 2025-11-18..2026-11-20 n=250 sigma 0.0160 ADV250 96.0 ty, 60 128.2, 20 139.5
+  Q=5 ty: CK 0.3658%, Q/ADV 5.207%, phien thoat @10% 0.52 @20% 0.26
+  Q=0.04 ty: CK 0.0327%, Q/ADV 0.042%, phien thoat @10% 0.00 @20% 0.00
+SAU CK 5 ty: {'center': 14621, 'p10': 10538, 'p25': 12214, 'p50': 14698, 'p75': 16655, 'p90': 18796, 'min': 8749, 'max': 20601, 'n': 81} | tham so trung tam 14917
+SAU CK 40 trieu: tam 14670 P10 10573 P90 18858
+Gia 16550 @2026-11-20: TRONG vung; gia/tam +13.2%; trong so gia tri < gia 70.8%; luat4 0,85xtam=12,428 -> False
+Ke ngu y boi gia: 12.49% (lai huy dong 12T ngu y 6.39%)

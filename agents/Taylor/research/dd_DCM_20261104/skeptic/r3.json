@@ -1,0 +1,13 @@
+{
+  "round": 3,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_DCM_20261104/REPORT_rev8.md",
+  "report_md5": "ce95d772d35cccc7506dba86311a1396",
+  "brief_md5": "988266f3235ff5a0b6b36c74c55ffd79",
+  "model": "opus",
+  "cost_usd": 0.7936264,
+  "started_at_ict": "2026-11-23T07:04:07+07:00",
+  "summary": "Rev8 truy nguồn tốt (số cổ phiếu, thuế 20% từ 2027, quỹ phúc lợi, kiểm toán FY2025, cầu nối tái lập được) và đã minh bạch chuyện sửa sau khi biết giá. Nhưng mô hình xử lý quỹ KH&CN hai kiểu: số dư chỉ trừ 11% theo lập luận pháp lý S2, còn dòng trích hằng năm ~200–250 tỷ đã nằm trong chi phí QLDN của LNST hồi quy thì vẫn coi là mất 100% vĩnh viễn. Theo chính logic của S2, tâm bị đặt thấp khoảng 1–2,5k đ/cp (trung tâm ~7%), có thể thêm phần trừ trùng với capex duy trì. Chiều ngược lại, +1.781 của S2 dựa trên nghị định/thông tư chưa kiểm và lãi ước lượng, và hồi quy 2021+ vẫn dự báo quá cao năm KT 2025. Vì sai lệch nội tại trọng yếu (>5%) và định lượng được, kết luận là REFUTED. Cần làm lại cùng lúc dòng trích và số dư quỹ theo một quy tắc duy nhất.",
+  "verdict_raw_path": "agents/Taylor/research/dd_DCM_20261104/skeptic/r3_raw.md"
+}
