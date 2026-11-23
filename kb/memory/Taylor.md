@@ -30,3 +30,5 @@
 - [2026-11-23T00:24:57Z] ĐANG DỞ: job Taylor_20261123_001046 CSV r3: skeptic r2 INCONCLUSIVE | NEXT: thêm tax shield + kd chiết khấu capex vay → REPORT_r4.md → skeptic r3 (vòng cuối) → LEDGER_PROPOSAL_CSV.json → bus+notify
 - [2026-11-23T00:26:04Z] [VLB rebuild 23/11] XONG job Taylor_20261123_001052: REPORT_rev3 tâm exdiv 42.800 (r2 48.735), skeptic r2 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_VLB.json (REFUTED_OPEN); thiếu BCTC KT 2025
 - [2026-11-23T00:26:06Z] [dd-HHS rev5 23/11] XONG job Taylor_20261123_001050: tâm 13.969 giữ, skeptic r3 INCONCLUSIVE (biên cao tầng HH1–HH4 + CK holding chờ user) — CHỜ Mike áp LEDGER_PROPOSAL_HHS.json (REFUTED_OPEN)
+- [2026-11-23T00:28:21Z] ĐANG DỞ: job Taylor_20261123_001048 LLM REPORT_rev4 (tâm 32.376) skeptic r3 (vòng cuối) nền log /tmp/llm_sk_r3.log | NEXT: LEDGER_PROPOSAL_LLM.json → bus+notify
+- [2026-11-23T00:28:38Z] [dd-CST rebuild 23/11] XONG job Taylor_20261123_001043: REPORT_rev3 tâm 6.022/5.837 sau CK, skeptic r3 REFUTED — CHỜ Mike áp LEDGER_PROPOSAL_CST.json (REFUTED_OPEN) / user quyết vòng 3
