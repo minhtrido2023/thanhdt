@@ -1,0 +1,17 @@
+{
+ "round": "r3c",
+ "job": "Taylor_20261108_180625",
+ "inherits": "calc_r3b/assumptions_r3b.json (md5 0d06fba6...) + calc_r3/assumptions_r3.json (md5 51bd57e9...) — moi gia dinh GIU NGUYEN tru muc ktpl_on_stake_income (skeptic cuoi r3b REFUTED hep o dung 1 diem so; A RONIC=Ke giu nguyen)",
+ "asof_price": "2026-11-06",
+ "price_file": "../calc_r3/px_szl_r3_20261106.csv (BQ tav2_bq.ticker, giu nguyen file r3; KHONG truy van lai)",
+ "ktpl_on_stake_income": {
+  "value": "khung BAN (base) + khung GIU-NHAN-CO-TUC (bien the song song)",
+  "base_sell_frame": "co phan SZC/SZB = thi gia (khung BAN, vi mo hinh dinh gia co phan theo thi gia tru thue lai von). Thu nhap tu co phan trong khung BAN = LAI VON. KTPL trich tren LAI VON SAU THUE: listed = MKT - TAX - kinv*k*(GAIN - TAX), GAIN = sum max(MKT_i - BOOK_i, 0), TAX = 20% x GAIN. Von goc 284,8 ty KHONG bi trich (hoan von, khong phai loi nhuan).",
+  "hold_frame": "giu va nhan co tuc: khong thue lai von; co tuc nhan tu DN khac da nop TNDN la thu nhap MIEN thue TNDN (Luat TNDN 14/2008/QH12 Dieu 4 khoan 6 theo hieu biet — CHUA TRA van ban trong phien nay; Luat TNDN 67/2025/QH15 CHUA TRA). PV dong co tuc ~ thi gia => KTPL trich tren toan bo: listed = MKT x (1 - kinv*k).",
+  "r3b_error": "r3b model_r3b.py:76 (MKT-TAX)x(1-kinv*k) tron 2 khung: tru thue theo khung BAN roi trich KTPL tren ca von goc => tru tong 90,3 ty, dung 54,5 (GIU) .. 58,4 (BAN)",
+  "b50_sensitivity": "kinv = 0,5 o khung BAN (giu tu r3b)",
+  "approved": "user duyet nguyen tac 'ap KTPL nhat quan tren thu nhap co phan' (dispatch Mike job Taylor_20261108_180625)"
+ },
+ "ktpl_on_unlisted": {"value": 0.0, "basis": "co phan chua niem yet (An Binh/Binh Thuan/Dich vu 113,25 ty) ghi THEO SO SACH => khong co lai von trong khung BAN => KTPL = 0. Do nhay r3b 'B ca co phan chua niem yet' (-253) BO vi khong co co so."},
+ "label_rule": "giu STANDARD_r2: DUOI neu gia < P10, TREN neu gia > P90, ket cuc sau CK; nhan hanh dong = co sleeve 40 tr; co 5 ty = tham chieu (Q/ADV250 1.084%, ngoai vung hieu chinh)"
+}

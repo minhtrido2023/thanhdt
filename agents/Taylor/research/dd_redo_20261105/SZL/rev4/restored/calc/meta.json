@@ -1,0 +1,17 @@
+{
+ "grid_desc": "4 bien, n=135: LN loi nam hoa N0 {-12; -6; 0; +6; +12}% quanh 131,1 ty (trong so 0,1/0,2/0,4/0,2/0,1) x g {2; 3; 4}% (1/4-1/2-1/4) x r {12,5; 13,5; 14,5}% (1/4-1/2-1/4) x ty le LN phi tien mat (phan bo DT chua thuc hien) {20; 10; 0}% (1/4-1/2-1/4). Co phan SZC/SZB theo thi gia 04/11 tru thue lai von 20%, chua niem yet gia so, no rong 205,5 co dinh; Long Phuoc NPV 0. CK thanh khoan 5 ty (4,2%) ap dong loat.",
+ "change_reason": "Tam sau CK 29.900 vs cu 27.200 (+9,9%, <10% sat nguong). (+) bo chiet khau holdco 15/25/35% tren co phan SZC/SZB (khong co co so du lieu; thay bang thue TNDN 20% tren lai von chua thuc hien 40,6 ty co so BCTC + luat thue) ~+2.200 d; (+) boi so loi ngam dinh tu r 13,5%/g 2-4% = 8,7-10,5x thay 6/8/10x tu dat; (-) moi: tru 0-20% LN loi phi tien mat (phan bo DT chua thuc hien 762 ty); (-) CK thanh khoan 4,2% (-1.296 d). Gia 28.200 -> 27.650.",
+ "warnings": [
+  "Cong ty me SNZ: Truong BKS bi khoi to/tam giam (CBTT ~27-28/05/2026) — ca nhan o cty me, chua cham phap nhan/tai san SZL",
+  "Luan chuyen tien trong he sinh thai Sonadezi (ABS); so huu cheo SZL-SZC-SZB; tra truoc nguoi ban NH tang 14,2 -> 72,6 ty (chua doc thuyet minh doi tuong)",
+  "Nhom co dong lon >75% (SNZ 52,7%) — free float thap; ADV 0,46 ty, 5 phien KL=0 trong 250",
+  "Dong Nai: sai pham quan ly xang dau/dat dai (bao chi 2026) — SZL chua bi neu ten"
+ ],
+ "open_issues": [
+  "Thoi han thue dat KCN Long Thanh (gia dinh ~2053, 27 nam) chua doi chieu => ty le LN phi tien mat 10% base la uoc luong (can tren 17%)",
+  "Bien LN cua phan DT dat phan bo chua co so lieu theo mang",
+  "Long Phuoc: tong muc dau tu 920 vs XDCB 407; quy mo 48 vs 75 ha chua doi chieu — NPV 0",
+  "Doi tuong tra truoc nguoi ban 72,6 ty (V.4) va phai thu khac 25,6",
+  "Sector read KCN co (sector_read_kcn_cho_thue_dat_20261101.md, Bobby blind): TT 99/2025 bat phan bo DT thue nhan truoc tu 2026 => danh gia qua dong tien/DT chua thuc hien — nhat quan voi dieu chinh LN phi tien mat; khong doi tham so khac theo sector read"
+ ]
+}

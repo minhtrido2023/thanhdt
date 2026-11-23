@@ -1,0 +1,13 @@
+{
+  "round": 3,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev3.md",
+  "report_md5": "50488508d0227b72119e381b3a5d22ff",
+  "brief_md5": "e93c86d76fe3359f2b66aa06a507895e",
+  "model": "opus",
+  "cost_usd": 1.0883711999999999,
+  "started_at_ict": "2026-11-23T12:20:46+07:00",
+  "summary": "Rev3's numbers reproduce (BQ NP and equity, real-estate gross profit, run-rate, base 15,119≈15,123), and the real-estate profit exclusion is backed by new audited filings. But the model is internally inconsistent: it removes the segment's profit and keeps its capital — about 1,186 bn of real-estate WIP inside operating equity, priced at ≈0.70× book and lowering ROE_op. Fixing only that raises the centre by +5.4% to +28.9% (estimate), above the 5% threshold, so the verdict is REFUTED in the 'too low' direction. In the other direction, the CIT incentive end date (about −13%, estimate, unrun), the biological-asset writedown (−1.5% to −3%) and environmental compliance capex are still unverified, so the corrected centre could move either way. The real-estate asset must be priced and B5 run before a centre can be accepted. Market prices in the report were ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_DBC_20261118/skeptic/r3_raw.md"
+}

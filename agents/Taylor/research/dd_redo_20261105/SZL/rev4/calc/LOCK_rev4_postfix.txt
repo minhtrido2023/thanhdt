@@ -1,0 +1,4 @@
+# LOCK rev4 POST-FIX 2026-11-23T12:05:38+07:00: sau lan chay dau (out md5 aea5210c) sua LAND_RENT_YR 18,3->13,74 (chi do nhay) + bo sung basis (BDS H1, NMXLNT) trong assumptions; khong doi base
+bc1f953251aadff9e68260396b5b8fbe  assumptions_rev4.json
+1ca00266e54094633781c74ba22d4969  model_rev4.py
+2a25b4892c701dce7b0c4a8b287d3493  model_rev4_out.txt

@@ -1,0 +1,42 @@
+{
+ "_doc": "Đầu vào BỔ SUNG rev3 (23/11/2026, job Taylor_20261123_050007). Nền giữ nguyên assumptions_POW_20261118_rev2.json (md5 721c5f28a97867749da9499ca68fa20e). Khoá MÙ GIÁ: lập trước khi đọc giá thị trường.",
+ "qcvn19_va1": {
+  "capacity_mw": 1200,
+  "capex_bn": 3485,
+  "opex_bn_per_year": 572,
+  "basis": "Tương tự QTP (NMNĐ Quảng Ninh 1.200 MW than): FS cải tạo hệ thống khí thải đáp ứng QCVN 19:2024 TMĐT 3.485 tỷ, O&M cố định 102,0 + điện-nước-hoá chất 470,3 = 572 tỷ/năm (agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_r3.md dòng 12, REPORT_r3c.md §2). VA1 = 2x600 MW = cùng 1.200 MW => quy đổi 1:1 theo MW (ước lượng; VA1 đã có/chưa có SCR-FGD: không công bố).",
+  "obligation_basis": "QCVN 19:2024/BTNMT bắt buộc cho cơ sở hiện hữu từ 01/01/2032 (legal-vn 20/11, QTP REPORT_r3.md:91); PV Power đã chọn thầu 'Tư vấn đánh giá kỹ thuật và lập báo cáo đề xuất đầu tư cho các nhà máy nhiệt điện của PV Power đáp ứng QCVN 19:2024' — PECC1, 2,984 tỷ, Q3/2026–Q1/2027 (CBTT 19/10/2026, src/cbtt/2026-10-xx_7139_qcvn19/post.html)",
+  "capex_schedule": {"2029": 0.30, "2030": 0.45, "2031": 0.25},
+  "schedule_basis": "(ước lượng) tư vấn xong Q1/2027 -> phê duyệt/EPC 2027-28 -> giải ngân 2029-31 theo tỷ lệ 30/45/25 của QTP, vận hành 01/01/2032",
+  "opex_start_year": 2032,
+  "dep_years": 15,
+  "tax_rate": 0.20,
+  "tax_basis": "thuế TNDN phổ thông 20% (ưu đãi VA1 COD 2015 nếu có coi như hết trước 2032 — ước lượng); độ nhạy 10,9% (thuế hiệu dụng 9T/26)",
+  "passthrough_weights": {"P0": 0.40, "P50": 0.36, "P100": 0.24},
+  "passthrough_basis": "Trọng số QTP r3b §4 (agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_r3b.md:72) dựa trên đánh giá pháp lý legal-vn 20/11: TT12/2025 không có điều thoả thuận bổ sung chi phí vào giá phát điện (TT07/2024 Đ27.4 đã bị bãi bỏ), còn Luật Điện lực 61/2024 Đ52.4 mở lối nhưng chưa có tiền lệ nhà máy than được bù. Cùng khung pháp lý, cùng bên mua EVN => áp nguyên cho VA1. P50 = bù một nửa; P100 = bù đủ (NPV ~0)",
+  "valuation_t0": "2026-09-30",
+  "mid_year": true
+ },
+ "net_debt_fix": {"st_debt_q3_ocr": 19418.290, "basis": "OCR BCTC HN Q3/26 dòng 357 '19.418.289.505.077' (rev2 ghi 19.438,3 — lỗi gõ); nợ ròng thật 7.367,7 -> 7.347,7. Không đổi định giá (mô hình dùng VCSH mẹ)"},
+ "legacy_fixed_assets": {
+  "tangible_gross_q3": 95454.865, "tangible_accum_dep_q3": 51979.254, "tangible_nbv_q3": 43475.612,
+  "dep_9m2026": 2905.899, "dep_9m2025": 2133.1,
+  "nt34_nbv_est": 23500,
+  "basis": "TM TSCĐ hữu hình BCTC HN Q3/26 (OCR dòng 218-232, 1905-1925): nguyên giá 95.454,9; hao mòn luỹ kế 51.979,3; còn lại 43.475,6; KH 9T 2.905,9. NT3&4 NBV (ước lượng) = ~24.300 vốn hoá FY25 − ~800 KH 9T. => NBV di sản ~19.976; KH di sản năm ~2.844 (= 9T/25 x 4/3) => đời sổ sách còn lại ~7 năm; toàn công ty 43.475,6/(2.905,9x4/3) = 11,2 năm"
+ },
+ "sensitivity_inputs": {
+  "cph_settlement_precedent_bn": 728.2,
+  "cph_basis": "TM16 FY2025: 728,2 phải nộp PVN (LNST CLTG VA1 2016-17 trước CPH) — tiền lệ; nghĩa vụ quyết toán CPH còn lại: không công bố",
+  "retro_receivable_pbt_bn": 2755,
+  "retro_uncollected_frac": [0.3, 0.5],
+  "welfare_balance_bn": 293.2,
+  "welfare_pct_npat_test": [0.03, 0.05],
+  "welfare_basis": "số dư 293,2 là nợ phải trả (đã nằm ngoài VCSH) — không trừ thêm; tỷ lệ trích hằng năm: không công bố (searched: BCTC HN Q3/26 TM, NQ ĐHĐCĐ 20/5/2026 không có trong src) => độ nhạy 3%/5% LNST di sản",
+  "gas_plants_mw": 1950,
+  "gas_qcvn_capex_bn_per_mw_test": [0.5, 1.0],
+  "gas_basis": "CM1&2 1.500 + NT1 450 MW (BCTN). Chi phí tuân thủ NOx tua-bin khí: KHÔNG có cơ sở độc lập => chỉ độ nhạy minh hoạ 0,5/1,0 tỷ/MW (ước lượng thuần), không opex",
+  "nt34_book_haircut_test": [0.15, 0.30, 0.50],
+  "legacy_finite_life": {"depreciating_share_test": [0.5, 0.64], "T_years_test": [7, 11]},
+  "legacy_finite_life_basis": "share 0,64 = NBV di sản ~19.976 / E di sản 31.394,5 (giả định toàn bộ nợ ròng gán cho NT3&4 — cận trên); 0,5 = cận dưới tròn. T 7 = đời sổ sách di sản, 11 = toàn công ty. Vốn thu hồi tái đầu tư ở NPV=0 (V4)."
+ }
+}

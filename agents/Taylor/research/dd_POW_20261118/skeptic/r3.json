@@ -1,0 +1,13 @@
+{
+  "round": 3,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_POW_20261118/REPORT_rev4.md",
+  "report_md5": "4e9934932e4d6700f9dc58ce34824d9d",
+  "brief_md5": "3572bcbd8392093060bb18c385d68179",
+  "model": "opus",
+  "cost_usd": 0.825694,
+  "started_at_ict": "2026-11-23T12:15:06+07:00",
+  "summary": "Rev4 tái lập được số học (tâm 9.482/9.387) và thay đổi tăng tâm duy nhất (tách hồi tố 2.454,7 ghi 1,0×) có nguồn gốc kiểm được: CBTT 03/08 xác nhận 1.103+991+381=2.475,6 ở công ty mẹ, từ các nhà máy của mẹ. ROE di sản 8% dựng lại độc lập được ~8,1%, nằm ở cận trên. Hai chiều: tâm có thể cao hơn thực khoảng 1–2% vì phần hồi tố là hoàn nhập dự phòng, thuế hiệu dụng thấp và tỷ giá thu dần; tâm cũng có thể thấp nếu lợi nhuận cốt lõi 2026 (cao hơn ~27% so với mức mô hình ngầm định) bền vững hoặc NT3&4 có NPV>0. Hạng mục ngành bắt buộc vẫn chưa đóng: hạn PPA/nguồn khí CM1&2 và NT1, cùng giá trị sổ theo nhà máy, nên không chặn được rủi ro tài sản mắc kẹt. Báo cáo không có thông tin mới nào đóng được hạng mục này (PPA ký lại 2021 chỉ giảm một phần), nên giữ INCONCLUSIVE. Hạng mục này có thể đóng bằng cách chặn trên thiệt hại từ giá trị sổ theo nhà máy. Không tra giá; giá DNSE trong báo cáo bị bỏ qua khi đánh giá mô hình.",
+  "verdict_raw_path": "agents/Taylor/research/dd_POW_20261118/skeptic/r3_raw.md"
+}

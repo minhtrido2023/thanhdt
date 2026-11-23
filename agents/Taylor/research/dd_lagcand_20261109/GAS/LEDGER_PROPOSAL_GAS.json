@@ -1,0 +1,72 @@
+{
+ "proposal_for": "kb/dd_price_zones.json",
+ "job": "Taylor_20261123_050003 (resume of Taylor_20261123_003454)",
+ "entry": {
+  "ticker": "GAS",
+  "dd_date": "2026-11-09",
+  "rev": 2,
+  "valuation_asof": "2026-11-23",
+  "bctc_quarter": "2026Q3",
+  "skeptic_final": "CONFIRMED",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/GAS/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "zone_low": 44760,
+  "center": 51652,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 81 kết cục, sau chiết khấu thanh khoản @5 tỷ (r 13,5% neo lãi huy động 7,40% @23/11), chiết khấu giữa kỳ",
+  "zone_high": 59986,
+  "center_range": null,
+  "price_ref": 74100,
+  "price_date": "2026-11-06",
+  "verdict_label": "TRÊN vùng (TƯƠNG ĐỐI THEO KHUNG): giá 74.100 cao hơn P90 59.986 23,5% và cao hơn tâm 51.652 43,5%; P/E TTM 12,1x sát đáy 10 năm (11,7x) — khoảng cách đến từ khung (r 13,5%, RONIC=Ke, suy giảm), không phải LN bị ép",
+  "skeptic_status": "rev4 (23/11): skeptic DD_GENERAL r1 INCONCLUSIVE (trên r2) → rev3 phân loại đủ BCĐKT, D3 ARO 100%, BCC Lô B, KT 2025; r2 INCONCLUSIVE (trên rev3) → rev4 sửa KT-PL 3,51%, lỗi điều chỉnh 2025 (hoàn nhập cả năm 436,6 thay 1.631 9T) + cộng lại trích DP Q4/25, độ nhạy hết hạn HĐ khí; r3 CONFIRMED medium (killer: cộng lại Q4/25 có thể +2–3% nếu trích lập lặp lại; HĐ khí 12/2026 −4…−15% là độ nhạy)",
+  "source_file": "agents/Taylor/research/dd_lagcand_20261109/GAS/REPORT_rev4.md",
+  "report_md5": "2260975bf2ef6e679dd43b52c4d105f3",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/GAS/REPORT_rev4.md",
+    "quote": "- **Giá trị nội tại sau chiết khấu thanh khoản (cỡ 5 tỷ):** tâm **51.652đ** · P10 **44.760** · P50 51.332 · P90 **59.986**.",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/GAS/REPORT_rev4.md",
+    "quote": "- **Vùng giá (sau CK 5 tỷ):** rẻ < 44.800 · hợp lý 44.800–60.000 · đắt > 60.000.",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_lagcand_20261109/GAS/calc/assumptions_r4.json",
+  "assumptions_md5": "1ea7531a51ac62a5e7a8f8f27e55824a",
+  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "expires_on": "2027-03-09",
+  "expires_basis": "dd_date+120 (mặc định); BCTC Q4/2026 sớm hơn thì hết hạn sớm hơn",
+  "correction_reason": "rebuild sau skeptic DD_GENERAL r1 INCONCLUSIVE: phân loại đủ BCĐKT; dự phòng 343 = thu dọn công trình khí (BCT duyệt) ⇒ D3 trừ 100%; góp vốn BCC Lô B 1.395,7 NPV0; quỹ KH&CN; RES trừ khấu hao giảm; chiết khấu giữa kỳ; trích quỹ KT-PL 3,51%/năm; sửa lỗi điều chỉnh 2025 (436,6) + cộng lại trích DP Q4/25. Tâm 50.146→51.652 (+3,0%), nhãn giữ TRÊN vùng",
+  "supersedes": "GAS@2026-11-09#1",
+  "notes": "Sleeve LAG_LO. CK 0,65% @5 tỷ (ADV250 113 tỷ). BCTC KT 2025 Deloitte chấp nhận toàn phần 28/02/2026. WARNING: free float 4,24% (hạn 31/12/2026), thay Chủ tịch/TGĐ 07/2026; HĐ mua khí Lô 05.2/05.3/05-1b/c + bán NCS-NT2 hết hạn 12/2026 (độ nhạy −1.995 / −7.980 đ/cp). Cam kết vốn 21.238,7 tỷ (Lô B + kho LNG Thị Vải) NPV0. Mở: 540,7 tỷ cổ tức; điều khoản gia hạn HĐ khí; IRR Lô B. Sizing V8: không đề xuất vị thế giá trị."
+ },
+ "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/GAS/skeptic/r3.json",
+ "skeptic_verdict": "CONFIRMED",
+ "skeptic_confidence": "medium",
+ "report_md5_in_verdict": "2260975bf2ef6e679dd43b52c4d105f3",
+ "md5_match": true,
+ "skeptic_rounds_this_job": [
+  "r2 INCONCLUSIVE (REPORT_rev3.md, 1,28 USD)",
+  "r3 CONFIRMED (REPORT_rev4.md, 1,07 USD)"
+ ],
+ "label_note": "skeptic_final=CONFIRMED vì r3.json CONFIRMED và md5 báo cáo khớp; Mike ghi bằng dd_ledger_append_confirmed.py",
+ "apply_mechanics": "Dry-run 23/11 (Taylor) bị TỪ CHỐI vì entry cuối sổ trỏ REPORT.md (md5 9357…) ≠ report_md5 r3 (2260…). Cách áp (như ca MSB): bước 1 append entry rev 2 trỏ REPORT_rev4.md (skeptic_final=FIXED_UNVERIFIED, skeptic_verdict_path=skeptic/r2.json — tức trạng thái trước vòng r3) → bước 2 `python3 bin/dd_ledger_append_confirmed.py --ticker GAS --verdict agents/Taylor/research/dd_lagcand_20261109/GAS/skeptic/r3.json` dry-run rồi --write (tạo rev 3 CONFIRMED) → `python3 bin/dd_price_zones_selfcheck.py`. Hoặc append trực tiếp `entry` dưới đây nếu Mike chấp nhận CONFIRMED không qua tool.",
+ "remaining_items": [
+  "cộng lại trích DP Q4/25 giả định một lần — chưa kiểm tính lặp lại Q4 các năm trước (skeptic: nếu lặp lại tâm cao ~2–3%)",
+  "điều khoản gia hạn HĐ khí 12/2026 (độ nhạy, không xác suất)",
+  "IRR/cước Lô B",
+  "540,7 tỷ chênh cổ tức",
+  "tổng sản lượng khí khô 8 tỷ m³ là ước lượng"
+ ]
+}

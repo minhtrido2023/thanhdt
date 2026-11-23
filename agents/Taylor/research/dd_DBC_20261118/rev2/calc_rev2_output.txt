@@ -1,0 +1,45 @@
+assumptions_md5 25d2e3059aa88705be3605ba500f9369
+--- XDCB/von chu lich su (noi suy) ---
+2021Q4:10.0% 2022Q1:15.7% 2022Q2:20.0% 2022Q3:23.9% 2022Q4:30.1% 2023Q1:27.0% 2023Q2:20.2% 2023Q3:15.2% 2023Q4:10.2% 2024Q1:13.2% 2024Q2:16.0% 2024Q3:14.3% 2024Q4:16.0% 2025Q1:17.3% 2025Q2:18.7% 2025Q3:20.0% 2025Q4:21.7% 2026Q1:19.0% 2026Q2:17.0% 2026Q3:14.9%
+XDCB/von TB 20q=18.0% | 15q=17.4% | hien tai Q3/26=14.9%
+W12 2023Q4..2026Q3 n=12: ROE_tot=0.1432 ROE_op(noi suy)=0.1733 ROE_op(bac thang)=0.1684 | cach rev1 ROE_tot*scale=0.1684
+W15 2023Q1..2026Q3 n=15: ROE_tot=0.1142 ROE_op(noi suy)=0.1358 ROE_op(bac thang)=0.1333 | cach rev1 ROE_tot*scale=0.1343
+W20 2021Q4..2026Q3 n=20: ROE_tot=0.0903 ROE_op(noi suy)=0.1057 ROE_op(bac thang)=0.1019 | cach rev1 ROE_tot*scale=0.1061
+ROE_op tam (TB 3 cua so khai truoc) = 0.1383; k_KTPL = 0.1106 -> ROE_op cho co dong = 0.1230
+scen (truoc CK thanh khoan): bad=10108 base=17798 good=24978
+TAM (sau CK 2%) = 17317 | VUNG = [9906; 24478] | tam truoc CK = 17670 | base sau CK = 17442
+LNST chuan hoa = 1025.7 ty; EPS chuan hoa = 2380; sau KTPL = 2116; BVPS = 20231; P/B ham y tai tam = 0.86; P/E ham y = 7.3
+--- DO NHAY cua so (tung cua so lam tam) ---
+W12: tam=23493 (+35.7%)
+W15: tam=16885 (-2.5%)
+W20: tam=11573 (-33.2%)
+XDCB bac thang thay noi suy: ROE_op=0.1345 tam=16654 (-3.8%)
+Toan-von (XDCB cung ROE lich su, khong tach): ROE_tot=0.1159 tam=12384 (-28.5%)
+--- quy KTPL ---
+k=0.000: tam=20352 (+17.5%)
+k=0.063: tam=18624 (+7.5%)
+k=0.130: tam=16785 (-3.1%)
+k=0.265: tam=13081 (-24.5%)
+--- r (V1, beta 1 / 0,5) + dai Ke D4 ---
+-100bp: r=0.1250 tam=19248 (+11.1%) | beta0,5 18222 (+5.2%)
+-50bp: r=0.1300 tam=18222 (+5.2%) | beta0,5 17756 (+2.5%)
++50bp: r=0.1400 tam=16513 (-4.6%) | beta0,5 16903 (-2.4%)
++100bp: r=0.1450 tam=15793 (-8.8%) | beta0,5 16513 (-4.6%)
+Ke D4 0.123: tam=19697
+Ke D4 0.134: tam=17489
+g=0.04: tam=17568
+g=0.06: tam=16999
+CK thanh khoan 0%: tam=17670
+CK thanh khoan 5%: tam=16787
+--- trong so kich ban ---
+w=(0.35, 0.5, 0.15): tam=15860 (-8.4%)
+w=(0.15, 0.5, 0.35): tam=18774 (+8.4%)
+--- khong kiem chung duoc ---
+chi tuan thu moi truong 50 ty: -116 d/cp (-0.7%)
+chi tuan thu moi truong 150 ty: -348 d/cp (-2.0%)
+ESOP pha loang 1% (o menh gia 10k): tam=17243
+ESOP pha loang 3% (o menh gia 10k): tam=17098
+phai thu nguoi lao dong 237,1 ty mat trang: -539 d/cp
+--- V6 hai nen (chi hien thi) ---
+V_ngan=12998 (tai dau tu 0.478, ROE tren toan von sau KTPL 0.1046) | CFO/nam=1133.3 capex(gom thue TC)/nam=1178.7 FCFE/nam=-45.5 -> V_dai khong xac dinh (FCFE<=0)
+so rev1: tam 19.491 -> rev2 17317 (-11.2%)

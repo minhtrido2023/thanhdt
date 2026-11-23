@@ -1,0 +1,49 @@
+r = 13.50% (dep 7.40% [cctg_12m(2026-11-02)]); gia SZL 27,700 (2026-11-06); SZC/SZB 06/11 20,350/46,500 (04/11 20,550/45,600)
+N0 131.08; KTPL k 11.22% (15,778/140,687); quy KTPL so du 23.96 (497 d/cp); CK 5 ty 4.12%, 40 tr 0.37%
+CONTROL r2 tai lap: tam sau 32,391 P10/50/90 28,966/32,162/36,075 (r2 ghi 32.391 / 28.966/32.162/36.075)
+CAU NOI r2 (control): tam 32,391
+CAU NOI + gia SZC/SZB 06/11: tam 32,370 (-22)
+CAU NOI + CK thanh khoan cua so den 06/11: tam 32,383 (+13)
+CAU NOI + tru so du quy KTPL 23,96 (ma 323): tam 31,906 (-477)
+CAU NOI + trich KTPL 11,2% LN loi hang nam (TM18): tam 29,257 (-2,649)
+HEADLINE r3 (5 ty): n=270 tam 29,257 | P10/P50/P90 26,209/28,963/32,706 | min 22,718 | duoi gia 29.3% | gia/tam -5.3% => TRONG
+HEADLINE r3 (sleeve 40 tr): n=270 tam 30,401 | P10/P50/P90 27,234/30,095/33,984 | min 23,606 | duoi gia 19.0% | gia/tam -8.9% => TRONG
+Gia tri tai tham so trung tam (truoc CK): 27 nam 30,027 / vinh vien 31,511; tron 3/4-1/4 30,398
+SONG SONG KTPL 0% (= r2 + gia/CK moi + so du quy): n=270 tam 31,906 | P10/P50/P90 28,480/31,676/35,592 | min 24,687 | duoi gia 5.6% | gia/tam -13.2% => DUOI | 40tr P10 29,593 => DUOI
+SONG SONG KTPL 5%: n=270 tam 30,725 | P10/P50/P90 27,385/30,459/34,306 | min 23,809 | duoi gia 12.9% | gia/tam -9.8% => TRONG | 40tr P10 28,456 => DUOI
+SONG SONG KTPL 8%: n=270 tam 30,017 | P10/P50/P90 26,782/29,710/33,519 | min 23,283 | duoi gia 20.5% | gia/tam -7.7% => TRONG | 40tr P10 27,828 => DUOI
+SONG SONG thoi han 1/2-1/2 (#2): n=270 tam 29,637 | P10/P50/P90 26,253/29,532/33,530 | min 22,718 | duoi gia 25.1% | gia/tam -6.5% => TRONG | 40tr P10 27,279 => TRONG
+SONG SONG chi 27 nam: n=135 tam 28,878 | P10/P50/P90 25,543/28,780/32,312 | min 22,718 | duoi gia 33.4% | gia/tam -4.1% => TRONG | 40tr P10 26,542 => TRONG
+SONG SONG chi vinh vien: n=135 tam 30,396 | P10/P50/P90 26,706/30,214/34,684 | min 23,275 | duoi gia 16.7% | gia/tam -8.9% => TRONG | 40tr P10 27,749 => DUOI
+SONG SONG holdco 10%: n=270 tam 28,370 | P10/P50/P90 25,322/28,035/31,819 | min 21,831 | duoi gia 42.4% | gia/tam -2.4% => TRONG | 40tr P10 26,312 => TRONG
+SONG SONG holdco 25% (#3): n=270 tam 27,039 | P10/P50/P90 23,991/26,745/30,488 | min 20,500 | duoi gia 63.7% | gia/tam +2.4% => TRONG | 40tr P10 24,929 => TRONG
+SONG SONG KTPL 5% + holdco 25%: n=270 tam 28,507 | P10/P50/P90 25,167/28,240/32,088 | min 21,591 | duoi gia 39.8% | gia/tam -2.8% => TRONG | 40tr P10 26,150 => TRONG
+SONG SONG capex duy tri 0,5x KH (+45/nam, #4 len): n=270 tam 37,366 | P10/P50/P90 33,472/36,958/41,353 | min 29,564 | duoi gia 0.0% | gia/tam -25.9% => DUOI | 40tr P10 34,780 => DUOI
+SONG SONG capex duy tri 1,5x KH (-45/nam, #4 xuong): n=270 tam 21,148 | P10/P50/P90 18,191/20,896/24,183 | min 15,873 | duoi gia 99.6% | gia/tam +31.0% => TREN | 40tr P10 18,902 => TREN
+SONG SONG RONIC=Ke (g khong tao gia tri; quy tac chung TOP5C): n=270 tam 25,524 | P10/P50/P90 23,296/25,368/28,070 | min 21,252 | duoi gia 87.8% | gia/tam +8.5% => TRONG | 40tr P10 24,207 => TRONG
+SONG SONG + BDS dau tu moi 166,9 theo gia von (#5 len): n=270 tam 32,577 | P10/P50/P90 29,529/32,283/36,026 | min 26,038 | duoi gia 1.6% | gia/tam -15.0% => DUOI | 40tr P10 30,683 => DUOI
+SONG SONG N0 = Q3x4 138,5 (#5 len): n=270 tam 30,310 | P10/P50/P90 27,090/30,000/33,955 | min 23,402 | duoi gia 20.4% | gia/tam -8.6% => TRONG | 40tr P10 28,149 => DUOI
+SONG SONG N0 = 2025 nam hoa 115,3 (#6 xuong): n=270 tam 27,017 | P10/P50/P90 24,336/26,758/30,051 | min 21,265 | duoi gia 63.7% | gia/tam +2.5% => TRONG | 40tr P10 25,287 => TRONG
+SONG SONG ky quy DH theo PV den 2053 (#5 len): n=270 tam 32,084 | P10/P50/P90 29,010/31,766/35,546 | min 25,567 | duoi gia 3.4% | gia/tam -13.7% => DUOI | 40tr P10 30,143 => DUOI
+SONG SONG SZC/SZB gia 04/11: n=270 tam 29,279 | P10/P50/P90 26,231/28,985/32,728 | min 22,740 | duoi gia 29.3% | gia/tam -5.4% => TRONG | 40tr P10 27,256 => TRONG
+GIA NGU Y 27,700: N0 120.1 ty (base KTPL 11,2%) / 105.1 (truoc KTPL); hoac KTPL 17.8%; hoac holdco 17.5%; hoac r 14.60%
+Cross-check (g 3%, nc 10%, KTPL 11,2%, vinh vien): A LNST gom TC 27,022; B loi + co phan 31,511; ROE co TC 22.5%; ROE loi 32.0%
+Do nhay lai huy dong (beta 1, tam): -100bp +5.7%; -50bp +2.7%; 50bp -2.5%; 100bp -4.9%
+adv250: ADV 0.46 ty (2025-11-04..2026-11-06, KL=0 5 phien), sigma 1.25%; 10tr CK 0.18% Q/ADV 2.2%; 20tr CK 0.26% Q/ADV 4.3%; 40tr CK 0.37% Q/ADV 8.7%; 1,000tr CK 1.84% Q/ADV 216.8% NGOAI; 5,000tr CK 4.12% Q/ADV 1083.9% NGOAI; 10,000tr CK 5.82% Q/ADV 2167.9% NGOAI
+adv60: ADV 0.61 ty (2026-08-12..2026-11-06, KL=0 0 phien), sigma 1.17%; 10tr CK 0.15% Q/ADV 1.6%; 20tr CK 0.21% Q/ADV 3.3%; 40tr CK 0.30% Q/ADV 6.6%; 1,000tr CK 1.50% Q/ADV 164.2% NGOAI; 5,000tr CK 3.36% Q/ADV 820.8% NGOAI; 10,000tr CK 4.75% Q/ADV 1641.5% NGOAI
+LOCK 1bb3c27280abc1dbd014af7eecf8b3d4  /home/trido/thanhdt/WorkingClaude/data/deposit_rate_vn_events.csv
+LOCK 13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py
+LOCK ba740438c76616f593cb4dffdf01354b  SZL/SUMMARY_r2.json
+LOCK 9d6e818ac1661cad0fa8bfcecd6ac985  SZL/calc/bq_oshares_szc_szb.csv
+LOCK 2b18249ce0a34bd3fc5e30ebd10b3666  SZL/calc/bq_szc_szb_20261104.csv
+LOCK 7f27a3942479265013ba67c30ac475ce  SZL/calc/model_r2.py
+LOCK 51bd57e93838555bcf7d54e4d1defdaf  SZL/calc_r3/assumptions_r3.json
+LOCK 4e2fb77754c393ae88ab3de9e163a24d  SZL/calc_r3/model_r3.py
+LOCK bc6402e3475c672385475698a1fd11df  SZL/calc_r3/px_szl_r3_20261106.csv
+LOCK 75ddecbfb6eafce50062c141f17ee110  SZL/calc_r3/snz_holdco_20261106.csv
+LOCK 78951d5a7502eb4819eec6496b924c52  SZL/calc_r3/szl_cf_hist.csv
+LOCK 6ef6a00565c73c60236e0175848e06cd  SZL/src/Q3_2026_hopnhat.pdf
+LOCK 74fb44444ac20d28ffeafc657821b116  _common/bq_px_4ma_20261104.csv
+LOCK ced2dcc1ba3d5fbc7d691ea00732920d  _common/liq.py
+LOCK c48da959c789ba976dc1f653bb9e09b2  _common_020021/r2lib.py
+LOCK 4597bc083f0d64d8873141b12fbfb3a6  _shared/wpct.py

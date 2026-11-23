@@ -1,0 +1,12 @@
+# LOCK rev4b prerun 2026-11-23T12:14:04+07:00 — ghi TRUOC lan chay dau model_rev4b.py
+140d259bfbe2a89d7c0fe06cd391f8d9  assumptions_rev4b.json
+c41b1305d9d7014bafdd08a2f83a8e09  model_rev4b.py
+9c2d232e714c94cdfb156df5f0d7e71e  szl_gpm_hist_20261123.csv
+c36ddb57980c35be76ce38b2f6ee28bf  ../restored/src/H1_2026_soatxet.pdf
+6ef6a00565c73c60236e0175848e06cd  ../restored/src/Q3_2026_hopnhat.pdf
+51bd57e93838555bcf7d54e4d1defdaf  ../restored/calc_r3/assumptions_r3.json
+bc6402e3475c672385475698a1fd11df  ../restored/calc_r3/px_szl_r3_20261106.csv
+9d6e818ac1661cad0fa8bfcecd6ac985  ../restored/calc/bq_oshares_szc_szb.csv
+75ddecbfb6eafce50062c141f17ee110  ../restored/calc_r3/snz_holdco_20261106.csv
+4597bc083f0d64d8873141b12fbfb3a6  ../../../_shared/wpct.py
+13dac039539fb91fc8f7256c03a71e5d  /home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py

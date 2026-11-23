@@ -1,0 +1,51 @@
+E_legacy=31394.5 BVPS_parent=14060
+QCVN19 VA1: P0 PV burden=3888 ty (1267 d/cp); expected (0.40 P0 + 0.36 x 0.5)=2255 ty (735 d/cp)
+rev2 reproduce: pre-liq 9891 post 9792
+REV3 scen pre-liq {'bad': 6503, 'base': 9156, 'good': 11809}
+REV3 center pre-liq=9156 post-liq=9064 zone_post=[6438;11691] P/B_center=0.64 0.85xcenter=7705 delta_vs_rev2=-7.4%
+
+-- QCVN19 variants (post-liq center) --
+P0 100% (khong bu): burden 3888 ty => 8537 (-5.8%)
+P100 (bu du): burden 0 ty => 9792 (+8.0%)
+P50: burden 1944 ty => 9165 (+1.1%)
+P0 0.5/P50 0.3/P100 0.2: burden 2527 ty => 8977 (-1.0%)
+capex/opex x0.5 (VA1 da co mot phan): burden 1128 ty => 9428 (+4.0%)
+capex/opex x1.5: burden 3383 ty => 8701 (-4.0%)
+opex dung 2045 (doi VA1 30 nam): burden 2074 ty => 9123 (+0.6%)
+thue 10.9%: burden 2420 ty => 9011 (-0.6%)
+
+-- V1 r (neo lai huy dong, beta 1) + D4 dai Ke --
+dep -100bp beta1.0: r=0.1250 => 9490 (+4.7%)
+dep -100bp beta0.5: r=0.1300 => 9269 (+2.3%)
+dep -50bp beta1.0: r=0.1300 => 9269 (+2.3%)
+dep -50bp beta0.5: r=0.1325 => 9165 (+1.1%)
+dep +50bp beta1.0: r=0.1400 => 8874 (-2.1%)
+dep +50bp beta0.5: r=0.1375 => 8968 (-1.1%)
+dep +100bp beta1.0: r=0.1450 => 8698 (-4.0%)
+dep +100bp beta0.5: r=0.1400 => 8874 (-2.1%)
+r=0.123: 9584 (+5.7%)
+r=0.134: 9104 (+0.4%)
+r=0.11: 10276 (+13.4%)
+
+-- NT3&4 (base NPV=0 so sach; chi do nhay) --
+NT34 book -15%: 8629 (-4.8%)
+NT34 book -30%: 8193 (-9.6%)
+NT34 book -50%: 7612 (-16.0%)
+
+-- Legacy finite life (von thu hoi tai dau tu NPV=0; chi do nhay) --
+share 0.5 T 7: 10348 (+14.2%)
+share 0.5 T 11: 10109 (+11.5%)
+share 0.64 T 7: 10708 (+18.1%)
+share 0.64 T 11: 10401 (+14.8%)
+
+-- Khac --
+hoi to khong thu duoc 30%: -238 d/cp (-2.6%)
+hoi to khong thu duoc 50%: -396 d/cp (-4.4%)
+CPH: them 1 khoan nhu tien le 728,2: -235 d/cp (-2.6%)
+quy KTPL 3% LNST di san: 8884 (-2.0%)
+quy KTPL 5% LNST di san: 8764 (-3.3%)
+QCVN19 khi CM1&2+NT1 0.5 ty/MW (minh hoa, kỳ vọng sau bu): -114 d/cp (-1.3%)
+QCVN19 khi CM1&2+NT1 1.0 ty/MW (minh hoa, kỳ vọng sau bu): -227 d/cp (-2.5%)
+ROE all -0.02: 7564
+ROE all +0.02: 10565
+VA1 CLTG con ~490 (ngoai base): +141 d/cp

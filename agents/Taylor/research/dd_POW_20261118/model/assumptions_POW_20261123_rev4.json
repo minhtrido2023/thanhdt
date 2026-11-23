@@ -1,0 +1,226 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "POW",
+ "dd_date": "2026-11-23",
+ "rev": 4,
+ "loai_hinh": "dien_ppa",
+ "method_version": "M20261122",
+ "units": "tỷ đồng; đ/cp = tỷ×1000/3.067,845688 triệu cp",
+ "sources": {
+  "bctc_q326_hn": "src/Q3_2026_BCTC_hopnhat.pdf (+ .ocr_garbled.txt)",
+  "bctc_fy25_kt_hn": "src/FY2025_BCTC_hopnhat_kiemtoan.pdf",
+  "cbtt_qcvn19": "src/cbtt/2026-10-xx_7139_qcvn19/post.html (19/10/2026, md5 c5064712815110737bdd13bf00f56d6c)",
+  "qtp_analog": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_r3.md, REPORT_r3b.md, REPORT_r3c.md",
+  "rev2_lock": "model/assumptions_POW_20261118_rev2.json (md5 721c5f28a97867749da9499ca68fa20e)",
+  "model_inputs": "model/model_rev3_inputs.json (md5 80cabe7ff555eec9b4ec51e7819d2ee9) + model/model_rev4_inputs.json (md5 a024a77aebe2dcde33fc6d3915cae74b)",
+  "model": "model/calc_rev4.py (md5 ea67f7b013cce6e1b918d617cc9ecb3c)",
+  "model_out": "model/calc_rev4_output.txt",
+  "rev3_lock": "model/assumptions_POW_20261123_rev3.json (md5 858632b79798a6b3e697b9d52482a4d7)"
+ },
+ "share_base": {
+  "shares_m": 3067.845688,
+  "source": "BCTC HN Q3/26 TM23: 3.067.845.688 cp lưu hành (gồm 281.024.592 cp chào bán, KQ 30/01/2026)",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "none",
+   "source": "TM23 Q3/26; không có NQ phát hành mới chưa thực hiện trong CBTT 11/2025–11/2026 đã đọc"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Cải tạo khí thải VA1 (1.200 MW than) đáp ứng QCVN 19:2024",
+    "total_bn": {
+     "value": 3485,
+     "source": "tương tự QTP FS 1.200 MW (ước lượng quy đổi 1:1 MW)"
+    },
+    "spent_bn": 0,
+    "remaining_bn": {
+     "value": 3485,
+     "source": "như total; tư vấn lập đề xuất đầu tư Q3/26–Q1/27 (CBTT 19/10/2026)"
+    },
+    "generates_revenue": false,
+    "mandatory": true,
+    "classification": "compliance",
+    "treatment": "CASH_OUTFLOW",
+    "source": "QCVN 19:2024 bắt buộc 01/01/2032 (legal-vn 20/11 qua QTP r3); capex + opex 572/năm sau thuế, kỳ vọng theo P0/P50/P100 0,40/0,36/0,24 = PV 2.255 tỷ"
+   },
+   {
+    "name": "NT3&4 LNG 1.624 MW (COD 11-12/2025)",
+    "total_bn": {
+     "value": 32487,
+     "source": "BCTN 2025 TMĐT"
+    },
+    "spent_bn": {
+     "value": 32487,
+     "source": "đã COD; quyết toán chưa xong"
+    },
+    "remaining_bn": 0,
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "vốn chủ 9.000 theo sổ (rev2 §4); V4a — hợp đồng LNG định hạn 20,7 tr MMBtu/năm < mức đốt thực 2026 ⇒ rủi ro ToP vượt nhu cầu thấp; công thức giá không công bố ⇒ chỉ độ nhạy −15/−30/−50%"
+   },
+   {
+    "name": "Quỳnh Lập LNG + Vũng Áng III LNG + XDCB khác",
+    "spent_bn": {
+     "value": 2740,
+     "source": "XDCB 1.659,6 + tiền chào bán chưa dùng 1.080,1 (BC tiến độ 27/07/2026)"
+    },
+    "remaining_bn": {
+     "value": 5049,
+     "source": "NQ 90 10/11/2026 vốn chủ mẹ KH 2026 (chưa đo giải ngân)"
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "V4a, rev2 §5"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": {
+   "value": 293.2,
+   "source": "số dư quỹ KTPL là nợ phải trả BCĐKT Q3/26 (skeptic r1) — đã nằm ngoài VCSH, không trừ thêm"
+  },
+  "annual_appropriation_pct_of_npat": {
+   "value": "khong_cong_bo",
+   "searched": [
+    "BCTC HN Q3/26 thuyết minh VCSH/quỹ",
+    "CBTT NQ ĐHĐCĐ 20/05/2026 trong src/cbtt (không có tỷ lệ trích)"
+   ]
+  },
+  "applied_to_cashflow": false,
+  "source": "độ nhạy 3%/5% LNST di sản ⇒ −2,0%/−3,3% (calc_rev3_output.txt)"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.109
+   },
+   {
+    "from_year": 2032,
+    "rate": 0.2
+   }
+  ],
+  "source": "thuế hiệu dụng 9T/26 = (768,1+76,8)/7.743,5 = 10,9% (KQKD Q3/26); dòng QCVN19 từ 2032 dùng 20% phổ thông (ước lượng), độ nhạy 10,9%"
+ },
+ "working_capital": {
+  "method": "balance_sheet_point",
+  "source": "VCSH mẹ theo sổ 30/09/2026; hồi tố sau thuế 2.454,7 (phần lớn ở phải thu EPTC) tách ra ghi 1,0x; độ nhạy 30%/50% không thu được"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "xau_ROE_di_san_4_5",
+    "side": "down",
+    "p": 0.25,
+    "basis": "≈ 2023–2024 trên VCSH mẹ loại vốn NT3&4 XDCB (rev2)"
+   },
+   {
+    "name": "co_so_ROE_di_san_8",
+    "side": "base",
+    "p": 0.5,
+    "basis": "TB 2019–25 mẹ 6,2% + điều chỉnh XDCB/hồi tố; skeptic r1 tự dựng lại ~8,0% (giữa dải)"
+   },
+   {
+    "name": "tot_ROE_di_san_11_5",
+    "side": "up",
+    "p": 0.25,
+    "basis": "đỉnh 2019 + thiếu nguồn 2027–30"
+   }
+  ]
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-23",
+  "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate('2026-11-23') = 7,4% (cctg_12m 2026-11-02; Big-4 6,8%, last_update 16/11) = neo 03/11 ⇒ r 13,5%",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true
+ },
+ "terminal": {
+  "moat_tier": "NONE",
+  "terminal_ronic": "EQUALS_KE",
+  "g": 0.0,
+  "mechanism_reason": "5F 18/11 (<12 tháng, tái dùng): NONE; g=0; vốn di sản vĩnh viễn ở ROE di sản (đời hữu hạn chỉ độ nhạy)"
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "pct": 0.01,
+  "source": "giữ quy ước rev2: ADV trung vị 62 phiên đo sau khoá (rev2 §8b); 1%, độ nhạy 0–3%",
+  "position_size_note": "≤30 tỷ thoát ≤5 phiên ở 10% tham gia"
+ },
+ "audit_opinion": {
+  "status": "unqualified_with_emphasis",
+  "fy": 2025,
+  "auditor": "Deloitte",
+  "interim_review": "reviewed_unqualified",
+  "emphasis_or_basis": "Nhấn mạnh: quyết toán cổ phần hoá chưa được phê duyệt (TM02)",
+  "source": "src/FY2025_BCTC_hopnhat_kiemtoan.pdf ký 12/03/2026; soát xét 6T/26 src/6M_2026_BCTC_hopnhat_soatxet.pdf"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "PVN 79,94%; PV GAS (khí/LNG), PV OIL, PVPS, NT2 — giá trị giao dịch FY25 không đọc được (OCR TM bên liên quan hỏng) ⇒ không kiểm chứng được, WARNING",
+    "source": "TM23 Q3/26; CBTT NQ 12/01, 06/01, 13/3, 09/9, 30/9, 11/6/2026"
+   },
+   {
+    "desc": "Phải trả PVN 728,2 (CLTG VA1 2016-17 trước CPH) — tiền lệ nghĩa vụ quyết toán CPH",
+    "amount_bn": 728.2,
+    "source": "TM16 FY2025"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "Hồi tố/hoàn nhập 9T/26 ≈ 2.755 LNTT (VA1 CLTG 1.103 + Cà Mau 991 + O&M 381 + hoàn nhập Q3 ~280) — không ngoại suy — rev4: 2.454,7 sau thuế tách khỏi vốn di sản, ghi 1,0x (skeptic r2); độ nhạy thu hồi 30/50% cùng cơ sở",
+    "amount_bn": 2755,
+    "source": "CBTT 03/08/2026 (2026-08-03_7013); GT-Q3"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "KH 2026 giải ngân mẹ 6.477 (VCSH 5.049), góp vốn thành viên 1.883 — growth NPV0",
+    "amount_bn": 6477,
+    "source": "NQ 90 10/11/2026 (2026-11-10_7184)"
+   },
+   {
+    "desc": "Gói tư vấn QCVN19 2,98 tỷ (Q3/26–Q1/27) — tiền đề capex tuân thủ",
+    "amount_bn": 2.98,
+    "source": "CBTT 19/10/2026"
+   }
+  ]
+ },
+ "sector": {
+  "ppa_expiry": {
+   "value": "khong_cong_bo",
+   "searched": [
+    "BCTN 2025 tr.24-29",
+    "BCTC KT 2025 thuyết minh cam kết",
+    "web: PPA CM1&2 ký mới 15/12/2021 (vietnamenergy.vn) — không nêu thời hạn; NT1 không tìm thấy"
+   ]
+  },
+  "ppa_price": {
+   "value": "NT3&4 Qc tối thiểu 65% (NĐ 100/2025, PPA SĐBS 02 tháng 8/2026); FMP H1/26 ~1.500 đ/kWh",
+   "source": "CBTT 13/10/2026 (2026-10-13_7130), CBTT 03/08/2026"
+  },
+  "gas_plants_qcvn19": {
+   "value": "chưa xác lập có phải cải tạo (tua-bin khí CM1&2/NT1; gói tư vấn 19/10 nói 'các nhà máy nhiệt điện' nhưng không nêu hạng mục/TMĐT) ⇒ không vào projects/base; độ nhạy minh hoạ 0,5/1,0 tỷ/MW = −1,3%/−2,5%",
+   "source": "CBTT 19/10/2026; calc_rev3_output.txt"
+  }
+ }
+}

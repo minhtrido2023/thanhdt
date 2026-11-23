@@ -1,0 +1,192 @@
+{
+ "_note": "File khoa v1 cho GAS r3 (khoa lai sau skeptic DD_GENERAL r1 INCONCLUSIVE 22/11); tham so day du calc/assumptions_r3.json (md5 xem LOCK_prerun_r3.txt). Gia thi truong da biet tu r1/r2 (minh bach); r3 KHONG doi gia dinh vi gia.",
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "GAS",
+ "dd_date": "2026-11-23",
+ "rev": 3,
+ "loai_hinh": "san_xuat_khac",
+ "method_version": "M20261122",
+ "units": "ty dong; d/cp",
+ "sources": {
+  "HN_Q3_2026": "src/GAS_Q3_2026_HN_VN.pdf (src/png/vn_p03-p04, p21-p29, p37-p38)",
+  "SX_6T_2026": "src/GAS_H1_2026_HN_soatxet.pdf (src/ocr_h1/p50 TM25 du phong DH)",
+  "KT_2025": "src/dl_20261123/GAS_Baocaotaichinh_2025_Kiemtoan_Hopnhat.pdf (md5 a00baa0354470f10e936cbd04714950d; ocr k08, k32, k60)",
+  "BQ_fin": "calc/bq_fin_gas.csv, calc/np_hist_gas.csv",
+  "bs_classification": "calc/notes_bctc_r3.md",
+  "model_params": "calc/assumptions_r3.json"
+ },
+ "share_base": {
+  "shares_m": 2412.949756,
+  "source": "Von dieu le 24.129.497.560.000 d / 10.000 (BCDKT ma 411, src/png/vn_p04.png)",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "none",
+   "source": "TM23 p27: 9T/26 khong tang von",
+   "note": "phat hanh khac phuc free float chua co NQ => chi do nhay"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Duong ong Lo B - O Mon (XDCB + gop von BCC 51%)",
+    "total_bn": 18982.2,
+    "spent_bn": 6587.8,
+    "remaining_bn": 12394.4,
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "TM13 Q3/26 XDCB 5.192,1; TM38 p35 phai thu BCC 1.395,7; cam ket con lai 12.394,4 @31/12/2025 (BCTC KT 2025 TM35, ocr k60)"
+   },
+   {
+    "name": "Mo rong kho LNG Thi Vai 1->3 trieu tan + Son My LNG",
+    "total_bn": 9056.5,
+    "spent_bn": 228.9,
+    "remaining_bn": 8827.6,
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "BCTC KT 2025 TM35 (cam ket 8.827,6); TM13 Q3/26 Son My 228,9"
+   },
+   {
+    "name": "Du phong thu don, hoan nguyen cong trinh khi (ma 343)",
+    "total_bn": 3300.0,
+    "spent_bn": 0.0,
+    "remaining_bn": 3300.0,
+    "generates_revenue": false,
+    "mandatory": true,
+    "classification": "compliance",
+    "treatment": "CASH_OUTFLOW",
+    "source": "TM25 soat xet 6T/2026 (ocr_h1 p50): du toan BCT duyet QD 1295/2019, 2437/2020, 610/2023, 3754/2016; BCDKT 30/09 3.300,0"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": {
+   "value": 1111.5,
+   "source": "BCDKT ma 323 875,6 + quy KH&CN ma 344 235,9 (src/png/vn_p04.png)"
+  },
+  "annual_appropriation_pct_of_npat": {
+   "value": 0.0191,
+   "source": "TM23 p27: trich quy ngoai bieu von 214,4 ty / LN 2025 11.212,5 ty"
+  },
+  "applied_to_cashflow": true,
+  "source": "TM23 p27"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.2
+   }
+  ],
+  "source": "thue TNDN 20%; lai tien gui sau thue x0,8"
+ },
+ "working_capital": {
+  "method": "zero_change_base",
+  "source": "conv=1; von luu dong HD 13.287 ty phan loai day du (notes_bctc_r3.md); thay doi chi la do nhay"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "XAU",
+    "side": "down",
+    "p": 0.275,
+    "basis": "Brent 95/72/62, LR 62, suy giam 2,8%"
+   },
+   {
+    "name": "CO_SO",
+    "side": "base",
+    "p": 0.45,
+    "basis": "Brent 100/85/75, LR 72, suy giam 1,4%"
+   },
+   {
+    "name": "TOT",
+    "side": "up",
+    "p": 0.275,
+    "basis": "Brent 105/100/85, LR 82, suy giam 0%"
+   }
+  ]
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-23",
+  "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate('2026-11-23') = cctg_12m(2026-11-02) 7,40% (big4 6,8%)",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true
+ },
+ "terminal": {
+  "moat_tier": "NARROW",
+  "terminal_ronic": "EQUALS_KE"
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "pct": null,
+  "position_size_note": "5 ty va 40 trieu",
+  "source": "model_r3.py liq(): sigma_ngay x sqrt(Q/ADV250) tu calc/px_gas_daily_20261106.csv"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "Cong ty TNHH Kiem toan Deloitte Viet Nam",
+  "interim_review": "reviewed_unqualified",
+  "source": "src/dl_20261123/GAS_Baocaotaichinh_2025_Kiemtoan_Hopnhat.pdf trang 8 (ocr k08: y kien chap nhan toan phan, ngay 28/02/2026; Van de khac chi ve so so sanh 2024 do hang khac kiem toan, chap nhan toan phan 20/02/2025); soat xet 6T/2026 Deloitte 12/08/2026 chap nhan toan phan"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "phai thu KH PVPower 30/09/2026 (01/01: 4.003,3)",
+    "amount_bn": 8870.4,
+    "source": "TM38 p35"
+   },
+   {
+    "desc": "phai thu ngan han khac PVPower",
+    "amount_bn": 2980.5,
+    "source": "TM38 p35"
+   },
+   {
+    "desc": "phai tra nguoi ban PVN",
+    "amount_bn": 3582.6,
+    "source": "TM38 p36"
+   },
+   {
+    "desc": "chi phi phai tra PVN (mua khi)",
+    "amount_bn": 3131.3,
+    "source": "TM38 p36"
+   },
+   {
+    "desc": "tien gui PVComBank",
+    "amount_bn": 1783.6,
+    "source": "TM38 p36"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "hoan nhap du phong phai thu kho doi 9T/26 (tru x0,8 khoi LN TTM)",
+    "amount_bn": 492.2,
+    "source": "TM31 CP QLDN"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "cam ket von con lai (Lo B 12.394,4 + LNG Thi Vai 8.827,6 + ERP 16,7) @31/12/2025, tien do chi chua cong bo",
+    "amount_bn": 21238.7,
+    "source": "BCTC KT 2025 TM35 (ocr k60)"
+   }
+  ]
+ },
+ "sector": {}
+}

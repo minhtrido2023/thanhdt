@@ -1,0 +1,83 @@
+{
+ "_doc": "ĐỀ XUẤT sổ giá cho Mike áp tuần tự — Taylor KHÔNG ghi kb/dd_price_zones.json (job Taylor_20261123_050007).",
+ "skeptic_verdict_path": "agents/Taylor/research/dd_POW_20261118/skeptic/r3.json",
+ "skeptic_verdict": "INCONCLUSIVE",
+ "skeptic_confidence": "medium",
+ "report_path": "agents/Taylor/research/dd_POW_20261118/REPORT_rev4.md",
+ "report_md5": "4e9934932e4d6700f9dc58ce34824d9d",
+ "report_md5_in_verdict": "4e9934932e4d6700f9dc58ce34824d9d",
+ "md5_match": true,
+ "label_rule": "Vòng cuối r3 INCONCLUSIVE ⇒ KHÔNG CONFIRMED. Dispatch ghi 'ngược lại FIXED_UNVERIFIED'; theo enum §E10 các mục r3 CHƯA áp (đã hết 2 vòng/ca: r2, r3) ⇒ REFUTED_OPEN (giống LLM/PNJ/DCM). Mike chọn; Taylor không tự nâng nhãn.",
+ "open_items_r3": [
+  "Hạn PPA/nguồn khí (tuổi mỏ) CM1&2, NT1 + giá trị sổ theo nhà máy không công bố ⇒ không chặn được rủi ro tài sản mắc kẹt (skeptic ước thô ≤~6% tâm) — không kiểm chứng được từ nguồn hiện có",
+  "Hồi tố ghi 1,0× gồm hoàn nhập dự phòng (381 + ~280) và thuế 10,9% ⇒ tâm có thể cao ~1–2% (sửa được, chưa áp vì hết vòng)",
+  "Giá trị giao dịch bên liên quan (OCR KT25 hỏng) — WARNING"
+ ],
+ "cost_usd_rounds": {
+  "r2": 1.058,
+  "r3": 0.826
+ },
+ "entry": {
+  "ticker": "POW",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_POW_20261118/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-18",
+  "rev": 2,
+  "valuation_asof": "2026-11-23",
+  "bctc_quarter": "2026Q3",
+  "zone_low": 6966,
+  "center": 9387,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số 25/50/25 (ROE vốn di sản 4,5/8,0/11,5%, thu nhập thặng dư vốn chủ) SAU chiết khấu thanh khoản 1%; r 13,5% neo lãi huy động 12T hiệu dụng 7,4% (23/11), g 0; NT3&4 + dự án mới sổ sách NPV=0; hồi tố sau thuế 2.454,7 ghi 1,0×; trừ PV kỳ vọng capex+opex QCVN19 VA1 2.255 tỷ (tương tự QTP FS, P0/P50/P100 0,40/0,36/0,24); moat NONE",
+  "zone_high": 11808,
+  "center_range": null,
+  "center_alt": 9482,
+  "center_alt_kind": "expected_weighted",
+  "price_ref": 13350,
+  "price_date": "2026-11-23",
+  "verdict_label": "Giá 13.350 (DNSE 23/11) = 1,42× tâm 9.387, trên cận trên vùng (11.808) ⇒ ĐẮT theo mô hình (không đổi). Cổng 0,85×tâm (7.979) không đạt. Ba nút hai chiều ngoài base: bù giá khí thải VA1 (P0 8.860 / P100 10.115), đời hữu hạn vốn di sản (+10…+16%), NT3&4 ghi giảm 30% (−9,3%). WARNING: quyết toán CPH chưa duyệt, hồi tố ~40% LNTT 9T, giao dịch bên liên quan dày.",
+  "skeptic_status": "DD_GENERAL: r1 (22/11, REPORT.md vòng 2) INCONCLUSIVE → REPORT_rev3; r2 (23/11, REPORT_rev3 md5 72f7e933) INCONCLUSIVE → REPORT_rev4; r3 (23/11, REPORT_rev4 md5 4e993493) INCONCLUSIVE medium — hết 2 vòng/ca, mục r3 chưa áp",
+  "correction_reason": "rebuild sau skeptic DD_GENERAL INCONCLUSIVE: thêm capex+opex tuân thủ QCVN 19:2024 VA1 làm dòng tiền ra (D3; CBTT 19/10/2026 thầu tư vấn; quy mô theo FS QTP) −735 đ/cp; tách hồi tố sau thuế khỏi khối ROE/r ghi 1,0× +326 đ/cp; sửa vay NH 19.418,3; NT3&4 giữ NPV0 (định hạn LNG < mức đốt); đời hữu hạn/CPH/KTPL/khí QCVN19 thành độ nhạy",
+  "supersedes": "POW@2026-11-18#1",
+  "source_file": "agents/Taylor/research/dd_POW_20261118/REPORT_rev4.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_POW_20261118/REPORT_rev4.md",
+    "quote": "tâm = 9.387 đ/cp",
+    "fields": [
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_POW_20261118/REPORT_rev4.md",
+    "quote": "Vùng [6.966; 11.808]",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_POW_20261118/REPORT_rev4.md",
+    "quote": "DNSE 13.350 đ (23/11/2026 11:29)",
+    "fields": [
+     "price_ref"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_POW_20261118/REPORT_rev4.md",
+    "quote": "trước: 9.482",
+    "fields": [
+     "center_alt"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_POW_20261118/model/assumptions_POW_20261123_rev4.json",
+  "assumptions_md5": "820f22c0728ad17ee476d8b3362ba9d0",
+  "null_reason": null,
+  "expires_on": "2027-03-18",
+  "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc 120 ngày từ dd_date",
+  "notes": "Sizing V8: không mở ở giá hiện tại; ≤7.979 ⇒ tối đa 2% NAV; ≤6.966 ⇒ 3% NAV. V6: V_ngắn 3.487, V_dài âm (FCFE≤0 do capex NT3&4 + phải thu EVN) ⇒ chỉ V_ngắn. Moat NONE (5F 18/11 tái dùng)."
+ }
+}

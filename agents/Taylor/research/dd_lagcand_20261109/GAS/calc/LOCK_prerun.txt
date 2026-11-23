@@ -1,0 +1,14 @@
+# LOCK pre-run GAS — 2026-11-09T14:44:21+07:00 (job Taylor_20261109_073604)
+# Minh bach: da chay thu 2 ban nhap truoc LOCK (v1 hoi quy quy — bi loai vi ngoai suy vo ly; v2 hoi quy nam chua co truc phan du). Gia 74.100 biet tu brief truoc moi tinh toan.
+3d026e48c49a96b639537feb52ec7b98  assumptions.json
+b4a5f9d55c490db8043a35a8585c8589  model.py
+8d55c558396fb47f94702e5080747e36  write_lock.py
+f203aefa9ef94e2d7802001c2fb975c0  notes_bctc.md
+e65f89a9b83e2f9ec0297a047ea217df  bq_fin_gas.csv
+0114975687094ac255ffffc81bb46689  np_hist_gas.csv
+5360b50b49441805d56d0918c3c883eb  brent_y.csv
+704fb6d41c032315f6c2fe91562cc1de  brent_q.csv
+b9884c40f348563476ac1bb229ae6316  px_daily.sql
+045fc58a598c96cc0480a5d4d4daa5ef  px_gas_daily_20261106.csv
+b81a07c786597ee3cae76ffdbf9a8986  ../src/GAS_Q3_2026_HN_VN.pdf
+cab4d365e44f31f194a83b4cdb8391a0  ../src/GAS_H1_2026_HN_soatxet.pdf
