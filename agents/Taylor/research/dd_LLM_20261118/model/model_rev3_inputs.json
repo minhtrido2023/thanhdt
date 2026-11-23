@@ -1,0 +1,110 @@
+{
+ "ticker": "LLM",
+ "dd_date": "2026-11-23",
+ "rev": 3,
+ "units": "ty dong",
+ "price_blind": true,
+ "note": "Dau vao so cho calc_rev3.py. KHONG chua gia LLM (mu gia). bs_q3_bn chep nguyen tu assumptions_LLM_20261118.json (rev2, md5 aaaeec21...) — skeptic r1 da doi chieu khop BCTC HN Q3/26.",
+ "shares_m": 79.726104,
+ "bs_q3_bn": {
+  "cash_TM3": 2707.864,
+  "htm_st_net_TM4": 868.129,
+  "htm_lt_TM4": 0.432,
+  "borrow_st": 620.677,
+  "borrow_lt": 0.0,
+  "op_assets": {
+   "ar_cust": 3101.782,
+   "prepay": 521.155,
+   "other_recv": 449.499,
+   "recv_provision": -871.184,
+   "inventory": 307.425,
+   "lt_recv": 171.0
+  },
+  "op_liabs": {
+   "ap": 1183.467,
+   "cust_adv": 1119.123,
+   "tax": 30.613,
+   "staff": 95.109,
+   "accrued": 1600.213,
+   "unearned_st": 0.939,
+   "other_pay_st": 295.847,
+   "prov_st": 9.394,
+   "bonus": 83.113,
+   "unearned_lt": 12.593,
+   "other_pay_lt": 1.152,
+   "prov_lt": 737.705
+  },
+  "lt_fin_invest_book": 553.664
+ },
+ "r_ke": 0.135,
+ "g": 0.0,
+ "warranty": {
+  "open_st": 386.34,
+  "open_lt": 593.77,
+  "new_9m26": 148.883,
+  "reversal_selling_9m26": 376.018,
+  "reversal_other_inc_9m26": 2.337,
+  "close_st": 9.394,
+  "close_lt": 737.705,
+  "fy25_open_total": 609.93,
+  "fy25_close_total": 980.11,
+  "fy25_reversal_other_income": 174.27,
+  "fy24_reversal_other_income": 19.612,
+  "policy": "trich toi da 5% gia tri cong trinh; chenh lech hoan nhap (TM2.21 BCTC KT 2025 PDF p23)",
+  "src": "BCTC HN Q3/26 txt dong 2895-2915 (TM23), 3383-3395 (TM31), 3457 (TM33); BCTC KT HN 2025 PDF p42 (TM23), p48 (TM32)",
+  "cash_share": {
+   "bad": 1.0,
+   "base": 0.25,
+   "good": 0.1
+  },
+  "cash_share_basis": "Do: 9T/26 chi bang tien = 980,110+148,883-376,018-2,337-747,099 = 3,54 tren 381,9 da giai quyet (0,9%). Base 25% = ~27x muc do duoc (dem cho khieu nai bao hanh lon: Song Hau 1 nha thau Hamon pha san, Vung Ang 1) — UOC LUONG than trong; xau 100% (cach rev2); tot 10%",
+  "tax_on_reversal": 0.2,
+  "flow_pct_rev": 0.01
+ },
+ "rev_base": 4150,
+ "rev_base_basis": "DT TTM 4.145,5 = Q4/25 1.719,8 (BQ) + 9T/26 2.425,7 (BCTC HN Q3/26); thay 4.500 khong co backlog (skeptic r1 muc 3). Tham chieu: KH 2026 me 3.378; FY2025 KT 5.432,6; FY2024 6.101,3; 9T/26 nam hoa 3.234",
+ "rev_good": 6000,
+ "gpm": {
+  "base": 0.045,
+  "good": 0.07
+ },
+ "opex_ga": {
+  "base": 100,
+  "good": 120
+ },
+ "nopat_bad": -30,
+ "bad_impairment": 200,
+ "trapped": {
+  "bad": 0.077,
+  "base": 1.0,
+  "good": 1.0
+ },
+ "lt_fin_invest_book": 553.664,
+ "hna_after_tax": 77.2,
+ "hna_basis": "BCTC KT 2025 TM4c (PDF p28): gia goc 85,696, ty le 3,71% tai 31/12/25 = 01/01/25 => dau gia 07/2025 KHONG ban (hoac khong thanh); Q3/26 gia goc khong doi. Gia tri thi truong HNA (ma KHAC) 182,2 => lai an 77,2 sau thue (rev2)",
+ "welfare": {
+  "pct_npat": 0.128,
+  "basis": "PP loi nhuan 2024 (NQ DHDCD 27/06/2025): KTPL 11,352 + thuong BDH 0,546 tren LNST me 2024 92,695 = 12,8% (BCTC KT 2025 TM25a PDF p44, KQKD p12)",
+  "npat_parent_9m26_unappropriated": 695.0,
+  "npat_9m26_basis": "115,9+479,9+99,2 (np_parent_quarterly rev2) — TM36 BCTC KT 2025: 'chua du tinh trich quy KTPL' => coi LN 2026 chua trich"
+ },
+ "hamon": {
+  "payable_bond_proceeds": 160.378,
+  "after_tax_if_recognised": 128.3,
+  "treatment": "base: giu la no (dung hach toan); tot: ghi nhan thu nhap x0,8; xau: tra het (da nam trong no)",
+  "src": "BCTC HN Q3/26 TM24 txt dong 2966-2980; BCTC KT 2025 TM22 PDF p42"
+ },
+ "weights": {
+  "bad": 0.25,
+  "base": 0.5,
+  "good": 0.25
+ },
+ "liquidity_discount": 0.1,
+ "sens": {
+  "guarantee_6901_overdue_debt": 496.97,
+  "guarantee_basis": "baodauthau 20/10/2026: Lilama 69-1 no qua han 496,97, VCSH -102,61; BCTC KT 2025 KHONG co thuyet minh bao lanh/no tiem tang (TM26 p46 chi thue dat + ngoai te; TM39 p54 khong su kien)",
+  "capraise_new_shares_m": 45.0,
+  "capraise_price": 10000,
+  "stock_div": 0.317
+ }
+}

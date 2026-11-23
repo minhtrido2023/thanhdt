@@ -1,0 +1,211 @@
+{
+ "r": 0.135,
+ "dep12": 0.074,
+ "hist_np_parent_ty": {
+  "2017": 240.78,
+  "2018": 251.72,
+  "2019": 244.02,
+  "2020": 179.66,
+  "2021": 208.93,
+  "2022": 353.21,
+  "2023": 209.18,
+  "2024": 240.78,
+  "2025": 208.95
+ },
+ "ttm": 294.49,
+ "E": {
+  "XAU": 179.663197031,
+  "CO_SO": 234.9621334094286,
+  "TOT": 294.48777423499996
+ },
+ "int_at": 32.6528,
+ "welfare_pct": 0.0243,
+ "net_cash": 484.69199999999995,
+ "nci": 49.958,
+ "capex_total": 1844.0,
+ "spent": 346.484,
+ "remaining": 1497.516,
+ "scen_central_param": {
+  "XAU": 7744,
+  "CO_SO": 11361,
+  "TOT": 15254
+ },
+ "pre_ck": {
+  "center": 11417,
+  "p10": 7109,
+  "p25": 9066,
+  "p50": 11358,
+  "p75": 13538,
+  "p90": 15808,
+  "min": 3096,
+  "max": 21337,
+  "n": 243
+ },
+ "sens_r": {
+  "-100bp": 12513,
+  "-50bp": 11944,
+  "+50bp": 10927,
+  "+100bp": 10471
+ },
+ "ke_band": {
+  "Ke_0.123": 12753,
+  "Ke_0.134": 11519
+ },
+ "sens_beta05": {
+  "beta0.5_-100bp": 11944,
+  "beta0.5_+100bp": 10927
+ },
+ "sens": {
+  "phi=1.0_(skeptic_100%_thay_the)": 6595,
+  "phi=0.33": 15825,
+  "phi=0.5": 13483,
+  "phi=0.8": 9351,
+  "phi=0_(r2_cach_a)": 20371,
+  "khong_chiet_khau_thoi_gian_capex_con_lai(t=0)": 10570,
+  "thay_the_lap_lai_moi_30_nam": 11217,
+  "ung_truoc_200ty_la_NhonTrach(G2)": 12999,
+  "boi_thuong_BH1_+100ty": 12322,
+  "gian_doan_0/-25/-50_(0.4/0.4/0.2)": 11058,
+  "gian_doan_nhu_tren_+boi_thuong_100": 11963,
+  "moat_thuong_RONIC=ROE5Y_18.3%_g4%": 12893,
+  "khong_la_chan_thue_KH": 10573,
+  "doi_KH_8_nam": 11605,
+  "doi_KH_20_nam": 11170,
+  "kd_6.4%_truoc_thue(=5.12%_sau_thue)": 11283,
+  "kd_9.5%": 11538,
+  "chiet_khau_toan_bo_o_Ke(r3)": 11231,
+  "TOT_thay_bang_CO_SO(TB2_dung)": 10444,
+  "hoan_nguyen_moi_truong_-100ty": 10512,
+  "khong_tru_quy_KTPL/KHCN_(r2)": 11787
+ },
+ "v6": {
+  "v_short": 9674,
+  "med3_np": 209.181399944,
+  "v_long": "FCFE<=0 (CFO 9T 197,8 - capex 265,7; con ~1.498 ty capex) => chi V_ngan"
+ },
+ "phi_step_per_0_1": 1377,
+ "kd_at": 0.064,
+ "eq_rem": 285.5160000000001
+}
+{
+ "price": 20300.0,
+ "price_date": "2026-11-20",
+ "liq": {
+  "sigma_d": 0.02252688089686961,
+  "adv250": 8880885000.0,
+  "adv60": 7323300000.0,
+  "ck": {
+   "5ty": 0.016902772331524502,
+   "1ty": 0.007559149588298279,
+   "40tr": 0.0015118299176596559
+  },
+  "exit": {
+   "5ty": {
+    "q_over_adv": 0.5630069525728574,
+    "days_at10": 5.630069525728573,
+    "days_at20": 2.8150347628642867
+   },
+   "1ty": {
+    "q_over_adv": 0.11260139051457146,
+    "days_at10": 1.1260139051457148,
+    "days_at20": 0.5630069525728574
+   }
+  },
+  "window": "2025-11-19..2026-11-20"
+ },
+ "post": {
+  "5ty": {
+   "center": 11224,
+   "p10": 6989,
+   "p25": 8913,
+   "p50": 11166,
+   "p75": 13309,
+   "p90": 15541,
+   "min": 3043,
+   "max": 20976,
+   "n": 243
+  },
+  "1ty": {
+   "center": 11331,
+   "p10": 7055,
+   "p25": 8998,
+   "p50": 11272,
+   "p75": 13435,
+   "p90": 15689,
+   "min": 3072,
+   "max": 21175,
+   "n": 243
+  },
+  "40tr": {
+   "center": 11400,
+   "p10": 7098,
+   "p25": 9053,
+   "p50": 11341,
+   "p75": 13517,
+   "p90": 15784,
+   "min": 3091,
+   "max": 21304,
+   "n": 243
+  }
+ },
+ "label": {
+  "5ty": "TREN vung",
+  "1ty": "TREN vung",
+  "40tr": "TREN vung"
+ },
+ "rule4": {
+  "5ty": {
+   "threshold": 9540,
+   "pass_": false
+  },
+  "1ty": {
+   "threshold": 9631,
+   "pass_": false
+  },
+  "40tr": {
+   "threshold": 9690,
+   "pass_": false
+  }
+ },
+ "pct_weight_below_price": 0.99765625,
+ "r_implied": 0.08050959976944541,
+ "dep12_implied": 0.0195095997694454,
+ "phi_implied": 4.336808689942018e-19,
+ "sens_r_post": {
+  "-100bp": 12301,
+  "-50bp": 11742,
+  "+50bp": 10742,
+  "+100bp": 10294
+ },
+ "ke_band_post": {
+  "Ke_0.123": 12537,
+  "Ke_0.134": 11324
+ },
+ "sens_post": {
+  "phi=1.0_(skeptic_100%_thay_the)": 6484,
+  "phi=0.33": 15558,
+  "phi=0.5": 13255,
+  "phi=0.8": 9193,
+  "phi=0_(r2_cach_a)": 20027,
+  "khong_chiet_khau_thoi_gian_capex_con_lai(t=0)": 10391,
+  "thay_the_lap_lai_moi_30_nam": 11027,
+  "ung_truoc_200ty_la_NhonTrach(G2)": 12779,
+  "boi_thuong_BH1_+100ty": 12114,
+  "gian_doan_0/-25/-50_(0.4/0.4/0.2)": 10871,
+  "gian_doan_nhu_tren_+boi_thuong_100": 11761,
+  "moat_thuong_RONIC=ROE5Y_18.3%_g4%": 12675,
+  "khong_la_chan_thue_KH": 10394,
+  "doi_KH_8_nam": 11409,
+  "doi_KH_20_nam": 10981,
+  "kd_6.4%_truoc_thue(=5.12%_sau_thue)": 11092,
+  "kd_9.5%": 11343,
+  "chiet_khau_toan_bo_o_Ke(r3)": 11041,
+  "TOT_thay_bang_CO_SO(TB2_dung)": 10267,
+  "hoan_nguyen_moi_truong_-100ty": 10334,
+  "khong_tru_quy_KTPL/KHCN_(r2)": 11588
+ },
+ "v6_v_short_post": 9510,
+ "pe_norm": 9.54684970063345,
+ "pe_ttm": 7.617118159920546,
+ "pb": 1.2332267354471815
+}

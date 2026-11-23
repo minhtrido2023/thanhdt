@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_CST_20261111/REPORT_rev2.md",
+  "report_md5": "fca9bab49269d8a047e5d23b8315901f",
+  "brief_md5": "bffcf15b9f7ba0170cb83558c82b9c41",
+  "model": "opus",
+  "cost_usd": 1.1052710000000001,
+  "started_at_ict": "2026-11-23T07:18:39+07:00",
+  "summary": "Rev 2 correctly fixes rev 1's killer error: the audited TM17 confirms the bonus-welfare fund took 82,3 bn of 2024 profit ahead of shareholders, and the arithmetic reproduces 4.563 exactly. But the centre rests on two unverified structural choices with large effects in both directions. (1) The fund rule min(0,64N; 82,3) does not match how the resolution sets the fund (49,95% of a pool that includes retained earnings); without the TKV/SOE fund policy the centre spans 1.243–7.787. (2) The committed 1.829,5 bn expansion is the licence that defines the 2045 horizon, yet it is held at NPV=0 while shareholder return on book is ~2,3%; the report's own downside of −66% is excluded. Add the Q4/25 concentration (79% of base TTM) and the unverified ρ=0,5 (±22%). The direction of the revision is evidence-based; the magnitude is not yet decidable.",
+  "verdict_raw_path": "agents/Taylor/research/dd_CST_20261111/skeptic/r2_raw.md"
+}

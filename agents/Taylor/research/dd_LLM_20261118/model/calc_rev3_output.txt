@@ -1,0 +1,28 @@
+NFP=1466.16 (net cash 2955.75, NWC -1489.59); warranty close=747.099; 9T26 utilised(cash)=3.54; share=0.927%
+NOPAT {'bad': -30, 'base': 53.3, 'good': 205.1}  welfare pending 89.0
+scen pre-liq {'bad': 4033, 'base': 35760, 'good': 52599}  post-liq {'bad': 3630, 'base': 32184, 'good': 47339}
+TAM pre=32038 post=28834 zone_post=[3630;47339] 0.85xtam=24509
+-- bridge rev2->rev3 (base scen, pre-liq):
+   rev2 base 30577 | base warranty cash 25% (stock+flow) only: 37840 | +rev 4150: 36876 | +welfare: 35760
+-- warranty cash share (ca 3 kich ban dung cung muc):
+   cash 0.9%: tam=30301
+   cash 10.0%: tam=29638
+   cash 25.0%: tam=28547
+   cash 50.0%: tam=26728
+   cash 75.0%: tam=24909
+   cash 100.0%: tam=23090
+-- doanh thu base (chi kich ban co so): {3378: 27877, 3400: 27904, 4150: 28834, 4500: 29268, 5433: 30424}
+-- GPM base: {0.03: 27018, 0.04: 28229, 0.045: 28834, 0.05: 29439, 0.06: 30650, 0.07: 31860}
+-- r beta1: {-100: '29305 (+1.6%)', -50: '29060 (+0.8%)', 50: '28624 (-0.7%)', 100: '28428 (-1.4%)'}
+-- r beta0.5: {-100: '29060', -50: '28945', 50: '28727', 100: '28624'}
+-- Ke band 12.3/13.4: {0.123: 29408, 0.134: 28878}
+-- liquidity: {0: 32038, 0.05: 30436, 0.1: 28834, 0.2: 25630}
+-- HNA=0: 27963  Hamon base ghi nhan: 29920  Hamon tot=0: 28472
+-- bao lanh 69-1 (neu co) 25% x 496.97: tam=27431
+-- bao lanh 69-1 (neu co) 50% x 496.97: tam=26029
+-- bao lanh 69-1 (neu co) 100% x 496.97: tam=23224
+-- welfare off: 29587
+-- trong so: {"{'bad': 0.4, 'base': 0.45, 'good': 0.15}": 23035, "{'bad': 0.5, 'base': 0.4, 'good': 0.1}": 19422, "{'bad': 0.1, 'base': 0.5, 'good': 0.4}": 35390, "{'bad': 0, 'base': 1, 'good': 0}": 32184}
+-- tang von 45.0tr cp @ 10000: tam/cp=21678; phat hanh dung bang tam => khong doi (NPV=0, V4)
+-- sau co tuc CP 31,7%: tam/1,317=21894 vung=[2756;35944]
+V6: V_ngan=9965 V_dai=54216 D=1.69; V_dai bo tam ung+ton kho=20189 D=0.71 (ln2=0.69 ln3=1.10)

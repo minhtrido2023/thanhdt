@@ -1,0 +1,25 @@
+{
+ "ticker": "CST", "rev": 2, "asof": "2026-11-23", "locked_before_price": "khong truy van gia moi; price_ref 14.900 (11/11) chi dung o pha sau khoa, lay tu rev1",
+ "shares": 42846773,
+ "sources": {
+  "KT25": "src_restored/VI_BaoCaoTaiChinh_KiemToan_2025.pdf md5 383226e174248bd16aa27eded8febea3 (khoi phuc tu git d036dc335^, file goc rev1)",
+  "Q3_26": "src_restored/000000016954303_VI_BaoCaoTaiChinh_Q3_2026.pdf md5 34d9d36fc65c95ee0a127e79cae451ce",
+  "6T_26": "src_restored/VI_BaoCaoTaiChinh_SauSoatXet_6T_2026.pdf md5 6ec2b8e33d3a1b8e0548cfff5b0b1138",
+  "px": "calc_rev2/px_cst.csv md5 c34c4e9f0bbcee540ea653f74235f31a (khoi phuc tu git, den 2026-11-11)",
+  "BQ": "tav2_bq.ticker_financial CST NP_P0, BVPS*OShares, Dividend_1Y 2020Q4-2026Q3"
+ },
+ "B0_bn": 961.322, "B0_note": "VCSH 30/09/26 [Q3 p4]",
+ "B0_adj_leak_on_accrued_2026": -10.16, "B0_adj_note": "0,64 x LNST 9T/26 15,884: phan LN da nam trong B0 se bi trich KTPL khi phan phoi (ty le 2 nam gan nhat)",
+ "life_years": 19, "book_recovery_at_end": 0.5,
+ "r": 0.135, "r_anchor": "13,5% @ effective_deposit_rate('2026-11-23') = 7,40% cctg_12m(2026-11-02) = neo; beta=1",
+ "g": 0.0,
+ "leak_rule": {"kind": "min(alpha*N, cap)", "alpha": 0.64, "cap_bn": 82.3,
+   "basis": "KT25 tr.30 TM17: phan phoi LN2024 (130,02): KTPL 81,99 + thuong QL 0,31 = 82,30 (63,3%); 2024 phan phoi LN2023 (293,1): 247,41-84,14 DTPT-85,69 co tuc = 77,58 (26,5%); Q3/26 p4: LN2025 82,749 phan phoi het, DTPT khong doi 386,31, co tuc 700d = 29,99 => KTPL+QL 52,76 (63,8%); BQ: 2022 55,9 (LN2021 106,6, 52%), 2023 83,5 (LN2022 339,9, 25%)"},
+ "compliance_outflow_bn_yr": 5.21, "compliance_basis": "Ky quy moi truong goc du an Cao Son 112,79 -> 118,00 trong 2025 [KT25 tr.18] = khoan nop hang nam theo QD 3928/QD-BTNMT; V4b dong tien ra",
+ "scenarios": {
+  "bear": {"N": 35, "w": 0.30, "basis": "KH LNST 2026 >36 ty (bao chi thoibaotaichinh; -28% so uoc TH 2025 ~51 truoc kiem toan); 9T/26 thuc te 15,88"},
+  "base": {"N": 75, "w": 0.45, "basis": "LNST TTM Q4/25-Q3/26 = 59,35+15,88 = 75,2"},
+  "bull": {"N": 130, "w": 0.25, "basis": "LNST 2024 kiem toan 130,02"}
+ },
+ "liquidity": {"method": "sigma_d*sqrt(Q/ADV60)", "sizes_bn": [1.0, 0.3, 0.1]}
+}

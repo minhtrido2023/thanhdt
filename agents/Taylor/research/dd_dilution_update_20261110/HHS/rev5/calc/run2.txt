@@ -1,0 +1,220 @@
+{
+ "inputs": {
+  "N0": 431985968,
+  "NR": 259191580,
+  "cash": 2591915800000,
+  "div": 0.07,
+  "d5": 0.014097179630599711,
+  "tch": 0.5831
+ },
+ "pre": {
+  "HEADLINE_CK0": {
+   "center": 13969,
+   "p10": 12422,
+   "p50": 13917,
+   "p90": 15564
+  },
+  "SONGSONG_CK27": {
+   "center": 10761,
+   "p10": 8624,
+   "p50": 10559,
+   "p90": 13207
+  }
+ },
+ "control_r4_ex_full_k1": 11615,
+ "ndl": {
+  "sh0": 182010000,
+  "eq0_bn": 2040.3,
+  "only_hhs": {
+   "own": 0.7988,
+   "gain_bn": 63.3,
+   "k": 1.0243
+  },
+  "company_7541": {
+   "others_new_sh_m": 26.2,
+   "gain_bn": 53.5,
+   "k": 1.0206
+  },
+  "note": "Mọi cách đọc cho k>=1 vì giá phát hành 10.000 < BV 11.210 (BV tự lập, không kiểm toán ⇒ phần k>1 chỉ là độ nhạy lên)"
+ },
+ "rows": {
+  "HEADLINE_CK0|khong_phat_hanh|k=1.0": {
+   "center": 13055,
+   "p10": 11609,
+   "p50": 13007,
+   "p90": 14546,
+   "rule4_thr": 11097,
+   "cum_exerciser": 13969,
+   "r4_formula_center": 13055
+  },
+  "HEADLINE_CK0|chi_TCH|k=1.0": {
+   "center": 12060,
+   "p10": 10989,
+   "p50": 12024,
+   "p90": 13164,
+   "rule4_thr": 10251,
+   "cum_exerciser": 14646,
+   "r4_formula_center": 12060
+  },
+  "HEADLINE_CK0|chi_TCH|k=0.8": {
+   "center": 11240,
+   "p10": 10169,
+   "p50": 11204,
+   "p90": 12345,
+   "rule4_thr": 9554,
+   "cum_exerciser": 13244,
+   "r4_formula_center": 11582
+  },
+  "HEADLINE_CK0|chi_TCH|k=1.0206": {
+   "center": 12144,
+   "p10": 11073,
+   "p50": 12108,
+   "p90": 13248,
+   "rule4_thr": 10322,
+   "cum_exerciser": 14790,
+   "r4_formula_center": 12109
+  },
+  "HEADLINE_CK0|chi_TCH|k=1.0243": {
+   "center": 12159,
+   "p10": 11088,
+   "p50": 12123,
+   "p90": 13263,
+   "rule4_thr": 10335,
+   "cum_exerciser": 14816,
+   "r4_formula_center": 12118
+  },
+  "HEADLINE_CK0|bao_phu_50|k=1.0": {
+   "center": 12169,
+   "p10": 11057,
+   "p50": 12131,
+   "p90": 13315,
+   "rule4_thr": 10344,
+   "cum_exerciser": 14833,
+   "r4_formula_center": 12169
+  },
+  "HEADLINE_CK0|bao_phu_50|k=0.8": {
+   "center": 11318,
+   "p10": 10206,
+   "p50": 11281,
+   "p90": 12465,
+   "rule4_thr": 9620,
+   "cum_exerciser": 13377,
+   "r4_formula_center": 11743
+  },
+  "HEADLINE_CK0|bao_phu_50|k=1.0206": {
+   "center": 12256,
+   "p10": 11144,
+   "p50": 12219,
+   "p90": 13403,
+   "rule4_thr": 10418,
+   "cum_exerciser": 14983,
+   "r4_formula_center": 12213
+  },
+  "HEADLINE_CK0|bao_phu_50|k=1.0243": {
+   "center": 12272,
+   "p10": 11160,
+   "p50": 12235,
+   "p90": 13419,
+   "rule4_thr": 10431,
+   "cum_exerciser": 15010,
+   "r4_formula_center": 12220
+  },
+  "HEADLINE_CK0|du_100|k=1.0": {
+   "center": 11615,
+   "p10": 10711,
+   "p50": 11584,
+   "p90": 12546,
+   "rule4_thr": 9873,
+   "cum_exerciser": 13884,
+   "r4_formula_center": 11615
+  },
+  "HEADLINE_CK0|du_100|k=0.8": {
+   "center": 10924,
+   "p10": 10020,
+   "p50": 10893,
+   "p90": 11855,
+   "rule4_thr": 9285,
+   "cum_exerciser": 12701,
+   "r4_formula_center": 10924
+  },
+  "HEADLINE_CK0|du_100|k=1.0206": {
+   "center": 11686,
+   "p10": 10782,
+   "p50": 11656,
+   "p90": 12618,
+   "rule4_thr": 9933,
+   "cum_exerciser": 14006,
+   "r4_formula_center": 11686
+  },
+  "HEADLINE_CK0|du_100|k=1.0243": {
+   "center": 11699,
+   "p10": 10795,
+   "p50": 11668,
+   "p90": 12630,
+   "rule4_thr": 9944,
+   "cum_exerciser": 14028,
+   "r4_formula_center": 11699
+  },
+  "SONGSONG_CK27|khong_phat_hanh|k=0.73": {
+   "center": 10057,
+   "p10": 8060,
+   "p50": 9868,
+   "p90": 12343,
+   "rule4_thr": 8548,
+   "cum_exerciser": 10761,
+   "r4_formula_center": 10057
+  },
+  "SONGSONG_CK27|chi_TCH|k=0.73": {
+   "center": 8733,
+   "p10": 7253,
+   "p50": 8593,
+   "p90": 10426,
+   "rule4_thr": 7423,
+   "cum_exerciser": 8950,
+   "r4_formula_center": 9194
+  },
+  "SONGSONG_CK27|bao_phu_50|k=0.73": {
+   "center": 8714,
+   "p10": 7178,
+   "p50": 8569,
+   "p90": 10473,
+   "rule4_thr": 7407,
+   "cum_exerciser": 8919,
+   "r4_formula_center": 9288
+  },
+  "SONGSONG_CK27|du_100|k=0.73": {
+   "center": 8808,
+   "p10": 7560,
+   "p50": 8690,
+   "p90": 10237,
+   "rule4_thr": 7487,
+   "cum_exerciser": 9079,
+   "r4_formula_center": 8808
+  }
+ },
+ "undercount_tch_only_k08_bn": 216.1,
+ "extra_call_I14": {
+  "gap_bn": 1803.2,
+  "hhs_part_bn": 1440.4,
+  "offer": 10000,
+  "new_sh_m": 144.0,
+  "ex_center_after": 11329,
+  "delta_pct": -0.0246,
+  "exerciser_wealth_change": "0 với k=1 (NPV0) — chỉ giảm giá trị/cp, người thực hiện quyền không mất",
+  "debt_route": "vay tại NĐL theo lãi thị trường = NPV0 ⇒ base không đổi"
+ },
+ "shortfall_spread_cost": {
+  "bn": 64.8,
+  "per_share_ex": -102
+ },
+ "V6": {
+  "np_ttm_median_3y_bn": 260.5,
+  "r": 0.135,
+  "g": 0.0,
+  "v_short": 4466,
+  "v_short_ex": 2609,
+  "v_long": "không tính: CFO 9T/2026 âm (BQ CF_OA 2026Q1-Q3 = -679,5/-1.170,6/-72,2 tỷ; LCTT HN mã 20 = -2.110,2 tỷ) ⇒ FCFE<=0, chỉ V_ngắn",
+  "D": "không áp (thiếu V_dài)",
+  "note": "NP_P0 BQ (LN sau thuế); 2025Q2 3.507 tỷ loại (lãi hợp nhất CRV)"
+ }
+}

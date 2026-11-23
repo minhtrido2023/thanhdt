@@ -1,0 +1,75 @@
+{
+ "px": 9700,
+ "px_date": "2026-11-20",
+ "terp_rights": 9812,
+ "terp_div": 9171,
+ "px_div_only": 9065,
+ "right_value_per_new": -300,
+ "adv60_med_bn": 10.35,
+ "adv250_mean_bn": 21.34,
+ "size5bn_pct_adv60": 0.483,
+ "size5bn_pct_adv250": 0.234,
+ "cum_headline": {
+  "center": 13969,
+  "p10": 12422,
+  "p50": 13917,
+  "p90": 15564,
+  "label": "DƯỚI vùng",
+  "rule4": true,
+  "px_vs_center": -0.3056
+ },
+ "cum_ck27": {
+  "center": 10761,
+  "p10": 8624,
+  "p50": 10559,
+  "p90": 13207,
+  "label": "TRONG vùng",
+  "rule4": false,
+  "px_vs_center": -0.0986
+ },
+ "HEADLINE_CK0|du_100|k=1.0": {
+  "center": 11615,
+  "p10": 10711,
+  "p90": 12546,
+  "label_vs_terp": "DƯỚI vùng",
+  "rule4": true,
+  "terp_vs_center": -0.2105
+ },
+ "HEADLINE_CK0|du_100|k=0.8": {
+  "center": 10924,
+  "p10": 10020,
+  "p90": 11855,
+  "label_vs_terp": "DƯỚI vùng",
+  "rule4": true,
+  "terp_vs_center": -0.1605
+ },
+ "HEADLINE_CK0|chi_TCH|k=1.0": {
+  "center": 12060,
+  "p10": 10989,
+  "p90": 13164,
+  "label_vs_terp": "DƯỚI vùng",
+  "rule4": true,
+  "terp_vs_center": -0.2396
+ },
+ "HEADLINE_CK0|chi_TCH|k=0.8": {
+  "center": 11240,
+  "p10": 10169,
+  "p90": 12345,
+  "label_vs_terp": "DƯỚI vùng",
+  "rule4": true,
+  "terp_vs_center": -0.1841
+ },
+ "SONGSONG_CK27|du_100|k=0.73": {
+  "center": 8808,
+  "p10": 7560,
+  "p90": 10237,
+  "label_vs_terp": "TRONG vùng",
+  "rule4": false,
+  "terp_vs_center": 0.0412
+ },
+ "no_rights": {
+  "center": 13055,
+  "label": "DƯỚI vùng"
+ },
+ "rule4_breakeven_k_ex": 0.761
+}

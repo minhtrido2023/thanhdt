@@ -1,0 +1,13 @@
+{
+  "round": 3,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_CST_20261111/REPORT_rev3.md",
+  "report_md5": "19a69878222f5b94bdb5417f7371ba8d",
+  "brief_md5": "9bbe85a3952e27ce8d659ec2da80e91f",
+  "model": "opus",
+  "cost_usd": 1.07915,
+  "started_at_ict": "2026-11-23T07:24:54+07:00",
+  "summary": "Rev 3's figures trace correctly to the audited 2025 equity note (verified from the page image) and the model arithmetic reproduces exactly (centre 6.022). But the main rev 3 change — adding +1.459 đ/cp for paying out the 130,66 bn of accumulated profit — rests on the premise that this amount 'already had bonus-and-welfare deductions in 2025'. The audited equity note shows the 2025 percentages were applied to the 164,155 bn tranche only. That tranche itself included older accumulated profit, about half of which went to the fund. If the same split applies, the item is worth ~+730, not +1.459 (−12% of centre). The rev2→rev3 upward move is a re-interpretation of information already available, with only press support, before the AGM has voted. In the other direction, the model may undervalue: it charges an estimated 19-year borrowing cost on the payout and has no TKV-restructuring scenario, under which book value (~22–24k đ/cp vs a 0,045 coefficient in the model) could be crystallised. Verdict REFUTED on provenance of a load-bearing, quantifiable item; the true centre band is roughly 5.300–7.600 depending on the payout split and funding, before any restructuring scenario.",
+  "verdict_raw_path": "agents/Taylor/research/dd_CST_20261111/skeptic/r3_raw.md"
+}

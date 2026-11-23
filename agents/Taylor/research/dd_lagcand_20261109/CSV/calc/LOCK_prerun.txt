@@ -1,0 +1,11 @@
+2026-11-09T14:45:09+07:00
+890ed7e7c4ae57bd6ef85a71ff09fc34  assumptions.json
+e1b40565757c42663cccd42e3928ef4b  model.py
+ff723f5685aabbd37584a505ff8a1c53  fin_csv_bq.csv
+a11ca604c03818434e99c187504f963b  px_csv.csv
+77628b8f50577bc4000014fb7cf6e887  ../src/q3_2026_HN.pdf
+fb3d85d3d5b914524194b6f797c00e34  ../src/q3_2026_giaitrinh_HN.pdf
+9e6cf78f24fb680c616b5cba31c577d8  ../src/q2_2026_giaitrinh_HN.pdf
+469b5acc2cb9e8ba9bc544b0c5724a38  ../src/cuongche_BH1_20260713.pdf
+70259f43635a030cd841d80f8147a333  ../src/dung_TB2_20260731.pdf
+7239b98874fa26a374fb0e0c08e9b266  /home/trido/thanhdt/WorkingClaude/mike/kb/data_registry/market-state/sector_read_hoa_chat_xut_clo_20261109.md

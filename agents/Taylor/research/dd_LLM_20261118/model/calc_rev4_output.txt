@@ -1,0 +1,30 @@
+NFP=1466.16 (net cash 2955.75, NWC -1489.59); warranty close=747.099; 9T26 utilised(cash)=3.54; share=0.927%
+NOPAT {'bad': -30, 'base': 117.3, 'good': 300.5}  welfare pending 43.6
+scen pre-liq {'bad': 4033, 'base': 42278, 'good': 62032}  post-liq {'bad': 3630, 'base': 38050, 'good': 55828}
+TAM pre=35974 post=32376 zone_post=[3630;55828] 0.85xtam=27520
+-- warranty cash share (ca 3 kich ban dung cung muc):
+   cash 0.9%: tam=33643
+   cash 10.0%: tam=33155
+   cash 25.0%: tam=32351
+   cash 50.0%: tam=31010
+   cash 75.0%: tam=29669
+   cash 100.0%: tam=28328
+-- doanh thu base (chi kich ban co so): {3378: 30382, 3400: 30439, 4150: 32376, 4500: 33280, 5433: 35690}
+-- GPM base: {0.03: 29775, 0.04: 31509, 0.045: 32376, 0.05: 33244, 0.06: 34978, 0.07: 36713}
+-- r beta1: {-100: '33078 (+2.2%)', -50: '32714 (+1.0%)', 50: '32063 (-1.0%)', 100: '31771 (-1.9%)'}
+-- r beta0.5: {-100: '32714', -50: '32542', 50: '32217', 100: '32063'}
+-- Ke band 12.3/13.4: {0.123: 33232, 0.134: 32442}
+-- liquidity: {0: 35974, 0.05: 34175, 0.1: 32376, 0.2: 28779}
+-- HNA=0: 31505  Hamon base ghi nhan: 33664  Hamon tot=0: 32215
+-- bao lanh 69-1 (neu co) 25% x 496.97: tam=30974
+-- bao lanh 69-1 (neu co) 50% x 496.97: tam=29571
+-- bao lanh 69-1 (neu co) 100% x 496.97: tam=26766
+-- welfare off: 32760
+-- flow add-back bao hanh (% DT, co so+tot): {0.0: 28760, 0.01: 30913, 0.0168: 32376, 0.03: 35218}
+-- trong so 25/50/25 (rev3): 33889
+-- ngoai tru: xoa con 370.51 => 28194 ; + lien ket ve 0 => 24460 ; chi lien ket 50% => 30509
+-- CPH (uoc luong khung): {100: 31248, 300: 28990, 500: 26732}
+-- trong so: {"{'bad': 0.4, 'base': 0.45, 'good': 0.15}": 26949, "{'bad': 0.5, 'base': 0.4, 'good': 0.1}": 22618, "{'bad': 0.1, 'base': 0.5, 'good': 0.4}": 41719, "{'bad': 0, 'base': 1, 'good': 0}": 38050}
+-- tang von 45.0tr cp @ 10000: tam/cp=23942; phat hanh dung bang tam => khong doi (NPV=0, V4)
+-- sau co tuc CP 31,7%: tam/1,317=24583 vung=[2756;42391]
+V6: V_ngan=9965 V_dai=54216 D=1.69; V_dai bo tam ung+ton kho=20189 D=0.71 (ln2=0.69 ln3=1.10)

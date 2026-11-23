@@ -1,0 +1,19 @@
+{
+ "g10_sens_cum_dps": {
+  "0.05": -351,
+  "0.1": -702,
+  "0.2": -1403
+ },
+ "g10_sens_ex_dps": {
+  "0.05": -205,
+  "0.1": -410,
+  "0.2": -820
+ },
+ "liquid_group_3009_bn": {
+  "cash": 181.9,
+  "htm_st": 848.6,
+  "sum": 1030.6,
+  "src": "BCTC Q3 HN CĐKT mã 110/123 (png/hn_p05.png)"
+ },
+ "hhs_rieng_fin_income_9T2026_bn": 21.6
+}

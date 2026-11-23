@@ -1,0 +1,4 @@
+2026-11-23T07:17:59+07:00
+05e886fe1782b273410640d108436e86  calc/assumptions_r3.json
+dab31cdb24d3d08ba071997367675df7  calc/model_r3.py
+ff723f5685aabbd37584a505ff8a1c53  calc/fin_csv_bq.csv

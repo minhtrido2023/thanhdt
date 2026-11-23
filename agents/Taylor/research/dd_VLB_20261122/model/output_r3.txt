@@ -1,0 +1,32 @@
+net_cash=488.84 ty (10,463 d/cp); CORE_FY25=264.8 CORE_TTM=357.3 -> NP_BASE 310.0
+  TC1: rate 1.500 res_now 20.32 life_lic 11.25 life_res 13.54 -> 11.25 share 0.320
+  TP1: rate 1.659 res_now 32.57 life_lic 11.25 life_res 19.62 -> 11.25 share 0.303
+  TT2: rate 1.500 res_now 20.11 life_lic 14.83 life_res 13.40 -> 13.40 share 0.290
+  SK2: rate 0.212 res_now 2.04 life_lic 5.08 life_res 9.63 -> 5.08 share 0.039
+  SK5: rate 0.265 res_now 1.39 life_lic 2.83 life_res 5.27 -> 2.83 share 0.048
+  doi mo binh quan theo ty trong LN = 11.23 nam (r2: 14)
+xau    op= 1171.0 off=   0.0 (du 329.4) dep=5.5 ->    35,645 d/cp w 0.25
+co_so  op= 1572.4 off= 150.2 (du 97.6) dep=5.5 ->    47,448 d/cp w 0.5
+tot    op= 1973.4 off= 161.0 (du 68.1) dep=3.1 ->    56,214 d/cp w 0.25
+TAM truoc CK = 46,689 | ex-div (-2500) = 44,189
+thanh khoan: ADV250 1.14 ADV68 0.92 sigma 1.340% CS 0.35%; d(5ty)=2.98% d(1ty)=1.43%; phien thoat 5ty@20%ADV 21.8
+SAU CK 5ty (co so 30/9): tam 45,300 xau 34,584 co_so 46,037 tot 54,542
+SAU CK 5ty ex-div: tam 42,800 xau 32,084 co_so 43,537 tot 52,042
+-- do nhay (truoc CK, % so tam) --
+  lai huy dong -100bp b1: 48,309 (+3.5%); b0.5: 47,483
+  lai huy dong -50bp b1: 47,483 (+1.7%); b0.5: 47,082
+  lai huy dong +50bp b1: 45,924 (-1.6%); b0.5: 46,303
+  lai huy dong +100bp b1: 45,187 (-3.2%); b0.5: 45,924
+  Ke dai noi dia 12.3%: 48,648 (+4.2%)
+  Ke dai noi dia 13.4%: 46,845 (+0.3%)
+  offset chiet khau @Ke 13.5% (thay vi 7.4%): 46,042 (-1.4%)
+  quy LO 12.4%: 47,671 (+2.1%)
+  co_so np1=265: 42,563 (-10.3% vs co_so)
+  co_so np1=290: 45,277 (-4.6% vs co_so)
+  co_so np1=357: 52,551 (+10.8% vs co_so)
+  co_so g=0: 44,874 (-5.4%)
+  co_so + gia han TP1 toi 2042: 49,365 (+4.0%)
+  co_so + gia han ca TC1/TP1/TT2 den het tru luong: 51,558 (+8.7%)
+  du bu tru chua dung 97.6 ty neu duoc HOAN tai dong mo: +802 d/cp (khong kiem chung duoc, KHONG vao base)
+  co_so neu TC1 tru luong -20%: 47,208 (-0.5%)
+V6: V_ngan(Gordon vo han, +net cash)=57,143 V_dai(huu han)=47,448 D=0.186 (ln2=0.693)
