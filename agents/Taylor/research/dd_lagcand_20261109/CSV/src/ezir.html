@@ -1,0 +1,1356 @@
+<!--Created by TungLX-->
+
+
+<!DOCTYPE html>
+<html>
+<!-- begin::Head -->
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="description" content="EzIRFront">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="shortcut icon" href="/favicon.png">
+    <!--begin::Web font -->
+    <!--end::Web font -->
+    <!--begin::Page Vendors Styles -->
+    <!--data table style sheet -->
+    <!-- <link href="css/fpts-main.min.css" rel="stylesheet" type="text/css"> -->
+    <link href="/css/client/tongquan-client.css" rel="stylesheet" type="text/css">
+
+    <link href="/assets/vendors/custom/datatables/datatables.bundle.min.css" rel="stylesheet" type="text/css">
+
+    <!--end::Page Vendors Styles -->
+    <!--begin:: Global Mandatory Vendors -->
+    <link href="/assets/vendors/general/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet" type="text/css">
+    <!--end:: Global Mandatory Vendors -->
+    <!--begin:: Global Optional Vendors -->
+
+    <script src="/js/polyfill.min.js" type="text/javascript"></script>
+    <script src="/assets/vendors/general/jquery/dist/jquery.min.js" type="text/javascript"></script>
+
+
+    <script src="/assets/vendors/general/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+    <link href="/assets/vendors/general/select2/css/select2.min.css" rel="stylesheet">
+    <script src="/assets/vendors/general/select2/js/select2.min.js"></script>
+    <script src="/js/jquery-3.3.1.min.js"></script>
+
+    <link href="/assets/vendors/custom/vendors/line-awesome/css/line-awesome.css" rel="stylesheet" type="text/css">
+    <!--
+    <link href=" assets/vendors/general/toastr/build/toastr.css" rel="stylesheet" type="text/css"> -->
+    <link href="/assets/vendors/custom/vendors/fontawesome5/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="/assets/vendors/general/sweetalert2/dist/sweetalert2.css" rel="stylesheet" type="text/css">
+    <link href="/css/client/Customer-client.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/css/client/site-client.css">
+    <link rel="stylesheet" href="/css/client-page.css" />
+    <!--end:: Global Optional Vendors -->
+
+
+    <link href="/css/client/taichinh-client.css" rel="stylesheet" />
+    <link href="/css/client/lichsugiaodich-client.css" rel="stylesheet" />
+    <link href="/css/client/luutru-client.css" rel="stylesheet" />
+
+    <!--Custome CSS-->
+    <link href="/css/client/TuVanQuanTriDN-details-client.css" rel="stylesheet" />
+    <link href="/css/client/theme-details-client.css" rel="stylesheet">
+    <link href="/css/client/stellarnav-client.css" rel="stylesheet" />
+    <link href="/css/client/details-tablet-responsive-client.css" rel="stylesheet" />
+    <link href="/css/client/details-mobile-responsive -client.css" rel="stylesheet" />
+
+    <script src="/assets/vendors/general/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/assets/vendors/general/perfect-scrollbar/dist/perfect-scrollbar.js" type="text/javascript"></script>
+    <script src="/assets/vendors/general/sticky-js/dist/sticky.min.js" type="text/javascript"></script>
+
+    <!--Sử dụng cho JS SaveFile, Xuất báo cáo-->
+    <script src="/lib/filesaver/FileSaver.min.js"></script>
+    <script src="/js/jquery-ajax-native.js"></script>
+
+
+    <script src="/assets/demo/demo3/base/scripts.bundle.min.js" type="text/javascript"></script>
+
+    <script src="/assets/vendors/custom/datatables/datatables.bundle.min.js" type="text/javascript"></script>
+    <script src="/assets/vendors/general/sweetalert2/dist/sweetalert2.js" type="text/javascript"></script>
+
+
+    <script src="/js/lodash.js"></script>
+    <script src="/js/highcharts-lib.js"></script>
+    <script src="/js/highchart-3d.js"></script>
+    <script src="/js/highchart-module-exporting.js"></script>
+    <script src="/js/highchart-module-export-data.js"></script>
+    <script src="/js/highchart-module-accessibility.js"></script>
+
+    <!--css + js search_mobile-->
+    <link href="/Public/css/easy-autocomplete.min.css" rel="stylesheet">
+    <script src="/js/jquery.easy-autocomplete.min.js"></script>
+
+    <script src="/js/site.js"></script>
+    <script src="/js/stellarnav.js"></script>
+    <style>
+        .card-body {
+            padding: 1.3rem;
+            background: none;
+            cursor: pointer;
+        }
+
+        .info-card :hover {
+        }
+
+        .text-gray-800 {
+            color: #5a5c69 !important;
+        }
+
+        .text-gray-300 {
+            color: #dddfeb !important;
+        }
+
+        .border-left-primary {
+            border-left: .25rem solid #4e73df !important;
+        }
+
+        .shadow {
+            box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .25) !important;
+        }
+
+        .no-gutters {
+            margin-right: 0;
+            margin-left: 0;
+        }
+
+        .border-left-success {
+            border-left: .25rem solid #1cc88a !important;
+        }
+
+        .border-left-info {
+            border-left: .25rem solid #36b9cc !important;
+        }
+
+        .border-left-warning {
+            border-left: .25rem solid #f6c23e !important;
+        }
+
+        .text-primary {
+            font-size: inherit;
+        }
+
+        body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            user-select: none;
+        }
+
+        .hidden-menu {
+            display: none;
+        }
+    </style>
+    <title>Home Page - EzIR</title>
+
+    <script src="/js/block.js"></script>
+    <link href="/css/QuanLyGiaoDien.css" rel="stylesheet" type="text/css">
+
+</head>
+<body class="" style="background-color: white">
+    <div id="k_header_mobile" class="k-header-mobile" style="display: none;">
+        <div class="fpts-header">
+            <div class="container d-flex navbar-mobile ">
+                <div class="fpts-left">
+                    <div class="k-header-mobile-bottom">
+                        <div class="k-header-mobile__toolbar">
+                            <button class="k-header-mobile__toolbar-toggler" id="k_header_mobile_toggler"><span></span></button>
+                        </div>
+
+                        <div class="fpts-right d-flex justify-content-end align-items-center">
+                            <form id="selectLanguage" method="post" class="form-horizontal mb-0" role="form" action="/ThongTinDoanhNghiepClient/SetLanguage?returnUrl=~%2Fthongtindoanhnghiepclient%2FCSV">
+                                <input type="hidden" name="culture" asp-items="cultureItems" id="requestValue" value="en-US" />
+                                <button type="submit" style="border-style: hidden; background-color: inherit;">
+                                    <a class="culture-image">
+                                        <img src="/images/iconVietnam.svg.png" />
+                                    </a>
+                                </button>
+                            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8IyW3X8PP_5BvQHhPKL_e-HUE18LoKiWaSWf9_YC2dDLhoE9-U-3mrTaKU9LuBFRez6UDp5ZFz3swZczt5YCSiarGOIegag--bHAQi1XZAPF1IUzwEyBor8hL-U12EF8oRFBtDb69cDRLQKI2J1PitM" /></form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stellarnav right mobile stellarnav_othersite">
+
+        <div class="Langgue  Langgue_detail">
+            <!--Chuyển language-->
+            <form id="selectLanguage" method="post" class="form-horizontal mb-0" role="form" action="/HomeDemo/SetLanguage?returnUrl=~%2Fthongtindoanhnghiepclient%2FCSV">
+                <input type="hidden" name="culture" asp-items="cultureItems" id="requestValue" value="en-US" />
+                <button type="submit" style="border-style: hidden; background-color: inherit;">
+                    <a class="culture-image">
+                        <img src="/images/iconVietnam.svg.png" width="25" height="22" />
+                    </a>
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8IyW3X8PP_5BvQHhPKL_e-HUE18LoKiWaSWf9_YC2dDLhoE9-U-3mrTaKU9LuBFRez6UDp5ZFz3swZczt5YCSiarGOIegag--bHAQi1XZAPF1IUzwEyBor8hL-U12EF8oRFBtDb69cDRLQKI2J1PitM" /></form>
+        </div>
+
+        <a class="menu-toggle" id="menu_btn">
+            <span class="bars">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </a>
+        <ul id="ul-menu">
+                <li id="menu_hidden">
+                    <a class="menu_mobile_lv1" id="menu_tq_mobile_new">T&#x1ED5;ng quan</a>
+                    <ul>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="ttc_mobile()">Th&#xF4;ng tin chung</a>
+
+                            </li>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="tncl_mobile()">T&#x1EA7;m nh&#xEC;n chi&#x1EBF;n l&#x1B0;&#x1EE3;c</a>
+
+                            </li>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="tcbmql_mobile()">T&#x1ED5; ch&#x1EE9;c b&#x1ED9; m&#xE1;y qu&#x1EA3;n l&#xFD;</a>
+
+                            </li>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="tpld_mobile()">Th&#xE0;nh ph&#x1EA7;n l&#xE3;nh &#x111;&#x1EA1;o</a>
+
+                            </li>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="ccsh_mobile()">C&#x1A1; c&#x1EA5;u s&#x1EDF; h&#x1EEF;u</a>
+
+                            </li>
+                    </ul>
+                </li>
+
+                <li id="menu_hidden">
+                    <a class="menu_mobile_lv1" id="menu_kd_mobile_new">Kinh doanh</a>
+                    <ul>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="tt_kh_dt_mobile()">Ho&#x1EA1;t &#x111;&#x1ED9;ng kinh doanh</a>
+
+                            </li>
+                    </ul>
+                </li>
+
+                <li id="menu_hidden">
+                    <a class="menu_mobile_lv1" id="menu_tc_mobile_new">T&#xE0;i ch&#xED;nh</a>
+                    <ul>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="hstc_mobile()">H&#x1EC7; s&#x1ED1; t&#xE0;i ch&#xED;nh</a>
+
+                            </li>
+
+
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="cdkt_mobile()">T&#xEC;nh h&#xEC;nh t&#xE0;i ch&#xED;nh</a>
+
+                            </li>
+
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="kqhdkd_mobile()">K&#x1EBF;t qu&#x1EA3; ho&#x1EA1;t &#x111;&#x1ED9;ng kinh doanh</a>
+
+                            </li>
+
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="icf_mobile()">L&#x1B0;u chuy&#x1EC3;n ti&#x1EC1;n t&#x1EC7; (ICF)</a>
+
+                            </li>
+
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="dcf_mobile()">L&#x1B0;u chuy&#x1EC3;n ti&#x1EC1;n t&#x1EC7; (DCF)</a>
+
+                            </li>
+
+                    </ul>
+                </li>
+                <li id="menu_hidden">
+                    <a class="menu_mobile_lv1" id="menu_cp_mobile_new">C&#x1ED5; phi&#x1EBF;u</a>
+                    <ul>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="lsgd_mobile()">L&#x1ECB;ch s&#x1EED; giao d&#x1ECB;ch</a>
+
+                            </li>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="lstvtct_mobile()">L&#x1ECB;ch s&#x1EED; t&#x103;ng v&#x1ED1;n - Tr&#x1EA3; c&#x1ED5; t&#x1EE9;c</a>
+
+                            </li>
+                            <li id="menu_hidden">
+                                <a class="menu_mobile_lv2" onclick="dtkt_mobile()">&#x110;&#x1ED3; th&#x1ECB; k&#x1EF9; thu&#x1EAD;t</a>
+
+                            </li>
+                    </ul>
+                </li>
+
+
+                <li id="menu_hidden">
+                    <a class="menu_mobile_lv1" id="menu_lt_mobile_new">L&#x1B0;u tr&#x1EEF;</a>
+                    <ul>
+                        <li id="menu_hidden">
+                            <a class="menu_mobile_lv2" onclick="tdn_mobile()">L&#x1B0;u tr&#x1EEF; tin doanh nghi&#x1EC7;p</a>
+
+                        </li>
+                        <li id="menu_hidden">
+                            <a class="menu_mobile_lv2" onclick="tts_mobile()">L&#x1B0;u tr&#x1EEF; tin t&#x1EEB; S&#x1EDF; v&#xE0; VSDC</a>
+
+                        </li>
+                    </ul>
+                </li>
+
+
+
+
+        </ul>
+    </div>
+    <!-- .stellarnav -->
+
+
+    <div class="full-page-green"></div>
+
+    <div class="main_info_home_othersite main-container mb-t-d-none">
+        <div class="nav_menu nav_menu_details background_menu_lv1">
+
+
+            <div class="Langgue  Langgue_detail">
+                <!--Chuyển language-->
+                <form id="selectLanguage" method="post" class="form-horizontal mb-0" role="form" action="/HomeDemo/SetLanguage?returnUrl=~%2Fthongtindoanhnghiepclient%2FCSV">
+                    <input type="hidden" name="culture" asp-items="cultureItems" id="requestValue" value="en-US" />
+                    <button type="submit" style="border-style: hidden; background-color: inherit;">
+                        <a class="culture-image">
+                            <img src="/images/iconVietnam.svg.png" width="25" height="22" />
+                        </a>
+                    </button>
+                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8IyW3X8PP_5BvQHhPKL_e-HUE18LoKiWaSWf9_YC2dDLhoE9-U-3mrTaKU9LuBFRez6UDp5ZFz3swZczt5YCSiarGOIegag--bHAQi1XZAPF1IUzwEyBor8hL-U12EF8oRFBtDb69cDRLQKI2J1PitM" /></form>
+            </div>
+
+            <ul id="navbar_details">
+                
+                        <li class="nav-item">
+                            <a class="nav-bar_child" id="menu_lt">
+                                L&#x1B0;u tr&#x1EEF;
+                                 <hr class="detail_menu_hr" />
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-bar_child" id="menu_cp">
+                                C&#x1ED5; phi&#x1EBF;u
+                                 <hr class="detail_menu_hr" />
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-bar_child" id="menu_tc">
+                                T&#xE0;i ch&#xED;nh
+                                 <hr class="detail_menu_hr" />
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-bar_child" id="menu_kd">
+                                Kinh doanh
+                                 <hr class="detail_menu_hr" />
+                            </a>
+
+                        </li>
+
+                        <li class="nav-item" data-menuanchor="trangchu">
+                            <a class="nav-bar_child active menu_tq" id="menu_tq">
+                                T&#x1ED5;ng quan
+                                 <hr class="detail_menu_hr" />
+                            </a>
+
+                        </li>
+                </ul>
+
+            <!--Tổng quan-->
+            <div id="nav_menu_inside" class="menu_tongquan_lv2 background_menu_lv2">
+                <!--Tổng quan-->
+                <!--Begin-->
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu active" id="menu_ttc" onclick="ttc()">
+                            Th&#xF4;ng tin chung
+
+                        </a>
+
+                    </div>
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_tncl">
+                            T&#x1EA7;m nh&#xEC;n chi&#x1EBF;n l&#x1B0;&#x1EE3;c
+
+                        </a>
+                    </div>
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_tcbmql" onclick="tncl()">
+                            T&#x1ED5; ch&#x1EE9;c b&#x1ED9; m&#xE1;y qu&#x1EA3;n l&#xFD;
+
+                        </a>
+                    </div>
+
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_tpld">
+                            Th&#xE0;nh ph&#x1EA7;n l&#xE3;nh &#x111;&#x1EA1;o
+
+                        </a>
+                    </div>
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_ccsh">
+                            C&#x1A1; c&#x1EA5;u s&#x1EDF; h&#x1EEF;u
+
+                        </a>
+                    </div>
+
+
+                <!--End-->
+            </div>
+
+            <!--Kinh doanh-->
+            <div id="nav_menu_inside" class="menu_kinhdoanh_lv2" style="display:none;">
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu active" id="menu_tt_kh_dt">
+                            Ho&#x1EA1;t &#x111;&#x1ED9;ng kinh doanh
+                        </a>
+                    </div>
+
+
+
+
+
+
+
+            </div>
+
+            <!--Tài chính-->
+            <div id="nav_menu_inside" class="menu_taichinh_lv2" style="display:none;">
+
+
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_hstc">
+                            H&#x1EC7; s&#x1ED1; t&#xE0;i ch&#xED;nh
+                        </a>
+
+                    </div>
+
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu active" id="menu_cdkt">
+                            T&#xEC;nh h&#xEC;nh t&#xE0;i ch&#xED;nh
+                        </a>
+
+                    </div>
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_kqhdkd">
+                            K&#x1EBF;t qu&#x1EA3; ho&#x1EA1;t &#x111;&#x1ED9;ng kinh doanh
+                        </a>
+
+                    </div>
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_icf">
+                            L&#x1B0;u chuy&#x1EC3;n ti&#x1EC1;n t&#x1EC7; (ICF)
+                        </a>
+
+                    </div>
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_dcf">
+                            L&#x1B0;u chuy&#x1EC3;n ti&#x1EC1;n t&#x1EC7; (DCF)
+                        </a>
+
+                    </div>
+            </div>
+
+            <!--Cổ phiếu-->
+            <div id="nav_menu_inside" class="menu_cophieu_lv2" style="display:none;">
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu active" id="menu_lsgd">
+                            L&#x1ECB;ch s&#x1EED; giao d&#x1ECB;ch
+                        </a>
+                    </div>
+
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_lstv">
+                            L&#x1ECB;ch s&#x1EED; t&#x103;ng v&#x1ED1;n - Tr&#x1EA3; c&#x1ED5; t&#x1EE9;c
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_dtkt">
+                            &#x110;&#x1ED3; th&#x1ECB; k&#x1EF9; thu&#x1EAD;t
+                        </a>
+
+                    </div>
+
+            </div>
+
+            <!--Lưu trữ-->
+            <div id="nav_menu_inside" class="menu_luutru_lv2" style="display:none;">
+
+                <div class="nav-item">
+                    <a class="nav-bar_child_inside detail_menu active" id="menu_tdn" onclick="tdn()">
+                        L&#x1B0;u tr&#x1EEF; tin doanh nghi&#x1EC7;p
+                    </a>
+
+                </div>
+
+                <div class="nav-item">
+                    <a class="nav-bar_child_inside detail_menu" id="menu_vsd" onclick="tts()">
+                        L&#x1B0;u tr&#x1EEF; tin t&#x1EEB; S&#x1EDF; v&#xE0; VSDC
+                    </a>
+
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+    <!--Load nội dung từng view component-->
+    <div class="main-container main_info_home row main_info_home_othersite">
+        
+    </div>
+
+
+
+    <input type="text" id="cpnyid" hidden />
+    <input type="text" id="cpnytypeid" hidden />
+    <!--Lấy tilte company-->
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            if ($(window).width() <= 480 && /Android|webOS|iPhone|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                $('.mobile').show();
+                $('.n-mobile').hide();
+            } else {
+                $('.mobile').hide();
+                $('.n-mobile').show();
+            }
+            var r = document.querySelector(':root');
+            var pageStyleData
+            $("#icon_search_top").click(function () {
+
+                $('.search_mobile').slideToggle();
+            });
+
+            //Lấy thông tin Company
+            /*var stock_code = window.location.href.split('/')[4];*/
+            var stock_code = window.location.href.split('/')[5] ?? window.location.href.split('/')[4];
+            var stockurl = stock_code.toUpperCase();
+            var vi_en = "vi-VN";
+
+            var lang;
+
+            if (window.location.href.includes('?culture=en-US'))
+            {
+                lang = "&culture=en-US";
+                stockurl = stockurl.split('?')[0];
+            }
+            else
+                lang = "";
+            $.ajax({
+                url: '/ThongTinDoanhNghiep/ThongTinCompanyViEn?stock_Code=' + stockurl + lang,
+                type: 'POST',
+                dataType: 'json',
+                success: function (data) {
+                   // console.log(data);
+                    $('.title_line_item_company_name').html(data[0].astockname + ` ` + `(` + data[0].aposT_TO + `:` + data[0].astock_CODE + `)`);
+                    $('#cpnyid').val(data[0].acpnyid);
+                },
+
+                error: function (err) {
+                    //console.log(err);
+
+                }
+            });
+            
+
+        });
+    </script>
+
+    <!--end:: Body-->
+    <script>
+        var KAppOptions = {
+            "colors": {
+                "state": {
+                    "brand": "#4d5cf2",
+                    "metal": "#c4c5d6",
+                    "light": "#ffffff",
+                    "accent": "#00c5dc",
+                    "primary": "#5867dd",
+                    "success": "#34bfa3",
+                    "info": "#36a3f7",
+                    "warning": "#ffb822",
+                    "danger": "#fd3995",
+                    "focus": "#9816f4"
+                },
+                "base": {
+                    "label": ["#c5cbe3", "#a1a8c3", "#3d4465", "#3e4466"],
+                    "shape": ["#f0f3ff", "#d9dffa", "#afb4d4", "#646c9a"]
+                }
+            }
+        };</script>
+
+    <script type="text/javascript">
+        const menuList = [["TQ_TQ","CP_DTKT","TQ_TNCL","TQ_TCBMQL","TQ_TPLD","TQ_CCSH","LT_LT","KD_KD","KD_TTKHDT","TC_TC","TC_HSTC","TC_CDKT","TC_KQHDKD","TC_ICF","TC_DCF","CP_CP","CP_LSGD","CP_LSTVTCT","TQ_TTC"]];
+        const roleList = menuList[0]
+        const roles_arr = ["TQ_TQ", "TQ_TTC", "TQ_TNCL", "TQ_TCBMQL", "TQ_TPLD", "TQ_CCSH", "LT_LT", "KD_KD", "KD_TTKHDT", "PTBV", "KD_TDCN", "KD_NLQL", "KD_TTDADT", "KD_PTSWOT", "KD_VTDN", "TC_TC", "TC_HSTC", "TC_KHTC", "TC_CDKT", "TC_KQHDKD", "TC_ICF", "TC_DCF", "CP_CP", "CP_LSGD", "CP_LSTVTCT", "CP_DTKT", "PT_FPTS"];
+        let menuListCustom = [];
+        //nền màu chính(xanh)
+        var colorBackgroundFocus = "#007db8";
+        //nền màu default(xám)
+        var colorBackground = "";
+        //nền chữ focus menu2(xanh lá cây)
+        var colorTextFocus = "#007DB8";
+        //màu chữ menu1 focus và menu2 default(trắng)
+        var colorText = "#384555";
+        //màu chữ menu 1 default(đen)
+        var colorTextDefault = "";
+        /*ChienND 30/08/2022 Lấy ngôn ngữ qua link website*/
+        var lang;
+        if (window.location.href.includes("?culture=en-US"))
+            lang = "?culture=en-US";
+        else
+            lang = "";
+
+
+        function loadTQ() {
+            /*var stock_code = window.location.href.split('/')[4];*/
+
+            let html = `                            <div class="nav-item">
+                                <a class="nav-bar_child_inside detail_menu active" id="menu_ttc" onclick="ttc()">
+                                    Th&#xF4;ng tin chung
+                                </a>
+                            </div>
+                            <div class="nav-item">
+                                <a  class="nav-bar_child_inside detail_menu" id="menu_tncl" onclick="tncl()">
+                                   T&#x1EA7;m nh&#xEC;n chi&#x1EBF;n l&#x1B0;&#x1EE3;c
+                                </a>
+                            </div>
+                            <div class="nav-item">
+                                <a  class="nav-bar_child_inside detail_menu" id="menu_tcbmql" onclick="tcbmql()">
+                                    T&#x1ED5; ch&#x1EE9;c b&#x1ED9; m&#xE1;y qu&#x1EA3;n l&#xFD;
+                                </a>
+                            </div>
+                            <div class="nav-item">
+                                <a  class="nav-bar_child_inside detail_menu" id="menu_tpld" onclick="tpld()">
+                                    Th&#xE0;nh ph&#x1EA7;n l&#xE3;nh &#x111;&#x1EA1;o
+                                </a>
+                            </div>
+                            <div class="nav-item">
+                                <a  class="nav-bar_child_inside detail_menu" id="menu_ccsh" onclick="ccsh()">
+                                    C&#x1A1; c&#x1EA5;u s&#x1EDF; h&#x1EEF;u
+                                </a>
+                             </div>
+`;
+
+            $('#nav_menu_inside').empty();
+            $('#nav_menu_inside').append(html);
+            $('.main_info_home').empty();
+            // Tìm vị trí của "TQ_TQ" trong roleList
+            const indexTQ = menuListCustom.indexOf("TQ_TQ");
+            // Kiểm tra nếu "TQ_TQ" không phải là phần tử cuối cùng của roleList
+            if (indexTQ !== -1 && indexTQ < menuListCustom.length - 1) {
+                // Lấy phần tử liền kề ngay sau "TQ_TQ"
+                const firstElement = menuListCustom[indexTQ + 1];
+                if (firstElement == "TQ_TTC") {
+                    ttc();
+                } else if (firstElement == "TQ_TNCL") {
+                    tncl();
+                } else if (firstElement == "TQ_TCBMQL") {
+                    tcbmql();
+                } else if (firstElement == "TQ_TPLD") {
+                    tpld();
+                } else if (firstElement == "TQ_CCSH") {
+                    ccsh();
+                }
+            }
+
+        };
+
+        // menu header 2 Tổng quan
+        $('#menu_tq').click(function () {
+            var currentActive = $('.nav-bar_child.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tq').addClass('active');
+            loadTQ();
+        });
+
+        // Kinh doanh
+        $('#menu_kd').click(function () {
+
+            var currentActive = $('.nav-bar_child.active')
+            currentActive.first().removeClass('active')
+            $('#menu_kd').addClass('active');
+            $(".main_info_home").empty();
+            $('#navbar_details').show();
+            $('#menu_tt_kh_dt').addClass('active')
+
+            let html = `
+                        <div class="nav-item">
+                            <a class="nav-bar_child_inside detail_menu active" id="menu_tt_kh_dt" onclick="tt_kh_dt()">
+                               Ho&#x1EA1;t &#x111;&#x1ED9;ng kinh doanh
+                           </a>
+                        </div>
+`;
+
+
+            $('#nav_menu_inside').empty();
+            $('#nav_menu_inside').append(html);
+            const indexKD = menuListCustom.indexOf("KD_KD");
+
+            if (indexKD !== -1 && indexKD < menuListCustom.length - 1) {
+                const firstElement = menuListCustom[indexKD + 1];
+
+                if (firstElement == "KD_TTKHDT") {
+                    tt_kh_dt();
+                } else if (firstElement == "PTBV") {
+                    ptbv();
+                } else if (firstElement == "KD_TDCN") {
+                    tdcn();
+                } else if (firstElement == "KD_NLQL") {
+                    nlql();
+                } else if (firstElement == "KD_TTDADT") {
+                    ttdadt();
+                } else if (firstElement == "KD_PTSWOT") {
+                    ptswot();
+                } else if (firstElement == "KD_VTDN") {
+                    vtdn();
+                }
+            }
+        });
+
+         // Tài chính
+        $('#menu_tc').click(function () {
+            var currentActive = $('.nav-bar_child.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tc').addClass('active');
+            $('#navbar_details').show();
+            let html = `
+                         <div class="nav-item">
+                             <a class="nav-bar_child_inside detail_menu active" id="menu_hstc" onclick="hstc()">
+                                H&#x1EC7; s&#x1ED1; t&#xE0;i ch&#xED;nh
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a class="nav-bar_child_inside detail_menu" id="menu_cdkt" onclick="cdkt()">
+                                T&#xEC;nh h&#xEC;nh t&#xE0;i ch&#xED;nh
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a class="nav-bar_child_inside detail_menu" id="menu_kqhdkd" onclick="kqhdkd()">
+                               K&#x1EBF;t qu&#x1EA3; ho&#x1EA1;t &#x111;&#x1ED9;ng kinh doanh
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a class="nav-bar_child_inside detail_menu" id="menu_icf" onclick="icf()">
+                               L&#x1B0;u chuy&#x1EC3;n ti&#x1EC1;n t&#x1EC7; (ICF)
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a class="nav-bar_child_inside detail_menu" id="menu_dcf" onclick="dcf()">
+                                L&#x1B0;u chuy&#x1EC3;n ti&#x1EC1;n t&#x1EC7; (DCF)
+                            </a>
+                        </div>
+`;
+
+            $('#nav_menu_inside').empty();
+            $('#nav_menu_inside').append(html);
+
+            const indexTC = menuListCustom.indexOf("TC_TC");
+
+            if (indexTC !== -1 && indexTC < menuListCustom.length - 1) {
+                const firstElement = menuListCustom[indexTC + 1];
+                if (firstElement == "TC_HSTC") {
+                    hstc();
+                } else if (firstElement == "TC_CDKT") {
+                    cdkt();
+                } else if (firstElement == "KD_NLQL") {
+                    nlql();
+                } else if (firstElement == "TC_ICF") {
+                    icf();
+                } else if (firstElement == "TC_DCF") {
+                    dcf();
+                } else if (firstElement == "TC_KHTC") {
+                    khtc();
+                } else if (firstElement == "TC_KQHDKD") {
+                    kqhdkd();
+                }
+            }
+
+            });
+
+        //Cổ phiếu
+        $('#menu_cp').click(function () {
+            var currentActive = $('.nav-bar_child.active')
+            currentActive.first().removeClass('active')
+            $('#menu_cp').addClass('active');
+            $('#menu_lsgd').addClass('active');
+            $('#navbar_details').show();
+            let html = `
+                            <div class="nav-item">
+                                <a class="nav-bar_child_inside detail_menu active" id="menu_lsgd" onclick="lsgd()">
+                                   L&#x1ECB;ch s&#x1EED; giao d&#x1ECB;ch
+                                </a>
+                            </div>
+                            <div class="nav-item">
+                                <a class="nav-bar_child_inside detail_menu" id="menu_lstv" onclick="lstvtct()">
+                                    L&#x1ECB;ch s&#x1EED; t&#x103;ng v&#x1ED1;n - Tr&#x1EA3; c&#x1ED5; t&#x1EE9;c
+                                </a>
+                            </div>
+                            <div class="nav-item">
+                                <a class="nav-bar_child_inside detail_menu" id="menu_dtkt" onclick="dtkt()">
+                                   &#x110;&#x1ED3; th&#x1ECB; k&#x1EF9; thu&#x1EAD;t
+                                </a>
+                            </div>
+`;
+
+            $('#nav_menu_inside').empty();
+            $('#nav_menu_inside').append(html);
+            const indexCP = menuListCustom.indexOf("CP_CP");
+            if (indexCP !== -1 && indexCP < menuListCustom.length - 1) {
+                const firstElement = menuListCustom[indexCP + 1];
+                if (firstElement == "CP_LSGD") {
+                    lsgd();
+                } else if (firstElement == "CP_LSTVTCT") {
+                    lstvtct();
+                } else if (firstElement == "CP_DTKT") {
+                    dtkt();
+                }
+            }
+        });
+
+        //Lưu trữ
+        $('#menu_lt').click(function () {
+            var currentActive = $('.nav-bar_child.active')
+            currentActive.first().removeClass('active')
+            $('#menu_lt').addClass('active');
+            $('#navbar_details').show();
+
+            let html = `
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu active" id="menu_tdn" onclick="tdn()">
+                          L&#x1B0;u tr&#x1EEF; tin doanh nghi&#x1EC7;p
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a class="nav-bar_child_inside detail_menu" id="menu_vsd" onclick="tts()">
+                           L&#x1B0;u tr&#x1EEF; tin t&#x1EEB; S&#x1EDF; v&#xE0; VSDC
+                       </a>
+                    </div>
+`;
+
+            $('#nav_menu_inside').empty();
+            $('#nav_menu_inside').append(html);
+            tdn();
+        });
+
+        // bản tin IR
+        $('#bantinir_details').click(function () {
+            var currentActive = $('.nav-bar_child.active')
+            currentActive.first().removeClass('active')
+            $('#bantinir_details').addClass('active');
+            $('#navbar_details').show();
+            $('.main_info_home').empty();
+            $('#nav_menu_inside').empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiep/BanTinIR' + lang);
+        });
+
+        //Load tab đầu tiên trên menu khi mới vào trang
+        loadFirstData();
+        function loadFirstData() {
+            // Lấy thẻ cuối cùng vì menu bị ngược
+            var elementLi = $('#navbar_details li:last');
+            var stock_code = '';
+            for (let i = 0; i < roles_arr.length; i++) {
+                if (roleList.includes(roles_arr[i])) {
+                    menuListCustom.push(roles_arr[i]);
+                }
+            }
+
+            var url = window.location.href.split('?')[0].split('/');
+            if (url.length > 5) {
+                window.location.href = "/PageNotFound";
+            }
+            var stock_code = url[4];
+            var stockurl = stock_code.toUpperCase();
+            //AnhDT Comment
+            //if (window.location.href.includes('?culture=en-US')) {
+            //    lang = "&culture=en-US";
+            //    stock_code = window.location.href.split('/')[4].slice(0, 3);
+            //    stockurl = stock_code.toUpperCase();
+            //}
+            //else {
+            //    lang = "";
+            //    stock_code = window.location.href.split('/')[4];
+            //    stockurl = stock_code.toUpperCase();
+            //}
+
+            //lấy loại công ty
+            $.ajax({
+                url: '/ThongTinDoanhNghiepClient/ThongTin?stock_Code=' + stockurl,
+                type: 'POST',
+                dataType:'json',
+                success: function (data) {
+                    if (data.length == 0) {
+                        window.location.href = "/PageNotFound";
+                    }
+                    $('#cpnytypeid').val(data[0].acpnytype);
+                    var linkId = $(elementLi).find('a').attr('id');
+                    $('#' + linkId).trigger('click');
+                },
+                error: function (err) {
+                    // console.log(err);
+                }
+            });
+
+
+        }
+
+
+
+
+        //Tổng quan
+        //Thông tin chung
+        function ttc() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_ttc').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThongTinChung' + lang);
+        }
+
+        //Tầm nhìn chiến lược
+        function tncl() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tncl').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/TamNhinChienLuoc' + lang);
+        }
+
+        //Tổ chức bộ máy quản lý
+        function tcbmql() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tcbmql').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/ToChucBoMayQuanLy' + lang);
+        }
+
+        // Thành phần lãnh đạo
+        function tpld() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tpld').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThanhPhanLanhDao' + lang);
+        }
+
+        // cơ cấu sở hữu
+        function ccsh() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_ccsh').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/CoCauSoHuu' + lang);
+        }
+
+        //lưu trữ
+        function tdn() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tdn').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuTruTinDoanhNghiep' + lang);
+        }
+
+        function tts() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_vsd').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuTruTinTuSoVaVSD' + lang);
+        }
+
+        /// <summary>
+        /// kinh doanh
+        /// </summary>
+        /// <returns></returns>
+        ///
+        // site trình độ công nghệ
+        function tdcn() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tdcn').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/TrinhDoCongNghe' + lang);
+        }
+
+        //Thị trường khách hàng đối thủ
+        function tt_kh_dt() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_tt_kh_dt').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThiTruongKHDT' + lang);
+        }
+
+        // phát triển bền vững
+        function ptbv() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_ptbv').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/PhatTrienBenVung' + lang);
+        }
+
+        // thông tin dự án đầu tư
+        function ttdadt() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_ttdadt').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThongTinDuAnDauTu' + lang);
+        }
+
+                   //năng lực quản lỹ
+        function nlql() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_nlql').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/NangLucQuanLy' + lang);
+        }
+
+        //Phân tích swot
+        function ptswot() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_ptswot').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/PhanTichSWOT' + lang);
+        }
+
+        //vị thế doanh nghiệp
+        function vtdn() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_vtdn').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/ViTheDoanhNghiep' + lang);
+        }
+
+        // Tài chính
+        // Hệ số tài chính
+        function hstc() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_hstc').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/HeSoTaiChinh' + lang);
+        }
+
+        //Kế hoạch tài chính
+        function khtc() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_khtc').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/KeHoachTaiChinh' + lang);
+        }
+
+        //Cân đối kế toán
+        function cdkt() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_cdkt').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/CanDoiKeToan' + lang);
+        }
+
+        // Kết quả hoạt động kinh doanh
+        function kqhdkd() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_kqhdkd').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/KetQuaHoatDongKinhDoanh' + lang);
+        }
+
+        //Lưu chuyển tiền tế ICF
+        function icf() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_icf').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuChuyenTienTeICF' + lang);
+        }
+
+        //Lưu chuyển tiền tệ DCF
+        function dcf() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_dcf').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuChuyenTienTeDCF' + lang);
+        }
+
+        // Cổ Phiếu
+        // Lịch sử giao dịch
+        function lsgd() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_lsgd').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/LichSuGiaoDich' + lang);
+        }
+
+        //Lịch sử tăng vốn trả cổ tức
+        function lstvtct() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_lstv').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/LichSuTangVonTraCoTuc' + lang);
+        }
+
+        //Đồ thị kỹ thuật
+        function dtkt() {
+            var currentActive = $('.nav-bar_child_inside.active')
+            currentActive.first().removeClass('active')
+            $('#menu_dtkt').addClass('active');
+            $(".main_info_home").empty();
+            $(".main_info_home").load('/ThongTinDoanhNghiepClient/DoThiKyThuat' + lang);
+        }
+
+    </script>
+
+    <script>
+
+    var lang;
+    if (window.location.href.includes("?culture=en-US"))
+        lang = "?culture=en-US";
+    else
+        lang = "";
+
+    // bản tin IR
+    $('#menu_ir_mobile_new').click(function () {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul")[0].classList.toggle("show");
+        $('.menu_mobile_lv1').siblings('ul')[0].classList.toggle("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiep/BanTinIR' + lang);
+    });
+
+    //Tổng Quan
+    //Thông tin chung
+    function ttc_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThongTinChung' + lang);
+    }
+
+    //Tầm nhìn chiến lược
+    function tncl_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/TamNhinChienLuoc' + lang);
+    }
+
+    function tcbmql_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/ToChucBoMayQuanLy' + lang);
+    }
+
+    function tpld_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThanhPhanLanhDao' + lang);
+     }
+
+    // cơ cấu sở hữu
+    function ccsh_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/CoCauSoHuu' + lang);
+    }
+
+    function tdcn_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/TrinhDoCongNghe' + lang);
+    }
+
+    function tdn_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuTruTinDoanhNghiep' + lang);
+    }
+
+    function tts_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuTruTinTuSoVaVSD' + lang);
+    }
+
+    //Thị trường khách hàng đối  thủ
+    function tt_kh_dt_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThiTruongKHDT' + lang);
+    }
+
+    function ptbv_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/PhatTrienBenVung' + lang);
+    }
+
+    function ttdadt_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/ThongTinDuAnDauTu' + lang);
+    }
+
+    function nlql_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/NangLucQuanLy' + lang);
+    }
+
+    //Phân tích swot
+    function ptswot_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/PhanTichSWOT' + lang);
+    }
+
+    //vị thế doanh nghiệp
+    function vtdn_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/ViTheDoanhNghiep' + lang);
+    }
+
+    // Cổ Phiếu
+    function lsgd_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/LichSuGiaoDich' + lang);
+    }
+
+    function lstvtct_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/LichSuTangVonTraCoTuc' + lang);
+     }
+
+    function dtkt_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/DoThiKyThuat' + lang);
+    }
+
+
+    // Tab tài chính
+    // hệ số tài chính
+    function hstc_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/HeSoTaiChinh' + lang);
+                    }
+
+    function khtc_mobile()
+    {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/KeHoachTaiChinh' + lang);
+    }
+
+    function cdkt_mobile()
+    {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/CanDoiKeToan' + lang);
+    }
+
+    function kqhdkd_mobile()
+    {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/KetQuaHoatDongKinhDoanh' + lang);
+    }
+
+    function icf_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuChuyenTienTeICF' + lang);
+    }
+
+    function dcf_mobile() {
+        $('.main_info_home').empty();
+        $(".stellarnav.mobile > ul").removeClass("show");
+        $('.menu_mobile_lv1').removeClass("show");
+        $(".main_info_home").load('/ThongTinDoanhNghiepClient/LuuChuyenTienTeDCF' + lang);
+    }
+
+    </script>
+
+    <script>
+        document.getElementById("menu_btn").addEventListener("click", function () {
+            $(".stellarnav.mobile > ul")[0].classList.toggle("show");
+        });
+
+        $(document).on('click', '.menu_mobile_lv1', function () {
+            $(this).siblings('ul')[0].classList.toggle("show");
+        });
+        document.body.addEventListener("click", function (event) {
+            if (!document.getElementById("menu_btn").contains(event.target) && event.target.parentElement.id != "menu_hidden") {
+
+                $(".stellarnav.mobile > ul").removeClass("show");
+                $(".stellarnav.mobile > ul").classList.toggle("hidden-menu");
+            }
+        });
+        window.addEventListener("scroll", function () {
+
+            $(".stellarnav.mobile > ul").removeClass("show");
+            $(".stellarnav.mobile > ul").classList.toggle("hidden-menu");
+        }
+        );
+    </script>
+</body>
+</html>

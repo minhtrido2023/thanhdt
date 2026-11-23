@@ -1,0 +1,13 @@
+locked 2026-11-23T12:22:17Z
+0cdacd09f3931f0be844b397bc7f2bb6  inputs/divs_24m.csv
+b07c58b66e31124a3ee8ab0a0995e258  inputs/fin_equity.csv
+1e84dcd1fb50b448f73cd9d50a823c0b  inputs/prices.csv
+25014a8b7bcb8a7b6d1bb23cfb3af391  inputs/shares_pit.csv
+43b96717a6f55c3068ebf8755e7fbecc  inputs/stakes.csv
+48921e9dcbc0bbc3a70bbd4e2dd01fb7  calc_ck.py
+2c955510208e4001947713db83006a61  fetch_inputs.py
+aa55842b20c557f750bb8ac9598f9f49  raw/listing_vci_20261123.csv
+71b478672473cf56395f4689f0cd4f81  raw/kbs_listed_matches.json
+4585c24800e1b1c512b7cc4249c33e28  run1.txt
+4585c24800e1b1c512b7cc4249c33e28  run2.txt
+e78cc0d9a934add02fcb796f1d06ce0d  calc_out.json

@@ -1,0 +1,42 @@
+SNZ 14
+IPA 15
+TVN 33
+VGT 31
+HAG 8
+FIT 5
+CII 23
+BCG 10
+KDC 13
+SJG 21
+Rate limit exceeded. 
+============================================================
+⚠️  GIỚI HẠN API ĐÃ ĐẠT TỐI ĐA (Rate Limit Exceeded)
+============================================================
+
+📌 Bạn đã đạt giới hạn tối đa số lượt yêu cầu API trong 1 phút (minute).
+   (You have reached the maximum API request limit for this period)
+
+📊 Chi tiết (Details):
+   • Gói hiện tại: Khách (Guest)
+   • Giới hạn: 20 requests/phút
+   • Đã sử dụng: 20/20
+   • Chờ 40 giây để tiếp tục (Wait to retry)
+
+💡 Giải pháp (Solutions):
+   1️⃣ Chờ 40 giây rồi thử lại
+      (Wait and retry)
+   2️⃣ Tham gia chương trình tài trợ dự án (Sponsor) để sử dụng không gián đoạn.
+      Lưu ý: vnstock là công cụ mã nguồn mở giúp tự động hoá kết nối với
+      các API công khai mà bạn vốn đã có quyền truy cập hợp lệ, không
+      phải nhà cung cấp dữ liệu. Việc tài trợ giúp duy trì
+      nghiên cứu - phát triển công cụ và hạ tầng công nghệ phục vụ cộng đồng.
+
+🚀 Nâng cấp (Upgrade):
+   • Phiên bản cộng đồng (60 request/phút - Community):
+     Đăng ký API key miễn phí: https://vnstocks.com/login
+   • Gói thành viên tài trợ (180-600 request/phút - Sponsor):
+     Tham gia: https://vnstocks.com/insiders-program
+     Sau khi tham gia tài trợ, cài bộ thư viện riêng vnstock_data theo hướng dẫn https://vnstocks.com/onboard-member
+
+============================================================
+ Process terminated.

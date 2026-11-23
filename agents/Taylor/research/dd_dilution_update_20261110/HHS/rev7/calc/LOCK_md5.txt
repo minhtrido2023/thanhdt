@@ -1,0 +1,9 @@
+# LOCK rev7 HHS — ghi 2026-11-23T19:24:09+0700; rev7 KHONG truy van gia HHS moi; gia so sanh 9.700 (BQ 20/11) ke thua. Lint 0 vi pham. run1=run2.
+3afcd113013fad82acfa5ea35c5bce1d  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev7/calc/assumptions.json
+a098b0030c4c9769e2da74d322c339de  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev7/calc/calc_rev7.py
+b7d912f6062f59a6ef08ece9a7f92264  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev7/calc/calc_rev7_out.json
+967960e196611b6005b2524eaa193a14  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev7/calc/run1.txt
+967960e196611b6005b2524eaa193a14  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev7/calc/run2.txt
+cf5420d86989f25b4070697b38347c52  agents/Taylor/research/dd_redo_20261105/HHS/calc_r3/hhs_r3.py
+0450ba0aee972c6c4ec97847fe2de68c  agents/Taylor/research/dd_dilution_update_20261110/calc/dilution_out.json
+e78cc0d9a934add02fcb796f1d06ce0d  agents/Taylor/research/ck_holding_vn_20261123/calc_out.json

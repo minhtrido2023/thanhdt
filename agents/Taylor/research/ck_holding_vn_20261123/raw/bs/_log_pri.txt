@@ -1,0 +1,4 @@
+2026-11-23 19:18:22 - vnstock.core.utils.client - ERROR - API request failed: HTTPSConnectionPool(host='iq.vietcap.com.vn', port=443): Read timed out. (read timeout=30)
+GEX ERR ConnectionError("API request failed: HTTPSConnectionPool(host='iq.vietcap.com.vn', port=443): Read timed out. (read timeout=30)")
+GEE ERR ConnectionError('Failed to fetch data: 418 - ')
+IPA ERR ConnectionError('Failed to fetch data: 418 - ')

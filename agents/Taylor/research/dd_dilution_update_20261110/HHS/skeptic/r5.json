@@ -1,0 +1,13 @@
+{
+  "round": 5,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_dilution_update_20261110/HHS/REPORT_rev7.md",
+  "report_md5": "afe93ea4699823a0479575eaa4725a56",
+  "brief_md5": "7b4fa23fb102900a3210b0ab11b0bbd3",
+  "model": "opus",
+  "cost_usd": 0.7838648000000001,
+  "started_at_ict": "2026-11-23T19:25:04+07:00",
+  "summary": "Rev7's mechanics are clean: the calc reproduces, the md5s match the lock, and the CUM tâm 10.805 and EX 8.846/9.767 recompute exactly. The issues are in the modelling choices. (1) The EX base uses k=0,734 while the locked assumptions say k_base=1,0, and rev5 had shown k≥1; that is −9,4% on the EX centre with no V4 basis. (2) The CK scope rule is applied inconsistently: OTHER/auto are spared in CUM, while CK is applied to the new cash in EX. (3) The parameter is fragile: N=6, bootstrap CI −110…+42%, and a coverage threshold or peer-set choice moves the centre +2,8…+8,8% (cheap side) or −5,1…−16,9% (expensive side). CUM 10.805 is defensible as one point in a wide band, but it is not a base resting on a consistent rule. Market prices in the report were ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_dilution_update_20261110/HHS/skeptic/r5_raw.md"
+}

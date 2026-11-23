@@ -1,0 +1,118 @@
+parent,sub,stake_kbs,type,stake_date,stake_vci,kbs_name
+BCM,BCE,44.42,công ty liên kết,2025-12-31,,CTCP Xây dựng và Giao thông Bình Dương
+BCM,IJC,49.76,công ty liên kết,2025-12-31,49.76,CTCP Phát triển Hạ tầng Kỹ thuật
+BCM,TDC,47.71,công ty liên kết,2025-12-31,47.71,CTCP Kinh doanh và Phát triển Bình Dương
+BCM,UDJ,51.0,công ty con,2025-12-31,51.0,CTCP Phát triển Đô thị
+CII,CEE,96.23,công ty con,2025-12-31,,CTCP xây dựng Hạ tầng CII
+CII,LGC,54.84,công ty con,2025-12-31,47.29,CTCP Đầu tư Cầu đường CII
+CII,NBB,79.79,công ty con,2025-12-31,21.88,CTCP Đầu tư Năm Bảy Bảy
+DXG,DXS,59.0,công ty con,2025-12-31,,CTCP Dịch vụ Bất động sản Đất Xanh
+DXG,RGG,55.0,công ty con,2025-12-31,,CTCP Regal Group
+FIT,DCL,58.05,công ty con,2025-12-31,58.050000000000004,CTCP Dược phẩm Cửu Long
+FIT,TSC,41.07,công ty liên kết,2025-12-31,41.07,CTCP Vật tư Kỹ thuật Nông nghiệp Cần Thơ
+FIT,VKD,95.53,công ty con,2025-12-31,0.0,CTCP Nước khoáng Khánh Hòa
+GEX,GEE,75.95,công ty con,2025-12-31,,CTCP Điện lực Gelex
+GEX,GEL,79.1,công ty con,2025-12-31,,CTCP Hạ tầng Gelex
+GVR,BAX,36.07,công ty liên kết,2022-12-31,,CTCP Thống Nhất
+GVR,BRC,48.85,công ty liên kết,2022-12-31,48.85,CTCP Cao su Bến Thành
+GVR,BRR,97.47,công ty con,2022-12-31,,CTCP Cao su Bà Rịa
+GVR,CDR,31.13,công ty liên kết,2022-12-31,,CTCP Xây dựng Cao su Đổng Nai
+GVR,DPD,88.41,công ty con,2022-12-31,,CTCP Cao su Đồng Phú Đăk Nông
+GVR,DPR,55.81,công ty con,2022-12-31,55.24,CTCP Cao su Đồng Phú
+GVR,GER,92.11,công ty con,2022-12-31,64.38000000000001,CTCP Thể thao Ngôi Sao Geru
+GVR,GTA,59.69,công ty con,2022-12-31,,CTCP Chế biến Gỗ Thuận An
+GVR,HRC,55.06,công ty con,2022-12-31,55.059999999999995,CTCP Cao su Hòa Bình
+GVR,MDF,97.41,công ty con,2022-12-31,84.85000000000001,CTCP gỗ MDF VRG - Quảng Trị
+GVR,MH3,76.53,công ty con,2022-12-31,,CTCP Khu công nghiệp Cao su Bình Long
+GVR,NTC,53.27,công ty con,2022-12-31,20.419999999999998,CTCP Khu công nghiệp Nam Tân Uyên
+GVR,PHR,66.62,công ty con,2022-12-31,66.62,CTCP Cao su Phước Hòa
+GVR,RTB,98.46,công ty con,2022-12-31,,CTCP Cao su Tân Biên
+GVR,TRC,60.0,công ty con,2022-12-31,60.0,CTCP Cao su Tây Ninh
+IPA,DTV,20.43,công ty liên kết,2025-12-31,20.43,CTCP Phát triển Điện Trà Vinh
+IPA,HOT,20.01,công ty liên kết,2025-12-31,20.01,CTCP Du lịch - Dịch vụ Hội An
+IPA,VND,25.84,công ty liên kết,2025-12-31,25.840000000000003,CTCP Chứng khoán VNDIRECT
+KDC,HVG,75.39,công ty con,2025-12-31,,CTCP HÙNG VƯƠNG
+KDC,TAC,95.56,công ty con,2025-12-31,72.39,CTCP Dầu thực vật Tường An
+KDC,VOC,87.29,công ty con,2025-12-31,,Tổng Công ty Công Nghiệp Dầu Thực Vật Việt Nam - CTCP
+PAN,ABT,76.47,công ty con,2025-12-31,76.47,CTCP Xuất nhập khẩu Thủy sản Bến Tre
+PAN,BBC,98.3,công ty con,2025-12-31,,CTCP Bibica
+PAN,FMC,50.12,công ty con,2025-12-31,37.75,CTCP Thực phẩm Sao Ta
+PAN,LAF,77.88,công ty con,2025-12-31,77.88000000000001,CTCP Chế biến hàng Xuất khẩu Long An
+PAN,NSC,80.11,công ty con,2025-12-31,,CTCP Tập Đoàn Giống Cây Trồng Việt Nam
+PAN,VFG,51.25,công ty con,2025-12-31,,CTCP Khử trùng Việt Nam
+PLX,PEN,30.0,công ty liên kết,2022-12-31,,CTCP Xây lắp III - Petrolimex
+PLX,PGC,52.37,công ty con,2022-12-31,52.37270000000001,Tổng Công ty Gas Petrolimex - CTCP
+PLX,PGI,40.95,công ty liên kết,2022-12-31,40.949999999999996,Tổng Công ty Cổ phần Bảo hiểm Petrolimex
+PLX,PLC,79.07,công ty con,2022-12-31,79.07,Tổng Công ty Hóa dầu Petrolimex - CTCP
+PLX,PMS,46.17,công ty liên kết,2022-12-31,,CTCP Cơ khí Xăng dầu
+PLX,VPA,57.62,công ty con,2022-12-31,,CTCP Vận tải Hóa dầu VP
+PLX,VSE,22.38,công ty liên kết,2022-12-31,22.38,CTCP Dịch vụ Đường cao tốc Việt Nam
+REE,CHP,24.25,công ty liên kết,2025-12-31,,CTCP Thủy điện Miền Trung
+REE,DTV,66.29,công ty con,2025-12-31,,CTCP Phát triển Điện Trà Vinh
+REE,GDW,20.05,công ty liên kết,2025-12-31,,CTCP Cấp nước Gia Định
+REE,ISH,34.3,công ty liên kết,2025-12-31,,CTCP Thủy điện Srok Phu Miêng IDICO
+REE,KHW,43.88,công ty liên kết,2025-12-31,,CTCP Cấp thoát nước Khánh Hòa
+REE,NBW,20.02,công ty liên kết,2025-12-31,,CTCP Cấp nước Nhà Bè
+REE,PPC,20.13,công ty liên kết,2025-12-31,,CTCP Nhiệt điện Phả Lại
+REE,SBH,25.76,công ty liên kết,2025-12-31,,CTCP Thủy điện sông Ba Hạ
+REE,SHP,11.1,công ty liên kết,2025-12-31,,CTCP Thủy điện miền Nam
+REE,SP2,28.88,công ty liên kết,2025-12-31,,CTCP Thủy điện Sử Pần 2
+REE,TBC,60.42,công ty con,2025-12-31,,CTCP Thủy điện Thác Bà
+REE,TDW,44.17,công ty liên kết,2025-12-31,,CTCP Cấp nước Thủ Đức
+REE,TMP,42.63,công ty liên kết,2025-12-31,,CTCP Thủy điện Thác Mơ
+REE,VCW,35.95,công ty liên kết,2025-12-31,,CTCP Đầu tư nước sạch Sông Đà
+REE,VSH,52.58,công ty con,2025-12-31,0.0,CTCP Thủy điện Vĩnh Sơn - Sông Hinh
+SJG,MEC,46.15,công ty liên kết,2025-12-31,46.155,CTCP Cơ khí - Lắp máy Sông Đà
+SJG,PTN,36.0,công ty liên kết,2025-12-31,,CTCP Phát triển nhà Khánh Hòa
+SJG,S12,49.0,công ty liên kết,2025-12-31,49.0,CTCP Sông Đà 12
+SJG,SD2,40.77,công ty liên kết,2025-12-31,,CTCP Sông Đà 2
+SJG,SD3,51.0,công ty con,2025-12-31,51.00209999999999,CTCP Sông Đà 3
+SJG,SD4,65.0,công ty con,2025-12-31,65.0,CTCP Sông Đà 4
+SJG,SD5,64.16,công ty con,2025-12-31,64.16,CTCP Sông Đà 5
+SJG,SD6,65.0,công ty con,2025-12-31,65.0,CTCP Sông Đà 6
+SJG,SD9,58.5,công ty con,2025-12-31,58.4997,CTCP Sông Đà 9
+SJG,SDC,51.01,công ty con,2025-12-31,51.0057,CTCP Tư Vấn Sông Đà
+SJG,SDT,62.27,công ty con,2025-12-31,62.27,CTCP Sông Đà 10
+SJG,SDU,30.0,công ty liên kết,2025-12-31,30.0,CTCP Đầu tư Xây dựng và Phát triển Đô thị Sông Đà
+SJG,SDX,51.0,công ty con,2025-12-31,51.0,CTCP Phòng Cháy chữa cháy và Đầu tư Xây dựng Sông Đà
+SJG,SJD,50.96,công ty con,2025-12-31,50.9591,CTCP Thủy điện Cần Đơn
+SNZ,D2D,57.86,công ty con,2025-12-31,57.86,CTCP Phát triển Đô thị Công nghiệp số 2
+SNZ,DND,35.99,công ty liên kết,2025-12-31,,CTCP Đầu tư Xây dựng và Vật liệu Đồng Nai
+SNZ,DNW,63.99,công ty con,2025-12-31,,CTCP Cấp nước Đồng Nai
+SNZ,PDN,51.0,công ty con,2025-12-31,51.0,CTCP Cảng Đồng Nai
+SNZ,SDN,30.01,công ty liên kết,2025-12-31,30.009999999999998,CTCP Sơn Đồng Nai
+SNZ,SDV,20.0,công ty liên kết,2025-12-31,,CTCP Dịch vụ Sonadezi
+SNZ,SZB,46.22,công ty liên kết,2025-12-31,,CTCP Sonadezi Long Bình
+SNZ,SZC,46.84,công ty liên kết,2025-12-31,,CTCP Sonadezi Châu Đức
+SNZ,SZE,64.04,công ty con,2025-12-31,64.03999999999999,CTCP Môi trường Sonadezi
+SNZ,SZG,46.45,công ty liên kết,2025-12-31,,CTCP Sonadezi Giang Điền
+SNZ,SZL,52.75,công ty con,2025-12-31,52.746300000000005,CTCP Sonadezi Long Thành
+TVN,HMC,55.67,công ty con,2025-12-31,55.669999999999995,CTCP Kim khí Thành phố Hồ Chí Minh - VNSTEEL
+TVN,HMG,89.37,công ty con,2025-12-31,89.37,CTCP Kim khí Hà Nội - VNSTEEL
+TVN,KMT,38.3,công ty liên kết,2025-12-31,38.3,CTCP Kim Khí Miền Trung
+TVN,SDK,45.0,công ty liên kết,2025-12-31,45.0,CTCP Cơ khí Luyện Kim
+TVN,TDS,65.0,công ty con,2025-12-31,65.0,CTCP Thép Thủ Đức - VNSTEEL
+TVN,TIS,65.0,công ty con,2025-12-31,65.0,CTCP Gang thép Thái Nguyên
+TVN,TNB,84.77,công ty con,2025-12-31,84.77,CTCP Thép Nhà Bè - VNSTEEL
+TVN,TNS,31.25,công ty liên kết,2025-12-31,,CTCP Thép Tấm lá Thống Nhất
+TVN,TRT,20.05,công ty liên kết,2025-12-31,,CTCP RedStarCera
+TVN,VDT,40.06,công ty liên kết,2025-12-31,40.06,CTCP Lưới thép Bình Tây
+TVN,VGL,51.0,công ty con,2025-12-31,,CTCP Mạ Kẽm Công Nghiệp Vingal - VNSTEEL
+TVN,VIN,95.37,công ty con,2025-12-31,95.37,CTCP Giao nhận Kho vận Ngoại Thương Việt Nam
+VEA,CKA,47.4,công ty liên kết,2025-12-31,,CTCP Cơ khí An Giang
+VEA,FBC,51.0,công ty con,2025-12-31,,CTCP Cơ khí Phổ Yên
+VEA,FT1,55.0,công ty con,2025-12-31,,CTCP Phụ tùng máy số 1
+VGT,BMG,25.0,công ty liên kết,2025-12-31,,CTCP May Bình Minh
+VGT,HDM,60.86,công ty con,2025-12-31,60.86,CTCP Dệt May Huế
+VGT,HNI,29.24,công ty liên kết,2025-12-31,,CTCP May Hữu Nghị
+VGT,HSM,57.57,công ty con,2025-12-31,,Tổng Công ty Cổ phần Dệt may Hà Nội
+VGT,HTG,61.87,công ty con,2025-12-31,61.870000000000005,Tổng Công ty Cổ phần Dệt May Hòa Thọ
+VGT,M10,32.21,công ty liên kết,2025-12-31,,Tổng Công ty May 10 - CTCP
+VGT,NJC,53.67,công ty con,2025-12-31,,CTCP May Nam Định
+VGT,NTT,11.97,công ty liên kết,2025-12-31,,CTCP Dệt May Nha Trang
+VGT,SPB,63.77,công ty con,2025-12-31,60.727,CTCP Sợi Phú Bài
+VGT,VTI,68.34,công ty con,2025-12-31,68.3449,CTCP Sản xuất - Xuất nhập khẩu Dệt may
+VIC,VEF,87.97,công ty con,2024-12-31,86.65,CTCP Trung tâm Hội chợ Triển lãm Việt Nam
+VIC,VHM,73.5,công ty con,2024-12-31,,CTCP Vinhomes
+VIC,VNB,65.33,công ty con,2024-12-31,,CTCP Sách Việt Nam
+VIC,VPL,85.55,công ty con,2024-12-31,85.55,CTCP Vinpearl
