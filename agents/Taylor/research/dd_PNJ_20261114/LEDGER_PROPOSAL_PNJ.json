@@ -1,65 +1,64 @@
 {
- "proposal_for": "kb/dd_price_zones.json",
- "job": "Taylor_20261122_234426",
  "entry": {
   "ticker": "PNJ",
   "skeptic_final": "REFUTED_OPEN",
   "skeptic_final_basis": "skeptic_run",
-  "skeptic_verdict_path": "agents/Taylor/research/dd_PNJ_20261114/skeptic/r3.json",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_PNJ_20261114/skeptic/r4.json",
   "audited_fy_missing": false,
   "dd_date": "2026-11-14",
-  "rev": 2,
+  "rev": 3,
+  "supersedes": "PNJ@2026-11-14#2",
   "bctc_quarter": "2026Q3",
-  "zone_low": 2212,
-  "center": 4205,
+  "zone_low": 6488,
+  "center": 7395,
   "center_kind": "expected_weighted",
-  "center_desc": "Giá trị kỳ vọng cổ đông HIỆN HỮU trên cây kết cục phát hành (O1 phát hành 550tr cp ở sàn BVPS / O2 không phát hành), p thành công 0,5 trung tính; trọng số vận hành cơ sở 0,5/tốt 0,2/trễ 0,2/100% thu đổi 0,1 khoá TRƯỚC giá; r 13,5% (lãi huy động 12T 7,40%), RONIC=Ke; vùng = p 0,25/0,75. Skeptic r3 REFUTED: O2 phạt kép (hạ kinh tế + trừ đủ 8.000×1,08, tính cả 1.600 đảo nợ) ⇒ tâm có thể thấp ~30% (ước tính của skeptic 5.430–5.490); p=0,5 lại bỏ qua việc O1 bắt NĐT mới lỗ ~40% ⇒ kéo xuống. Tâm KHÔNG ổn định cả hai chiều.",
-  "zone_high": 6198,
+  "center_desc": "Giá trị kỳ vọng cổ đông HIỆN HỮU trên cây kết cục phát hành: O1 phát hành 550tr cp ở sàn BVPS 12.586 (phần thiếu 1.077,5 trừ mệnh giá) / O2 không phát hành, tài trợ nợ/tồn kho, kinh tế giữ nguyên, trừ 8.000 một lần; + PV LNST KH 2027–28 [IRQ3 p9]; p 0,5 trung tính; trọng số cơ sở 0,5/tốt 0,2/trễ 0,2/100% thu đổi 0,1 khoá TRƯỚC giá; r 13,5% (lãi huy động 12T 7,40%, Δ0), RONIC=Ke; vùng = p 0,25/0,75. Skeptic r4 REFUTED: +1.406 từ PV LNST 2027–28 không phân phối được (cần giữ lại cho vốn lưu động tăng trưởng DT +48%) ⇒ tâm ≤~5.989; O2 tự mâu thuẫn; O3 q=0 không có cơ sở; thiếu kịch bản thu đổi <80% (chiều tăng).",
+  "zone_high": 8303,
   "center_range": null,
-  "center_alt": 3785,
+  "center_alt": 6474,
   "center_alt_kind": "base_scenario",
   "price_ref": 13500,
   "price_date": "2026-11-20",
-  "verdict_label": "NON — giữ loại PNJ. Giá 13.500 = 3,2× tâm 4.205; trên cả nhánh phát hành thành công (8.191). Không có biên an toàn; sizing 0%. Tâm chưa được skeptic xác nhận (REFUTED r3) — KHÔNG dùng cho watch/luật 0,85×tâm.",
-  "skeptic_status": "r1 (22/11, REPORT.md r2) REFUTED → rev3; r2 (23/11, REPORT_rev3.md) INCONCLUSIVE → rev4; r3 (23/11, REPORT_rev4.md md5 87db0f9b…) REFUTED medium — sửa CHƯA áp (đã hết 2 vòng/ca, vòng sau cần user). Nhãn NON không bị bác.",
-  "correction_reason": "skeptic r1 REFUTED: chia F cho 1.061,72tr cp ngầm giả định NĐT mới trả ≥14.545 cho thứ đáng 6.366; thiếu 100% thu đổi, kiểm toán FY2025, GP vàng miếng, lịch sử số cp, src/ mất. Rev4 dựng lại bằng cây kết cục phát hành, RONIC=Ke, tải lại 14 PDF gốc.",
-  "source_file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev4.md",
+  "verdict_label": "NON — giữ loại PNJ. Giá 13.500 = 1,83× tâm 7.395; trên cận trên vùng 8.303 và trên nhánh phát hành thành công 9.210. Sizing 0%. Tâm chưa được skeptic xác nhận (REFUTED r4, vòng cuối) — KHÔNG dùng cho watch/luật 0,85×tâm.",
+  "skeptic_status": "r1 (22/11, REPORT.md) REFUTED → rev3; r2 (23/11, REPORT_rev3.md) INCONCLUSIVE → rev4; r3 (23/11, REPORT_rev4.md) REFUTED → rev5; r4 (23/11, REPORT_rev5.md md5 0742ee83…) REFUTED medium — VÒNG CUỐI, sửa CHƯA áp. Nhãn NON không bị bác.",
+  "correction_reason": "skeptic r3 REFUTED: O2 phạt kép (hạ kinh tế + trừ 8.000×1,08), lãi cầu nối tính trùng, LNST 2027–28 bị bỏ, p=0,5 mâu thuẫn mô hình. Rev5: O2 một cơ chế (nợ/tồn kho, kinh tế giữ nguyên, trừ 8.000 một lần — 1.600 đảo nợ KHÔNG tách vì F0 post-money đã giả định trả), bỏ cầu nối, cộng PV LNST 2027–28, nêu rõ NĐT O1 trả cao hơn giá trị 36,7%, O3 vỡ nợ làm độ nhạy. Tâm 4.205 → 7.395.",
+  "source_file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev5.md",
   "evidence": [
    {
-    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev4.md",
-    "quote": "**Tâm = 4.205 đ/cp**",
+    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev5.md",
+    "quote": "**Tâm = 7.395 đ/cp**",
     "fields": [
      "center"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev4.md",
-    "quote": "**Vùng 2.212–6.198**",
+    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev5.md",
+    "quote": "**Vùng 6.488–8.303**",
     "fields": [
      "zone_low",
      "zone_high"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev4.md",
+    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev5.md",
     "quote": "giá đóng cửa 20/11 = 13.500 [BQ]",
     "fields": [
      "price_ref"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev4.md",
-    "quote": "| Cơ sở | 0,50 | KH LNST 2029 = 1.600 [IRQ3 p9] | 9.200 | 7.569 | 0 | 3.785 |",
+    "file": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev5.md",
+    "quote": "| Cơ sở | 0,50 | KH LNST 2029 = 1.600 [IRQ3 p9] | 9.200 | 1.020 | 8.611 | 4.338 | 6.474 |",
     "fields": [
      "center_alt"
     ]
    }
   ],
-  "assumptions_file": "agents/Taylor/research/dd_PNJ_20261114/calc/assumptions_r4.json",
-  "assumptions_md5": "bdc370b2ee515b23043c1580c4f543ac",
-  "report_md5": "87db0f9ba9f96720784a607858dc6d63",
+  "assumptions_file": "agents/Taylor/research/dd_PNJ_20261114/calc/assumptions_r5.json",
+  "assumptions_md5": "4135406421db9dced251fda798d25d7f",
+  "report_md5": "0742ee83af15007d7ffd553c75e3ed72",
   "expires_on": "2027-03-14",
   "expires_basis": "BCTC quý mới hơn Q3/2026 (Q4/2026 ~30/01/2027) hoặc 120 ngày từ 14/11",
-  "notes": "Đề xuất của Taylor (job Taylor_20261122_234426) — Mike áp tuần tự. Dispatch nói 'ngược lại FIXED_UNVERIFIED' nhưng theo định nghĩa §E10, verdict cuối REFUTED mà sửa chưa áp = REFUTED_OPEN (không nâng nhãn); Mike chọn. Hạng mục còn thiếu: O2 một cơ chế nhất quán (vay + KH, trừ 1.600 đảo nợ) hoặc mô hình thanh lý; neo p bằng bằng chứng (danh sách NĐT/hồ sơ chào bán); quyết định tính LN giữ lại 2027–28 (~+960 đ/cp ở O1); pha loãng ESOP; NĐ 390, kiện tụng chậm thanh toán, vốn khác 500, quỹ thưởng 50,7."
+  "notes": "Đề xuất của Taylor (job Taylor_20261123_120259) — Mike áp tuần tự. Hạng mục còn thiếu theo skeptic r4: (1) mô hình vốn lưu động cho tăng trưởng DT 39,1k→57,7k (tồn kho/DT 0,34–0,45) thay vì cộng PV LNST 2027–28 ⇒ tâm ≤~5.989; (2) O2 chọn hẳn vay (chứng minh hạn mức/tài sản đảm bảo) hoặc cắt tồn kho kèm tăng trưởng thấp hơn; (3) trọng số O3 theo bằng chứng thanh khoản (tiền 770, 150 tỷ/tháng, chậm thanh toán) hoặc ghi rõ q=0 là giả định; (4) kịch bản thu đổi <80% (TM17 ~3.867) cho cân hai chiều; (5) NĐ 390/kiện tụng/thời hạn GP vàng miếng, vốn khác 500, quỹ thưởng 50,7, ESOP, thuế hoãn lại 773 ở O2/O3. Hai chiều lệch >5%, chiều GIẢM lớn hơn."
  }
 }

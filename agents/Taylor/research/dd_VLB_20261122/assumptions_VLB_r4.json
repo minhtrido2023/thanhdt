@@ -1,0 +1,166 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "VLB",
+ "dd_date": "2026-11-23",
+ "rev": 4,
+ "loai_hinh": "mo_giay_phep",
+ "method_version": "M20261122",
+ "units": "tỷ VND trừ khi ghi khác",
+ "sources": {
+  "model": "model/dcf_vlb_r4.py (md5 05cc094364d09b4c90b3ffbf7ecac207)",
+  "q3_26": "src/BCTC_Q3_2026.pdf (01a8878b2dccea903c005cfade011475)",
+  "h1_26": "src/BCTC_BanNien_2026.pdf (05d849860398c69a1f7b8d5039e6eed2)",
+  "nq_dhdcd_26": "src/nhan_su_0617.pdf tr.2-4 (c07a277139d21b850b98ef2cc95aa9bd)",
+  "giay_phep_bvsc_2602": "src/BVSC_VLB_update_202602.pdf tr.7 (88d9ecbe5f29249abfd362199db88b8e)",
+  "giay_phep_bvsc_2503": "src/BVSC_VLB_initiation_202503.pdf tr.5-6 (21af79c058c56443eed750f00e4f3470)",
+  "san_luong_fpts_2604": "src/FPTS_VLB_update_20260406.pdf tr.2,4,6 (34cf034bcef2bc65fa0bddeeb08fcccd)",
+  "abs_2602": "src/ABS_VLB_note_20260227.pdf (5872fea1f6e7422edcf9c8cd8c453846)",
+  "bctc_kt_2025": "src/BCTC_KiemToan_2025.pdf tr.7-8 (ý kiến A&C), tr.13 KQKD (a251aaf3a2fcdd2d5fae5ca591faaebd; tải cafef.vn FileBCTC.ashx 23/11/2026)",
+  "bctn_2025": "src/BCTN_2025.pdf tr.8 bảng GP/trữ lượng 31/12/2025, tr.40 KH 2026 (bc03c6ff99bb65e30021eb32676f3d6d)",
+  "nq_hdqt_12m": "src/NQHDQT_20251030.pdf (ef2b39668629491ac510d61355107a71), src/NQHDQT_20251117.pdf (0e95aea1416aa75e228f7ad6a58fda81), src/NQHDQT_20260116_KHSXKD2026.pdf (caa4f7ad474a6a0c108c0c8fd175edeb), src/NQDHCDBT_20251209.pdf (fb6c1137dfa123344ecff20dbed564e5)"
+ },
+ "share_base": {
+  "shares_m": 46.72056,
+  "source": "Q3/26 p22 23c (46.921.600 phát hành − 201.040 CP quỹ)",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "none",
+   "source": "NQ ĐHĐCĐ 2026 nội dung 1–14: không phát hành/ESOP"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Hoàn nguyên môi trường khi đóng mỏ (dự phòng 16,22 tỷ đã trích; ký quỹ 38,88 tỷ)",
+    "spent_bn": {
+     "value": 38.88,
+     "source": "Q3/26 p16 ký quỹ PHMT 5 mỏ"
+    },
+    "remaining_bn": {
+     "value": 16.22,
+     "source": "Q3/26 p3/p21 dự phòng DH"
+    },
+    "generates_revenue": false,
+    "mandatory": true,
+    "classification": "compliance",
+    "treatment": "CASH_OUTFLOW",
+    "source": "Chi hoàn nguyên = dự phòng đã trừ; phần ký quỹ vượt dự phòng 22,66 tỷ nhận lại khi đóng mỏ (PV @13,5%)"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": {
+   "value": 143.4,
+   "source": "Q3/26 p3 quỹ KTPL 107,466 + trích tạm 9T 35,93 (565,97 − 11.345×46,72056)"
+  },
+  "annual_appropriation_pct_of_npat": 0.1484,
+  "applied_to_cashflow": true,
+  "source": "NQ ĐHĐCĐ 2026 tr.1: (39,187+5,538)/301,437; độ nhạy 12,4%"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.2
+   }
+  ],
+  "source": "Q3/26 p5 (thuế TNDN hiện hành 20%)"
+ },
+ "working_capital": {
+  "method": "balance_sheet_point",
+  "source": "Ứng trước KH 76,938 (đủ) + WC ròng 67,06 (phải trả NB+NLĐ+khác − tồn kho − phải thu − trả trước) [Q3 p2-3] = 144,0 tỷ số dư tại 30/9 (balance_sheet_point), quay vòng, tất toán khi từng mỏ đóng theo tỷ trọng (PV @13,5%). Quy ước r3 (trừ ngay) = độ nhạy −3,8%"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "Xấu — LN 250 phẳng, g 0, khoản bù trừ bị đảo (=0), hạn GP theo BCTN 2025 (không gia hạn)",
+    "side": "down",
+    "p": 0.25,
+    "basis": "tiền lệ 2022 nộp bổ sung >270 tỷ (báo chí); BVSC 2/2026 tr.3 cầu cụm Tân Cang giảm sau Long Thành GĐ1; lõi FY24 kiểm toán 212,1. Truy thu kiểu 2022 (−4.623 đ/cp) = STRESS ngoài mô hình, HARD ABANDON"
+   },
+   {
+    "name": "Cơ sở — năm 1 = lõi TTM 357,4; phần vượt mức giữa chu kỳ (lõi FY25 kiểm toán 265,05 × 1,02^t) giảm tuyến tính về 0 ở năm 3; g 2%; đời mỏ = min(hạn GP BCTN, trữ lượng/sản lượng)",
+    "side": "base",
+    "p": 0.5,
+    "basis": "BCTC KT 2025 tr.13 (LNTT 376,993 − DTTC 30,655 − LN khác 15,031); BCTN 2025 tr.8 (số GP, hạn: TP1 31/7/2042, TC1 01/01/2039, TT2 30/6/2038, SK2 28/11/2031, SK5 28/08/2029); BVSC 2/2026 tr.3 + BCTN 2025 (Long Thành GĐ1 cơ bản hoàn thành 2025) làm cơ sở độc lập cho việc giảm dần phần đỉnh chu kỳ"
+   },
+   {
+    "name": "Tốt — giữ mức lõi TTM 357,4 (g 2%) + gia hạn 3 mỏ chính tới hết trữ lượng",
+    "side": "up",
+    "p": 0.25,
+    "basis": "BCTN 2025: dư trữ lượng khi hết GP TP1 ~7,9 / TT2 ~3,8 / TC1 ~3,1 tr m³ (tính); thủ tục huy động 44,3 ha TC1; tiền lệ gia hạn Soklu 2/5 (GP 30,31/GP-UBND 28/02/2025). Chưa có văn bản gia hạn ⇒ chỉ kịch bản"
+   }
+  ],
+  "asymmetry_reason": "Giữ bộ trọng số 0,25/0,50/0,25 của r1–r3, không re-tune. Độ nhạy trọng số tốt 50%: +5,8%."
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-23",
+  "deposit_rate_source": "deposit_rate_vn.consumer_deposit_rate_detail() đọc 23/11/2026: cctg_12m(2026-11-02) 7,40%, Big-4 6,80%, last_update 2026-11-16",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true,
+  "finite_life_rate_note": "Dòng tiền hữu hạn ≤ 7/2042 (không terminal). Bù trừ tiền cấp quyền chiết khấu @7,4% (khớp kỳ hạn; đảo chiều nằm ở kịch bản xấu); độ nhạy @13,5% −1,5%"
+ },
+ "terminal": {
+  "moat_tier": "NARROW",
+  "terminal_ronic": "NOT_APPLICABLE_FINITE_LIFE"
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "position_size_note": "tham chiếu Q = 5 tỷ (và 1 tỷ)",
+  "source": "model/dcf_vlb_r4.py d_liq() (giữ r3): Corwin-Schultz 120 phiên + σ·√(Q/ADV250) trên model/px_vlb.csv"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "A&C (Baker Tilly A&C), BC kiểm toán số 1.0386/26/TC-AC ngày 20/3/2026: chấp nhận toàn phần, KHÔNG đoạn nhấn mạnh; thuyết minh 4: không có sự kiện trọng yếu sau ngày kết thúc năm",
+  "interim_review": "reviewed_unqualified",
+  "source": "src/BCTC_KiemToan_2025.pdf tr.7-8, tr.39 (PDF); src/BCTC_BanNien_2026.pdf tr.7"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "Không giao dịch bán hàng với bên liên quan (Dofico 49,08%, KSB 21,95%, Hóa An 10,05%)",
+    "amount_bn": 0,
+    "source": "Q3/26 p23 VI.1b, p26"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "Hoàn nhập tiền cấp quyền nộp thừa 343,93 tỷ ghi thu nhập khác Q2/26 — loại khỏi LN lõi; giá trị tính riêng qua khoản bù trừ 329,36",
+    "amount_bn": 343.929,
+    "source": "Q3/26 p19 V.17, p24 VI.6; H1 p42"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [],
+  "none_reason": "NQ HĐQT 30/10/2025, 17/11/2025 (cổ tức 2025), 16/01/2026 (KH SXKD 2026: LNTT 275 tỷ, SX 6,8 tr m³), NQ ĐHĐCĐ BT 09/12/2025 (cổ tức) và NQ ĐHĐCĐ 2026: KHÔNG có hạng mục đầu tư/đền bù. BCTN 2025 tr.41: thủ tục huy động 44,3 ha TC1 + xin mở rộng 20 ha Soklu (chưa có số vốn) ⇒ V4 NPV=0. Capex 9T/26 1,13 tỷ",
+  "searched": [
+   "cafef FileBCTC.ashx Type=4 (danh sách NQ HĐQT/ĐHĐCĐ 2016–2026, 23/11/2026)",
+   "src/NQHDQT_20251030.pdf, src/NQHDQT_20251117.pdf, src/NQHDQT_20260116_KHSXKD2026.pdf, src/NQDHCDBT_20251209.pdf",
+   "src/BCTN_2025.pdf tr.40-41",
+   "src/nhan_su_0617.pdf tr.2-4"
+  ]
+ },
+ "sector": {
+  "reserves": {
+   "value": "Trữ lượng nguyên khối còn lại 31/12/2025: TP1 35,407949 · TT2 22,527367 · TC1 22,571743 · SK2 2,303277 · SK5 1,613878 tr m³ (cộng 84,424214). Ước tới 30/9/2026: TC1 21,45 · TP1 34,16 · TT2 21,40 · SK2 2,14 · SK5 1,42. Hạn GP ràng buộc ở cả 5 mỏ",
+   "source": "src/BCTN_2025.pdf tr.8 (công ty công bố, có số GP)"
+  },
+  "license_expiry": {
+   "value": "TP1 31/7/2042 (GP 1048/GP-UBND 11/04/2016) · TC1 01/01/2039 (GP 661/QĐ-UBND 28/02/2018) · TT2 30/6/2038 (GP 1362/GP-UBND 28/05/2015) · SK2 28/11/2031 (GP 31/GP-UBND 28/02/2025) · SK5 28/08/2029 (GP 30/GP-UBND 28/02/2025); công suất 1,8/1,5/1,5/0,4/0,5 tr m³/năm. Cột 'thời gian còn lại' của BCTN lệch +1 năm so với ngày hạn ⇒ dùng ngày hạn (thận trọng hơn)",
+   "source": "src/BCTN_2025.pdf tr.8; bảng BVSC 2/2026 tr.7 (r3) bị thay vì là tổng hợp thứ cấp"
+  }
+ }
+}

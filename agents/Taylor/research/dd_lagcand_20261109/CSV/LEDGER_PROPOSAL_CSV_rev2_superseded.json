@@ -1,0 +1,67 @@
+{
+ "proposal_for": "kb/dd_price_zones.json (Mike áp tuần tự; Taylor KHÔNG ghi sổ)",
+ "job": "Taylor_20261123_001046",
+ "entry": {
+  "ticker": "CSV",
+  "dd_date": "2026-11-09",
+  "rev": 2,
+  "valuation_asof": "2026-11-23",
+  "bctc_quarter": "2026Q3",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/CSV/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "zone_low": 6989,
+  "center": 11224,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 243 kết cục (kịch bản×dE×φ thay thế×thời điểm chi×NPV tăng trưởng), sau chiết khấu thanh khoản @5 tỷ, r 13,5% neo lãi huy động 7,40%; capex thay thế BH1 là dòng tiền ra (D3)",
+  "zone_high": 15541,
+  "center_range": null,
+  "price_ref": 20300,
+  "price_date": "2026-11-20",
+  "verdict_label": "TRÊN vùng: giá 20.300 cao hơn tâm 11.224 +80,9% và cao hơn P90 15.541 +30,6%; 99,8% trọng số < giá; luật 4 (≤ 0,85×tâm = 9.540) KHÔNG đạt; kể cả φ=0 (20.027) vẫn dưới giá; giá ngụ ý r ≈ 8,05%",
+  "skeptic_status": "DD_GENERAL: r1 (22/11, REPORT.md r2) REFUTED → REPORT_r3.md; r2 (23/11, REPORT_r3.md) INCONCLUSIVE → REPORT_r4.md; r3 (23/11, REPORT_r4.md md5 d8bdc5f6) INCONCLUSIVE medium — hết 2 vòng/ca, chưa áp sửa sau r3 ⇒ REFUTED_OPEN; vòng 3 = user quyết",
+  "source_file": "agents/Taylor/research/dd_lagcand_20261109/CSV/REPORT_r4.md",
+  "report_md5": "d8bdc5f60d7848d55ab1ce3623a78888",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/CSV/REPORT_r4.md",
+    "quote": "| **Sau CK, cỡ 5 tỷ (headline)** | **11.224** | **6.989** | 8.913 | 11.166 | 13.309 | **15.541** | 20.300 | **TRÊN vùng** |",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high",
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_lagcand_20261109/CSV/calc/assumptions_r4.json",
+  "assumptions_md5": "162f60f7a72b1b81135059327f6d3daa",
+  "null_reason": "center_range null: trung tâm là giá trị kỳ vọng một điểm; vùng = P10–P90",
+  "expires_on": "2027-03-09",
+  "expires_basis": "dd_date+120 (mặc định); BCTC Q4/2026 sớm hơn thì hết hạn sớm hơn",
+  "correction_reason": "rebuild sau skeptic DD_GENERAL r1 REFUTED (đếm hai lần E_core BH1 + Nhơn Trạch NPV=0): cách (b) — phần thay thế φ 0,5/0,65/0,8 của capex 1.844 tỷ là dòng tiền ra (D3), phần tăng trưởng NPV=0; + trừ quỹ KTPL/KH&CN, trích 2,43% LNST; r4 thêm lá chắn thuế KH (L12) và chiết khấu phần vay ở kd sau thuế 6,4%. Tâm 20.717→11.224, nhãn TRONG→TRÊN vùng",
+  "supersedes": "CSV@2026-11-09#1",
+  "notes": "Sleeve LAG_LO. Sizing V8: 0% NAV tại giá hiện tại (xét 2%, trần 4% chỉ khi giá ≤ 9.540). CK 1,69% @5 tỷ (ADV250 8,88 tỷ, ≤1 tỷ/phiên). Kiểm toán FY2025 FAC 041/2025 + soát xét 6T FAC 044/2026 chấp nhận toàn phần (Taylor tự đọc 23/11). Khoá mù giá gốc calc/assumptions_r3.json md5 05e886fe (07:17:59, trước giá 07:18:16); r4 khoá lại sau khi thấy giá (lý do skeptic r2). src/calc khôi phục từ git b01861a67^ (md5 khớp LOCK r2). Còn mở (skeptic r3): chu kỳ tái đầu tư nhà máy mới chỉ ở độ nhạy (N=20 −6%, N=12 −19% theo skeptic) vs capex duy trì lịch sử ~42 tỷ/năm đã trong E; gián đoạn/hoàn nguyên chỉ độ nhạy (−3,1%/−7,9%); TỐT vs TB2 dừng (−8,5%); điện xút-clo chưa bàn; chiều tăng: φ theo capex <0,65 (±1.377/0,1φ), bồi thường BH1 (NĐ 88/2024, VB 719; +890/100 tỷ), G2 +1.555; lỗi nhỏ: độ nhạy kd sai chiều kinh tế (±1%). Nhãn TRÊN vùng đứng ở mọi φ≥0."
+ },
+ "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/CSV/skeptic/r3.json",
+ "skeptic_verdict": "INCONCLUSIVE",
+ "skeptic_confidence": "medium",
+ "report_md5_in_verdict": "d8bdc5f60d7848d55ab1ce3623a78888",
+ "md5_match": true,
+ "skeptic_rounds_this_job": {
+  "r2.json": "INCONCLUSIVE (REPORT_r3.md, 1,14 USD)",
+  "r3.json": "INCONCLUSIVE (REPORT_r4.md, 1,00 USD)"
+ },
+ "label_note": "skeptic_final=REFUTED_OPEN (không phải FIXED_UNVERIFIED): vòng cuối r3 INCONCLUSIVE và các điểm r3 nêu CHƯA được áp vào báo cáo (dừng sửa để giữ md5 khớp verdict) — đúng định nghĩa enum §E10; KHÔNG tự nâng nhãn. Không chạy dd_ledger_append_confirmed.py (chỉ dành cho CONFIRMED).",
+ "apply_mechanics": "Append entry như rev 2 của (CSV, 2026-11-09) rồi chạy bin/dd_price_zones_selfcheck.py.",
+ "remaining_items": [
+  "chu kỳ tái đầu tư Nhơn Trạch (đời máy 4–10 năm) chỉ ở độ nhạy — cần đối chiếu capex duy trì lịch sử ~42 tỷ/năm trong E",
+  "gián đoạn chuyển tiếp và hoàn nguyên môi trường BH1 chưa có số",
+  "kịch bản TỐT vs TB2 dừng — kiểm BCTC Q4/26",
+  "φ theo capex (cơ cấu 307.900 t, NQ tổng vốn) — cần NQ/BCTN 2022-25",
+  "bồi thường BH1 (NĐ 88/2024, VB 719) chưa có số",
+  "G2 trả trước 242,4 tỷ",
+  "biểu giá điện xút-clo chưa bàn"
+ ]
+}

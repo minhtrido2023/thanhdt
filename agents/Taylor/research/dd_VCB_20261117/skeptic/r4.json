@@ -1,0 +1,13 @@
+{
+  "round": 4,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev4.md",
+  "report_md5": "0ff4c3b2f809ef6f78d3ed5ee2536ac0",
+  "brief_md5": "9ac47eedcfd9db8a909fde6f29e83aa7",
+  "model": "opus",
+  "cost_usd": 1.2697521999999999,
+  "started_at_ict": "2026-11-23T19:06:46+07:00",
+  "summary": "Rev 4's arithmetic and audited inputs are verified and reproduce exactly; the centre moved only −1% and each move traces to a sourced r3 item. Its central claim that the base window is independently corroborated does not hold: FY2025 and 9T/26 reach the same ~2,83% spread through opposite margin/credit-cost mixes, and the 2026 margin rebound behind the base is still unexplained. A component-consistent downside is about −35% (≈ the bear case) and a through-cycle-CC reading about −10%. Upward, the Gordon payout assumption versus VCB's actual ~89% retention understates value by about +4–6%. On VCBNeo, the Q3 notes list it as a consolidated 100% subsidiary, which contradicts rev 1's 'exempt' claim and probably makes the −2…−8% sensitivity a double count. Bank-mandatory CET1/LDR remain absent. The centre is one defensible reading within roughly ±10% that the report already shows, but it is not established.",
+  "verdict_raw_path": "agents/Taylor/research/dd_VCB_20261117/skeptic/r4_raw.md"
+}

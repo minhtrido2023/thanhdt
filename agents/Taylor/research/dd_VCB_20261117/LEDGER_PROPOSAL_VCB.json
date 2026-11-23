@@ -1,92 +1,68 @@
 {
  "proposal_for": "kb/dd_price_zones.json",
- "apply_by": "Mike (tuần tự; không --write CONFIRMED vì r3 INCONCLUSIVE)",
- "job": "Taylor_20261122_234428",
- "label_note": "Theo dispatch: không CONFIRMED ⇒ FIXED_UNVERIFIED. Lưu ý enum skill §E10: vòng cuối INCONCLUSIVE và KHÔNG áp sửa sau đó khớp định nghĩa REFUTED_OPEN — Mike chọn; Taylor không tự nâng/hạ.",
- "skeptic_rounds_this_job": [
-  {
-   "round": 2,
-   "report": "REPORT_rev2.md",
-   "verdict": "REFUTED",
-   "cost_usd": 0.949
-  },
-  {
-   "round": 3,
-   "report": "REPORT_rev3.md",
-   "verdict": "INCONCLUSIVE",
-   "cost_usd": 0.94,
-   "report_md5": "c8248b3de9f5a332eb5912686d478031"
-  }
- ],
- "open_items": [
-  "cửa sổ base 9T/26 vs chu kỳ 2017–25 cùng cửa sổ (~43.900, +14%)",
-  "kịch bản xấu dùng spread thấp hơn mọi năm kiểm toán (2017 spread 2,26% ⇒ ~23.700)",
-  "đòn bẩy BQ vs BVPS cuối kỳ (−3%)",
-  "KTPL 2026 chưa trích trong BVPS 30/09 (~−405 đ/cp)",
-  "VCBNeo không định lượng",
-  "CET1/LDR TT22/Pillar 3",
-  "luật rebase vùng cho cổ phiếu thưởng/cổ tức cổ phiếu"
- ],
+ "apply_by": "Mike (tuần tự; KHÔNG CONFIRMED)",
+ "job": "Taylor_20261123_120305",
  "entry": {
   "ticker": "VCB",
-  "skeptic_final": "FIXED_UNVERIFIED",
+  "skeptic_final": "REFUTED_OPEN",
   "skeptic_final_basis": "skeptic_run",
-  "skeptic_verdict_path": "agents/Taylor/research/dd_VCB_20261117/skeptic/r3.json",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_VCB_20261117/skeptic/r4.json",
   "audited_fy_missing": false,
   "dd_date": "2026-11-17",
-  "rev": 2,
+  "rev": 3,
+  "supersedes": "VCB@2026-11-17#2",
   "bctc_quarter": "2026Q3",
-  "zone_low": 31200,
-  "center": 36000,
+  "zone_low": 30900,
+  "center": 35600,
   "center_kind": "expected_weighted",
-  "center_desc": "giá trị kỳ vọng trọng số 3 kịch bản (xấu 0,25 ROE 11,5% = 21.200 / cơ sở 0,50 ROE 15,2% = 38.400 / tốt 0,25 ROE 16,8% = 45.900); ROE thuộc cổ đông = (biên PPOP − CC) × dư nợ/VCSH 7,30 × (1−20%) × (1−quỹ KTPL 8,46%), biên & CC cùng kỳ; P/B=(ROE−g)/(Ke−g), Ke 13,5%, g 7%; mù giá; chiết khấu thanh khoản 0%",
-  "zone_high": 42500,
+  "center_desc": "giá trị kỳ vọng trọng số 3 kịch bản, mỗi kịch bản một cửa sổ đo được (xấu 0,25 năm KT 2017 spread 2,26% = 23.000 / cơ sở 0,50 9T/26 spread 2,85% ROE 15,1% = 37.400 / tốt 0,25 2022–26 spread 3,15% = 44.700); ROE = spread × đòn bẩy cuối kỳ 7,24 × (1−20%) × (1−KTPL 8,46%); BVPS 30.024 sau trừ KTPL 2026 ước tích; P/B=(ROE−g)/(Ke−g), Ke 13,5%, g 7%; mù giá; thanh khoản 0%",
+  "zone_high": 42100,
   "center_range": null,
-  "center_alt": 38400,
+  "center_alt": 37400,
   "center_alt_kind": "base_scenario",
   "price_ref": 52100,
   "price_date": "2026-11-17",
-  "verdict_label": "Giá 52.100 = P/B 1,72, TRÊN vùng hợp lý 31.200–42.500 theo r 13,5% (+45% so tâm 36.000); hàm ý ROE thuộc cổ đông 18,2% hoặc Ke 11,8%, ngoài mọi kịch bản dựng từ số kiểm toán. Chất lượng tài sản tốt nhất hệ thống, moat NARROW. Rủi ro: biên PPOP 2026 hồi chưa giải thích, nhóm 2 +85% YTD, bảo lãnh ×2,37; VCBNeo/CET1 không kiểm chứng được.",
-  "skeptic_status": "rev1: skeptic r1 (22/11, DD_GENERAL) REFUTED → REPORT_rev2 (tâm 44.900) r2 REFUTED (quỹ KTPL, cửa sổ lệch) → REPORT_rev3 r3 INCONCLUSIVE (23/11; md5 c8248b3d… khớp): số học/nguồn đạt; mở: chọn cửa sổ 9T/26 vs chu kỳ đủ (+14%), đòn bẩy BQ vs BVPS cuối kỳ (−3%), KTPL 2026 chưa trích (−1,2%), VCBNeo/CET1 không định lượng. Đã hết trần 2 vòng/ca của job ⇒ vòng sau cần user.",
-  "source_file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev3.md",
+  "verdict_label": "Giá 52.100 = P/B 1,74, TRÊN vùng hợp lý 30.900–42.100 theo r 13,5% (+46% so tâm 35.600); hàm ý ROE thuộc cổ đông ≈18,3%, trên mọi cửa sổ kiểm toán trừ biên đỉnh 2022. Moat NARROW. Mở: nguyên nhân NII 2026 +34,5% (động lực base), CET1/LDR/Pillar 3, VCBNeo hợp nhất hay miễn trừ.",
+  "skeptic_status": "r1 REFUTED → r2 REFUTED → r3 INCONCLUSIVE (REPORT_rev3) → REPORT_rev4 r4 INCONCLUSIVE (23/11, md5 0ff4c3b2… khớp, cost 1,27 USD): số học/nguồn đạt, tâm −1%; mở: NII 2026 chưa giải thích (stress thành phần nhất quán có thể −35% ≈ bear), FY2025 khớp spread bằng cơ cấu ngược, Gordon payout 54% vs giữ lại ~89% (+4–6%), VCBNeo có thể đã hợp nhất (TM1 Q3) ⇒ độ nhạy −2…−8% đếm kép, CET1/LDR vắng. Vòng cuối — DỪNG, chờ user.",
+  "source_file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev4.md",
   "evidence": [
    {
-    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev3.md",
-    "quote": "| **Có trọng số** | | | | | | | **36.000** |",
+    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev4.md",
+    "quote": "| **Có trọng số** | | | | | | **35.600** |",
     "fields": [
      "center"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev3.md",
-    "quote": "hợp lý **31.200–42.500**",
+    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev4.md",
+    "quote": "**Vùng đọc:** rẻ ≤ **30.300** (0,85 × tâm) · hợp lý **30.900–42.100** · trên 42.100 = đắt theo r 13,5%.",
     "fields": [
      "zone_low",
      "zone_high"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev3.md",
-    "quote": "| **Cơ sở** | 0,50 | 9T/2026 | 3,55% | 0,70% | **15,2%** | 1,265 | **38.400** |",
+    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev4.md",
+    "quote": "| **Cơ sở** | 0,50 | 9T/2026 | 2,85% | **15,1%** | 1,246 | **37.400** |",
     "fields": [
      "center_alt"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev3.md",
-    "quote": "Giá 52.100 (17/11) nằm TRÊN vùng",
+    "file": "agents/Taylor/research/dd_VCB_20261117/REPORT_rev4.md",
+    "quote": "- **So giá:** Giá 52.100 (17/11/2026) = P/B 1,74 trên BVPS 30.024",
     "fields": [
      "price_ref"
     ]
    }
   ],
-  "assumptions_file": "agents/Taylor/research/dd_VCB_20261117/assumptions_VCB_rev3_20261123.json",
-  "assumptions_md5": "07853fb1c382f7c1b13486c64a8b5162",
-  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "assumptions_file": "agents/Taylor/research/dd_VCB_20261117/assumptions_VCB_rev4_20261123.json",
+  "assumptions_md5": "20dc556d1869d2d21ee1d7b0efb4a208",
+  "null_reason": "center_range: nguồn không cho khoảng bắt đầu từ tâm (khung cửa sổ thay thế 35.300–38.800 ghi ở notes)",
   "expires_on": "2027-03-17",
   "expires_basis": "BCTC Q4/2026 (~tháng 1-2/2027) hoặc 120 ngày từ dd_date; công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
-  "correction_reason": "skeptic DD_GENERAL r1 REFUTED rev1: CC 0,8% không nguồn → chuỗi CC kiểm toán 2017–2025; trung điểm phán đoán bỏ; số KT 2025/bảo lãnh/Xây dựng đọc lại từ PDF; cổ tức tiền 450đ đã trả (bỏ trừ −2.850 vô điều kiện); r2: thêm quỹ KTPL 8,46% (TM34a KT2025), biên & CC cùng kỳ. Tâm 38.800 → 36.000 (−7,2%).",
-  "notes": "Vùng trên số cp hiện hành 8.355,7 triệu. Cổ phiếu thưởng ~12,8% và nếu 16.571 tỷ chia cổ phiếu (~19,8%): chia vùng theo hệ số pha loãng, không đổi giá trị. Nếu 16.571 tỷ trả TIỀN: trừ ~1.983 đ/cp sau GDKHQ. KHÔNG phải tín hiệu mua. Report REPORT_rev3.md = rev sổ 2 (REPORT_rev2.md là bản trung gian bị r2 REFUTED, không vào sổ).",
+  "correction_reason": "skeptic r3 INCONCLUSIVE: bear thay bằng năm KT 2017 (+), đòn bẩy cuối kỳ + trừ KTPL 2026 ước tích 334 đ/cp (−), cửa sổ cơ sở giữ 9T/26 kèm bằng chứng + bảng cửa sổ thay thế, sửa nhãn cc_bull_source, CASA nguồn Q3, quy tắc chia lại vùng khi pha loãng. Tâm 36.000 → 35.600 (−1,0%).",
+  "notes": "Có trọng số nếu cơ sở thay bằng cửa sổ khác (hiển thị): FY2025 35.300 · 2017–21 36.800 · chu kỳ 2017–25 38.300 · trung vị năm 38.800. Vùng trên 8.355,7 triệu cp; sau GDKHQ phát hành cổ phiếu: vùng × N_cũ/N_mới (chỉ thưởng 12,8% ⇒ 27.400–37.300). Nếu 16.571 tỷ trả TIỀN: trừ 1.983 đ/cp. KHÔNG phải tín hiệu mua.",
   "recorded_at": null
  }
 }

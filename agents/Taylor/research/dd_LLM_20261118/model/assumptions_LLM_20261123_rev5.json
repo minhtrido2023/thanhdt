@@ -1,0 +1,189 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "LLM",
+ "dd_date": "2026-11-23",
+ "rev": 5,
+ "loai_hinh": "san_xuat_khac",
+ "method_version": "M20261122",
+ "units": "tỷ đồng; đ/cp = tỷ×1e9/79,726104 triệu cp",
+ "sources": {
+  "bctc_q326_hn": "src/bao_cao_tai_chinh_hop_nhat_q3.2026_vie-da_nen.pdf",
+  "bctc_q326_hn_txt": "src/bao_cao_tai_chinh_hop_nhat_q3.2026_vie-da_nen.txt",
+  "bctc_fy25_kt_hn": "src_r2/llm_25cn_bctc_hn_da_kt_signed.pdf (md5 9be1160b5c2ffca6683ff765ce00ade7; ảnh png/kt25full/p01-57)",
+  "bctc_6t26_sx": "src/bchn_lilama_30.06.26_tv.pdf",
+  "model_inputs": "model/model_rev5_inputs.json (md5 3e5d558f19a889d8ee1d5a5cfdaae076)",
+  "model": "model/calc_rev5.py (md5 3d57009047a175155d38b7b9563e71ae)",
+  "model_out": "model/calc_rev5_output.txt",
+  "rev2_lock": "model/assumptions_LLM_20261118.json (md5 aaaeec2149986398055371ea535850ea)",
+  "rev3_lock": "model/assumptions_LLM_20261123_rev3.json (md5 1324555180a92b84938ace205922aa11)",
+  "rev4_lock": "model/assumptions_LLM_20261123_rev4.json (md5 deb5277d9d15493b6e544b5945a889e6)",
+  "bq_fin": "model/bq_fin_LLM.csv (div1y, rev theo quy)"
+ },
+ "share_base": {
+  "shares_m": 79.726104,
+  "source": "CĐKT HN Q3/26 mã 411 = 797,261 tỷ / 10.000; BCTC KT 2025 TM36 EPS trên 79.726.104 cp",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "pending_not_in_base",
+   "ratio": 0.317,
+   "source": "NQ ĐHĐCĐ 26/06/2026 (cổ tức cổ phiếu 31,7%, chưa thực hiện tới 07/11 — rev2)",
+   "note": "Không đổi tổng giá trị; REPORT báo thêm tâm/1,317"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Kế hoạch đầu tư phát triển 2026 ~850 tỷ + tăng vốn 1.500/2.500 tỷ",
+    "spent_bn": 0,
+    "remaining_bn": {
+     "value": "khong_cong_bo",
+     "searched": [
+      "BCTC HN Q3/26 TM XDCB",
+      "web: NQ ĐHĐCĐ 2026 (stockbiz chỉ tiêu đề)"
+     ]
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "rev2 REPORT §9; V4a"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": 83.113,
+  "annual_appropriation_pct_of_npat": 0.0628,
+  "applied_to_cashflow": true,
+  "source": "Số dư 83,113 (CĐKT Q3/26, trong nợ vận hành); tỷ lệ 6,28% = KTPL 30,895 / LNST mẹ 2025 492,04 theo NQ ĐHĐCĐ 232/NQ-ĐHĐCĐ 26/06/2026 (BCTC HN Q3/26 TM25); áp lên LN mẹ 9T/26 695,0 ⇒ trừ 43,6 + NOPAT×(1−6,28%)"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.2
+   }
+  ],
+  "source": "Thuế TNDN phổ thông 20%; hoàn nhập dự phòng bảo hành chịu thuế 20%"
+ },
+ "working_capital": {
+  "method": "balance_sheet_point",
+  "source": "NWC vận hành tại 30/09/2026 theo sổ (rev2, skeptic r1 khớp 1.466,16); g=0 ⇒ ΔVLĐ=0"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "xau_lo_van_hanh",
+    "side": "down",
+    "p": 0.2222,
+    "basis": "Tần suất 2/9 năm lỗ (2018 −163,1; 2019 −78,0) 2017–25; NOPAT −30; phải thu cũ −200 (ước lượng, nằm trong khối tiền ×f); bảo hành chi 100%. rev5: KHÔNG còn f=0,077 riêng — trục tiền mắc kẹt tách thành f chung (skeptic r3)"
+   },
+   {
+    "name": "co_so_DT_TTM_4150_GPM_4_5",
+    "side": "base",
+    "p": 0.6667,
+    "basis": "6/9 năm; DT TTM 4.145,5; GPM trung vị 4,5%; cộng lại hoàn nhập 1,68% DT bắt đầu sau 1,48 năm (số dư chạy hết theo nhịp 9T/26); NCI 3,28%; số dư bảo hành chi tiền 25%"
+   },
+   {
+    "name": "tot_DT_6000_GPM_7_Hamon",
+    "side": "up",
+    "p": 0.1111,
+    "basis": "1/9 năm GPM ≥7% (2025); DT 6.000; hoàn nhập 1,68% (hoãn 1,48 năm); bảo hành chi 10%; Hamon ghi nhận (trong khối tiền ×f)"
+   }
+  ],
+  "asymmetry_reason": "Bất đối xứng theo tần suất năm lỗ/năm biên cao 2017–2025 (N=9, nhỏ); lưới 25/50/25 và 40/45/15 báo kèm. Trục tiền mắc kẹt KHÔNG còn gắn vào kịch bản xấu."
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-16",
+  "deposit_rate_source": "deposit_rate_vn effective = max(Big4 12M 6,8% [events.csv 16/11], CCTG 12M 7,40% [02/11]) = 7,40% = điểm neo 03/11 ⇒ r 13,5%",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true
+ },
+ "terminal": {
+  "moat_tier": "NONE",
+  "terminal_ronic": "EQUALS_KE",
+  "g": 0.0,
+  "mechanism_reason": "5F 18/11 (<12 tháng): NONE; g=0, NOPAT/r"
+ },
+ "liquidity_discount": {
+  "basis": "sensitivity_only",
+  "pct": null,
+  "source": "Không có cơ sở đo độc lập (Amihud/thực thi) ⇒ chỉ độ nhạy 0/5/10/20%; tâm báo tại điểm 10% (giữ quy ước rev2), số đo thanh khoản ở pha sau khoá trong REPORT"
+ },
+ "audit_opinion": {
+  "status": "qualified",
+  "fy": 2025,
+  "auditor": "AASC",
+  "interim_review": "reviewed_qualified",
+  "source": "BCTC KT HN 2025 báo cáo 310325.015/BCTC.KT2 31/03/2026 (PDF p07–09); soát xét 6T/26 AASC 280826.018 ngoại trừ",
+  "emphasis_or_basis": "Ngoại trừ: (1) công ty con Cơ khí Lắp máy/Lilama 5/Lilama 7 — phải thu quá hạn 92,26, tồn kho 246,69, lãi vay quá hạn Lilama 5 74,01 + vay BIDV 182,96, lãi vốn hoá CKLM 31,56; (2) liên kết 45-3/69-3/BĐS (mã 252 = 330,77). Nhấn mạnh: quyết toán CPH chưa duyệt"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "Bộ Xây dựng ~97,9% vốn; công ty liên kết họ Lilama (69-1 VCSH −102,6, nợ quá hạn 497) — BCTC KT 2025 không có thuyết minh bảo lãnh/nợ tiềm tàng",
+    "source": "BCTC KT 2025 TM26 p46, TM39 p54; baodauthau 20/10/2026"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "9T/26: hoàn nhập bảo hành ròng 227,1 + 2,3; lãi thanh lý TSCĐ 61,0 — không ngoại suy (NOPAT dùng GPM trung vị)",
+    "source": "BCTC HN Q3/26 TM31, TM33-34"
+   }
+  ],
+  "searched": [
+   "KQKD 9T/26",
+   "TM31-34"
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "Không có cam kết capex tuân thủ công bố; đầu tư phát triển ~850 tỷ = growth NPV0",
+    "source": "BCTC HN Q3/26; BCTC KT 2025 TM26"
+   }
+  ]
+ },
+ "sector": {},
+ "non_operating_assets_trapping": {
+  "method": "f(p) = (y_sau_thuế + p)/(r + p), áp CHUNG cho cả 3 kịch bản: tài sản phi hoạt động sinh lợi y tới khi được giải phóng theo mệnh giá với hazard p/năm",
+  "evidence": "Cổ tức tiền 2017–25 (đ/cp): 225/600/400/400/200/100/100/450/350 (BQ div1y; khớp LCTT KT25 mã 36: 2024 35,776 tỷ = 448,7 đ, 2025 27,850 tỷ = 349,3 đ); 9T/26 chi 5,244 triệu đ; phân phối LN 2025 (NQ 232) chỉ ĐTPT 242,306 + KTPL 30,895, KHÔNG cổ tức tiền; 0 lần phân phối gốc trong 9 năm; trả theo tỷ lệ cho mọi cổ đông",
+  "y_cash_gross": 0.0128,
+  "y_cash_basis": "Lãi tiền gửi/cho vay: 2024 41,438 (1,45%), 2025 33,452 (1,18%) [KT25 TM29 p47, mẫu số tiền+TĐT bình quân, cận trên]; 9T/26 34,398 năm hoá 45,86 / 3.576,4 = 1,28% [HN Q3/26 TM29]; trung vị",
+  "y_inv": 0.042,
+  "y_inv_basis": "Cổ tức nhận 2024 23,283 / 2025 19,196 / 9T26 17,441 (năm hoá 23,25) trên ĐTTC dài hạn 553,7 [KT25 TM29; HN Q3/26 TM29]; trung vị 4,2%",
+  "p_base": 0.0909,
+  "p_estimator": "Laplace (0+1)/(9+2) — ƯỚC LƯỢNG từ 0 sự kiện/9 năm (lựa chọn estimator, không phải số đo); lưới MLE 0 / Jeffreys 0,05 / 0,2 / cận trên 95% 1/3 báo kèm",
+  "f_cash": 0.4477,
+  "f_inv": 0.5883
+ },
+ "nci": {
+  "share_of_npat": 0.0328,
+  "source": "HN Q3/26 KQKD: LNST 718,515 = mẹ 694,979 + CĐKKS 23,536 (9T/26); NOPAT × (1 − 3,28%)"
+ },
+ "revenue_base": {
+  "value": 4150,
+  "basis": "TTM 4.145,5 (Q4/25 1.719,8 + 9T/26 2.425,7)",
+  "alt_shown": {
+   "seasonal_2026E": 3490.2,
+   "seasonal_basis": "9T/26 / (1 − trung vị tỷ trọng Q4 2018–25 = 30,5%) [BQ rev quý]; Q4/25 = 31,7% DT 2025 ≈ trung vị ⇒ không bất thường về mùa vụ",
+   "run_rate_9m26": 3234.3,
+   "median_2019_2025": 5432.5
+  }
+ },
+ "warranty_addback": {
+  "pct_rev": 0.0168,
+  "deferral_years": 1.481,
+  "basis": "Hoàn nhập 9T/26 378,355 trong 0,75 năm ⇒ 504,5/năm; số dư 747,1 chạy hết sau 1,48 năm; cộng lại dòng chỉ tính sau đó (PV × 0,829) để không đếm hai lần với số dư"
+ }
+}

@@ -1,0 +1,200 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "TTA",
+ "dd_date": "2026-11-23",
+ "rev": 5,
+ "loai_hinh": "dien_ppa",
+ "method_version": "M20261122",
+ "units": "tỷ VND trừ khi ghi khác",
+ "sources": {
+  "model": "model/dcf_tta_r5.py (khoá tham số; md5 ghi ở REPORT_rev5.md)",
+  "kt25": "src/BCKT-TTA-2025-Viet.pdf",
+  "q3_26": "src/BCTC-quy-3.2026-TV.pdf",
+  "q3_25": "src/20251027-TTA-BCTC-quy-3-nam-2025-TV.pdf",
+  "nq_dhdcd_26": "src/20260423-TTA-CBTT-NQ-DHDCD-TN-2026-signed.pdf",
+  "fx": "/home/trido/thanhdt/WorkingClaude/data/macro_usdvnd.csv",
+  "avoided_cost": "QĐ 226/QĐ-BCT 2019; QĐ 4036/QĐ-BCT 2019 (năm 2020); QĐ 650/QĐ-BCT 2021; QĐ 131/QĐ-BCT 2022; QĐ 1028/QĐ-BCT 2023; QĐ 1670/QĐ-BCT 2024; QĐ 3734/QĐ-BCT 2024 (năm 2025); QĐ 392/QĐ-BCT 2026",
+  "segment_hist": "src/dl_r5/TTA_BCTN_2021.pdf tr.45 · TTA_BCTN_2022.pdf tr.45 · TTA_BCTN_2023.pdf tr.43 · TTA_BCTC_KT_2024.pdf tr.43 (thuyết minh bộ phận, Khu vực Yên Bái) · KT25 tr.45",
+  "phuoc_hoa_tmdt": "nhadautu.vn (báo, không phải văn bản gốc): TMĐT 22.865 tỷ, liên danh Trường Thành + Daewoo E&C; tỷ lệ TTA không công bố"
+ },
+ "share_base": {
+  "shares_m": 178.559087,
+  "source": "KT25 tr.39 (178.559.087 cp lưu hành) + EPS 849,10 Q3/26",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "none",
+   "source": "NQ ĐHĐCĐ 2026 Điều 6: cổ tức 0%, không phát hành/ESOP"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Thuỷ điện tích năng Phước Hoà (1.200 MW đề xuất)",
+    "spent_bn": {
+     "value": 95.7,
+     "source": "Q3/26 tr.20 XDCB dở dang"
+    },
+    "remaining_bn": {
+     "value": "khong_cong_bo",
+     "searched": [
+      "NQ ĐHĐCĐ 2026",
+      "BCTC Q3/2026 thuyết minh",
+      "CBTT 2026",
+      "nhadautu.vn (TMĐT dự án 22.865 tỷ; tỷ lệ góp TTA không nêu)"
+     ]
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "Q3/26 tr.20; KT25 tr.30 mục 15a(*) (5 tỷ của bà Nguyễn Thị Thanh trừ ra ⇒ 90,7)"
+   },
+   {
+    "name": "Thay inverter 2032 (sửa chữa lớn mặt trời)",
+    "spent_bn": 0,
+    "remaining_bn": {
+     "value": 60,
+     "source": "ước lượng r1"
+    },
+    "generates_revenue": false,
+    "mandatory": false,
+    "classification": "maintenance",
+    "treatment": "CASH_OUTFLOW",
+    "source": "ước lượng (REPORT.md r1 §6)"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": {
+   "value": 14.037,
+   "source": "NQ ĐHĐCĐ 2026 Điều 6 (12,037 + 2,0)"
+  },
+  "annual_appropriation_pct_of_npat": 0.06,
+  "applied_to_cashflow": true,
+  "source": "model: funds = 6% LNST + 2 tỷ/năm"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2027,
+    "rate": 0.06
+   },
+   {
+    "from_year": 2031,
+    "rate": 0.1
+   },
+   {
+    "from_year": 2035,
+    "rate": 0.2
+   }
+  ],
+  "source": "Q3/26 tr.21 ưu đãi 10% 15 năm, miễn 4, giảm 50% 9 năm; lộ trình mô hình = ước lượng hiệu dụng"
+ },
+ "working_capital": {
+  "method": "zero_change_base",
+  "source": "Phải thu EPTC vượt mức tách riêng (322,52 gộp VAT = 399,63 − 77,11) — Q3/26 tr.18, KT25 tr.24"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "A — giữ FIT cả 2 NM",
+    "side": "up",
+    "p": 0.15,
+    "basis": "chưa có quyết định thu hồi FIT"
+   },
+   {
+    "name": "B — Bầu Ngứ FIT1→FIT2 + hồi tố",
+    "side": "base",
+    "p": 0.25,
+    "basis": "KL TTCP nhóm 14 dự án FIT1 sai đối tượng"
+   },
+   {
+    "name": "B′ — B + Núi Một 1 về giá chuyển tiếp + hồi tố",
+    "side": "base",
+    "p": 0.35,
+    "basis": "KL TTCP nêu cả hai nhà máy"
+   },
+   {
+    "name": "C — cả hai về giá chuyển tiếp + thuỷ điện −15% 2027 + lãi +1pp + BIDV 70 cầm cố = 0 + Phương Mai −50%",
+    "side": "down",
+    "p": 0.25,
+    "basis": "kịch bản xấu; cầm cố HĐ tiền gửi BIDV làm TSĐB bảo lãnh (Q3/26 tr.18); dự phòng Phương Mai tăng (Q3/26 tr.20)"
+   }
+  ],
+  "asymmetry_reason": "Rủi ro pháp lý FIT là một chiều (chỉ có thể bị hạ giá/hồi tố), nên trọng số nghiêng xuống; giữ bộ trọng số r2/r3 không re-tune."
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-02",
+  "deposit_rate_source": "deposit_rate_vn.consumer_deposit_rate_detail(): cctg_12m(2026-11-02) 7,40%, Big-4 6,80%, last_update 2026-11-16",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true,
+  "finite_life_rate_note": "Dòng tiền hữu hạn tới 2060 (không terminal Gordon); dùng r 13,5% cho cả chuỗi"
+ },
+ "terminal": {
+  "moat_tier": "NONE",
+  "terminal_ronic": "NOT_APPLICABLE_FINITE_LIFE"
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "position_size_note": "tham chiếu Q = 5 tỷ",
+  "source": "model/dcf_tta_r4.py liquidity(): Corwin-Schultz 120 phiên + σ·√(Q/ADV) trên model/data/px_tta.csv"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "theo KT25 (chấp nhận toàn phần)",
+  "interim_review": "reviewed_unqualified",
+  "source": "src/BCKT-TTA-2025-Viet.pdf; src/BCTC-soat-xet-6-thang-2026-gop.pdf"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "Cho vay Cty TNHH XD Trường Thành (cổ đông lớn) 12,5 ngắn + 2,5 dài hạn — tính đủ mệnh giá",
+    "amount_bn": 15.0,
+    "source": "Q3/26 tr.18 mục 2"
+   },
+   {
+    "desc": "HTKD chia LN thuỷ điện cho cá nhân (NH2 25,22%, NH2A 31,21%) — mô hình trừ 12% EBITDA thuỷ điện; thời hạn không công bố",
+    "amount_bn": 31.003,
+    "source": "NQ ĐHĐCĐ 2026 Điều 6; Q3/26 tr.22,26"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [],
+  "none_reason": "Không có khoản một-lần trong nền dòng tiền; hồi tố FIT xử lý theo kịch bản",
+  "searched": [
+   "KT25 thu nhập/chi phí khác",
+   "Q3/26 KQKD"
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [],
+  "none_reason": "Không văn bản nào công bố cam kết góp vốn Phước Hoà 12 tháng tới; 19,9 tỷ chi 9T/2026 đã nằm trong số dư sổ sách",
+  "searched": [
+   "NQ ĐHĐCĐ 2026",
+   "NQ HĐQT 29/06/2026",
+   "CBTT 18/06/2026",
+   "BCTC Q3/2026"
+  ]
+ },
+ "sector": {
+  "ppa_expiry": {
+   "value": "Bầu Ngứ FIT ~11/2039; Núi Một 1 ~2040; NH2A ~2036 (ước lượng); Pá Hu ~2040; NH2 (48 MW) cơ chế giá không kiểm chứng được (TT 16/2025 Đ4: >30 MW thuộc diện tham gia thị trường điện; không tìm được xác nhận đăng ký)",
+   "source": "REPORT.md r1 §3 bảng nhà máy"
+  },
+  "ppa_price": {
+   "value": "FIT1 9,35 USc / FIT2 7,09 USc quy đổi tỷ giá (FX26 × 1,018^t); thuỷ điện nền 369,9 tỷ 2026 PHẲNG danh nghĩa (biểu giá chi phí tránh được 2020/2021→2026 không đổi; Ngòi Hút 2 cơ chế không kiểm chứng được); giá sau FIT 1.100 đ phẳng",
+   "source": "QĐ 13/2020; QĐ 4036/2019, 650/2021, 131/2022, 1028/2023, 1670/2024, 3734/2024, 392/2026; BCTC bộ phận 2021–2025"
+  }
+ }
+}

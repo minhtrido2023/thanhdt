@@ -1,81 +1,67 @@
 {
- "proposal_for": "kb/dd_price_zones.json (Mike áp tuần tự; Taylor KHÔNG ghi sổ)",
- "job": "Taylor_20261123_050001 (resume Taylor_20261123_003452)",
  "entry": {
   "ticker": "BSR",
   "dd_date": "2026-11-09",
-  "rev": 2,
+  "rev": 3,
   "valuation_asof": "2026-11-23",
   "bctc_quarter": "2026Q3",
   "skeptic_final": "REFUTED_OPEN",
   "skeptic_final_basis": "skeptic_run",
-  "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/skeptic/r3.json",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/skeptic/r4.json",
   "audited_fy_missing": true,
-  "zone_low": 12159,
-  "center": 16886,
+  "zone_low": 11818,
+  "center": 16544,
   "center_kind": "expected_weighted",
-  "center_desc": "kỳ vọng trọng số lưới 243 kết cục (kịch bản×LN lõi×WC×LN vượt×tỷ trọng tuân thủ dự án mở rộng), sau CK thanh khoản @5 tỷ, r 13,5% neo lãi huy động 7,40%; phần tuân thủ dự án mở rộng là dòng tiền ra (D3), phần tăng trưởng NPV0",
-  "center_alt": 17097,
+  "center_desc": "kỳ vọng trọng số lưới 243 kết cục, sau CK thanh khoản @5 tỷ, r 13,5% neo lãi huy động 7,40%; VAT khấu trừ thu hồi bằng bù trừ từ 2027 (không được hoàn, Luật 48/2024 Đ15), tuân thủ dự án mở rộng là dòng tiền ra, tăng trưởng NPV0",
+  "center_alt": 16753,
+  "center_alt_kind": "base_scenario",
   "center_alt_desc": "kịch bản CƠ SỞ giữa trục (tuân thủ kỳ vọng)",
-  "zone_high": 22451,
+  "zone_high": 22110,
   "center_range": null,
   "price_ref": 26250,
   "price_date": "2026-11-06",
-  "verdict_label": "TRÊN vùng: giá 26.250 cao hơn tâm 16.886 +55,5% và cao hơn P90 22.451 +16,9%; luật 4 (≤ 0,85×tâm = 14.353) KHÔNG đạt; TRÊN vùng ở mọi biến thể (tuân thủ 0→1,0: tâm 18.771→12.539; VAT 0%: 15.770; bản A +402: 17.465); giá ngụ ý Ke 4,92%",
-  "skeptic_status": "DD_GENERAL: r1 (22/11, REPORT.md rev2) INCONCLUSIVE → REPORT_rev3.md; r2 (23/11, REPORT_rev3.md) INCONCLUSIVE → REPORT_rev4.md; r3 (23/11, REPORT_rev4.md md5 64228a9f) INCONCLUSIVE medium — hết 2 vòng/ca, điểm r3 CHƯA áp ⇒ REFUTED_OPEN; vòng tiếp = user quyết",
-  "source_file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev4.md",
-  "report_md5": "64228a9fde907b642d9a69ced89fbc0a",
+  "verdict_label": "TRÊN vùng: giá 26.250 cao hơn tâm 16.544 +58,7% và cao hơn P90 22.110 +18,7%; luật 4 (≤ 0,85×tâm = 14.062) KHÔNG đạt; TRÊN vùng ở mọi biến thể (P90 cao nhất 24.277 khi tỷ trọng tuân thủ 0)",
+  "skeptic_status": "DD_GENERAL: r1 INCONCLUSIVE (rev2) → r2 INCONCLUSIVE (rev3) → r3 INCONCLUSIVE (rev4) → r4 INCONCLUSIVE medium (REPORT_rev5.md md5 9df8f553) — vòng cuối, không CONFIRMED ⇒ REFUTED_OPEN; điểm r4 chưa áp",
+  "source_file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev5.md",
+  "report_md5": "9df8f55395f57e00832d201042b10139",
   "evidence": [
    {
-    "file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev4.md",
-    "quote": "| Tâm (kỳ vọng có trọng số, 243 kết cục) | 17.496 | 16.112 | 16.964 | **16.886** | 16.957 |",
+    "file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev5.md",
+    "quote": "| Tâm (kỳ vọng có trọng số, 243 kết cục) | 17.496 | 16.112 | 16.886 | 16.621 | **16.544** | 16.614 |",
     "fields": [
      "center"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev4.md",
-    "quote": "| P10 / P50 / P90 | 13.093 / 17.350 / 23.345 | 11.385 / 15.933 / 21.911 | 12.216 / 16.704 / 22.556 | **12.159 / 16.627 / 22.451** | 12.211 / 16.697 / 22.546 |",
+    "file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev5.md",
+    "quote": "| P10 / P50 / P90 | 13.093 / 17.350 / 23.345 | 11.385 / 15.933 / 21.911 | 12.159 / 16.627 / 22.451 | 11.872 / 16.361 / 22.212 | **11.818 / 16.285 / 22.110** | 11.868 / 16.354 / 22.203 |",
     "fields": [
      "zone_low",
      "zone_high"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev4.md",
-    "quote": "| Nhãn @ 26.250 (06/11) | TRÊN | TRÊN | TRÊN | **TRÊN vùng** (+55% trên tâm, +17% trên P90) | TRÊN |",
+    "file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev5.md",
+    "quote": "| Nhãn @ 26.250 (06/11) | TRÊN | TRÊN | TRÊN | TRÊN | **TRÊN vùng** (+58,7% trên tâm, +18,7% trên P90) | TRÊN |",
     "fields": [
      "price_ref"
     ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev5.md",
+    "quote": "Kịch bản giữa trục: **XẤU 12.483 · CƠ SỞ 16.753 · TỐT 22.496**.",
+    "fields": [
+     "center_alt"
+    ]
    }
   ],
-  "assumptions_file": "agents/Taylor/research/dd_lagcand_20261109/BSR/calc/assumptions_rev4.json",
-  "assumptions_md5": "902291f3fb9e925f38608391c8419c72",
-  "null_reason": "center_range null: trung tâm là giá trị kỳ vọng một điểm; vùng = P10–P90",
+  "assumptions_file": "agents/Taylor/research/dd_lagcand_20261109/BSR/calc/assumptions_rev5.json",
+  "assumptions_md5": "b6abb9cdc0f620a87fd2155ab7629055",
+  "null_reason": "center_range null: tâm là kỳ vọng một điểm; vùng = P10–P90; khung độ nhạy 14.939 (VAT gia hạn 2027)…18.429 (tuân thủ 0) không bắt đầu từ center",
   "expires_on": "2027-03-09",
   "expires_basis": "dd_date+120 (mặc định); BCTC Q4/2026 sớm hơn thì hết hạn sớm hơn",
-  "correction_reason": "rebuild sau skeptic DD_GENERAL r1 INCONCLUSIVE (thiếu phân loại tăng trưởng/tuân thủ dự án mở rộng 39.004,5 tỷ): QĐ968 ⇒ cụm môi trường là dòng tiền ra (trục tỷ trọng 0,10/0,40/0,75, kỳ vọng 30,25%, −1.885 đ/cp); bỏ +370 CƠ SỞ + sửa TA đếm hai lần (+501); VAT khấu trừ tách khỏi trục giá dầu (+774); E1–E4 đối chiếu PDF gốc khớp. Tâm 17.496→16.886, nhãn TRÊN vùng giữ",
-  "supersedes": "BSR@2026-11-09#1",
-  "notes": "Sleeve LAG_HI. Sizing V8: 0% NAV discretionary ở giá tham chiếu (2–4% chỉ khi giá ≤ vùng). CK 0,46% @5 tỷ (ADV250 260,6 tỷ). audited_fy_missing=true: BCTC KT FY2025 không có trong thư mục, tìm web 23/11 không ra (có soát xét 6T/2026 Deloitte). WARNING: quyết toán CPH chưa phê duyệt; MBV 2.735,6 tỷ tạm dừng giao dịch (−544 đ/cp nếu mất trắng); PVN 92,12%. Còn mở (skeptic r3): cơ chế/thời hạn thu hồi VAT 6.373 tỷ (3 năm −251, 5 năm −446, 0% −1.116 đ/cp); quỹ KHCN tối thiểu DNNN (~−224 ước); Q4/2026 KH lỗ −6.323 vs XẤU −2.000 (~−300 ước); phân loại GHDT/DHDT/HGU theo V4a (−919 nếu kỳ vọng 0,45) cần user/Mike phán; Euro V bắt buộc với NSX chưa kiểm (legal-vn); cơ cấu chi phí 39.004,5 tỷ không công bố."
- },
- "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/skeptic/r3.json",
- "skeptic_verdict": "INCONCLUSIVE",
- "skeptic_confidence": "medium",
- "report_md5_in_verdict": "64228a9fde907b642d9a69ced89fbc0a",
- "md5_match": true,
- "skeptic_rounds_this_job": {
-  "r2.json": "INCONCLUSIVE (REPORT_rev3.md, 1,16 USD)",
-  "r3.json": "INCONCLUSIVE (REPORT_rev4.md, 1,18 USD)"
- },
- "label_note": "skeptic_final=REFUTED_OPEN: vòng cuối r3 INCONCLUSIVE và điểm r3 CHƯA áp (dừng sửa để md5 khớp verdict) — đúng enum §E10; KHÔNG tự nâng nhãn. Không chạy dd_ledger_append_confirmed.py.",
- "apply_mechanics": "Append entry như rev 2 của (BSR, 2026-11-09) rồi chạy bin/dd_price_zones_selfcheck.py.",
- "remaining_items": [
-  "thời hạn/cơ chế thu hồi VAT khấu trừ 6.373 tỷ (legal-vn: Luật GTGT 48/2024 hoàn thuế; tách VAT thiết bị dự án vs dầu thô)",
-  "quỹ KHCN tối thiểu DNNN",
-  "Q4/2026 KH lỗ −6.323 (đọc NQ 5795 PL1: có dừng máy?)",
-  "phân loại GHDT/DHDT/HGU theo V4a — user/Mike phán",
-  "Euro V bắt buộc với NSX (legal-vn)",
-  "cơ cấu chi phí 39.004,5 tỷ theo cụm",
-  "BCTC KT FY2025 + quyết toán CPH"
- ]
+  "correction_reason": "áp skeptic r3: VAT khấu trừ 6.373 tỷ không được hoàn (Luật GTGT 48/2024 Đ15; cơ chế không kê khai GTGT xăng dầu 27/3–31/12/2026 theo QĐ482/NQ19/NQ34/NQ43) ⇒ bù trừ từ 2027 ở 2.027 tỷ/năm (TM17 168,93 tỷ/tháng) + tích luỹ Q4 3.119 tỷ ⇒ PV 778 đ/cp thay 1.121; KHCN không bắt buộc (Luật TNDN 67/2025, NĐ 265/2025 bãi NĐ 95/2014); Q4 −6.323 của NQ 5795 là phép trừ cơ học (KH = 6T thực + H2 KH cũ). Tâm 16.886→16.544 (−342)",
+  "supersedes": "BSR@2026-11-09#2",
+  "notes": "Sleeve LAG_HI. Sizing V8: 0% NAV discretionary ở giá tham chiếu. CK 0,46% @5 tỷ. WARNING: quyết toán CPH chưa phê duyệt; MBV 2.735,6 tỷ tạm dừng (16.000 nếu mất trắng). Còn mở (skeptic r4): xác suất gia hạn cơ chế GTGT 0-kê khai sang 2027 đang =0 trong base (gia hạn ⇒ 14.939; p≈0,5 ≈ −800); năng lực bù trừ 2.027 tỷ/năm bị số 9T/2026 phản chứng (−200…−313); trích KTPL/thưởng từ LN 2026 chưa đo (<200 đ/cp ước lượng skeptic); phân loại GHDT/DHDT/HGU (0,45 ⇒ 15.625) cần user/Mike; cơ cấu chi phí 39.004,5 tỷ, BCTC KT FY2025, thuê đất/dầu thô không kiểm chứng được."
+ }
 }

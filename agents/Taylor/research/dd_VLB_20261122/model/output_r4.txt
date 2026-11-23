@@ -1,0 +1,42 @@
+net_cash_now=607.44 (r3 quy uoc 488.84); WC_SETTLE=144.00
+CORE_FY24=212.1 CORE_FY25=265.05 CORE_TTM=357.4 mid(1)=274.4 PREM=83.0
+  duong LN co so t1..6: 357.4, 321.4, 285.5, 291.2, 297.0, 303.0
+  TC1: rate 1.500 res_now 21.45 life_lic 12.25 life_res 14.30 -> 12.25 share 0.320 du_tru_luong_khi_het_GP 3.07
+  TP1: rate 1.659 res_now 34.16 life_lic 15.83 life_res 20.59 -> 15.83 share 0.303 du_tru_luong_khi_het_GP 7.89
+  TT2: rate 1.500 res_now 21.40 life_lic 11.75 life_res 14.27 -> 11.75 share 0.290 du_tru_luong_khi_het_GP 3.78
+  SK2: rate 0.212 res_now 2.14 life_lic 5.16 life_res 10.13 -> 5.16 share 0.039 du_tru_luong_khi_het_GP 1.05
+  SK5: rate 0.265 res_now 1.42 life_lic 2.91 life_res 5.35 -> 2.91 share 0.048 du_tru_luong_khi_het_GP 0.65
+  doi mo binh quan theo ty trong LN = 12.46 nam (r3: 11,2)
+xau    op= 1217.6 off=   0.0 (du 329.4) dep=3.1 nc=574.7 ->    38,426 d/cp w 0.25
+co_so  op= 1546.8 off= 159.9 (du 71.5) dep=3.1 nc=574.7 ->    48,895 d/cp w 0.5
+tot    op= 2053.2 off= 179.1 (du 11.3) dep=1.7 nc=582.1 ->    60,276 d/cp w 0.25
+TAM truoc CK = 49,123 | ex-div (-2500) = 46,623
+thanh khoan: ADV250 1.14 ADV68 0.92 sigma 1.340% CS 0.35%; d(5ty)=2.98% d(1ty)=1.43%; phien thoat 5ty@20%ADV 21.8
+SAU CK 5ty (co so 30/9): tam 47,661 xau 37,283 co_so 47,440 tot 58,483
+SAU CK 5ty ex-div: tam 45,161 xau 34,783 co_so 44,940 tot 55,983
+-- cau noi r3 -> r4 (tam truoc CK, them tung thay doi) --
+  r4 voi quy uoc VLD r3 (tru ngay): 47,246
+-- do nhay (truoc CK, % so tam) --
+  lai huy dong -100bp b1: 50,810 (+3.4%); b0.5: 49,949 (+1.7%)
+  lai huy dong -50bp b1: 49,949 (+1.7%); b0.5: 49,532 (+0.8%)
+  lai huy dong +50bp b1: 48,330 (-1.6%); b0.5: 48,723 (-0.8%)
+  lai huy dong +100bp b1: 47,569 (-3.2%); b0.5: 48,330 (-1.6%)
+  Ke dai noi dia 12.3%: 51,164 (+4.2%)
+  Ke dai noi dia 13.4%: 49,285 (+0.3%)
+  offset chiet khau @Ke 13.5%: 48,366 (-1.5%)
+  quy LO 12.4%: 50,116 (+2.0%)
+  co_so LN phang 265 (loi FY25 KT, g0): 43,416 (-11.2% vs co_so)
+  co_so LN phang 310 g2% (r3): 51,023 (+4.4% vs co_so)
+  co_so LN TTM giu (g2%): 56,405 (+15.4% vs co_so)
+  co_so LN fade 1 nam: 48,308 (-1.2% vs co_so)
+  co_so LN fade 4 nam: 49,920 (+2.1% vs co_so)
+  co_so LN mid = loi FY24 KT: 41,241 (-15.7% vs co_so)
+  co_so + gia han 3 mo chinh den het tru luong: 51,993 (+6.3%)
+  co_so + GP theo bang BVSC 2/2026 (r3): 47,596 (-2.7%)
+  trong so kich ban tot (gia han) 25%: tam 49,123 (+0.0%) [w xau/co_so/tot = 0.250/0.500/0.250]
+  trong so kich ban tot (gia han) 50%: tam 51,968 (+5.8%) [w xau/co_so/tot = 0.250/0.250/0.500]
+  quy uoc VLD r3 (tru ngay phan gia von ung truoc + WC): 47,246 (-3.8%)
+  du bu tru chua dung 71.5 ty neu duoc HOAN: +494 d/cp (KHONG vao base)
+  ky quy vuot du phong = 0 (skeptic r2: ky quy co the = chi phi hoan nguyen): -65 d/cp
+  STRESS ngoai mo hinh: truy thu kieu 2022 (~270 ty truoc thue, x0,8) = -4,623 d/cp tren kich ban xau -> 33,803 (HARD ABANDON)
+V6: V_ngan(Gordon, LN nam1, +net cash)=66,811 V_dai(huu han, co so)=48,895 D=0.312 (ln2=0.693)

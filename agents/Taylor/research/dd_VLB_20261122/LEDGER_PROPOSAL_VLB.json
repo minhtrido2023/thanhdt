@@ -1,52 +1,67 @@
 {
  "proposal_for": "kb/dd_price_zones.json",
- "job": "Taylor_20261123_001052",
+ "job": "Taylor_20261123_120307",
  "entry": {
   "ticker": "VLB",
   "dd_date": "2026-11-22",
-  "rev": 3,
+  "rev": 4,
   "bctc_quarter": "2026Q3",
   "skeptic_final": "REFUTED_OPEN",
   "skeptic_final_basis": "skeptic_run",
-  "skeptic_verdict_path": "agents/Taylor/research/dd_VLB_20261122/skeptic/r2.json",
-  "audited_fy_missing": true,
-  "zone_low": 32084,
-  "center": 42800,
+  "skeptic_verdict_path": "agents/Taylor/research/dd_VLB_20261122/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "zone_low": 34783,
+  "center": 45161,
   "center_kind": "expected_weighted",
-  "center_desc": "kỳ vọng trọng số 3 kịch bản (xấu 0,25 / cơ sở 0,50 / tốt 0,25, giữ trọng số r1/r2) SAU chiết khấu thanh khoản 2,98% @5 tỷ, CÙNG CƠ SỞ VỚI GIÁ (ex-div: đã trừ cổ tức tạm ứng 2026 2.500 đ/cp, GDKHQ 19/11/2026). Cơ sở 30/9: tâm 45.300 (trước CK 46.689). Đời mỏ theo từng mỏ = min(hạn GP, trữ lượng/sản lượng): TC1/TP1 hết 1/2038, TT2 8/2041 (trữ lượng chặn 13,4 năm), Soklu2 11/2031, Soklu5 8/2029 [BVSC 2/2026 tr.7] ⇒ đời bình quân 11,2 năm (r2: 14). LN vận hành gốc 310 tỷ (trung điểm lõi FY25 264,8 và TTM 357,3; loại lãi tiền gửi + thu nhập khác), g 2%; bù trừ tiền cấp quyền chiết khấu 7,4%; r 13,5% @ lãi huy động 12T hiệu dụng 7,4%; quỹ KTPL 14,84%; mù giá",
-  "zone_high": 52042,
+  "center_desc": "kỳ vọng trọng số 3 kịch bản (xấu 0,25 / cơ sở 0,50 / tốt 0,25, giữ trọng số r1–r3) SAU chiết khấu thanh khoản 2,98% @5 tỷ, CÙNG CƠ SỞ VỚI GIÁ (ex-div: trừ cổ tức tạm ứng 2026 2.500 đ/cp, GDKHQ 19/11/2026). Cơ sở 30/9: tâm 47.661 (trước CK 49.123). Hạn GP theo BCTN 2025 tr.8 (công ty công bố, có số GP): TP1 31/7/2042, TC1 01/01/2039, TT2 30/6/2038, SK2 28/11/2031, SK5 28/08/2029 ⇒ đời bình quân 12,46 năm. LN cơ sở: năm 1 lõi TTM 357,4 giảm tuyến tính về mức giữa chu kỳ = lõi FY25 kiểm toán 265,05 × 1,02^t ở năm 3. VLĐ quay vòng (ứng trước 76,9 + WC 67,1) tất toán khi đóng mỏ. r 13,5% @ lãi huy động 12T 7,4%; quỹ 14,84%; mù giá",
+  "zone_high": 55983,
   "center_range": null,
-  "center_alt": 43537,
+  "center_alt": 44940,
   "center_alt_kind": "base_scenario",
   "price_ref": 48100,
   "price_date": "2026-11-20",
-  "verdict_label": "Giá 48.100 (ex-div) = 1,12 × tâm 42.800 cùng cơ sở ⇒ TRONG vùng ±15% (36.380–49.220) nhưng nghiêng ĐẮT; trên cơ sở 43.537, dưới cận tốt 52.042. Giá hàm ý giữa cơ sở và tốt (gia hạn GP Thạnh Phú 1 / LN giữ quanh TTM). Moat NARROW, đồng hồ cắt hào 1/2038 cho 62% LN. Pháp lý: WARNING.",
-  "skeptic_status": "r1 (22/11, DD_GENERAL) INCONCLUSIVE trên investor_report r2 (thiếu bảng GP, BCTC KT 2025, QĐ tiền cấp quyền; base LN 330 cao; kịch bản tốt mâu thuẫn trữ lượng) → REPORT_rev3 áp 13 hạng mục (bảng GP BVSC 2/2026, LN 310, tốt = gia hạn TP1, bù trừ @7,4%, ký quỹ thừa), tâm ex-div 48.735 → 42.800 (−12,2%); r2 (23/11) INCONCLUSIVE medium: số học tái lập khớp, lệch hai chiều gần triệt tiêu, không hạng mục định lượng được nào >5% tâm; chặn vì thiếu BCTC KT FY2025, bản gốc GP, NQ HĐQT đầu tư. Không chạy vòng 3 (hạng mục chặn không lấy được từ nguồn hiện có; API tài liệu vietstock bị chặn trong phiên).",
-  "source_file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev3.md",
+  "verdict_label": "Giá 48.100 (ex-div) = 1,07 × tâm 45.161 cùng cơ sở ⇒ TRONG vùng ±15% (38.387–51.935), nghiêng đắt nhẹ; trên cơ sở 44.940, dưới cận tốt 55.983. Ngưỡng sleeve 0,85×tâm = 38.387. Moat NARROW (đồng hồ GP 6/2038–7/2042). Pháp lý: WARNING.",
+  "skeptic_status": "r1 (22/11) INCONCLUSIVE → rev3; r2 (23/11) INCONCLUSIVE medium trên rev3 (LN 310 phẳng cao hơn mọi năm lõi kiểm toán; thiếu BCTC KT FY25, số GP gốc, NQ HĐQT) → REPORT_rev4 áp: BCTC KT 2025 (A&C chấp nhận toàn phần), bảng GP BCTN 2025 có số GP, NQ HĐQT 12 tháng (không cam kết vốn), đường LN fade về lõi FY25, VLĐ tất toán khi đóng mỏ; tâm ex-div 42.800 → 45.161 (+5,5%). r3 (23/11, vòng CUỐI) INCONCLUSIVE medium: số học + nguồn khớp BQ; còn lệch hai chiều chưa định lượng — neo giữa chu kỳ = năm cao nhất (ước −5–6%), VLĐ mùa vụ (−1–2%), đền bù diện tích còn lại/44,3 ha TC1 (ước −4–6%) vs khấu hao/phân bổ đền bù 286,75 tỷ không cộng lại (ước +3–5%), năm 1 thấp hơn tốc độ Q3/26 (+3%). Dừng theo luật vòng cuối; bản sửa cho r3 CHƯA áp.",
+  "source_file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev4.md",
   "evidence": [
-   {"file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev3.md", "quote": "| **Ex-div (−2.500, so với giá/ghi sổ)** | **32.084** | **43.537** | **52.042** | **42.800** |", "fields": ["zone_low", "center_alt", "zone_high", "center"]},
-   {"file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev3.md", "quote": "**42.800 đ/cp** theo cơ sở ex-div", "fields": ["center"]},
-   {"file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev3.md", "quote": "Giá tham chiếu **48.100 đ** (20/11/2026", "fields": ["price_ref"]}
+   {
+    "file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev4.md",
+    "quote": "| **Ex-div (−2.500, so với giá/ghi sổ)** | **34.783** | **44.940** | **55.983** | **45.161** |",
+    "fields": [
+     "zone_low",
+     "center_alt",
+     "zone_high",
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev4.md",
+    "quote": "**45.161 đ/cp** theo cơ sở ex-div",
+    "fields": [
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_VLB_20261122/REPORT_rev4.md",
+    "quote": "Giá tham chiếu **48.100 đ** (20/11/2026",
+    "fields": [
+     "price_ref"
+    ]
+   }
   ],
-  "assumptions_file": "agents/Taylor/research/dd_VLB_20261122/model/dcf_vlb_r3.py",
-  "assumptions_md5": "affb2d84af055ff9eeb6163bf2809e9a",
-  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "assumptions_file": "agents/Taylor/research/dd_VLB_20261122/assumptions_VLB_r4.json",
+  "assumptions_md5": "08740786baa1e16556cc848439ba9d3d",
+  "null_reason": "center_range: nguồn không cho khoảng tâm bắt đầu từ center",
   "expires_on": "2027-03-22",
   "expires_basis": "BCTC Q4/2026 (~20/01/2027) hoặc 120 ngày; công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
-  "correction_reason": "skeptic DD_GENERAL r1 22/11 INCONCLUSIVE: đời mỏ 14 năm dựa trữ lượng báo chí, không bảng GP; base LN 330 > chuẩn hoá; tốt ghép sản lượng cao + đời dài; bù trừ chiết khấu Ke; ký quỹ thừa chưa đếm. Rev3: bảng GP 5 mỏ (BVSC 2/2026 tr.7, nguồn VLB + Sở XD Đồng Nai) ⇒ đời theo hạn GP 1/2038; LN 310; tốt = gia hạn TP1 tới 7/2042; bù trừ @7,4%; +ký quỹ thừa 22,66 tỷ; đính chính Soklu 2/5 đã gia hạn.",
-  "notes": "KHÔNG phải tín hiệu mua. Ngưỡng sleeve 0,85×tâm = 36.380. Sizing V8 2–4% NAV nhưng thanh khoản trói: 5 tỷ cần ~22 phiên ở 20% ADV. assumptions lock: assumptions_VLB_r3.json md5 bedb196bd81a6db23cc2087a456b14d0 (lint 0 vi phạm). Độ nhạy (trước CK): np1 265 −10,3% cơ sở; gia hạn TP1 2042 +4,0%; gia hạn 3 mỏ hết trữ lượng +8,7%; bù trừ @13,5% −1,4%; dư bù trừ hoàn +802 đ/cp; lãi huy động ±100bp +3,5%/−3,2%. HARD ABANDON: truy thu tiền cấp quyền / huỷ bù trừ / rà soát GP lan sang TC1-TP1-TT2 / kiểm toán ngoại trừ. Bobby: sector_read_da_xay_dung_dnb_20261122.md.",
-  "report_md5": "b687b61aef361f7dd35a9ee55efae44e",
-  "supersedes": "VLB@2026-11-22#2"
+  "correction_reason": "skeptic DD_GENERAL r2 23/11 INCONCLUSIVE trên rev3: LN gốc 310 phẳng +2% cao hơn mọi năm lõi kiểm toán; thiếu BCTC KT FY25, bản gốc/số GP, NQ HĐQT. Rev4: tải BCTC KT 2025 (A&C 1.0386/26/TC-AC chấp nhận toàn phần) + BCTN 2025 (bảng GP có số hiệu: TP1 hạn 31/7/2042, TC1 01/01/2039, TT2 30/6/2038 thay bảng BVSC) + 4 NQ HĐQT/ĐHĐCĐ 12 tháng (không cam kết vốn); LN cơ sở fade TTM→lõi FY25 265,05 trong 2 năm; VLĐ + ứng trước đủ tất toán khi đóng mỏ; truy thu kiểu 2022 = stress ngoài mô hình. Cầu nối trước CK: GP BCTN +3,5%, LN fade −3,0%, VLĐ +4,0%.",
+  "notes": "KHÔNG phải tín hiệu mua. audited_fy_missing=false (BCTC KT 2025 đã đọc tr.7-8, 12-13, 39). Sizing V8 2–4% NAV nhưng 5 tỷ cần ~22 phiên ở 20% ADV. assumptions lint 0 vi phạm. Độ nhạy (trước CK): LN phẳng 265 −11,2% cơ sở; mid = lõi FY24 −15,7%; giữ TTM +15,4%; gia hạn 3 mỏ hết trữ lượng +6,3%; trọng số tốt 50% +5,8%; quy ước VLĐ r3 −3,8%; bù trừ @13,5% −1,5%; lãi huy động ±100bp +3,4%/−3,2%; stress truy thu 2022 −4.623 đ/cp. Hạng mục skeptic r3 chưa xử lý: khấu hao/phân bổ đền bù chưa cộng lại; đền bù diện tích còn lại + 44,3 ha TC1 chưa có số; neo giữa chu kỳ; VLĐ mùa vụ (phải trả NLĐ 54,2); kịch bản tốt chưa tính tiền cấp quyền/đền bù phần gia hạn. Meta cafef 23/11 hiện giá 48.600 (thấy ngẫu nhiên, không dùng).",
+  "report_md5": "3bb1f0649139ab826ad6799a15c77eea",
+  "supersedes": "VLB@2026-11-22#3"
  },
- "skeptic_verdict_path": "agents/Taylor/research/dd_VLB_20261122/skeptic/r2.json",
+ "skeptic_verdict_path": "agents/Taylor/research/dd_VLB_20261122/skeptic/r3.json",
  "skeptic_verdict": "INCONCLUSIVE",
  "skeptic_rounds_this_job": 1,
- "skeptic_cost_usd": 1.2146666,
- "label_note": "skeptic_final = REFUTED_OPEN (không phải FIXED_UNVERIFIED): theo enum §E10, vòng cuối r2 INCONCLUSIVE và SAU r2 không áp thêm sửa nào (REPORT_rev3 md5 khớp r2.json). Mike có thể giữ/hạ nhãn; KHÔNG được nâng CONFIRMED.",
- "remaining_items": [
-  "BCTC kiểm toán FY2025 (ý kiến A&C + thuyết minh tiền cấp quyền/GP): không tải được — website bbcc.com.vn chỉ còn CBTT 2026; 24hmoney/vietstock/FPTS/WebSearch không có PDF; API tài liệu vietstock bị classifier chặn. Cần HNX/UPCoM CBTT hoặc SSC IDS (user/Winston)",
-  "Bản gốc/số hiệu giấy phép TC1/TP1/TT2: bảng hiện có là CTCK tổng hợp (BVSC 2/2026 tr.7); ±1 năm hạn TC1+TP1 ≈ ±4% cơ sở (ước lượng)",
-  "NQ HĐQT 12 tháng về đầu tư/đền bù: chưa đọc",
-  "Skeptic gợi ý (sửa được, chưa áp vì không đổi verdict): kịch bản truy thu kiểu 2022 (−270 tỷ ≈ −5.780 đ/cp) thay vì bù trừ = 0; thống nhất quy ước VLĐ/ứng trước (±4%); độ nhạy trọng số gia hạn GP 25%→50%"
- ]
+ "skeptic_cost_usd": 1.093171,
+ "label_note": "skeptic_final = REFUTED_OPEN: vòng cuối r3 INCONCLUSIVE, bản sửa cho r3 CHƯA áp (REPORT_rev4 md5 khớp r3.json). KHÔNG nâng CONFIRMED; KHÔNG chạy thêm vòng."
 }

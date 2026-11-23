@@ -1,0 +1,168 @@
+{
+ "_note": "File khoa v1 cho CSV r5 (khoa lai SAU khi thay gia, ly do skeptic r3 INCONCLUSIVE; khong truy van gia moi); tham so day du calc/assumptions_r5.json; khoa mu gia goc = calc/assumptions_r3.json md5 05e886fe1782b273410640d108436e86.",
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "CSV",
+ "dd_date": "2026-11-23",
+ "rev": 5,
+ "loai_hinh": "san_xuat_khac",
+ "method_version": "M20261122",
+ "units": "ty dong; d/cp",
+ "sources": {
+  "HN_Q3_2026": "src/q3_2026_HN.pdf (+ src/png/q3_2026_HN_p*.png)",
+  "KT_2025": "src/fy2025_HN_kiemtoan.pdf md5 af037ff2 (src/png_r3/fy2025_p5-6.png; r5: src/png_r5/fy2025_kt_p10/p25/p32/p36/p38.jpg = LCTT, TM11, TM23.1, TM31, TM33)",
+  "BCTN_2021": "src/bctn_2021_vietstock.pdf",
+  "cuong_che_BH1": "src/cuongche_BH1_20260713.pdf (p3-p4: Dieu 2.4 ND 88/2024 D27; VB 719 ho so boi thuong)",
+  "dung_TB2": "src/dung_TB2_20260731.pdf",
+  "thu_hoi_dat_HCM": "src/thuhoi_dat_HCM_20261019.pdf",
+  "BQ_fin": "calc/fin_csv_bq.csv",
+  "model_params": "calc/assumptions_r5.json"
+ },
+ "share_base": {
+  "shares_m": 110.49991,
+  "source": "BCDKT ma 411 1.104.999.100.000 d / 10.000 (src/png/q3_2026_HN_p2.png)",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "none",
+   "source": "TM17a p19: 9T/26 khong tang von dau tu cua CSH",
+   "note": "khong thay NQ phat hanh trong src/"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Nha may Hoa chat Nhon Trach - PHAN THAY THE cong suat BH1 (di doi bat buoc)",
+    "total_bn": 1198.6,
+    "spent_bn": 225.2,
+    "remaining_bn": 973.4,
+    "generates_revenue": false,
+    "mandatory": true,
+    "classification": "compliance",
+    "treatment": "CASH_OUTFLOW",
+    "source": "phi tam 0,65 x 1.844 / 346,484 / 1.497,5 (assumptions_r3.json nhon_trach; QD 2408/QD-UBND cuong che BH1; cafef 04/08/2026 1.844 ty; BCTC Q3 p16; BCTN 2021 p18 SX 245.949 t; TCCT 21/05/2025 xut 50k t) | r4: phan vay 1.212 chiet khau o kd sau thue 6,4% (lai vay 9T 9,974/du no BQ 208,7 = 6,37% + 1,6pp ky han, BCTC p3/p18); la chan thue KH L=12 nam (chinh sach KH p9) | r5: APV - toan bo capex con chi chiet khau o r_commit 8,0% co dinh, NPV tai tro vay 10 nam tra goc deu (uoc luong lich tra); CHU KY TAI DAU TU phi x 1.844 moi N=20/30/40 nam (0,25/0,5/0,25) tai Ke, moi chu ky tru la chan thue KH; co so doi kinh te >> L: TM11 KT FY2025 TSCD het KH van dung 1.049,4/1.137,4 ty = 92,3%"
+   },
+   {
+    "name": "Nha may Hoa chat Nhon Trach - PHAN TANG TRUONG vuot cong suat cu",
+    "total_bn": 645.4,
+    "spent_bn": 121.3,
+    "remaining_bn": 524.1,
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "(1-phi) x tong von; truc NPV +/-20% doi xung chi la kich ban (assumptions_r3.json growth_npv_axis)"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": {
+   "value": 25.916,
+   "source": "BCDKT ma 323 30/09/2026 (p2); kem quy KH&CN ma 344 15,0 ty cung tru tien rong"
+  },
+  "annual_appropriation_pct_of_npat": {
+   "value": 0.0955,
+   "source": "BCTC KT FY2025 TM33 (src/png_r5/fy2025_kt_p38.jpg): trich KTPL tu LN 2025 20,900 / LNST me 208,948 = 10,00%; tu LN 2024 21,690/238,636 = 9,09%; TB 9,55% (r4 2,43% = chi phan bo sung 9T/26, sai)"
+  },
+  "applied_to_cashflow": true,
+  "source": "src/png/q3_2026_HN_p2.png, p19.png"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.2
+   }
+  ],
+  "source": "thue TNDN pho thong 20%; lai tien gui sau thue x0,8"
+ },
+ "working_capital": {
+  "method": "zero_change_base",
+  "source": "LN chuan hoa nam 2019-25; CFO 9T/26 +197,8 ty (BCTC p4); von luu dong khong tach rieng"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "XAU",
+    "side": "down",
+    "p": 0.25,
+    "basis": "LN me min 2019-25 = 179,7 (day xut 2020)"
+   },
+   {
+    "name": "CO_SO",
+    "side": "base",
+    "p": 0.5,
+    "basis": "LN me TB 2019-25 = 235,0"
+   },
+   {
+    "name": "TOT",
+    "side": "up",
+    "p": 0.25,
+    "basis": "TTM Q4/25-Q3/26 = 294,5 (cu soc axit/phot pho duy tri)"
+   }
+  ]
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-23",
+  "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate('2026-11-23') = cctg_12m(2026-11-02) 7,40% (big4 6,8%)",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true
+ },
+ "terminal": {
+  "moat_tier": "NARROW",
+  "terminal_ronic": "EQUALS_KE"
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "pct": null,
+  "position_size_note": "5 ty, 1 ty va 40 trieu",
+  "source": "calc/postlock_r3.py: sigma_ngay x sqrt(Q/ADV250) tu BQ tav2_bq.ticker sau khoa"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "Cong ty TNHH Kiem toan FAC",
+  "interim_review": "reviewed_unqualified",
+  "source": "src/fy2025_HN_kiemtoan.pdf trang 3-4 (bao cao so 041/2025/BCTCHN-FAC ngay 23/02/2026, Taylor tu doc 23/11: chap nhan toan phan, khong doan nhan manh); soat xet 6T/2026 FAC 044/2026 ngay 27/07/2026 ket luan chap nhan toan phan (Taylor tu doc src/png_r3/h1_p5.png 23/11)"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "dich vu tu Thiet ke CN Hoa chat (cung Vinachem) 9T/26",
+    "amount_bn": 17.6,
+    "source": "BCTC Q3/26 thuyet minh giao dich ben lien quan (REPORT r2 para 9)"
+   },
+   {
+    "desc": "co tuc tra CDKKS 9T/26 (cong ty con)",
+    "amount_bn": 21.142,
+    "source": "TM17a p19 (cot loi ich CDKKS)"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "lai vuot 9T/26 do gia H2SO4 +249%/+289% va phot pho vang (khong phai mot lan ke toan; chi trong kich ban TOT)",
+    "amount_bn": 85.5,
+    "source": "giai trinh LNST Q2/Q3 (src/q2_2026_giaitrinh_HN.pdf, src/q3_2026_giaitrinh_HN.pdf); 9T26 258,3 vs 9T25 172,8"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "capex Nhon Trach con lai (chi deu Q4/26-2030 theo uoc luong)",
+    "amount_bn": 1497.5,
+    "source": "1.844 (cafef 04/08/2026) - 346,484 da chi (BCTC Q3 p16)"
+   }
+  ]
+ },
+ "sector": {}
+}

@@ -1,0 +1,161 @@
+{
+ "ticker": "CSV",
+ "rev": "r5 (vong skeptic cuoi; khoa lai sau skeptic DD_GENERAL r3 INCONCLUSIVE 23/11; user duyet xu ly tiep 23/11 19:00)",
+ "job": "Taylor_20261123_120254",
+ "lock_written_before_price_read": false,
+ "price_blind_note": "KHOA LAI SAU KHI DA THAY GIA 20.300 (r3/r4). r5 KHONG truy van gia moi (postlock dung lai px_csv_r3.csv md5 7d2e86d2). Moi thay doi r5 lay tu BCTC kiem toan FY2025 (src/fy2025_HN_kiemtoan.pdf md5 af037ff2) hoac la sua phuong phap theo khuyen nghi skeptic r3; khong chinh theo gia. Khoa mu gia goc = assumptions_r3.json md5 05e886fe.",
+ "shares": 110499910,
+ "shares_source": "Von dau tu cua CSH ma 411 = 1.104.999.100.000 d / 10.000 d = 110.499.910 cp (src/png/q3_2026_HN_p2.png, 30/09/2026); khong co co phieu quy trong BCDKT",
+ "bs_30_09_2026_ty": {
+  "cash_110": 154.627,
+  "st_deposit_121": 630.598,
+  "st_debt_321": 259.617,
+  "lt_debt": 0.0,
+  "nci_429": 49.958,
+  "welfare_fund_323": 25.916,
+  "rnd_fund_344": 15.0,
+  "equity_parent": 1818.926,
+  "source": "src/png/q3_2026_HN_p1/p2.png (ma 110/121/321/323/344/429), TM V.1-V.2 p14"
+ },
+ "net_cash_rule": "tien + tien gui - vay - quy KTPL (323, no phai tra da cap bang tien) - quy KH&CN (344, no phai tra phai chi) ; tru CDKKS theo so",
+ "interest_income_9T_ty": 30.612,
+ "tax_rate": 0.2,
+ "welfare_appropriation_pct_of_npat": 0.0955,
+ "welfare_basis": "DINH CHINH r5: BCTC kiem toan FY2025 TM33 (trang in 36, src/png_r5/fy2025_kt_p38.jpg): trich quy KTPL tu LN 2025 = 20.900.000.000 / LNST me 208.948.230.404 = 10,00%; tu LN 2024 = 21.689.605.950 / 238.636.262.415 = 9,09% (NQ DHDCD 02/2025). TB 9,55%. TM23.1 (src/png_r5/fy2025_kt_p32.jpg) xac nhan dong tien ra khoi VCSH: 2025 me 85,13 - 63,54 DTPT = 21,59 ty; 2024 95,18 - 74,04 = 21,15 ty. r4 dung 2,43% = chi phan trich bo sung 9T/26 (TM17a Q3: 2,431+2,656) - SAI (thieu phan chinh). Do nhay: 2,43% (r4), 11,4% (gom ca trich quy cong ty con phan me 5,50 ty 2025).",
+ "norm_np": {
+  "source_file": "fin_csv_bq.csv (md5 ff723f5685aabbd37584a505ff8a1c53, khoi phuc tu git b01861a67^, khop LOCK_post_md5_r2.txt)",
+  "XAU": "min nam 2019-2025 (2020 = 179,7; day xut 2020)",
+  "CO_SO": "TB nam 2019-2025 = 235,0",
+  "TOT": "TTM Q4/25-Q3/26 = 294,5 (gom cu soc axit/phot pho)",
+  "weights": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "weights_tag": "uoc luong doi xung",
+  "dE_axis": [
+   -0.1,
+   0.0,
+   0.1
+  ],
+  "dE_w": [
+   0.25,
+   0.5,
+   0.25
+  ]
+ },
+ "r_rule": "r = 13,5% + 1,0 x (dep12T - 7,40%); deposit_rate_vn.effective_deposit_rate('2026-11-23') = cctg_12m(2026-11-02) 7,40% (big4 6,8%) => r = 13,50%. Bao kem dai Ke 12,3-13,4%.",
+ "dep12": 0.074,
+ "nhon_trach": {
+  "capex_total_ty": 1844.0,
+  "capex_total_source": "cafef 04/08/2026 + danchuphapluat 18/08/2026: 1.844 ty (VCSH 632 + vay 1.212); baodauthau 03/07/2025: ~1.840",
+  "spent_book_ty": 346.484,
+  "spent_book_source": "BCTC Q3/26 p16: TM9b tien thue dat + ha tang KCN Nhon Trach 294,484; TM8 XDCB du an 52,000",
+  "classification": "HON HOP: phan thay the cong suat BH1 bi buoc di doi (QD 2408/QD-UBND cuong che; QD 1122 dung TB2) = capex TUAN THU/duy tri (D3: CASH_OUTFLOW); phan vuot cong suat cu = tang truong (NPV=0 gia so sach)",
+  "replacement_share_axis": [
+   0.5,
+   0.65,
+   0.8
+  ],
+  "replacement_share_w": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "replacement_share_basis": "(i) Xut: cong suat cu 50.000 t NaOH100%/nam (TCCT 21/05/2025, di doi 3 giai doan 20k+15k+15k) vs muc tieu Nhon Trach 100.000 t xut + 100.000 t H2SO4 (daibieunhandan 26/09/2025, cafef 04/08/2026) => 0,5 cho xut. (ii) Tong: SP chu yeu san xuat 2021 = 245.949 t (BCTN 2021 trang PDF 18, src/bctn_2021_vietstock.pdf md5 4ff91a0a; ca 3 NM Bien Hoa/Tan Binh 2/Dong Nai deu o KCN Bien Hoa 1) / 307.900 t thiet ke quy 100% (danchuphapluat 18/08/2026) = 0,80 (don vi 2021 khong ghi 'quy 100%' => can tren). Bao chi mo ta NM moi 'tren co so hop nhat 3 nha may hien huu' (baodauthau 03/07/2025). Tam 0,65 = giua hai moc; trong so doi xung (uoc luong).",
+  "remaining_timing_years_axis": [
+   0.5,
+   1.75,
+   3.0
+  ],
+  "remaining_timing_w": [
+   0.25,
+   0.5,
+   0.25
+  ],
+  "timing_basis": "Mot so day chuyen chay tu cuoi 2026 (danchuphapluat 18/08/2026); thao do BH1 hoan tat 10/2029, nghiem thu toan bo 12/2031 (cafef 04/08/2026); du an ~6 nam tu 07/2025 (baodauthau). Phan con chi 1.497,5 ty chi deu Q4/26-2030 => trung diem ~1,75 nam tu 30/09/2026; chiet khau o r.",
+  "growth_npv_axis": [
+   -0.2,
+   0.0,
+   0.2
+  ],
+  "growth_npv_w": [
+   0.2,
+   0.6,
+   0.2
+  ],
+  "growth_npv_basis": "chi ap len PHAN TANG TRUONG (1-phi) x tong von. (-) Bobby sector read 09/11: cong suat xut noi dia co the 230 -> 430-500 nghin t 2028-30; (+) cau alumina. Do lon 20% uoc luong, doi xung, ky vong 0.",
+  "advance_suspected_ty": 200.0,
+  "advance_basis": "Tra truoc nguoi ban 29,1 -> 242,4 ty; BCTC Q3 khong co thuyet minh chi tiet (doc lai p14 23/11) => G2 VAN KHONG KIEM CHUNG DUOC => chi do nhay.",
+  "funding": {
+   "debt_ty": 1212.0,
+   "equity_ty": 632.0,
+   "source": "cafef 04/08/2026: VCSH 632 + vay 1.212 (vay 10 nam, baodauthau 03/07/2025)",
+   "remaining_rule": "phan con chi 1.497,5 = vay 1.212 + VCSH con lai 285,5 (632 - 346,5 da chi bang tien san co)"
+  },
+  "kd_pretax": 0.08,
+  "kd_basis": "Lai vay hieu dung 9T/26: chi phi lai vay 9,974 ty (BCTC p3 ma 24) x 4/3 / du no vay BQ (157,8+259,6)/2 = 6,37%/nam (vay ngan han, p18 TM14). Vay du an 10 nam: + 1,6pp ky han (uoc luong) => 8,0%. Phan vay chiet khau o kd x (1-20%) = 6,4% (no-like, gom la chan thue lai vay); phan VCSH o Ke. Do nhay kd 6,4% va 9,5%.",
+  "depr_tax_shield": {
+   "tax_rate": 0.2,
+   "life_years": 12,
+   "life_basis": "Chinh sach KH (BCTC Q3 p9): nha cua 5-25 nam, may moc 4-10, phuong tien 6-10; co cau nguyen gia cu (p15): nha 16%, may 79%, khac 5% => 0,16x25+0,79x10+0,05x10 = 12,4 => 12 nam (uoc luong dung dau tren khung). Do nhay 8 va 20 nam.",
+   "base": "phi x tong von 1.844 x 20% / L, nien kim L nam o Ke, bat dau tu thoi diem t cua truc thoi gian. Chi cho PHAN THAY THE (phan tang truong NPV=0 da gom)."
+  },
+  "reinvest_cycle": {
+   "years_axis": [
+    20,
+    30,
+    40
+   ],
+   "w": [
+    0.25,
+    0.5,
+    0.25
+   ],
+   "basis": "Skeptic r3: base cu coi phan thay the la chi 1 lan. r5 dua CHU KY TAI DAU TU vao base: phi x 1.844 lap lai moi N nam ke tu t, moi chu ky tru la chan thue KH rieng (L=12, Ke), chiet khau o Ke. N la DOI KINH TE (khong phai doi KH ke toan): BCTC kiem toan FY2025 TM11 (src/png_r5/fy2025_kt_p25.jpg) nguyen gia TSCD HET KHAU HAO NHUNG VAN CON SU DUNG 1.049.436.668.963 / tong nguyen gia 1.137.434.499.348 = 92,3% (31/12/2024: 939.549.281.649) => doi kinh te >> L=12 (L chi dung cho la chan thue vi thue theo khau hao ke toan). Nguyen gia/capex BQ ~42 ty/nam (BQ CF_Invest 2017-25) ~ 27 nam. Truc N 20/30/40 (trong so 0,25/0,5/0,25 uoc luong); can duoi 20 = muc skeptic r3. KHONG tru phan capex duy tri ~39 ty/nam da nam trong E (KH 2025 33,9 / 2024 44,6 ty, LCTT ma 02 = TM31) => than trong (co the dem trung mot phan, chieu RE).",
+   "discount": "Ke",
+   "shield_each_cycle": true,
+   "sens": "N=12 (skeptic, = L ke toan) va khong chu ky (r4)"
+  },
+  "apv": {
+   "r_commit": 0.08,
+   "r_commit_basis": "Skeptic r3 khuyen nghi APV: toan bo capex con chi (1.497,5 ty, cam ket) chiet khau o lai suat cua dong tien cam ket = kd truoc thue 8,0% (6,37% do + 1,6pp uoc luong), GIU CO DINH khi chay do nhay kd.",
+   "loan": "vay 1.212 giai ngan tai t, tra goc deu 10 nam (baodauthau 03/07/2025: vay 10 nam; lich tra cu the KHONG kiem chung duoc => tra goc deu la uoc luong), lai kd; NPV tai tro = 1.212 - PV_{r_commit}(goc + lai x (1-20%)). kd=r_commit => NPV = PV la chan thue lai vay; kd tang => gia tri GIAM (sua loi sai chieu r4).",
+   "kd_sens": [
+    0.064,
+    0.095
+   ]
+  }
+ },
+ "compensation_BH1_ty": 0.0,
+ "compensation_basis": "Khong co so boi thuong nha may/may moc cong bo. Cafef 04/08/2026: boi thuong cay trong 195 tr + thuong 8 tr (QD 1618 ngay 08/09/2025) - khong trong yeu. Dat BH1 thue lai cua Sonadezi. Do nhay +100 ty. | QD 2408 Dieu 2.4: kinh phi cuong che theo Dieu 27 ND 88/2024 (boi thuong, ho tro, tai dinh cu khi Nha nuoc thu hoi dat) va can cu VB 719/TTPTQD-BT 03/07/2026 'ho so boi thuong' => co co so boi thuong > 0 nhung KHONG CO SO TIEN => base 0, do nhay.",
+ "land_HCM": "TB 610/TB-UBND 15/10/2026 (src/thuhoi_dat_HCM_20261019.pdf p2): thu hoi 5.845 m2 dat THUE (HD thue 5899/HD-TD 1996) tai 1/180 A1 Dong Hung Thuan theo k2 D82 Luat Dat dai 2024 - tu nguyen tra lai, khong co dieu khoan boi thuong => gia tri 0 co co so, khong phai thieu hang muc.",
+ "disruption": {
+  "base": 0.0,
+  "sens_axis": [
+   0.0,
+   -0.25,
+   -0.5
+  ],
+  "sens_w": [
+   0.4,
+   0.4,
+   0.2
+  ],
+  "basis": "Giu NGOAI base (r5): TB2 dung 15/08/2026 la su kien that nhung Q3/26 (6 tuan sau dung) LN me +47,9% YoY - chua co so do muc giam; luat user: dieu chinh GIAM can co so doc lap => do nhay; moc kiem = BCTC Q4/26."
+ },
+ "ronic": "= Ke (moat NARROW tai dung moat_tags 2026-06-05; ROE_Min5Y 13,66% ~ Ke)",
+ "perpetual_replacement_sens_life_years": 30,
+ "liquidity": "CK = sigma_d x sqrt(Q/ADV250) - tinh SAU KHOA trong postlock_r3.py",
+ "label_rule": "DUOI vung neu gia < P10; TREN neu > P90; con lai TRONG; luat 4 dat khi gia <= 0,85 x tam (sau CK)",
+ "demolition_remediation": "Kinh phi cuong che pha do do Nha nuoc bo tri (QD 2408 Dieu 2.4, ND 88/2024 D27). Chi phi hoan nguyen moi truong khu hoa chat: KHONG KIEM CHUNG DUOC (khong co so; nguoc chieu voi boi thuong chua dinh luong) => chi ghi WARNING + do nhay -100 ty.",
+ "welfare_sens": [
+  0.0243,
+  0.114
+ ],
+ "electricity": {
+  "status": "KHONG KIEM CHUNG DUOC",
+  "basis": "Chi phi dien khong tach rieng trong BCTC; TM31 FY2025 (src/png_r5/fy2025_kt_p36.jpg) dich vu mua ngoai 610,1 ty (2024: 497,7) la can tren chua dien. E lich su 2019-25 da gom bieu gia den 2025. Do nhay: bieu gia +5% tren gia dinh dien = 50% dich vu mua ngoai (uoc luong) = -15,25 ty/nam truoc thue; nha may mang moi tiet kiem dien: chieu nguoc, khong co so => chi ghi.",
+  "sens_pretax_ty": -15.25
+ }
+}
