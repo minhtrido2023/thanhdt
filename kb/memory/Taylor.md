@@ -78,3 +78,5 @@
 - [2026-11-23T12:03:14Z] ĐANG DỞ: job Taylor_20261123_120256 DD LLM rev mới (vòng cuối, r4) | NEXT: đọc r3 + REPORT_rev4
 - [2026-11-23T12:03:19Z] ĐANG DỞ: job Taylor_20261123_120250 DD BSR rev5 | NEXT: đọc r3_raw + REPORT_rev4, xử lý VAT 6.373
 - [2026-11-23T12:04:25Z] ĐANG DỞ: job Taylor_20261123_120407 CK holding VN (A) + HHS rev7 (B) | NEXT: xem research/ck_holding_vn_20261123/ (đã có sẵn?)
+- [2026-11-23T12:11:00Z] [CST DD rev4 23/11] XONG job Taylor_20261123_120252: tâm giữ 5.837, skeptic r4 INCONCLUSIVE (vòng cuối) — CHỜ Mike áp LEDGER_PROPOSAL_CST.json (REFUTED_OPEN) / NQ ĐHĐCĐ 20–30/12
+- [2026-11-23T12:11:12Z] [dd-PNJ vong cuoi 23/11] XONG job Taylor_20261123_120259: REPORT_rev5 tam 7.395 (vung 6.488-8.303), skeptic r4 REFUTED (VLD tang truong) — CHO Mike ap LEDGER_PROPOSAL_PNJ (rev3 REFUTED_OPEN); het vong
