@@ -1,0 +1,8 @@
+# LOCK rev6 HHS — ghi 2026-11-23T17:14:32+0700 TRUOC khi so voi gia (rev6 KHONG truy van gia moi; gia so sanh 9.700 ke thua rev5 post_lock_out.json). Lint 0 vi pham. run1=run2.
+c7e6c927e84c010d71d0c28449410b0a  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev6/calc/assumptions.json
+64187d776a6cb7416bead2fdfee1ce9e  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev6/calc/calc_rev6.py
+e948769e22fb0fd3db3ac8d5a45400b4  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev6/calc/calc_rev6_out.json
+4e593e3391a9ec15b54a3fb0585d258b  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev6/calc/run1.txt
+4e593e3391a9ec15b54a3fb0585d258b  agents/Taylor/research/dd_dilution_update_20261110/HHS/rev6/calc/run2.txt
+cf5420d86989f25b4070697b38347c52  agents/Taylor/research/dd_redo_20261105/HHS/calc_r3/hhs_r3.py
+0450ba0aee972c6c4ec97847fe2de68c  agents/Taylor/research/dd_dilution_update_20261110/calc/dilution_out.json

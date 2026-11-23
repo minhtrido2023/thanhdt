@@ -1,0 +1,13 @@
+{
+  "round": 4,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev4.md",
+  "report_md5": "6fe87f23293f20c15ebeeacf298fb99d",
+  "brief_md5": "e7ab8210e27c1581e6cf5c736856c1ea",
+  "model": "opus",
+  "cost_usd": 1.165367,
+  "started_at_ict": "2026-11-23T17:15:27+07:00",
+  "summary": "Rev4's arithmetic reproduces, and the change from rev3 rests on real audited real-estate WIP balances (checked against the KT25 page). But the 17,673 centre stacks two favourable choices with no evidence behind them. First, all 2,489 bn of construction plus real-estate WIP is treated as 100% equity-funded, which shrinks operating equity and lifts operating ROE, even though BQ shows 7,622 bn of debt against 8,720 bn of equity, borrowing costs are capitalised and 2,447.7 bn of inventory is pledged for loans; the report's own 50% case is −22%. Second, slow-selling real-estate WIP is held at full book with zero NPV despite very low segment returns. The tax, bonus/welfare-fund, share-count and audit items hold up. Upside risks (land bank above cost, tax-loss shield, window roll-forward) are smaller or already disclosed, so on balance the centre is biased too high by an amount above the 5% threshold. Market prices in the report were ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_DBC_20261118/skeptic/r4_raw.md"
+}

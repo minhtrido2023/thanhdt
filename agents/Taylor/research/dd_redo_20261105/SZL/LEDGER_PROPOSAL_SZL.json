@@ -1,62 +1,60 @@
 {
  "proposal_for": "kb/dd_price_zones.json",
- "apply_by": "Mike (tuần tự; dd_ledger_append_confirmed.py chỉ cho ca CONFIRMED — ca này KHÔNG CONFIRMED)",
- "job": "Taylor_20261123_050009 (gốc Taylor_20261123_003503)",
- "skeptic_rounds_this_job": [
-  "skeptic/r2.json INCONCLUSIVE (REPORT_rev4.md)",
-  "skeptic/r3.json REFUTED (REPORT_rev4b.md)"
- ],
+ "apply_by": "Mike (tuần tự; KHÔNG CONFIRMED)",
+ "job": "Taylor_20261123_100922",
  "entry": {
   "ticker": "SZL",
   "skeptic_final": "REFUTED_OPEN",
   "skeptic_final_basis": "skeptic_run",
-  "skeptic_verdict_path": "agents/Taylor/research/dd_redo_20261105/SZL/skeptic/r3.json",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_redo_20261105/SZL/skeptic/r4.json",
   "audited_fy_missing": true,
-  "dd_date": "2026-11-23",
-  "rev": 3,
+  "dd_date": "2026-10-26",
+  "rev": 4,
   "bctc_quarter": "2026Q3",
-  "zone_low": 22290,
-  "center": 25852,
-  "zone_high": 29534,
+  "zone_low": 22740,
+  "center": 26183,
+  "zone_high": 29700,
   "center_kind": "expected_weighted",
-  "center_desc": "kỳ vọng trọng số lưới kết cục (2 mức N0 9T/biên chu kỳ × ±12% × g × r × nc × thời hạn × BĐS ĐT mới × ký quỹ DH), RONIC=Ke, KTPL 11,215% khung bán, sau CK 4,12% @5 tỷ",
+  "center_desc": "kỳ vọng trọng số lưới kết cục (2 mức N0 9T/biên chu kỳ × ±12% × r × nc × thời hạn × BĐS ĐT mới × ký quỹ DH; bỏ trục g), RONIC=Ke, KTPL 20% (BCTC Q3/2026), đất Tân Đức sổ sách, cơ sở 48,198884 tr cp sau thưởng, sau CK 4,12% @5 tỷ",
   "center_range": null,
   "price_ref": 27700,
   "price_date": "2026-11-06",
-  "verdict_label": "TRONG vùng ở cả 2 cỡ: giá 27.700 cao hơn tâm 7,1% (5 tỷ) / 3,1% (40 tr); 74,9% / 60,8% trọng số kết cục dưới giá. Luật sổ (giá < tâm −15%): KHÔNG đạt. Skeptic r3 REFUTED: KTPL 2026 = 20% (TM EPS Q3) chưa vào mô hình (−1.688) và trừ NQ76 sai (+708) ⇒ tâm ước ~24.793 theo skeptic (chưa áp).",
-  "skeptic_status": "r1 (22/11) INCONCLUSIVE trên r3c → rev4 → r2 (23/11) INCONCLUSIVE → rev4b → r3 (23/11) REFUTED medium (KTPL 2026 20% chưa áp, NQ76 không qua P&L). Hết 2 vòng/ca ⇒ vòng 3 chờ user; bản sửa CHƯA áp.",
-  "source_file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev4b.md",
-  "report_md5": "c18b4f1695228efd8d7f2a7f1e665e9f",
+  "verdict_label": "TRONG vùng ở cả 2 cỡ: giá 27.700 cao hơn tâm 5,8% (5 tỷ) / 1,8% (40 tr); 70,9% / 57,6% trọng số kết cục dưới giá. Luật sổ (giá < tâm −15%): KHÔNG đạt. Skeptic r4 (vòng 3, cuối) INCONCLUSIVE: tồn kho 118 + trả trước NCC 72,6 tỷ chưa định giá (lên tới ~+13%, chưa rõ bản chất), trục nc doanh thu chưa thực hiện dưới sàn phân bổ đều (~−4,5% ước lượng), capex/thu trước chưa đối chiếu.",
+  "skeptic_status": "r1 INCONCLUSIVE (r3c) → r2 INCONCLUSIVE (rev4) → r3 REFUTED (rev4b) → rev5 áp KTPL 20%/bỏ NQ76/Tân Đức → r4 (vòng 3, user duyệt 23/11 17:03) INCONCLUSIVE medium. Hết vòng; KHÔNG chạy thêm; hạng mục r4 CHƯA áp.",
+  "source_file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev5.md",
+  "report_md5": "3d5eecc3816d88fc2e97d1e937a07538",
   "evidence": [
    {
-    "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev4b.md",
-    "quote": "| Tâm, cỡ 5 tỷ (CK 4,12%) | 25.165 | 27.397 | **25.852** |",
+    "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev5.md",
+    "quote": "| Tâm, cỡ 5 tỷ (CK 4,12%) | 25.852 | **26.183** |",
     "fields": [
      "center"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev4b.md",
-    "quote": "| P10 / P50 / P90, 5 tỷ | 22.936 / 25.008 / 27.710 | 23.812 / 27.335 / 31.145 | **22.290 / 25.840 / 29.534** |",
+    "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev5.md",
+    "quote": "| P10 / P50 / P90, cỡ 5 tỷ | 22.290 / 25.840 / 29.534 | **22.740 / 26.153 / 29.700** |",
     "fields": [
      "zone_low",
      "zone_high"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev4b.md",
+    "file": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev5.md",
     "quote": "Giá 27.700 (06/11) đã biết từ r3/r3c.",
     "fields": [
      "price_ref"
     ]
    }
   ],
-  "assumptions_file": "agents/Taylor/research/dd_redo_20261105/SZL/rev4/calc_b/LOCK_rev4b_prerun.txt",
-  "assumptions_md5": "4d30dfe23577d69e4bb147becd64cee1",
-  "notes": "Cỡ 40 tr: tâm 26.862, P10/P90 23.162/30.688. Cầu nối r3c 25.165 → +BĐS ĐT mới 1.707 → +ký quỹ DH 0,5 mệnh giá/0,5 PV 1.249 → −NQ76 708 → −N0 biên chu kỳ 1.562 = 25.852. r 13,5% neo 7,40% (±100bp: +3,6%/−3,1%). Nguồn khôi phục từ git fc5bd02d9 vào rev4/restored. Việc cho vòng 3 (nếu user duyệt): KTPL 20% 2026 (BCTC Q3 tr.26), bỏ trừ NQ76, cơ sở cổ phiếu thưởng 19,85 tr chưa đăng ký, CP trả trước thuê đất Châu Đức/Tân Đức 217 tỷ.",
+  "assumptions_file": "agents/Taylor/research/dd_redo_20261105/SZL/rev5/calc/LOCK_rev5_prerun.txt",
+  "assumptions_md5": "fd5265090e56beac6177dc5a8e6a4aaf",
+  "notes": "Cỡ 40 tr: tâm 27.207, P10/P90 23.629/30.861. Cầu nối rev4b 25.852 → +bỏ trừ NQ76 708 → −KTPL 20% 1.766 → +Tân Đức sổ sách 1.391 = 26.183 (control tái lập 25.852). r 13,5% neo 7,40% (±100bp: +3,3%/−2,9%). Còn mở theo skeptic r4: tồn kho 118,03 + trả trước NCC 72,61 (TM V.7/V.4), trục nc vs phân bổ doanh thu chưa thực hiện 762 (TM V.19), đối chiếu capex/CF_OA, ý kiến KT FY2025, ngày GDKHQ thưởng 70% (ĐKCC 17/09/2026 theo báo chí), Long Phước 920.",
   "null_reason": "center_range: nguồn không cho khoảng tâm",
   "recorded_at": null,
-  "supersedes": "SZL@2026-10-26#2",
-  "correction_reason": "Rebuild 23/11 theo skeptic DD_GENERAL r1 (INCONCLUSIVE trên r3c): xử lý BĐS ĐT mới 166,9, ký quỹ DH PV, N0 chuẩn hoá biên, NQ76; skeptic r3 REFUTED (chưa áp)."
+  "supersedes": "SZL@2026-10-26#3",
+  "expires_on": "2027-02-23",
+  "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+  "correction_reason": "Vòng 3 (user duyệt 23/11 17:03) theo skeptic r3 REFUTED: KTPL 2026 20% (TM21e tr.26), bỏ trừ NQ76 (bảng vốn chủ tr.25), cơ sở cp sau thưởng, đất Tân Đức 69,9 sổ sách, bỏ trục g; skeptic r4 INCONCLUSIVE (chưa áp)."
  }
 }

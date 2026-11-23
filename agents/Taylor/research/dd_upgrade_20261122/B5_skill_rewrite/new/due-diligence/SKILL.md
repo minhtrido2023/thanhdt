@@ -6,7 +6,7 @@ description: Quy trình due diligence 1 mã cổ phiếu VN cho sleeve discretio
 # Due diligence 1 mã — LUẬT HIỆN HÀNH (bản B5, 22/11/2026)
 
 File này chỉ chứa luật đang áp, xếp theo thứ tự làm thật. Nguyên văn luật user, lý do, ca minh hoạ và số đo nằm ở
-`SKILL_ext.md` cùng thư mục, mục §E1…§E13 (đọc khi cần, không nạp mặc định). Bảng đối chiếu luật cũ→mới:
+`SKILL_ext.md` cùng thư mục, mục §E1…§E14 (đọc khi cần, không nạp mặc định). Bảng đối chiếu luật cũ→mới:
 `mike/agents/Taylor/research/dd_upgrade_20261122/B5_skill_rewrite/LAW_MAP.md`.
 
 ## Nguyên tắc chung
@@ -48,13 +48,14 @@ Kiểm chứng giả thuyết user bằng số · chất lượng LN theo mảng
   - Ngầm thưởng ⇒ ghi rõ + độ nhạy, không đổi headline; không đếm hai lần; độ nhạy WIDE/NARROW/NONE; cấm suy moat từ giá; 5F non-PIT ⇒ cấm backtest.
 - **V6 Hai nền + cờ phân kỳ — chỉ HIỂN THỊ** (user 11/11): bảng V_ngắn / V_dài / D = |ln(V_ngắn/V_dài)|; tỷ lệ tái đầu tư g/ROE chặn [0; 0,8]; cờ D>ln2 / D>ln3; dòng C4 và D2 kèm nhãn "chưa qua tiêu chí khoá trước, chỉ theo dõi". Tâm/vùng/nhãn/luật 0,85×tâm vẫn từ mô hình DD; không trộn (blend w=0,5 bị bác). HỆ QUẢ CỜ (user 11/11 11:37; watch KHÔNG đọc D ⇒ miễn trừ chỉ sống trong lời viết DD): D>ln2 ⇒ giải thích nguồn chênh (capex chu kỳ, vốn lưu động, một-lần, số cổ phiếu, ROE<g làm V_ngắn sụp) + mở rộng vùng đọc thành [min,max] hai nền; D>ln3 ⇒ ghi "phân kỳ mạnh", luật 0,85×tâm KHÔNG tự kích hoạt, cần Mike/user phán đoán; FCFE≤0 hoặc trượt cổng CFO ⇒ chỉ V_ngắn + giải thích dòng tiền âm. Nếu D>ln2 ∧ V_dài<giá ∧ capex/CFO cao ⇒ ghi "FCFE thấp vì đầu tư tăng trưởng (capex)", ĐỪNG hiểu cờ là cảnh báo đắt (user 11/11 12:59, §E8). Giờ ICT: 11/11 11:37 (hai nền), 12:09 (chặn g/ROE 0,8; khi ROE≤g ghi "tái đầu tư bị chặn ở 80%"), 12:59 (C4), 17:23 (D2); không ghi `v_short/v_long/D`/C4/D2 vào sổ. Đủ luật + nhãn nguyên văn: §E8.
 - **V7 Dùng snapshot vĩ mô**: chỉ dòng cờ `ok`; DISPLAY-ONLY; không đổi giá trị nội tại/biên an toàn/nhãn vì một chỉ báo (§E2).
-- **V8 Sizing — CHƯA THỐNG NHẤT, chờ user (Q4, review 22/11 F22-d).** Ba mức đang cùng tồn tại: (i) skill cũ "tiền lệ ≤0,5–1,0% NAV"; (ii) `~/.claude/agents/fundamental-skeptic.md` "sleeve cap 2-4% NAV per name"; (iii) thực tế 5% NAV/mã (`kb/projects/disc-fpt-nnc-approval-20261105.md:4,7`, user 05/11 22:17 duyệt FPT/NNC). KHÔNG tự chọn; DD đụng sizing ⇒ nêu cả ba.
+- **V8 Sizing — CHUẨN 2–4% NAV/mã** (user chốt 23/11/2026, `decided_by: user`, câu F phương án b; thay mức cũ "tiền lệ ≤0,5–1,0% NAV"). Mức 5% NAV của FPT/NNC (05/11) và VGS là NGOẠI LỆ đã duyệt riêng từng mã, không phải chuẩn. DD đề xuất sizing trong 2–4%; đề xuất >4% ⇒ nêu rõ và chờ user duyệt riêng. Khớp `~/.claude/agents/fundamental-skeptic.md` (sleeve cap 2-4%).
 
 ## Sổ mức giá `kb/dd_price_zones.json` (user 01/11 22:39 + A2/B2/D5 22/11)
 - Append-only; rev cao nhất của (mã, dd_date) thắng. Trường cơ bản (danh sách đủ §E10) + trích nguyên văn dòng chứa vùng giá (số khớp nguồn) + `assumptions_md5` = md5 file nguồn/khoá; center_kind ưu tiên giá trị kỳ vọng trọng số kịch bản.
 - Từ 2026-11-23 bắt buộc (`bin/dd_price_zones_selfcheck.py` chặn): `skeptic_final` ∈ {CONFIRMED, FIXED_UNVERIFIED, REFUTED_OPEN, NONE}, `audited_fy_missing` (bool), `skeptic_verdict_path` (file thật hoặc `null`, không đoán), `skeptic_final_basis` (`skeptic_run`|`user_confirmed`). Định nghĩa enum: §E10.
 - `CONFIRMED` CHỈ ghi qua `bin/dd_ledger_append_confirmed.py --ticker <MÃ> --verdict <dir>/skeptic/rN.json --write` (verdict CONFIRMED thật, md5 báo cáo khớp). Vòng skeptic mới trên DD đã ghi sổ ⇒ rev mới + `correction_reason`, không sửa tại chỗ. Sửa nguồn sau khi ghi ⇒ rev mới (watch loại mã nếu md5 lệch).
 - **D5** (user 22/11 19:07): thiếu BCTC năm gần nhất đã kiểm toán ⇒ VẪN ghi sổ với `audited_fy_missing=true`; không vào Bậc 1 watch; cổng LAG coi như chưa có DD. Hiện trạng code: watch ĐÃ loại mã `audited_fy_missing` khỏi Bậc 1 (A7, `bin/dd_price_zone_watch.py:115`, 22/11); cổng LAG chỉ chặn khi bật `LAG_DD_REQUIRE_CONFIRMED` (§E12-g).
+- **LEDGER_PROPOSAL (Taylor chạy song song)**: chỉ ghi `LEDGER_PROPOSAL_<MÃ>.json` `{"entry":…}`, KHÔNG ghi sổ; 9 lỗi định dạng hay gặp (dd_date/rev/supersedes/expires_on, quote nguyên văn, fields chỉ số, center_alt_kind, center_range, price_ref, zone nguyên số, nhãn REFUTED_OPEN) ⇒ **§E14 SKILL_ext.md — ĐỌC trước khi viết proposal**; thử bằng `dd_price_zones_selfcheck.py --ledger <bản tạm>` 0 lỗi.
 - Sau khi ghi: `python3 mike/bin/dd_price_zones_selfcheck.py` 0 lỗi. Watch tối ghi chú mã giá dưới tâm ≥15% (chỉ để user cân nhắc). DD hết hạn khi có BCTC quý mới hơn hoặc 120 ngày.
 - Backfill mơ hồ: `kb/projects/dd-ledger-ambiguous-queue-20261122.md` (hạn 29/11).
 

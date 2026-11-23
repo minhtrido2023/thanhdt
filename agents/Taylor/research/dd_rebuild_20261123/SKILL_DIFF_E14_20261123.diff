@@ -1,0 +1,41 @@
+--- SKILL.md.bak_20261123_v3	2026-11-23 10:07:54.986190580 +0000
++++ SKILL.md	2026-11-23 10:07:55.006191016 +0000
+@@ -6,7 +6,7 @@
+ # Due diligence 1 mã — LUẬT HIỆN HÀNH (bản B5, 22/11/2026)
+ 
+ File này chỉ chứa luật đang áp, xếp theo thứ tự làm thật. Nguyên văn luật user, lý do, ca minh hoạ và số đo nằm ở
+-`SKILL_ext.md` cùng thư mục, mục §E1…§E13 (đọc khi cần, không nạp mặc định). Bảng đối chiếu luật cũ→mới:
++`SKILL_ext.md` cùng thư mục, mục §E1…§E14 (đọc khi cần, không nạp mặc định). Bảng đối chiếu luật cũ→mới:
+ `mike/agents/Taylor/research/dd_upgrade_20261122/B5_skill_rewrite/LAW_MAP.md`.
+ 
+ ## Nguyên tắc chung
+@@ -55,6 +55,7 @@
+ - Từ 2026-11-23 bắt buộc (`bin/dd_price_zones_selfcheck.py` chặn): `skeptic_final` ∈ {CONFIRMED, FIXED_UNVERIFIED, REFUTED_OPEN, NONE}, `audited_fy_missing` (bool), `skeptic_verdict_path` (file thật hoặc `null`, không đoán), `skeptic_final_basis` (`skeptic_run`|`user_confirmed`). Định nghĩa enum: §E10.
+ - `CONFIRMED` CHỈ ghi qua `bin/dd_ledger_append_confirmed.py --ticker <MÃ> --verdict <dir>/skeptic/rN.json --write` (verdict CONFIRMED thật, md5 báo cáo khớp). Vòng skeptic mới trên DD đã ghi sổ ⇒ rev mới + `correction_reason`, không sửa tại chỗ. Sửa nguồn sau khi ghi ⇒ rev mới (watch loại mã nếu md5 lệch).
+ - **D5** (user 22/11 19:07): thiếu BCTC năm gần nhất đã kiểm toán ⇒ VẪN ghi sổ với `audited_fy_missing=true`; không vào Bậc 1 watch; cổng LAG coi như chưa có DD. Hiện trạng code: watch ĐÃ loại mã `audited_fy_missing` khỏi Bậc 1 (A7, `bin/dd_price_zone_watch.py:115`, 22/11); cổng LAG chỉ chặn khi bật `LAG_DD_REQUIRE_CONFIRMED` (§E12-g).
++- **LEDGER_PROPOSAL (Taylor chạy song song)**: chỉ ghi `LEDGER_PROPOSAL_<MÃ>.json` `{"entry":…}`, KHÔNG ghi sổ; 9 lỗi định dạng hay gặp (dd_date/rev/supersedes/expires_on, quote nguyên văn, fields chỉ số, center_alt_kind, center_range, price_ref, zone nguyên số, nhãn REFUTED_OPEN) ⇒ **§E14 SKILL_ext.md — ĐỌC trước khi viết proposal**; thử bằng `dd_price_zones_selfcheck.py --ledger <bản tạm>` 0 lỗi.
+ - Sau khi ghi: `python3 mike/bin/dd_price_zones_selfcheck.py` 0 lỗi. Watch tối ghi chú mã giá dưới tâm ≥15% (chỉ để user cân nhắc). DD hết hạn khi có BCTC quý mới hơn hoặc 120 ngày.
+ - Backfill mơ hồ: `kb/projects/dd-ledger-ambiguous-queue-20261122.md` (hạn 29/11).
+ 
+--- SKILL_ext.md.bak_20261123_v3	2026-11-23 10:07:54.986190580 +0000
++++ SKILL_ext.md	2026-11-23 10:07:55.002190929 +0000
+@@ -126,6 +126,19 @@
+ - **f** Cổng `discretionary_dd_pick.py --claim` (docstring :15–17): `data/discretionary_dd_ledger.jsonl` không tồn tại (kiểm 22/11) ⇒ chưa từng dùng; core ghi đúng hiện trạng, không tuyên bố đang dùng. Dùng hay gỡ: chờ Mike/user.
+ - **g** (B5 phát hiện, ĐÃ VÁ 22/11 23:14 ICT bằng A7 `468b75384`) D5 "không vào Bậc 1": `bin/dd_price_zone_watch.py:115` nay loại mã có `audited_fy_missing=true` khỏi Bậc 1 (selfcheck 124/0). Cổng LAG chỉ chặn khi `LAG_DD_REQUIRE_CONFIRMED=True` (mặc định False).
+ 
++## §E14 Đặc tả LEDGER_PROPOSAL — 9 lỗi định dạng ĐÃ chặn selfcheck/áp sổ ở lô 1–4 (23/11/2026, user duyệt 17:03)
++Taylor chạy song song KHÔNG ghi `kb/dd_price_zones.json`; chỉ ghi `LEDGER_PROPOSAL_<MÃ>.json` = `{"entry": {…}}` (thống nhất dạng này) trong thư mục DD. Mike áp sổ tuần tự. Trước khi báo xong: chép sổ ra bản tạm, chèn entry, chạy `python3 bin/dd_price_zones_selfcheck.py --ledger <bản tạm>` ⇒ **0 lỗi**. Chín điểm (mỗi điểm = một lỗi thật):
++1. **dd_date / rev / supersedes / expires_on**: đính chính cùng DD ⇒ GIỮ NGUYÊN `dd_date` của entry cuối sổ; `rev` = rev cuối + 1; `supersedes` = `TICKER@dd_date#rev_cuối`; `expires_on` + `expires_basis` = của entry cuối (null làm sập `dd_price_zone_watch`). KHÔNG đặt dd_date = ngày làm rev (HHS, SZL bị chặn: "rev=5 cần supersedes=…#4", "expires_on=None").
++2. **evidence.quote = CHUỖI NGUYÊN VĂN có trong `source_file`** (chép nguyên dòng, kể cả `**`, `|`); mỗi số trong `fields` phải xuất hiện trong CHÍNH quote đó. Quote tự tóm tắt ("Vùng [7.284; 21.857]") là sai (DBC) — lấy dòng thật bằng `grep -n`.
++3. **evidence.fields chỉ chứa trường SỐ**: `zone_low, center, zone_high, price_ref, center_alt, center_range`. KHÔNG đưa `price_date` (chuỗi) hay trường dict (`ex_basis_pending`) vào `fields` — làm selfcheck crash (ValueError/TypeError).
++4. **`center_alt` ⇒ bắt buộc `center_alt_kind`** ∈ {expected_weighted, base_scenario, blend, median, zone_midpoint, point} (không tự đặt tên như `expected_weighted_pre_liquidity`) **và** một evidence phủ `center_alt` (BSR, MSB bị chặn).
++5. **`center_range` = [center, hi] tăng dần, bắt đầu ĐÚNG `center`**. Khung độ nhạy không bắt đầu từ center ⇒ `center_range: null` và ghi khung vào `notes` (SCL bị chặn: [16558, 22868] vs center 16883).
++6. **`price_ref` cần evidence phủ** (quote chứa đúng số giá) — GAS thiếu.
++7. **Zone = nguyên con số của nguồn**: quote chứa 44.760 thì `zone_low=44760`, không làm tròn 44.800 (GAS).
++8. **Nhãn `skeptic_final`**: vòng cuối REFUTED/INCONCLUSIVE & bản sửa chưa áp ⇒ `REFUTED_OPEN` (KHÔNG phải `FIXED_UNVERIFIED` — dispatch cũ ghi sai; `FIXED_UNVERIFIED` chỉ khi bản sửa ĐÃ áp mà chưa có vòng nào chạy lại). `CONFIRMED` CHỈ qua `bin/dd_ledger_append_confirmed.py` (2 bước: entry `FIXED_UNVERIFIED` trỏ REPORT mới vào sổ trước, vì tool so md5 `source_file` của entry CUỐI sổ với `report_md5` trong `skeptic/rN.json`). Taylor KHÔNG tự nâng nhãn.
++9. **Không ghi sổ khi chạy song song** (đua ghi) — chỉ LEDGER_PROPOSAL; áp sổ là việc của Mike trong worktree riêng.
++Sau vòng skeptic CUỐI (vòng 3 của một rev): không CONFIRMED ⇒ DỪNG, báo user; KHÔNG chạy thêm vòng.
++
+ ## §E13 Nguồn
+ Kế hoạch: `kb/projects/dd-upgrade-final-action-20261122.md` (B1–B5, D1–D6). Review: `kb/projects/dd-process-review-20261122.md` (F8, F22, P0-5).
+ SPEC: `agents/Taylor/research/dd_upgrade_20261122/B5_skill_rewrite/SPEC.md`.

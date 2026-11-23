@@ -1,0 +1,187 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "DCM",
+ "dd_date": "2026-11-23",
+ "rev": 9,
+ "loai_hinh": "san_xuat_khac",
+ "method_version": "M20261122",
+ "units": "tỷ đồng; đ/cp = tỷ×1e9/529,4 triệu cp",
+ "sources": {
+  "bctc_q326_hn": "src/web/DCM_Baocaotaichinh_Q3_2026_Hopnhat.pdf",
+  "bctc_fy25_kt_hn": "src/web/DCM_Baocaotaichinh_2025_Kiemtoan_Hopnhat.pdf",
+  "bctc_6t26_sx": "src/web/DCM_Baocaotaichinh_6T_2026_Soatxet_Hopnhat.pdf",
+  "np_hist": "calc/bq_np_hist_out.csv",
+  "commod": "calc/bq_commod_out.csv",
+  "da_bq": "calc/bq_da_r7_out.csv",
+  "gas_contract": "src/gas/egm2026_tailieu.txt",
+  "model": "calc/model_r9.py",
+  "model_out": "calc/model_r9_out.json",
+  "khcn_fund_note": "png_r7/kt25_p37.png (TM25 KT 2025: trích 2024 44,78 / 2025 187,99; sử dụng 39,50 / 75,82; chuyển TSCĐ 11,80 / 13,51)",
+  "khcn_law": "Luật 67/2025/QH15 Đ17; NĐ 320/2025/NĐ-CP Đ22; TT 20/2026/TT-BTC Đ9; NĐ 265/2025 Đ13 k5 (luatvietnam.vn, legal-vn 23/11, chưa đối chiếu Công báo)",
+  "bctc_fy24_kt_hn": "src/web/DCM_Baocaotaichinh_2024_Kiemtoan_Hopnhat.pdf (static2.vietstock.vn, md5 14e9746f135e2fb47360dc8d33bd39f8): 2023 D&A 1.083,38 (LCTT mã 02), trích quỹ KH&CN 108,89, LNTT 1.254,81"
+ },
+ "share_base": {
+  "shares_m": 529.4,
+  "source": "CĐKT Q3/26 mã 411 = 5.294 tỷ / mệnh giá 10.000; BQ OShares 2021Q1–2026Q3 (skeptic r1 khớp)",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "none",
+   "source": "NQ ĐHĐCĐ 2026 (src/web/20260423_DCM_NghiQuyet_DHDCD2026_996NQ-PVCFC_via_bsc.pdf) — r3–r6 không ghi phát hành thưởng/ESOP; r7 không tra lại; rev9: tra tin 05–23/11 không thấy phát hành thêm"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Dự án tăng trưởng dở dang: kho cảng Nhơn Trạch 247,07 + khí công nghiệp NMĐ 157,98 (+ nâng công suất/NPK 800–1.000 tỷ theo r3–r6)",
+    "spent_bn": 405.05,
+    "remaining_bn": {
+     "value": "khong_cong_bo",
+     "searched": [
+      "TM16 BCTC HN Q3/26",
+      "NQ ĐHĐCĐ 2026"
+     ]
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "TM16 BCTC HN Q3/26 tr.25; V4a"
+   },
+   {
+    "name": "Lắp đặt bổ sung thiết bị HTS và LTS (nhà máy đạm) + công trình khác",
+    "spent_bn": 250.0,
+    "remaining_bn": {
+     "value": "khong_cong_bo",
+     "searched": [
+      "TM16 BCTC HN Q3/26"
+     ]
+    },
+    "generates_revenue": false,
+    "mandatory": false,
+    "classification": "maintenance",
+    "treatment": "CASH_OUTFLOW",
+    "source": "TM16: HTS/LTS 152,41 + khác 97,56; dòng ra nằm trong capex duy trì M (model_r7 M_GRID 342/401/540)"
+   },
+   {
+    "name": "Quỹ phát triển KH&CN — MỘT quy tắc cho số dư + dòng trích: mỗi đồng trích gộp giá trị v=(1−t_kỳ trích×(1+2×Y5))×((1+d)/(1+r))^L; phần chi thiết bị/KH&CN = NPV0 (≥ v)",
+    "spent_bn": 0,
+    "remaining_bn": 1059.37,
+    "generates_revenue": false,
+    "mandatory": true,
+    "classification": "compliance",
+    "treatment": "CASH_OUTFLOW",
+    "independent_basis": "Số dư: CĐKT Q3/26 mã 344 1.059,37, trừ 27,74 đã hình thành TSCĐ (TM25 KT 2025) ⇒ tiền 1.031,63; mất 1−v(10%, L=2,485 năm (FIFO lớp trích), r)=22,1% @r13,5%. Dòng: hồi quy lại trên LN trước trích (A 2023 108,89 KT 2024 / 2024 44,78 / 2025 187,99 TM25 KT 2025; 2016–22 ước lượng tỷ lệ 6,23%), tương lai trích 6,23% LNTT trước trích (TB tỷ lệ KT 2023 7,98% / 2024 2,86% / 2025 7,85%), cổ đông nhận lại A×v(20%, L=5, r)=0,598 @r13,5%. Luật 67/2025 Đ17 k2: thu hồi thuế theo thuế suất kỳ trích + lãi TPKB 5 năm tính 2 năm (NĐ 320/2025 Đ22 k2). Y5=3% ước lượng.",
+    "source": "png_r7/kt25_p37.png; png_r7/kt25_p12.png; BCTC Q3/26 pdf p40 (TM34) + p08 (KQKD); calc/model_r9.py"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": 265.34,
+  "annual_appropriation_pct_of_npat": 0.0597,
+  "applied_to_cashflow": true,
+  "source": "CĐKT Q3/26 mã 323; TM37 tạm trích 136,19/2.282,09 LNST 9T/26"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.108
+   },
+   {
+    "from_year": 2027,
+    "rate": 0.2
+   }
+  ],
+  "source": "BCTC HN Q3/26 tr.17: 2026 năm thứ 15 hưởng ưu đãi 10% ⇒ 20% từ 2027; hiệu dụng 9T/26 = (242,7+35,2)/2.562,9",
+  "note": "TAX_HIST 10,8% dùng quy LNST lịch sử về LNTT; độ nhạy 5% (ước lượng)"
+ },
+ "working_capital": {
+  "method": "zero_change_base",
+  "source": "g thực = 0 ⇒ ΔVLĐ = 0 dài hạn; CFO 2024–9T/26 biến động mạnh vì tồn kho (V6 hiển thị)"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "bien_DH_138",
+    "side": "down",
+    "p": 0.3333,
+    "basis": "lưới đối xứng quanh TB 2016–25"
+   },
+   {
+    "name": "bien_DH_179_TB_2016_25",
+    "side": "base",
+    "p": 0.3334,
+    "basis": "proxy urê − 25×(2,5+0,06×Brent), WB/BQ"
+   },
+   {
+    "name": "bien_DH_220",
+    "side": "up",
+    "p": 0.3333,
+    "basis": "lưới đối xứng"
+   }
+  ],
+  "asymmetry_reason": "Đối xứng; trục khác cùng lưới: 2 cửa sổ hồi quy 2021+, M 342/401/540, r ±100bp, năm 1 170/222/285, khí A/B, I_C 20/22/25; khí 2035+ base = cấu trúc giá HĐ 3918 Đ9.1 hiện hành (PSC PM3 tới 2047), biến thể 0,5/0,25/0,25 song song"
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-16",
+  "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate() đọc 23/11/2026: cctg_12m(2026-11-02)=7,40%, big4 6,80%, last_update 2026-11-16",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true
+ },
+ "terminal": {
+  "moat_tier": "NARROW",
+  "terminal_ronic": "EQUALS_KE",
+  "g": 0.0,
+  "mechanism_reason": "ADDENDUM_5F (08/11, <12 tháng): NARROW, không bền ⇒ không thưởng"
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "position_size_note": "tham chiếu 5 tỷ + sleeve 2–4% NAV (V8)",
+  "source": "calc/compare_px_r7.py (sau khoá): luật căn bậc hai σ_ngày×sqrt(Q/ADV)"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "Deloitte",
+  "interim_review": "reviewed_unqualified",
+  "source": "BCTC HN KT 2025 (skeptic r1: chấp nhận toàn phần); soát xét 6T/26"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "PVN → PV GAS → DCM: HĐ khí 3918, SĐBS 12 mới là dự thảo; ĐHĐCĐ uỷ quyền HĐQT sửa nội dung cơ bản",
+    "source": "REPORT_r6 §7; src/gas/egm2026_tailieu.txt"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "Phân loại lại 102,9 tỷ và khoản một lần 67,4 tỷ (r3–r5); trích quỹ KH&CN 9T/26 249,63 (TM34) — rev9 xử lý trong hồi quy trước trích (T1), không coi là một lần",
+    "source": "REPORT_r3 §2"
+   }
+  ],
+  "searched": [
+   "KQKD 9T/26",
+   "Thuyết minh 35 thu nhập/chi phí khác"
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "XDCB dở dang 724,28 tỷ (TM16) — growth NPV0, phần duy trì trong M",
+    "source": "TM16 BCTC HN Q3/26"
+   }
+  ]
+ },
+ "sector": {}
+}

@@ -1,0 +1,53 @@
+assumptions_md5 57b36d63e05ad2e2c209f2ce34fda8c9
+BDS do dang 30/9 (=30/6) = 1186.4; XDCB = 1302.6; Eop = 6231.4 (rev3: 7417.8)
+W12: ROE_op=0.1998 -> tam 26819 (+51.8%)
+W15: ROE_op=0.1298 -> tam 16447 (-6.9%)
+W20: ROE_op=0.0847 -> tam 9753 (-44.8%)
+ROE_op tam = 0.1381; sau KTPL = 0.1228
+scen truoc CK: bad=10471 base=18162 good=25341
+TAM (sau CK 2%) = 17673 | VUNG = [10262; 24835] | tam truoc CK = 18034 | base sau CK = 17798
+LNST chuan hoa (loai BDS) = 860.6; EPS = 1997; sau KTPL = 1776; BVPS = 20231; P/B ham y = 0.87; P/E ham y = 8.9
+so rev3 14.696: +20.3% | rev2 17.317: +2.1% | rev1 19.491: -9.3%
+--- doi chieu cach xu ly BDS ---
+rev3 (BDS trong von hd + muc chay): ROE_op=0.1234 tam=14696 (-16.8%)
+tach BDS + giu muc chay (dem 2 lan nhe): ROE_op=0.1409 tam=18079 (+2.3%)
+XDCB/BDS bac thang: ROE_op=0.1290 tam=16317 (-7.7%)
+haircut BDS do dang 20% (237 ty): tam=17134 (-3.1%)
+haircut BDS do dang 40% (475 ty): tam=16594 (-6.1%)
+XDCB+BDS do von chu tai tro 25%: ROE_op=0.1097 tam=11589 (-34.4%)
+XDCB+BDS do von chu tai tro 50%: ROE_op=0.1184 tam=13767 (-22.1%)
+XDCB+BDS do von chu tai tro 100%: ROE_op=0.1381 tam=17673 (+0.0%)
+--- thue uu dai TNDN (KT25 TM31) ---
+het 100% mien giam: 78.2 ty = 4.82% LNTT 2025 -> LNST x0.9481 -> tam=16610 (-6.0%)
+het 50% mien giam: 39.1 ty = 2.41% LNTT 2025 -> LNST x0.9740 -> tam=17142 (-3.0%)
+het mien giam + lo chuyen sang: 123.4 ty = 7.60% LNTT 2025 -> LNST x0.9181 -> tam=15997 (-9.5%)
+thue hieu dung 2025 = 7.19%; 2024 = 9.97%; mien giam/LNTT 2024 = 4.51%
+--- KTPL / r / g / CK / trong so ---
+k=0.000: tam=20220 (+14.4%)
+k=0.063: tam=18769 (+6.2%)
+k=0.130: tam=17227 (-2.5%)
+k=0.265: tam=14119 (-20.1%)
+-100bp: tam=19292 (+9.2%) | beta0,5 18432 (+4.3%)
+-50bp: tam=18432 (+4.3%) | beta0,5 18041 (+2.1%)
++50bp: tam=16999 (-3.8%) | beta0,5 17326 (-2.0%)
++100bp: tam=16395 (-7.2%) | beta0,5 16999 (-3.8%)
+Ke D4 0.123: tam=19669
+Ke D4 0.134: tam=17818
+g=0.04: tam=17887
+g=0.06: tam=17403
+CK thanh khoan 0%: tam=18034
+CK thanh khoan 5%: tam=17132
+w=(0.35, 0.5, 0.15): tam=16216 (-8.2%)
+w=(0.15, 0.5, 0.35): tam=19131 (+8.2%)
+--- mot lan / khong kiem chung ---
+trich lap TSSH 94 ty: -214 d/cp (-1.2%)
+trich lap TSSH 188 ty: -427 d/cp (-2.4%)
+chi tuan thu moi truong mot lan 50 ty: -114 d/cp (-0.6%)
+chi tuan thu moi truong mot lan 150 ty: -341 d/cp (-1.9%)
+EPR dinh ky 10 ty/nam (PV tang g): -267 d/cp (-1.5%)
+EPR dinh ky 30 ty/nam (PV tang g): -802 d/cp (-4.5%)
+ESOP pha loang 1%: tam=17595
+ESOP pha loang 3%: tam=17444
+phai thu NLD 237,1 ty mat trang: -539 d/cp
+--- V6 (chi hien thi) ---
+V_ngan=8991 (tai dau tu 0.570, ROE toan von sau KTPL 0.0878) | FCFE/nam=-45.5 -> V_dai khong xac dinh

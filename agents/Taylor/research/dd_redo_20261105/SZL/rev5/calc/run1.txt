@@ -1,0 +1,34 @@
+r 13.50%; lai huy dong 12T 7.40%; gia 27,700 (2026-11-06); k 20.000%; CK 5 ty 4.12% / 40 tr 0.37%
+N0_9M 131.08 (= r3c 131.08; rev4b sau tru NQ76 124.84); k 20.000% (cu 11.215%); SH 48.198884 tr; Tan Duc 69.900; GPM 9M 38.97% vs TB 2017-24 33.23% (n=32); DT 9M 449.4 => N0_cycle 103.55
+BDS DT moi 166.9, DC 78.7 => truc 0/88.2/166.9; ky quy DH menh gia 147.0 / PV@7.40% 21.4 / PV@r 4.8
+CONTROL rev4b: 5 ty tam 25,852 | P10/P50/P90 22,296/25,840/29,530 | duoi gia 74.9% => TRONG | 40 tr tam 26,862 | P10/P50/P90 23,168/26,850/30,685 | duoi gia 60.8% => TRONG  (rev4b ghi 25.852 / 22.290/25.840/29.534; 40 tr 26.862)
+CAU NOI rev4b (control): 5 ty tam 25,852 | P10/P50/P90 22,296/25,840/29,530 | duoi gia 74.9% => TRONG | 40 tr tam 26,862 | P10/P50/P90 23,168/26,850/30,685 | duoi gia 60.8% => TRONG
+CAU NOI + bo tru NQ76 (khong qua P&L): 5 ty tam 26,559 | P10/P50/P90 22,944/26,562/30,287 | duoi gia 66.8% => TRONG (+708) | 40 tr tam 27,597 | P10/P50/P90 23,841/27,600/31,471 | duoi gia 52.2% => TRONG
+CAU NOI + KTPL 2026 = 20,0%: 5 ty tam 24,793 | P10/P50/P90 21,349/24,763/28,310 | duoi gia 85.5% => TRONG (-1,766) | 40 tr tam 25,762 | P10/P50/P90 22,184/25,731/29,416 | duoi gia 75.7% => TRONG
+CAU NOI + dat Tan Duc so sach 69,9 (= rev5 base): 5 ty tam 26,183 | P10/P50/P90 22,740/26,153/29,700 | duoi gia 70.9% => TRONG (+1,391) | 40 tr tam 27,207 | P10/P50/P90 23,629/27,175/30,861 | duoi gia 57.6% => TRONG
+HEADLINE rev5 (5 ty):  n=1080 tam 26,183 | P10/P50/P90 22,740/26,153/29,700 | duoi gia 70.9% => TRONG | gia/tam +5.8%
+HEADLINE rev5 (40 tr): n=1080 tam 27,207 | P10/P50/P90 23,629/27,175/30,861 | duoi gia 57.6% => TRONG | gia/tam +1.8%
+DO NHAY N0 chi 9T (bien hien tai): 5 ty tam 27,571 (+1,388) TRONG | 40 tr tam 28,649 | P10/P50/P90 25,383/28,630/31,903 | duoi gia 35.9% => TRONG
+DO NHAY N0 chi bien chu ky: 5 ty tam 24,796 (-1,388) TREN | 40 tr tam 25,765 | P10/P50/P90 22,812/25,760/28,686 | duoi gia 79.4% => TRONG
+DO NHAY BDS DT moi = 0 (da het trong N0): 5 ty tam 24,476 (-1,707) TRONG | 40 tr tam 25,433 | P10/P50/P90 22,130/25,361/28,861 | duoi gia 81.2% => TRONG
+DO NHAY BDS DT moi = gia von du: 5 ty tam 27,796 (+1,612) TRONG | 40 tr tam 28,882 | P10/P50/P90 25,579/28,811/32,311 | duoi gia 34.3% => TRONG
+DO NHAY ky quy DH menh gia: 5 ty tam 24,934 (-1,249) TRONG | 40 tr tam 25,909 | P10/P50/P90 22,769/25,809/29,200 | duoi gia 76.3% => TRONG
+DO NHAY ky quy DH PV@lai huy dong: 5 ty tam 27,433 (+1,249) TRONG | 40 tr tam 28,505 | P10/P50/P90 25,365/28,405/31,796 | duoi gia 38.9% => TRONG
+DO NHAY ky quy DH 0,25/0,5/0,25 kem PV@r (rev4): 5 ty tam 26,890 (+707) TRONG | 40 tr tam 27,941 | P10/P50/P90 24,411/27,914/31,573 | duoi gia 47.1% => TRONG
+DO NHAY thue dat hang nam +25% (sau thue): 5 ty tam 25,788 (-396) TRONG | 40 tr tam 26,796 | P10/P50/P90 23,230/26,792/30,453 | duoi gia 63.5% => TRONG
+DO NHAY thue dat hang nam +50% (sau thue): 5 ty tam 25,392 (-792) TRONG | 40 tr tam 26,384 | P10/P50/P90 22,825/26,370/30,052 | duoi gia 68.0% => TRONG
+DO NHAY thue dat hang nam x2 (sau thue): 5 ty tam 24,600 (-1,583) TRONG | 40 tr tam 25,562 | P10/P50/P90 22,012/25,520/29,232 | duoi gia 78.1% => TRONG
+DO NHAY thue dat ghi 1 lan/nam => bo x4/3 (+13,74/3 truoc thue): 5 ty tam 26,553 (+369) TRONG | 40 tr tam 27,591 | P10/P50/P90 23,966/27,530/31,269 | duoi gia 53.0% => TRONG
+DO NHAY NQ76 tru nhu rev4b (sai theo bang von chu): 5 ty tam 25,555 (-629) TRONG | 40 tr tam 26,553 | P10/P50/P90 23,063/26,533/30,129 | duoi gia 67.0% => TRONG
+DO NHAY dat Tan Duc = 0: 5 ty tam 24,793 (-1,391) TRONG | 40 tr tam 25,762 | P10/P50/P90 22,184/25,731/29,416 | duoi gia 75.7% => TRONG
+DO NHAY Long Phuoc vuot von 20% phan con lai (-102,6): 5 ty tam 24,142 (-2,041) TREN | 40 tr tam 25,086 | P10/P50/P90 21,508/25,055/28,740 | duoi gia 80.9% => TRONG
+DO NHAY holdco 10% (SZC/SZB): 5 ty tam 25,360 (-823) TRONG | 40 tr tam 26,351 | P10/P50/P90 22,773/26,320/30,006 | duoi gia 68.6% => TRONG
+DO NHAY holdco 25% (SZC/SZB): 5 ty tam 24,125 (-2,058) TREN | 40 tr tam 25,068 | P10/P50/P90 21,490/25,037/28,723 | duoi gia 81.2% => TRONG
+DO NHAY KTPL 11,215% (ty le 2025): 5 ty tam 27,950 (+1,766) TRONG | 40 tr tam 29,042 | P10/P50/P90 25,286/29,045/32,916 | duoi gia 34.7% => TRONG
+DO NHAY KTPL 25%: 5 ty tam 25,178 (-1,005) TRONG | 40 tr tam 26,162 | P10/P50/P90 22,690/26,113/29,748 | duoi gia 71.4% => TRONG
+DO NHAY capex duy tri 0,5x KH (+45/nam): 5 ty tam 32,666 (+6,482) DUOI | 40 tr tam 33,942 | P10/P50/P90 30,171/33,887/37,854 | duoi gia 0.9% => DUOI
+DO NHAY capex duy tri 1,5x KH (-45/nam): 5 ty tam 19,701 (-6,482) TREN | 40 tr tam 20,471 | P10/P50/P90 16,908/20,400/24,152 | duoi gia 99.6% => TREN
+DO NHAY chi 27 nam: 5 ty tam 26,082 (-102) TRONG | 40 tr tam 27,101 | P10/P50/P90 23,505/27,060/30,808 | duoi gia 59.1% => TRONG
+DO NHAY chi vinh vien: 5 ty tam 26,488 (+305) TRONG | 40 tr tam 27,524 | P10/P50/P90 23,896/27,430/31,349 | duoi gia 53.3% => TRONG
+NGUONG 40 tr: TREN neu dong tien them < -21.2 ty/nam, DUOI neu > +27.7; holdco TREN > 37.0%; KTPL TREN > 33.9%; r de tam 5 ty = gia: 11.82%
+Do nhay lai huy dong (beta 1, r): -100bp +3.3%; 100bp -2.9%

@@ -1,0 +1,34 @@
+{
+ "last_date": "2026-11-20",
+ "last_close": 37400.0,
+ "sigma250": 0.0221,
+ "adv60_bn": 0.37,
+ "adv250_bn": 0.273,
+ "adv20_bn": 10.32,
+ "pos": {
+  "1.0": {
+   "disc": 0.0363,
+   "center_after": 29686,
+   "bear_after": 17729,
+   "bull_after": 45282,
+   "days_10pct": 27.0,
+   "days_20pct": 13.5
+  },
+  "0.3": {
+   "disc": 0.0199,
+   "center_after": 30192,
+   "bear_after": 18032,
+   "bull_after": 46055,
+   "days_10pct": 8.1,
+   "days_20pct": 4.1
+  },
+  "0.1": {
+   "disc": 0.0115,
+   "center_after": 30451,
+   "bear_after": 18187,
+   "bull_after": 46450,
+   "days_10pct": 2.7,
+   "days_20pct": 1.4
+  }
+ }
+}
