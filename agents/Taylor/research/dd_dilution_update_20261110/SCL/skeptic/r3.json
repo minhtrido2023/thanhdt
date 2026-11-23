@@ -1,0 +1,13 @@
+{
+  "round": 3,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_dilution_update_20261110/SCL/REPORT_rev6.md",
+  "report_md5": "52584a8a60dc6c085b210a86c17f73ca",
+  "brief_md5": "9cb96261d4e99b777ed3b48f19c9eb96",
+  "model": "opus",
+  "cost_usd": 1.3250888,
+  "started_at_ict": "2026-11-23T13:53:06+07:00",
+  "summary": "Các số then chốt của rev6 (nợ, KTPL, LNST, lãi, thuế, số cp, ESOP-2 chưa phát hành, tiền thu quyền mua) truy được về BCTC gốc, và calc tái lập đúng tâm 16.883. Model còn thiếu hai khoản đủ lượng hoá, kéo ngược chiều nhau. Chiều đắt: hệ số chia cho người lao động 10% bỏ qua ESOP miễn phí 6,8 tỷ cùng năm; tổng phần chia thực tế 17–21% ⇒ tâm −9 đến −11%. Chiều rẻ: khung nợ mệnh giá bỏ lá chắn thuế ⇒ tâm +4 đến +10%. Mỗi khoản vượt ngưỡng 5% nên kết luận là REFUTED theo luật attack 8. Hai lỗi gần triệt tiêu nhau nên tâm có thể đúng tình cờ, nhưng model chưa bền. Pha loãng do huy động vốn lặp lại để trả nợ là rủi ro nghiêng xuống chưa được lượng hoá.",
+  "verdict_raw_path": "agents/Taylor/research/dd_dilution_update_20261110/SCL/skeptic/r3_raw.md"
+}

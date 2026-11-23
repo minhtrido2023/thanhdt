@@ -1,0 +1,57 @@
+r2 tam truoc CK 14599 (pin 14.599) | KTPL_RATE 0.1138
+tai lap r3c 8557/7701 (pin 8.557/7.701) | r3 W_P 7836/7053 (pin 7.836/7.053)
+ buoc r3c (W 0,4/0,36/0,24, khong KTPL)       : truoc 8557 sau 7701
+ buoc + KTPL 11,4% + so du 120,6              : truoc 7661 sau 6895
+ buoc + trong so ve 0,5/0,3/0,2 = TAM rev4    : truoc 6970 sau 6273
+
+TAM rev4: truoc CK 6970 | sau CK 6273 | vs r3c sau CK -18.5%
+  thuan P0: truoc 3519 sau 3167
+  thuan P50: truoc 8726 sau 7854
+  thuan P100: truoc 12966 sau 11669
+  KTPL rieng tren nen r2 khong du an (co so): -1001 d/cp
+
+ Do nhay trong so P0 (P50:P100 = 60:40), co KTPL:
+  P0=0.0: truoc 10422 sau 9380
+  P0=0.2: truoc 9041 sau 8137
+  P0=0.3: truoc 8351 sau 7516
+  P0=0.4: truoc 7661 sau 6895
+  P0=0.5: truoc 6970 sau 6273
+  P0=0.6: truoc 6280 sau 5652
+
+ Kich ban Cvlp (amoniac qua gia bien doi, can sua PPA) - xac suat q trong nhanh P0:
+  q=0.00: truoc 6970 sau 6273 (+0.0%)
+  q=0.25: truoc 7536 sau 6782 (+8.1%)
+  q=0.50: truoc 8101 sau 7291 (+16.2%)
+  q=1.00: truoc 9231 sau 8308 (+32.4%)
+  [doi chieu skeptic] VC=0 moi kich ban: truoc 9794 sau 8815 (+40.5%)
+
+ Bien the (W_R4, co KTPL; truoc / sau CK):
+  bo phan du 115 cua VC                         :   7688 /   6919 (+10.3%)
+  opex SCR tu 2032 (QCVN19)                     :   7908 /   7117 (+13.4%)
+  san luong 5.000h (vol 0,833)                  :   7174 /   6456 (+2.9%)
+  san luong 6.500h (vol 1,083)                  :   6868 /   6181 (-1.5%)
+  ty gia EPC USD VND -10% (+237 ty von chu)     :   6554 /   5899 (-6.0%)
+  thay xuc tac SCR 27 ty/nam tu 2033 (uoc luong):   6819 /   6137 (-2.2%)
+  thay xuc tac SCR 54 ty/nam tu 2033 (uoc luong):   6668 /   6001 (-4.3%)
+  FC chi bu 10 nam (den 2039)                   :   6740 /   6066 (-3.3%)
+  bu cham tu 2033                               :   5711 /   5140 (-18.1%)
+  khau hao 18 nam                               :   6844 /   6160 (-1.8%)
+  lai vay 7%                                    :   7366 /   6629 (+5.7%)
+  lai vay 11%                                   :   6570 /   5913 (-5.7%)
+  KTPL 8%  :   7148 /   6433 (+2.5%)
+  KTPL 15% :   6780 /   6102 (-2.7%)
+  lai huy dong -100bp (r va lai vay, beta=1):   7361 /   6625 (+5.6%)
+  lai huy dong -50bp (r va lai vay, beta=1):   7161 /   6445 (+2.7%)
+  lai huy dong +50bp (r va lai vay, beta=1):   6790 /   6111 (-2.6%)
+  lai huy dong +100bp (r va lai vay, beta=1):   6618 /   5956 (-5.1%)
+  beta 0,5, lai huy dong +100bp:   6692 /   6022 (-4.0%)
+  beta 0,5, lai huy dong -100bp:   7261 /   6535 (+4.2%)
+  Ke dai V2 0.123:   7196 /   6476 (+3.2%)
+  Ke dai V2 0.134:   6988 /   6289 (+0.2%)
+  ket hop thuan loi (bo du 115 + opex 2032 + lai 7%): 8808 / 7927 (+26.4%)
+  ket hop bat loi (bu cham 2033 + xuc tac 27 + 5.000h + lai 11%): 5547 / 4993 (-20.4%)
+
+ vung bien the don le sau CK: 5140..7117
+ vung theo trong so P0 0,6..0: 5652..9380
+ V6: V_ngan -579 | V_dai co so 7541 | D khong xac dinh (V_ngan <= 0: LNST nen + delta TB 2030-39 am) (ln2 0,69 / ln3 1,10) | NORM 565 dnpat TB 2030-39 -605 ty
+ P0 co so co KTPL: cong don 2030-39 -3168 ty; tien thap nhat -254 ty nam 2039 (chua co tuc)

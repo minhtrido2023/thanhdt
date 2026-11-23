@@ -1,0 +1,168 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "QTP",
+ "dd_date": "2026-11-17",
+ "rev": 4,
+ "asof": "2026-11-23",
+ "loai_hinh": "phat dien than PPA (EVN/EPTC) + du an cai tao khi thai bat buoc (QCVN 19:2024)",
+ "method_version": "r2 FCFE theo kich ban PPA + delta du an khi thai P0/P50/P100 (qtp_model_rev4.py)",
+ "units": "ty dong; d/cp; GWh",
+ "blind": "KHOA truoc khi doc gia. Khong co gia/PE/PB/ADV moi trong file nay. ADV dung lai so r2 (BQ 15/8-16/11/2026) chi cho V3.",
+ "sources": {
+  "FS": "src_fs/000000016457564_2.VI_BCTT_FS_DIEUCHINHLAN_2_Signed.pdf (+ .txt) §3.1.7; BC tham tra PECC1 2985/TVD1-NDNLM 22/5/2026",
+  "KT25": "../dd_QTP_20261117/src/fy2025_kt_vi.pdf tr.7 BCDKT (quy KTPL 120,6 ty), tr.31 TM 19.1 (trich KTPL 2024 69,04; 2025 71,36)",
+  "EPC": "../dd_QTP_20261117/src/epc_khithai_qd1710.pdf (89.756.813 USD + 901,8 ty)",
+  "VAY": "../dd_QTP_20261117/src/vay_khithai_qd917.pdf (2.787,9 ty)",
+  "LEGAL": "legal-vn 23/11/2026: TT12/2025 (VBHN 56/VBHN-BCT) D7.3 Cvlp; D18 bien dong khac truot 2,5%/nam; D26, D27.3; khong tien le",
+  "R2": "../dd_QTP_20261117/model/qtp_model.py (nen, tai lap 14.599)"
+ },
+ "share_base": {
+  "shares_m": 450.0,
+  "source": "KT25 TM 19.4 (450.000.000 cp luu hanh); khop tam ung co tuc 1.000d = 449,3 ty (r2)",
+  "as_of_date": "2025-12-31",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "pending": false,
+   "note": "khong co phat hanh them 2026 (r2)"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "Nang cap cai tao HT xu ly khi thai (FGD/SCR/ESP)",
+    "class": "V4b capex TUAN THU (dong tien ra trong base)",
+    "tmdt_pre_vat": 3484.88,
+    "loan": 2787.9,
+    "loan_rate": 0.09,
+    "loan_rate_note": "(uoc luong) - khong co trong van ban doc duoc; bien the 7%/11%",
+    "tenor_y": 10,
+    "disb": {
+     "2027": 0.3,
+     "2028": 0.45,
+     "2029": 0.25
+    },
+    "cod": 2030,
+    "fom": 102.01,
+    "vc": 470.29,
+    "vc_split": {
+     "ammonia": 317.4,
+     "own_power": 37.6,
+     "unexplained": 115.3
+    },
+    "comp_price_dkwh": {
+     "FC": 81.42,
+     "FOM": 15.69,
+     "VC": 72.33
+    },
+    "net_gwh": 6501.57,
+    "hours_fs": 6000,
+    "fc_comp_end": 2047,
+    "dep_years": 10
+   }
+  ]
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "P0",
+    "side": "down",
+    "p": 0.5
+   },
+   {
+    "name": "P50",
+    "side": "base",
+    "p": 0.3
+   },
+   {
+    "name": "P100",
+    "side": "up",
+    "p": 0.2
+   }
+  ],
+  "asymmetry_reason": "(uoc luong, N=0 tien le) - ve muc r3; doi 0,4 o r3b bi skeptic r1 bac (khong co du kien moi); legal-vn 23/11 khong them du kien thuan loi",
+  "r2_base": {
+   "bad": 0.25,
+   "base": 0.65,
+   "good": 0.1
+  },
+  "cvlp_pass_through_q": {
+   "center": 0.0,
+   "basis": "can sua PPA (TT12 D18: Cvlp chi truot 2,5%/nam); khong tien le => chi kich ban co dieu kien, KHONG vao tam"
+  }
+ },
+ "welfare_fund": {
+  "balance_deducted": 148.64,
+  "annual_appropriation_pct_of_npat": 0.1035,
+  "applied_to_cashflow": true,
+  "source": "Q3/26 BCDKT ma 323 = 148,64 ty (30/9/2026); KT25 TM19.1 trich 69,04 (2024) & 71,36 (2025; TM30 xac nhan); Q3/26 V.27 giam khac LNST chua PP 544,58 - co tuc 450 = ~94,58 (2026, uoc tach); ty le gop = 234,98/2.269,56; nwc r2 cong lai PV so du khi thu hoi. Anh: evidence_rev4/"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from": 2025,
+    "rate": 0.2
+   }
+  ],
+  "source": "FS bang thue (tu 2025 thue suat 20%)",
+  "note": "chuyen lo gian luoc khong het han (bao thu cho phuong an lo)"
+ },
+ "working_capital": {
+  "method": "balance_sheet_point",
+  "nwc_bn": 2259.0,
+  "source": "r2 qtp_model.py nwc = 3091,52+729,32+16,66-1578,55"
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-23",
+  "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate cctg_12m(2026-11-02)",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true,
+  "finite_life_rate_note": "dong tien huu han den 2047; r = neo V1",
+  "band": [
+   0.123,
+   0.134
+  ]
+ },
+ "terminal": {
+  "moat_tier": "NARROW",
+  "terminal_ronic": "NOT_APPLICABLE_FINITE_LIFE",
+  "mechanism_reason": "thue dat den 15/3/2047; dung nha may 2047 (co so) / 2040 (xau)",
+  "g": 0.0
+ },
+ "liquidity_discount": {
+  "basis": "ADV trung vi + free float tu r2 §6 (doc SAU khoa o r2; khong doc lai o rev4)",
+  "pct": 0.1,
+  "position_size_note": "V8 2-4% NAV; 1 ty thoat ~5,5 phien, 3 ty ~16 phien o 15% ADV",
+  "source": "../dd_QTP_20261117/REPORT.md §6"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "(xem KT25)",
+  "emphasis_or_basis": "khong",
+  "interim_review": "H1/2026 soat xet",
+  "source": "../dd_QTP_20261117/src/fy2025_kt_vi.pdf"
+ },
+ "related_parties": "EVN/EPTC vua la ben mua dien vua la co dong chi phoi gian tiep (r2)",
+ "one_offs": "FX Q4/25 da loai khoi nam goc (r2)",
+ "capital_commitments_12m": "EPC QD 1710 (6/10/2026, 38 thang); giai ngan 2027 30% (uoc luong)",
+ "sector": {
+  "name": "nhiet dien than",
+  "moat_src": "data/moat_tags.csv QTP NARROW REGULATORY/COST asof 2026-06-05 (<12 thang => tai dung 5F)"
+ },
+ "model_file": "qtp_model_rev4b.py",
+ "model_md5": "7fc3969b04012119de370de27be28fce",
+ "model_out_md5": "c58a317314cf0ea31eb80ac43f84c2bf",
+ "center_locked": {
+  "pre_liq": 6993,
+  "post_liq": 6294
+ },
+ "sub_rev": "4b"
+}

@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_dilution_update_20261110/SCL/REPORT_rev6.md",
+  "report_md5": "fe54ceda144ca5cf64d9427137e6d213",
+  "brief_md5": "9cb96261d4e99b777ed3b48f19c9eb96",
+  "model": "opus",
+  "cost_usd": 1.3281062,
+  "started_at_ict": "2026-11-23T13:47:06+07:00",
+  "summary": "Rev6's numbers trace to the original filings. I checked debt, the welfare fund, 9-month profit, the share count and the ESOP-2 status against the BCTC images, and the equity rollforward confirms the 680k free ESOP shares are still pending. The bridge from r4 is driven by sourced filings and a stated rule, not by reinterpreting old facts. Two-sided review: the par-debt frame leans low (est. 4–6%) and the 10% welfare rate, one-off other income and the dropped Vincons sensitivity lean high. These roughly offset. What stops a CONFIRMED is a missing item: the Phả Lại ash supply contract, which the core business depends on, is unverified and its effect on core margin is unmodelled (the report confines it to a CIP impairment). That item is material and cannot be quantified from the sources, hence INCONCLUSIVE. The report's market-price text was ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_dilution_update_20261110/SCL/skeptic/r2_raw.md"
+}

@@ -5872,6 +5872,169 @@
    "supersedes": "GAS@2026-11-09#2",
    "notes": "Sleeve LAG_LO. CK 0,65% @5 tỷ (ADV250 113 tỷ). BCTC KT 2025 Deloitte chấp nhận toàn phần 28/02/2026. WARNING: free float 4,24% (hạn 31/12/2026), thay Chủ tịch/TGĐ 07/2026; HĐ mua khí Lô 05.2/05.3/05-1b/c + bán NCS-NT2 hết hạn 12/2026 (độ nhạy −1.995 / −7.980 đ/cp). Cam kết vốn 21.238,7 tỷ (Lô B + kho LNG Thị Vải) NPV0. Mở: 540,7 tỷ cổ tức; điều khoản gia hạn HĐ khí; IRR Lô B. Sizing V8: không đề xuất vị thế giá trị.",
    "recorded_at": "2026-11-23T13:36:30+07:00"
+  },
+  {
+   "ticker": "VCP",
+   "dd_date": "2026-11-12",
+   "rev": 2,
+   "valuation_asof": "2026-11-23",
+   "bctc_quarter": "2026Q3",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_VCP_20261112/skeptic/r3.json",
+   "audited_fy_missing": false,
+   "zone_low": 21037,
+   "center": 32605,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số 3 kịch bản (bear 30% / base 45% N 332,8 tỷ chuẩn hoá thuỷ văn k=1,127×Etb, thuế KH2026 15,3%, KT-PL 1,84% / bull 25% N 531,5), V=N/r (RONIC=Ke) + ΔB 427,9 giá sổ (base/bear), r 13,5% (lãi huy động 12T 7,40% @23/11), sau chiết khấu thanh khoản 1 tỷ 3,64%; trước CK 33.837",
+   "zone_high": 45280,
+   "center_range": null,
+   "price_ref": 37400,
+   "price_date": "2026-11-20",
+   "verdict_label": "TRONG vùng, TRÊN tâm: giá 37.400 cao hơn tâm sau CK 32.605 14,7%; trên 0,85×tâm = 27.715 ⇒ không có biên an toàn. Tâm nhạy lựa chọn thuỷ văn bình thường (k=1,0 ⇒ 30.501 trước CK) và hạn PPA Cửa Đạt (Pc −20% ⇒ 29.043). Rủi ro số 1: phân bổ vốn (cho vay cá nhân 823 tỷ, ~1.000 tỷ góp vốn 9T/26 chưa thuyết minh). Moat NARROW (định lượng ≈ NONE). Sizing V8: không đề xuất vị thế; thanh khoản ≲0,3 tỷ (ADV60 0,37 tỷ)",
+   "skeptic_status": "skeptic DD_GENERAL r1 INCONCLUSIVE (REPORT.md) → rev3 chuẩn hoá thuỷ văn BCTN25, thuế KH2026, KT-PL, RONIC=Ke, ΔB V4a; r2 INCONCLUSIVE (REPORT_rev3.md: pool 1.000 tỷ chưa haircut, bull đếm trùng ΔB) → rev3b bear −50% pool, bull bỏ ΔB, k 4 năm, sở hữu Đak Glun 41,43%; r3 INCONCLUSIVE medium (REPORT_rev3b.md): killer = chọn k=1,127 vs Etb (KH2025 ≈1,0×Etb) −9,9%, hạn PPA Cửa Đạt chưa rõ, bảo lãnh vay Đak Lô 1-3 của công ty mẹ chưa nêu; sửa r3 CHƯA áp (hết 2 vòng/ca)",
+   "source_file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
+   "report_md5": "a6bf4fcc5ecf7259a1e94601ac102188",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
+     "quote": "**Tâm 33.837 đ/cp trước chiết khấu thanh khoản; 32.605 đ/cp sau chiết khấu (vị thế 1 tỷ, 3,64%).**",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
+     "quote": "**Vùng [21.832 ; 46.990]** trước CK = bear/bull; **sau CK [21.037 ; 45.280]**. r = 13,5%, terminal RONIC = Ke.",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_VCP_20261112/REPORT_rev3b.md",
+     "quote": "**Giá 37.400 (đóng cửa 20/11/2026, đọc SAU khoá) = +14,7% so với tâm sau CK**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_VCP_20261112/calc_rev3/assumptions_rev3b.json",
+   "assumptions_md5": "8d93c85bd812d4841090ca0c80f40dac",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-03-12",
+   "expires_basis": "dd_date+120 (mặc định); BCTC Q4/2026 sớm hơn thì hết hạn sớm hơn",
+   "correction_reason": "rebuild sau skeptic DD_GENERAL r1 INCONCLUSIVE: 2025 là năm thuỷ văn đỉnh (SL 1.009,6 tr kWh =132% KH; thuỷ điện 1,32×Etb, BCTN25) ⇒ chuẩn hoá k=1,127 (−85,7 tỷ); thuế KH2026 15,3%; quỹ KT-PL 1,84%; terminal RONIC=Ke; tài sản 2026 NPV0 giá sổ; bear = El Niño 2 năm + lỗ cho vay 401,9 + lỗ 50% pool 1.000 tỷ chưa thuyết minh; bull bỏ ΔB. Tâm sau CK 40.273→32.605 (−19,0%); nhãn đổi 'TRONG vùng, sát tâm (giá dưới tâm 5,9%)' → 'TRONG vùng, TRÊN tâm 14,7%'",
+   "supersedes": "VCP@2026-11-12#1",
+   "notes": "UPCoM. CK 3,64% @1 tỷ (ADV60 trung vị 0,37 tỷ, σ250 2,22%). BCTC KT 2025 AASC chấp nhận toàn phần. Nguồn src/ khôi phục từ git ff5fe27cd^ (RESTORED_MD5_20261123.txt) + BCTN 2023/2025 (src_rev3/MD5.txt). WARNING pháp lý: phạt thuế 102 triệu (hoá đơn đơn vị không hoạt động), 46,8% cp cầm cố TP. Mở: hạn PPA Cửa Đạt, ngày hết ưu đãi thuế, nhượng quyền NSX, bảo lãnh vay Đak Lô 1-3, NQ ĐHĐCĐ 2026, bản chất pool 1.000 tỷ. Sizing V8: không đề xuất.",
+   "recorded_at": "2026-11-23T14:01:04+07:00"
+  },
+  {
+   "ticker": "QTP",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/qtp_r3_envcapex_20261120/skeptic/r3.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-11-17",
+   "rev": 4,
+   "valuation_asof": "2026-11-23",
+   "bctc_quarter": "2026Q3",
+   "zone_low": 5159,
+   "center": 6294,
+   "center_kind": "expected_weighted",
+   "zone_high": 7139,
+   "center_desc": "kỳ vọng trọng số P0/P50/P100 0,50/0,30/0,20 (bù giá dự án khí thải 3.485 tỷ) × r2 xấu/cơ sở/tốt 0,25/0,65/0,10, SAU chiết khấu thanh khoản 10%; r 13,5% (lãi huy động 7,40% = neo); capex+opex tuân thủ QCVN19 là dòng tiền ra (V4b); quỹ KTPL 10,35% LNST + số dư 148,64 tỷ trừ; Cvlp amoniac qua giá = kịch bản ngoài tâm",
+   "center_range": null,
+   "center_alt": 6993,
+   "center_alt_kind": "expected_weighted",
+   "price_ref": 10200,
+   "price_date": "2026-11-20",
+   "verdict_label": "Giá 10.200 (BQ đóng cửa 20/11) = 1,62× tâm 6.294, trên cận trên vùng 7.139 và trên cả P0=0 (9.413) ⇒ ĐẮT (không đổi). Cổng 0,85×tâm 5.350 không đạt. Upside có điều kiện: Cvlp amoniac qua giá (q=1 +32%), SCR từ 2032 (+13%). WARNING: P0 tiền ròng −230 tỷ 2039 kể cả không cổ tức; V6 V_ngắn âm (D không xác định) ⇒ phân kỳ, 0,85×tâm không tự kích hoạt.",
+   "skeptic_status": "DD_GENERAL: r1 (22/11, REPORT_r3c md5 639f0a5c) INCONCLUSIVE → REPORT_rev4; r2 (23/11, REPORT_rev4 md5 582e5c7e) INCONCLUSIVE → REPORT_rev4b; r3 (23/11, REPORT_rev4b md5 72d3cca2) INCONCLUSIVE medium — hết 2 vòng/ca, mục r3 chưa áp",
+   "correction_reason": "rebuild sau skeptic DD_GENERAL INCONCLUSIVE: thêm quỹ KTPL (KT25 TM19.1/TM30, Q3/26 V.27 + mã 323) −871 trước CK; trọng số P0 về 0,5 (r3; r3b hạ 0,4 không có dữ kiện mới) −693; Cvlp (legal-vn: TT12 Đ7.3/Đ18 cần sửa PPA) thành kịch bản ngoài tâm; thêm biến thể tỷ giá EPC, sản lượng, xúc tác SCR, FC 10 năm",
+   "supersedes": "QTP@2026-11-17#3",
+   "source_file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+     "quote": "Tâm rev4b: 6.294 đ/cp",
+     "fields": [
+      "center"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+     "quote": "Vùng biến thể đơn lẻ, sau CK: 5.159 … 7.139",
+     "fields": [
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+     "quote": "giá tham chiếu là 10.200",
+     "fields": [
+      "price_ref"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/qtp_r3_envcapex_20261120/REPORT_rev4b.md",
+     "quote": "(6.993 trước CK)",
+     "fields": [
+      "center_alt"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/qtp_r3_envcapex_20261120/assumptions_QTP_rev4b.json",
+   "assumptions_md5": "91add83223d20aa7ec4880a145259334",
+   "null_reason": null,
+   "expires_on": "2027-03-17",
+   "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc 120 ngày từ dd_date",
+   "notes": "Sizing V8: không mở ở giá hiện tại (trên mọi biến thể); nếu ≤5.350 tối đa 2–4% NAV theo khung. Moat NARROW (5F tái dùng <12 tháng). Model qtp_model_rev4b.py md5 7fc3969b.",
+   "recorded_at": "2026-11-23T14:01:04+07:00"
+  },
+  {
+   "ticker": "SCL",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_dilution_update_20261110/SCL/skeptic/r3.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-10-29",
+   "rev": 6,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 13652,
+   "center": 16883,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 108 kết cục (lõi r3 không re-tune), khung nợ mệnh giá, KTPL 10%, ESOP-2 680k, terminal RONIC=Ke; cơ sở SAU QUYỀN 45.516.815 cp; sau CK 5 tỷ (4,454%)",
+   "zone_high": 20415,
+   "center_range": null,
+   "price_ref": 25100,
+   "price_date": "2026-11-20",
+   "verdict_label": "TRÊN vùng (>P90): giá 25.100 (đóng cửa 20/11, DNSE) cao hơn P90 20.415 +22,9% (5 tỷ), +18,5% so P90 sleeve 40tr 21.187; nhãn KHÔNG bền ở cận trên khung nợ (P/E có đòn bẩy, P90 26.387 ⇒ TRONG). Luật 0,85×tâm: KHÔNG đạt (14.351)",
+   "skeptic_status": "r1 (22/11, trên r4) INCONCLUSIVE · r2 (23/11, rev6) INCONCLUSIVE (HĐ nguồn tro) · r3 (23/11, rev6 + độ nhạy) REFUTED medium: k KTPL 10% bỏ ESOP từ LNST 6,8 tỷ (tổng chia NLĐ 17–21% ⇒ tâm −9…−11%) và khung nợ mệnh giá thiếu lá chắn thuế (+4…+10%); chưa áp — đã hết 2 vòng/ca",
+   "source_file": "agents/Taylor/research/dd_dilution_update_20261110/SCL/REPORT_rev6.md",
+   "report_md5": "52584a8a60dc6c085b210a86c17f73ca",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_dilution_update_20261110/SCL/REPORT_rev6.md",
+     "quote": "| **CK 5 tỷ (cỡ ghi sổ, 4,454%)** | **16.883** | **13.652** | 16.510 | **20.415** | **25.100** (đóng cửa 20/11, DNSE ohlc) | **+22,9%** | +48,7% | **TRÊN vùng (>P90)** |",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high",
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_dilution_update_20261110/SCL/rev6/assumptions_SCL_rev6.json",
+   "assumptions_md5": "f59e25ea086fb4a7262c6095fdd030e7",
+   "null_reason": null,
+   "expires_on": "2027-02-26",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+   "notes": "center_range = dải 5 khung định giá nợ (không cộng lại 16.558 … cận trên P/E có đòn bẩy 22.868). Sleeve 40tr: tâm 17.521 · P10 14.168 · P90 21.187. Cơ sở cum (38,84tr cp): 17.942. BCTC gốc khôi phục từ git 0090c758e^ vào rev6/src. BQ OShares ghi trước 44,84tr từ 06/11 và Close chưa điều chỉnh lùi quyền — không dùng. | Khung nợ (không phải khoảng tâm theo luật ledger): cơ sở không cộng lại 16.558 · tâm 16.883 · cận trên P/E có đòn bẩy 22.868 (REPORT_rev6.md dòng 71/83/91); nhãn KHÔNG bền ở cận trên.",
+   "recorded_at": "2026-11-23T14:01:04+07:00",
+   "supersedes": "SCL@2026-10-29#5",
+   "correction_reason": "Skeptic r1 (22/11) INCONCLUSIVE trên r4 ⇒ rev6: khung nợ mệnh giá thay cộng lại lãi dự án (−968), quỹ KTPL 10% theo NQ 486 (−2.163), ESOP-2 680k cp từ LNST (−272), terminal RONIC=Ke theo D4 (−1.053); tâm 21.339 → 16.883 (−20,9%)."
   }
  ],
  "center_kinds": [

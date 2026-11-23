@@ -1,0 +1,69 @@
+{
+ "k_hist": [
+  1.2636,
+  0.8845,
+  1.039,
+  1.3204
+ ],
+ "k": 1.1269,
+ "ratio_2025": 1.3204,
+ "etb_hydro": 748.29,
+ "actual_hydro_2025": 988.01,
+ "hydro_excess_parent_2025": 85.7,
+ "hydro_excess_if_k1": 139.5,
+ "tax_factor": 0.9532,
+ "welfare_factor": 0.9816,
+ "N_base": 332.8,
+ "N_bull": 531.5,
+ "el_nino_short_per_year": 97.9,
+ "el_nino_pv": 162.3,
+ "value_bn": {
+  "bear": 1829.3,
+  "base": 2893.4,
+  "bull": 3937.3
+ },
+ "value_ps": {
+  "bear": 21832,
+  "base": 34532,
+  "bull": 46990
+ },
+ "center_ps": 33837,
+ "sens": {
+  "dep-100bp_beta1.0": 36534,
+  "dep-50bp_beta1.0": 35133,
+  "dep+50bp_beta1.0": 32633,
+  "dep+100bp_beta1.0": 31512,
+  "dep-100bp_beta0.5": 35133,
+  "dep-50bp_beta0.5": 34473,
+  "dep+50bp_beta0.5": 33224,
+  "dep+100bp_beta0.5": 32633,
+  "Ke_0.123": 37127,
+  "Ke_0.134": 34088,
+  "k1_design_etb": 30501,
+  "k_1.0813": 32639,
+  "k_1.15": 34445,
+  "unexplained_haircut0": 35627,
+  "unexplained_haircut100": 32046,
+  "no_hydro_norm": 39154,
+  "tax20_from_y0": 32246,
+  "tax20_from_y5": 32992,
+  "tax20_from_y10": 33388,
+  "cuadat_pc_minus20_from_y0": 29043,
+  "cuadat_pc_minus20_from_y5": 31292,
+  "nsx_concession_20y": 32641,
+  "base_minus_accrued_interest": 32296,
+  "accrued_interest_after_tax": 24.8,
+  "w35_45_20": 32579,
+  "w40_40_20": 31944,
+  "w25_45_30": 35095,
+  "loanloss0": 35276,
+  "loanloss100": 32398,
+  "ronic_eq_roe_display": 35063,
+  "roe_base_on_B2025": 0.155
+ },
+ "v6": {
+  "V_short": 37394,
+  "V_long": 31269,
+  "D": 0.179
+ }
+}
