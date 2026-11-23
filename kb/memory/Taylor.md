@@ -56,3 +56,15 @@
 - [2026-11-23T05:20:46Z] ĐANG DỞ: job Taylor_20261123_050005 DBC REPORT_rev3 (tâm 14.696, khoá 66d9fbc6) skeptic r3 vòng cuối log /tmp/dbc_sk_r3.log | NEXT: LEDGER_PROPOSAL_DBC.json → bus+notify
 - [2026-11-23T05:23:42Z] [dd-DBC rebuild 23/11] XONG job Taylor_20261123_050005: REPORT_rev3 tâm 14.696, skeptic r3 REFUTED (BĐS dở dang 1.186 tỷ chưa tách; thuế TNDN chưa kiểm) — CHỜ Mike áp LEDGER_PROPOSAL_DBC.json (REFUTED_OPEN) / user quyết vòng 4
 - [2026-11-23T05:23:54Z] [dd-GAS rebuild 23/11] XONG job Taylor_20261123_050003: REPORT_rev4 tâm 51.652, skeptic r3 CONFIRMED — CHỜ Mike áp LEDGER_PROPOSAL_GAS.json (cần entry bước1 trước tool)
+- [2026-11-23T06:37:02Z] ĐANG DỞ: job Taylor_20261123_063642 DD VCP rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_VCP_20261112
+- [2026-11-23T06:37:04Z] ĐANG DỞ: job Taylor_20261123_063644 DD QTP rebuild | NEXT: đọc skeptic r1 + REPORT_r3c.md qtp_r3_envcapex_20261120
+- [2026-11-23T06:37:09Z] ĐANG DỞ: job Taylor_20261123_063646 DD SCL rebuild (dd_dilution_update_20261110/SCL) | NEXT: đọc skeptic r1 + SCL_r4.md
+- [2026-11-23T06:40:24Z] ĐANG DỞ: job Taylor_20261123_063642 VCP rev3: src khôi phục từ git ff5fe27cd^; nguồn mới /tmp/vcp_dl (BCTN2023) | NEXT: chuẩn hoá thuỷ văn theo SL thiết kế, ROE fade, thuế, KTPL → calc_rev3 → REPORT_rev3.md → skeptic r2
+- [2026-11-23T06:45:29Z] ĐANG DỞ: job Taylor_20261123_063642 VCP model rev3 xong (calc_rev3, lock fd9d6dd3, tâm 35.826→34.522 sau CK) | NEXT: REPORT_rev3.md → skeptic r2 → LEDGER_PROPOSAL_VCP.json → bus+notify
+- [2026-11-23T06:47:05Z] ĐANG DỞ: job Taylor_20261123_063646 SCL REPORT_rev6 (tâm 16.883 sau quyền CK5ty, khoá 7f0ee875) skeptic r2 đang chạy log /tmp/scl_sk_r2.log | NEXT: LEDGER_PROPOSAL_SCL.json → bus+notify
+- [2026-11-23T06:47:25Z] ĐANG DỞ: job Taylor_20261123_063642 VCP REPORT_rev3 (tâm 34.522, lock fd9d6dd3) skeptic r2 chạy nền log /tmp/vcp_sk_r2.log | NEXT: LEDGER_PROPOSAL_VCP.json → bus+notify
+- [2026-11-23T06:47:37Z] ĐANG DỞ: job Taylor_20261123_063644 QTP REPORT_rev4 (tâm 6.273, khoá 190b8294) skeptic r2 chạy | NEXT: LEDGER_PROPOSAL_QTP.json → bus+notify
+- [2026-11-23T06:53:05Z] ĐANG DỞ: job Taylor_20261123_063646 SCL REPORT_rev6 (tâm 16.883) skeptic r3 vòng cuối, log /tmp/scl_sk_r3.log | NEXT: LEDGER_PROPOSAL_SCL.json → bus+notify
+- [2026-11-23T06:53:47Z] ĐANG DỞ: job Taylor_20261123_063644 QTP REPORT_rev4b (tâm 6.294, khoá 91add832) skeptic r3 vòng cuối | NEXT: LEDGER_PROPOSAL_QTP.json → bus+notify
+- [2026-11-23T06:54:00Z] ĐANG DỞ: job Taylor_20261123_063642 VCP REPORT_rev3b (tâm 32.605, lock 8d93c85b) skeptic r3 vòng cuối log /tmp/vcp_sk_r3.log | NEXT: LEDGER_PROPOSAL_VCP.json → bus+notify
+- [2026-11-23T06:57:19Z] [dd-SCL rebuild 23/11] XONG job Taylor_20261123_063646: REPORT_rev6 tâm 16.883 (r4 21.339), skeptic r3 REFUTED (k chia NLĐ vs lá chắn thuế) — CHỜ Mike áp LEDGER_PROPOSAL_SCL.json (REFUTED_OPEN) / user quyết vòng 4
