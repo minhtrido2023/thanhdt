@@ -1,0 +1,38 @@
+CONTROL rev4 tai lap: 32376 (ky vong 32376) -> OK
+NFP=1466.16; y_cash_sau_thue=1.0240%; y_inv=4.20%; p_base=0.0909; f_cash=0.4477; f_inv=0.5883; NCI=3.2756%; T_hoan=1.481 nam, he so PV=0.8290
+kich ban truoc/sau CKTK: {'bad': (9070, 8163), 'base': (24901, 22411), 'good': (42230, 38007)}
+TAM pre=23309 post=20978 vung_post=[8163;38007] 0.85xtam=17831
+   cau: rev4 (control): 32376
+   cau: + bo f rieng cua kich ban xau (f=1 ca 3 kich ban; = tinh toan skeptic r3 +10,5%): 35771
+   cau: + NCI 3,28%: 35484
+   cau: + hoan cong lai bao hanh T=1,48 nam: 34886
+   cau: + f_cash theo p Laplace: 23909
+   cau: + f_inv dau tu dai han (= rev5): 20978
+-- luoi hazard p (f_cash, f_inv, tam):
+   p=0.0000: f_cash=0.076 f_inv=0.311 tam=11612
+   p=0.0500: f_cash=0.326 f_inv=0.497 tam=17902
+   p=0.0909: f_cash=0.448 f_inv=0.588 tam=20978
+   p=0.2000: f_cash=0.628 f_inv=0.722 tam=25507
+   p=0.3333: f_cash=0.734 f_inv=0.801 tam=28177
+-- f_cash=1 nhung giu cac sua khac: 34886
+-- yield tien gui 1,18%/1,45%: {0.0118: 20907, 0.0145: 21097}
+-- LN giu lai cung bi ket (payout 38%/0%): {0.38: 18092, 0.0: 16323}
+-- DT co so: {3234: 18796, 3378: 19139, 3490: 19405, 4150: 20978, 5433: 24034}
+-- GPM co so: {0.03: 18461, 0.04: 20139, 0.045: 20978, 0.05: 21817, 0.06: 23494, 0.07: 25172}
+-- cong lai bao hanh %DT: {0.0: 18078, 0.01: 19804, 0.0168: 20978, 0.03: 23256, 0.041: 25155}
+-- khong hoan cong lai: 21576  NCI=0: 21245
+-- ty le chi tien so du bao hanh: {0.009: 22159, 0.25: 21431, 0.5: 20676, 1.0: 19165}
+-- r beta1: {-100: '22256 (+6.1%)', -50: '21597 (+3.0%)', 50: '20394 (-2.8%)', 100: '19844 (-5.4%)'}
+-- r beta0.5: {-100: '21597', -50: '21283', 50: '20682', 100: '20394'}
+-- Ke band 12.3/13.4: {0.123: 22532, 0.134: 21099}
+-- thanh khoan: {0: 23309, 0.05: 22143, 0.1: 20978, 0.2: 18647}
+-- trong so 25/50/25: 22748  40/45/15: 19051
+-- ngoai tru: xoa con => 19105 ; + lien ket => 17433
+-- CPH (uoc luong khung): {100: 20472, 300: 19461, 500: 18450}
+-- bao lanh 69-1 25/50/100%: {0.25: 20350, 0.5: 19722, 1.0: 18466}
+-- HNA=0 (bo lai an): 20465
+-- khoan tru o MENH GIA (khong nhan f) xoa con / CPH 300 / bao lanh 100%: 16795 17591 15368
+-- sau co tuc CP 31,7%: tam/1,317=15928 vung=[6198;28859]
+-- tang von 45.0tr cp @ 10000: 16656 (V4a: von moi cho du an = NPV0, tinh theo menh gia thu ve); phat hanh bang tam => khong doi
+16908
+hamon_all 21554 576

@@ -1,0 +1,13 @@
+{
+  "round": 4,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_PNJ_20261114/REPORT_rev5.md",
+  "report_md5": "0742ee83af15007d7ffd553c75e3ed72",
+  "brief_md5": "fb0710b4deb3f56aebf7c4a4e6eda62f",
+  "model": "opus",
+  "cost_usd": 0.8609112,
+  "started_at_ict": "2026-11-23T19:07:46+07:00",
+  "summary": "Rev5 fixes the O2 double penalty and the double-counted bridge interest correctly, and every source number traced (IRQ3, BCTC, BQ) matches; the model reruns exactly to 7.395. But the largest change (+1.406, PV of 2027–28 profit) rests on the false premise that recovery needs no capital: the plan takes revenue up ~48% by 2029 in a business with inventory ≈0,34× revenue, while the raise funds only 1.600 of working capital, so the 2027–28 profit must be retained and the centre should be ≤~5.989 (−19%). O2 also contradicts itself (financed by cutting inventory while keeping growth), and O3 gets zero weight despite direct evidence of a liquidity squeeze (customer payment delays, cash 770). In the other direction, there is no scenario for an exchange rate below 80%. Errors of >5% of the centre on both sides, with the larger push downward, mean the zone needs rebuilding; the NON label is unaffected.",
+  "verdict_raw_path": "agents/Taylor/research/dd_PNJ_20261114/skeptic/r4_raw.md"
+}

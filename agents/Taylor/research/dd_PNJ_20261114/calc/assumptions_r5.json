@@ -1,0 +1,290 @@
+{
+ "_doc": "Khoa gia dinh rev3 DD PNJ (job Taylor_20261122_234426, 23/11/2026). Sua theo fundamental-skeptic r1 (REFUTED 22/11). Khoa TRUOC khi doc gia/ADV (pha mu gia). Don vi ty dong, trieu cp. '(uoc luong)' = gia dinh nhom nghien cuu. Phien nay da THAY so gia cu trong REPORT r2 (s3) — khong dung lam dau vao; mo hinh khong co bien gia. | REV4 (cung job, sau skeptic r2 INCONCLUSIVE): thay dong nhat thuc 'phat hanh dung gia tri' bang CAY KET CUC phat hanh; bo chiet khau t=0,6; them chi phi cau noi; nguon KH 2029 da truy lai (src/Cap-nhat...Q3-2026.pdf p9). Trong so kich ban van hanh GIU NGUYEN r3 (khoa truoc gia). p_success dat SAU khi da thay gia => KHONG mu gia, bao dai 0,25/0,5/0,75. | REV5 (job Taylor_20261123_120259, sau skeptic r3 REFUTED): (1) O2 bo phat kep — giu kinh te CUNG kich ban (tai tro bang no/ton kho thi DN van co tien), tru 8.000 theo MENH GIA mot lan (doi chieu post-money: KH dung 1.600 tra no => F0 da gia dinh no thap hon 1.600; khong phat hanh thi khoan no do con => tru dung mot lan, khong phai tinh trung); (2) bo lai cau noi cong them tren menh gia (O1 va O2); (3) cong PV LNST KH 2027-28 [IRQ3 p9] (RONIC=Ke: phan hoi phuc 2027-28 khong do tai dau tu von, nhu cau von da nam trong 8.000); (4) p giu 0,5 trung tinh, bao dai 0,25/0,75 + neo bang chung hai chieu; (5) nhanh vo no/thanh ly = do nhay (khong co xac suat doc lap); (6) ESOP khong dinh luong duoc (c). Trong so van hanh, N, r GIU NGUYEN r3 (khoa truoc gia).",
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "PNJ",
+ "dd_date": "2026-11-23",
+ "rev": 5,
+ "loai_hinh": "san_xuat_khac",
+ "method_version": "M20261122",
+ "units": "ty dong; trieu cp; d/cp",
+ "sources": {
+  "HN_Q3": "src/3b_-_20261030_-_PNJ_-_BCTC_quy_3_nam_2026__Hop_nhat_.pdf",
+  "SX_H1": "src/79c_-_20260903_-_PNJ_-_BCTC_soat_xet_ban_nien_2026__Hop_nhat_.pdf",
+  "KT_FY2025": "src/36e_-_20260401_-_PNJ_-_BCTC_kiem_toan_nam_2025_(Hop_nhat).pdf",
+  "TTr_bonus": "src/2e-20260120-PNJ-To-trinh-phuong-an-phat-hanh-co-phieu-de-tang-von-co-phan-tu-nguon-VCSH.pdf",
+  "TTr_placement": "src/9._To_trinh_Phuong_an_phat_hanh_co_phieu_rieng_le.pdf",
+  "NQ_EGM": "src/Nghi-quyet-DHDCD-bat-thuong-nam-2026.pdf",
+  "GP_vang_mieng": "src/21_-_Giay_phep_kinh_doanh_mua__ban_vang_mieng.pdf",
+  "plan_2027_29": "src/Cap-nhat-tinh-hinh-hoat-dong-tinh-hinh-tai-chinh-Q3-2026.pdf p9 'KET QUA KINH DOANH 2027-2029 – Neu Huy Dong Von thanh cong' (LNST 0,1/1,2/1,6 nghin ty; DT 43,4/50,6/57,7) + p7 (8.000 = 60/20/20)",
+  "SX_TM39": "src/79c... p53 (TM39 in trang 51) + p6 (PwC HCM18793: nhan manh TM39)",
+  "div2025": "src/To_trinh_dieu_chinh_ty_le_chia_co_tuc_nam_2025... 607/2026/TTr: 20%->10%, da chi tra du 341,1 ty"
+ },
+ "share_base": {
+  "shares_m": 511.72,
+  "source": "HN_Q3 BS ma 411a VDL 5.118.915.180.000 d = 511,89tr cp; tru 169.559 cp quy (TTr_bonus 1.4) = 511,72tr; khop BQ OShares",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "applied",
+   "ratio": 0.5,
+   "source": "TTr_bonus 40/2026/TTr-HDQT 20/01/2026: thuong 2:1 tu VCSH, 341,149tr -> 511,724tr luu hanh",
+   "note": "giai thich buoc nhay BQ 341,1 -> 511,7tr Q1/2026; khong co tien vao. ESOP 2025/2026 (TTr 19,20 DHDCD 2025) chua phat hanh tinh den 30/9 (VDL khop dung 511,89tr)"
+  }
+ },
+ "projects": {
+  "items": [],
+  "none_reason": "Khong co du an tang truong/ capex tuan thu dang ky; capex 9T/2026 57,4 ty, so cua hang giam 432->403. Dot phat hanh rieng le 8.000 ty la tai cau truc von, xu ly o khoi recap."
+ },
+ "welfare_fund": {
+  "balance_deducted": 473.17,
+  "annual_appropriation_pct_of_npat": {
+   "value": "khong_cong_bo",
+   "searched": [
+    "HN_Q3 BS ma 323",
+    "NQ_EGM"
+   ]
+  },
+  "applied_to_cashflow": false,
+  "source": "HN_Q3 BS ma 323 quy khen thuong phuc loi 473,17 (da la no phai tra, khong tru them VCSH). Rieng: TM15a quy thuong HDQT&BDH 50,75 (dau nam 0,73) — WARNING quan tri"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2027,
+    "rate": 0.2
+   }
+  ],
+  "source": "TNDN pho thong 20%; tai san thue hoan lai 773,3 (HN_Q3 BS 272) — thu hoi phu thuoc lai tuong lai, nam trong KH LNST cua DN",
+  "note": "Mo hinh dung LNST KH cua DN (da sau thue)"
+ },
+ "working_capital": {
+  "method": "balance_sheet_point",
+  "source": "HN_Q3 TM7 ton kho goc 18.855 - du phong 2.229,0 = 16.626 (rong); KH DN: 20% x 8.000 = 1.600 bo sung VLD",
+  "nwc_bn": 16626.03
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "base",
+    "side": "base",
+    "p": 0.5,
+    "basis": "KH LNST 2029 cua DN (plan_2027_29)"
+   },
+   {
+    "name": "bull",
+    "side": "up",
+    "p": 0.2,
+    "basis": "(uoc luong) thuong hieu hoi phuc gan kinh te 2023-25: LNST 1.971/2.113/2.828 (BQ) — trung diem trung vi 2.113 va 2025 2.828 ; 2027-28 dung so KH DN"
+   },
+   {
+    "name": "bear_delay",
+    "side": "down",
+    "p": 0.2,
+    "basis": "KH DN tre 1 nam (uoc luong; khong tru so KH)"
+   },
+   {
+    "name": "stress_100pct",
+    "side": "down",
+    "p": 0.1,
+    "basis": "100% khach thu doi thay 80%: 7.071 x 0,2/0,8 (tuyen tinh tu so DN; NQ_EGM / HN_Q3 TM27)"
+   }
+  ],
+  "asymmetry_reason": "Lech ve phia giam (0,30 vs 0,20) vi rui ro phat hanh 8.000 ty that bai/tre va ty le thu doi >80% la rui ro tai chinh da hien dien trong BCTC (TM17, TM2.1 hoat dong lien tuc dua vao gian thanh toan), con hoi phuc thuong hieu chua co bang chung."
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-23",
+  "deposit_rate_source": "deposit_rate_vn.effective_deposit_rate('2026-11-23') = cctg_12m(2026-11-02) 7,40% (Big-4 6,80%), last_update 2026-11-16; neo 03/11 = 7,40%",
+  "beta_passthrough": 1.0
+ },
+ "terminal": {
+  "terminal_ronic": "EQUALS_KE",
+  "moat_tier": "NARROW"
+ },
+ "liquidity_discount": {
+  "basis": "sensitivity_only",
+  "pct": null,
+  "source": "tinh SAU khoa (ADV BQ) — muc V3 REPORT_rev3"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "PwC (Viet Nam)",
+  "source": "KT_FY2025 p4: bao cao HCM17725 18/03/2026, chap nhan toan phan, khong doan nhan manh; SX_H1 PwC soat xet: chap nhan + nhan manh TM39"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "Vay ca nhan Chu tich Cao Thi Ngoc Dung 703,7 (goc 700 + lai), tin chap, NQ HDQT 587/2026 04/09",
+    "amount_bn": 703.7,
+    "source": "HN_Q3 TM16 p24"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "Du phong thu doi KH 2026 (gia dinh 80% khach) — LNST KH 2026 -6.270; Q4 ngam dinh -6.742",
+    "amount_bn": -7071.137,
+    "source": "HN_Q3 TM27 + TM17"
+   },
+   {
+    "desc": "Hoan nhap quy DTPT vao LNST chua phan phoi (ke toan, khong phai tien)",
+    "amount_bn": 4602.8,
+    "source": "HN_Q3 TM27"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [],
+  "none_reason": "Khong co cam ket capex/dau tu 12T theo NQ/CBTT; dot 8.000 ty la HUY DONG von (dong vao) xu ly trong model_r3.recap_commitment",
+  "searched": [
+   "NQ_EGM",
+   "HN_Q3 TM27",
+   "TTr_placement"
+  ]
+ },
+ "sector": {
+  "read": "kb/data_registry/market-state/sector_read_ban_le_trang_suc_vang_20261114.md",
+  "blind": true
+ },
+ "model_r3": {
+  "valuation_date": "2026-12-31",
+  "recap_bn": 8000.0,
+  "recap_t_years": 0.0,
+  "recap_t_note": "rev4: t=0 (khong huong loi chiet khau von moi); chi phi cau noi tinh rieng",
+  "equity_parent_930": 13182.31,
+  "npat_9m_2026": 471.66,
+  "npat_2026_plan": -6270.0,
+  "recap_max_shares_m": 550.0,
+  "identity": "Gia tri co dong hien huu = (F0_postmoney - PV(von moi)) / n0 ; gia phat hanh cong bang P* = cung gia tri do",
+  "sens": {
+   "npm_recovery": [
+    0.064,
+    0.079
+   ],
+   "rev_2029_plan": 57700.0,
+   "observed_loss_rates": {
+    "2020_26": [
+     10920.7,
+     638.17,
+     0.288
+    ],
+    "pre2020": [
+     10137.23,
+     183.22,
+     0.07
+    ]
+   },
+   "excess_inventory_step_bn": 1000.0,
+   "t_raise_alt": [
+    0.0,
+    1.0
+   ]
+  },
+  "scenario_params": {
+   "base": {
+    "N_steady": 1600.0,
+    "reach_year": 2029
+   },
+   "bull": {
+    "N_steady": 2500.0,
+    "reach_year": 2029
+   },
+   "bear_delay": {
+    "N_steady": 1600.0,
+    "reach_year": 2030
+   },
+   "stress_100pct": {
+    "N_steady": 1600.0,
+    "reach_year": 2029,
+    "extra_loss_bn": 1767.8,
+    "extra_loss_year": 2027
+   }
+  },
+  "weights_basis": "(uoc luong, chu quan) khoa TRUOC khi doc gia; Bobby 14/11 nganh 12T CYC 0,40/ADMIN 0,40/STRUCT 0,20, khung hoang rieng DN",
+  "r_anchor": "13,5% @ lai huy dong 12T hieu dung 7,40% (cctg_12m 2026-11-02); deposit_rate_vn.effective_deposit_rate('2026-11-23') = 7,40% => delta 0, beta 1",
+  "ke_band": [
+   0.123,
+   0.134
+  ],
+  "terminal_note": "D4: NARROW => RONIC=Ke cuoi ky => gia tri dong on dinh = N/r, g khong tao/huy gia tri (thay r2 ROE 10% voi g 5% vo han)",
+  "wc_note": "Ton kho du thua giai phong tien: KHONG vao base (KH chinh DN can them VLD) — chi do nhay",
+  "recap_commitment": {
+   "desc": "Huy dong 8.000 ty (60% thu doi, 20% VLD, 20% tra no) qua phat hanh rieng le <=550tr cp; gia >= max(TB 30 phien, BVPS kiem toan/soat xet gan nhat)",
+   "amount_bn": 8000.0,
+   "source": "TTr_placement 1.8; NQ_EGM; so 8.000 + co cau: plan_2027_29"
+  },
+  "outcome_tree": {
+   "O1_placement_at_floor": {
+    "desc": "Phat hanh 550tr cp o san phap ly (BVPS kiem toan FY2026 uoc 12.586) => thu 6.923; thieu 1.077 tai tro bang vay; co dong hien huu huong chuyen giao",
+    "shares_new_m": 550.0,
+    "shortfall_bn": 1077.5,
+    "economics": "same_scenario"
+   },
+   "O2_no_placement": {
+    "desc": "Khong phat hanh: 8.000 tai tro bang no va/hoac giam ton kho; kinh te GIU cung kich ban (DN van co tien); tru 8.000 theo menh gia mot lan. Doi chieu: F0 la gia tri post-money theo KH, KH dung 8.000 = 4.800 thu doi + 1.600 VLD + 1.600 tra no NH (IRQ3 p7) => so voi KH, O2 co them 8.000 no (6.400 moi + 1.600 khong tra duoc). Khong cong lai cau noi tren menh gia.",
+    "economics_shift": {
+     "base": "base",
+     "bull": "bull",
+     "bear_delay": "bear_delay",
+     "stress_100pct": "stress_100pct"
+    },
+    "deduct_bn": 8000.0
+   },
+   "bridge_rate_after_tax": 0.0,
+   "bridge_rate_basis": "rev5: bo — no tru theo menh gia; lai vay sau thue 8% (vay Chu tich 10% x 0,8 [HN TM16]) < r 13,5% => menh gia da la uoc tinh than trong cua gia tri no",
+   "bridge_years": 1.0,
+   "p_success_center": 0.5,
+   "p_success_band": [
+    0.25,
+    0.75
+   ],
+   "p_basis": "KHONG co co so doc lap. TTrPH: doi tuong 'nha dau tu chung khoan chuyen nghiep', KHONG co ten (REPORT r2 s3). Chieu giam: O1 bat NDT moi tra san BVPS 12.586 > gia tri mo hinh/cp. Chieu tang: Chu tich da cho vay ca nhan 700 ty tin chap [HN TM16; IRQ3 p4] = bang chung noi bo san sang cap von (~10% cua 6.923). Hai chieu khong dinh luong duoc => 0,5 trung tinh, bao dai 0,25/0,75. Dat sau khi da thay gia (r4) — khong doi o r5.",
+   "floor_zero": "giu san 0 ky thuat; o r5 khong nhanh nao cham san",
+   "O3_distress_sensitivity": {
+    "desc": "Vo no/tai cau truc khi khong vay duoc: bang chung rang buoc [IRQ3 p4]: tien 3.700 -> 770 ty (30/6->30/9, da gom 700 vay Chu tich), no vay NH 3.000, ton kho kim cuong 41% -> 52% (thanh khoan thap), tai tro hoat dong 150 ty/thang. KHONG co xac suat doc lap => chi do nhay: chuyen q tu O2 sang O3 gia tri L.",
+    "L_values_ps": [
+     0,
+     "(13.182,31-6.741,66 - h x 16.626)/511,72 voi h = 0,2 / 0,4"
+    ],
+    "q_steps": [
+     0.1,
+     0.2
+    ]
+   }
+  },
+  "pre_reach_npat": {
+   "source": "IRQ3 p9 'KET QUA KINH DOANH 2027-2029 – Neu Huy Dong Von thanh cong': LNST 2027 = 0,1 nghin ty, 2028 = 1,2 nghin ty",
+   "base": {
+    "2027": 100.0,
+    "2028": 1200.0
+   },
+   "bull": {
+    "2027": 100.0,
+    "2028": 1200.0
+   },
+   "bear_delay": {
+    "2028": 100.0,
+    "2029": 1200.0
+   },
+   "stress_100pct": {
+    "2027": 100.0,
+    "2028": 1200.0
+   },
+   "note": "bull dung dung so KH (khong co co so nhan len); bear_delay dich 1 nam. Do nhay: bo phan nay => tru PV."
+  },
+  "esop": {
+   "status": "khong_dinh_luong",
+   "note": "ESOP 2025/2026 (TTr 19,20 DHDCD 2025) da duyet, chua phat hanh toi 30/9 (VDL khop 511,89tr). Quy mo khong co trong src => khong kiem chung duoc; anh huong uoc luong: moi 1% pha loang => -1% gia tri/cp (uoc luong)"
+  }
+ }
+}

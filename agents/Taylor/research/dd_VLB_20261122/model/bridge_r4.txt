@@ -1,0 +1,4 @@
+A r3-equivalent (BVSC GP, LN 310, VLD r3, tru luong BCTN): 47,031
+B + GP theo BCTN 2025 (tot = gia han 3 mo): 48,699 (+3.5%)
+C + duong LN fade TTM->loi FY25 KT; tot = TTM giu: 47,246 (-3.0%)
+D + VLD tat toan khi dong mo: 49,123 (+4.0%)  tong +5.2% vs r3 46,689

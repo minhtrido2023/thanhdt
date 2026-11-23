@@ -1,0 +1,247 @@
+{
+ "ticker": "LLM",
+ "dd_date": "2026-11-23",
+ "rev": 5,
+ "units": "ty dong",
+ "price_blind": true,
+ "note": "rev5 (sau skeptic r3): truc f (tien mac ket) tach khoi kich ban xau, neo vao lich su phan phoi tien 2017-26 + lai tien gui thuc nhan; them hazard giai phong p; ap cung co che cho dau tu tai chinh dai han; cong lai hoan nhap bao hanh hoan den khi so du chay het; tru phan LN co dong khong kiem soat. bs_q3_bn chep nguyen rev2/rev4.",
+ "shares_m": 79.726104,
+ "bs_q3_bn": {
+  "cash_TM3": 2707.864,
+  "htm_st_net_TM4": 868.129,
+  "htm_lt_TM4": 0.432,
+  "borrow_st": 620.677,
+  "borrow_lt": 0.0,
+  "op_assets": {
+   "ar_cust": 3101.782,
+   "prepay": 521.155,
+   "other_recv": 449.499,
+   "recv_provision": -871.184,
+   "inventory": 307.425,
+   "lt_recv": 171.0
+  },
+  "op_liabs": {
+   "ap": 1183.467,
+   "cust_adv": 1119.123,
+   "tax": 30.613,
+   "staff": 95.109,
+   "accrued": 1600.213,
+   "unearned_st": 0.939,
+   "other_pay_st": 295.847,
+   "prov_st": 9.394,
+   "bonus": 83.113,
+   "unearned_lt": 12.593,
+   "other_pay_lt": 1.152,
+   "prov_lt": 737.705
+  },
+  "lt_fin_invest_book": 553.664
+ },
+ "r_ke": 0.135,
+ "g": 0.0,
+ "warranty": {
+  "open_st": 386.34,
+  "open_lt": 593.77,
+  "new_9m26": 148.883,
+  "reversal_selling_9m26": 376.018,
+  "reversal_other_inc_9m26": 2.337,
+  "close_st": 9.394,
+  "close_lt": 737.705,
+  "fy25_open_total": 609.93,
+  "fy25_close_total": 980.11,
+  "fy25_reversal_other_income": 174.27,
+  "fy24_reversal_other_income": 19.612,
+  "policy": "trich toi da 5% gia tri cong trinh; chenh lech hoan nhap (TM2.21 BCTC KT 2025 PDF p23)",
+  "src": "BCTC HN Q3/26 txt dong 2895-2915 (TM23), 3383-3395 (TM31), 3457 (TM33); BCTC KT HN 2025 PDF p42 (TM23), p48 (TM32)",
+  "cash_share": {
+   "bad": 1.0,
+   "base": 0.25,
+   "good": 0.1
+  },
+  "cash_share_basis": "Do: 9T/26 chi bang tien = 980,110+148,883-376,018-2,337-747,099 = 3,54 tren 381,9 da giai quyet (0,9%). Base 25% = ~27x muc do duoc (dem cho khieu nai bao hanh lon: Song Hau 1 nha thau Hamon pha san, Vung Ang 1) — UOC LUONG than trong; xau 100% (cach rev2); tot 10%",
+  "tax_on_reversal": 0.2,
+  "flow_noncash_addback_pct_rev": {
+   "bad": 0.0,
+   "base": 0.0168,
+   "good": 0.0168
+  },
+  "flow_basis": "GPM lich su (truoc TT99/2026) DA tru trich bao hanh trong gia von (chi phi ban hang = 0 nam 2024, 2025 [KT25 p12]); phan khong-tien ve sau la HOAN NHAP vao thu nhap khac (bi loai khoi GPM). Do: hoan nhap 2024 19,61 + 2025 174,27 tren DT 6.101,3 + 5.432,6 = 1,68% DT [KT25 p48, p12]. => NOPAT khong tru them bao hanh; cong lai 1,68% DT x 0,8. Xau 0 (moi khoan trich deu chi).",
+  "addback_deferral": {
+   "reversal_9m26": 378.355,
+   "annual_pace": 504.47333333333336,
+   "stock": 747.099,
+   "T_years": 1.4809484478862445,
+   "basis": "Cong lai hoan nhap dong (1,68% DT) chi bat dau sau khi so du 747,1 chay het theo nhip hoan nhap 9T/26 (376,018+2,337 trong 0,75 nam) => tranh dem 2 lan (skeptic r3 muc 2)"
+  }
+ },
+ "rev_base": 4150,
+ "rev_base_basis": "DT TTM 4.145,5 = Q4/25 1.719,8 (BQ) + 9T/26 2.425,7 (BCTC HN Q3/26); thay 4.500 khong co backlog (skeptic r1 muc 3). Tham chieu: KH 2026 me 3.378; FY2025 KT 5.432,6; FY2024 6.101,3; 9T/26 nam hoa 3.234",
+ "rev_good": 6000,
+ "gpm": {
+  "base": 0.045,
+  "good": 0.07
+ },
+ "opex_ga": {
+  "base": 100,
+  "good": 120
+ },
+ "nopat_bad": -30,
+ "bad_impairment": 200,
+ "trapped": {
+  "_superseded_rev4": {
+   "bad": 0.077,
+   "base": 1.0,
+   "good": 1.0
+  }
+ },
+ "lt_fin_invest_book": 553.664,
+ "hna_after_tax": 77.2,
+ "hna_basis": "BCTC KT 2025 TM4c (PDF p28): gia goc 85,696, ty le 3,71% tai 31/12/25 = 01/01/25 => dau gia 07/2025 KHONG ban (hoac khong thanh); Q3/26 gia goc khong doi. Gia tri thi truong HNA (ma KHAC) 182,2 => lai an 77,2 sau thue (rev2)",
+ "welfare": {
+  "pct_npat": 0.0628,
+  "basis": "Phan phoi LN 2025 (NQ DHDCD 232/NQ-DHDCD 26/06/2026): trich Quy KTPL 30,895 / LNST me 2025 492,04 = 6,28% (BCTC HN Q3/26 TM25 txt dong ~3140-3150; KT25 p12); DTPT 242,306 (nam trong VCSH, tien con o DN)",
+  "npat_parent_9m26_unappropriated": 695.0,
+  "npat_9m26_basis": "115,9+479,9+99,2; LN 2026 chua trich (phan phoi tai DHDCD 2027)"
+ },
+ "hamon": {
+  "payable_bond_proceeds": 160.378,
+  "after_tax_if_recognised": 128.3,
+  "treatment": "base: giu la no (dung hach toan); tot: ghi nhan thu nhap x0,8; xau: tra het (da nam trong no)",
+  "src": "BCTC HN Q3/26 TM24 txt dong 2966-2980; BCTC KT 2025 TM22 PDF p42"
+ },
+ "weights": {
+  "bad": 0.2222222222222222,
+  "base": 0.6666666666666666,
+  "good": 0.1111111111111111
+ },
+ "liquidity_discount": 0.1,
+ "sens": {
+  "guarantee_6901_overdue_debt": 496.97,
+  "guarantee_basis": "baodauthau 20/10/2026: Lilama 69-1 no qua han 496,97, VCSH -102,61; BCTC KT 2025 KHONG co thuyet minh bao lanh/no tiem tang (TM26 p46 chi thue dat + ngoai te; TM39 p54 khong su kien)",
+  "capraise_new_shares_m": 45.0,
+  "capraise_price": 10000,
+  "stock_div": 0.317,
+  "qualified_subs": 370.51,
+  "qualified_subs_basis": "KT25 p07-09: phai thu qua han 92,26 + ton kho 246,69 + lai von hoa CKLM 31,56",
+  "qualified_assoc": 330.77,
+  "cph_bracket": [
+   100,
+   300,
+   500
+  ],
+  "cph_basis": "KHONG co co so (uoc luong khung): quyet toan CPH chua duyet; nghia vu nop NSNN/dieu chinh von NN khong cong bo"
+ },
+ "weights_basis": "Tan suat nam 2017-2025 (9 nam, BQ np/rev + KT25): nam lo LNST me (2018 -163,1; 2019 -78,0) = 2/9 -> xau; nam GPM >=7% (2025) = 1/9 -> tot; con lai 6/9 -> co so. N=9 nho; luoi 25/50/25 bao kem",
+ "distribution_history": {
+  "cash_dps_vnd_by_year": {
+   "2017": 225,
+   "2018": 600,
+   "2019": 400,
+   "2020": 400,
+   "2021": 200,
+   "2022": 100,
+   "2023": 100,
+   "2024": 450,
+   "2025": 350,
+   "2026_9T": 0
+  },
+  "src_dps": "BQ tav2_bq.ticker_financial div1y tai dong Q4 moi nam (model/bq_fin_LLM.csv); 2026_9T: BCTC HN Q3/26 LCTT ma 36 = 5.244.000 d (0,07 d/cp, lam tron 0)",
+  "crosscheck_audited": {
+   "2024_paid_bn": 35.776,
+   "2025_paid_bn": 27.85,
+   "src": "BCTC KT HN 2025 LCTT ma 36 (PDF p13): (27.849.729.900) / (35.775.942.300)",
+   "implied_dps": {
+    "2024": 448.7,
+    "2025": 349.3
+   }
+  },
+  "profit_2025_distribution": {
+   "dtpt_bn": 242.306,
+   "ktpl_bn": 30.895,
+   "cash_dividend_bn": 0,
+   "npat_parent_bn": 492.04,
+   "src": "BCTC HN Q3/26 TM25 (NQ 232/NQ-DHDCD 26/06/2026): chi trich DTPT + KTPL, khong co co tuc tien"
+  },
+  "dividend_payable_q3_bn": 0.679,
+  "shares_unchanged": "79.726.104 cp tai 01/01/2026 va 30/09/2026 (TM25d)",
+  "principal_distribution_events_2017_2025": 0,
+  "n_years": 9,
+  "pro_rata": "Co tuc tien tra theo ty le so huu cho moi co dong (9/9 nam co chi tra 2017-25 o dong div1y) => co che mac ket KHONG phai loai tru co dong thieu so, ma la quy mo chi tra nho so voi dong tien ton"
+ },
+ "cash_yield": {
+  "obs": {
+   "2024": {
+    "interest_bn": 41.438,
+    "avg_cash_eq_bn": 2857.3,
+    "yield": 0.0145,
+    "note": "mau so chi tien+tuong duong (khong gom tien gui ky han) => can tren"
+   },
+   "2025": {
+    "interest_bn": 33.452,
+    "avg_cash_eq_bn": 2837.8,
+    "yield": 0.0118,
+    "note": "can tren nhu tren"
+   },
+   "9T26": {
+    "interest_bn": 34.398,
+    "annualised_bn": 45.864,
+    "cash_plus_deposits_q3_bn": 3576.4,
+    "yield": 0.0128
+   }
+  },
+  "src": "KT25 TM29 (PDF p47): lai tien gui, lai cho vay 33.452.287.939 / 41.438.199.363; tien cuoi nam 2.699,17 / 2.976,47 / 2.738,04 (LCTT p14); HN Q3/26 TM29 txt dong 3319: 34.397.902.566",
+  "gross_yield_used": 0.0128,
+  "basis": "trung vi 3 quan sat (1,18% / 1,28% / 1,45%)"
+ },
+ "lt_invest_yield": {
+  "obs": {
+   "2024": 23.283,
+   "2025": 19.196,
+   "9T26_annualised": 23.254
+  },
+  "book_bn": 553.664,
+  "yield_used": 0.042,
+  "tax": 0.0,
+  "src": "KT25 TM29 p47 co tuc, loi nhuan duoc chia 19.195.550.394 / 23.283.352.000; HN Q3/26 TM29: 17.440.552.000 (9T) ; trung vi 23,25/553,7 = 4,2%; co tuc giua doanh nghiep khong chiu thue TNDN"
+ },
+ "unlock_hazard": {
+  "p_base": 0.09090909090909091,
+  "estimator": "Laplace (rule of succession, prior deu): (0+1)/(9+2); 0 su kien phan phoi goc trong 9 nam 2017-25",
+  "grid": [
+   0.0,
+   0.05,
+   0.09090909090909091,
+   0.2,
+   0.3333333333333333
+  ],
+  "grid_labels": {
+   "0.0": "MLE (khong bao gio giai phong)",
+   "0.05": "Jeffreys (0+0,5)/(9+1)",
+   "0.0909": "Laplace (base)",
+   "0.2": "gia dinh",
+   "0.3333": "can tren 95% (quy tac 3/N)"
+  },
+  "formula": "f(p) = (y_sau_thue + p)/(r + p): tai san phi hoat dong sinh loi y den khi giai phong (hazard p/nam) roi duoc tra theo menh gia"
+ },
+ "nci": {
+  "share_of_npat": 0.032756449065085624,
+  "src": "HN Q3/26 KQKD txt dong 519-520: LNST me 694.979.139.771, CD khong kiem soat 23.535.515.525 (9T/26)"
+ },
+ "rev_alt": {
+  "seasonal_2026E": 3490.2,
+  "q4_share_2018_2025": [
+   0.212,
+   0.331,
+   0.293,
+   0.19,
+   0.393,
+   0.479,
+   0.165,
+   0.317
+  ],
+  "q4_share_median": 0.305,
+  "rev_9m26": 2425.7,
+  "src": "BQ ticker_financial rev theo quy 2018-2025 (model/bq_fin_LLM.csv); 9T/26 BCTC HN Q3/26",
+  "median_rev_2019_2025": 5432.5,
+  "run_rate_9m26": 3234.3
+ }
+}

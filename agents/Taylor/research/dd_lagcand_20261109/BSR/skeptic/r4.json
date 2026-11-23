@@ -1,0 +1,13 @@
+{
+  "round": 4,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev5.md",
+  "report_md5": "9df8f55395f57e00832d201042b10139",
+  "brief_md5": "54744118f33f4a420c16b786d53ac56e",
+  "model": "opus",
+  "cost_usd": 1.1471356000000001,
+  "started_at_ict": "2026-11-23T19:17:27+07:00",
+  "summary": "Rev5 sạch về số học: mọi số mô hình dùng đều khớp ảnh trang gốc của bảng cân đối Q3/2026 và TM17, và chạy lại mô hình ra đúng tâm 16.544. Mục VAT (B1, killer của r3) đã được dựng lại bằng cơ chế pháp lý thật thay vì giả định hoàn 100%. Điểm yếu còn lại cũng nằm ở mục đó: base coi cơ chế GTGT 0-kê khai chắc chắn hết hạn 31/12/2026 (p=0 cho gia hạn, −1.605 nếu gia hạn), trong khi chính kịch bản CƠ SỞ giả định cú sốc giá nhiên liệu kéo dài qua 2027 — hai giả định không nhất quán. Thêm nữa, năng lực bù trừ 2.027 tỷ/năm bị số 9T/2026 trong cùng TM17 phản chứng (ảnh hưởng nhỏ, −200…−313). Chiều rẻ: độ nhạy thuế suất 10% có lẽ không có cơ sở, còn trục tuân thủ dự án mở rộng và khả năng hoàn thuế chưa kiểm được. Cộng các mục mở, tâm dịch khoảng −13%…+11%; nhãn TRÊN vùng có lẽ không đổi, nhưng tâm chưa xác nhận được cho tới khi gán được xác suất gia hạn có cơ sở.",
+  "verdict_raw_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/skeptic/r4_raw.md"
+}

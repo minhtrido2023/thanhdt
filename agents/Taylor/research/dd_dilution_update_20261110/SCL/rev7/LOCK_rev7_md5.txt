@@ -1,0 +1,5 @@
+dd499b5a84a9eeddfd2c59df26ab71ea  assumptions_SCL_rev7.json
+25b4c14a01b785b3b7075ae045bff0b0  calc/calc_rev7.py
+a479d77aa1fdbb881abc61545aa385d0  calc/calc_rev7_out.json
+73a849830b66393d4120d69d2479a42d  ../rev6/inputs/model_scl_r3_out.json
+# khoá 2026-11-23 19:06:57 ICT (trước khi đọc giá SCL)

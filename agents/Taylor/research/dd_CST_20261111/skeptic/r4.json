@@ -1,0 +1,13 @@
+{
+  "round": 4,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_CST_20261111/REPORT_rev4.md",
+  "report_md5": "69ad67a604939eab8eae138f95eafea7",
+  "brief_md5": "7ea08e719120ab4ede3d0d16955930f0",
+  "model": "opus",
+  "cost_usd": 1.1229868,
+  "started_at_ict": "2026-11-23T19:07:47+07:00",
+  "summary": "Rev 4 vững về số học: TM17 và BCĐKT Q3 được tôi tự đọc từ ảnh trang gốc và khớp, công thức mô hình tái lập đúng 6.022. Bảng độ nhạy trình bày cả hai chiều. Tuy vậy lập luận then chốt của rev 4 (khoản 130,66 tỷ chia 100% cổ tức vì ĐTPT = 30% LN năm) không loại trừ được cách đọc 'KTPL bị chặn ở trần': KTPL 2025 bằng đúng trần 82,3, còn 2026 dư ~29,5 tỷ dưới trần, nên tâm có thể thấp hơn 5–11%. Theo chiều giảm còn có khoản dự phòng 333,5 tỷ chưa rõ bản chất, cùng việc trả ~356 tỷ nợ mâu thuẫn với giả định dự án 70% vay mà chưa được giải thích. Theo chiều tăng, lãi vay sẽ giảm và kịch bản tái cơ cấu TKV ở giá sổ sách chưa có trọng số. Các hạng mục ngành bắt buộc (trữ lượng, thời hạn giấy phép mỏ hiện tại, vốn cam kết dự án ~50% tâm) vẫn thiếu, nên chưa thể CONFIRMED.",
+  "verdict_raw_path": "agents/Taylor/research/dd_CST_20261111/skeptic/r4_raw.md"
+}

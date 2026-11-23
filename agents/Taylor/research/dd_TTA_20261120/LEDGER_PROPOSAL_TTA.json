@@ -1,78 +1,65 @@
 {
- "proposal_for": "kb/dd_price_zones.json",
- "job": "Taylor_20261122_234424",
  "entry": {
   "ticker": "TTA",
   "dd_date": "2026-11-20",
-  "rev": 2,
+  "rev": 3,
   "bctc_quarter": "2026Q3",
   "skeptic_final": "REFUTED_OPEN",
   "skeptic_final_basis": "skeptic_run",
-  "skeptic_verdict_path": "agents/Taylor/research/dd_TTA_20261120/skeptic/r2.json",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_TTA_20261120/skeptic/r3.json",
   "audited_fy_missing": false,
-  "zone_low": 7266,
-  "center": 8548,
+  "zone_low": 6415,
+  "center": 7547,
   "center_kind": "expected_weighted",
-  "center_desc": "kỳ vọng trọng số 4 kịch bản giá FIT mặt trời (A 0,15 / B 0,25 / B′ 0,35 / C 0,25; giữ trọng số r3; bù trừ hồi tố ngay V1 theo giá trị gộp VAT) SAU chiết khấu thanh khoản 2,89% @5 tỷ; thuỷ điện nền 373 tỷ +1%/năm (BGCPTĐ 2019→2026), FIT quy tỷ giá +1,8%/năm (CAGR 2016→2025); r 13,5% @ lãi huy động 12T hiệu dụng 7,40%; mù giá",
-  "zone_high": 9830,
+  "center_desc": "kỳ vọng trọng số 4 kịch bản giá FIT mặt trời (A 0,15 / B 0,25 / B′ 0,35 / C 0,25; giữ trọng số r3/r4; bù trừ hồi tố ngay V1 gộp VAT) SAU chiết khấu thanh khoản 2,89% @5 tỷ; thuỷ điện nền 369,9 tỷ (trung bình cắt DT bộ phận Yên Bái 2021–2025 đo từ BCTC kiểm toán) PHẲNG danh nghĩa (biểu giá chi phí tránh được 2020/2021→2026 không đổi); giá sau FIT 1.100 phẳng; FIT quy tỷ giá +1,8%/năm; r 13,5% @ lãi huy động 12T 7,40%; mù giá",
+  "zone_high": 8680,
   "center_range": null,
-  "center_alt": 8802,
+  "center_alt": 7772,
   "center_alt_kind": "expected_weighted",
   "price_ref": 10250,
   "price_date": "2026-11-19",
-  "verdict_label": "Giá 10.250 = 1,20× tâm sau chiết khấu thanh khoản 8.548 (1,16× trước TK 8.802): TRÊN vùng hợp lý 7.266–9.830, sát ngưỡng trên (~4%); 2/30 ô lưới trọng số vượt giá ⇒ hướng không còn bền với mọi trọng số. Moat NONE. Pháp lý: WARNING (FIT hưởng sai đối tượng; giấy phép Thuỷ lợi Bầu Ngứ; giao dịch bên liên quan).",
-  "skeptic_status": "r1 (22/11, DD_GENERAL) REFUTED trên REPORT_r3 (thiên lệch quá thấp: thuỷ điện phẳng danh nghĩa, FIT khoá tỷ giá) → REPORT_r4 áp K1–K5, tâm +38,8%; r2 (23/11) INCONCLUSIVE medium: tâm ~8.800 ±7% hợp lý, chưa CONFIRMED vì PPA/cơ chế giá Ngòi Hút 2 và cam kết vốn Phước Hoà không định lượng được. Không chạy vòng 3 (hạng mục chặn không kiểm chứng được từ nguồn hiện có).",
-  "source_file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r4.md",
+  "verdict_label": "Giá 10.250 = 1,36× tâm sau TK 7.547 (1,32× trước TK 7.772): TRÊN vùng hợp lý 6.415–8.680 (vượt ngưỡng trên ~18%); 0/30 ô lưới trọng số vượt giá. Moat NONE. Pháp lý: WARNING (FIT hưởng sai đối tượng; giấy phép Thuỷ lợi Bầu Ngứ; giao dịch bên liên quan).",
+  "skeptic_status": "r1 (22/11) REFUTED trên REPORT_r3 → REPORT_r4; r2 (23/11) INCONCLUSIVE (chỉ số thuỷ điện 1% không có cơ sở 2021→2026; NH2) → REPORT_rev5 áp L1–L3 (thuỷ điện + giá sau FIT phẳng theo 7 QĐ biểu giá; nền DT bộ phận đo), tâm −11,7%; r3 (23/11, vòng CUỐI) INCONCLUSIVE medium: phẳng danh nghĩa 34 năm vs chi phí +3%/năm không nhất quán khung lạm phát, cắt −15% sau 2036 không nguồn, chi phí thuỷ điện neo năm 2025 cao (chiều tăng +5–16%); ngược lại cam kết vốn Phước Hoà (TMĐT 22.865 tỷ) và giá NH2 không định lượng được (chiều giảm). DỪNG, không chạy vòng nữa.",
+  "source_file": "agents/Taylor/research/dd_TTA_20261120/REPORT_rev5.md",
   "evidence": [
    {
-    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r4.md",
-    "quote": "Tâm SAU thanh khoản (expected_weighted)** | **8.548",
+    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_rev5.md",
+    "quote": "| **Tâm SAU thanh khoản (expected_weighted)** | **7.547** (ADV 68 phiên: 7.472) |",
     "fields": [
      "center"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r4.md",
-    "quote": "TRƯỚC chiết khấu thanh khoản** | **8.802",
+    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_rev5.md",
+    "quote": "| **Tâm có trọng số TRƯỚC chiết khấu thanh khoản** | **7.772** (r4: 8.802, −11,7%) |",
     "fields": [
      "center_alt"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r4.md",
-    "quote": "7.266 – 9.830",
+    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_rev5.md",
+    "quote": "| Vùng cùng nền sau TK: dưới ≤ 0,85× · hợp lý · trên > 1,15× | **≤ 6.415 · 6.415 – 8.680 · > 8.680** |",
     "fields": [
      "zone_low",
      "zone_high"
     ]
    },
    {
-    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_r4.md",
-    "quote": "Giá 10.250 (19/11/2026",
+    "file": "agents/Taylor/research/dd_TTA_20261120/REPORT_rev5.md",
+    "quote": "- Giá 10.250 (19/11/2026, `model/data/px_tta.csv`) = **1,36×** tâm sau TK, 1,32× trước TK ⇒ **trên vùng hợp lý**, vượt ngưỡng trên 8.680 khoảng 18%.",
     "fields": [
      "price_ref"
     ]
    }
   ],
-  "assumptions_file": "agents/Taylor/research/dd_TTA_20261120/model/dcf_tta_r4.py",
-  "assumptions_md5": "11c5bef8b136a2c73a1ac5f13a4ab326",
+  "assumptions_file": "agents/Taylor/research/dd_TTA_20261120/model/dcf_tta_r5.py",
+  "assumptions_md5": "bfeea44ff92a6aca5d06eaf48dd79193",
   "null_reason": null,
   "expires_on": "2027-03-20",
   "expires_basis": "BCTC Q4/2026 (~1–2/2027) hoặc văn bản chốt giá FIT Bầu Ngứ/Núi Một 1 hoặc EPTC thanh toán bù/ngừng trả thêm hoặc 120 ngày",
-  "correction_reason": "skeptic DD_GENERAL r1 22/11 REFUTED rev1 (tâm 6.159): DT thuỷ điện phẳng danh nghĩa tới 2060 + FIT khoá tỷ giá (quá thấp), VAT trong phải thu vượt, BIDV 70 cầm cố, Phương Mai (quá cao). Rev mới REPORT_r4: thuỷ điện 373 +1%/năm, tỷ giá +1,8%/năm, phải thu vượt 322,52 gộp VAT, C: BIDV=0/Phương Mai −50%.",
-  "notes": "Độ nhạy tâm trước TK: thuỷ điện g 0% 7.865 / 2% 9.856; NH2 phẳng ≈ −550 (ước lượng); thuỷ điện dừng 2050 8.237; Bầu Ngứ dừng 2027 7.976; phải thu vượt = 0 6.996. r ±100bp sau TK 9.240…7.931. DSCR 2027 sau thuế+HTKD A 1,37 / B 1,24 / B′ 1,10 / C 0,80. HARD ABANDON thêm #6 (đình chỉ Bầu Ngứ theo Luật Thuỷ lợi), #7 (cam kết vốn Phước Hoà >300 tỷ trước khi FIT có kết luận). Sizing V8: không đề xuất mua; nếu về vùng hợp lý tối đa 2% NAV. KHÔNG phải tín hiệu mua.",
-  "report_md5": "43300d8cde3ece4ddd1d311b8df8d735",
-  "supersedes": "TTA@2026-11-20#1"
- },
- "skeptic_verdict_path": "agents/Taylor/research/dd_TTA_20261120/skeptic/r2.json",
- "skeptic_verdict": "INCONCLUSIVE",
- "skeptic_rounds_this_job": 1,
- "label_note": "skeptic_final = REFUTED_OPEN (không phải FIXED_UNVERIFIED như mặc định brief): theo định nghĩa enum §E10, vòng cuối r2 INCONCLUSIVE và SAU r2 không áp thêm sửa nào (hạng mục chặn không kiểm chứng được). Mike có thể hạ/giữ nhãn; KHÔNG được nâng CONFIRMED (dd_ledger_append_confirmed sẽ từ chối vì verdict ≠ CONFIRMED).",
- "remaining_items": [
-  "PPA/cơ chế giá Ngòi Hút 2 (48/82 MW) — áp chỉ số 1% không bằng chứng; phẳng ≈ −6% tâm",
-  "Tổng mức/tỷ lệ góp vốn Phước Hoà 1.200 MW — chưa công bố",
-  "Thời hạn HTKD + giấy phép nước/đất thuỷ điện tới 2060",
-  "DT thuỷ điện 2021–23 dùng tổng DT BQ (không phải DT điện) ⇒ nền 373 cao thêm ~4–5 tỷ (skeptic ước −150 đ/cp)",
-  "Chỉ số 1% đo khung 2019→2026; khung 2021→2026 ≈ 0% (tâm 7.865 trước TK)"
- ]
+  "correction_reason": "skeptic DD_GENERAL r2 23/11 INCONCLUSIVE rev2 (tâm 8.548): chỉ số thuỷ điện 1%/năm đo từ 2019 trong khi 2021→2026 phẳng, áp cả Ngòi Hút 2 không bằng chứng; DT thuỷ điện 2021–23 dùng tổng DT. Rev mới REPORT_rev5: HYD_G=0 & giá sau FIT phẳng (7 QĐ BGCPTĐ 2020–2026 cùng 726/703), nền 369,9 = trung bình cắt DT bộ phận Yên Bái đo từ BCTC kiểm toán 2021–2025.",
+  "notes": "Độ nhạy tâm trước TK: thuỷ điện g 1% 8.612 / 2% 9.550; nền 397 (nhịp 2026) 8.580; bỏ cắt −15% sau 2036 8.198; VAT hồi tố thu hồi 8.039; FX 3,2% 8.293; thuỷ điện dừng 2050 7.319; Bầu Ngứ dừng 2027 6.945; phải thu vượt = 0 5.966. r ±100bp sau TK 8.119…7.033. Lưới P(A)×P(C) sau TK cao nhất 9.902 < giá. DSCR 2027 A 1,36 / B 1,23 / B′ 1,09 / C 0,79. HARD ABANDON #7: cam kết vốn Phước Hoà >300 tỷ (TMĐT 22.865 tỷ theo nhadautu.vn ⇒ ~4,4% vốn chủ dự án, ước lượng). Skeptic r3 chỉ ra chiều tăng chưa xử lý (khung lạm phát chi phí vs DT phẳng, cắt −15%, neo chi phí) ⇒ tâm có thể +5–16%. Sizing V8: không đề xuất mua; nếu về vùng hợp lý tối đa 2% NAV. KHÔNG phải tín hiệu mua.",
+  "report_md5": "b76f74d0b869c18289dfb1b3600ba47a",
+  "supersedes": "TTA@2026-11-20#2"
+ }
 }

@@ -1,0 +1,3 @@
+gia/tam=1.587; tam=20978; 0.85xtam=17831
+hazard giai phong p can de tam=gia: 1.847/nam (f_cash=0.937)
+tam khi f=1 (khong mac ket): 34886 => gia/tam=0.955

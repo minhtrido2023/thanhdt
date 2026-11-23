@@ -1,0 +1,30 @@
+spread_pct {2017: 2.259, 2018: 3.109, 2019: 3.384, 2020: 2.928, 2021: 3.042, 2022: 3.549, 2023: 3.415, 2024: 3.106, 2025: 2.819, '9T26': 2.848}
+ktpl_accrual_bn 2794
+ktpl_accrual_ps 334
+bvps_rev3 30359
+bvps_adj 30024
+lev_end_adj 7.2391
+lev_end_unadj 7.1593
+scen_spread {'bear': 2.259, 'base': 2.848, 'bull': 3.147}
+roe {'bear': 0.1197, 'base': 0.151, 'bull': 0.1669}
+pb {'bear': 0.7652, 'base': 1.2459, 'bull': 1.4901}
+val {'bear': 22976, 'base': 37406, 'bull': 44741}
+weighted 35632
+weighted_ke {'-100bp': 42111, '+100bp': 30881}
+alt_base_spread_pct {'FY2025': 2.819, 'cycle_17_25': 3.068, 'median_year_17_25': 3.106, 'cycle_17_21': 2.944}
+alt_base_val {'FY2025': 36704, 'cycle_17_25': 42792, 'median_year_17_25': 43727, 'cycle_17_21': 39766}
+alt_base_weighted {'FY2025': 35281, 'cycle_17_25': 38325, 'median_year_17_25': 38793, 'cycle_17_21': 36812}
+equal_wt_all_10_windows 42253
+bear_rev3_stress_spread_pct 2.159
+ke_sens_base {'-100bp': 44207, '-50bp': 40523, '+50bp': 34734, '+100bp': 32419}
+ke_sens_base_b05 {'-100bp': 40523, '-50bp': 38902, '+50bp': 36021, '+100bp': 34734}
+ke_D4 {0.123: 45875, 0.134: 37991}
+g_sens {0.06: 36422, 0.08: 38748}
+val_car12 32408
+cbbank {5000: 36661, 10000: 35915, 20000: 34424}
+resid_dps_if_cash 1983
+weighted_post_if_cash 33279
+rebase_factor_bonus_12_8 0.8865
+rebase_factor_bonus_plus_stockdiv 0.754
+zone_rebased_bonus_only [27377, 31589, 37332]
+casa 0.3177
