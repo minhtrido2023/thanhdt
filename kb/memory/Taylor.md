@@ -70,3 +70,4 @@
 - [2026-11-23T06:57:19Z] [dd-SCL rebuild 23/11] XONG job Taylor_20261123_063646: REPORT_rev6 tâm 16.883 (r4 21.339), skeptic r3 REFUTED (k chia NLĐ vs lá chắn thuế) — CHỜ Mike áp LEDGER_PROPOSAL_SCL.json (REFUTED_OPEN) / user quyết vòng 4
 - [2026-11-23T06:57:46Z] [dd-QTP rebuild 23/11] XONG job Taylor_20261123_063644: REPORT_rev4b tâm 6.294 (r3c 7.701), skeptic r3 INCONCLUSIVE (ETS/hoàn trả mặt bằng/PPA/pha loãng) — CHỜ Mike áp LEDGER_PROPOSAL_QTP.json (REFUTED_OPEN) / user quyết vòng 3
 - [2026-11-23T06:59:29Z] [dd-VCP rebuild 23/11] XONG job Taylor_20261123_063642: REPORT_rev3b tâm 32.605 (rev2 40.273), skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_VCP.json (REFUTED_OPEN) / user quyết vòng 3
+- [2026-11-23T10:17:24Z] [SZL DD v3 23/11] XONG job Taylor_20261123_100922: REPORT_rev5 tâm 26.183 (vùng 22.740–29.700), skeptic r4 INCONCLUSIVE (vòng cuối) — CHỜ Mike áp LEDGER_PROPOSAL_SZL.json (REFUTED_OPEN)

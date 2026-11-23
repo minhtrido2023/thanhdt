@@ -1118,3 +1118,69 @@
 
 ## Consolidation 2026-11-23T08:07:02Z
 - [2026-11-23T07:29:03Z] Mafee/status — orb_futures_exit: {"account": "SpaceX", "mode": "DRY", "reason": "TIME", "entry": 1766.5, "exit": 1791.1, "pnl_gross_vnd": -2460000, "exit_px_estimated": false}
+
+## Consolidation 2026-11-23T10:17:43Z
+- [2026-11-23T10:09:32Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "in_progress", "note": "bat dau: doc r3 + rev8 DCM"}
+- [2026-11-23T10:09:38Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "in_progress", "note": "SZL v3: doc r3 + report"}
+- [2026-11-23T10:09:41Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "doc verdict r3 + report rev3b VCP"}
+- [2026-11-23T10:09:43Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "in_progress", "note": "bat dau: doc skill + r3 HHS"}
+- [2026-11-23T10:09:47Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "in_progress", "note": "doc rev3 + r3 verdict, lap danh sach hang muc"}
+- [2026-11-23T10:10:15Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:10:17Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:10:22Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:10:24Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:10:25Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "đã đọc r3 + rev3b; rà nguồn src cho 6 hạng mục"}
+- [2026-11-23T10:10:26Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:10:27Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "in_progress", "note": "tim nguon tach HTK NC-II thap/cao tang"}
+- [2026-11-23T10:10:59Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "in_progress", "note": "doc TM ton kho KT23/KT25: BDS do dang 2022-2025 da co; dang lay 2021 + Q3/26 + uu dai thue"}
+- [2026-11-23T10:11:04Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "in_progress", "note": "SZL v3: da xac minh KTPL 20% (tr.26), NQ76 qua von chu (tr.25), CP tra truoc dat; tim BCTC KT 2025"}
+- [2026-11-23T10:11:13Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "rà NQ DHDCD 2026 + chuỗi thuỷ văn dài Cửa Đạt"}
+- [2026-11-23T10:11:15Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:11:17Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:11:22Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:11:24Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:11:26Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:12:14Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "tải NQ+TL DHDCD 2026 vào src_rev4, đang đọc"}
+- [2026-11-23T10:12:15Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:12:17Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:12:21Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "in_progress", "note": "co so doc lap: BDS do dang KT21-25+H1/26; TM31 KT25 uu dai thue co thoi han (mien giam 78,2 ty 2025); TM35 nghia vu tai che bao bi. Dang dung calc rev4"}
+- [2026-11-23T10:12:22Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:12:24Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:12:26Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:12:37Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "in_progress", "note": "KTPL 6,46 ty tim duoc (ma 323 CDKT Q3); dang dung rev6 calc"}
+- [2026-11-23T10:12:41Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "in_progress", "note": "SZL v3: model rev5 chay xong, viet REPORT_rev5"}
+- [2026-11-23T10:13:05Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "NQ DHDCD 2026 đọc xong (không phát hành); rà QĐ HĐQT + thuỷ văn"}
+- [2026-11-23T10:13:15Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:13:17Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:13:22Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:13:24Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:13:26Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "in_progress", "note": "da lay bang bien dong quy KHCN KT2025 (trich 2024 44,8 / 2025 188,0); dang kiem phap ly + dung model_r9"}
+- [2026-11-23T10:13:26Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:13:49Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "in_progress", "note": "SZL v3: REPORT_rev5 xong (tam 26.183), chay skeptic r4"}
+- [2026-11-23T10:13:52Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "dựng chuỗi thuỷ văn 2021-2025 từ BCTN 2021/2023/2024/2025"}
+- [2026-11-23T10:14:08Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "in_progress", "note": "calc rev6 xong (tai lap 13969, tach HH), viet REPORT_rev6"}
+- [2026-11-23T10:14:15Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:14:17Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:14:23Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:14:25Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:14:27Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:15:16Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:15:18Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:15:23Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:15:25Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:15:27Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "in_progress", "note": "REPORT_rev4 viet xong (tam 17.673), chay skeptic r4"}
+- [2026-11-23T10:15:27Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:15:43Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "chuỗi thuỷ văn 2020-2025 đo xong (k~1,009); kiểm tiền cấp quyền TNN"}
+- [2026-11-23T10:15:53Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "in_progress", "note": "REPORT_rev6 xong, chay skeptic r4 (vong 3)"}
+- [2026-11-23T10:16:16Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:16:18Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:16:23Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:16:25Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:16:27Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:17:13Z] Taylor/finding — dd-rebuild-v3-SZL-20261123: {"ticker": "SZL", "verdict_new": "INCONCLUSIVE (skeptic r4 = vong 3, cuoi, medium)", "label_ledger": "REFUTED_OPEN (khong doi nhan)", "center_old": 25852, "center_new": 26183, "zone_5bn": [22740, 29700], "center_40m": 27207, "zone_40m": [23629, 30861], "label": "TRONG/TRONG; gia 27700 cao hon tam 5,8%/1,8%", "bridge": "rev4b 25852 +NQ76 708 -KTPL20% 1766 +TanDuc 1391 = 26183", "missing_items": ["ton kho 118,03 + tra truoc NCC 72,61 chua dinh gia (toi ~+13%, chua ro ban chat)", "truc nc doanh thu chua thuc hien 762 duoi san phan bo deu (~-4,5% uoc luong cua skeptic)", "doi chieu capex vs CF_OA chua lam", "y kien KT FY2025", "ngay GDKHQ thuong 70% (DKCC 17/09 theo bao chi)", "Long Phuoc 920"], "report": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev5.md", "report_md5": "3d5eecc3816d88fc2e97d1e937a07538", "ledger_proposal": "agents/Taylor/research/dd_redo_20261105/SZL/LEDGER_PROPOSAL_SZL.json", "selfcheck": "dd_price_zones_selfcheck --ledger /tmp/dd_pz_SZL_v3.json: 116 entry / 36 ma; loi 0; rc=0", "skeptic_cost_usd": 1.428, "measured_by": "rev5/calc/model_rev5_out.txt (md5 f9f1a8a2) + skeptic/r4.json + dd_price_zones_selfcheck.py"}
+- [2026-11-23T10:17:16Z] Taylor/heartbeat — Taylor_20261123_100914: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261123_100914", "source": "watcher"}
+- [2026-11-23T10:17:18Z] Taylor/heartbeat — Taylor_20261123_100916: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261123_100916", "source": "watcher"}
+- [2026-11-23T10:17:23Z] Taylor/heartbeat — Taylor_20261123_100922: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261123_100922", "source": "watcher"}
+- [2026-11-23T10:17:25Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261123_100924", "source": "watcher"}
+- [2026-11-23T10:17:27Z] Taylor/heartbeat — Taylor_20261123_100926: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261123_100926", "source": "watcher"}
+- [2026-11-23T10:17:33Z] Taylor/heartbeat — Taylor_20261123_100924: {"status": "in_progress", "note": "đủ nguồn (BCTN20/21/22/24, NQ DHDCD26, KT25 PL04/05); dựng calc_rev4"}
