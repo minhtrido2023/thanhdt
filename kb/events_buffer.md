@@ -790,3 +790,6 @@
 - [2026-11-23T00:38:45Z] Taylor/heartbeat — Taylor_20261123_003452: {"status": "in_progress", "note": "QĐ 968/QĐ-BSR tải được: NCMR 148→171k thùng/ngày + Euro V + lộ trình môi trường bắt buộc (hỗn hợp tăng trưởng/tuân thủ); đang đọc lại PDF cho E1-E4"}
 - [2026-11-23T00:38:53Z] Taylor/heartbeat — Taylor_20261123_003452: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_003452", "source": "watcher"}
 - [2026-11-23T00:38:55Z] Taylor/heartbeat — Taylor_20261123_003454: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_003454", "source": "watcher"}
+
+## Consolidation 2026-11-23T00:39:02Z
+- [2026-11-23T00:38:57Z] Taylor/heartbeat — Taylor_20261123_003456: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_003456", "source": "watcher"}
