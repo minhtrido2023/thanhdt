@@ -50,3 +50,4 @@
 - [2026-11-23T05:15:06Z] ĐANG DỞ: job Taylor_20261123_050007 POW REPORT_rev4 (tâm 9.387, lock 820f22c0) skeptic r3 vòng cuối | NEXT: LEDGER_PROPOSAL_POW.json → bus+notify
 - [2026-11-23T05:15:23Z] ĐANG DỞ: job Taylor_20261123_050009 SZL REPORT_rev4b (tâm 25.852) skeptic r3 vòng cuối log /tmp/szl_sk_r3.log | NEXT: LEDGER_PROPOSAL_SZL.json → bus+notify
 - [2026-11-23T05:16:39Z] [dd-BSR rebuild 23/11] XONG job Taylor_20261123_050001: REPORT_rev4 tâm 16.886, skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_BSR.json (REFUTED_OPEN) / user quyết VAT + V4a hydrotreating
+- [2026-11-23T05:18:51Z] [dd-POW rebuild 23/11] XONG job Taylor_20261123_050007: REPORT_rev4 tâm 9.387 (vùng 6.966–11.808), skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_POW.json (REFUTED_OPEN) / user quyết vòng 3
