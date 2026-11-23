@@ -89,3 +89,4 @@
 - [2026-11-23T12:20:45Z] [BSR rev5 23/11] XONG job Taylor_20261123_120250: tâm 16.544, r4 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_BSR.json (rev3 REFUTED_OPEN)
 - [2026-11-23T12:27:37Z] [CK holding + HHS rev7 23/11] XONG job Taylor_20261123_120407: CK đo 26,63% (N=6), HHS rev7 tâm 10.805 TRONG, skeptic r5 REFUTED (EX k, phạm vi CK) — CHỜ Mike áp LEDGER_PROPOSAL (REFUTED_OPEN) / user quyết base CK
 - [2026-11-23T17:50:47Z] CODE B radar xong: nhánh session/Taylor_20261123_174706 (repo ngoài, commit 33c14fdef) chờ Mike duyệt/merge; sau merge chạy value_radar.py --rebuild-norm5
+- [2026-11-23T17:57:39Z] [dd-vs-radar rerun 24/11] XONG job Taylor_20261123_174703: rerun/REPORT_R2.md + REPORT_D2.md, finding dd-vs-radar-R2/D2-20261124 — CHỜ Mike tổng hợp/skeptic; chưa commit (rerun/ untracked)

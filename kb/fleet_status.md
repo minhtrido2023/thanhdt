@@ -1,8 +1,8 @@
-# Fleet status — 2026-11-23T17:51:04 UTC
+# Fleet status — 2026-11-23T17:51:22 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| Mike | Mike | child | working | 2026-11-23T17:48:14Z | 2 |  |
+| Mike | Mike | child | working | 2026-11-23T17:48:14Z | 3 |  |
 | Mike_2703112 | mike-b3 | child | dead | 2026-11-22T09:40:01Z | 1931 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_2775652 | mike-42 | child | dead | 2026-11-22T10:20:01Z | 1891 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_2794490 | mike-fe | child | dead | 2026-11-22T10:20:01Z | 1891 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
@@ -43,49 +43,49 @@
 | Taylor_4060740 | taylor-17 | child | dead | 2026-11-23T06:50:01Z | 661 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Taylor_4061041 | taylor-52 | child | dead | 2026-11-23T06:50:01Z | 661 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor |
 | Wags | Wags | child | working | 2026-11-23T17:32:48Z | 18 |  |
-| Winston | winston-b4 | child | busy | 2026-11-23T17:50:01Z | 1 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Winston |
+| Winston | Winston | child | working | 2026-11-23T17:51:16Z | 0 |  |
 | mike-b4 | mike-b4 | external | dead | 2026-11-22T17:10:01Z | 1481 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike |
 | thanhdt-29 | thanhdt-29 | external | dead | 2026-11-23T09:20:01Z | 511 | interactive · cwd=/home/trido/thanhdt |
 | workingclaude-02 | workingclaude-02 | child | dead | 2026-11-23T12:26:42Z | 324 |  |
 | workingclaude-03 | workingclaude-03 | child | dead | 2026-11-23T00:25:23Z | 1045 |  |
 | workingclaude-13 | workingclaude-13 | child | dead | 2026-11-23T06:50:44Z | 660 |  |
-| workingclaude-1a | workingclaude-1a | child | dead | 2026-11-23T17:06:11Z | 44 |  |
+| workingclaude-1a | workingclaude-1a | child | dead | 2026-11-23T17:06:11Z | 45 |  |
 | workingclaude-1f | workingclaude-1f | child | dead | 2026-11-22T16:44:01Z | 1507 |  |
 | workingclaude-21 | workingclaude-21 | child | dead | 2026-11-23T05:10:03Z | 761 |  |
-| workingclaude-22 | workingclaude-22 | child | dead | 2026-11-23T00:25:11Z | 1045 |  |
-| workingclaude-24 | workingclaude-24 | child | dead | 2026-11-22T16:56:15Z | 1494 |  |
+| workingclaude-22 | workingclaude-22 | child | dead | 2026-11-23T00:25:11Z | 1046 |  |
+| workingclaude-24 | workingclaude-24 | child | dead | 2026-11-22T16:56:15Z | 1495 |  |
 | workingclaude-26 | workingclaude-26 | child | dead | 2026-11-22T16:49:02Z | 1502 |  |
 | workingclaude-29 | workingclaude-29 | child | dead | 2026-11-23T05:19:53Z | 751 |  |
 | workingclaude-2a | workingclaude-2a | child | dead | 2026-11-23T12:10:41Z | 340 |  |
 | workingclaude-2c | workingclaude-2c | child | dead | 2026-11-23T12:20:02Z | 331 |  |
-| workingclaude-31 | workingclaude-31 | child | dead | 2026-11-22T23:56:22Z | 1074 |  |
-| workingclaude-3c | workingclaude-3c | child | dead | 2026-11-22T16:54:13Z | 1496 |  |
+| workingclaude-31 | workingclaude-31 | child | dead | 2026-11-22T23:56:22Z | 1075 |  |
+| workingclaude-3c | workingclaude-3c | child | dead | 2026-11-22T16:54:13Z | 1497 |  |
 | workingclaude-41 | workingclaude-41 | child | dead | 2026-11-23T10:23:03Z | 448 |  |
 | workingclaude-45 | workingclaude-45 | child | dead | 2026-11-23T00:21:31Z | 1049 |  |
 | workingclaude-46 | workingclaude-46 | child | dead | 2026-11-22T23:55:30Z | 1075 |  |
-| workingclaude-49 | workingclaude-49 | child | dead | 2026-11-23T12:10:17Z | 340 |  |
+| workingclaude-49 | workingclaude-49 | child | dead | 2026-11-23T12:10:17Z | 341 |  |
 | workingclaude-4d | workingclaude-4d | child | dead | 2026-11-23T06:56:37Z | 654 |  |
 | workingclaude-50 | workingclaude-50 | child | dead | 2026-11-22T13:23:38Z | 1707 |  |
 | workingclaude-56 | workingclaude-56 | child | dead | 2026-11-22T16:47:00Z | 1504 |  |
 | workingclaude-57 | workingclaude-57 | child | dead | 2026-11-22T16:52:56Z | 1498 |  |
 | workingclaude-58 | workingclaude-58 | child | dead | 2026-11-23T00:31:36Z | 1039 |  |
 | workingclaude-5b | workingclaude-5b | child | dead | 2026-11-22T13:22:54Z | 1708 |  |
-| workingclaude-5c | workingclaude-5c | child | dead | 2026-11-23T17:05:05Z | 45 |  |
+| workingclaude-5c | workingclaude-5c | child | dead | 2026-11-23T17:05:05Z | 46 |  |
 | workingclaude-62 | workingclaude-62 | child | dead | 2026-11-23T00:00:34Z | 1070 |  |
 | workingclaude-6d | workingclaude-6d | child | dead | 2026-11-23T12:10:24Z | 340 |  |
 | workingclaude-6e | workingclaude-6e | child | dead | 2026-11-23T05:23:04Z | 748 |  |
 | workingclaude-79 | workingclaude-79 | child | dead | 2026-11-23T00:24:31Z | 1046 |  |
-| workingclaude-7b | workingclaude-7b | child | dead | 2026-11-23T12:11:11Z | 339 |  |
+| workingclaude-7b | workingclaude-7b | child | dead | 2026-11-23T12:11:11Z | 340 |  |
 | workingclaude-7d | workingclaude-7d | child | dead | 2026-11-22T16:50:25Z | 1500 |  |
-| workingclaude-80 | workingclaude-80 | child | dead | 2026-11-23T05:23:05Z | 747 |  |
+| workingclaude-80 | workingclaude-80 | child | dead | 2026-11-23T05:23:05Z | 748 |  |
 | workingclaude-81 | workingclaude-81 | child | dead | 2026-11-23T06:50:36Z | 660 |  |
-| workingclaude-8f | workingclaude-8f | child | dead | 2026-11-22T23:59:05Z | 1071 |  |
-| workingclaude-94 | workingclaude-94 | child | dead | 2026-11-23T12:14:21Z | 336 |  |
+| workingclaude-8f | workingclaude-8f | child | dead | 2026-11-22T23:59:05Z | 1072 |  |
+| workingclaude-94 | workingclaude-94 | child | dead | 2026-11-23T12:14:21Z | 337 |  |
 | workingclaude-95 | workingclaude-95 | child | dead | 2026-11-23T10:17:51Z | 453 |  |
 | workingclaude-98 | workingclaude-98 | child | dead | 2026-11-22T16:43:33Z | 1507 |  |
 | workingclaude-99 | workingclaude-99 | child | dead | 2026-11-23T05:15:44Z | 755 |  |
 | workingclaude-a4 | workingclaude-a4 | child | dead | 2026-11-23T10:16:40Z | 454 |  |
-| workingclaude-a6 | workingclaude-a6 | child | dead | 2026-11-22T16:40:22Z | 1510 |  |
+| workingclaude-a6 | workingclaude-a6 | child | dead | 2026-11-22T16:40:22Z | 1511 |  |
 | workingclaude-ad | workingclaude-ad | child | dead | 2026-11-22T16:50:47Z | 1500 |  |
 | workingclaude-b4 | workingclaude-b4 | child | dead | 2026-11-23T00:01:02Z | 1070 |  |
 | workingclaude-bb | workingclaude-bb | child | dead | 2026-11-23T06:56:45Z | 654 |  |
@@ -95,20 +95,20 @@
 | workingclaude-cc | workingclaude-cc | child | dead | 2026-11-23T17:05:58Z | 45 |  |
 | workingclaude-cf | workingclaude-cf | child | dead | 2026-11-23T05:12:39Z | 758 |  |
 | workingclaude-d3 | workingclaude-d3 | child | dead | 2026-11-23T00:02:49Z | 1068 |  |
-| workingclaude-d7 | workingclaude-d7 | child | dead | 2026-11-22T16:46:15Z | 1504 |  |
-| workingclaude-db | workingclaude-db | child | dead | 2026-11-22T16:57:16Z | 1493 |  |
+| workingclaude-d7 | workingclaude-d7 | child | dead | 2026-11-22T16:46:15Z | 1505 |  |
+| workingclaude-db | workingclaude-db | child | dead | 2026-11-22T16:57:16Z | 1494 |  |
 | workingclaude-dc | workingclaude-dc | child | dead | 2026-11-23T10:18:32Z | 452 |  |
 | workingclaude-de | workingclaude-de | child | dead | 2026-11-22T16:40:24Z | 1510 |  |
-| workingclaude-df | workingclaude-df | child | dead | 2026-11-22T16:52:17Z | 1498 |  |
-| workingclaude-e2 | workingclaude-e2 | child | dead | 2026-11-22T23:55:11Z | 1075 |  |
+| workingclaude-df | workingclaude-df | child | dead | 2026-11-22T16:52:17Z | 1499 |  |
+| workingclaude-e2 | workingclaude-e2 | child | dead | 2026-11-22T23:55:11Z | 1076 |  |
 | workingclaude-e3 | workingclaude-e3 | child | dead | 2026-11-23T10:31:33Z | 439 |  |
 | workingclaude-e5 | workingclaude-e5 | child | dead | 2026-11-23T00:27:42Z | 1043 |  |
 | workingclaude-e7 | workingclaude-e7 | child | dead | 2026-11-23T00:06:26Z | 1064 |  |
 | workingclaude-ec | workingclaude-ec | child | dead | 2026-11-23T05:15:58Z | 755 |  |
-| workingclaude-ee | workingclaude-ee | child | dead | 2026-11-22T13:22:08Z | 1708 |  |
+| workingclaude-ee | workingclaude-ee | child | dead | 2026-11-22T13:22:08Z | 1709 |  |
 | workingclaude-f2 | workingclaude-f2 | child | dead | 2026-11-23T05:12:02Z | 759 |  |
 | workingclaude-f5 | workingclaude-f5 | child | dead | 2026-11-22T16:46:40Z | 1504 |  |
 | workingclaude-f8 | workingclaude-f8 | child | dead | 2026-11-23T12:13:48Z | 337 |  |
-| workingclaude-fc | workingclaude-fc | child | dead | 2026-11-22T23:56:19Z | 1074 |  |
+| workingclaude-fc | workingclaude-fc | child | dead | 2026-11-22T23:56:19Z | 1075 |  |
 | workingclaude-fd | workingclaude-fd | child | dead | 2026-11-23T12:14:03Z | 337 |  |
 | workingclaude-fe | workingclaude-fe | child | dead | 2026-11-23T06:56:41Z | 654 |  |
