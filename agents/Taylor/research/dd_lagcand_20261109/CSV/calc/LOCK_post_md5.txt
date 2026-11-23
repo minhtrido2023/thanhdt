@@ -1,0 +1,13 @@
+2026-11-09T14:47:45+07:00
+ff96ecca27bb77289eb08f946e33d740  calc/make_summary.py
+e1b40565757c42663cccd42e3928ef4b  calc/model.py
+890ed7e7c4ae57bd6ef85a71ff09fc34  calc/assumptions.json
+360713de36a334b7162f5d75107aeae7  calc/model_out.json
+ff723f5685aabbd37584a505ff8a1c53  calc/fin_csv_bq.csv
+a11ca604c03818434e99c187504f963b  calc/px_csv.csv
+1027a26718a688715c05674b9862ef7e  calc/fin_csv_bq.sql
+123635cf53a70561376e3c39d67e1cd4  calc/px_csv.sql
+38878033374f5da55515cbb17ac54dc0  calc/run1.txt
+38878033374f5da55515cbb17ac54dc0  calc/run2.txt
+49005a1c928c59f9d62d09fc33423fd8  REPORT.md
+9c8cfbb6d879b3258eeadf16f1b734de  SUMMARY.json

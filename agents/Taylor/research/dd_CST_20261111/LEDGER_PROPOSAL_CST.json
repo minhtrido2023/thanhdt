@@ -1,0 +1,74 @@
+{
+ "proposal_for": "kb/dd_price_zones.json",
+ "job": "Taylor_20261123_001043",
+ "entry": {
+  "ticker": "CST",
+  "dd_date": "2026-11-11",
+  "rev": 2,
+  "bctc_quarter": "2026Q3",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_CST_20261111/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "zone_low": 3511,
+  "center": 5837,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số 3 kịch bản (30/45/25; LNST 35/75/130 tỷ/năm) với N CỔ ĐÔNG = LNST − quỹ KTPL min(0,64N; 82,3) − ký quỹ môi trường 5,21/năm; thu nhập thặng dư hữu hạn tới 08/2045, ρ 0,5; + chia 130,66 tỷ LN tích luỹ (+1.459, vay 8%); r 13,5% (neo lãi huy động 7,40%); SAU chiết khấu thanh khoản 3,1% cỡ 0,3 tỷ; mù giá",
+  "zone_high": 8862,
+  "center_range": null,
+  "center_alt": 6022,
+  "center_alt_kind": "expected_weighted",
+  "price_ref": 14100,
+  "price_date": "2026-11-20",
+  "verdict_label": "Giá 14.100 = 2,42× tâm sau CK 5.837: TRÊN vùng 3.511–8.862 (cao hơn lạc quan ~59%) ⇒ không có biên an toàn; ngưỡng luật 0,85×tâm = 4.961. Moat NONE (nhà thầu giá vốn cộng lãi cho TKV, 97% DT nội bộ); quỹ KTPL lấy 63–64% LNST trước cổ đông (TM17 KT25). Không đề xuất vị thế.",
+  "skeptic_status": "r1 (22/11) REFUTED rev1 (bỏ sót quỹ KTPL; tâm 13.084) → REPORT_rev2 tâm 4.563; r2 (23/11) INCONCLUSIVE medium (quy tắc KTPL thiếu văn bản; dự án mở rộng NPV=0; Q4/25; tiền cho khoản chia) → REPORT_rev3 tâm 6.022 (+chia 130,66); r3 (23/11) REFUTED medium: giả định 130,66 chia 100% cổ tức không trích KTPL chỉ có báo chí — nếu 49,95% vào KTPL thì −729 đ/cp (~5.290); dải tâm skeptic ước 5.300–7.600; thiếu kịch bản tái cơ cấu TKV (chiều tăng). Đã dùng hết 2 vòng skeptic cho job này — vòng sau cần user quyết.",
+  "source_file": "agents/Taylor/research/dd_CST_20261111/REPORT_rev3.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_CST_20261111/REPORT_rev3.md",
+    "quote": "6.022 đ/cp trước chiết khấu thanh khoản, 5.837 sau chiết khấu (cỡ 0,3 tỷ)",
+    "fields": [
+     "center",
+     "center_alt"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_CST_20261111/REPORT_rev3.md",
+    "quote": "bi quan **3.511** — lạc quan **8.862**",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_CST_20261111/REPORT_rev3.md",
+    "quote": "giá 14.100 (20/11) **TRÊN vùng**",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_CST_20261111/calc_rev3/assumptions_rev3.json",
+  "assumptions_md5": "028e67b909a87f091a6924dd4c0c582a",
+  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "expires_on": "2027-03-23",
+  "expires_basis": "BCTC Q4/2026 (~20/01/2027) hoặc NQ ĐHĐCĐ bất thường 20–30/12/2026 về chia 130,66 tỷ, hoặc 120 ngày",
+  "correction_reason": "skeptic DD_GENERAL r1 22/11 REFUTED rev1: mô hình dùng LNST gộp làm N, bỏ sót quỹ KTPL (82,0 tỷ từ LN2024, 52,8 tỷ từ LN2025 — KT25 TM17, Q3 BCĐKT). Rev mới: N cổ đông = LNST − KTPL − ký quỹ; cộng khoản chia 130,66 tỷ LN tích luỹ.",
+  "notes": "Độ nhạy tâm trước CK: chia 130,66 có trích KTPL 49,95% ⇒ ~5.290 (skeptic r3); không chia ⇒ 4.563; α KTPL 0,50 ⇒ 7.677; dự án mở rộng sinh lời dưới r ⇒ −3.017 (hiển thị P0,3 ⇒ 5.117); ρ 1/0 ⇒ 7.023/5.021; r 11% ⇒ 6.771. Mốc: chốt DS 30/11, ĐHĐCĐ bất thường 20–30/12/2026. Ghi chú để user cân nhắc — không phải tín hiệu mua.",
+  "recorded_at": "2026-11-23T07:40:00+07:00",
+  "center_alt_desc": "kỳ vọng trọng số TRƯỚC chiết khấu thanh khoản",
+  "supersedes": "CST@2026-11-11#1"
+ },
+ "skeptic_verdict_path": "agents/Taylor/research/dd_CST_20261111/skeptic/r3.json",
+ "skeptic_final_verdict": "REFUTED",
+ "report_md5": "19a69878222f5b94bdb5417f7371ba8d",
+ "label_rule": "REFUTED_OPEN vì vòng cuối r3 REFUTED và đính chính r3 CHƯA áp (job đã dùng 2 vòng skeptic; vòng 3 của job = user quyết)",
+ "open_items": [
+  "130,66 tỷ chia cổ tức: có trích KTPL không (−729 đ/cp nếu 49,95%) — chờ NQ ĐHĐCĐ bất thường 20–30/12/2026",
+  "quy chế trích KTPL TKV / ND 167/2024 bản gốc chưa đọc",
+  "vốn còn phải chi dự án mở rộng Cao Sơn (~1.020 tỷ ước lượng)",
+  "kịch bản tái cơ cấu/thoái vốn TKV (chiều tăng, chưa định lượng)",
+  "giấy phép/phương án phục hồi Khe Chàm II (ký quỹ 42,31 tỷ)"
+ ],
+ "dont": "Mike áp bằng append tuần tự; KHÔNG dùng dd_ledger_append_confirmed.py (verdict không CONFIRMED)"
+}

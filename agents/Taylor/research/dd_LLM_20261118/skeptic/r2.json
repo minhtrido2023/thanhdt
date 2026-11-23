@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_LLM_20261118/REPORT_rev3.md",
+  "report_md5": "99e599291ee4d6e7e5c3ce63b468f27e",
+  "brief_md5": "7a9ad6799afa8fde39e40cc25a2154f5",
+  "model": "opus",
+  "cost_usd": 1.4020926000000002,
+  "started_at_ict": "2026-11-23T07:21:36+07:00",
+  "summary": "The arithmetic and sourcing of LLM rev3 largely hold up: I reproduced the model exactly and the FY2025 audited P&L, 2024 profit distribution, retained-earnings bridge and share count all match the filings. The verdict is still refuted on a two-sided basis. The decisive flaw pushes the centre too LOW: historical gross margins (the 4,5% base) are already after warranty accruals because before TT99 warranty sat in cost of goods sold (selling expense was zero in 2024 and 2025), yet the model deducts warranty again and ignores the non-cash share it itself assumes; fixing this adds about 7% at a 1%-of-revenue accrual and more at higher rates (FY2025 implies ~10%). The welfare-fund rate is also stale (2025 actual ≤6,3% vs 12,8% used, ~+1%). Pushing the other way, auditor-qualified subsidiary and associate balances (~700 bn) and the unapproved equitization settlement remain outside the base with no rev3 sensitivity, the former worth roughly −11% or more, and the 25/50/25 weights are unanchored. Market prices quoted in the report were ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_LLM_20261118/skeptic/r2_raw.md"
+}

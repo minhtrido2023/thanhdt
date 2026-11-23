@@ -1,0 +1,13 @@
+# LOCK rev5 HHS — ghi TRƯỚC khi đọc giá/ADV. 2026-11-23T07:17:15+07:00 job Taylor_20261123_001050
+228d217b765eb6859982e11017296538  calc/assumptions.json
+96629ed70902d5f28164412afea3540e  calc/calc_rev5.py
+190f37cb7e06274900a0098bde94fbb3  calc/calc_rev5_out.json
+d3604e9bcf6fbbc903935a69d3168e9d  calc/run1.txt
+0450ba0aee972c6c4ec97847fe2de68c  ../../calc/dilution_out.json
+bbf89372512bdb7e058f8eff7adbe781  ../../calc/dilution_calc.py
+6688f665e6c5efc866bbdaa52fdadc2f  src/nq_hdqt_xyk_20261120.pdf
+df056cd328e0c4956c2a43950ddaec3e  ../../../dd_HHS_20261101/src/20261029_-_HHS_-_Bao_cao_tai_chinh_Q3_2026_Hop_nhat.pdf
+d97c4a0b9810228e464fe14d0f9bc3ae  ../../src_hhs/nq_dhdcd_2026.pdf
+# PHỤ LỤC 2026-11-23T07:22:31+07:00 sau skeptic r2: assumptions.json thêm 2 khoá CHỈ-ĐỘ-NHẠY/NGUỒN (tch_stake_source, g10_completion_cost base=0); không đổi tham số base, tâm, lưới. calc_rev5 không đọc 2 khoá này (run lại vẫn trùng run1).
+e55f46afc7bb009fb30d42906bcfbf9b  assumptions.json
+1ff2eb1759df02c252209f2b55a0d5e6  rev5b_addendum_out.json

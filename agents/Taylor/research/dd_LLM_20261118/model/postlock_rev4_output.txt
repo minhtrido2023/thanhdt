@@ -1,0 +1,3 @@
+gia/tam=1.029; tam=32376; 0.85xtam=27520
+GPM co so de tam=gia: 0.0503
+cash share bao hanh can de tam=gia (neu tam van < gia o 0.9% thi khong dat): tam@0.9%=33643

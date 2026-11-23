@@ -1,0 +1,84 @@
+{
+ "_doc": "ĐỀ XUẤT sổ giá cho Mike áp tuần tự — Taylor KHÔNG ghi kb/dd_price_zones.json (job Taylor_20261123_001048).",
+ "skeptic_verdict_path": "agents/Taylor/research/dd_LLM_20261118/skeptic/r3.json",
+ "skeptic_verdict": "REFUTED",
+ "skeptic_confidence": "medium",
+ "report_path": "agents/Taylor/research/dd_LLM_20261118/REPORT_rev4.md",
+ "report_md5": "5630ba52bba9b7cbd4600f52468c49fc",
+ "report_md5_in_verdict": "5630ba52bba9b7cbd4600f52468c49fc",
+ "md5_match": true,
+ "label_rule": "Vòng cuối r3 REFUTED ⇒ KHÔNG CONFIRMED. Dispatch ghi 'ngược lại FIXED_UNVERIFIED', nhưng theo định nghĩa enum §E10, các mục sửa của r3 CHƯA áp (đã hết 2 vòng/ca) ⇒ REFUTED_OPEN (giống PNJ/DCM). Mike chọn; Taylor không tự nâng nhãn.",
+ "open_items_r3": [
+  "Trục f (tiền mắc kẹt) của kịch bản xấu không có neo; trọng số 2/9 là tần suất năm lỗ, một sự kiện khác ⇒ ±~10% tâm (cần lịch sử cổ tức tiền 2017–26 cho cổ đông thiểu số)",
+  "Số dư bảo hành (75%×747,1×0,8) chồng với cộng lại hoàn nhập vĩnh viễn 1,68% DT trong lúc số dư chạy hết ⇒ −1,3…−7,1%; 1,68% chỉ dựa N=2 năm",
+  "Chưa trừ phần lãi của cổ đông không kiểm soát (~3,3% LNST 9T) ⇒ ~−1%",
+  "DT TTM 4.150 dựa vào Q4/25 bất thường (41%); nhịp 9T/26 là 3.234 ⇒ ~−7%"
+ ],
+ "cost_usd_rounds": {
+  "r2": 1.402,
+  "r3": 1.017
+ },
+ "entry": {
+  "ticker": "LLM",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_LLM_20261118/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-18",
+  "rev": 2,
+  "valuation_asof": "2026-11-23",
+  "bctc_quarter": "2026Q3",
+  "zone_low": 3630,
+  "center": 32376,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số 2/9–6/9–1/9 (tần suất 2017–25) xấu/cơ sở/tốt, SOTP một phương pháp, SAU chiết khấu thanh khoản 10%; r 13,5% neo lãi huy động 12T hiệu dụng 7,40%; bảo hành: số dư chi tiền 25% + cộng lại hoàn nhập 1,68% DT; DT cơ sở 4.150 TTM; quỹ KTPL 6,28%",
+  "zone_high": 55828,
+  "center_range": null,
+  "center_alt": 35974,
+  "center_alt_kind": "expected_weighted",
+  "price_ref": 33300,
+  "price_date": "2026-11-18",
+  "verdict_label": "Giá 33.300 (18/11) = 1,03× tâm 32.376: quanh giá trị hợp lý, không rẻ (skeptic r3: nhãn chưa vững ±10% vì trục tiền mắc kẹt). WARNING: kiểm toán ngoại trừ 2023–25 + soát xét 6T/26, quyết toán CPH chưa duyệt, HNX cảnh báo, công ty con vay quá hạn ~330 tỷ, free float ~2%, ADV ~0,45 tỷ.",
+  "skeptic_status": "DD_GENERAL: r1 (22/11, REPORT.md rev2) REFUTED → REPORT_rev3; r2 (23/11, REPORT_rev3) REFUTED → REPORT_rev4; r3 (23/11, REPORT_rev4, md5 5630ba52) REFUTED medium — hết 2 vòng/ca, mục r3 chưa áp",
+  "correction_reason": "rebuild sau skeptic DD_GENERAL REFUTED: bảo hành không còn coi 100% là nợ tiền (đo 9T/26 chi tiền 0,9%) và bỏ trừ kép trong NOPAT; DT cơ sở 4.500→TTM 4.150; trừ quỹ KTPL 6,28%; Hamon vào kịch bản tốt; trọng số theo tần suất; đọc đủ thuyết minh BCTC KT 2025 (không có thuyết minh bảo lãnh; HNA còn giữ 3,71%)",
+  "supersedes": "LLM@2026-11-18#1",
+  "source_file": "agents/Taylor/research/dd_LLM_20261118/REPORT_rev4.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_LLM_20261118/REPORT_rev4.md",
+    "quote": "**Tâm giá trị 32.376 đ/cp**",
+    "fields": [
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_LLM_20261118/REPORT_rev4.md",
+    "quote": "**Vùng [3.630; 55.828]**",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_LLM_20261118/REPORT_rev4.md",
+    "quote": "Giá tham chiếu 33.300 đ (18/11/2026",
+    "fields": [
+     "price_ref"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_LLM_20261118/REPORT_rev4.md",
+    "quote": "trước chiết khấu 35.974",
+    "fields": [
+     "center_alt"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_LLM_20261118/model/assumptions_LLM_20261123_rev4.json",
+  "assumptions_md5": "deb5277d9d15493b6e544b5945a889e6",
+  "null_reason": null,
+  "expires_on": "2027-03-18",
+  "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc 120 ngày từ dd_date",
+  "notes": "Nút kém chắc nhất: trục f tiền mắc kẹt (±10%), hạng mục ngoại trừ (xoá con ⇒ 28.194; + liên kết ⇒ 24.460), CPH (khung ước lượng 26.732–31.248), bảo lãnh 69-1 nếu có (26.766–30.974). V6 D=1,69 > ln3 (phân kỳ mạnh ⇒ luật 0,85×tâm không tự kích hoạt). Sizing: không mở ở giá ≈ tâm; ≤27.520 ⇒ tối đa 2% NAV. Moat NONE."
+ }
+}
