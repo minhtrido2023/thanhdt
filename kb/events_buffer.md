@@ -793,3 +793,6 @@
 
 ## Consolidation 2026-11-23T00:39:02Z
 - [2026-11-23T00:38:57Z] Taylor/heartbeat — Taylor_20261123_003456: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261123_003456", "source": "watcher"}
+
+## Consolidation 2026-11-23T00:39:25Z
+- [2026-11-23T00:39:19Z] Taylor/heartbeat — Taylor_20261123_003456: {"status": "in_progress", "note": "quy KTPL do xong (2024:26,5%, 2025:6,3%); lay XDCB lich su"}
