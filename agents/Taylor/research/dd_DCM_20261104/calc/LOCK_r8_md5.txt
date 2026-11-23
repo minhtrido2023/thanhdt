@@ -1,0 +1,14 @@
+LOCK_r8 2026-11-23 07:02:33 ICT — job Taylor_20261122_234422 — khoá TRƯỚC khi chạy compare_px_r8 (giá 30.400 đã biết từ pha r7)
+cd2b53e2d6c3f57781cc5c366f37283a  calc/model_r8.py
+c5899d71a44a0cff937bd9525e911bec  calc/model_r7.py
+d394f256e99356159951e3ed49b9d81b  calc/model_r6.py
+df0e56541d3ea593e82cfe87c2e14879  calc/model_r5.py
+019593798a0814db939f05e65cb738b3  calc/model_r2.py
+d8f1bd5e8c993b7dcc39845673b8359c  calc/model.py
+4597bc083f0d64d8873141b12fbfb3a6  ../dd_redo_20261105/_shared/wpct.py
+1b4fb5fc8f33123f4ff4e1ff310cc59f  calc/bq_np_hist_out.csv
+49afc18eba7b6ca9b9f73f58a506e406  calc/bq_commod_out.csv
+b7e29efbce6a0db2739c7a51b3afec85  calc/bq_da_r7_out.csv
+cd5bdf18802b171d7a4eaf6c0ff7f77b  calc/model_r8_out.txt
+b972aad36463abf21feefb159d8bc72b  calc/model_r8_out.json
+79ddbcdb7f403bf27c61ebd68ea857e2  assumptions_r8.json

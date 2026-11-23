@@ -1,0 +1,7 @@
+LOCK_r5 2026-11-05 00:24:45 ICT (trước khi so giá)
+df0e56541d3ea593e82cfe87c2e14879  calc/model_r5.py
+3e9feff1baca2daa8dacc25877ac5287  calc/model_r5_out.txt
+073a904156968986e476e043e7b540a3  calc/model_r5_out.json
+e98b6c5ae0e898a99a7dbe3989e6ef93  calc/model_r4.py
+019593798a0814db939f05e65cb738b3  calc/model_r2.py
+d8f1bd5e8c993b7dcc39845673b8359c  calc/model.py

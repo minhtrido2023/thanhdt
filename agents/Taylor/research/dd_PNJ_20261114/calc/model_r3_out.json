@@ -1,0 +1,93 @@
+{
+ "r": 0.135,
+ "scen": {
+  "base": {
+   "p": 0.5,
+   "F0_bn": 9200.1,
+   "existing_ps": 3489,
+   "issue_feasible_at_floor": false,
+   "if_550m_issued_ps_transfer_case": 8665
+  },
+  "bull": {
+   "p": 0.2,
+   "F0_bn": 14375.2,
+   "existing_ps": 13602,
+   "issue_feasible_at_floor": true,
+   "if_550m_issued_ps_transfer_case": 13540
+  },
+  "bear_delay": {
+   "p": 0.2,
+   "F0_bn": 8105.9,
+   "existing_ps": 1351,
+   "issue_feasible_at_floor": false,
+   "if_550m_issued_ps_transfer_case": 7635
+  },
+  "stress_100pct": {
+   "p": 0.1,
+   "F0_bn": 7642.6,
+   "existing_ps": 445,
+   "issue_feasible_at_floor": false,
+   "if_550m_issued_ps_transfer_case": 7198
+  }
+ },
+ "bvps_fy2026_est": 12586,
+ "center_weighted": 4780,
+ "center_base": 3489,
+ "zone_low": 1351,
+ "zone_high": 13602,
+ "sens_r": {
+  "-100bp": {
+   "base": 5197,
+   "weighted": 6674
+  },
+  "-50bp": {
+   "base": 4308,
+   "weighted": 5688
+  },
+  "+50bp": {
+   "base": 2733,
+   "weighted": 3971
+  },
+  "+100bp": {
+   "base": 2034,
+   "weighted": 3274
+  }
+ },
+ "ke_band": {
+  "0.123": {
+   "base": 5574,
+   "weighted": 7093
+  },
+  "0.134": {
+   "base": 3648,
+   "weighted": 4955
+  }
+ },
+ "sens_t_raise": {
+  "0.0": {
+   "base": 2345,
+   "weighted": 3706
+  },
+  "1.0": {
+   "base": 4205,
+   "weighted": 5495
+  }
+ },
+ "npm_0.064_N": 3693,
+ "npm_0.064_existing_ps": 27005,
+ "npm_0.079_N": 4558,
+ "npm_0.079_existing_ps": 36731,
+ "observed_loss_per_exercised": {
+  "2020_26": 0.2029,
+  "pre2020": 0.2582
+ },
+ "loss_at80_observed_rates_bn": 3866.6,
+ "observed_rate_reversal_bn": 3204.5,
+ "observed_rate_upside_ps_on_base": 5878,
+ "excess_inventory_per_1000bn_ps": 1954,
+ "raise_at_floor_550m_bn": 6922.5,
+ "F_needed_for_floor_issue_bn": 13855.3,
+ "v_short_bn": 15651,
+ "v_short_ps_n0": 30585,
+ "v_short_ps_n1061": 14741
+}

@@ -1,0 +1,7 @@
+564835112d45356275bdd5b812542c9e  calc/assumptions_r3.json
+6891d0c29f34946e641a69258a5da461  calc/lock_v1_r3.json
+19c39ce0cdb56290928838f31fd71093  calc/model_r3.py
+d2e0c7e26618518a213d1207b6209f0c  calc/model_r3_out.txt
+159da757aed9148a90b665c9dd567b5d  src/bctn_2025.pdf
+5beea9f2f4b1bacc8f3f060047e931c0  calc/bq_msb_fin_r3.csv
+2026-11-23T06:51:27+07:00

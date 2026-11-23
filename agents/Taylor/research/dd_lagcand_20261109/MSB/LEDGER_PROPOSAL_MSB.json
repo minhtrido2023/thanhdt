@@ -1,0 +1,126 @@
+{
+ "_doc": "ĐỀ XUẤT sổ giá cho Mike áp tuần tự — Taylor KHÔNG ghi kb/dd_price_zones.json (job Taylor_20261122_234430).",
+ "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/skeptic/r3.json",
+ "skeptic_verdict": "CONFIRMED",
+ "skeptic_confidence": "medium",
+ "report_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+ "report_md5": "b3ec7a51b23c5c59b350d14bf5f8737f",
+ "report_md5_in_verdict": "b3ec7a51b23c5c59b350d14bf5f8737f",
+ "md5_match": true,
+ "label_rule": "skeptic_final=CONFIRMED vì skeptic/r3.json (vòng mới nhất) CONFIRMED và md5 REPORT_r4.md khớp report_md5",
+ "entry": {
+  "ticker": "MSB",
+  "skeptic_final": "CONFIRMED",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/skeptic/r3.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-09",
+  "rev": 2,
+  "valuation_asof": "2026-11-23",
+  "bctc_quarter": "2026Q3",
+  "zone_low": 9144,
+  "center": 13042,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 81 kết cục, sau chiết khấu thanh khoản @5 tỷ, giá trị trên CP CON QUYỀN (r 13,5% neo lãi huy động 7,40%); tương đương sau quyền 12.433",
+  "center_alt": 13344,
+  "center_alt_desc": "tham số trung tâm CƠ SỞ, không haircut, sau CK",
+  "zone_high": 17062,
+  "center_range": null,
+  "price_ref": 16550,
+  "price_date": "2026-11-20",
+  "verdict_label": "TRONG vùng, phần trên: giá 16.550 (con quyền) cao hơn tâm 13.042 +26,9%; 82% trọng số kết cục < giá; luật 4 (giá ≤ 0,85×tâm = 11.085) KHÔNG đạt; giá ngụ ý Ke 11,63%",
+  "skeptic_status": "DD_GENERAL: r1 (22/11, trên REPORT.md r2) REFUTED → r3 REPORT_r3.md; r2 (23/11, trên REPORT_r3.md) REFUTED → r4 REPORT_r4.md; r3 (23/11, trên REPORT_r4.md, md5 b3ec7a51) CONFIRMED medium",
+  "correction_reason": "rebuild sau skeptic DD_GENERAL REFUTED: sửa quy ước ROE (bình quân→đầu kỳ), neo ROE CƠ SỞ vào 2026E quan sát 14,4% − 0,3pp làm sạch lãi dự thu, thêm trục haircut lãi dự thu 4.218,6 tỷ (tín dụng + CK), đọc BCTC kiểm toán EY 2025 gốc",
+  "supersedes": "MSB@2026-11-09#1",
+  "source_file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+    "quote": "**P10 9.144 / P50 13.119 / P90 17.062.**",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+    "quote": "- **Giá trị nội tại: tâm 13.042 đ/cp** (sau chiết khấu thanh khoản; 13.090 trước CK; vị thế 5 tỷ, CK 0,37%).",
+    "fields": [
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+    "quote": "giá 16.550 (đóng cửa 20/11, BQ; giá con quyền)",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_lagcand_20261109/MSB/calc/assumptions_r4.json",
+  "assumptions_md5": "f39391ea1153fb1fdf0925b53ccd2100",
+  "notes": "Sleeve LAG_LO. Ngân hàng, RI (ROE đầu kỳ). CK 0,37% @5 tỷ (ADV250 96,0 tỷ). Khoá r4 lập SAU khi thấy giá (khoá lại có lý do: skeptic r2); khoá mù giá gốc = calc/assumptions_r3.json md5 564835112d45356275bdd5b812542c9e. Kiểm toán FY2025 EY chấp nhận toàn phần (src/bctn_2025.pdf P73). Cờ: lãi phải thu TD/dư nợ 1,85%→3,31%→3,5%, thu/ghi nhận lãi 2025 76%; NPL 2,70%, nhóm 2 +66% YTD, bao phủ 47%; phải thu bán nợ 4.101; LC miễn truy đòi 9.229; room tín dụng đã dùng hết. Caveat skeptic r3: đặt cọc thuê VP ~3.300 tỷ chưa rõ bên nhận (mất 25% ⇒ −1,4%), cho vay xây dựng +36,7% YTD chưa stress, lãi phải thu phái sinh/phí ngoài trục; PDF Q3/6T gốc thiếu trong src/. Sizing V8: đề xuất 0% discretionary tại giá hiện tại.",
+  "expires_on": "2027-03-09",
+  "expires_basis": "dd_date+120 (mặc định); BCTC Q4/2026 sớm hơn thì hết hạn sớm hơn"
+ },
+ "apply_mechanics": "dd_ledger_append_confirmed.py sao entry CUỐI của sổ và so md5(source_file của entry cuối) với report_md5 ⇒ entry cuối hiện là REPORT.md (r2) nên tool sẽ TỪ CHỐI. Cách áp gợi ý: (1) thêm entry_step1 (FIXED_UNVERIFIED, source_file=REPORT_r4.md, các số vùng mới) rồi selfcheck; (2) chạy dd_ledger_append_confirmed.py --ticker MSB --verdict agents/Taylor/research/dd_lagcand_20261109/MSB/skeptic/r3.json --dry-run rồi --write ⇒ ra rev 3 CONFIRMED. Hoặc Mike tự chọn cách khác; 'entry' ở trên là trạng thái đích.",
+ "entry_step1": {
+  "ticker": "MSB",
+  "skeptic_final": "FIXED_UNVERIFIED",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/skeptic/r2.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-09",
+  "rev": 2,
+  "valuation_asof": "2026-11-23",
+  "bctc_quarter": "2026Q3",
+  "zone_low": 9144,
+  "center": 13042,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 81 kết cục, sau chiết khấu thanh khoản @5 tỷ, giá trị trên CP CON QUYỀN (r 13,5% neo lãi huy động 7,40%); tương đương sau quyền 12.433",
+  "center_alt": 13344,
+  "center_alt_desc": "tham số trung tâm CƠ SỞ, không haircut, sau CK",
+  "zone_high": 17062,
+  "center_range": null,
+  "price_ref": 16550,
+  "price_date": "2026-11-20",
+  "verdict_label": "TRONG vùng, phần trên: giá 16.550 (con quyền) cao hơn tâm 13.042 +26,9%; 82% trọng số kết cục < giá; luật 4 (giá ≤ 0,85×tâm = 11.085) KHÔNG đạt; giá ngụ ý Ke 11,63%",
+  "skeptic_status": "r4 đã áp sửa của skeptic r2 (REFUTED); bước 1 để dd_ledger_append_confirmed.py so md5 source_file = REPORT_r4.md",
+  "correction_reason": "rebuild sau skeptic DD_GENERAL REFUTED: sửa quy ước ROE (bình quân→đầu kỳ), neo ROE CƠ SỞ vào 2026E quan sát 14,4% − 0,3pp làm sạch lãi dự thu, thêm trục haircut lãi dự thu 4.218,6 tỷ (tín dụng + CK), đọc BCTC kiểm toán EY 2025 gốc",
+  "supersedes": "MSB@2026-11-09#1",
+  "source_file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+    "quote": "**P10 9.144 / P50 13.119 / P90 17.062.**",
+    "fields": [
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+    "quote": "- **Giá trị nội tại: tâm 13.042 đ/cp** (sau chiết khấu thanh khoản; 13.090 trước CK; vị thế 5 tỷ, CK 0,37%).",
+    "fields": [
+     "center"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r4.md",
+    "quote": "giá 16.550 (đóng cửa 20/11, BQ; giá con quyền)",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_lagcand_20261109/MSB/calc/assumptions_r4.json",
+  "assumptions_md5": "f39391ea1153fb1fdf0925b53ccd2100",
+  "notes": "Sleeve LAG_LO. Ngân hàng, RI (ROE đầu kỳ). CK 0,37% @5 tỷ (ADV250 96,0 tỷ). Khoá r4 lập SAU khi thấy giá (khoá lại có lý do: skeptic r2); khoá mù giá gốc = calc/assumptions_r3.json md5 564835112d45356275bdd5b812542c9e. Kiểm toán FY2025 EY chấp nhận toàn phần (src/bctn_2025.pdf P73). Cờ: lãi phải thu TD/dư nợ 1,85%→3,31%→3,5%, thu/ghi nhận lãi 2025 76%; NPL 2,70%, nhóm 2 +66% YTD, bao phủ 47%; phải thu bán nợ 4.101; LC miễn truy đòi 9.229; room tín dụng đã dùng hết. Caveat skeptic r3: đặt cọc thuê VP ~3.300 tỷ chưa rõ bên nhận (mất 25% ⇒ −1,4%), cho vay xây dựng +36,7% YTD chưa stress, lãi phải thu phái sinh/phí ngoài trục; PDF Q3/6T gốc thiếu trong src/. Sizing V8: đề xuất 0% discretionary tại giá hiện tại.",
+  "expires_on": "2027-03-09",
+  "expires_basis": "dd_date+120 (mặc định); BCTC Q4/2026 sớm hơn thì hết hạn sớm hơn"
+ },
+ "skeptic_rounds_this_job": {
+  "r2.json": "REFUTED (REPORT_r3.md, 1,08 USD)",
+  "r3.json": "CONFIRMED (REPORT_r4.md, 1,20 USD)"
+ }
+}

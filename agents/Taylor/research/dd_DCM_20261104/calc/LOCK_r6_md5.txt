@@ -1,0 +1,17 @@
+LOCK_r6 2026-11-08 21:27:36 ICT — job Taylor_20261108_142018
+d394f256e99356159951e3ed49b9d81b  calc/model_r6.py
+a0bc9abf53c158e7b14b698b8517d7c1  calc/write_summary_r6.py
+df0e56541d3ea593e82cfe87c2e14879  calc/model_r5.py
+019593798a0814db939f05e65cb738b3  calc/model_r2.py
+d8f1bd5e8c993b7dcc39845673b8359c  calc/model.py
+4597bc083f0d64d8873141b12fbfb3a6  ../dd_redo_20261105/_shared/wpct.py
+1b4fb5fc8f33123f4ff4e1ff310cc59f  calc/bq_np_hist_out.csv
+49afc18eba7b6ca9b9f73f58a506e406  calc/bq_commod_out.csv
+c82adf46954dad94e1f21fff7389474a  calc/bq_liq_r6_out.csv
+5803e4734879687384ed9d138072a3ea  calc/bq_liq_r6.sql
+073a904156968986e476e043e7b540a3  calc/model_r5_out.json
+d6d7aa4c1ede1b7485f59d315f2e969c  calc/model_r6_out.txt
+0e08dba063dd2d4b770931ae288c8253  calc/model_r6_out.json
+adb3e5c319e173a09c1f61ec9b510a09  ../dd_redo_20261105/DCM/SUMMARY.json
+9c98b4b0c0426f9c85b63eb5dd7f0fe3  ../dd_redo_20261105/DCM/SUMMARY_r2.json
+480d9f67f69834fed9245512ac1f45ad  REPORT_r6.md

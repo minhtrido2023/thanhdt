@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/REPORT_r3.md",
+  "report_md5": "eee0bc9f33b8aa65dca84ec88d796a89",
+  "brief_md5": "e1998228a85bcdb54518f1acd36220a7",
+  "model": "opus",
+  "cost_usd": 1.0767428,
+  "started_at_ict": "2026-11-23T06:53:59+07:00",
+  "summary": "r3 sửa đúng lỗi ROE bình quân nhân trên VCSH đầu kỳ, và các số FY2025 đều khớp BCTC EY gốc. Tuy nhiên báo cáo dùng lợi nhuận 2025–26 có thu tiền thấp (76%) làm nền ROE, chỉ haircut một lần trên số dư lãi dự thu tín dụng và bỏ qua lãi phải thu chứng khoán tăng gấp ~1,8 lần. Nhất quán với chính giả định tổn thất của báo cáo, ROE nền thấp hơn ~1pp, kéo tâm xuống ~11% (ước lượng, trên ngưỡng 5%). Cơ sở số cổ phiếu trước/sau quyền mua không được ghi nhãn (≈ −6,5% sau quyền). Chiều ngược lại: Ke 13,5% nằm ngoài dải nội địa do chính báo cáo nêu, và tỷ lệ thu tiền 9T26 đã hồi lên 91%, hai yếu tố này bù một phần. Kết luận: REFUTED mức trung bình, cần chạy lại với ROE nền đã làm sạch.",
+  "verdict_raw_path": "agents/Taylor/research/dd_lagcand_20261109/MSB/skeptic/r2_raw.md"
+}

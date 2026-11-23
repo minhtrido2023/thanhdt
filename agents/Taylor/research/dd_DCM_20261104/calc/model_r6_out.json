@@ -1,0 +1,310 @@
+{
+ "bridge_point": {
+  "+reg_TB4": 24818,
+  "+reg_all_2016_25": 25449,
+  "+reg_all_ex22": 24058,
+  "+reg_r5_2021_25": 24288,
+  "+reg_reg_ex22": 25477,
+  "bo_policy": 23292,
+  "bo_policy_bo_struct": 24288,
+  "r5": 24326
+ },
+ "compare": {
+  "label": "TRÊN vùng (>P90)",
+  "price": 32100.0,
+  "price_date": "2026-11-06",
+  "px_vs_center_post": 0.2932,
+  "px_vs_p10": 0.5413,
+  "px_vs_p90": 0.1143
+ },
+ "control": {
+  "diff": 0.0,
+  "r5_ev_r5": 24325.589,
+  "r6_reconstruct": 24325.589
+ },
+ "grids": {
+  "H_headline": {
+   "center_post": 24822,
+   "center_pre": 24964,
+   "max_out": 34093,
+   "min_out": 17052,
+   "n": 1620,
+   "p10_out": 20827,
+   "p10_pre": 20947,
+   "p50_out": 24824,
+   "p90_out": 28808,
+   "p90_pre": 28973,
+   "pct_weight_below_price": 0.9949
+  },
+  "V_brent4_upside_only": {
+   "center_post": 24081,
+   "center_pre": 24219,
+   "max_out": 32486,
+   "min_out": 14913,
+   "n": 2160,
+   "p10_out": 19997,
+   "p10_pre": 20112,
+   "p50_out": 24189,
+   "p90_out": 28251,
+   "p90_pre": 28413,
+   "pct_weight_below_price": 0.9997
+  },
+  "V_gas_ND4xV1V2": {
+   "center_post": 24310,
+   "center_pre": 24449,
+   "max_out": 35874,
+   "min_out": 15785,
+   "n": 4320,
+   "p10_out": 19713,
+   "p10_pre": 19826,
+   "p50_out": 24244,
+   "p90_out": 28955,
+   "p90_pre": 29121,
+   "pct_weight_below_price": 0.9826
+  },
+  "V_policy_055": {
+   "center_post": 25852,
+   "center_pre": 26001,
+   "max_out": 35212,
+   "min_out": 18000,
+   "n": 1620,
+   "p10_out": 21824,
+   "p10_pre": 21949,
+   "p50_out": 25851,
+   "p90_out": 29849,
+   "p90_pre": 30021,
+   "pct_weight_below_price": 0.9843
+  },
+  "V_r5conv_outcome": {
+   "center_post": 23947,
+   "center_pre": 24085,
+   "max_out": 32706,
+   "min_out": 14606,
+   "n": 1080,
+   "p10_out": 19089,
+   "p10_pre": 19199,
+   "p50_out": 23606,
+   "p90_out": 29220,
+   "p90_pre": 29387,
+   "pct_weight_below_price": 0.9978
+  },
+  "V_reg_all_2016_25_only": {
+   "center_post": 25456,
+   "center_pre": 25602,
+   "max_out": 34093,
+   "min_out": 18420,
+   "n": 405,
+   "p10_out": 21173,
+   "p10_pre": 21295,
+   "p50_out": 25437,
+   "p90_out": 29903,
+   "p90_pre": 30074,
+   "pct_weight_below_price": 0.987
+  },
+  "V_reg_all_ex22_only": {
+   "center_post": 24061,
+   "center_pre": 24199,
+   "max_out": 31530,
+   "min_out": 18038,
+   "n": 405,
+   "p10_out": 20677,
+   "p10_pre": 20795,
+   "p50_out": 24054,
+   "p90_out": 27606,
+   "p90_pre": 27764,
+   "pct_weight_below_price": 1.0
+  },
+  "V_reg_r5_only": {
+   "center_post": 24301,
+   "center_pre": 24440,
+   "max_out": 33194,
+   "min_out": 17052,
+   "n": 405,
+   "p10_out": 19817,
+   "p10_pre": 19931,
+   "p50_out": 24290,
+   "p90_out": 28981,
+   "p90_pre": 29147,
+   "pct_weight_below_price": 0.9944
+  },
+  "V_reg_reg_ex22_only": {
+   "center_post": 25469,
+   "center_pre": 25616,
+   "max_out": 32190,
+   "min_out": 20082,
+   "n": 405,
+   "p10_out": 22653,
+   "p10_pre": 22783,
+   "p50_out": 25432,
+   "p90_out": 28432,
+   "p90_pre": 28595,
+   "pct_weight_below_price": 0.9981
+  },
+  "V_restricted_half": {
+   "center_post": 24510,
+   "center_pre": 24651,
+   "max_out": 34093,
+   "min_out": 16428,
+   "n": 3240,
+   "p10_out": 20506,
+   "p10_pre": 20624,
+   "p50_out": 24496,
+   "p90_out": 28509,
+   "p90_pre": 28673,
+   "pct_weight_below_price": 0.9963
+  },
+  "V_struct20": {
+   "center_post": 24038,
+   "center_pre": 24175,
+   "max_out": 34093,
+   "min_out": 13846,
+   "n": 6480,
+   "p10_out": 19729,
+   "p10_pre": 19843,
+   "p50_out": 24000,
+   "p90_out": 28401,
+   "p90_pre": 28564,
+   "pct_weight_below_price": 0.9959
+  },
+  "V_sym5_margin": {
+   "center_post": 24820,
+   "center_pre": 24963,
+   "max_out": 37791,
+   "min_out": 13677,
+   "n": 2700,
+   "p10_out": 18617,
+   "p10_pre": 18724,
+   "p50_out": 24852,
+   "p90_out": 30914,
+   "p90_pre": 31091,
+   "pct_weight_below_price": 0.9444
+  }
+ },
+ "implied_margin": {
+  "CYC_nopolicy_all_2016_25": 259.3,
+  "CYC_nopolicy_all_ex22": 305.7,
+  "CYC_nopolicy_r5_2021_25": 266.1,
+  "CYC_nopolicy_r5reg_at33000_nodisc": 273.9,
+  "CYC_nopolicy_reg_ex22": 319.2,
+  "CYC_policy055_all_2016_25_at32100": 247.2,
+  "CYC_policy055_r5_2021_25_at32100": 254.9,
+  "CYC_policy055_r5reg_at33000_nodisc": 262.6,
+  "HEADLINE_avg4reg_nopolicy": 281.8,
+  "note": "biên dài hạn (USD/t, proxy urê−25×(2,5+0,06B)) để giá trị kết cục trung tâm sau CK = giá; TB có trọng số GAS_AB của biên hàm ý từng cách đọc"
+ },
+ "liquidity": {
+  "adv250": 93199945125.0,
+  "adv60": 82380180000.0,
+  "d_5bn_adv250": 0.005703692968953134,
+  "d_5bn_adv60": 0.006066701115586074,
+  "date_last": "2026-11-06",
+  "n": 250,
+  "price_last": 32100.0,
+  "q_over_adv250": 0.053648100256861606,
+  "sigma_d": 0.02462515458435554,
+  "sleeve": {
+   "10tr": {
+    "adv250": 0.0002550769040273361,
+    "adv60": 0.0002713111218724854
+   },
+   "40tr": {
+    "adv250": 0.0005101538080546722,
+    "adv60": 0.0005426222437449708
+   }
+  },
+  "window": "2025-11-05..2026-11-06"
+ },
+ "regressions": {
+  "all_2016_25": {
+   "icpt": -102.5,
+   "lnst_at_179": 1368.2,
+   "lnst_at_222": 1719.8,
+   "resid": {
+    "2016": 183,
+    "2017": 169,
+    "2018": 100,
+    "2019": -180,
+    "2020": -76,
+    "2021": -566,
+    "2022": 362,
+    "2023": -199,
+    "2024": 252,
+    "2025": -45
+   },
+   "slope": 8.209
+  },
+  "all_ex22": {
+   "icpt": 140.6,
+   "lnst_at_179": 1260.9,
+   "lnst_at_222": 1528.8,
+   "resid": {
+    "2016": 69,
+    "2017": 62,
+    "2018": 14,
+    "2019": -253,
+    "2020": -118,
+    "2021": -193,
+    "2022": 1073,
+    "2023": -107,
+    "2024": 311,
+    "2025": 214
+   },
+   "slope": 6.253
+  },
+  "r5_2021_25": {
+   "icpt": -317.6,
+   "lnst_at_179": 1266.8,
+   "lnst_at_222": 1645.7,
+   "resid": {
+    "2016": 357,
+    "2017": 339,
+    "2018": 264,
+    "2019": -20,
+    "2020": 73,
+    "2021": -550,
+    "2022": 267,
+    "2023": -93,
+    "2024": 369,
+    "2025": 7
+   },
+   "slope": 8.844
+  },
+  "reg_ex22": {
+   "icpt": 551.3,
+   "lnst_at_179": 1389.0,
+   "lnst_at_222": 1589.3,
+   "resid": {
+    "2016": -239,
+    "2017": -239,
+    "2018": -270,
+    "2019": -527,
+    "2020": -366,
+    "2021": -107,
+    "2022": 1432,
+    "2023": -247,
+    "2024": 145,
+    "2025": 208
+   },
+   "slope": 4.675
+  }
+ },
+ "sens": {
+  "I_C20": -487,
+  "I_C25": 731,
+  "base_point": 24818,
+  "capex_per_100bn_yr": -1233,
+  "dep_+100bp": -816,
+  "dep_-100bp": 958,
+  "gas_short_10pct_2028_29": -262,
+  "late2035_esc": -11364,
+  "late2035_flat": -7606,
+  "lnst_lr_at179_avg4reg_ty": 950.2,
+  "nd30_V1": 3962,
+  "nd605_V2": -3484,
+  "policy_p055": 1033,
+  "policy_p1": 1879,
+  "restricted_332": -627,
+  "struct125_w20": -788,
+  "tax_hist_5pct": -981
+ }
+}
