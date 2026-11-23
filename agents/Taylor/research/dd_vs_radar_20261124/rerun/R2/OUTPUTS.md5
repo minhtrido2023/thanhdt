@@ -1,0 +1,8 @@
+08df939faaf65a60ba87578f662ef5b5  out/basket_monthly_r2.csv
+8821f62c9be5b688f2b9d714f56552db  out/deposit_big4_snapshot.csv
+e99f2038edaed5191926f8da355b4385  out/deposit_effective_snapshot.csv
+d839cbf440942c1983b99e2523df9e9e  out/h1_np5_coverage_by_year.csv
+e55a8091fa093b9f36e10b55e2b20f7f  out/h3_consistent_grid.csv
+ba081577f7287d01d2a8957253016ed2  out/h3_r_vs_roe_decomp.csv
+4ff888e8c646443f5add4f3565cd4021  out/summary_r2.json
+a93487466c0a966d8483aaf81b7c2f6f  out/ticker_np5_ratio.parquet

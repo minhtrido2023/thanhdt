@@ -1,0 +1,14 @@
+base,n_steps,n_tickers,median_step_pct,min_pct,max_pct,n_down,n_up,share_UL,direction_csv
+r_cost_of_equity,3,3,-18.52,-19.72,-5.31,3,0,1.0,two_way
+earnings_fade,2,2,-15.38,-21.93,-8.83,2,0,0.5,down|two_way
+bonus_fund_esop_nci,5,5,-10.18,-58.87,-0.8,5,0,0.0,down
+compliance_capex_V4,4,4,-8.65,-15.22,-2.54,4,0,0.5,down
+governance_discount,1,1,-7.55,-7.55,-7.55,1,0,0.0,down
+gT_cap,3,3,-5.33,-15.27,-0.37,3,0,0.33,down
+skeptic_round_fix,1,1,-1.69,-1.69,-1.69,1,0,0.0,
+liquidity_discount,15,15,-1.69,-10.0,0.0,13,0,0.07,down
+scenario_weighting,12,10,-0.54,-48.77,9.2,7,5,1.0,down|two_way
+other,14,8,-0.31,-31.47,31.97,7,7,0.5,
+earnings_fade_floor_anchor,1,1,1.29,1.29,1.29,0,1,0.0,up
+holding_discount,1,1,2.58,2.58,2.58,0,1,1.0,up
+npv0_new_project,1,1,32.58,32.58,32.58,0,1,1.0,up
