@@ -1,0 +1,6 @@
+9331f5b13cd68c336d63a83759ab2afb  model_r3c.py
+8aa59b6a7133e01157f9b0cda932ea16  make_summary_r3c.py
+6a4cc7cde707661a4421780f197696f1  model_r3c_out.txt
+237c4daae54b6b2e284dee3235a74ea7  model_r3c_out.json
+9f6f85e238d2fe70de02b0ca8fc2cf45  ../SUMMARY.json
+668f4bd153412a681e196d10f654de5f  ../REPORT_r3c.md

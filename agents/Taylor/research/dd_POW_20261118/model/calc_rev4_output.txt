@@ -1,0 +1,53 @@
+RETRO_after_tax=2454.7 (1.0x)
+E_legacy=28939.8 BVPS_parent=14060
+QCVN19 VA1: P0 PV burden=3888 ty (1267 d/cp); expected (0.40 P0 + 0.36 x 0.5)=2255 ty (735 d/cp)
+rev3 reproduce (retro in legacy): pre-liq 9156 post 9064
+khong QCVN (=P100), retro tach: pre-liq 10217 post 10115
+REV4 scen pre-liq {'bad': 7036, 'base': 9482, 'good': 11928}
+REV4 center pre-liq=9482 post-liq=9387 zone_post=[6966;11808] P/B_center=0.67 0.85xcenter=7979 delta_vs_P100=-7.2%
+
+-- QCVN19 variants (post-liq center) --
+P0 100% (khong bu): burden 3888 ty => 8860 (-5.6%)
+P100 (bu du): burden 0 ty => 10115 (+7.8%)
+P50: burden 1944 ty => 9488 (+1.1%)
+P0 0.5/P50 0.3/P100 0.2: burden 2527 ty => 9299 (-0.9%)
+capex/opex x0.5 (VA1 da co mot phan): burden 1128 ty => 9751 (+3.9%)
+capex/opex x1.5: burden 3383 ty => 9023 (-3.9%)
+opex dung 2045 (doi VA1 30 nam): burden 2074 ty => 9445 (+0.6%)
+thue 10.9%: burden 2420 ty => 9334 (-0.6%)
+
+-- V1 r (neo lai huy dong, beta 1) + D4 dai Ke --
+dep -100bp beta1.0: r=0.1250 => 9775 (+4.1%)
+dep -100bp beta0.5: r=0.1300 => 9574 (+2.0%)
+dep -50bp beta1.0: r=0.1300 => 9574 (+2.0%)
+dep -50bp beta0.5: r=0.1325 => 9479 (+1.0%)
+dep +50bp beta1.0: r=0.1400 => 9214 (-1.8%)
+dep +50bp beta0.5: r=0.1375 => 9299 (-0.9%)
+dep +100bp beta1.0: r=0.1450 => 9053 (-3.6%)
+dep +100bp beta0.5: r=0.1400 => 9214 (-1.8%)
+r=0.123: 9861 (+5.0%)
+r=0.134: 9423 (+0.4%)
+r=0.11: 10492 (+11.8%)
+
+-- NT3&4 (base NPV=0 so sach; chi do nhay) --
+NT34 book -15%: 8951 (-4.6%)
+NT34 book -30%: 8516 (-9.3%)
+NT34 book -50%: 7935 (-15.5%)
+
+-- Legacy finite life (von thu hoi tai dau tu NPV=0; chi do nhay) --
+share 0.5 T 7: 10571 (+12.6%)
+share 0.5 T 11: 10350 (+10.3%)
+share 0.64 T 7: 10902 (+16.1%)
+share 0.64 T 11: 10620 (+13.1%)
+
+-- Khac --
+hoi to khong thu duoc 30%: -238 d/cp (-2.5%)
+hoi to khong thu duoc 50%: -396 d/cp (-4.2%)
+CPH: them 1 khoan nhu tien le 728,2: -235 d/cp (-2.5%)
+quy KTPL 3% LNST di san: 9221 (-1.8%)
+quy KTPL 5% LNST di san: 9110 (-2.9%)
+QCVN19 khi CM1&2+NT1 0.5 ty/MW (minh hoa, kỳ vọng sau bu): -114 d/cp (-1.2%)
+QCVN19 khi CM1&2+NT1 1.0 ty/MW (minh hoa, kỳ vọng sau bu): -227 d/cp (-2.4%)
+ROE all -0.02: 8004
+ROE all +0.02: 10771
+VA1 CLTG con ~490 (ngoai base): +141 d/cp

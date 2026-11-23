@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_redo_20261105/SZL/REPORT_rev4.md",
+  "report_md5": "e363704a8d8057b99b0758b14c0cb46a",
+  "brief_md5": "0a2547f252184081505a032f7a5fd0f4",
+  "model": "opus",
+  "cost_usd": 1.6832402000000002,
+  "started_at_ict": "2026-11-23T12:07:39+07:00",
+  "summary": "Rev4 tái lập được (output trùng byte, md5 OK) và các số BCTC chịu lực khớp BCTC Q3/2026 gốc. Các hạng mục skeptic r1 được xử lý minh bạch, có control tái lập r3c. Tuy vậy, tâm tăng +8,9% chủ yếu nhờ hai trục có trọng số [UL]; riêng trục ký quỹ PV 27 năm (+1.956, 7,1%) không có điều khoản nào làm căn cứ, đúng loại điều chỉnh một chiều mà luật hai chiều yêu cầu phải có bằng chứng. Lỗi nhỏ: mục #4 'đối xứng' sai vì DT tài chính là cổ tức miễn thuế còn lãi vay được khấu trừ (+131 sai chiều). Bỏ sót khoản 151,99 tỷ NQ 76 (lãi phi tiền mặt 5,85 tỷ/năm, khoảng −690 đ), và N0 vẫn ×4/3 các khoản ghi một lần/năm (khoảng +240 đ). Tổng các lệch định lượng được khoảng −2%, dưới ngưỡng 5% nên không REFUTED. Các mục mở chưa định lượng được (kiểm toán FY2025, đơn giá thuê đất mới, căn cứ ký quỹ) khiến chưa thể CONFIRMED. Nhãn TRONG nhiều khả năng giữ được, nhưng tâm 27.397 vẫn phụ thuộc vào trọng số chưa có căn cứ.",
+  "verdict_raw_path": "agents/Taylor/research/dd_redo_20261105/SZL/skeptic/r2_raw.md"
+}

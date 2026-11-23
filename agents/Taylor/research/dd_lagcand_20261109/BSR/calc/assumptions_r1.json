@@ -1,0 +1,50 @@
+{
+ "ticker": "BSR",
+ "job": "Taylor_20261109_073600",
+ "asof_bctc": "2026-09-30",
+ "price_date": "2026-11-06",
+ "anchor_date": "2026-11-03",
+ "r_anchor": 0.135,
+ "shares_m": 5007.299686,
+ "bs_bn": {
+  "cash_110": 1758.392, "htm_123": 56892.821, "st_debt_321": 13525.007, "lt_debt": 0.0,
+  "khcn_fund_344": 843.965, "cip_252": 2525.899, "lt_invest_260": 9.371,
+  "_src": "BCTC HN Q3/2026 src/BCTC_HN_Q3_2026.pdf tr.1-2 (pdf p4-5)"
+ },
+ "wc_bn": {
+  "now": {"ar_131": 22864.709, "prepay_132": 3008.707, "inv_140": 15430.278, "vat_162": 6509.082, "ap_311": -18001.465, "adv_312": -410.299, "tax_314": -2431.445, "accr_316": -546.509, "other_320": -47.102, "labor_315": -358.376},
+  "start": {"ar_131": 12852.830, "prepay_132": 372.049, "inv_140": 12666.909, "vat_162": 136.125, "ap_311": -11343.197, "adv_312": -59.262, "tax_314": -1046.403, "accr_316": -46.174, "other_320": -54.165, "labor_315": -475.159},
+  "brent_start": 60.85, "brent_now": 98.03, "brent_mid": 78.0,
+  "_basis": "WC dang phinh theo gia dau (Brent 60,85 -> 98,03 cuoi quy, Bobby 3.2). Phan vuot co the giai phong khi gia ve muc giua chu ky (78 [UL]) = (98-78)/(98-61) ~ 54% phan tang; truc giai phong 0/0,27/0,54 x phan tang"
+ },
+ "np_hist_bn": {"2019": 2840.2, "2020": -2808.9, "2021": 6704.5, "2022": 14450.7, "2023": 8509.5, "2024": 631.1, "2025": 5213.6,
+  "_src": "BQ tav2_bq.ticker_financial NP_P0 cong 4 quy (calc/bq_bsr_fin.csv)"},
+ "fin_income_9T25_bn": 1462.750,
+ "interest_ann_aftertax_bn": {"2023_25": 1755.0, "2019_22": 1400.0, "_basis": "9T/2025 DT tai chinh 1.462,75 ty (BCTC HN Q3/26 cot nam truoc) x 4/3 x (1-10%) = 1.755; 2019-22 [UL] tien it hon"},
+ "core_nopat_bn": {
+  "XAU": 2000.0, "CO_SO": 3400.0, "TOT": 5500.0,
+  "_basis": "LN loi lam (khong lai tien gui) chuan hoa chu ky: TB 2023-25 = 4.785-1.755 = 3.030; TB 2019-25 = 5.077-~1.55 = 3.53; CO_SO 3.400 = giua 2 moc (+ cong suat chay ~115% thay vi TB lich su, [UL]). XAU 2.000 = 2023-25 nghieng nam yeu (2024 TA5 + crack thap) + thue NK MFN giu 0% (Bobby ADMIN_GATED 0,30). TOT 5.500 = CO_SO + ~1,6 USD/thung GRM nen cao hon ben vung (Bobby STRUCTURAL 0,15) x 1,27 nghin ty/USD/thung. KHONG dung 2026.",
+  "tag": "[UL] neo lich su BQ"
+ },
+ "grm_sens": {"bbl_m": 55.0, "usdvnd": 25582.5, "tax": 0.10, "_basis": "~7,5 tr t x 7,33 thung/t ~ 55 tr thung/nam [UL]; USD/VND snapshot 06/11"},
+ "tax_step": {"rate_now": 0.10, "rate_after": 0.20, "years_left": 13, "_src": "TM thue HN Q3/26 tr.15: QD 952/QD-TTg thue suat 10% 30 nam 2010-2039"},
+ "windfall_np_bn": {
+  "Q4_2026": {"XAU": -2000.0, "CO_SO": 4000.0, "TOT": 7000.0},
+  "Y2027": {"XAU": -1000.0, "CO_SO": 4000.0, "TOT": 12000.0},
+  "Y2028": {"XAU": 0.0, "CO_SO": 1000.0, "TOT": 5000.0},
+  "_basis": "LN VUOT nen chuan hoa (nen quy ~ (CO_SO+lai)/4 ~ 1.300). Q4/26: Bobby F1 P(Brent<98 cuoi nam)=0,55 => lo ton kho; crack diesel van ~84 vs ~32 nam 2025. 2027: TA6 ~48 ngay (D2/D3), IEA gasoil cang H1/27 nong H2/27 (F2-F4). XAU Q4 -2.000 khong lay nguyen -6.323 cua KH dieu chinh (xem rui ro). [UL]",
+  "multiplier_axis": [[0.5, 0.25], [1.0, 0.5], [1.5, 0.25]]
+ },
+ "plan_2026_adj": {"np_consol_bn": 18579.0, "rev_bn": 190831.0, "np_9T_actual_bn": 24901.714, "implied_Q4_np_bn": -6322.7,
+  "_src": "src/NQ_dieu_chinh_KH_2026.pdf Phu luc 1 (NQ 5795/NQ-BSR 06/11/2026)",
+  "_read": "KH = LN 6T thuc (15.934) + H2 ke hoach 2.645; DT ngu y Q4 26,6 nghin ty (Q3 59,6) khong khop nha may dang chay 125% => doc la ke hoach hanh chinh, KHONG phai du bao Q4; giu WARNING"},
+ "weights": {"bobby": {"XAU": 0.30, "CO_SO": 0.50, "TOT": 0.20}, "sym": {"XAU": 0.275, "CO_SO": 0.45, "TOT": 0.275},
+  "_basis": "Bobby sector read 09/11: K2 thoa thuan 0,35 + ADMIN_GATED 0,30 -> XAU 0,30; K1 0,50 -> CO_SO; STRUCTURAL 0,15 + K3 0,15 mot phan -> TOT 0,20. Ban doi xung chay song song."},
+ "nopat_shift_axis": [[-0.2, 0.25], [0.0, 0.5], [0.2, 0.25]],
+ "wc_release_axis": [[0.0, 0.25], [0.27, 0.5], [0.54, 0.25]],
+ "expansion": {"total_bn": 39004.5, "equity_bn": 15601.8, "debt_bn": 23402.7, "capex_2026_plan_bn": 7787.3, "cip_now_bn": 2137.697, "npv": 0.0,
+  "_src": "NQ 5795 Phu luc 2; TM 10 HN Q3/26", "_rule": "luat 03/11: base NPV=0, CIP theo gia so"},
+ "moat": {"tier": "NARROW", "type": "ADMIN/LOCATION", "durable": false, "params_in_model": "none (RONIC=Ke, khong thuong)",
+  "_basis": "ROIC_Min5Y -1,0% (BQ), LN 2020 -2.809 / 2024 631 ty => ROIC-Ke khong duong lien tuc; rao can = giay phep/vi tri nhung bien do Singapore dinh; dong ho: uu dai thue 2039, thue NK MFN 0% den 31/12/2026"},
+ "liq": {"sizes_vnd": [5e9, 4e7, 1e7], "method": "sigma_d x sqrt(Q/ADV_med) (cung FPT r3)"}
+}

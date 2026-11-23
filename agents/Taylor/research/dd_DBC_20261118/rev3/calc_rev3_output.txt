@@ -1,0 +1,53 @@
+assumptions_md5 66d9fbc6e099246b4c386080340c26cd
+BDS: muc chay sau thue/quy = 2.64 ty; tong LN BDS sau thue bi loai trong 20q = 474.3 ty
+--- XDCB/von chu lich su (noi suy) ---
+2021Q4:10.0% 2022Q1:15.7% 2022Q2:20.0% 2022Q3:23.9% 2022Q4:30.1% 2023Q1:27.0% 2023Q2:20.2% 2023Q3:15.2% 2023Q4:10.2% 2024Q1:13.2% 2024Q2:16.0% 2024Q3:14.3% 2024Q4:16.0% 2025Q1:17.3% 2025Q2:18.7% 2025Q3:20.0% 2025Q4:21.7% 2026Q1:19.0% 2026Q2:17.0% 2026Q3:14.9%
+XDCB/von TB 20q=18.0% | 15q=17.4% | hien tai Q3/26=14.9%
+W12 2023Q4..2026Q3 n=12: ROE_tot=0.1388 ROE_op(noi suy)=0.1684 ROE_op(bac thang)=0.1635 | cach rev1 ROE_tot*scale=0.1632
+W15 2023Q1..2026Q3 n=15: ROE_tot=0.1003 ROE_op(noi suy)=0.1187 ROE_op(bac thang)=0.1143 | cach rev1 ROE_tot*scale=0.1179
+W20 2021Q4..2026Q3 n=20: ROE_tot=0.0719 ROE_op(noi suy)=0.0832 ROE_op(bac thang)=0.0785 | cach rev1 ROE_tot*scale=0.0845
+ROE_op tam (TB 3 cua so khai truoc) = 0.1234; k_KTPL = 0.1106 -> ROE_op cho co dong = 0.1098
+scen (truoc CK thanh khoan): bad=7433 base=15123 good=22303
+TAM (sau CK 2%) = 14696 | VUNG = [7284; 21857] | tam truoc CK = 14996 | base sau CK = 14821
+LNST chuan hoa = 915.5 ty; EPS chuan hoa = 2124; sau KTPL = 1889; BVPS = 20231; P/B ham y tai tam = 0.73; P/E ham y = 6.9
+--- DO NHAY cua so (tung cua so lam tam) ---
+W12: tam=22630 (+54.0%)
+W15: tam=13861 (-5.7%)
+W20: tam=7596 (-48.3%)
+XDCB bac thang thay noi suy: ROE_op=0.1188 tam=13875 (-5.6%)
+Toan-von (XDCB cung ROE lich su, khong tach): ROE_tot=0.1037 tam=9845 (-33.0%)
+--- quy KTPL ---
+k=0.000: tam=17405 (+18.4%)
+k=0.063: tam=15862 (+7.9%)
+k=0.130: tam=14221 (-3.2%)
+k=0.265: tam=10915 (-25.7%)
+--- r (V1, beta 1 / 0,5) + dai Ke D4 ---
+-100bp: r=0.1250 tam=16277 (+10.8%) | beta0,5 15437 (+5.0%)
+-50bp: r=0.1300 tam=15437 (+5.0%) | beta0,5 15055 (+2.4%)
++50bp: r=0.1400 tam=14037 (-4.5%) | beta0,5 14357 (-2.3%)
++100bp: r=0.1450 tam=13447 (-8.5%) | beta0,5 14037 (-4.5%)
+Ke D4 0.123: tam=16645
+Ke D4 0.134: tam=14837
+g=0.04: tam=15223
+g=0.06: tam=14028
+CK thanh khoan 0%: tam=14996
+CK thanh khoan 5%: tam=14246
+--- trong so kich ban ---
+w=(0.35, 0.5, 0.15): tam=13238 (-9.9%)
+w=(0.15, 0.5, 0.35): tam=16153 (+9.9%)
+--- khong kiem chung duoc ---
+chi tuan thu moi truong 50 ty: -116 d/cp (-0.8%)
+chi tuan thu moi truong 150 ty: -348 d/cp (-2.3%)
+ESOP pha loang 1% (o menh gia 10k): tam=14647
+ESOP pha loang 3% (o menh gia 10k): tam=14553
+phai thu nguoi lao dong 237,1 ty mat trang: -539 d/cp
+--- V6 hai nen (chi hien thi) ---
+V_ngan=10324 (tai dau tu 0.535, ROE tren toan von sau KTPL 0.0934) | CFO/nam=1133.3 capex(gom thue TC)/nam=1178.7 FCFE/nam=-45.5 -> V_dai khong xac dinh (FCFE<=0)
+so rev1 19.491 / rev2 17.317 -> rev3 14696 (-24.6% / -15.1%)
+--- R3: do nhay bo sung ---
+Giu BDS lich su (=rev2): ROE_op=0.1383 tam=17317 (+17.8%)
+XDCB do von chu tai tro 25% (ROE lich su tinh lai cung ti le, ROE_op=0.1080): base=11316 tam=10965 (-25.4%)
+XDCB do von chu tai tro 50% (ROE lich su tinh lai cung ti le, ROE_op=0.1128): base=12587 tam=12210 (-16.9%)
+XDCB do von chu tai tro 100% (ROE lich su tinh lai cung ti le, ROE_op=0.1234): base=15123 tam=14696 (+0.0%)
+Cua so dai 2016Q1-2026Q3 n=43: ROE_tot=0.1422 | toan-von base=17834 | quy ROE_op (/(1-18%) uoc luong) base=23640 (+60.9% so tam)
+Cua so dai 2016Q1-2026Q3 bo 2020 n=39: ROE_tot=0.1186 | toan-von base=12943 | quy ROE_op (/(1-18%) uoc luong) base=18565 (+26.3% so tam)

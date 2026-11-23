@@ -1,0 +1,76 @@
+{
+ "axes_excluded": [
+  {
+   "axis": "chiet khau holdco tren co phan SZC/SZB",
+   "reason": "khong co du lieu (SZC thanh khoan ~7,8 ty/phien); bao song song 10%/25%"
+  },
+  {
+   "axis": "thanh tra tap doan SNZ lan sang SZL",
+   "reason": "chua co quyet dinh/ket luan neu ten SZL; WARNING"
+  },
+  {
+   "axis": "Long Phuoc NPV != 0 (doi von/cho thue cao)",
+   "reason": "luat du an moi 03/11: NPV 0 den khi co hop dong thue/doi von co so"
+  }
+ ],
+ "axes_included": [
+  "LN loi +-12%",
+  "g 2/3/4%",
+  "r +-100bp",
+  "LN phi tien mat 0/10/20%",
+  "thoi han dong tien 27 nam (den 2053, co so TM17) / vinh vien (MOI r2)"
+ ],
+ "base_adjustments": [
+  {
+   "basis": "TM17 nhan ky quy (doi tuong khac 10,1 + BLQ 0,2 + DH 147,0); TM16 trich thue dat 44,3 (khong doi tu 01/01)",
+   "effect_dong_per_share": -4183.282711276054,
+   "item": "tru ky quy ky cuoc NH+DH 157,4 + trich bo sung chi phi thue dat KCN Long Thanh 44,3 (MOI r2; vong 1 bo sot no theo so)",
+   "source": "src/Q3_2026_hopnhat.pdf tr.20-23 (anh trang PDF 24/27)"
+  },
+  {
+   "basis": "BCTC ma 242/TM8a: CCN Long Phuoc 344,7 + nha xuong 39,2 + TDC Tam An 14,2 + Chau Duc 6,1 + khac; phai tra nguoi ban chi 16,7 => khong co no xay dung lon doi ung; luat du an moi 03/11",
+   "effect_dong_per_share": 8444.946784016825,
+   "item": "XDCB 407,0 cong theo gia von (MOI r2; vong 1 bo => NPV thuc -407)",
+   "source": "src/Q3_2026_hopnhat.pdf BS in tr.2"
+  },
+  {
+   "basis": "gia so BCTC (ma 260 + co cau ABS 30/03/2026) + thue suat 20%",
+   "effect_dong_per_share": -842.1021368574428,
+   "item": "thue TNDN 20% tren lai von chua thuc hien SZC/SZB",
+   "source": "BCTC + dd_SZL_20261026/src/abs_szl_260330.txt"
+  },
+  {
+   "basis": "DT chua thuc hien ma 319+337 = 762,2 / thoi han con lai (27 nam, UOC LUONG) => can tren 17%; tam 10% = [UL], da la truc 0/10/20",
+   "effect_dong_per_share": null,
+   "item": "LN phi tien mat tam 10% N0",
+   "source": "BCTC in tr.3"
+  },
+  {
+   "basis": "BCTC ma 313, chi 07/10/2026",
+   "effect_dong_per_share": -1459.7852748001385,
+   "item": "co tuc phai tra 70,4 cong vao no",
+   "source": "BCTC"
+  }
+ ],
+ "center_vs_p50_note": "tam = ky vong luoi; P50 = trung vi ket cuc; gia tri tai tham so trung tam bao 2 nhanh thoi han (27 nam/vinh vien). Nhanh vinh vien (trong so 0,25) keo P90 len; khong nhanh trong so nho nao quyet dinh P10.",
+ "change_reason": "Vong 1 +9,9% vs zone cu 27.200. Vong 2: +XDCB 407 theo gia von (+8.445 d/cp truoc CK) — sua loi NPV0; -no khac theo so 201,7 (-4.185 d); -truc thoi han 27 nam (trong so 3/4). Tam tang manh, nhan doi TRONG -> DUOI vung.",
+ "change_vs_r1": "(1) +XDCB 407 (+8.445 d truoc CK); (2) -ky quy + trich thue dat 201,7 (-4.185 d); (3) +truc thoi han 27 nam/vinh vien 3/4-1/4 (-); (3) tam = ky vong luoi. NHAN DOI do sua loi NPV0, khong do doi dinh nghia vung.",
+ "grid_desc": "5 truc, n=270 ket cuc tat dinh: LN loi N0 {-12;-6;0;+6;+12}% quanh 131,1 (0,1/0,2/0,4/0,2/0,1) [UL] x g {2;3;4}% x r {R-1;R;R+1}% x ty le LN phi tien mat {20;10;0}% [UL; can tren 17% = DT chua thuc hien 762,2/27 nam x 0,8] (moi truc 1/4-1/2-1/4) x thoi han dong tien loi {27 nam (den 2053: TM17 NQ DHDCD 76/2020 phan bo LN den 2053); vinh vien (gia han) } (3/4-1/4) [UL trong so]. Co dinh: SZC/SZB thi gia 04/11 - thue TNDN 20% lai von; chua niem yet so sach; XDCB 407,0 gia von (NPV 0; TM8: CCN Long Phuoc 344,7, nha xuong cho thue 39,2, TDC Tam An 14,2, Chau Duc 6,1...); no rong 205,5 (sau co tuc phai tra); tru ky quy 157,4 + trich thue dat bo sung 44,3 (TM16-17). Phan vi wpct tren 270 o; tam = ky vong luoi. CK thanh khoan 5 ty ADV250 ap dong loat.",
+ "label_note": "Nhan theo co 5 ty/ADV250 (CK ~4,2%, Q/ADV >1.000% — NGOAI xa vung hieu chinh). Nhan DOI so vong 1 (TRONG -> DUOI) do sua loi NPV0 XDCB, KHONG do doi dinh nghia vung (van P10-P90). O co sleeve 40 tr xem label_sleeve40.",
+ "open_issues": [
+  "Moc 2053 lay tu NQ DHDCD 76/2020 phan bo LN (TM17) — chua doi chieu giay phep thue dat",
+  "Chi phi tra truoc DH 280,9 (tien thue dat Chau Duc 147,3, Tan Duc 69,9...) khong cong (tai san van hanh, da phan bo vao chi phi trong N0)",
+  "Phai tra DH khac 152,0 = LN giu lai phan bo 5,85/nam den 2053 (phi tien mat, nam trong truc nc)",
+  "Tach XDCB Long Phuoc vs khac; tong muc 920 + tien do (bao chi: hoat dong cuoi 2026)",
+  "Doi tuong tra truoc nguoi ban 72,6",
+  "Chua doc LCTT/thuyet minh",
+  "BQ OShares/BVPS restate (bay oshares)"
+ ],
+ "warnings": [
+  "SNZ (me 52,7%): Truong BKS bi khoi to, tam giam (CBTT ~27-28/05/2026; nhadautu, vneconomy) — ca nhan o cong ty me; chua cham phap nhan/tai san SZL",
+  "Luan chuyen tien trong he sinh thai Sonadezi (ABS); so huu cheo (SZL nam SZC/SZB; SNZ nam SZL); tra truoc nguoi ban NH 14,2 -> 72,6 chua doc doi tuong; tra truoc DH cho du an Sonadezi Binh Thuan",
+  "Dong Nai: sai pham quan ly xang dau/dat dai (bao chi 2026) — SZL co mang xang dau, chua bi neu ten",
+  "Free float < 25%; ADV 0,46 ty — rang buoc thuc thi",
+  "'Chua thay khoi to/xu phat cham phap nhan SZL': nguon = DD 26/10/2026 (nhadautu, vneconomy, doanhnghiephoinhap) + web search 05/11/2026 (baophapluat, diendandoanhnghiep) — khong co ket qua moi; khong thay NQ HDQT/DHDCD moi"
+ ]
+}

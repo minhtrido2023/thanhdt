@@ -1,0 +1,16 @@
+# LOCK pre-run r3 GAS — 2026-11-23T12:12:17+07:00 (job Taylor_20261123_050003, resume of Taylor_20261123_003454)
+# Gia 74.100 (06/11) da biet tu r1/r2; moi thay doi r3 co co so BCTC (notes_bctc_r3.md), khong vi gia. Khong ghi de r2.
+92cdd96edd552e60f056c2417e0c6966  assumptions_r3.json
+8bc38e351607be682a044e6670dc6a01  lock_v1_r3.json
+8100a9c909380bc4acc5c011aecada7d  model_r3.py
+eff794b4991eff3ebbc202bea4ff9d19  notes_bctc_r3.md
+e65f89a9b83e2f9ec0297a047ea217df  bq_fin_gas.csv
+0114975687094ac255ffffc81bb46689  np_hist_gas.csv
+5360b50b49441805d56d0918c3c883eb  brent_y.csv
+704fb6d41c032315f6c2fe91562cc1de  brent_q.csv
+2e8da85a1f5b74f0eb07358e002c0af1  gas_pe_quarterly.csv
+045fc58a598c96cc0480a5d4d4daa5ef  px_gas_daily_20261106.csv
+b81a07c786597ee3cae76ffdbf9a8986  ../src/GAS_Q3_2026_HN_VN.pdf
+cab4d365e44f31f194a83b4cdb8391a0  ../src/GAS_H1_2026_HN_soatxet.pdf
+a00baa0354470f10e936cbd04714950d  ../src/dl_20261123/GAS_Baocaotaichinh_2025_Kiemtoan_Hopnhat.pdf
+8173fc6cc904f701cc84586d502ef8b0  ../skeptic/r1.json

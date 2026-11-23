@@ -1,0 +1,13 @@
+{
+  "round": 3,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/REPORT_rev4.md",
+  "report_md5": "64228a9fde907b642d9a69ced89fbc0a",
+  "brief_md5": "aff6b05873fb556cf1e1d4dc35e51a4e",
+  "model": "opus",
+  "cost_usd": 1.1829114,
+  "started_at_ict": "2026-11-23T12:12:59+07:00",
+  "summary": "Rev4 sạch về số học: khoản cố định và kịch bản CƠ SỞ tính lại khớp, TM17 khớp ảnh trang gốc, và dữ liệu BQ 2019-25 cho thấy FCF ≈ LNST nên cách vốn hoá đứng vững. Điểm yếu nằm ở chính thay đổi mới của rev4: VAT khấu trừ 6.373 tỷ được tính đủ mệnh giá, thu hồi sau 1 năm (+774), trong khi lý lẽ 'tích luỹ cơ cấu' từ TM17 lại hàm ý không tự bù trừ được và phải chờ hoàn thuế với điều kiện chưa kiểm. Dải ảnh hưởng 0 đến −1.116 đ/cp. Chiều đắt còn có quỹ KHCN tối thiểu nếu là DNNN (~−224, ước lượng), Q4 kế hoạch lỗ −6.323 so với XẤU −2.000 (~−300, ước lượng), và CPH/FY2025 kiểm toán chưa lượng hoá. Chiều rẻ: phần tăng trưởng ghi NPV0 dù có bằng chứng tạo giá trị, và bản giữ lãi tỷ giá (+402). Tổng các mục mở dịch tâm khoảng −7%…+2%; chưa xác nhận được cho tới khi cơ chế thu hồi VAT và quyết toán CPH có nguồn.",
+  "verdict_raw_path": "agents/Taylor/research/dd_lagcand_20261109/BSR/skeptic/r3_raw.md"
+}

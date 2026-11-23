@@ -1,0 +1,6 @@
+{
+ "_doc": "Bổ sung rev4 (23/11/2026, job Taylor_20261123_050007) sau skeptic r2. Mù giá.",
+ "retro_equity": {"pbt_bn": 2755, "tax": 0.109, "basis": "Hồi tố/hoàn nhập 9T/26 ≈2.755 LNTT (CBTT 03/08/2026 + GT-Q3; rev2 §3) × (1−10,9% thuế hiệu dụng 9T) = 2.454,7 sau thuế, 100% thuộc mẹ; đây là khoản một lần đã duyệt (phần lớn còn nằm ở phải thu EPTC) ⇒ tách khỏi vốn di sản định giá ROE/r, ghi theo sổ 1,0x; rủi ro thu hồi chỉ độ nhạy 30%/50% cùng cơ sở"},
+ "lng_burn_check": {"gen_9m_mkwh": 3757, "heat_rate_btu_kwh": 6543, "basis": "đốt ước lượng = 3.757 tr kWh × 6.543 BTU/kWh = 24,6 tr MMBtu/9T ≈ 32,8/năm (ước lượng; suất hao rev2) — khớp giao nhận 23,8 tr MMBtu/9T (CBTT 13/10); hợp đồng định hạn 20,7/năm < mức đốt"},
+ "ppa_cm12": {"value": "PPA CM1&2 ký mới với EVN 15/12/2021 (vietnamenergy.vn 'signing power purchase agreement for ca mau 1 and 2 power plants'); thời hạn không công bố; EVN–PV Power có biên bản thống nhất phương án sửa đổi PPA (en.evn.com.vn)", "nt1": "không tìm thấy"}
+}

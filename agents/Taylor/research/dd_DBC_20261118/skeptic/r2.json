@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev2.md",
+  "report_md5": "7332200b5ab983737def341215362720",
+  "brief_md5": "2bb9342a21b865f9d4d167f4c427ebd4",
+  "model": "opus",
+  "cost_usd": 1.3736140000000001,
+  "started_at_ict": "2026-11-23T12:11:45+07:00",
+  "summary": "Rev2 fixes the issues skeptic r1 raised: the welfare fund is deducted with k measured from filings, 2022 is corrected to the audited figure, the CIP history is measured, and the window rule is declared in advance. The arithmetic and data reproduce exactly (BQ NP, ROE W20 9,03%, base 17.798, KTPL 200 tỷ from KT25 TM23). However, two judgment choices that carry the centre are not shown, and they push in opposite directions. The model treats all CIP as equity-funded; at 50% equity funding the base falls to 15.211, −14,5%. The window rule cuts off at 5 years; the 2016–2026 ROE from BQ is 14,22% vs 11,59%, giving a base of 18.198 even without the CIP adjustment. Q2/23's 326,8 tỷ profit has not been checked for a one-off (≈ −10% if it is, estimate), and NCI and the CIT incentive term are unchecked. Since no single item is decisive but several material items remain open, the verdict is INCONCLUSIVE, not CONFIRMED. Market prices in the report were ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_DBC_20261118/skeptic/r2_raw.md"
+}

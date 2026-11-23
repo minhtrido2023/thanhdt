@@ -1,0 +1,5 @@
+TTM window 2023Q4 .. 2026Q3 median 11508.4
+V_ngan 32,009 d/cp (NP chuan hoa 11,508 ty, g=-0.014, tai dau tu chan 0 vi g<0)
+V_dai (FCFE 9T x4/3 = 11,201 ty) 31,156 d/cp
+V_C4 (CFO - min(capex,KH)) 38,493 d/cp  [chua qua tieu chi khoa truoc (2/4 chan troi), chi theo doi]
+D = 0.027 (ln2=0.693) -> D<=ln2

@@ -1,0 +1,36 @@
+r = 13.50%; gia SZL 27,700 (2026-11-06); N0 131.08; k 11.215%; CK 5 ty 4.12% (Q/ADV250 1083.9%), 40 tr 0.37% (Q/ADV250 8.7%)
+Co phan SZC/SZB thi gia 06/11 486.4 ty, thue lai von 40.3, rong 446.1 ty (9,255 d/cp); KTPL tren phan nay 50.0 ty (1,038 d/cp truoc CK)
+CONTROL r3 tai lap: 5 ty tam 29,257 | P10/P50/P90 26,209/28,963/32,706 | duoi gia 29.3% => TRONG | 40 tr P10 27,234 (r3 ghi 29.257 / 26.209/28.963/32.706; 40 tr 30.401 P10 27.234)
+CAU NOI r3 (control): tam 29,257 P10/P90 26,209/32,706 TRONG | 40tr tam 30,401 P10/P90 27,234/33,984 TRONG
+CAU NOI + A: RONIC = Ke: tam 25,524 (-3,733) P10/P90 23,296/28,070 TRONG | 40tr tam 26,522 P10/P90 24,207/29,167 TRONG
+CAU NOI + B: KTPL 11,2% tren co phan SZC/SZB (100%): tam 24,529 (-995) P10/P90 22,301/27,074 TREN | 40tr tam 25,488 P10/P90 23,173/28,133 TRONG
+HEADLINE r3b (5 ty):  n=270 tam 24,529 | P10/P50/P90 22,301/24,372/27,074 | duoi gia 95.3% => TREN | gia/tam +12.9% | gia/P90 +2.3%
+HEADLINE r3b (40 tr): n=270 tam 25,488 | P10/P50/P90 23,173/25,325/28,133 | duoi gia 87.2% => TRONG | gia/tam +8.7% | gia/P90 -1.5%
+DO NHAY chi A (B tat): tam 25,524 | P10/P50/P90 23,296/25,368/28,070 | duoi gia 87.8% => TRONG (+995) | 40tr P10/P90 24,207/29,167 => TRONG
+DO NHAY chi B (A tat, RONIC ngam vo han): tam 28,262 | P10/P50/P90 25,214/27,927/31,711 | duoi gia 43.1% => TRONG (+3,733) | 40tr P10/P90 26,200/32,950 => TRONG
+DO NHAY B o 50%: tam 25,027 | P10/P50/P90 22,799/24,870/27,572 | duoi gia 90.5% => TREN (+498) | 40tr P10/P90 23,690/28,650 => TRONG
+DO NHAY KTPL 5% (LN loi + co phan): tam 26,254 | P10/P50/P90 23,995/26,085/29,000 | duoi gia 76.1% => TRONG (+1,725) | 40tr P10/P90 24,933/30,134 => TRONG
+DO NHAY KTPL 8% (LN loi + co phan): tam 25,421 | P10/P50/P90 23,178/25,258/28,071 | duoi gia 87.8% => TRONG (+892) | 40tr P10/P90 24,083/29,168 => TRONG
+DO NHAY N0 = Q3x4 138,5: tam 25,371 | P10/P50/P90 23,017/25,206/28,060 | duoi gia 87.8% => TRONG (+842) | 40tr P10/P90 23,917/29,157 => TRONG
+DO NHAY chi nhanh vinh vien: tam 24,913 | P10/P50/P90 22,442/24,871/27,443 | duoi gia 90.6% => TREN (+384) | 40tr P10/P90 23,319/28,516 => TRONG
+DO NHAY chi 27 nam: tam 24,401 | P10/P50/P90 22,113/24,372/26,929 | duoi gia 96.9% => TREN (-128) | 40tr P10/P90 22,977/27,981 => TRONG
+DO NHAY thoi han 1/2-1/2: tam 24,657 | P10/P50/P90 22,329/24,509/27,074 | duoi gia 93.7% => TREN (+128) | 40tr P10/P90 23,202/28,133 => TRONG
+DO NHAY B ca co phan chua niem yet: tam 24,276 | P10/P50/P90 22,048/24,120/26,822 | duoi gia 95.9% => TREN (-253) | 40tr P10/P90 22,910/27,870 => TRONG
+DO NHAY holdco 10% (SZC/SZB): tam 23,741 | P10/P50/P90 21,513/23,585/26,286 | duoi gia 98.8% => TREN (-788) | 40tr P10/P90 22,354/27,314 => TREN
+DO NHAY holdco 25% (SZC/SZB): tam 22,559 | P10/P50/P90 20,331/22,403/25,105 | duoi gia 99.8% => TREN (-1,970) | 40tr P10/P90 21,126/26,086 => TREN
+DO NHAY holdco ngu y P/B SNZ/SZC 45% (can tren tho): tam 20,970 | P10/P50/P90 18,742/20,813/23,515 | duoi gia 100.0% => TREN (-3,559) | 40tr P10/P90 19,474/24,434 => TREN
+DO NHAY N0 = 2025 nam hoa 115,3: tam 22,738 | P10/P50/P90 20,778/22,600/24,977 | duoi gia 99.8% => TREN (-1,791) | 40tr P10/P90 21,591/25,953 => TREN
+DO NHAY capex duy tri 0,5x KH (+45/nam): tam 31,011 | P10/P50/P90 28,619/30,787/33,650 | duoi gia 2.8% => DUOI (+6,482) | 40tr P10/P90 29,738/34,965 => DUOI
+DO NHAY capex duy tri 1,5x KH (-45/nam): tam 18,047 | P10/P50/P90 15,823/17,958/20,411 | duoi gia 100.0% => TREN (-6,482) | 40tr P10/P90 16,442/21,208 => TREN
+DO NHAY + BDS dau tu moi 166,9 theo gia von: tam 27,849 | P10/P50/P90 25,621/27,692/30,394 | duoi gia 53.1% => TRONG (+3,320) | 40tr P10/P90 26,622/31,582 => TRONG
+DO NHAY ky quy DH theo PV den 2053: tam 27,356 | P10/P50/P90 25,110/27,201/29,903 | duoi gia 59.4% => TRONG (+2,827) | 40tr P10/P90 26,092/31,071 => TRONG
+DOI CHIEU r3: KTPL 5% + holdco 25% (SZC/SZB): tam 28,507 (vs 28.052: +455)
+DOI CHIEU + holdco 25% ca co phan chua niem yet: tam 27,943 (vs 28.052: -109)
+DOI CHIEU + KTPL tren N0x(1-nc) (quy uoc skeptic): tam 28,625 (vs 28.052: +573)
+DOI CHIEU ca hai (holdco chua niem yet + KTPL tren N0x(1-nc)): tam 28,062 (vs 28.052: +10)
+DOI CHIEU KTPL 11,2% + holdco 25% (r3): tam 27,039 (vs 28.052: -1,013)
+DOI CHIEU KTPL 11,2% tren N0x(1-nc) + holdco 25% ca chua niem yet: tam 26,740 (vs 28.052: -1,312)
+DOI CHIEU skeptic diem 29.510 (KTPL 11,2% tren N0x(1-nc), khong holdco): tam 29,522 (vs 28.052: +1,470)
+GIA NGU Y 27,700 (tam 5 ty): N0 159.0 ty (KTPL 11,2%) / 131.5 (KTPL 0%); hoac KTPL -0.2%; hoac r 10.89%; hoac dong tien them +22.0 ty/nam
+P90 = gia khi N0 = 135.8 ty (5 ty) / 127.9 ty (40 tr)
+Do nhay lai huy dong (beta 1, tam): -100bp +4.4%; 100bp -3.9%

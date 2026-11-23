@@ -1,0 +1,13 @@
+{
+  "round": 2,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_POW_20261118/REPORT_rev3.md",
+  "report_md5": "72f7e9334aa34d35eabedd63a3a5d275",
+  "brief_md5": "b1758f4b6b074d7a4760dfabf0170e3c",
+  "model": "opus",
+  "cost_usd": 1.0581839999999998,
+  "started_at_ict": "2026-11-23T12:09:02+07:00",
+  "summary": "Rev3 thêm đúng khoản capex tuân thủ QCVN 19 của VA1 làm dòng tiền ra và số học tái lập được: tâm 9.156 trước CK và PV P0 ~3.883 so với 3.888 đều tự tính lại khớp, số cổ phiếu khớp BCTC kiểm toán. Chưa CONFIRMED được vì một hạng mục ngành điện trọng yếu chưa kiểm chứng — hạn PPA/nguồn khí CM1&2 và NT1 — trong khi mô hình coi vốn di sản vĩnh viễn. Hai chiều: tâm có thể quá CAO (QCVN19 nhà máy khí ngoài base, công thức giá LNG NT3&4 không công bố, trọng số bù giá chủ quan) và cũng có thể quá THẤP (khoản phải thu hồi tố đã duyệt bị định giá 0,593× thay vì ~1,0×, khoảng +3% ước lượng; đời máy hữu hạn +11…+18%). Báo cáo còn gọi 23,8tr MMBtu là 'đốt thực' trong khi CBTT chỉ ghi giao nhận. Không tra hay dùng giá thị trường.",
+  "verdict_raw_path": "agents/Taylor/research/dd_POW_20261118/skeptic/r2_raw.md"
+}

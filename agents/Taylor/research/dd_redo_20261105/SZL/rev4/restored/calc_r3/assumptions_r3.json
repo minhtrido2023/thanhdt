@@ -1,0 +1,17 @@
+{
+ "asof_price": "2026-11-06",
+ "price_file": "px_szl_r3_20261106.csv (BQ tav2_bq.ticker, SZL/SZC/SZB/SNZ 2025-06-01..2026-11-06)",
+ "ktpl_rate": {"value": 0.11215, "num_ty": 15.778011, "den_ty": 140.686596943, "basis": "TM18 BCTC Q3/2026 tr.23: trich quy KTPL trong nam 15,778 ty; LNST 2025 (ma 420b cot dau nam, BCTC tr.4) 140,687 ty => 11,2%. Moi 1 nam quan sat => do nhay 0%/5%/8%", "applies_to": "N0 (LN loi, ke ca phan phi tien mat) — trich tren LNST ke toan"},
+ "ktpl_fund_balance_ty": {"value": 23.964056338, "basis": "BS ma 323 / TM18 so du 30/09/2026 — no phai tra nguoi lao dong, r2 bo sot"},
+ "term_weights": {"T27": 0.75, "perp": 0.25, "basis": "[UL] giu r2; moc 2053 tu NQ DHDCD 76/2020 (TM17) chi cho phan dat KCN Long Thanh cho thue lai 2004-08; khong co doanh thu tach theo KCN (BCTC scan khong co bo phan) => khong tach dong ho duoc trong base; 1/2-1/2 la do nhay"},
+ "n0_ty": {"value": "CORE_9M*4/3 = 131,1", "basis": "giu r2; giua 115,3 (2025 nam hoa) va 138,5 (Q3x4) — skeptic #6 xac nhan"},
+ "axes": {"N0": "-12/-6/0/+6/+12% (0,1/0,2/0,4/0,2/0,1) [UL]", "g": "2/3/4% (1/4-1/2-1/4)", "r": "R-1/R/R+1 (1/4-1/2-1/4)", "nc": "20/10/0% (1/4-1/2-1/4) [UL]", "T": "27 nam / vinh vien (3/4-1/4) [UL]"},
+ "ronic": {"base": "giu cau truc Gordon r2 (khong tru tai dau tu cho g)", "basis": "skeptic TOP5C SZL khong neu RONIC; tien le SAS r3 (NARROW, Gordon loi theo g); bien the RONIC=Ke bao song song (quy tac chung TOP5C dong 2) — Mike/user chon"},
+ "holdco": {"base": 0.0, "basis": "chua co du lieu anh xa: SNZ P/B 0,66 vs SZC 1,20/SZB 1,78/SZL 1,70 (BQ 06/11) goi y holdco discount o SNZ nhung khong anh xa duoc sang co phan 10%/8% cua SZL => do nhay 10/25%"},
+ "investments": "SZC/SZB thi gia dong cua 06/11 (20.350/46.500) - thue TNDN 20% lai von; chua niem yet theo so",
+ "cip": "XDCB 407,0 theo gia von (NPV 0, giu r2)",
+ "r": "13,5% + 1,0 x (lai huy dong 12T hieu dung tai 06/11 - 7,40%)",
+ "liq": "CK = sigma*sqrt(Q/ADV), Y=1; ADV trung vi Price*Volume 250 va 60 phien den 06/11; co tham chieu 5 ty; sleeve 10/20/40 tr",
+ "sens_up": {"bds_dt_add_ty": 166.875, "bds_basis": "BS ma 241 nguyen gia 1.178,8 vs 1.011,9 dau nam (+166,9; skeptic ghi 166,2)", "n0_q3x4_ty": 138.5, "deposit_pv": "ky quy DH 146,99 chiet khau den 2053 tai r"},
+ "sens_capex": {"da_ty_per_year": 90.0, "da_basis": "LCTT ma 02: khau hao 9T 67,51 => 90,0/nam", "maint_mult": [0.5, 1.5], "basis": "[UL] capex duy tri / khau hao; N0 da tru khau hao => m=1 trung tinh"}
+}

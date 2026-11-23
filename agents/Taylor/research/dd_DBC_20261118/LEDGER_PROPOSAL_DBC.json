@@ -1,0 +1,81 @@
+{
+ "ticker": "DBC",
+ "dd_date": "2026-11-18",
+ "rev": 2,
+ "skeptic_final": "REFUTED_OPEN",
+ "skeptic_final_basis": "skeptic_run",
+ "skeptic_verdict_path": "agents/Taylor/research/dd_DBC_20261118/skeptic/r3.json",
+ "audited_fy_missing": false,
+ "bctc_quarter": "2026Q3",
+ "zone_low": 7284,
+ "center": 14696,
+ "zone_high": 21857,
+ "center_kind": "expected_weighted",
+ "center_desc": "gia tri ky vong trong so 25/50/25 (thu nhap thang du von chu, ROE_op = TB deu 3 cua so khai truoc 12/15/20q, LNST loai LN BDS lich su, tru quy KTPL k=11,06%, XDCB NPV=0 so sach) SAU chiet khau thanh khoan 2%; r 13,5% neo lai huy dong 7,4%, g 5%; rev3",
+ "center_range": null,
+ "center_alt": 14821,
+ "center_alt_kind": "base_scenario",
+ "price_ref": 16200,
+ "price_date": "2026-11-23",
+ "verdict_label": "Gia 16.200 = 1,10x tam 14.696: quanh/tren gia tri hop ly, KHONG re; cong 0,85xtam (12.492) khong dat. Do bat dinh lon hai chieu (cua so -48%/+54%, tai tro XDCB toi -25%, BDS +18%). Phap ly chi WARNING (phai thu NLD 237,1 ty).",
+ "skeptic_status": "skeptic r1 INCONCLUSIVE (rev1) -> rev2 r2 INCONCLUSIVE -> rev3 r3 REFUTED (medium; tam qua THAP: ~1.186 ty BDS do dang nam trong von hoat dong, sua +5,4% den +28,9% uoc luong; nguoc chieu: uu dai thue TNDN ~-13% chua chay). Het 2 vong/ca -> vong 3 bao user",
+ "source_file": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev3.md",
+ "report_md5": "50488508d0227b72119e381b3a5d22ff",
+ "evidence": [
+  {
+   "file": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev3.md",
+   "quote": "Tâm = 14.696 đ/cp",
+   "fields": [
+    "center"
+   ]
+  },
+  {
+   "file": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev3.md",
+   "quote": "Vùng [7.284; 21.857]",
+   "fields": [
+    "zone_low",
+    "zone_high"
+   ]
+  },
+  {
+   "file": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev3.md",
+   "quote": "Giá 16.200 (DNSE, 23/11/2026 11:29)",
+   "fields": [
+    "price_ref"
+   ]
+  },
+  {
+   "file": "agents/Taylor/research/dd_DBC_20261118/REPORT_rev3.md",
+   "quote": "14.821",
+   "fields": [
+    "center_alt"
+   ]
+  }
+ ],
+ "assumptions_file": "agents/Taylor/research/dd_DBC_20261118/rev3/assumptions_DBC_rev3.json",
+ "assumptions_md5": "66d9fbc6e099246b4c386080340c26cd",
+ "null_reason": null,
+ "expires_on": "2027-03-18",
+ "expires_basis": "BCTC Q4/2026 (~cuoi 01/2027) hoac 120 ngay",
+ "correction_reason": "skeptic r1 INCONCLUSIVE tren rev1: them quy KTPL (k=11,06% tu BCTC KT), BCTC KT 2022-25 (sua Q4/22 -144,9), XDCB lich su theo quy, luat 3 cua so khai truoc; r2 INCONCLUSIVE: loai LN BDS lich su (DT BDS KT 769->21 ty), do nhay tai tro XDCB/cua so 2016+",
+ "open_items": [
+  "BDS do dang ~1.186 ty (TM 8, 30/6/26) chua tach khoi von hoat dong: +5,4% den +28,9% (uoc luong skeptic)",
+  "Thoi han uu dai thue TNDN chua kiem: ~-13% (uoc luong)",
+  "Trich lap TSSH 94-188 ty bo khoi rev3: -1,5% den -3%",
+  "Chi tuan thu moi truong / giay phep trai: khong kiem chung duoc",
+  "Capex con lai de hoan thanh XDCB: khong cong bo"
+ ],
+ "alternates": {
+  "rev2": {
+   "report": "REPORT_rev2.md",
+   "md5_assumptions": "25d2e3059aa88705be3605ba500f9369",
+   "center": 17317,
+   "zone": [
+    9906,
+    24478
+   ],
+   "skeptic": "skeptic/r2.json INCONCLUSIVE"
+  }
+ },
+ "notes": "Nut kem chac: lua chon cua so, ti le tai tro XDCB, xu ly BDS (ca LN lan von). Moat NARROW mong. Neu Mike/user cho vong 4: tach BDS do dang thanh tai san rieng (NPV=0 so sach) + chay B5 thue."
+}
