@@ -1,0 +1,37 @@
+ticker,group,first_dd_date,evidence,confidence
+BSR,LAG_candidate,2026-11-09,"agents/Taylor/research/dd_lagcand_20261109/BSR/PROMPT.txt:L4 ""DD một mã cho sleeve LAG (candidate sẽ MUA trong plan 09/11, chưa có DD trong sổ)""; ""LAG_HI, ADV3T 253 tỷ""; bus 2026-11-09T07:46Z dd-lagcand BSR",high
+CSV,LAG_candidate,2026-11-09,"agents/Taylor/research/dd_lagcand_20261109/CSV/PROMPT.txt:L4 (cùng câu ""DD một mã cho sleeve LAG ... plan 09/11""); bus dd-lagcand",high
+GAS,LAG_candidate,2026-11-09,"agents/Taylor/research/dd_lagcand_20261109/GAS/PROMPT.txt:L4 (cùng câu); ""(1) vì sao LAG chọn mã này""",high
+MSB,LAG_candidate,2026-11-09,"agents/Taylor/research/dd_lagcand_20261109/MSB/PROMPT.txt (cùng mẫu); bus 2026-11-09T07:47Z ""dd-lagcand MSB 09/11""",high
+SCL,LAG_candidate,2026-10-21,"kb/projects/scl-dd-research-20261021.md:L2-3 ""nghiên cứu thêm SCL sau cờ DD EQ_PHAI_THU_TANG ... gói DD data/lag_dd/SCL_2026-10-19.json""; bus job Taylor_20261028_071503 ""Đang giữ: ZaloPay 700cp (LAG), SpaceX 1100cp (LAG)"". Là cờ DD của vị thế LAG đang giữ, nên cũng có thể xếp held_position",med
+DCM,LAG_candidate,2026-11-04,"kb/projects/dcm-dd-20261104.md:L13 ""plan 05/11 có lệnh MUA DCM 33.000 (LAG_LO)""; DD khởi chạy tối 04/11 (job Taylor_20261104_155446) ngày trước plan. Prompt không nêu lý do; ngoài ra bus 2026-11-01T13:26Z funnel-8l-v2 top8 asof 10/30 có DCM. Không chắc",low
+VGS,LAG_candidate,2026-11-10,"Prompt job Taylor_20261110_125453 không nêu lý do; bus decision 2026-11-11 ""vgs-exit-max-sessions"" cho thấy VGS đang có deal SpaceX+ZaloPay (+15%/-10%) ngay sau DD. Suy luận, không có dòng khẳng định",low
+DGC,fear_buy,2026-07-17,"kb/projects/dgc-tv1-fearbuy-discretionary.md:L1,L8-10 ""DD mua khi sợ hãi có tính toán ... re-do 23/07 (job Taylor_20260723_112707)"", gốc §6 17/07; đang giữ ZaloPay/SpaceX (excluded ở ZaloPay). DD 10/29 là sau BCTC theo yêu cầu user (kb/projects/dgc-dd-20261029.md:L3). Ngày đầu tiên là cận trên",high
+TV1,fear_buy,2026-07-23,"agents/Taylor/research/tv1_pecc1_sotp_20260723.md:L1-3 ""Lần 1 (job Taylor_20260723_091219) ... User phản biện""; kb/projects/dgc-tv1-fearbuy-discretionary.md:L1 ""QUALIFIED YES""; plan_TV1_SpaceX_discretionary_20260723.json",high
+DRI,held_position,2026-10-21,"kb/projects/dri-q3-hold-review-20261021.md:L1-3 ""đánh giá GIỮ/BÁN sau số Q3; sleeve discretionary (mua có chủ đích khi giá rẻ)""; dri-manual-sell-20261021.md; DD Taylor đầu 10/26-10/27 (dd_blind2_DRI_20261026, dd_DRI_20261027). Lần mua gốc chưa truy được",med
+FPT,fear_buy,2026-10-14,"agents/Taylor/research/fpt_dd_tech_20261014/README.md:L1-9 ""DD + kỹ thuật 14/10 ... MUA CHIA ĐỢT ... đáy mới 52 tuần, khối ngoại bán 11 phiên"" (giảm sâu); DD bản đầy đủ 11/11 01 là sau BCTC (dd_FPT_20261101). Prompt gốc không còn (job bus đã dọn); suy luận",low
+PNJ,fear_buy,2026-09-25,"Prompt Taylor_20261114_014836: ""PNJ bị loại khỏi 2 account từ 2026-09-30 (hạ bậc AMBIGUOUS->NON ... lãnh đạo bị bắt buôn lậu kim cương 07/2026, giá sập ~-32%)""; kb/projects/pnj-dd-20261114.md:L1. DD 11/14 là review trigger; DD ngày/đợt đầu trước 25/09 chưa tìm được file (ngày là cận trên)",med
+DDV,fear_buy,2026-10-26,"bus job Taylor_20261026_011019 prompt: ""DD cho sleeve discretionary, theo calculated_fear_state_backstop §2/§2.5 ... Funnel 8L 23/10 ... Giả thuyết CỦA USER"" ; agents/Taylor/research/dd_DDV_20261026/REPORT.md:L36 ""Kiểm chứng giả thuyết của user"". Kết luận NON (không phải ca sợ hãi). Cũng đúng user_request",med
+NNC,fear_buy,2026-10-26,"job Taylor_20261026_012529 prompt (cùng mẫu sleeve discretionary §2/§2.5); agents/Taylor/research/dd_NNC_20261026/REPORT.md:L27 ""Giả thuyết của user (giống SCL, ăn theo chu kỳ VLXD)""; REPORT:L126 ""Funnel ghi 0,96 tỷ"". Cũng đúng user_request",med
+NT2,fear_buy,2026-10-26,"job Taylor_20261026_011018 prompt (cùng mẫu); agents/Taylor/research/dd_NT2_20261026/REPORT.md:L8 ""funnel context KHÔNG-GIẢM; NON (sai sleeve fear-buy)""",med
+SAS,fear_buy,2026-10-26,"job Taylor_20261026_012530 prompt (cùng mẫu); agents/Taylor/research/dd_SAS_20261026/REPORT.md:L43 ""Giả thuyết đã lập""; REPORT:L142 ""Funnel 8L ghi thanh khoản 1,1 tỷ""",med
+SZL,fear_buy,2026-10-26,"job Taylor_20261026_012527 prompt (cùng mẫu); agents/Taylor/research/dd_SZL_20261026/REPORT.md:L14 ""Kiểm chứng giả thuyết của user: KCN -> cho thuê thêm -> LN tăng""; REPORT:L106 funnel drop_pct",med
+DBC,user_request,2026-11-18,"agents/Taylor/research/dd_DBC_20261118/brief.md:L1 ""Làm DD mã DBC ... user yêu cầu 18/11/2026""; kb/projects/dbc-dd-20261118.md:L1 ""(user yêu cầu trong topic 1572457748526800986)""",high
+QTP,user_request,2026-11-17,"job Taylor_20261117_035339 prompt: ""DD mã QTP ... User yêu cầu 17/11/2026""",high
+TTA,user_request,2026-11-20,"job Taylor_20261120_041933 prompt: ""DD mã TTA ... User yêu cầu 20/11/2026""",high
+HPG,post_BCTC,2026-10-31,"job Taylor_20261031_093839 prompt: ""Due diligence HPG as-of 31/10 ... không phục vụ fear-buy ... chỉ khi user xét mua discretionary""; mùa BCTC Q3 (kb/projects/hpg-dd-20261031.md). Lý do chọn mã không nêu",low
+MBB,post_BCTC,2026-10-31,"job Taylor_20261031_142133 prompt: ""DD mã MBB ... Q3/2026""; bus dd-MBB-20261031; MBB nằm trong dc_seed_Q3 (bus newdeals-season-refactor-20261117). Lý do chọn mã không nêu",low
+HHS,post_BCTC,2026-11-01,"job Taylor_20261101_033221 prompt: ""(user chốt 29/10: không phục vụ fear-buy ...) HHS là công ty con 58,31% của TCH""; nối từ DD TCH 10/31",low
+TCH,post_BCTC,2026-10-31,"job Taylor_20261031_141634 prompt ""DD TCH ... KHÔNG phục vụ fear-buy""; BCTC Q2 FY26 (01/07-30/09); TCH từng bị UBCKNN phạt. Lý do chọn mã không nêu (job sau: user yêu cầu 21:55 ""tìm thêm thông tin"")",low
+SIP,post_BCTC,2026-11-01,"job Taylor_20261101_041613 prompt: ""DD SIP (nghi là CTCP Đầu tư Sài Gòn VRG ... XÁC MINH tên pháp nhân)"" - người giao chỉ biết mã; BCTC Q3 công bố 30/10",low
+MVC,post_BCTC,2026-11-03,"job Taylor_20261103_082601; kb/projects/mvc-dd-20261103.md:L12 ""MVC kế thừa ~35-50% giá trị NNC"" (MVC liên quan NNC). Lý do chọn không nêu",low
+PVP,post_BCTC,2026-10-29,"job Taylor_20261029_065413 prompt: ""Due diligence mã PVP ... sau BCTC Q3/2026""",med
+PVT,post_BCTC,2026-10-29,"job Taylor_20261029_035644 prompt: ""DUE DILIGENCE PVT ... sau BCTC hợp nhất Quý 3/2026""; PVT thuộc dc_seed_Q3",med
+TV2,post_BCTC,2026-10-28,"job Taylor_20261028_051709 prompt: ""DD TV2 ... cho user, sau BCTC Q3/2026 công bố sáng 28/10""",med
+VCB,post_BCTC,2026-11-17,"job Taylor_20261117_110239 prompt ""DD mã VCB mùa BCTC Q3/2026""; bus 2026-11-17T10:50Z question newdeals-season-2026Q3 dd-queue {""dd_queue"":[""VCB""], enter VCB} (converge paper newdeals season)",med
+CST,post_BCTC,2026-11-11,"job Taylor_20261111_133358 prompt (BCTC Q3/2026 vừa ra, dự phòng 333 tỷ); lý do chọn mã không nêu",low
+LLM,post_BCTC,2026-11-18,job Taylor_20261118_122349 prompt (BCTC Q3/2026); lý do chọn mã không nêu,low
+POW,post_BCTC,2026-11-18,job Taylor_20261118_041402 prompt (BCTC Q3 công bố 30/10); lý do chọn mã không nêu,low
+VCP,post_BCTC,2026-11-12,job Taylor_20261112_051752 prompt (BCTC Q3/2026); lý do chọn mã không nêu,low
+VLB,post_BCTC,2026-11-22,"job Taylor_20261122_094500 prompt (""DD đầy đủ mã VLB""; BCTC Q3/2026); lý do chọn mã không nêu",low
+PAT,other,2026-11-14,"job Taylor_20261114_120425 prompt: ""PAT ... 51% do Đức Giang Lào Cai/DGC nắm ... khởi tố 17/03/2026 liên quan Đức Giang Chemical""; liên quan DGC (đang giữ); sau đó user phản biện (dd_PAT_rebuttal_20261117). Lý do khởi đầu không nêu rõ",low
