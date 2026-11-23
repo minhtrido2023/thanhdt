@@ -1,8 +1,8 @@
 # Paper-Trade Comparison — 5 Systems
 
-*Generated: 2026-11-20 15:44*
+*Generated: 2026-11-23 15:44*
 
-*Window: 2026-04-01 → 2026-11-19 (232 calendar days)*
+*Window: 2026-04-01 → 2026-11-20 (233 calendar days)*
 
 *Init NAV: 50B VND fresh, all-cash, no positions (each system)*
 
@@ -11,30 +11,30 @@
 
 | System | Final NAV | Total Ret | CAGR | Vol (ann) | Sharpe | Max DD | Calmar |
 |---|---|---|---|---|---|---|---|
-| **V11 Song Sinh + KELLY + DT5G ⭐** | 49.152B | -1.55% | -2.43% | 16.42% | -0.07 | -11.81% | -0.21 |
-| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 49.029B | -1.89% | -2.96% | 9.86% | -0.26 | -8.07% | -0.37 |
-| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 46.971B | -6.01% | -12.40% | 10.47% | -1.19 | -6.84% | -1.81 |
-| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 46.241B | -7.52% | -16.25% | 13.24% | -1.26 | -11.06% | -1.47 |
-| **VNINDEX Buy & Hold (rebased 50B)** | 49.609B | -0.78% | -1.23% | 16.66% | +0.01 | -13.46% | -0.09 |
+| **V11 Song Sinh + KELLY + DT5G ⭐** | 49.444B | -0.96% | -1.51% | 16.38% | -0.01 | -11.81% | -0.13 |
+| **V12 Âm Dương (BAL+LAGGED) + DT5G ⭐** | 49.209B | -1.53% | -2.39% | 9.84% | -0.20 | -8.07% | -0.30 |
+| **V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01** | 47.204B | -5.54% | -11.41% | 10.46% | -1.08 | -6.84% | -1.67 |
+| **V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐** | 46.147B | -7.71% | -16.54% | 13.20% | -1.29 | -11.24% | -1.47 |
+| **VNINDEX Buy & Hold (rebased 50B)** | 49.585B | -0.83% | -1.30% | 16.61% | +0.00 | -13.46% | -0.10 |
 
 ## Delta vs V23 (production baseline)
 
 | System | ΔRet | ΔDD | Verdict |
 |---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | +5.97pp | -0.75pp | Return better, DD worse |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +5.63pp | +3.00pp | Both better |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +1.51pp | +4.22pp | Both better |
-| VNINDEX Buy & Hold (rebased 50B) | +6.74pp | -2.39pp | Return better, DD worse |
+| V11 Song Sinh + KELLY + DT5G ⭐ | +6.74pp | -0.57pp | Return better, DD worse |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | +6.17pp | +3.18pp | Both better |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | +2.16pp | +4.40pp | Both better |
+| VNINDEX Buy & Hold (rebased 50B) | +6.87pp | -2.21pp | Return better, DD worse |
 
 ## Grind lens — current drawdown & recent momentum
 
 | System | Cur DD (from peak) | Underwater | Peak date | Trailing 1M | Trailing 3M |
 |---|---|---|---|---|---|
-| V11 Song Sinh + KELLY + DT5G ⭐ | -11.7% | 189d | 2026-05-14 | -3.4% | -3.3% |
-| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -5.3% | 196d | 2026-05-07 | -1.5% | +0.1% |
-| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -6.4% | 141d | 2026-07-01 | -1.9% | -1.5% |
-| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -11.1% | 141d | 2026-07-01 | -2.9% | -3.7% |
-| VNINDEX Buy & Hold (rebased 50B) | -12.4% | 185d | 2026-05-18 | -2.8% | -2.1% |
+| V11 Song Sinh + KELLY + DT5G ⭐ | -11.1% | 190d | 2026-05-14 | -3.5% | -2.8% |
+| V12 Âm Dương (BAL+LAGGED) + DT5G ⭐ | -5.0% | 197d | 2026-05-07 | -1.6% | +0.5% |
+| V4 12.1 (V121_ENS + BASE) + DT5G — fresh 2026-06-01 | -5.9% | 142d | 2026-07-01 | -1.9% | -1.2% |
+| V2.3 = V2.2 (BAL|LAG static + park) + capit — fresh 2026-06-11 ⭐ | -11.2% | 142d | 2026-07-01 | -3.5% | -4.4% |
+| VNINDEX Buy & Hold (rebased 50B) | -12.4% | 186d | 2026-05-18 | -4.1% | -2.6% |
 
 *Grind = sustained underwater stretch where the book bleeds while the index holds/rises (style-divergence). V2.3's known weak spot is the 2025-08→ style-divergence grind (momentum lags the VIC-led megacap index); watch V2.3 trailing-3M vs VNINDEX.*
 
@@ -73,8 +73,9 @@
 | 2026-10-22 | 51.22B | 50.00B | 48.13B | 47.80B | 51.69B |
 | 2026-10-29 | 51.25B | 50.01B | 48.15B | 47.66B | 51.55B |
 | 2026-11-05 | 50.89B | 49.55B | 48.11B | 47.43B | 51.11B |
-| 2026-11-12 | 50.37B | 49.45B | 47.79B | 47.30B | 50.93B |
-| 2026-11-19 | 49.15B | 49.03B | 46.97B | 46.24B | 49.61B |
+| 2026-11-12 | 50.37B | 49.45B | 47.79B | 47.33B | 50.93B |
+| 2026-11-19 | 49.15B | 49.03B | 46.97B | 46.22B | 49.61B |
+| 2026-11-20 | 49.44B | 49.21B | 47.20B | 46.15B | 49.58B |
 
 ## Files
 
