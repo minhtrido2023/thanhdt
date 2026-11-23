@@ -206,3 +206,6 @@
 
 ## Archived 2026-11-23 (keep=12 days=0 require_done=False)
 - [2026-11-22T23:44:52Z] [23/11 06:5x] Việc dựng lại rev 18 ca đã BÀN GIAO sang topic 1574208662719828062 (lô 1 dispatch 5 job Taylor_20261122_234422..30; plan agents/Taylor/research/dd_rebuild_20261123/PLAN.md). Sizing chuẩn 2–4% đã ghi skill (chưa sửa dòng trong current_ops_ext). Topic cũ 1574099638007505046 dừng — KHÔNG poll ở đó.
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:46:02Z] [23/11 06:5x] Phiên mới topic 1574208662719828062: sửa current_ops_ext sizing xong+merged. Lô 1 (DCM/TTA/PNJ/VCB/MSB) đang chạy, poll bằng ScheduleWakeup; worktree ../wt-mike-1574208662719828062 (branch session/1574208662719828062). Usage 71%.

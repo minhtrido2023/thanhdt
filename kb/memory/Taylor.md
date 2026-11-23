@@ -87,3 +87,4 @@
 - [2026-11-23T12:15:17Z] [dd-VLB rev4 23/11] XONG job Taylor_20261123_120307: REPORT_rev4 tâm 45.161, skeptic r3 INCONCLUSIVE (vòng cuối, dừng) — CHỜ Mike áp LEDGER_PROPOSAL_VLB.json (REFUTED_OPEN, audited_fy_missing=false)
 - [2026-11-23T12:15:28Z] [DD TTA 23/11] XONG job Taylor_20261123_120303: REPORT_rev5 tâm 7.547 (vùng 6.415–8.680), skeptic r3 (vòng cuối) INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_TTA.json (REFUTED_OPEN rev3) / user quyết
 - [2026-11-23T12:20:45Z] [BSR rev5 23/11] XONG job Taylor_20261123_120250: tâm 16.544, r4 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_BSR.json (rev3 REFUTED_OPEN)
+- [2026-11-23T12:27:37Z] [CK holding + HHS rev7 23/11] XONG job Taylor_20261123_120407: CK đo 26,63% (N=6), HHS rev7 tâm 10.805 TRONG, skeptic r5 REFUTED (EX k, phạm vi CK) — CHỜ Mike áp LEDGER_PROPOSAL (REFUTED_OPEN) / user quyết base CK
