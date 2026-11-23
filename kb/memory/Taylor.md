@@ -35,3 +35,8 @@
 - [2026-11-23T00:31:59Z] [dd-CSV rebuild 23/11] XONG job Taylor_20261123_001046: REPORT_r4 tâm 11.224 TRÊN vùng, skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_CSV.json (REFUTED_OPEN) / user quyết vòng 3
 - [2026-11-23T00:32:52Z] [dd-LLM rebuild 23/11] XONG job Taylor_20261123_001048: REPORT_rev4 tâm 32.376, skeptic r3 REFUTED — CHỜ Mike áp LEDGER_PROPOSAL_LLM.json (REFUTED_OPEN) / user quyết vòng 3
 - [2026-11-23T00:32:57Z] [dd-CSV 23/11] job Taylor_20261123_001046 đã đóng đủ (bus+notify): REPORT_r4 tâm 11.224, r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_CSV.json (REFUTED_OPEN) / user quyết vòng 3
+- [2026-11-23T00:35:08Z] ĐANG DỞ: job Taylor_20261123_003452 DD BSR rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_lagcand_20261109/BSR
+- [2026-11-23T00:35:11Z] ĐANG DỞ: job Taylor_20261123_003454 DD GAS rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_lagcand_20261109/GAS
+- [2026-11-23T00:35:12Z] ĐANG DỞ: job Taylor_20261123_003456 DD DBC rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_DBC_20261118
+- [2026-11-23T00:35:14Z] ĐANG DỞ: job Taylor_20261123_003458 DD POW rebuild | NEXT: đọc skeptic r1 + REPORT.md dd_POW_20261118
+- [2026-11-23T00:35:20Z] ĐANG DỞ: job Taylor_20261123_003503 DD SZL rebuild | NEXT: đọc skeptic r1 + REPORT_r3c.md dd_redo_20261105/SZL
