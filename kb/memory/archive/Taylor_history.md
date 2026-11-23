@@ -2647,3 +2647,6 @@
 - [2026-11-22T13:38:59Z] ĐANG DỞ: job Taylor_20261122_133837 B5 skill rewrite | NEXT: viết new/ trong wt-dd-b5
 - [2026-11-22T13:49:07Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
 - [2026-11-22T13:49:18Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T16:14:47Z] [B5 r2 22/11] XONG job Taylor_20261122_161344: commit 232ce19bf (wt-dd-b5, chưa merge/cài) — CHỜ Mike merge + cài .bak

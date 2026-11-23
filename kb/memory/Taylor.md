@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-22T16:14:47Z] [B5 r2 22/11] XONG job Taylor_20261122_161344: commit 232ce19bf (wt-dd-b5, chưa merge/cài) — CHỜ Mike merge + cài .bak
 - [2026-11-22T23:44:15Z] ĐANG DỞ: job Taylor_20261122_234402 DD DCM rebuild rev3 | NEXT: đọc skeptic r1 + report rev2
 - [2026-11-22T23:44:33Z] ĐANG DỞ: job Taylor_20261122_234424 DD TTA rebuild rev mới | NEXT: đọc skeptic r1 + REPORT_r3
 - [2026-11-22T23:44:35Z] ĐANG DỞ: job Taylor_20261122_234422 DD DCM rebuild (job 234402 bị cancel) | NEXT: đọc skeptic r1 + report, viết REPORT_rev7.md
@@ -26,3 +25,4 @@
 - [2026-11-22T23:56:35Z] [dd-TTA r4 23/11] XONG job Taylor_20261122_234424: tâm sau TK 8.548 (r3 6.159), skeptic r2 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_TTA.json (REFUTED_OPEN)
 - [2026-11-22T23:59:08Z] ĐANG DỞ: job Taylor_20261122_234428 VCB REPORT_rev3 (tâm 36.000) skeptic r3 | NEXT: LEDGER_PROPOSAL_VCB.json → bus+notify
 - [2026-11-23T00:01:20Z] [dd-pnj rebuild 23/11] XONG job Taylor_20261122_234426: REPORT_rev4 tam 4.205 (vung 2.212-6.198), skeptic r3 REFUTED (O2 phat kep) — CHO Mike ap LEDGER_PROPOSAL (REFUTED_OPEN) / user quyet vong 3
+- [2026-11-23T00:01:59Z] [VCB rebuild 23/11] XONG job Taylor_20261122_234428: REPORT_rev3 tâm 36.000 vùng 31.200–42.500, skeptic r3 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_VCB.json
