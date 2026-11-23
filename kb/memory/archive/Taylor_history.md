@@ -2653,3 +2653,6 @@
 
 ## Archived 2026-11-23 (keep=12 days=0 require_done=False)
 - [2026-11-22T23:44:15Z] ĐANG DỞ: job Taylor_20261122_234402 DD DCM rebuild rev3 | NEXT: đọc skeptic r1 + report rev2
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:44:33Z] ĐANG DỞ: job Taylor_20261122_234424 DD TTA rebuild rev mới | NEXT: đọc skeptic r1 + REPORT_r3
