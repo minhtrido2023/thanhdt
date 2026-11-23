@@ -54,3 +54,5 @@
 - [2026-11-23T05:20:28Z] ĐANG DỞ: job Taylor_20261123_050003 GAS REPORT_rev4 (tâm 51.652) skeptic r3 vòng cuối, log /tmp/gas_sk_r3.log | NEXT: LEDGER_PROPOSAL_GAS.json → bus+notify
 - [2026-11-23T05:20:33Z] [dd-SZL rebuild 23/11] XONG job Taylor_20261123_050009: REPORT_rev4b tâm 25.852, skeptic r3 REFUTED (KTPL 2026 20% chưa áp; skeptic ước 24.793) — CHỜ Mike áp LEDGER_PROPOSAL_SZL.json (REFUTED_OPEN) / user quyết vòng 3
 - [2026-11-23T05:20:46Z] ĐANG DỞ: job Taylor_20261123_050005 DBC REPORT_rev3 (tâm 14.696, khoá 66d9fbc6) skeptic r3 vòng cuối log /tmp/dbc_sk_r3.log | NEXT: LEDGER_PROPOSAL_DBC.json → bus+notify
+- [2026-11-23T05:23:42Z] [dd-DBC rebuild 23/11] XONG job Taylor_20261123_050005: REPORT_rev3 tâm 14.696, skeptic r3 REFUTED (BĐS dở dang 1.186 tỷ chưa tách; thuế TNDN chưa kiểm) — CHỜ Mike áp LEDGER_PROPOSAL_DBC.json (REFUTED_OPEN) / user quyết vòng 4
+- [2026-11-23T05:23:54Z] [dd-GAS rebuild 23/11] XONG job Taylor_20261123_050003: REPORT_rev4 tâm 51.652, skeptic r3 CONFIRMED — CHỜ Mike áp LEDGER_PROPOSAL_GAS.json (cần entry bước1 trước tool)
