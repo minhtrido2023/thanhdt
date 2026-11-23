@@ -14,25 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-22T09:45:11Z] ĐANG DỞ: job Taylor_20261122_094500 DD VLB | NEXT: đọc skill+BCTC scan, ghi REPORT.md từng phần
-- [2026-11-22T09:50:02Z] ĐANG DỞ: job Taylor_20261122_094949 VCB investor report | NEXT: đọc skill, dựng investor_report/ trong dd_VCB_20261117
-- [2026-11-22T09:51:02Z] [PAT r5 22/11] XONG job Taylor_20261122_094714: tam 66.470 trước CK / 59.823 sau CK / cong 50.850; tam phu thuoc cach doc H1/26 (62.578 neu 'nhieu') — CHO Mike goi skeptic r5 + ghi dd_price_zones (chua ghi, khong email)
-- [2026-11-22T09:54:25Z] [dd-vlb 22/11] XONG job Taylor_20261122_094500: REPORT tam 61.798 sau CK (md5 f80cd48a…), RE ≤52.500 — CHO Mike goi fundamental-skeptic + ghi dd_price_zones; con thieu BCTC 2025 KT + bang giay phep
-- [2026-11-22T09:59:41Z] [vcb-investor 22/11] XONG job Taylor_20261122_094949: investor_report VCB 12 trang dry-run, chưa gửi email — CHỜ Mike kiểm + ghi dd_price_zones + user lệnh gửi
-- [2026-11-22T10:06:04Z] [dd-vlb r2 22/11] XONG job Taylor_20261122_100129: tam 51.163 sau CK (r1 61.798), 48.100=0,94 TRUNG TINH (md5 93e0ec77…) — CHO Mike goi skeptic xac nhan lai + ghi dd_price_zones
-- [2026-11-22T10:08:03Z] ĐANG DỞ: job Taylor_20261122_100749 VLB investor report | NEXT: copy khuôn VCB investor_report/build_report.py, dựng dd_VLB_20261122/investor_report/
-- [2026-11-22T10:19:06Z] [vlb-investor 22/11] XONG job Taylor_20261122_100749: PDF 8 trang dry-run, chưa gửi email; phát hiện cổ tức 2.500đ ex 19/11 -> giá/tâm 0,99 cùng cơ sở (r2 0,94) — CHỜ Mike ghi dd_price_zones + user lệnh gửi
-- [2026-11-22T12:51:20Z] [A6 22/11] XONG job Taylor_20261122_124816: lint email DD commit ffeae621e (wt-dd-a6, chưa merge); file skill ngoài git đã sửa, bak_20261122 — CHỜ Mike duyệt, bật DD_LINT_BLOCK=True sau khi có số báo giả
-- [2026-11-22T13:00:27Z] ĐANG DỞ: job Taylor_20261122_130006 B1 LAG_DD_REQUIRE_CONFIRMED | NEXT: worktree wt-dd-b1 + wt-dd-b1m, sửa plan.py + prompt
-- [2026-11-22T13:05:18Z] [B1 22/11] XONG job Taylor_20261122_130006: outer 096541ed8 (wt-dd-b1) + mike f2cc160d5 (wt-dd-b1m), hằng False, chưa merge — CHỜ arch-reviewer + Mike merge
-- [2026-11-22T13:14:18Z] ĐANG DỞ: job Taylor_20261122_131400 B4 assumptions lint | NEXT: đọc SPEC, tạo wt-dd-b4
-- [2026-11-22T13:17:22Z] [B2 22/11] XONG job Taylor_20261122_131331: commit 270c0231a (wt-dd-b2, chưa merge) — CHỜ arch-review + Mike merge; PLAN: FULL 4 (TCH DCM PAT VLB), ? 12, MECH 5 (HHH MSB PNJ QTP SCL)
-- [2026-11-22T13:24:54Z] [B4 22/11] XONG job Taylor_20261122_131400: lint assumptions v1 commit 41b5d6dd2 (wt-dd-b4, chưa merge), cảnh báo — CHỜ quant-skeptic soát + Mike đặt ENFORCE_FROM sau 2 tuần
-- [2026-11-22T13:36:20Z] [B3 22/11] XONG job Taylor_20261122_133237: thẻ luận điểm commit (wt-dd-b3, chưa merge) — CHỜ arch-review + Mike merge + user duyệt thẻ nháp FPT/NNC/VGS + user duyệt cron
-- [2026-11-22T13:37:41Z] [B4 vòng 2 22/11] XONG job Taylor_20261122_133206: commit b242e616e (wt-dd-b4, chưa merge) — CHỜ quant-skeptic vòng 2 + Mike; còn tồn: kiểm quỹ KT-PL trên BCTC thật
-- [2026-11-22T13:38:59Z] ĐANG DỞ: job Taylor_20261122_133837 B5 skill rewrite | NEXT: viết new/ trong wt-dd-b5
-- [2026-11-22T13:49:07Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
-- [2026-11-22T13:49:18Z] [B5 22/11] XONG job Taylor_20261122_133837: commit 38e00e2e1 (wt-dd-b5, chưa merge/cài) — CHỜ arch-review + Mike cài .bak_20261122_b5; mở: sizing Q4, watch chưa đọc audited_fy_missing
 - [2026-11-22T16:14:47Z] [B5 r2 22/11] XONG job Taylor_20261122_161344: commit 232ce19bf (wt-dd-b5, chưa merge/cài) — CHỜ Mike merge + cài .bak
 - [2026-11-22T23:44:15Z] ĐANG DỞ: job Taylor_20261122_234402 DD DCM rebuild rev3 | NEXT: đọc skeptic r1 + report rev2
 - [2026-11-22T23:44:33Z] ĐANG DỞ: job Taylor_20261122_234424 DD TTA rebuild rev mới | NEXT: đọc skeptic r1 + REPORT_r3
@@ -43,3 +24,5 @@
 - [2026-11-22T23:53:17Z] ĐANG DỞ: job Taylor_20261122_234428 VCB rev2 viết xong REPORT_rev2.md | NEXT: skeptic r2 → LEDGER_PROPOSAL_VCB.json → bus+notify
 - [2026-11-22T23:55:37Z] ĐANG DỞ: job Taylor_20261122_234422 DCM rev7 (REPORT_rev7.md tâm 24.822 TRÊN vùng) | NEXT: skeptic r2 → LEDGER_PROPOSAL_DCM.json → bus+notify
 - [2026-11-22T23:56:35Z] [dd-TTA r4 23/11] XONG job Taylor_20261122_234424: tâm sau TK 8.548 (r3 6.159), skeptic r2 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_TTA.json (REFUTED_OPEN)
+- [2026-11-22T23:59:08Z] ĐANG DỞ: job Taylor_20261122_234428 VCB REPORT_rev3 (tâm 36.000) skeptic r3 | NEXT: LEDGER_PROPOSAL_VCB.json → bus+notify
+- [2026-11-23T00:01:20Z] [dd-pnj rebuild 23/11] XONG job Taylor_20261122_234426: REPORT_rev4 tam 4.205 (vung 2.212-6.198), skeptic r3 REFUTED (O2 phat kep) — CHO Mike ap LEDGER_PROPOSAL (REFUTED_OPEN) / user quyet vong 3
