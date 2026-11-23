@@ -68,3 +68,4 @@
 - [2026-11-23T06:53:47Z] ĐANG DỞ: job Taylor_20261123_063644 QTP REPORT_rev4b (tâm 6.294, khoá 91add832) skeptic r3 vòng cuối | NEXT: LEDGER_PROPOSAL_QTP.json → bus+notify
 - [2026-11-23T06:54:00Z] ĐANG DỞ: job Taylor_20261123_063642 VCP REPORT_rev3b (tâm 32.605, lock 8d93c85b) skeptic r3 vòng cuối log /tmp/vcp_sk_r3.log | NEXT: LEDGER_PROPOSAL_VCP.json → bus+notify
 - [2026-11-23T06:57:19Z] [dd-SCL rebuild 23/11] XONG job Taylor_20261123_063646: REPORT_rev6 tâm 16.883 (r4 21.339), skeptic r3 REFUTED (k chia NLĐ vs lá chắn thuế) — CHỜ Mike áp LEDGER_PROPOSAL_SCL.json (REFUTED_OPEN) / user quyết vòng 4
+- [2026-11-23T06:57:46Z] [dd-QTP rebuild 23/11] XONG job Taylor_20261123_063644: REPORT_rev4b tâm 6.294 (r3c 7.701), skeptic r3 INCONCLUSIVE (ETS/hoàn trả mặt bằng/PPA/pha loãng) — CHỜ Mike áp LEDGER_PROPOSAL_QTP.json (REFUTED_OPEN) / user quyết vòng 3
