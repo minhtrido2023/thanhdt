@@ -796,3 +796,6 @@
 
 ## Consolidation 2026-11-23T00:39:25Z
 - [2026-11-23T00:39:19Z] Taylor/heartbeat — Taylor_20261123_003456: {"status": "in_progress", "note": "quy KTPL do xong (2024:26,5%, 2025:6,3%); lay XDCB lich su"}
+
+## Consolidation 2026-11-23T01:05:08Z
+- [2026-11-23T01:05:02Z] Winston/status — deposit-cctg-weekly-dispatch: {"date": "2026-11-23", "current_deposit": "6.80", "current_cctg": "7.40"}
