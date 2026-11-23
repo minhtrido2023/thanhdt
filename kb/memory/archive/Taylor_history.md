@@ -2656,3 +2656,27 @@
 
 ## Archived 2026-11-23 (keep=12 days=0 require_done=False)
 - [2026-11-22T23:44:33Z] ĐANG DỞ: job Taylor_20261122_234424 DD TTA rebuild rev mới | NEXT: đọc skeptic r1 + REPORT_r3
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:44:35Z] ĐANG DỞ: job Taylor_20261122_234422 DD DCM rebuild (job 234402 bị cancel) | NEXT: đọc skeptic r1 + report, viết REPORT_rev7.md
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:44:43Z] ĐANG DỞ: job Taylor_20261122_234426 DD PNJ rebuild rev2 | NEXT: đọc skeptic r1 + REPORT.md dd_PNJ_20261114
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:44:43Z] ĐANG DỞ: job Taylor_20261122_234428 DD VCB rebuild rev2 | NEXT: đọc skeptic r1 + REPORT.md
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:44:47Z] ĐANG DỞ: job Taylor_20261122_234430 DD MSB rebuild rev2 | NEXT: đọc skeptic r1 + REPORT.md
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:53:17Z] ĐANG DỞ: job Taylor_20261122_234428 VCB rev2 viết xong REPORT_rev2.md | NEXT: skeptic r2 → LEDGER_PROPOSAL_VCB.json → bus+notify
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:55:37Z] ĐANG DỞ: job Taylor_20261122_234422 DCM rev7 (REPORT_rev7.md tâm 24.822 TRÊN vùng) | NEXT: skeptic r2 → LEDGER_PROPOSAL_DCM.json → bus+notify
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:56:35Z] [dd-TTA r4 23/11] XONG job Taylor_20261122_234424: tâm sau TK 8.548 (r3 6.159), skeptic r2 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_TTA.json (REFUTED_OPEN)
+
+## Archived 2026-11-23 (keep=12 days=0 require_done=False)
+- [2026-11-22T23:59:08Z] ĐANG DỞ: job Taylor_20261122_234428 VCB REPORT_rev3 (tâm 36.000) skeptic r3 | NEXT: LEDGER_PROPOSAL_VCB.json → bus+notify
