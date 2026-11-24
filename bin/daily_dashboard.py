@@ -68,7 +68,7 @@ _DNA_LINES = (("build_dt_gate_line", True), ("build_value_radar_line", True), ("
 def market_block():
     out = ["**E. Thị trường**"]
     code = ("import dna_report as d\n"
-            + "".join(f"v=d.{n}(html=False)\nprint('##{n}')\nprint('' if v is None else v)\n" for n, _ in _DNA_LINES))
+            + "".join(f"v=d.{n}(html=False{', with_norm5=True' if n == 'build_value_radar_line' else ''})\nprint('##{n}')\nprint('' if v is None else v)\n" for n, _ in _DNA_LINES))  # norm5: dashboard nội bộ
     try:
         stdout, stderr = _wc_python(code)
         got = {}

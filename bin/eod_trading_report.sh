@@ -300,7 +300,8 @@ try:
     # Value Radar (định giá, phân vị rolling 10 năm) — đặt NGAY CẠNH khối regime DT5G để
     # có cả góc định giá lẫn góc tâm lý/kỹ thuật. THUẦN HIỂN THỊ, không phải tín hiệu.
     from dna_report import build_value_radar_line
-    vr = build_value_radar_line(html=False)
+    # norm5 (P/E chuẩn hoá 5Y + cờ LỢI NHUẬN ĐỈNH): CHỈ ZaloPay (nội bộ). SpaceX = báo cáo nhà đầu tư ngoài ⇒ giữ nguyên.
+    vr = build_value_radar_line(html=False, with_norm5=('$ACCOUNT' == 'ZaloPay'))
     if vr:
         print('🧭 ' + vr)
 except Exception:
