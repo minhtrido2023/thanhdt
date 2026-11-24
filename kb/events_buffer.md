@@ -905,3 +905,35 @@
 - [2026-11-24T10:51:07Z] Taylor/heartbeat — Taylor_20261124_104632: {"status": "in_progress", "note": "calc xong (run1=run2), viết ADJ_CENTER.md"}
 - [2026-11-24T10:51:18Z] Taylor/finding — dd-adjcenter-pilot-FPT-20261124: {"ticker": "FPT", "center_base": 57312, "center_adj": 56204, "center_adj_pct": -1.93, "range": [55092, 57345], "center_adj_ex_div": 55204, "adj_json": "agents/Taylor/research/dd_adjcenter_20261124/FPT/adj.json", "adj_json_md5": "e5b67a72ed14a6e5bf603b2e65ca6025", "report": "agents/Taylor/research/dd_adjcenter_20261124/FPT/ADJ_CENTER.md", "prereg_md5": "ef5157cb3f762d58623ed550ebc214c7", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-adjpilot", "branch": "session/adjpilot", "commit": "0d52b34ec", "merged": false, "open_decisions": ["C+ tier cho hạng mục chắc dấu (trích quỹ KTPL)", "dải theo (p,m) thay vì chỉ p", "giữ tham số luật r/RONIC ngoài Σ?"], "measured_by": "python3 agents/Taylor/research/dd_adjcenter_20261124/FPT/calc_adj.py (run1=run2 md5 4e4f43a8)"}
 - [2026-11-24T10:51:33Z] Taylor/heartbeat — Taylor_20261124_104632: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261124_104632", "source": "watcher"}
+
+## Consolidation 2026-11-24T11:07:02Z
+- [2026-11-24T11:01:35Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "in_progress", "note": "worktree wt-adj-g1 tạo, đọc PREREG"}
+- [2026-11-24T11:01:36Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "in_progress", "note": "worktree wt-adj-g2 tao xong, doc PREREG"}
+- [2026-11-24T11:01:37Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "in_progress", "note": "worktree wt-adj-g3 tạo, đọc PREREG + pilot FPT"}
+- [2026-11-24T11:01:50Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_110049", "source": "watcher"}
+- [2026-11-24T11:01:53Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_110052", "source": "watcher"}
+- [2026-11-24T11:01:55Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_110054", "source": "watcher"}
+- [2026-11-24T11:02:33Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "in_progress", "note": "đọc nguồn TCH, kiểm calc mirror"}
+- [2026-11-24T11:02:34Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "in_progress", "note": "NNC: đọc nguồn, kiểm kê hạng mục"}
+- [2026-11-24T11:02:50Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_110049", "source": "watcher"}
+- [2026-11-24T11:02:53Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_110052", "source": "watcher"}
+- [2026-11-24T11:02:56Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_110054", "source": "watcher"}
+- [2026-11-24T11:03:07Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "in_progress", "note": "NNC: truy thu Núi Nhỏ đã phủ đủ; lấy capex/khấu hao BQ"}
+- [2026-11-24T11:03:50Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261124_110049", "source": "watcher"}
+- [2026-11-24T11:03:53Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261124_110052", "source": "watcher"}
+- [2026-11-24T11:03:55Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "in_progress", "note": "TCH kiểm kê xong, đọc VGS"}
+- [2026-11-24T11:03:56Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261124_110054", "source": "watcher"}
+- [2026-11-24T11:04:11Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "in_progress", "note": "NNC: có capex/KH/KTPL lịch sử (FPTS 2023A-24A), xem model r3 để rerun"}
+- [2026-11-24T11:04:46Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "in_progress", "note": "DRI kiem ke hang muc xong (Dakruco B-nguoc, KTPL B1), doc SIP"}
+- [2026-11-24T11:04:51Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261124_110049", "source": "watcher"}
+- [2026-11-24T11:04:53Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261124_110052", "source": "watcher"}
+- [2026-11-24T11:04:56Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261124_110054", "source": "watcher"}
+- [2026-11-24T11:05:41Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "in_progress", "note": "NNC: viết calc chạy lại r3 tổ hợp KTPL C+/capex B/Q4 B"}
+- [2026-11-24T11:05:51Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261124_110049", "source": "watcher"}
+- [2026-11-24T11:05:53Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261124_110052", "source": "watcher"}
+- [2026-11-24T11:05:56Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261124_110054", "source": "watcher"}
+- [2026-11-24T11:06:12Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "in_progress", "note": "kiểm kê 3 mã xong, viết calc FPT v2"}
+- [2026-11-24T11:06:18Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "in_progress", "note": "SIP kiem ke xong (VAT A, NCI B1, G12 B1, GPM Bneg; Sigma>5% -> chay to hop model r3), doc HHS"}
+- [2026-11-24T11:06:51Z] Taylor/heartbeat — Taylor_20261124_110049: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261124_110049", "source": "watcher"}
+- [2026-11-24T11:06:53Z] Taylor/heartbeat — Taylor_20261124_110052: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261124_110052", "source": "watcher"}
+- [2026-11-24T11:06:56Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261124_110054", "source": "watcher"}
