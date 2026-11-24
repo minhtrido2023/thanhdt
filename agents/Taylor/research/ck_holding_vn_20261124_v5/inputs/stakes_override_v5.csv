@@ -1,0 +1,13 @@
+parent,sub,action,stake,stake_date,valid_from,src,note
+MSN,MCH,set,67.4,2024-12-31,,BCTC_MSN_2024,"BCTN MSN 2025 tr.71 bang cong ty con: CTCP Hang tieu dung Masan ty le loi ich 1/1/2025 = 67,4% (BCTN 2024: 67,4% tai 31/12/2024)"
+MSN,MCH,set,66.2,2025-12-31,,BCTC_MSN_2025,"BCTN MSN 2025 tr.71: 66,2% tai 31/12/2025 (thuyet minh (j): MCH phat hanh 326,8tr CP 03/2025). v4 dung 60% x 70,44% = 42,26% (VCI MCHC 60% cu + KBS)"
+MSN,TCB,set,19.8,2024-12-31,,BCTC_MSN_2024,"BCTN MSN 2024 thuyet minh lien ket (i): Tap doan nam 19,8% loi ich VCSH Techcombank. v4 dung 14,8% (chi phan truc tiep MSN, thieu Mapleleaf 2,47% + con khac)"
+MSN,TCB,set,19.7,2025-12-31,,BCTC_MSN_2025,"BCTN MSN 2025 thuyet minh 12(c)(i): 19,7%"
+MSN,MML,set,94.3,2024-12-31,,BCTC_MSN_2024,"BCTN MSN 2025 tr.72: CTCP Masan MEATLife ty le loi ich 1/1/2025 = 94,3% (chuoi MSN->SHERPA 100%->Masan Agri 100% (82,04% MML) + WinEco 100% (16,19% MML), KBS 2023)"
+MSN,MML,set,91.2,2025-12-31,,BCTC_MSN_2025,"BCTN MSN 2025 tr.72: 91,2% tai 31/12/2025 (ESOP thuyet minh (d))"
+MSN,MSR,set,87.46,2024-12-31,,KBS_2026-10-30+BCTC_MSN,"CP pho thong: KBS MSR co dong lon Cong ty TNHH Tam nhin Masan 966.441.389 CP = 87,46% (30/10/2026). Chuoi MSN->ZENITH 100%->Tam nhin Masan (MH) 100% (BCTN 2025 tr.71-72, ghi chu (ii); BCTN 2024 muc rui ro vi). Ap tu 31/12/2024 vi BCTC MSN: loi ich kinh te MHT 94,9% ca 31/12/2024 lan 31/12/2025 (khong doi; 94,9% gom CP uu dai khong bieu quyet, khong niem yet)"
+MSN,VSN,drop,,,,BCTC_MSN_2025,"Vissan la lien ket cua MML (BCTN 2025: MML nam 24,9%) -> nam trong MV MML (con long nhau), bo dong truc tiep de khong dem doi"
+VSC,VGR,set,74.0,2024-12-31,,KBS_subs_VSC,"giu v4 truoc giao dich"
+VSC,VGR,set,54.35,2025-07-23,2025-10-28,KBS_sh_VGR_2026-06-30+bao_chi,"VSC ban 2 dot x 6,325tr CP VGR 01-23/07/2025 (74,35% -> 54,35%; vneconomy, baophapluat); KBS VGR 30/06/2026: VSC 44.687.500 CP = 54,35%. Hieu luc tu ngay cong bo BCTC Q3/2025 cua VSC (BQ 2025-10-28) de ty le va VCSH me (tien thu) doi CUNG luc"
+PAN,FMC,set,37.75,2025-12-31,,KBS_sh_FMC_2021,"KBS FMC: PAN 37,75% truc tiep + ABT 12,37% (ABT la con PAN 76,47%, phan nay da nam trong MV ABT). v4 dung 50,12% (KBS subs PAN = tong truc tiep+gian tiep) -> dem doi 12,37% FMC"
+MSN,MCH,set,66.2,2025-06-30,2025-07-28,POSTHOC_v5_BCTN_MSN_2025,"POSTHOC_v5 (them sau lan chay 1): thuyet minh (b)(c) BCTN MSN 2025 — mua lai CP Consumer Holdings hoan tat 06/2025 -> loi ich MSN trong Consumer Holdings 72,8 -> 94,4%, MSN trong MCH 66,2%; hieu luc tu ngay cong bo BCTC Q2/2025 MSN (BQ rel 2025-07-28)"

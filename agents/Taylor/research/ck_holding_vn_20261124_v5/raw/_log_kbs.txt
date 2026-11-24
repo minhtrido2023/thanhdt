@@ -1,0 +1,55 @@
+kbs subs 0 AAA
+kbs subs 50 BNA
+kbs subs 100 DCL
+kbs subs 0 AAA
+kbs subs 50 BNA
+kbs subs 100 DCL
+kbs subs 150 FRT
+kbs subs 200 HU4
+kbs subs 250 LSS
+kbs subs 300 ORS
+kbs subs 350 SAV
+kbs subs 400 TDH
+kbs subs 450 VGC
+kbs sh 0 AAA
+kbs sh 50 CII
+kbs sh 100 FIC
+kbs sh 150 KHG
+kbs sh 200 OCB
+kbs sh 250 SBT
+kbs sh 300 TMS
+kbs sh 350 VPB
+kbs done subs 496 sh 364
+stakes rows 393 qualified parents 116
+['AAA', 'ACV', 'ADS', 'AIG', 'APH', 'ASM', 'ASP', 'BCG', 'BCM', 'BID', 'BMP', 'BSR', 'BVH', 'BWE', 'C32', 'CII', 'CLX', 'CMS', 'CMX', 'CQN', 'DCM', 'DGC', 'DIG', 'DPM', 'DRH', 'DVN', 'DXG', 'FIT', 'FOX', 'FPT', 'GAS', 'GEE', 'GEG', 'GEX', 'GMD', 'GVR', 'HAX', 'HDC', 'HPG', 'HUT', 'HVN', 'IDC', 'IDI', 'IMP', 'IPA', 'ITD', 'KDC', 'KHP', 'KSB', 'KSF', 'KSV', 'LHC', 'MBB', 'MCH', 'MML', 'MSN', 'MST', 'MTA', 'MVC', 'MVN', 'NDN', 'NTC', 'NVL', 'OGC', 'OIL', 'PAN', 'PC1', 'PCB', 'PET', 'PGV', 'PHP', 'PHR', 'PLC', 'PLX', 'POW', 'PPC', 'PPH', 'PVC', 'PVI', 'PVS', 'PVT', 'REE', 'S99', 'SAB', 'SAM', 'SGP', 'SHI', 'SIP', 'SJE', 'SJG', 'SNZ', 'TAL', 'TCB', 'TCD', 'TIS', 'TPB', 'TVC', 'TVN', 'VCG', 'VCP', 'VEA', 'VEC', 'VGC', 'VGT', 'VHC', 'VIC', 'VIP', 'VIW', 'VLC', 'VND', 'VNE', 'VNM', 'VPB', 'VSC', 'VSF', 'VTD']
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  THÔNG BÁO THAY ĐỔI DỊCH VỤ
+
+  Từ 10/11/2026, thư viện Vnstock thế hệ 4 và thế hệ 5 ngừng hoạt động,
+  thế hệ 6 sẽ thay thế.
+
+  Nghị định 363/2026/NĐ-CP có hiệu lực từ ngày 11/11/2026, với quy định
+  chặt chẽ hơn về truy cập, sử dụng dữ liệu và API. Vnstock chuyển sang
+  cách làm mới: bạn dùng API miễn phí của công ty chứng khoán nơi bạn có
+  tài khoản, hoặc tệp dữ liệu tự chuẩn bị; phần mềm Vnstock chuẩn hoá và
+  xử lý trên máy bạn.
+
+  Vnstock thế hệ 6 dự kiến phát hành để thay thế. Khoá API của bạn nằm
+  trên máy bạn; máy chủ Vnstock không nhận khoá API hay nội dung dữ liệu
+  bạn xử lý. Cổng kết nối thuộc bản Cộng đồng, miễn phí cho cá nhân, học
+  tập và nghiên cứu.
+
+  Bạn có thể chuẩn bị ngay:
+    - Nếu mã còn dùng thế hệ 4, chuyển sang cách viết thế hệ 5, gợi ý
+      trước 05/11/2026. Thế hệ 6 giữ cách viết này.
+    - Kiểm tra tài khoản chứng khoán của bạn đã đăng ký API chưa; hầu hết
+      công ty chứng khoán cho đăng ký trực tuyến.
+
+  Đọc thông báo đầy đủ trong tài khoản:
+    https://vnstocks.com/account?section=notifications&n=chuyen-doi
+
+  Nhận thông báo cập nhật về thế hệ 6 trong nhóm Zalo của đợt chuyển đổi:
+    https://zalo.me/g/iovyc498nm5mpoexnaob
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+vci 0 454 AAA
