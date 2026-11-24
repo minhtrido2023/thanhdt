@@ -1,0 +1,22 @@
+{
+ "asof": "2026-11-20",
+ "big4_anchor_pct": 6.8,
+ "inputs_md5": {
+  "deposit_big4": "8821f62c9be5b688f2b9d714f56552db",
+  "ledger": "9e4cab03a59edbf8af16eb5d83b9679b",
+  "panel": "b64b0015dc6e9ff9f37ce981c81f9a57"
+ },
+ "inputs_path": {
+  "deposit_big4": "/home/trido/thanhdt/WorkingClaude/wt-Taylor_20261124_031942/agents/Taylor/research/dd_vs_radar_20261124/rerun/R2/out/deposit_big4_snapshot.csv",
+  "ledger": "/home/trido/thanhdt/WorkingClaude/wt-Taylor_20261124_031942/kb/dd_price_zones.json",
+  "panel": "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_vs_radar_20261124/D1/calc/panel_all.parquet"
+ },
+ "min_months": 36,
+ "peak_ratio": 1.3,
+ "r_anchor": 0.135,
+ "tercile": [
+  33.0,
+  67.0
+ ],
+ "window_years": 10
+}
