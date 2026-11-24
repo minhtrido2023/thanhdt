@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-23T12:27:37Z] [CK holding + HHS rev7 23/11] XONG job Taylor_20261123_120407: CK đo 26,63% (N=6), HHS rev7 tâm 10.805 TRONG, skeptic r5 REFUTED (EX k, phạm vi CK) — CHỜ Mike áp LEDGER_PROPOSAL (REFUTED_OPEN) / user quyết base CK
 - [2026-11-23T17:50:47Z] CODE B radar xong: nhánh session/Taylor_20261123_174706 (repo ngoài, commit 33c14fdef) chờ Mike duyệt/merge; sau merge chạy value_radar.py --rebuild-norm5
 - [2026-11-23T17:57:39Z] [dd-vs-radar rerun 24/11] XONG job Taylor_20261123_174703: rerun/REPORT_R2.md + REPORT_D2.md, finding dd-vs-radar-R2/D2-20261124 — CHỜ Mike tổng hợp/skeptic; chưa commit (rerun/ untracked)
 - [2026-11-24T03:24:18Z] [dd-forward 24/11] XONG job Taylor_20261124_031944: nhánh feat/dd-forward-outcome-20261124 (526879fef) — CHỜ Mike duyệt diff + cài cron đề xuất; mốc đánh giá 2027-03-31
@@ -26,3 +25,4 @@
 - [2026-11-24T08:16:37Z] [CK holding v5 24/11] XONG job Taylor_20261124_073243: hien tai 19,7% (PAN), median -3,2% N=12, hull 36,5pp KHONG dat; +6% mat cho dua — CHO Mike skeptic phan doi + commit + user chot dai
 - [2026-11-24T09:53:16Z] [dd-recheck pilot HHS 24/11] XONG job Taylor_20261124_094353: worktree wt-1574720404268912680 commit bd92fae86, tam khong doi 10.805, skeptic r1 REFUTED (CK base cu) — CHO Mike duyet quy trinh + user chot CK holding truoc rev8/fan-out 7 ma
 - [2026-11-24T10:13:25Z] [dd-recheck nhóm A 24/11] XONG job Taylor_20261124_095514: VGS/TCH/DRI/SIP tâm 0%, skeptic r1 đều INCONCLUSIVE, 4 LEDGER_PROPOSAL REFUTED_OPEN (DRI/SIP hạ từ CONFIRMED backfill) — CHỜ Mike áp sổ + xử lý TRIM_DD xoá đầu vào calc khoá
+- [2026-11-24T10:25:24Z] [dd-recheck nhóm B 24/11] XONG job Taylor_20261124_095517: FPT/NNC/DGC tâm 0%, cả 3 skeptic r1 INCONCLUSIVE (thiếu hạng mục), worktree wt-1574720404268912680b commits d2fe430f1/97ef0a396/5d276f5e6 — CHỜ Mike duyệt LEDGER_PROPOSAL + quyết FULL

@@ -2771,3 +2771,6 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T12:20:45Z] [BSR rev5 23/11] XONG job Taylor_20261123_120250: tâm 16.544, r4 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_BSR.json (rev3 REFUTED_OPEN)
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T12:27:37Z] [CK holding + HHS rev7 23/11] XONG job Taylor_20261123_120407: CK đo 26,63% (N=6), HHS rev7 tâm 10.805 TRONG, skeptic r5 REFUTED (EX k, phạm vi CK) — CHỜ Mike áp LEDGER_PROPOSAL (REFUTED_OPEN) / user quyết base CK
