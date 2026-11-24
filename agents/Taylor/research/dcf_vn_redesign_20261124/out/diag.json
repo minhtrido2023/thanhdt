@@ -1,0 +1,272 @@
+{
+ "A_coverage": {
+  "OK": 0.4242,
+  "CF_OA_3Y <= 0 (operating": 0.2588,
+  "normalized 3y FCFE <= 0 ": 0.1629,
+  "financial-sector (BANK/I": 0.133,
+  "insufficient financial h": 0.0185,
+  "OShares missing": 0.0027
+ },
+ "A_n": 17946,
+ "var_decomp": {
+  "A_fix": {
+   "between_share": 0.4834106696539157,
+   "sd_total": 1.251313570264005,
+   "n_tk": 412
+  },
+  "B_fix": {
+   "between_share": 0.4100080674527085,
+   "sd_total": 1.05417920938017,
+   "n_tk": 633
+  },
+  "C_fix": {
+   "between_share": 0.5521143891016932,
+   "sd_total": 1.0423963683338915,
+   "n_tk": 633
+  },
+  "D0_fix": {
+   "between_share": 0.5090271364724055,
+   "sd_total": 0.8304340243394389,
+   "n_tk": 633
+  },
+  "D_fix": {
+   "between_share": 0.5077636613656527,
+   "sd_total": 0.7479002998876023,
+   "n_tk": 633
+  },
+  "E_fix": {
+   "between_share": 0.23876139320368284,
+   "sd_total": 0.5579396556139782,
+   "n_tk": 592
+  },
+  "G1D0_fix": {
+   "between_share": 0.20912381326686472,
+   "sd_total": 0.6837082986435126,
+   "n_tk": 592
+  }
+ },
+ "A_split": {
+  "var_A": 1.5802273021491213,
+  "var_D0": 0.5989230695531239,
+  "var_noise": 1.819990326003784,
+  "corr_A_D0": 0.18459193447509012,
+  "n": 7342,
+  "ic36_lv_A_fix_IS": 0.11210516442854494,
+  "ic36_lv_D0_fix_IS": 0.15709858640772484,
+  "ic36_noise_IS": 0.0037388153870647075,
+  "ic36_lv_A_fix_OOS": 0.041929482140129155,
+  "ic36_lv_D0_fix_OOS": 0.2357454014140175,
+  "ic36_noise_OOS": -0.09536582420892281
+ },
+ "A_groups": {
+  "share": {
+   "always_cheap": 0.451,
+   "always_exp": 0.296,
+   "mid": 0.252
+  },
+  "traits": {
+   "always_cheap": {
+    "n": 186,
+    "roe_tc": 0.102,
+    "roe_min": 0.016,
+    "pb": 0.983,
+    "capex_int": 0.259,
+    "payout": 0.291,
+    "de": 1.11,
+    "tv_bn": 1.12,
+    "fwd36_log": 0.092
+   },
+   "always_exp": {
+    "n": 122,
+    "roe_tc": 0.128,
+    "roe_min": 0.042,
+    "pb": 1.627,
+    "capex_int": 0.561,
+    "payout": 0.219,
+    "de": 0.662,
+    "tv_bn": 2.721,
+    "fwd36_log": 0.13
+   },
+   "mid": {
+    "n": 104,
+    "roe_tc": 0.153,
+    "roe_min": 0.061,
+    "pb": 1.277,
+    "capex_int": 0.37,
+    "payout": 0.317,
+    "de": 0.815,
+    "tv_bn": 2.202,
+    "fwd36_log": 0.143
+   }
+  },
+  "route_mix": {
+   "always_cheap": {
+    "COMPOUNDER": 0.656,
+    "CYCLICAL": 0.086,
+    "POWER": 0.07,
+    "REALESTATE": 0.188
+   },
+   "always_exp": {
+    "COMPOUNDER": 0.795,
+    "CYCLICAL": 0.033,
+    "POWER": 0.016,
+    "REALESTATE": 0.156
+   },
+   "mid": {
+    "COMPOUNDER": 0.808,
+    "CYCLICAL": 0.019,
+    "POWER": 0.038,
+    "REALESTATE": 0.135
+   }
+  }
+ },
+ "D0_groups": {
+  "share": {
+   "always_exp": 0.529,
+   "mid": 0.341,
+   "always_cheap": 0.13
+  },
+  "traits": {
+   "always_cheap": {
+    "n": 82,
+    "roe_tc": 0.189,
+    "roe_min": 0.094,
+    "pb": 0.957,
+    "capex_int": 0.499,
+    "payout": 0.167,
+    "de": 1.43,
+    "tv_bn": 1.183,
+    "fwd36_log": 0.105
+   },
+   "always_exp": {
+    "n": 335,
+    "roe_tc": 0.061,
+    "roe_min": 0.003,
+    "pb": 1.247,
+    "capex_int": 0.37,
+    "payout": 0.0,
+    "de": 1.061,
+    "tv_bn": 1.643,
+    "fwd36_log": -0.023
+   },
+   "mid": {
+    "n": 216,
+    "roe_tc": 0.122,
+    "roe_min": 0.044,
+    "pb": 0.989,
+    "capex_int": 0.435,
+    "payout": 0.378,
+    "de": 1.017,
+    "tv_bn": 1.558,
+    "fwd36_log": 0.128
+   }
+  },
+  "route_mix": {
+   "always_cheap": {
+    "BANK": 0.122,
+    "COMPOUNDER": 0.671,
+    "CYCLICAL": 0.049,
+    "INSURANCE": 0.012,
+    "POWER": 0.012,
+    "REALESTATE": 0.134,
+    "SECURITIES": 0.0
+   },
+   "always_exp": {
+    "BANK": 0.039,
+    "COMPOUNDER": 0.651,
+    "CYCLICAL": 0.03,
+    "INSURANCE": 0.018,
+    "POWER": 0.027,
+    "REALESTATE": 0.14,
+    "SECURITIES": 0.096
+   },
+   "mid": {
+    "BANK": 0.019,
+    "COMPOUNDER": 0.736,
+    "CYCLICAL": 0.042,
+    "INSURANCE": 0.009,
+    "POWER": 0.06,
+    "REALESTATE": 0.116,
+    "SECURITIES": 0.019
+   }
+  }
+ },
+ "G1D0_groups": {
+  "share": {
+   "mid": 0.649,
+   "always_exp": 0.272,
+   "always_cheap": 0.079
+  },
+  "traits": {
+   "always_cheap": {
+    "n": 47,
+    "roe_tc": 0.096,
+    "roe_min": 0.002,
+    "pb": 0.85,
+    "capex_int": 0.358,
+    "payout": 0.0,
+    "de": 1.125,
+    "tv_bn": 1.266,
+    "fwd36_log": -0.299
+   },
+   "always_exp": {
+    "n": 161,
+    "roe_tc": 0.057,
+    "roe_min": -0.01,
+    "pb": 1.03,
+    "capex_int": 0.455,
+    "payout": 0.0,
+    "de": 1.045,
+    "tv_bn": 0.902,
+    "fwd36_log": -0.069
+   },
+   "mid": {
+    "n": 384,
+    "roe_tc": 0.115,
+    "roe_min": 0.04,
+    "pb": 1.093,
+    "capex_int": 0.43,
+    "payout": 0.189,
+    "de": 1.087,
+    "tv_bn": 2.265,
+    "fwd36_log": 0.192
+   }
+  },
+  "route_mix": {
+   "always_cheap": {
+    "BANK": 0.043,
+    "COMPOUNDER": 0.702,
+    "CYCLICAL": 0.021,
+    "INSURANCE": 0.0,
+    "POWER": 0.021,
+    "REALESTATE": 0.149,
+    "SECURITIES": 0.064
+   },
+   "always_exp": {
+    "BANK": 0.0,
+    "COMPOUNDER": 0.783,
+    "CYCLICAL": 0.043,
+    "INSURANCE": 0.012,
+    "POWER": 0.019,
+    "REALESTATE": 0.118,
+    "SECURITIES": 0.025
+   },
+   "mid": {
+    "BANK": 0.062,
+    "COMPOUNDER": 0.633,
+    "CYCLICAL": 0.039,
+    "INSURANCE": 0.018,
+    "POWER": 0.044,
+    "REALESTATE": 0.135,
+    "SECURITIES": 0.068
+   }
+  }
+ },
+ "A_noFV_vs_FV_fwd36_median": {
+  "noFV": 0.025975486403260736,
+  "FV": 0.15404161667926347,
+  "n_noFV": 5245,
+  "n_FV": 5396,
+  "ic36_D0_in_noFV": 0.17902508993297334
+ }
+}
