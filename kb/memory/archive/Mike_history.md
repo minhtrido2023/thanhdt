@@ -215,3 +215,9 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T17:47:56Z] [24/11 00:5x] User DUYỆT 4 việc (A,B+C,D,F), hỏi thêm luật 4. Dispatched (thread 1574470111769796668): A rerun R1/D1 → Taylor_20261123_174703 (opus/medium, ra rerun/REPORT_R2/D2.md); B radar display EPS chuẩn hoá+cờ đỉnh+cơ sở lãi huy động → Taylor_20261123_174706 (worktree riêng, KHÔNG merge — Mike duyệt diff rồi merge); F ticket OShares/ex-date → Winston_20261123_174708 (read-only). C+D XONG tại chỗ: skill due-diligence V1 thêm E15 (dòng 'Tâm @Ke 12,3%'), fundamental-skeptic DD_GENERAL thêm 5b symmetry (backup .bak_20261124). Sau A xong: chạy quant-skeptic lần cuối (1 vòng) trên R2/D2 rồi mới nhãn E. Luật 4: khuyến nghị GIỮ; đề xuất đo prospective price/tâm→fwd return 3/6/12m, checkpoint 2027-03-31. Wakeup poll cả batch.
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T17:52:07Z] [24/11 00:5x] B merged outer main (value_radar B1 default-off, B2 Big-4-only: composite 2,3→1,0 nhãn RẺ giữ; rollback VALUE_RADAR_DEP_BASIS=effective); F xong (không chạm tiền; SIP không tái lập). CÒN: A Taylor_20261123_174703 running → quant-skeptic 1 vòng trên rerun/REPORT_R2+D2. Nếu user muốn dòng norm5 hiện ở khối NOW: chạy value_radar.py --rebuild-norm5 + bật env/with_norm5 (chỉ nội bộ/ZaloPay, SpaceX chờ user).
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T18:03:24Z] [24/11 01:1x] DD vs Radar HOÀN TẤT: A (R2/D2) xong + quant-skeptic 1 vòng REFUTED/medium (lõi đứng; D2 'đổi chiều p73–75' và §6 'p0–33' đổ), commit master d84eebe2b. B/C/D/F xong trước đó. E (nhãn 'so với lịch sử' DD) CHƯA trình user — cần dựng lại trên lịch sử giá/proxy của chính mã, chỉ tercile thô. Luật 4 giữ. Đề xuất đo prospective price/tâm→fwd return chờ user duyệt (checkpoint 2027-03-31). KHÔNG poll nữa.

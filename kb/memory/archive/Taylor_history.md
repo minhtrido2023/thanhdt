@@ -2756,3 +2756,6 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T12:11:56Z] [SCL rev7 23/11] XONG job Taylor_20261123_120301: REPORT_rev7 tâm 16.237, skeptic r4 INCONCLUSIVE (HĐ nguồn tro) — vòng cuối, CHỜ Mike áp LEDGER_PROPOSAL_SCL.json (REFUTED_OPEN)
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T12:14:43Z] [DD CSV vòng cuối 23/11] XONG job Taylor_20261123_120254: REPORT_r5 tâm 10.447, skeptic r4 INCONCLUSIVE ⇒ DỪNG — CHỜ Mike áp LEDGER_PROPOSAL_CSV.json (rev3 REFUTED_OPEN)
