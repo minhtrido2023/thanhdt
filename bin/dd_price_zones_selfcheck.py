@@ -108,7 +108,7 @@ def check(ledger_path, src_root=SRC_ROOT):
         errs += _expiry_errs(tag, e)
         errs += _lock_errs(tag, e, src_root)
         errs += _skeptic_final_errs(tag, e, src_root)
-        errs += _center_adj_errs(tag, e, src_root)
+        errs += _center_adj_errs(tag, e, src_root, d["entries"][:i])
         errs += _skeptic_path_errs(tag, e, src_root)
         for fld in ("source_file",):
             if not os.path.exists(os.path.join(src_root, e[fld])):
@@ -149,7 +149,7 @@ SKEPTIC_BASIS_ENUM = ("rule_backfill_20261122", "ambiguous_backfill", "skeptic_r
 _RE_NOT_CONFIRMED = re.compile(r"REFUTED|INCONCLUSIVE|CHƯA (?:qua|chạy)", re.I)
 
 
-def _center_adj_errs(tag, e, src_root):
+def _center_adj_errs(tag, e, src_root, prior=()):
     """E17 (user 24/11): tâm kỳ vọng điều chỉnh — TUỲ CHỌN, nhưng đã có trường nào thì phải đủ bộ. Ràng buộc (arch-review 24/11):
     center (tâm base) số >0 ∧ 0 < low ≤ adj ≤ high ∧ skeptic_final ∈ whitelist watch ∧ center_adj_basis = đường dẫn TƯƠNG ĐỐI trong
     src_root tới adj.json thật, md5 = center_adj_md5, và adj.json khớp entry: ticker, center_base≈center, center_adj≈center_adj,
@@ -191,16 +191,28 @@ def _center_adj_errs(tag, e, src_root):
         jv = j.get(jk)
         if not num(jv) or not num(ev) or abs(jv - ev) > tol:
             errs.append(f"{tag}: adj.json {jk}={jv!r} không khớp entry ({ev!r})")
-    # rev: adj.json phải khớp rev của CHÍNH entry, HOẶC (entry là rev "thêm tâm điều chỉnh" có `supersedes` T@D#N) rev N của entry bị
-    # supersede — adj.json dựng trên rev N, entry mới = N+1 chỉ gắn thêm tâm adj. center_base≈center ở trên chặn đổi tâm base ngầm.
+    # rev: adj.json phải khớp rev của CHÍNH entry, HOẶC rev N của entry bị supersede (entry "thêm tâm điều chỉnh" = N+1 supersedes #N),
+    # HOẶC — khi tâm adj được MANG THEO qua các rev sau (vd append CONFIRMED deepcopy entry cuối) — rev của tổ tiên trong chuỗi supersedes
+    # còn mang ĐÚNG center_adj_md5 + center đó (cùng file adj.json, cùng tâm base). center_base≈center ở trên chặn đổi tâm base ngầm.
+    def _sup(x):
+        m = re.fullmatch(r"([^@#]+)@([^#]+)#(\d+)", str(x.get("supersedes") or ""))
+        return (m.group(3) if m and m.group(1) == x.get("ticker") and m.group(2) == x.get("dd_date") else None)
     ok_revs = {str(e.get("rev", 1))}
-    m = re.fullmatch(r"([^@#]+)@([^#]+)#(\d+)", str(e.get("supersedes") or ""))
-    if m and m.group(1) == e.get("ticker") and m.group(2) == e.get("dd_date"):
-        ok_revs.add(m.group(3))
+    cur = e
+    while _sup(cur) is not None:
+        ok_revs.add(_sup(cur))
+        nxt = next((x for x in prior if x.get("ticker") == cur.get("ticker") and x.get("dd_date") == cur.get("dd_date")
+                    and str(x.get("rev", 1)) == _sup(cur)), None)
+        if nxt is None or nxt.get("center_adj_md5") != e["center_adj_md5"] or nxt.get("center") != c:
+            break
+        cur = nxt
+    for jk in ("dd_date", "rev"):
+        if jk not in j:
+            errs.append(f"{tag}: adj.json thiếu {jk} (bắt buộc khi có center_adj — chặn adj.json không gắn được vào rev nào)")
     if "dd_date" in j and str(j["dd_date"]) != str(e.get("dd_date")):
         errs.append(f"{tag}: adj.json dd_date={j['dd_date']!r} ≠ entry (center_adj của DD khác)")
     if "rev" in j and str(j["rev"]) not in ok_revs:
-        errs.append(f"{tag}: adj.json rev={j['rev']!r} ∉ {sorted(ok_revs)} (rev entry hoặc rev entry được supersede) — center_adj của rev khác")
+        errs.append(f"{tag}: adj.json rev={j['rev']!r} ∉ {sorted(ok_revs)} (rev entry / entry được supersede / tổ tiên mang cùng center_adj) — center_adj của rev khác")
     return errs
 
 
@@ -357,6 +369,21 @@ def _self_tests():
         r.append(("center_adj: supersedes trỏ dd_date khác bị bắt", bool(E(rev=5, supersedes="AAA@2026-11-04#4"))))
         r.append(("center_adj: supersedes hỏng định dạng bị bắt", bool(E(rev=5, supersedes="AAA@2026-11-05#x"))))
         r.append(("center_adj: supersedes đúng nhưng dd_date adj.json lệch bị bắt", bool(E(rev=5, supersedes="AAA@2026-11-05#4", dd_date="2026-11-05x"))))
+        # mang theo qua rev sau (append CONFIRMED deepcopy): rev 5 mang center_adj (adj.rev=4) → rev 6 supersedes #5
+        r5 = dict(ca_e, rev=5, supersedes="AAA@2026-11-05#4")
+        r6 = dict(r5, rev=6, supersedes="AAA@2026-11-05#5")
+        r7 = dict(r5, rev=7, supersedes="AAA@2026-11-05#6")
+        C = lambda ent, prior: _center_adj_errs("t", ent, td2, prior)
+        r.append(("center_adj: mang theo qua 1 rev (tổ tiên cùng md5+center) → sạch", not C(r6, [r5])))
+        r.append(("center_adj: mang theo qua 2 rev → sạch", not C(r7, [r5, r6])))
+        r.append(("center_adj: tổ tiên KHÁC md5 ⇒ chuỗi đứt, bị bắt", bool(C(r6, [dict(r5, center_adj_md5="0" * 32)]))))
+        r.append(("center_adj: tổ tiên KHÁC center ⇒ chuỗi đứt, bị bắt", bool(C(r6, [dict(r5, center=20001.0)]))))
+        r.append(("center_adj: không có prior ⇒ mang theo bị bắt (fail-closed)", bool(C(r6, []))))
+        r.append(("center_adj: chuỗi đứt ở giữa (thiếu rev 6) bị bắt", bool(C(r7, [r5]))))
+        for _k in ("rev", "dd_date"):
+            _w("adjm.json", {k: v for k, v in aj.items() if k != _k})
+            _mm = hashlib.md5(open(os.path.join(td2, "adjm.json"), "rb").read()).hexdigest()
+            r.append((f"center_adj: adj.json thiếu {_k} bị bắt", bool(E(center_adj_basis="adjm.json", center_adj_md5=_mm))))
         _w("adjl.json", [1, 2])
         r.append(("center_adj: adj.json là list ⇒ lỗi chứ không crash", bool(E(center_adj_basis="adjl.json", center_adj_md5=hashlib.md5(json.dumps([1, 2]).encode()).hexdigest()))))
         mb = _w("adjs.json", dict(aj, center_adj="19000"))
@@ -406,6 +433,26 @@ def _self_tests():
         r.append(("A4: REFUTED + skeptic_final=REFUTED_OPEN sạch", not _skeptic_path_errs("t", dict(pe, skeptic_final="REFUTED_OPEN", skeptic_verdict_path="ref.json"), td2, F)))
         r.append(("A4: entry cũ (trước ngày bật) path=null được miễn", not _skeptic_path_errs("t", dict(pe, recorded_at="2026-10-30T09:00:00+07:00", skeptic_verdict_path=None), td2, F)))
         r.append(("A4: mặc định 9999-12-31 ⇒ chưa bật, path=null qua", not _skeptic_path_errs("t", dict(pe, skeptic_verdict_path=None), td2)))
+    # E17 trên SỔ THẬT: mô phỏng append CONFIRMED (deepcopy entry cuối mang center_adj, rev+1) ⇒ validator KHÔNG được chặn chuỗi mang theo
+    _real = os.path.join(os.path.dirname(HERE), "kb", "dd_price_zones.json")
+    try:
+        _L = json.load(open(_real, encoding="utf-8"))
+    except (OSError, ValueError):
+        _L = None
+    if _L is not None:
+        _cands = [x for x in _L["entries"] if x.get("center_adj") is not None]
+        if _cands:
+            import copy
+            _last = [x for x in _L["entries"] if x["ticker"] == _cands[-1]["ticker"]][-1]
+            _n = copy.deepcopy(_last)
+            _n.update(rev=int(_last.get("rev", 1)) + 1, supersedes="%s@%s#%s" % (_last["ticker"], _last["dd_date"], _last.get("rev", 1)),
+                      correction_reason="mô phỏng mang center_adj qua rev sau")
+            _L["entries"].append(_n)
+            with tempfile.TemporaryDirectory() as td3:
+                _tp = os.path.join(td3, "sim.json")
+                json.dump(_L, open(_tp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+                _, _errs = check(_tp, SRC_ROOT)
+            r.append(("center_adj trên sổ thật: mang theo qua rev sau KHÔNG bị chặn", not [x for x in _errs if "center_adj" in x or "adj.json" in x]))
     return r
 
 

@@ -55,20 +55,32 @@ def main():
         r.append(("mã khai 2 lần bị từ chối", rc == 2))
         rc, _, _ = go(["FPT=agents/Taylor/research/dd_adjcenter_20261124/FPT/adj.json", "DRI=agents/Taylor/research/dd_adjcenter_20261124/DRI/adj.json"])
         r.append(("lô 2 mã dry-run qua", rc == 0))
-        # adj.json lệch rev: tạo bản sao adj với rev khác
-        bad_rel = "agents/Taylor/research/dd_adjcenter_20261124/DGC/_tmp_adj_badrev.json"
-        j = json.load(open(os.path.join(ROOT, SRC_ADJ), encoding="utf-8"))
-        j["rev"] = 99
-        bp = os.path.join(ROOT, bad_rel)
-        try:
-            json.dump(j, open(bp, "w", encoding="utf-8"))
+        # adj.json lệch rev / dd_date / thiếu số: bản sao trong tmpdir (root=td) — không đụng cây research thật
+        def go_td(mut):
+            jj = json.load(open(os.path.join(ROOT, SRC_ADJ), encoding="utf-8"))
+            mut(jj)
+            rel = "adj_bad.json"
+            json.dump(jj, open(os.path.join(td, rel), "w", encoding="utf-8"))
             led2 = os.path.join(td, "led2.json")
             open(led2, "w", encoding="utf-8").write(json.dumps(txt, ensure_ascii=False, indent=1))
-            rc, _, err = go(["DGC=" + bad_rel], ledger=led2)
-            r.append(("adj.json lệch rev entry cuối bị từ chối", rc == 2 and "rev khác" in err))
-        finally:
-            if os.path.exists(bp):
-                os.unlink(bp)
+            o, e = io.StringIO(), io.StringIO()
+            return t.run(led2, ["DGC=" + rel], False, td, out=o, err=e), e.getvalue()
+        rc, err = go_td(lambda jj: jj.update(rev=99))
+        r.append(("adj.json lệch rev entry cuối bị từ chối", rc == 2 and "rev khác" in err))
+        rc, err = go_td(lambda jj: jj.update(dd_date="2026-01-01"))
+        r.append(("adj.json lệch dd_date bị từ chối", rc == 2 and "rev khác" in err))
+        rc, err = go_td(lambda jj: jj.pop("center_adj"))
+        r.append(("adj.json thiếu center_adj bị từ chối", rc == 2 and "center_adj" in err))
+        # rc=3: sổ bản sao có entry cũ hỏng (zone_low > zone_high) ⇒ selfcheck bản tạm FAIL ⇒ KHÔNG ghi, sổ nguyên vẹn
+        bad_led = os.path.join(td, "led_bad.json")
+        bt = json.loads(json.dumps(txt))
+        for e_ in bt["entries"]:
+            if e_["ticker"] == "DGC":
+                e_["zone_low"], e_["zone_high"] = 9e9, 1
+        open(bad_led, "w", encoding="utf-8").write(json.dumps(bt, ensure_ascii=False, indent=1))
+        before = open(bad_led, "rb").read()
+        rc, _, err = go(["DGC=" + SRC_ADJ], write=True, ledger=bad_led)
+        r.append(("selfcheck bản tạm FAIL ⇒ rc=3, sổ không đổi", rc == 3 and open(bad_led, "rb").read() == before))
     bad = [n for n, ok in r if not ok]
     for n, ok in r:
         print(("PASS " if ok else "FAIL ") + n)
