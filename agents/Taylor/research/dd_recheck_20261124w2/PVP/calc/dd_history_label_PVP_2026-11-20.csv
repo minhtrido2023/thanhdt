@@ -1,0 +1,2 @@
+ticker,dd_date,rev,skeptic_final,asof,center,price_asof,pc_asof,label,label_v1,reasons,demote_k,demote_neff,pct_fade,pct_hold,terc_fade,terc_hold,n_fade,n_hold,n_eff_hold,n_eff_fade,k_fade,k_hold,hist_med_fade,hist_med_hold,hist_p25_fade,hist_p75_fade,hist_p25_hold,hist_p75_hold,ROE5Y,roe_ttm,roe_ttm_over_5y,warn
+PVP,2026-10-29,2,CONFIRMED,2026-11-20,23099,16750,0.72514,TRUNG TÍNH,TRUNG TÍNH,,0,0,65.5462,56.1905,TRUNG TÍNH,TRUNG TÍNH,119,105,2.97467,10.4244,1.2046,1.33235,0.670902,0.648826,0.585329,0.776039,0.54673,0.891627,0.119227,0.153312,1.28588,

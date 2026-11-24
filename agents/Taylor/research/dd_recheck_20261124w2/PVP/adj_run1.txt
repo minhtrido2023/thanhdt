@@ -1,0 +1,7 @@
+{"center_base": 23099, "sum_p_m_pct": -0.48, "center_adj": 22988, "range_low": 22766, "range_high": 23044}
+Phế liệu đội tàu hiện hữu (base = 0) | +1 tr USD ⇒ 23216 (+0.51%); +5 tr USD ⇒ 23684 (+2.53%)
+ĐHĐCĐ bất thường 23/10/2026 — tàu Aframax "số 3", nguồn vốn/phát hành | không định lượng được (chưa có văn kiện); nhánh "không mua" NPV0 ⇒ biến thể r3 NPV0 24.678 (+6,8%); phát hành dưới giá trị nội tại ⇒ pha loãng
+Trích quỹ KTPL hằng năm (ví dụ 5% LN sau thuế) | -866 đ/cp (-3.75%) — ước lượng: 5% × PV(đội tàu+FSO−chi phí công ty) tại tham số trung tâm
+Chi phí công ty 10 năm [UL] | 8 năm ⇒ 23335 (+1.02%); 6 năm ⇒ 23639 (+2.34%)
+NPV tàu mới −30% nhánh xấu [UL] | NPV0 mọi nhánh 24.678 (+6,8%); −30% vô điều kiện 18.935 (−18,0%) (REPORT_r3 §3)
+[LUẬT] r 13,5% vs dải Ke (E15) | Ke 12,3% ⇒ 23.593 (+2,14%); 13,4% ⇒ +0,17%
