@@ -26,3 +26,4 @@
 - [2026-11-24T10:25:24Z] [dd-recheck nhóm B 24/11] XONG job Taylor_20261124_095517: FPT/NNC/DGC tâm 0%, cả 3 skeptic r1 INCONCLUSIVE (thiếu hạng mục), worktree wt-1574720404268912680b commits d2fe430f1/97ef0a396/5d276f5e6 — CHỜ Mike duyệt LEDGER_PROPOSAL + quyết FULL
 - [2026-11-24T10:51:25Z] [dd-adjcenter pilot FPT 24/11] XONG job Taylor_20261124_104632: tâm adj 56.204 (−1,93%), nhánh session/adjpilot 0d52b34ec (wt-adjpilot, chưa merge) — CHỜ Mike chốt 3 sửa PREREG (C+, dải p×m, luật r ngoài Σ) trước fan-out 7 mã
 - [2026-11-24T11:11:59Z] [dd-adjcenter g1 24/11] XONG job Taylor_20261124_110049: FPT 55.668 / TCH 15.152 / VGS 25.148 (nhánh session/adj-g1, wt-adj-g1, chưa merge) — CHỜ Mike merge + skeptic; VGS phát hiện tồn quỹ KTPL 36,1 tỷ chưa trừ
+- [2026-11-24T11:14:24Z] [dd-adjcenter g2 24/11] XONG job Taylor_20261124_110052: DRI 15.164 / SIP 57.261 (tổ hợp) / HHS 11.593 display — nhánh session/adj-g2 b4f7b48c6 (wt-adj-g2, chưa merge) — CHỜ Mike merge
