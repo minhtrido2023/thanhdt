@@ -1,0 +1,253 @@
+{
+ "ticker": "NNC",
+ "dd_date": "2026-11-03",
+ "rev": 6,
+ "asof": "2026-11-24",
+ "prereg_md5": "ef5157cb3f762d58623ed550ebc214c7",
+ "prereg_v2_md5": "835dfc1e07f9c67ac7f6c3028b529d13",
+ "blind_to_price": true,
+ "center_base": 61273,
+ "center_base_source": "kb/dd_price_zones.json NNC rev6 center (sau CK 3,65% @5 tỷ)",
+ "method": "chạy lại mô hình r3 tổ hợp (rerun_combo.py; |Σ| gần ngưỡng 5%) cho KTPL/capex/Q4 + cộng tuyến tính chân MVC",
+ "rerun_md5": "8971f24bfb223a77568d29c10a7bae2c",
+ "items": [
+  {
+   "name": "Trích quỹ KTPL hằng năm từ LNST 2026–2043 chưa trừ (C+ — cận bảo thủ)",
+   "dir": "down",
+   "evidence_tier": "C+",
+   "mag_pct": -3.587,
+   "mag_range_pct": [
+    -3.587,
+    -6.395
+   ],
+   "note": "Dấu chắc chắn. Cận dưới tỷ lệ = Δtồn quỹ/LNST kỳ trước (chi quỹ ≥0 ⇒ trích ≥ Δtồn): 2024: (7−4)/36,61 = 8,2%; 2025–9T26: (16,78−7)/(62,62+147,84) = 4,6%. Vào tâm ở 4,6% (cận bảo thủ), dải m tới 8,2%. 2 kỳ ⇒ p mặc định B. m đo bằng chạy lại mô hình (thuế hiệu dụng NNC + trừ KT×LN 2026).",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:11; /tmp/ddrestore_B/agents/Taylor/research/dd_NNC_20261030/src/fpts_nnc_init_20260107.txt (git 14ad1c925^/ef7472f56^):2038 (tồn quỹ 2023A 4 / 2024A 7); BCTC Q3/26 tr.3 16,78 (agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md:100); BQ tav2_bq.ticker_financial NNC NP_P0 theo quý (LNST 2023 36,61 / 2024 62,62 / 2025 147,84 tỷ)",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "counted_in_center_bool": true,
+   "contrib_pct": -1.793
+  },
+  {
+   "name": "Capex duy trì > khấu hao (giả định 'capex ≈ KH' không nguồn)",
+   "dir": "down",
+   "evidence_tier": "B",
+   "mag_pct": -3.848,
+   "mag_range_pct": [
+    0.0,
+    -9.747
+   ],
+   "note": "Capex: 2022 23 / 2023 19 / 2024 23 / 2025 54 tỷ (FPTS); KH: 2023 7 / 2024 10 tỷ (FPTS), Q3/26 5,56 tỷ/quý ⇒ 22,2/năm (BCTC VI.9). 3 kỳ cùng hướng có số (2023 +12, 2024 +13, 2025 ≥+32) ⇒ p 0,65. m ước lượng: khoảng hở 7,5 tỷ/năm = capex TB 2022–25 29,75 − KH 22,2 [0; 19 = TB 3 khoảng hở cùng năm].",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:12; /tmp/ddrestore_B/agents/Taylor/research/dd_NNC_20261030/src/fpts_nnc_init_20260107.txt (git 14ad1c925^/ef7472f56^):1323-1330,2203 + bảng LCTT 'Đầu tư TSCĐ'; agents/Taylor/research/dd_NNC_20261026/REPORT.md:86-88",
+   "p": 0.65,
+   "p_low": 0.4,
+   "p_high": 0.9,
+   "counted_in_center_bool": true,
+   "contrib_pct": -2.501
+  },
+  {
+   "name": "LNST Q4/26 ước 60 tỷ thấp hơn nhịp quý (Q3/26 thực 69,29)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "mag_pct": 0.698,
+   "mag_range_pct": [
+    0.0,
+    2.127
+   ],
+   "note": "Q4/Q3: 2024 1,28; 2025 1,27 (lên) — 2023 0,92 (ngược, có số) ⇒ nhánh ngược. m: Q4 = Q3 (phẳng, +9,29 tỷ) [0; Q3×1,275 = +28,3 tỷ].",
+   "source": "BQ tav2_bq.ticker_financial NNC NP_P0 theo quý (LNST 2023 36,61 / 2024 62,62 / 2025 147,84 tỷ) quý 2023Q3–2025Q4; agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:37 (n_q4 60 là ước lượng)",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "counted_in_center_bool": true,
+   "contrib_pct": 0.244
+  },
+  {
+   "name": "Chân MVC 10,3% dùng engine MVC r6 chưa vá trần chu kỳ",
+   "dir": "up",
+   "evidence_tier": "B",
+   "mag_pct": 0.43,
+   "mag_range_pct": [
+    0.0,
+    0.43
+   ],
+   "note": "Vá D1 ở MVC redo r3 = +556 đ/cp MVC (sau CK). Quy về NNC qua hệ sở hữu chéo (×1/(1−0,103×0,4407)) và CK NNC; ước lượng, có thể đã vá một phần trong NNC r3 ⇒ cận dưới 0.",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:18,36; agents/Taylor/research/dd_redo_20261105/MVC/REPORT_r3.md:22",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "counted_in_center_bool": true,
+   "contrib_pct": 0.215
+  },
+  {
+   "name": "Truy thu Núi Nhỏ ~42 tỷ vs dự phòng 22,37 — ĐÃ PHỦ ĐỦ",
+   "dir": "none",
+   "evidence_tier": "A",
+   "mag_pct": 0.0,
+   "mag_range_pct": [
+    0.0,
+    0.0
+   ],
+   "note": "42 = dự phòng 15,58 + 5,95 (nằm trong 22,37, đã trừ ở tiền ròng) + 20,43 đã nộp 2026 (đã ra khỏi tiền). Khoảng hở skeptic (≤1,5%) đóng = 0.",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:13; agents/Taylor/research/dd_redo_20261105/NNC/REPORT_r2.md:60; agents/Taylor/research/dd_NNC_20261030/archive_internal/REPORT_v2_20261031.md:93,202",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "counted_in_center_bool": true,
+   "contrib_pct": 0.0
+  }
+ ],
+ "sum_p_m_pct_linear": -3.835,
+ "sum_pct_combo": -3.85,
+ "center_adj": 58914,
+ "range_low": 52959,
+ "range_high": 61630,
+ "range_low_linear": 52959,
+ "range_high_linear": 61638,
+ "dividend_mech": {
+  "status": "không có cổ tức tiền đã công bố chưa GDKHQ trong nguồn (cổ tức phải trả 5,89 tỷ đã trừ ở tiền ròng)",
+  "vnd": 0
+ },
+ "center_adj_ex_div": 58914,
+ "sensitivity_only": [
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke 12,3–13,4% (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3% ⇒ 63.725 (+4,00%); 13,4% ⇒ 61.467 (+0,32%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md:76-80"
+  },
+  {
+   "name": "Đối thủ hết GP từ 2034",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "+4.367 đ/cp (+7,13%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:20"
+  },
+  {
+   "name": "ADMIN perm05",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "+4.962 đ/cp (+8,10%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:21"
+  },
+  {
+   "name": "Trả trước dài hạn CNBP là tiền thuê",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "+2.126 đ/cp (+3,47%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:22"
+  },
+  {
+   "name": "Trọng số STRUCTURAL 0,20 → 0,30",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "≈ +4,8%",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:23"
+  },
+  {
+   "name": "Truy thu lan sang mỏ lõi Mũi Tàu (E12; dự phòng 0,84, CQKTKS 1,735 tỷ)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "chưa có cơ sở độ lớn ngoài 0,84 đã trừ",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md:106"
+  },
+  {
+   "name": "Chi PHMT/đóng mỏ 2043 ngoài 4,50",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "không trọng yếu (hệ số chiết khấu ≈0,12)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md:14"
+  },
+  {
+   "name": "Pháp lý (MVC 44,07% + uỷ quyền 51%/D195; NHC 61% phải thu)",
+   "dir": "down",
+   "evidence_tier": "warning",
+   "sensitivity": "WARNING, không vào tâm",
+   "source": "agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md:106"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "Đọc thuyết minh VCSH BCTC kiểm toán 2025 (KT25, đã công bố) — số trích KTPL từ LN 2024",
+   "when": "có thể làm ngay",
+   "direction": "down",
+   "delta_pct": -3.96,
+   "delta_vnd": -2428,
+   "note": "ví dụ tỷ lệ 8,2%: C+→A p 0,9; mỗi 1pp ≈ -0.78%×0,9"
+  },
+  {
+   "event": "NQ ĐHĐCĐ 2027 phân phối LN 2026: tỷ lệ trích KTPL 5%",
+   "when": "ước lượng 04/2027*",
+   "direction": "down",
+   "delta_pct": -1.72,
+   "delta_vnd": -1051,
+   "note": "C+→A"
+  },
+  {
+   "event": "NQ ĐHĐCĐ 2027: tỷ lệ trích KTPL 10%",
+   "when": "ước lượng 04/2027*",
+   "direction": "down",
+   "delta_pct": -5.23,
+   "delta_vnd": -3202,
+   "note": "C+→A (ngoại suy tuyến tính từ 2 lần chạy)"
+  },
+  {
+   "event": "BCTC Q4/2026: LNST Q4 ≥ 69 tỷ",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "up",
+   "delta_pct": 0.38,
+   "delta_vnd": 235,
+   "note": "B→A"
+  },
+  {
+   "event": "BCTC Q4/2026: LNST Q4 ≤ 60 tỷ",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "down",
+   "delta_pct": -0.24,
+   "delta_vnd": -150,
+   "note": "hạng mục = 0"
+  },
+  {
+   "event": "LCTT năm 2026: capex 2026 − KH 2026 ≥ 7,5 tỷ (kỳ thứ 4 cùng hướng)",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "down",
+   "delta_pct": -0.96,
+   "delta_vnd": -589,
+   "note": "p 0,65→0,90"
+  },
+  {
+   "event": "LCTT năm 2026: capex 2026 ≤ KH 2026 (quan sát ngược có số)",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "up",
+   "delta_pct": 1.15,
+   "delta_vnd": 707,
+   "note": "p 0,65→0,35"
+  },
+  {
+   "event": "Vá trần chu kỳ engine MVC r6 rồi chạy lại chân MVC trong NNC",
+   "when": "khi có việc (nội bộ)",
+   "direction": "up",
+   "delta_pct": 0.17,
+   "delta_vnd": 105,
+   "note": "B→A p 0,9 (nếu đã vá sẵn: −0.21%)"
+  },
+  {
+   "event": "Lãi huy động 12T hiệu dụng ±50bp (luật V1, β=1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_pct": -1.54,
+   "delta_vnd": -944,
+   "note": "−50bp ⇒ +988 (REPORT_recheck:78,81)"
+  },
+  {
+   "event": "Văn bản truy thu mới chạm Mũi Tàu / D195 MVC",
+   "when": "khi có",
+   "direction": "down",
+   "delta_pct": 0,
+   "delta_vnd": 0,
+   "note": "WARNING; có số tiền ⇒ trừ ở tiền ròng theo số (A)"
+  }
+ ],
+ "caveat": "m KTPL/capex/Q4 đo bằng chạy lại mô hình (CONTROL trùng byte r3); m capex & Q4 là ước lượng có khoảng; chân MVC ước lượng tuyến tính; thu nhập tài chính không chịu KTPL trong hook (nhỏ)"
+}
