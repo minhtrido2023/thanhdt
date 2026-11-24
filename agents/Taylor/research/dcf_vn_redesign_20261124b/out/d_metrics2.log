@@ -1,0 +1,55 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-vn-redesign-20261124b/agents/Taylor/research/dcf_vn_redesign_20261124b/calc/d_metrics2.py:39: RuntimeWarning: Mean of empty slice
+  bm = np.log(np.nanmean(np.where(S, np.exp(f), np.nan), axis=1))
+A_pit done
+A_RI done
+D0 done
+D0J done
+D0B done
+DDM done
+EPV done
+MULT done
+HEDf done
+HEDr done
+HEDL done
+REL done
+G1 done
+ENS1 done
+ENS1w done
+ENS2 done
+META done
+L2_ENS1 done
+L2_ENS2 done
+L2_D0B done
+L2_MULT done
+L2_ENS1w done
+N0 done
+EP done
+BP done
+/home/trido/thanhdt/WorkingClaude/wt-dcf-vn-redesign-20261124b/agents/Taylor/research/dcf_vn_redesign_20261124b/calc/d_metrics2.py:120: RuntimeWarning: Mean of empty slice
+  "U_mths_med": float(np.median(mths)) if mths else np.nan, "U_ex36_mean": float(np.nanmean(exs)) if n else np.nan,
+HPG vốn chủ 12/2018→12/2019: 39.033700617587 46.049525945374
+model
+A_RI        1/2
+A_pit       1/2
+D0          3/5
+D0B         4/5
+D0J         4/5
+DDM         1/1
+ENS1        3/5
+ENS1w       3/5
+ENS2        3/5
+EPV         4/5
+G1          3/5
+HEDL        2/4
+HEDf        2/4
+HEDr        2/4
+L2_D0B      3/5
+L2_ENS1     3/5
+L2_ENS1w    2/5
+L2_ENS2     2/5
+L2_MULT     0/1
+META        3/5
+MULT        1/4
+N0          1/5
+REL         3/5
+base {"n": 21447, "P_ex36_neg": 0.6139786450319392, "P_ex36_gt030": 0.21923812188184827, "P_max36_ge_125": 0.6945934599057704, "P_f36_le_010": 0.4662656781834289} {"n": 20133, "P_ex36_neg": 0.5865494461828838, "P_ex36_gt030": 0.21566582228182585, "P_max36_ge_125": 0.6807136112905631, "P_f36_le_010": 0.5467640192718423}

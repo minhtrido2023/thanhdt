@@ -1,0 +1,114 @@
+{
+ "vintage_overlap_2013_01": {
+  "n": 13834,
+  "share_abs_dlog_gt_0.5pct": 0.011131993638860778
+ },
+ "dead": {
+  "tickers_with_px": 640,
+  "tickers_ever_in_universe": 92,
+  "in_universe_rows_daily_2014plus": 62899
+ },
+ "gate_check_vs_universe_pit": {
+  "n": 512576,
+  "agree": 0.9966483019103508,
+  "recall_of_pit": 0.992830989086514,
+  "precision_vs_pit": 0.9969776297001428
+ },
+ "fix1_vintage": {
+  "n": 58719,
+  "share_abs_gt_2pct": 0.2463086905430951,
+  "tickers_gt_2pct": 378,
+  "p50_abs": 0.0,
+  "p95_abs": 0.10619194751654802
+ },
+ "fix2_basis": {
+  "n": 58719,
+  "rows_N_from_E_over_BVPS": 1458,
+  "rows_OS_kept_despite_mismatch": 4675,
+  "share_abs_dlogBP_gt_15pct": 0.045913588446669734,
+  "rows_abs_dlogBP_gt_15pct": 2696,
+  "E_src_counts": {
+   "TA-L": 58586,
+   "BVPSxOS": 1133
+  }
+ },
+ "fix2_HPG": [
+  {
+   "time": "2018-10-30",
+   "q": "2018Q3",
+   "BVPS/Price_cu": 0.4749,
+   "E/MC_moi": 0.4749,
+   "N_how": "OS",
+   "N_trieu": 2123.9,
+   "OShares_trieu": 2123.9
+  },
+  {
+   "time": "2019-01-30",
+   "q": "2018Q4",
+   "BVPS/Price_cu": 0.6593,
+   "E/MC_moi": 0.6593,
+   "N_how": "OS",
+   "N_trieu": 2123.9,
+   "OShares_trieu": 2123.9
+  },
+  {
+   "time": "2019-04-25",
+   "q": "2019Q1",
+   "BVPS/Price_cu": 0.4619,
+   "E/MC_moi": 0.6004,
+   "N_how": "OS*",
+   "N_trieu": 2123.9,
+   "OShares_trieu": 2123.9
+  },
+  {
+   "time": "2019-08-01",
+   "q": "2019Q2",
+   "BVPS/Price_cu": 0.7092,
+   "E/MC_moi": 0.7092,
+   "N_how": "OS",
+   "N_trieu": 2761.1,
+   "OShares_trieu": 2761.1
+  },
+  {
+   "time": "2019-10-28",
+   "q": "2019Q3",
+   "BVPS/Price_cu": 0.7513,
+   "E/MC_moi": 0.7513,
+   "N_how": "OS",
+   "N_trieu": 2761.1,
+   "OShares_trieu": 2761.1
+  }
+ ],
+ "panel": {
+  "rows": 188947,
+  "tickers": 1556,
+  "in_universe_rows_2014plus": 56549,
+  "by_src": {
+   "BQ": 53694,
+   "VND": 2855
+  },
+  "tickers_in_universe_by_src": {
+   "BQ": 757,
+   "VND": 79
+  },
+  "ended36_rows_in_universe_asof<=2023-10": {
+   "BQ": 74,
+   "VND": 1035
+  },
+  "rows_in_universe_asof<=2023-10": {
+   "BQ": 38846,
+   "VND": 2741
+  }
+ },
+ "dead_named_in_universe": [
+  "AMD",
+  "ART",
+  "FLC",
+  "GTN",
+  "HAI",
+  "HVG",
+  "KSA",
+  "ROS",
+  "TGG"
+ ]
+}
