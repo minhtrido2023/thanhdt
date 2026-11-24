@@ -1,0 +1,218 @@
+{
+  "account": "SpaceX",
+  "broker": "DNSE",
+  "account_no": "0002023347",
+  "mode": "live",
+  "strategy": "V2.4",
+  "strategy_version": "V2.4",
+  "requires_user_approval": true,
+  "state": 3,
+  "state_name": "NEUTRAL",
+  "state_source": "DT5G_gated (source=DT5G_macro), as_of 2026-11-19 (golive_state_today.json published 19:01)",
+  "dt4_gate_line": "base=3(NEUTRAL) == DT5G=3(NEUTRAL), không bị macro cap.",
+  "plan_date": "2026-11-20",
+  "signal_date": "2026-11-19",
+  "recommendations_file": "deploy_golive_dt5g_v4/out/golive_v23_recommendations_2026-11-19.csv",
+  "next_trading_day_check": "plan_date=2026-11-20 nguyên văn từ job (next_trading_day, T6).",
+  "nav_basis": {
+    "source": "compute_active_nav.py (DNSE sống 18/11 ~19:0x)",
+    "nav_date": "2026-11-19",
+    "available_cash_vnd": 0.0,
+    "total_cash_minus_debt_vnd": -5819454.0,
+    "total_stock_value_vnd": 193387000.0,
+    "excluded_value_vnd": 0.0,
+    "egg_assets_vnd": 752837306.0,
+    "total_nav_vnd": 940404852.0,
+    "active_nav_vnd": 940404852.0,
+    "offbook_assets_vnd": 0,
+    "egg_note": "Egg đọc sống = tiền; plan không có lệnh mua nên không cần chuyển."
+  },
+  "lag_analysis": {
+    "signal_date": "2026-11-19",
+    "source_script": "mike/bin/filter_lag_entry_window.py",
+    "due_today": [],
+    "lag_upcoming_for_next_plans": [],
+    "note": "Script filter_lag_entry_window: 0 due_today, 0 upcoming (calendar_check ok, plan_date 2026-11-19). Cổng DD: mọi mã LAG PACK_STALE, không mã nào được phép."
+  },
+  "bal_analysis": {
+    "signal_date": "2026-11-19",
+    "n_bal": 0,
+    "bal_picks": [],
+    "note": "TCH RE_BACKLOG_BUY loại theo quyết định user 02/11 (đồng thời 8L rating 4 > 3, FLOOR_FAIL)."
+  },
+  "capit_sizing": {
+    "capit_signal_today": false,
+    "note": "Không lệnh CAPIT."
+  },
+  "orders": [
+    {
+      "id": "SELL-FPT-AUTOEXIT-DISC-STOP",
+      "ticker": "FPT",
+      "side": "sell",
+      "qty": 800,
+      "ref_price": 45700.0,
+      "book": "DISCRETIONARY_SPECIAL",
+      "play_type": "DISCRETIONARY_AUTO_EXIT",
+      "priority": 1,
+      "urgency": "normal",
+      "note": "AUTO-EXIT DISCRETIONARY STOP — ⚠️ CẮT LỖ — ĐỀ XUẤT, user XÁC NHẬN khi duyệt plan (không tự bán): đóng 45,700 ≤ −10% giá vốn broker 51,138 (-10.63%) — ngưỡng cứng user 06/11 14:19 (discretionary_exit_rules.json)",
+      "dcf_check": null,
+      "dcf_override_reason": "",
+      "dd_check": null,
+      "dd_override_reason": "",
+      "cash_only": false,
+      "lever_f": null,
+      "loan_package_id": null,
+      "hard_no_chase_ceiling_vnd": null,
+      "ceiling_rule": null,
+      "ceiling_anchor_price": null,
+      "ceiling_anchor_date": null,
+      "ceiling_tau": null,
+      "hard_sell_floor_vnd": null,
+      "disc_exit": {
+        "triggers": [
+          "STOP"
+        ],
+        "pnl_pct": -0.106331,
+        "avg_cost_broker": 51137.5,
+        "close": 45700,
+        "sessions_held": 9,
+        "entry_date": "2026-11-06",
+        "requires_user_confirm": true,
+        "earliest_session": "MORNING",
+        "partial_fill_ok": false,
+        "rule_ref": "user 06/11/2026 14:19 ICT (decided_by: user) — mike/kb/projects/disc-fpt-nnc-approval-20261105.md mục CẬP NHẬT 06/11 14:19"
+      }
+    }
+  ],
+  "deferred_orders": [],
+  "notes": [
+    "⚠️ VGS: giá live 19/11 = 18.600 (đóng 18/11 = 18.500, KL 539.500cp chạm cờ huỷ Livermore LVR-STK-2026-11-11-VGS, đóng <18.900 + KL bán >500k). Không mua thêm; giữ 2300cp (~42,8tr ≈ 4,5% NAV). Cờ huỷ KHÔNG tự thực thi bán — cần user/Mike quyết giữ hay giảm; ngưỡng cờ thứ hai: đóng <18.300.",
+    "NNC (DISC): giá live 19/11 = 47.800 > trần Livermore 46.000 ⇒ KHÔNG đặt lệnh mua (không đuổi giá). Giữ 400cp (~19,1tr ≈ 2,0% NAV).",
+    "TV1 paused, không lệnh. LAG: 0 mã đến hạn (filter_lag_entry_window, signal 19/11), mọi gói DD PACK_STALE. BAL: TCH loại (quyết định user 02/11; rating 4). CAPIT dormant (breadth 18,4% < 31%). Park: NO_TRIM (PARK 1,85tr < ngưỡng 3,72tr). Không lệnh nào ⇒ không cần chuyển Trứng vàng (egg sống 752,84tr).",
+    "data/discretionary_exit_rules.json: VGS entry_date 2026-11-11 vs lần khớp đầu thực tế 12/11 — chưa sửa, cần Mike/user quyết (đã flag trước)."
+  ],
+  "created_at": "2026-11-19T19:04:58+07:00",
+  "allocator": {
+    "w_lag_target": 0.5,
+    "w_lag_current": null,
+    "band": 0.1,
+    "band_breach": false,
+    "note": "Không lệnh LAG/BAL mới."
+  },
+  "park_trim_proposal": {
+    "account_label": "SpaceX",
+    "asof": "2026-11-19",
+    "target_park": 0.0,
+    "trim_band": 0.005,
+    "orders": [],
+    "blocked": [],
+    "notes": [
+      "PARK 1.9tr vs target 0.0tr (pool 748.9tr) — vượt 1.9tr, chưa quá ngưỡng 3.7tr"
+    ],
+    "at_or_below_target": [],
+    "park_mv_vnd": 1850000.0,
+    "cash_available_vnd": 0.0,
+    "cash_total_vnd": 1640.0,
+    "reconcile_ok": true,
+    "unverified_tickers": [],
+    "excluded_tickers": [
+      "PNJ"
+    ],
+    "state": {
+      "state": 3,
+      "state_name": "NEUTRAL",
+      "date": "2026-11-19",
+      "etf_park_frac_live": 0.0
+    },
+    "cash_basis": "total_cash",
+    "cash_dividend_receiving_vnd": 0.0,
+    "cash_debt_vnd": 5821094.0,
+    "egg_assets_vnd": 752837306.0,
+    "excluded_dividend_receivable_pending_vnd": 0.0,
+    "excluded_dividend_receivable_detail": [],
+    "pool_vnd": 748867852.0,
+    "target_park_vnd": 0.0,
+    "delta_vnd": -1850000.0,
+    "threshold_vnd": 3744339.2600000002,
+    "decision": "NO_TRIM",
+    "_merged_into_orders": "⛔ KHÔNG merge vào orders[] — L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh."
+  },
+  "merge_park_orders": {
+    "owner": "park_merge_v1",
+    "layers": {
+      "L1": {
+        "accepted": false,
+        "reason": "L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh."
+      },
+      "L2": {
+        "accepted": false,
+        "reason": "L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+      }
+    },
+    "n_generated": 0,
+    "n_dropped_owned": 0,
+    "sell_gross_vnd": 0,
+    "sell_fee_est_vnd": 0,
+    "warnings": [
+      "L1 park_trim: decision='NO_TRIM' ≠ 'TRIM' — tầng này không sinh lệnh.",
+      "L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+    ],
+    "note": "orders[] phần bán PARK được DỰNG LẠI mỗi lần chạy (không cộng dồn). Chạy lại merge với artifact mới = kết quả mới đúng, không phải chồng lên."
+  },
+  "discretionary_inject_notes": [
+    {
+      "ticker": "TV1",
+      "action": "none",
+      "note": "TV1 paused — injector không sinh lệnh."
+    },
+    {
+      "at": "2026-11-17T20:30:01+07:00",
+      "ticker": "TV1",
+      "action": "state_skipped",
+      "state_file": "data/trade_plans/discretionary/state_TV1_SpaceX.json",
+      "note": "status=paused (≠ active) — chương trình KHÔNG sinh lệnh; đúng ý thì bỏ qua, không thì bật lại state"
+    }
+  ],
+  "decision": "HOLD ALL — 0 lệnh. NNC 47.800 > trần 46.000 (không đuổi); VGS chạm cờ huỷ Livermore, chờ user quyết; TCH loại; LAG 0 đến hạn.",
+  "approved_by": "user - Discord 19/11/2026 21:50 ICT: duyệt bán FPT (AUTO-EXIT STOP -10%); VGS hủy mua thêm; NNC không mua đuổi",
+  "approved_at": "2026-11-19T21:51:54+07:00",
+  "auto_exit_inject_notes": [
+    {
+      "at": "2026-11-19T20:40:03+07:00",
+      "source": "auto_exit_inject",
+      "injected": [
+        {
+          "ticker": "FPT",
+          "book": "DISCRETIONARY_SPECIAL",
+          "sessions_held": "STOP pnl=-10.63% phiên=9"
+        }
+      ]
+    }
+  ],
+  "jit_unpark_proposal": {
+    "layer": "L2_JIT_UNPARK",
+    "account_label": "SpaceX",
+    "asof": "2026-11-19",
+    "park_mv_vnd": 1850000.0,
+    "cash_available_vnd": 0.0,
+    "egg_assets_vnd": 752837306.0,
+    "reconcile_ok": true,
+    "unverified_tickers": [],
+    "excluded_tickers": [
+      "PNJ"
+    ],
+    "margin_room_vnd": 0.0,
+    "friction": 0.0015,
+    "orders": [],
+    "buy_amendments": [],
+    "blocked": [],
+    "notes": [
+      "không có lệnh MUA book BAL/LAG trong plan ⇒ L2 no-op (đúng thiết kế: L2 chỉ chạy khi có lệnh mua thật)"
+    ],
+    "plan_path": "plan_SpaceX_2026-11-20.json",
+    "n_buy_orders_bal_lag": 0,
+    "decision": "NO_TRIGGER",
+    "_merged_into_orders": "⛔ KHÔNG merge vào orders[] — L2 jit_unpark: decision='NO_TRIGGER' ≠ 'JIT' — tầng này không sinh lệnh."
+  }
+}

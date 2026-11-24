@@ -1141,6 +1141,14 @@ def filter_dd_flag_orders(plan, asof=None):
 # trở lại bình thường" CHƯA được định nghĩa bằng số — xem kb/projects/lag-dd-zone-gate-20261109.md.
 LAG_DD_ZONE_GATE_ENABLED = True
 
+# ── CỔNG CON "DD PHẢI ĐƯỢC XÁC NHẬN LẠI" (D1 + D5) — user duyệt 2026-11-22 19:07 ICT (`decided_by: user`,
+# "theo khuyến nghị"; kb/projects/dd-upgrade-final-action-20261122.md mục B1). Khi True, lệnh MUA LAG đã
+# qua mọi điều kiện cũ còn bị chặn nếu entry sổ mới nhất có skeptic_final != "CONFIRMED" (thiếu trường ⇒
+# chặn, fail-closed) HOẶC audited_fy_missing is True (thiếu BCTC kiểm toán năm gần nhất ⇒ coi như chưa DD).
+# MẶC ĐỊNH False ⇒ hành vi cổng KHÔNG ĐỔI. Bật/rollback = đổi hằng này (code có version control), không env.
+# Prompt DollarBill (mike/bin/bq_freshness_check.sh, LAG_ZONE_NOTE) đọc hằng này để lặp luật cho khớp.
+LAG_DD_REQUIRE_CONFIRMED = False
+
 
 def _lag_dd_zone_deps():
     """(latest_entries, lock_mismatch, ledger, expiry_of, corp_events, frame_check) — DÙNG LẠI nguyên logic sổ DD của
@@ -1203,7 +1211,8 @@ def filter_lag_dd_zone_orders(plan, asof=None):
     FAIL-CLOSED hoàn toàn (khác filter_dd_flag_orders): không đọc được sổ/không import được ⇒ LOẠI mọi
     lệnh LAG buy kèm action="BLOCKED" (không mua là phía ít hại; user vừa nói edge LAG đang kém).
     Chỉ side=buy, chỉ book LAG; lệnh BÁN không bao giờ bị chặn; book khác không đổi. Hằng số
-    LAG_DD_ZONE_GATE_ENABLED=False ⇒ no-op. Live-only: không đổi backtest/số pin R3.
+    LAG_DD_ZONE_GATE_ENABLED=False ⇒ no-op. LAG_DD_REQUIRE_CONFIRMED=True (mặc định False) ⇒ thêm (4)
+    skeptic_final == "CONFIRMED" và (5) audited_fy_missing không phải True (D1/D5 user 22/11). Live-only: không đổi backtest/số pin R3.
     Vị trí cascade (bot_execute.py): ngay SAU filter_dd_flag_orders, TRƯỚC net_offsetting_orders (cùng lý
     do: netting gán nhãn chân lớn hơn ⇒ lệnh LAG trốn vào NET nhãn khác).
     Trả (plan đã lọc, list dict {"ticker","order_id","book","action":"BLOCKED","qty_before","price",
@@ -1281,6 +1290,14 @@ def filter_lag_dd_zone_orders(plan, asof=None):
                        + (f" (đỉnh vùng {zh:,.0f})" if zh and zh < center else "")
                        + f" (dd_date {e['dd_date']}, vùng {e.get('zone_low')}–{e.get('zone_high')}) "
                          f"— luật 09/11: chỉ mua khi giá ≤ tâm")
+            # D1/D5 (22/11) — đặt SAU mọi điều kiện cũ để lý do cũ không bị che. Nhãn in nguyên văn từ sổ.
+            elif LAG_DD_REQUIRE_CONFIRMED and e.get("skeptic_final") != "CONFIRMED":
+                sk = repr(e["skeptic_final"]) if "skeptic_final" in e else "<thiếu trường>"
+                why = (f"DD {e['dd_date']} rev{e.get('rev', 1)}: skeptic_final={sk} ≠ 'CONFIRMED' "
+                       f"— luật D1 22/11: mua LAG đòi DD đã được skeptic xác nhận lại")
+            elif LAG_DD_REQUIRE_CONFIRMED and e.get("audited_fy_missing") is True:
+                why = (f"DD {e['dd_date']} rev{e.get('rev', 1)}: audited_fy_missing=True "
+                       f"— luật D5 22/11: thiếu BCTC kiểm toán năm gần nhất ⇒ coi như chưa có DD")
             else:
                 why = None
         if why:

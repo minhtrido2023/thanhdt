@@ -240,10 +240,17 @@ def cli_battery(gate_patch=None):
     src = open(os.path.join(HERE, "dcf_refresh_gate.py"), encoding="utf-8").read()
     src = src.replace('fp = fin_path or f"{WORKDIR}/data/bq_cache/ticker_financial.parquet"',
                       'fp = fin_path or "/nonexistent/ticker_financial.parquet"')
+    t = tempfile.mkdtemp()
+    # State/log CLI phải là file TẠM: bản sao đọc data/dcf_refresh_state.json SỐNG thì slot
+    # 2026-11-15:full (cron thật đã chạy 15/11) ⇒ slot_already_done rc=0 ⇒ đỏ giả từ 2026-11-15.
+    for a, b in (('STATE_FP = f"{WORKDIR}/data/dcf_refresh_state.json"', f'STATE_FP = {os.path.join(t, "state.json")!r}'),
+                 ('LOG_FP = f"{WORKDIR}/data/dcf_refresh_gate.log"', f'LOG_FP = {os.path.join(t, "gate.log")!r}')):
+        assert a in src, a
+        src = src.replace(a, b)
     if gate_patch:
         assert gate_patch[0] in src, gate_patch[0]
         src = src.replace(*gate_patch)
-    t = tempfile.mkdtemp(); gp = os.path.join(t, "dcf_refresh_gate.py"); open(gp, "w", encoding="utf-8").write(src)
+    gp = os.path.join(t, "dcf_refresh_gate.py"); open(gp, "w", encoding="utf-8").write(src)
     env = {k: v for k, v in os.environ.items() if k != "TZ"}
     bad = subprocess.run([sys.executable, gp, "--season", "--asof", "2026-11-15", "--dry"], capture_output=True, text=True, env=env)
     ok = subprocess.run([sys.executable, gp, "--season", "--asof", "2026-12-20", "--dry"], capture_output=True, text=True, env=env)

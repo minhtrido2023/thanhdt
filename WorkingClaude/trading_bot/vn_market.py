@@ -39,6 +39,9 @@ _VARIABLE_HOLIDAYS: set = {
     # 31/08 (T2, ngày làm việc hoán đổi) + 01/09 (T3, ngày bù) + 02/09 đã có _FIXED_HOLIDAYS
     dt.date(2026, 8, 31),
     dt.date(2026, 9,  1),
+    # Ngày Văn hóa VN 2026 — nghỉ giao dịch T3 24/11, giao dịch lại T4 25/11
+    # (Nghị quyết 28/2026/QH16; SSI thông báo 23/11/2026)
+    dt.date(2026, 11, 24),
 }
 
 # (tên phiên, giờ bắt đầu, giờ kết thúc, có được đặt LO liên tục không)

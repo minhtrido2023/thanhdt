@@ -666,6 +666,16 @@ class DNSEBroker(BrokerBase):
         # là ngày go-live, một bản ghi có totalCash âm — ở đó chặn là đúng.
         return tc - td
 
+    def _log_ppse_error(self, fn, symbol, price, exc):
+        """Ghi bằng chứng lỗi ppse vào raw log mà KHÔNG BAO GIỜ ném ra: caller (executor.py:2163)
+        không bọc try, nên log lỗi mà tự ném (vd UnicodeEncodeError do surrogate lẻ trong message —
+        `_log_raw` chỉ bắt OSError) sẽ biến `return None` thành STEP_FAIL cả lượt step()."""
+        try:
+            self._log_raw("ppse_error", {"fn": fn, "symbol": symbol, "price": price,
+                                         "error": f"{type(exc).__name__}: {exc}"})
+        except Exception:
+            pass
+
     def get_max_buy_qty(self, symbol, price, loan_package_id=None):
         """Sức mua tối đa theo mã+giá qua GET /accounts/{acc}/ppse (qmaxBuy). ppse đã tính
         cả tiền bán chờ về T+0 — availableCash thì chưa (xem BrokerBase docstring). Mọi
@@ -680,7 +690,10 @@ class DNSEBroker(BrokerBase):
                                    "loan_package_id_sent": lp_sent, "resp": r})
             v = _fnum(qget(r, "qmaxBuy", "qmaxbuy"))
             return int(v) if v is not None and v >= 0 else None
-        except Exception:
+        except Exception as e:
+            # §29: vẫn trả None (caller fail-safe như cũ) nhưng ghi BẰNG CHỨNG — trước đây lỗi
+            # API ppse nhìn y hệt "hết tiền" vì không để lại dấu vết nào.
+            self._log_ppse_error("get_max_buy_qty", symbol, price, e)
             return None
 
     def get_buying_power(self, symbol, price, loan_package_id=None):
@@ -698,7 +711,8 @@ class DNSEBroker(BrokerBase):
                                    "loan_package_id_sent": lp_sent, "resp": r})
             v = _fnum(qget(r, "pp0Buy", "pp0buy"))
             return float(v) if v is not None and v >= 0 else None
-        except Exception:
+        except Exception as e:
+            self._log_ppse_error("get_buying_power", symbol, price, e)
             return None
 
     def positions_raw(self):
@@ -1295,6 +1309,9 @@ class DNSEBroker(BrokerBase):
         Old order bị Canceled, new order_id xuất hiện với price/qty mới.
 
         Returns: new_oid (str) nếu tìm được, None nếu không (caller dùng cancel+replace).
+        None = trạng thái MƠ HỒ (modify có thể đã thành công mà lệnh mới chưa hiện trong sổ):
+        caller phải poll lại / dừng an toàn (§5), không cancel+replace mù — dễ đặt lệnh lần hai.
+        Lệnh mới chỉ được nhận khi CÙNG mã (và cùng chiều nếu biết) với lệnh cũ.
         """
         from dnse_api import DNSEError as _DNSEError
         try:
@@ -1316,9 +1333,27 @@ class DNSEBroker(BrokerBase):
                 old = updates.get(str(order_id))
                 if old and not old.is_dead:
                     return None  # modify thực ra chưa xong
-                # Tìm order mới nhất còn sống (heuristic: id số lớn nhất)
+                # Tìm order mới nhất còn sống (heuristic: id số lớn nhất) — CHỈ trong cùng
+                # mã (và cùng chiều nếu cả hai biết) với lệnh cũ. Trước 2026-11-22 lấy id lớn
+                # nhất của MỌI mã còn sống ⇒ có thể trả order_id của mã khác (caller sẽ coi
+                # lệnh sai là lệnh đã sửa). Không xác định được mã của lệnh cũ (không còn
+                # trong sổ / thiếu field symbol) ⇒ fail-safe: None ⇒ caller cancel+replace.
+                old_raw = (old.raw if old else None) or {}
+                sym = qget(old_raw, "symbol", "instrument", "code", "sym")
+                if not sym:
+                    self._log_raw("modify_order_new_oid", {
+                        "old_oid": order_id, "new_oid": None,
+                        "note": "không xác định được mã lệnh cũ ⇒ không đoán lệnh mới"})
+                    return None
+                side = qget(old_raw, "side", "orderside")
+                def _same(u):
+                    r = u.raw or {}
+                    if str(qget(r, "symbol", "instrument", "code", "sym") or "") != str(sym):
+                        return False
+                    s2 = qget(r, "side", "orderside")
+                    return not (side and s2) or str(side) == str(s2)
                 candidates = [(int(k), k) for k, u in updates.items()
-                              if not u.is_dead and k != str(order_id)]
+                              if not u.is_dead and k != str(order_id) and _same(u)]
                 if candidates:
                     new_oid = str(max(candidates)[1])
                     self._log_raw("modify_order_new_oid", {

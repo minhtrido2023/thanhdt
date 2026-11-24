@@ -22,6 +22,7 @@ import subprocess
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 WORKDIR = Path(__file__).parent
 STATE_PATH = WORKDIR / 'bull_div_boost_state.json'
@@ -72,7 +73,7 @@ def detect_today():
            'SELECT l.*, h.hi252 FROM latest l, hi h')
     out = _q(sql).strip().split('\n')
     if len(out) < 2:
-        return {'date': str(datetime.today().date()), 'error': 'no_data'}
+        return {'date': str(datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()), 'error': 'no_data'}
     header = out[0].split(','); row = out[1].split(',')
     rec = dict(zip(header, row))
 
@@ -230,7 +231,7 @@ def get_current_max_positions():
         return MAX_POS_NORMAL
     # Check window not expired
     fire_d = datetime.strptime(st['current_window']['fire_date'], '%Y-%m-%d').date()
-    today_d = datetime.today().date()
+    today_d = datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()  # §16: neo ICT, không tin TZ host
     cal_days = (today_d - fire_d).days
     if cal_days >= int(HOLD_DAYS * 1.4):
         return MAX_POS_NORMAL

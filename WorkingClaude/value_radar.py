@@ -219,7 +219,16 @@ def load_series(update=True, rebuild=False):
     # first anchor (2026-09-30). Value Radar is DISPLAY-ONLY (CLAUDE.md §6b), so this is the
     # explicitly-approved wiring; see mike/kb/data_registry/macro/cctg_rate_vn.md consumer table.
     from deposit_rate_vn import effective_deposit_events_df, deposit_events_df as _big4_events_df
-    ev = effective_deposit_events_df().sort_values("time")
+    # B2 (2026-11-24, user duyệt, job Taylor_20261123_174706): cơ sở chuỗi lãi huy động của PHÉP SO
+    # LỊCH SỬ phải đồng nhất. CCTG chỉ có từ 2026-09-30 (7,4% vs Big-4 6,8%) ⇒ trộn max() làm gãy
+    # cơ sở ngay đoạn cuối chuỗi, phân vị spread của hôm nay bị so táo với cam. Mặc định = Big-4
+    # thuần suốt chuỗi. Rollback 1 từ: VALUE_RADAR_DEP_BASIS=effective (hành vi cũ, max(Big-4,CCTG)).
+    # CHỈ ảnh hưởng value_radar; effective_deposit_rate()/consumer_deposit_rate() và các consumer
+    # khác (rating_8l, custom30_yield_labels, due_diligence, kill-switch A) KHÔNG đổi.
+    if os.environ.get("VALUE_RADAR_DEP_BASIS", "big4").strip().lower() == "effective":
+        ev = effective_deposit_events_df().sort_values("time")
+    else:
+        ev = _big4_events_df()[["time", "deposit_rate"]].sort_values("time")
     d = pd.merge_asof(d, ev, on="time", direction="backward")   # nhân quả: mốc ≤ t
     d["ey"] = 100.0 / d["pe_cap10"]
     d["spread"] = d["ey"] - d["deposit_rate"]
@@ -288,7 +297,7 @@ def value_radar_now(update=True, ttl=900):
     return val
 
 
-def build_value_radar_line(html=True, update=True):
+def build_value_radar_line(html=True, update=True, with_norm5=False):
     """1 dòng cho khối NOW / EOD report. None khi lỗi dữ liệu (caller bỏ dòng).
 
     THUẦN HIỂN THỊ — không hàm nào ở đây được nối vào sizing/allocator/threshold."""
@@ -304,7 +313,7 @@ def build_value_radar_line(html=True, update=True):
     # tenor tag (quant-skeptic round-2 fix 4, 2026-10-01): spread = EY - max(Big-4 12M, CCTG);
     # must name which tenor is driving it, never a bare "tiết kiệm" that silently assumed 12M.
     dep_tag = _DEP_TAG.get(c.get("deposit_rate_source"), "Big-4 12T")
-    return (
+    out = (
         f"Value Radar: {emo} {head}"
         f" (phân vị 10 năm) · P/E {c['pe_cap10']:.2f} (p{c['p_pe']:.0f})"
         f" · P/B {c['pb_cap10']:.2f} (p{c['p_pb']:.0f})"
@@ -312,6 +321,144 @@ def build_value_radar_line(html=True, update=True):
         f"\n  ↳ ⓘ thông tin bổ sung, CHƯA qua kiểm định đủ mạnh để dùng cho sizing "
         f"(0/17 lăng kính qua đa kiểm định) — chỉ để đọc, không phải tín hiệu mua/bán."
     )
+    # B1: dòng phụ P/E chuẩn hoá 5Y — MẶC ĐỊNH TẮT (không consumer nào tự đổi định dạng); bật bằng
+    # with_norm5=True hoặc env VALUE_RADAR_NORM5_LINE=1. Lỗi/None ⇒ bỏ dòng phụ, dòng chính nguyên vẹn.
+    if with_norm5 or os.environ.get("VALUE_RADAR_NORM5_LINE") == "1":
+        n5 = build_value_radar_norm5_line(html=html, update=update)
+        if n5:
+            out += "\n" + n5
+    return out
+
+
+# ------------------------------------------------------- B1: P/E chuẩn hoá 5Y + cờ LỢI NHUẬN ĐỈNH
+# Dòng PHỤ, DISPLAY-ONLY (job Taylor_20261123_174706, user duyệt 2026-11-24, theo R1 + quant-skeptic
+# R1). KHÔNG đổi composite / ngưỡng RẺ-ĐẮT / rổ / trọng số: chỉ trả lời "độ rẻ của P/E TTM có phải
+# do lợi nhuận đang ở đỉnh không?". Công thức = đúng `R1/calc/analyze_r1.py` (lagged_mean + basket_stats):
+#   np_ttm = NP_P0+P1+P2+P3 (đủ 4 quý); np5 = TB np_ttm tại t, t-12, ..., t-48 THÁNG (cần đủ 5 mốc);
+#   rổ = top-300 vốn hoá -> PB>0 -> top-100; P/E chuẩn hoá = harm(cap10(w), mcap/np5) (chỉ np5>0);
+#   eps_ratio = Σnp_ttm / Σnp5 (mã có cả hai). Tần suất THÁNG (phiên cuối mỗi tháng; tháng hiện tại =
+#   phiên mới nhất) ⇒ phân vị nhân quả cửa sổ 120 tháng (tối thiểu 24), cùng `_roll_pct`.
+# Nguồn: tav2_bq.ticker (Price thô × OShares; registry Bẫy 7). Cache `data/value_radar_norm5_panel.csv`.
+NORM5_CACHE = os.environ.get("VALUE_RADAR_NORM5_CACHE",
+                             os.path.join(W, "data", "value_radar_norm5_panel.csv"))
+NORM5_START = "2007-01-01"   # cần ≥48 tháng lùi trước floor 2008 (cùng panel R1)
+NORM5_WIN, NORM5_MINP = 120, 24
+PEAK_PCT = 90.0              # cờ khi phân vị causal 10Y của EPS_TTM/TB5Y ≥ 90
+
+_SQL_NORM5 = """
+WITH me AS (
+  SELECT MAX(time) AS time FROM `{project}.tav2_bq.ticker`
+  WHERE ticker='VNINDEX' AND time >= '{start}'
+  GROUP BY DATE_TRUNC(time, MONTH)
+)
+SELECT t.time, t.ticker, t.Price*t.OShares AS mcap, t.BVPS*t.OShares AS book,
+       t.NP_P0, t.NP_P1, t.NP_P2, t.NP_P3
+FROM `{project}.tav2_bq.ticker` t JOIN me USING(time)
+WHERE t.ticker NOT IN ('VNINDEX','VN30') AND t.OShares>0 AND t.Price>0
+"""
+
+
+def update_norm5_panel(rebuild=False):
+    """Panel tháng (mọi mã) -> cache. Tăng dần: kéo lại từ ĐẦU THÁNG của dòng cuối (tháng đang
+    chạy đổi mỗi ngày; BQ có thể restate) rồi ghi đè. Thiếu cache ⇒ lỗi (rebuild phải tường minh)."""
+    from google.cloud import bigquery
+    old, start = None, NORM5_START
+    if not rebuild:
+        if not os.path.exists(NORM5_CACHE):
+            raise FileNotFoundError(f"thiếu cache {NORM5_CACHE} — chạy `value_radar.py --rebuild-norm5`")
+        old = pd.read_csv(NORM5_CACHE, parse_dates=["time"])
+        start = str(old["time"].max().to_period("M").to_timestamp().date())
+    sql = _SQL_NORM5.format(project=PROJECT, start=start)
+    new = bigquery.Client(project=PROJECT).query(sql).result().to_dataframe()
+    new["time"] = pd.to_datetime(new["time"].astype(str))
+    new["np_ttm"] = new[["NP_P0", "NP_P1", "NP_P2", "NP_P3"]].sum(axis=1, min_count=4)
+    new = new[["time", "ticker", "mcap", "book", "np_ttm"]]
+    if old is not None:
+        old = old[old["time"] < pd.Timestamp(start)]
+        new = pd.concat([old, new], ignore_index=True)
+    new = new.sort_values(["time", "ticker"]).drop_duplicates(["time", "ticker"], keep="last")
+    tmp = NORM5_CACHE + ".tmp"
+    new.to_csv(tmp, index=False)
+    os.replace(tmp, NORM5_CACHE)          # nguyên tử (§5)
+    return new.reset_index(drop=True)
+
+
+def _lagged_mean5(series):
+    """TB np_ttm tại t, t-12, ..., t-48 THÁNG theo từng mã; cần đủ 5 mốc. series index=(ticker, period[M])."""
+    vals = []
+    for k in range(5):
+        s = series.copy()
+        s.index = pd.MultiIndex.from_arrays([s.index.get_level_values(0),
+                                             s.index.get_level_values(1) + 12 * k])
+        vals.append(s.rename(f"l{k}"))
+    m = pd.concat(vals, axis=1).reindex(series.index)
+    return m.mean(axis=1).where(m.notna().sum(axis=1) >= 5)
+
+
+def norm5_series(p):
+    """Từ panel tháng -> chuỗi theo tháng: pe_norm5, eps_ratio5, cov5 (+ phân vị causal 10Y)."""
+    p = p.copy()
+    p["time"] = pd.to_datetime(p["time"])
+    p["per"] = p["time"].dt.to_period("M")
+    q = p.set_index(["ticker", "per"]).sort_index()
+    q = q[~q.index.duplicated(keep="last")]
+    q["np5"] = _lagged_mean5(q["np_ttm"])
+    q = q.reset_index()
+    rows = []
+    for tm, d in q[q["time"] >= FLOOR].groupby("time"):
+        d = d.copy()
+        d["pb_i"] = d["mcap"] / d["book"]
+        t300 = d.nlargest(PANEL_N, "mcap")
+        t = t300[np.isfinite(t300["pb_i"]) & (t300["pb_i"] > 0)].nlargest(TOP_N, "mcap")
+        if len(t) < MIN_NAMES:
+            continue
+        w = (t["mcap"] / t["mcap"].sum()).values
+        x = (t["mcap"] / t["np5"]).values
+        ok = np.isfinite(x) & (x > 0)
+        pe5 = _harm(_cap_weights(w[ok]), x[ok]) if ok.sum() > 30 else np.nan
+        both = t[np.isfinite(t["np5"]) & np.isfinite(t["np_ttm"])]
+        rows.append(dict(time=tm, pe_norm5=pe5, cov5=float(w[ok].sum()),
+                         eps_ratio5=(both["np_ttm"].sum() / both["np5"].sum()) if len(both) else np.nan))
+    b = pd.DataFrame(rows).sort_values("time").reset_index(drop=True)
+    b["p_pe_norm5"] = _roll_pct(b["pe_norm5"], NORM5_WIN, NORM5_MINP)
+    b["p_eps_ratio5"] = _roll_pct(b["eps_ratio5"], NORM5_WIN, NORM5_MINP)
+    return b
+
+
+_NORM5_NOW = {"t": 0.0, "val": None}
+
+
+def value_radar_norm5_now(update=True, ttl=900):
+    """dict {pe_norm5, p_pe_norm5, eps_ratio5, p_eps_ratio5, peak(bool), asof} hoặc None (fail-safe)."""
+    import time as _t
+    if _NORM5_NOW["val"] is not None and (_t.time() - _NORM5_NOW["t"]) < ttl:
+        return _NORM5_NOW["val"]
+    val = None
+    try:
+        p = update_norm5_panel() if update else pd.read_csv(NORM5_CACHE, parse_dates=["time"])
+        b = norm5_series(p).dropna(subset=["p_pe_norm5", "p_eps_ratio5"])
+        cur = b.iloc[-1]
+        val = dict(pe_norm5=float(cur["pe_norm5"]), p_pe_norm5=float(cur["p_pe_norm5"]),
+                   eps_ratio5=float(cur["eps_ratio5"]), p_eps_ratio5=float(cur["p_eps_ratio5"]),
+                   cov5=float(cur["cov5"]), peak=bool(cur["p_eps_ratio5"] >= PEAK_PCT),
+                   asof=str(pd.Timestamp(cur["time"]).date()))
+    except Exception as e:
+        print(f"[value_radar] norm5 skipped (fail-safe): {e}", file=sys.stderr)
+    _NORM5_NOW.update(t=_t.time(), val=val)
+    return val
+
+
+def build_value_radar_norm5_line(html=True, update=True):
+    """Dòng PHỤ P/E chuẩn hoá 5Y (+ cờ LỢI NHUẬN ĐỈNH). None khi lỗi. DISPLAY-ONLY."""
+    c = value_radar_norm5_now(update=update)
+    if not c:
+        return None
+    B = (lambda s: f"<b>{s}</b>") if html else (lambda s: s)
+    flag = f" · {B('⚠ LỢI NHUẬN ĐỈNH')}" if c["peak"] else ""
+    asof = f"[dữ liệu tới {c['asof']}]"
+    asof = f"<i>{asof}</i>" if html else asof
+    return (f"  ↳ P/E trên lợi nhuận chuẩn hoá 5Y {c['pe_norm5']:.2f} (p{c['p_pe_norm5']:.0f}, 10 năm)"
+            f" · EPS TTM/TB5Y {c['eps_ratio5']:.2f}× (p{c['p_eps_ratio5']:.0f}){flag}  {asof}")
 
 
 # --------------------------------------------------------------------------------- CLI
@@ -361,6 +508,8 @@ def _selfcheck():
 if __name__ == "__main__":
     if "--rebuild" in sys.argv:
         update_cache(rebuild=True, verbose=True)
+    if "--rebuild-norm5" in sys.argv:
+        update_norm5_panel(rebuild=True)
     if "--selfcheck" in sys.argv:
         sys.exit(0 if _selfcheck() else 1)
     c = value_radar_now()

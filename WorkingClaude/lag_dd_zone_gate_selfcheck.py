@@ -98,6 +98,107 @@ pm.LAG_DD_ZONE_GATE_ENABLED = False
 p, b = pm.filter_lag_dd_zone_orders(mk([("ZZZ", "LAG", "buy", 1)])); check("công tắc OFF ⇒ no-op", len(p.orders) == 1 and not b)
 pm.LAG_DD_ZONE_GATE_ENABLED = True
 
+print("== D1/D5: LAG_DD_REQUIRE_CONFIRMED (user 22/11) — sổ fixture riêng ==")
+check("module đang test là bản cạnh selfcheck (không phải canonical qua .pth)",
+      os.path.dirname(os.path.dirname(os.path.abspath(pm.__file__))) == os.path.abspath(CODE_ROOT), pm.__file__)
+check("hằng mặc định LAG_DD_REQUIRE_CONFIRMED is False (không commit bản bật)", pm.LAG_DD_REQUIRE_CONFIRMED is False)
+
+
+def EK(t, sk="__MISSING__", afm=None, center=10000):
+    e = E(t, center)
+    if sk != "__MISSING__":
+        e["skeptic_final"] = sk
+    if afm is not None:
+        e["audited_fy_missing"] = afm
+    return e
+
+
+LEDGER_D = {"entries": [EK("CNF", "CONFIRMED", False), EK("FXU", "FIXED_UNVERIFIED", False),
+                        EK("RFO", "REFUTED_OPEN", False), EK("NON", "NONE", False), EK("MIS"),
+                        EK("NUL", None, False), EK("AFM", "CONFIRMED", True), EK("AFN", "CONFIRMED"),
+                        EK("PXH", "FIXED_UNVERIFIED", True), EK("LCK", "FIXED_UNVERIFIED", True)]}
+
+
+def d_cases(mod, flag):
+    """→ list (tên, ok). Chạy trên module `mod` (pm thật hoặc mutant) với hằng = flag."""
+    fd = fake_deps(lock_bad=("LCK",))
+    mod._lag_dd_zone_deps = lambda: fd()[:2] + (LEDGER_D,) + fd()[3:]
+    mod.LAG_DD_REQUIRE_CONFIRMED = flag
+    res = []
+
+    def one(t, px=9000):
+        return mod.filter_lag_dd_zone_orders(mk([(t, "LAG", "buy", px)]))
+    if not flag:
+        for t in ("FXU", "RFO", "NON", "MIS", "AFM", "CNF"):
+            p, b = one(t)
+            res.append((f"hằng False ⇒ {t} vẫn QUA (hành vi cũ)", len(p.orders) == 1 and not b))
+        return res
+    p, b = one("CNF"); res.append(("hằng True ⇒ CONFIRMED + audited_fy_missing=False ⇒ QUA", len(p.orders) == 1 and not b))
+    p, b = one("AFN"); res.append(("hằng True ⇒ CONFIRMED + thiếu trường audited_fy_missing ⇒ QUA (chỉ `is True` mới chặn)", len(p.orders) == 1 and not b))
+    for t, lab in (("FXU", "'FIXED_UNVERIFIED'"), ("RFO", "'REFUTED_OPEN'"), ("NON", "'NONE'"),
+                   ("MIS", "<thiếu trường>"), ("NUL", "None")):
+        p, b = one(t)
+        ok = len(p.orders) == 0 and len(b) == 1 and f"skeptic_final={lab}" in b[0]["reason"] \
+            and "rev1" in b[0]["reason"] and "2026-11-09" in b[0]["reason"] and "D1" in b[0]["reason"]
+        res.append((f"hằng True ⇒ {t} bị CHẶN, lý do in nhãn thật {lab} + rev + dd_date", ok))
+    p, b = one("AFM")
+    res.append(("hằng True ⇒ CONFIRMED nhưng audited_fy_missing=True ⇒ CHẶN (D5), lý do có rev+dd_date",
+                len(p.orders) == 0 and len(b) == 1 and "audited_fy_missing=True" in b[0]["reason"]
+                and "D5" in b[0]["reason"] and "rev1" in b[0]["reason"] and "2026-11-09" in b[0]["reason"]))
+    p, b = one("PXH", 10500)
+    res.append(("hằng True ⇒ giá > tâm VẪN báo lý do cũ (điều kiện mới đặt SAU, không che)",
+                len(b) == 1 and "luật 09/11" in b[0]["reason"] and "skeptic_final" not in b[0]["reason"]))
+    p, b = one("LCK")
+    res.append(("hằng True ⇒ khoá md5 lệch VẪN báo lý do cũ", len(b) == 1 and "md5" in b[0]["reason"]
+                and "skeptic_final" not in b[0]["reason"]))
+    p, b = mod.filter_lag_dd_zone_orders(mk([("FXU", "LAG", "sell", 9000), ("FXU", "BAL", "buy", 9000)]))
+    res.append(("hằng True ⇒ SELL LAG / BUY book khác không bị cổng con chặn", len(p.orders) == 2 and not b))
+    p, b = one("CNF")
+    res.append(("hằng True ⇒ lệnh QUA vẫn bị ép trần = tâm", p.orders[0].hard_no_chase_ceiling_vnd == 10000.0))
+    return res
+
+
+for flag in (False, True):
+    for n, ok in d_cases(pm, flag):
+        check(n, ok)
+pm.LAG_DD_REQUIRE_CONFIRMED = False
+
+print("== mutation (mỗi mutant phải làm ≥1 ca D1/D5 FAIL) ==")
+import types
+_SRC = open(pm.__file__, encoding="utf-8").read()
+_C1 = 'elif LAG_DD_REQUIRE_CONFIRMED and e.get("skeptic_final") != "CONFIRMED":'
+_C2 = 'elif LAG_DD_REQUIRE_CONFIRMED and e.get("audited_fy_missing") is True:'
+_LM = "            if lm:\n"
+MUTANTS = {
+    "M1 bỏ điều kiện skeptic_final": (_C1, "elif False:"),
+    "M2 bỏ điều kiện audited_fy_missing": (_C2, "elif False:"),
+    "M3 thiếu trường ⇒ coi CONFIRMED (fail-open)": ('e.get("skeptic_final") != "CONFIRMED"',
+                                                     'e.get("skeptic_final", "CONFIRMED") != "CONFIRMED"'),
+    "M4 bỏ hằng (luôn bật)": (_C1, 'elif e.get("skeptic_final") != "CONFIRMED":'),
+    "M5 đặt điều kiện mới TRƯỚC điều kiện cũ": (_LM, '            if LAG_DD_REQUIRE_CONFIRMED and '
+                                                     'e.get("skeptic_final") != "CONFIRMED":\n'
+                                                     '                why = "skeptic_final sớm"\n'
+                                                     '            elif lm:\n'),
+    "M6 chỉ chặn đúng chuỗi FIXED_UNVERIFIED": ('e.get("skeptic_final") != "CONFIRMED"',
+                                                 'e.get("skeptic_final") == "FIXED_UNVERIFIED"'),
+    "M7 hằng mặc định True": ("LAG_DD_REQUIRE_CONFIRMED = False", "LAG_DD_REQUIRE_CONFIRMED = True"),
+}
+for name, (a, b_) in MUTANTS.items():
+    if _SRC.count(a) < 1:
+        check(f"{name}: tìm thấy điểm đột biến", False, a)
+        continue
+    msrc = _SRC.replace(a, b_, 1)
+    m = types.ModuleType("trading_bot._plan_mut")
+    m.__package__ = "trading_bot"
+    m.__file__ = pm.__file__
+    sys.modules[m.__name__] = m
+    exec(compile(msrc, pm.__file__ + "<mut>", "exec"), m.__dict__)
+    default_true = m.LAG_DD_REQUIRE_CONFIRMED is not False
+    fails = [n for flag in (False, True) for n, ok in d_cases(m, flag) if not ok]
+    killed = bool(fails) or default_true
+    check(f"{name}: KILLED" + (f" (vd: {fails[0][:60]})" if fails else " (hằng mặc định khác False)"), killed)
+    del sys.modules[m.__name__]
+
 print("== đường nạp THẬT (importlib, mike root tạm) ==")
 import json, shutil, tempfile
 real_root = next(r for r in ("/home/trido/thanhdt/WorkingClaude/mike",) if os.path.isfile(r + "/bin/dd_price_zone_watch.py"))
