@@ -1,0 +1,29 @@
+{
+ "ticker": "SIP",
+ "job": "Taylor_20261108_180132",
+ "asof_price": "2026-11-06",
+ "price_source": "px_sip_r3_20261106.csv = BQ tav2_bq.ticker (px_sip_r3.sql); Price đóng cửa 06/11",
+ "r_rule": "r = 13,5% + 1,0 × (lãi huy động 12T hiệu dụng ngày 2026-11-06 − neo 2026-11-03), deposit_rate_vn.effective_deposit_rate",
+ "ronic": {"value": "Ke", "basis": "moat NARROW không bền (ADDENDUM_5F) ⇒ RONIC = Ke theo quy ước 08/11 (tiền lệ DDV#3, HPG#3); ROE5Y 29,7% phồng bởi ~15 nghìn tỷ tiền thuê nhận trước (TM21 15.077,2) — đính chính #1 chấp nhận"},
+ "land_weights": {"tot": 0.25, "co_so": 0.50, "xau": 0.25, "basis": "đối xứng: nhánh xấu 30 năm ≈31 ha/năm đã chính là tốc độ 2025 (28,6 ha, AR25) ⇒ nghiêng 20/50/30 đếm hai lần; dữ kiện chiều lên DT chưa thực hiện +1.701,8 9T26 (TM21) — đính chính #2 chấp nhận"},
+ "land_scenarios": {"tot": [18.0, 15], "co_so": [12.0, 22], "xau": [6.0, 30], "basis": "giữ r2 (tỷ/ha ròng, số năm bán hết 937,1 ha)"},
+ "recover": {"value": 1.0, "basis": "luật NPV0: chi phí đã chi cho quỹ đất thu hồi theo giá vốn; 60% (Bobby 'đền bù tăng', [UL]) đếm đôi với nhánh xấu 6 tỷ/ha đã gồm đền bù tăng, không có dòng dữ liệu ⇒ ra độ nhạy — đính chính #3 chấp nhận"},
+ "book_assets_added_ty": {"gop_von_khac_net": 305.0, "phai_thu_thanh_ly_BCC": 74.3, "uy_thac_MB_Capital": 17.5,
+   "basis": "notes_read.md TM4c (321,2 − DP 16,2 = 305,0: CSM 115,7−16,2; Thế Hệ Mới 201,0; Địa ốc 7 4,5) + TM7 (74,3; 17,5) — tài sản sổ sách, luật 20 theo sổ, không NCI (nắm ở mẹ: BCTC riêng góp vốn khác 688,0 ≥ 305) — đính chính #4 chấp nhận; số từ ảnh BCTC, PDF không có lớp text (pymupdf 423 ký tự/49 trang) ⇒ chưa kiểm bằng text"},
+ "advance_insiders_ty": {"value": 643.7, "in_base": true, "treatment": "chi phí đất theo giá vốn, thu hồi đều theo số năm bán hết như spent_land (×(1−NCI LN))",
+   "basis": "TM7 'tạm ứng nhân viên để tìm hiểu và mua đất' 643,7 (TM40 635,6 — lệch phân loại/thời điểm; dùng số dư BCĐ/TM7). r2 KHÔNG có khoản này trong mô hình (không nằm trong spent_land 4.457,3) ⇒ bản song song r2 'mất trọn' trừ tài sản không tồn tại (đính chính #6b đúng). Luật user: base = sổ sách; chiết khấu quản trị [UL] ⇒ độ nhạy base 0% ⇒ đưa theo sổ vào base; mất trọn = bản song song. ĐÂY LÀ ĐIỂM TAYLOR THÊM, skeptic không đề xuất"},
+ "ktpl_on_deferred_rev": {"in_base": true, "formula": "PV đều 35 năm của 15.077,2×0,69×(1−20%)×(1−NCI LN)×ktpl", "basis": "KTPL trích từ LNST; mô hình đã trích KTPL ở mảng vận hành và đất nhưng không ở LN phân bổ từ DT chưa thực hiện — đính chính #5 chấp nhận; khác skeptic: nhân thêm (1−NCI LN) cho nhất quán với nhánh đất"},
+ "axes_kept_from_r2": ["perha_mult x0.75/1/1.25 đều", "gcore 2/3/4% (vô hiệu khi RONIC=Ke)", "credit 0/10/30% (0,60/0,25/0,15)", "nci 8,5/20/31% (0,25/0,5/0,25)", "taxdef x0.8/1/1.2", "ktpl 7,25/9,04% đều"],
+ "sensitivities_not_in_center": {
+   "vat_minus_dtl_ty": {"value": 766.8, "basis": "thuế GTGT khấu trừ 890,5 − thuế TNDN hoãn lại phải trả 123,7 (BCĐ, notes_read.md); chưa đọc thuyết minh (khả năng hoàn/khấu trừ thực, DTL có trùng taxdef không) ⇒ độ nhạy"},
+   "ha_leased_9T26": {"per_ha": 50, "basis": "937,1 ha là số 31/12/2025 (AR25); đất cho thuê 9T26 đã vào tiền/DT chưa thực hiện ⇒ đếm đôi; số ha 9T26 chưa có (G12) ⇒ độ nhạy mỗi 50 ha; thiên lệch đã biết là XUỐNG"},
+   "recover_60": {"basis": "trục r2 p0,25 60% ⇒ độ nhạy"},
+   "gpm_peak_normalisation": {"factor": 0.9457, "basis": "GPM TB 2019–25 14,63% / TTM 15,47% (skeptic #7) áp lên lợi nhuận gộp vận hành; số GPM chưa tự kiểm"},
+   "nci_bs_9_9": {"value": 0.099, "basis": "NCI 568,4 / VCSH 5.744,4 BCĐ"},
+   "land_weights_20_50_30": {"basis": "trọng số r2"},
+   "ronic_roe5y": {"basis": "quy ước r2 (moat bền)"}
+ },
+ "liquidity": "ddr2.liquidity (đăng ký trước: nửa spread CS 120 phiên + σ√(Q/ADV120)) trên px_sip_r3_20261106.csv; cỡ tham chiếu 5 tỷ + sleeve 10/20/40 tr",
+ "rule4": "giá ≤ 0,85 × tâm (theo từng cỡ)",
+ "label": "DƯỚI vùng (<P10) / TRONG / TRÊN (>P90), P mức kết cục _shared/wpct.py"
+}

@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/TCH/REPORT_recheck_TCH.md",
+  "report_md5": "80f8cd5e405eeaa70565114cd71031cf",
+  "brief_md5": "23e6c38e2ff82c0124da766d40ab10e8",
+  "model": "opus",
+  "cost_usd": 0.8545566,
+  "started_at_ict": "2026-11-24T17:03:35+07:00",
+  "summary": "The recheck's mechanics are correct: I reproduced every r and CK-holding number and verified share count, parent equity and zero debt against the filing notes. But the recheck only changed r and the holding discount on r3b's unchanged model, and re-read no filing. Two of r3b's load-bearing weaknesses remain open. First, base gross margin 51,9% (unreviewed 6T FY26) against 42,7% in two audited years, worth −14% to the centre. Second, an absent, unquantified NƠXH / supplementary land-use-fee obligation that the company demonstrably has exposure to. Smaller too-high items: welfare fund ~−1,8%, unverified 678 bn deposit up to −4,2%, CK at the optimistic end (−9,9% at +20%). Too-low items (r above the Ke band, completion-timing conservatism, no price escalation, new land at book) are real but mostly unquantified and small where quantified. The centre 15.864 is a reproducible output of the model, but it is not yet a confirmed fair value.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/TCH/skeptic/r1_raw.md"
+}

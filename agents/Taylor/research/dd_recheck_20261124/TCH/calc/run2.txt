@@ -1,0 +1,117 @@
+{
+ "base": {
+  "r": 0.135,
+  "hold": 0.0,
+  "center_pre": 15964,
+  "center_post": 15864,
+  "p10_post": 14563,
+  "p50_post": 15795,
+  "p90_post": 17325,
+  "g_audit_427_center_post": 13642
+ },
+ "r0.123": {
+  "r": 0.123,
+  "hold": 0.0,
+  "center_pre": 16373,
+  "center_post": 16270,
+  "p10_post": 14894,
+  "p50_post": 16199,
+  "p90_post": 17752,
+  "g_audit_427_center_post": 13979,
+  "d_center_post": 406,
+  "d_pct": 2.56
+ },
+ "r0.125": {
+  "r": 0.125,
+  "hold": 0.0,
+  "center_pre": 16304,
+  "center_post": 16201,
+  "p10_post": 14833,
+  "p50_post": 16130,
+  "p90_post": 17675,
+  "g_audit_427_center_post": 13922,
+  "d_center_post": 337,
+  "d_pct": 2.12
+ },
+ "r0.130": {
+  "r": 0.13,
+  "hold": 0.0,
+  "center_pre": 16132,
+  "center_post": 16031,
+  "p10_post": 14707,
+  "p50_post": 15960,
+  "p90_post": 17515,
+  "g_audit_427_center_post": 13781,
+  "d_center_post": 167,
+  "d_pct": 1.05
+ },
+ "r0.134": {
+  "r": 0.134,
+  "hold": 0.0,
+  "center_pre": 15998,
+  "center_post": 15897,
+  "p10_post": 14591,
+  "p50_post": 15828,
+  "p90_post": 17362,
+  "g_audit_427_center_post": 13670,
+  "d_center_post": 33,
+  "d_pct": 0.21
+ },
+ "r0.140": {
+  "r": 0.14,
+  "hold": 0.0,
+  "center_pre": 15800,
+  "center_post": 15700,
+  "p10_post": 14421,
+  "p50_post": 15632,
+  "p90_post": 17138,
+  "g_audit_427_center_post": 13507,
+  "d_center_post": -164,
+  "d_pct": -1.03
+ },
+ "r0.145": {
+  "r": 0.145,
+  "hold": 0.0,
+  "center_pre": 15639,
+  "center_post": 15540,
+  "p10_post": 14283,
+  "p50_post": 15473,
+  "p90_post": 16955,
+  "g_audit_427_center_post": 13375,
+  "d_center_post": -324,
+  "d_pct": -2.04
+ },
+ "hold0.20": {
+  "r": 0.135,
+  "hold": 0.2,
+  "center_pre": 14385,
+  "center_post": 14294,
+  "p10_post": 13155,
+  "p50_post": 14234,
+  "p90_post": 15587,
+  "g_audit_427_center_post": 12336,
+  "d_pct": -9.9
+ },
+ "hold0.27": {
+  "r": 0.135,
+  "hold": 0.27,
+  "center_pre": 13832,
+  "center_post": 13745,
+  "p10_post": 12662,
+  "p50_post": 13688,
+  "p90_post": 14949,
+  "g_audit_427_center_post": 11879,
+  "d_pct": -13.36
+ },
+ "r0.123_hold0.20": {
+  "r": 0.123,
+  "hold": 0.2,
+  "center_pre": 14734,
+  "center_post": 14641,
+  "p10_post": 13456,
+  "p50_post": 14579,
+  "p90_post": 15946,
+  "g_audit_427_center_post": 12624,
+  "d_pct": -7.71
+ }
+}

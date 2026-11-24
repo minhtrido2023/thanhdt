@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md",
+  "report_md5": "53c3d244df093877f61e900fc61555c9",
+  "brief_md5": "0df1cf5012dd3d7f627bcf75c65833bd",
+  "model": "opus",
+  "cost_usd": 1.212766,
+  "started_at_ict": "2026-11-24T17:04:50+07:00",
+  "summary": "The recheck does what it says: it re-runs the locked r3 model and changes only r, the CONTROL run reproduces r3 byte-for-byte, and the sensitivity table is monotonic with a plausible slope (centre 59,4k–63,7k for r 14,5%–12,3%). I independently re-checked the load-bearing balance sheet against BQ Q3/26 (cash, debt, share count, BVPS) and it matches; the unchecked 322,44 bn deposit fits the BQ current-asset structure. Two-sided: on the low side, base r 13,5% sits above the Ke band (+0,3…+4%) and the MVC leg still carries the unpatched cycle-cap bug; the larger upside items (rival license expiry, ADMIN perm05, CNBP rent) are rightly kept out of base for lack of evidence. On the high side, the inherited r3 model has two material gaps it cannot quantify: future welfare/bonus-fund appropriations (potentially −3,6…−7,2%) and an unsourced 'capex ≈ D&A' assumption despite recurring capex of 23–54 bn/year. Under the attack-8 rule this is INCONCLUSIVE, not CONFIRMED, until those two items are sourced.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1_raw.md"
+}

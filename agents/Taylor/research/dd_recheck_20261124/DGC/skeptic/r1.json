@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/DGC/REPORT_recheck_DGC.md",
+  "report_md5": "c6d0aeab03acc2eb8b5b65707ffeaa84",
+  "brief_md5": "932af91abd7a15da47ad1e00b19b3eb9",
+  "model": "opus",
+  "cost_usd": 1.0632996,
+  "started_at_ict": "2026-11-24T17:06:59+07:00",
+  "summary": "Bản rà lại đúng như mô tả: chỉ đổi r trên mô hình r3b đã khoá. Tôi tự chạy lại ra đúng md5, và các con số bảng cân đối then chốt (tiền, vay, số cổ phiếu, tồn kho) khớp BQ. Bảng độ nhạy r nội tại nhất quán, và tâm ít nhạy với r là do ~54% giá trị nằm ở tiền ròng. Tuy vậy tâm 41.849 còn dựa trên hai điểm chưa có căn cứ đầy đủ, ngược chiều nhau. Chiều lên: nhánh mở lại khai trường không được ghi biên lợi nhuận nào sau 2028 (chắc chắn mở lại chỉ +1,6%), trong khi biến thể vĩnh viễn cho +14%; thời hạn giấy phép và trữ lượng mỏ, dữ kiện quyết định điểm đúng, đều vắng. Chiều xuống: ngoại trừ kiểm toán 950,9 tỷ tồn kho chưa được mô hình hoá (≤−5,8%), capex môi trường bắt buộc sau vụ án chưa có số, và HTM 9.531 chưa đối chiếu PDF gốc. Không có hạng mục nào định lượng chắc chắn >5% để REFUTED, nhưng cũng chưa đủ căn cứ để CONFIRMED.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md"
+}

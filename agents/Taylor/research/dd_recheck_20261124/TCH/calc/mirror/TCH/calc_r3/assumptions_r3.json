@@ -1,0 +1,15 @@
+{"ticker": "TCH", "round": 3, "job": "Taylor_20261108_180134", "locked_before_price": true,
+ "assumptions": [
+  {"key": "hold_base", "value": 0.0, "basis": "dinh chinh 1 (TOP5D TCH#1) + quy tac chung: CK holding do lon [UL] => base 0%; du lieu chi cho CAU TRUC (2 tang niem yet, CRV free float ~3%) => song song {0;10;20;30} va r1 {10;20;30}", "source": "TOP5D_CORRECTIONS_20261108.md TCH#1; dd_TCH_20261031/GAPS.md"},
+  {"key": "g_obs", "value": 0.519, "basis": "bien gop ban BDS 6T FY26 51,9% (6T FY25 51,0%) — DU LIEU quan sat, chu yeu NC-II", "source": "dd_TCH_20261031/calc/notes_read.md TM25 (BCTC HN 6T FY26)"},
+  {"key": "g_axis", "value": [-0.05, 0.0, 0.05], "w": [0.25, 0.5, 0.25], "basis": "doi xung +-5pp quanh g_obs, ap DOC LAP cho backlog (NC-II/GR/H2 da ky) va dat cu chua ban; +-5pp ~ gia ban +-10% (g'=1-(1-g)/(1+x): x=+10% -> 56,3%, -10% -> 46,6%) — do lon [UL] quy uoc doi xung, khong co du lieu gia ban", "source": "dinh chinh 2,3"},
+  {"key": "m_of_g", "value": "m = 0.8*(g - 0.10)", "basis": "bien rong sau thue tren DT truoc VAT: tru CPBH+QLDN ~10% DT, thue TNDN 20% (r2: m 33,5% <=> g 51,9%)", "source": "model_r2.py:15; SKEPTIC_20261031.md B3"},
+  {"key": "s_of_g", "value": "s = 0.8*(g - 0.10)/(1 - g)", "basis": "thang du sau thue tren GIA VON HTK (cung cong thuc quy doi skeptic B3); ap len chi phi DA phat sinh => than trong san (chi phi hoan thanh tuong lai cung sinh bien)", "source": "SKEPTIC_20261031.md B3; TOP5D TCH#2"},
+  {"key": "r_axis", "value": [-0.01, 0.0, 0.01], "w": [0.25, 0.5, 0.25], "basis": "r = 13,5% + 1,0 x (lai huy dong 12T hieu dung - 7,40%); dep 06/11 = 7,40% (cctg_12m 2026-11-02) => r 13,50%; truc +-100bp giu nhu r2", "source": "deposit_rate_vn.effective_deposit_rate('2026-11-06')"},
+  {"key": "share_khac", "value": 0.80, "basis": "ty le so huu H1+khac [UL] (<20 d/cp); do nhay 0,5/1,0", "source": "TOP5D TCH#5; model_r2.py"},
+  {"key": "new_land_npv", "value": 0.0, "basis": "quy dat moi 150 To Hieu 1.677,5 + I.14 1.328,8 = gia so (luat du an moi 03/11 NPV0); song song +-10%", "source": "notes_read.md TM17"},
+  {"key": "gov_base", "value": 0.0, "basis": "CK quan tri = WARNING (luat 2026-09-27); song song 5/10/15%", "source": "quy tac chung"},
+  {"key": "sgtl_loss_base", "value": 0.0, "basis": "tien gui 678,3 ty NH 'Sai Gon Tai Loc' — danh tinh chua xac minh; khong co du lieu han che rut => base sach so; stress mat 100% song song", "source": "notes_read.md TM4; TOP5D TCH#6"},
+  {"key": "pv_years", "value": {"NC-II": 1.0, "Green River": 1.5, "H2": 2.0, "H1+khac": 1.0, "old_land": 4.0}, "basis": "giu nhu r2 (tien do ban giao)", "source": "model_r2.py"},
+  {"key": "ck_ref_size", "value": "5 ty, ADV250 (+ADV60), luat can bac hai; sleeve 10/20/40 tr", "basis": "STANDARD_r2 dieu 6", "source": "STANDARD_r2.md"}
+ ]}

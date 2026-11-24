@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/SIP/REPORT_recheck_SIP.md",
+  "report_md5": "d901852e986af1441d66c528e271ade2",
+  "brief_md5": "725b7b7d22e539b592f93a4e646b68d0",
+  "model": "opus",
+  "cost_usd": 0.8920454000000001,
+  "started_at_ict": "2026-11-24T17:09:20+07:00",
+  "summary": "The SIP recheck reproduces exactly (identical md5; the r 12.3–14.5% sensitivity is consistent when recomputed by hand), so the narrow claim 'centre unchanged under the new discount-rate rules' is right. As a DD, however, the centre is not well enough founded to be called confirmed. Too-high side: land value at 12 bn/ha rests only on an estimate (~36% of centre), land rent to the State (G16) is not in the model (could be ~−5%), double-counted 9M26 leased area is left in the centre although the bias is known, and 6,016 bn of credit has unidentified borrowers. Too-low side: deductible VAT (+5.7%) is left out while the insider advance is in the base under the same 'book value' rule, balance-sheet NCI 9.9% vs 20% in the model (+3.2%), and RONIC=Ke ignores service income from new tenants. Net quantified leaning is about +4.8% too low, but the unquantified G16 points the other way; hence INCONCLUSIVE, naming G16, the 12 bn/ha source and VAT as the items to settle. The market price in the report was ignored.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/SIP/skeptic/r1_raw.md"
+}

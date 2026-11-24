@@ -1,0 +1,2 @@
+ticker,dd_date,rev,skeptic_final,asof,center,price_asof,pc_asof,label,label_v1,reasons,demote_k,demote_neff,pct_fade,pct_hold,terc_fade,terc_hold,n_fade,n_hold,n_eff_hold,n_eff_fade,k_fade,k_hold,hist_med_fade,hist_med_hold,hist_p25_fade,hist_p75_fade,hist_p25_hold,hist_p75_hold,ROE5Y,roe_ttm,roe_ttm_over_5y,warn
+SIP,2026-11-01,3,CONFIRMED,2026-11-20,54466,43000,0.789483,"KHÔNG CHẮC (N hiệu dụng thấp, 1.88)",RẺ,"N hiệu dụng thấp, 1.88",0,1,2.24719,13.4831,RẺ,RẺ,89,89,1.87535,3.20747,1.41053,0.766018,1.29342,1.03719,1.03722,1.73838,0.911379,1.99816,0.296548,0.243541,0.821254,
