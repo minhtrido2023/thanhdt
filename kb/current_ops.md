@@ -40,6 +40,8 @@
 
 ## CAPIT đòn bẩy TẮT từ 2026-10-13 (`capit_margin_lever.enabled=false`, user duyệt): KHÔNG plan nào sizing ×1,3, KHÔNG cấp margin; chỉ user bật lại: `kb/projects/capit-margin-hold-20261013.md`
 
+## Dải chiết khấu holding HHS = 0…+20% (user đồng ý chốt gọn 24/11; thu về 2 mốc: Mike đề xuất) — DISPLAY-ONLY, tin THẤP; KHÔNG rev8/wire/email: `kb/projects/ck-hhs-reference-range-20261124.md`
+
 ## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13: tin đỏ Trading Daily ⇒ báo user, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; mốc 11-09 đóng: user giữ cảnh báo (13/11): `kb/projects/nav-loss-brake-monitor-20261013.md`
 
 ## Cổng giá trong phiên → hồ sơ DD khủng hoảng 7 ngày (user 2026-11-01: KHÔNG tự bán)
@@ -75,7 +77,7 @@
 - **Ex-date price-frame — KL và GIÁ phải CÙNG hệ quy chiếu** (`bin/exdate_frame.py` + wire vào `compute_active_nav.py` / `park_holdings.py` / `compute_park_trim.py` / `compute_jit_unpark.py`) — LIVE từ **2026-09-24**, commit `508bb607`, **3 vòng arch-review**. Sự cố gốc + nhánh định giá: `kb/projects/corp-action-nav-chain-20260922.md`.
   · không dựng được giá cùng hệ, hoặc KL đổi chưa giải thích được ⇒ **rc=6, KHÔNG ghi file** (mẫu số sizing: số sai tệ hơn số cũ)
   · `park_holdings` phát `frame_blocked_tickers` ⇒ `compute_park_trim`/`compute_jit_unpark` trả **BLOCKED_FRAME** thay vì trim trên mẫu số phồng
-  ⚠️ **CÙNG LỚP LỖI CÒN 4 CALL-SITE CHƯA VÁ** (xem `kb/memory/Mike.md`): `dividend_adjusted_return.py:473-478` (chạm SỐ CÔNG BỐ nhà đầu tư §21 — ưu tiên cao nhất), `discretionary_margin_gate.py:335` (sleeve margin tiền thật, latent), `report_return_gate.py` (lỗ hổng phủ im lặng), `discretionary_accumulation_inject.py:124`, + `due_diligence.py:173-202 adv_vnd()` (chiều an toàn). arch-reviewer nói rõ **KHÔNG khẳng định đã quét hết**.
+  ✅ 4 call-site cùng lớp lỗi ĐÃ LIVE, audit ĐÓNG; cảnh báo cũ 'CHƯA VÁ' nguyên văn: `kb/projects/corp-action-nav-chain-20260922.md`.
   Selfcheck 38/0 + 64/0 + 8/0 qua 3 TZ. rc=5 là mã MỚI: `eod_trading_report.sh` không ghi marker, `nav_sync_retry.sh` không retry 2h, `nav_snapshot_daily.sh` escalate ngay. Runbook rc=5 ĐÃ LIVE ở `kb/ops_runbook.md` (mục 5, ~dòng 142).
 
 - **KL hưởng quyền neo bằng BẰNG CHỨNG** (`dividend_adjusted_return.py`) LIVE 2026-09-24, fail-closed khi thiếu bằng chứng → `kb/projects/corp-action-nav-chain-20260922.md`.

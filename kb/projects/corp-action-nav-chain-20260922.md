@@ -93,3 +93,8 @@ trong trạng thái đó sẽ đếm 2 lần đúng 80 triệu (+8,15% NAV, lọ
 ## Chuyển nguyên văn từ `kb/current_ops.md` (2026-11-19, gate kb-hot-size) — 4 call-site còn lại
 - **4 call-site còn lại của lớp lỗi corp-action — audit xong 2026-09-24 (dispatch `Taylor_20260924_064510`), arch-review theo TỪNG VIỆC — CẢ 4 ĐÃ LIVE, ĐÓNG HẲN CHUỖI AUDIT NÀY:**
   · Chi tiết 4 việc (đều APPROVED+LIVE): `kb/projects/corp-action-nav-chain-20260922.md`.
+
+
+## Chuyển nguyên văn từ kb/current_ops.md (24/11/2026, kb-hot-size-gate) — dòng 'CÒN 4 CALL-SITE CHƯA VÁ' đã LỖI THỜI (4 call-site ĐÃ LIVE, chuỗi audit ĐÓNG 2026-09-24)
+
+  ⚠️ **CÙNG LỚP LỖI CÒN 4 CALL-SITE CHƯA VÁ** (xem `kb/memory/Mike.md`): `dividend_adjusted_return.py:473-478` (chạm SỐ CÔNG BỐ nhà đầu tư §21 — ưu tiên cao nhất), `discretionary_margin_gate.py:335` (sleeve margin tiền thật, latent), `report_return_gate.py` (lỗ hổng phủ im lặng), `discretionary_accumulation_inject.py:124`, + `due_diligence.py:173-202 adv_vnd()` (chiều an toàn). arch-reviewer nói rõ **KHÔNG khẳng định đã quét hết**.
