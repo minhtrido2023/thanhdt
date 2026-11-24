@@ -380,13 +380,14 @@ def market_pass_block(kind, period_end):
     return j
 
 
-def regime_lines():
-    """(trạng thái DT gate, Value Radar) dạng chuỗi — §6b, không tự tính phân vị."""
+def regime_lines(with_norm5=False):
+    """(trạng thái DT gate, Value Radar) dạng chuỗi — §6b, không tự tính phân vị.
+    with_norm5=True (CHỈ ZaloPay, nội bộ): Value Radar kèm dòng phụ P/E chuẩn hoá 5Y + cờ LỢI NHUẬN ĐỈNH."""
     try:
         from dna_report import build_dt_gate_line, build_value_radar_line
         import contextlib
         import io
         with contextlib.redirect_stderr(io.StringIO()):
-            return build_dt_gate_line(html=False), build_value_radar_line(html=False)
+            return build_dt_gate_line(html=False), build_value_radar_line(html=False, with_norm5=with_norm5)
     except Exception as exc:  # noqa: BLE001
         raise Unavailable(f"dna_report: {type(exc).__name__}: {exc}")

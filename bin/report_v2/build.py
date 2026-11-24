@@ -213,7 +213,8 @@ def market_rows(cx, kind, period_end):
 def regime_rows(cx):
     """2 dòng định giá + trạng thái (§6b), tên công khai; lỗi ⇒ "không có" kèm lý do."""
     try:
-        dtl, vr = S.regime_lines()
+        # norm5 (P/E chuẩn hoá 5Y + cờ LỢI NHUẬN ĐỈNH): CHỈ ZaloPay (nội bộ); SpaceX = NĐT ngoài ⇒ không đổi byte nào
+        dtl, vr = S.regime_lines(with_norm5=(cx.acct == "ZaloPay"))
     except S.Unavailable as exc:
         return [["Mô hình trạng thái thị trường", "không có"], ["Định giá thị trường (tham khảo)", "không có"]], str(exc)
     state = {"CRISIS": "Khủng hoảng", "BEAR": "Giảm", "NEUTRAL": "Trung tính", "BULL": "Tăng", "EX-BULL": "Tăng mạnh",
@@ -228,7 +229,15 @@ def regime_rows(cx):
                  f" · P/B {vn(float(m3.group(3)), 2)} — tham khảo, 0/17 qua kiểm định")
     else:
         v_txt = "không có"
-    return [["Mô hình trạng thái thị trường", st_txt], ["Định giá thị trường (tham khảo)", v_txt]], None
+    rows = [["Mô hình trạng thái thị trường", st_txt], ["Định giá thị trường (tham khảo)", v_txt]]
+    # Dòng phụ norm5 — regex riêng, lỗi/thiếu ⇒ chỉ mất hàng này (hàng 1-2 không đổi)
+    m4 = re.search(r"P/E trên lợi nhuận chuẩn hoá 5Y ([\d.]+) \(p(\d+)[^)]*\) · EPS TTM/TB5Y ([\d.]+)×", vr or "")
+    if m4:
+        peak = " · ⚠ lợi nhuận đang ở mức đỉnh so với trung bình 5 năm" if "LỢI NHUẬN ĐỈNH" in (vr or "") else ""
+        rows.append(["P/E theo lợi nhuận chuẩn hoá 5 năm (chỉ hiển thị)",
+                     f"{vn(float(m4.group(1)), 2)} (phân vị {m4.group(2)}) · EPS 12T/TB 5 năm {vn(float(m4.group(3)), 2)}×{peak}"
+                     " — thông tin bổ sung, không phải tín hiệu mua/bán"])
+    return rows, None
 
 
 def positions_block(cx, acct, d, nav):
