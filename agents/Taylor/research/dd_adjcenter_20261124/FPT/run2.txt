@@ -1,0 +1,20 @@
+{"center_adj": 55668, "range_low": 52604, "range_high": 57605, "center_adj_ex_div": 54668, "range_low_ex_div": 51604, "range_high_ex_div": 56605, "sum_p_m_pct": -2.869}
+A 0.9 -1.367 [-1.367, -1.367] -1.23 Tồn quỹ KTPL 1.477 tỷ chưa trừ khỏi NC
+A 0.9 0.343 [0.343, 0.343] 0.309 XDCB 'Khác' 371 tỷ chưa cộng (NPV 0 = giá sổ)
+C+ 0.5 -2.866 [-5.732, -2.866] -1.433 Trích quỹ KTPL hằng năm từ LNST (C+ — cận bảo thủ)
+B 0.5 -2.5 [-3.0, -0.47] -1.25 Pha loãng ESOP (108 tỷ mệnh giá 9T26 ≈0,57%/năm)
+B 0.5 -1.85 [-1.85, -1.85] -0.925 conv CƠ SỞ 0,75 → 0,60
+B 0.5 3.32 [3.32, 3.32] 1.66 g CƠ SỞ 9% → 12% (LFL 9T26 +13,7%)
+-1000 -1.74 GDKHQ cổ tức tiền 1.000 đ (chốt quyền 30/11/2026)
+-700 -1.22 NQ/tài liệu ĐHĐCĐ 2027 hoặc BCTC năm 2026 có dòng trích KTPL: tỷ lệ thật
+-530 -0.93 Thuyết minh cam kết vốn DC/AI/giáo dục (BCTC năm 2026)
+-159 -0.28 Q4/2026 (kỳ mới) conv ≤0,60
+159 0.28 Q4/2026 conv ≥0,75
+285 0.5 Q4/2026 LFL LNST ≥12% (kỳ mới) + KH 2027 ĐHĐCĐ ≥12%
+-285 -0.5 Q4/2026 LFL LNST <9%
+-573 -1.0 NQ ĐHĐCĐ 2027: có ESOP cùng cỡ
+716 1.25 NQ ĐHĐCĐ 2027: KHÔNG có ESOP
+-696 -1.21 BCTC kiểm toán 2026: lãi LK Q4/25 (ví dụ 740 tỷ)
+-1406 -2.45 Lãi huy động 12T hiệu dụng ±50bp (luật V1, β=1)
+None None Số dư quỹ KTPL mới mỗi BCTC quý
+0 0 Pháp lý FTEL

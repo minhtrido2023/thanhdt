@@ -1,0 +1,345 @@
+{
+ "ticker": "VGS",
+ "dd_date": "2026-11-10",
+ "rev": 3,
+ "asof": "2026-11-24",
+ "job": "Taylor_20261124_110049",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13"
+ },
+ "blind_to_price": true,
+ "center_base": 26526,
+ "center_base_source": "kb/dd_price_zones.json VGS rev3 center (sau CK ≤1 tỷ); model_r2 trước CK 26.778",
+ "model_control_pre_ck": 26778.3,
+ "ck_factor": 0.99058,
+ "items": [
+  {
+   "key": "ktpl_stock",
+   "name": "Tồn quỹ KTPL 36,1 tỷ chưa trừ khỏi nợ ròng",
+   "dir": "down",
+   "evidence_tier": "A",
+   "ov": {
+    "eq_add": -36.1053
+   },
+   "rng": null,
+   "source": "src/BCTC-Q3-HN.pdf tr.2 (khôi phục từ git 30ca17444^, md5 e30e74ce; ảnh /tmp/vgs_src/p2.png) mã 323",
+   "note": "nợ phải trả; model_r2 nợ ròng = tiền + HTM − vay, không trừ quỹ",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": -2.192,
+   "mag_range_pct": [
+    -2.192,
+    -2.192
+   ],
+   "counted_in_center": true,
+   "contrib_pct_linear": -1.972
+  },
+  {
+   "key": "vinaconex_adv",
+   "name": "Ứng trước Vinaconex 38,02 tỷ thiếu trong vốn ròng Legend City",
+   "dir": "up",
+   "evidence_tier": "A",
+   "ov": {
+    "lgc_add": 38.02
+   },
+   "rng": null,
+   "source": "agents/Taylor/research/dd_VGS_20261110/skeptic/r2_raw.md:19,49",
+   "note": "chi phí dự án đã trả ⇒ luật NPV=0 theo giá gốc; chịu cùng hệ số LGC 1,0/0,7",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": 2.1,
+   "mag_range_pct": [
+    2.1,
+    2.1
+   ],
+   "counted_in_center": true,
+   "contrib_pct_linear": 1.89
+  },
+  {
+   "key": "capex_maint",
+   "name": "Capex duy trì > khấu hao (capex ngoài LGC 9T26 33,7 vs KH 9,1 tỷ)",
+   "dir": "down",
+   "evidence_tier": "B",
+   "ov": {
+    "core_np_delta": -26.2293
+   },
+   "rng": [
+    {
+     "core_np_delta": -13.1147
+    },
+    {
+     "core_np_delta": -32.7867
+    }
+   ],
+   "source": "agents/Taylor/research/dd_VGS_20261110/skeptic/r2_raw.md:15,40",
+   "note": "m điểm: toàn bộ khoảng chênh 32.8 tỷ/năm là duy trì, sau lá chắn thuế 20% (26.2); khoảng: ½ khoảng chênh … không lá chắn. 1 kỳ (9T26) ⇒ B1",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -11.793,
+   "mag_range_pct": [
+    -14.741,
+    -5.897
+   ],
+   "counted_in_center": true,
+   "contrib_pct_linear": -5.897
+  },
+  {
+   "key": "ktpl_flow",
+   "name": "Trích KTPL hằng năm từ LN lõi (C+ — cận bảo thủ)",
+   "dir": "down",
+   "evidence_tier": "C+",
+   "ov": {
+    "core_np_delta": -0.744
+   },
+   "rng": [
+    {
+     "core_np_delta": -0.744
+    },
+    {
+     "core_np_delta": -9.1804
+    }
+   ],
+   "source": "src/BCTC-Q3-HN.pdf tr.2 (khôi phục từ git 30ca17444^, md5 e30e74ce; ảnh /tmp/vgs_src/p2.png) mã 323, 420a/420b; agents/Taylor/research/dd_VGS_20261110/skeptic/r2_raw.md:40",
+   "note": "cận bảo thủ = tốc độ chi quỹ 9T26 năm hoá 0.74 tỷ; cận trên = 9.18 tỷ phân phối từ LN 2025 (4,2% LNST). 1 kỳ ⇒ B1",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -0.335,
+   "mag_range_pct": [
+    -4.128,
+    -0.335
+   ],
+   "counted_in_center": true,
+   "contrib_pct_linear": -0.167
+  },
+  {
+   "key": "sga",
+   "name": "SG&A base 1,5% → TTM 1,625%",
+   "dir": "down",
+   "evidence_tier": "B",
+   "ov": {
+    "sga": 0.0163
+   },
+   "rng": null,
+   "source": "agents/Taylor/research/dd_recheck_20261124/VGS/skeptic/r1_raw.md:15; assumptions core_scenarios._basis",
+   "note": "1 kỳ (TTM, CPBH 9T +59%); ngược có số: FY25 1,28%",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": -3.417,
+   "mag_range_pct": [
+    -3.417,
+    -3.417
+   ],
+   "counted_in_center": true,
+   "contrib_pct_linear": -1.196
+  },
+  {
+   "key": "gpm",
+   "name": "GPM base 3,6% → 4,0% (biên SP tự sản xuất 5,29% hai kỳ 9T; tỷ trọng thương mại giảm)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "ov": {
+    "base_gpm": 0.04
+   },
+   "rng": [
+    {
+     "base_gpm": 0.0395
+    },
+    {
+     "base_gpm": 0.04
+    }
+   ],
+   "source": "agents/Taylor/research/dd_VGS_20261110/skeptic/r2_raw.md:40; agents/Taylor/research/dd_recheck_20261124/VGS/skeptic/r1_raw.md:24; agents/Taylor/research/dd_VGS_20261110/REPORT.md:69",
+   "note": "2 kỳ cùng hướng (9T25, 9T26); ngược có số: GPM năm 2018/19/22/23/24 = 2,6/3,3/2,3/2,5/3,0% < 3,6%",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": 5.539,
+   "mag_range_pct": [
+    4.847,
+    5.539
+   ],
+   "counted_in_center": true,
+   "contrib_pct_linear": 1.939
+  },
+  {
+   "key": "rev",
+   "name": "DT base 7.700 → TTM 7.849,6 tỷ",
+   "dir": "up",
+   "evidence_tier": "B",
+   "ov": {
+    "base_rev": 7849.6
+   },
+   "rng": null,
+   "source": "agents/Taylor/research/dd_recheck_20261124/VGS/skeptic/r1_raw.md:24",
+   "note": "1 kỳ (TTM); ngược có số: FY25 7.318,6 < 7.700",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": 0.565,
+   "mag_range_pct": [
+    0.565,
+    0.565
+   ],
+   "counted_in_center": true,
+   "contrib_pct_linear": 0.198
+  }
+ ],
+ "sum_p_m_pct_linear": -5.205,
+ "aggregation": "combinatorial 2^7 (v2 §5, |Σ tuyến tính|>5%)",
+ "sum_p_m_pct": -5.197,
+ "center_adj": 25148,
+ "range_low": 22325,
+ "range_high": 26996,
+ "dividend_mech": {
+  "vnd": 0,
+  "status": "cổ tức tiền 2025 1.000 đ đã chi (61,5 tỷ); không có quyền chưa chốt trong nguồn"
+ },
+ "sensitivity_only": [
+  {
+   "name": "Legend City NPV=0 vs trần lợi nhuận NOXH (miễn tiền SDĐ chiều ngược)",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "−2…−6%% (skeptic, ước lượng; chưa tra văn bản)",
+   "source": "agents/Taylor/research/dd_VGS_20261110/skeptic/r2_raw.md:40",
+   "why_not_center": "dấu không chắc (miễn SDĐ bù); kịch bản xấu 0,7 đã có trong lưới"
+  },
+  {
+   "name": "Cam kết vốn còn lại Legend City (tờ trình 05/2026 chưa có)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "chưa định lượng",
+   "source": "agents/Taylor/research/dd_VGS_20261110/skeptic/r2_raw.md:48"
+  },
+  {
+   "name": "Capex tuân thủ môi trường (mạ kẽm/xử lý nước thải)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "chưa định lượng",
+   "source": "agents/Taylor/research/dd_recheck_20261124/VGS/skeptic/r1_raw.md:21"
+  },
+  {
+   "name": "Hoàn nhập dự phòng 21,1 tỷ (dự phòng phải trả NH 31,37→10,02) làm phồng GPM TTM của kịch bản tốt",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "≈ −520 đ (−1,9%%) (skeptic r2)",
+   "source": "agents/Taylor/research/dd_VGS_20261110/skeptic/r2_raw.md:40; src/BCTC-Q3-HN.pdf tr.2 (khôi phục từ git 30ca17444^, md5 e30e74ce; ảnh /tmp/vgs_src/p2.png) mã 322",
+   "why_not_center": "bản chất dòng P&L chưa xác định"
+  },
+  {
+   "name": "Cách đọc (b) lãi liên kết 2025 = 70,2 (cổ tức LK 26,6 đã trừ)",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "+535 đ (+2,0%%) ⇒ 27.313 trước CK",
+   "source": "agents/Taylor/research/dd_VGS_20261110/REPORT.md:222"
+  },
+  {
+   "name": "Liên kết base = sổ / 0,75×sổ (P/B peer)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "0,75×sổ ⇒ 24.911 (−7,0%%) trước CK",
+   "source": "agents/Taylor/research/dd_VGS_20261110/REPORT.md:19"
+  },
+  {
+   "name": "[LUẬT] CK holding +20% lên liên kết + Legend City (số đúng theo skeptic)",
+   "dir": "down",
+   "evidence_tier": "rule",
+   "sensitivity": "24.288 trước CK (−9,3%%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/VGS/skeptic/r1_raw.md:12"
+  },
+  {
+   "name": "[LUẬT] CK thanh khoản theo ADV60 thay ADV250",
+   "dir": "down",
+   "evidence_tier": "rule",
+   "sensitivity": "CK 1,57%% thay 0,94%% ở 1 tỷ ⇒ −0,64%%",
+   "source": "agents/Taylor/research/dd_recheck_20261124/VGS/skeptic/r1_raw.md:'liquidity'"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3%% ⇒ 28.294 sau CK (+6,66%%); 13,4%% ⇒ +0,51%%",
+   "source": "REPORT_recheck_VGS.md:35-38"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "BCTC năm 2026: thuyết minh TSCĐ/XDCB tách capex duy trì ≈ khấu hao (phần chênh là mở rộng)",
+   "when": "ước lượng cuối 01–03/2027",
+   "direction": "up",
+   "delta_vnd": 1564,
+   "delta_pct": 5.9,
+   "note": "p capex 0,50→0"
+  },
+  {
+   "event": "BCTC năm 2026 / LCTT FY24–FY25: capex ngoài LGC ≫ khấu hao cả 3 kỳ, không có dự án mở rộng",
+   "when": "ước lượng 01–03/2027",
+   "direction": "down",
+   "delta_vnd": -469,
+   "delta_pct": -1.77,
+   "note": "3 kỳ cùng hướng ⇒ p 0,65"
+  },
+  {
+   "event": "NQ ĐHĐCĐ 2027: tỷ lệ trích KTPL (ví dụ 4,2% LNST ≈ 9,2 tỷ)",
+   "when": "ước lượng 04/2027",
+   "direction": "down",
+   "delta_vnd": -941,
+   "delta_pct": -3.55,
+   "note": "C+→A p 0,9 ở cận trên"
+  },
+  {
+   "event": "Q4/2026: GPM quý ≥4% và SG&A ≤1,5%",
+   "when": "cuối 01/2027",
+   "direction": "up",
+   "delta_vnd": 356,
+   "delta_pct": 1.34,
+   "note": "p GPM 0,35→0,50, p SG&A 0,35→0,20 (ước lượng nhánh)"
+  },
+  {
+   "event": "Q4/2026: GPM quý <3% hoặc SG&A >1,8%",
+   "when": "cuối 01/2027",
+   "direction": "down",
+   "delta_vnd": -475,
+   "delta_pct": -1.79,
+   "note": "p GPM →0,15, p SG&A →0,55"
+  },
+  {
+   "event": "Tờ trình 05/2026 / mức trần lợi nhuận NOXH Legend City",
+   "when": "khi có",
+   "direction": "both",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "C→A: chạy lại NPV LGC ở r 13,5% (−2…−6%% ước lượng)"
+  },
+  {
+   "event": "BCTC kiểm toán 2026 + giải trình cổ tức liên kết 2025 (mốc M5)",
+   "when": "31/03/2027",
+   "direction": "both",
+   "delta_vnd": 531,
+   "delta_pct": 2.0,
+   "note": "cách đọc (b) đúng ⇒ +535 đ trước CK; sai ⇒ 0"
+  },
+  {
+   "event": "Lãi huy động 12T ±50bp (luật V1, β=1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_vnd": -647,
+   "delta_pct": -2.44,
+   "note": "+50bp −647; −50bp +697 (REPORT_recheck §2)"
+  },
+  {
+   "event": "User chốt CK holding +20% áp cho liên kết/LGC",
+   "when": "khi user quyết",
+   "direction": "down",
+   "delta_vnd": -2467,
+   "delta_pct": -9.3,
+   "note": "đổi luật ⇒ chạy lại"
+  }
+ ],
+ "caveat": "m capex/SG&A/GPM/DT/Vinaconex chạy qua mô hình r2 tái hiện (CONTROL 26.778); m KTPL flow cận trên là suy luận (9,18 tỷ phân phối từ LN 2025, có thể gồm quỹ khác)"
+}

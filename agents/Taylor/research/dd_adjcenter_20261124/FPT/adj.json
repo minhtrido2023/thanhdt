@@ -1,0 +1,284 @@
+{
+ "ticker": "FPT",
+ "dd_date": "2026-11-01",
+ "rev": 4,
+ "asof": "2026-11-24",
+ "job": "Taylor_20261124_110049",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13"
+ },
+ "blind_to_price": true,
+ "center_base": 57312,
+ "center_base_source": "kb/dd_price_zones.json FPT rev4 center (gồm cổ tức 1.000 đ chưa GDKHQ)",
+ "items": [
+  {
+   "name": "Tồn quỹ KTPL 1.477 tỷ chưa trừ khỏi NC",
+   "dir": "down",
+   "evidence_tier": "A",
+   "source": "agents/Taylor/research/dd_FPT_20261101/calc/notes_q3_bctc.md:323(dòng 69); agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:14",
+   "note": "nợ phải trả, tiền tương ứng đang nằm trong NC 12.233 tỷ; số trực tiếp BCTC",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": -1.367,
+   "mag_range_pct": [
+    -1.367,
+    -1.367
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.23
+  },
+  {
+   "name": "XDCB 'Khác' 371 tỷ chưa cộng (NPV 0 = giá sổ)",
+   "dir": "up",
+   "evidence_tier": "A",
+   "source": "agents/Taylor/research/dd_FPT_20261101/calc/notes_q3_bctc.md:344; agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:24",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": 0.343,
+   "mag_range_pct": [
+    0.343,
+    0.343
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 0.309
+  },
+  {
+   "name": "Trích quỹ KTPL hằng năm từ LNST (C+ — cận bảo thủ)",
+   "dir": "down",
+   "evidence_tier": "C+",
+   "source": "agents/Taylor/research/dd_FPT_20261101/calc/notes_q3_bctc.md:323,326; agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:8,9,15",
+   "note": "dấu chắc chắn (quỹ giảm 683 tỷ trong 9T26 không có dòng trích ⇒ đang chi ~9.7% LNST/năm, phải trích bù để duy trì). Cận bảo thủ 4.86% LNST = ½ tốc độ chi (½ còn lại quy cho FTEL ra khỏi hợp nhất); cận cao 9.71%. 1 quan sát (9T26) ⇒ p B1",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -2.866,
+   "mag_range_pct": [
+    -5.732,
+    -2.866
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.433
+  },
+  {
+   "name": "Pha loãng ESOP (108 tỷ mệnh giá 9T26 ≈0,57%/năm)",
+   "dir": "down",
+   "evidence_tier": "B",
+   "source": "agents/Taylor/research/dd_FPT_20261101/calc/notes_q3_bctc.md:321; agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:16",
+   "note": "m điểm = số skeptic; khoảng ước lượng: thấp = một lần 0,57%×(1−10.000/57.312); cao = vĩnh viễn 0,57%/năm ≈ +0,57pp vào r trên phần DCF 59%, trừ tiền thu mệnh giá. 1 quan sát (9T26)",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -2.5,
+   "mag_range_pct": [
+    -3.0,
+    -0.47
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.25
+  },
+  {
+   "name": "conv CƠ SỞ 0,75 → 0,60",
+   "dir": "down",
+   "evidence_tier": "B",
+   "source": "agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:17,47 (probe model_r3)",
+   "note": "2 kỳ báo cáo (FY25 0,60; 9T26 −0,12) cùng hướng < 3 ⇒ mặc định; gồm phần capex đã thể hiện trong lịch sử",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -1.85,
+   "mag_range_pct": [
+    -1.85,
+    -1.85
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -0.925
+  },
+  {
+   "name": "g CƠ SỞ 9% → 12% (LFL 9T26 +13,7%)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "source": "agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:22,47 (probe model_r3)",
+   "note": "1 kỳ (LNST LFL và LNTT CN cùng 9T26 = 1 quan sát). v2 §3: quan sát ngược định tính (5F Nhật giảm tốc) KHÔNG tính ⇒ B1 (pilot dùng Bneg)",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": 3.32,
+   "mag_range_pct": [
+    3.32,
+    3.32
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 1.66
+  }
+ ],
+ "sum_p_m_pct": -2.869,
+ "aggregation": "linear (|Σ|≤5%)",
+ "center_adj": 55668,
+ "range_low": 52604,
+ "range_high": 57605,
+ "center_adj_ex_div": 54668,
+ "range_low_ex_div": 51604,
+ "range_high_ex_div": 56605,
+ "dividend_mech": {
+  "vnd": -1000,
+  "record_date": "2026-11-30",
+  "status": "chưa GDKHQ",
+  "note": "trừ đ/cp, ngoài Σ"
+ },
+ "sensitivity_only": [
+  {
+   "name": "Cam kết capex DC/AI/giáo dục vượt lịch sử conv (chưa đọc thuyết minh)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "mỗi 1.000 tỷ cam kết NPV âm toàn phần = -0.93% (-530 đ/cp)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:13",
+   "why_not_center": "không dấu chắc chắn (capex tăng trưởng NPV≈0) và không có cận; phần đã thể hiện trong lịch sử nằm ở conv"
+  },
+  {
+   "name": "OTHER_ASSOC_BOOK 1.500 tỷ [UL]",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "−1.300…+2.600 đ/cp = -2.27%…+4.54%",
+   "source": "agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md:23,39; agents/Taylor/research/dd_FPT_20261101/calc/notes_q3_bctc.md:277"
+  },
+  {
+   "name": "Lãi LK Q4/25 600 tỷ [UL] (G10)",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "740 tỷ ⇒ 56.616 (-1.21%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/FPT/REPORT_recheck_FPT.md:62"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke 12,3–13,4% (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3% ⇒ 61.176 (+6,74%); 13,4% ⇒ +0,51%",
+   "source": "agents/Taylor/research/dd_recheck_20261124/FPT/REPORT_recheck_FPT.md:13,37-41"
+  },
+  {
+   "name": "[LUẬT] chặn RONIC pha 5 năm ở Ke (bản G)",
+   "dir": "down",
+   "evidence_tier": "rule",
+   "sensitivity": "50.652 (-11.62%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/FPT/REPORT_recheck_FPT.md:51"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "GDKHQ cổ tức tiền 1.000 đ (chốt quyền 30/11/2026)",
+   "when": "cuối 11/2026",
+   "direction": "down",
+   "delta_vnd": -1000,
+   "delta_pct": -1.74,
+   "note": "cơ học"
+  },
+  {
+   "event": "NQ/tài liệu ĐHĐCĐ 2027 hoặc BCTC năm 2026 có dòng trích KTPL: tỷ lệ thật",
+   "when": "BCTC năm cuối 01/2027; ĐHĐCĐ 03–04/2027 (ước lượng lịch)",
+   "direction": "both",
+   "delta_vnd": -700,
+   "delta_pct": -1.22,
+   "note": "C+→A, p 0,9; ví dụ 5% LNST; mỗi 1pp khác 5% ⇒ -0.53%; tỷ lệ ≤ 2.7% ⇒ chiều lên"
+  },
+  {
+   "event": "Thuyết minh cam kết vốn DC/AI/giáo dục (BCTC năm 2026)",
+   "when": "cuối 01/2027 (ước lượng)",
+   "direction": "down",
+   "delta_vnd": -530,
+   "delta_pct": -0.93,
+   "note": "mỗi 1.000 tỷ cam kết NPV âm: C→A; growth NPV≈0 ⇒ 0"
+  },
+  {
+   "event": "Q4/2026 (kỳ mới) conv ≤0,60",
+   "when": "cuối 01/2027",
+   "direction": "down",
+   "delta_vnd": -159,
+   "delta_pct": -0.28,
+   "note": "3 kỳ cùng hướng ⇒ p 0,50→0,65"
+  },
+  {
+   "event": "Q4/2026 conv ≥0,75",
+   "when": "cuối 01/2027",
+   "direction": "up",
+   "delta_vnd": 159,
+   "delta_pct": 0.28,
+   "note": "quan sát ngược có số ⇒ p 0,50→0,35"
+  },
+  {
+   "event": "Q4/2026 LFL LNST ≥12% (kỳ mới) + KH 2027 ĐHĐCĐ ≥12%",
+   "when": "01–04/2027",
+   "direction": "up",
+   "delta_vnd": 285,
+   "delta_pct": 0.5,
+   "note": "3 quan sát ⇒ p 0,50→0,65"
+  },
+  {
+   "event": "Q4/2026 LFL LNST <9%",
+   "when": "cuối 01/2027",
+   "direction": "down",
+   "delta_vnd": -285,
+   "delta_pct": -0.5,
+   "note": "quan sát ngược có số ⇒ p 0,50→0,35"
+  },
+  {
+   "event": "NQ ĐHĐCĐ 2027: có ESOP cùng cỡ",
+   "when": "03–04/2027",
+   "direction": "down",
+   "delta_vnd": -573,
+   "delta_pct": -1.0,
+   "note": "B→A p 0,9"
+  },
+  {
+   "event": "NQ ĐHĐCĐ 2027: KHÔNG có ESOP",
+   "when": "03–04/2027",
+   "direction": "up",
+   "delta_vnd": 716,
+   "delta_pct": 1.25,
+   "note": "p→0"
+  },
+  {
+   "event": "BCTC kiểm toán 2026: lãi LK Q4/25 (ví dụ 740 tỷ)",
+   "when": "03/2027",
+   "direction": "both",
+   "delta_vnd": -696,
+   "delta_pct": -1.21,
+   "note": "C→A"
+  },
+  {
+   "event": "Lãi huy động 12T hiệu dụng ±50bp (luật V1, β=1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_vnd": -1406,
+   "delta_pct": -2.45,
+   "note": "+50bp −1.406; −50bp +1.519 (REPORT_recheck:42)"
+  },
+  {
+   "event": "Số dư quỹ KTPL mới mỗi BCTC quý",
+   "when": "mỗi quý",
+   "direction": "both",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "m#1 = −số dư/SH/tâm, p 0,9"
+  },
+  {
+   "event": "Pháp lý FTEL",
+   "when": "khi có",
+   "direction": "none",
+   "delta_vnd": 0,
+   "delta_pct": 0,
+   "note": "chỉ WARNING, không vào tâm"
+  }
+ ],
+ "supersedes": {
+  "pilot_commit": "0d52b34ec",
+  "pilot_center_adj": 56204,
+  "pilot_range": [
+   55092,
+   57345
+  ]
+ },
+ "caveat": "cộng tuyến tính (|Σ|≤5%); m ESOP/conv/g là số skeptic/probe, không rerun model (calc r3 bị TRIM)"
+}

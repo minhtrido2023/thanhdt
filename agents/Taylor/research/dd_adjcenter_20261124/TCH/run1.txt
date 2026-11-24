@@ -1,0 +1,15 @@
+{"center_adj": 15152, "range_low": 14369, "range_high": 15780, "sum_p_m_pct": -4.491, "interaction_check": {"sum_with_margin_scaling_pct": -4.523, "center": 15147, "note": "NOXH/dạng chính xác co 0,780 khi biên 42,7%; chỉ kiểm, không thay tâm"}}
+B 0.35 -14.007 [-14.007, -14.007] -4.902 Biên gộp BĐS base 51,9% (6T FY26 chưa soát xét) → 42,7% kiểm
+C+ 0.5 -1.727 [-3.026, -1.727] -0.864 NOXH Green River (441 căn NOXH/1.251, 'đang thi công khu NOX
+B 0.35 3.643 [3.643, 3.643] 1.275 Dạng chính xác C_unsold (backlog chỉ chiếm cost_bl/(1+k) tro
+444 2.8 Báo cáo soát xét 6T FY26 (AASC): biên BĐS xác nhận ≈51,9%
+-1222 -7.7 Báo cáo soát xét 6T FY26: biên điều chỉnh xuống ≤45%
+None None BCTC Q3 FY26 (quý đến 31/12/2026): biên BĐS quý ≥50% / ≤45%
+444 2.8 BCTC FY26 kiểm toán (năm đến 31/03/2027): biên BĐS ≥50%
+-1222 -7.7 BCTC FY26 kiểm toán: biên BĐS ≤45%
+-295 -1.86 QĐ đầu tư/BCTN: tỷ trọng chi phí NOXH Green River
+-259 -1.63 Văn bản xác nhận NC-II có quỹ đất NOXH 20%
+-257 -1.62 NQ ĐHĐCĐ (FY26, ~06–07/2027): tỷ lệ trích KTPL
+0 0 Xác minh đối tác HTM 678,3 tỷ là TCTD được cấp phép
+-1570 -9.9 User chốt CK holding áp cho TCH ở +20%
+-164 -1.03 Lãi huy động 12T ±50bp (luật V1, β=1)
