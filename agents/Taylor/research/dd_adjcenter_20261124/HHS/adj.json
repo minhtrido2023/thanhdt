@@ -140,7 +140,7 @@
    "when": "hằng quý",
    "direction": "both",
    "delta_vnd": -119,
-   "delta_pct": -1.1,
+   "delta_pct": -1.02,
    "note": "mỗi +1pp CK; dải user chốt chỉ đổi khi user chốt lại"
   },
   {
@@ -156,7 +156,7 @@
    "when": "BCTN 2026 / CBTT",
    "direction": "down",
    "delta_vnd": -562,
-   "delta_pct": -5.2,
+   "delta_pct": -4.85,
    "note": "mỗi 10% giá gốc HTK không sinh biên (quy đổi @CK 20%, ước lượng)"
   },
   {

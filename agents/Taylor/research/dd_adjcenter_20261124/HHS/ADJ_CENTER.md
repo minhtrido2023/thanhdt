@@ -3,7 +3,7 @@
 > **Display-only.** Dựng theo dải CK holding **0 … +20%** user đã chốt ngày 24/11 (`kb/projects/ck-hhs-reference-range-20261124.md`). Đây KHÔNG phải rev mới. Không ghi `dd_price_zones.json`, không email, không wire.
 
 - Phương pháp: `../PREREG_adj.md` (md5 `ef5157cb…`) + `../PREREG_adj_v2.md` (md5 `835dfc1e…`), cả hai assert trong `calc_adj.py`.
-- Chạy 2 lần: run1 = run2 (md5 `764be80d…`).
+- Chạy 2 lần: run1 = run2 (md5 `108999d2…`).
 - Lõi tính: dùng lại `hhs_r3.py` + `dilution_out.json` + assumptions rev7, đều khoá md5, giống `dd_recheck_20261124/HHS/calc/calc_recheck.py`.
 - **CONTROL:** ở CK 26,63% tái lập đúng tâm sổ rev8 là 10.805, và EX 9.767 / 8.846.
 - Mù giá: lưới không đọc giá. Bỏ qua mọi nhãn và mọi mức giá trong báo cáo gốc.
@@ -52,9 +52,9 @@ Không có hạng mục nào. Σ = 0.
 |---|---|---|---|---|
 | Lấy ý kiến cổ đông NQ 10 (14–25/12/2026) giữ quyền 5:3 @10.000 + CP 7% | cuối 12/2026 | Sau GDKHQ dùng dòng EX (k = 1). Nếu đổi giá chào hoặc quy mô ⇒ tính lại EX | −1.366 (pha loãng cơ học/cp) | −11,78 |
 | NQ 10 huỷ hoặc hoãn phát hành | cuối 12/2026 | Giữ dòng CUM | 0 | 0 |
-| Đo lại CK holding (quét v5 định kỳ) | hằng quý | Chỉ hiển thị; dải chỉ đổi khi user chốt lại | −119 mỗi +1pp | −1,10 mỗi pp |
+| Đo lại CK holding (quét v5 định kỳ) | hằng quý | Chỉ hiển thị; dải chỉ đổi khi user chốt lại | −119 mỗi +1pp | −1,02 mỗi pp |
 | HHS nhận cổ tức tiền từ CRV | khi công bố | Bằng chứng chống CK cao ⇒ nghiêng về đầu 0% | tối đa +2.376 | tối đa +20,5 |
-| Công bố dự toán hoàn thiện NC-II/HH1–HH4 (G10) | BCTN 2026 / CBTT | C → A | −562 mỗi 10% giá gốc HTK không sinh biên (ước lượng) | −5,2 |
+| Công bố dự toán hoàn thiện NC-II/HH1–HH4 (G10) | BCTN 2026 / CBTT | C → A | −562 mỗi 10% giá gốc HTK không sinh biên (ước lượng) | −4,85 |
 | BCTC kiểm toán NĐL cho thấy BV < 10.000 | ước lượng 03/2027 | Dòng EX dùng k đo được (k < 1) | k = 0,8 ⇒ EX 9.536 | −6,8 (so EX k = 1) |
 | Có số liệu NƠXH / KL 08 thu hồi | khi có | C → A, trừ theo đ/cp; phần pháp lý chỉ WARNING | theo số | — |
 | Lãi huy động 12T ±50bp (V1) | liên tục | r | +50bp: −92 / −50bp: +94 | ∓0,8 |

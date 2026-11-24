@@ -52,9 +52,9 @@ sens = [
 trig = [
  dict(event="Kết quả lấy ý kiến cổ đông NQ 10/NQ-HĐQT (14–25/12/2026): giữ quyền 5:3 @10.000 + CP 7%", when="cuối 12/2026", direction="down", delta_vnd=EX["h0.2"]["k1"] - ca, delta_pct=round((EX["h0.2"]["k1"] / ca - 1) * 100, 2), note="sau GDKHQ dùng dòng EX (k=1) @CK 20%; đổi giá chào/quy mô ⇒ tính lại EX"),
  dict(event="NQ 10 huỷ / hoãn phát hành", when="cuối 12/2026", direction="none", delta_vnd=0, delta_pct=0.0, note="giữ dòng CUM"),
- dict(event="Đo lại CK holding (quét v5 định kỳ)", when="hằng quý", direction="both", delta_vnd=round(slope), delta_pct=round(slope / C * 100, 2), note="mỗi +1pp CK; dải user chốt chỉ đổi khi user chốt lại"),
+ dict(event="Đo lại CK holding (quét v5 định kỳ)", when="hằng quý", direction="both", delta_vnd=round(slope), delta_pct=round(slope / ca * 100, 2), note="mỗi +1pp CK; dải user chốt chỉ đổi khi user chốt lại"),
  dict(event="Cổ tức tiền CRV về HHS", when="khi công bố", direction="up", delta_vnd=None, delta_pct=None, note="bằng chứng chống CK cao ⇒ nghiêng về đầu 0%% (tối đa +%d)" % (hi - ca)),
- dict(event="Dự toán hoàn thiện NC-II/HH1–HH4 công bố (G10)", when="BCTN 2026 / CBTT", direction="down", delta_vnd=-562, delta_pct=round(-562 / C * 100, 2), note="mỗi 10% giá gốc HTK không sinh biên (quy đổi @CK 20%, ước lượng)"),
+ dict(event="Dự toán hoàn thiện NC-II/HH1–HH4 công bố (G10)", when="BCTN 2026 / CBTT", direction="down", delta_vnd=-562, delta_pct=round(-562 / ca * 100, 2), note="mỗi 10% giá gốc HTK không sinh biên (quy đổi @CK 20%, ước lượng)"),
  dict(event="BCTC kiểm toán NĐL (BV < 10.000)", when="ước lượng 03/2027", direction="down", delta_vnd=None, delta_pct=None, note="k<1 có cơ sở ⇒ dòng EX dùng k đo được"),
  dict(event="Số liệu NƠXH / KL 08 thu hồi", when="khi có", direction="down", delta_vnd=None, delta_pct=None, note="C→A, trừ theo đ/cp; pháp lý chỉ WARNING"),
  dict(event="Lãi huy động 12T ±50bp (V1)", when="liên tục", direction="both", delta_vnd=rs["r0.14"] - ca, delta_pct=round((rs["r0.14"] / ca - 1) * 100, 2), note="+50bp; −50bp %+d" % (rs["r0.13"] - ca)),

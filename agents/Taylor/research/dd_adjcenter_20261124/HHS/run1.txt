@@ -2,9 +2,9 @@
 slope -118.8 {'r0.123': 11821, 'r0.13': 11687, 'r0.134': 11611, 'r0.14': 11501}
 -1366 -11.78 Kết quả lấy ý kiến cổ đông NQ 10/NQ-HĐQT (14–25/12/2026): giữ quyền 5:3 @10.000 + CP 7%
 0 0.0 NQ 10 huỷ / hoãn phát hành
--119 -1.1 Đo lại CK holding (quét v5 định kỳ)
+-119 -1.02 Đo lại CK holding (quét v5 định kỳ)
 None None Cổ tức tiền CRV về HHS
--562 -5.2 Dự toán hoàn thiện NC-II/HH1–HH4 công bố (G10)
+-562 -4.85 Dự toán hoàn thiện NC-II/HH1–HH4 công bố (G10)
 None None BCTC kiểm toán NĐL (BV < 10.000)
 None None Số liệu NƠXH / KL 08 thu hồi
 -92 -0.79 Lãi huy động 12T ±50bp (V1)
