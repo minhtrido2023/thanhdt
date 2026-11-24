@@ -2768,3 +2768,6 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T12:15:28Z] [DD TTA 23/11] XONG job Taylor_20261123_120303: REPORT_rev5 tâm 7.547 (vùng 6.415–8.680), skeptic r3 (vòng cuối) INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_TTA.json (REFUTED_OPEN rev3) / user quyết
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T12:20:45Z] [BSR rev5 23/11] XONG job Taylor_20261123_120250: tâm 16.544, r4 INCONCLUSIVE — CHỜ Mike áp LEDGER_PROPOSAL_BSR.json (rev3 REFUTED_OPEN)
