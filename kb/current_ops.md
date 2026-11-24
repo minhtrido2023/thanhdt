@@ -40,7 +40,7 @@
 
 ## CAPIT đòn bẩy TẮT từ 2026-10-13 (`capit_margin_lever.enabled=false`, user duyệt): KHÔNG plan nào sizing ×1,3, KHÔNG cấp margin; chỉ user bật lại: `kb/projects/capit-margin-hold-20261013.md`
 
-## Dải chiết khấu holding HHS = 0…+20% (user đồng ý chốt gọn 24/11; thu về 2 mốc: Mike đề xuất) — DISPLAY-ONLY, tin THẤP; KHÔNG rev8/wire/email: `kb/projects/ck-hhs-reference-range-20261124.md`
+## Dải chiết khấu holding HHS = 0…+20% (user duyệt 24/11 15:48, `decided_by: user`) — DISPLAY-ONLY, tin THẤP; KHÔNG rev8/wire/email: `kb/projects/ck-hhs-reference-range-20261124.md`
 
 ## Phanh lỗ cấp NAV — monitor CHỈ CẢNH BÁO, LIVE 2026-10-13: tin đỏ Trading Daily ⇒ báo user, **KHÔNG tự tạo BOT_STOP**; `risk_monitor.py` KHÔNG phải cổng; mốc 11-09 đóng: user giữ cảnh báo (13/11): `kb/projects/nav-loss-brake-monitor-20261013.md`
 

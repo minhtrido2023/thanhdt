@@ -4,8 +4,8 @@
 > Nguồn số: `agents/Taylor/research/ck_holding_vn_20261124_v5/` (REPORT_CK_HOLDING_v5.md, SKEPTIC_v5.md; skeptic rà phần thay đổi CONFIRMED/medium; merge master c69a7935b).
 
 ## Quyết định
-- **`decided_by: user` (24/11 15:36 ICT)** — chỉ phần: "đồng ý chốt dải đề xuất, nhưng dải không nên quá dài làm mất giá trị đề xuất".
-- **Việc thu về 0 … +20% là đề xuất của Mike** (không phải câu chữ user) — user chỉnh được nếu muốn khác.
+- **`decided_by: user` (24/11 15:36 ICT)** — "đồng ý chốt dải đề xuất, nhưng dải không nên quá dài làm mất giá trị đề xuất".
+- **`decided_by: user` (24/11 15:48 ICT)** — duyệt luôn mốc đề xuất **0 … +20%** ("Dải hhs duyệt mốc đề nghị"). Dải 0…+20% đã được user chốt.
 
 ## Dải: 2 mốc
 | Mốc | Là gì | KHÔNG phải là |
