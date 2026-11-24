@@ -1,0 +1,16 @@
+{"center_adj": 58914, "range_low": 52959, "range_high": 61630, "sum_p_m_pct_linear": -3.835, "sum_pct_combo": -3.85, "range_low_linear": 52959, "range_high_linear": 61638}
+C+ 0.5 -3.587 [-3.587, -6.395] -1.793 Trích quỹ KTPL hằng năm từ LNST 2026–2043 chưa trừ (C+ — cận bảo thủ)
+B 0.65 -3.848 [0.0, -9.747] -2.501 Capex duy trì > khấu hao (giả định 'capex ≈ KH' không nguồn)
+B 0.35 0.698 [0.0, 2.127] 0.244 LNST Q4/26 ước 60 tỷ thấp hơn nhịp quý (Q3/26 thực 69,29)
+B 0.5 0.43 [0.0, 0.43] 0.215 Chân MVC 10,3% dùng engine MVC r6 chưa vá trần chu kỳ
+A 0.9 0.0 [0.0, 0.0] 0.0 Truy thu Núi Nhỏ ~42 tỷ vs dự phòng 22,37 — ĐÃ PHỦ ĐỦ
+-2428 -3.96 Đọc thuyết minh VCSH BCTC kiểm toán 2025 (KT25, đã công bố) — số trích KTPL từ LN 2024
+-1051 -1.72 NQ ĐHĐCĐ 2027 phân phối LN 2026: tỷ lệ trích KTPL 5%
+-3202 -5.23 NQ ĐHĐCĐ 2027: tỷ lệ trích KTPL 10%
+235 0.38 BCTC Q4/2026: LNST Q4 ≥ 69 tỷ
+-150 -0.24 BCTC Q4/2026: LNST Q4 ≤ 60 tỷ
+-589 -0.96 LCTT năm 2026: capex 2026 − KH 2026 ≥ 7,5 tỷ (kỳ thứ 4 cùng hướng)
+707 1.15 LCTT năm 2026: capex 2026 ≤ KH 2026 (quan sát ngược có số)
+105 0.17 Vá trần chu kỳ engine MVC r6 rồi chạy lại chân MVC trong NNC
+-944 -1.54 Lãi huy động 12T hiệu dụng ±50bp (luật V1, β=1)
+0 0 Văn bản truy thu mới chạm Mũi Tàu / D195 MVC
