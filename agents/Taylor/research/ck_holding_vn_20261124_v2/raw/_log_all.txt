@@ -1,0 +1,134 @@
+U0 497 dates 24 2024-12-31 2026-11-20
+kbs subs 0 AAA
+kbs subs 50 BNA
+kbs subs 100 DCL
+kbs subs 150 FRT
+kbs subs 200 HTP
+kbs subs 250 LSG
+kbs subs 300 OIL
+kbs subs 350 SAS
+kbs subs 400 TDC
+kbs subs 450 VFS
+kbs sh 0 AAA
+kbs sh 50 CII
+kbs sh 100 FIC
+kbs sh 150 KHG
+kbs sh 200 OCB
+kbs sh 250 SBT
+kbs sh 300 TMS
+kbs sh 350 VPB
+kbs done subs 497 sh 364
+stakes rows 390 qualified parents 116
+['AAA', 'ACV', 'ADS', 'AIG', 'APH', 'ASM', 'ASP', 'BCG', 'BCM', 'BID', 'BMP', 'BSR', 'BVH', 'BWE', 'C32', 'CII', 'CLX', 'CMS', 'CMX', 'DCM', 'DGC', 'DIG', 'DPM', 'DRH', 'DVN', 'DXG', 'FIT', 'FOX', 'FPT', 'GAS', 'GEE', 'GEG', 'GEL', 'GEX', 'GMD', 'GVR', 'HAX', 'HDC', 'HPG', 'HUT', 'HVN', 'IDC', 'IDI', 'IMP', 'IPA', 'ITD', 'KDC', 'KHP', 'KSB', 'KSF', 'KSV', 'LHC', 'MBB', 'MCH', 'MML', 'MSN', 'MST', 'MTA', 'MVC', 'MVN', 'NDN', 'NTC', 'NVL', 'OGC', 'OIL', 'PAN', 'PC1', 'PCB', 'PET', 'PGV', 'PHP', 'PHR', 'PLC', 'PLX', 'POW', 'PPC', 'PPH', 'PVC', 'PVI', 'PVS', 'PVT', 'REE', 'S99', 'SAB', 'SAM', 'SGP', 'SHI', 'SIP', 'SJE', 'SJG', 'SNZ', 'TAL', 'TCB', 'TCD', 'TIS', 'TPB', 'TVC', 'TVN', 'VCG', 'VCP', 'VEA', 'VEC', 'VGC', 'VGT', 'VHC', 'VIC', 'VIP', 'VIW', 'VLC', 'VND', 'VNE', 'VNM', 'VPB', 'VSC', 'VSF', 'VTD']
+prescreen pass 26 of 116
+parent  cov_approx  listed_mv_bn  eq_tot_bn  pass
+   APH       0.592      2096.767   6003.871  True
+   CII       0.157      2005.809  12955.823  True
+   CMX       0.570      1210.339   1815.116  True
+   DRH       0.311       308.612   1284.956  True
+   DVN       0.407      2030.796   4176.005  True
+   DXG       0.329      6999.253  21113.456  True
+   FIT       0.326      2003.867   6030.542  True
+   FPT       0.493     32800.143  44039.381  True
+   GEE       0.000         0.000   8909.711  True
+   GEL         NaN     10713.475        NaN  True
+   GEX       0.533     32252.242  35043.176  True
+   IPA       1.297      5296.827   4425.567  True
+   LHC       0.746       918.335    967.691  True
+   MCH       0.336      8620.388  18754.210  True
+   MSN       0.790     97548.429  53630.857  True
+   MVN       0.666     20523.592  20876.884  True
+   OGC       0.500       778.400   1915.845  True
+   PAN       0.419      3626.338   9414.380  True
+   PHR       0.313      1009.151   2701.109  True
+   REE       0.390     12256.113  26378.860  True
+   SNZ       0.570      8956.291  12591.862  True
+   TCB       0.438     73080.674 131549.748  True
+   TVC       0.327       445.596   1627.739  True
+   VGT       0.371      3842.108  10869.529  True
+   VIC       0.936    350354.074 180706.650  True
+   VSC       0.584      8265.291   7260.764  True
+vci 0 149 APH
+vci 10 149 GEX
+vci 20 149 SNZ
+vci 30 149 CAV
+vci 40 149 LAF
+vci 50 149 VTI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  THÔNG BÁO THAY ĐỔI DỊCH VỤ
+
+  Từ 10/11/2026, thư viện Vnstock thế hệ 4 và thế hệ 5 ngừng hoạt động,
+  thế hệ 6 sẽ thay thế.
+
+  Nghị định 363/2026/NĐ-CP có hiệu lực từ ngày 11/11/2026, với quy định
+  chặt chẽ hơn về truy cập, sử dụng dữ liệu và API. Vnstock chuyển sang
+  cách làm mới: bạn dùng API miễn phí của công ty chứng khoán nơi bạn có
+  tài khoản, hoặc tệp dữ liệu tự chuẩn bị; phần mềm Vnstock chuẩn hoá và
+  xử lý trên máy bạn.
+
+  Vnstock thế hệ 6 dự kiến phát hành để thay thế. Khoá API của bạn nằm
+  trên máy bạn; máy chủ Vnstock không nhận khoá API hay nội dung dữ liệu
+  bạn xử lý. Cổng kết nối thuộc bản Cộng đồng, miễn phí cho cá nhân, học
+  tập và nghiên cứu.
+
+  Bạn có thể chuẩn bị ngay:
+    - Nếu mã còn dùng thế hệ 4, chuyển sang cách viết thế hệ 5, gợi ý
+      trước 05/11/2026. Thế hệ 6 giữ cách viết này.
+    - Kiểm tra tài khoản chứng khoán của bạn đã đăng ký API chưa; hầu hết
+      công ty chứng khoán cho đăng ký trực tuyến.
+
+  Đọc thông báo đầy đủ trong tài khoản:
+    https://vnstocks.com/account?section=notifications&n=chuyen-doi
+
+  Nhận thông báo cập nhật về thế hệ 6 trong nhóm Zalo của đợt chuyển đổi:
+    https://zalo.me/g/iovyc498nm5mpoexnaob
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+vci 60 149 TW3
+vci 70 149 DCL
+vci 80 149 VSH
+vci 90 149 PPH
+vci 100 149 SZG
+vci 110 149 MGG
+vci 120 149 HNI
+vci 130 149 SNC
+vci 140 149 HOT
+shares 2024-12-31
+shares 2025-01-24
+shares 2025-02-28
+shares 2025-03-31
+shares 2025-04-29
+shares 2025-05-30
+shares 2025-06-30
+shares 2025-07-31
+shares 2025-08-29
+shares 2025-09-30
+shares 2025-10-31
+shares 2025-11-28
+shares 2025-12-31
+shares 2026-01-30
+shares 2026-02-27
+shares 2026-03-31
+shares 2026-04-29
+shares 2026-05-29
+shares 2026-06-30
+shares 2026-07-31
+shares 2026-08-28
+shares 2026-09-30
+shares 2026-10-30
+shares 2026-11-20
+Traceback (most recent call last):
+  File "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/ck_holding_vn_20261124_v2/fetch_inputs_v2.py", line 264, in <module>
+    b = pd.read_csv(f)
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1898, in _make_engine
+    return mapping[engine](f, **self.options)
+  File "/home/trido/.local/lib/python3.10/site-packages/pandas/io/parsers/c_parser_wrapper.py", line 93, in __init__
+    self._reader = parsers.TextReader(src, **kwds)
+  File "pandas/_libs/parsers.pyx", line 581, in pandas._libs.parsers.TextReader.__cinit__
+pandas.errors.EmptyDataError: No columns to parse from file
