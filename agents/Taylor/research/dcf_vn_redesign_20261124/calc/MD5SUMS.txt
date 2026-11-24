@@ -6,6 +6,7 @@ b3af0aa22ad514333473f54f5ee69a1a  d_metrics.py
 8a7b566a595034db626689029da92de8  f_diag.py
 f1df0d5529841391887d737de714e47a  g_selfcheck.py
 fd32cb3d3b6ebab2313679608a4d1edc  ../PRELOCK.md
+96190bfb7593bb01cb524deda3b9b875  ../REPORT.md
 c8a848d376e0485e99d16dbc79020506  ../out/bt_monthly_S1_A_fix.csv
 67d6f9be01609f4f579575f0360e663d  ../out/bt_monthly_S1_B_slow.csv
 f30d3e64c032646ab9b6cfe2af9a7f18  ../out/bt_monthly_S1_D0_fix.csv

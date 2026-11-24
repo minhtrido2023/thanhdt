@@ -15,7 +15,7 @@ Taylor · 2026-11-24 · CHỈ NGHIÊN CỨU + ĐỀ XUẤT (không sửa `dcf_va
    Engine còn bỏ trống 58% universe và xếp "luôn đắt" đúng nhóm doanh nghiệp đang đầu tư mở rộng.
 3. **Mô hình đề xuất thay thế = RIM-VN (ký hiệu D0):** giá trị = vốn chủ sở hữu + giá trị hiện tại của lợi nhuận thặng dư,
    với ROE **xuyên chu kỳ** (trung vị 5 năm của chính mã) × vốn chủ **hiện tại**, fade 10 năm. So với engine FCFE: độ phủ
-   42% → ~100% (gồm cả ngân hàng), độ phân tán giảm một phần ba, IC 36T OOS 0,042 → 0,255, 4 ca user 1/5 → 3/5.
+   42% → phủ thêm nhóm tài chính và nhóm FCFE âm, độ phân tán giảm một phần ba, IC 36T OOS 0,042 → 0,255, 4 ca user 1/5 → 3/5.
 4. **Cái cản tiêu chí (1) là bản chất thị trường, không phải tham số:** ~51% phương sai log(tâm/giá) là lệch **bền theo
    từng mã**. Nhóm "luôn đắt" theo RIM (ROE xuyên chu kỳ 6%, không cổ tức) thật sự cho lợi suất 36T âm (−0,02 log) nhưng giá
    trôi xuống chậm chứ không về tâm. Muốn tâm cắt giá thì phải hiệu chỉnh theo premium lịch sử của chính mã (biến thể
@@ -117,7 +117,7 @@ trong 36 tháng sau. Nguồn: `out/metrics.csv`, `out/metrics_post.csv`, `out/ca
 |---|---|---|---|---|---|
 | VCS: ≥50% cuối tháng 2015 có tâm > giá | 42% ✗ | **92% ✓** | 0% ✗ | 0% ✗ | 0% ✗ |
 | DGC: ≥50% cuối tháng 2016 có tâm > giá | 0% ✗ (2 quan sát) | 100% ✓ | 100% ✓ | 75% ✓ | 80% ✓ (5 q.s.) |
-| VNM-a: ≥50% cuối tháng 2011 có tâm > giá | không có FV | 100% ✓ | 0% ✗ | 0% ✗ | **100% ✓** |
+| VNM-a: ≥50% cuối tháng 2011 có tâm > giá | không chạy (A chỉ dựng từ 2014) | 100% ✓ | 0% ✗ | 0% ✗ | **100% ✓** |
 | VNM-b: ≥50% tháng 2015-07→2016-12 có tâm < giá | 100% ✓ | 100% ✓ | 100% ✓ | 100% ✓ | 94% ✓ |
 | HPG: tâm 12/2019 > 12/2018, 06/2020 > 06/2019, có tháng 2019 tâm > giá | ✗ | ✗ (17.087 → 10.487) | **✓ (11.694 → 13.656)** | ✓ | ✓ |
 | Điểm | 1/5 | 4/5 | 3/5 | 3/5 | 4/5 |
@@ -130,15 +130,16 @@ trong 36 tháng sau. Nguồn: `out/metrics.csv`, `out/metrics_post.csv`, `out/ca
   chu kỳ" với "thay đổi cấu trúc" cần thông tin ngoài BCTC quý (đổi chủ, sản phẩm, công suất), tức là việc của DD.
 - **VNM 2011**: P/B 4,0 với ROE 39–49%. Tâm > giá chỉ khi cho ROE 40% **không fade** (B, C) hoặc neo premium riêng
   (G1, E). D0 fade về 0,4 phần vượt trội nên cho tâm 8.642 < giá 11.710. Biến thể H (độ bền theo ROE thấp nhất 5 năm) được
-  thiết kế cho đúng ca này nhưng vẫn trượt 2011 vì ROE_min 5 năm của VNM lúc đó còn dính 2008 (8%→22%); nó chỉ đúng từ 2012.
+  thiết kế cho đúng ca này nhưng vẫn trượt: ROE_min 5 năm của VNM còn dính 2008 (8% cuối 2010, 22% cuối 2011); tâm H 11.040 <
+  giá 11.710 cuối 2011 và vẫn dưới giá suốt 2012–2014.
 - Ca đối chiếu ngược (tâm < giá rồi giá nguội): VNM 2015–2017 đúng ở mọi mô hình RIM (D0: tâm 21.482 vs giá 43.770 cuối
   2015; giá cuối 2022 là 59.150 sau đỉnh 91.970). Trên toàn universe: nhóm "luôn đắt" của D0 (53% mã) có lợi suất 36T trung
   vị −0,02 so với +0,13 nhóm giữa.
 
 Mẫu ngẫu nhiên 24 mã (seed 20261124, 3 mã × 6 route + 6 COMPOUNDER) và danh sách thất bại: `out/sample_table.csv`. Vài
 dòng đáng nói: VCB tâm D0 < giá 153/155 tháng (trung vị V/P 0,48) trong khi giá ×7,3 — **mô hình sai rõ với ngân hàng
-đầu ngành**; VPD (điện) không cắt lần nào trong 128 tháng; QBS, POM, HNG, OGC, PVX (giá còn 4–40%) được D0 xếp "đắt" phần
-lớn thời gian (V/P trung vị 0,14–0,46 với HNG, PVX, POM, OGC) — đúng; nhưng QBS V/P trung vị 1,13 và HAG 0,91 — không cảnh
+đầu ngành**; VPD (điện) không cắt lần nào trong 128 tháng; POM, HNG, OGC, PVX (giá còn 18–40% so với 2014) được D0 xếp
+"đắt" phần lớn thời gian (V/P trung vị 0,14–0,46) — đúng; nhưng QBS (giá còn 4%) có V/P trung vị 1,13 và HAG 0,91 — không cảnh
 báo. FLC, ROS, HVG, KSA **không có trong cache** (xem §7).
 
 ## 5. Tạo giá trị đầu tư (4) — luật khoá trước, không tune (`out/bt_summary.csv`, `bt_dsr.json`, `resid_ic.csv`)
@@ -185,11 +186,11 @@ Tham số và lý do (đã đo độ nhạy ở `metrics.csv`; không tham số 
 
 | Tham số | Giá trị | Lý do góc nhìn VN | Độ nhạy đo được |
 |---|---|---|---|
-| Cơ sở lợi nhuận | ROE trung vị 5 năm × vốn chủ hiện tại | Chu kỳ ngành VN 3–5 năm; capex đi trước lợi nhuận (HPG, DGC); LNST quý nhiễu vì thu nhập tài chính/thanh lý | cửa sổ 3 năm: cắt +2đ, IC ≈ ; 7 năm: cắt −4đ |
+| Cơ sở lợi nhuận | ROE trung vị 5 năm × vốn chủ hiện tại | Chu kỳ ngành VN 3–5 năm; capex đi trước lợi nhuận (HPG, DGC); LNST quý nhiễu vì thu nhập tài chính/thanh lý | đo trên D: cửa sổ 3 năm cắt +2–3đ, IC không đổi; 7 năm cắt −2–4đ |
 | r | 12,25% cố định (= domestic_v2) | Huy động 12T ~6,75% + ERP nội địa 5,5đ | r theo lãi suất tại chỗ / TB 5 năm: IC ±0,005, cắt ±1đ ⇒ **chỉ dời mức, không cần r động** |
 | g_T | min(5,5%, r − 4đ) | Lạm phát mục tiêu ~4% + tăng trưởng thực dài hạn, trần dưới r | – |
 | Kỳ dự báo | 10 năm, fade tuyến tính | 3 năm quá ngắn cho doanh nghiệp tái đầu tư 15%/năm | – |
-| Fade ROE vượt trội | giữ 0,4 phần chênh so với r | Cạnh tranh bào mòn nhưng VN còn rào cản (giấy phép, đất, thương hiệu) | κ=0: IC OOS 0,255 → 0,148; κ=0,7: phía đắt OOS 44% → 35% |
+| Fade ROE vượt trội | giữ 0,4 phần chênh so với r | Cạnh tranh bào mòn nhưng VN còn rào cản (giấy phép, đất, thương hiệu) | đo trên D: κ=0 ⇒ IC OOS 0,242 → 0,148; κ=0,7 ⇒ phía đắt OOS 45% → 35% |
 | Tái đầu tư | g = ROE × (1 − cổ tức tiền/LN), trần 15%, không giả định phát hành thêm | Cổ tức cổ phiếu = giữ lại; trần tránh ngoại suy giai đoạn tăng nóng | – |
 | Shrink về ngành | **không** (D0 hơn D ở IC cả hai era) | Phân ngành 8L quá thô (1.026/1.306 mã nằm ở COMPOUNDER) | D: IC 0,133 / 0,242 |
 | Phụ phí thanh khoản | **không đưa vào r** | +1đ cho nửa kém thanh khoản không cải thiện gì (IC 0,130 / 0,242) | xử lý ở sizing, không ở tâm |
@@ -211,7 +212,7 @@ Cách dùng để tạo giá trị (theo bằng chứng ở §3–§5):
 
 - **Thiên lệch sống sót:** FLC, ROS, HVG, KSA không có dòng nào trong cache `ticker` lẫn `ticker_financial` (chưa kiểm BQ
   gốc). Nếu mã huỷ niêm yết bị xoá khỏi nguồn thì mọi con số ở đây lạc quan, nhất là phía "rẻ". Trong panel hiện có, 559 /
-  37.261 dòng in-universe (1,5%) thiếu giá sau 36 tháng và bị loại khỏi mẫu. Độ nhạy −50% cho mã biến mất: chưa có số.
+  37.261 dòng in-universe (1,5%) thiếu giá sau 36 tháng và bị loại khỏi mẫu. Độ nhạy −50% cho mã biến mất: S1-D0 CAGR 15,3% vs EW 8,9% (`out/bt_summary_hair.csv`).
 - **Mã vốn chủ âm bị loại** (BVPS ≤ 0; TTF chỉ có 5 tháng) — RIM không định giá được đúng nhóm rủi ro nhất.
 - **33 biến thể, 6 trong đó thêm sau khi thấy số** (H, Hd, G1, G05 trên D0 và H). G1 và H phải coi là giả thuyết.
 - **Sức mạnh theo thời gian yếu:** 2 khối 36 tháng độc lập mỗi era; OOS trùng giai đoạn 2020–2021 tăng mạnh. CI theo cụm
@@ -230,7 +231,7 @@ Cách dùng để tạo giá trị (theo bằng chứng ở §3–§5):
 2. Bootstrap B=300 (khai 2.000); chưa có CI cụm theo năm as-of.
 3. Mẫu ngẫu nhiên: chỉ có 7 route ⇒ 3 × 6 route + 6 COMPOUNDER = 24 mã.
 4. 4/12 mã thất bại khai trước không có dữ liệu (FLC, ROS, HVG, KSA).
-5. Độ nhạy mã rời sàn −50%: đã khởi chạy, chưa có kết quả lúc viết báo cáo.
+5. Độ nhạy mã rời sàn −50%: chỉ chạy cho D0 (số ở §7).
 6. Đề xuất D0 thay vì biến thể mà luật chọn khoá trước chỉ ra (B) — lý do ở cuối §3.
 
 ## 9. Lộ trình `dcf_valuation` v3 và việc cần user duyệt
