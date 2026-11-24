@@ -733,3 +733,50 @@
 
 ## Consolidation 2026-11-24T06:30:29Z
 - [2026-11-24T06:30:23Z] Wags/finding — work-tree verify 24/11: {"closed": 0, "updated": 2, "kept_open": 2, "items": ["busq:Mike/plan-t1-not-ready-2026-11-24-SpaceX", "busq:Mike/plan-t1-not-ready-2026-11-24-ZaloPay"], "note": "không có bằng chứng giải quyết; overdue=0"}
+
+## Consolidation 2026-11-24T08:07:02Z
+- [2026-11-24T07:32:56Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "bat dau v5: doc v4"}
+- [2026-11-24T07:33:44Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:34:14Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "xac minh chuoi so huu MSN->MSR/MML (VCI subs MSN thieu Masan Horizon)"}
+- [2026-11-24T07:34:44Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:35:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:36:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:37:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:38:04Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "MSN BCTN 2024/2025: MCH 67.4/66.2, TCB 19.8/19.7, MSR econ 94.9 (common 87.46), MML 94.3/91.2 -> v4 MCH 42.3%/TCB 14.8% SAI; dang quet he thong"}
+- [2026-11-24T07:38:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:39:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:39:47Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "quet xong: MSN(MSR,MML,MCH,TCB sai), VSC-VGR ban 20% 07/2025 (74->54.35), PAN-FMC double-count (50.12->37.75 truc tiep); dang sua code"}
+- [2026-11-24T07:40:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:41:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:42:45Z] Taylor/status — Taylor_20261124_073243: {"status": "deadline_extended", "hb_age_s": 178, "extension": 1, "max_ext": 3, "source": "watcher"}
+- [2026-11-24T07:42:45Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:43:46Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:44:08Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "PREREG_v5 khoa md5; dang sua calc_ck_v5.py (override stake PIT, lai pha loang me, BCTC cu, ambiguous variant)"}
+- [2026-11-24T07:44:46Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:45:47Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:46:47Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:47:47Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:48:47Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:49:47Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:50:48Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:51:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:52:45Z] Taylor/status — Taylor_20261124_073243: {"status": "deadline_extended", "hb_age_s": 517, "extension": 2, "max_ext": 3, "source": "watcher"}
+- [2026-11-24T07:52:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 20, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:53:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 21, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:54:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 22, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:55:41Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "calc v5 chay lan 1 xong (10 phut), dang doc so"}
+- [2026-11-24T07:55:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 23, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:56:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 24, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:56:59Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "chay thu 1: control v4 tai lap dung; MSN 9.8->32.5%, VSC roi khoi N (VGR 54.35%); them bang chung tham gia quyen MCH 02/2025 (POSTHOC, khai) -> chay lai"}
+- [2026-11-24T07:57:22Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "in_progress", "note": "LOCK_md5 xong; run1/run2/run_dna dang chay song song (~10 phut)"}
+- [2026-11-24T07:57:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 25, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:58:49Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 26, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T07:59:50Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 27, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T08:00:50Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 28, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T08:01:50Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 29, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T08:02:46Z] Taylor/status — Taylor_20261124_073243: {"status": "deadline_extended", "hb_age_s": 324, "extension": 3, "max_ext": 3, "source": "watcher"}
+- [2026-11-24T08:02:50Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 30, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T08:03:51Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 31, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T08:04:51Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 32, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T08:05:51Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 33, "job_id": "Taylor_20261124_073243", "source": "watcher"}
+- [2026-11-24T08:06:51Z] Taylor/heartbeat — Taylor_20261124_073243: {"status": "still_running", "elapsed_min": 34, "job_id": "Taylor_20261124_073243", "source": "watcher"}
