@@ -1146,3 +1146,13 @@
 
 ## Consolidation 2026-11-24T17:00:01Z
 - [2026-11-24T16:49:28Z] quant-skeptic/verification — ✅ CONFIRMED dcf-vn-redesign-20261124: {"job": "Taylor_20261124_160038", "round": 2, "verdict": "CONFIRMED", "confidence": "medium", "summary": "3 kết luận chính (mục tiêu 2 ĐẠT, mục tiêu 1 KHÔNG ĐẠT, lens chưa phải alpha) tái lập độc lập tới số lẻ; 8/9 lỗi vòng 1 sửa thật, lỗi 2 (cơ sở CP) sửa một phần. 2 diễn giải bị thổi phồng BLOCKING cho bước 4: (B-1) cảnh báo theo E/P cùng tỉ lệ cờ cũng qua đủ mục tiêu 2 (69,3/69,5% đúng) và S7 gần bằng (8,31% vs 8,73% gộp); (B-2) cổng rating chỉ đóng góp ~1,1-3,5đ, không phải 3,5đ (~2,4đ là loại mã vắng BQ). NON-BLOCKING: nhánh VND không qua pick_n, tra giá T+1 từ panel (8 dòng EW lợi suất giả), thiếu embargo 36T khi fit ENS1w, OOS chỉ là lần nhìn thứ hai.", "decided_by": "agent"}
+
+## Consolidation 2026-11-24T17:07:02Z
+- [2026-11-24T17:04:20Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "in_progress", "note": "V3 start: tao worktree, doc code V2"}
+- [2026-11-24T17:04:56Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:05:18Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "in_progress", "note": "doc code V2 (b_panel,c_models2,e_bt2); worktree wt-dcf-v3-20261125 san sang"}
+- [2026-11-24T17:05:56Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:06:56Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:05:48Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "bắt đầu: khảo sát file"}
+- [2026-11-24T17:06:38Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:06:47Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "đo BQ xong (sàn đề xuất 150, hệ số 0.90 không false-positive từ 2016); đọc cổng"}
