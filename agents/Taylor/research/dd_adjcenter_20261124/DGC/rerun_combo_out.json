@@ -1,0 +1,140 @@
+{
+ "cases": {
+  "COMBO_center": {
+   "KT": 0.030927,
+   "center": 41132,
+   "dQ4": 31.645,
+   "d_pct": -1.712,
+   "d_vnd": -717
+  },
+  "COMBO_high": {
+   "KT": 0.015463,
+   "center": 41555,
+   "dQ4": 47.4675,
+   "d_pct": -0.701,
+   "d_vnd": -293
+  },
+  "COMBO_low": {
+   "KT": 0.075,
+   "center": 39957,
+   "dQ4": 0.0,
+   "d_pct": -4.52,
+   "d_vnd": -1892
+  },
+  "KT_hi": {
+   "KT": 0.1,
+   "center": 39327,
+   "d_pct": -6.027,
+   "d_vnd": -2522
+  },
+  "KT_lo": {
+   "KT": 0.061853,
+   "center": 40289,
+   "d_pct": -3.728,
+   "d_vnd": -1560
+  },
+  "Q4_q3runrate": {
+   "center": 41979,
+   "dQ4": 63.29,
+   "d_pct": 0.313,
+   "d_vnd": 131
+  },
+  "S_inv_qual_full": {
+   "center": 39437,
+   "d_pct": -5.763,
+   "d_vnd": -2412,
+   "other": -922.622676
+  },
+  "S_inv_qual_full_aftertax": {
+   "center": 39755,
+   "d_pct": -5.003,
+   "d_vnd": -2094,
+   "other": -801.008221
+  },
+  "S_legal_axis": {
+   "center": 38919,
+   "d_pct": -7.001,
+   "d_vnd": -2930,
+   "legal": true
+  },
+  "S_ore_w0": {
+   "center": 41522,
+   "d_pct": -0.782,
+   "d_vnd": -327
+  },
+  "S_ore_w0.5_term": {
+   "center": 47753,
+   "d_pct": 14.108,
+   "d_vnd": 5904
+  },
+  "S_ore_w1.0": {
+   "center": 42176,
+   "d_pct": 0.782,
+   "d_vnd": 327
+  },
+  "S_prov_4q": {
+   "center": 43791,
+   "d_pct": 4.642,
+   "d_vnd": 1942,
+   "prov": {
+    "huu_han_4q": 1.0
+   }
+  },
+  "S_prov_mot_lan": {
+   "center": 44700,
+   "d_pct": 6.813,
+   "d_vnd": 2851,
+   "prov": {
+    "mot_lan": 1.0
+   }
+  },
+  "S_prov_vinh_vien": {
+   "center": 37055,
+   "d_pct": -11.455,
+   "d_vnd": -4794,
+   "prov": {
+    "vinh_vien": 1.0
+   }
+  },
+  "S_r4_fix": {
+   "center": 39427,
+   "d_pct": -5.788,
+   "d_vnd": -2422
+  },
+  "S_ronic20": {
+   "center": 43813,
+   "d_pct": 4.694,
+   "d_vnd": 1964
+  },
+  "S_shield20": {
+   "center": 42419,
+   "d_pct": 1.363,
+   "d_vnd": 570
+  },
+  "S_wc_release_to_YE25": {
+   "center": 42873,
+   "d_pct": 2.448,
+   "d_vnd": 1025,
+   "other": 391.986078
+  }
+ },
+ "ck": 0.00724700220209937,
+ "control_center": 41849,
+ "dq4": 63.29,
+ "ebit_q3_ex_prov": 481.21,
+ "kt_hi": 0.1,
+ "kt_lo": 0.06185,
+ "p": {
+  "KT": [
+   0.5,
+   0.25,
+   0.75
+  ],
+  "Q4": [
+   0.5,
+   0.25,
+   0.75
+  ]
+ },
+ "q4_base": 417.92
+}

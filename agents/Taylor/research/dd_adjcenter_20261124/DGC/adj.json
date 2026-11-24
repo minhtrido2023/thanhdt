@@ -1,0 +1,247 @@
+{
+ "ticker": "DGC",
+ "dd_date": "2026-10-30",
+ "rev": 3,
+ "asof": "2026-11-24",
+ "prereg_md5": "ef5157cb3f762d58623ed550ebc214c7",
+ "prereg_v2_md5": "835dfc1e07f9c67ac7f6c3028b529d13",
+ "blind_to_price": true,
+ "center_base": 41849,
+ "center_base_source": "kb/dd_price_zones.json DGC rev3 center (sau CK 0,725% @5 tỷ)",
+ "method": "chạy lại mô hình r3b tổ hợp (rerun_combo.py) — CONTROL 41.849 + 7 biến thể r3b tái lập đúng",
+ "rerun_md5": "149a7ba1b487a5e17548a2d6b85d427e",
+ "items": [
+  {
+   "name": "Trích quỹ KTPL hằng năm từ LNST (2026→vĩnh viễn) chưa trừ (C+ — cận bảo thủ)",
+   "dir": "down",
+   "evidence_tier": "C+",
+   "mag_pct": -3.728,
+   "mag_range_pct": [
+    -3.728,
+    -6.027
+   ],
+   "note": "Mô hình chỉ trừ tồn quỹ 592,8 (stock). Quỹ tăng 405,7 → 592,8 (+187,1) trong Q3/26 — chi quỹ ≥0 ⇒ trích ≥ 187,1 trên LNST mẹ 2025 3.024,9 (BQ) = 6,19% (cận bảo thủ, 1 kỳ ⇒ p mặc định). Cận trên m dùng 10% = ước lượng (không có số DGC). m đo bằng chạy lại mô hình: core×(1−KT) + trừ KT×LNST mẹ 9T/26 1.267,10.",
+   "source": "/tmp/ddrestore_B/agents/Taylor/research/dgc_valuation_20261029_r12/MIKE_EXTRACT_BCTC_Q3_2026.md (git 60fe58b82^; md5 0e8288ee…):35 (quỹ KTPL 592,8; 30/06 405,7); BQ ticker_financial DGC NP_P0 2025Q1–Q4; mô hình r3b value_ps (trừ FUND_KTPL)",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "counted_in_center_bool": true,
+   "contrib_pct": -1.864
+  },
+  {
+   "name": "EBIT lõi Q4/26 (base 9T/3 = 417,92 trước dự phòng) thấp hơn nhịp Q3 (481,21)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "mag_pct": 0.313,
+   "mag_range_pct": [
+    0.0,
+    0.313
+   ],
+   "note": "Q3/26: LN gộp 506,35 − BH 76,18 − QLDN 48,96 + dự phòng 100 trong giá vốn = 481,21; H1 TB 386,3. Skeptic nghi Q4 'quá cao' vì gồm thời gian khai trường còn chạy — số Q3 (sau khi dừng) đi NGƯỢC nghi ngờ đó. 1 kỳ ⇒ p mặc định.",
+   "source": "/tmp/ddrestore_B/agents/Taylor/research/dgc_valuation_20261029_r12/MIKE_EXTRACT_BCTC_Q3_2026.md (git 60fe58b82^; md5 0e8288ee…):8-17,35,40; agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:34 (too_high 'Q4 lấy TB 9T <1%')",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "counted_in_center_bool": true,
+   "contrib_pct": 0.157
+  }
+ ],
+ "sum_p_m_pct_linear": -1.708,
+ "sum_pct_combo": -1.713,
+ "center_adj": 41132,
+ "range_low": 39957,
+ "range_high": 41555,
+ "range_low_linear": 39957,
+ "range_high_linear": 41557,
+ "dividend_mech": {
+  "status": "cổ tức 8.000 đ/cp đã chi xong (phải trả 0,06 tỷ); không có quyền tiền mặt chưa GDKHQ trong nguồn",
+  "vnd": 0
+ },
+ "center_adj_ex_div": 41132,
+ "legal": "WARNING — vụ án hình sự (luật 27/09): phân tích trên BCTC, pháp lý không vào tâm",
+ "sensitivity_only": [
+  {
+   "name": "[QUYẾT ĐỊNH USER 08/11 — cách B] biên vĩnh viễn nhánh mở lại khai trường 25",
+   "dir": "up",
+   "evidence_tier": "user_decision",
+   "sensitivity": "w=0,5 CÓ biên vĩnh viễn ⇒ 47.753 (+14.11%); w=1 không biên ⇒ 42.176 (+0.78%); w=0 ⇒ 41.522 (-0.78%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:15; agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3b.md:5,13-15"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke 12,3–13,4% (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3% ⇒ 43.657 (+4,32%); 13,4% ⇒ 41.987 (+0,33%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/REPORT_recheck_DGC.md:72-76"
+  },
+  {
+   "name": "[LUẬT D4] RONIC = Ke (thay vì 20%)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "RONIC 20% ⇒ 43.813 (+4.69%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:34"
+  },
+  {
+   "name": "Ngoại trừ kiểm toán 2025: 950,9 tỷ tồn kho",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "mất toàn bộ ⇒ 39.437 (-5.76%); sau thuế ⇒ 39.755 (-5.00%); cận dưới 0 (tồn kho có thật)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:16; agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3b.md:77"
+  },
+  {
+   "name": "Giải phóng vốn lưu động: tồn kho 2.085,9 về mức YE25 1.681,9",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "42.873 (+2.45%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:34; /tmp/ddrestore_B/agents/Taylor/research/dgc_valuation_20261029_r12/MIKE_EXTRACT_BCTC_Q3_2026.md (git 60fe58b82^; md5 0e8288ee…):32"
+  },
+  {
+   "name": "Trục dự phòng môi trường 100 tỷ/quý (1/3 một lần · 1/3 bốn quý · 1/3 vĩnh viễn [UL])",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "một lần ⇒ 44.700 (+6.81%); bốn quý ⇒ 43.791 (+4.64%); vĩnh viễn ⇒ 37.055 (-11.46%)",
+   "source": "agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3b.md:91"
+  },
+  {
+   "name": "Lá chắn thuế của dự phòng 0 [UL]",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "20% ⇒ 42.419 (+1.36%)",
+   "source": "agents/Taylor/research/dd_redo_20261105/DGC/REPORT_r3b.md:40"
+  },
+  {
+   "name": "Nền biên r4 thay R2 (đã đối chiếu: GPM Q3 trước dự phòng 24,6% ủng hộ R2)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "39.427 (-5.79%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:34"
+  },
+  {
+   "name": "HTM 9.531 chưa đối chiếu PDF gốc",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "mỗi 1.000 tỷ lệch ⇒ ∓2.536 đ/cp",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:10"
+  },
+  {
+   "name": "Capex môi trường bắt buộc sau vụ án (bãi thải/xử lý nước/hoàn nguyên KT25)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "mỗi 1.000 tỷ NPV âm ⇒ −2.536 đ/cp (ngoài trục dự phòng đã có)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:16; agents/Taylor/research/dd_recheck_20261124/DGC/REPORT_recheck_DGC.md:85"
+  },
+  {
+   "name": "Nhà cung cấp quặng mua ngoài / bên liên quan",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "chưa có số",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:33"
+  },
+  {
+   "name": "PHÁP LÝ — vụ án hình sự (luật 27/09: chỉ WARNING)",
+   "dir": "down",
+   "evidence_tier": "warning",
+   "sensitivity": "trục haircut tiền ròng 3/9/29% (hiển thị) ⇒ 38.919 (-7.00%); KHÔNG vào tâm",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DGC/REPORT_recheck_DGC.md:100; agents/Taylor/research/dd_recheck_20261124/DGC/skeptic/r1_raw.md:27"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "Đọc thuyết minh 18 (quỹ KTPL) BCTC Q3/26 + NQ ĐHĐCĐ 2026: số trích thật từ LN 2025 = 10%",
+   "when": "làm được ngay",
+   "direction": "down",
+   "delta_pct": -3.56,
+   "delta_vnd": -1490,
+   "note": "C+→A p 0,9"
+  },
+  {
+   "event": "… số trích thật = 6,2% (đúng cận dưới)",
+   "when": "làm được ngay",
+   "direction": "down",
+   "delta_pct": -1.49,
+   "delta_vnd": -624,
+   "note": "C+→A p 0,9"
+  },
+  {
+   "event": "BCTC soát xét bán niên 2026 (đã công bố): ngoại trừ tồn kho 950,9 còn/gỡ",
+   "when": "làm được ngay",
+   "direction": "down",
+   "delta_pct": -4.5,
+   "delta_vnd": -1884,
+   "note": "gỡ ⇒ 0; còn VÀ kiểm toán lượng hoá mất toàn bộ ⇒ C→A p 0,9 (sau thuế); mất một phần ⇒ tỷ lệ theo số"
+  },
+  {
+   "event": "BCTC Q4/2026: không trích dự phòng môi trường mới",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "up",
+   "delta_pct": 6.813,
+   "delta_vnd": 2851,
+   "note": "trục dự phòng → nhánh một lần (w=1)"
+  },
+  {
+   "event": "BCTC Q4/2026: trích tiếp ≥100 tỷ",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "down",
+   "delta_pct": -3.41,
+   "delta_vnd": -1426,
+   "note": "loại nhánh một lần; bốn quý/vĩnh viễn 50/50"
+  },
+  {
+   "event": "BCTC Q4/2026: EBIT lõi Q4 trước dự phòng ≥ 481 tỷ",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "up",
+   "delta_pct": 0.13,
+   "delta_vnd": 52,
+   "note": "B→A"
+  },
+  {
+   "event": "BCTC Q4/2026: EBIT lõi Q4 ≤ 418 tỷ",
+   "when": "ước lượng cuối 01/2027*",
+   "direction": "down",
+   "delta_pct": -0.16,
+   "delta_vnd": -65,
+   "note": "hạng mục = 0"
+  },
+  {
+   "event": "Văn bản thời hạn GP + trữ lượng KT25/19B",
+   "when": "khi có",
+   "direction": "up",
+   "delta_pct": 14.108,
+   "delta_vnd": 5904,
+   "note": "CẬN TRÊN (vĩnh viễn). Biên hữu hạn theo thời hạn GP nằm giữa 0 và số này; đổi cách B là QUYẾT ĐỊNH USER, không tự áp. Quyết định đóng vĩnh viễn ⇒ -327"
+  },
+  {
+   "event": "Đối chiếu HTM 9.531 với PDF gốc",
+   "when": "làm được ngay",
+   "direction": "both",
+   "delta_pct": 6.06,
+   "delta_vnd": 2536,
+   "note": "mỗi 1.000 tỷ lệch"
+  },
+  {
+   "event": "NQ/công văn: capex môi trường bắt buộc",
+   "when": "khi có",
+   "direction": "down",
+   "delta_pct": -6.06,
+   "delta_vnd": -2536,
+   "note": "mỗi 1.000 tỷ NPV âm; C→A"
+  },
+  {
+   "event": "Lãi huy động 12T hiệu dụng ±50bp (luật V1, β=1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_pct": -1.58,
+   "delta_vnd": -661,
+   "note": "−50bp ⇒ +712 (REPORT_recheck:74,77)"
+  },
+  {
+   "event": "Pháp lý: khởi tố pháp nhân / phạt, truy thu có số tiền",
+   "when": "khi có",
+   "direction": "down",
+   "delta_pct": 0,
+   "delta_vnd": 0,
+   "note": "WARNING (luật 27/09). Có SỐ TIỀN phạt/truy thu ⇒ trừ tiền ròng theo số (A), không phải haircut"
+  }
+ ],
+ "caveat": "m KTPL & Q4 đo bằng mô hình; cận trên KTPL 10% là ước lượng; trục dự phòng/biên mở lại giữ nguyên [UL]/quyết định user"
+}
