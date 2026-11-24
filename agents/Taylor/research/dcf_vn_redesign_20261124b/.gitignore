@@ -1,0 +1,4 @@
+out/*.parquet
+out/delisted/px_*.csv
+out/delisted/fs_*.csv
+out/px_pre2013_d.csv
