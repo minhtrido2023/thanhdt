@@ -1,0 +1,26 @@
+# LOCK md5 — CK holding v3 (job Taylor_20261124_041821) 2026-11-24 11:56:26 ICT
+7a7aef5904a29d2981187553332837c0  PREREG_v3.md
+934589a46ad975bc8b4a770caae8512e  calc_ck_v3.py
+36cfc1355fe91dbbd3a94bb2bb135aab  fetch_inputs_v3.py
+d39742ddc65c7686d0568c2e891833f5  inputs/bq_fin.csv
+0b356525a823b68914f43b2dab7030f7  inputs/cap_events.csv
+299cd6ca17d32e67e327d9baf28d7ec7  inputs/divs.csv
+aa52814ecf1c74700aec569193991d10  inputs/prescreen.csv
+ab9fa970fd157d67b05ba08f54218377  inputs/prices.csv
+c7b85272708bb82222d01e18da0fc2da  inputs/qualified_parents.csv
+cb11b8d57a43126c3f0d71a7e404321b  inputs/sh_scan_targets.csv
+4ca52663289d6599439dfe1f8820f50d  inputs/shares_pit.csv
+7d8f277aa42dfcbeb84f00a87412d91b  inputs/stakes_all.csv
+3f6eba4b0e5be8fbc25760e55f34bf3b  inputs/universe_U0.csv
+664fd8850d2a3043e6c90c182fbc9e51  inputs/universe_pit_monthend.csv
+e206e88c677ab1df267641dfbb6ca38b  inputs/vci_bs_long.csv
+bf5a116fb052258ff8d27ce6343a8c6e  inputs/dates.json
+a0ff4f43e92b249310b2ec0a2f2d264c  calc_out_v3.json
+8a06d01b3c20c1d035ca28ce88e31f40  panel_v3.csv
+b8cf3c781a6ffa9d5b12f8ce9d61c107  run1.txt
+b8cf3c781a6ffa9d5b12f8ce9d61c107  run2.txt
+b8cf3c781a6ffa9d5b12f8ce9d61c107  run_dna.txt
+a43f87d142b04f42acd9844d156aaf09  REPORT_CK_HOLDING_v3.md
+# raw/ tong hop (find raw -type f | sort | xargs md5sum | md5sum):
+2164318f68b3960ad6e71c8d13d20e56  -
+# interpreters: python3 pandas 2.3.3 / numpy 1.26.4 ; /home/trido/thanhdt/wc_venv/bin/python pandas 3.0.2 / numpy 2.4.4 -> run1=run2=run_dna, calc_out/panel md5 trung
