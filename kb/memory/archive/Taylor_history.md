@@ -2753,3 +2753,6 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T12:11:22Z] [VCB DD 23/11] XONG job Taylor_20261123_120305: REPORT_rev4 tâm 35.600 (vùng 30.900–42.100), r4 INCONCLUSIVE (vòng cuối) — CHỜ Mike áp LEDGER_PROPOSAL_VCB.json (REFUTED_OPEN) / user quyết
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T12:11:56Z] [SCL rev7 23/11] XONG job Taylor_20261123_120301: REPORT_rev7 tâm 16.237, skeptic r4 INCONCLUSIVE (HĐ nguồn tro) — vòng cuối, CHỜ Mike áp LEDGER_PROPOSAL_SCL.json (REFUTED_OPEN)

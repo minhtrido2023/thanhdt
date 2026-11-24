@@ -209,3 +209,9 @@
 
 ## Archived 2026-11-23 (keep=12 days=0 require_done=False)
 - [2026-11-22T23:46:02Z] [23/11 06:5x] Phiên mới topic 1574208662719828062: sửa current_ops_ext sizing xong+merged. Lô 1 (DCM/TTA/PNJ/VCB/MSB) đang chạy, poll bằng ScheduleWakeup; worktree ../wt-mike-1574208662719828062 (branch session/1574208662719828062). Usage 71%.
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T17:37:05Z] [24/11 00:5x] DD vs Radar XONG: R1+D1 done, quant-skeptic cả hai REFUTED/medium (phần quy trách; lõi đứng). MEMO_MIKE.md đã post topic 1574470111769796668 (3 tin). CHỜ USER: A rerun R1/D1 nhất quán; B radar display (dòng EPS chuẩn hoá+cờ đỉnh, thống nhất cơ sở lãi huy động); C cột tâm@Ke12,3%; D brief skeptic đếm too_low; F ticket data-ops OShares/ex-date; luật 4 giữ. KHÔNG tự đổi gì, không poll nữa. Sổ 133 (PAT/TCH/VGS REFUTED_OPEN) đã merge.
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T17:47:56Z] [24/11 00:5x] User DUYỆT 4 việc (A,B+C,D,F), hỏi thêm luật 4. Dispatched (thread 1574470111769796668): A rerun R1/D1 → Taylor_20261123_174703 (opus/medium, ra rerun/REPORT_R2/D2.md); B radar display EPS chuẩn hoá+cờ đỉnh+cơ sở lãi huy động → Taylor_20261123_174706 (worktree riêng, KHÔNG merge — Mike duyệt diff rồi merge); F ticket OShares/ex-date → Winston_20261123_174708 (read-only). C+D XONG tại chỗ: skill due-diligence V1 thêm E15 (dòng 'Tâm @Ke 12,3%'), fundamental-skeptic DD_GENERAL thêm 5b symmetry (backup .bak_20261124). Sau A xong: chạy quant-skeptic lần cuối (1 vòng) trên R2/D2 rồi mới nhãn E. Luật 4: khuyến nghị GIỮ; đề xuất đo prospective price/tâm→fwd return 3/6/12m, checkpoint 2027-03-31. Wakeup poll cả batch.
