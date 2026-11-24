@@ -110,7 +110,34 @@ else
   say "WARNING: không đọc được CCDB ($CCDB_URL) — fail-closed, sẽ không xoá gì ở chế độ --apply"
 fi
 
+# Nới luật "active" (user duyệt 2026-11-24 16:15 ICT, sau sự cố đĩa 100%: CCDB coi MỌI thread là
+# active ⇒ cron dọn 03:00 giữ cả 17/17 worktree đã merge). Nay: CCDB có tên VÀ còn dấu hiệu sống
+# mới là active. Idle = KHÔNG process nào có cwd trong worktree VÀ không file nào ghi trong
+# IDLE_MIN phút (mặc định 120); worktree không còn thư mục ⇒ tuổi commit đầu nhánh > IDLE_MIN.
+# Vẫn BẮT BUỘC merged + sạch (kiểm sau đó) — chỉ bỏ cái neo "thread còn đăng ký trong CCDB".
+IDLE_MIN="${WT_IDLE_MIN:-120}"
+is_idle() {
+  local wt="$1" branch="$2" c l pid
+  if [ -d "$wt" ]; then
+    for c in /proc/[0-9]*/cwd; do
+      pid="${c#/proc/}"; pid="${pid%/cwd}"; [ "$pid" = "$$" ] && continue
+      l="$(readlink "$c" 2>/dev/null || true)"
+      case "$l" in "$wt"|"$wt"/*) return 1 ;; esac
+    done
+    [ -z "$(find "$wt" -xdev -mmin "-$IDLE_MIN" -type f -not -name .git -not -path '*/.git/*' -print -quit 2>/dev/null)" ]
+  else
+    local ct; ct="$(git -C "$ROOT" log -1 --format=%ct "$branch" 2>/dev/null || echo 0)"
+    [ $(( $(date +%s) - ct )) -ge $(( IDLE_MIN * 60 )) ]
+  fi
+}
+
 is_active() {
+  is_ccdb_listed "$@" || return 1
+  is_idle "$@" && return 1
+  return 0
+}
+
+is_ccdb_listed() {
   local wt="$1" branch="$2" id dir
   for id in "${active_ids[@]}"; do
     case "$branch" in
