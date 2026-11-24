@@ -101,21 +101,44 @@ def sector_of(t):
     return f"ICB{c}·đá" if t.upper() in STONE_GROUP else f"ICB{c}"
 
 
+def _num(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+
+
 def adj_center_ok(e):
-    """Tâm kỳ vọng điều chỉnh HỢP LỆ (E17, user 24/11): center_adj số dương ∧ có center_adj_basis (adj.json) ∧ center_adj_md5
-    ∧ nhãn skeptic_final ≠ NONE. Tồn tại file/md5 do dd_price_zones_selfcheck chặn lúc ghi sổ — ở đây chỉ đọc trường."""
-    ca = e.get("center_adj")
-    return (isinstance(ca, (int, float)) and not isinstance(ca, bool) and ca > 0 and bool(e.get("center_adj_basis"))
-            and bool(e.get("center_adj_md5")) and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN"))
+    """Tâm kỳ vọng điều chỉnh HỢP LỆ (E17, user 24/11): center (tâm base) ∧ center_adj ∧ center_adj_low đều số dương
+    ∧ có center_adj_basis + center_adj_md5 ∧ skeptic_final ∈ whitelist (khớp validator sổ). Khớp md5 file basis kiểm LÚC ĐỌC
+    ở evaluate() (adj_basis_problem) — lệch/mất ⇒ evaluate bỏ các trường center_adj* khỏi entry ⇒ hàm này trả False."""
+    return (_num(e.get("center")) and _num(e.get("center_adj")) and _num(e.get("center_adj_low"))
+            and bool(e.get("center_adj_basis")) and bool(e.get("center_adj_md5"))
+            and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN"))
+
+
+def adj_basis_problem(e, root=None):
+    """None nếu entry không khai center_adj* hoặc md5 file center_adj_basis còn khớp; ngược lại lý do (mất file/md5 lệch/đường dẫn thoát root)."""
+    if not any(k.startswith("center_adj") for k in e):
+        return None
+    import hashlib
+    base = os.path.realpath(root or MIKE)
+    f = os.path.realpath(os.path.join(base, str(e.get("center_adj_basis") or "")))
+    if not str(e.get("center_adj_basis") or "") or not (f == base or f.startswith(base + os.sep)):
+        return "center_adj_basis thiếu/ngoài root"
+    try:
+        got = hashlib.md5(open(f, "rb").read()).hexdigest()
+    except OSError as x:
+        return f"không đọc được center_adj_basis ({x.__class__.__name__})"
+    if got != e.get("center_adj_md5"):
+        return f"md5 center_adj_basis lệch ({got[:8]}≠{str(e.get('center_adj_md5'))[:8]})"
+    return None
 
 
 def zone_low_eff(e):
-    """Đáy vùng DÙNG CHO BẬC 1 = zone_low, và CHỈ SIẾT khi tâm điều chỉnh < tâm base: zone_low × (center_adj/center).
-    Tâm điều chỉnh cao hơn tâm KHÔNG nới đáy (phương án A — điều chỉnh chỉ làm cổng chặt hơn, không lỏng hơn)."""
-    lo, c, ca = e.get("zone_low"), e.get("center"), e.get("center_adj")
-    if lo is not None and c and adj_center_ok(e) and ca < c:
-        return lo * ca / c
-    return lo
+    """Đáy vùng DÙNG CHO BẬC 1 = min(zone_low, zone_low×center_adj/center, center_adj_low) khi tâm điều chỉnh hợp lệ — CHỈ SIẾT
+    (phương án A): tâm điều chỉnh cao hơn tâm base KHÔNG nới đáy. Không hợp lệ ⇒ zone_low."""
+    lo = e.get("zone_low")
+    if lo is None or not adj_center_ok(e):
+        return lo
+    return min(lo, lo * e["center_adj"] / e["center"], e["center_adj_low"])
 
 
 def tier_of(row, dd_flag, adv, pos_vnd, part, max_sessions=TIER1_EXIT_SESSIONS):
@@ -129,7 +152,8 @@ def tier_of(row, dd_flag, adv, pos_vnd, part, max_sessions=TIER1_EXIT_SESSIONS):
     sk = e.get("skeptic_final")
     if sk != "CONFIRMED" and not adj_center_ok(e):
         why.append(f"skeptic {sk or '?'}")
-        why.append("chưa có tâm kỳ vọng điều chỉnh (E17)")
+        why.append("chưa có tâm kỳ vọng điều chỉnh (E17)" if not row.get("adj_note")
+                   else f"tâm điều chỉnh bị bỏ: {row['adj_note']}")
     if e.get("audited_fy_missing") is True:   # D5 (user 22/11): thiếu BCTC kiểm toán năm gần nhất ⇒ không vào Bậc 1
         why.append("thiếu BCTC kiểm toán năm gần nhất (D5)")
     fl = [f for f in row.get("flags", []) if not f.startswith("đang giữ")]
@@ -316,6 +340,11 @@ def evaluate(ledger, asof, prices, flags, newer_releases, state, thr=THRESHOLD_P
         lm = lock_mismatch(e)
         if lm:
             is_exp, why = True, lm
+        adj_note = None
+        if not is_exp:
+            adj_note = adj_basis_problem(e)
+            if adj_note:                 # basis mất/lệch ⇒ bỏ tâm điều chỉnh, về cổng nhãn cũ (fail-closed), kèm lý do ở Bậc 2
+                e = {k: v for k, v in e.items() if not k.startswith("center_adj")}
         if is_exp:
             expired.append({"ticker": t, "dd_date": e["dd_date"], "why": why, "flags": flags.get(t, [])})
             continue
@@ -325,6 +354,8 @@ def evaluate(ledger, asof, prices, flags, newer_releases, state, thr=THRESHOLD_P
             pr.update(close=None, adv20=None, err=uerr)
         row = {"ticker": t, "entry": e, "close": pr.get("close"), "adv20": pr.get("adv20"),
                "err": pr.get("err"), "flags": list(flags.get(t, [])), "frame_notes": [], "frame_block": False}
+        if adj_note:
+            row["adj_note"] = adj_note
         if corp is not None:
             row["frame_notes"], row["frame_block"] = frame_check(e, corp.get(t), asof)
         if pr.get("close") is not None:

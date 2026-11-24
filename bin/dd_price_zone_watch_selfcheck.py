@@ -514,6 +514,39 @@ def cases(m):
        and m.zone_low_eff(arow(adj=25000.0)["entry"]) == 18000)
     ok("E17: CONFIRMED + tâm điều chỉnh thấp cũng bị siết", T(arow(sk="CONFIRMED", adj=15000.0))[0] == 2)
     ok("E17: CONFIRMED không có tâm điều chỉnh ⇒ vẫn Bậc 1 (không đổi hành vi cũ)", T(trow()) == (1, []))
+    ok("E17: center=None + center_adj ⇒ fail-closed Bậc 2 (không mở nhãn)", T(dict(arow(), entry=dict(arow()["entry"], center=None)))[0] == 2)
+    ok("E17: center=0 + center_adj ⇒ Bậc 2", T(dict(arow(), entry=dict(arow()["entry"], center=0)))[0] == 2)
+    ok("E17: center_adj dạng chuỗi ⇒ Bậc 2 (không crash)", T(dict(arow(), entry=dict(arow()["entry"], center_adj="19000")))[0] == 2)
+    ok("E17: center_adj_low thiếu ⇒ Bậc 2", T(dict(arow(), entry={k: v for k, v in arow()["entry"].items() if k != "center_adj_low"}))[0] == 2)
+    ok("E17: giá 17.000 > center_adj_low 12.000 ⇒ Bậc 2 (đáy lấy cả low)",
+       T(dict(arow(), entry=dict(arow()["entry"], center_adj_low=12000.0, center_adj=19000.0)))[0] == 2
+       and m.zone_low_eff(dict(arow()["entry"], center_adj_low=12000.0)) == 12000.0)
+    # đọc basis LÚC ĐỌC (evaluate): md5 lệch / mất file ⇒ bỏ tâm điều chỉnh, về cổng nhãn cũ
+    with tempfile.TemporaryDirectory() as td:
+        import hashlib
+        aj = json.dumps({"ticker": "AAA", "center_adj": 19000.0}).encode()
+        os.makedirs(os.path.join(td, "root"))
+        open(os.path.join(td, "root", "adj.json"), "wb").write(aj)
+        open(os.path.join(td, "x.json"), "wb").write(aj)     # file NGOÀI root có md5 đúng — vẫn phải bị từ chối
+        m0 = m.MIKE
+        m.MIKE = os.path.join(td, "root")
+        try:
+            def ev(md5, basis="adj.json"):
+                e3 = dict(ent("AAA"), skeptic_final="REFUTED_OPEN", center_adj=19000.0, center_adj_low=18000.0,
+                          center_adj_high=21000.0, center_adj_basis=basis, center_adj_md5=md5)
+                rws3, _x3, _ = m.evaluate({"entries": [e3]}, D(2026, 11, 2), {"AAA": {"close": 15000}}, {}, None, {})
+                return rws3[0], m.tier_of(rws3[0], CLEAN, ADV, POS, PART)
+            rg, tg = ev(hashlib.md5(aj).hexdigest())
+            ok("E17 đọc: basis khớp md5 ⇒ Bậc 1, entry giữ center_adj", tg == (1, []) and "center_adj" in rg["entry"] and "adj_note" not in rg)
+            rb, tb = ev("0" * 32)
+            ok("E17 đọc: md5 lệch ⇒ bỏ tâm điều chỉnh, Bậc 2 kèm lý do", tb[0] == 2 and "center_adj" not in rb["entry"]
+               and any("tâm điều chỉnh bị bỏ" in w for w in tb[1]))
+            rm, tm = ev(hashlib.md5(aj).hexdigest(), basis="mat.json")
+            ok("E17 đọc: mất file basis ⇒ Bậc 2", tm[0] == 2 and "center_adj" not in rm["entry"])
+            rp, tp = ev(hashlib.md5(aj).hexdigest(), basis="../x.json")
+            ok("E17 đọc: basis thoát root ⇒ Bậc 2", tp[0] == 2)
+        finally:
+            m.MIKE = m0
     ok("tier_of không đổi row", (lambda r: (m.tier_of(r, CLEAN, ADV, POS, PART), r)[1] == trow())(trow()))
     # end-to-end qua evaluate/build_candidates/render: mã có cờ VẪN hiện (Bậc 2), tập mã không đổi
     led2 = {"entries": [dict(ent("OKK"), skeptic_final="CONFIRMED"), dict(ent("FLG"), skeptic_final="CONFIRMED")]}
@@ -596,12 +629,21 @@ MUTANTS = [
      'out.update(zip(rest, ex.map(one, rest[::-1])))'),
     ("A7-1 Bậc 1 không cần dưới đáy", 'if c is None or lo is None or not c < lo:', 'if False:'),
     ("A7-2 Bậc 1 không cần CONFIRMED", 'if sk != "CONFIRMED" and not adj_center_ok(e):', 'if False:'),
-    ("E17-1 tâm điều chỉnh cao NỚI đáy", 'and ca < c:', 'and True:'),
-    ("E17-2 skeptic NONE vẫn nhận tâm điều chỉnh", ' and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN")', ''),
-    ("E17-3 không đòi center_adj_basis", ' and bool(e.get("center_adj_basis"))', ''),
-    ("E17-4 không đòi center_adj_md5", '\n            and bool(e.get("center_adj_md5"))', ''),
-    ("E17-5 bool coi là số", ' and not isinstance(ca, bool)', ''),
-    ("E17-6 bỏ siết đáy", 'return lo * ca / c', 'return lo'),
+    ("E17-1 tâm điều chỉnh cao NỚI đáy", 'min(lo, lo * e["center_adj"] / e["center"], e["center_adj_low"])', 'lo * e["center_adj"] / e["center"]'),
+    ("E17-2 skeptic NONE vẫn nhận tâm điều chỉnh", '\n            and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN"))', ')'),
+    ("E17-3 không đòi center_adj_basis", 'and bool(e.get("center_adj_basis")) ', ''),
+    ("E17-4 không đòi center_adj_md5", ' and bool(e.get("center_adj_md5"))', ''),
+    ("E17-5 không đòi center_adj số", ' and _num(e.get("center_adj")) and', ' and'),
+    ("E17-15 không đòi center_adj_low", ' and _num(e.get("center_adj_low"))', ''),
+    ("E17-6 bỏ siết đáy", 'min(lo, lo * e["center_adj"] / e["center"], e["center_adj_low"])', 'lo'),
+    ("E17-7 bỏ center_adj_low khỏi đáy", 'min(lo, lo * e["center_adj"] / e["center"], e["center_adj_low"])', 'min(lo, lo * e["center_adj"] / e["center"])'),
+    ("E17-8 không đòi center số dương", 'return (_num(e.get("center")) and ', 'return (True and '),
+    ("E17-9 _num nhận bool", 'return isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0', 'return isinstance(v, (int, float)) and v > 0'),
+    ("E17-10 _num nhận chuỗi", 'return isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0', 'return v is not None and v != 0'),
+    ("E17-11 bỏ kiểm md5 lúc đọc", 'if got != e.get("center_adj_md5"):', 'if False:'),
+    ("E17-12 không bỏ adj khi basis hỏng", 'e = {k: v for k, v in e.items() if not k.startswith("center_adj")}', 'pass'),
+    ("E17-13 basis thoát root được phép", 'not (f == base or f.startswith(base + os.sep))', 'False'),
+    ("E17-14 whitelist skeptic thêm NONE", '("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN")', '("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN", "NONE")'),
     ("A7-3 bỏ kiểm cờ tĩnh", 'if fl:\n        why.append("cờ: "', 'if False:\n        why.append("cờ: "'),
     ("A7-4 cờ DD chưa kiểm ⇒ im lặng Bậc 1", 'if dd_flag is None:', 'if False:'),
     ("A7-5 FLAGGED không hạ bậc", 'elif dd_flag[0] == "FLAGGED":', 'elif False:'),
