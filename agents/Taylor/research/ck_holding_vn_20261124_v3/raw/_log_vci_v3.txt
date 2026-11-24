@@ -1,0 +1,125 @@
+vci 0 451 AAA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  THÔNG BÁO THAY ĐỔI DỊCH VỤ
+
+  Từ 10/11/2026, thư viện Vnstock thế hệ 4 và thế hệ 5 ngừng hoạt động,
+  thế hệ 6 sẽ thay thế.
+
+  Nghị định 363/2026/NĐ-CP có hiệu lực từ ngày 11/11/2026, với quy định
+  chặt chẽ hơn về truy cập, sử dụng dữ liệu và API. Vnstock chuyển sang
+  cách làm mới: bạn dùng API miễn phí của công ty chứng khoán nơi bạn có
+  tài khoản, hoặc tệp dữ liệu tự chuẩn bị; phần mềm Vnstock chuẩn hoá và
+  xử lý trên máy bạn.
+
+  Vnstock thế hệ 6 dự kiến phát hành để thay thế. Khoá API của bạn nằm
+  trên máy bạn; máy chủ Vnstock không nhận khoá API hay nội dung dữ liệu
+  bạn xử lý. Cổng kết nối thuộc bản Cộng đồng, miễn phí cho cá nhân, học
+  tập và nghiên cứu.
+
+  Bạn có thể chuẩn bị ngay:
+    - Nếu mã còn dùng thế hệ 4, chuyển sang cách viết thế hệ 5, gợi ý
+      trước 05/11/2026. Thế hệ 6 giữ cách viết này.
+    - Kiểm tra tài khoản chứng khoán của bạn đã đăng ký API chưa; hầu hết
+      công ty chứng khoán cho đăng ký trực tuyến.
+
+  Đọc thông báo đầy đủ trong tài khoản:
+    https://vnstocks.com/account?section=notifications&n=chuyen-doi
+
+  Nhận thông báo cập nhật về thế hệ 6 trong nhóm Zalo của đợt chuyển đổi:
+    https://zalo.me/g/iovyc498nm5mpoexnaob
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+vci 10 451 BMP
+vci 20 451 DGC
+vci 30 451 GEE
+vci 40 451 HVN
+vci 50 451 KSV
+vci 60 451 NDN
+vci 70 451 PHP
+vci 80 451 PVT
+vci 90 451 SNZ
+vci 100 451 VEA
+vci 110 451 VNE
+vci 120 451 RTB
+vci TAC ERR ValueError('Không nhận được dữ liệu (data) từ VCI cho mã TAC tại section BALANCE_SHEET.')
+vci TAC ERR ValueError('Không nhận được dữ liệu (data) từ VCI cho mã TAC tại section BALANCE_SHEET.')
+vci TAC ERR ValueError('Không nhận được dữ liệu (data) từ VCI cho mã TAC tại section BALANCE_SHEET.')
+vci 130 451 PQN
+vci DPD ERR ValueError('Không nhận được dữ liệu (data) từ VCI cho mã DPD tại section BALANCE_SHEET.')
+vci 0 451 AAA
+vci 10 451 BMP
+vci 20 451 DGC
+vci 30 451 GEE
+vci 40 451 HVN
+vci 50 451 KSV
+vci 60 451 NDN
+vci 70 451 PHP
+vci 80 451 PVT
+vci 90 451 SNZ
+vci 100 451 VEA
+vci 110 451 VNE
+vci 120 451 RTB
+vci 130 451 PQN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  THÔNG BÁO THAY ĐỔI DỊCH VỤ
+
+  Từ 10/11/2026, thư viện Vnstock thế hệ 4 và thế hệ 5 ngừng hoạt động,
+  thế hệ 6 sẽ thay thế.
+
+  Nghị định 363/2026/NĐ-CP có hiệu lực từ ngày 11/11/2026, với quy định
+  chặt chẽ hơn về truy cập, sử dụng dữ liệu và API. Vnstock chuyển sang
+  cách làm mới: bạn dùng API miễn phí của công ty chứng khoán nơi bạn có
+  tài khoản, hoặc tệp dữ liệu tự chuẩn bị; phần mềm Vnstock chuẩn hoá và
+  xử lý trên máy bạn.
+
+  Vnstock thế hệ 6 dự kiến phát hành để thay thế. Khoá API của bạn nằm
+  trên máy bạn; máy chủ Vnstock không nhận khoá API hay nội dung dữ liệu
+  bạn xử lý. Cổng kết nối thuộc bản Cộng đồng, miễn phí cho cá nhân, học
+  tập và nghiên cứu.
+
+  Bạn có thể chuẩn bị ngay:
+    - Nếu mã còn dùng thế hệ 4, chuyển sang cách viết thế hệ 5, gợi ý
+      trước 05/11/2026. Thế hệ 6 giữ cách viết này.
+    - Kiểm tra tài khoản chứng khoán của bạn đã đăng ký API chưa; hầu hết
+      công ty chứng khoán cho đăng ký trực tuyến.
+
+  Đọc thông báo đầy đủ trong tài khoản:
+    https://vnstocks.com/account?section=notifications&n=chuyen-doi
+
+  Nhận thông báo cập nhật về thế hệ 6 trong nhóm Zalo của đợt chuyển đổi:
+    https://zalo.me/g/iovyc498nm5mpoexnaob
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+vci DPD ERR ValueError('Không nhận được dữ liệu (data) từ VCI cho mã DPD tại section BALANCE_SHEET.')
+vci 140 451 VOC
+vci 150 451 CCR
+vci 160 451 HEM
+vci 170 451 CMM
+vci 180 451 VTI
+vci 190 451 DP1
+vci 200 451 PVP
+vci 210 451 SDT
+vci 220 451 BVS
+vci 230 451 VPA
+vci 240 451 VTB
+vci 250 451 PSN
+vci 260 451 PGC
+vci 270 451 SAC
+vci 280 451 VSA
+vci 290 451 NAP
+vci 300 451 PTX
+vci 310 451 VAV
+vci 320 451 PGD
+vci 330 451 TVH
+vci 340 451 TVT
+vci 350 451 COM
+vci 360 451 ARM
+vci 370 451 KMT
+vci 380 451 PXC
+vci 390 451 M10
+vci 400 451 SDU
+vci 410 451 DAN
+vci 420 451 CTW
+vci 430 451 SGR
+vci 440 451 VRG
+vci 450 451 SII

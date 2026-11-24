@@ -1,0 +1,22 @@
+VIỆC (user duyệt 24/11/2026 11:17 ICT, topic Discord 1574627160235319398): CK holding VN v3 = SỬA 4 LỖI của v2 + dựng DẢI THAM CHIẾU HỢP LÝ HƠN.
+
+BỐI CẢNH: đọc agents/Taylor/research/ck_holding_vn_20261124_v2/REPORT_CK_HOLDING_v2.md và SKEPTIC_v2_quant-skeptic.md (cùng thư mục). User chọn phương án A cho HHS: giữ base 0% + dải độ nhạy có nguồn, NHƯNG nói: "nếu dải biến động lớn quá sẽ mất giá trị tham chiếu, cần có 1 dải hợp lý hơn". Dải v2 (0 / 6,5 / 23 / 38%) quá rộng (IQR 57pp).
+
+LÀM VIỆC TRONG thư mục mới agents/Taylor/research/ck_holding_vn_20261124_v3/ (copy inputs/raw/code từ v2 được, KHÔNG sửa file trong v2). Khoá md5 (LOCK_md5.txt), chạy 2 lần bit-exact (run1=run2).
+
+PHẦN 1 — SỬA 4 LỖI (theo SKEPTIC_v2, mỗi lỗi nêu tác động lên N/trung vị/đường tháng):
+1. PAN: thưởng 20% ex 29/05/2026 — dùng số CP 250,67 tr từ ngày ex (kể cả 07–09/2026; kiểm cổ phiếu quỹ). Rà TOÀN BỘ holding trong mẫu xem còn ca giá đã ex mà số CP chưa cập nhật tương tự (đối chiếu tav2_bq.corporate_action).
+2. T_eff/tự tương quan: chỉ tính trên các tháng n>=11 (cắt ngang thật), không gồm các tháng chỉ có VIC.
+3. Tiền lọc: độ phủ theo VCSH THUỘC CỔ ĐÔNG MẸ (không phải VCSH tổng gồm NCI), cho cả 116 mã đủ tiêu chí (hoặc hạ ngưỡng xuống ~15%); tải CĐKT VCI + giá cho mã mới đạt; báo N và trung vị mới; liệt kê mã mới vào/ra. Prescreen không được chụp 1 ngày cuối cửa sổ để chọn mẫu cho các tháng trước đó (PIT nhất quán).
+4. Con mỏng: dùng cờ thin/ADV60 (đề xuất ADV60 < 0,1 tỷ hoặc ngày khớp 60 phiên < 20); chạy độ nhạy loại/giảm trọng con mỏng; đặc biệt CMX (chỉ con CMM ADV60 0,045 tỷ).
+Kèm: sửa calc để chạy đúng cả pandas 2.x lẫn 3 (isinstance(r.nested_via, str)) — kiểm tra bằng CẢ HAI interpreter ($DNA_PYEXE = /home/trido/thanhdt/wc_venv/bin/python và python3), kết quả PHẢI giống nhau.
+
+PHẦN 2 — DẢI THAM CHIẾU HỢP LÝ HƠN. Yêu cầu của user là một dải HẸP & CÓ NGHĨA hơn, KHÔNG phải dải hẹp bằng mọi giá. KỶ LUẬT: khai trước (pre-register, ghi vào đầu REPORT TRƯỚC khi xem kết quả) các ứng viên dải và tiêu chí chọn; không chọn dải vì nó hẹp. Ứng viên tối thiểu (thêm nếu có cơ sở tài chính):
+ (a) Dải độ nhạy của TRUNG VỊ qua các đặc tả hợp lý (ngưỡng độ phủ 50/60/70, mẫu có/không VIC, có/không con mỏng, PIT vs ...) — đo "trung tâm" bất định cỡ nào.
+ (b) IQR sau khi loại holding KHÔNG so sánh được vì lý do CẤU TRÚC có tài liệu (VIC: VinFast vốn chủ âm nằm ở phần sổ; MVN: free-float nhỏ) — nêu tiêu chí loại bằng quy tắc chung, không theo kết quả.
+ (c) Dải CÓ ĐIỀU KIỆN theo đặc điểm holding giống HHS (kiểm soát + cổ tức tiền con→mẹ thấp; hoặc theo tercile cổ tức con→mẹ / kiểm soát) — nếu N quá nhỏ thì nói thẳng là không đủ.
+ (d) Dải theo thời gian: trung vị tháng PIT (n>=11) — min/max/IQR của đường tháng.
+Với mỗi ứng viên báo: [thấp … giữa … cao], độ rộng (pp), N, ổn định (leave-one-holding-out, theo tháng), nó đo cái gì (bất định trung tâm vs phân tán liên-holding). Rồi KẾT LUẬN: dải nào dùng làm tham chiếu cho HHS, nó là dải của cái gì (nói rõ: dải hẹp của "trung tâm" khác dải rộng của "một holding bất kỳ"), và 0% nằm ở đâu trong dải đó. Nếu không dải nào vừa hẹp vừa trung thực → NÓI THẲNG, đừng ép.
+
+KHÔNG: không email; không dựng rev8 HHS; không ghi sổ dd_price_zones.json; không wire production/sizing; không đọc giá HHS/TCH/CRV; không git commit (Mike commit). Tái dùng nguồn v2 (BQ/VCI/KBS cache trong raw/).
+RA: REPORT_CK_HOLDING_v3.md (đầu báo cáo: kết luận + bảng ứng viên dải; có mục 'Đính chính so với v2' từng lỗi), LOCK_md5.txt, run1/run2.txt, calc_out_v3.json, panel_v3.csv; bus finding topic ck-holding-vn-measure-v3-20261124. Cuối báo cáo: tự liệt kê hạn chế còn lại.
