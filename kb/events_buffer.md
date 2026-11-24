@@ -527,3 +527,18 @@
 
 ## Consolidation 2026-11-24T02:07:01Z
 - [2026-11-24T02:05:13Z] Mafee/status — bot-done: {"account": "ZaloPay", "plan_date": "2026-11-24", "elapsed_s": 12, "rc": 0}
+
+## Consolidation 2026-11-24T03:22:19Z
+- [2026-11-24T03:20:01Z] Taylor/heartbeat — Taylor_20261124_031947: {"status": "in_progress", "note": "mapping radar call-sites"}
+- [2026-11-24T03:20:27Z] Taylor/heartbeat — Taylor_20261124_031944: {"status": "in_progress", "note": "doc so + dung worktree"}
+- [2026-11-24T03:20:27Z] Taylor/heartbeat — Taylor_20261124_031942: {"status": "in_progress", "note": "worktree tao, doc tai lieu"}
+- [2026-11-24T03:20:43Z] Taylor/heartbeat — Taylor_20261124_031942: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_031942", "source": "watcher"}
+- [2026-11-24T03:20:45Z] Taylor/heartbeat — Taylor_20261124_031944: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_031944", "source": "watcher"}
+- [2026-11-24T03:20:48Z] Taylor/heartbeat — Taylor_20261124_031947: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261124_031947", "source": "watcher"}
+- [2026-11-24T03:21:16Z] Taylor/heartbeat — Taylor_20261124_031947: {"status": "in_progress", "note": "edits done in 2 worktrees; rebuilding norm5 cache + selfcheck"}
+- [2026-11-24T03:21:18Z] Taylor/heartbeat — Taylor_20261124_031942: {"status": "in_progress", "note": "doc xong D2/skeptic, kiem so DD + registry"}
+- [2026-11-24T03:21:20Z] Taylor/heartbeat — Taylor_20261124_031944: {"status": "in_progress", "note": "viet dd_forward_outcome.py trong wt-dd-fwd-20261124"}
+- [2026-11-24T03:21:43Z] Taylor/heartbeat — Taylor_20261124_031942: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_031942", "source": "watcher"}
+- [2026-11-24T03:21:45Z] Taylor/heartbeat — Taylor_20261124_031944: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_031944", "source": "watcher"}
+- [2026-11-24T03:21:48Z] Taylor/heartbeat — Taylor_20261124_031947: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261124_031947", "source": "watcher"}
+- [2026-11-24T03:22:02Z] Taylor/finding — radar-norm5-internal-20261124: {"branches": {"outer": "feat/radar-norm5-internal-20261124 @0abba3afa wt-radar-norm5-out-20261124 (dna_report.py: +with_norm5 passthrough)", "mike": "feat/radar-norm5-internal-20261124 @488687e26 wt-radar-norm5-mike-20261124 (eod_trading_report.sh, daily_dashboard.py)"}, "callsites": {"eod_trading_report.sh:302 (per-account, ZaloPay internal / SpaceX investor)": "ON only ACCOUNT=ZaloPay", "daily_dashboard.py:65 (Discord decision topic, internal)": "ON", "portfolio_status.py:833 (daily body, uses splitlines()[0])": "unchanged - would not show anyway", "report_v2/data_sources.py:390 (weekly/monthly both accounts)": "unchanged OFF", "dna_report.py:851 build_report (telegram_8l_bot, recipients unverified)": "unchanged OFF"}, "cache": "value_radar.py --rebuild-norm5 ok, ~8s, data/value_radar_norm5_panel.csv in main WorkingClaude/data; refresh = update_norm5_panel incremental already inside value_radar_norm5_now(update=True), no new cron", "today_line": "P/E chuẩn hoá 5Y 14.26 (p2) · EPS TTM/TB5Y 1.58x (p100) · LOI NHUAN DINH [2026-11-23]", "selfcheck": "8 PASS x (env -u TZ, TZ=Asia/Ho_Chi_Minh)", "measured_by": "python3 agents/Taylor/research/radar_norm5_internal_20261124/rn5_sc.py + value_radar.py --rebuild-norm5"}
