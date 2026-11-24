@@ -2777,3 +2777,6 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T17:50:47Z] CODE B radar xong: nhánh session/Taylor_20261123_174706 (repo ngoài, commit 33c14fdef) chờ Mike duyệt/merge; sau merge chạy value_radar.py --rebuild-norm5
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T17:57:39Z] [dd-vs-radar rerun 24/11] XONG job Taylor_20261123_174703: rerun/REPORT_R2.md + REPORT_D2.md, finding dd-vs-radar-R2/D2-20261124 — CHỜ Mike tổng hợp/skeptic; chưa commit (rerun/ untracked)

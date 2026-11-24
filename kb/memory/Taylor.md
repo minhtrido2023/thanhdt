@@ -14,7 +14,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-23T17:57:39Z] [dd-vs-radar rerun 24/11] XONG job Taylor_20261123_174703: rerun/REPORT_R2.md + REPORT_D2.md, finding dd-vs-radar-R2/D2-20261124 — CHỜ Mike tổng hợp/skeptic; chưa commit (rerun/ untracked)
 - [2026-11-24T03:24:18Z] [dd-forward 24/11] XONG job Taylor_20261124_031944: nhánh feat/dd-forward-outcome-20261124 (526879fef) — CHỜ Mike duyệt diff + cài cron đề xuất; mốc đánh giá 2027-03-31
 - [2026-11-24T03:26:22Z] [dd-history-label E 24/11] XONG job Taylor_20261124_031942: nhánh session/Taylor_20261124_031942 commit 1784cbafb (chưa merge) — CHỜ Mike duyệt diff + quyết cờ 'proxy lệch DD' (k ngoài [0,5;2])
 - [2026-11-24T03:46:22Z] [E2 dd-history-label v2 24/11] XONG job Taylor_20261124_034215: nhánh session/Taylor_20261124_034215 — CHỜ Mike duyệt diff + merge; SIP caveat lệch số skeptic, cần skeptic xác nhận cách đo
@@ -26,3 +25,4 @@
 - [2026-11-24T10:13:25Z] [dd-recheck nhóm A 24/11] XONG job Taylor_20261124_095514: VGS/TCH/DRI/SIP tâm 0%, skeptic r1 đều INCONCLUSIVE, 4 LEDGER_PROPOSAL REFUTED_OPEN (DRI/SIP hạ từ CONFIRMED backfill) — CHỜ Mike áp sổ + xử lý TRIM_DD xoá đầu vào calc khoá
 - [2026-11-24T10:25:24Z] [dd-recheck nhóm B 24/11] XONG job Taylor_20261124_095517: FPT/NNC/DGC tâm 0%, cả 3 skeptic r1 INCONCLUSIVE (thiếu hạng mục), worktree wt-1574720404268912680b commits d2fe430f1/97ef0a396/5d276f5e6 — CHỜ Mike duyệt LEDGER_PROPOSAL + quyết FULL
 - [2026-11-24T10:51:25Z] [dd-adjcenter pilot FPT 24/11] XONG job Taylor_20261124_104632: tâm adj 56.204 (−1,93%), nhánh session/adjpilot 0d52b34ec (wt-adjpilot, chưa merge) — CHỜ Mike chốt 3 sửa PREREG (C+, dải p×m, luật r ngoài Σ) trước fan-out 7 mã
+- [2026-11-24T11:11:59Z] [dd-adjcenter g1 24/11] XONG job Taylor_20261124_110049: FPT 55.668 / TCH 15.152 / VGS 25.148 (nhánh session/adj-g1, wt-adj-g1, chưa merge) — CHỜ Mike merge + skeptic; VGS phát hiện tồn quỹ KTPL 36,1 tỷ chưa trừ
