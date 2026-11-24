@@ -17,6 +17,13 @@ Pilot = **HHS** (cần phản biện lại đầy đủ; tâm dịch −22,7% gi
 8. **Phạm vi skeptic** (§E4): moat/cân bằng/thiếu hạng mục. Chuẩn bị bản báo cáo MỚI (đặt tên `REPORT_recheck_<MÃ>.md`, KHÔNG sửa đè báo cáo cũ) gồm: mục tóm tắt thay đổi so với bản cũ + dòng E15/E16 ngay dưới dòng TÂM + các bổ sung ở trên. Tâm đổi >5% hoặc đổi lớp nhãn ⇒ nói rõ (cần phản biện lại đầy đủ).
 9. **Phản biện**: `python3 bin/dd_skeptic_run.py --dir agents/Taylor/research/dd_recheck_20261124/<MÃ> --report <REPORT_recheck>.md` (mặc định chế độ DD_GENERAL; trần 3 USD/ca; chạy trong worktree; brief tự qua blind lint). KHÔNG tự ghi verdict. Trần chi phí tổng pilot ~4 USD.
 
+## Bài học pilot HHS (24/11 16:5x) — ÁP CHO FAN-OUT
+- **Bước 0 (trước bước 1, rẻ hơn một vòng skeptic): kiểm "tham số nền đã bị phép đo/luật mới hơn phủ lên chưa".** Đọc báo cáo xem tâm có phụ thuộc: chiết khấu holding/CK (v5 24/11: `kb/projects/ck-hhs-reference-range-20261124.md`, chỉ liên quan mã có tầng holding), lãi huy động/r (neo 03/11), RONIC terminal, độ nhạy r. Ghi "có/không + tham số". Nếu CÓ và báo cáo cũ dùng bản đã bị phủ ⇒ KHÔNG chạy skeptic, ghi vào SUMMARY và dừng mã đó cho Mike.
+- Độ nhạy r phải TÍNH từ mô hình (pv(y,Ke)), không viết "≈0" (lỗi thật của HHS rev7).
+- Selfcheck ledger trong worktree: `MIKE_SRC_ROOT=<worktree> python3 bin/dd_price_zones_selfcheck.py --ledger <bản tạm>`.
+- Báo cáo recheck chỉ thêm E15/E16 + sửa lệch luật mới; tâm không đổi thì nói "0%" rõ ràng. Mỗi mã SUMMARY ≤1 trang.
+- Commit CHỈ thư mục của mình (`git add agents/Taylor/research/dd_recheck_20261124/<MÃ>`); nếu commit gate báo job khác LIVE, đợi 30s thử lại.
+
 ## Cấm
 - KHÔNG ghi `kb/dd_price_zones.json` (chỉ ghi `LEDGER_PROPOSAL_<MÃ>.json` theo §E14, thử bằng `dd_price_zones_selfcheck.py --ledger <bản tạm>`); Mike duyệt rồi mới ghi sổ (CONFIRMED chỉ qua `dd_ledger_append_confirmed.py`).
 - KHÔNG email, KHÔNG đặt lệnh, KHÔNG wire. Pháp lý chỉ WARNING (user 27/09).
