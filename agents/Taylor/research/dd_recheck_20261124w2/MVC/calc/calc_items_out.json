@@ -1,0 +1,35 @@
+{
+ "c0_pre": 17703.8,
+ "vn_central": 64133.6,
+ "parts_ty": {
+  "A": 521.92,
+  "BOT": 92.57,
+  "gach_xang": 40.77,
+  "Q4": 50.0,
+  "stake": 619.48,
+  "VM": 1770.38
+ },
+ "cross_hold_factor": 1.04755,
+ "fund11": {
+  "rate": 0.11,
+  "basis": "NQ DHDCD 2026 (VI_BienBanHopDaiHoiDongCoDongThuongNien2026VaNghiQuyet.txt:767-785): KTPL 7% + HDQT/BKS 2% + BDH 2%",
+  "m_low_pct": -10.131,
+  "m_cons_pct": -4.59,
+  "m_9t26_pct": -1.509,
+  "cons_abs_pre": -812.7,
+  "note": "m_cons = chi tren A+BOT+gach/xang+Q4; m_low = them phan NNC (stake) + 11% LNST 9T/26 HN (231,77 ty, gom lai LK)"
+ },
+ "nnc_flow": {
+  "nnc_adj_md5": "6beb796cbc592884c96d76f0e8c8efb7",
+  "m_nnc": -0.04065,
+  "m_nnc_lo": -0.13569,
+  "m_nnc_hi": 0.0026,
+  "d_mvc_pct": {
+   "+0.00000": -0.0,
+   "-0.04065": -1.422,
+   "-0.13569": -4.748,
+   "+0.00260": 0.091
+  },
+  "excluded": "NNC #4 (chan MVC trong NNC, engine r6) — khong ap cho MVC r3"
+ }
+}

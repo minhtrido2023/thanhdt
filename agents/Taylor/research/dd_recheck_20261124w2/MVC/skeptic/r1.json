@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124w2/MVC/REPORT_recheck_MVC.md",
+  "report_md5": "c04d150a894c85d7bfe571cc39fdff5a",
+  "brief_md5": "646969f9bd908141502caf7343f98c3e",
+  "model": "opus",
+  "cost_usd": 0.7635834000000001,
+  "started_at_ict": "2026-11-24T20:27:23+07:00",
+  "summary": "Recheck chỉ đổi r và công khai khoản trích quỹ 11% LNST theo NQ ĐHĐCĐ 2026, nhưng vẫn giữ tâm 16.241. Tôi đã đối chiếu tỷ lệ 11% với biên bản gốc và tự tính lại cả bốn con số tác động (−4,59/−1,51/−4,03/−10,13%) — khớp. Hai chiều: cơ sở đang dùng thổi phồng mức trừ (dòng tiền chưa trừ khấu hao và lãi vay, LNST hợp nhất gồm lãi liên kết), nên mức thực tế nhiều khả năng ≈ −5…−7%, vẫn trên ngưỡng trọng yếu 5% ⇒ hạng mục thiếu đo được và trọng yếu ⇒ REFUTED. Thêm vào đó cụm công nghiệp ≤500 tỷ (r4 ước −8…−13%) vẫn ở NPV=0 không căn cứ và không có trong mục hạng mục thiếu. Chiều rẻ: r 13,5% cao hơn dải Ke (+0,3…+3,2% nếu hạ), nhưng không bù được khoản trích quỹ. Giá thị trường trong báo cáo đã được bỏ qua khi chấm.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124w2/MVC/skeptic/r1_raw.md"
+}

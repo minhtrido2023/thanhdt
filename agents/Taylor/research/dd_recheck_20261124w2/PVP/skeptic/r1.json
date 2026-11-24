@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124w2/PVP/REPORT_recheck_PVP.md",
+  "report_md5": "d34aa5f3e4f443f449761b756806c8d6",
+  "brief_md5": "c35d2848770c8058fbd60830ee807007",
+  "model": "opus",
+  "cost_usd": 0.9633536550000001,
+  "started_at_ict": "2026-11-24T20:16:50+07:00",
+  "summary": "The recheck is mechanically sound. The 270-cell grid, the r table and the D3 table reproduce exactly (md5 91f4475b), and a hand-summed SOTP matches the model. Low r sensitivity is real (short cash flows, net cash ~40% of value). D3 is the main 'too high' finding, but the report probably overstates it: base EBITDA of 400 is anchored to pre-TT99 2025 levels that already include the repair accrual, so the right adjustment is ≈ −2%, not −7%. Meanwhile scrap = 0 is a downward haircut with no basis and was never quantified, so the two directions roughly offset. Not CONFIRMED because of one material, unquantifiable missing item: the 23/10/2026 extraordinary AGM on buying Aframax ship #3 (funding/issuance undisclosed, not re-checked since 05/11). Also, HTM 1.016 bn cannot be traced back to its source PDF.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124w2/PVP/skeptic/r1_raw.md"
+}
