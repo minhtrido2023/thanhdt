@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md",
+  "report_md5": "fafa135d2c11c37703d5f7d93a7f71de",
+  "brief_md5": "9b71087a3baee791c567f99c4561665c",
+  "model": "opus",
+  "cost_usd": 1.0157402,
+  "started_at_ict": "2026-11-24T20:16:21+07:00",
+  "summary": "Mô hình RI tái lập được, đầu vào truy đúng về BCTC HN-Q3, số CP đã gồm quyền mua 805,5tr, và bảng độ nhạy r chính xác (Ke 12,3% = +12,3%). Kết luận 'tâm không đổi 21.069' đúng về mặt cơ học nhưng chưa đứng vững về dữ kiện: (1) chiều ĐẮT — giả định clean-surplus bỏ qua phần LN ~8,9% có vẻ chảy ra quỹ KTPL (ước −6,5 đến −11%), chênh ROE_T 16% so với Ke 13,5% giữ vĩnh viễn dù moat NARROW không bền (bỏ = −14%; '3c chặt' chưa chạy lại trên r3), CAR 30/09 và nhu cầu vốn/pha loãng chưa mô hình; (2) chiều RẺ — ROE 2027 18,5% fade mạnh so với TTM 20,7% và mục tiêu 22–24% (giữ gần lịch sử +8,5%), Q4/26 thận trọng. Hạng mục thiếu material nhưng chỉ ước được từ phần dư ⇒ INCONCLUSIVE cho tới khi đọc số trích quỹ KTPL thật.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md"
+}

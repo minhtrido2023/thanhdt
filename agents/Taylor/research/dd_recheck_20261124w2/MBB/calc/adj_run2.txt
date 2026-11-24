@@ -1,0 +1,49 @@
+{
+ "control_center": 21069,
+ "bvps": 15594,
+ "cases": {
+  "KT_half": {
+   "center": 19828,
+   "d_pct": -5.887
+  },
+  "KT_full": {
+   "center": 18630,
+   "d_pct": -11.577
+  },
+  "ROEpath_up": {
+   "center": 21648,
+   "d_pct": 2.749
+  },
+  "PPL_book": {
+   "center": 20962,
+   "d_pct": -0.509
+  },
+  "PPL_1.3x": {
+   "center": 21052,
+   "d_pct": -0.077
+  },
+  "S_no_term_premium": {
+   "center": 17961,
+   "d_pct": -14.749
+  },
+  "S_cov_restore_1940": {
+   "center": 20877,
+   "d_pct": -0.909
+  },
+  "S_KT_5pct": {
+   "center": 19678,
+   "d_pct": -6.601
+  }
+ },
+ "sum_lin_pct": -2.236,
+ "range_lin_pct": [
+  -8.652,
+  0.021
+ ],
+ "combo": {
+  "center": 20587,
+  "d_pct": -2.288,
+  "low": 19245,
+  "high": 21061
+ }
+}

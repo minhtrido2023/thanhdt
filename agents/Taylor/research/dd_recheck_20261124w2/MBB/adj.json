@@ -1,0 +1,201 @@
+{
+ "ticker": "MBB",
+ "dd_date": "2026-10-31",
+ "rev": 4,
+ "asof": "2026-11-24",
+ "job": "Taylor_20261124_131354",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13"
+ },
+ "blind_to_price": true,
+ "center_base": 21069,
+ "center_base_source": "LEDGER_PROPOSAL_MBB.json rev4 center (= sổ rev3, không đổi)",
+ "method": "chạy lại mô hình RI r3 tổ hợp (calc/calc_adj.py; CONTROL 21.069); tham số nội suy theo p",
+ "items": [
+  {
+   "name": "Rò LN sang quỹ khen thưởng–phúc lợi (clean-surplus) — C+ cận bảo thủ",
+   "dir": "down",
+   "evidence_tier": "C+",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -5.887,
+   "mag_range_pct": [
+    -11.577,
+    -5.887
+   ],
+   "counted_in_center": true,
+   "note": "Phần dùng LNCPP 2025 28.463 − cổ tức tiền 8.557 − CP thưởng 12.082 − tăng quỹ trong VCSH 5.446 = dư 2.378 tỷ (8,9% LN 2025) không về VCSH (skeptic). Dấu: NH VN trích KTPL từ LNST (thông lệ, như FPT/DGC). Cận bảo thủ = ½ phần dư (4,45%/năm), cận cao 8,9%; ½ còn lại quy cho khả năng tách VĐL 15%+quyền mua vs 25% chưa chắc (notes_read:81 ghi 'cổ tức CP 25%'). 1 kỳ (phân phối LN 2025) ⇒ B1. m đo bằng chạy lại RI với LN×(1−k).",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:13-19; /tmp/ddrestore_MBB/agents/Taylor/research/dd_MBB_20261031/calc/notes_read.md (git 14ad1c925^):25,81",
+   "contrib_pct": -2.943
+  },
+  {
+   "name": "Đường ROE 2027–29 thấp hơn ROE TTM 20,7% / mục tiêu BLĐ 22–24% (dịch +1,5/+1/+1pp, ROE_T giữ)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": 2.749,
+   "mag_range_pct": [
+    2.749,
+    2.749
+   ],
+   "counted_in_center": true,
+   "note": "ROE ≥20% nhiều kỳ (TTM 20,7%), nhưng có quan sát NGƯỢC bằng số: chi phí tín dụng Q3 1,65% > 9T 1,46%, nhóm 2 HN +67% YTD, bao phủ 93,7→84,7% ⇒ nhánh Bneg 0,35. Chỉ dịch pha 2027–29; ROE_T không đổi (ROE_T là tham số luật). Skeptic đo phương án cả T17 = +8,5% (gồm phần luật).",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:31; agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§3 bảng chất lượng tài sản",
+   "contrib_pct": 0.962
+  },
+  {
+   "name": "Phát hành riêng lẻ 200 tr CP (~2%) chưa vào mô hình",
+   "dir": "down",
+   "evidence_tier": "B",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -0.509,
+   "mag_range_pct": [
+    -0.509,
+    -0.077
+   ],
+   "counted_in_center": true,
+   "note": "Nguồn thứ cấp (Vietcap 07/08/2026: 200 tr CP, 27 tr cho Viettel). Giá phát hành chưa biết: m tại BVPS 15.594 (−0,51%) … 1,3×BVPS (−0,08%). 1 quan sát ⇒ B1. Skeptic ước −1…−2% (không nêu giá) — số đo mô hình nhỏ hơn.",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:9,26; /tmp/ddrestore_MBB/agents/Taylor/research/dd_MBB_20261031/src/web_facts.md:13",
+   "contrib_pct": -0.255
+  }
+ ],
+ "sum_p_m_pct_linear": -2.236,
+ "sum_pct_combo": -2.288,
+ "aggregation": "combo rerun (|Σ|=2,3% ≤5% — tuyến tính cũng hợp lệ, dùng tổ hợp cho chính xác)",
+ "center_adj": 20587,
+ "range_low": 19245,
+ "range_high": 21061,
+ "range_linear_pct": [
+  -8.652,
+  0.021
+ ],
+ "dividend_mech": {
+  "status": "payout tiền 30% nằm trong RI; không có quyền tiền mặt chưa GDKHQ trong nguồn đã đọc (chưa kiểm lịch cổ tức 2026)",
+  "vnd": 0
+ },
+ "center_adj_ex_div": 20587,
+ "sensitivity_only": [
+  {
+   "name": "[LUẬT] chênh ROE_T−Ke vĩnh viễn trên sổ 2029 (quy ước user 08/11: NARROW không thưởng, không trừ)",
+   "dir": "down",
+   "evidence_tier": "rule",
+   "sensitivity": "bỏ chênh terminal (ROE_T=Ke) ⇒ 17961 (-14.75%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:22"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3% ⇒ 23.659 (+12,30%); 13,4% ⇒ 21.266 (+0,94%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§2"
+  },
+  {
+   "name": "Xây lại bao phủ 93,7% (thiếu 1.940 tỷ DP)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "20877 (-0.91%)",
+   "why_not_center": "trùng nhánh XẤU (DP Q4 7.500 'xây lại bao phủ', trọng số 0,275) ⇒ cấm đếm hai lần",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§3"
+  },
+  {
+   "name": "Nhu cầu vốn: tín dụng 18–35%/năm vs VCSH +12,6%/năm, CAR riêng 30/06 10,28%",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "chưa định lượng (không có CAR 30/09, không có kế hoạch phát hành thêm ngoài 200 tr CP)",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:24"
+  },
+  {
+   "name": "Phải thu bán nợ MBV 11.248 (số dư 30/09 chưa kiểm)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "bản E (mất 30%, p 0,20) ⇒ 20.983 (−0,41%)",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§4"
+  },
+  {
+   "name": "Nghĩa vụ gánh lỗ MBV ≥15.688",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "cờ HARD ABANDON: CO_SO = 18.969",
+   "source": "REPORT_r3.md §10"
+  },
+  {
+   "name": "Q4/26 LNTT / DP Q4 thận trọng",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "skeptic: nhỏ, không số; LNTT Q4/26 CƠ SỞ 12.000 vs Q4/25 11.129 (+7,8%) — mô hình không giả định giảm YoY",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:33-34"
+  },
+  {
+   "name": "Pháp lý sau 05/11 chưa quét",
+   "dir": "down",
+   "evidence_tier": "warning",
+   "sensitivity": "chỉ WARNING",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§5"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "NQ ĐHĐCĐ 2026 / thuyết minh VCSH: tỷ lệ trích quỹ KTPL thật từ LN 2025",
+   "when": "đọc được ngay (đã công bố 04/2026)",
+   "direction": "both",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "C+→A p 0,9 (tuyến tính từ case mô hình): k=4,45% ⇒ ≈20.102 (−2,36% so với tâm adj); k=0 ⇒ ≈21.218 (+3,06%); k=8,9% ⇒ ≈19.023 (−7,60%)"
+  },
+  {
+   "event": "BCTC Q4/26: ROE quý ≥20% và chi phí tín dụng ≤1,46%",
+   "when": "≤ cuối 01/2027",
+   "direction": "up",
+   "delta_vnd": null,
+   "delta_pct": 0.82,
+   "note": "mất quan sát ngược ⇒ p ROE 0,35→0,65"
+  },
+  {
+   "event": "BCTC Q4/26: nhóm 2 HN >20.000 hoặc bao phủ <75%",
+   "when": "≤ cuối 01/2027",
+   "direction": "down",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "mốc r3 §10 ⇒ trọng số về 0,35/0,45/0,20 = 20.419 (−3,1%), ROE path p→0,15"
+  },
+  {
+   "event": "Giá/khối lượng phát hành riêng lẻ chốt",
+   "when": "khi CBTT",
+   "direction": "down",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "B→A: giá ≥BVPS ⇒ −0,08…−0,51%"
+  },
+  {
+   "event": "CAR/Tier1 30/09 + kế hoạch tăng vốn 2027",
+   "when": "BCTC Q3 thuyết minh / ĐHĐCĐ 2027",
+   "direction": "down",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "C→B nếu có phát hành mới"
+  },
+  {
+   "event": "Lãi huy động 12T ±50bp (V1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_vnd": null,
+   "delta_pct": -4.47,
+   "note": "+50bp −942 (−4,47%); −50bp +1.019 (+4,83%)"
+  },
+  {
+   "event": "Văn bản nghĩa vụ MBV",
+   "when": "khi có",
+   "direction": "down",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "≥15.688 ⇒ HARD ABANDON"
+  }
+ ],
+ "caveat": "MÙ GIÁ; hạng mục C+ dựa trên phần dư LNCPP do skeptic suy, chưa có dòng BCTC trực tiếp"
+}

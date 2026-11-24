@@ -1,0 +1,83 @@
+{
+ "entry": {
+  "ticker": "DBC",
+  "dd_date": "2026-11-18",
+  "rev": 4,
+  "supersedes": "DBC@2026-11-18#3",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_DBC_20261118/skeptic/r4.json",
+  "audited_fy_missing": false,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 10262,
+  "center": 17673,
+  "zone_high": 24835,
+  "center_kind": "expected_weighted",
+  "center_desc": "gia tri ky vong trong so 25/50/25 (thu nhap thang du von chu, ROE_op = TB deu 3 cua so khai truoc 12/15/20q, LNST loai toan bo LN BDS, tru quy KTPL k=11,06%, XDCB + BDS do dang 1.186,4 ty NPV=0 so sach, tai tro 100% von chu) SAU chiet khau thanh khoan 2%; r 13,5% neo lai huy dong 7,4%, g 5%; REPORT_rev4",
+  "center_range": null,
+  "center_alt": 17798,
+  "center_alt_kind": "base_scenario",
+  "price_ref": 16400,
+  "price_date": "2026-11-23",
+  "verdict_label": "Gia 16.400 = 0,93x tam 17.673: quanh gia tri hop ly, duoi tam ~7%; cong 0,85xtam (15.022) chua dat. Skeptic r4 REFUTED chieu QUA CAO (gia dinh XDCB+BDS 100% von chu tai tro; tai tro 50% -> 13.767). Phap ly chi WARNING (phai thu NLD 237,1 ty).",
+  "skeptic_status": "skeptic r1 INCONCLUSIVE (rev1) -> r2 INCONCLUSIVE (rev2) -> r3 REFUTED (rev3, tam qua THAP: BDS do dang trong von hd) -> r4 REFUTED medium (REPORT_rev4, tam qua CAO: XDCB+BDS 2.489 ty gia dinh 100% von chu tai tro khong co co so; no 7.622 ty, lai vay von hoa, 2.447,7 ty ton kho the chap; ~53% trung tinh don bay -> ~-22%). Vong 3 cuoi da chay -> DUNG, bao user",
+  "source_file": "agents/Taylor/research/dd_recheck_20261124w2/DBC/REPORT_recheck_DBC.md",
+  "report_md5": "50d69040f3e05503ca8804f5817c54bf",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261124w2/DBC/REPORT_recheck_DBC.md",
+    "quote": "**TÂM (base, r 13,5%, sau chiết khấu thanh khoản 2%): 17.673 đ/cp — vùng 10.262–24.835. KHÔNG ĐỔI so với rev4.**",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261124w2/DBC/REPORT_recheck_DBC.md",
+    "quote": "- **Nhãn** (giá 16.400, DNSE 23/11/2026, kế thừa rev4): quanh giá trị hợp lý, dưới tâm ~7%; luật 4 (0,85 × 17.673 = 15.022) CHƯA đạt. Không đổi so với rev4.",
+    "fields": [
+     "price_ref"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261124w2/DBC/REPORT_recheck_DBC.md",
+    "quote": "- Kịch bản cơ sở sau chiết khấu (center_alt, kế thừa rev4): 17.798 đ/cp.",
+    "fields": [
+     "center_alt"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_DBC_20261118/rev4/assumptions_DBC_rev4.json",
+  "assumptions_md5": "57b36d63e05ad2e2c209f2ce34fda8c9",
+  "null_reason": null,
+  "expires_on": "2027-03-18",
+  "expires_basis": "BCTC Q4/2026 (~cuoi 01/2027) hoac 120 ngay",
+  "correction_reason": "recheck đợt 2 theo HANDOFF dd_recheck_20261124w2: thêm E15 (Tâm @ Ke 12,3% = 19.669, +11,29%) + E16 (KHÔNG CHẮC (rẻ…đắt), N hiệu dụng 14.0) + dữ kiện A mới lãi vay vốn hoá KT25 (9,5/21,7 tỷ, vay đặc thù TSCĐ) cho E17. Tâm/vùng/nhãn KHÔNG đổi (17.673; 10.262–24.835). Không chạy skeptic vòng 5 (r4 DD_GENERAL cùng mô hình; §E14 dừng sau vòng cuối không CONFIRMED). Tâm kỳ vọng điều chỉnh E17: 16.439 (14.828–17.542).",
+  "open_items": [
+   "Ti le tai tro XDCB+BDS (2.489 ty) chua co co so: chua trich lai vay von hoa/khoan vay rieng du an (VAS 16) tu KT25/H1/26; 50% von chu -> 13.767 (-22,1%), 75% ~ -11% (uoc luong skeptic)",
+   "BDS do dang 1.186 ty ghi 1,0x so sach du LN gop BDS 2024-25 chi 0,4-2% so du; chua tru nguoi mua tra truoc/no rieng du an BDS: haircut 20-40% -3,1% den -6,1%; chieu tang: gia tri quy dat > gia goc chua dinh luong",
+   "Nghia vu tai che bao bi EPR (KT25 TM35) chua xac dinh so tien: -1,5% den -4,5% (uoc luong 10-30 ty/nam)",
+   "Thoi han mien giam thue tung cong ty con khong cong bo: -3,0% den -6,0% (mien giam 4,82% LNTT 2025)",
+   "Lech 1 ty equity_parent_q3 (8.720,4) vs chuoi 2026Q3 (8.721,4)"
+  ],
+  "alternates": {
+   "rev3_ledger_rev2": {
+    "report": "REPORT_rev3.md",
+    "md5_assumptions": "66d9fbc6e099246b4c386080340c26cd",
+    "center": 14696,
+    "zone": [
+     7284,
+     21857
+    ],
+    "skeptic": "skeptic/r3.json REFUTED"
+   },
+   "funding_50pct": {
+    "center": 13767,
+    "note": "do nhay XDCB+BDS do von chu tai tro 50% (rev4 calc), skeptic r4 coi gan trung tinh don bay"
+   }
+  },
+  "notes": "Hai vong cuoi lech nguoc chieu (r3 qua thap 14.696, r4 qua cao 17.673); vung doc hop ly ~13.800-17.700 tuy ti le tai tro. center_range=null: khung do nhay tai tro [13.767; 17.673] khong bat dau tu center. Khong chay them vong (het 3 vong).",
+  "recorded_at": "2026-11-24T22:00:00+07:00"
+ }
+}

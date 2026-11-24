@@ -1,0 +1,2 @@
+ticker,dd_date,rev,skeptic_final,asof,center,price_asof,pc_asof,label,label_v1,reasons,demote_k,demote_neff,pct_fade,pct_hold,terc_fade,terc_hold,n_fade,n_hold,n_eff_hold,n_eff_fade,k_fade,k_hold,hist_med_fade,hist_med_hold,hist_p25_fade,hist_p75_fade,hist_p25_hold,hist_p75_hold,ROE5Y,roe_ttm,roe_ttm_over_5y,warn
+DBC,2026-11-18,3,REFUTED_OPEN,2026-11-20,17673,16300,0.922311,KHÔNG CHẮC (rẻ…đắt),KHÔNG CHẮC (rẻ…đắt),,0,0,30,68.3333,RẺ,ĐẮT,120,120,14.017,9.52828,0.945699,1.10032,1.09905,0.807078,0.873745,1.31959,0.692764,0.960924,0.11209,0.116026,1.03511,
