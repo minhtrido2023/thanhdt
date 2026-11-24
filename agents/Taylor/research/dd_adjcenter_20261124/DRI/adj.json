@@ -1,0 +1,244 @@
+{
+ "ticker": "DRI",
+ "dd_date": "2026-11-03",
+ "rev": 4,
+ "asof": "2026-11-24",
+ "prereg_md5": "ef5157cb3f762d58623ed550ebc214c7",
+ "prereg_v2_md5": "835dfc1e07f9c67ac7f6c3028b529d13",
+ "blind_to_price": true,
+ "center_base": 15257,
+ "center_base_source": "kb/dd_price_zones.json DRI rev4 (center sau CK 2,00% @5 tỷ)",
+ "items": [
+  {
+   "name": "Haircut khoản cho Dakruco vay 40 tỷ (TSĐB = 6 tr cp DRI, rủi ro cùng chiều)",
+   "dir": "down",
+   "m_basis": "engine r3: haircut 50% −268, mất trắng −536 (sau CK) — ước lượng khoảng; tâm m = trung điểm",
+   "p_basis": "1 quan sát ủng hộ (khoản vay phải gia hạn, REPORT_recheck:77) + quan sát NGƯỢC có số (đã trả đúng hạn 80→40 tỷ H1, SUMMARY_r2:84) ⇒ nhánh ngược",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt ('haircut 50%', 'mat trang'); agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:13; agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/SUMMARY_r2.json:84,136; agents/Taylor/research/dd_recheck_20261124/DRI/REPORT_recheck_DRI.md:77",
+   "mag_pct": -2.635,
+   "mag_range_pct": [
+    -1.757,
+    -3.513
+   ],
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "evidence_tier": "B",
+   "counted_in_center_bool": true,
+   "contrib_pct": -0.922
+  },
+  {
+   "name": "Tỷ lệ KTPL 10,6% (FY25) → 9,9% (mẫu 9T26)",
+   "dir": "up",
+   "m_basis": "(1−0,099−0,078)/(1−0,106−0,078)−1 = +0.86% trên phần vận hành; tâm m = × phần vận hành 73% (ước lượng); cận dưới = ½",
+   "p_basis": "1 quan sát (9T26, 1 kỳ) ⇒ mặc định B",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:33 (too_low 'KTPL 16,68/157,4 = 10,6% … 9,9%'); assumptions_r3.json wht_basis",
+   "mag_pct": 0.625,
+   "mag_range_pct": [
+    0.429,
+    0.858
+   ],
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "evidence_tier": "B",
+   "counted_in_center_bool": true,
+   "contrib_pct": 0.312
+  }
+ ],
+ "sum_p_m_pct": -0.61,
+ "combination_rerun": false,
+ "center_adj": 15164,
+ "range_low": 14979,
+ "range_high": 15315,
+ "dividend_rights": "không còn quyền chưa chốt (cổ tức 2025 đã chi 20/10/2026)",
+ "sensitivity_only": [
+  {
+   "name": "Đất tô nhượng Lào 01616/KĐ/DDT4 + nghĩa vụ trả/trồng bù rừng bảo tồn Đông Huê Sáo (D3)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "(a) trả đất SAU chu kỳ 1: ≈0 (tái canh chu kỳ 2 đã = NPV0 theo luật 20); (b) chi tuân thủ bắt buộc: mỗi 10 tỷ PV = −134 đ/cp (-0.88%); (c) trả đất TRƯỚC hết đời cạo: mỗi 1.000 ha mất ngay ≈ −8.9% (ước lượng cận trên: 1.000/8.166 ha × phần vận hành 73%)",
+   "why": "Không có diện tích chồng lấn / chi phí trồng bù trong tài liệu công bố ⇒ không có dấu chắc + cận bảo thủ (cận = 0) ⇒ C, không phải C+",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:12,36; dd_DRI_20261027/investor_report_v4/DRI_DD_investor_report_20261103.md:178"
+  },
+  {
+   "name": "Trục q khối thanh lý 1.975 ha [UL]",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "q 0,7 cố định +652 (+4,27%); q 1,0 −652; q 0,5 +1.522",
+   "why": "Chỉ có dữ liệu định tính 'q<1' (đã vào lưới 0,7/0,85/1)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt ('q khoi'); agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:14"
+  },
+  {
+   "name": "FCF/LN lõi 90% [UL] vs CFO TTM yếu",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "80% −936 (−6,13%); 100% +936",
+   "why": "3 kỳ TTM không chồng (Q3/24, Q3/25, Q3/26) CFO/LNST = 1,36 / 0,91 / 0,48 — NGƯỢC chiều nhau, trung bình 0,92 ≈ base; Q3/26 thấp do giữ hàng (thành phẩm 138,8 tỷ)",
+   "source": "dd_recheck_20261124/DRI/calc/v6_bq.csv (BQ ticker_financial); agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:16"
+  },
+  {
+   "name": "wht 8,16% vs quan sát 7,04% (2025) / 8,30% (2024)",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "7,04% +159; 8,30% −20; 10% phẳng −260",
+   "why": "Base nằm TRONG dải 2 quan sát, hai quan sát ngược chiều",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt ('wht'); assumptions_r3.json wht_basis"
+  },
+  {
+   "name": "Giữ lại 15% tiền tại Lào (~197 tỷ)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "−395 (−2,59%)",
+   "why": "Dấu chắc (0% đã là trần) nhưng không có số quan sát về tỷ lệ giữ lại ⇒ cận bảo thủ = 0",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt ('giu 15%'); agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/SUMMARY_r2.json:88"
+  },
+  {
+   "name": "Trục wp PEAK giá cao su (E16 ĐỈNH LỢI NHUẬN?)",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "mỗi 0,1 wp ∓76; wp 0 +382; wp 1 −382",
+   "why": "Phân vị giá RSS3 thực phụ thuộc cửa sổ: 2014–26 ≈89% (investor_report:22) nhưng 2006–26 = 56% (đo lại từ rubber_monthly_snapshot + CPI trong mirror) ⇒ không có hướng",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt ('wp PEAK'); calc/mirror/dd_DRI_20261027/r5/calc/data/rubber_monthly_snapshot_20261103.csv"
+  },
+  {
+   "name": "Giá gỗ LAK ±10%",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "±164 (±1,07%)",
+   "why": "Tỷ giá, không có hướng",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt"
+  },
+  {
+   "name": "GPM về peer 25%",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "−20,6% (ADDENDUM_5F)",
+   "why": "Bị dữ liệu bác: GPM lịch sử chính DRI 28–43%, tb ~37% (skeptic tự kiểm BQ)",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:9"
+  },
+  {
+   "name": "Gia hạn tô nhượng sau 2054",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "≈0 dưới luật NPV0 chu kỳ 2; nếu chu kỳ 2 có NPV>0 thì ≤ +1,6% (ước lượng: chiết khấu 28 năm @13,5% ≈ 0,03)",
+   "why": "Văn bản tô nhượng chưa công khai",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:15"
+  },
+  {
+   "name": "Ý kiến kiểm toán BCTC FY2025",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "chưa ghi; nếu ngoại trừ ⇒ chuyển hạng mục liên quan C→A",
+   "why": "Báo cáo recheck không nêu",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md:32"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke 12,3–13,4% (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3% ⇒ 15.713 (+2,99%); 13,4% ⇒ 15.294 (+0,24%)",
+   "why": "Tham số luật V1 (PREREG v2 §4), không vào Σ",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/REPORT_recheck_DRI.md:14,38-44"
+  },
+  {
+   "name": "[LUẬT] tái canh = NPV0 (RONIC=Ke) — hai chiều",
+   "dir": "both",
+   "evidence_tier": "rule",
+   "sensitivity": "nhánh KINH TẾ 0,1/0,2/0,3 ⇒ −164/−329/−494; chiều lên (đất không mất tiền thuê) chưa lượng hoá",
+   "why": "Luật 20 / V5",
+   "source": "agents/Taylor/research/dd_recheck_20261124/DRI/calc/mirror/dd_redo_20261105/DRI/calc/dri_redo_r3_out.txt"
+  },
+  {
+   "name": "Cổ tức",
+   "dir": "none",
+   "evidence_tier": "mech",
+   "sensitivity": "Cổ tức 2025 1.000 đ ĐÃ chi từ 20/10/2026 (đã GDKHQ); chưa có cổ tức mới công bố ⇒ một dòng",
+   "why": "PREREG v2 §6",
+   "source": "dd_redo_20261105/DRI/REPORT.md:20; investor_report_v4:104"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "BCTC Q4/2026 hoặc CBTT: Dakruco trả nốt 40 tỷ",
+   "when": "ước lượng cuối 01/2027 (lịch chưa xác minh)",
+   "direction": "up",
+   "delta_vnd": 141,
+   "delta_pct": 0.92,
+   "note": "hạng mục Dakruco hết (p→0)"
+  },
+  {
+   "event": "BCTC Q4/2026: Dakruco gia hạn tiếp / quá hạn / DRI trích dự phòng",
+   "when": "ước lượng cuối 01/2027",
+   "direction": "down",
+   "delta_vnd": -221,
+   "delta_pct": -1.45,
+   "note": "p 0,35→0,90; nếu trích dự phòng có số ⇒ thay m bằng số đó"
+  },
+  {
+   "event": "Văn bản tô nhượng / thuyết minh BCTN: diện tích rừng bảo tồn phải trả + chi trồng bù",
+   "when": "khi công bố (BCTN 2026 ước lượng 04/2027) hoặc legal-vn tra",
+   "direction": "down",
+   "delta_vnd": -134,
+   "delta_pct": -0.88,
+   "note": "mỗi 10 tỷ PV nghĩa vụ; trả đất trước hết đời cạo: chạy lại engine với A0 − X ha"
+  },
+  {
+   "event": "BCTC kiểm toán 2026: tỷ lệ KTPL cả năm ≤10%",
+   "when": "ước lượng 03/2027",
+   "direction": "up",
+   "delta_vnd": 38,
+   "delta_pct": 0.25,
+   "note": "p 0,5→0,9"
+  },
+  {
+   "event": "BCTC kiểm toán 2026: tỷ lệ KTPL ≥10,6%",
+   "when": "ước lượng 03/2027",
+   "direction": "down",
+   "delta_vnd": -48,
+   "delta_pct": -0.31,
+   "note": "p→0"
+  },
+  {
+   "event": "Kết quả đấu giá 1.975 ha (giá trúng vs khởi điểm 36 tr LAK/ha; danh tính bên trúng)",
+   "when": "theo lịch đấu giá NQ15",
+   "direction": "both",
+   "delta_vnd": 164,
+   "delta_pct": 1.07,
+   "note": "mỗi +10% giá gỗ ≈ +164; bên trúng là bên liên quan (Dakruco/Dakruwood) ⇒ WARNING quản trị"
+  },
+  {
+   "event": "HĐQT 12/2026: mua Dakruwood từ Dakruco (bên liên quan)",
+   "when": "12/2026",
+   "direction": "down",
+   "delta_vnd": -134,
+   "delta_pct": -0.88,
+   "note": "mỗi 10 tỷ trả cao hơn giá trị sổ/NPV0"
+  },
+  {
+   "event": "BCTN 2026: năng suất khối thanh lý",
+   "when": "ước lượng 04/2027",
+   "direction": "both",
+   "delta_vnd": 652,
+   "delta_pct": 4.27,
+   "note": "q 0,7 ⇒ +652; q 1,0 ⇒ −652 (C→A)"
+  },
+  {
+   "event": "Lãi huy động 12T hiệu dụng ±50bp (luật V1, β=1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_vnd": -180,
+   "delta_pct": -1.18,
+   "note": "+50bp −180; −50bp +186"
+  },
+  {
+   "event": "Ý kiến kiểm toán FY2025/FY2026 có ngoại trừ",
+   "when": "khi đọc BCKT",
+   "direction": "down",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "khoản ngoại trừ có số ⇒ A, trừ theo đ/cp"
+  }
+ ],
+ "caveat": "cộng tuyến tính (|Σ|<5%); m Dakruco = trung điểm khoảng engine; m KTPL ước lượng theo phần vận hành"
+}
