@@ -1,0 +1,89 @@
+{
+ "r_base": 0.135,
+ "ck": 0.00724700220209937,
+ "base": {
+  "center": 41849,
+  "p10": 33272,
+  "p90": 50227
+ },
+ "rows": [
+  {
+   "label": "12,3% E15/dau duoi Ke",
+   "r": 0.123,
+   "center": 43657,
+   "center_pre": 43976,
+   "p10": 34265,
+   "p90": 52823,
+   "d_center": 1808,
+   "d_pct": 0.0432,
+   "center_point_r": 43640
+  },
+  {
+   "label": "12,5% (-100bp)",
+   "r": 0.125,
+   "center": 43331,
+   "center_pre": 43647,
+   "p10": 34075,
+   "p90": 52369,
+   "d_center": 1482,
+   "d_pct": 0.0354,
+   "center_point_r": 43315
+  },
+  {
+   "label": "13,0% (-50bp)",
+   "r": 0.13,
+   "center": 42561,
+   "center_pre": 42872,
+   "p10": 33659,
+   "p90": 51252,
+   "d_center": 712,
+   "d_pct": 0.017,
+   "center_point_r": 42547
+  },
+  {
+   "label": "13,4% dau tren Ke",
+   "r": 0.134,
+   "center": 41987,
+   "center_pre": 42293,
+   "p10": 33352,
+   "p90": 50425,
+   "d_center": 138,
+   "d_pct": 0.0033,
+   "center_point_r": 41974
+  },
+  {
+   "label": "13,5% BASE",
+   "r": 0.135,
+   "center": 41849,
+   "center_pre": 42154,
+   "p10": 33272,
+   "p90": 50227,
+   "d_center": 0,
+   "d_pct": 0.0,
+   "center_point_r": 41836
+  },
+  {
+   "label": "14,0% (+50bp)",
+   "r": 0.14,
+   "center": 41188,
+   "center_pre": 41488,
+   "p10": 32886,
+   "p90": 49277,
+   "d_center": -661,
+   "d_pct": -0.0158,
+   "center_point_r": 41176
+  },
+  {
+   "label": "14,5% (+100bp)",
+   "r": 0.145,
+   "center": 40573,
+   "center_pre": 40869,
+   "p10": 32540,
+   "p90": 48394,
+   "d_center": -1276,
+   "d_pct": -0.0305,
+   "center_point_r": 40562
+  }
+ ],
+ "note": "center = truc r dich (nhat quan voi base); center_point_r = 1 diem r khong truc (cach r_sens cua r3b)"
+}
