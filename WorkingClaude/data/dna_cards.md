@@ -332,7 +332,7 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
 ━━ VOS [COMPOUNDER]  VALUE_TRAP→event_check  (PE4.3 pe_z-0.2 PEGnan dd-39%)
    Engine: LOWROIC_GROWTH  (ROIC 10%, asset-growth +10%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 12%, ROE 28%)
-   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.55]  (BDI now 2898,real): thuần BDI (NP~BDI +0.55, NPM +0.58): LỖ ở đáy cước, lãi khi BDI vọt. ⚠ bẫy đỉnh-cước rõ nhất nhóm
+   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.55]  (BDI now 3000,real): thuần BDI (NP~BDI +0.55, NPM +0.58): LỖ ở đáy cước, lãi khi BDI vọt. ⚠ bẫy đỉnh-cước rõ nhất nhóm
    Margin-cycle: MARGIN_PEAK (GPM pctile 0.81)
    Runway/TAM:   SATURATING [DOMESTIC]  (rev CAGR +5% vs prior +29%)
 
@@ -474,14 +474,14 @@ ROUTE(ICB)·VALUATION·ENGINE(runway×ROIC)·CASH◆·MOAT·MARGIN-CYCLE·RUNWAY
 ━━ VNA [COMPOUNDER]  VALUE_TRAP→event_check  (PE3.2 pe_z-1.0 PEGnan dd-31%)
    Engine: LOWROIC_GROWTH  (ROIC 11%, asset-growth +13%, dilut3y +70%)
    Moat:   WEAK/commodity []  (GPM 12%, ROE 42%)
-   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.59]  (BDI now 2898,real): bám BDI sát như VOS (NP~BDI +0.59); bulk thuần, biến động mạnh
+   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.59]  (BDI now 3000,real): bám BDI sát như VOS (NP~BDI +0.59); bulk thuần, biến động mạnh
    Margin-cycle: MID (GPM pctile 0.73)
    Runway/TAM:   MODERATE [DOMESTIC]  (rev CAGR -4% vs prior +8%)
 
 ━━ VSA [COMPOUNDER]  VALUE_TRAP→event_check  (PE10.1 pe_z-0.1 PEGnan dd-26%)
    Engine: -  (ROIC 5%, asset-growth -6%, dilut3y +0%)
    Moat:   WEAK/commodity []  (GPM 8%, ROE 9%)
-   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.00]  (BDI now 2898,real): tín hiệu yếu/nhiễu (thanh khoản nhỏ); danh nghĩa bulk
+   🚢 FREIGHT[DRY_BULK·BDI·NP~+0.00]  (BDI now 3000,real): tín hiệu yếu/nhiễu (thanh khoản nhỏ); danh nghĩa bulk
    Margin-cycle: MID (GPM pctile 0.42)
    Runway/TAM:   MATURE/FLAT [DOMESTIC]  (rev CAGR +3% vs prior +8%)
 
