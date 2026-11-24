@@ -1,0 +1,27 @@
+diff --git a/bin/daily_dashboard.py b/bin/daily_dashboard.py
+index 2cf6e6b91..1fcc2f0ea 100644
+--- a/bin/daily_dashboard.py
++++ b/bin/daily_dashboard.py
+@@ -68,7 +68,7 @@ _DNA_LINES = (("build_dt_gate_line", True), ("build_value_radar_line", True), ("
+ def market_block():
+     out = ["**E. Thị trường**"]
+     code = ("import dna_report as d\n"
+-            + "".join(f"v=d.{n}(html=False)\nprint('##{n}')\nprint('' if v is None else v)\n" for n, _ in _DNA_LINES))
++            + "".join(f"v=d.{n}(html=False{', with_norm5=True' if n == 'build_value_radar_line' else ''})\nprint('##{n}')\nprint('' if v is None else v)\n" for n, _ in _DNA_LINES))  # norm5: dashboard nội bộ
+     try:
+         stdout, stderr = _wc_python(code)
+         got = {}
+diff --git a/bin/eod_trading_report.sh b/bin/eod_trading_report.sh
+index 6a97a64bd..8abbe6231 100755
+--- a/bin/eod_trading_report.sh
++++ b/bin/eod_trading_report.sh
+@@ -300,7 +300,8 @@ try:
+     # Value Radar (định giá, phân vị rolling 10 năm) — đặt NGAY CẠNH khối regime DT5G để
+     # có cả góc định giá lẫn góc tâm lý/kỹ thuật. THUẦN HIỂN THỊ, không phải tín hiệu.
+     from dna_report import build_value_radar_line
+-    vr = build_value_radar_line(html=False)
++    # norm5 (P/E chuẩn hoá 5Y + cờ LỢI NHUẬN ĐỈNH): CHỈ ZaloPay (nội bộ). SpaceX = báo cáo nhà đầu tư ngoài ⇒ giữ nguyên.
++    vr = build_value_radar_line(html=False, with_norm5=('$ACCOUNT' == 'ZaloPay'))
+     if vr:
+         print('🧭 ' + vr)
+ except Exception:

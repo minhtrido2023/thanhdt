@@ -1,0 +1,22 @@
+diff --git a/WorkingClaude/dna_report.py b/WorkingClaude/dna_report.py
+index f9979f008..a31d0392b 100755
+--- a/WorkingClaude/dna_report.py
++++ b/WorkingClaude/dna_report.py
+@@ -391,7 +391,7 @@ def build_dt_gate_line(html=True):
+     return line + ("\n   " + _badzone_text(bz, comm) if bz else "")
+ 
+ 
+-def build_value_radar_line(html=True):
++def build_value_radar_line(html=True, with_norm5=False):
+     """Value Radar — lăng kính ĐỊNH GIÁ (phân vị rolling 10 năm của P/E + P/B capped-10%
+     + spread earnings-yield vs lãi suất huy động), hiển thị NGAY CẠNH state DT5G để người
+     đọc có cả góc định giá lẫn góc tâm lý/kỹ thuật.
+@@ -404,7 +404,7 @@ def build_value_radar_line(html=True):
+         if W not in sys.path:
+             sys.path.insert(0, W)
+         from value_radar import build_value_radar_line as _vr
+-        return _vr(html=html)
++        return _vr(html=html, with_norm5=with_norm5)   # norm5: chỉ call-site NỘI BỘ truyền True (2026-11-24)
+     except Exception as e:
+         import sys as _sys
+         print(f"[dna_report] value_radar skipped (fail-safe): {e}", file=_sys.stderr)

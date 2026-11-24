@@ -1,0 +1,163 @@
+diff --git a/bin/dd_price_zone_watch.py b/bin/dd_price_zone_watch.py
+index 3796f874e..2a77efc1e 100644
+--- a/bin/dd_price_zone_watch.py
++++ b/bin/dd_price_zone_watch.py
+@@ -101,17 +101,35 @@ def sector_of(t):
+     return f"ICB{c}·đá" if t.upper() in STONE_GROUP else f"ICB{c}"
+ 
+ 
++def adj_center_ok(e):
++    """Tâm kỳ vọng điều chỉnh HỢP LỆ (E17, user 24/11): center_adj số dương ∧ có center_adj_basis (adj.json) ∧ center_adj_md5
++    ∧ nhãn skeptic_final ≠ NONE. Tồn tại file/md5 do dd_price_zones_selfcheck chặn lúc ghi sổ — ở đây chỉ đọc trường."""
++    ca = e.get("center_adj")
++    return (isinstance(ca, (int, float)) and not isinstance(ca, bool) and ca > 0 and bool(e.get("center_adj_basis"))
++            and bool(e.get("center_adj_md5")) and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN"))
++
++
++def zone_low_eff(e):
++    """Đáy vùng DÙNG CHO BẬC 1 = zone_low, và CHỈ SIẾT khi tâm điều chỉnh < tâm base: zone_low × (center_adj/center).
++    Tâm điều chỉnh cao hơn tâm KHÔNG nới đáy (phương án A — điều chỉnh chỉ làm cổng chặt hơn, không lỏng hơn)."""
++    lo, c, ca = e.get("zone_low"), e.get("center"), e.get("center_adj")
++    if lo is not None and c and adj_center_ok(e) and ca < c:
++        return lo * ca / c
++    return lo
++
++
+ def tier_of(row, dd_flag, adv, pos_vnd, part, max_sessions=TIER1_EXIT_SESSIONS):
+-    """→ (1|2, [lý do thiếu]). Bậc 1 = giá < zone_low ∧ skeptic_final==CONFIRMED ∧ không cờ ∧ thoát ≤max_sessions
+-    phiên (pos_vnd / (part×adv)). Thiếu dữ liệu ⇒ Bậc 2 kèm lý do (không im lặng Bậc 1). dd_flag = (status,codes,why)|None;
+-    adv = (adv_vnd|None, err|None)|None."""
++    """→ (1|2, [lý do thiếu]). Bậc 1 = giá < zone_low_eff ∧ (skeptic_final==CONFIRMED ∨ có tâm kỳ vọng điều chỉnh hợp lệ — E17)
++    ∧ không cờ ∧ thoát ≤max_sessions phiên (pos_vnd / (part×adv)). Thiếu dữ liệu ⇒ Bậc 2 kèm lý do (không im lặng Bậc 1).
++    dd_flag = (status,codes,why)|None; adv = (adv_vnd|None, err|None)|None."""
+     e, why = row["entry"], []
+-    lo, c = e.get("zone_low"), row.get("close")
++    lo, c = zone_low_eff(e), row.get("close")
+     if c is None or lo is None or not c < lo:
+         why.append("giá chưa dưới đáy vùng")
+     sk = e.get("skeptic_final")
+-    if sk != "CONFIRMED":
++    if sk != "CONFIRMED" and not adj_center_ok(e):
+         why.append(f"skeptic {sk or '?'}")
++        why.append("chưa có tâm kỳ vọng điều chỉnh (E17)")
+     if e.get("audited_fy_missing") is True:   # D5 (user 22/11): thiếu BCTC kiểm toán năm gần nhất ⇒ không vào Bậc 1
+         why.append("thiếu BCTC kiểm toán năm gần nhất (D5)")
+     fl = [f for f in row.get("flags", []) if not f.startswith("đang giữ")]
+diff --git a/bin/dd_price_zone_watch_selfcheck.py b/bin/dd_price_zone_watch_selfcheck.py
+index 341b1385b..f6631d791 100644
+--- a/bin/dd_price_zone_watch_selfcheck.py
++++ b/bin/dd_price_zone_watch_selfcheck.py
+@@ -494,6 +494,26 @@ def cases(m):
+        m.tier_of(trow(), CLEAN, (None, "no row"), POS, PART)[0] == 2 and m.tier_of(trow(), CLEAN, None, POS, PART)[0] == 2
+        and m.tier_of(trow(), CLEAN, ADV, POS, None)[0] == 2)
+     ok("giả định vị thế = 5% × 1,55 tỷ = 77,5 triệu", abs(m.POS_NAV_VND * m.POS_PCT - 77.5e6) < 1 and m.TIER1_EXIT_SESSIONS == 3)
++    # E17 (user 24/11): tâm kỳ vọng điều chỉnh thay nhãn CONFIRMED; chỉ SIẾT đáy, không nới
++    def arow(sk="REFUTED_OPEN", adj=19000.0, close=17000, basis="a/adj.json", md5="x"):
++        r = trow(close=close, sk=sk)
++        r["entry"].update({"center_adj": adj, "center_adj_low": 18000.0, "center_adj_high": 21000.0,
++                           "center_adj_basis": basis, "center_adj_md5": md5})
++        return r
++    T = lambda r: m.tier_of(r, CLEAN, ADV, POS, PART)
++    ok("E17: REFUTED_OPEN + tâm điều chỉnh + dưới đáy ⇒ Bậc 1", T(arow()) == (1, []))
++    ok("E17: INCONCLUSIVE-kiểu FIXED_UNVERIFIED + tâm điều chỉnh ⇒ Bậc 1", T(arow(sk="FIXED_UNVERIFIED")) == (1, []))
++    ok("E17: REFUTED_OPEN KHÔNG có tâm điều chỉnh ⇒ Bậc 2", T(trow(sk="REFUTED_OPEN"))[0] == 2)
++    ok("E17: skeptic_final=NONE dù có tâm điều chỉnh ⇒ Bậc 2", T(arow(sk="NONE"))[0] == 2)
++    ok("E17: thiếu center_adj_basis ⇒ Bậc 2", T(arow(basis=None))[0] == 2)
++    ok("E17: thiếu center_adj_md5 ⇒ Bậc 2", T(arow(md5=None))[0] == 2)
++    ok("E17: center_adj=True (bool) không hợp lệ", T(arow(adj=True))[0] == 2 and not m.adj_center_ok(arow(adj=True)["entry"]))
++    ok("E17: tâm điều chỉnh THẤP (15000<20000) SIẾT đáy→13.500: giá 17.000 ⇒ Bậc 2", T(arow(adj=15000.0))[0] == 2
++       and m.zone_low_eff(arow(adj=15000.0)["entry"]) == 13500.0)
++    ok("E17: tâm điều chỉnh CAO (25000>20000) KHÔNG nới đáy: giá 18.500 ⇒ Bậc 2", T(arow(adj=25000.0, close=18500))[0] == 2
++       and m.zone_low_eff(arow(adj=25000.0)["entry"]) == 18000)
++    ok("E17: CONFIRMED + tâm điều chỉnh thấp cũng bị siết", T(arow(sk="CONFIRMED", adj=15000.0))[0] == 2)
++    ok("E17: CONFIRMED không có tâm điều chỉnh ⇒ vẫn Bậc 1 (không đổi hành vi cũ)", T(trow()) == (1, []))
+     ok("tier_of không đổi row", (lambda r: (m.tier_of(r, CLEAN, ADV, POS, PART), r)[1] == trow())(trow()))
+     # end-to-end qua evaluate/build_candidates/render: mã có cờ VẪN hiện (Bậc 2), tập mã không đổi
+     led2 = {"entries": [dict(ent("OKK"), skeptic_final="CONFIRMED"), dict(ent("FLG"), skeptic_final="CONFIRMED")]}
+@@ -575,7 +595,13 @@ MUTANTS = [
+     ("C16 dd_flag_map song song lệch mã↔verdict", 'out.update(zip(rest, ex.map(one, rest)))',
+      'out.update(zip(rest, ex.map(one, rest[::-1])))'),
+     ("A7-1 Bậc 1 không cần dưới đáy", 'if c is None or lo is None or not c < lo:', 'if False:'),
+-    ("A7-2 Bậc 1 không cần CONFIRMED", 'if sk != "CONFIRMED":', 'if False:'),
++    ("A7-2 Bậc 1 không cần CONFIRMED", 'if sk != "CONFIRMED" and not adj_center_ok(e):', 'if False:'),
++    ("E17-1 tâm điều chỉnh cao NỚI đáy", 'and ca < c:', 'and True:'),
++    ("E17-2 skeptic NONE vẫn nhận tâm điều chỉnh", ' and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN")', ''),
++    ("E17-3 không đòi center_adj_basis", ' and bool(e.get("center_adj_basis"))', ''),
++    ("E17-4 không đòi center_adj_md5", '\n            and bool(e.get("center_adj_md5"))', ''),
++    ("E17-5 bool coi là số", ' and not isinstance(ca, bool)', ''),
++    ("E17-6 bỏ siết đáy", 'return lo * ca / c', 'return lo'),
+     ("A7-3 bỏ kiểm cờ tĩnh", 'if fl:\n        why.append("cờ: "', 'if False:\n        why.append("cờ: "'),
+     ("A7-4 cờ DD chưa kiểm ⇒ im lặng Bậc 1", 'if dd_flag is None:', 'if False:'),
+     ("A7-5 FLAGGED không hạ bậc", 'elif dd_flag[0] == "FLAGGED":', 'elif False:'),
+diff --git a/bin/dd_price_zones_selfcheck.py b/bin/dd_price_zones_selfcheck.py
+index 3c4eb21c1..75e68969c 100644
+--- a/bin/dd_price_zones_selfcheck.py
++++ b/bin/dd_price_zones_selfcheck.py
+@@ -108,6 +108,7 @@ def check(ledger_path, src_root=SRC_ROOT):
+         errs += _expiry_errs(tag, e)
+         errs += _lock_errs(tag, e, src_root)
+         errs += _skeptic_final_errs(tag, e, src_root)
++        errs += _center_adj_errs(tag, e, src_root)
+         errs += _skeptic_path_errs(tag, e, src_root)
+         for fld in ("source_file",):
+             if not os.path.exists(os.path.join(src_root, e[fld])):
+@@ -148,6 +149,36 @@ SKEPTIC_BASIS_ENUM = ("rule_backfill_20261122", "ambiguous_backfill", "skeptic_r
+ _RE_NOT_CONFIRMED = re.compile(r"REFUTED|INCONCLUSIVE|CHƯA (?:qua|chạy)", re.I)
+ 
+ 
++def _center_adj_errs(tag, e, src_root):
++    """E17 (user 24/11): tâm kỳ vọng điều chỉnh — TUỲ CHỌN, nhưng đã có trường nào thì phải đủ bộ: center_adj (số >0),
++    center_adj_basis (adj.json thật, md5 = center_adj_md5, ticker khớp, center_adj khớp) và center_adj_low ≤ center_adj ≤ center_adj_high."""
++    keys = ("center_adj", "center_adj_basis", "center_adj_md5", "center_adj_low", "center_adj_high")
++    if not any(k in e for k in keys):
++        return []
++    errs = [f"{tag}: có trường tâm điều chỉnh nhưng thiếu {k}" for k in keys if e.get(k) is None]
++    if errs:
++        return errs
++    ca, lo, hi = e["center_adj"], e["center_adj_low"], e["center_adj_high"]
++    if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in (ca, lo, hi)) or not (0 < lo <= ca <= hi):
++        errs.append(f"{tag}: center_adj phải số, 0 < low ≤ adj ≤ high (low={lo!r} adj={ca!r} high={hi!r})")
++    if e.get("skeptic_final") == "NONE":
++        errs.append(f"{tag}: center_adj nhưng skeptic_final=NONE (tâm điều chỉnh dựng SAU phản biện)")
++    pth = os.path.join(src_root, str(e["center_adj_basis"]))
++    try:
++        raw = open(pth, "rb").read()
++    except OSError as x:
++        return errs + [f"{tag}: center_adj_basis không đọc được {e['center_adj_basis']}: {x}"]
++    if hashlib.md5(raw).hexdigest() != e["center_adj_md5"]:
++        errs.append(f"{tag}: center_adj_md5 KHÔNG khớp {e['center_adj_basis']} (file đổi sau khi ghi sổ)")
++    try:
++        j = json.loads(raw)
++    except ValueError as x:
++        return errs + [f"{tag}: center_adj_basis không phải JSON: {x}"]
++    if j.get("ticker") != e.get("ticker") or abs(float(j.get("center_adj", -1)) - float(ca)) > 0.5:
++        errs.append(f"{tag}: adj.json (ticker={j.get('ticker')!r}, center_adj={j.get('center_adj')!r}) không khớp entry")
++    return errs
++
++
+ def _skeptic_final_errs(tag, e, src_root):
+     """A2: skeptic_final ∈ enum (bắt buộc từ SKEPTIC_FINAL_REQUIRED_FROM; entry cũ chỉ bị kiểm nếu CÓ trường);
+     audited_fy_missing phải bool; skeptic_verdict_path null được, khác null thì file phải tồn tại."""
+@@ -264,6 +295,22 @@ def _self_tests():
+         nolock = {k: v for k, v in ok_e.items() if k != "assumptions_md5"}
+         r.append(("entry mới thiếu khoá bị bắt", bool(_lock_errs("t", nolock, td))))
+         r.append(("entry cũ (trước 08/11) thiếu khoá được miễn", not _lock_errs("t", dict(nolock, recorded_at="2026-11-02T00:00:00+07:00"), td)))
++    # E17: tâm kỳ vọng điều chỉnh — đủ bộ, md5 khớp adj.json, ticker/center_adj khớp, low ≤ adj ≤ high
++    with tempfile.TemporaryDirectory() as td2:
++        aj = json.dumps({"ticker": "AAA", "center_adj": 19000.0}).encode()
++        open(os.path.join(td2, "adj.json"), "wb").write(aj)
++        ca_e = {"ticker": "AAA", "skeptic_final": "REFUTED_OPEN", "center_adj": 19000.0, "center_adj_low": 18000.0,
++                "center_adj_high": 21000.0, "center_adj_basis": "adj.json", "center_adj_md5": hashlib.md5(aj).hexdigest()}
++        r.append(("center_adj: bộ đủ → sạch", not _center_adj_errs("t", ca_e, td2)))
++        r.append(("center_adj: không có trường nào → bỏ qua", not _center_adj_errs("t", {"ticker": "AAA"}, td2)))
++        r.append(("center_adj: thiếu 1 trường bị bắt", bool(_center_adj_errs("t", {k: v for k, v in ca_e.items() if k != "center_adj_md5"}, td2))))
++        r.append(("center_adj: md5 lệch bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj_md5="0" * 32), td2))))
++        r.append(("center_adj: file adj.json mất bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj_basis="nope.json"), td2))))
++        r.append(("center_adj: ticker lệch bị bắt", bool(_center_adj_errs("t", dict(ca_e, ticker="BBB"), td2))))
++        r.append(("center_adj: giá trị lệch adj.json bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj=19500.0, center_adj_high=21000.0), td2))))
++        r.append(("center_adj: adj ngoài [low,high] bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj_high=18500.0), td2))))
++        r.append(("center_adj: bool bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj=True), td2))))
++        r.append(("center_adj: skeptic_final=NONE bị bắt", bool(_center_adj_errs("t", dict(ca_e, skeptic_final="NONE"), td2))))
+     ne = {"ticker": "AAA", "recorded_at": "2026-11-23T09:00:00+07:00", "skeptic_final": "NONE", "audited_fy_missing": False}
+     r.append(("skeptic_final: entry mới đủ trường → sạch", not _skeptic_final_errs("t", ne, SRC_ROOT)))
+     r.append(("skeptic_final: entry mới thiếu skeptic_final bị bắt", bool(_skeptic_final_errs("t", {k: v for k, v in ne.items() if k != "skeptic_final"}, SRC_ROOT))))

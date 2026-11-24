@@ -1,0 +1,26 @@
+# BÀN GIAO — topic "DD: tâm kỳ vọng điều chỉnh" (24/11/2026 17:4x ICT, từ topic 1574720404268912680)
+
+## User chốt (24/11)
+- 17:36: duyệt ghi sổ 8 rev (ĐÃ làm) + merge (ĐÃ làm, master `590991e6c`). Nguyên văn nguyên tắc: *"Nếu đã dùng tất cả thông tin public mà vẫn INCONCLUSIVE thì nhà đầu tư cá nhân sẽ ra quyết định thế nào? Việc của chúng ta không phải là gắn nhãn INCONCLUSIVE là xong mà phải dự báo như thị trường để ra quyết định. Khi nào có thông tin thêm thì update lại mô hình. Không bao giờ thụ động ra kết luận và đổ lỗi cho thiếu thông tin. Chúng ta chỉ cố dự báo tốt nhất dựa trên thông tin đang có."*
+- 17:43: "Mở topic mới và làm cả 3 việc bạn đề nghị."
+
+## 3 việc (Mike đề nghị, user duyệt)
+**Việc 1 — Taylor dựng "tâm kỳ vọng điều chỉnh" cho 8 mã** (HHS, VGS, TCH, DRI, SIP, FPT, NNC, DGC).
+- Nguồn: `agents/Taylor/research/dd_recheck_20261124/<MÃ>/` — `REPORT_recheck_<MÃ>.md`, `SUMMARY.md`, `skeptic/r1.json` + `r1_raw.md` (các hạng mục skeptic ĐÃ định lượng, cả hai chiều), sổ `kb/dd_price_zones.json` (rev mới nhất của mã).
+- Phương pháp (khoá TRƯỚC khi tính, ghi `PREREG_adj.md` + md5): mỗi hạng mục = hướng, độ lớn % tâm (lấy số skeptic/báo cáo; không có số ⇒ khoảng nêu rõ "ước lượng" + cơ sở), xác suất (bậc bằng chứng cố định: số trực tiếp từ BCTC / suy từ peer-lịch sử / không có cơ sở ⇒ chỉ độ nhạy, không vào tâm — khớp V4 "mọi khoản giảm trừ trong base phải có dòng cơ sở dữ liệu"). Cấm đếm hai lần (vd r 13,5% > dải Ke vs E15 đã là cùng một hạng mục). Tâm kỳ vọng điều chỉnh = tâm × (1 + Σ p×m) + dải (thấp/cao theo p cực trị). MÙ GIÁ: không đọc giá thị trường khi dựng.
+- Mỗi mã thêm: **bảng điều kiện đổi số** — sự kiện/dữ kiện cụ thể sắp có (BCTC quý, soát xét, ĐHCĐ, văn bản...) → hướng + độ lớn → tâm đổi bao nhiêu. Đây là thứ thay cho "thiếu dữ kiện".
+- Đầu ra: `agents/Taylor/research/dd_adjcenter_20261124/<MÃ>/ADJ_CENTER.md` + `adj.json`. KHÔNG ghi sổ giá, KHÔNG email. Pilot 1 mã (khuyến nghị FPT hoặc TCH — có số skeptic rõ) rồi mới fan-out 7 mã còn lại. Opus/medium (phán đoán xác suất) hoặc sonnet cho phần cơ học — theo skill `dispatch-routing`. Worktree riêng (`git worktree add ../wt-<thread> -b session/<thread>`), commit đường dẫn của mình.
+- HHS: nhớ user đã chốt dải CK 0…+20% display-only, KHÔNG rev8 (`kb/projects/ck-hhs-reference-range-20261124.md`) — HHS chỉ dựng tâm kỳ vọng ở dạng hiển thị theo dải đó, không đụng sổ.
+
+**Việc 2 — sửa skill `due-diligence`** (`~/.claude/skills/due-diligence/SKILL.md`, + `SKILL_ext.md` nếu cần): mọi DD mà skeptic trả INCONCLUSIVE (hoặc REFUTED_OPEN còn hạng mục chưa đóng) PHẢI có (a) dòng "Tâm kỳ vọng điều chỉnh" ngay dưới dòng TÂM (cùng khu E15/E16), (b) bảng điều kiện đổi số; cấm kết luận kiểu "thiếu thông tin nên chưa kết luận". Nhãn `skeptic_final` GIỮ nguyên nghĩa (trạng thái phản biện) — không phải quan điểm. Quy trình: soạn bản `.proposed` + `diff`, ĐƯA DIFF CHO USER trong topic, ĐỢI user OK rồi mới áp (CLAUDE.md WorkingClaude: chưa có "bắt đầu"/duyệt diff thì không sửa). Backup `.bak_<ngày>` như các lần trước (xem `SKILL.md.bak_20261124_e16`). Cập nhật memory `feedback-dd-inconclusive-must-still-forecast.md` khi xong.
+
+**Việc 3 — đổi cổng Bậc 1 của `bin/dd_price_zone_watch.py`** (dòng ~105-115: Bậc 1 = giá < zone_low ∧ `skeptic_final==CONFIRMED` ∧ không cờ ∧ thoát ≤max_sessions ∧ không `audited_fy_missing`). Đề xuất: điều kiện nhãn đổi thành "có tâm kỳ vọng điều chỉnh hợp lệ" (nguồn: trường mới trong sổ, ví dụ `center_adjusted` + `center_adjusted_basis`; hoặc dùng `center_alt`/`center_alt_kind` nếu enum cho phép — kiểm `dd_price_zones_selfcheck.py` + `kb/dd_price_zones.json` "center_kinds" TRƯỚC khi thêm trường; thêm trường mới = đổi schema, selfcheck phải cập nhật + test đột biến). Ngưỡng zone_low giữ nguyên hay dựng lại quanh tâm điều chỉnh = quyết định thiết kế — nêu 2 phương án + khuyến nghị, đưa user. Luật 4 (02/11: giá < tâm 15% ⇒ được xét candidate discretionary, user duyệt từng lần) KHÔNG đổi. Watch chỉ THÔNG BÁO, không đặt lệnh; nhưng tác động nhãn Bậc 1 ⇒ chạy arch-reviewer 1 vòng (opus/medium) trước khi merge. Diff cho user xem trước khi áp. Selfcheck dưới `env -u TZ`.
+- Tác động hiện tại cần nêu cho user: sau ghi sổ 24/11, DRI/FPT/NNC/DGC/SIP (từng CONFIRMED) đã rơi Bậc 1→Bậc 2 (vẫn hiện, kèm lý do); giá hiện (watch 23/11): FPT 46.850 vs zone_low 45.270, NNC 47.150 (tâm 61.273), DGC 30.550 < zone_low 33.272, DRI 12.400 < 12.908, SIP 42.400 < 43.257 — nghĩa là DGC/DRI/SIP đang DƯỚI đáy vùng mà bị Bậc 2: đúng ca tự mâu thuẫn user nêu.
+
+## Trạng thái đã xong (đừng làm lại)
+- Sổ giá 141 entry (8 rev REFUTED_OPEN ghi 24/11 17:36), selfcheck 0 lỗi 2 TZ; 2 nhánh recheck merge master; worktree wt-1574720404268912680/…b đã gỡ; đĩa 69% (69G trống).
+- Kết quả đợt 1: tâm 8/8 KHÔNG đổi; skeptic HHS REFUTED, 7 mã INCONCLUSIVE/medium (~7,5 USD); E15/E16 từng mã trong SUMMARY.md.
+- Đợt 2 (9 FULL: CSV, DBC, DCM, LLM, PNJ, QTP, TTA, VLB + PAT/POW/VCP chưa xác định) và việc thêm E15/E16 vào báo cáo cũ: user "tạm thời chưa làm" — KHÔNG chạy.
+
+## Quy tắc
+KHÔNG email, KHÔNG wire, KHÔNG đặt lệnh. Mọi thay đổi file chạm skill/code: đưa diff user trước. Poll job bằng ScheduleWakeup (`--wakeup-ack`), `claim-reply` dòng đầu. Báo bảng vào topic này; HỎI user chỉ những gì cần quyết (phương án ngưỡng zone_low, duyệt diff skill + watch). Ghi `bin/remember.sh Mike`. Topic cũ 1574720404268912680 DỪNG.
