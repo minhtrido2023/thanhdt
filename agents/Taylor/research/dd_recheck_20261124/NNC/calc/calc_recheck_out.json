@@ -1,0 +1,92 @@
+{
+ "center_pre": 63591,
+ "ck_ref": {
+  "Y": 1.0,
+  "adv250": 0.036455063673381825,
+  "adv60": 0.04458837433549336,
+  "q_over_adv250": 2.400595136341441,
+  "q_over_adv60": 3.5912569269959236,
+  "size_bn": 5
+ },
+ "control_stdout_md5": "857c7adb3a319e2a819cbfa4de08caa4",
+ "r_base": 0.135,
+ "rows": [
+  {
+   "center": 63725,
+   "center_pre": 66136,
+   "d_center": 2452,
+   "d_pct": 0.04,
+   "label": "12,3% E15/dau duoi Ke",
+   "p10": 30591,
+   "p90": 100340,
+   "pct_below_px": 0.2718,
+   "r": 0.123
+  },
+  {
+   "center": 63297,
+   "center_pre": 65691,
+   "d_center": 2024,
+   "d_pct": 0.033,
+   "label": "12,5% (-100bp)",
+   "p10": 30554,
+   "p90": 99467,
+   "pct_below_px": 0.2718,
+   "r": 0.125
+  },
+  {
+   "center": 62261,
+   "center_pre": 64617,
+   "d_center": 988,
+   "d_pct": 0.0161,
+   "label": "13,0% (-50bp)",
+   "p10": 30463,
+   "p90": 97355,
+   "pct_below_px": 0.2742,
+   "r": 0.13
+  },
+  {
+   "center": 61467,
+   "center_pre": 63792,
+   "d_center": 194,
+   "d_pct": 0.0032,
+   "label": "13,4% dau tren Ke",
+   "p10": 30393,
+   "p90": 95736,
+   "pct_below_px": 0.2809,
+   "r": 0.134
+  },
+  {
+   "center": 61273,
+   "center_pre": 63591,
+   "d_center": 0,
+   "d_pct": 0.0,
+   "label": "13,5% BASE",
+   "p10": 30375,
+   "p90": 95341,
+   "pct_below_px": 0.2824,
+   "r": 0.135
+  },
+  {
+   "center": 60329,
+   "center_pre": 62611,
+   "d_center": -944,
+   "d_pct": -0.0154,
+   "label": "14,0% (+50bp)",
+   "p10": 30290,
+   "p90": 93417,
+   "pct_below_px": 0.289,
+   "r": 0.14
+  },
+  {
+   "center": 59426,
+   "center_pre": 61674,
+   "d_center": -1847,
+   "d_pct": -0.0301,
+   "label": "14,5% (+100bp)",
+   "p10": 30208,
+   "p90": 91579,
+   "pct_below_px": 0.2931,
+   "r": 0.145
+  }
+ ]
+}

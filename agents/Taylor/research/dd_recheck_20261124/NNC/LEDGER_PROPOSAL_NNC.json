@@ -1,0 +1,49 @@
+{
+ "entry": {
+  "ticker": "NNC",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261124/NNC/skeptic/r1.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-03",
+  "rev": 6,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 30375,
+  "center": 61273,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 5832 kết cục (trạng thái biên Bobby 0,20/0,45/0,35 × K × SL × ADMIN × trần 3 mức × thuê Núi Nhỏ), sau CK 3,65% @5 tỷ",
+  "zone_high": 95341,
+  "center_range": null,
+  "price_ref": 47200,
+  "price_date": "2026-11-06",
+  "verdict_label": "TRONG vùng: giá 47.200 thấp hơn tâm 61.273 −23,0%; 28,2% trọng số kết cục dưới giá. Luật sổ (giá < tâm −15%): ĐẠT (giá ≤ 0,85×tâm = 52.082) — chỉ là điều kiện được XÉT làm candidate discretionary (user duyệt từng lần, không tự mua). Phân phối lệch phải, P90 do nhánh STRUCTURAL (Bobby 0,20)",
+  "skeptic_status": "recheck 24/11 (luật B5+E15/E16): dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (report_md5 khớp, 1,21 USD). Cơ học đúng (CONTROL trùng byte r3; BQ Q3/26 cash/nợ/OShares/BVPS khớp; n_cash 223,62 tỷ). Đòn 8 chưa qua: trích quỹ KTPL hằng năm từ LNST 2027–2043 chưa trừ (ước −3,6…−7,2% nếu 5–10%, tỷ lệ chưa có nguồn); giả định capex duy trì ≈ khấu hao chưa có nguồn (capex thực 23–54 tỷ/năm, mua máy từ NHC); truy thu Núi Nhỏ ~42 tỷ có nằm trong dự phòng 22,37 không (≤1,5%). Chiều lên: r 13,5% trên dải Ke; MVC còn lỗi trần chu kỳ chưa vá. Không chạy thêm vòng: sửa = đổi mô hình ⇒ rev mới + phản biện đầy đủ.",
+  "source_file": "agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md",
+    "quote": "**TÂM (base, r 13,5%, sau CK 5 tỷ): 61.273 đ/cp — vùng 30.375–95.341. KHÔNG ĐỔI so với r3.**",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261124/NNC/REPORT_recheck_NNC.md",
+    "quote": "- **Nhãn** (giá 47.200, BQ 06/11/2026, kế thừa r3): **TRONG vùng**. Luật 4 ĐẠT (giá ≤ 0,85 × 61.273 = 52.082) — chỉ là điều kiện được XÉT làm candidate, user duyệt từng lần. Nhãn không đổi so với r3.",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_redo_20261105/NNC/calc/LOCK_r3_md5.txt",
+  "assumptions_md5": "1a681b3e34262686a33d0ad377cab899",
+  "expires_on": "2027-03-03",
+  "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn",
+  "recorded_at": "2026-11-24T17:45:00+07:00",
+  "supersedes": "NNC@2026-11-03#5",
+  "correction_reason": "recheck theo HANDOFF dd_recheck_20261124: thêm E15 (Tâm @ Ke 12,3% = 63.725, +4,00%) + E16 (KHÔNG CHẮC, N hiệu dụng thấp 1.81, cờ ĐỈNH LỢI NHUẬN?) + dải Ke (63.725/61.467) + độ nhạy ±50/±100bp tính từ mô hình (r3 chưa có) + V6 (nền máy dd_blend, chỉ hiển thị) + soát D3/D4. Tâm/vùng/nhãn KHÔNG đổi (61.273; 30.375–95.341; TRONG).",
+  "report_md5": "53c3d244df093877f61e900fc61555c9"
+ }
+}

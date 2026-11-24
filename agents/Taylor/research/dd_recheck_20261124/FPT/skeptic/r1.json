@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/FPT/REPORT_recheck_FPT.md",
+  "report_md5": "78b26579c2211ecb7e86c8c9a5778ebe",
+  "brief_md5": "8ea6cd6a33e0398e9b2f38c3184ea01b",
+  "model": "opus",
+  "cost_usd": 1.0383251999999998,
+  "started_at_ict": "2026-11-24T16:59:08+07:00",
+  "summary": "Phần tái chạy cơ học của bản recheck FPT đúng: các số then chốt (LNST, lãi liên kết, CĐKKS, tiền ròng, số cổ phiếu, LNST Q4/25) khớp BCTC Q3/2026 và BQ; bảng độ nhạy r tái lập được. Tuy vậy, kiểm thiếu hạng mục (attack 8) chưa qua. Cam kết capex data center/AI factory chưa được đọc trong khi FCF 9 tháng 2026 âm. Mô hình cũng bỏ qua quỹ khen thưởng phúc lợi 1.477 tỷ (−1,4%), trích quỹ hằng năm (~−3%) và pha loãng ESOP (~−2,5%), cộng lại ≈ −6–7%. Chiều ngược lại có lực kéo lên có cơ sở: r 13,5% cao hơn dải Ke 12,3–13,4% (đến +6,7%), và g cơ sở 9% thấp hơn đà LFL +13,7% (g 12% ⇒ +3,3%). Hai chiều gần bù nhau nên chưa đủ để bác tâm, nhưng chưa thể CONFIRMED khi hạng mục capex còn bỏ trống.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/FPT/skeptic/r1_raw.md"
+}
