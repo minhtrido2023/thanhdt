@@ -1,0 +1,100 @@
+{
+ "ticker": "MVC",
+ "ck_5ty": 0.08547018049093726,
+ "r_sens_grid": {
+  "0.123": {
+   "center": 16761,
+   "p10": 10036,
+   "p50": 15801,
+   "p90": 24515,
+   "center_pre": 18328,
+   "d_vnd": 520,
+   "d_pct": 3.2
+  },
+  "0.125": {
+   "center": 16671,
+   "p10": 10018,
+   "p50": 15723,
+   "p90": 24322,
+   "center_pre": 18229,
+   "d_vnd": 430,
+   "d_pct": 2.65
+  },
+  "0.130": {
+   "center": 16451,
+   "p10": 9982,
+   "p50": 15539,
+   "p90": 23867,
+   "center_pre": 17989,
+   "d_vnd": 210,
+   "d_pct": 1.29
+  },
+  "0.134": {
+   "center": 16283,
+   "p10": 9948,
+   "p50": 15395,
+   "p90": 23546,
+   "center_pre": 17804,
+   "d_vnd": 42,
+   "d_pct": 0.26
+  },
+  "0.135": {
+   "center": 16241,
+   "p10": 9940,
+   "p50": 15359,
+   "p90": 23471,
+   "center_pre": 17759,
+   "d_vnd": 0,
+   "d_pct": 0.0
+  },
+  "0.140": {
+   "center": 16040,
+   "p10": 9905,
+   "p50": 15190,
+   "p90": 23105,
+   "center_pre": 17539,
+   "d_vnd": -201,
+   "d_pct": -1.24
+  },
+  "0.145": {
+   "center": 15847,
+   "p10": 9870,
+   "p50": 15025,
+   "p90": 22733,
+   "center_pre": 17328,
+   "d_vnd": -394,
+   "d_pct": -2.43
+  }
+ },
+ "hold20_param": {
+  "c0_pre": 17704,
+  "V_pre": 16418,
+  "d_pre": -1286,
+  "d_pct": -7.26,
+  "d_post_approx": -1176,
+  "note": "tai tham so trung tam (nhu tornado r3 6%/15%), phan NNC"
+ },
+ "tornado_r3": {
+  "ADMIN full": -227,
+  "ADMIN perm05": 1241,
+  "ICD von gop 44,797 (r2)": 64,
+  "V_NNC = gia thi truong 47.200": -1636,
+  "bien TL 25%": -1204,
+  "bien TL 30%": -564,
+  "bien TL 38%": 576,
+  "bo thue Nui Nho": -329,
+  "chi CYCLICAL": -1801,
+  "chiet khau holding 15% (phan NNC)": -967,
+  "chiet khau holding 6% (phan NNC)": -388,
+  "mo moi hai phia (upside + NPV gia xau; lech NPV0)": -2078,
+  "tran SL 1,05": 604,
+  "tran SL 1,40": -831,
+  "tre GP ky vong (Bobby F6) mo moi + CIP NNC": -571
+ },
+ "V_NNC_implied_pre": 63369,
+ "branch_post": {
+  "ADMIN_GATED": 15431,
+  "CYCLICAL": 14284,
+  "STRUCTURAL": 21490
+ }
+}
