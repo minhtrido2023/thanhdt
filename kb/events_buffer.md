@@ -1156,3 +1156,52 @@
 - [2026-11-24T17:05:48Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "bắt đầu: khảo sát file"}
 - [2026-11-24T17:06:38Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20261124_170537", "source": "watcher"}
 - [2026-11-24T17:06:47Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "đo BQ xong (sàn đề xuất 150, hệ số 0.90 không false-positive từ 2016); đọc cổng"}
+
+## Consolidation 2026-11-24T17:23:18Z
+- [2026-11-24T17:22:41Z] DollarBill/heartbeat — DollarBill_20261124_172234: {"status": "in_progress", "note": "start SpaceX plan 11-25"}
+- [2026-11-24T17:23:07Z] DollarBill/decision — plan-ZaloPay-2026-11-25: HOLD ALL 0 lệnh; chạy tay sáng, cần user duyệt trước 08:45; không có CSV recommend hợp lệ, LAG PACK_STALE; DT5G NEUTRAL
+- [2026-11-24T17:23:17Z] DollarBill/decision — plan-2026-11-25-SpaceX: {"decision": "HOLD ALL 0 lenh", "morning_run": true, "needs_user_approval_before": "08:45 ICT", "reason": "recommend 0 picks, LAG DD PACK_STALE, FPT stop user mien"}
+- [2026-11-24T17:07:01Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "in_progress", "note": "baseline V2 repro dang chay (out_A); viet h_null_ep + sua NB-2/NB-1/NB-3"}
+- [2026-11-24T17:07:56Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:08:56Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:09:29Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "in_progress", "note": "da viet code NB-1/2/3/6 + h_null_ep; baseline out_A dang chay xong d, cho e/f; sau do stage C"}
+- [2026-11-24T17:09:56Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:10:57Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:11:57Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:12:57Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:13:57Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:14:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:15:12Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "in_progress", "note": "A(V2 repro byte-giong) + C(NB-1,2) xong; B,D,final dang chay. null E/P: ENS1w 70.5/69.9 vs EPN 68.5/67.7 (CI chua 0)"}
+- [2026-11-24T17:15:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:16:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:17:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:18:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 15, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:19:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 16, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:20:32Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "in_progress", "note": "embargo NB-3 lam luat S5 chon ENS2 (ENS1w 2,75 vs ENS2 3,09, hoa <1d); them null E2; final dang chay lai; sau do tables+REPORT+selfcheck3"}
+- [2026-11-24T17:20:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 17, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:21:59Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 18, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:23:00Z] Taylor/heartbeat — Taylor_20261124_170355: {"status": "still_running", "elapsed_min": 19, "job_id": "Taylor_20261124_170355", "source": "watcher"}
+- [2026-11-24T17:07:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:08:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:08:42Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "thiết kế xong 5 hạng mục; đọc late_plan_catchup/expected_session"}
+- [2026-11-24T17:09:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:10:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:11:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:12:18Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "HM1 xong (gate chung + selfcheck 3TZ xanh), HM3 daily_refresh holiday xong; đang HM2 lịch"}
+- [2026-11-24T17:12:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 7, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:13:10Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "HM2 lịch xong (helper+watch); đang HM3 probe/housekeeping/send_plan_report"}
+- [2026-11-24T17:13:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 8, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:14:39Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 9, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:15:40Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 10, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:16:10Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "HM3 xong (25/25 selfcheck); đang HM4 retry+escalate"}
+- [2026-11-24T17:16:40Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 11, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:17:40Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 12, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:18:40Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 13, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:19:29Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "HM4 xong (retry+escalate, selfcheck xanh); đang HM5 dòng trạng thái 08:00"}
+- [2026-11-24T17:19:41Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 14, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:20:21Z] Wags/heartbeat — Wags_20261124_170537: {"status": "in_progress", "note": "5/5 hạng mục code xong; chạy selfcheck hồi quy theo phạm vi"}
+- [2026-11-24T17:20:41Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 15, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:21:41Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 16, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:22:41Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 17, "job_id": "Wags_20261124_170537", "source": "watcher"}
+- [2026-11-24T17:18:08Z] Winston/error — anomaly-flags-stale: {"consumer": "golive_recommend_v23", "date": "2026-11-25", "generated_at": "2026-11-24T05:45:10Z", "reason": "lần ghi cuối 2026-11-24 (ICT) < phiên giao dịch gần nhất 2026-11-25"}
+- [2026-11-24T17:21:50Z] Winston/error — anomaly-flags-stale: {"consumer": "golive_recommend_v23", "date": "2026-11-25", "generated_at": "2026-11-24T05:45:10Z", "reason": "lần ghi cuối 2026-11-24 (ICT) < phiên giao dịch gần nhất 2026-11-25"}
