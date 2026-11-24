@@ -1,0 +1,10 @@
+SIP r3 giá 50.100 (2026-11-06) | r 0.1350 (huy động 0.0740→0.0740) | n 1458
+CONTROL r2: tâm 54.230 P10 43.784 P90 68.713 (kỳ vọng 54.230/43.784/68.713)
+HEADLINE @5 tỷ (CK 1.39%): tâm 54.466 P10 43.257 P50 53.085 P90 69.818 min 35.663 max 78.715 | dưới giá 35.4% | TRONG vùng | luật4 False (0,85×tâm 46.296)
+SLEEVE 40tr (CK 0.31%): tâm 55.062 P10 43.730 P50 53.665 P90 70.581 | dưới giá 33.8% | TRONG vùng | luật4 False
+tham số trung tâm SAU CK 53.919 | nhánh đất quanh P10 {'co_so': 0.059, 'xau': 0.941} | quanh P90 {'tot': 1.0}
+CẦU: r2 (giá/CK/r 04/11) — control 54.230 | 0 giá/CK/r 06/11 54.217 (-13) | 1 RONIC=Ke (đ.chính #1) 50.829 (-3,389) | 2 đất 25/50/25 (#2) 52.015 (+1,186) | 3 thu hồi 100% (#3) 52.587 (+572) | 4 tài sản sổ sách 396,8 (#4) 54.203 (+1,616) | 5 KTPL trên LN DT chưa thực hiện (#5) 53.640 (-563) | 6 tạm ứng 643,7 theo sổ (Taylor thêm, #6b) 54.466 (+826)
+ĐỘ NHẠY: VAT_khau_tru_890_5_tru_DTL_123_7 (+766,8 theo sổ) +3,123 | dat_cho_thue_9T26_moi_50ha -756 | thu_hoi_60pct_p0.25 (truc r2) -655 | GPM_ve_TB_2019_25 (x0,9457 LN gop van hanh) -1,228 | NCI_con_9_9pct_co_dinh (BCD) +1,735 | dat_20_50_30 (trong so r2) -1,225 | RONIC=ROE5Y 29,7% (quy uoc r2) +3,389 | bo_tam_ung_643_7 (=0 nhu r2) -826
+ĐỘ NHẠY r: b1.0_-100 57.161 (+4.9%) | b1.0_-50 55.769 (+2.4%) | b1.0_+0 54.466 (+0.0%) | b1.0_+50 53.244 (-2.2%) | b1.0_+100 52.095 (-4.4%) | b0.5_-100 55.769 (+2.4%) | b0.5_-50 55.107 (+1.2%) | b0.5_+0 54.466 (+0.0%) | b0.5_+50 53.846 (-1.1%) | b0.5_+100 53.244 (-2.2%)
+SONG SONG: mất trọn tạm ứng p0,15 tâm 53.949 P10 42.688 | tạm ứng=0 tâm 53.640 P10 42.640 P90 68.745 | CK quản trị 10% tâm 49.020
+GIÁ NGỤ Ý: tỷ/ha ×0.692 (cơ sở 8.30 tỷ/ha) hoặc r 0.1545

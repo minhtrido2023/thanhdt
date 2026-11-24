@@ -1,0 +1,328 @@
+{
+ "ticker": "SIP",
+ "round": 2,
+ "job": "Taylor_20261105_020018",
+ "asof_price_date": "2026-11-04",
+ "price": 49000.0,
+ "r": 0.135,
+ "r_anchor": {
+  "rate": 7.4,
+  "date": "2026-11-03",
+  "current_rate": 7.4,
+  "current_source": "cctg_12m(2026-11-02)"
+ },
+ "center_pre_liq": 54981,
+ "center_post_liq": 54230,
+ "p10_post": 43784,
+ "p50_post": 53086,
+ "p90_post": 68713,
+ "p10_pre": 44390,
+ "p90_pre": 69665,
+ "p10_out": 43784,
+ "p50_out": 53086,
+ "p90_out": 68713,
+ "min_out": 34356,
+ "max_out": 81487,
+ "pct_weight_below_price": 0.3296,
+ "n_outcomes": 2916,
+ "center_param_post": 55421,
+ "liq_discount_ref": 0.0137,
+ "liq_ref_size_ty": 5.0,
+ "ck_ref_size": {
+  "size_ty": 5.0,
+  "discount_adv120": 0.0137,
+  "discount_adv250": 0.0092,
+  "discount_adv60": 0.015,
+  "pct_adv120": 1.273,
+  "in_sqrt_calibration_zone": false
+ },
+ "ck_real_sleeve": {
+  "10tr": 0.0026,
+  "20tr": 0.0028,
+  "40tr": 0.0031
+ },
+ "adv250_median_ty": 10.37,
+ "adv120_median_ty": 3.93,
+ "adv60_median_ty": 3.16,
+ "px_vs_center": -0.0964,
+ "px_vs_p10": 0.1191,
+ "px_vs_p90": -0.2869,
+ "grid_desc": "8 trục độc lập: thị trường đất (tỷ/ha+năm bán hết; 20/50/30) × tỷ/ha ×0,75/1/1,25 × g 2/3/4% × lỗ tín dụng không bảo đảm 0/10/30% (0,60/0,25/0,15) × NCI con 8,5/20/31% × thu hồi chi phí đã chi 100/60% (0,75/0,25) × thuế tương lai ×0,8/1/1,2 × KTPL 7,25/9,04%; phân vị wpct mức kết cục (n=2916)",
+ "label": "TRONG vùng",
+ "label_note": "Nhãn TRONG vùng không đổi so vòng 1, không do đổi định nghĩa vùng (cả hai vòng đều P10–P90). Vòng 2 P10 cao hơn (43.784 vs 34.501) vì tách các rủi ro thành trục độc lập: vòng 1 gói mọi cú xấu vào một kịch bản (tương quan hoàn toàn); bản song song lưới vòng 1 + wpct cho P10 35.041 — nhãn vẫn TRONG.",
+ "center_vs_p50_note": "Tâm (kỳ vọng lưới) 54.230 > P50 53.086 (lệch phải do nhánh đất tốt + tỷ/ha ×1,25); tham số trung tâm (đất cơ sở, ×1, g3, tín dụng 0%, NCI 20%, thu hồi 100%, thuế ×1, KTPL 9,04%) 55.421 cao hơn tâm vì tín dụng/thu hồi trung tâm ở cận sổ sách còn lưới có xác suất lỗ. P10 do nhánh đất XẤU quyết định (95% trọng số quanh P10); P90 do riêng nhánh đất TỐT (w 0,20).",
+ "axes_included": [
+  {
+   "axis": "land",
+   "values": [
+    [
+     "tot",
+     [
+      18.0,
+      15
+     ],
+     0.2
+    ],
+    [
+     "co_so",
+     [
+      12.0,
+      22
+     ],
+     0.5
+    ],
+    [
+     "xau",
+     [
+      6.0,
+      30
+     ],
+     0.3
+    ]
+   ],
+   "basis": "kịch bản thị trường đất 20/50/30 nghiêng xuống (ước lượng; giữ từ DD 01/11 vì 2025 chỉ 28,6 ha vs KH 45)"
+  },
+  {
+   "axis": "perha_mult",
+   "values": [
+    [
+     "x0.75",
+     0.75,
+     0.3333333333333333
+    ],
+    [
+     "x1",
+     1.0,
+     0.3333333333333333
+    ],
+    [
+     "x1.25",
+     1.25,
+     0.3333333333333333
+    ]
+   ],
+   "basis": "×0,75/1/1,25 quanh tỷ/ha mỗi kịch bản, đều (ước lượng) — hai chiều"
+  },
+  {
+   "axis": "gcore",
+   "values": [
+    [
+     "g2",
+     0.02,
+     0.25
+    ],
+    [
+     "g3",
+     0.03,
+     0.5
+    ],
+    [
+     "g4",
+     0.04,
+     0.25
+    ]
+   ],
+   "basis": "g mảng vận hành 2/3/4% (ước lượng) — hai chiều đối xứng"
+  },
+  {
+   "axis": "credit",
+   "values": [
+    [
+     "0%",
+     0.0,
+     0.6
+    ],
+    [
+     "10%",
+     0.1,
+     0.25
+    ],
+    [
+     "30%",
+     0.3,
+     0.15
+    ]
+   ],
+   "basis": "lỗ trên tín dụng KHÔNG bảo đảm (cho vay CTCK 68,93% + TP trừ VHM): 0% = sổ sách (EY chấp nhận toàn phần, chưa dự phòng; cách đọc nhẹ TM4b: bên thứ ba = ngân hàng cho vay) p0,60; 10% p0,25; 30% p0,15 [UL]. Phía trên 0% không tồn tại (không thu quá gốc) ⇒ trục một phía là CẬN SỔ SÁCH, không phải chọn chiều"
+  },
+  {
+   "axis": "nci",
+   "values": [
+    [
+     "8.5%",
+     0.085,
+     0.25
+    ],
+    [
+     "20%",
+     0.2,
+     0.5
+    ],
+    [
+     "31%",
+     0.31,
+     0.25
+    ]
+   ],
+   "basis": "NCI hiệu dụng trên tài sản ròng ở con 8,5/20/31% (8,5% = tỷ trọng LN; 31% = NCI VRG Long Thành, TM1) — chưa có BCTC từng con (G14)"
+  },
+  {
+   "axis": "recover",
+   "values": [
+    [
+     "100%",
+     1.0,
+     0.75
+    ],
+    [
+     "60%",
+     0.6,
+     0.25
+    ]
+   ],
+   "basis": "thu hồi chi phí đã chi cho quỹ đất: 100% = giá vốn (luật NPV=0) p0,75; 60% p0,25 (đền bù tăng theo bảng giá đất — Bobby KCN; tạm ứng PĐ-BL 2.421 chưa quyết toán) [UL]. Phía >100% đã nằm ở trục tỷ/ha (giá trị đất gia tăng) ⇒ không đếm hai lần"
+  },
+  {
+   "axis": "taxdef",
+   "values": [
+    [
+     "x0.8",
+     0.8,
+     0.25
+    ],
+    [
+     "x1",
+     1.0,
+     0.5
+    ],
+    [
+     "x1.2",
+     1.2,
+     0.25
+    ]
+   ],
+   "basis": "PV thuế TNDN tương lai trên DT chưa thực hiện ×0,8/1/1,2 (ưu đãi/phần không chịu thuế vs thuế suất thực cao hơn) [UL]"
+  },
+  {
+   "axis": "ktpl",
+   "values": [
+    [
+     "7.25%",
+     0.0725,
+     0.5
+    ],
+    [
+     "9.04%",
+     0.09044526901669758,
+     0.5
+    ]
+   ],
+   "basis": "quỹ KTPL: 7,25% (thực 2025, G13) / 9,04% (ước tính 9T26, TM36), đều"
+  }
+ ],
+ "axes_excluded": [
+  {
+   "axis": "tạm ứng 635,6 tỷ cho HĐQT/BGĐ/BKS/quản lý (TM40)",
+   "reason": "quản trị/bên liên quan ⇒ WARNING (luật skill: pháp lý/quản trị không vào tâm); báo song song bản CÓ trục (mất trọn p0,15 [UL])"
+  },
+  {
+   "axis": "kịch bản 'thuế đã nộp khi thu tiền' (+~2.000 đ/cp)",
+   "reason": "BCĐ bác: không có TS thuế hoãn lại; thuế hiện hành 19,9% LNTT dù DT chưa TH +1.701,8 (SKEPTIC F7) ⇒ xác suất ≈0; chiều xuống tương ứng nằm ở trục taxdef ×1,2"
+  },
+  {
+   "axis": "tiền thuê đất hằng năm trả Nhà nước trên đất đã cho thuê lại (G16)",
+   "reason": "chưa có dữ liệu định lượng (chính sách kế toán/QĐ giao đất chưa đọc) — không có cả hai chiều; giữ open_issue"
+  },
+  {
+   "axis": "chiết khấu quản trị 10% (DD 01/11)",
+   "reason": "quản trị = WARNING; báo song song"
+  }
+ ],
+ "base_adjustments": [
+  {
+   "item": "nghĩa vụ hạ tầng đất đã cho thuê",
+   "effect_dong_per_share": -13476.355124062906,
+   "basis": "nợ phải trả trên sổ",
+   "source": "TM20 BCTC HN Q3/2026"
+  },
+  {
+   "item": "quỹ KTPL",
+   "effect_dong_per_share": -2638.4380450077797,
+   "basis": "nợ phải trả trên sổ",
+   "source": "BCĐ mã 323"
+  },
+  {
+   "item": "PV thuế TNDN tương lai trên DT chưa thực hiện (×1)",
+   "effect_dong_per_share": -1914.624593478686,
+   "basis": "luật thuế TNDN 20%; thuế nộp theo phân bổ (không có TS thuế hoãn lại, thuế hiện hành 19,9% LNTT)",
+   "source": "TM21, BCĐ; SKEPTIC F7"
+  },
+  {
+   "item": "NCI 20% trên tài sản ròng ở con (cơ sở)",
+   "effect_dong_per_share": -3527.279415210775,
+   "basis": "trung điểm 8,5% (tỷ trọng LN) và 31% (VRG Long Thành)",
+   "source": "KQKD 9T26; TM1"
+  }
+ ],
+ "parallel": {
+  "with_related_party_advance": {
+   "center_post": 53842,
+   "p10_post": 43334,
+   "p50_post": 52694,
+   "p90_post": 68257,
+   "pct_weight_below_price": 0.3448
+  },
+  "land_weights_25_50_25": {
+   "center_post": 55416,
+   "p10_post": 44319,
+   "p50_post": 54135,
+   "p90_post": 70560,
+   "pct_weight_below_price": 0.2828
+  },
+  "r1_grid_wpct": {
+   "center_post": 53265,
+   "p10_post": 35041,
+   "p50_post": 54263,
+   "p90_post": 73949,
+   "pct_weight_below_price": 0.3
+  }
+ },
+ "gordon": {
+  "g": 0.03,
+  "roe_all": 0.24248715156723338,
+  "with_interest": 43263.299346560394,
+  "without_interest": 39050.281236334224,
+  "roe_ex": 0.41270955312245045
+ },
+ "zone_old": {
+  "round": 1,
+  "center_post_liq": 53175,
+  "p10_post": 34501,
+  "p50_post": 54135,
+  "p90_post": 73949,
+  "label": "TRONG vùng",
+  "grid": "3 kịch bản (tốt/cơ sở/xấu, trọng số 20/50/30) × tỷ/ha toàn phần cho 937 ha ×{0,75;1;1,25} × g mảng vận hành {−1;0;+1}pp, trọng số đều trong kịch bản (n=27)"
+ },
+ "center_new_vs_old": 0.0198,
+ "change_reason": "Tâm sau CK 54.230 vs vòng 1 53.175 (+2,0%). Lưới đổi từ 3 kịch bản bó (n=27) sang 8 trục độc lập (n=2.916): lỗ tín dụng/NCI/thu hồi/thuế không còn dồn hết vào nhánh xấu ⇒ P10 34.501 → 43.784, P90 73.949 → 68.713 (phân phối hẹp lại); tâm tăng nhẹ vì trục KTPL thêm mức 7,25% và g/NCI đối xứng. Lưới vòng 1 tính lại bằng wpct chuẩn: tâm 53.265, P10 35.041, P90 73.949 (song song). Nhãn không đổi.",
+ "warnings": [
+  "Tín dụng phi ngân hàng 6.016 tỷ = 116% VCSH mẹ: cho CTCK vay 4.223 (68,93% không TS bảo đảm bên vay, bên vay không nêu tên; hai cách đọc TM4b) + TP DN 1.792 (T&T 1.000,7; GTHL chưa xác định) — TM4a/4b BCTC HN Q3/2026 (nay là TRỤC lưới, không chỉ WARNING)",
+  "Tạm ứng 635,6 tỷ cho thành viên HĐQT/BGĐ/BKS/quản lý chủ chốt (TM40; KT25 635,2), đứng yên ≥2 năm, mục đích 'tìm hiểu và mua đất' — bên liên quan; bản song song mất trọn p0,15: tâm 53.842",
+  "Lệch phân loại tạm ứng trong chính BCTC: BCĐ/TM7 dài hạn vs TM40 'phải thu ngắn hạn khác'",
+  "Vay NH tín chấp 4.374 tỷ (HM 1.700 tỷ 'bổ sung vốn lưu động') song song cho vay CTCK 4.223 — cấu trúc vay-cho-vay có thể có (TM23, TM4b)",
+  "Cổ tức 2025 = 111% LNST riêng + hoàn nhập quỹ ĐTPT ~329 tỷ (ĐHĐCĐ 2026); kế hoạch 2026 tối thiểu 10% ⇒ lợi suất 10,3% quá khứ khó lặp",
+  "Chủ tịch chuyển 3,7tr cp cho người thân (06/2026); miễn nhiệm 1 PTGĐ (21/05/2026) và 1 TV BKS (21/04/2026) — dữ liệu nhân sự, không phải xử phạt",
+  "Chưa thấy tin xử phạt/khởi tố SIP: WebSearch 05/11/2026 (doanhnhan.baophapluat.vn, dnse.com.vn, vneconomy.vn — kết quả tới 07/2026); WebSearch không phải CBTT sàn ⇒ 'không thấy' ≠ không có. Chưa thấy NQ HĐQT/ĐHĐCĐ mới sau 01/11."
+ ],
+ "open_issues": [
+  "G14: BCTC từng công ty con ⇒ NCI hiệu dụng (nay là trục 8,5/20/31%)",
+  "G16: tiền thuê đất hằng năm trả Nhà nước trên đất đã cho thuê lại — chưa định lượng, ngoài lưới cả hai chiều",
+  "G1/G2: danh tính CTCK đi vay, TSĐB; trái phiếu T&T 1.000,7 / Phước Sơn 200",
+  "G3/G12: giá thuê thực thu/ha và diện tích cho thuê 9T/2026",
+  "Xác suất các trục [UL]; giả định các trục độc lập (tín dụng và thị trường đất thực tế có thể cùng xấu theo chu kỳ BĐS ⇒ bản lưới vòng 1 là giới hạn tương quan hoàn toàn)",
+  "Q3/2026 HN chưa soát xét; CBTT sàn chưa quét"
+ ],
+ "fearbuy_sleeve_eligible": "KHÔNG — DD trung dung, không phải ca sợ hãi/khủng hoảng §2/§2.5 (giá không trong trạng thái fear; không có sự kiện xấu đã lượng hoá cần định giá lại); áp nhãn tham chiếu, không phải tín hiệu sleeve fear-buy",
+ "source_calc": "calc/model_sip_r2_out.json",
+ "lock": "calc/LOCK_r2_md5.txt"
+}
