@@ -494,6 +494,26 @@ def cases(m):
        m.tier_of(trow(), CLEAN, (None, "no row"), POS, PART)[0] == 2 and m.tier_of(trow(), CLEAN, None, POS, PART)[0] == 2
        and m.tier_of(trow(), CLEAN, ADV, POS, None)[0] == 2)
     ok("giả định vị thế = 5% × 1,55 tỷ = 77,5 triệu", abs(m.POS_NAV_VND * m.POS_PCT - 77.5e6) < 1 and m.TIER1_EXIT_SESSIONS == 3)
+    # E17 (user 24/11): tâm kỳ vọng điều chỉnh thay nhãn CONFIRMED; chỉ SIẾT đáy, không nới
+    def arow(sk="REFUTED_OPEN", adj=19000.0, close=17000, basis="a/adj.json", md5="x"):
+        r = trow(close=close, sk=sk)
+        r["entry"].update({"center_adj": adj, "center_adj_low": 18000.0, "center_adj_high": 21000.0,
+                           "center_adj_basis": basis, "center_adj_md5": md5})
+        return r
+    T = lambda r: m.tier_of(r, CLEAN, ADV, POS, PART)
+    ok("E17: REFUTED_OPEN + tâm điều chỉnh + dưới đáy ⇒ Bậc 1", T(arow()) == (1, []))
+    ok("E17: INCONCLUSIVE-kiểu FIXED_UNVERIFIED + tâm điều chỉnh ⇒ Bậc 1", T(arow(sk="FIXED_UNVERIFIED")) == (1, []))
+    ok("E17: REFUTED_OPEN KHÔNG có tâm điều chỉnh ⇒ Bậc 2", T(trow(sk="REFUTED_OPEN"))[0] == 2)
+    ok("E17: skeptic_final=NONE dù có tâm điều chỉnh ⇒ Bậc 2", T(arow(sk="NONE"))[0] == 2)
+    ok("E17: thiếu center_adj_basis ⇒ Bậc 2", T(arow(basis=None))[0] == 2)
+    ok("E17: thiếu center_adj_md5 ⇒ Bậc 2", T(arow(md5=None))[0] == 2)
+    ok("E17: center_adj=True (bool) không hợp lệ", T(arow(adj=True))[0] == 2 and not m.adj_center_ok(arow(adj=True)["entry"]))
+    ok("E17: tâm điều chỉnh THẤP (15000<20000) SIẾT đáy→13.500: giá 17.000 ⇒ Bậc 2", T(arow(adj=15000.0))[0] == 2
+       and m.zone_low_eff(arow(adj=15000.0)["entry"]) == 13500.0)
+    ok("E17: tâm điều chỉnh CAO (25000>20000) KHÔNG nới đáy: giá 18.500 ⇒ Bậc 2", T(arow(adj=25000.0, close=18500))[0] == 2
+       and m.zone_low_eff(arow(adj=25000.0)["entry"]) == 18000)
+    ok("E17: CONFIRMED + tâm điều chỉnh thấp cũng bị siết", T(arow(sk="CONFIRMED", adj=15000.0))[0] == 2)
+    ok("E17: CONFIRMED không có tâm điều chỉnh ⇒ vẫn Bậc 1 (không đổi hành vi cũ)", T(trow()) == (1, []))
     ok("tier_of không đổi row", (lambda r: (m.tier_of(r, CLEAN, ADV, POS, PART), r)[1] == trow())(trow()))
     # end-to-end qua evaluate/build_candidates/render: mã có cờ VẪN hiện (Bậc 2), tập mã không đổi
     led2 = {"entries": [dict(ent("OKK"), skeptic_final="CONFIRMED"), dict(ent("FLG"), skeptic_final="CONFIRMED")]}
@@ -575,7 +595,13 @@ MUTANTS = [
     ("C16 dd_flag_map song song lệch mã↔verdict", 'out.update(zip(rest, ex.map(one, rest)))',
      'out.update(zip(rest, ex.map(one, rest[::-1])))'),
     ("A7-1 Bậc 1 không cần dưới đáy", 'if c is None or lo is None or not c < lo:', 'if False:'),
-    ("A7-2 Bậc 1 không cần CONFIRMED", 'if sk != "CONFIRMED":', 'if False:'),
+    ("A7-2 Bậc 1 không cần CONFIRMED", 'if sk != "CONFIRMED" and not adj_center_ok(e):', 'if False:'),
+    ("E17-1 tâm điều chỉnh cao NỚI đáy", 'and ca < c:', 'and True:'),
+    ("E17-2 skeptic NONE vẫn nhận tâm điều chỉnh", ' and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN")', ''),
+    ("E17-3 không đòi center_adj_basis", ' and bool(e.get("center_adj_basis"))', ''),
+    ("E17-4 không đòi center_adj_md5", '\n            and bool(e.get("center_adj_md5"))', ''),
+    ("E17-5 bool coi là số", ' and not isinstance(ca, bool)', ''),
+    ("E17-6 bỏ siết đáy", 'return lo * ca / c', 'return lo'),
     ("A7-3 bỏ kiểm cờ tĩnh", 'if fl:\n        why.append("cờ: "', 'if False:\n        why.append("cờ: "'),
     ("A7-4 cờ DD chưa kiểm ⇒ im lặng Bậc 1", 'if dd_flag is None:', 'if False:'),
     ("A7-5 FLAGGED không hạ bậc", 'elif dd_flag[0] == "FLAGGED":', 'elif False:'),

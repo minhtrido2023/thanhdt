@@ -108,6 +108,7 @@ def check(ledger_path, src_root=SRC_ROOT):
         errs += _expiry_errs(tag, e)
         errs += _lock_errs(tag, e, src_root)
         errs += _skeptic_final_errs(tag, e, src_root)
+        errs += _center_adj_errs(tag, e, src_root)
         errs += _skeptic_path_errs(tag, e, src_root)
         for fld in ("source_file",):
             if not os.path.exists(os.path.join(src_root, e[fld])):
@@ -146,6 +147,36 @@ def _lock_errs(tag, e, src_root):
 
 SKEPTIC_BASIS_ENUM = ("rule_backfill_20261122", "ambiguous_backfill", "skeptic_run", "user_confirmed")
 _RE_NOT_CONFIRMED = re.compile(r"REFUTED|INCONCLUSIVE|CHƯA (?:qua|chạy)", re.I)
+
+
+def _center_adj_errs(tag, e, src_root):
+    """E17 (user 24/11): tâm kỳ vọng điều chỉnh — TUỲ CHỌN, nhưng đã có trường nào thì phải đủ bộ: center_adj (số >0),
+    center_adj_basis (adj.json thật, md5 = center_adj_md5, ticker khớp, center_adj khớp) và center_adj_low ≤ center_adj ≤ center_adj_high."""
+    keys = ("center_adj", "center_adj_basis", "center_adj_md5", "center_adj_low", "center_adj_high")
+    if not any(k in e for k in keys):
+        return []
+    errs = [f"{tag}: có trường tâm điều chỉnh nhưng thiếu {k}" for k in keys if e.get(k) is None]
+    if errs:
+        return errs
+    ca, lo, hi = e["center_adj"], e["center_adj_low"], e["center_adj_high"]
+    if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in (ca, lo, hi)) or not (0 < lo <= ca <= hi):
+        errs.append(f"{tag}: center_adj phải số, 0 < low ≤ adj ≤ high (low={lo!r} adj={ca!r} high={hi!r})")
+    if e.get("skeptic_final") == "NONE":
+        errs.append(f"{tag}: center_adj nhưng skeptic_final=NONE (tâm điều chỉnh dựng SAU phản biện)")
+    pth = os.path.join(src_root, str(e["center_adj_basis"]))
+    try:
+        raw = open(pth, "rb").read()
+    except OSError as x:
+        return errs + [f"{tag}: center_adj_basis không đọc được {e['center_adj_basis']}: {x}"]
+    if hashlib.md5(raw).hexdigest() != e["center_adj_md5"]:
+        errs.append(f"{tag}: center_adj_md5 KHÔNG khớp {e['center_adj_basis']} (file đổi sau khi ghi sổ)")
+    try:
+        j = json.loads(raw)
+    except ValueError as x:
+        return errs + [f"{tag}: center_adj_basis không phải JSON: {x}"]
+    if j.get("ticker") != e.get("ticker") or abs(float(j.get("center_adj", -1)) - float(ca)) > 0.5:
+        errs.append(f"{tag}: adj.json (ticker={j.get('ticker')!r}, center_adj={j.get('center_adj')!r}) không khớp entry")
+    return errs
 
 
 def _skeptic_final_errs(tag, e, src_root):
@@ -264,6 +295,22 @@ def _self_tests():
         nolock = {k: v for k, v in ok_e.items() if k != "assumptions_md5"}
         r.append(("entry mới thiếu khoá bị bắt", bool(_lock_errs("t", nolock, td))))
         r.append(("entry cũ (trước 08/11) thiếu khoá được miễn", not _lock_errs("t", dict(nolock, recorded_at="2026-11-02T00:00:00+07:00"), td)))
+    # E17: tâm kỳ vọng điều chỉnh — đủ bộ, md5 khớp adj.json, ticker/center_adj khớp, low ≤ adj ≤ high
+    with tempfile.TemporaryDirectory() as td2:
+        aj = json.dumps({"ticker": "AAA", "center_adj": 19000.0}).encode()
+        open(os.path.join(td2, "adj.json"), "wb").write(aj)
+        ca_e = {"ticker": "AAA", "skeptic_final": "REFUTED_OPEN", "center_adj": 19000.0, "center_adj_low": 18000.0,
+                "center_adj_high": 21000.0, "center_adj_basis": "adj.json", "center_adj_md5": hashlib.md5(aj).hexdigest()}
+        r.append(("center_adj: bộ đủ → sạch", not _center_adj_errs("t", ca_e, td2)))
+        r.append(("center_adj: không có trường nào → bỏ qua", not _center_adj_errs("t", {"ticker": "AAA"}, td2)))
+        r.append(("center_adj: thiếu 1 trường bị bắt", bool(_center_adj_errs("t", {k: v for k, v in ca_e.items() if k != "center_adj_md5"}, td2))))
+        r.append(("center_adj: md5 lệch bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj_md5="0" * 32), td2))))
+        r.append(("center_adj: file adj.json mất bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj_basis="nope.json"), td2))))
+        r.append(("center_adj: ticker lệch bị bắt", bool(_center_adj_errs("t", dict(ca_e, ticker="BBB"), td2))))
+        r.append(("center_adj: giá trị lệch adj.json bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj=19500.0, center_adj_high=21000.0), td2))))
+        r.append(("center_adj: adj ngoài [low,high] bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj_high=18500.0), td2))))
+        r.append(("center_adj: bool bị bắt", bool(_center_adj_errs("t", dict(ca_e, center_adj=True), td2))))
+        r.append(("center_adj: skeptic_final=NONE bị bắt", bool(_center_adj_errs("t", dict(ca_e, skeptic_final="NONE"), td2))))
     ne = {"ticker": "AAA", "recorded_at": "2026-11-23T09:00:00+07:00", "skeptic_final": "NONE", "audited_fy_missing": False}
     r.append(("skeptic_final: entry mới đủ trường → sạch", not _skeptic_final_errs("t", ne, SRC_ROOT)))
     r.append(("skeptic_final: entry mới thiếu skeptic_final bị bắt", bool(_skeptic_final_errs("t", {k: v for k, v in ne.items() if k != "skeptic_final"}, SRC_ROOT))))

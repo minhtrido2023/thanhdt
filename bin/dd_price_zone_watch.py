@@ -101,17 +101,35 @@ def sector_of(t):
     return f"ICB{c}·đá" if t.upper() in STONE_GROUP else f"ICB{c}"
 
 
+def adj_center_ok(e):
+    """Tâm kỳ vọng điều chỉnh HỢP LỆ (E17, user 24/11): center_adj số dương ∧ có center_adj_basis (adj.json) ∧ center_adj_md5
+    ∧ nhãn skeptic_final ≠ NONE. Tồn tại file/md5 do dd_price_zones_selfcheck chặn lúc ghi sổ — ở đây chỉ đọc trường."""
+    ca = e.get("center_adj")
+    return (isinstance(ca, (int, float)) and not isinstance(ca, bool) and ca > 0 and bool(e.get("center_adj_basis"))
+            and bool(e.get("center_adj_md5")) and e.get("skeptic_final") in ("CONFIRMED", "FIXED_UNVERIFIED", "REFUTED_OPEN"))
+
+
+def zone_low_eff(e):
+    """Đáy vùng DÙNG CHO BẬC 1 = zone_low, và CHỈ SIẾT khi tâm điều chỉnh < tâm base: zone_low × (center_adj/center).
+    Tâm điều chỉnh cao hơn tâm KHÔNG nới đáy (phương án A — điều chỉnh chỉ làm cổng chặt hơn, không lỏng hơn)."""
+    lo, c, ca = e.get("zone_low"), e.get("center"), e.get("center_adj")
+    if lo is not None and c and adj_center_ok(e) and ca < c:
+        return lo * ca / c
+    return lo
+
+
 def tier_of(row, dd_flag, adv, pos_vnd, part, max_sessions=TIER1_EXIT_SESSIONS):
-    """→ (1|2, [lý do thiếu]). Bậc 1 = giá < zone_low ∧ skeptic_final==CONFIRMED ∧ không cờ ∧ thoát ≤max_sessions
-    phiên (pos_vnd / (part×adv)). Thiếu dữ liệu ⇒ Bậc 2 kèm lý do (không im lặng Bậc 1). dd_flag = (status,codes,why)|None;
-    adv = (adv_vnd|None, err|None)|None."""
+    """→ (1|2, [lý do thiếu]). Bậc 1 = giá < zone_low_eff ∧ (skeptic_final==CONFIRMED ∨ có tâm kỳ vọng điều chỉnh hợp lệ — E17)
+    ∧ không cờ ∧ thoát ≤max_sessions phiên (pos_vnd / (part×adv)). Thiếu dữ liệu ⇒ Bậc 2 kèm lý do (không im lặng Bậc 1).
+    dd_flag = (status,codes,why)|None; adv = (adv_vnd|None, err|None)|None."""
     e, why = row["entry"], []
-    lo, c = e.get("zone_low"), row.get("close")
+    lo, c = zone_low_eff(e), row.get("close")
     if c is None or lo is None or not c < lo:
         why.append("giá chưa dưới đáy vùng")
     sk = e.get("skeptic_final")
-    if sk != "CONFIRMED":
+    if sk != "CONFIRMED" and not adj_center_ok(e):
         why.append(f"skeptic {sk or '?'}")
+        why.append("chưa có tâm kỳ vọng điều chỉnh (E17)")
     if e.get("audited_fy_missing") is True:   # D5 (user 22/11): thiếu BCTC kiểm toán năm gần nhất ⇒ không vào Bậc 1
         why.append("thiếu BCTC kiểm toán năm gần nhất (D5)")
     fl = [f for f in row.get("flags", []) if not f.startswith("đang giữ")]
