@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/VGS/REPORT_recheck_VGS.md",
+  "report_md5": "e7390d6c7bbed46152eb8d2e4df1750d",
+  "brief_md5": "6af8b47e20ef3ba2a43055d230796942",
+  "model": "opus",
+  "cost_usd": 0.8042936,
+  "started_at_ict": "2026-11-24T16:59:06+07:00",
+  "summary": "The recheck is a correct mechanical rerun: same model and assumptions (md5 verified), centre 26,778 / 26,526 reproduced independently, r sensitivities 12.3–14.5% match. But as a valuation it still carries r2's unclosed load-bearing gaps (maintenance capex vs D&A, Legend City at cost vs NOXH profit cap, compliance capex), adds no new data to close them, and a new missing item turned up (bonus/welfare fund absent from EPV). One display number was back-solved wrongly (CK +20%: 24,103 should be ~24,288). Upside items (GPM mix, revenue below TTM, r above the Ke band, LGC with no bull, Vinaconex advance) were also checked; each is <5% and unevidenced. The downside items are larger but unquantifiable from the files on hand ⇒ INCONCLUSIVE, consistent with r2.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/VGS/skeptic/r1_raw.md"
+}
