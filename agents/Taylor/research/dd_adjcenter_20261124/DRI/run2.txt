@@ -1,0 +1,14 @@
+{"center_adj": 15164, "range_low": 14979, "range_high": 15315, "sum_p_m_pct": -0.61}
+B 0.35 -2.635 [-1.757, -3.513] -0.922 Haircut khoản cho Dakruco vay 40 tỷ (TSĐB = 6 tr cp DRI, rủi ro cùng chiều)
+B 0.5 0.625 [0.429, 0.858] 0.312 Tỷ lệ KTPL 10,6% (FY25) → 9,9% (mẫu 9T26)
+141 0.92 BCTC Q4/2026 hoặc CBTT: Dakruco trả nốt 40 tỷ
+-221 -1.45 BCTC Q4/2026: Dakruco gia hạn tiếp / quá hạn / DRI trích dự phòng
+-134 -0.88 Văn bản tô nhượng / thuyết minh BCTN: diện tích rừng bảo tồn phải trả + chi trồng bù
+38 0.25 BCTC kiểm toán 2026: tỷ lệ KTPL cả năm ≤10%
+-48 -0.31 BCTC kiểm toán 2026: tỷ lệ KTPL ≥10,6%
+164 1.07 Kết quả đấu giá 1.975 ha (giá trúng vs khởi điểm 36 tr LAK/ha; danh tính bên trúng)
+-134 -0.88 HĐQT 12/2026: mua Dakruwood từ Dakruco (bên liên quan)
+652 4.27 BCTN 2026: năng suất khối thanh lý
+-180 -1.18 Lãi huy động 12T hiệu dụng ±50bp (luật V1, β=1)
+None None Ý kiến kiểm toán FY2025/FY2026 có ngoại trừ
+op_share 0.7285 k_ratio 0.858 obl10 134

@@ -1,0 +1,262 @@
+{
+ "ticker": "SIP",
+ "dd_date": "2026-11-01",
+ "rev": 4,
+ "asof": "2026-11-24",
+ "prereg_md5": "ef5157cb3f762d58623ed550ebc214c7",
+ "prereg_v2_md5": "835dfc1e07f9c67ac7f6c3028b529d13",
+ "blind_to_price": true,
+ "center_base": 54466,
+ "center_base_source": "kb/dd_price_zones.json SIP rev4 (center sau CK 1,39% @5 tỷ)",
+ "items": [
+  {
+   "name": "Thuế GTGT khấu trừ 890,5 − DTL 123,7 (sổ sách; đối xứng với tạm ứng 643,7 đã vào base)",
+   "dir": "up",
+   "m_basis": "mid/small = +766,8 tỷ theo sổ (VAT − DTL); big = +890,5 nếu DTL đã trùng taxdef (chưa đọc thuyết minh)",
+   "p_basis": "A: số trực tiếp CĐKT; không hạ p (khoản thu hồi qua VAT đầu ra cho thuê đất); luật 'base = sổ sách' áp HAI chiều",
+   "source": "assumptions_r3.json sensitivities.vat_minus_dtl_ty; notes_read.md (CĐKT); r1_raw.md:32",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": 5.734,
+   "mag_range_pct": [
+    5.734,
+    6.659
+   ],
+   "contrib_pct": 5.161,
+   "evidence_tier": "A",
+   "counted_in_center_bool": true
+  },
+  {
+   "name": "NCI công ty con: model 20% trung tâm → CĐKT 9,9%",
+   "dir": "up",
+   "m_basis": "mid = 9,9% (NCI 568,4/VCSH 5.744,4); big = 8,5% (NCI/LNST 9T26 100,3/1.178,3)",
+   "p_basis": "1 kỳ (30/9/2026; CĐKT và LN 9T cùng kỳ = 1 quan sát) ⇒ mặc định B; quy đổi tỷ lệ sổ → tỷ lệ giá trị là suy luận",
+   "source": "assumptions_r3.json sensitivities.nci_bs_9_9; model_r3.py nci_profit; r1_raw.md:33",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": 3.185,
+   "mag_range_pct": [
+    3.185,
+    3.628
+   ],
+   "contrib_pct": 1.593,
+   "evidence_tier": "B",
+   "counted_in_center_bool": true
+  },
+  {
+   "name": "Đất cho thuê 9T26 đếm đôi (đã vào DT chưa thực hiện, vẫn nằm trong 937,1 ha)",
+   "dir": "down",
+   "m_basis": "mid 60 ha (DT chưa thực hiện +1.701,8 tỷ 9T26 ÷ giá thuê gộp, skeptic); small 21,5 ha = tốc độ 2025 28,6 ha × 0,75 năm (cận bảo thủ); big 66 ha (≈ −1.000 đ/cp)",
+   "p_basis": "1 kỳ (9T26) ⇒ mặc định B; dấu chắc (có cho thuê trong kỳ)",
+   "source": "notes_read.md TM21:56; assumptions_r3.json ha_leased_9T26; r1_raw.md:23",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -1.666,
+   "mag_range_pct": [
+    -0.596,
+    -1.833
+   ],
+   "contrib_pct": -0.833,
+   "evidence_tier": "B",
+   "counted_in_center_bool": true
+  },
+  {
+   "name": "Chuẩn hoá biên gộp vận hành về bình quân lịch sử",
+   "dir": "down",
+   "m_basis": "mid/big ×0,9457 (TB 2019–25 / TTM, skeptic r3); small ×FY25/TTM (BQ)",
+   "p_basis": "6/7 năm 2019–25 < TTM 15,7% (cùng hướng) NHƯNG quan sát ngược có số: 2021 = 16,7% > TTM và xu hướng 2022→TTM đi lên 13,5→15,7% (BQ) ⇒ nhánh ngược",
+   "source": "assumptions_r3.json gpm_peak_normalisation; sip_gpm_bq.csv; r1_raw.md:29",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": -2.255,
+   "mag_range_pct": [
+    -1.882,
+    -2.255
+   ],
+   "contrib_pct": -0.789,
+   "evidence_tier": "B",
+   "counted_in_center_bool": true
+  }
+ ],
+ "sum_p_m_pct": 5.131,
+ "combination_rerun": true,
+ "center_adj_linear": 57261,
+ "center_adj": 57261,
+ "range_low": 55818,
+ "range_high": 59340,
+ "gpm_bq": {
+  "ttm": 0.1568,
+  "fy25": 0.1497,
+  "annual": {
+   "2019": 0.1247,
+   "2020": 0.1165,
+   "2021": 0.1675,
+   "2022": 0.1354,
+   "2023": 0.1451,
+   "2024": 0.1401,
+   "2025": 0.1497
+  }
+ },
+ "dividend_rights": "không có quyền chưa chốt ghi nhận trong nguồn",
+ "sensitivity_only": [
+  {
+   "name": "G16 tiền thuê đất trả Nhà nước (nếu trả hằng năm cho phần đã cho thuê lại)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "mỗi 10 tỷ/năm × 35 năm: -318 đ/cp (-0.58%); 100 tỷ/năm: -3176 (-5.83%); cận trên dữ liệu = toàn bộ giá vốn mảng đất 9T26 106,0 tỷ quy năm 141 tỷ/năm: -4488 (-8.24%)",
+   "why": "Trả một lần (thường gặp ở KCN, đã nằm trong chi phí đất/sổ) ⇒ 0; trả hằng năm ⇒ âm. Không biết hình thức ⇒ cận bảo thủ = 0 ⇒ C, không đủ C+",
+   "source": "r1_raw.md:22,53; notes_read.md:40"
+  },
+  {
+   "name": "Giá trị đất ròng 12 tỷ/ha (không nguồn, ~36% tâm)",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "trục ×0,75 cố định: -3543; ×1,25: 3543",
+   "why": "Không có giao dịch/biên cho thuê lại để định hướng",
+   "source": "r1_raw.md:21,48"
+  },
+  {
+   "name": "Tín dụng phi ngân hàng 6.016 tỷ, bên vay G1/G2 chưa định danh",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "trục tổn thất 0/10/30% (60/25/15) đã trong lưới (−1.255 ở điểm giữa); EY không trích dự phòng",
+   "why": "Hai chiều, không có dữ liệu bên vay",
+   "source": "r1_raw.md:24,54"
+  },
+  {
+   "name": "Tạm ứng nội bộ 643,7 tỷ 'tìm hiểu và mua đất'",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "bỏ khỏi base: -826; mất trọn p0,15 (song song r3): −517",
+   "why": "Không có dữ liệu tổn thất; base = sổ sách (đối xứng với VAT #1)",
+   "source": "model_r3_out.txt SONG SONG; r1_raw.md:27"
+  },
+  {
+   "name": "Tài sản sổ sách 396,8 tỷ đọc từ ảnh scan",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "±1.616 (bước cầu #4)",
+   "why": "Chưa đối chiếu text; không có hướng",
+   "source": "model_r3_out.txt CẦU #4"
+  },
+  {
+   "name": "D3 hạ tầng môi trường cho 937 ha",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "≈0 nếu 12 tỷ/ha đã ròng hạ tầng (định nghĩa)",
+   "why": "r1_raw:53 (4): giảm nhẹ",
+   "source": "REPORT_recheck_SIP.md:58"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3%: 57.744 (+6,02%); 13,4%: 54.720 (+0,47%)",
+   "why": "Tham số luật V1 (v2 §4)",
+   "source": "REPORT_recheck_SIP.md:38-41"
+  },
+  {
+   "name": "[LUẬT] RONIC = Ke cho mảng vận hành (skeptic: thu nhập dịch vụ trên 937 ha mới)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "RONIC = ROE5Y 29,7%: +3.389 (+6,22%)",
+   "why": "Luật V5/D4",
+   "source": "model_r3_out.txt ĐỘ NHẠY"
+  },
+  {
+   "name": "Cổ tức",
+   "dir": "none",
+   "evidence_tier": "mech",
+   "sensitivity": "Cổ tức 9T26 968,5 tỷ đã công bố & trả (TM24); nguồn không ghi cổ tức tiền đã công bố chưa GDKHQ ⇒ một dòng",
+   "why": "PREREG v2 §6",
+   "source": "notes_read.md:35"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "BCTC năm 2026 (kiểm toán): thuyết minh thuê đất G16 — trả hằng năm",
+   "when": "ước lượng 03/2027",
+   "direction": "down",
+   "delta_vnd": -318,
+   "delta_pct": -0.58,
+   "note": "mỗi 10 tỷ/năm; trả một lần ⇒ 0 (đóng hạng mục)"
+  },
+  {
+   "event": "Thuyết minh VAT/DTL: VAT khấu trừ được (hoặc DTL trùng taxdef)",
+   "when": "ước lượng 03/2027",
+   "direction": "up",
+   "delta_vnd": 312,
+   "delta_pct": 0.57,
+   "note": "p 0,9→1,0; DTL trùng ⇒ m lên 6.66%"
+  },
+  {
+   "event": "Thuyết minh VAT: không hoàn/khấu trừ được trong tầm nhìn",
+   "when": "ước lượng 03/2027",
+   "direction": "down",
+   "delta_vnd": -2811,
+   "delta_pct": -5.16,
+   "note": "p→0"
+  },
+  {
+   "event": "NCI từng công ty con (G14) xác nhận ≈ tỷ lệ sổ",
+   "when": "BCTC năm 2026",
+   "direction": "up",
+   "delta_vnd": 694,
+   "delta_pct": 1.27,
+   "note": "p 0,5→0,9"
+  },
+  {
+   "event": "Số ha cho thuê 9T26/FY26 công bố (G12)",
+   "when": "CBTT/BCTN 2026",
+   "direction": "down",
+   "delta_vnd": -15,
+   "delta_pct": -0.028,
+   "note": "mỗi 1 ha; số chính thức ⇒ A, p 0,9"
+  },
+  {
+   "event": "GPM Q4/2026 ≥ 15,5% (giữ đà tăng)",
+   "when": "ước lượng cuối 01/2027",
+   "direction": "up",
+   "delta_vnd": 246,
+   "delta_pct": 0.45,
+   "note": "p GPM 0,35→0,15"
+  },
+  {
+   "event": "GPM Q4/2026 < 14,6% (về TB 2019–25)",
+   "when": "ước lượng cuối 01/2027",
+   "direction": "down",
+   "delta_vnd": -368,
+   "delta_pct": -0.68,
+   "note": "p 0,35→0,65"
+  },
+  {
+   "event": "Định danh bên vay G1/G2 = bên liên quan",
+   "when": "khi có",
+   "direction": "down",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "trọng số tổn thất 0% (60%) giảm ⇒ C→B; WARNING quản trị"
+  },
+  {
+   "event": "Giao dịch cho thuê lại gần đây (giá/biên ròng)",
+   "when": "CBTT",
+   "direction": "both",
+   "delta_vnd": null,
+   "delta_pct": null,
+   "note": "thay 12 tỷ/ha; trục ×0,75/×1,25 ở §2"
+  },
+  {
+   "event": "Lãi huy động 12T ±50bp (V1, β=1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_vnd": -1222,
+   "delta_pct": -2.24,
+   "note": "+50bp −1.222; −50bp +1.303"
+  }
+ ],
+ "caveat": "tâm/dải = kỳ vọng tổ hợp 16 tập (hạng mục độc lập Bernoulli p) chạy lại model_r3; dải chọn (p,m) cực trị theo dấu từng hạng mục"
+}
