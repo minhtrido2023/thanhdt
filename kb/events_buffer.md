@@ -984,3 +984,6 @@
 ## Consolidation 2026-11-24T11:15:07Z
 - [2026-11-24T11:14:51Z] Taylor/answer — dd-adjcenter-g3-20261124 xong: {"job": "Taylor_20261124_110054", "branch": "session/adj-g3", "commits": {"NNC": "be5f420aa", "DGC": "13a13e91f"}, "NNC": {"base": 61273, "adj": 58914, "range": [52959, 61630], "sum_pct": -3.85}, "DGC": {"base": 41849, "adj": 41132, "range": [39957, 41555], "sum_pct": -1.71}, "note": "ca 2 ma chay lai mo hinh to hop (CONTROL trung). Trich KTPL hang nam (flow) thieu o ca NNC va DGC; DGC skeptic khong neu - nen kiem 5 ma con lai cung lop loi", "measured_by": "agents/Taylor/research/dd_adjcenter_20261124/{NNC,DGC}/adj.json"}
 - [2026-11-24T11:14:58Z] Taylor/heartbeat — Taylor_20261124_110054: {"status": "still_running", "elapsed_min": 14, "job_id": "Taylor_20261124_110054", "source": "watcher"}
+
+## Consolidation 2026-11-24T12:07:02Z
+- [2026-11-24T11:40:06Z] Winston/status — corp-action-scan-daily: {"scanned_universe": "tav2_bq.ticker_prune", "candidates_this_run": 0, "fresh_alerts_this_run": 0, "resolved_since_last_run": [], "still_pending_count": 0, "still_pending": [], "stale_pending_over_7d": []}
