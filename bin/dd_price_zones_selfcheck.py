@@ -191,9 +191,16 @@ def _center_adj_errs(tag, e, src_root):
         jv = j.get(jk)
         if not num(jv) or not num(ev) or abs(jv - ev) > tol:
             errs.append(f"{tag}: adj.json {jk}={jv!r} không khớp entry ({ev!r})")
-    for jk in ("dd_date", "rev"):
-        if jk in j and str(j[jk]) != str(e.get(jk, 1) if jk == "rev" else e.get(jk)):
-            errs.append(f"{tag}: adj.json {jk}={j[jk]!r} ≠ entry (center_adj của rev/DD khác)")
+    # rev: adj.json phải khớp rev của CHÍNH entry, HOẶC (entry là rev "thêm tâm điều chỉnh" có `supersedes` T@D#N) rev N của entry bị
+    # supersede — adj.json dựng trên rev N, entry mới = N+1 chỉ gắn thêm tâm adj. center_base≈center ở trên chặn đổi tâm base ngầm.
+    ok_revs = {str(e.get("rev", 1))}
+    m = re.fullmatch(r"([^@#]+)@([^#]+)#(\d+)", str(e.get("supersedes") or ""))
+    if m and m.group(1) == e.get("ticker") and m.group(2) == e.get("dd_date"):
+        ok_revs.add(m.group(3))
+    if "dd_date" in j and str(j["dd_date"]) != str(e.get("dd_date")):
+        errs.append(f"{tag}: adj.json dd_date={j['dd_date']!r} ≠ entry (center_adj của DD khác)")
+    if "rev" in j and str(j["rev"]) not in ok_revs:
+        errs.append(f"{tag}: adj.json rev={j['rev']!r} ∉ {sorted(ok_revs)} (rev entry hoặc rev entry được supersede) — center_adj của rev khác")
     return errs
 
 
@@ -344,6 +351,12 @@ def _self_tests():
         r.append(("center_adj: center_base adj.json lệch tâm entry (rev khác) bị bắt", bool(E(center=21000.0))))
         r.append(("center_adj: dd_date adj.json ≠ entry bị bắt", bool(E(dd_date="2026-11-24"))))
         r.append(("center_adj: rev adj.json ≠ entry bị bắt", bool(E(rev=5))))
+        r.append(("center_adj: rev mới + supersedes đúng rev adj.json (4→5) → sạch", not E(rev=5, supersedes="AAA@2026-11-05#4")))
+        r.append(("center_adj: supersedes trỏ rev khác rev adj.json bị bắt", bool(E(rev=5, supersedes="AAA@2026-11-05#3"))))
+        r.append(("center_adj: supersedes trỏ ticker khác bị bắt", bool(E(rev=5, supersedes="BBB@2026-11-05#4"))))
+        r.append(("center_adj: supersedes trỏ dd_date khác bị bắt", bool(E(rev=5, supersedes="AAA@2026-11-04#4"))))
+        r.append(("center_adj: supersedes hỏng định dạng bị bắt", bool(E(rev=5, supersedes="AAA@2026-11-05#x"))))
+        r.append(("center_adj: supersedes đúng nhưng dd_date adj.json lệch bị bắt", bool(E(rev=5, supersedes="AAA@2026-11-05#4", dd_date="2026-11-05x"))))
         _w("adjl.json", [1, 2])
         r.append(("center_adj: adj.json là list ⇒ lỗi chứ không crash", bool(E(center_adj_basis="adjl.json", center_adj_md5=hashlib.md5(json.dumps([1, 2]).encode()).hexdigest()))))
         mb = _w("adjs.json", dict(aj, center_adj="19000"))
