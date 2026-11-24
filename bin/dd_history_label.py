@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""dd_history_label.py — nhãn "so với LỊCH SỬ CỦA CHÍNH MÃ" cho tâm DD (CHỈ HIỂN THỊ).
+"""dd_history_label.py — nhãn CƠ HỌC "so với lịch sử CỦA CHÍNH MÃ" trên thước RI-ROE5Y (CHỈ HIỂN THỊ).
+
+v2 (24/11/2026, theo quant-skeptic CONFIRMED/medium; user duyệt): thêm (a) hạ nhãn khi k_mã ngoài [0,5; 2]
+("proxy lệch DD"), (b) cờ đối xứng lợi nhuận SỤT (ROE TTM/ROE5Y ≤ 1/1,3), (c) hạ nhãn khi N hiệu dụng (hold)
+< 2,5, (d) dòng hiển thị KHÔNG còn mệnh đề "trung vị 10 năm ≈ …× tâm" — nhãn KHÔNG dùng tâm DD.
+Nhãn v1 giữ ở cột `label_v1` để so trước/sau.
 
 User duyệt 24/11/2026, thiết kế theo quant-skeptic R2/D2 (b):
   - Với mỗi mã DD: x(t) = Price_t / (k_mã × proxy_mã(t)), k_mã = tâm DD hôm nay / proxy_mã hôm nay
@@ -13,7 +18,7 @@ User duyệt 24/11/2026, thiết kế theo quant-skeptic R2/D2 (b):
     tercile; vắt ngưỡng ⇒ 'KHÔNG CHẮC (a…b)'.
   - Hệ quả toán học (ghi rõ): vì k cố định theo mã và hôm nay = Price/(k·proxy_hôm nay), phân vị KHÔNG
     phụ thuộc k ⇒ nhãn = vị trí giá/proxy hôm nay của mã trên lịch sử giá/proxy của CHÍNH mã. Tâm DD chỉ
-    đổi THANG hiển thị (trung vị lịch sử theo đơn vị tâm), không đổi nhãn.
+    đổi THANG hiển thị ở CSV (cột hist_med_*, pc_asof), KHÔNG đổi nhãn và KHÔNG nằm trong dòng hiển thị v2.
 
 KHÔNG: vào luật 4 (cổng giá ≤0,85×tâm giữ nguyên, riêng) · đổi tâm/sổ/schema · dùng giá làm đầu vào giá
 trị nội tại (tâm đọc từ sổ ĐÃ KHOÁ, giá chỉ dùng SAU) · wire sizing. Không đọc đồng hồ: asof = ngày cuối panel
@@ -53,7 +58,11 @@ WIN_YEARS = 10
 MIN_MONTHS = 36
 LO, HI = 33.0, 67.0
 PEAK_RATIO = 1.3          # ROE TTM / ROE5Y ≥ 1,3 ⇒ cảnh báo đỉnh lợi nhuận (ngưỡng hiển thị, chọn trước)
+DECLINE_RATIO = 1.0 / PEAK_RATIO   # ROE TTM / ROE5Y ≤ 0,77 ⇒ cờ lợi nhuận SỤT (đối xứng cờ đỉnh) — do skeptic đề xuất
+K_BAND = (0.5, 2.0)       # k_mã ngoài dải ⇒ "proxy lệch DD" ⇒ hạ nhãn — NGƯỠNG DO QUANT-SKEPTIC ĐỀ XUẤT 24/11/2026
+NEFF_MIN = 2.5            # N hiệu dụng (hold) < 2,5 ⇒ hạ nhãn — NGƯỠNG DO QUANT-SKEPTIC ĐỀ XUẤT 24/11/2026
 ORDER = ["RẺ", "TRUNG TÍNH", "ĐẮT"]
+DEFINITE = set(ORDER)
 
 
 def vbv_dd(roe, r, g):
@@ -113,8 +122,10 @@ def pct_rank(hist, x):
     return float(100.0 * (hist < x).mean())
 
 
-def tercile(p):
-    return "RẺ" if p < LO else ("ĐẮT" if p > HI else "TRUNG TÍNH")
+def tercile(p, lo=None, hi=None):
+    lo = LO if lo is None else lo
+    hi = HI if hi is None else hi
+    return "RẺ" if p < lo else ("ĐẮT" if p > hi else "TRUNG TÍNH")
 
 
 def combine(t_fade, t_hold):
@@ -148,7 +159,7 @@ def ledger_centers(ledger_path):
     return {tk: e for tk, (_, e) in best.items()}
 
 
-def label_ticker(rows, center, asof):
+def label_ticker(rows, center, asof, win_years=None, lo=None, hi=None):
     """rows: các dòng panel (đã add_proxy) của MỘT mã, time ≤ asof. Trả dict một dòng kết quả."""
     rows = rows[rows.time <= asof].sort_values("time")
     rec = {"asof": str(asof.date()), "center": float(center)}
@@ -160,7 +171,7 @@ def label_ticker(rows, center, asof):
     price = float(t0.Price)
     rec.update({"price_asof": price, "pc_asof": price / center, "ROE5Y": float(t0.ROE5Y),
                 "roe_ttm": float(t0.roe_ttm) if pd.notna(t0.roe_ttm) else np.nan})
-    win = rows[(rows.time > asof - pd.DateOffset(years=WIN_YEARS)) & (rows.time < asof)]
+    win = rows[(rows.time > asof - pd.DateOffset(years=win_years or WIN_YEARS)) & (rows.time < asof)]
     res = {}
     for v in ("fade", "hold"):
         pv0 = t0[f"pv_{v}"]
@@ -182,7 +193,7 @@ def label_ticker(rows, center, asof):
     elif min(res["fade"]["n"], res["hold"]["n"]) < MIN_MONTHS:
         rec["label"] = "KHÔNG ĐỦ LỊCH SỬ"
     else:
-        tf, th = tercile(res["fade"]["pct"]), tercile(res["hold"]["pct"])
+        tf, th = tercile(res["fade"]["pct"], lo, hi), tercile(res["hold"]["pct"], lo, hi)
         rec.update({"terc_fade": tf, "terc_hold": th, "label": combine(tf, th),
                     "pct_lo": min(res["fade"]["pct"], res["hold"]["pct"]),
                     "pct_hi": max(res["fade"]["pct"], res["hold"]["pct"]),
@@ -195,13 +206,31 @@ def label_ticker(rows, center, asof):
         rec["roe_ttm_over_5y"] = rt / r5 if pd.notna(rt) else np.nan
         if pd.notna(rt) and rt / r5 >= PEAK_RATIO:
             warn.append(f"ĐỈNH LỢI NHUẬN? (ROE TTM/5Y={rt / r5:.2f})")
+        if pd.notna(rt) and rt / r5 <= DECLINE_RATIO:
+            warn.append(f"LỢI NHUẬN SỤT? (ROE TTM/5Y={rt / r5:.2f})")
         if r5 > ROE_CLIP[1]:
             warn.append("ROE5Y bị kẹp 45%")
     rec["warn"] = "; ".join(warn)
+    # v2: hạ nhãn. label_v1 = nhãn trước khi hạ; reasons = lý do (có thể nhiều), chỉ hạ khi nhãn v1 là RẺ/TRUNG TÍNH/ĐẮT.
+    rec["label_v1"] = rec["label"]
+    reasons = []
+    ks = [rec.get("k_fade"), rec.get("k_hold")]
+    ks = [k for k in ks if k is not None and pd.notna(k)]
+    if ks and any(not (K_BAND[0] <= k <= K_BAND[1]) for k in ks):
+        reasons.append(f"proxy lệch DD, k={min(ks):.2f}–{max(ks):.2f}")
+    ne = rec.get("n_eff_hold", np.nan)
+    if pd.notna(ne) and ne < NEFF_MIN:
+        reasons.append(f"N hiệu dụng thấp, {ne:.2f}")
+    rec["reasons"] = "; ".join(reasons)
+    rec["demote_k"] = int(any(x.startswith("proxy") for x in reasons))
+    rec["demote_neff"] = int(any(x.startswith("N hiệu") for x in reasons))
+    if reasons and rec["label"] in DEFINITE:
+        rec["label"] = f"KHÔNG CHẮC ({'; '.join(reasons)})"
     return rec
 
 
-def run(tickers, asof=None, panel_path=None, dep_path=None, ledger_path=None, panel_df=None):
+def run(tickers, asof=None, panel_path=None, dep_path=None, ledger_path=None, panel_df=None,
+        win_years=None, lo=None, hi=None):
     panel_path = panel_path or resolve(PANEL_REL)
     dep_path = dep_path or resolve(DEP_REL)
     ledger_path = ledger_path or resolve(LEDGER_REL)
@@ -224,32 +253,42 @@ def run(tickers, asof=None, panel_path=None, dep_path=None, ledger_path=None, pa
         e = centers[tk]
         rec = {"ticker": tk, "dd_date": e["dd_date"], "rev": e.get("rev", 1),
                "skeptic_final": e.get("skeptic_final")}
-        rec.update(label_ticker(p[p.ticker == tk], float(e["center"]), asof))
+        rec.update(label_ticker(p[p.ticker == tk], float(e["center"]), asof, win_years, lo, hi))
         rows.append(rec)
     meta = {"asof": str(asof.date()), "big4_anchor_pct": dep_now, "r_anchor": R0,
             "inputs_md5": {"panel": md5(panel_path) if panel_df is None else "in-memory",
                            "deposit_big4": md5(dep_path), "ledger": md5(ledger_path)},
             "inputs_path": {"panel": panel_path, "deposit_big4": dep_path, "ledger": ledger_path},
-            "window_years": WIN_YEARS, "min_months": MIN_MONTHS, "tercile": [LO, HI], "peak_ratio": PEAK_RATIO}
+            "window_years": win_years or WIN_YEARS, "k_band": list(K_BAND), "neff_min": NEFF_MIN, "decline_ratio": DECLINE_RATIO, "version": "v2", "min_months": MIN_MONTHS, "tercile": [LO if lo is None else lo, HI if hi is None else hi], "peak_ratio": PEAK_RATIO}
     return pd.DataFrame(rows), meta
 
 
-COLS = ["ticker", "dd_date", "rev", "skeptic_final", "asof", "center", "price_asof", "pc_asof", "label",
+COLS = ["ticker", "dd_date", "rev", "skeptic_final", "asof", "center", "price_asof", "pc_asof", "label", "label_v1", "reasons", "demote_k", "demote_neff",
         "pct_fade", "pct_hold", "terc_fade", "terc_hold", "n_fade", "n_hold", "n_eff_hold", "n_eff_fade",
         "k_fade", "k_hold", "hist_med_fade", "hist_med_hold", "hist_p25_fade", "hist_p75_fade",
         "hist_p25_hold", "hist_p75_hold", "ROE5Y", "roe_ttm", "roe_ttm_over_5y", "warn"]
 
 
 def fmt_table(df):
-    lines = [f"{'Mã':<5}{'giá/tâm':>8}  {'nhãn':<30}{'dải p[fade,hold]':>18}{'N th':>6}{'Neff':>6}  cảnh báo"]
+    lines = [f"{'Mã':<5}{'nhãn':<62}{'dải p[fade,hold]':>17}{'N th':>6}{'Neff':>6}  cảnh báo"]
     for _, r in df.iterrows():
-        pc = f"{r.pc_asof:.3f}" if pd.notna(r.get("pc_asof", np.nan)) else "-"
         band = (f"[{r.pct_fade:.0f}, {r.pct_hold:.0f}]" if pd.notna(r.get("pct_fade", np.nan))
                 and pd.notna(r.get("pct_hold", np.nan)) else "-")
         n = int(min(r.get("n_fade", 0) or 0, r.get("n_hold", 0) or 0)) if pd.notna(r.get("n_hold", np.nan)) else 0
         ne = f"{r.n_eff_hold:.1f}" if pd.notna(r.get("n_eff_hold", np.nan)) else "-"
-        lines.append(f"{r.ticker:<5}{pc:>8}  {str(r.label):<30}{band:>18}{n:>6}{ne:>6}  {r.get('warn', '') or ''}")
+        lines.append(f"{r.ticker:<5}{str(r.label):<62}{band:>17}{n:>6}{ne:>6}  {r.get('warn', '') or ''}")
     return "\n".join(lines)
+
+
+def display_line(r):
+    """Dòng hiển thị v2 (đề xuất cho DD). KHÔNG chứa giá/tâm hay trung vị theo tâm: nhãn không dùng tâm DD."""
+    if pd.isna(r.get("pct_hold", np.nan)):
+        return f"{r.ticker}: {r.label} (thước cơ học RI-ROE5Y của chính mã, KHÔNG dùng tâm DD)"
+    n = int(min(r.n_fade, r.n_hold))
+    w = f" ⚠ {r.warn}" if r.get("warn") else ""
+    return (f"{r.ticker}: so với lịch sử 10 năm của chính mã — **{r.label}** — phân vị [fade {r.pct_fade:.0f}, "
+            f"hold {r.pct_hold:.0f}], {n} tháng, N hiệu dụng ≈ {r.n_eff_hold:.1f} (thước cơ học RI-ROE5Y của chính mã, "
+            f"KHÔNG dùng tâm DD; chỉ hiển thị){w}")
 
 
 def write_out(df, meta, out_dir, tag):
@@ -276,6 +315,7 @@ def main(argv=None):
     print(f"asof {meta['asof']} · cửa sổ {WIN_YEARS}Y nhân quả · ≥{MIN_MONTHS} tháng · cơ sở ROE5Y · r Big-4 thuần "
           f"(neo {meta['big4_anchor_pct']}% → 13,5%) · CHỈ HIỂN THỊ, không vào luật 4")
     print(fmt_table(df))
+    print("\n".join(display_line(r) for _, r in df.iterrows()))
     tag = "all" if a.all_ledger else "-".join(tickers)
     csv, js = write_out(df, meta, a.out_dir, tag)
     print(f"→ {csv}\n→ {js}")

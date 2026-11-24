@@ -105,9 +105,9 @@ with tempfile.TemporaryDirectory() as td:
     json.dump(z, open(lp, "w"))
     sc, _ = L.run(None, ledger_path=lp)
 sc = sc.set_index("ticker")
-inv = (sc.label == base.label).all() and np.allclose(sc.pct_hold.fillna(-1), base.pct_hold.fillna(-1))
+inv = (sc.label_v1 == base.label_v1).all() and np.allclose(sc.pct_hold.fillna(-1), base.pct_hold.fillna(-1))
 lvl = np.allclose((sc.hist_med_hold * 1.3).dropna(), base.hist_med_hold.dropna(), rtol=1e-9)
-check(inv and lvl, "(4d) tâm ×1,3 (k đổi nhất quán) ⇒ nhãn/phân vị KHÔNG đổi, chỉ thang trung vị lịch sử ÷1,3 "
+check(inv and lvl, "(4d) tâm ×1,3 (k đổi nhất quán) ⇒ nhãn v1/phân vị KHÔNG đổi, chỉ thang trung vị lịch sử ÷1,3 "
       "(nhãn độc lập tâm — tính chất thiết kế, ghi trong REPORT)")
 
 # (5) luật nhãn
@@ -121,9 +121,63 @@ syn = pd.DataFrame({"time": t, "ticker": "ZZZ", "Price": 100.0, "PB": np.linspac
 synp, _ = L.add_proxy(syn, pd.DataFrame({"time": [pd.Timestamp("2010-01-01")], "deposit_rate": [6.8]}))
 r36 = L.label_ticker(synp, 100.0, t[-1])
 r35 = L.label_ticker(synp.iloc[1:], 100.0, t[-1])
-check(r36["n_hold"] == 36 and r36["label"] == "ĐẮT" and r36["pct_hold"] == 100.0,
-      f"(5c) chuỗi tổng hợp PB tăng dần, 36 tháng quá khứ ⇒ p100 ĐẮT (được: {r36['label']}, n={r36['n_hold']})")
+check(r36["n_hold"] == 36 and r36["label_v1"] == "ĐẮT" and r36["pct_hold"] == 100.0,
+      f"(5c) chuỗi tổng hợp PB tăng dần, 36 tháng quá khứ ⇒ p100 ĐẮT (được: {r36['label_v1']}, n={r36['n_hold']})")
 check(r35["label"] == "KHÔNG ĐỦ LỊCH SỬ", f"(5d) 35 tháng ⇒ KHÔNG ĐỦ LỊCH SỬ (được: {r35['label']})")
+
+# (7) v2 — cờ k-band, cờ sụt/đỉnh, cổng N_eff, display
+DEF = L.DEFINITE
+skp = ["CST", "CSV", "DGC", "HHS", "MVC", "PAT", "PNJ", "QTP", "TCH", "TV1"]
+kflag = sorted(base[base.reasons.fillna("").str.contains("proxy lệch DD")].index)
+check(kflag == sorted(skp), f"(7a) cờ k ngoài [0,5;2] (k_fade hoặc k_hold) = đúng 10 mã skeptic nêu: {kflag}")
+okk = all(str(base.loc[t, "label"]).startswith("KHÔNG CHẮC (") for t in skp if base.loc[t, "label_v1"] in DEF)
+check(okk and all("proxy lệch DD" in base.loc[t, "label"] for t in skp if base.loc[t, "label_v1"] in DEF),
+      "(7b) mã ngoài dải k mà v1 xác định ⇒ nhãn v2 = KHÔNG CHẮC (proxy lệch DD, k=…) (không còn RẺ/ĐẮT trần)")
+ne_lo = base[(base.n_eff_hold < L.NEFF_MIN) & base.label_v1.isin(DEF)]
+check(len(ne_lo) > 0 and ne_lo.label.str.contains("N hiệu dụng thấp").all(),
+      f"(7c) N_eff(hold)<{L.NEFF_MIN} & v1 xác định ⇒ KHÔNG CHẮC (N hiệu dụng thấp): {len(ne_lo)} mã")
+keep = base[(base.n_eff_hold >= L.NEFF_MIN) & ~base.reasons.fillna("").str.contains("proxy") & base.label_v1.isin(DEF)]
+check(len(keep) > 0 and (keep.label == keep.label_v1).all(),
+      f"(7d) N_eff≥{L.NEFF_MIN} & k trong dải ⇒ nhãn v1 giữ nguyên: {len(keep)} mã")
+und = base[~base.label_v1.isin(DEF)]
+check((und.label == und.label_v1).all(), f"(7e) nhãn v1 đã KHÔNG CHẮC/khác ⇒ v2 không đổi chữ ({len(und)} mã)")
+# cờ sụt/đỉnh: biên đối xứng, dựng bằng cách chỉnh PE dòng asof của FPT
+def flag_at(ratio):
+    pn = panel.copy()
+    msk = (pn.ticker == "FPT") & (pn.time == pn.time.max())
+    pn.loc[msk, "PE"] = pn.loc[msk, "PB"] / (ratio * pn.loc[msk, "ROE5Y"])
+    return str(L.run(["FPT"], panel_df=pn)[0].iloc[0].warn)
+check("SỤT" in flag_at(0.76) and "SỤT" not in flag_at(0.78) and "ĐỈNH" not in flag_at(0.76),
+      "(7f) cờ SỤT bật ở ROE TTM/5Y=0,76, tắt ở 0,78 (ngưỡng 1/1,3=0,769)")
+check("ĐỈNH" in flag_at(1.31) and "ĐỈNH" not in flag_at(1.29) and "SỤT" not in flag_at(1.31),
+      "(7g) cờ ĐỈNH bật ở 1,31, tắt ở 1,29 (đối xứng, không dính cờ SỤT)")
+sut = sorted(base[base.warn.fillna("").str.contains("SỤT")].index)
+check(sut == ["CST", "DGC", "HHS", "PAT", "PNJ"], f"(7h) cờ SỤT trên sổ thật = {sut} (skeptic: HHS/DGC/CST/PAT/PNJ; PNJ 0,59 thuộc)")
+# mutation: tắt cổng ⇒ không hạ; tắt ngưỡng cực cao ⇒ hạ mọi nhãn xác định
+sv = (L.K_BAND, L.NEFF_MIN)
+L.K_BAND, L.NEFF_MIN = (0.0, 1e9), 0.0
+off, _ = L.run(None)
+L.K_BAND, L.NEFF_MIN = (1e9, 2e9), 1e9
+allx, _ = L.run(None)
+L.K_BAND, L.NEFF_MIN = sv
+check((off.label == off.label_v1).all(), "(7i) mutation: nới cổng (k-band rộng vô hạn, N_eff≥0) ⇒ v2 ≡ v1 36/36")
+dd_ = allx[allx.label_v1.isin(DEF)]
+check(len(dd_) > 0 and dd_.label.str.startswith("KHÔNG CHẮC").all(), "(7j) mutation: siết cổng cực đoan ⇒ MỌI nhãn xác định bị hạ")
+# nhân tâm ×3: nhãn v1 giữ, nhưng k ra ngoài dải ⇒ cờ k bật (cờ k là thuộc tính của tâm, nhãn v1 thì không)
+z3 = json.load(open(led))
+for e in z3["entries"]:
+    if e.get("center"):
+        e["center"] = e["center"] * 3
+with tempfile.TemporaryDirectory() as td:
+    lp = os.path.join(td, "z3.json")
+    json.dump(z3, open(lp, "w"))
+    s3, _ = L.run(["FPT"], ledger_path=lp)
+r3 = s3.iloc[0]
+check(r3.label_v1 == base.loc["FPT", "label_v1"] and "proxy lệch DD" in r3.label,
+      f"(7k) FPT tâm ×3: nhãn v1 {r3.label_v1} không đổi, k_hold={r3.k_hold:.2f}>2 ⇒ v2 hạ: {r3.label}")
+ln = [L.display_line(r) for _, r in df.iterrows()]
+check(all("trung vị" not in x and "× tâm" not in x and "×tâm" not in x and "KHÔNG dùng tâm DD" in x for x in ln),
+      "(7l) dòng hiển thị 36 mã: không có mệnh đề 'trung vị … × tâm', có nhãn 'thước cơ học … KHÔNG dùng tâm DD'")
 
 # (6) tất định
 with tempfile.TemporaryDirectory() as td:
