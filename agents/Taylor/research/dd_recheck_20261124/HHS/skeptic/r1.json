@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/HHS/REPORT_recheck_HHS.md",
+  "report_md5": "055da7700bbcb38849f0451913141733",
+  "brief_md5": "47c4cb25d08034bea043b40d74a03a35",
+  "model": "opus",
+  "cost_usd": 0.7949494000000001,
+  "started_at_ict": "2026-11-24T16:47:53+07:00",
+  "summary": "Phần cơ học của bản rà lại HHS đúng: md5 khớp, calc tái lập, độ nhạy r tự tính (+215 đ/cp ở điểm giữa) khớp báo cáo (+209), và việc sửa lỗi '≈0' của rev7 là đúng. Nhưng kết luận chính 'tâm 10.805 không đổi' không đứng được. Nó dựa trên CK holding 26,63% (N=6), trong khi phép đo v5 mới hơn đề xuất base 0% (mốc hiện tại 19,7%), nghĩa là tâm có thể cao hơn 7,6–29,3%. Base cũng còn mang REFUTED r5 chưa sửa (EX k=0,734 trái k_base=1,0; phạm vi CK không nhất quán). Ở chiều ngược lại, nghĩa vụ NƠXH/quỹ đất và cơ cấu HH1–HH4 (−2,3…−9%) chưa vào base. Báo cáo minh bạch về các lỗ hổng này, nhưng minh bạch không biến một base lỗi thời thành tâm hợp lệ. Cần user chốt CK rồi làm rev8. Giá thị trường trong báo cáo (9.700) và các nhãn vùng đã bị bỏ qua theo ràng buộc mù giá.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/HHS/skeptic/r1_raw.md"
+}
