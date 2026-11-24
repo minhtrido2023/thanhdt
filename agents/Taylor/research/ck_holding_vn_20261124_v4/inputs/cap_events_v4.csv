@@ -1,0 +1,299 @@
+id,ticker,exright_date,record_date,issue_date,listing_date,public_date,issue_method_code,exercise_ratio,issue_volumn,value_per_share,total_value,ref_price,shares_delta,shares_total_after,issue_status_code,event_status,event_title_vi
+681956ee86e9541d8ab43edc,AAA,2025-08-29,2025-08-29,,2026-08-31,2025-08-29,EMPL,0.03,11468234,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 3.0%
+6835066f0e8a716db611843d,ACV,2025-08-07,2025-08-08,,2025-09-29,2025-07-30,DIV,0.6458,1405674287,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 64.6%
+67d0d46aac13fa2f17153cb2,AGP,2025-05-05,2025-05-06,,2025-07-04,2025-04-17,DIV,0.1,2314130,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+67d0d46aac13fa2f17153cb3,AGP,2025-05-14,2025-05-14,,2026-05-15,2025-05-19,EMPL,0.05,1157197,,20829546000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 5.0%
+68b0f37c64af214c2605c4a9,AGP,2025-11-26,2025-11-27,,2026-03-31,2025-11-19,Rights,0.15,3992290,,99807250000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 15.0%
+69cb1410dfdbc1b12b2df39e,AGP,2026-05-28,2026-05-29,,2026-08-11,2026-05-07,DIV,0.12,3672486,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 12.0%
+69cb1410dfdbc1b12b2df39f,AGP,2026-06-08,2026-06-08,,2027-06-09,2026-06-11,EMPL,0.05,1530377,,27546786000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 5.0%
+6a4d982a279ac17a86f2f280,AIG,2026-08-04,2026-08-05,,2026-10-13,2026-07-28,Bonus,0.15,25590145,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 15.0%
+6708f3f80ec61045ab800ae6,ASM,2024-07-15,2024-07-16,,2024-08-22,2024-07-04,DIV,0.1,33651498,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+680ad651b3bb8d7911f49951,ASM,2025-10-07,2025-10-08,,2025-11-28,2025-09-23,DIV,0.1,37015933,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+69e17d758e0e35deadf0a808,BCE,2026-05-22,2026-05-25,,2026-07-01,2026-05-15,DIV,0.2,6999846,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+6708f3f80ec61045ab800b61,BCG,2024-08-01,2024-08-02,,2024-09-05,2024-07-24,Bonus,0.1,80014019,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+6708f3f80ec61045ab800b8d,BCR,2024-07-26,2024-07-29,,2024-09-16,2024-07-23,DIV,0.03,13799913,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 3.0%
+6840e409c8766c48b08d3798,BIC,2025-09-09,2025-09-10,,2025-10-31,2025-08-14,Bonus,0.723,84790162,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 72.3%
+6708f3f80ec61045ab800b36,BID,2024-12-23,2024-12-24,,2025-01-24,2024-12-17,DIV,0.21,1197079368,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 21.0%
+6708f3f80ec61045ab800b37,BID,2025-02-28,2025-02-28,,2026-03-02,2025-03-03,PP,0.01796,123846649,,4805249981200.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 1.8%
+68101caf1e6996338091df28,BID,2026-03-24,2026-03-24,,2027-03-24,2026-03-25,PP,0.0375,258703293,,10063558097700.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 3.8%
+68101caf1e6996338091df26,BID,2026-08-17,2026-08-18,,2026-10-05,2026-08-12,Bonus,0.068433,498164263,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 6.8%
+6708f3f80ec61045ab800afd,BSI,2024-07-09,2024-07-10,,2024-08-23,2024-06-21,DIV,0.1,20277574,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6806e1eeb3bb8d7911ed3e5b,BSI,2025-06-11,2025-06-12,,2025-07-29,2025-05-30,DIV,0.1,22305242,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+69effda3db487120c6897f29,BSI,2026-06-15,2026-06-16,,2026-07-24,2026-06-09,DIV,0.1,24535606,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+68df182182ba4d1dc7586161,BSR,2025-10-29,2025-10-30,,2025-12-08,2025-10-15,Bonus,0.315,976651211,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 31.5%
+68df182182ba4d1dc7586160,BSR,2025-10-29,2025-10-30,,2025-12-08,2025-10-15,DIV,0.3,930148859,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 30.0%
+69cb1410dfdbc1b12b2df39c,BWE,2026-07-23,2026-07-24,,,2026-07-10,Rights,0.14285714,31418377,,1162479949000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 14.3%
+69128298d4eafd4c0785c54a,C32,2025-12-26,2025-12-29,,2026-02-03,2025-12-22,Bonus,1.0,15029145,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 100.0%
+69167757d4eafd4c078c958b,CHP,2025-12-11,2025-12-12,,2026-02-10,2025-12-04,Bonus,0.07315456,10745408,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 7.3%
+67329ae390126c16e9d55879,CII,2024-11-04,2024-11-04,,2025-01-09,2024-11-11,TRANS,0.0,974300,,9743000000.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+67abea38bf8a9233106dd4b3,CII,2025-02-03,2025-02-03,,2025-02-24,2025-02-11,TRANS,0.0,228224170,,2282241700000.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+6823e3000e8a716db6f00821,CII,2025-05-05,2025-05-05,,2025-06-25,2025-05-13,TRANS,0.0,217700,,2177000000.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+6708f3f80ec61045ab800986,CII,2025-08-05,2025-08-06,,2025-08-29,2025-07-04,Bonus,0.14,76744738,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 14.0%
+690beb0e46866f36b4007a76,CII,2025-11-03,2025-11-03,,2025-12-01,2025-11-04,TRANS,0.0,511400,,5114000000.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+698291958092e728da4ea931,CII,2026-01-26,2026-01-26,,2026-03-10,2026-02-03,TRANS,0.0,46534870,,465348700000.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+69cf087f714770f525d61b59,CMN,2026-06-11,2026-06-12,,2026-08-03,2026-06-04,Bonus,2.0,9600000,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 200.0%
+6708f3f80ec61045ab800aec,DAT,2024-07-01,2024-07-02,,2024-08-09,2024-06-26,DIV,0.1,6293237,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+69f938a2db487120c6970a49,DC1,2026-06-26,2026-06-29,,2026-09-04,2026-06-17,Bonus,0.35,1576441,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 35.0%
+6708f3f80ec61045ab800b71,DC2,2024-11-21,2024-11-21,,2025-11-24,2024-12-04,PP,0.6617,3419309,,34193090000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 66.2%
+6827d78c0e8a716db6f75be5,DC2,2025-06-05,2025-06-06,,2025-07-18,2025-05-29,DIV,0.03,329049,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 3.0%
+69fbdb8cdb487120c69ad6e9,DC2,2026-06-11,2026-06-12,,2026-07-22,2026-06-04,DIV,0.03,338918,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 3.0%
+68083370b3bb8d7911ef70a2,DIG,2025-05-29,2025-05-30,,2025-07-02,2025-05-19,DIV,0.06,36579196,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 6.0%
+68083370b3bb8d7911ef70a1,DIG,2025-10-09,2025-10-10,,2026-01-08,2025-10-02,Rights,0.232,150000000,,1800000000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 23.2%
+69f938a2db487120c6970a32,DIG,2026-09-08,2026-09-09,,2026-10-13,2026-08-21,DIV,0.06,47761572,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 6.0%
+6708f3f80ec61045ab800a95,DND,2024-11-19,2024-11-19,,2025-11-20,2024-11-20,PP,0.4528,4000000,,72800000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 45.3%
+6806e1eeb3bb8d7911ed3e49,DPM,2025-08-07,2025-08-08,,2025-09-30,2025-07-23,Bonus,0.737476,288590761,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 73.7%
+6708f3f80ec61045ab800b00,DTG,2024-06-19,2024-06-20,,2024-08-08,2024-06-13,DIV,0.15,1089363,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+68083370b3bb8d7911ef70a5,DTG,2025-07-24,2025-07-25,,2025-09-23,2025-07-11,DIV,0.15,1252745,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+69cc6579dfdbc1b12b2fdcc9,DTG,2026-07-24,2026-07-27,,2026-09-18,2026-07-10,DIV,0.1,960393,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6769fbec16bfba1b8aa01769,DXG,2025-01-06,2025-01-07,,2025-04-02,2024-12-27,Rights,0.20833333,150146548,,1801758576000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 20.8%
+6823e3000e8a716db6f0081a,DXG,2025-06-04,2025-06-05,,2025-07-11,2025-05-28,Bonus,0.17,148034206,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 17.0%
+6823e3000e8a716db6f0081b,DXG,2025-12-09,2025-12-09,,2026-12-10,2025-12-10,PP,0.107366,93500000,,1739100000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 10.7%
+69e571ea9a7ad2360021d493,DXG,2026-05-28,2026-05-29,,2026-06-30,2026-05-22,Bonus,0.14,155720776,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 14.0%
+68004a56d2606e49d1e5b5c8,FOX,2025-06-09,2025-06-10,,2025-08-12,2025-05-13,Bonus,0.5,246254299,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 50.0%
+6708f3f80ec61045ab800aaf,FPT,2024-06-12,2024-06-13,,2024-08-01,2024-06-07,Bonus,0.15,190479191,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 15.0%
+6708f3f80ec61045ab800a6e,FPT,2024-10-09,2024-10-09,,2027-10-11,2024-10-14,EMPL,0.00499,7302117,,73021170000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.5%
+6708f3f80ec61045ab800c4c,FPT,2024-10-09,2024-10-09,,2034-10-09,2024-10-14,EMPL,0.00227,3319000,,33190000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.2%
+6802ed4ed2606e49d1ead8af,FPT,2025-05-07,2025-05-07,,2028-05-08,2025-05-12,EMPL,0.00472,6945939,,69459390000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.5%
+6802ed4ed2606e49d1ead8b0,FPT,2025-05-07,2025-05-07,,2035-05-07,2025-05-12,EMPL,0.00225,3315000,,33150000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.2%
+6802ed4ed2606e49d1ead8b1,FPT,2025-07-21,2025-07-22,,2025-09-12,2025-07-16,Bonus,0.15,222176999,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 15.0%
+69e6c30a9a7ad2360023b0c2,FPT,2026-06-24,2026-06-24,,2029-06-25,2026-06-29,EMPL,0.00499,8517301,,85173010000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.5%
+6a309747e56b40f0536c38e0,FPT,2026-06-24,2026-06-24,,2036-06-24,2026-06-29,EMPL,0.00135,2302000,,23020000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.1%
+69e6c30a9a7ad2360023b0c1,FPT,2026-09-21,2026-09-22,,2026-11-12,2026-09-16,Bonus,0.1,171401226,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+6816b3ec86e9541d8aaffd46,FRT,2025-07-16,2025-07-17,,2025-08-28,2025-07-08,DIV,0.25,34059396,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 25.0%
+69e6c30a9a7ad2360023b0bf,FRT,2026-06-29,2026-06-30,,2026-08-18,2026-06-12,DIV,0.05,8513269,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+6708f3f80ec61045ab800a81,FTS,2024-06-07,2024-06-07,,2026-06-08,2024-06-12,EMPL,0.0,5529950,,55299500000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV
+67ef26d990c07f62ae30dab6,FTS,2025-05-14,2025-05-15,,2025-07-10,2025-05-06,Bonus,0.1,30590243,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+67ef26d990c07f62ae30dab7,FTS,2025-06-25,2025-06-25,,2027-06-28,2025-06-26,EMPL,0.029682,9988400,,99884000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 3.0%
+69cf087f714770f525d61b58,FTS,2026-05-21,2026-05-22,,2026-07-13,2026-05-12,Bonus,0.1,34647741,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+6708f3f80ec61045ab800bb7,GAS,2024-09-13,2024-09-16,,2024-11-01,2024-08-23,Bonus,0.02,45933072,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 2.0%
+688c0970a6a4d755dbae5db0,GAS,2025-08-28,2025-08-29,,,2025-08-05,Bonus,0.03,70276837,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 3.0%
+68dc754082ba4d1dc754b80e,GAS,2025-08-28,2025-08-29,,2025-10-20,2025-08-05,Bonus,0.03,70276837,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 3.0%
+6708f3f80ec61045ab800ac2,GCF,2025-02-21,2025-02-21,,2026-02-23,2025-02-24,EMPL,0.04889,1500000,,15000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 4.9%
+68004a56d2606e49d1e5b5c4,GCF,2025-07-25,2025-07-25,,2028-07-25,2025-07-28,PP,0.2217,7135000,,214050000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 22.2%
+68004a56d2606e49d1e5b5c3,GCF,2025-11-24,2025-11-25,,2026-01-20,2025-11-17,Bonus,0.1,3931472,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+6708f3f80ec61045ab800a7c,GEE,2025-02-25,2025-02-25,,2030-02-21,2025-02-26,EMPL,0.0167,5000000,,50000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.7%
+67e49abe7fc0a0169126ebac,GEE,2025-04-28,2025-04-29,,2025-06-12,2025-04-23,Bonus,0.2,60999956,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 20.0%
+69bc9334e334da549cefbf9e,GEE,2026-05-05,2026-05-06,,2026-06-09,2026-04-24,Bonus,0.75,274499255,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 75.0%
+6708f3f80ec61045ab800bef,GEG,2024-08-29,2024-08-30,,2024-10-10,2024-08-23,DIV,0.05,17058970,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+697bfa3a4d2e2f6f5284a729,GEG,2025-12-16,2025-12-16,,2026-03-06,2025-12-17,PP,0.0,-7704000,,82864224000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ
+69f7e74adb487120c6944fba,GEG,2026-06-10,2026-06-11,,2026-07-22,2026-06-02,DIV,0.05,17912154,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+698291958092e728da4ea92f,GEL,2026-01-07,2026-01-07,,2026-01-07,2026-01-07,PUBL,0.0,100000000,,2882000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành rộng rãi qua đấu giá
+6708f3f80ec61045ab800a7e,GEX,2024-08-29,2024-08-29,,2027-08-30,2024-08-30,EMPL,0.009,7934000,,79340000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.9%
+67eb325d90c07f62ae28a5f9,GEX,2025-05-14,2025-05-15,,2025-06-27,2025-05-05,DIV,0.05,42969155,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+69d2fd28714770f525dc6c25,GEX,2026-05-05,2026-05-06,,2026-06-10,2026-04-24,Bonus,0.2,180477285,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 20.0%
+69d2fd28714770f525dc6c24,GEX,2026-05-05,2026-05-06,,2026-06-10,2026-04-24,DIV,0.25,225595125,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 25.0%
+67d37779ac13fa2f171b26ac,GIC,2026-03-02,2026-03-03,,2026-04-14,2026-02-24,DIV,0.1,1211988,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+67d37779ac13fa2f171b26ad,GIC,2026-03-02,2026-03-03,,2026-06-22,2026-02-24,Rights,1.0,12120000,,121200000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+6a600ddac5a4aaeae5fa24a7,GLT,2026-09-30,2026-10-01,,2026-11-12,2026-09-22,Bonus,0.065,606133,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 6.5%
+6a600ddac5a4aaeae5fa24a6,GLT,2026-09-30,2026-10-01,,2026-11-12,2026-09-22,DIV,0.255,2378213,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 25.5%
+6708f3f80ec61045ab800bf2,GMD,2024-10-22,2024-10-23,,2025-01-17,2024-10-18,Rights,0.33333333,103495652,,3001373908000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 33.3%
+67a15df273615257e2efe4c3,GMD,2025-03-03,2025-03-03,,2028-03-06,2025-03-05,EMPL,0.015,6209700,,62097000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.5%
+68c0c56c6a7bab4d8b740a07,GMD,2025-10-02,2025-10-02,,2028-10-02,2025-10-06,EMPL,0.015,6302800,,63028000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.5%
+6a03c4a25b1fb4c98c37ecfd,GMD,2026-07-31,2026-07-31,,2029-08-01,2026-08-04,EMPL,0.015,6397400,,63974000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.5%
+6a03c4a25b1fb4c98c37ecfe,GMD,2026-10-07,2026-10-08,,2026-11-12,2026-10-02,Bonus,0.5,216444883,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 50.0%
+6708f3f80ec61045ab800b0f,GSP,2024-06-27,2024-06-28,,2024-08-15,2024-06-14,DIV,0.1,5579820,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+685b41f2bffa71495b712bef,GSP,2025-08-13,2025-08-14,,2025-10-02,2025-08-05,DIV,0.1,6137785,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6a503b303711162a7e7841df,GSP,2026-08-06,2026-08-07,,2026-09-21,2026-07-29,DIV,0.1,6751370,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6708f3f80ec61045ab800c13,HDC,2024-09-16,2024-09-17,,2024-10-22,2024-08-30,DIV,0.15,23259841,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+68df182182ba4d1dc758615f,HDC,2025-11-11,2025-11-12,,2025-12-11,2025-11-05,Bonus,0.12,21399605,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 12.0%
+69f7e74adb487120c6944fab,HDC,2026-06-19,2026-06-22,,2026-07-21,2026-06-09,DIV,0.15,29957872,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+6983e32e8092e728da5096f5,HPA,2025-05-28,2025-05-28,,2025-05-28,2025-05-28,PP,0.0,-25000000,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ
+6983e32e8092e728da5096f6,HPA,2026-01-06,2026-01-06,,2026-01-06,2026-01-06,PUBL,0.0,30000000,,1257000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành rộng rãi qua đấu giá
+681956ee86e9541d8ab43edf,HPG,2025-06-26,2025-06-27,,2025-07-31,2025-06-05,DIV,0.2,1279215655,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+69eab80f9a7ad236002b1866,HPG,2026-05-25,2026-05-26,,2026-07-15,2026-05-15,DIV,0.1,767498665,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+69f14f8edb487120c68b4ce0,HTG,2026-07-16,2026-07-17,,2026-08-28,2026-07-02,DIV,0.2,7199684,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+681956ee86e9541d8ab43ede,HUB,2025-06-24,2025-06-25,,2025-08-15,2025-06-18,DIV,0.15,3944441,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+69e2cf489a7ad236001e3daa,HUB,2026-09-09,2026-09-10,,2026-10-23,2026-08-24,DIV,0.05,1511719,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+6708f3f80ec61045ab800bc1,HUT,2025-06-27,2025-06-30,,2025-09-24,2025-06-25,Rights,0.2,175773616,,1757736160000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 20.0%
+682bcc070e8a716db6fe75d8,HVN,2025-07-21,2025-07-22,,2025-11-07,2025-07-11,Rights,0.4064317,897104037,,8971040370000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 40.6%
+68101caf1e6996338091df2a,ICN,2025-07-03,2025-07-04,,2025-08-22,2025-06-25,DIV,0.5,10199963,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 50.0%
+681d4b7086e9541d8abad660,IDC,2025-08-14,2025-08-15,,2025-10-03,2025-08-08,DIV,0.15,49498894,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+69fa8a04db487120c698f1fb,IDC,2026-07-23,2026-07-24,,2026-09-16,2026-06-30,DIV,0.1,37948041,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6708f3f80ec61045ab800aea,IDI,2024-07-15,2024-07-16,,2024-08-22,2024-07-05,DIV,0.2,45528060,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+67f8616490c07f62ae421ea0,IJC,2025-09-16,2025-09-17,,2025-12-10,2025-09-09,Rights,0.66666667,251832256,,2518322560000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 66.7%
+6708f3f80ec61045ab800b30,IMP,2024-07-11,2024-07-12,,2024-08-16,2024-07-02,DIV,0.1,6999832,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6708f3f80ec61045ab800c37,IMP,2024-09-17,2024-09-18,,2024-10-21,2024-09-06,Bonus,1.0,77004481,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 100.0%
+682534980e8a716db6f3023b,INC,2025-12-10,2025-12-10,,2026-12-11,2025-12-18,PP,0.6,1200000,,12000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 60.0%
+6a4852d3279ac17a86eab12a,IPA,2026-08-21,2026-08-24,,2026-10-15,2026-08-14,Bonus,0.15,32075258,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 15.0%
+68671f786cc7f571c1b992c7,ITD,2025-08-07,2025-08-08,,2025-09-23,2025-07-31,DIV,0.07,1711404,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 7.0%
+6a518d283711162a7e7a2c8d,ITD,2026-08-06,2026-08-07,,2026-09-22,2026-07-31,DIV,0.18,4710245,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 18.0%
+6a309747e56b40f0536c38e1,KHP,2026-07-30,2026-07-31,,2026-09-14,2026-07-21,DIV,0.03,1809772,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 3.0%
+69fa8a04db487120c698f1f7,KHW,2026-07-13,2026-07-14,,2026-09-14,2026-07-02,Bonus,0.25,7149923,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 25.0%
+68dc754082ba4d1dc754b815,KSF,2025-09-17,2025-09-17,,2025-12-24,2025-09-29,MERGER,0.0,599787308,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành để sáp nhập
+69f14f8edb487120c68b4cf1,KSV,2026-07-14,2026-07-15,,2026-09-17,2026-07-03,DIV,0.5,99999812,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 50.0%
+6708f3f80ec61045ab800ba6,LAF,2024-07-25,2024-07-25,,2027-07-26,2024-07-26,EMPL,0.0339,500000,,5000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 3.4%
+6708f3f80ec61045ab800b91,LAI,2024-08-19,2024-08-20,,2024-11-01,2024-07-25,Bonus,1.0,8550000,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 100.0%
+6827d78c0e8a716db6f75be4,LAI,2025-07-15,2025-07-16,,2025-09-22,2025-07-02,DIV,0.6,10259969,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 60.0%
+69e9668c9a7ad236002783fa,LAI,2026-07-27,2026-07-28,,2026-09-25,2026-07-14,DIV,0.2,5471936,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+6708f3f80ec61045ab800ae3,LBM,2024-07-19,2024-07-22,,2024-09-12,2024-07-11,Bonus,1.0,20000000,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 100.0%
+68dc754082ba4d1dc754b80d,LBM,2026-03-31,2026-04-01,,2026-07-20,2026-03-25,Rights,0.25,10000000,,250000000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 25.0%
+680d7953b3bb8d7911f8e8e9,LGC,2025-10-20,2025-10-21,,2025-12-26,2025-10-13,Rights,0.1,19275543,,192755430000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+69f14f8edb487120c68b4cf0,LHC,2026-06-23,2026-06-24,,2026-08-03,2026-06-16,Bonus,1.0,14400000,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 100.0%
+6708f3f60ec61045ab800297,MBB,2024-06-11,2024-06-11,,2029-06-11,2024-06-13,EMPL,0.003639,19240000,,192400000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.4%
+6708f3f80ec61045ab800adf,MBB,2025-01-07,2025-01-08,,2025-03-05,2024-12-31,DIV,0.15,795948607,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+6816b3ec86e9541d8aaffd3b,MBB,2025-08-13,2025-08-14,,2025-10-10,2025-08-08,DIV,0.32,1952727250,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 32.0%
+69e6c30a9a7ad2360023b0be,MBB,2026-08-11,2026-08-12,,2026-10-06,2026-08-06,DIV,0.15,1208249986,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+69e6c30a9a7ad2360023b0bd,MBB,2026-08-11,2026-08-12,,,2026-08-06,Rights,0.1,805499990,,8054999900000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+6708f3f80ec61045ab800a86,MBS,2024-08-13,2024-08-14,,2024-11-15,2024-08-09,Rights,0.25,109409988,,1094099880000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 25.0%
+6708f3f80ec61045ab800a87,MBS,2024-11-27,2024-11-27,,2025-11-28,2024-12-03,PP,0.04704,25733000,,592888320000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 4.7%
+6806e1eeb3bb8d7911ed3e4b,MBS,2025-09-24,2025-09-25,,2025-11-11,2025-09-23,Bonus,0.03,17179853,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 3.0%
+6806e1eeb3bb8d7911ed3e4a,MBS,2025-09-24,2025-09-25,,2026-01-12,2025-09-23,Rights,0.12,68733953,,687339530000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 12.0%
+6806e1eeb3bb8d7911ed3e4c,MBS,2026-01-22,2026-01-22,,2029-01-23,2026-01-27,EMPL,0.013,8592194,,85921940000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.3%
+6945ed45bdc91e0e0d501df0,MBS,2026-04-02,2026-04-03,,2026-07-02,2026-03-30,Rights,0.5,333644470,,3336444700000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+6708f3f80ec61045ab800b87,MCH,2024-09-05,2024-09-05,,2025-09-05,2024-09-06,EMPL,0.009999,7130635,,71306350000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.0%
+67105538f4bb746cb8ca9d42,MCH,2025-02-11,2025-02-12,,2025-04-22,2025-02-05,Rights,0.451,326811643,,3268116430000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 45.1%
+682291730e8a716db6edd5a5,MCH,2025-07-28,2025-07-28,,2026-07-28,2025-07-29,EMPL,0.004999,5255924,,52559240000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.5%
+6917c918d4eafd4c078ed8d7,MCH,2026-01-09,2026-01-12,,2026-02-13,2025-12-30,Bonus,0.2147,226872799,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 21.5%
+6966e22924a1c5199e7ee784,MCH,2026-01-09,2026-01-12,,,2025-12-30,Bonus,0.0103,0,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 1.0%
+69f7e74adb487120c6944fb6,MCH,2026-06-23,2026-06-23,,2027-06-23,2026-06-24,EMPL,0.01000025,12911404,,129114040000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.0%
+6708f3f70ec61045ab8008e1,MIG,2024-12-09,2024-12-10,,2025-04-16,2024-12-04,Rights,0.15,25900875,,259008750000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 15.0%
+6708f3f70ec61045ab8008e2,MIG,2025-03-20,2025-03-20,,2030-03-21,2025-03-24,EMPL,0.0166,2860000,,28600000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.7%
+67edd55490c07f62ae2eab4f,MIG,2025-08-22,2025-08-25,,2025-10-15,2025-08-18,DIV,0.05,10070088,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+6708f3f80ec61045ab800b26,MML,2024-10-15,2024-10-15,,2025-10-15,2024-10-17,EMPL,0.005,1634646,,24519690000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.5%
+681aa86d86e9541d8ab67a20,MML,2025-09-10,2025-09-10,,2026-09-04,2025-09-10,EMPL,0.034452,11264265,,112642650000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 3.4%
+69fd2d36db487120c69cc52d,MML,2026-06-23,2026-06-23,,2027-06-23,2026-06-25,EMPL,0.0141,4792571,,47925710000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.4%
+6708f3f80ec61045ab800a6d,MNB,2024-06-06,2024-06-06,,2026-06-08,2024-06-21,EMPL,0.0,890000,,8900000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV
+6708f3f80ec61045ab800b13,MSN,2024-06-18,2024-06-18,,2025-06-18,2024-06-19,EMPL,0.0,7508211,,75082110000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV
+6816b3ec86e9541d8aaffd43,MSN,2025-07-30,2025-07-30,,2026-07-30,2025-07-31,EMPL,0.005,7563840,,75638400000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.5%
+69effda3db487120c6897f22,MSN,2026-06-23,2026-06-23,,2027-06-23,2026-06-24,EMPL,0.0095,14459154,,144591540000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.0%
+683e40f8c8766c48b0880208,MST,2025-08-19,2025-08-20,,2025-09-29,2025-08-13,DIV,0.1,7599919,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+683e40f8c8766c48b0880207,MST,2025-11-24,2025-11-24,,2026-11-25,2025-11-25,PP,0.394714,30000000,,300000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 39.5%
+67451104bd137224cf4541ec,NHH,2025-05-21,2025-05-22,,2025-09-16,2025-05-16,Rights,0.5,36440000,,364400000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+67451104bd137224cf4541eb,NHH,2025-07-29,2025-07-29,,2026-07-30,2025-08-01,EMPL,0.05,3644000,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 5.0%
+6708f3f80ec61045ab800b2f,NJC,2024-10-23,2024-10-24,,2025-02-19,2024-10-18,Rights,0.5079,1600000,,16000000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.8%
+682534980e8a716db6f30241,NJC,2025-10-27,2025-10-28,,2025-12-24,2025-10-17,DIV,0.1,474917,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6a1f73fe6c972745c9f7a719,NTT,2026-07-24,2026-07-24,,2027-07-26,2026-07-31,PP,0.2128,5000000,,50000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 21.3%
+680d7953b3bb8d7911f8e8f4,NVL,2025-10-09,2025-10-09,,2028-10-10,2025-10-10,EMPL,0.025,48752613,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 2.5%
+680d7953b3bb8d7911f8e8f5,NVL,2025-10-09,2025-10-09,,2026-10-12,2025-10-10,EMPL,0.025,48752613,,487526130000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 2.5%
+680d7953b3bb8d7911f8e8f3,NVL,2025-12-31,2025-12-31,,2027-01-04,2026-01-05,PP,0.08616,163658391,,2211268155.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 8.6%
+695da745ff978e3bae243ccd,NVL,2025-12-31,2025-12-31,,2026-03-06,2026-01-05,TRANS,0.0,20750394,,747014311680.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+69d2fd28714770f525dc6c23,NVL,2026-03-31,2026-03-31,,2026-05-29,2026-04-03,TRANS,0.00111,2477925,,84249734400.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi tỉ lệ 0.1%
+6a16399da6ca51ba73adb2ba,NVL,2026-06-10,2026-06-11,,2026-07-13,2026-06-03,Bonus,0.075,167571498,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 7.5%
+6a4c4732279ac17a86f02b65,NVL,2026-09-30,2026-10-01,,,2026-09-25,Rights,0.33333333,800689324,,8006893240000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 33.3%
+6ac6e1f62bf21c76c8b18088,NVL,2026-10-14,2026-10-14,,2026-11-18,2026-10-14,TRANS,0.0,1737080,,59060720000.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+6afcdfed3b473589f04951ce,NVL,2026-11-20,2026-11-20,,,2026-11-20,TRANS,0.0,2779328,,94497152000.0,,,,D,executed,Phát hành cổ phiếu - Chuyển từ trái phiếu chuyển đổi
+6a178af4a6ca51ba73afa1be,OCH,2026-10-07,2026-10-07,,2027-10-08,2026-10-09,PP,0.65,130000000,,1300000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 65.0%
+6708f3f80ec61045ab800b08,ORS,2024-06-14,2024-06-17,,2024-08-12,2024-06-11,DIV,0.12,35999743,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 12.0%
+686db6f563f1e526ca8ce4b8,ORS,2025-12-31,2025-12-31,,2027-01-04,2025-12-31,PP,0.8569,287931161,,3599139512500.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 85.7%
+6a03c4a25b1fb4c98c37ecfc,PAN,2026-05-29,2026-06-01,,2026-07-13,2026-05-21,Bonus,0.2,41778416,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 20.0%
+6a45af2c279ac17a86e6ccd3,PBP,2026-09-14,2026-09-15,,,2026-09-08,DIV,0.085,407862,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 8.5%
+6708f3f80ec61045ab800b31,PC1,2024-11-07,2024-11-08,,2025-01-10,2024-10-28,DIV,0.15,46646563,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+6816b3ec86e9541d8aaffd58,PC1,2025-11-12,2025-11-13,,2025-12-17,2025-11-05,Bonus,0.15,53643222,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 15.0%
+69f938a2db487120c6970a2b,PC1,2026-11-04,2026-11-05,,,2026-10-23,DIV,0.15,61688681,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+680d7953b3bb8d7911f8e8ed,PDN,2025-06-24,2025-06-25,,2025-08-04,2025-06-16,Bonus,0.5,18521912,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 50.0%
+6708f3f80ec61045ab800b84,PDV,2024-08-16,2024-08-19,,2024-11-04,2024-08-12,Rights,0.534,23008635,,230086350000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 53.4%
+6876f15af00c716e3cba7234,PDV,2025-12-02,2025-12-03,,2025-12-30,2025-11-24,DIV,0.2,13218960,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+69f7e74adb487120c6944fb8,PET,2026-07-09,2026-07-10,,2026-08-12,2026-07-03,Bonus,0.4,42687197,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 40.0%
+69f7e74adb487120c6944fb7,PET,2026-07-09,2026-07-10,,2026-08-12,2026-07-03,DIV,0.05,5334431,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+6a39d213a3320c07054aa0d4,PGV,2026-08-10,2026-08-11,,2026-09-30,2026-08-04,Bonus,0.08,89876835,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 8.0%
+6a1f73fe6c972745c9f7a71a,PHR,2026-09-11,2026-09-14,,2026-11-02,2026-08-28,Bonus,0.8,108398601,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 80.0%
+68d9d23182ba4d1dc751fcee,POW,2025-12-10,2025-12-11,,2026-01-27,2025-12-05,Bonus,0.15,351277104,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 15.0%
+68d9d23182ba4d1dc751fcef,POW,2025-12-10,2025-12-11,,2026-01-27,2025-12-05,DIV,0.04,93672392,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 4.0%
+68d9d23182ba4d1dc751fced,POW,2025-12-10,2025-12-11,,2026-03-26,2025-12-05,Rights,0.12,281024592,,2810245920000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 12.0%
+6a178af4a6ca51ba73afa1c0,PPH,2026-07-29,2026-07-30,,2026-09-25,2026-07-21,DIV,0.05,3733334,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+6a35ddb3a3320c0705451ae4,PPY,2026-07-16,2026-07-17,,2026-09-07,2026-07-10,Bonus,0.50117862,4682810,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 50.1%
+69aa1e93f2d24c49e816eeb3,PSD,2026-05-20,2026-05-20,,,2026-05-25,EMPL,0.04244818,2200000,,22000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 4.2%
+69e6c30a9a7ad2360023b0bb,PSD,2026-07-24,2026-07-27,,2026-10-12,2026-07-14,DIV,0.3,16208218,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 30.0%
+6a275d3268613db18bab16e2,PTH,2026-10-23,2026-10-26,,,2026-10-19,Rights,0.5,1751582,,17515820000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+6708f3f80ec61045ab800b25,PTI,2025-01-17,2025-01-20,,2025-03-12,2025-01-13,Bonus,0.5,40196420,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 50.0%
+68a515fd64af214c26f70183,PTM,2024-07-25,2024-07-25,,2024-07-25,2024-07-25,Rights,1.0,8000000,,0.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+68a515fd64af214c26f70184,PTM,2024-10-08,2024-10-08,,2024-10-08,2024-10-08,Rights,1.0,16000000,,160000000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+68e701214b8a9643750fa7e5,PTM,2026-03-09,2026-03-10,,2026-07-16,2026-03-03,Rights,0.1,3199993,,31999930000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+6708f3f80ec61045ab800b6c,PVG,2024-06-27,2024-06-28,,2024-09-04,2024-06-21,Bonus,0.09589042,3498522,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 9.6%
+69ed5b34db487120c685f630,PVI,2026-08-07,2026-08-10,,2026-09-23,2026-07-10,DIV,0.1,23423105,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6708f3f80ec61045ab800add,PVP,2024-07-25,2024-07-26,,2024-09-18,2024-07-19,DIV,0.1,9427424,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6905539b46866f36b4f8a10d,PVS,2025-11-27,2025-11-28,,2026-01-15,2025-11-19,DIV,0.07,33453809,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 7.0%
+6a3b235ea3320c07054c91e9,PVS,2026-09-14,2026-09-15,,2026-11-16,2026-09-03,DIV,0.2,102279218,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+68019bebd2606e49d1e7e3b0,PVT,2025-06-19,2025-06-20,,2025-08-01,2025-06-13,DIV,0.32,113918597,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 32.0%
+69eab80f9a7ad236002b1865,PVT,2026-06-05,2026-06-08,,2026-08-20,2026-05-29,DIV,0.1,46987703,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6708f3f80ec61045ab800ae9,PXL,2025-02-24,2025-02-24,,2028-02-25,2025-02-25,PP,1.1294,93423288,,934232880000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 112.9%
+67edd55490c07f62ae2eab50,REE,2025-06-11,2025-06-12,,2025-08-08,2025-06-04,DIV,0.15,70644739,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+69cf087f714770f525d61b5c,REE,2026-05-18,2026-05-19,,2026-06-26,2026-05-08,DIV,0.15,81240897,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+67edd55490c07f62ae2eab51,REE,2026-08-19,2026-08-19,,2029-08-20,2026-08-06,EMPL,0.0008,500000,,5000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.1%
+68a6678464af214c26f93660,RGG,2025-08-28,2025-08-29,,2025-12-05,2025-08-20,Rights,0.11111111,20000000,,200000000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 11.1%
+69fe7eaddb487120c69ea36a,RGG,2026-06-19,2026-06-22,,2026-08-10,2026-06-11,DIV,0.1,20000000,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6708f3f80ec61045ab800b6e,S99,2024-07-31,2024-08-01,,2024-10-01,2024-07-15,DIV,0.05,4697494,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+6708f3f80ec61045ab800b6f,S99,2024-08-01,2024-08-01,,2025-08-01,2024-08-19,EMPL,0.03,439468,,4394680000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 3.0%
+67fda753d2606e49d1e15fad,S99,2025-08-19,2025-08-20,,2025-10-14,2025-08-12,DIV,0.05,4954661,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+69f14f8edb487120c68b4ced,S99,2026-06-30,2026-06-30,,2027-07-01,2026-07-02,EMPL,0.006,630000,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.6%
+69f14f8edb487120c68b4ce3,SAM,2026-06-04,2026-06-05,,2026-07-15,2026-05-28,DIV,0.06,22792372,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 6.0%
+6708f3f80ec61045ab800ac3,SCI,2024-10-24,2024-10-25,,2025-01-16,2024-10-18,DIV,0.2,5081562,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+67ec83e090c07f62ae2ba41c,SCI,2026-01-13,2026-01-14,,2026-04-24,2026-01-08,Rights,0.5,11508591,,115085910000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 50.0%
+69f938a2db487120c6970a3a,SCS,2026-06-12,2026-06-12,,2028-06-13,2026-06-17,EMPL,0.01,1020700,,10207000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 1.0%
+69fd2d36db487120c69cc52c,SDC,2026-06-29,2026-06-30,,2026-08-24,2026-06-09,Bonus,0.16,417240,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 16.0%
+68019bebd2606e49d1e7e3ae,SDK,2025-08-04,2025-08-05,,2025-10-07,2025-07-28,DIV,0.2,519988,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+6a6beb2e0739e044ed7d7137,SDK,2026-08-28,2026-09-03,,2026-10-19,2026-08-26,Bonus,0.48576,1515475,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 48.6%
+6802ed4ed2606e49d1ead8b2,SDV,2025-10-16,2025-10-17,,2026-03-16,2025-10-13,Rights,1.0,5000000,,125000000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+6708f3f80ec61045ab800b42,SGR,2025-05-07,2025-05-07,,2026-05-08,2025-05-07,PP,0.3333,9875000,,395000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 33.3%
+69e17d758e0e35deadf0a809,SGR,2026-08-14,2026-08-17,,2026-11-02,2026-08-10,DIV,0.2,13974864,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+6708f3f80ec61045ab800b38,SHB,2025-02-26,2025-02-27,,2025-04-23,2025-02-20,DIV,0.11,402838460,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 11.0%
+680c27e9b3bb8d7911f6c56d,SHB,2025-08-18,2025-08-19,,2025-10-07,2025-08-08,DIV,0.13,528453022,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 13.0%
+6909482f46866f36b4fcb79b,SHB,2026-04-03,2026-04-06,,,2026-03-31,Rights,0.1,459370384,,5742129800000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 10.0%
+6909482f46866f36b4fcb79c,SHB,2026-04-20,2026-04-20,,,2026-04-28,PP,0.0435,200000000,,3370000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 4.4%
+6909482f46866f36b4fcb79d,SHB,2026-05-22,2026-05-22,,,2026-06-01,EMPL,0.0197,90629616,,906296160000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 2.0%
+685c935ebffa71495b728cfc,SHE,2025-07-09,2025-07-10,,2025-08-15,2025-07-04,Bonus,0.3,3450640,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 30.0%
+691e6040c3789f3c26046802,SHE,2026-02-24,2026-02-24,,2027-02-25,2026-03-02,MERGER,3.3472,50050763,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành để sáp nhập tỉ lệ 334.7%
+682534980e8a716db6f3023a,SHI,2025-06-27,2025-06-30,,2025-08-18,2025-06-20,Bonus,0.05,8091960,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 5.0%
+6708f3f80ec61045ab800b58,SIP,2024-07-10,2024-07-11,,2024-08-22,2024-07-05,DIV,0.15,27271017,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+6708f3f80ec61045ab800b59,SIP,2024-08-30,2024-08-30,,2027-08-30,2024-09-06,EMPL,0.007,1454463,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.7%
+6816b3ec86e9541d8aaffd4e,SIP,2025-07-14,2025-07-15,,2025-08-20,2025-07-04,DIV,0.15,31579540,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+6708f3f80ec61045ab800a6f,SJE,2025-06-27,2025-06-30,,2025-12-01,2025-06-24,Rights,0.75,15831289,,205806757000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 75.0%
+682d1d7b0e8a716db6017643,SVC,2025-09-11,2025-09-12,,2025-11-20,2025-09-09,DIV,0.4,26647725,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 40.0%
+69e6c30b9a7ad2360023b0c5,SZL,2026-09-16,2026-09-17,,2026-11-05,2026-09-07,DIV,0.7,19846544,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 70.0%
+6708f3f80ec61045ab800b88,TAL,2024-12-24,2024-12-25,,2025-04-15,2024-12-17,Rights,0.05,14850000,,148500000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 5.0%
+68bb7f746a7bab4d8b6ddfc5,TAL,2025-09-22,2025-09-22,,2026-09-22,2025-09-23,PP,0.1544,48150000,,1492650000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 15.4%
+69f938a2db487120c6970a2f,TAL,2026-05-27,2026-05-28,,2026-07-10,2026-05-20,Bonus,0.3,107999844,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 30.0%
+69f938a2db487120c6970a2e,TAL,2026-05-27,2026-05-28,,2026-07-10,2026-05-20,DIV,0.1,35999864,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+69e815409a7ad236002599e0,TBD,2026-11-05,2026-11-06,,,2026-10-27,Bonus,0.5,16209097,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 50.0%
+6708f3f80ec61045ab800ae4,TCB,2024-06-20,2024-06-21,,2024-08-06,2024-06-13,Bonus,1.0,3522510811,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 100.0%
+6708f3f80ec61045ab800c36,TCB,2024-11-30,2024-11-30,,2025-12-01,2024-12-03,EMPL,0.002815,19830117,,198301170000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.3%
+6816b3ec86e9541d8aaffd3c,TCB,2025-08-04,2025-08-04,,2026-08-05,2025-08-07,EMPL,0.0030275,21388675,,213886750000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.3%
+6aa49b5403bfaa031b0c563c,TCB,2026-10-29,2026-10-30,,,2026-10-23,DIV,0.5,3543115125,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 50.0%
+6708f3f80ec61045ab800ad1,TCD,2024-07-08,2024-07-09,,2024-08-08,2024-07-02,Bonus,0.1,30526655,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+68eeea174b8a964375188e19,TCX,2025-09-18,2025-09-18,,2025-09-18,2025-09-19,PUBL,0.111122,231150000,,10817820000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành rộng rãi qua đấu giá tỉ lệ 11.1%
+6941f8c083471c01b78cd9e6,TCX,2026-03-02,2026-03-02,,2027-03-02,2026-03-06,EMPL,0.0001192,275475,,2754750000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.0%
+6924f784ee693a7b8f4bfe77,TCX,2026-05-25,2026-05-26,,2026-07-06,2026-05-20,DIV,0.2,462313307,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+69f14f8edb487120c68b4cf8,TCX,2026-07-02,2026-07-02,,2027-07-05,2026-07-03,EMPL,0.0002006,556522,,5565220000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 0.0%
+69f14f8edb487120c68b4cf9,TCX,2026-09-17,2026-09-18,,2026-10-27,2026-09-11,DIV,0.2,554886498,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+6708f3f80ec61045ab800c49,TDC,2025-05-15,2025-05-15,,2026-05-18,2025-05-16,PP,0.35,27228000,,322379520000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 35.0%
+6708f3f80ec61045ab800c30,TNB,2025-03-28,2025-03-28,,2026-03-28,2025-04-03,PP,1.030996,14939000,,149390000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 103.1%
+6708f3f80ec61045ab800af6,TPB,2024-09-23,2024-09-24,,2024-10-22,2024-09-13,DIV,0.2,440321187,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 20.0%
+680d7953b3bb8d7911f8e8e8,TPB,2025-10-30,2025-10-31,,2025-11-27,2025-10-24,DIV,0.05,132090677,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+69e2cf489a7ad236001e3db0,TPB,2026-10-02,2026-10-05,,2026-11-03,2026-09-29,DIV,0.15,416088023,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 15.0%
+6a470141279ac17a86e8c06d,TRC,2026-09-15,2026-09-16,,2026-11-03,2026-08-18,Bonus,3.0,90000000,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 300.0%
+6708f3f80ec61045ab8009c7,TUG,2025-04-23,2025-04-24,,2025-08-28,2025-04-18,Rights,1.0,2675079,,26750790000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%
+6747b2f3bd137224cf4a19e5,UIC,2025-05-14,2025-05-14,,2027-05-14,2025-05-21,EMPL,0.0385,308000,,3080000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 3.9%
+67ef26d990c07f62ae30dab8,VAV,2025-07-24,2025-07-25,,2025-09-22,2025-07-17,DIV,0.5,15999995,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 50.0%
+6708f3f80ec61045ab800bce,VC2,2024-07-26,2024-07-26,,2025-07-28,2024-07-30,EMPL,0.0234,1570000,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 2.3%
+682bcc070e8a716db6fe75dc,VC2,2025-12-12,2025-12-15,,2026-02-02,2025-12-04,DIV,0.1,6876115,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 10.0%
+6708f3f80ec61045ab800b0b,VCG,2024-06-14,2024-06-17,,2024-08-08,2024-06-07,DIV,0.12,64127944,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 12.0%
+680984fbb3bb8d7911f1a038,VCG,2025-06-11,2025-06-12,,2025-08-15,2025-06-03,DIV,0.08,47874878,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 8.0%
+69f7e74adb487120c6944fac,VCG,2026-07-14,2026-07-15,,2026-09-09,2026-07-07,DIV,0.08,51707909,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 8.0%
+6708f3f80ec61045ab800be8,VDN,2024-10-28,2024-10-28,,2026-10-28,2024-10-30,EMPL,0.0498,156000,,1560000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 5.0%
+677f138e7eee280b39d4ca4b,VE4,2025-06-18,2025-06-18,,,2025-06-19,PP,1.0,0,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 100.0%
+686f086763f1e526ca8e477a,VE4,2026-02-06,2026-02-06,,2029-02-07,2026-02-09,PP,1.945525,2000000,,21000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 194.6%
+67e3495c7fc0a0169123f5ac,VGR,2025-07-25,2025-07-28,,2025-09-22,2025-07-21,DIV,0.3,18974959,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 30.0%
+69eab80f9a7ad236002b1863,VHM,2026-08-06,2026-08-07,,2026-09-09,2026-07-24,DIV,1.0,4107412004,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 100.0%
+68a7b90f64af214c26fa9ccc,VIC,2025-08-21,2025-08-21,,,2025-08-21,PP,0.0,-27460873,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ
+68a7b90f64af214c26fa9ccd,VIC,2025-08-21,2025-08-21,,2025-10-07,2025-08-21,PP,0.0,29353951,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ
+690d3ca37f917761c5d02bee,VIC,2025-12-05,2025-12-08,,2025-12-31,2025-12-02,Bonus,1.0,3853015512,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 100.0%
+6a5581c93711162a7e8083e7,VIC,2026-07-10,2026-07-10,,2026-08-10,2026-07-10,PP,0.007287,56155405,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 0.7%
+6a5581c93711162a7e8083e8,VIC,2026-07-10,2026-07-10,,2026-07-10,2026-07-10,PP,0.0,-27460872,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ
+691bbd4ec3789f3c2600a9a7,VIT,2026-03-18,2026-03-19,,2026-05-18,2026-03-26,MERGER,0.1957,9785691,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành để sáp nhập tỉ lệ 19.6%
+691bbd4ec3789f3c2600a9a8,VIT,2026-03-18,2026-03-19,,2026-05-18,2026-03-26,MERGER,0.18032,9015971,,0.0,,,,D,executed,Phát hành cổ phiếu - Phát hành để sáp nhập tỉ lệ 18.0%
+6a14e82ba6ca51ba73aaef83,VIT,2026-06-23,2026-06-24,,2026-08-20,2026-06-16,Bonus,0.11000054,7567692,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 11.0%
+6a14e82ba6ca51ba73aaef82,VIT,2026-06-23,2026-06-24,,2026-08-20,2026-06-16,DIV,0.05000024,3439780,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 5.0%
+6708f3f80ec61045ab800aed,VMC,2024-07-17,2024-07-18,,2024-09-09,2024-07-08,Bonus,0.1,2375181,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+67de0367ac13fa2f172ea3a0,VMC,2025-11-17,2025-11-18,,2026-01-16,2025-11-05,Bonus,0.1,2612885,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 10.0%
+6708f3f80ec61045ab800b8c,VNA,2024-06-28,2024-07-01,,2024-08-26,2024-06-21,Bonus,0.7,13999960,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 70.0%
+6a6beb2e0739e044ed7d7138,VPB,2026-09-24,2026-09-25,,2026-11-03,2026-09-17,DIV,0.2604104,2066076399,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 26.0%
+67ad3b7cbf8a923310719014,VPL,2025-01-09,2025-01-10,,2025-02-20,2025-01-02,Rights,0.040673,70088173,,5000791143550.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 4.1%
+6a35ddb3a3320c0705451ae1,VPL,2026-06-23,2026-06-23,,,2026-06-24,PP,0.0557,84150000,,6732000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 5.6%
+6708f3f80ec61045ab800bc9,VSC,2024-09-11,2024-09-12,,2024-10-25,2024-08-14,DIV,0.075,20005535,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 7.5%
+6708f3f80ec61045ab800bca,VSC,2025-02-24,2025-02-24,,2026-02-25,2025-03-03,EMPL,0.0499,12704000,,127040000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành cho CBCNV tỉ lệ 5.0%
+6816b3ec86e9541d8aaffd49,VSC,2025-06-02,2025-06-03,,2025-07-16,2025-05-27,Bonus,0.22,65887212,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 22.0%
+6816b3ec86e9541d8aaffd45,VSC,2025-06-02,2025-06-03,,2025-07-16,2025-05-27,DIV,0.03,8982331,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 3.0%
+67eb325d90c07f62ae28a5f8,VSM,2025-05-26,2025-05-27,,2025-07-22,2025-05-19,Bonus,0.2,670990,,0.0,,,,D,executed,Phát hành cổ phiếu - Cổ phiếu thưởng tỉ lệ 20.0%
+67eb325d90c07f62ae28a5f7,VSM,2025-05-26,2025-05-27,,2025-07-22,2025-05-19,DIV,0.3,1006489,,0.0,,,,D,executed,Phát hành cổ phiếu - Trả Cổ tức bằng Cổ phiếu tỉ lệ 30.0%
+6708f3f80ec61045ab800a7f,VST,2024-11-04,2024-11-04,,2025-11-05,2024-11-06,PP,0.03,2000000,,20000000000.0,,,,D,executed,Phát hành cổ phiếu - Phát hành riêng lẻ tỉ lệ 3.0%
+6708f3f80ec61045ab800a96,VTD,2025-01-09,2025-01-10,,2026-03-04,2024-12-31,Rights,1.0,12000000,,120000000000.0,,,,D,executed,Phát hành cổ phiếu - Quyền mua CP cho Cổ đông hiện hữu tỉ lệ 100.0%

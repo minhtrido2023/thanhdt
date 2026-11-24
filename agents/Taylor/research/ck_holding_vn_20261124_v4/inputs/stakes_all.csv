@@ -1,0 +1,391 @@
+parent,sub,stake,stake_date,layer,src,via,type,name,stake_vci
+AAA,HII,45.1,2025-12-31,1,KBS,,công ty liên kết,CTCP An Tiến Industries,
+AAA,NHH,100.0,2025-12-31,1,KBS,,công ty con,CTCP Nhựa Hà Nội,
+AAA,VBC,34.84,2025-12-31,1,KBS,,công ty liên kết,CTCP Nhựa Bao bì Vinh,
+ACB,VIB,1.0,2025-12-31,2,KBS+KBS_sh,Công ty TNHH Chứng khoán ACB 100.0% x 1.0%,qua con trung gian,Công ty TNHH Chứng khoán ACB,
+ACV,SAS,49.07,2025-12-31,1,KBS,,công ty liên kết,CTCP Dịch vụ Hàng không Sân bay Tân Sơn Nhất,
+ACV,SCS,13.62,2025-12-31,1,KBS,,công ty liên kết,CTCP dịch vụ hàng hóa Sài Gòn,
+ACV,SGN,48.03,2025-12-31,1,KBS,,công ty liên kết,CTCP Phục vụ Mặt đất Sài Gòn,
+ADS,VDM,30.0,2025-12-31,1,KBS,,công ty liên kết,CTCP Viện Nghiên Cứu Dệt May,
+AIG,GCF,44.5,2025-12-31,1,KBS,,,CTCP Thực phẩm G.C,
+APH,AAA,48.71,2025-12-31,1,KBS,,,CTCP Nhựa An Phát Xanh,
+APH,NHH,68.6,2025-12-31,1,KBS,,,CTCP Nhựa Hà Nội,
+ASM,DAT,82.67,2025-12-31,1,KBS,,,CTCP Đầu tư Du lịch và Phát triển Thủy sản,
+ASP,MTG,40.73,2025-12-31,1,KBS,,,CTCP MT Gas,
+BCG,BCR,71.53,2024-12-31,1,KBS,,,CTCP BCG Land,62.1
+BCG,BGE,51.41,2024-12-31,1,KBS,,,CTCP BCG Energy,47.7123
+BCG,DTG,51.14,2024-12-31,1,KBS,,,CTCP Dược phẩm Tipharco,
+BCG,TCD,51.7,2024-12-31,1,KBS,,,CTCP Tập đoàn Xây dựng TRACODI,43.9
+BCM,BCE,44.42,2025-12-31,1,KBS,,công ty liên kết,CTCP Xây dựng và Giao thông Bình Dương,
+BCM,BWE,17.01,2025-12-31,1,VCI_NODATE,,vci,nuoc moi truong binh duong,17.01
+BCM,IJC,49.76,2025-12-31,1,KBS,,công ty liên kết,CTCP Phát triển Hạ tầng Kỹ thuật,49.76
+BCM,TDC,47.71,2025-12-31,1,KBS,,công ty liên kết,CTCP Kinh doanh và Phát triển Bình Dương,47.71
+BCM,TTN,48.59,2025-12-31,1,VCI_NODATE,,vci,cong nghe & truyen thong viet nam,48.59
+BCM,UDJ,51.0,2025-12-31,1,KBS,,công ty con,CTCP Phát triển Đô thị,51.0
+BID,BIC,51.0,2025-12-31,1,KBS,,,Tổng Công ty cổ phần Bảo hiểm Ngân hàng Đầu tư và Phát triển Việt Nam,
+BID,BSI,51.97,2025-12-31,1,KBS,,,CTCP Chứng khoán BIDV,
+BMP,DPC,29.05,2024-12-31,1,KBS,,,CTCP Nhựa Đà Nẵng,
+BSR,PBT,83.26,2025-12-31,1,KBS,,,CTCP Bao bì và Thương mại dầu khí Bình Sơn,
+BVH,BVS,59.92,2025-12-31,1,KBS,,,CTCP Chứng khoán Bảo Việt,
+BWE,CTW,24.64,2025-12-31,1,KBS,,,CTCP Cấp thoát nước Cần Thơ,
+BWE,LAW,38.06,2025-12-31,1,KBS,,,CTCP Cấp thoát nước Long An,
+BWE,NQB,41.0,2025-12-31,1,KBS,,,CTCP Cấp nước Quảng Bình,
+C32,MDG,33.76,2025-12-31,1,KBS,,,CTCP Miền Đông,
+CII,CEE,96.23,2025-12-31,1,KBS,,công ty con,CTCP xây dựng Hạ tầng CII,
+CII,LGC,54.84,2025-12-31,1,KBS,,công ty con,CTCP Đầu tư Cầu đường CII,47.29
+CII,NBB,79.79,2025-12-31,1,KBS,,công ty con,CTCP Đầu tư Năm Bảy Bảy,21.88
+CII,PC1,8.08,2026-09-30,2,KBS+KBS_sh,Công ty TNHH Thương Mại Đầu Tư CII 100.0% x 8.08%,qua con trung gian,Công ty TNHH Thương Mại Đầu Tư CII,
+CII,SII,0.01,2025-12-31,1,VCI_NODATE,,vci,ha tang nuoc sai gon,0.01
+CLX,CMF,40.72,2025-12-31,1,KBS,,,CTCP Thực Phẩm Cholimex,
+CMS,VCE,68.44,2025-12-31,1,KBS,,,CTCP Xây lắp Môi trường,
+CMX,CMM,74.03,2025-12-31,1,KBS,,,CTCP Camimex,
+CMX,SNC,24.5,2025-12-31,1,KBS,,,CTCP Xuất nhập khẩu Thủy sản Năm Căn,
+CTG,HAH,18.24,2026-09-29,2,KBS+KBS_sh,Công ty TNHH MTV Quản lý Quỹ Ngân hàng TMCP Công Thương Việt Nam 100.0% x 18.24%,qua con trung gian,Công ty TNHH MTV Quản lý Quỹ Ngân hàng TMCP Công Thương Việt Nam,
+CTG,PC1,7.54,2026-07-09,2,KBS+KBS_sh,Công ty TNHH MTV Quản lý Quỹ Ngân hàng TMCP Công Thương Việt Nam 100.0% x 7.54%,qua con trung gian,Công ty TNHH MTV Quản lý Quỹ Ngân hàng TMCP Công Thương Việt Nam,
+CTG,PET,14.31,2026-09-24,2,KBS+KBS_sh,Công ty TNHH MTV Quản lý Quỹ Ngân hàng TMCP Công Thương Việt Nam 100.0% x 14.31%,qua con trung gian,Công ty TNHH MTV Quản lý Quỹ Ngân hàng TMCP Công Thương Việt Nam,
+DCM,PBP,51.03,2025-12-31,1,KBS,,,CTCP Bao Bì Dầu Khí Việt Nam,
+DGC,PAT,51.0,2025-12-31,2,KBS+KBS_sh,Công ty TNHH MTV Hóa chất Đức Giang - Lào Cai 100.0% x 51.0%,qua con trung gian,Công ty TNHH MTV Hóa chất Đức Giang - Lào Cai,
+DGC,TSB,51.0,2025-12-31,1,KBS,,,CTCP Ắc quy Tia Sáng,
+DIG,DC1,51.68,2025-12-31,1,KBS,,,CTCP Đầu tư Phát triển Xây dựng Số 1,
+DIG,DC2,50.14,2025-12-31,1,KBS,,,CTCP Đầu tư phát triển - Xây dựng (DIC) Số 2,
+DPM,PCE,75.0,2025-12-31,1,KBS,,,CTCP Phân bón và Hóa chất Dầu khí Miền Trung,
+DPM,PMB,75.0,2025-12-31,1,KBS,,,CTCP Phân bón và Hóa chất Dầu khí Miền Bắc,
+DPM,PMP,43.35,2025-12-31,1,KBS,,,CTCP Bao bì Đạm Phú Mỹ,
+DPM,PSE,75.0,2025-12-31,1,KBS,,,CTCP Phân Bón và Hóa Chất Dầu khí Đông Nam Bộ,
+DPM,PSW,75.0,2025-12-31,1,KBS,,,CTCP Phân bón và Hóa chất Dầu khí Tây Nam Bộ,
+DPM,PXC,35.63,2025-12-31,1,KBS,,,CTCP Phát triển Đô thị Dầu khí,
+DPM,UXC,6.78,2025-12-31,1,KBS,,,CTCP Chế biến Thủy sản Út Xi,
+DRH,KSB,21.15,2024-12-31,1,KBS,,,CTCP Khoáng sản và Xây dựng Bình Dương,
+DVN,CDP,66.35,2024-12-31,1,KBS,,,CTCP Dược phẩm Trung ương Codupha,
+DVN,DAN,26.45,2024-12-31,1,KBS,,,CTCP Dược Danapha,
+DVN,DP1,65.41,2024-12-31,1,KBS,,,CTCP Dược phẩm Trung ương CPC1,
+DVN,DP3,22.07,2024-12-31,1,KBS,,,CTCP Dược phẩm Trung ương 3,
+DVN,IMP,22.03,2024-12-31,1,KBS,,,CTCP Dược phẩm Imexpharm,
+DVN,TW3,65.0,2024-12-31,1,KBS,,,CTCP Dược Trung Ương 3,
+DXG,DXS,59.0,2025-12-31,1,KBS,,công ty con,CTCP Dịch vụ Bất động sản Đất Xanh,55.372
+DXG,LDG,10.418527,2025-12-31,2,VCI_NODATE+KBS_sh,xay dung thuong mai dich vu ha thuan hung 99.89% x 10.43%,qua con trung gian,xay dung thuong mai dich vu ha thuan hung,0.0
+DXG,RGG,55.0,2025-12-31,1,KBS,,công ty con,CTCP Regal Group,
+FIT,DCL,58.05,2025-12-31,1,KBS,,công ty con,CTCP Dược phẩm Cửu Long,58.050000000000004
+FIT,TSC,41.07,2025-12-31,1,KBS,,công ty liên kết,CTCP Vật tư Kỹ thuật Nông nghiệp Cần Thơ,41.07
+FIT,VKD,95.53,2025-12-31,1,KBS,,công ty con,CTCP Nước khoáng Khánh Hòa,0.0
+FOX,FOC,56.51,2025-12-31,1,KBS,,,CTCP Dịch vụ Trực tuyến FPT,
+FPT,FOC,49.52,2025-12-31,1,KBS,,,CTCP Dịch vụ Trực tuyến FPT,23.86
+FPT,FOX,45.66,2025-12-31,1,KBS,,,CTCP Viễn thông FPT,45.660000000000004
+FPT,FRT,46.54,2025-12-31,1,KBS,,,CTCP Bán lẻ Kỹ thuật số FPT,46.54
+FPT,FTS,17.580000000000002,2025-12-31,1,VCI_NODATE,,vci,chung khoan fpt,17.580000000000002
+GAS,CNG,56.0,2025-12-31,1,KBS,,,CTCP CNG Việt Nam,
+GAS,PGD,50.5,2025-12-31,1,KBS,,,CTCP Phân phối khí thấp áp Dầu khí Việt Nam,
+GAS,PGS,35.26,2025-12-31,1,KBS,,,CTCP Kinh doanh Khí Miền Nam,
+GAS,PVB,52.94,2025-12-31,1,KBS,,,CTCP Bọc ống dầu khí Việt Nam,
+GAS,PVG,51.0,2025-12-31,1,KBS,,,CTCP Kinh doanh LPG Việt Nam,
+GEE,CAV,97.09,2025-12-31,1,KBS,,,CTCP Dây cáp điện Việt Nam,
+GEE,HEM,76.7,2025-12-31,1,KBS,,,CTCP Chế tạo Điện cơ Hà Nội,
+GEE,TBD,47.0,2025-12-31,1,KBS,,,Tổng Công ty Thiết bị điện Đông Anh - Công ty cổ phần,
+GEE,THI,98.07,2025-12-31,1,KBS,,,CTCP Thiết bị điện,
+GEG,GHC,62.53,2025-12-31,1,KBS,,,CTCP Thủy Điện Gia Lai,
+GEL,PXL,65.05,2025-12-31,1,KBS,,,CTCP Đầu tư Khu Công nghiệp Dầu khí Long Sơn,
+GEL,VCW,62.46,2025-12-31,1,KBS,,,CTCP Đầu tư Nước sạch Sông Đà,
+GEL,VGC,50.21,2025-12-31,1,KBS,,,Tổng Công ty Viglacera - CTCP,
+GEX,GEE,75.95,2025-12-31,1,KBS,,công ty con,CTCP Điện lực Gelex,
+GEX,GEL,79.1,2025-12-31,1,KBS,,công ty con,CTCP Hạ tầng Gelex,70.21
+GMD,SCS,35.88,2026-06-30,1,KBS,,,CTCP Dịch vụ Hàng hóa Sài Gòn,
+GVR,BAX,36.07,2022-12-31,1,KBS,,công ty liên kết,CTCP Thống Nhất,
+GVR,BRC,48.85,2022-12-31,1,KBS,,công ty liên kết,CTCP Cao su Bến Thành,48.85
+GVR,BRR,97.47,2022-12-31,1,KBS,,công ty con,CTCP Cao su Bà Rịa,97.47
+GVR,CDR,31.13,2022-12-31,1,KBS,,công ty liên kết,CTCP Xây dựng Cao su Đổng Nai,
+GVR,DPD,88.41,2022-12-31,1,KBS,,công ty con,CTCP Cao su Đồng Phú Đăk Nông,
+GVR,DPR,55.81,2022-12-31,1,KBS,,công ty con,CTCP Cao su Đồng Phú,55.24
+GVR,GER,92.11,2022-12-31,1,KBS,,công ty con,CTCP Thể thao Ngôi Sao Geru,64.38000000000001
+GVR,GTA,59.69,2022-12-31,1,KBS,,công ty con,CTCP Chế biến Gỗ Thuận An,
+GVR,HRC,55.06,2022-12-31,1,KBS,,công ty con,CTCP Cao su Hòa Bình,55.059999999999995
+GVR,MDF,97.41,2022-12-31,1,KBS,,công ty con,CTCP gỗ MDF VRG - Quảng Trị,84.85000000000001
+GVR,MH3,76.53,2022-12-31,1,KBS,,công ty con,CTCP Khu công nghiệp Cao su Bình Long,
+GVR,NTC,53.27,2022-12-31,1,KBS,,công ty con,CTCP Khu công nghiệp Nam Tân Uyên,20.419999999999998
+GVR,PHR,66.62,2022-12-31,1,KBS,,công ty con,CTCP Cao su Phước Hòa,66.62
+GVR,RAT,47.49,2025-12-31,1,VCI_NODATE,,vci,cp cao su mang yang rattanakiri,47.49
+GVR,RBC,69.12,2025-12-31,1,VCI_NODATE,,vci,cong nghiep va xuat nhap khau cao su,69.12
+GVR,RTB,98.46,2022-12-31,1,KBS,,công ty con,CTCP Cao su Tân Biên,98.46000000000001
+GVR,TRC,60.0,2022-12-31,1,KBS,,công ty con,CTCP Cao su Tây Ninh,60.0
+GVR,VRG,5.53,2022-12-31,2,KBS+KBS_sh,Công ty TNHH MTV Tổng Công ty Cao su Đồng Nai 100.0% x 5.53%,qua con trung gian,Công ty TNHH MTV Tổng Công ty Cao su Đồng Nai,15.09
+HAX,PTM,51.62,2025-12-31,1,KBS,,,CTCP Sản xuất Thương mại và Dịch vụ Ô tô PTM,
+HDC,HUB,39.97,2025-12-31,1,KBS,,,CTCP Xây Lắp Thừa Thiên Huế,
+HGM,CBI,9.6,2024-12-31,1,KBS,,,CTCP Gang thép Cao Bằng,
+HPG,HPA,94.99,2025-12-31,1,KBS,,,CTCP Phát triển Nông nghiệp Hòa Phát,
+HUT,SVC,54.07,2025-12-31,2,KBS+KBS_sh,CTCP Tasco Auto 100.0% x 54.07%,qua con trung gian,CTCP Tasco Auto,
+HVN,ARM,41.31,2025-12-31,1,KBS,,,CTCP Xuất nhập khẩu Hàng không,
+HVN,MAS,36.11,2025-12-31,1,KBS,,,CTCP Dịch vụ Hàng không Sân bay Đà Nẵng,
+HVN,NAS,51.0,2025-12-31,1,KBS,,,CTCP Dịch vụ Hàng không Sân bay Việt Nam,
+HVN,NCS,60.17,2025-12-31,1,KBS,,,CTCP Suất ăn Hàng không Nội Bài,
+HVN,NCT,55.13,2025-12-31,1,KBS,,,CTCP Dịch vụ Hàng hóa Nội Bài,
+IDC,HTI,59.68,2025-12-31,1,KBS,,,CTCP Đầu tư Phát triển Hạ tầng IDICO,
+IDC,ICN,51.0,2025-12-31,1,KBS,,,CTCP Đầu tư Xây dựng Dầu khí IDICO,
+IDC,INC,44.0,2025-12-31,1,KBS,,,CTCP Tư vấn Đầu tư IDICO,
+IDC,ISH,51.78,2025-12-31,1,KBS,,,CTCP Thủy điện Srok Phu Miêng IDICO,
+IDC,LAI,51.0,2025-12-31,1,KBS,,,CTCP Đầu tư Xây dựng Long An IDICO,
+IDC,LMI,20.13,2025-12-31,1,KBS,,,CTCP Đầu tư xây dựng lắp máy IDICO,
+IDC,MCI,91.52,2025-12-31,1,KBS,,,CTCP Đầu tư Xây dựng và Phát triển Vật liệu IDICO,
+IDC,UIC,64.51,2025-12-31,1,KBS,,,CTCP Đầu tư Phát triển Nhà và Đô thị IDICO,
+IDI,DAT,79.25,2025-12-31,1,KBS,,,CTCP Đầu tư du lịch và Phát triển Thủy sản,
+IMP,AGP,31.56,2024-12-31,1,KBS,,,CTCP Dược phẩm Agimexpharm,
+IPA,DTV,20.43,2025-12-31,1,KBS,,công ty liên kết,CTCP Phát triển Điện Trà Vinh,20.43
+IPA,HOT,20.01,2025-12-31,1,KBS,,công ty liên kết,CTCP Du lịch - Dịch vụ Hội An,20.01
+IPA,VND,25.84,2025-12-31,1,KBS,,công ty liên kết,CTCP Chứng khoán VNDIRECT,25.840000000000003
+ITD,GLT,50.02,2024-12-31,1,KBS,,,CTCP Kỹ thuật điện Toàn Cầu,
+KDC,HVG,75.39,2025-12-31,1,KBS,,công ty con,CTCP HÙNG VƯƠNG,75.39
+KDC,TAC,95.56,2025-12-31,1,KBS,,công ty con,CTCP Dầu thực vật Tường An,72.39
+KDC,VOC,87.29,2025-12-31,1,KBS,,công ty con,Tổng Công ty Công Nghiệp Dầu Thực Vật Việt Nam - CTCP,93.85
+KHP,KCE,31.0,2025-12-31,1,KBS,,,CTCP Bê tông Ly tâm Điện Lực Khánh Hòa,
+KSB,VLB,22.05,2025-12-31,1,KBS,,,CTCP Xây dựng và Sản xuất Vật liệu Xây dựng Biên Hòa,
+KSF,SSH,99.96,2025-12-31,1,KBS,,,CTCP Phát triển Sunshine Homes,
+KSV,CBI,52.54,2025-12-31,1,KBS,,,CTCP Gang thép Cao Bằng,
+KSV,KCB,51.89,2025-12-31,1,KBS,,,CTCP Khoáng sản và Luyện kim Cao Bằng,
+KSV,MC3,51.0,2025-12-31,1,KBS,,,CTCP Khoáng sản 3 - Vimico,
+KSV,TMG,51.0,2025-12-31,1,KBS,,,CTCP Kim loại màu Thái Nguyên - Vimico,
+LHC,LBM,64.9,2025-12-31,1,KBS,,,CTCP Khoáng sản và Vật liệu Xây dựng Lâm Đồng,
+MBB,MBS,66.76,2025-12-31,1,KBS,,,CTCP Chứng khoán MB,
+MBB,MIG,67.76,2025-12-31,1,KBS,,,Tổng Công ty cổ phần Bảo hiểm Quân Đội,
+MCH,CMF,32.83,2025-12-31,1,KBS,,,CTCP Thực phẩm Cholimex,
+MCH,NET,52.25,2025-12-31,2,KBS+KBS_sh,Công ty TNHH Masan HPC 100.0% x 52.25%,qua con trung gian,Công ty TNHH Masan HPC,
+MCH,QHW,65.85,2025-12-31,1,KBS,,,CTCP Nước khoáng Quảng Ninh,
+MCH,VCF,98.79,2025-12-31,1,KBS,,,CTCP VinaCafe Biên Hòa,
+MML,VSN,24.94,2025-12-31,1,KBS,,,CTCP Việt Nam Kỹ nghệ Súc sản,
+MSN,MCH,42.263999999999996,2025-12-31,2,VCI_NODATE+KBS_sh,masan consumer holdings 60.0% x 70.44%,qua con trung gian,masan consumer holdings,
+MSN,TCB,14.79813,2025-12-31,1,VCI_NODATE,,vci,ngan hang thuong mai co phan ky thuong viet nam,14.79813
+MSN,VSN,24.9,2025-12-31,1,VCI_NODATE,,vci,viet nam ky nghe suc san,24.9
+MST,VC2,36.16,2025-12-31,1,KBS,,,CTCP Đầu tư và Xây dựng Vina2,
+MTA,MLS,51.3,2025-12-31,1,KBS,,,CTCP Chăn nuôi - Mitraco,
+MTA,POV,10.0,2025-12-31,1,KBS,,,CTCP Xăng dầu dầu khí Vũng Áng,
+MVC,MCC,29.9,2025-12-31,1,KBS,,,CTCP Gạch Ngói Cao Cấp,
+MVC,NHC,30.04,2025-12-31,1,KBS,,,CTCP Gạch Ngói Nhị Hiệp,
+MVN,CCR,80.9,2025-12-31,1,KBS,,,CTCP Cảng Cam Ranh,
+MVN,CCT,99.05,2025-12-31,1,KBS,,,CTCP Cảng Cần Thơ,
+MVN,CDN,75.0,2025-12-31,1,KBS,,,CTCP Cảng Đà Nẵng,
+MVN,CPI,56.58,2025-12-31,1,KBS,,,CTCP Đầu tư Cảng Cái Lân,
+MVN,DDM,48.97,2025-12-31,1,KBS,,,CTCP Hàng Hải Đông Đô,
+MVN,ISG,36.0,2025-12-31,1,KBS,,,CTCP Vận tải biển và Hợp tác lao động quốc tế,
+MVN,NAP,51.0,2025-12-31,1,KBS,,,CTCP Cảng Nghệ Tĩnh,
+MVN,NOS,49.0,2025-12-31,1,KBS,,,CTCP Vận tải biển và Thương mại Phương Đông,
+MVN,PHP,92.56,2025-12-31,1,KBS,,,CTCP Cảng Hải Phòng,
+MVN,QNP,75.01,2025-12-31,1,KBS,,,CTCP Cảng Quy Nhơn,
+MVN,SGP,65.45,2025-12-31,1,KBS,,,CTCP Cảng Sài Gòn,
+MVN,TJC,33.49,2025-12-31,1,KBS,,,CTCP Dịch vụ vận tải và Thương mại,
+MVN,TVH,49.0,2025-12-31,1,KBS,,,CTCP Tư vấn xây dựng công trình Hàng Hải,
+MVN,VNA,51.0,2025-12-31,1,KBS,,,CTCP Vận tải biển Vinaship,
+MVN,VOS,51.0,2025-12-31,1,KBS,,,CTCP Vận tải biển Việt Nam,
+MVN,VSA,51.05,2025-12-31,1,KBS,,,CTCP Đại lý hàng hải Việt Nam,
+MVN,VST,43.32,2025-12-31,1,KBS,,,CTCP Vận tải và Thuê tàu biển Việt Nam,
+NDN,NDX,44.12,2025-12-31,1,KBS,,,CTCP Xây lắp Phát triển Nhà Đà Nẵng,
+NTC,MH3,37.79,2025-12-31,1,KBS,,,CTCP Khu công nghiệp Cao su Bình Long,
+NTL,BHT,14.11,2025-12-31,1,KBS,,,CTCP Đầu tư Xây dựng Bạch Đằng TMC,
+NVL,SEA,24.025194000000003,2025-12-31,2,KBS+KBS_sh,CTCP Địa ốc Ngân Hiệp 99.98% x 24.03%,qua con trung gian,CTCP Địa ốc Ngân Hiệp,
+OGC,OCH,55.6,2025-12-31,1,KBS,,,CTCP One Capital Hospitality,
+OIL,COM,44.87,2025-12-31,1,KBS,,,CTCP Vật tư Xăng Dầu,
+OIL,PEG,94.78,2025-12-31,1,KBS,,,Tổng công ty Thương mại Kỹ thuật và Đầu tư - CTCP,
+OIL,PND,56.75,2025-12-31,1,KBS,,,CTCP Xăng dầu Dầu khí Nam Định,
+OIL,POV,56.5,2025-12-31,1,KBS,,,CTCP Xăng dầu Dầu khí Vũng Áng,
+OIL,PPY,67.64,2025-12-31,1,KBS,,,CTCP Xăng dầu Dầu khí Phú Yên,
+OIL,PTV,29.0,2025-12-31,1,KBS,,,CTCP Thương mại Dầu khí,
+OIL,PVO,62.66,2025-12-31,1,KBS,,,CTCP Dầu nhờn PV Oil,
+OIL,TMC,51.01,2025-12-31,1,KBS,,,CTCP Thương mại Xuất nhập khẩu Thủ Đức,
+PAN,ABT,76.47,2025-12-31,1,KBS,,công ty con,CTCP Xuất nhập khẩu Thủy sản Bến Tre,76.47
+PAN,BBC,98.3,2025-12-31,1,KBS,,công ty con,CTCP Bibica,
+PAN,FMC,50.12,2025-12-31,1,KBS,,công ty con,CTCP Thực phẩm Sao Ta,37.75
+PAN,LAF,77.88,2025-12-31,1,KBS,,công ty con,CTCP Chế biến hàng Xuất khẩu Long An,77.88000000000001
+PAN,NSC,80.11,2025-12-31,1,KBS,,công ty con,CTCP Tập Đoàn Giống Cây Trồng Việt Nam,
+PAN,VFG,51.25,2025-12-31,1,KBS,,công ty con,CTCP Khử trùng Việt Nam,
+PC1,CBI,25.09,2025-12-31,1,KBS,,,CTCP Gang thép Cao Bằng,
+PCB,PSI,51.17,2025-12-31,1,KBS,,,CTCP Chứng khoán Dầu khí,
+PET,PSD,76.93,2025-12-31,1,KBS,,,CTCP Dịch vụ Phân phối Tổng hợp Dầu khí,
+PGV,BTP,79.56,2025-12-31,1,KBS,,,CTCP Nhiệt điện Bà Rịa,
+PGV,NBP,54.76,2025-12-31,1,KBS,,,CTCP Nhiệt điện Ninh Bình,
+PGV,TBC,30.0,2025-12-31,1,KBS,,,CTCP Thủy điện Thác Bà,
+PGV,VSH,30.55,2025-12-31,1,KBS,,,CTCP Thủy điện Vĩnh Sơn - Sông Hinh,
+PHP,DVP,51.0,2025-12-31,1,KBS,,,CTCP Đầu tư và Phát triển Cảng Đình Vũ,
+PHP,TUG,60.27,2025-12-31,1,KBS,,,CTCP Lai dắt và vận tải Cảng Hải Phòng,
+PHR,GER,26.82,2025-12-31,1,KBS,,,CTCP Thể thao Ngôi sao Geru,
+PHR,NTC,32.85,2025-12-31,1,KBS,,,CTCP Khu Công nghiệp Nam Tân Uyên,
+PLC,VPA,43.78,2025-12-31,1,KBS,,,CTCP Vận tải Hoá Dầu VP,
+PLX,BMF,8.267,2025-12-31,1,VCI_NODATE,,vci,vat lieu xay dung va chat dot dong nai,8.267
+PLX,PEN,30.0,2022-12-31,1,KBS,,công ty liên kết,CTCP Xây lắp III - Petrolimex,
+PLX,PGC,52.37,2022-12-31,1,KBS,,công ty con,Tổng Công ty Gas Petrolimex - CTCP,52.37270000000001
+PLX,PGI,40.95,2022-12-31,1,KBS,,công ty liên kết,Tổng Công ty Cổ phần Bảo hiểm Petrolimex,40.949999999999996
+PLX,PJC,51.06,2025-12-31,1,VCI_NODATE,,vci,thuong mai va van tai petrolimex ha noi,51.06
+PLX,PLC,79.07,2022-12-31,1,KBS,,công ty con,Tổng Công ty Hóa dầu Petrolimex - CTCP,79.07
+PLX,PMS,46.17,2022-12-31,1,KBS,,công ty liên kết,CTCP Cơ khí Xăng dầu,
+PLX,PSC,52.73,2025-12-31,1,VCI_NODATE,,vci,van tai va dich vu petrolimex sai gon,52.73
+PLX,PTH,51.0,2025-12-31,1,VCI_NODATE,,vci,van tai va dich vu petrolimex ha tay,51.0
+PLX,PTX,51.0,2025-12-31,1,VCI_NODATE,,vci,van tai va dich vu petrolimex nghe tinh,51.0
+PLX,VIP,51.0,2025-12-31,2,VCI_NODATE+KBS_sh,van tai thuy petrolimex 100.0% x 51.0%,qua con trung gian,van tai thuy petrolimex,
+PLX,VPA,57.62,2022-12-31,1,KBS,,công ty con,CTCP Vận tải Hóa dầu VP,
+PLX,VSE,22.38,2022-12-31,1,KBS,,công ty liên kết,CTCP Dịch vụ Đường cao tốc Việt Nam,22.38
+PLX,VTO,51.92,2025-12-31,2,VCI_NODATE+KBS_sh,van tai thuy petrolimex 100.0% x 51.92%,qua con trung gian,van tai thuy petrolimex,
+POW,HNA,80.72,2025-12-31,1,KBS,,,CTCP Thủy điện Hủa Na,
+POW,NT2,59.37,2025-12-31,1,KBS,,,CTCP Điện lực Dầu khí Nhơn Trạch 2,
+POW,PPS,51.0,2025-12-31,1,KBS,,,CTCP Dịch vụ kỹ thuật Điện lực Dầu khí Việt Nam,
+PPC,HND,25.97,2025-12-31,1,KBS,,,CTCP Nhiệt điện Hải Phòng,
+PPH,NTT,23.89,2025-12-31,1,KBS,,,CTCP Dệt - May Nha Trang,
+PVC,DMS,51.0,2025-12-31,1,KBS,,,CTCP Hóa phẩm Dầu khí DMC - Miền Nam,
+PVG,POV,-1.0,2025-12-31,1,KBS,,,CTCP Xăng dầu Dầu khí Vũng Áng,
+PVI,PRE,81.09,2025-12-31,1,KBS,,,Tổng Công ty cổ phần Tái bảo hiểm Hà Nội,
+PVI,SHB,0.8612439999999999,2026-06-11,2,KBS+KBS_sh,CTCP Quản lý quỹ PVI 61.96% x 1.39%,qua con trung gian,CTCP Quản lý quỹ PVI,
+PVS,PQN,95.19,2025-12-31,1,KBS,,,CTCP Dịch vụ Dầu khí Quảng Ngãi PTSC,
+PVS,PSN,54.69,2025-12-31,1,KBS,,,CTCP Dịch vụ Kỹ thuật PTSC Thanh Hóa,
+PVS,PSP,51.0,2025-12-31,1,KBS,,,CTCP Cảng Dịch vụ Dầu khí Đình Vũ,
+PVS,PVY,28.75,2025-12-31,1,KBS,,,CTCP chế tạo Giàn khoan Dầu khí,
+PVT,GSP,67.98,2025-12-31,1,KBS,,,CTCP Vận tải Sản Phẩm Khí Quốc tế,
+PVT,PDV,51.87,2025-12-31,1,KBS,,,CTCP Vận tải và Tiếp vận Phương Đông Việt,
+PVT,PTT,54.08,2025-12-31,1,KBS,,,CTCP Vận tải Dầu khí Đông Dương,
+PVT,PVP,64.92,2025-12-31,1,KBS,,,CTCP Vận tải Dầu khí Thái Bình Dương,
+REE,CHP,24.25,2025-12-31,2,KBS+KBS_sh,Công ty TNHH Năng lượng REE 100.0% x 24.25%,qua con trung gian,Công ty TNHH Năng lượng REE,
+REE,DTV,66.29,2025-12-31,1,KBS,,công ty con,CTCP Phát triển Điện Trà Vinh,
+REE,GDW,20.05,2025-12-31,1,KBS,,công ty liên kết,CTCP Cấp nước Gia Định,
+REE,ISH,34.3,2025-12-31,1,KBS,,công ty liên kết,CTCP Thủy điện Srok Phu Miêng IDICO,
+REE,KHW,43.88,2025-12-31,1,KBS,,công ty liên kết,CTCP Cấp thoát nước Khánh Hòa,
+REE,NBW,20.02,2025-12-31,1,KBS,,công ty liên kết,CTCP Cấp nước Nhà Bè,
+REE,PPC,20.13,2025-12-31,1,KBS,,công ty liên kết,CTCP Nhiệt điện Phả Lại,
+REE,SBH,25.76,2025-12-31,2,KBS+KBS_sh,Công ty TNHH Năng lượng REE 100.0% x 25.76%,qua con trung gian,Công ty TNHH Năng lượng REE,
+REE,SGR,21.02,2026-03-31,2,KBS+KBS_sh,Công ty TNHH Bất động sản REE 100.0% x 21.02%,qua con trung gian,Công ty TNHH Bất động sản REE,
+REE,SHP,11.1,2025-12-31,1,KBS,,công ty liên kết,CTCP Thủy điện miền Nam,
+REE,SP2,28.88,2025-12-31,1,KBS,,công ty liên kết,CTCP Thủy điện Sử Pần 2,
+REE,TBC,60.42,2025-12-31,2,KBS+KBS_sh,Công ty TNHH Năng lượng REE 100.0% x 60.42%,qua con trung gian,Công ty TNHH Năng lượng REE,
+REE,TDW,44.17,2025-12-31,1,KBS,,công ty liên kết,CTCP Cấp nước Thủ Đức,
+REE,TMP,42.63,2025-12-31,2,KBS+KBS_sh,Công ty TNHH Năng lượng REE 100.0% x 42.63%,qua con trung gian,Công ty TNHH Năng lượng REE,
+REE,VCW,35.95,2025-12-31,1,KBS,,công ty liên kết,CTCP Đầu tư nước sạch Sông Đà,
+REE,VSH,52.58,2025-12-31,2,KBS+KBS_sh,Công ty TNHH Năng lượng REE 100.0% x 52.58%,qua con trung gian,Công ty TNHH Năng lượng REE,0.0
+S99,SCI,51.0,2025-12-31,1,KBS,,,CTCP SCI E&C,
+SAB,BSH,52.11,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Hà Nội,
+SAB,BSL,68.78,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Sông Lam,
+SAB,BSP,33.85,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Phú Thọ,
+SAB,BSQ,66.56,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Quảng Ngãi,
+SAB,IME,26.0,2025-12-31,1,KBS,,,CTCP Cơ khí và Xây lắp Công nghiệp,
+SAB,SB1,54.73,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Nghệ Tĩnh,
+SAB,SBB,22.18,2025-12-31,1,KBS,,,CTCP Tập đoàn Bia Sài Gòn - Bình Tây,
+SAB,SBL,20.0,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Bạc Liêu,
+SAB,SCD,62.06,2025-12-31,1,KBS,,,CTCP Nước Giải khát Chương Dương,
+SAB,SMB,32.41,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Miền Trung,
+SAB,SPA,20.89,2025-12-31,1,KBS,,,Công ty Cổ phần Tập đoàn Bao Bì Sài Gòn,
+SAB,STD,34.92,2025-12-31,1,KBS,,,CTCP Bia - Nước giải khát Sài Gòn - Tây Đô,
+SAB,WSB,84.46,2025-12-31,1,KBS,,,CTCP Bia Sài Gòn - Miền Tây,
+SAM,SLD,85.7,2025-12-31,1,KBS,,,CTCP Địa ốc Sacom,
+SGP,SAC,51.43,2025-12-31,1,KBS,,,CTCP Xếp dỡ và Dịch vụ Cảng Sài Gòn,
+SHI,NLS,20.1,2025-12-31,1,KBS,,,CTCP Cấp thoát nước Lạng Sơn,
+SHI,SHE,50.38,2025-12-31,1,KBS,,,CTCP Phát triển Năng lượng Sơn Hà,
+SIP,SPA,93.58,2025-12-31,1,KBS,,,CTCP Bao bì Sài Gòn,
+SIP,VRG,19.910099999999996,2025-12-31,2,KBS+KBS_sh,CTCP Xây dựng Incontec 99.8% x 19.95%,qua con trung gian,CTCP Xây dựng Incontec,
+SJE,HPD,65.1,2025-12-31,1,KBS,,,CTCP Thủy điện Đăk Đoa,
+SJG,MEC,46.15,2025-12-31,1,KBS,,công ty liên kết,CTCP Cơ khí - Lắp máy Sông Đà,46.155
+SJG,PTN,36.0,2025-12-31,1,KBS,,công ty liên kết,CTCP Phát triển nhà Khánh Hòa,36.0
+SJG,S12,49.0,2025-12-31,1,KBS,,công ty liên kết,CTCP Sông Đà 12,49.0
+SJG,SD2,40.77,2025-12-31,1,KBS,,công ty liên kết,CTCP Sông Đà 2,
+SJG,SD3,51.0,2025-12-31,1,KBS,,công ty con,CTCP Sông Đà 3,51.00209999999999
+SJG,SD4,65.0,2025-12-31,1,KBS,,công ty con,CTCP Sông Đà 4,65.0
+SJG,SD5,64.16,2025-12-31,1,KBS,,công ty con,CTCP Sông Đà 5,64.16
+SJG,SD6,65.0,2025-12-31,1,KBS,,công ty con,CTCP Sông Đà 6,65.0
+SJG,SD9,58.5,2025-12-31,1,KBS,,công ty con,CTCP Sông Đà 9,58.4997
+SJG,SDC,51.01,2025-12-31,1,KBS,,công ty con,CTCP Tư Vấn Sông Đà,51.0057
+SJG,SDT,62.27,2025-12-31,1,KBS,,công ty con,CTCP Sông Đà 10,62.27
+SJG,SDU,30.0,2025-12-31,1,KBS,,công ty liên kết,CTCP Đầu tư Xây dựng và Phát triển Đô thị Sông Đà,30.0
+SJG,SDX,51.0,2025-12-31,1,KBS,,công ty con,CTCP Phòng Cháy chữa cháy và Đầu tư Xây dựng Sông Đà,51.0
+SJG,SJD,50.96,2025-12-31,1,KBS,,công ty con,CTCP Thủy điện Cần Đơn,50.9591
+SNZ,D2D,57.86,2025-12-31,1,KBS,,công ty con,CTCP Phát triển Đô thị Công nghiệp số 2,57.86
+SNZ,DND,35.99,2025-12-31,1,KBS,,công ty liên kết,CTCP Đầu tư Xây dựng và Vật liệu Đồng Nai,35.99
+SNZ,DNW,63.99,2025-12-31,1,KBS,,công ty con,CTCP Cấp nước Đồng Nai,63.99
+SNZ,PDN,51.0,2025-12-31,1,KBS,,công ty con,CTCP Cảng Đồng Nai,51.0
+SNZ,SDN,30.01,2025-12-31,1,KBS,,công ty liên kết,CTCP Sơn Đồng Nai,30.009999999999998
+SNZ,SDV,20.0,2025-12-31,1,KBS,,công ty liên kết,CTCP Dịch vụ Sonadezi,
+SNZ,SZB,46.22,2025-12-31,1,KBS,,công ty liên kết,CTCP Sonadezi Long Bình,
+SNZ,SZC,46.84,2025-12-31,1,KBS,,công ty liên kết,CTCP Sonadezi Châu Đức,
+SNZ,SZE,64.04,2025-12-31,1,KBS,,công ty con,CTCP Môi trường Sonadezi,64.03999999999999
+SNZ,SZG,46.45,2025-12-31,1,KBS,,công ty liên kết,CTCP Sonadezi Giang Điền,46.45
+SNZ,SZL,52.75,2025-12-31,1,KBS,,công ty con,CTCP Sonadezi Long Thành,52.746300000000005
+SSI,PAN,-1.0,2025-12-31,1,KBS,,,CTCP Tập đoàn PAN,
+TAL,CC4,68.68,2025-12-31,1,KBS,,,CTCP Đầu tư và Xây dựng số 4,
+TCB,TCX,79.82,2025-12-31,1,KBS,,,CTCP Chứng khoán Kỹ thương,
+TCD,BCR,20.43,2024-12-31,1,KBS,,,CTCP BCG Land,
+TIS,TTS,93.68,2025-12-31,1,KBS,,,CTCP cán Thép Thái Trung,
+TPB,ORS,51.0,2025-12-31,1,KBS,,,CTCP Chứng khoán Tiên Phong,
+TVC,TVB,68.4,2025-12-31,1,KBS,,,CTCP Chứng khoán T-Cap,
+TVN,HMC,55.67,2025-12-31,1,KBS,,công ty con,CTCP Kim khí Thành phố Hồ Chí Minh - VNSTEEL,55.669999999999995
+TVN,HMG,89.37,2025-12-31,1,KBS,,công ty con,CTCP Kim khí Hà Nội - VNSTEEL,89.37
+TVN,KMT,38.3,2025-12-31,1,KBS,,công ty liên kết,CTCP Kim Khí Miền Trung,38.3
+TVN,SDK,45.0,2025-12-31,1,KBS,,công ty liên kết,CTCP Cơ khí Luyện Kim,45.0
+TVN,TDS,65.0,2025-12-31,1,KBS,,công ty con,CTCP Thép Thủ Đức - VNSTEEL,65.0
+TVN,TIS,65.0,2025-12-31,1,KBS,,công ty con,CTCP Gang thép Thái Nguyên,65.0
+TVN,TNB,84.77,2025-12-31,1,KBS,,công ty con,CTCP Thép Nhà Bè - VNSTEEL,84.77
+TVN,TNS,31.25,2025-12-31,1,KBS,,công ty liên kết,CTCP Thép Tấm lá Thống Nhất,31.25
+TVN,TRT,20.05,2025-12-31,1,KBS,,công ty liên kết,CTCP RedStarCera,20.05
+TVN,VDT,40.06,2025-12-31,1,KBS,,công ty liên kết,CTCP Lưới thép Bình Tây,40.06
+TVN,VGL,51.0,2025-12-31,1,KBS,,công ty con,CTCP Mạ Kẽm Công Nghiệp Vingal - VNSTEEL,51.0
+TVN,VIN,95.37,2025-12-31,1,KBS,,công ty con,CTCP Giao nhận Kho vận Ngoại Thương Việt Nam,95.37
+VCG,ND2,51.1,2025-12-31,1,KBS,,,CTCP Đầu tư và Phát triển Điện Miền Bắc 2,
+VCG,V12,2.5,2025-12-31,1,KBS,,,CTCP Xây dựng số 12,
+VCG,VAV,51.0,2025-12-31,1,KBS,,,CTCP Viwaco,
+VCG,VC1,55.14,2025-12-31,1,KBS,,,CTCP Xây dựng số 1,
+VCG,VCC,71.12,2025-12-31,1,KBS,,,CTCP Vinaconex 25,
+VCG,VMC,5.0,2025-12-31,1,KBS,,,CTCP VIMECO,
+VCP,SMA,50.06,2025-12-31,1,KBS,,,CTCP thiết bị phụ tùng Sài Gòn,
+VCP,XMP,51.0,2025-12-31,1,KBS,,,CTCP Thủy điện Xuân Minh,
+VEA,CKA,47.4,2025-12-31,1,KBS,,công ty liên kết,CTCP Cơ khí An Giang,
+VEA,FBC,51.0,2025-12-31,1,KBS,,công ty con,CTCP Cơ khí Phổ Yên,
+VEA,FT1,55.0,2025-12-31,1,KBS,,công ty con,CTCP Phụ tùng máy số 1,
+VEC,BEL,51.0,2025-12-31,1,KBS,,,CTCP Điện tử Biên Hòa,
+VEC,VBH,51.0,2025-12-31,1,KBS,,,CTCP Điện tử Bình Hòa,
+VEC,VTB,55.54,2025-12-31,1,KBS,,,CTCP Viettronics Tân Bình,
+VGC,DAC,51.0,2025-12-31,1,KBS,,,CTCP 382 Đông Anh,
+VGC,DSG,86.41,2025-12-31,1,KBS,,,CTCP Kính Đáp Cầu,
+VGC,HLY,26.0,2025-12-31,1,KBS,,,CTCP gốm xây dựng Yên Hưng,
+VGC,TLT,51.07,2025-12-31,1,KBS,,,CTCP Viglacera Thăng Long,
+VGC,VHL,50.48,2025-12-31,1,KBS,,,CTCP Viglacera Hạ Long,
+VGC,VIH,51.0,2025-12-31,1,KBS,,,CTCP Viglacera Hà Nội,
+VGC,VIM,51.0,2025-12-31,1,KBS,,,CTCP Khoáng sản Viglacera,
+VGC,VIT,51.0,2025-12-31,1,KBS,,,CTCP Viglacera Tiên Sơn,
+VGC,VTS,24.93,2025-12-31,1,KBS,,,CTCP Gạch ngói Từ Sơn,
+VGT,BMG,25.0,2025-12-31,1,KBS,,công ty liên kết,CTCP May Bình Minh,25.0
+VGT,DCG,24.04,2025-12-31,1,VCI_NODATE,,vci,may dap cau,24.04
+VGT,HDM,60.86,2025-12-31,1,KBS,,công ty con,CTCP Dệt May Huế,60.86
+VGT,HNI,29.24,2025-12-31,1,KBS,,công ty liên kết,CTCP May Hữu Nghị,29.24
+VGT,HSM,57.57,2025-12-31,1,KBS,,công ty con,Tổng Công ty Cổ phần Dệt may Hà Nội,
+VGT,HTG,61.87,2025-12-31,1,KBS,,công ty con,Tổng Công ty Cổ phần Dệt May Hòa Thọ,61.870000000000005
+VGT,HUG,35.010000000000005,2025-12-31,1,VCI_NODATE,,vci,may hung yen,35.010000000000005
+VGT,M10,32.21,2025-12-31,1,KBS,,công ty liên kết,Tổng Công ty May 10 - CTCP,32.21
+VGT,MGG,35.22,2025-12-31,1,VCI_NODATE,,vci,duc giang,35.22
+VGT,MNB,25.2,2025-12-31,1,VCI_NODATE,,vci,may nha be,25.2
+VGT,NDT,53.669999999999995,2025-12-31,1,VCI_NODATE,,vci,tong det may nam dinh,53.669999999999995
+VGT,NJC,53.67,2025-12-31,1,KBS,,công ty con,CTCP May Nam Định,28.57
+VGT,NTT,11.97,2025-12-31,1,KBS,,công ty liên kết,CTCP Dệt May Nha Trang,
+VGT,PPH,50.1,2025-12-31,1,VCI_NODATE,,vci,tong phong phu,50.1
+VGT,SPB,63.77,2025-12-31,1,KBS,,công ty con,CTCP Sợi Phú Bài,60.727
+VGT,TVT,46.928,2025-12-31,1,VCI_NODATE,,vci,viet thang,46.928
+VGT,VDN,27.281699999999997,2025-12-31,1,VCI_NODATE,,vci,vinatex da nang,27.281699999999997
+VGT,VGG,30.4,2025-12-31,1,VCI_NODATE,,vci,tong may viet tien,30.4
+VGT,VTI,68.34,2025-12-31,1,KBS,,công ty con,CTCP Sản xuất - Xuất nhập khẩu Dệt may,68.3449
+VHC,SGC,76.72,2025-12-31,1,KBS,,,CTCP Xuất Nhập Khẩu Sa Giang,
+VIC,VEF,87.97,2024-12-31,1,KBS,,công ty con,CTCP Trung tâm Hội chợ Triển lãm Việt Nam,86.65
+VIC,VHM,73.5,2024-12-31,1,KBS,,công ty con,CTCP Vinhomes,71.7
+VIC,VNB,65.33,2024-12-31,1,KBS,,công ty con,CTCP Sách Việt Nam,65.33
+VIC,VPL,85.55,2024-12-31,1,KBS,,công ty con,CTCP Vinpearl,85.55
+VIC,VRE,18.37,2025-12-31,1,VCI_NODATE,,vci,vincom retail,18.37
+VIP,VPA,45.1,2025-12-31,1,KBS,,,CTCP Vận tải Hoá Dầu VP,
+VIW,PWA,24.9,2025-12-31,1,KBS,,,CTCP Bất động sản Dầu khí,
+VLC,MCM,59.3,2025-12-31,1,KBS,,,CTCP Giống bò sữa Mộc Châu,
+VLC,VDL,38.3,2025-12-31,1,KBS,,,CTCP Thực phẩm Lâm Đồng,
+VND,PTI,20.0,2025-12-31,1,KBS,,,Tổng Công ty Cổ phần Bảo Hiểm Bưu Điện,
+VNE,VE4,54.73,2025-12-31,1,KBS,,,CTCP Xây dựng Điện VNECO4,
+VNM,MCM,49.73,2025-12-31,1,KBS,,,CTCP Giống Bò sữa Mộc Châu,
+VNM,VLC,68.94,2025-12-31,1,KBS,,,Tổng Công ty Chăn Nuôi Việt Nam - CTCP,
+VPB,VPX,79.96,2025-12-31,1,KBS,,,CTCP Chứng khoán VPBank,
+VSC,DNL,31.0,2024-12-31,1,KBS,,,CTCP Logistics Cảng Đà Nẵng,
+VSC,GIC,66.0,2024-12-31,1,KBS,,,CTCP VSC Green Logistics,
+VSC,VGR,74.0,2024-12-31,1,KBS,,,CTCP Cảng Xanh VIP,
+VSC,VNA,40.01,2024-12-31,1,KBS,,,CTCP Vận tải Biển Vinaship,
+VSC,VSM,65.0,2024-12-31,1,KBS,,,CTCP Container Miền Trung,
+VSF,BLT,51.0,2025-12-31,1,KBS,,,CTCP Lương thực Bình Định,
+VSF,BTG,60.0,2025-12-31,1,KBS,,,CTCP Bao bì Tiền Giang,
+VSF,CMN,30.72,2025-12-31,1,KBS,,,CTCP Lương thực Thực phẩm Colusa - Miliket,
+VSF,FCS,59.78,2025-12-31,1,KBS,,,CTCP Lương thực Thành Phố Hồ Chí Minh,
+VSF,KGM,83.31,2025-12-31,1,KBS,,,CTCP Xuất nhập khẩu Kiên Giang,
+VSF,MCF,60.0,2025-12-31,1,KBS,,,CTCP Xây lắp Cơ khí và lương thực Thực phẩm,
+VSF,SAF,51.3,2025-12-31,1,KBS,,,CTCP Lương thực Thực phẩm Safoco,
+VSF,TCJ,65.4,2025-12-31,1,KBS,,,CTCP Tô Châu,
+VSF,VLF,40.0,2025-12-31,1,KBS,,,CTCP Lương thực Thực phẩm Vĩnh Long,
+VTD,CTC,45.33,2025-12-31,1,KBS,,,CTCP Tập đoàn Hoàng Kim Tây Nguyên,

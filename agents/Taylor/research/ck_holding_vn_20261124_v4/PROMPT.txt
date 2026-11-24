@@ -1,0 +1,19 @@
+VIỆC (user duyệt 24/11/2026 12:36 ICT, topic Discord 1574659987832307762): CK holding VN v4 = SỬA các lỗi quant-skeptic v3 chỉ ra + TÍNH LẠI dải; KHÔNG đổi phương pháp ngoài các sửa dưới đây.
+
+ĐỌC: agents/Taylor/research/ck_holding_vn_20261124_v3/ — REPORT_CK_HOLDING_v3.md, PREREG_v3.md, SKEPTIC_v3_quant-skeptic.md (nguồn của danh sách sửa), calc_ck_v3.py, fetch_inputs_v3.py, inputs/, raw/. Bối cảnh: user chọn phương án A cho HHS (base 0% + dải độ nhạy có nguồn), muốn dải hợp lý, không quá rộng.
+
+LÀM trong thư mục MỚI agents/Taylor/research/ck_holding_vn_20261124_v4/ (copy code/inputs/raw từ v3 được; KHÔNG sửa v3). Khoá md5 (LOCK_md5.txt), chạy 2 lần bit-exact, và bằng CẢ python3 (pandas 2.x) lẫn $DNA_PYEXE=/home/trido/thanhdt/wc_venv/bin/python (pandas 3) phải giống nhau.
+
+PREREG_v4.md (viết + md5 TRƯỚC khi chạy calc v4; ghi mtime): khai (1) các sửa dưới đây, (2) KHÔNG đổi ứng viên dải a–d và tiêu chí C của v3, (3) nếu code diễn giải khác chữ PREREG thì phải ghi vào danh sách 'khác PREREG' trong report — không im lặng.
+
+SỬA (mỗi mục nêu tác động lên N / trung vị / đường tháng / hull):
+1. OCH/OGC (lỗi chính, skeptic): OCH phát hành riêng lẻ 130 tr CP (tỷ lệ 0,65, giá 10.000đ, ex 07/10/2026) toàn lô về bên ngoài (Leadvisors 39,39%, KBS 07/10/2026) ⇒ tỷ lệ OGC nắm OCH phải về ≈33,7% từ ngày đó, và 1.300 tỷ tiền phát hành vào VCSH OCH. Tổng quát hoá thành QUY TẮC (không vá riêng OCH): với mọi phát hành riêng lẻ / quyền mua trong tav2_bq.corporate_action của con trong mẫu, tỷ lệ sở hữu của mẹ sau sự kiện = (CP mẹ nắm, không tham gia) / (CP mới tổng), VCSH con cộng tiền thu về (nếu có total_value). Phải PIT (chỉ dùng sự kiện đã ex ≤ D). Kiểm toàn bộ con của 13 holding + các holding mới nếu có: OCH (OGC), GIC (VSC, quyền mua 1:1), LBM (LHC), và liệt kê tất cả ca khác (kể cả ngoài N). Nếu KBS có cập nhật cổ đông lớn sau sự kiện thì đối chiếu.
+2. GAS (ngoài N nhưng là lỗi quy tắc): corporate_action có 2 dòng Bonus 3% trùng nhau bị cộng ×1,06. Khử dòng trùng (cùng mã/ex/method/ratio) TRƯỚC khi cộng các sự kiện cùng ngày ex; nêu tên GAS và mọi ca khử trùng khác trong danh sách sửa.
+3. 5 chỗ làm khác PREREG v3 (skeptic): (i) TREASURY_FIX không có trong PREREG (tác động −0,07pp, giữ nhưng ghi là mở rộng ngoài PREREG); (ii) cộng tỷ lệ cùng ngày ex vs Π(1+r); (iii) ISS_FIX một chiều; (iv) §C2 '(c) đạt N≥8 thì thay (a)' — v3 chỉ xét c1, nhưng c3 N=10 đạt chữ quy tắc: ÁP ĐÚNG CHỮ, báo c3 và nói rõ hệ quả (dải c3 rộng hơn ⇒ kết luận?), (v) LOO của (d) dùng n≥10 thay n≥11: sửa về n≥11. Ghi mục 'Khác PREREG' đầy đủ.
+4. GLT TREASURY_FIX 9,17% khó là cổ phiếu quỹ, SZL 0,76 tr chưa kiểm: kiểm lại (ngoài N nên chỉ ghi kết luận), không để rác trong share_fixes.
+5. Trình bày TRUNG TÂM: báo trung vị theo chẵn/lẻ N (1,5% vs 5,6% khi bỏ KSF; CII thêm 1 tháng ⇒ nhảy) — báo như một KHOẢNG kèm bootstrap, không một điểm. Giữ KSF theo quy tắc khai trước (BANNED là luật đầu tư, không phải tiêu chí đo) và báo bản bỏ KSF + bỏ cả KSF&CMX.
+
+RA ĐỀ XUẤT DẢI THAM CHIẾU CHO HHS (không phải quyết định): sau sửa, báo hull(a)∪(d) mới, độ rộng, 0% ở phân vị nào; so với gợi ý của skeptic: base 0% (nhãn 'đầu lạc quan'), độ nhạy ≈ +6% / ≈ +14% (hiện tại, xu hướng chưa đảo chiều) / +37% (stress riêng một holding), bỏ đầu −12% trừ khi HHS có cấu trúc kiểu R1/R2 (mã premium: VIC/MVN/KSF/LHC). Nói rõ mỗi mốc là của cái gì (trung tâm / hiện tại / phân tán một holding) và nguồn số. Nếu số không ủng hộ gợi ý đó thì nói thẳng.
+
+KHÔNG: không email; không dựng rev8 HHS; không ghi sổ dd_price_zones.json; không wire production/sizing; không đọc giá HHS/TCH/CRV; không git commit (Mike commit).
+RA: REPORT_CK_HOLDING_v4.md (đầu báo cáo: kết luận + bảng; mục 'Đính chính so với v3' từng lỗi + mục 'Khác PREREG'), PREREG_v4.md + md5, LOCK_md5.txt, run1/run2/run_dna.txt, calc_out_v4.json, panel_v4.csv; bus finding topic ck-holding-vn-measure-v4-20261124. Cuối báo cáo: hạn chế còn lại.
