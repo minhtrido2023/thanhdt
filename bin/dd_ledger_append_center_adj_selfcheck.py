@@ -20,8 +20,8 @@ def main():
         led = os.path.join(td, "led.json")
         base = os.path.join(ROOT, "kb", "dd_price_zones.json")
         txt = json.load(open(base, encoding="utf-8"))
-        # bản sao sổ với entry cuối DGC "chưa có center_adj" (nếu đã ghi) để test lặp lại được
-        txt["entries"] = [e for e in txt["entries"] if not (e["ticker"] == "DGC" and e.get("center_adj") is not None)]
+        # bản sao sổ chưa có entry center_adj nào (nếu sổ thật đã ghi) để test lặp lại được
+        txt["entries"] = [e for e in txt["entries"] if e.get("center_adj") is None]
         open(led, "w", encoding="utf-8").write(json.dumps(txt, ensure_ascii=False, indent=1))
         n0 = len(txt["entries"])
 
