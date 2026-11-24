@@ -1,0 +1,41 @@
+{
+ "dist_new": {
+  "KHÔNG CHẮC (rẻ…trung tính)": 6,
+  "KHÔNG CHẮC (rẻ…đắt)": 1,
+  "KHÔNG CHẮC (trung tính…đắt)": 4,
+  "RẺ": 17,
+  "TRUNG TÍNH": 5,
+  "ĐẮT": 3
+ },
+ "dist_univ_old": {
+  "KHÔNG CHẮC (rẻ…trung tính)": 1,
+  "KHÔNG CHẮC (rẻ…đắt)": 2,
+  "KHÔNG CHẮC (trung tính…đắt)": 6,
+  "RẺ": 20,
+  "ĐẮT": 7
+ },
+ "k_fade_range": [
+  0.215758,
+  1.79873
+ ],
+ "k_hold_range": [
+  0.153794,
+  2.81187
+ ],
+ "k_univ": {
+  "fade": 0.9537268922026783,
+  "hold": 0.8470628667456008
+ },
+ "n": 36,
+ "n_eff_hold_median": 3.07263,
+ "n_eff_hold_range": [
+  1.0,
+  14.017
+ ],
+ "n_insufficient": 0,
+ "n_months_min": 53,
+ "n_same_label": 12,
+ "n_warn_peak": 14,
+ "spearman_pc_asof_vs_pct_hold_new": -0.005924782809888532,
+ "spearman_pc_asof_vs_pct_hold_univ": 0.9880886480064308
+}
