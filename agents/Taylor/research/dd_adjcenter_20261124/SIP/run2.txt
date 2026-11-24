@@ -1,0 +1,24 @@
+{"center_adj": 57261, "range_low": 55818, "range_high": 59340, "sum_p_m_pct": 5.131, "center_adj_linear": 57261, "gpm_bq": {"ttm": 0.1568, "fy25": 0.1497, "annual": {"2019": 0.1247, "2020": 0.1165, "2021": 0.1675, "2022": 0.1354, "2023": 0.1451, "2024": 0.1401, "2025": 0.1497}}}
+A 0.9 5.734 [5.734, 6.659] 5.161 Thuế GTGT khấu trừ 890,5 − DTL 123,7 (sổ sách; đối xứng với tạm ứng 643,7 đã vào base)
+B 0.5 3.185 [3.185, 3.628] 1.593 NCI công ty con: model 20% trung tâm → CĐKT 9,9%
+B 0.5 -1.666 [-0.596, -1.833] -0.833 Đất cho thuê 9T26 đếm đôi (đã vào DT chưa thực hiện, vẫn nằm trong 937,1 ha)
+B 0.35 -2.255 [-1.882, -2.255] -0.789 Chuẩn hoá biên gộp vận hành về bình quân lịch sử
+S mỗi 10 tỷ/năm × 35 năm: -318 đ/cp (-0.58%); 100 tỷ/năm: -3176 (-5.83%); cận trên dữ liệu = toàn bộ giá vốn mảng đất 9T26 106,0 tỷ quy năm 141 tỷ/năm: 
+S trục ×0,75 cố định: -3543; ×1,25: 3543
+S trục tổn thất 0/10/30% (60/25/15) đã trong lưới (−1.255 ở điểm giữa); EY không trích dự phòng
+S bỏ khỏi base: -826; mất trọn p0,15 (song song r3): −517
+S ±1.616 (bước cầu #4)
+S ≈0 nếu 12 tỷ/ha đã ròng hạ tầng (định nghĩa)
+S Ke 12,3%: 57.744 (+6,02%); 13,4%: 54.720 (+0,47%)
+S RONIC = ROE5Y 29,7%: +3.389 (+6,22%)
+S Cổ tức 9T26 968,5 tỷ đã công bố & trả (TM24); nguồn không ghi cổ tức tiền đã công bố chưa GDKHQ ⇒ một dòng
+-318 -0.58 BCTC năm 2026 (kiểm toán): thuyết minh thuê đất G16 — trả hằng năm
+312 0.57 Thuyết minh VAT/DTL: VAT khấu trừ được (hoặc DTL trùng taxdef)
+-2811 -5.16 Thuyết minh VAT: không hoàn/khấu trừ được trong tầm nhìn
+694 1.27 NCI từng công ty con (G14) xác nhận ≈ tỷ lệ sổ
+-15 -0.028 Số ha cho thuê 9T26/FY26 công bố (G12)
+246 0.45 GPM Q4/2026 ≥ 15,5% (giữ đà tăng)
+-368 -0.68 GPM Q4/2026 < 14,6% (về TB 2019–25)
+None None Định danh bên vay G1/G2 = bên liên quan
+None None Giao dịch cho thuê lại gần đây (giá/biên ròng)
+-1222 -2.24 Lãi huy động 12T ±50bp (V1, β=1)
