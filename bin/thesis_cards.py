@@ -156,7 +156,7 @@ def validate(doc, ledger_entries, held=None):
                              ("zone_low", "zone_low"), ("zone_high", "zone_high")):
             if d.get(k_ref) != e.get(k_led, 1 if k_led == "rev" else None):
                 errs.append(f"{t}: dd_ref.{k_ref}={d.get(k_ref)!r} ≠ sổ giá rev cuối {e.get(k_led)!r} "
-                            f"(cập nhật thẻ rev+1 hoặc ghi dd_ref.stale_reason)")
+                            f"(chạy bin/thesis_cards_sync_ddref.py --write nếu chỉ rev đổi; số đổi ⇒ cập nhật thẻ rev+1 hoặc ghi dd_ref.stale_reason)")
     # mọi mã đang giữ trong book DISCRETIONARY_SPECIAL phải có thẻ active
     if held is not None:
         act = {t for t, c in latest_cards(doc).items() if c.get("status") == "active"}
