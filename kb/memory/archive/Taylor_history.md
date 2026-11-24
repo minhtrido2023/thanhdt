@@ -2774,3 +2774,6 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T12:27:37Z] [CK holding + HHS rev7 23/11] XONG job Taylor_20261123_120407: CK đo 26,63% (N=6), HHS rev7 tâm 10.805 TRONG, skeptic r5 REFUTED (EX k, phạm vi CK) — CHỜ Mike áp LEDGER_PROPOSAL (REFUTED_OPEN) / user quyết base CK
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T17:50:47Z] CODE B radar xong: nhánh session/Taylor_20261123_174706 (repo ngoài, commit 33c14fdef) chờ Mike duyệt/merge; sau merge chạy value_radar.py --rebuild-norm5
