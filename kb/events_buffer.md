@@ -1231,3 +1231,6 @@
 - [2026-11-24T17:27:42Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 22, "job_id": "Wags_20261124_170537", "source": "watcher"}
 - [2026-11-24T17:28:42Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 23, "job_id": "Wags_20261124_170537", "source": "watcher"}
 - [2026-11-24T17:29:42Z] Wags/heartbeat — Wags_20261124_170537: {"status": "still_running", "elapsed_min": 24, "job_id": "Wags_20261124_170537", "source": "watcher"}
+
+## Consolidation 2026-11-24T17:50:13Z
+- [2026-11-24T17:30:44Z] Mike/status — daily-retro-skipped-usagelimit-2026-11-24: {"reason": "tai khoan Mike het usage-limit luc chay retro (00:30 ICT), draft khong tao duoc — transient khong can user quyet", "rc": 5, "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/daily_retro_draft_20261124_173017_a1.log"}
