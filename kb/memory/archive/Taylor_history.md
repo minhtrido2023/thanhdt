@@ -2762,3 +2762,6 @@
 
 ## Archived 2026-11-24 (keep=12 days=0 require_done=False)
 - [2026-11-23T12:14:49Z] [DD LLM rev5 23/11] XONG job Taylor_20261123_120256: tâm 20.978 (đắt, 1,59×), r4 REFUTED vòng cuối — CHỜ Mike áp LEDGER_PROPOSAL_LLM (rev3 REFUTED_OPEN) / user quyết
+
+## Archived 2026-11-24 (keep=12 days=0 require_done=False)
+- [2026-11-23T12:15:17Z] [dd-VLB rev4 23/11] XONG job Taylor_20261123_120307: REPORT_rev4 tâm 45.161, skeptic r3 INCONCLUSIVE (vòng cuối, dừng) — CHỜ Mike áp LEDGER_PROPOSAL_VLB.json (REFUTED_OPEN, audited_fy_missing=false)
