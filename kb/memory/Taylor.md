@@ -33,3 +33,4 @@
 - [2026-11-24T13:34:27Z] [dd-recheck w2 job A 24/11] XONG Taylor_20261124_131351: PVP adj 22.988 (MECH, 01fc032ad) · MVC adj 15.684 −3,43% skeptic REFUTED trích quỹ 11% ⇒ FULL (91bccb404); wt-…a — CHỜ Mike áp LEDGER_PROPOSAL + center_adj
 - [2026-11-24T14:39:15Z] [dcf-vn-redesign 24/11] XONG job Taylor_20261124_140534: nhánh session/Taylor_20261124_140534 (wt-dcf-vn-redesign-20261124) 6937c5cc2 chưa merge; không mô hình mù giá nào đạt cắt-giá 36T, đề xuất RIM-VN 2 lớp — CHỜ Mike quant-skeptic + Winston kiểm mã huỷ niêm yết + user quyết tâm hiển thị có dùng giá quá khứ
 
+- [2026-11-24T16:01:36Z] ĐANG DỞ [dcf-vn-redesign V2, job Taylor_20261124_160038]: worktree wt-dcf-vn-redesign-20261124b nhánh session/Taylor_20261124_160038, thư mục agents/Taylor/research/dcf_vn_redesign_20261124b/ | NEXT: kiểm kê dữ liệu → PRELOCK → sửa 9 lỗi skeptic → họ mô hình đa proxy → REPORT + bus (a)(b)(c)(d)
