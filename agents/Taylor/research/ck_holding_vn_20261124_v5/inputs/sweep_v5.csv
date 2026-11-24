@@ -1,0 +1,26 @@
+parent,sub,rule,holder,holder_pct,date,stake_v4,via_pct,inN
+APH,SJS,B_brand,CTCP Thương Mại Dịch vụ Đầu tư An Phát,21.33,2026-05-13,,,True
+GEX,ABB,B_brand,Tập đoàn Geleximco - CTCP,12.14,2026-08-28,,,True
+GEX,VEC,B_brand,Tập Đoàn Geleximco - CTCP,87.97,2025-10-31,,,True
+KSF,ODE,B_brand,CTCP Sunshine Sky Villa,5.0,2024-12-18,,,True
+MSN,MML,B_brand,Công ty TNHH Masan Agri,82.04,2023-10-12,,,True
+MSN,MSR,B_brand,Công ty TNHH Tầm nhìn Masan,87.46,2026-10-30,,,True
+MSN,NET,B_brand,Công ty TNHH Masan HPC,52.25,2020-05-22,,,True
+PAN,AST,B_brand,STIC PAN-ASIA 4th Industry Growth Private Equity Fund,10.0,2022-12-31,,,True
+PAN,FMC,C_stake_diff,CTCP Tập đoàn PAN,37.75,2021-10-12,50.12,,True
+VSC,VGR,C_stake_diff,CTCP Container Việt Nam,54.35,2026-06-30,74.0,,True
+AAA,NHH,C_stake_diff,CTCP Nhựa An Phát Xanh,68.6,2026-06-30,100.0,,False
+AIG,GCF,C_stake_diff,CTCP Nguyên liệu Á Châu AIG,52.88,2025-07-30,44.5,,False
+BCG,BCR,C_stake_diff,CTCP Tập đoàn Bamboo Capital,62.1,2024-12-31,71.53,,False
+BCG,BGE,C_stake_diff,CTCP Tập đoàn Bamboo Capital,47.71,2024-06-11,51.41,,False
+BCG,TCD,C_stake_diff,CTCP Tập đoàn Bamboo Capital,43.9,2024-12-31,51.7,,False
+CII,NBB,C_stake_diff,CTCP Đầu tư Hạ tầng Kỹ thuật Thành phố Hồ Chí Minh,21.95,2025-11-21,79.79,,False
+DXG,DXS,C_stake_diff,CTCP Bluemarq Group,55.85,2023-12-31,59.0,,False
+FPT,FOC,C_stake_diff,CTCP FPT,23.86,2022-12-31,49.52,,False
+GVR,NTC,C_stake_diff,Tập đoàn Công nghiệp Cao su Việt Nam - CTCP,20.42,2022-12-31,53.27,,False
+GVR,VRG,C_stake_diff,Tập đoàn Công nghiệp Cao su Việt Nam - CTCP,15.09,2024-12-31,5.53,,False
+KDC,VDS,A_unlisted_sub_name,CTCP Thực phẩm Quốc tế NUTI KD,20.58,2026-06-30,,29.4,False
+SAB,SBB,C_stake_diff,Tổng Công ty cổ phần Bia - Rượu - Nước giải khát Sài Gòn,59.62,2024-12-25,22.18,,False
+TCD,BCR,C_stake_diff,CTCP Tập đoàn Xây dựng TRACODI,9.43,2024-12-31,20.43,,False
+TVC,TVB,C_stake_diff,CTCP Tập đoàn Quản lý Tài sản T - Corp,73.42,2026-10-20,68.4,,False
+VNM,MCM,C_stake_diff,CTCP Sữa Việt Nam,8.85,2022-12-31,49.73,,False

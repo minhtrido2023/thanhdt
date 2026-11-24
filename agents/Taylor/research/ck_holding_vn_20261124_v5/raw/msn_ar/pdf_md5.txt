@@ -1,0 +1,3 @@
+6b02c3509189ebc666ef927245988134  msn24.pdf
+b3b4d266e67ffd6fcba0058c9beee88a  msn25.pdf
+nguon: static2.vietstock.vn/vietstock/2026/4/2/20260402___msn___bao_cao_thuong_nien_2025___signed.pdf (msn25) ; static2.vietstock.vn/data/HOSE/2024/BCTN/VN/MSN_Baocaothuongnien_2024.pdf (msn24); tai 24/11/2026, trich text bang pypdf
