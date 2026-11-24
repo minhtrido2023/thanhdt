@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261124/DRI/REPORT_recheck_DRI.md",
+  "report_md5": "07add5f02030e39424d7b69a035846a0",
+  "brief_md5": "0267a25de83d37548fd17d8ccc64c170",
+  "model": "opus",
+  "cost_usd": 1.1299142,
+  "started_at_ict": "2026-11-24T17:06:19+07:00",
+  "summary": "Recheck chạy lại nguyên văn mô hình r3 có khoá md5, tái lập tâm 15.257 và chỉ bổ sung độ nhạy r theo dải Ke (+0,24% đến +2,99%), nên phần cơ học đúng. Các số chịu lực tôi tự kiểm trên BQ (số cổ phiếu 73,2tr, LNST 2025 157,4 tỷ, TTM, FCFE, biên gộp lịch sử ~37%) đều khớp; biên mô hình ~36% có cơ sở từ lịch sử của chính DRI, nên kịch bản về peer 25% không đủ căn cứ để hạ tâm. Chiều quá rẻ: r 13,5% hơi cao hơn đầu trên dải Ke, giá trị sau 2054 bằng 0, q khối [UL] có thể thấp hơn (làm tâm tăng). Chiều quá đắt: khoản Dakruco 40 tỷ tính đủ mệnh giá với TSĐB là cp DRI (−1,8 đến −3,5%), và quan trọng nhất là quyền đất tô nhượng Lào cùng nghĩa vụ rừng bảo tồn chưa xác minh, capex tuân thủ vắng mặt, ý kiến kiểm toán FY2025 không được nêu. Vì mục đất/giấy phép là mục bắt buộc, tác động lớn nhưng chưa định lượng được, verdict là INCONCLUSIVE, không phải REFUTED; chưa có bằng chứng để dời tâm theo chiều nào.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261124/DRI/skeptic/r1_raw.md"
+}
