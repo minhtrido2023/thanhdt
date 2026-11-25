@@ -184,6 +184,10 @@ def part_c():
         rc, out = py(code3, NEW_WC)
         got = out.strip().splitlines()[-1] if rc == 0 else "ERR"
         chk((got != "None" and "exists with plan_date=2026-11-25" in got) if want else got == "None", name, out)
+    (td / "plan_SpaceX_2026-11-25.json").write_text(json.dumps({"plan_date": "2026-11-25", "orders": [], "account": "SpaceX"}))
+    rc, out = py(code3.replace("plan-t1-not-ready-2026-11-25-SpaceX", "plan-t1-not-ready-r2-2026-11-25-SpaceX"), NEW_WC)
+    chk(rc == 0 and out.strip().splitlines()[-1] == "None",
+        "C5b r2 + plan HỢP LỆ ⇒ vẫn KHÔNG đóng ở housekeeping (chỉ probe marker+md5 đóng r2)  [giết: bỏ chặn r2]", out)
 
 
 def extract(path, b, e, indented=False):
