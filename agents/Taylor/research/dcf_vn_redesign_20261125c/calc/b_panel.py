@@ -192,7 +192,16 @@ dfs = pd.merge_asof(dfs.sort_values("fq"), dk2, left_on="fq", right_on="ptime_fq
 dfs = dfs.sort_values(["ticker", "known"]).reset_index(drop=True)
 dfs["N_v2"] = dfs.N
 dfs["pf"] = np.log(dfs.price_rel / dfs.close_rel); dfs["pf_fq"] = np.log(dfs.price_fq / dfs.close_fq)
-dfs["N_v3"] = np.where(dfs.pf_fq.notna(), dfs.N_v2 * np.exp(dfs.pf_fq - dfs.pf), dfs.N_v2)
+# [V3.1 mục 1] hệ số giá Close/Price gộp CẢ cổ tức tiền lẫn sự kiện cổ phiếu ⇒ chỉ áp bước khi kỳ BCTC kế tiếp xác nhận số CP đổi theo đúng hướng/độ lớn đó
+# (cùng nguyên lý pick_n: bước tốt hơn "không bước" khi dự đoán log(N_kế/N)). Thiếu kỳ kế ⇒ KHÔNG áp (bảo thủ, đếm trong LOG).
+dfs["N_nxt"] = dfs.groupby("ticker").N_v2.shift(-1)
+_stp = (dfs.pf_fq - dfs.pf); _s = np.log(dfs.N_nxt / dfs.N_v2)
+_ok = dfs.pf_fq.notna() & _s.notna() & (_stp.abs() > 0.003) & ((_s - _stp).abs() < _s.abs())
+if os.environ.get("MC_OLD") == "1":
+    _ok = dfs.pf_fq.notna()
+dfs["N_v3"] = np.where(_ok, dfs.N_v2 * np.exp(_stp), dfs.N_v2)
+LOG["vnd_n_fix31"] = {"rows": int(len(dfs)), "step_applied": int(_ok.sum()), "step_candidate_|pf_fq-pf|>0.3%": int((dfs.pf_fq.notna() & (_stp.abs() > 0.003)).sum()),
+                      "no_next_quarter": int(dfs.N_nxt.isna().sum())}
 def jump_rate(d, ncol, howcol=None):
     """tỉ lệ dòng có nhảy vốn hoá > 15% sau khi điều chỉnh bước nhảy hệ số giá: (N_i/N_{i-1}) × exp(pf_i − pf_{i-1})."""
     d = d.sort_values(["ticker", "known"]).copy(); g = d.groupby("ticker")
@@ -209,10 +218,12 @@ LOG["jump_BQ_OShares_only"] = jump_rate(bq_j, "OShares")
 print("jump", json.dumps(LOG["jump_VND"], ensure_ascii=False), json.dumps(LOG["jump_BQ"], ensure_ascii=False), flush=True)
 dfs["N"] = dfs.N_v2 if os.environ.get("VND_N_OLD") == "1" else dfs.N_v3
 dfs["MC_rel"] = dfs.price_rel * dfs.N; dfs["time"] = dfs.known
-KEEP = ["ticker", "known", "quarter", "src", "E", "N", "MC_rel", "close_rel", "roe", "np_ttm", "np_prev", "rev_ttm", "rev_prev", "cfo_ttm", "capex_ttm", "debt", "cash",
+dfs["price_rel"] = dfs.price_rel
+KEEP = ["ticker", "known", "price_rel", "quarter", "src", "E", "N", "MC_rel", "close_rel", "roe", "np_ttm", "np_prev", "rev_ttm", "rev_prev", "cfo_ttm", "capex_ttm", "debt", "cash",
         "ebit_ttm", "div_ttm", "gpm", "roa", "fscore", "intcov", "cashcycle", "roic5", "debt_eq", "cfo3y", "cfi3y", "E_src", "N_how", "BVPS", "OShares"]
 F = pd.concat([fin[KEEP], dfs[KEEP]], ignore_index=True).sort_values(["ticker", "known"]).reset_index(drop=True)
 F = F[F.E.notna() & (F.MC_rel > 0)].copy()
+F["N_next"] = F.groupby("ticker").N.shift(-1)
 F["roe"] = F.roe.clip(-0.5, 0.6); F["npm"] = (F.np_ttm / F.rev_ttm.where(F.rev_ttm > 0)).clip(-0.5, 0.6)
 F["payout_raw"] = np.where(F.np_ttm > 0, (F.div_ttm / F.np_ttm).clip(0, 1), np.nan)
 F["revg"] = (F.rev_ttm / F.rev_prev.where(F.rev_prev > 0) - 1).clip(-0.6, 1.5); F["npg"] = np.where((F.np_prev > 0) & (F.np_ttm > 0), (F.np_ttm / F.np_prev - 1), np.nan)
@@ -253,9 +264,26 @@ me = me[me.ym >= pd.Period("2008-01")].sort_values(["time", "ticker"]).reset_ind
 pan = pd.merge_asof(me, F.sort_values("known"), left_on="time", right_on="known", by="ticker", direction="backward", suffixes=("", "_f"))
 pan = pan[pan.known.notna() & ((pan.time - pan.known).dt.days <= 200)].copy()
 assert (pan.known <= pan.time).all(), "PIT violation"
-pan["mc"] = pan.MC_rel * pan.Close / pan.close_rel
+pan["mc_old"] = pan.MC_rel * pan.Close / pan.close_rel          # V3: Close đã điều chỉnh cổ tức tiền ⇒ mc phồng đúng bằng tỉ suất cổ tức (skeptic đòn 8)
+# [V3.1 mục 1] mc = Price_thô(d) × N(d); N chỉ bước theo sự kiện CỔ PHIẾU: có sự kiện (hệ số Close/Price đổi so với ngày công bố) VÀ kỳ BCTC kế xác nhận N đổi (>1%)
+# ⇒ N = N_kế (số CP sau sự kiện); ngược lại N = N tại ngày công bố (cổ tức tiền không đổi số CP). Giá thô thiếu ⇒ rơi về mc_old (đếm trong LOG).
+_lr_now = np.log(pan.Close / pan.Price); _lr_k = np.log(pan.close_rel / pan.price_rel)
+_sevent = ((_lr_now - _lr_k).abs() > 0.003)
+_nn = pan.N_next.where(pan.N_next.notna() & (np.log(pan.N_next / pan.N).abs() > 0.01))
+_N = np.where(_sevent & _nn.notna(), _nn, pan.N)
+_mc_new = pan.Price * _N
+pan["mc"] = np.where(np.isfinite(_mc_new) & (pan.Price > 0), _mc_new, pan.mc_old)
+if os.environ.get("MC_OLD") == "1":
+    pan["mc"] = pan.mc_old
 pan = pan.merge(uni[["ticker", "time"]].assign(iu_bq=True), on=["ticker", "time"], how="left")
 pan["in_universe"] = np.where(pan.src == "BQ", pan.iu_bq.fillna(False), pan.in_universe.fillna(False)).astype(bool); pan = pan.drop(columns=["iu_bq", "src_f"], errors="ignore")
+LOG["mc_fix31"] = {"rows": int(len(pan)), "price_missing_fallback": int((~np.isfinite(_mc_new.values) | ~(pan.Price.values > 0)).sum()), "rows_event_since_filing": int(_sevent.sum()),
+                   "rows_stock_step_applied": int((_sevent & _nn.notna()).sum()), "rows_event_no_next_confirm": int((_sevent & _nn.isna()).sum()),
+                   "p50_abs_dlog_mc_new_vs_old_in_univ": float(np.log(pan.mc / pan.mc_old).abs()[pan.in_universe].median()),
+                   "share_abs_dlog_gt_0.2pct_in_univ": float((np.log(pan.mc / pan.mc_old).abs() > 0.002)[pan.in_universe].mean()),
+                   "share_abs_dlog_gt_10pct_in_univ": float((np.log(pan.mc / pan.mc_old).abs() > 0.10)[pan.in_universe].mean())}
+_v = pan[(pan.ticker == "VNM") & (pan.ym.between(pd.Period("2019-04"), pd.Period("2019-08")))]
+LOG["mc_fix31_VNM_2019"] = [{"ym": str(r.ym), "mc_old_tyVND": round(r.mc_old / 1e9), "mc_new_tyVND": round(r.mc / 1e9), "dlog": round(float(np.log(r.mc / r.mc_old)), 4)} for r in _v.itertuples()]
 rat = c.execute(f"SELECT ticker, CAST(time AS DATE) AS time, route, rating FROM read_parquet('{WC}/data/bq_cache/fa_ratings_8l.parquet')").df()
 rat["time"] = pd.to_datetime(rat.time).astype(NS); rat = rat.sort_values("time"); route = rat.groupby("ticker").route.last()
 pan["route"] = pan.ticker.map(route).fillna("COMPOUNDER")

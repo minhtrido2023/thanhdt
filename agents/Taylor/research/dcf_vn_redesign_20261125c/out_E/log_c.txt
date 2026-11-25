@@ -1,0 +1,53 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-v3-20261125/agents/Taylor/research/dcf_vn_redesign_20261125c/calc/c_models2.py:106: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-v3-20261125/agents/Taylor/research/dcf_vn_redesign_20261125c/calc/c_models2.py:141: RuntimeWarning: All-NaN slice encountered
+  L["REL"] = np.where(np.isfinite(rel).sum(0) >= 2, np.nanmedian(rel, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-v3-20261125/agents/Taylor/research/dcf_vn_redesign_20261125c/calc/c_models2.py:152: RuntimeWarning: All-NaN slice encountered
+  med = np.where(n >= minn, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/numpy/lib/_nanfunctions_impl.py:1593: RuntimeWarning: All-NaN slice encountered
+  return fnb._ureduce(a,
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/numpy/lib/_nanfunctions_impl.py:1997: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+/home/trido/thanhdt/WorkingClaude/wt-dcf-v3-20261125/agents/Taylor/research/dcf_vn_redesign_20261125c/calc/c_models2.py:152: RuntimeWarning: All-NaN slice encountered
+  med = np.where(n >= minn, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/numpy/lib/_nanfunctions_impl.py:1593: RuntimeWarning: All-NaN slice encountered
+  return fnb._ureduce(a,
+/home/trido/thanhdt/wc_venv/lib/python3.12/site-packages/numpy/lib/_nanfunctions_impl.py:1997: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+               count    25%    50%    75%
+lv_N0        50920.0 -0.616 -0.252  0.040
+lv_D0        54282.0 -0.808 -0.290  0.185
+lv_D0J       53972.0 -0.769 -0.257  0.212
+lv_D0B       53972.0 -0.773 -0.256  0.217
+lv_DDM       15997.0 -0.431  0.079  0.563
+lv_EPV       34934.0 -0.920 -0.297  0.210
+lv_A_pit     22283.0 -0.627  0.175  0.865
+lv_A_RI      22231.0 -0.924 -0.175  0.366
+lv_MULT      52803.0 -0.556 -0.093  0.321
+lv_HEDf      51102.0 -0.488 -0.099  0.277
+lv_HEDr      51102.0 -0.408 -0.018  0.366
+lv_HEDL      51102.0 -0.393 -0.011  0.359
+lv_REL       50053.0 -0.379 -0.071  0.179
+lv_G1        48636.0 -0.497 -0.100  0.215
+lv_ENS1      53972.0 -0.928 -0.342  0.160
+lv_ENS2      55924.0 -0.613 -0.161  0.242
+lv_ENS1w     55924.0 -0.684 -0.215  0.195
+lv_META      55924.0 -0.616 -0.157  0.252
+lv_EPN       55924.0 -0.693  0.000  0.000
+lv_WBOTH     55924.0 -0.693  0.000  0.000
+lv_WONLY     55924.0  0.000  0.000  0.000
+lv_EONLY     55924.0  0.000  0.000  0.000
+lv_EPN_E2    55924.0 -0.693  0.000  0.000
+lv_WBOTH_E2  55924.0  0.000  0.000  0.000
+lv_WONLY_E2  55924.0  0.000  0.000  0.000
+lv_EONLY_E2  55924.0  0.000  0.000  0.000
+lv_L2_ENS1   48330.0 -0.502 -0.104  0.217
+lv_L2_ENS2   50025.0 -0.402 -0.050  0.237
+lv_L2_D0B    48330.0 -0.480 -0.094  0.225
+lv_L2_D0J    48330.0 -0.480 -0.094  0.222
+lv_L2_HEDf   40297.0 -0.298 -0.006  0.237
+lv_L2_MULT   41723.0 -0.286  0.027  0.301
+lv_L2_META   50025.0 -0.405 -0.047  0.243
+lv_L2_ENS1w  50025.0 -0.418 -0.061  0.227
+{"ic36_IS": {"lv_D0B": 0.11702149525403309, "lv_DDM": 0.04769401735304673, "lv_EPV": 0.1216967062677562, "lv_MULT": 0.13354384901909583, "lv_HEDf": 0.06530004908806021}, "meta": {"BANK": {"n_avg": 10.5, "ic_ENS2": 0.023, "pick": "lv_ENS2", "ic_pick": 0.023}, "COMPOUNDER": {"n_avg": 198.2, "ic_ENS2": 0.168, "pick": "lv_ENS2", "ic_pick": 0.168}, "CYCLICAL": {"n_avg": 16.0, "ic_ENS2": 0.197, "pick": "lv_ENS2", "ic_pick": 0.197}, "INSURANCE": {"n_avg": 4.6, "ic_ENS2": null, "pick": "lv_ENS2", "ic_pick": null}, "POWER": {"n_avg": 9.6, "ic_ENS2": 0.11, "pick": "lv_MULT", "ic_pick": 0.216}, "REALESTATE": {"n_avg": 42.5, "ic_ENS2": 0.164, "pick": "lv_DDM", "ic_pick": 0.553}, "SECURITIES": {"n_avg": 17.5, "ic_ENS2": 0.26, "pick": "lv_ENS2", "ic_pick": 0.26}}}
+53.33s

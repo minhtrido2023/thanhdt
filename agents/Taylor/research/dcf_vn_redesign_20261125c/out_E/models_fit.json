@@ -1,0 +1,94 @@
+{
+ "ic36_IS_components": {
+  "lv_D0B": 0.11702149525403309,
+  "lv_DDM": 0.04769401735304673,
+  "lv_EPV": 0.1216967062677562,
+  "lv_MULT": 0.13354384901909583,
+  "lv_HEDf": 0.06530004908806021
+ },
+ "weights_ENS1w": {
+  "lv_D0B": 0.11702149525403309,
+  "lv_DDM": 0.04769401735304673,
+  "lv_EPV": 0.1216967062677562,
+  "lv_MULT": 0.13354384901909583,
+  "lv_HEDf": 0.06530004908806021
+ },
+ "meta": {
+  "BANK": {
+   "n_avg": 10.5,
+   "ic_ENS2": 0.023,
+   "pick": "lv_ENS2",
+   "ic_pick": 0.023
+  },
+  "COMPOUNDER": {
+   "n_avg": 198.2,
+   "ic_ENS2": 0.168,
+   "pick": "lv_ENS2",
+   "ic_pick": 0.168
+  },
+  "CYCLICAL": {
+   "n_avg": 16.0,
+   "ic_ENS2": 0.197,
+   "pick": "lv_ENS2",
+   "ic_pick": 0.197
+  },
+  "INSURANCE": {
+   "n_avg": 4.6,
+   "ic_ENS2": null,
+   "pick": "lv_ENS2",
+   "ic_pick": null
+  },
+  "POWER": {
+   "n_avg": 9.6,
+   "ic_ENS2": 0.11,
+   "pick": "lv_MULT",
+   "ic_pick": 0.216
+  },
+  "REALESTATE": {
+   "n_avg": 42.5,
+   "ic_ENS2": 0.164,
+   "pick": "lv_DDM",
+   "ic_pick": 0.553
+  },
+  "SECURITIES": {
+   "n_avg": 17.5,
+   "ic_ENS2": 0.26,
+   "pick": "lv_ENS2",
+   "ic_pick": 0.26
+  }
+ },
+ "hed_cols": [
+  "c",
+  "tc",
+  "roe",
+  "loss",
+  "revg",
+  "po",
+  "lev",
+  "sd",
+  "le",
+  "r_BANK",
+  "r_CYCLICAL",
+  "r_INSURANCE",
+  "r_POWER",
+  "r_REALESTATE",
+  "r_SECURITIES"
+ ],
+ "hed_beta_frozen_2019-12": {
+  "c": -2.6935,
+  "tc": 1.8992,
+  "roe": 2.6284,
+  "loss": 0.0336,
+  "revg": -0.0036,
+  "po": 0.1892,
+  "lev": 0.0573,
+  "sd": -0.1001,
+  "le": 0.0728,
+  "r_BANK": 0.1595,
+  "r_CYCLICAL": -0.1896,
+  "r_INSURANCE": 0.0974,
+  "r_POWER": 0.1079,
+  "r_REALESTATE": 0.0732,
+  "r_SECURITIES": 0.1394
+ }
+}
