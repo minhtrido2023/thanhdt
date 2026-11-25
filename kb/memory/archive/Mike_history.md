@@ -288,3 +288,6 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T17:04:50Z] [25/11 00:1x] Topic 1574832773489754163 (DCF-VN v2 vòng sửa): poll Taylor_20261124_170355 (V3) qua ScheduleWakeup 900-1200s; xong→verify+quant-skeptic 1 vòng, KHÔNG wire/merge/email. Handoff agents/Taylor/research/dcf_vn_redesign_20261125c/HANDOFF.md
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T17:05:43Z] [25/11 00:08 ICT] User duyệt B. Dispatched Wags_20261124_170537 (opus/high, --bg, timeout 90') sửa 5 hạng mục (ngưỡng tương đối depth, lịch nghỉ lễ cảnh báo, cổng biết ngày nghỉ + tự đóng q, tăng cấp 07:30, dòng trạng thái plan bản tin 08:00). Xong → arch-reviewer 1 lần → merge. CHƯA làm A (dựng plan 25/11 cần DT5G publish cho 23/11 + DollarBill) — chờ user 'bắt đầu A'; hạn 08:30 ICT 25/11.
