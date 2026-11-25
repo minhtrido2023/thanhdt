@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """lvens2_pit2.py (job Taylor_20261125_160331) = lvens2_incremental.py (md5 357f69c5…, master 4a5cba411) + sửa theo quant-skeptic REFUTED:
   (1) mc `stepca`/`stepcar`: bước số CP chỉ theo sự kiện ĐỔI SỐ CP trong corporate_action (extract đóng băng out/ca/, md5 kiểm fail-closed), không bao giờ cổ tức tiền.
-  (2) E của dòng BVPS×OShares (ngân hàng…): chặn BVPS đã ghi theo cơ sở CP sau sự kiện (rò vintage) — E = E_trước + NP_P0 khi E tụt >7%/kỳ.
+  (2) E của dòng BVPS×OShares (ngân hàng…): BVPS đã ghi theo cơ sở CP sau sự kiện (rò vintage) — khi E tụt >7%/kỳ VÀ được giải thích bởi sự kiện CA đổi số CP
+      công bố ≤ D ⇒ E = E_raw × Π(1+r); tụt không giải thích được ⇒ giữ E_raw, gắn cờ E_unexpl (xem e_guard).
   (3) poison tách khỏi cut: poison áp cho MỌI nguồn lúc nạp; --mutate-nocut <nguồn> bỏ cắt 1 nguồn (mutation test); --cache-root cho selfcheck vintage.
   (4) freshness fail-closed: manifest cache phải phủ D (ticker) và ticker_financial/fa_ratings_8l max_time ≥ D − FRESH_DAYS.
 Phần dưới là docstring gốc (vẫn đúng cho phần không đổi).
@@ -31,7 +32,7 @@ NS = "datetime64[ns]"
 KD_Q, KD_Y = 45, 90
 R = 0.1225; GT = 0.055; H = 10
 FIN_ROUTES = ["BANK", "INSURANCE", "SECURITIES"]
-OUTCOLS = ["ticker", "ym", "time", "known", "src", "route", "in_universe", "E", "E_raw", "E_fix", "mc", "N", "N_mc", "ca_ratio", "ca_n", "n_next_used", "event_no_next",
+OUTCOLS = ["ticker", "ym", "time", "known", "src", "route", "in_universe", "E", "E_raw", "E_fix", "E_unexpl", "mc", "N", "N_mc", "ca_ratio", "ca_n", "n_next_used", "event_no_next",
            "lv_D0B", "lv_DDM", "lv_EPV", "lv_MULT", "lv_HEDf", "lv_ENS2", "n_ENS2"]
 CACHE = f"{WC}/data/bq_cache"                     # đổi bằng --cache-root (selfcheck vintage); universe_pit LUÔN đọc từ WC/data/bq_cache (cache cũ không có)
 CA_FILE = os.environ.get("LVENS2_CA", os.path.join(HERE, "..", "out", "ca", "ca_extract_20261125.csv"))
@@ -68,16 +69,33 @@ def ca_factor(rows, ca, include_rights=False):
             n.reindex(rows.index).fillna(0).astype(int).values)
 
 
-def e_guard(F):
-    """F (đã sort ticker,known): với dòng E_src=BVPSxOS, nếu E tụt > 7%/kỳ so với E đã nhận kỳ trước (≤200 ngày) ⇒ E = E_trước + NP_P0. Chỉ dùng dòng ≤ hiện tại."""
-    E = F.E.values.astype(float).copy(); fix = np.zeros(len(F), bool)
-    bo = (F.E_src.values == "BVPSxOS"); t = F.known.values; tk = F.ticker.values; np0 = F.np_q.values
-    for i in range(1, len(F)):
-        if not bo[i] or tk[i] != tk[i - 1] or not bo[i - 1] or (t[i] - t[i - 1]) > np.timedelta64(200, "D"):
-            continue
-        if np.isfinite(E[i]) and np.isfinite(E[i - 1]) and E[i - 1] > 0 and E[i] > 0 and np.log(E[i] / E[i - 1]) < EGUARD:
-            E[i] = E[i - 1] + (np0[i] if np.isfinite(np0[i]) else 0.0); fix[i] = True
-    return E, fix
+def e_guard(F, ca, Dcut=None, tol=0.06):
+    """F (đã sort ticker,known): dòng E_src=BVPSxOS. BVPS có thể đã ghi theo cơ sở CP SAU sự kiện trong khi OShares còn cũ ⇒ E_raw tụt giả.
+    Chỉ sửa khi mức tụt được GIẢI THÍCH bởi sự kiện đổi số CP (thưởng/cổ tức CP/quyền mua) đã CÔNG BỐ ≤ Dcut (as-of; None = ≤ known+400 ngày, chỉ mode v31):
+    có tích tiền tố P = Π(1+r) (theo thứ tự ex, ex trong (known_trước−90, known+400]) với |log(E_trước/E_raw) − log P| < tol ⇒ E = E_raw × P.
+    Hệ số mang theo qua các dòng CÙNG OShares, reset khi OShares đổi. Tụt KHÔNG giải thích được (cổ tức tiền, lỗ, dòng đầu sai) ⇒ giữ E_raw (không lan truyền)."""
+    Er = F.E.values.astype(float); E = Er.copy(); fix = np.zeros(len(F), bool); unex = np.zeros(len(F), bool)
+    bo = (F.E_src.values == "BVPSxOS"); t = F.known.values; tk = F.ticker.values; os_ = F.OShares.values.astype(float)
+    ev = {k: g.sort_values("ex") for k, g in ca.groupby("ticker")}
+    k = 1.0
+    for i in range(len(F)):
+        if i == 0 or not bo[i] or tk[i] != tk[i - 1] or not bo[i - 1] or (t[i] - t[i - 1]) > np.timedelta64(200, "D") or not (np.isfinite(E[i - 1]) and E[i - 1] > 0):
+            k = 1.0; continue
+        if not np.isfinite(os_[i]) or not np.isfinite(os_[i - 1]) or abs(np.log(os_[i] / os_[i - 1])) > 1e-6:
+            k = 1.0
+        cand = Er[i] * k
+        if np.isfinite(cand) and cand > 0 and np.log(cand / E[i - 1]) < EGUARD:
+            unex[i] = True
+        if unex[i] and tk[i] in ev:
+            g = ev[tk[i]]; lim = Dcut if Dcut is not None else t[i] + np.timedelta64(400, "D")
+            g = g[(g.ex.values > t[i - 1] - np.timedelta64(90, "D")) & (g.ex.values <= t[i] + np.timedelta64(400, "D")) & (g.pub.values <= lim)]
+            if len(g):
+                P = np.cumprod(1.0 + g.exercise_ratio.values); drop = np.log(E[i - 1] / cand)
+                j = np.argmin(np.abs(np.log(P) - drop))
+                if abs(np.log(P[j]) - drop) < tol:
+                    k = k * P[j]; unex[i] = False
+        E[i] = Er[i] * k; fix[i] = k != 1.0
+    return E, fix, unex
 
 
 def md5f(p):
@@ -248,14 +266,14 @@ def build_panel(D, frozen, use_vnd=True, poison=None, route_global=False, mc_pit
     if eguard:                                                # [pit2] SAU pick_n (N vẫn từ E gốc = OShares ⇒ không kéo số CP tương lai vào N)
         fin = fin.sort_values(["ticker", "known" if "known" in fin else "time"]).reset_index(drop=True)
         fin["known"] = fin.time
-        fin["E"], fin["E_fix"] = e_guard(fin)
+        fin["E"], fin["E_fix"], fin["E_unexpl"] = e_guard(fin, _hurt(ca if ca is not None else load_ca(), "pub", "ca"), Dcut=D if "ca" not in nocut else None)
     else:
-        fin["E_fix"] = False
+        fin["E_fix"] = False; fin["E_unexpl"] = False
     fin = fin.rename(columns={"GPM_P0": "gpm", "ROA_P0": "roa", "FSCORE": "fscore", "IntCov_P0": "intcov", "CashCycle_P0": "cashcycle", "ROIC5Y": "roic5",
                               "Debt_Eq_P0": "debt_eq", "CF_OA_3Y": "cfo3y", "CF_Invest_3Y": "cfi3y"})
     fin["known"] = fin.time
     KEEP = ["ticker", "known", "price_rel", "quarter", "src", "E", "N", "MC_rel", "close_rel", "roe", "np_ttm", "np_prev", "rev_ttm", "rev_prev", "cfo_ttm", "capex_ttm", "debt", "cash",
-            "ebit_ttm", "div_ttm", "gpm", "roa", "fscore", "intcov", "cashcycle", "roic5", "debt_eq", "cfo3y", "cfi3y", "E_src", "N_how", "BVPS", "OShares", "E_raw", "E_fix"]
+            "ebit_ttm", "div_ttm", "gpm", "roa", "fscore", "intcov", "cashcycle", "roic5", "debt_eq", "cfo3y", "cfi3y", "E_src", "N_how", "BVPS", "OShares", "E_raw", "E_fix", "E_unexpl"]
     parts = [fin[KEEP]]
     if use_vnd and len(dead):
         dfs = load_dead_fs(frozen)
@@ -274,7 +292,7 @@ def build_panel(D, frozen, use_vnd=True, poison=None, route_global=False, mc_pit
         _ok = dfs.pf_fq.notna() & _s.notna() & (_stp.abs() > 0.003) & ((_s - _stp).abs() < _s.abs())
         dfs["N_v3"] = np.where(_ok, dfs.N_v2 * np.exp(_stp), dfs.N_v2)
         dfs["N"] = dfs.N_v3
-        dfs["MC_rel"] = dfs.price_rel * dfs.N; dfs["time"] = dfs.known; dfs["E_raw"] = dfs.E; dfs["E_fix"] = False
+        dfs["MC_rel"] = dfs.price_rel * dfs.N; dfs["time"] = dfs.known; dfs["E_raw"] = dfs.E; dfs["E_fix"] = False; dfs["E_unexpl"] = False
         parts.append(dfs[KEEP])
     F = pd.concat(parts, ignore_index=True).sort_values(["ticker", "known"]).reset_index(drop=True)
     F = F[F.E.notna() & (F.MC_rel > 0)].copy()
@@ -543,7 +561,7 @@ def _emit(pan, mc_pit, yms, mode, D, out_dir, frozen, use_vnd, route_global, egu
         meta = {"asof_ym": ym, "mode": mode, "D": str(o.asof_date.iloc[0].date()) if len(o) else None, "rows": int(len(o)), "in_universe": int(len(iu)),
                 "in_universe_lv_ENS2_ok": int(iu.lv_ENS2.notna().sum()), "n_next_used_in_univ": int(iu.n_next_used.sum()),
                 "use_vnd": use_vnd, "vnd_px_max_date": vnd_max, "mc_pit": mc_pit, "route_global": route_global, "eguard": eguard, "nocut": sorted(nocut),
-                "event_no_next_in_univ": int(iu.event_no_next.sum()), "ca_step_in_univ": int((iu.ca_n > 0).sum()), "E_fix_in_univ": int(iu.E_fix.sum()),
+                "event_no_next_in_univ": int(iu.event_no_next.sum()), "ca_step_in_univ": int((iu.ca_n > 0).sum()), "E_fix_in_univ": int(iu.E_fix.sum()), "E_unexpl_in_univ": int(iu.E_unexpl.sum()), "E_unexpl_tickers": sorted(iu[iu.E_unexpl].ticker),
                 "frozen_files_verified": n_frozen, "hed_beta_frozen_2020-01": beta, "cache_root": CACHE, "cache_vintage": vintage, "freshness": fresh,
                 "inputs_md5": {k: md5f(p) for k, p in (("ticker_financial", f"{CACHE}/ticker_financial.parquet"), ("fa_ratings_8l", f"{CACHE}/fa_ratings_8l.parquet"),
                                                        ("ca_extract", CA_FILE), ("frozen_manifest", os.path.join(frozen, "..", "MD5SUMS_delisted.txt")),

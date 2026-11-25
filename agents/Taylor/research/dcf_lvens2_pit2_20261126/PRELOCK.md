@@ -20,6 +20,6 @@ Chọn biến thể có thước chính nhỏ nhất trong {strict, step, stepca
 Nếu chênh giữa hạng 1 và 2 < 2% tương đối ⇒ chọn biến thể ĐƠN GIẢN hơn theo thứ tự strict < stepca < step (step lẫn cổ tức tiền nên xếp sau).
 Không chọn theo "gần vp2" (vp2 không PIT).
 
-## Sửa E ngân hàng (không phải trial — sửa lỗi dữ liệu, áp cho mọi biến thể)
+## Sửa E ngân hàng (không phải trial — sửa lỗi dữ liệu; luật SỬA SAU khi thấy lan truyền ở bản đầu, xem REPORT §2)
 Dòng có E = BVPS×OShares (không có nợ ngắn/dài hạn ⇒ ngân hàng…): nếu log(E_bo / E_trước) < −0,07 với kỳ trước ≤ 200 ngày ⇒ BVPS đã bị ghi theo cơ sở CP sau sự kiện
 ⇒ E = E_trước + NP_P0 (lãi quý, đại lượng tổng, không phụ thuộc số CP). Chỉ dùng dòng ≤ D. N (pick_n) vẫn tính từ E gốc để không kéo số CP tương lai vào.
