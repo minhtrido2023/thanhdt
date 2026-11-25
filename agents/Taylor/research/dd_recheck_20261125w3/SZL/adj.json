@@ -1,0 +1,199 @@
+{
+ "ticker": "SZL",
+ "dd_date": "2026-10-26",
+ "rev": 5,
+ "center_base": 26183,
+ "center_adj": 27782,
+ "range_low": 25975,
+ "range_high": 29277,
+ "adj_pct": 0.06104,
+ "method": "PREREG_adj v1+v2 + ADJ_PREREG_SZL v1+v2 (đính chính skeptic r1); chạy qua mô hình rev5 (add_extra t=0, dịch trục NCS)",
+ "items": {
+  "S1_ton_kho_BDS_Tam_An": {
+   "bac": "B",
+   "input": 116.58,
+   "input_range": [
+    116.58,
+    116.58
+   ],
+   "m_pct": 0.08857,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_max": 0.06643,
+   "pm_min": 0.02214,
+   "pm_pct": 0.04429
+  },
+  "S2_tra_truoc_nha_thau_capex": {
+   "bac": "B",
+   "input": 58.39,
+   "input_range": [
+    58.39,
+    72.61
+   ],
+   "m_pct": 0.04436,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_max": 0.04138,
+   "pm_min": 0.01109,
+   "pm_pct": 0.02218
+  },
+  "S3_co_tuc_du_thu": {
+   "bac": "A",
+   "input": 23.264,
+   "input_range": [
+    23.264,
+    23.264
+   ],
+   "m_pct": 0.01768,
+   "p": 0.9,
+   "p_range": [
+    0.75,
+    1.0
+   ],
+   "pm_max": 0.01768,
+   "pm_min": 0.01326,
+   "pm_pct": 0.01591
+  },
+  "S4_nc_phan_bo_DTCTH": {
+   "bac": "C+",
+   "input": 0.07,
+   "input_range": [
+    0.07,
+    0.13
+   ],
+   "m_pct": -0.04518,
+   "p": 0.35,
+   "p_range": [
+    0.15,
+    0.55
+   ],
+   "pm_max": -0.00678,
+   "pm_min": -0.04615,
+   "pm_pct": -0.01581
+  },
+  "S5_nguoi_mua_tra_truoc": {
+   "bac": "B",
+   "input": -14.54,
+   "input_range": [
+    -2.95,
+    -14.54
+   ],
+   "m_pct": -0.01105,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_max": -0.00056,
+   "pm_min": -0.00829,
+   "pm_pct": -0.00552
+  }
+ },
+ "rule_t0_wc": "chỉ khoản t=0 phi vận hành; vốn lưu động vận hành ngoài cả hai phía (ròng ≈ −0,4% theo skeptic r1)",
+ "history": {
+  "v1": {
+   "center_adj": 28506,
+   "range": [
+    26772,
+    29639
+   ],
+   "skeptic": "agents/Taylor/research/dd_recheck_20261125w3/SZL/skeptic/r1.json INCONCLUSIVE medium"
+  },
+  "v2_delta_vs_v1": -0.0254
+ },
+ "sensitivity_only": [
+  "C1 thu trước mới định kỳ (lên)",
+  "C2 capex duy trì vs KH ±24,8% (hai chiều)",
+  "C3 ý kiến kiểm toán FY2025 (xuống)",
+  "C4 Long Phước vượt 920 −2.041 (xuống)",
+  "C5 liên kết theo giá gốc (xuống)",
+  "C6 SNZ số dư/bảo lãnh (xuống)",
+  "C8 vốn lưu động vận hành ròng ≈ −0,4%",
+  "W thuế truy thu ~14 tỷ / vụ SNZ (WARNING)"
+ ],
+ "law_params_not_in_sum": [
+  "L1 r 13,5% vs dải Ke: E15 27.233 (+4,01%)",
+  "L2 RONIC = Ke; holdco 0%"
+ ],
+ "trigger_table": [
+  {
+   "event": "NRV Tam An xác nhận (S1 A p0,90)",
+   "date": "2027-03",
+   "direction": "up",
+   "delta_pct": 0.03339
+  },
+  {
+   "event": "Tồn kho Tam An suy giảm 50%",
+   "date": "khi có",
+   "direction": "down",
+   "delta_pct": -0.02087
+  },
+  {
+   "event": "trả trước = ứng capex (S2 A)",
+   "date": "BCTC năm",
+   "direction": "up",
+   "delta_pct": 0.01672
+  },
+  {
+   "event": "trả trước = vốn lưu động (S2=0)",
+   "date": "BCTC năm",
+   "direction": "down",
+   "delta_pct": -0.02091
+  },
+  {
+   "event": "phân bổ DTCTH thực 17% N0",
+   "date": "2027-01-31",
+   "direction": "down",
+   "delta_pct": -0.02342
+  },
+  {
+   "event": "phân bổ DTCTH thực 23% N0",
+   "date": "2027-01-31",
+   "direction": "down",
+   "delta_pct": -0.05627
+  },
+  {
+   "event": "thu trước mới ≥ phân bổ (S4 đóng)",
+   "date": "BCTC năm",
+   "direction": "up",
+   "delta_pct": 0.0149
+  },
+  {
+   "event": "người mua trả trước không thuộc Tam An",
+   "date": "BCTC năm",
+   "direction": "up",
+   "delta_pct": 0.00521
+  },
+  {
+   "event": "người mua trả trước thuộc Tam An (p0,90)",
+   "date": "BCTC năm",
+   "direction": "down",
+   "delta_pct": -0.00416
+  },
+  {
+   "event": "thuế truy thu ~14 tỷ chưa hạch toán",
+   "date": "khi có",
+   "direction": "down",
+   "delta_pct": -0.01002
+  },
+  {
+   "event": "LCTT tách capex duy trì",
+   "date": "2027-03-31",
+   "direction": "both",
+   "delta_pct": "chạy lại trục capex; ±0,248"
+  }
+ ],
+ "prereg_md5": {
+  "PREREG_adj.md": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2.md": "835dfc1e07f9c67ac7f6c3028b529d13",
+  "ADJ_PREREG_SZL.md": "c43c1873805cb9c7386a4e535964c2bd",
+  "ADJ_PREREG_SZL_v2.md": "fdddf36d4a5a8475ceef22ec1a29b423"
+ },
+ "skeptic_verdict": "agents/Taylor/research/dd_recheck_20261125w3/SZL/skeptic/r1.json"
+}

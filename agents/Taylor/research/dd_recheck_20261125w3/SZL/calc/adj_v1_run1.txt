@@ -1,0 +1,89 @@
+{
+ "center_base": 26183,
+ "center_adj": 28506,
+ "adj_pct": 0.08871,
+ "range_low": 26772,
+ "range_high": 29639,
+ "sum_pm_linear_pct": 0.08871,
+ "items": {
+  "S1_ton_kho_BDS_Tam_An": {
+   "bac": "A",
+   "input": 116.58,
+   "input_range": [
+    116.58,
+    116.58
+   ],
+   "m_pct": 0.08857,
+   "p": 0.75,
+   "p_range": [
+    0.5,
+    0.9
+   ],
+   "pm_pct": 0.06643,
+   "pm_min": 0.04429,
+   "pm_max": 0.07972
+  },
+  "S2_tra_truoc_nha_thau_capex": {
+   "bac": "B",
+   "input": 58.39,
+   "input_range": [
+    58.39,
+    72.61
+   ],
+   "m_pct": 0.04436,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_pct": 0.02218,
+   "pm_min": 0.01109,
+   "pm_max": 0.04138
+  },
+  "S3_co_tuc_du_thu": {
+   "bac": "A",
+   "input": 23.264,
+   "input_range": [
+    23.264,
+    23.264
+   ],
+   "m_pct": 0.01768,
+   "p": 0.9,
+   "p_range": [
+    0.75,
+    1.0
+   ],
+   "pm_pct": 0.01591,
+   "pm_min": 0.01326,
+   "pm_max": 0.01768
+  },
+  "S4_nc_phan_bo_DTCTH": {
+   "bac": "C+",
+   "input": 0.07,
+   "input_range": [
+    0.07,
+    0.13
+   ],
+   "m_pct": -0.04518,
+   "p": 0.35,
+   "p_range": [
+    0.15,
+    0.55
+   ],
+   "pm_pct": -0.01581,
+   "pm_min": -0.04615,
+   "pm_max": -0.00678
+  }
+ },
+ "triggers": {
+  "S1_nguoi_mua_tra_truoc_bang_0_p0.90": 0.0122,
+  "S1_suy_giam_50pct": -0.03051,
+  "S2_TM_xac_nhan_capex_A_p0.90": 0.0163,
+  "S2_la_von_luu_dong_van_hanh_0": -0.02037,
+  "S4_TM19_phan_bo_thuc_17pct_p0.90": -0.02282,
+  "S4_TM19_phan_bo_thuc_23pct_p0.90": -0.05484,
+  "S4_dong_nc_giu_10pct": 0.01452
+ },
+ "sh_mn": 48.198884,
+ "d_ref": 0.04115928005270644
+}

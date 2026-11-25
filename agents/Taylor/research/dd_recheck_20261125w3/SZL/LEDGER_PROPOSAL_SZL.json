@@ -1,0 +1,51 @@
+{
+ "entry": {
+  "ticker": "SZL",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261125w3/SZL/skeptic/r1.json",
+  "audited_fy_missing": true,
+  "dd_date": "2026-10-26",
+  "rev": 5,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 22740,
+  "center": 26183,
+  "zone_high": 29700,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới kết cục (2 mức N0 9T/biên chu kỳ × ±12% × r × nc × thời hạn × BĐS ĐT mới × ký quỹ DH), RONIC=Ke, KTPL 20%, đất Tân Đức sổ sách, cơ sở 48,198884 tr cp sau thưởng, sau CK 4,12% @5 tỷ",
+  "center_range": null,
+  "price_ref": 27700,
+  "price_date": "2026-11-06",
+  "verdict_label": "TRONG vùng ở cả 2 cỡ: giá 27.700 cao hơn tâm 5,8% (5 tỷ) / 1,8% (40 tr); 70,9% / 57,6% trọng số kết cục dưới giá. Luật sổ (giá < tâm −15%): KHÔNG đạt (ngưỡng 22.256)",
+  "skeptic_status": "recheck đợt 3 25/11 (luật B5+E15/E16+E17): base rev5 giữ nguyên; E17 v1 28.506 (+8,87% >5%) ⇒ dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (report_md5 khớp, 1,30 USD): base tái lập, số khớp ảnh trang; E17 cộng tài sản chọn lọc chưa nêu luật vốn lưu động, người mua trả trước 14,54 bị bỏ, Tam An chưa kiểm NRV; không khoảng nào lượng hoá được >5%. Đính chính E17 v2 = 27.782 (+6,10%, dải 25.975–29.277), Δ v1→v2 −2,54% ⇒ xác nhận cơ học. Còn mở: kiểm toán FY2025, pháp lý SNZ/thuế.",
+  "source_file": "agents/Taylor/research/dd_recheck_20261125w3/SZL/REPORT_recheck_SZL.md",
+  "report_md5": "33e276f6850a7abfb1d6565d870e8767",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w3/SZL/REPORT_recheck_SZL.md",
+    "quote": "**TÂM (base, r 13,5%, RONIC = Ke, sau CK 4,12% @5 tỷ): 26.183 đ/cp — vùng 22.740–29.700 (P10–P90 lưới 1.080 kết cục). KHÔNG ĐỔI so với rev5.**",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w3/SZL/REPORT_recheck_SZL.md",
+    "quote": "- **Nhãn** (giá 27.700, BQ 06/11/2026, kế thừa rev5): **TRONG vùng** ở cả 2 cỡ (+5,8% so tâm 5 tỷ; 70,9% trọng số kết cục dưới giá). Luật 4 KHÔNG ĐẠT (ngưỡng 0,85 × 26.183 = 22.256). Nhãn không đổi so với rev5.",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_redo_20261105/SZL/rev5/calc/LOCK_rev5_prerun.txt",
+  "assumptions_md5": "fd5265090e56beac6177dc5a8e6a4aaf",
+  "notes": "Recheck: tâm/vùng/nhãn KHÔNG đổi so rev4 sổ (rev5 báo cáo). Cỡ 40 tr: tâm 27.207. E15 Tâm @ Ke 12,3% = 27.233 (+4,01%); dải Ke 27.233/26.265; ±100bp 27.046/25.424. E16 TRUNG TÍNH (fade 52/hold 43, N≈13.2, chỉ hiển thị). V6 V_ngắn 31.011 / V_dài 1.335, D=3,15>ln2 (FCFE ≈0 do pha xây nhà xưởng + Long Phước; engine không thấy thu trước DTCTH; chỉ hiển thị). V8 trần 2% NAV nhưng chặn bởi thanh khoản: ADV250 0,461 tỷ/phiên, tham gia ≤20% ⇒ ≈92 tr/phiên. E17 v2 27.782 (S1 tồn kho Tam An B, S2 trả trước nhà thầu B, S3 cổ tức dự thu A, S4 nc phân bổ DTCTH C+, S5 người mua trả trước B). r 13,5% neo 7,40% (Δ=0 tới 25/11). WARNING: vụ SNZ, thuế truy thu ~14 tỷ.",
+  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "expires_on": "2027-02-23",
+  "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+  "recorded_at": "2026-11-25T13:30:00+07:00",
+  "supersedes": "SZL@2026-10-26#4",
+  "correction_reason": "recheck đợt 3 theo dd_recheck_20261125w3/HANDOFF.md: thêm E15/E16/dải Ke/V6/V8 + E17 (tâm điều chỉnh) từ hạng mục skeptic r4 chưa áp; skeptic DD_GENERAL r1 trên bản recheck INCONCLUSIVE ⇒ giữ REFUTED_OPEN. Tâm/vùng/nhãn không đổi (26.183; 22.740–29.700; TRONG)."
+ }
+}
