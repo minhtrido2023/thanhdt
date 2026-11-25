@@ -111,7 +111,7 @@ def selfcheck_resolved(root, topic):
     return None
 
 
-PLAN_T1_RE = re.compile(r"^plan-t1-not-ready-(?:r2-)?(\d{4}-\d{2}-\d{2})-([A-Za-z0-9_]+)$")
+PLAN_T1_RE = re.compile(r"^plan-t1-not-ready-(r2-)?(\d{4}-\d{2}-\d{2})-([A-Za-z0-9_]+)$")
 META_RE = re.compile(r"^(wags-fix-not-confirmed|wags-autofix-review-needed|"
                      r"wags-arch-review-round2-unresolved): coord-(\d{4}-\d{2}-\d{2})$")
 META_EXPIRE_DAYS = 3
@@ -122,7 +122,7 @@ def plan_t1_resolved(plans_dir, topic):
     m = PLAN_T1_RE.match(topic)
     if not m:
         return None
-    date, account = m.groups()
+    r2, date, account = m.groups()
     # 2026-11-25: ngày đích KHÔNG giao dịch theo lịch hiện tại (lễ khai muộn, vd 24/11/2026) ⇒ không cần
     # plan ⇒ đóng với bằng chứng is_holiday. Lịch lỗi ⇒ không đoán, xét file plan như cũ.
     try:
@@ -133,6 +133,12 @@ def plan_t1_resolved(plans_dir, topic):
         ev = None
     if ev:
         return f"{ev} — không cần plan_{account}_{date}.json, câu hỏi là báo động giả"
+    # arch-review vòng 2 #1 (25/11): câu `-r2-` mở lúc 23:00 CHÍNH VÌ plan tồn tại nhưng HỎNG/đổi sau khi câu
+    # cũ đã đóng (send_plan_report.sh GATE_BLOCK_PLAN_T1) ⇒ "file có + plan_date khớp" KHÔNG phải bằng chứng
+    # phục hồi. r2 chỉ đóng ở đây bằng bằng chứng ngày nghỉ; còn lại để gate_block_question sweep đóng theo
+    # probe marker-đã-gửi + md5 khớp (cmd_probe_plan_t1) — tiêu chí đúng duy nhất.
+    if r2:
+        return None
     path = plans_dir / f"plan_{account}_{date}.json"
     try:
         plan = json.loads(path.read_text(encoding="utf-8"))
