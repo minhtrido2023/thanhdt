@@ -37,7 +37,7 @@ try:
  c=classify(sys.argv[1], sys.argv[2])
  if c != 'OK': print(c); raise SystemExit(0)
  p=json.load(open(sys.argv[1]))
- if p.get('approved_by'): print('APPROVED')
+ if p.get('approved_by') or p.get('approved_by_user'): print('APPROVED')  # bí danh như auto_exit_inject.py:780
  elif (p.get('park_trim_proposal') or {}).get('_merged_into_orders','').startswith('✅ ĐÃ MERGE'): print('READY')
  else: print('NEEDS_CHAIN')
 except FileNotFoundError: print('MISSING')
