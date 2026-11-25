@@ -27,13 +27,16 @@ labels="$(cd "$WC_ROOT" && python3 -c 'from trading_bot.config import live_dnse_
 rc=0
 
 # JSON is the authority, not mtime: reject wrong date, malformed or already-approved plans.
+# MISSING/INVALID/OK = định nghĩa chung bin/plan_presence.py::classify (25/11/2026, gom 4 bản lệch).
 check_status() {
-  python3 - "$1" "$2" <<'PY'
+  python3 - "$1" "$2" "$ROOT/bin" <<'PY'
 import json,sys
+sys.path.insert(0, sys.argv[3])
 try:
+ from plan_presence import classify
+ c=classify(sys.argv[1], sys.argv[2])
+ if c != 'OK': print(c); raise SystemExit(0)
  p=json.load(open(sys.argv[1]))
- assert p.get('plan_date',p.get('date')) == sys.argv[2]
- assert isinstance(p.get('orders'),list)
  if p.get('approved_by'): print('APPROVED')
  elif (p.get('park_trim_proposal') or {}).get('_merged_into_orders','').startswith('✅ ĐÃ MERGE'): print('READY')
  else: print('NEEDS_CHAIN')

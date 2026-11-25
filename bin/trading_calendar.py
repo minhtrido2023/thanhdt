@@ -15,7 +15,13 @@ from zoneinfo import ZoneInfo
 WC_ROOT = os.environ.get("WORKDIR_8L", "/home/trido/thanhdt/WorkingClaude")
 if WC_ROOT not in sys.path:
     sys.path.insert(0, WC_ROOT)
-from trading_bot import vn_market as VM  # noqa: E402
+try:
+    from trading_bot import vn_market as VM  # noqa: E402
+    _VM_ERR = None
+except Exception as _exc:  # noqa: BLE001 — §28: import hỏng KHÔNG được ra rc=1 (= "ngày giao dịch") của CLI
+    VM, _VM_ERR = None, _exc
+    if __name__ != "__main__":
+        raise
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
 WD = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
@@ -76,8 +82,13 @@ def fmt_day(d):
 
 def main(argv=None):
     """CLI: `trading_calendar.py --evidence YYYY-MM-DD` → rc 0 + in bằng chứng nếu KHÔNG giao dịch,
-    rc 1 nếu là ngày giao dịch, rc 2 nếu ngày sai định dạng. `--upcoming [N]` → in cửa sổ N ngày."""
+    rc 1 nếu là ngày giao dịch, rc 2 nếu LỖI (ngày sai định dạng / import vn_market hỏng / exception) —
+    §28: rc 1 chỉ có nghĩa "đã đọc lịch và đó là ngày giao dịch"; crash KHÔNG bao giờ ra rc 1. `--upcoming [N]` → in cửa sổ N ngày."""
     argv = sys.argv[1:] if argv is None else argv
+    if VM is None:
+        print(f"trading_calendar: ERROR không import được trading_bot.vn_market từ {WC_ROOT}: "
+              f"{type(_VM_ERR).__name__}: {_VM_ERR}")
+        return 2
     try:
         if argv[:1] == ["--evidence"] and len(argv) == 2:
             ev = non_trading_evidence(argv[1])
@@ -88,7 +99,7 @@ def main(argv=None):
             print("holidays=" + ",".join(map(str, u["holidays"])) + " unconfirmed=" +
                   ",".join(map(str, u["unconfirmed"])) + f" confirmed_through={u['confirmed_through']}")
             return 0
-    except (ValueError, TypeError) as exc:
+    except Exception as exc:  # noqa: BLE001 — mọi lỗi ⇒ rc 2, không bao giờ trùng rc 0/1 có nghĩa
         print(f"trading_calendar: ERROR {type(exc).__name__}: {exc}")
         return 2
     print("usage: trading_calendar.py --evidence YYYY-MM-DD | --upcoming [N]")
