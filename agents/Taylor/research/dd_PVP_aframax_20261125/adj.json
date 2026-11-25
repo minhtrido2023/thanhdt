@@ -1,0 +1,129 @@
+{
+ "ticker": "PVP",
+ "dd_date": "2026-10-29",
+ "rev": 5,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_080254",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13",
+  "INVENTORY_adj_PVP": "c0d80348a3f758e101dc4d58b391c20c"
+ },
+ "inherits": {
+  "path": "agents/Taylor/research/dd_recheck_20261124w2/PVP/adj.json",
+  "md5": "bd4b09d18d9494ee9ae20593217aa0b5"
+ },
+ "blind_to_price": true,
+ "center_base": 23099,
+ "center_base_source": "sổ rev4 center 23.099 (không đổi — NQ ĐHĐCĐ bất thường chưa thông qua, họp 30/11/2026)",
+ "items": [
+  {
+   "name": "Lên đà định kỳ sau TT99 — chỉ nhánh tốt (C+ cận bảo thủ k=0,5)",
+   "dir": "down",
+   "evidence_tier": "C+",
+   "source": "agents/Taylor/research/dd_recheck_20261124w2/PVP/skeptic/r1_raw.md:10-14; calc/calc_d3_tot_out.json; dd_PVP_20261029/REPORT.md:73 (LCTT mã 03 9T/25 53,1 tỷ)",
+   "note": "dấu chắc chắn (lên đà đăng kiểm bắt buộc); cận bảo thủ ½ mức trích cũ; 1 quan sát ⇒ B1",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -0.96,
+   "mag_range_pct": [
+    -1.92,
+    -0.96
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -0.48
+  },
+  {
+   "name": "Nhánh \"một tàu\" = DT-08/26/TBD ≤80 tr USD (thay Aframax #2 56,5 tr USD) — chỉ tác động qua nhánh xấu NPV −30% đã khoá",
+   "dir": "down",
+   "evidence_tier": "A",
+   "source": "src/3-du-thao-to-trinh-dieu-chinh-danh-muc-dau-tu-nam-2026*.txt p1 (2 dòng 56,5+59,5 gộp thành \"01 đến 03 tàu\", tổng 116 giữ); src/4-du-thao-to-trinh-...-tau-cho-dau-tho*.txt p1,p3,p5 (TMĐT ≤80.000.000 USD, giá tàu 79.550.000, 10 tuổi, vay ≤70%); calc/calc_afx_out.json A_mot_tau_80",
+   "note": "Văn bản công ty (tài liệu họp CBTT 09/11) ⇒ bậc A, p theo thang 0,90 [0,75;1,00] (PREREG §2 không cho hạ vì rủi ro biểu quyết — ghi rõ: ĐHĐCĐ họp 30/11, NQ chưa có). m = −0,72% (chạy mô hình r3, chỉ đổi giá trị nhánh chi_2 56,5→80; trọng số 0,50/0,35/0,15 + NPV {xấu −30%, cơ sở/tốt 0} GIỮ — luật house, không phải hạng mục). Khoảng m [−0,72; 0]: 80 là TRẦN (\"không vượt quá\"); giá mua ≤56,5 ⇒ 0.",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": -0.72,
+   "mag_range_pct": [
+    -0.72,
+    0.0
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -0.648
+  }
+ ],
+ "sum_p_m_pct": -1.128,
+ "aggregation": "linear (|Σ|≤5%)",
+ "center_adj": 22838,
+ "range_low": 22600,
+ "range_high": 23044,
+ "dividend_mech": {
+  "vnd": 0,
+  "status": "cổ tức 2025 1.000 đ đã trả 20/10/2026, đã trừ trong tiền ròng (DIV_PAY); không có quyền tiền chưa chốt đã biết"
+ },
+ "sensitivity_only": [
+  {
+   "name": "Phế liệu đội tàu hiện hữu (base = 0)",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "+1 tr USD ⇒ 23216 (+0.51%); +5 tr USD ⇒ 23684 (+2.53%)",
+   "why_not_center": "không có LDT/giá phế liệu trong tay ⇒ không có cận từ dữ liệu",
+   "source": "skeptic/r1_raw.md:15-18"
+  },
+  {
+   "name": "Trích quỹ KTPL hằng năm (ví dụ 5% LN sau thuế)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "-866 đ/cp (-3.75%) — ước lượng: 5% × PV(đội tàu+FSO−chi phí công ty) tại tham số trung tâm",
+   "why_not_center": "không có số dư/tốc độ chi quỹ trong tay",
+   "source": "skeptic/r1_raw.md:27"
+  },
+  {
+   "name": "Chi phí công ty 10 năm [UL]",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "8 năm ⇒ 23335 (+1.02%); 6 năm ⇒ 23639 (+2.34%)",
+   "why_not_center": "tham số tự đặt; FSO hợp đồng tới 2036 ≈ 10 năm",
+   "source": "skeptic/r1_raw.md:26"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke (E15)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "Ke 12,3% ⇒ 23.593 (+2,14%); 13,4% ⇒ +0,17%",
+   "source": "REPORT_recheck_PVP.md §2"
+  },
+  {
+   "name": "[LUẬT] trọng số mua tàu 0,50/0,35/0,15 — \"không\" 0,15→0,05 (văn kiện đã xong, đã triệu tập)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "22769 (-1.43%)",
+   "why_not_center": "trọng số kịch bản = tham số house (PREREG §4)",
+   "source": "calc/calc_afx_out.json"
+  },
+  {
+   "name": "[LUẬT] \"không\" 0,15→0,30 (không thông qua / không tìm được tàu — tờ trình 3: ít chủ tàu chào bán)",
+   "dir": "up",
+   "evidence_tier": "C",
+   "sensitivity": "23249 (+0.65%)",
+   "why_not_center": "trọng số kịch bản = tham số house",
+   "source": "calc/calc_afx_out.json"
+  },
+  {
+   "name": "Dùng hết 116 tr USD chắc chắn / chỉ 1 tàu 80 chắc chắn",
+   "dir": "down",
+   "evidence_tier": "C",
+   "sensitivity": "116: 22323 (-3.36%); 80: 23054 (-0.19%)",
+   "why_not_center": "trọng số kịch bản",
+   "source": "calc/calc_afx_out.json"
+  },
+  {
+   "name": "NPV tàu mới: NPV0 mọi nhánh / −30% vô điều kiện (nhánh một tàu 80)",
+   "dir": "both",
+   "evidence_tier": "C",
+   "sensitivity": "NPV0: 24678 (+6.84%); −30% vô đk: 18328 (-20.65%)",
+   "why_not_center": "độ lớn [UL]; kiểm chéo: giá tàu 10 tuổi về TB 2023-25 (54) ⇒ −32,1% giá mua 79,55 (bảng Clarksons/Allied trong tờ trình 4 p3) — chỉ ủng hộ dấu/độ lớn nhánh xấu, không đổi tham số",
+   "source": "calc/calc_afx_out.json xcheck_m30"
+  }
+ ]
+}

@@ -1,0 +1,56 @@
+{
+ "entry": {
+  "ticker": "PVP",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261124w2/PVP/skeptic/r1.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-10-29",
+  "rev": 5,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 13799,
+  "center": 23099,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 270 kết cục (cước 0,275/0,45/0,275 × tuổi đội tàu × r × FSO 177 tỷ 0,5/0,5 × NPV tàu), sau CK 1,98% @5 tỷ",
+  "zone_high": 30338,
+  "center_range": null,
+  "price_ref": 18000,
+  "price_date": "2026-11-06",
+  "verdict_label": "TRONG vùng: giá 18.000 thấp hơn tâm 23.099 −22,1%; 20,5% trọng số kết cục dưới giá. Luật sổ (giá < tâm −15%): ĐẠT (giá ≤ 0,85×tâm = 19.634) — chỉ là điều kiện được XÉT làm candidate (user duyệt từng lần). NHÃN MONG MANH: phụ thuộc giả định NPV tàu mới (NPV0 mọi nhánh ⇒ P10 20.474 > giá ⇒ DƯỚI; −30% vô điều kiện ⇒ tâm 18.935 ≈ giá)",
+  "skeptic_status": "recheck 24/11 đợt 2 (luật B5+E15/E16): dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (report_md5 khớp, 0,96 USD). Cơ học đúng (lưới 270 ô, bảng r, bảng D3 tái lập md5 91f4475b; SOTP cộng tay 25.573 = tham số trung tâm). Đòn 8 chưa qua: ĐHĐCĐ bất thường 23/10/2026 mua tàu Aframax \"số 3\" (nguồn vốn/phát hành chưa rõ, chưa tra lại sau 05/11); D3 lên đà sau TT99 đúng ra chỉ nhánh tốt (≈−1,9%, đã đo lại); phế liệu = 0 chưa định lượng (chiều lên); HTM 1.015,87 không đọc lại được PDF. Tâm điều chỉnh E17: adj.json. | 25/11 (job Taylor_20261125_080254): đòn 8 mục ĐHĐCĐ — đã đọc tài liệu họp DỰ THẢO (src/ dd_PVP_aframax_20261125): không phát hành, trong 116 tr USD; NQ chính thức chờ 30/11. Chưa chạy skeptic lại.",
+  "source_file": "agents/Taylor/research/dd_recheck_20261124w2/PVP/REPORT_recheck_PVP.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261124w2/PVP/REPORT_recheck_PVP.md",
+    "quote": "**TÂM (base, r 13,5%, sau CK 5 tỷ): 23.099 đ/cp — vùng 13.799–30.338 (P10–P90). KHÔNG ĐỔI so với r3.**",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261124w2/PVP/REPORT_recheck_PVP.md",
+    "quote": "- **Nhãn** (giá 18.000, 06/11/2026, kế thừa r3): **TRONG vùng**. Luật 4 ĐẠT (ngưỡng 0,85 × 23.099 = 19.634). Nhãn mong manh: NPV tàu mới −30% vô điều kiện ⇒ tâm 18.935 ≈ giá (r3 §3).",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_redo_20261105/PVP/calc_r3/LOCK_md5.txt",
+  "assumptions_md5": "4c506623e7ff2dec7cd94658e5a72285",
+  "notes": "Vùng = P10–P90 kết cục, CK 1,98% @5 tỷ (62% ADV, ngoài vùng hiệu chỉnh); sleeve 40 tr: CK 0,18%. Đối xứng trọng số cước 0,275/0,45/0,275, bỏ +30% NPV tàu nhánh tốt (không có dữ liệu), FSO chiết khấu = r, cộng VLĐ ròng +37,0 tỷ. WARNING: phụ lục gia hạn FSO đến 2036 CHƯA KÝ (hợp đồng cũ hết 17/05/2026, đối tác là công ty mẹ đã từng cắt giá cước 03/06/2025); tài liệu ĐHĐCĐ bất thường đã đọc (DỰ THẢO; họp 30/11, NQ chưa có); HTM 1.015,87 không có trong BQ. Moat NONE. r 13,5% neo 7,40%.",
+  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "expires_on": "2027-02-26",
+  "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+  "recorded_at": "2026-11-25T15:40:00+07:00",
+  "supersedes": "PVP@2026-10-29#4",
+  "correction_reason": "dữ kiện mới: tài liệu ĐHĐCĐ bất thường 2026 (DỰ THẢO, CBTT 09/11, họp 30/11/2026 09:00 trực tuyến): danh mục 2026 gộp Aframax #2 56,5 + #3/MR 59,5 thành \"01–03 tàu\" trong tổng 116 tr USD (không đổi); dự án DT-08/26/TBD 1 tàu dầu thô ≤120.000 DWT, TMĐT ≤80 tr USD (giá 79,55), 10 tuổi, vay ≤70% giá tàu, IRR 7,67%, NPV dự án 33.856 USD; KHÔNG có phát hành cổ phiếu trong chương trình. Tâm base/vùng/nhãn/skeptic_final GIỮ NGUYÊN (NQ chưa thông qua); chỉ cập nhật tâm kỳ vọng điều chỉnh E17 22838 (dải 22600–23044) — thêm hạng mục bậc A nhánh một tàu 56,5→80 (−0,72%, p 0,90)",
+  "report_md5": "d34aa5f3e4f443f449761b756806c8d6",
+  "center_adj": 22838,
+  "center_adj_low": 22600,
+  "center_adj_high": 23044,
+  "center_adj_basis": "agents/Taylor/research/dd_PVP_aframax_20261125/adj.json",
+  "center_adj_md5": "c062c5eb3354aa0b9043d397e41ba954"
+ }
+}
