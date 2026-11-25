@@ -3,11 +3,13 @@
 
 Nguồn lịch DUY NHẤT vẫn là `trading_bot/vn_market.py` (_FIXED_HOLIDAYS/_VARIABLE_HOLIDAYS, sửa tay khi
 có thông báo SSI/HOSE). File này chỉ: (1) hỏi "ngày D có giao dịch không" kèm bằng chứng in được (§28),
-(2) liệt kê ngày T2-T6 sắp tới CHƯA được người xác nhận lịch (mốc `CALENDAR_CONFIRMED_THROUGH` trong
-vn_market.py; thiếu/None ⇒ coi như chưa xác nhận ngày nào — fail-safe về phía CẢNH BÁO, không đoán lễ).
+(2) liệt kê ngày T2-T6 sắp tới CHƯA được người xác nhận lịch (mốc trong FILE DỮ LIỆU
+`config/trading_calendar_confirmed.json` — ngoài trading_bot, sửa mốc không đụng module executor import;
+thiếu/null/không có `source` ⇒ coi như chưa xác nhận ngày nào — fail-safe về phía CẢNH BÁO, không đoán lễ).
 Thêm 2026-11-25 (sự cố "không ra plan 25/11": lễ 24/11 khai SAU chuỗi 19:00-23:00 ngày 23/11).
 """
 import datetime as dt
+import json
 import os
 import sys
 from zoneinfo import ZoneInfo
@@ -24,6 +26,8 @@ except Exception as _exc:  # noqa: BLE001 — §28: import hỏng KHÔNG đượ
         raise
 
 ICT = ZoneInfo("Asia/Ho_Chi_Minh")
+CONFIRMED_FILE = os.environ.get("TC_CONFIRMED_FILE") or os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "trading_calendar_confirmed.json")
 WD = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
 
 
@@ -52,10 +56,13 @@ def non_trading_evidence(d):
 
 
 def confirmed_through():
-    v = getattr(VM, "CALENDAR_CONFIRMED_THROUGH", None)
+    """Mốc người đã đối chiếu lịch (file dữ liệu). Thiếu file / JSON hỏng / ngày sai / KHÔNG có source ⇒ None."""
     try:
-        return as_date(v) if v else None
-    except (TypeError, ValueError):
+        with open(CONFIRMED_FILE, encoding="utf-8") as f:
+            j = json.load(f)
+        v, src = j.get("confirmed_through"), str(j.get("source") or "").strip()
+        return as_date(v) if (v and src) else None
+    except (OSError, ValueError, TypeError, AttributeError):
         return None
 
 

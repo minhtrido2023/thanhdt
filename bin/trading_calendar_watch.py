@@ -4,8 +4,9 @@
 Sự cố "không ra plan 25/11" (2026-11-25): lễ Ngày Văn hóa 24/11 chỉ được khai vào vn_market.py lúc
 00:01 ngày 24/11 — SAU chuỗi 19:00/21:00/23:00 ngày 23/11 ⇒ hệ thống tin T+1=24/11, mở báo động giả.
 Script này KHÔNG đoán ngày lễ và KHÔNG đổi lịch: nó chỉ liệt kê và nhắc người đối chiếu thông báo
-SSI/HOSE, rồi (a) thêm ngày nghỉ vào `_VARIABLE_HOLIDAYS` hoặc (b) nâng `CALENDAR_CONFIRMED_THROUGH`
-trong trading_bot/vn_market.py. Nguồn lịch duy nhất = vn_market.py (đọc qua bin/trading_calendar.py).
+SSI/HOSE, rồi (a) thêm ngày nghỉ vào `_VARIABLE_HOLIDAYS` trong trading_bot/vn_market.py và/hoặc (b) nâng
+`confirmed_through` (+ `source`) trong config/trading_calendar_confirmed.json (file dữ liệu, ngoài trading_bot).
+Nguồn lịch duy nhất = vn_market.py (đọc qua bin/trading_calendar.py).
 
 Gửi: có ngày chưa xác nhận ⇒ Telegram + Discord trading_daily; đủ xác nhận ⇒ 1 dòng Discord (heartbeat).
 rc: 0 OK · 3 NOTIFY_FAILED (không kênh nào nhận). --dry-run: chỉ in.
@@ -33,8 +34,9 @@ def build(today=None, days=14):
     msg = (f"{head} — ⚠️ {len(u['unconfirmed'])} ngày T2-T6 CHƯA XÁC NHẬN lịch: {lst}.\n"
            f"Ngày nghỉ T2-T6 đã khai trong cửa sổ: {hol} · mốc xác nhận hiện tại: {ct}.\n"
            "Việc cần làm: đối chiếu thông báo lịch nghỉ giao dịch của SSI/HOSE. Có ngày nghỉ ⇒ thêm vào "
-           "`_VARIABLE_HOLIDAYS` trong trading_bot/vn_market.py; không có ⇒ đặt `CALENDAR_CONFIRMED_THROUGH` = "
-           "ngày cuối đã đối chiếu. Hệ thống KHÔNG tự đoán/đổi lịch — ngày nghỉ khai muộn = plan T+1 sai ngày + "
+           "`_VARIABLE_HOLIDAYS` trong trading_bot/vn_market.py; rồi đặt `confirmed_through` = ngày cuối đã đối chiếu "
+           f"+ `source` (tên/link thông báo) trong {TC.CONFIRMED_FILE} (thiếu source ⇒ mốc bị bỏ qua). "
+           "Hệ thống KHÔNG tự đoán/đổi lịch — ngày nghỉ khai muộn = plan T+1 sai ngày + "
            "báo động giả (sự cố 24/11/2026).")
     return True, msg
 

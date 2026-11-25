@@ -75,10 +75,23 @@ def part_a():
     rc, out = py("import trading_calendar as T;u=T.upcoming('2026-11-23',14);"
                  "print([str(d) for d in u['holidays']],len(u['unconfirmed']),str(u['unconfirmed'][0]))", NEW_WC)
     chk("['2026-11-24'] 9 2026-11-25" in out, "A4 upcoming 23/11: nghỉ=[24/11], 9 ngày chưa xác nhận, đầu tiên 25/11", out)
-    rc, out = py("import trading_calendar as T, datetime as dt;T.VM.CALENDAR_CONFIRMED_THROUGH=dt.date(2026,12,1);"
-                 "u=T.upcoming('2026-11-23',14);print([str(d) for d in u['unconfirmed']])", NEW_WC)
+    cf = Path(tempfile.mkdtemp(prefix="pgh_cf_")); G.TMP.append(cf)
+    up = "import trading_calendar as T;u=T.upcoming('2026-11-23',14);print([str(d) for d in u['unconfirmed']])"
+    (cf / "ok.json").write_text(json.dumps({"confirmed_through": "2026-12-01", "source": "thông báo HOSE số X"}))
+    rc, out = py(up, NEW_WC, TC_CONFIRMED_FILE=str(cf / "ok.json"))
     chk("['2026-12-02', '2026-12-03', '2026-12-04', '2026-12-07']" in out,
-        "A5 CALENDAR_CONFIRMED_THROUGH=01/12 ⇒ chỉ còn ngày SAU 01/12 chưa xác nhận", out)
+        "A5 file mốc confirmed_through=01/12 + source ⇒ chỉ còn ngày SAU 01/12 chưa xác nhận", out)
+    (cf / "nosrc.json").write_text(json.dumps({"confirmed_through": "2026-12-01", "source": ""}))
+    rc, out = py(up, NEW_WC, TC_CONFIRMED_FILE=str(cf / "nosrc.json"))
+    chk("'2026-11-25'" in out and len(out.split(",")) == 9, "A5b mốc KHÔNG có source ⇒ bỏ qua (9 ngày vẫn chưa xác nhận)", out)
+    (cf / "bad.json").write_text("{hỏng")
+    rc, out = py(up, NEW_WC, TC_CONFIRMED_FILE=str(cf / "bad.json"))
+    chk("'2026-11-25'" in out and rc == 0, "A5c file hỏng ⇒ coi như chưa xác nhận (fail-safe cảnh báo), không crash", out)
+    shipped = json.loads((HERE.parent / "config" / "trading_calendar_confirmed.json").read_text())
+    chk(shipped.get("confirmed_through") is None and shipped.get("source") is None,
+        "A5d file giao kèm nhánh CHƯA điền mốc (không bịa xác nhận) — user điền", shipped)
+    chk("CALENDAR_CONFIRMED_THROUGH" not in (HERE / "trading_calendar.py").read_text(),
+        "A5e mốc KHÔNG còn đọc từ trading_bot/vn_market.py", "")
     rc, out = py("import trading_calendar as T;print(T.non_trading_evidence('2026-11-24'))", old_calendar_wc())
     chk(out.strip() == "None", "A6 lịch CŨ (chưa khai 24/11) ⇒ 24/11 bị coi là ngày giao dịch (đúng hiện trạng sự cố)", out)
 
