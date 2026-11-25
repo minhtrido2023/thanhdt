@@ -276,3 +276,6 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T16:40:13Z] [24/11 23:5x] Taylor V2 xong, Mike verify md5/selfcheck/PIT OK; đang chạy quant-skeptic 1 vòng; sau đó post tóm tắt user, KHÔNG merge/wire/email. Worktree wt-dcf-vn-redesign-20261124b, commit 5ae76594d.
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T16:49:29Z] [24/11 23:5x] DCF-VN v2 XONG: Taylor V2 verify OK + quant-skeptic CONFIRMED/medium (B-1 E/P null, B-2 rating gate 1,1-3,5đ). Đã post user, đang chờ user quyết: có cho Taylor 1 vòng sửa báo cáo không. KHÔNG merge/wire/email.
