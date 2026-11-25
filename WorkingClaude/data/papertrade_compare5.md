@@ -1,6 +1,6 @@
 # Paper-Trade Comparison — 5 Systems
 
-*Generated: 2026-11-24 15:39*
+*Generated: 2026-11-25 15:39*
 
 *Window: 2026-04-01 → 2026-11-23 (236 calendar days)*
 

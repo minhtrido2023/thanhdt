@@ -1,8 +1,6 @@
 # V2.3 + DT5G — Daily Recommendations — 2026-11-25
 
-*Generated 2026-11-25 00:22. System: V2.3 = BAL | LAG (static, always-on) + allocator + parking + CAPIT v2, gated DT5G state (fail-safe DT4).*
-
-> ⚠️ **`anomaly_flags.json` KHÔNG tươi hôm nay** (generated_at=`2026-11-24T05:45:10Z` — lần ghi cuối 2026-11-24 (ICT) < phiên giao dịch gần nhất 2026-11-25). Gate due-diligence vẫn chạy trên cờ CŨ ⇒ **CÓ THỂ THIẾU mã vừa nổ cờ bất thường**. Tự kiểm tra tin tức/giá các mã trong danh sách mua trước khi duyệt; kiểm tra `ops_health_check.sh`/`anomaly_scan.py` có chạy sáng nay không.
+*Generated 2026-11-25 19:02. System: V2.3 = BAL | LAG (static, always-on) + allocator + parking + CAPIT v2, gated DT5G state (fail-safe DT4).*
 
 ## Regime, allocator & parking
 
@@ -14,7 +12,7 @@
 
 _No new BAL entries today_ — không có signal đạt chuẩn trong các tier BAL (MEGA/MOMENTUM*/DVR/RE_BACKLOG) sau SV_TIGHT/overheat/AVOID_exbull. **Action: giữ vị thế hiện có (45d) + park cash theo target ở trên.** Đây là hành vi thận trọng bình thường, không phải lỗi.
 
-_Informational (ngoài tier BAL, V2.3 không trade):_ DHA(COMPOUNDER_BUY), PHP(COMPOUNDER_BUY), QTP(COMPOUNDER_BUY), NT2(COMPOUNDER_BUY), POW(COMPOUNDER_BUY)
+_Informational (ngoài tier BAL, V2.3 không trade):_ NAB(COMPOUNDER_BUY), DHA(COMPOUNDER_BUY), NT2(COMPOUNDER_BUY), SAB(COMPOUNDER_BUY), POW(COMPOUNDER_BUY)
 
 ## LAG book (50% NAV target, always-on PEAD)
 
@@ -28,7 +26,7 @@ _Đã loại ở tầng tín hiệu (gate quản trị BANNED/forensic): VVS (ba
 
 ## CAPIT v2 monitor
 
-- Oversold breadth (D_RSI<0.3, top-250 thanh khoản universe_pit): **18.0%** vs gate 31%
+- Oversold breadth (D_RSI<0.3, top-250 thanh khoản universe_pit): **20.4%** vs gate 31%
 - Gate chưa kích hoạt — sleeve dormant.
 
 ## Notes
