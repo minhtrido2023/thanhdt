@@ -9631,6 +9631,109 @@
    "center_adj_high": 13969,
    "center_adj_basis": "agents/Taylor/research/dd_recheck_20261125w3/HHS/adj.json",
    "center_adj_md5": "a6d09227b06db7d17fa3ca95b7741bd8"
+  },
+  {
+   "ticker": "MBB",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_MBB_agm_20261125/skeptic/r2.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-10-31",
+   "rev": 6,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 12719,
+   "center": 17925,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 45 kết cục (kịch bản XẤU/CƠ SỞ/TỐT 0,275/0,45/0,275 × dịch ROE ±3pp × MBV 0,25/0,5/0,25), sau CK 0,19% @5 tỷ",
+   "zone_high": 23215,
+   "center_range": null,
+   "price_ref": 19250,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng: giá 19.250 cao hơn tâm 17.925 +7,4%; 64,1% trọng số kết cục dưới giá. Luật 4 (giá < 0,85×tâm = 15.236): KHÔNG đạt",
+   "skeptic_status": "recheck đợt 2 24/11 (luật B5+E15/E16+E17): dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (1,02 USD). Cơ học đúng (BVPS 15.594, ROE TTM 20,7%, Ke 12,3% +12,3% khớp). Đòn 8 chưa qua: rò LN sang quỹ KTPL ~8,9% LN 2025 suy từ phần dư LNCPP (−6,5…−11,4%); chênh ROE_T−Ke vĩnh viễn (bỏ = −14,7%, tham số luật 08/11); CAR 30/09 + nhu cầu vốn chưa mô hình; phát hành riêng lẻ 200 tr CP. Chiều lên: đường ROE 2027 18,5% < TTM 20,7%. Hạ từ CONFIRMED kiểu cũ (08/11, chưa DD_GENERAL) xuống REFUTED_OPEN. Tâm kỳ vọng điều chỉnh E17: 20.587 (19.245–21.061), adj.json. | 25/11 (job Taylor_20261125_080251): đòn 8 KTPL ĐÓNG bằng BCTC gốc — trích KTPL+thưởng BĐH 9,03% LN MB 2025 (HN Q3/26 TM22.1), 8,25% (KT HN 2025 TM26.1), riêng 8,00%/8,50%; vào tâm base rev6. Các đòn khác (CAR/nhu cầu vốn, riêng lẻ) còn mở ⇒ giữ REFUTED_OPEN. | 25/11 r2 (skeptic/r2.json) = INCONCLUSIVE medium, giữ REFUTED_OPEN. Xử lý (job Taylor_20261125_082754, REPORT_v2.md): (1) killer 'Quỹ khác: sử dụng' ĐÓNG — dòng 'Sử dụng các quỹ' giảm TỔNG VCSH 3 kỳ (348.289/620.313/460.531; KT HN25 TM26.1 + Q3/26 TM22.1), không đối ứng trong VCSH, không qua P&L ⇒ bậc A vào base, k 9,03%→11,59% (quỹ khác 2,56% = trích 2026/LN 2025), tâm 18.595→17.925; (2) 6 số rev5 cũ trong notes/adj tính lại hết trên rev6' (calc_agm_v2.py, CONTROL tái lập 25.317/18.969/18.742/23.396 ở k=0); (3) dải E17 đối xứng k 9,78…12,56%; (4) CAR 30/09 không có nguồn gốc (thứ cấp Q2 HN ~10,7%) ⇒ ngoài Σ, sensitivity C; pháp lý sau 05/11 không thấy tin mới (WARNING).",
+   "source_file": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md",
+     "quote": "**TÂM (base, r 13,5%, sau CK 5 tỷ): 17.925 đ/cp — vùng 12.719–23.215. k = 11,59% (KTPL 9,03% + quỹ khác 2,56%).**",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md",
+     "quote": "Nhãn @19.250 (06/11): giá cao hơn tâm 17.925 **+7,4%**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/MBB/calc_r3/LOCK_md5.txt",
+   "assumptions_md5": "61a2c340211c54fca7ef43c971291870",
+   "notes": "Vùng = P10–P90 kết cục (n=45 sau gộp), CK 0,19% @5 tỷ. g_RI terminal=0 mọi nhánh (moat NARROW không bền ⇒ RONIC=Ke); trọng số kịch bản và trục MBV đối xứng. rev6': RI trừ rò LN k=11,59%/năm (KTPL+thưởng BĐH 9,03% + quỹ khác sử dụng 2,56%; clean-surplus; dòng BCTC 3 kỳ). Không gồm quỹ khác ⇒ 18.595; k thấp 9,78% ⇒ 18.396; k cao 12,56% ⇒ 17.674. Nếu user cho RONIC>Ke: tâm 19.913. Độ nhạy ROE_T ±2pp: 15.979 / 19.871. Bỏ chênh terminal ⇒ 17.070. Ke 12,3% ⇒ 20.095; r ±50bp ⇒ 17.135/18.778. NPL/nhóm 2/bao phủ Q3 đã đối chiếu BCTC HN-Q3 (nhóm 2 HN 17.014, nhóm 2–5 2,99%, bao phủ 84,7%; chưa chạm mốc xấu); phải thu bán nợ MBV 11.248 tỷ ở axes_excluded; điểm MBV 15.688 giữ làm cờ HARD ABANDON (CƠ SỞ = 16.163). CAR 30/09 chưa có nguồn gốc (ngoài Σ). Pháp lý sau 05/11: không thấy tin mới (WARNING). r 13,5% neo 7,40%. Cổ tức tiền 10% đã chi 9T/26; NQ ĐHĐCĐ 2026 gốc chưa đọc (MB 403).",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-25T17:09:35+07:00",
+   "supersedes": "MBB@2026-10-31#5",
+   "correction_reason": "đóng E17 #1 (KTPL, C+→A) bằng BCTC gốc KT 2025 HN/riêng + Q3/26 (k 9,03%), cộng rò 'Quỹ khác: sử dụng' (skeptic r2 killer; giảm tổng VCSH 3 kỳ, bậc A, 2,56%) ⇒ k 11,59% vào tâm base: 21.069→17.925 (−14,92%), vùng 14.729–27.577→12.719–23.215; mọi độ nhạy tính lại trên base mới; nhãn TRONG không đổi",
+   "report_md5": "4f911391652a065d75b28e2da1ca291d"
+  },
+  {
+   "ticker": "MBB",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_MBB_agm_20261125/skeptic/r2.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-10-31",
+   "rev": 7,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 12719,
+   "center": 17925,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 45 kết cục (kịch bản XẤU/CƠ SỞ/TỐT 0,275/0,45/0,275 × dịch ROE ±3pp × MBV 0,25/0,5/0,25), sau CK 0,19% @5 tỷ",
+   "zone_high": 23215,
+   "center_range": null,
+   "price_ref": 19250,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRONG vùng: giá 19.250 cao hơn tâm 17.925 +7,4%; 64,1% trọng số kết cục dưới giá. Luật 4 (giá < 0,85×tâm = 15.236): KHÔNG đạt",
+   "skeptic_status": "recheck đợt 2 24/11 (luật B5+E15/E16+E17): dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (1,02 USD). Cơ học đúng (BVPS 15.594, ROE TTM 20,7%, Ke 12,3% +12,3% khớp). Đòn 8 chưa qua: rò LN sang quỹ KTPL ~8,9% LN 2025 suy từ phần dư LNCPP (−6,5…−11,4%); chênh ROE_T−Ke vĩnh viễn (bỏ = −14,7%, tham số luật 08/11); CAR 30/09 + nhu cầu vốn chưa mô hình; phát hành riêng lẻ 200 tr CP. Chiều lên: đường ROE 2027 18,5% < TTM 20,7%. Hạ từ CONFIRMED kiểu cũ (08/11, chưa DD_GENERAL) xuống REFUTED_OPEN. Tâm kỳ vọng điều chỉnh E17: 20.587 (19.245–21.061), adj.json. | 25/11 (job Taylor_20261125_080251): đòn 8 KTPL ĐÓNG bằng BCTC gốc — trích KTPL+thưởng BĐH 9,03% LN MB 2025 (HN Q3/26 TM22.1), 8,25% (KT HN 2025 TM26.1), riêng 8,00%/8,50%; vào tâm base rev6. Các đòn khác (CAR/nhu cầu vốn, riêng lẻ) còn mở ⇒ giữ REFUTED_OPEN. | 25/11 r2 (skeptic/r2.json) = INCONCLUSIVE medium, giữ REFUTED_OPEN. Xử lý (job Taylor_20261125_082754, REPORT_v2.md): (1) killer 'Quỹ khác: sử dụng' ĐÓNG — dòng 'Sử dụng các quỹ' giảm TỔNG VCSH 3 kỳ (348.289/620.313/460.531; KT HN25 TM26.1 + Q3/26 TM22.1), không đối ứng trong VCSH, không qua P&L ⇒ bậc A vào base, k 9,03%→11,59% (quỹ khác 2,56% = trích 2026/LN 2025), tâm 18.595→17.925; (2) 6 số rev5 cũ trong notes/adj tính lại hết trên rev6' (calc_agm_v2.py, CONTROL tái lập 25.317/18.969/18.742/23.396 ở k=0); (3) dải E17 đối xứng k 9,78…12,56%; (4) CAR 30/09 không có nguồn gốc (thứ cấp Q2 HN ~10,7%) ⇒ ngoài Σ, sensitivity C; pháp lý sau 05/11 không thấy tin mới (WARNING).",
+   "source_file": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md",
+     "quote": "**TÂM (base, r 13,5%, sau CK 5 tỷ): 17.925 đ/cp — vùng 12.719–23.215. k = 11,59% (KTPL 9,03% + quỹ khác 2,56%).**",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md",
+     "quote": "Nhãn @19.250 (06/11): giá cao hơn tâm 17.925 **+7,4%**",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_redo_20261105/MBB/calc_r3/LOCK_md5.txt",
+   "assumptions_md5": "61a2c340211c54fca7ef43c971291870",
+   "notes": "Vùng = P10–P90 kết cục (n=45 sau gộp), CK 0,19% @5 tỷ. g_RI terminal=0 mọi nhánh (moat NARROW không bền ⇒ RONIC=Ke); trọng số kịch bản và trục MBV đối xứng. rev6': RI trừ rò LN k=11,59%/năm (KTPL+thưởng BĐH 9,03% + quỹ khác sử dụng 2,56%; clean-surplus; dòng BCTC 3 kỳ). Không gồm quỹ khác ⇒ 18.595; k thấp 9,78% ⇒ 18.396; k cao 12,56% ⇒ 17.674. Nếu user cho RONIC>Ke: tâm 19.913. Độ nhạy ROE_T ±2pp: 15.979 / 19.871. Bỏ chênh terminal ⇒ 17.070. Ke 12,3% ⇒ 20.095; r ±50bp ⇒ 17.135/18.778. NPL/nhóm 2/bao phủ Q3 đã đối chiếu BCTC HN-Q3 (nhóm 2 HN 17.014, nhóm 2–5 2,99%, bao phủ 84,7%; chưa chạm mốc xấu); phải thu bán nợ MBV 11.248 tỷ ở axes_excluded; điểm MBV 15.688 giữ làm cờ HARD ABANDON (CƠ SỞ = 16.163). CAR 30/09 chưa có nguồn gốc (ngoài Σ). Pháp lý sau 05/11: không thấy tin mới (WARNING). r 13,5% neo 7,40%. Cổ tức tiền 10% đã chi 9T/26; NQ ĐHĐCĐ 2026 gốc chưa đọc (MB 403).",
+   "null_reason": "center_range: nguồn không cho khoảng tâm",
+   "expires_on": "2027-02-28",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-25T17:09:35+07:00",
+   "supersedes": "MBB@2026-10-31#6",
+   "correction_reason": "thêm tâm kỳ vọng điều chỉnh E17 (user duyệt 24/11/2026 19:10): 18059 đ/cp, dải 17709–18678; tâm base/vùng/nhãn/skeptic_final GIỮ NGUYÊN, tâm adj KHÔNG thay tâm base trong luật 0,85×tâm/luật 4",
+   "report_md5": "4f911391652a065d75b28e2da1ca291d",
+   "center_adj": 18059,
+   "center_adj_low": 17709,
+   "center_adj_high": 18678,
+   "center_adj_basis": "agents/Taylor/research/dd_MBB_agm_20261125/adj.json",
+   "center_adj_md5": "ae0a4786166f36ca9fd6643aa229ae52"
   }
  ],
  "center_kinds": [
