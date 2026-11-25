@@ -1,0 +1,12 @@
+# selfcheck_pit2.py 2026-10 stepcar out/sc — TZ=Asia/Ho_Chi_Minh, rc=0 (stdout log bị cắt khi chạy nền; bảng dựng lại từ md5 artefact out/sc/*.parquet, cùng phép so của script)
+poison vs base | PASS | dea31ba7 | dea31ba7
+mutate-nocut px | DETECTED | dea31ba7 | 356d3050
+mutate-nocut vnd_px | DETECTED | dea31ba7 | 6aae295f
+mutate-nocut universe | BLIND(expected) | dea31ba7 | dea31ba7
+mutate-nocut fin | DETECTED | dea31ba7 | d960338d
+mutate-nocut vnd_fs | DETECTED | dea31ba7 | 38b4853b
+mutate-nocut rating | DETECTED | dea31ba7 | 02ca726a
+mutate-nocut ca | BLIND(expected) | dea31ba7 | dea31ba7
+mutate-nocut ca+inner(pub) | DETECTED | dea31ba7 | 017b68d5
+RESULT: PASS (rc=0)
+3 TZ base md5: Asia/Ho_Chi_Minh dea31ba7 · America/New_York dea31ba7 · <unset> dea31ba7 (out/selfcheck_pit2_tz_*.txt)

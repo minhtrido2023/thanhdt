@@ -1,0 +1,28 @@
+{
+ "2026-05": {
+  "n_common": 1087,
+  "n_lv_both": 1052,
+  "lv_identical": 363,
+  "lv_absdiff_gt_0.01": 19,
+  "lv_absdiff_gt_0.05": 8,
+  "lv_absdiff_mean": 0.0013643664228920398,
+  "lv_absdiff_p95": 0.0034833518436432342,
+  "lv_absdiff_max": 0.1400551950565898,
+  "E_changed_gt_1pct": 0,
+  "rank_spearman": 0.9998792116709869,
+  "half_flip(lv rank vs median)": 2
+ },
+ "2026-06": {
+  "n_common": 1075,
+  "n_lv_both": 1041,
+  "lv_identical": 360,
+  "lv_absdiff_gt_0.01": 16,
+  "lv_absdiff_gt_0.05": 5,
+  "lv_absdiff_mean": 0.0010130774931785653,
+  "lv_absdiff_p95": 0.0034833518436432342,
+  "lv_absdiff_max": 0.08136999208610168,
+  "E_changed_gt_1pct": 0,
+  "rank_spearman": 0.9999193377161653,
+  "half_flip(lv rank vs median)": 4
+ }
+}

@@ -63,14 +63,96 @@ Có 1.841 ô >5% dưới stepcar:
 - 2026-05: OCB/ACB/KLB/VBB/ABB mang `E_unexpl` (xem §0.3). LPB 2025-07 tụt thật (cổ tức tiền) ⇒ giữ nguyên, không sửa.
 - HDB/TPB: đã đi ex trước D và có hệ số stepcar (HDB ×1,312, TPB ×1,15). E của dòng BCTC 07-31 đã cùng cơ sở OShares nên không sửa.
 
-## 4. Selfcheck
-(điền ở cuối job — xem §4 bảng dưới)
+## 4. Selfcheck (đều 0 lỗi)
+**4.1 PIT poison/mutation** — `calc/selfcheck_pit2.py 2026-10 stepcar` (rc=0, bảng `out/selfcheck_pit2_2026-10_table.txt`; md5 lấy từ artefact `out/sc/`):
 
-## 5. Đổi nhãn ô 2026-05..10
-(điền ở cuối job)
+| ca | kết quả | md5 |
+|---|---|---|
+| poison (phá MỌI nguồn sau D lúc nạp) vs base | PASS | `dea31ba7` = `dea31ba7` |
+| bỏ cắt px / vnd_px / fin / vnd_fs / rating | DETECTED ×5 | `356d3050` `6aae295f` `d960338d` `38b4853b` `02ca726a` |
+| bỏ cắt universe | BLIND (khai trước: ghép theo (mã, phiên ≤ D)) | `dea31ba7` |
+| bỏ cắt ca | BLIND (khai trước: `ca_factor` tự lọc ex ≤ D, pub ≤ D) | `dea31ba7` |
+| bỏ cắt ca **và** phá lớp lọc trong (`leaky_ca_factor`, bỏ pub ≤ D) | DETECTED | `017b68d5` |
 
-## 6. Vận hành (ĐỀ XUẤT — KHÔNG cài)
-(điền ở cuối job)
+Lần chạy trước (attempt 1, 23:50) báo `ca` là BLIND(UNEXPECTED). Lý do: ca có hai lớp PIT, bỏ một lớp thì không lộ. Đã thêm ca+inner để chứng minh lớp trong thật sự chặn. EXPECT_BLIND được khai trong code, không sửa sau khi thấy kết quả.
+
+**4.2 Ba TZ:** base 2026-10 md5 `dea31ba7` dưới Asia/Ho_Chi_Minh, America/New_York, `env -u TZ` (`out/selfcheck_pit2_tz_*.txt`). File final `out/final/lvens2_2026-10_mcstepcar.parquet` dựng lại độc lập cũng ra `dea31ba7` (tất định).
+
+**4.3 Sổ** — `calc/selfcheck_paper_cell_pit2.sh`, 9 ca + T8b, **PASS dưới 3 TZ** (`out/selfcheck_paper_cell_pit2.txt`):
+T1/T2 ghi · T3 chạy lại ⇒ SKIP · T4 đổi biến thể giữa chừng ⇒ rc 3 · T5 sidecar sai biến thể ⇒ rc 3 · T6 file sai tháng ⇒ rc 3 · T7 sửa 1 dòng cũ ⇒ rc 3 ·
+T8 khôi phục rồi ghi, và byte cũ giữ nguyên (T8b) · T9 manifest `ticker_financial` max_time 2026-10-01 < D−10 ⇒ rc 3.
+
+**4.4 Vintage** (skeptic mục 3) — `calc/vintage_drift.py`: dựng as-of 2026-05 và 2026-06 (stepcar) từ `data/bq_cache_asof20260728`, so với cache hiện tại (`out/vintage_drift.json`).
+
+| as-of | N chung (lv cả hai) | lv giống hệt | \|Δlv\|>0,01 / >0,05 | mean / p95 / max \|Δlv\| | Spearman | đổi nửa trên/dưới trung vị | E hoặc N đổi |
+|---|---|---|---|---|---|---|---|
+| 2026-05 | 1.087 (1.052) | 363 | 19 / 8 | 0,0014 / 0,0035 / 0,140 | 0,99988 | 2 | 0 / 0 |
+| 2026-06 | 1.075 (1.041) | 360 | 16 / 5 | 0,0010 / 0,0035 / 0,081 | 0,99992 | 4 | 0 / 0 |
+
+- Drift lớn nhất đến từ **mc**: giá bị restate sau ngày chụp cache (2026-05: 10 mã, ví dụ HPI +0,140, PTT −0,138). Phần còn lại đến từ MULT và HEDf: trung vị nhóm và hệ số hedonic dịch nhẹ (cả nhóm POWER cùng −0,032).
+  Cache hiện tại có thêm mã mà vintage không có: BPC, DNN, VLW (2026-05), QST (2026-06).
+- **E và N giống hệt giữa hai vintage.** Vì vậy đo vintage **không** phát hiện được rò BVPS của OCB/ACB/KLB/VBB (§0.3): cache 07-28 đã mang BVPS restate rồi. Giới hạn này nói thẳng, không coi là đã sạch.
+- Hệ quả vận hành: dựng lại cùng một tháng vào ngày khác có thể lệch ô ở 2–4 mã sát trung vị. Vì vậy sổ là append-only, không dựng lại để "sửa".
+
+## 5. Đổi nhãn ô 2026-05..10 (`out/cmp_cells.json`, `out/cmp_cells_changes.csv`)
+Số ô đổi so với stepcar (N ô in-universe đủ dữ liệu: 391/374/360/350/344/333):
+
+| as-of | vs merged | vs vp2 | merged vs vp2 | strict vs vp2 | step vs vp2 | stepca vs vp2 |
+|---|---|---|---|---|---|---|
+| 2026-05 | 6 | 2 | 8 | 10 | 2 | 2 |
+| 2026-06 | 10 | 4 | 8 | 10 | 4 | 6 |
+| 2026-07 | 0 | 2 | 2 | 2 | 2 | 2 |
+| 2026-08 | 2 | 4 | 4 | 4 | 4 | 4 |
+| 2026-09 | 6 | 4 | 6 | 6 | 4 | 2 |
+| 2026-10 | 6 | 4 | 2 | 2 | 4 | 0 |
+| **tổng** | **30** | **20** | 30 | 34 | 20 | 16 |
+
+Giải thích từng ô. **Thật** nghĩa là sửa đúng cơ chế; **artefact** nghĩa là ngưỡng trung vị hoặc nguồn so sánh không PIT.
+- **Thật, do mc bước theo sự kiện đổi số CP ≤ D (bản merge bỏ sót):** GEX 05/06 (×1,5) · L40 06 (×2,2) · TRC 09 (×4) · PHR 09/10 (×1,8) · TCM 05 (×1,05) · VFS 05 (×1,1).
+  Δv_grp từ −0,27 đến −0,63. Ở các mã này mc cũ thiếu số CP mới ⇒ lv cao giả.
+- **Thật nhưng là CẬN TRÊN, do có quyền mua trong hệ số:** RYG 09/10 (×1,755, gồm 50% quyền mà AIS cho thấy chỉ thực hiện một phần; §1), SMC 10 (×1,5, cả vs vp2), VVS 06 (×2,0).
+  Cả ba ô KHÁC giữa stepcar và stepca (đã kiểm). Tổng số ô stepcar≠stepca trong 6 tháng là 8 (06 JVC, VVS · 09 RYG, SZC · 10 SMC, RYG, VVS, GIL). Đây là các ô nhạy với lựa chọn stepcar.
+- **Thật, do E ngân hàng (e_guard):** KLB 06 (E_fix, +0,39). KLB 08 (vs merged): E/mc tháng 08 không đổi, nhưng lv_D0B −0,046 → 0,735 vì chuỗi E lịch sử (các kỳ 05/06) không còn cú tụt giả.
+  MSB 08/09 (vs vp2; E ×1,2, cùng cơ sở với mc ×1,2).
+- **Đối xứng ở ngân hàng, sát trung vị:** TCB 08/09, CTG 06. E và mc không đổi; đổi hạng vì KLB/MBB/MSB/VAB/VIB trong nhóm BANK (n≈26) đổi lv. Đây là hệ quả hợp lệ của xếp hạng trong nhóm, không phải lỗi của chính mã.
+- **Artefact so với vp2 (vp2 không PIT, có N_next/route look-ahead):** TRC 07 (v_grp vp2 0,05 → 0,56) và TOS 06. Bản merge cho ô giống stepcar, tức chênh này đã có từ bản PIT trước, không do pit2.
+- **Artefact ngưỡng** (|v−0,5| < 0,05, lv gần như không đổi): vs merged gồm TTN, DPG, DBC 05 · JVC, VSC, DL1, TLG 06 · TLD, SZC, EVG 09 · VVS, GIL, VCG 10 (**13 ô**).
+  vs vp2 gồm BGE, HBC 05 · NTL 07 · CIG, QNS 08 · SZC 09 · VVS, GIL 10 (**8 ô**). Lệch hạng ±0,01 làm đổi ô, nên đọc sổ theo hạng liên tục, không theo nhãn cứng.
+- Cờ `E_unexpl` (E tụt >7% không giải thích được bằng CA ≤ D): 05 ABB/ACB/KLB/OCB/VBB · 06 ABB/VBB · 07 LPB/MBB/MSB/VAB/VIB/VPB · 08 LPB/VPB · 09 LPB · 10 TIN.
+  Cờ này được ghi vào sổ để người đọc biết, KHÔNG được dùng để loại mã.
+
+## 6. Vận hành (ĐỀ XUẤT — KHÔNG cài; tra `kb/cron_registry.md` §11 trước khi cài)
+**Còn chặn trước khi cài (blocker):**
+- **B1 — Extract CA hằng tháng.** `CA_MD5` hiện viết cứng trong `lvens2_pit2.py`, nên mỗi lần làm mới extract `corporate_action` sẽ đổi `script_md5`, và sổ sẽ fail-closed (T4) mỗi tháng.
+  Sửa đề xuất: đọc `LVENS2_CA` + `LVENS2_CA_MD5` từ env, đặt file theo tháng `out/ca/ca_extract_<YYYYMM>.csv`. `ca_md5` đã nằm trong từng dòng sổ.
+  Script cố định, dữ liệu đổi thì ghi lại. Chưa làm ở job này để không đổi md5 các số đã đo.
+- **B2 — quant-skeptic vòng 2** trên stepcar + e_guard + vintage (gate trong entry đề xuất).
+- **B3 — Snapshot VND dừng ở 2026-11-23** (giữ nguyên từ bản merge §5.2): DSH/GEL/HPA sẽ thiếu giá từ as-of 2026-11.
+
+**Dòng cron đề xuất** (thay dòng của bản merge; host cron chạy UTC, `5 1` = 08:05 ICT; thứ tự: sync 23:45 ICT ngày D, sau đó ngày làm việc 1–3 tháng sau):
+```
+# ĐỀ XUẤT — chưa cài, chờ B1+B2 + user duyệt. Đường dẫn sau merge: mike/agents/Taylor/research/dcf_lvens2_pit2_20261126
+5 1 1-3 * 1-5  cd /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_lvens2_pit2_20261126 && YM=$(TZ=Asia/Ho_Chi_Minh date -d "$(TZ=Asia/Ho_Chi_Minh date +\%Y-\%m-01) -1 day" +\%Y-\%m) && LVENS2_FROZEN=/home/trido/thanhdt/WorkingClaude/data/research_frozen/dcf_v31_inputs/out PYTHONHASHSEED=0 timeout 900 /home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym $YM --mc-pit stepcar --out-dir out/monthly && timeout 300 /home/trido/thanhdt/wc_venv/bin/python calc/paper_cell_monthly_pit2.py --asof-ym $YM --lvens2-from out/monthly/lvens2_${YM}_mcstepcar.parquet >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_cell_monthly_pit2.log 2>&1
+```
+- Sổ mới: `out/paper_cell_ledger_pit2.csv` + `.blocks.jsonl`. Không trộn với sổ của bản merge (`mc_pit` khác thì sổ sẽ fail-closed).
+- Chi phí: khoảng 53 giây/tháng một luồng, dựng cả 4 biến thể (đo bằng mtime `out/final`: 6 tháng tuần tự 00:06:54→00:11:19). RSS khoảng 2,1 GB (ước lượng, lấy từ bản merge, chưa đo lại). Không tốn BQ.
+  Chạy một mình theo §32.
+- Rủi ro: ngày 1–3 chưa có BCTC quý mới thì panel dùng kỳ cũ hơn. Cách này đúng PIT. Drift vintage nêu ở §4.4.
 
 ## 7. Tái lập
-(điền ở cuối job)
+```bash
+cd mike/agents/Taylor/research/dcf_lvens2_pit2_20261126
+export LVENS2_FROZEN=/home/trido/thanhdt/WorkingClaude/data/research_frozen/dcf_v31_inputs/out PY=/home/trido/thanhdt/wc_venv/bin/python
+$PY calc/mc_err.py                                                     # §2 → out/mc_err.json
+for ym in 2026-05 2026-06 2026-07 2026-08 2026-09 2026-10; do $PY calc/lvens2_pit2.py --asof-ym $ym --mc-pit all --out-dir out/final; done   # 1 as-of mỗi lần
+$PY calc/cmp_cells.py out/cmp_cells.json out/cmp_cells_changes.csv     # §5
+$PY calc/selfcheck_pit2.py 2026-10 stepcar out/sc                      # §4.1 (rc 0)
+TZ=America/New_York $PY calc/selfcheck_pit2.py 2026-10 stepcar out/sc_tz_ny base; env -u TZ $PY calc/selfcheck_pit2.py 2026-10 stepcar out/sc_tz_unset base   # §4.2
+bash calc/selfcheck_paper_cell_pit2.sh                                 # §4.3
+for ym in 2026-05 2026-06; do $PY calc/lvens2_pit2.py --asof-ym $ym --mc-pit stepcar --out-dir out/vintage --cache-root /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260728; done
+$PY calc/vintage_drift.py out/vintage_drift.json out/vintage_drift_top.csv   # §4.4
+$PY calc/lvens2_pit2.py --asof-ym 2026-10 --mc-pit strict --no-eguard --out-dir out/regress   # hồi quy Δ=0 vs bản merge (§1)
+```
+md5 (8 ký tự đầu): `lvens2_pit2.py` ad565e0d · `paper_cell_monthly_pit2.py` 65eaf7e4 · `selfcheck_pit2.py` 20e4b7b8 · `mc_err.py` e4ebca73 · `cmp_cells.py` f9a3e94c · `vintage_drift.py` e59ecfe8 ·
+extract CA 28418e9d · manifest frozen 59a5ee62 · cache `ticker_financial` ab5d424d (max_time 2026-11-20) · `fa_ratings_8l` 2ab15311 · final 2026-10 stepcar dea31ba7.
+Không dùng `profit_*`. Không dùng `ticker_prune`. Universe lấy từ `universe_pit`.
