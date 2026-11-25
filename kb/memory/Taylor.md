@@ -49,3 +49,5 @@
 - [2026-11-25T08:13:28Z] [dd-MBB KTPL 25/11] XONG job Taylor_20261125_080251: 7c1fad8a2 (wt-dd-mbb-agm-20261125) — k=9,03% ⇒ rev6 18.595 (−11,7%) vùng 13.151–24.140 TRONG, E17 18.731 — CHỜ Mike ghi sổ+merge; NQ gốc chưa đọc (MB 403)
 - [2026-11-25T08:28:03Z] ĐANG DỞ: job Taylor_20261125_082754 MBB rev6' (quỹ khác-sử dụng, E17 đối xứng k, CAR) wt-dd-mbb-agm-20261125 | NEXT: đọc skeptic/r2.json
 - [2026-11-25T08:34:30Z] [dd-MBB rev6' 25/11] XONG job Taylor_20261125_082754: 8881d7289 (wt-dd-mbb-agm-20261125) tâm 17.925 (k 11,59% gồm quỹ khác), E17 18.059 — CHỜ Mike ghi sổ+merge; CAR 30/09 gốc còn mở
+- [2026-11-25T10:43:16Z] ĐANG DỞ: job Taylor_20261125_104308 dcf-vn-behavioral (plan + pilot tâm hành vi) | NEXT: kiểm kê dữ liệu, đọc REPORT 20261125c
+- [2026-11-25T10:55:06Z] [dcf-vn-behavioral 25/11] XONG job Taylor_20261125_104308: 7294cf0d1 nhánh session/Taylor_20261125_104308 (wt-dcf-behav-20261125) — pilot YẾU, tâm hành vi không hơn giá hôm nay về mức; đề xuất bốn ô nội tại × hi52 — CHỜ Mike quant-skeptic 1 vòng + user duyệt G1 hẹp/dừng
