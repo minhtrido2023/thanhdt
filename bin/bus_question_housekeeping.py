@@ -111,7 +111,7 @@ def selfcheck_resolved(root, topic):
     return None
 
 
-PLAN_T1_RE = re.compile(r"^plan-t1-not-ready-(\d{4}-\d{2}-\d{2})-([A-Za-z0-9_]+)$")
+PLAN_T1_RE = re.compile(r"^plan-t1-not-ready-(?:r2-)?(\d{4}-\d{2}-\d{2})-([A-Za-z0-9_]+)$")
 META_RE = re.compile(r"^(wags-fix-not-confirmed|wags-autofix-review-needed|"
                      r"wags-arch-review-round2-unresolved): coord-(\d{4}-\d{2}-\d{2})$")
 META_EXPIRE_DAYS = 3
@@ -123,6 +123,16 @@ def plan_t1_resolved(plans_dir, topic):
     if not m:
         return None
     date, account = m.groups()
+    # 2026-11-25: ngày đích KHÔNG giao dịch theo lịch hiện tại (lễ khai muộn, vd 24/11/2026) ⇒ không cần
+    # plan ⇒ đóng với bằng chứng is_holiday. Lịch lỗi ⇒ không đoán, xét file plan như cũ.
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import trading_calendar as _tc
+        ev = _tc.non_trading_evidence(date)
+    except Exception:  # noqa: BLE001
+        ev = None
+    if ev:
+        return f"{ev} — không cần plan_{account}_{date}.json, câu hỏi là báo động giả"
     path = plans_dir / f"plan_{account}_{date}.json"
     try:
         plan = json.loads(path.read_text(encoding="utf-8"))

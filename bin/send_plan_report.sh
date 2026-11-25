@@ -61,6 +61,18 @@ from trading_bot.vn_market import next_trading_day
 print(next_trading_day(dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).date()))  # §16: neo ICT, không dùng date.today() trần
 " 2>/dev/null)"
 [ -n "$PLAN_DATE_OVERRIDE" ] && EXPECTED_DATE="$PLAN_DATE_OVERRIDE"
+# NONTRADING-GUARD (2026-11-25, sự cố lễ 24/11 khai muộn): ngày plan đích KHÔNG giao dịch theo lịch hiện tại
+# (chỉ xảy ra qua --plan-date hoặc lịch vừa đổi) ⇒ không có gì để gửi/báo động: ghi "ngày nghỉ, bỏ qua",
+# KHÔNG mở bus question plan-t1-not-ready. Lịch lỗi (rc≠0/1) ⇒ không đoán, chạy tiếp như cũ.
+if [ -n "$EXPECTED_DATE" ]; then
+  _nt_ev="$(python3 "$ROOT/bin/trading_calendar.py" --evidence "$EXPECTED_DATE" 2>&1)"; _nt_rc=$?
+  if [ "$_nt_rc" -eq 0 ]; then
+    echo "[send_plan_report] $ACCOUNT — ngày nghỉ, bỏ qua: $_nt_ev"
+    exit 0
+  elif [ "$_nt_rc" -ne 1 ]; then
+    echo "[send_plan_report] [WARN] không đọc được lịch cho $EXPECTED_DATE (rc=$_nt_rc: $_nt_ev) — chạy tiếp như ngày giao dịch"
+  fi
+fi
 
 # Plan file mới nhất theo mtime (Bill ghi vào data/trade_plans/plan_<account>_<date>.json)
 PLAN_FILE="$(ls -t "$WORKDIR"/data/trade_plans/plan_${ACCOUNT}_*.json 2>/dev/null | head -1)"

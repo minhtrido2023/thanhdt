@@ -415,7 +415,9 @@ def sweep_one(path: Path, dry: bool) -> None:
             return
         c = subprocess.run(
             [sys.executable, str(ROOT / "bin" / "close_bus_question.py"), ref,
-             "--resolution", f"cổng {rec['gate']} [{rec['key']}] đã phục hồi — probe artifact rc=0",
+             "--resolution", (f"cổng {rec['gate']} [{rec['key']}]: ngày đích KHÔNG phải ngày giao dịch theo lịch đã cập nhật — báo động giả, đóng"
+                              if "NON_TRADING_DAY" in out else
+                              f"cổng {rec['gate']} [{rec['key']}] đã phục hồi — probe artifact rc=0"),
              "--evidence", f"probe `{rec['probe']}` rc=0 lúc {now.isoformat(timespec='seconds')}: {out}",
              "--source-topic", "gate-block-sweep", "--actor", rec["agent"]],
             capture_output=True, text=True, timeout=TOOL_TIMEOUT_S)
@@ -570,6 +572,20 @@ def cmd_probe_plan_t1(a) -> int:
     """Phục hồi plan-t1 = marker 'đã gửi' của send_plan_report được ghi SAU lúc mở (mtime VÀ
     sent_at) VÀ content_md5 của nó khớp plan hiện tại. Marker bản cũ (gửi 21:00 rồi plan đổi/hỏng)
     KHÔNG đóng câu hỏi."""
+    # 2026-11-25 (sự cố lễ 24/11 khai muộn): ngày đích hóa ra KHÔNG giao dịch theo lịch HIỆN TẠI
+    # (vn_market.py — nguồn duy nhất) ⇒ không cần plan, câu hỏi là báo động giả ⇒ rc 0 kèm bằng chứng
+    # is_holiday để sweep đóng (close_bus_question, actor=agent mở, KHÔNG decided-by-user).
+    # Lịch lỗi ⇒ KHÔNG đoán, đi tiếp đường marker như cũ.
+    try:
+        sys.path.insert(0, str(ROOT / "bin"))
+        import trading_calendar as _tc
+        ev = _tc.non_trading_evidence(a.date)
+    except Exception as exc:  # noqa: BLE001
+        ev = None
+        print(f"probe plan-t1: (không đọc được lịch: {type(exc).__name__}: {exc} — kiểm tra marker như cũ)")
+    if ev:
+        print(f"probe plan-t1: NON_TRADING_DAY {ev} — không cần plan cho ngày này, báo động giả")
+        return 0
     since = opened_since(a)
     marker = Path(a.marker_dir) / f"{a.account}_{a.date}.json"
     plan = Path(a.plan_dir) / f"plan_{a.account}_{a.date}.json"
