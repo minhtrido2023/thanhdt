@@ -1,0 +1,26 @@
+{
+ "id": "behav_cell_ledger",
+ "name": "Sổ ô bốn-ô (tâm nội tại lv_ENS2 × điểm thừa nhận hi52) hằng tháng, universe_pit — theo dõi paper, DISPLAY-ONLY",
+ "owner": "Taylor",
+ "start": "2026-11-30",
+ "end": null,
+ "review_date": "2027-11-30",
+ "reporting": false,
+ "reporting_reason": "Chưa có nhãn nào đóng trước 2027-11; không có gì để báo cáo. Đọc 1 lần khi nhãn 12 tháng của as-of 2026-11 đóng.",
+ "behavior_contract": "LOG_ONLY_NO_BROKER_PATH",
+ "feature_flag": "N/A — sổ append-only; không sizing/gate/luật lệnh, không đụng dcf_valuation.py, không cron mặc định (chờ Mike duyệt)",
+ "objective": "Ghi nhận trước (không nhìn lại được) ô bốn-ô + điểm hi52 của từng mã trong universe_pit mỗi cuối tháng từ as-of 2026-11, để có bằng chứng ngoài-mẫu sạch duy nhất cho nhánh 'tâm hành vi' (pilot G0 YẾU; dữ liệu 2015–2025 đã bị nhìn). Chấp nhận trước rằng có thể mãi là hiển thị. Spec: agents/Taylor/research/dcf_vn_behavioral_20261125/PLAN.md, PRELOCK_PROPOSED.md §7.",
+ "end_or_trigger": "LUẬT KHAI TRƯỚC: đọc lần đầu khi nhãn 12 tháng của as-of 2026-11 đóng (2027-11-30): ΔIC/DiD theo PRELOCK_PROPOSED §4 (CI rộng nhất), N độc lập = số tháng-cụm đã đóng — 1 tháng ≠ bằng chứng; kết luận chỉ khi ≥ 12 as-of đã đóng nhãn (2028-11). Không tự đóng, không tự gia hạn — quá mốc ⇒ báo user.",
+ "gate_criteria": [
+  {"status": "pending", "text": "Sổ đúng luật: append-only, mỗi asof_ym đúng 1 lần, fail-closed khi universe_pit không phủ ngày as-of (paper_cell_monthly.py)"},
+  {"status": "pending", "text": "Nhãn 12 tháng đóng ≥ 12 as-of trước khi kết luận bất cứ điều gì; quant-skeptic CONFIRMED + user duyệt riêng trước mọi wire/hiển thị DD"}
+ ],
+ "data_sources": [
+  "tav2_mike.universe_pit (cache data/bq_cache/universe_pit, CANONICAL)",
+  "tav2_bq.ticker (cache data/bq_cache/ticker; Close điều chỉnh)",
+  "panel V3.1 vp2.parquet (lv_ENS2, route) — CẦN DỰNG LẠI hằng tháng"
+ ],
+ "today_activity": "agents/Taylor/research/dcf_vn_behavioral_20261125/calc/paper_cell_monthly.py --asof-ym <YYYY-MM> --dry-run",
+ "review_short": "Sổ ô hằng tháng; chưa đọc trước 2027-11",
+ "notes": "Tạo 2026-11-25 job Taylor_20261125_114526 theo duyệt user 25/11 18:44 ICT (C). Chưa cài cron; chưa merge."
+}

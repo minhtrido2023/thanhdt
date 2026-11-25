@@ -1,0 +1,18 @@
+PASS feat_recompute_VNM n=973 max|Δ|=1.75e-15
+PASS feat_recompute_HPG n=885 max|Δ|=1.69e-15
+PASS feat_recompute_DGC n=560 max|Δ|=1.78e-15
+PASS feat_recompute_VCS n=881 max|Δ|=1.64e-15
+PASS pit_truncate_hi52_VCS_2019-12 
+PASS dIC_F_F0_h12_IS +0.0166
+PASS ydm_zero_mean_h12_IS 
+PASS dIC_F_F0_h12_OOS +0.0545
+PASS ydm_zero_mean_h12_OOS 
+PASS dIC_F_F0_h24_IS +0.0071
+PASS ydm_zero_mean_h24_IS 
+PASS dIC_F_F0_h24_OOS +0.0736
+PASS ydm_zero_mean_h24_OOS 
+PASS frozen_months_h12 72
+PASS frozen_months_h24 60
+PASS coef_frozen_F_h12 [-0.021 -0.029  0.038  0.133  0.313  0.03 ]
+PASS no_profit_cols 
+ALL PASS
