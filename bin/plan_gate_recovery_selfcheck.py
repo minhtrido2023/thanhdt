@@ -112,6 +112,15 @@ def main():
     rc, out, c = run(sb, "--retry", "2026-11-23T21:20:00")
     chk(rc == 0 and "late_plan_catchup" in c.splitlines() and not sent(c),
         "R1c 21:20 ⇒ bin/late_plan_catchup.sh, KHÔNG send_plan_report trực tiếp", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23")
+    rc, out, c = run(sb, "--retry", "2026-11-23T21:05:00")
+    chk(rc == 0 and "late_plan_catchup" not in c.splitlines() and not sent(c) and "21:15" in out,
+        "R1d 21:05 (cùng giờ cron send_plan_report 21:00) ⇒ KHÔNG gửi, không đua", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23")
+    rc, out, c = run(sb, "--retry", "2026-11-24T00:10:00")
+    chk(rc == 0 and "send --account SpaceX --second-chance --plan-date 2026-11-25 NOTE=yes" in c
+        and "late_plan_catchup" not in c.splitlines(),
+        "R1e qua nửa đêm (late_plan_catchup tự no-op) ⇒ gửi kèm cảnh báo chuỗi CHƯA chạy", out + c)
     n_before = c.count("\n")
     rc, out, c = run(sb, "--retry", "2026-11-23T20:20:00")
     chk("OK plan đủ" in out and c.count("\n") == n_before, "R2 lượt sau, plan đã đủ ⇒ không làm gì", out)

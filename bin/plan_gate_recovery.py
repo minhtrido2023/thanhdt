@@ -5,7 +5,7 @@ Sự cố "không ra plan 25/11" (user duyệt B 25/11/2026): cổng 19:00 FAIL 
 publisher-evidence) ⇒ không dispatch DollarBill ⇒ thiếu plan; cổng "KHÔNG tự phục hồi" và
 gate_block_question chỉ REMIND lặp, không ai tăng cấp.
 
---retry    (cron 20 phút/lần 19:40–23:20 và 05:00–07:00 ICT)
+--retry    (cron 20 phút/lần 19:40–23:20 ICT trừ 21:00/23:00 (giờ send_plan_report) + 05:00–07:00 ICT T2-T6)
   Khi: plan phiên kế (NEXT) còn thiếu cho ≥1 account live, VÀ artifact state/bq_freshness_gate_last.json
   (do bq_freshness_check.sh ghi) cho đúng phiên đó báo FAIL ở cổng dữ liệu nền (prune_depth/dt5g_publisher),
   VÀ điều kiện ĐO LẠI đã hồi phục (bin/prune_depth_gate.py --date <phiên> rc=0 — CÙNG ngưỡng, KHÔNG nới),
@@ -14,10 +14,10 @@ gate_block_question chỉ REMIND lặp, không ai tăng cấp.
       với BQF_SKIP_EXISTING_PLANS=1 (CHỈ dispatch DollarBill cho account CHƯA có file plan — không ghi đè
       plan có thể đã duyệt). Plan hỏng (file có, INVALID) KHÔNG retry — cần người, 07:30 tăng cấp.
   Chờ plan của account vắng (≤45'), rồi GỬI theo giờ (arch-review vòng 2 #2 — không bỏ qua chuỗi tối):
-      trước 21:00 ⇒ KHÔNG tự gửi: cron 20:20 merge_park/20:30 inject_discretionary/20:40 auto_exit/20:50 drift
+      trước 21:15 ⇒ KHÔNG tự gửi: cron 20:20 merge_park/20:30 inject_discretionary/20:40 auto_exit/20:50 drift
                     → 21:00 send_plan_report (+ late_plan_catchup 21:45 nếu plan ra sau chuỗi park) lo;
-      21:00–23:59 ⇒ bin/late_plan_catchup.sh (có khoá; chạy park→merge→inject→auto_exit RỒI mới gửi);
-      buổi sáng   ⇒ send_plan_report --second-chance --plan-date NEXT cho ĐÚNG account vắng, đầu bản gửi ghi
+      21:15–23:59 ⇒ bin/late_plan_catchup.sh (có khoá; chạy park→merge→inject→auto_exit RỒI mới gửi);
+      sáng / qua 0h ⇒ send_plan_report --second-chance --plan-date NEXT cho ĐÚNG account vắng, đầu bản gửi ghi
                     rõ chuỗi inject_discretionary/auto_exit/park CHƯA chạy cho plan này (+ Telegram).
   Mốc "đã retry" ghi TRƯỚC khi chạy (bị kill giữa chừng vẫn không lặp — §3 idempotent); flock
   state/locks/plan_gate_recovery_retry.lock ⇒ 2 lượt cron không chồng nhau.
@@ -258,21 +258,25 @@ def cmd_retry(now):
     if miss2:
         return _retry_done(nxt, rec, tag, steps, f"DollarBill đã dispatch nhưng sau {PLAN_WAIT_S // 60}' vẫn thiếu plan {miss2}")
     t = now_ict()
-    if morning:
-        note = (f"⚠️ PLAN LẬP BÙ BUỔI SÁNG ({t:%H:%M} ICT, retry tự động): chuỗi tối park_trim/jit_unpark/merge_park, "
-                "inject_discretionary (20:30) và auto_exit_inject (20:40, đề xuất SELL LAG/BAL/CAPIT) CHƯA chạy cho "
-                "plan này — kiểm tra lệnh BÁN thoát theo thời gian trước khi duyệt.")
-        for a in absent:
-            rc, out = run([str(BIN / "send_plan_report.sh"), "--account", a, "--second-chance", "--plan-date", str(nxt)],
-                          {"PLAN_REPORT_NOTE": note}, timeout=900)
-            steps.append(f"send_plan_report {a} rc={rc}")
-        return _retry_done(nxt, rec, tag, steps, None, warn=note)
-    if t.date() == session and t.hour >= 21:
+    # Mốc gửi 21:15 (không phải 21:00): tránh đua với cron send_plan_report 21:00 cùng phút. Qua nửa đêm
+    # (chờ plan vắt qua 00:00) ⇒ late_plan_catchup tự no-op (<21:00) ⇒ đi nhánh gửi buổi sáng kèm cảnh báo.
+    evening_send = t.date() == session and (t.hour, t.minute) >= (21, 15)
+    if t.date() == session and not evening_send:
+        steps.append("KHÔNG tự gửi trước 21:15 — chuỗi cron 20:20→20:50 + send_plan_report 21:00 (+ late_plan_catchup 21:45) lo")
+        return _retry_done(nxt, rec, tag, steps, None)
+    if evening_send:
         rc, out = run([str(BIN / "late_plan_catchup.sh")], timeout=3600)
         steps.append(f"late_plan_catchup rc={rc}")
         return _retry_done(nxt, rec, tag, steps, None if rc == 0 else f"late_plan_catchup rc={rc}: {out[-200:]}")
-    steps.append("KHÔNG tự gửi trước 21:00 — chuỗi cron 20:20→20:50 + send_plan_report 21:00 (+ late_plan_catchup 21:45) lo")
-    return _retry_done(nxt, rec, tag, steps, None)
+    # buổi sáng (hoặc chờ plan vắt qua nửa đêm)
+    note = (f"⚠️ PLAN LẬP BÙ BUỔI SÁNG ({t:%H:%M} ICT, retry tự động): chuỗi tối park_trim/jit_unpark/merge_park, "
+            "inject_discretionary (20:30) và auto_exit_inject (20:40, đề xuất SELL LAG/BAL/CAPIT) CHƯA chạy cho "
+            "plan này — kiểm tra lệnh BÁN thoát theo thời gian trước khi duyệt.")
+    for a in absent:
+        rc, out = run([str(BIN / "send_plan_report.sh"), "--account", a, "--second-chance", "--plan-date", str(nxt)],
+                      {"PLAN_REPORT_NOTE": note}, timeout=900)
+        steps.append(f"send_plan_report {a} rc={rc}")
+    return _retry_done(nxt, rec, tag, steps, None, warn=note)
 
 
 def _retry_done(nxt, rec, tag, steps, err, warn=None):
