@@ -1,0 +1,10 @@
+r = 0.1350 (assert model: r_of(current_dep 06/11) = 13,5%)
+r3 headline (sổ rev2)        tâm trước/sau CK   33,652 /   31,658  P10/P50/P90 sau CK 25,083/31,402/38,043  Δ vs r3 +0.00%  Δ vs D4 +15.43%
+D4: RONIC = Ke (g=0)         tâm trước/sau CK   29,154 /   27,426  P10/P50/P90 sau CK 22,379/27,333/32,368  Δ vs r3 -13.37%  Δ vs D4 +0.00%
+r3 @ Ke 12,3% (E15)          tâm trước/sau CK   36,572 /   34,404  P10/P50/P90 sau CK 26,889/34,124/42,052  Δ vs r3 +8.68%  Δ vs D4 +25.44%
+D4 @ Ke 12,3% (E15)          tâm trước/sau CK   30,893 /   29,062  P10/P50/P90 sau CK 23,457/28,928/34,542  Δ vs r3 -8.20%  Δ vs D4 +5.97%
+D4 @ Ke 13,4%                tâm trước/sau CK   29,287 /   27,551  P10/P50/P90 sau CK 22,462/27,455/32,534  Δ vs r3 -12.97%  Δ vs D4 +0.46%
+D4 r -100bp                  tâm trước/sau CK   30,580 /   28,768  P10/P50/P90 sau CK 23,263/28,642/34,150  Δ vs r3 -9.13%  Δ vs D4 +4.89%
+D4 r -50bp                   tâm trước/sau CK   29,839 /   28,071  P10/P50/P90 sau CK 22,804/27,962/33,224  Δ vs r3 -11.33%  Δ vs D4 +2.35%
+D4 r +50bp                   tâm trước/sau CK   28,518 /   26,828  P10/P50/P90 sau CK 21,984/26,748/31,575  Δ vs r3 -15.26%  Δ vs D4 -2.18%
+D4 r +100bp                  tâm trước/sau CK   27,926 /   26,271  P10/P50/P90 sau CK 21,616/26,202/30,816  Δ vs r3 -17.02%  Δ vs D4 -4.21%
