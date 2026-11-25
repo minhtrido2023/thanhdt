@@ -1,0 +1,17 @@
+T1 ghi 2026-09 | PASS | rc=0
+T2 ghi 2026-10 | PASS | rc=0
+T3 chạy lại 2026-10 (SKIP idempotent) | PASS | rc=0
+T4 đổi biến thể giữa chừng (stepca) | PASS | rc=3
+T5 file sai biến thể so với expect | PASS | rc=3
+T6 file sai tháng | PASS | rc=3
+T7 sửa 1 dòng cũ rồi ghi | PASS | rc=3
+T8 khôi phục rồi ghi 2026-08 | PASS | rc=0
+T8b prefix byte cũ giữ nguyên | PASS
+T9 cache ticker_financial cũ | PASS | rc=3
+T10a dựng lvens2 với extract MỚI (md5 mới) | PASS | rc=0
+T10b script_md5 sidecar = md5 file script (không đổi theo extract) | PASS
+T10c sổ đã có khối ca_md5 cũ, ghi khối extract mới | PASS | rc=0
+T10d sổ chứa 2 ca_md5 khác nhau | PASS
+T11 extract md5 SAI | PASS | rc=3
+T12 thiếu LVENS2_CA_MD5 | PASS | rc=3
+TZ=America/New_York RESULT: PASS
