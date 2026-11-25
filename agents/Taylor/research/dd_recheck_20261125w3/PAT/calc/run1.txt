@@ -1,0 +1,10 @@
+CONTROL mix 66,470.1 (r5 66.470,1)
+r 0.123: 72,085 (+8.45%) sau CK 64,877
+r 0.134: 66,893 (+0.64%) sau CK 60,204
+D4 RONIC=Ke terminal: 65,510 (-1.44%) sau CK 58,959
+D4 + r 12,3%: 70,651 (+7.85% vs D4) sau CK 63,586
+D4 + ô theo D (skeptic killer): 61,697 (-5.82% vs D4) sau CK 55,527
+tv_share (base path) 0.1
+D4 quantiles sau CK {'P10': 33457, 'P25': 40550, 'P50': 58633, 'P75': 73753, 'P90': 86116}
+thuê đất hết 2034, không gia hạn, không TV: 45,479 (-30.58% vs D4)
+thuê đất hết 2042, không gia hạn, không TV: 57,539 (-12.17% vs D4)

@@ -1,0 +1,2 @@
+LOCK rev9 2026-11-25 10:40:13 ICT job Taylor_20261125_032448 — khoá TRƯỚC khi chạy calc_rev9.py; không đọc giá mới (9.700 BQ 20/11 kế thừa)
+b5057d9d0497cb3fae3aba08798e03fe  assumptions_rev9.json

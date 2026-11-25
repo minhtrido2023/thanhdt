@@ -1,0 +1,278 @@
+{
+ "schema_version": "dd_assumptions_v1",
+ "ticker": "HHS",
+ "dd_date": "2026-11-25",
+ "rev": 9,
+ "loai_hinh": "bds_kcn",
+ "method_version": "M20261122",
+ "units": "VND; bn = tỷ đồng; shares_m = triệu cp",
+ "sources": {
+  "v_pre_dist": "agents/Taylor/research/dd_dilution_update_20261110/calc/dilution_out.json (md5 0450ba0aee972c6c4ec97847fe2de68c; HHS.HEADLINE_CKholding0.pre + song_song_CKholding_r2_27pct.pre; = REPORT_r3 §0; assumptions_r3.json/SUMMARY.json gốc ĐÃ MẤT khỏi đĩa, xem LOCK_md5 r3)",
+  "nq_dhdcd_2026": "agents/Taylor/research/dd_dilution_update_20261110/src_hhs/nq_dhdcd_2026.pdf (TT08 tr.108-118, TT09 tr.118-120)",
+  "bctc_q3_2026_hn": "agents/Taylor/research/dd_HHS_20261101/src/20261029_-_HHS_-_Bao_cao_tai_chinh_Q3_2026_Hop_nhat.pdf (TM1.5 tr.12 PDF13; TM37-38 tr.41; TM40 tr.42-43; LCTT tr.9); CĐKT HN mã 323 Quỹ KTPL tr.6 (render rev6/png/hn_p07.png)",
+  "nq_hdqt_10_20261120": "agents/Taylor/research/dd_dilution_update_20261110/HHS/rev5/src/nq_hdqt_xyk_20261120.pdf (md5 6688f665e6c5efc866bbdaa52fdadc2f)",
+  "deposit_rate": "/home/trido/thanhdt/WorkingClaude/deposit_rate_vn.py effective_deposit_rate() chạy 2026-11-23",
+  "kt25_hn": "agents/Taylor/research/dd_HHS_20261101/src/20260328_-_HHS_-_Bao_cao_tai_chinh_nam_2025_kiem_toan_Hop_nhat.pdf (EN tr.38 = PDF p.91: 04 lô HH1-HH4 tổng 18.494,00 m² thế chấp VietinBank; render dd_HHS_20261101/img/kt25s_p91.png)",
+  "r3_grid": "agents/Taylor/research/dd_redo_20261105/HHS/calc_r3/hhs_r3.py (md5 cf5420d86989f25b4070697b38347c52) — lõi make(HEAD) chạy lại được, rev6 tái lập 14.169/13.969",
+  "ck_holding_vn": "agents/Taylor/research/ck_holding_vn_20261123/calc_out.json (md5 e78cc0d9a934add02fcb796f1d06ce0d; REPORT_CK_HOLDING.md; inputs khoá LOCK_md5.txt) — N=6 holding niêm yết VN độ phủ giá thị trường ≥60% (CII, GEX, IPA, PAN, SNZ, VIC), 4 ngày đo 2026"
+ },
+ "share_base": {
+  "shares_m": 431.985968,
+  "source": "BCTC Q3/2026 HN TM1.1 (vốn điều lệ 4.319.859.680.000 = 431.985.968 cp)",
+  "as_of_date": "2026-09-30",
+  "treasury_excluded": true,
+  "bonus_esop": {
+   "status": "pending_not_in_base",
+   "ratio": 0.07,
+   "source": "NQ ĐHĐCĐ 01/2026 TT09: 48.382.428 cp = 7% x 691.177.548, phát hành SAU quyền mua",
+   "note": "Quyền mua 5:3 259.191.580 cp @10.000 (TT08) cũng pending; cơ sở EX tính riêng trong calc"
+  }
+ },
+ "projects": {
+  "items": [
+   {
+    "name": "NĐL mua 260tr cp @10.000 -> lô I.14/CTHH-01 Bắc sông Cấm",
+    "total_bn": {
+     "value": 6223.3,
+     "source": "TT08 §III (tổng mức đầu tư I.14, gồm 1.322,3 tỷ tiền SDĐ)"
+    },
+    "spent_bn": {
+     "value": 0,
+     "source": "tiền quyền mua chưa thu (chưa có GCN UBCKNN tại 23/11)"
+    },
+    "remaining_bn": {
+     "value": 2591.9,
+     "source": "TT08: 259.191.580 x 10.000"
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "NPV0_BOOK",
+    "source": "TT08 + NQ 07/NQ-HĐQT 26/08/2026"
+   },
+   {
+    "name": "Phần vốn I.14 chưa có nguồn (6.223,3 - 1.820,1 VĐL NĐL - 2.600 tăng vốn)",
+    "total_bn": {
+     "value": 1803.2,
+     "source": "tính từ TT08 (tổng mức) và VĐL NĐL 1.820,1 tỷ"
+    },
+    "spent_bn": {
+     "value": 0,
+     "source": "chưa công bố cấu trúc tài trợ"
+    },
+    "remaining_bn": {
+     "value": 1803.2,
+     "source": "như trên"
+    },
+    "generates_revenue": true,
+    "mandatory": false,
+    "classification": "growth",
+    "treatment": "SCENARIO_ONLY",
+    "independent_basis": "Không có văn bản về đợt gọi vốn thêm; vay theo lãi thị trường = NPV0 (base không đổi); gọi vốn cổ phần thêm chỉ là độ nhạy",
+    "source": "TT08 §III 'phần còn thiếu từ vốn tự có và vốn vay'"
+   }
+  ]
+ },
+ "welfare_fund": {
+  "balance_deducted": 6.458303282,
+  "annual_appropriation_pct_of_npat": {
+   "value": "khong_cong_bo",
+   "searched": [
+    "CĐKT Q3/2026 HN mã 323: số dư 30/09 = 01/01 ⇒ 9T/2026 không trích"
+   ]
+  },
+  "applied_to_cashflow": false,
+  "source": "BCTC Q3/2026 HN CĐKT mã 323 'Quỹ khen thưởng phúc lợi' 6.458.303.282 đ (đầu năm như cũ ⇒ 9T không trích; tr.6, rev6/png/hn_p07.png). Đã là NỢ PHẢI TRẢ ⇒ đã trừ trong VCSH mẹ 9.152,94 tỷ của lưới r3; mô hình NAV không dùng tiền ròng riêng ⇒ không trừ thêm"
+ },
+ "tax": {
+  "rate_path": [
+   {
+    "from_year": 2026,
+    "rate": 0.2
+   }
+  ],
+  "source": "REPORT_r3 §7 A3 (thuế 20% trong s_obs)"
+ },
+ "working_capital": {
+  "method": "balance_sheet_point",
+  "source": "REPORT_r3: mô hình NAV/HTK theo sổ, không dự phóng NWC"
+ },
+ "scenarios": {
+  "items": [
+   {
+    "name": "TIÊU CỰC (r3 lưới)",
+    "side": "down",
+    "p": 0.25,
+    "basis": "REPORT_r3 §4 trọng số đối xứng A6"
+   },
+   {
+    "name": "CƠ SỞ (r3 lưới)",
+    "side": "base",
+    "p": 0.5,
+    "basis": "REPORT_r3 §4"
+   },
+   {
+    "name": "TÍCH CỰC (r3 lưới)",
+    "side": "up",
+    "p": 0.25,
+    "basis": "REPORT_r3 §4"
+   }
+  ]
+ },
+ "discount_rate": {
+  "r": 0.135,
+  "deposit_rate_now": 0.074,
+  "deposit_rate_date": "2026-11-16",
+  "deposit_rate_source": "effective_deposit_rate(): cctg_12m 7,40% (2026-11-02), Big-4 6,80%; neo 03/11 = 7,40% => Δ0",
+  "beta_passthrough": 1.0,
+  "sensitivity_bp": [
+   -100,
+   -50,
+   50,
+   100
+  ],
+  "band_ends_reported": true
+ },
+ "terminal": {
+  "moat_tier": "NONE",
+  "terminal_ronic": "NOT_APPLICABLE_FINITE_LIFE"
+ },
+ "liquidity_discount": {
+  "basis": "computed_after_lock",
+  "pct": null,
+  "position_size_note": "CK 5 tỷ 1,41% kế thừa r3 (d5 trong dilution_out.json); cập nhật ADV sau khoá chỉ để hiển thị",
+  "source": "REPORT_r3 §5"
+ },
+ "audit_opinion": {
+  "status": "unqualified",
+  "fy": 2025,
+  "auditor": "AASC",
+  "interim_review": "not_reviewed",
+  "source": "BCTC Q3/2026 HN TM41 (BCTC 2025 kiểm toán bởi AASC); BCTC Q3 tự lập không soát xét"
+ },
+ "related_parties": {
+  "items": [
+   {
+    "desc": "HHS vay TCH 39 tỷ và đã trả 39 tỷ trong 9T/2026 (CRV vay TCH 30 tỷ, đã trả); số dư vay 30/09 = 0",
+    "amount_bn": 39.0,
+    "source": "BCTC Q3/2026 HN TM40 tr.42-43; TM37 (vay 30/09/2026 = 0)"
+   },
+   {
+    "desc": "Chuyển nhượng hợp đồng tiền gửi giữa TCH và CRV (215,5 tỷ) / NĐL (636,6 tỷ)",
+    "amount_bn": 852.0,
+    "source": "BCTC Q3/2026 HN TM40 tr.43"
+   },
+   {
+    "desc": "Tiền quyền mua chảy vào NĐL (công ty con 51,14% lợi ích) qua chuỗi TCH/CRV; HĐQT tự phân bổ cp dư @10.000",
+    "amount_bn": 2591.9,
+    "source": "TT08; BCTC Q3 TM1.5"
+   }
+  ]
+ },
+ "one_offs": {
+  "items": [
+   {
+    "desc": "LNST 2025Q2 3.507 tỷ (lãi hợp nhất CRV, một lần) loại khỏi LN chuẩn hoá V_ngắn",
+    "amount_bn": 3507.1,
+    "source": "BQ ticker_financial HHS 2025Q2 NP_P0"
+   }
+  ]
+ },
+ "capital_commitments_12m": {
+  "items": [
+   {
+    "desc": "Góp 2.591,9 tỷ vào NĐL Q4/2026-Q1/2027 (thiếu bao phủ thì vay/trái phiếu)",
+    "amount_bn": 2591.9,
+    "source": "TT08 + NQ 07/NQ-HĐQT 26/08/2026"
+   }
+  ]
+ },
+ "sector": {
+  "land_bank": {
+   "value": "NC-II + I.14 (kế thừa r3)",
+   "source": "REPORT_r3"
+  },
+  "commitments": {
+   "value": "I.14 tổng mức 6.223,3 tỷ",
+   "source": "TT08"
+  }
+ },
+ "holding_discount": {
+  "base": 0.0,
+  "basis": "Bỏ base CK holding 26,63% (N=6, ck_holding_vn_20261123) vì đã bị phép đo v5 phủ: ck_holding_vn_20261124_v5 trung vị N=12 = −3,24% (LOO −8,1…+1,6%) ≈ 0; user chốt dải tham chiếu 0…+20% (kb/projects/ck-hhs-reference-range-20261124.md, decided_by user 24/11 15:36 + 15:48 ICT) là DISPLAY-ONLY, KHÔNG vào base/ledger (HANDOFF dd_recheck_20261125w3). ⇒ base = 0 (không chiết khấu holding). KHÔNG dùng giá HHS/TCH/CRV.",
+  "source": "agents/Taylor/research/ck_holding_vn_20261124_v5/REPORT_CK_HOLDING_v5.md; kb/projects/ck-hhs-reference-range-20261124.md",
+  "display_band": {
+   "low": 0.0,
+   "high": 0.2,
+   "note": "0% = đầu lạc quan (≈ trung vị v5); +20% = mốc hiện tại (khoảng đo 15–23%), 1 holding PAN ≈ 1 quan sát độc lập; stress +33…+38% chỉ ghi chú"
+  },
+  "superseded": {
+   "base_rev7": 0.2663,
+   "source_rev7": "agents/Taylor/research/ck_holding_vn_20261123/calc_out.json groups[0] median"
+  },
+  "applied_to": "phần HHS × CRV (gồm thặng dư BĐSĐT quy về HHS) = HHS*c*(1-h) + bds*BDS_SURP*HHS*(1-h) trong hhs_r3.make; KHÔNG áp lên phần lợi ích thiểu số 48,85% (đã loại vì chỉ lấy HHS=51,15%), KHÔNG áp lên OTHER (tài sản ròng riêng HHS ngoài CRV) và mảng ô tô",
+  "confidence": "THẤP (v5: N=12, 1 chế độ thị trường, T_eff≈0,4; hull 36,5pp)"
+ },
+ "k_base": 1.0,
+ "k_sensitivity": {
+  "0.8": "stress không có cơ sở",
+  "1.0205": "đọc 75,41% (bên khác mua ~26,2tr cp NĐL @10.000 < BV)",
+  "1.025": "đọc NĐL chỉ phát hành cho HHS (79,9%)"
+ },
+ "ndl": {
+  "charter_bn": 1820.1,
+  "hhs_econ_pre": 0.5114,
+  "hhs_vote_pre": 0.5853,
+  "bv_per_share": 11210,
+  "bv_source": "TT08 tr.110, BCTC NĐL tự lập 31/12/2025 (không kiểm toán)",
+  "econ_source": "BCTC Q3/2026 HN TM1.5"
+ },
+ "tch_stake_hhs": 0.5831,
+ "shortfall_financing": "phần (1-c) do HHS vay theo lãi thị trường = NPV0; độ nhạy chênh lãi vay - lợi suất dự án 2pp x 3 năm (ước lượng)",
+ "tch_stake_source": "BCTC kiểm toán 2025 TM22b: TCH 2.519,06 tỷ = 251.905.777 cp / 431.985.968 = 58,31% (dd_HHS_20261101/GAPS_FILL.md:96)",
+ "g10_completion_cost": {
+  "base": 0,
+  "basis": "BCTC không công bố dự toán còn lại NC-II (GAPS G10); V4: giảm trừ cần cơ sở độc lập ⇒ chỉ độ nhạy",
+  "sensitivity_pct_of_cost_base": [
+   0.05,
+   0.1,
+   0.2
+  ],
+  "cost_base_bn": 6009.8,
+  "hhs_econ_crv": 0.5115,
+  "note_rev6": "skeptic r3: trong mô hình s trên tổng giá gốc, chi phí hoàn thiện sinh biên ⇒ trục #11 rev5 sai biến; rev6 thay bằng trục biên HH (hh_split). Số −351/−702/−1.403 giữ làm tham khảo, không phải độ nhạy chính"
+ },
+ "hh_split": {
+  "base_treatment": "không tách trong base (V4: giảm trừ cần cơ sở độc lập; BCTC không công bố cơ cấu HTK NC-II thấp/cao tầng; PPA kiểm toán phủ cả HH1–HH4 cao hơn mô hình)",
+  "w_ladder": [
+   0.03,
+   0.05,
+   0.1,
+   0.15,
+   0.3,
+   1.0
+  ],
+  "w_def": "tỷ trọng giá gốc HH1–HH4 trong BLK 6.009,8 tỷ (ước lượng — không công bố)",
+  "s_hh_ladder": [
+   -0.2,
+   0.0,
+   0.16
+  ],
+  "s_hh_def": "thặng dư sau thuế/giá gốc của phần HH: 0 = NPV0 theo sổ; 0,16 = biên gộp 25% theo công thức s=0,8(g-0,1)/(1-g) (ước lượng skeptic r3); -0,2 = lỗ 20% giá gốc (stress)",
+  "hh_land_m2": 18494.0,
+  "hh_land_src": "KT25 HN EN tr.38",
+  "nc2_site_m2": 493600.0,
+  "nc2_site_src": "49,36 ha — nhadautu.vn d97221 (thứ cấp, ước lượng); tài liệu khác ghi ~50 ha",
+  "scenario_probs": {
+   "w=0.05|s_hh=0.0": 0.3,
+   "w=0.15|s_hh=0.0": 0.15,
+   "w=0.3|s_hh=-0.2": 0.05
+  },
+  "scenario_probs_basis": "ước lượng: 50% còn lại = phần HH đạt thặng dư ≥ s_obs (nhất quán PPA kiểm toán); KHÔNG vào base"
+ },
+ "governance_discount": {
+  "base": 0.0,
+  "basis": "CK holding đo từ giá thị trường là CK TỔNG HỢP đã gồm quản trị ⇒ không cộng trục CK quản trị r2 vào base (tránh trừ hai lần)"
+ },
+ "_rev9_change": "Chỉ đổi holding_discount (base 0,2663 → 0). k_base giữ 1,0 ⇒ EX dùng k = 1 (sửa điểm (a) skeptic r5). Mọi tham số khác giữ nguyên rev7 (md5 3afcd113013fad82acfa5ea35c5bce1d)."
+}

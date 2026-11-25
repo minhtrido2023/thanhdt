@@ -1,0 +1,202 @@
+{
+ "ticker": "VLB",
+ "dd_date": "2026-11-22",
+ "rev": 5,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_032448",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13"
+ },
+ "blind_to_price": true,
+ "center_base": 45161,
+ "center_base_source": "LEDGER_PROPOSAL_VLB.json rev5 center (= sổ rev4 REPORT_rev4, không đổi)",
+ "method": "chạy lại mô hình rev4 từng hạng mục (calc/calc_adj_vlb.py; CONTROL 45.161), cộng tuyến tính vì |Σ|≤5%; kiểm tra tổ hợp nội suy 43.505",
+ "items": [
+  {
+   "id": "I1_mid_cycle",
+   "name": "Neo giữa chu kỳ: mid = TB lõi FY24/FY25; xấu = lõi FY24 phẳng",
+   "dir": "down",
+   "evidence_tier": "B",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": -4.791,
+   "mag_range_pct": [
+    -7.457,
+    -2.667
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.677,
+   "source": "dd_VLB_20261122/skeptic/r3_raw.md:9-14; dd_VLB_20261122/model/dcf_vlb_r4.py (OP_FY24/OP_FY25, KT25 tr.13)",
+   "note": "B nhánh ngược: 9T/26 lõi năm hoá 352,8, Q3/26 403,0"
+  },
+  {
+   "id": "I2_wc_nld",
+   "name": "Phải trả NLĐ 54,215 tỷ trừ ngay (mùa vụ) thay tất toán khi đóng mỏ",
+   "dir": "down",
+   "evidence_tier": "B",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -1.958,
+   "mag_range_pct": [
+    -2.509,
+    -1.958
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -0.979,
+   "source": "dd_VLB_20261122/model/dcf_vlb_r4.py:30; skeptic/r3_raw.md:15-18",
+   "note": "B 1 quan sát"
+  },
+  {
+   "id": "I3_cash_gap",
+   "name": "Chênh dòng tiền vs LNST (khấu hao − chi TSCĐ + Δ chi phí trả trước/đền bù), TB 2024–9T26 −12,19 tỷ/năm",
+   "dir": "down",
+   "evidence_tier": "B",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": -3.26,
+   "mag_range_pct": [
+    -9.563,
+    3.478
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.141,
+   "source": "dd_VLB_20261122/src/BCTC_KiemToan_2025.pdf tr.14 PDF (LCTT mã 02,12,21); src/BCTC_Q3_2026.pdf tr.6 PDF; BCTN_2025.pdf tr.54-55; skeptic/r3_raw.md:24-29",
+   "note": "B 3 kỳ dấu trái nhau ⇒ nhánh ngược; gộp 2 hạng mục r3 (khấu hao ↑, đền bù ↓) vì cùng một dòng tiền"
+  },
+  {
+   "id": "I4_year1_q3",
+   "name": "Năm 1 cơ sở = lõi Q3/26 ×4 (403,0) thay TTM 357,4",
+   "dir": "up",
+   "evidence_tier": "B",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": 1.135,
+   "mag_range_pct": [
+    -0.113,
+    1.135
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 0.397,
+   "source": "dd_VLB_20261122/src/BCTC_Q3_2026.pdf tr.5 PDF (mã 30, 21); skeptic/r3_raw.md:23",
+   "note": "B nhánh ngược: 9T/26 năm hoá 352,8 < TTM; KH 2026 LNTT 275"
+  }
+ ],
+ "sum_p_m_pct_linear": -3.399,
+ "sum_pct_combo": -3.667,
+ "aggregation": "|Σ|=3,40% ≤5% ⇒ tuyến tính (PREREG v1 §3)",
+ "center_adj": 43626,
+ "range_low": 40056,
+ "range_high": 45906,
+ "dividend_mech": {
+  "status": "cổ tức tạm ứng 2026 2.500 đ/cp GDKHQ 19/11/2026 đã qua ⇒ tâm base đã ex-div",
+  "vnd": 0
+ },
+ "center_adj_ex_div": 43626,
+ "sensitivity_only": [
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke (E15)",
+   "value": 47142,
+   "pct": 4.39,
+   "reason": "V1 tham số luật"
+  },
+  {
+   "name": "Đền bù diện tích còn lại vượt lịch sử",
+   "pct_range": [
+    -6,
+    -4
+   ],
+   "reason": "C — ước lượng skeptic 90–130 tỷ, chưa có diện tích/đơn giá"
+  },
+  {
+   "name": "Kịch bản tốt gia hạn không tính tiền cấp quyền/đền bù mới",
+   "pct_range": null,
+   "reason": "C"
+  },
+  {
+   "name": "Bù trừ chiết khấu @13,5%",
+   "pct": -1.5,
+   "reason": "đếm hai lần với kịch bản xấu bù trừ = 0"
+  },
+  {
+   "name": "Truy thu tiền cấp quyền kiểu 2022",
+   "vnd": -4623,
+   "reason": "STRESS + HARD ABANDON"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "BCTC Q4/2026 lõi Q4",
+   "when": "~20/01/2027",
+   "direction": "both",
+   "delta_pct": [
+    -1.7,
+    1.3
+   ],
+   "note": "I1/I4 đổi p (ước lượng)"
+  },
+  {
+   "event": "BCĐKT 31/12/2026 phải trả NLĐ",
+   "when": "~20/01/2027",
+   "direction": "both",
+   "delta_pct": [
+    -0.8,
+    0.5
+   ],
+   "note": "I2 B→A"
+  },
+  {
+   "event": "LCTT KT 2026 chi phí trả trước + chi TSCĐ vs khấu hao",
+   "when": "~03/2027",
+   "direction": "both",
+   "delta_pct": [
+    -1.0,
+    0.7
+   ],
+   "note": "I3 p"
+  },
+  {
+   "event": "CBTT đền bù phần diện tích còn lại có số",
+   "when": "bất kỳ",
+   "direction": "down",
+   "delta_pct": [
+    -6,
+    -4
+   ],
+   "note": "C→A, ước lượng skeptic"
+  },
+  {
+   "event": "Văn bản gia hạn GP 3 mỏ chính",
+   "when": "bất kỳ",
+   "direction": "up",
+   "delta_pct": [
+    3,
+    3
+   ],
+   "note": "ước lượng từ +6,3% cơ sở × w 0,5"
+  },
+  {
+   "event": "TB truy thu/huỷ bù trừ",
+   "when": "bất kỳ",
+   "direction": "down",
+   "delta_vnd": -3423,
+   "note": "HARD ABANDON"
+  },
+  {
+   "event": "Lãi huy động 12T ±50bp",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_pct": [
+    -1.7,
+    1.77
+   ],
+   "note": "V1"
+  }
+ ],
+ "legal": "WARNING — tiền cấp quyền đảo chiều 2022↔2026, rà soát GP Soklu, Kiểm toán NN; không vào tâm",
+ "caveat": "MÙ GIÁ; I3 dùng dòng \"tăng giảm chi phí trả trước\" (gồm cả ngắn hạn) làm proxy chi đền bù; I4 lõi một quý ×4 chưa khử mùa vụ"
+}

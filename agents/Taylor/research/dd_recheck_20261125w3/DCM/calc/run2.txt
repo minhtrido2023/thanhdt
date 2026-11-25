@@ -1,0 +1,17 @@
+CONTROL tâm sau CK 27,392.5 (rev9 27.393)
+E15 trục r dịch về tâm 12,3% (±100bp giữ): 28,941 (+5.65%)
+   r cố định 12,3% (bỏ trục): 28,881 (+5.43%)
+   r cố định 13,5% (bỏ trục, đối chiếu): 27,348
+   lãi huy động -100bp (β1, dịch trục): 28,661 (+4.63%)
+   lãi huy động -50bp (β1, dịch trục): 28,001 (+2.22%)
+   lãi huy động +50bp (β1, dịch trục): 26,830 (-2.06%)
+   lãi huy động +100bp (β1, dịch trục): 26,307 (-3.96%)
+phần dư 2024/2025: {'r5_2021_25': {2024: 65.6, 2025: -372.8}, 'reg_ex22': {2024: -118.9, 2025: -207.2}}
+f: 2024 0.619 2025 0.331 pool 0.387 9T26 0.190
+D1_khcn_forced_spend: m -3.25% [lo -5.20%; hi -1.60%] p 0.5 -> -1.63%
+D2_regression_overpredict: m -6.72% [lo -12.30%; hi -1.13%] p 0.35 -> -2.35%
+SUM linear -3.977% -> adj 26,303; range 24,470 – 27,236; TO HOP 26,309 (-3.956%)
+  sens late_axis: 22,574 (-17.59%)
+  sens w4: 29,405 (+7.34%)
+  sens policy055: 28,423 (+3.76%)
+  sens rev7_100pct: 25,009 (-8.70%)

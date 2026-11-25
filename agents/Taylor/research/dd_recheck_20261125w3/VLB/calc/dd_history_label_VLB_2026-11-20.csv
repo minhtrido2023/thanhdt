@@ -1,0 +1,2 @@
+ticker,dd_date,rev,skeptic_final,asof,center,price_asof,pc_asof,label,label_v1,reasons,demote_k,demote_neff,pct_fade,pct_hold,terc_fade,terc_hold,n_fade,n_hold,n_eff_hold,n_eff_fade,k_fade,k_hold,hist_med_fade,hist_med_hold,hist_p25_fade,hist_p75_fade,hist_p25_hold,hist_p75_hold,ROE5Y,roe_ttm,roe_ttm_over_5y,warn
+VLB,2026-11-22,4,REFUTED_OPEN,2026-11-20,45161,48100,1.06508,RẺ,RẺ,,0,0,0,0,RẺ,RẺ,120,120,9.68499,17.7308,1.26868,0.797544,1.59603,1.66047,1.36669,1.80296,1.34821,1.90367,0.24454,0.564186,2.30713,ĐỈNH LỢI NHUẬN? (ROE TTM/5Y=2.31)

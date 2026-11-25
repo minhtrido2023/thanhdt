@@ -1,0 +1,59 @@
+{
+ "entry": {
+  "ticker": "DCM",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_DCM_20261104/skeptic/r4.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-11-04",
+  "rev": 5,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 24385,
+  "center": 27393,
+  "zone_high": 30479,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng lưới 2.430 kết cục (2 cửa sổ hồi quy 2021+ trên LN trước khấu hao và trước trích quỹ KH&CN, capex duy trì M 342/401/540, r 13,5%±100bp, biên DH 138/179/220, năm 1 170/222/285, khí A/B, I_C 20/22/25) SAU chiết khấu thanh khoản 0,585% @5 tỷ; quỹ KTPL trừ đủ; quỹ KH&CN MỘT quy tắc cho số dư + dòng trích: v=(1−t_kỳ trích×(1+2×Y5))×((1+d)/(1+r))^L (Luật 67/2025 Đ17, NĐ 320/2025 Đ22); khí 2035+ = cấu trúc HĐ 3918 Đ9.1 hiện hành; mù giá (LOCK_r9)",
+  "center_alt": 27387,
+  "center_alt_kind": "point",
+  "center_range": null,
+  "price_ref": 30400,
+  "price_date": "2026-11-20",
+  "verdict_label": "Giá 30.400 TRONG vùng P10–P90 (22.065–32.564), +11,0% so tâm 27.393; KHÔNG đạt luật 0,85×tâm (23.284). Biến thể khí 2035+ khai trọng số (tâm 22.574, P10 13.902, P90 31.086) ⇒ TRONG sát P90 — vùng đọc mở rộng [13.902…32.564]. Cách đọc quỹ KH&CN rev7 (mất 100%) ⇒ TRÊN (tâm 25.009). 'Không rẻ' chắc chắn ở mọi biến thể. Skeptic r4 (vòng 3, cuối) INCONCLUSIVE: tâm dựa trên 3 tiền đề chưa kiểm (hoàn nhập quỹ KH&CN cho DN không phải DNNN tới −8,7%; hạn thuê đất Cà Mau −3,6…−6,8%; khí sau 2034 100% công thức Đ9.1) + hồi quy đoán cao 2024–25 (ước lượng −4,5%)",
+  "skeptic_status": "r1 22/11 REFUTED → rev7; r2 23/11 INCONCLUSIVE → rev8; r3 23/11 REFUTED (quỹ KH&CN số dư vs dòng không nhất quán) → rev9; r4 23/11 INCONCLUSIVE medium (vòng 3 cuối, user duyệt 17:03) — DỪNG, không chạy thêm",
+  "source_file": "agents/Taylor/research/dd_recheck_20261125w3/DCM/REPORT_recheck_DCM.md",
+  "assumptions_file": "agents/Taylor/research/dd_DCM_20261104/assumptions_r9.json",
+  "assumptions_md5": "a12917ea454b449b000bf660af2f929c",
+  "report_md5": "98bdf6a8192213cc4dd734986fb50148",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w3/DCM/REPORT_recheck_DCM.md",
+    "quote": "**TÂM (base, r 13,5% ±100bp trong lưới, sau chiết khấu thanh khoản 0,585%): 27.393 đ/cp — vùng P25–P75 24.385–30.479. KHÔNG ĐỔI so với rev9.**",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w3/DCM/REPORT_recheck_DCM.md",
+    "quote": "- Điểm tham số trung tâm trước CK (center_alt, kế thừa rev9): 27.387 đ/cp.",
+    "fields": [
+     "center_alt"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w3/DCM/REPORT_recheck_DCM.md",
+    "quote": "- **Nhãn** (giá 30.400, DNSE 20/11/2026, kế thừa rev9): TRONG vùng P10–P90 (22.065–32.564), +11,0% so tâm; luật 4 (0,85 × 27.393 = 23.284) KHÔNG đạt. Không đổi so với rev9.",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "notes": "Vùng = P25–P75 lưới (quy ước rev2); P10–P90 22.065–32.564 sau CK. center_alt = điểm tham số trung tâm trước CK (27.387). center_range=null: biến thể khí 2035+ khai trọng số cho tâm THẤP HƠN 22.574, cách đọc quỹ rev7 25.009, M=738 24.178 — xem REPORT_rev9.md §3. Độ nhạy r ±100bp β1: −1.077/+1.258; Ke 12,3/13,4: +1.535/+117. Capex duy trì −1.040/100 tỷ/năm. Khí 2035+ phẳng −7.606, leo thang −11.364. Đất/vòng đời dừng 2042 −1.873, 2047 −994. Số: calc/model_r9_out.txt, calc/compare_px_r9_out.json; khoá calc/LOCK_r9_md5.txt.",
+  "null_reason": null,
+  "expires_on": "2027-03-04",
+  "expires_basis": "dd_date+120 (giữ theo DD gốc); thay bằng ngày công bố BCTC Q4/2026 nếu sớm hơn",
+  "supersedes": "DCM@2026-11-04#4",
+  "correction_reason": "recheck đợt 3 theo HANDOFF dd_recheck_20261125w3: thêm E15 (Tâm @ Ke 12,3% = 28.941, +5,65%, dịch trục r lưới) + E16 (RẺ, phân vị [fade 30, hold 1], N hiệu dụng 4.4) + đính chính câu công bố mù giá (giá biết từ r5, không phải rev7). Tâm/vùng/nhãn KHÔNG đổi (27.393; 24.385–30.479). Không chạy skeptic vòng mới (r4 DD_GENERAL vòng 3 cuối cùng mô hình; §E14). Tâm kỳ vọng điều chỉnh E17: 26.303 (24.470–27.236)."
+ }
+}
