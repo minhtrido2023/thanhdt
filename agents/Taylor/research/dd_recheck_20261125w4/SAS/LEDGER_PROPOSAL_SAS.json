@@ -1,0 +1,49 @@
+{
+ "entry": {
+  "ticker": "SAS",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261125w4/SAS/skeptic/r1.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-10-26",
+  "rev": 3,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 22430,
+  "center": 27477,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 45 kết cục (Δ Long Thành × N0 × r; D4 TV = E2028/r), sau CK 5,93% @5 tỷ",
+  "zone_high": 32420,
+  "center_range": null,
+  "price_ref": 34200,
+  "price_date": "2026-11-06",
+  "verdict_label": "TRÊN vùng: giá 34.200 cao hơn tâm 27.477 +24,5%, trên P90 32.420; 95,6% trọng số kết cục dưới giá (sleeve 40 tr: tâm 29.053, P90 34.279 ⇒ TRONG sát mép trên). Luật sổ (giá < tâm −15% = 23.355): KHÔNG đạt. §2.5 không đủ điều kiện. Rev2 (31.658) nhãn TRONG — đổi do D4.",
+  "skeptic_status": "rev3 đầy đủ 25/11 (D4 + lãi Q4 + thuyết minh): dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (1,09 USD). Cơ học đúng (tâm điểm giữa tái lập 29.159/≈27.430; D4 đúng; biên vận hành 12,57%/15,42% khớp). Mở: thời hạn hợp đồng mặt bằng ACV (TV vĩnh viễn), q trượt thầu Long Thành ngầm 0,5 (±10pp ≈ ±7,45%), đỉnh biên nhiều năm. Đã áp: E17 #2→C+, #3 bù trừ VLĐ, thêm #4 mùa vụ Q4; truy thu thuê đất đã hạch toán/nộp; soát xét H1 chấp nhận. Tâm base không đổi sau đính chính ⇒ không phản biện lại.",
+  "source_file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+    "quote": "**TÂM (base rev3, r 13,5%, D4 RONIC = Ke, sau CK 5 tỷ 5,93%): 27.477 đ/cp — vùng P10–P90 22.430–32.420** (trước CK 29.208; P50 27.384). Δ so với r3: **−13,21%**.",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+    "quote": "## 6. Sau khoá — nhãn (giá 34.200, BQ 06/11/2026, kế thừa r3)",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/LOCK_rev3_md5.txt",
+  "assumptions_md5": "6ac277a4fee4a2eac2c423f448831d3a",
+  "expires_on": "2027-02-23",
+  "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+  "recorded_at": "2026-11-25T14:20:00+07:00",
+  "supersedes": "SAS@2026-10-26#2",
+  "correction_reason": "rev3 đầy đủ theo HANDOFF đợt 4 phương án (a), user duyệt 25/11 13:3x: D4 terminal RONIC = Ke (moat NARROW, r3 RONIC ngầm ∞) 31.658 → 27.426; + lãi tiền gửi Q4/26 +51 ⇒ 27.477 (−13,21%); E15 29.113 (+5,95%); E16 KHÔNG CHẮC (1.99, cờ ĐỈNH LỢI NHUẬN); nhãn TRONG → TRÊN.",
+  "report_md5": "2a01d185b33bb8e929b1f08d4e2c9f2d"
+ }
+}

@@ -1,0 +1,4 @@
+5f7a11ba9cdbf44b74474d7dd1a21c40  PREREG_rev3_addendum_r1.md
+a6c92e31fb43caa71568e229dcf0556a  calc/calc_adj_rev3.py
+6ac277a4fee4a2eac2c423f448831d3a  LOCK_rev3_md5.txt
+a965e16a01b41f74b7778299a95ee65b  skeptic/r1.json
