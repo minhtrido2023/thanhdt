@@ -1,0 +1,60 @@
+EW_f0 {'cagr': np.float64(0.068), 'sharpe': np.float64(0.403), 'maxdd': -0.486, 'n': np.float64(368.304), 'turnover': np.float64(0.14), 'invested': np.float64(0.963)}
+S1_ENS1w_f0 {'cagr': np.float64(0.121), 'sharpe': np.float64(0.703), 'maxdd': -0.354, 'n': np.float64(58.122), 'turnover': np.float64(0.256), 'invested': np.float64(0.695)}
+EW_f1 {'cagr': np.float64(0.06), 'sharpe': np.float64(0.361), 'maxdd': -0.52, 'n': np.float64(264.899), 'turnover': np.float64(0.271), 'invested': np.float64(1.0)}
+S1_ENS1w_f1 {'cagr': np.float64(0.135), 'sharpe': np.float64(0.66), 'maxdd': -0.44, 'n': np.float64(37.608), 'turnover': np.float64(0.359), 'invested': np.float64(0.85)}
+EW_f5 {'cagr': np.float64(0.022), 'sharpe': np.float64(0.215), 'maxdd': -0.536, 'n': np.float64(155.554), 'turnover': np.float64(0.357), 'invested': np.float64(1.0)}
+S1_ENS1w_f5 {'cagr': np.float64(0.127), 'sharpe': np.float64(0.567), 'maxdd': -0.493, 'n': np.float64(20.899), 'turnover': np.float64(0.484), 'invested': np.float64(0.975)}
+S1_ENS1w_f1_nocap {'cagr': np.float64(0.141), 'sharpe': np.float64(0.647), 'maxdd': -0.496, 'n': np.float64(37.608), 'turnover': np.float64(0.437), 'invested': np.float64(0.993)}
+EW_f1_nocap {'cagr': np.float64(0.06), 'sharpe': np.float64(0.361), 'maxdd': -0.52, 'n': np.float64(264.899), 'turnover': np.float64(0.271), 'invested': np.float64(1.0)}
+S2_ENS1w_f1 {'cagr': np.float64(0.1), 'sharpe': np.float64(0.493), 'maxdd': -0.492, 'n': np.float64(62.682), 'turnover': np.float64(0.373), 'invested': np.float64(0.948)}
+S1_D0_f1 {'cagr': np.float64(0.15), 'sharpe': np.float64(0.736), 'maxdd': -0.407, 'n': np.float64(36.372), 'turnover': np.float64(0.341), 'invested': np.float64(0.839)}
+S1_ENS2_f1 {'cagr': np.float64(0.141), 'sharpe': np.float64(0.691), 'maxdd': -0.417, 'n': np.float64(40.182), 'turnover': np.float64(0.371), 'invested': np.float64(0.849)}
+S1_ENS1_f1 {'cagr': np.float64(0.123), 'sharpe': np.float64(0.627), 'maxdd': -0.456, 'n': np.float64(38.527), 'turnover': np.float64(0.341), 'invested': np.float64(0.875)}
+S1_MULT_f1 {'cagr': np.float64(0.125), 'sharpe': np.float64(0.604), 'maxdd': -0.433, 'n': np.float64(40.142), 'turnover': np.float64(0.364), 'invested': np.float64(0.815)}
+S1_A_pit_f1 {'cagr': np.float64(0.089), 'sharpe': np.float64(0.497), 'maxdd': -0.441, 'n': np.float64(34.074), 'turnover': np.float64(0.365), 'invested': np.float64(0.863)}
+S1_L2_ENS1w_f1 {'cagr': np.float64(0.087), 'sharpe': np.float64(0.492), 'maxdd': -0.412, 'n': np.float64(40.608), 'turnover': np.float64(0.382), 'invested': np.float64(0.884)}
+S1_REL_f1 {'cagr': np.float64(0.077), 'sharpe': np.float64(0.458), 'maxdd': -0.358, 'n': np.float64(34.101), 'turnover': np.float64(0.387), 'invested': np.float64(0.878)}
+S1_N0_f1 {'cagr': np.float64(0.026), 'sharpe': np.float64(0.223), 'maxdd': -0.505, 'n': np.float64(12.047), 'turnover': np.float64(0.366), 'invested': np.float64(0.679)}
+S3f_f1 {'cagr': np.float64(0.131), 'sharpe': np.float64(0.646), 'maxdd': -0.421, 'n': np.float64(37.608), 'turnover': np.float64(0.357), 'invested': np.float64(0.862)}
+S3f_f5 {'cagr': np.float64(0.142), 'sharpe': np.float64(0.627), 'maxdd': -0.464, 'n': np.float64(20.899), 'turnover': np.float64(0.468), 'invested': np.float64(0.958)}
+S3f_f0 {'cagr': np.float64(0.121), 'sharpe': np.float64(0.706), 'maxdd': -0.343, 'n': np.float64(57.872), 'turnover': np.float64(0.246), 'invested': np.float64(0.701)}
+S3f_D0_f1 {'cagr': np.float64(0.127), 'sharpe': np.float64(0.632), 'maxdd': -0.42, 'n': np.float64(36.372), 'turnover': np.float64(0.355), 'invested': np.float64(0.853)}
+S5_ENS1w_f1 {'cagr': np.float64(0.136), 'sharpe': np.float64(0.667), 'maxdd': -0.435, 'n': np.float64(37.608), 'turnover': np.float64(0.387), 'invested': np.float64(0.839)}
+S1_ENS1w_f1_deadin {'cagr': np.float64(0.111), 'sharpe': np.float64(0.558), 'maxdd': -0.472, 'n': np.float64(41.378), 'turnover': np.float64(0.381), 'invested': np.float64(0.892)}
+S1_D0_f1_deadin {'cagr': np.float64(0.126), 'sharpe': np.float64(0.625), 'maxdd': -0.441, 'n': np.float64(40.412), 'turnover': np.float64(0.357), 'invested': np.float64(0.881)}
+S3f_f1_deadin {'cagr': np.float64(0.124), 'sharpe': np.float64(0.613), 'maxdd': -0.445, 'n': np.float64(41.378), 'turnover': np.float64(0.363), 'invested': np.float64(0.883)}
+EW_f1_bqonly {'cagr': np.float64(0.081), 'sharpe': np.float64(0.443), 'maxdd': -0.506, 'n': np.float64(252.493), 'turnover': np.float64(0.27), 'invested': np.float64(1.0)}
+S7_ENS1w_f1 {'cagr': np.float64(0.083), 'sharpe': np.float64(0.442), 'maxdd': -0.512, 'n': np.float64(185.601), 'turnover': np.float64(0.331), 'invested': np.float64(1.0)}
+S7_D0_f1 {'cagr': np.float64(0.09), 'sharpe': np.float64(0.47), 'maxdd': -0.495, 'n': np.float64(172.196), 'turnover': np.float64(0.322), 'invested': np.float64(1.0)}
+                       ALL      IS     OOS  sharpe  maxdd        n  turnover  invested
+strategy                                                                              
+EW_f0               0.0679  0.0149  0.1139   0.403 -0.486  368.304     0.140     0.963
+EW_f1               0.0596  0.0124  0.1003   0.361 -0.520  264.899     0.271     1.000
+EW_f1_bqonly        0.0809  0.0462  0.1104   0.443 -0.506  252.493     0.270     1.000
+EW_f1_nocap         0.0596  0.0124  0.1003   0.361 -0.520  264.899     0.271     1.000
+EW_f5               0.0224 -0.0451  0.0819   0.215 -0.536  155.554     0.357     1.000
+S1_A_pit_f1         0.0888  0.0457  0.1259   0.497 -0.441   34.074     0.365     0.863
+S1_D0_f1            0.1499  0.0647  0.2254   0.736 -0.407   36.372     0.341     0.839
+S1_D0_f1_deadin     0.1261  0.0299  0.2125   0.625 -0.441   40.412     0.357     0.881
+S1_ENS1_f1          0.1235  0.0600  0.1788   0.627 -0.456   38.527     0.341     0.875
+S1_ENS1w_f0         0.1213  0.0398  0.1935   0.703 -0.354   58.122     0.256     0.695
+S1_ENS1w_f1         0.1351  0.0568  0.2043   0.660 -0.440   37.608     0.359     0.850
+S1_ENS1w_f1_deadin  0.1113  0.0210  0.1919   0.558 -0.472   41.378     0.381     0.892
+S1_ENS1w_f1_nocap   0.1408  0.0752  0.1980   0.647 -0.496   37.608     0.437     0.993
+S1_ENS1w_f5         0.1267  0.0043  0.2391   0.567 -0.493   20.899     0.484     0.975
+S1_ENS2_f1          0.1408  0.0659  0.2066   0.691 -0.417   40.182     0.371     0.849
+S1_L2_ENS1w_f1      0.0869  0.0177  0.1477   0.492 -0.412   40.608     0.382     0.884
+S1_MULT_f1          0.1246  0.0439  0.1960   0.604 -0.433   40.142     0.364     0.815
+S1_N0_f1            0.0257 -0.0721  0.1144   0.223 -0.505   12.047     0.366     0.679
+S1_REL_f1           0.0775  0.0268  0.1213   0.458 -0.358   34.101     0.387     0.878
+S2_ENS1w_f1         0.1005  0.0036  0.1877   0.493 -0.492   62.682     0.373     0.948
+S3f_D0_f1           0.1269  0.0342  0.2099   0.632 -0.420   36.372     0.355     0.853
+S3f_f0              0.1213  0.0379  0.1953   0.706 -0.343   57.872     0.246     0.701
+S3f_f1              0.1314  0.0446  0.2087   0.646 -0.421   37.608     0.357     0.862
+S3f_f1_deadin       0.1239  0.0429  0.1956   0.613 -0.445   41.378     0.363     0.883
+S3f_f5              0.1424  0.0245  0.2501   0.627 -0.464   20.899     0.468     0.958
+S5_ENS1w_f1         0.1357  0.0548  0.2073   0.667 -0.435   37.608     0.387     0.839
+S7_D0_f1            0.0900  0.0291  0.1430   0.470 -0.495  172.196     0.322     1.000
+S7_ENS1w_f1         0.0830  0.0267  0.1319   0.442 -0.512  185.601     0.331     1.000
+{"S1_ENS1w_f1": {"dsr_abs": 0.8656295089492062, "dsr_active_vs_EW": 0.3780918609147404, "sr0_active": 1.0056618535044728, "active_sharpe": 0.9169347026348308, "years_beat_EW": "9/13", "active_sharpe_vs_S3f": 0.052717194082953334, "dt5g_excess_m": {"1.0": [0.00820806969148736, 21], "2.0": [0.0036146343695141296, 13], "3.0": [0.0039288395093249814, 90], "4.0": [0.01117505341940941, 21], "5.0": [0.007238617302328096, 3]}}, "S1_D0_f1": {"dsr_abs": 0.9138884873260038, "dsr_active_vs_EW": 0.5602295319343122, "sr0_active": 1.0056618535044728, "active_sharpe": 1.0497890696210312, "years_beat_EW": "11/13", "active_sharpe_vs_S3f": 0.28901241800540134, "dt5g_excess_m": {"1.0": [0.015653439071236657, 21], "2.0": [0.006732928254353787, 13], "3.0": [0.004267816264763106, 90], "4.0": [0.0061102167084877874, 21], "5.0": [0.011894428005745781, 3]}}}
+34.70s

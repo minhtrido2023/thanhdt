@@ -1,0 +1,14 @@
+PASS NAV S1_ENS1w_f1 lệch 0.001434 VND trên 238,657,809,111
+PASS NAV S1_D0_f1 lệch 0.000366 VND trên 279,856,785,779
+PASS NAV S3f_f1 lệch 0.000854 VND trên 229,286,365,898
+PASS NAV S7_D0_f1 lệch 0.000946 VND trên 144,688,384,967
+PASS D0 V/B vòng lặp thuần (200 dòng) lệch tối đa 3.55e-15
+PASS PIT known ≤ time 188947 dòng; tuổi BCTC tối đa 200 ngày
+PASS hệ số hedonic đóng băng 2019-12 (tính lại từ dòng thô 2015-01..2019-12) lệch hệ số tối đa 4.83e-05; tháng dùng 24181..24240 < 24241
+PASS IC36 ENS1w IS (scipy) 0.149059 vs 0.149059
+PASS IC36 ENS1w OOS (scipy) 0.203581 vs 0.203581
+PASS U-hit ENS1w IS (vòng lặp pandas) 289 sự kiện, 0.6644 vs 289, 0.6644
+PASS cảnh báo đắt D0 IS đúng-tương đối (vòng lặp pandas) 298/420 = 0.7095 vs 0.7095
+PASS U-hit ENS1w OOS (vòng lặp pandas) 271 sự kiện, 0.6827 vs 271, 0.6827
+PASS cảnh báo đắt D0 OOS đúng-tương đối (vòng lặp pandas) 323/474 = 0.6814 vs 0.6814
+TỔNG: PASS

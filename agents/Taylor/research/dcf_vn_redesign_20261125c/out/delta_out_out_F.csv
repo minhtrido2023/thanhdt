@@ -1,0 +1,31 @@
+item,out,out_F
+D0 IS,IC 0.138 | Uhit 60.3 Ust 61.9 | đúng 71.0 sai 15.5 (nO=420),IC 0.139 | Uhit 63.3 Ust 64.2 | đúng 70.9 sai 15.8 (nO=419)
+D0 OOS,IC 0.208 | Uhit 70.5 Ust 68.3 | đúng 68.1 sai 18.8 (nO=475),IC 0.210 | Uhit 71.0 Ust 67.4 | đúng 68.4 sai 18.6 (nO=473)
+D0B IS,IC 0.117 | Uhit 61.9 Ust 57.1 | đúng 71.6 sai 15.7 (nO=408),IC 0.119 | Uhit 64.2 Ust 59.1 | đúng 71.3 sai 15.7 (nO=407)
+D0B OOS,IC 0.207 | Uhit 67.8 Ust 62.8 | đúng 68.1 sai 18.8 (nO=458),IC 0.209 | Uhit 68.6 Ust 62.0 | đúng 68.2 sai 18.6 (nO=457)
+EPV IS,IC 0.122 | Uhit 58.8 Ust 59.4 | đúng 68.4 sai 16.2 (nO=247),IC 0.123 | Uhit 58.1 Ust 59.1 | đúng 68.8 sai 16.4 (nO=250)
+EPV OOS,IC 0.167 | Uhit 73.1 Ust 67.2 | đúng 67.5 sai 19.9 (nO=311),IC 0.170 | Uhit 71.9 Ust 65.9 | đúng 67.0 sai 20.5 (nO=312)
+MULT IS,IC 0.134 | Uhit 62.9 Ust 59.5 | đúng 68.4 sai 14.6 (nO=294),IC 0.137 | Uhit 63.2 Ust 61.0 | đúng 68.0 sai 15.3 (nO=294)
+MULT OOS,IC 0.118 | Uhit 65.6 Ust 58.2 | đúng 70.8 sai 14.2 (nO=373),IC 0.121 | Uhit 66.2 Ust 58.3 | đúng 70.9 sai 14.2 (nO=374)
+HEDf IS,IC 0.065 | Uhit 57.0 Ust 55.5 | đúng 69.4 sai 17.7 (nO=232),IC 0.068 | Uhit 57.5 Ust 56.0 | đúng 69.4 sai 17.2 (nO=232)
+HEDf OOS,IC 0.145 | Uhit 66.7 Ust 58.4 | đúng 70.2 sai 16.4 (nO=367),IC 0.147 | Uhit 67.5 Ust 59.0 | đúng 69.8 sai 16.0 (nO=369)
+ENS1 IS,IC 0.135 | Uhit 60.6 Ust 59.8 | đúng 71.7 sai 16.2 (nO=438),IC 0.137 | Uhit 62.6 Ust 61.7 | đúng 71.4 sai 15.9 (nO=441)
+ENS1 OOS,IC 0.239 | Uhit 67.4 Ust 64.2 | đúng 70.4 sai 17.6 (nO=506),IC 0.241 | Uhit 68.4 Ust 63.3 | đúng 70.4 sai 17.8 (nO=506)
+ENS1w IS,IC 0.152 | Uhit 62.8 Ust 61.7 | đúng 71.6 sai 15.2 (nO=433),IC 0.154 | Uhit 62.6 Ust 61.5 | đúng 71.3 sai 15.2 (nO=428)
+ENS1w OOS,IC 0.223 | Uhit 68.8 Ust 65.8 | đúng 71.8 sai 17.9 (nO=507),IC 0.224 | Uhit 67.1 Ust 66.3 | đúng 72.1 sai 17.3 (nO=502)
+ENS2 IS,IC 0.146 | Uhit 64.4 Ust 62.1 | đúng 70.3 sai 15.4 (nO=384),IC 0.149 | Uhit 64.6 Ust 63.0 | đúng 69.9 sai 15.8 (nO=385)
+ENS2 OOS,IC 0.190 | Uhit 68.2 Ust 61.8 | đúng 68.9 sai 18.4 (nO=426),IC 0.193 | Uhit 68.0 Ust 60.0 | đúng 68.6 sai 18.5 (nO=428)
+N0 IS,IC 0.010 | Uhit 70.2 Ust 59.0 | đúng 63.8 sai 20.3 (nO=345),IC 0.010 | Uhit 70.2 Ust 59.0 | đúng 63.8 sai 20.3 (nO=345)
+N0 OOS,IC 0.060 | Uhit 78.4 Ust 70.3 | đúng 61.4 sai 22.2 (nO=447),IC 0.060 | Uhit 78.4 Ust 70.3 | đúng 61.4 sai 22.2 (nO=447)
+EW_f1,ALL 6.12 | IS 1.24 | OOS 10.33 | Sh 0.37 | DD -51.7,ALL 6.12 | IS 1.24 | OOS 10.33 | Sh 0.37 | DD -51.7
+S1_ENS1w_f1,ALL 12.87 | IS 5.81 | OOS 19.05 | Sh 0.64 | DD -44.3,ALL 12.20 | IS 4.58 | OOS 18.92 | Sh 0.61 | DD -44.8
+S1_D0_f1,ALL 14.99 | IS 6.47 | OOS 22.54 | Sh 0.74 | DD -40.7,ALL 14.33 | IS 5.20 | OOS 22.47 | Sh 0.71 | DD -41.5
+S3f_f1,ALL 12.30 | IS 3.30 | OOS 20.33 | Sh 0.61 | DD -43.6,ALL 12.79 | IS 3.42 | OOS 21.18 | Sh 0.63 | DD -42.6
+S3f_D0_f1,ALL 12.69 | IS 3.42 | OOS 20.99 | Sh 0.63 | DD -42.0,ALL 13.35 | IS 4.73 | OOS 21.02 | Sh 0.66 | DD -42.0
+S7_ENS1w_f1,ALL 8.83 | IS 3.03 | OOS 13.87 | Sh 0.47 | DD -49.8,ALL 8.74 | IS 2.99 | OOS 13.74 | Sh 0.46 | DD -49.8
+S7_D0_f1,ALL 9.17 | IS 2.93 | OOS 14.62 | Sh 0.48 | DD -49.3,ALL 9.24 | IS 3.00 | OOS 14.67 | Sh 0.48 | DD -49.4
+S7_EPN_f1,ALL 8.55 | IS 2.87 | OOS 13.48 | Sh 0.46 | DD -50.4,ALL 8.47 | IS 2.71 | OOS 13.49 | Sh 0.46 | DD -50.3
+S1_ENS1w_f1_deadin,ALL 10.56 | IS 2.02 | OOS 18.15 | Sh 0.54 | DD -46.5,ALL 10.00 | IS 1.04 | OOS 18.01 | Sh 0.52 | DD -47.0
+EW_f1_bqonly,ALL 8.25 | IS 4.62 | OOS 11.35 | Sh 0.45 | DD -50.2,ALL 8.25 | IS 4.62 | OOS 11.35 | Sh 0.45 | DD -50.2
+S2_ENS1w_f1,ALL 10.34 | IS 0.96 | OOS 18.75 | Sh 0.51 | DD -48.7,ALL 9.76 | IS 0.03 | OOS 18.51 | Sh 0.49 | DD -49.2
+S5_ENS1w_f1,ALL 12.72 | IS 5.61 | OOS 18.96 | Sh 0.64 | DD -44.5,ALL 11.85 | IS 4.12 | OOS 18.68 | Sh 0.60 | DD -45.4

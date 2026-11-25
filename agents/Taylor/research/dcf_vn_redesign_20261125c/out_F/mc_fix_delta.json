@@ -1,0 +1,14 @@
+{
+ "rows_in_universe_2014plus": 56549,
+ "share_abs_dlog_gt_0.2pct": 0.14385753947903587,
+ "rows_gt_0.2pct": 8135,
+ "tickers_gt_0.2pct": 695,
+ "tickers_total": 836,
+ "share_abs_dlog_gt_10pct": 0.016463597941608163,
+ "median_abs_dlog": 0.00015385798937969577,
+ "VNM_2019-06": {
+  "mc_old": 216732764361664.8,
+  "mc_new": 214189524996000.0,
+  "dlog": -0.011803840078225818
+ }
+}
