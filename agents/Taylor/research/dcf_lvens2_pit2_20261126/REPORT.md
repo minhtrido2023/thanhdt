@@ -21,8 +21,10 @@ Chỉ nghiên cứu, DISPLAY-ONLY: KHÔNG cron, KHÔNG chèn registry, KHÔNG wi
 6. **Đổi nhãn ô 2026-05..10** (stepcar so với bản đã merge và so với vp2) liệt kê ở §5. Ô đổi do mc là **thật** (sự kiện thưởng hoặc cổ tức CP lớn: TRC ×4, L40 ×2,2, PHR ×1,8, GEX ×1,5).
    Ô đổi do bank E là **thật** (KLB, MSB). Phần còn lại là mã sát trung vị (|v−0,5|<0,05), tức artefact ngưỡng.
 
+7. **B1 ĐÃ XONG (job Taylor_20261125_173540).** Extract CA không còn nằm trong code: `lvens2_pit2.py` đọc `LVENS2_CA` (mặc định `out/ca/ca_extract_<YYYYMM tháng hiện hành ICT>.csv`) và `LVENS2_CA_MD5` (BẮT BUỘC); thiếu/không có file/md5 lệch ⇒ rc 3. Script md5 mới **`3f5041d6`** (cũ `ad565e0d`); làm mới extract từ nay KHÔNG đổi `script_md5`. Số đã đo không đổi: 24/24 parquet `out/final` dựng lại giống từng byte, 2026-10 stepcar vẫn `dea31ba7`, `strict --no-eguard` Δ=0 vs bản merge. **B2 (quant-skeptic vòng 2) và B3 (snapshot VND) còn mở.**
+
 ## 1. Đổi gì so với bản đã merge (`lvens2_incremental.py` md5 `357f69c5…` → `calc/lvens2_pit2.py`)
-- **Hồi quy:** `--mc-pit strict|step --no-eguard` cho lại bản merge **Δ=0** (2026-10, 1.086 dòng, mọi cột lv, mc, E). Đã chạy lại `strict --no-eguard` với script cuối `ad565e0d`, vẫn Δ=0 (`out/regress_vs_merged_2026-10.txt`).
+- **Hồi quy:** `--mc-pit strict|step --no-eguard` cho lại bản merge **Δ=0** (2026-10, 1.086 dòng, mọi cột lv, mc, E). Đã chạy lại `strict --no-eguard` với script cuối `3f5041d6` (sau B1), vẫn Δ=0 (`out/regress_vs_merged_2026-10_b1.txt`; bản trước B1: `out/regress_vs_merged_2026-10.txt`).
 - **mc `stepca`/`stepcar`:** mc = Price(D) × N_row × Π(1+exercise_ratio), lấy trên `tav2_bq.corporate_action` ISS, status ≠ not_executed, ratio > 0,
   method ∈ {Trả Cổ tức bằng Cổ phiếu, Cổ phiếu thưởng} (stepcar thêm Quyền mua CP cho Cổ đông hiện hữu), với ngày BCTC < ex ≤ D và public_date ≤ D. **Không bao giờ dùng DIV.**
   Nguồn là extract đóng băng `out/ca/ca_extract_20261125.csv` (34.159 dòng ISS/DIV/AIS, md5 `28418e9d…`, kiểm fail-closed). Đã dedup (ticker, ex, method, ratio).
@@ -123,16 +125,14 @@ Giải thích từng ô. **Thật** nghĩa là sửa đúng cơ chế; **artefac
 
 ## 6. Vận hành (ĐỀ XUẤT — KHÔNG cài; tra `kb/cron_registry.md` §11 trước khi cài)
 **Còn chặn trước khi cài (blocker):**
-- **B1 — Extract CA hằng tháng.** `CA_MD5` hiện viết cứng trong `lvens2_pit2.py`, nên mỗi lần làm mới extract `corporate_action` sẽ đổi `script_md5`, và sổ sẽ fail-closed (T4) mỗi tháng.
-  Sửa đề xuất: đọc `LVENS2_CA` + `LVENS2_CA_MD5` từ env, đặt file theo tháng `out/ca/ca_extract_<YYYYMM>.csv`. `ca_md5` đã nằm trong từng dòng sổ.
-  Script cố định, dữ liệu đổi thì ghi lại. Chưa làm ở job này để không đổi md5 các số đã đo.
+- ~~**B1 — Extract CA hằng tháng.**~~ **XONG** (§0.7): `LVENS2_CA`/`LVENS2_CA_MD5` từ env, extract hiện tại đổi tên `out/ca/ca_extract_202611.csv` (+ `.csv.md5`, md5 `28418e9d…`). Tháng sau: thả `ca_extract_<YYYYMM>.csv` + `.csv.md5` mới; script và `script_md5` giữ nguyên, `ca_md5` đổi trong dòng sổ. Selfcheck sổ thêm T10–T12 (extract mới + script giữ nguyên ⇒ ghi được; md5 sai/thiếu ⇒ rc 3). Lưu ý: `.md5` nằm cạnh extract nên chỉ chống hỏng/lệch file, không chống người thay cả hai.
 - **B2 — quant-skeptic vòng 2** trên stepcar + e_guard + vintage (gate trong entry đề xuất).
 - **B3 — Snapshot VND dừng ở 2026-11-23** (giữ nguyên từ bản merge §5.2): DSH/GEL/HPA sẽ thiếu giá từ as-of 2026-11.
 
 **Dòng cron đề xuất** (thay dòng của bản merge; host cron chạy UTC, `5 1` = 08:05 ICT; thứ tự: sync 23:45 ICT ngày D, sau đó ngày làm việc 1–3 tháng sau):
 ```
-# ĐỀ XUẤT — chưa cài, chờ B1+B2 + user duyệt. Đường dẫn sau merge: mike/agents/Taylor/research/dcf_lvens2_pit2_20261126
-5 1 1-3 * 1-5  cd /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_lvens2_pit2_20261126 && YM=$(TZ=Asia/Ho_Chi_Minh date -d "$(TZ=Asia/Ho_Chi_Minh date +\%Y-\%m-01) -1 day" +\%Y-\%m) && LVENS2_FROZEN=/home/trido/thanhdt/WorkingClaude/data/research_frozen/dcf_v31_inputs/out PYTHONHASHSEED=0 timeout 900 /home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym $YM --mc-pit stepcar --out-dir out/monthly && timeout 300 /home/trido/thanhdt/wc_venv/bin/python calc/paper_cell_monthly_pit2.py --asof-ym $YM --lvens2-from out/monthly/lvens2_${YM}_mcstepcar.parquet >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_cell_monthly_pit2.log 2>&1
+# ĐỀ XUẤT — chưa cài, chờ B2 (+ B3) + user duyệt. Đường dẫn sau merge: mike/agents/Taylor/research/dcf_lvens2_pit2_20261126
+5 1 1-3 * 1-5  cd /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_lvens2_pit2_20261126 && YM=$(TZ=Asia/Ho_Chi_Minh date -d "$(TZ=Asia/Ho_Chi_Minh date +\%Y-\%m-01) -1 day" +\%Y-\%m) && CAYM=$(TZ=Asia/Ho_Chi_Minh date +\%Y\%m) && export LVENS2_CA_MD5=$(cut -d' ' -f1 out/ca/ca_extract_${CAYM}.csv.md5) && LVENS2_FROZEN=/home/trido/thanhdt/WorkingClaude/data/research_frozen/dcf_v31_inputs/out PYTHONHASHSEED=0 timeout 900 /home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym $YM --mc-pit stepcar --out-dir out/monthly && timeout 300 /home/trido/thanhdt/wc_venv/bin/python calc/paper_cell_monthly_pit2.py --asof-ym $YM --lvens2-from out/monthly/lvens2_${YM}_mcstepcar.parquet >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_cell_monthly_pit2.log 2>&1
 ```
 - Sổ mới: `out/paper_cell_ledger_pit2.csv` + `.blocks.jsonl`. Không trộn với sổ của bản merge (`mc_pit` khác thì sổ sẽ fail-closed).
 - Chi phí: khoảng 53 giây/tháng một luồng, dựng cả 4 biến thể (đo bằng mtime `out/final`: 6 tháng tuần tự 00:06:54→00:11:19). RSS khoảng 2,1 GB (ước lượng, lấy từ bản merge, chưa đo lại). Không tốn BQ.
@@ -143,6 +143,7 @@ Giải thích từng ô. **Thật** nghĩa là sửa đúng cơ chế; **artefac
 ```bash
 cd mike/agents/Taylor/research/dcf_lvens2_pit2_20261126
 export LVENS2_FROZEN=/home/trido/thanhdt/WorkingClaude/data/research_frozen/dcf_v31_inputs/out PY=/home/trido/thanhdt/wc_venv/bin/python
+export LVENS2_CA_MD5=28418e9d4d91abfa8965ac756bb3d9c4   # B1: bắt buộc; extract mặc định out/ca/ca_extract_<YYYYMM>.csv, đặt LVENS2_CA nếu dựng lại tháng cũ
 $PY calc/mc_err.py                                                     # §2 → out/mc_err.json
 for ym in 2026-05 2026-06 2026-07 2026-08 2026-09 2026-10; do $PY calc/lvens2_pit2.py --asof-ym $ym --mc-pit all --out-dir out/final; done   # 1 as-of mỗi lần
 $PY calc/cmp_cells.py out/cmp_cells.json out/cmp_cells_changes.csv     # §5
@@ -153,6 +154,6 @@ for ym in 2026-05 2026-06; do $PY calc/lvens2_pit2.py --asof-ym $ym --mc-pit ste
 $PY calc/vintage_drift.py out/vintage_drift.json out/vintage_drift_top.csv   # §4.4
 $PY calc/lvens2_pit2.py --asof-ym 2026-10 --mc-pit strict --no-eguard --out-dir out/regress   # hồi quy Δ=0 vs bản merge (§1)
 ```
-md5 (8 ký tự đầu): `lvens2_pit2.py` ad565e0d · `paper_cell_monthly_pit2.py` 65eaf7e4 · `selfcheck_pit2.py` 20e4b7b8 · `mc_err.py` e4ebca73 · `cmp_cells.py` f9a3e94c · `vintage_drift.py` e59ecfe8 ·
+md5 (8 ký tự đầu): `lvens2_pit2.py` 3f5041d6 (sau B1; trước B1 ad565e0d) · `selfcheck_paper_cell_pit2.sh` 3a5e884d · `paper_cell_monthly_pit2.py` 65eaf7e4 · `selfcheck_pit2.py` 20e4b7b8 · `mc_err.py` e4ebca73 · `cmp_cells.py` f9a3e94c · `vintage_drift.py` e59ecfe8 ·
 extract CA 28418e9d · manifest frozen 59a5ee62 · cache `ticker_financial` ab5d424d (max_time 2026-11-20) · `fa_ratings_8l` 2ab15311 · final 2026-10 stepcar dea31ba7.
 Không dùng `profit_*`. Không dùng `ticker_prune`. Universe lấy từ `universe_pit`.

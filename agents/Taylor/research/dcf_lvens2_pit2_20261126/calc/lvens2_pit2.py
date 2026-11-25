@@ -24,6 +24,8 @@ Nguồn (tra mike/kb/data_registry/): data/bq_cache/ticker (CANONICAL) · ticker
 Dùng:  python lvens2_incremental.py --asof-ym 2026-10 [--mode pit|v31] [--out-dir DIR] [--frozen DIR] [--no-vnd]
 Ra:    <out-dir>/lvens2_<ym>[_<mode-tag>].parquet + .json (md5 đầu vào, D, số dòng). rc 0 ok · 3 fail-closed."""
 import os, sys, json, glob, hashlib, argparse
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import numpy as np, pandas as pd, duckdb
 WC = os.environ.get("WC_ROOT", "/home/trido/thanhdt/WorkingClaude"); HERE = os.path.dirname(os.path.abspath(__file__))
 FROZEN = os.environ.get("LVENS2_FROZEN", f"{WC}/wt-dcf-v3-20261125/agents/Taylor/research/dcf_vn_redesign_20261125c/out")
@@ -35,8 +37,17 @@ FIN_ROUTES = ["BANK", "INSURANCE", "SECURITIES"]
 OUTCOLS = ["ticker", "ym", "time", "known", "src", "route", "in_universe", "E", "E_raw", "E_fix", "E_unexpl", "mc", "N", "N_mc", "ca_ratio", "ca_n", "n_next_used", "event_no_next",
            "lv_D0B", "lv_DDM", "lv_EPV", "lv_MULT", "lv_HEDf", "lv_ENS2", "n_ENS2"]
 CACHE = f"{WC}/data/bq_cache"                     # đổi bằng --cache-root (selfcheck vintage); universe_pit LUÔN đọc từ WC/data/bq_cache (cache cũ không có)
-CA_FILE = os.environ.get("LVENS2_CA", os.path.join(HERE, "..", "out", "ca", "ca_extract_20261125.csv"))
-CA_MD5 = "28418e9d4d91abfa8965ac756bb3d9c4"
+# [B1] extract CA = DỮ LIỆU, không phải code: đường dẫn + md5 đọc từ env lúc gọi (script_md5 không đổi khi làm mới extract hằng tháng).
+#   LVENS2_CA = đường dẫn (mặc định out/ca/ca_extract_<YYYYMM tháng hiện hành ICT>.csv) · LVENS2_CA_MD5 = md5 mong đợi (BẮT BUỘC, không mặc định).
+#   Thiếu md5 / file / md5 lệch ⇒ rc 3 (fail-closed). Extract hiện tại: ca_extract_202611.csv md5 28418e9d4d91abfa8965ac756bb3d9c4.
+def ca_cfg():
+    path = os.environ.get("LVENS2_CA") or os.path.join(HERE, "..", "out", "ca", f"ca_extract_{datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).strftime('%Y%m')}.csv")
+    want = (os.environ.get("LVENS2_CA_MD5") or "").strip().lower()
+    if not want:
+        print("FAIL-CLOSED: thiếu LVENS2_CA_MD5 (md5 extract corporate_action mong đợi)", file=sys.stderr); raise SystemExit(3)
+    if not os.path.exists(path):
+        print(f"FAIL-CLOSED: không có extract CA {path} (đặt LVENS2_CA)", file=sys.stderr); raise SystemExit(3)
+    return path, want
 SHARE_METHODS = {"Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng"}   # đổi số CP cho cổ đông hiện hữu tại ex-date, không có tiền
 RIGHTS = "Quyền mua CP cho Cổ đông hiện hữu"
 EGUARD = -0.07                                    # log(E_bo/E_trước) < EGUARD ⇒ BVPS đã ở cơ sở CP sau sự kiện
@@ -46,9 +57,10 @@ MC_TAG = {"strict": "", "step": "_mcstep", "stepca": "_mcstepca", "stepcar": "_m
 
 def load_ca(path=None, verify=True):
     """Extract corporate_action đóng băng (ISS/DIV/AIS). Chỉ trả ISS đổi-số-CP (+ quyền mua), đã dedup (Bẫy 3 registry)."""
-    path = path or CA_FILE
-    if verify and md5f(path) != CA_MD5:
-        raise SystemExit(f"FAIL-CLOSED: md5 {path} != {CA_MD5}")
+    cpath, want = ca_cfg() if (path is None or verify) else (path, None)
+    path = path or cpath
+    if verify and md5f(path) != want:
+        print(f"FAIL-CLOSED: md5 {path} != {want}", file=sys.stderr); raise SystemExit(3)
     ca = pd.read_csv(path)
     ca = ca[(ca.event_code == "ISS") & (ca.event_status != "not_executed") & (ca.exercise_ratio > 0)
             & ca.issue_method_name_vi.isin(SHARE_METHODS | {RIGHTS}) & ca.exright_date.notna() & ca.public_date.notna()].copy()
@@ -566,7 +578,7 @@ def _emit(pan, mc_pit, yms, mode, D, out_dir, frozen, use_vnd, route_global, egu
                 "event_no_next_in_univ": int(iu.event_no_next.sum()), "ca_step_in_univ": int((iu.ca_n > 0).sum()), "E_fix_in_univ": int(iu.E_fix.sum()), "E_unexpl_in_univ": int(iu.E_unexpl.sum()), "E_unexpl_tickers": sorted(iu[iu.E_unexpl].ticker),
                 "frozen_files_verified": n_frozen, "hed_beta_frozen_2020-01": beta, "cache_root": CACHE, "cache_vintage": vintage, "freshness": fresh,
                 "inputs_md5": {k: md5f(p) for k, p in (("ticker_financial", f"{CACHE}/ticker_financial.parquet"), ("fa_ratings_8l", f"{CACHE}/fa_ratings_8l.parquet"),
-                                                       ("ca_extract", CA_FILE), ("frozen_manifest", os.path.join(frozen, "..", "MD5SUMS_delisted.txt")),
+                                                       ("ca_extract", ca_cfg()[0]), ("frozen_manifest", os.path.join(frozen, "..", "MD5SUMS_delisted.txt")),
                                                        ("px_pre2013", os.path.join(frozen, "px_pre2013_d.csv")))},
                 "script_md5": md5f(os.path.abspath(__file__))}
         json.dump(meta, open(fp.replace(".parquet", ".json"), "w"), ensure_ascii=False, indent=1, default=str)
