@@ -1,0 +1,222 @@
+{
+ "ticker": "SAS",
+ "dd_date": "2026-10-26",
+ "rev": 3,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_063648",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13",
+  "PREREG_rev3": "94221da19639fbf0a250020086764ce6",
+  "PREREG_rev3_addendum_r1": "5f7a11ba9cdbf44b74474d7dd1a21c40"
+ },
+ "blind_to_price": true,
+ "center_base": 27477,
+ "center_base_source": "LEDGER_PROPOSAL_SAS.json rev3 (REPORT_recheck_SAS.md §0)",
+ "items": [
+  {
+   "name": "N0 ở đỉnh biên vận hành — về biên 9T/25 (12,57% vs 15,42%)",
+   "dir": "down",
+   "evidence_tier": "B",
+   "source": "src_ocr/q3_11.txt:13-26; skeptic/r1_raw.md:15",
+   "note": "1 quan sát cùng hướng (9T/25) + quan sát ngược có số (giá vốn miễn thuế Q3 150,6 vs 224,2; ngừng mua qua IPP h1_52) ⇒ nhánh ngược",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": -11.691,
+   "mag_range_pct": [
+    -5.845,
+    -11.691
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -4.092
+  },
+  {
+   "name": "Phải thu DH gắn dự án đứng 227,8 tỷ — giá trị thời gian",
+   "dir": "down",
+   "evidence_tier": "C+",
+   "source": "src_ocr/q3_28.txt:5-20; skeptic/r1_raw.md:20",
+   "note": "C+ cận bảo thủ: dấu chắc (không sinh lãi, số dư 9T không đổi); m = 1 năm @13,5% (dải tới 3 năm, ước lượng); p thang B 1 quan sát",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -0.695,
+   "mag_range_pct": [
+    -0.695,
+    -1.847
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -0.347
+  },
+  {
+   "name": "Thuế GTGT khấu trừ 240,6 tỷ / VLĐ ròng ngoài tiền 130,3 tỷ thu hồi được",
+   "dir": "up",
+   "evidence_tier": "B",
+   "source": "src_ocr/q3_07.txt:43; h1_10.txt:26; skeptic/r1_raw.md:16",
+   "note": "số dư tăng 3 kỳ liền (199,4→226,5→240,6) ⇒ nhánh ngược; m bù trừ VLĐ theo skeptic",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": 3.342,
+   "mag_range_pct": [
+    1.671,
+    3.342
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 1.17
+  },
+  {
+   "name": "Mùa vụ Q4 trong năm hoá N0 (DT Q4/TB Q1–Q3 1,104/1,118/1,252)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "source": "BQ tav2_bq.ticker_financial Revenue_P0/NP_P0 SAS 2023Q1–2025Q4; skeptic/r1_raw.md:19",
+   "note": "DT 3 kỳ cùng hướng nhưng LN Q4/2023 52,9 < TB Q1–Q3 80,4 (quan sát ngược có số) ⇒ nhánh ngược",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": 2.497,
+   "mag_range_pct": [
+    1.638,
+    3.984
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 0.874
+  }
+ ],
+ "sum_p_m_pct": -2.396,
+ "aggregation": "tổ hợp chạy qua mô hình (calc/calc_adj_rev3.py): N0 × Π(1+p·m_N0), tiền + Σ p·m",
+ "center_adj": 26803,
+ "range_low": 25459,
+ "range_high": 28287,
+ "dividend_mech": "không có cổ tức tiền 2026 chưa GDKHQ (tìm 25/11; đợt 2/2025 GDKHQ 03/08/2026 đã trả)",
+ "sensitivity_only": [
+  {
+   "name": "q trượt thầu Long Thành (dịch Δ ±10pp; trọng số lưới là tham số r3 kế thừa)",
+   "tier": "C",
+   "pct": [
+    -7.45,
+    7.45
+   ]
+  },
+  {
+   "name": "Hợp đồng thuê hữu hạn ~27 năm (ước lượng từ cam kết thuê h1_45) thay TV vĩnh viễn",
+   "tier": "C",
+   "pct": -1.72
+  },
+  {
+   "name": "Biên vận hành ~10% (ước lượng; EBITM 2023–24 6–13% chưa cùng định nghĩa)",
+   "tier": "C",
+   "pct": -22.23
+  },
+  {
+   "name": "Vốn hoá cổ tức đầu tư 12,8/71/100 tỷ/năm thay sổ 253,8 (hai chiều)",
+   "tier": "C",
+   "pct": [
+    -4.36,
+    5.43,
+    10.31
+   ]
+  },
+  {
+   "name": "HTK −10%",
+   "tier": "C",
+   "pct": -0.52
+  },
+  {
+   "name": "Chuyển tự vận hành miễn thuế → đối tác (điều khoản chưa công bố)",
+   "tier": "C",
+   "pct": null,
+   "note": "dùng #1 làm thước"
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs Ke 12,3% (E15)",
+   "tier": "LUAT",
+   "pct": 5.95
+  },
+  {
+   "name": "[LUẬT] D4 RONIC = Ke (r3 RONIC ngầm ∞ ⇒ 31.709)",
+   "tier": "LUAT",
+   "pct": 15.4
+  },
+  {
+   "name": "[LUẬT] chặt-3C biên ngành (V5 cấm ở pha dự báo; ADDENDUM_5F_r1 nền r2 17.438)",
+   "tier": "LUAT",
+   "pct": null
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "BCTC Q4/2026 (biên vận hành Q4)",
+   "when": "31/01/2027",
+   "direction": "both",
+   "delta_pct": [
+    -2.34,
+    2.34
+   ],
+   "note": "#1 p 0,35→0,55 nếu biên ~12,6%; →0,15 nếu ≥15%"
+  },
+  {
+   "event": "BCTC năm 2026 kiểm toán: thuế GTGT được hoàn/khấu trừ",
+   "when": "03/2027",
+   "direction": "up",
+   "delta_pct": 1.83,
+   "note": "#3 → bậc A p 0,9: p×m 1,17%→3,00% (tâm_adj +1,83%)"
+  },
+  {
+   "event": "BCTC năm 2026: trích lập/thu hồi phải thu DH dự án (Bắc Vũng Bàu)",
+   "when": "03/2027",
+   "direction": "both",
+   "delta_pct": [
+    -5.24,
+    0.35
+   ],
+   "note": "trích lập hết ⇒ A6 −6,21% bậc A p 0,9 thay #2 (−5,24%); thu hồi/chuyển QSDĐ ⇒ bỏ #2 (+0,35%)"
+  },
+  {
+   "event": "DT + LN Q4/2026 so TB Q1–Q3",
+   "when": "31/01/2027",
+   "direction": "both",
+   "delta_pct": [
+    -0.87,
+    0.5
+   ],
+   "note": "#4 p 0,35→0,55 nếu Q4 cao cả DT lẫn LN (+0,50%); bỏ nếu thấp (−0,87%)"
+  },
+  {
+   "event": "Kết quả thầu mặt bằng Long Thành",
+   "when": "trước 03/2027",
+   "direction": "both",
+   "delta_pct": [
+    -7.45,
+    7.45
+   ],
+   "note": "chạy lại mô hình (rev mới) với Δ thực; mỗi 10pp ≈ 7,45%"
+  },
+  {
+   "event": "Hợp đồng khai thác mặt bằng TSN–ACV (thời hạn)",
+   "when": "chưa lịch",
+   "direction": "down",
+   "delta_pct": -1.72,
+   "note": "≈27 năm ⇒ −1,72%; ngắn hơn ⇒ lớn hơn"
+  },
+  {
+   "event": "Đối tác vận hành miễn thuế mới, điều khoản chia doanh thu",
+   "when": "chưa lịch",
+   "direction": "both",
+   "delta_pct": null,
+   "note": "#1 → bậc A"
+  },
+  {
+   "event": "Cổ tức 2026 từ Xăng dầu TSN (đều đặn hay một lần)",
+   "when": "BCTC năm 2026",
+   "direction": "both",
+   "delta_pct": [
+    -2.18,
+    2.72
+   ],
+   "note": "C→B p 0,5: m −4,36% (12,8 tỷ) / +5,43% (71 tỷ)"
+  }
+ ],
+ "supersedes": null,
+ "caveat": "E17 hiển thị/siết đáy watch; KHÔNG thay tâm base trong sổ/luật 0,85×tâm/luật 4. Mù giá khi dựng. skeptic r1 INCONCLUSIVE."
+}

@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+  "report_md5": "39d4675659cda67d6e1ea28b008674ad",
+  "brief_md5": "9e25ef2033020cf9c7498c90ffebd8e0",
+  "model": "opus",
+  "cost_usd": 1.0907259999999999,
+  "started_at_ict": "2026-11-25T13:49:36+07:00",
+  "summary": "Mô hình rev3 tính đúng: tâm tái lập độc lập khớp 27.477, D4 áp đúng (TV = E₂₀₂₈/r, không tái đầu tư), số BCTC 9T truy được về nguồn và tự cân, số CP khớp thuyết minh. Chưa CONFIRMED vì ba mảng có thể làm lệch tâm nhiều mà báo cáo chưa định lượng: (1) TV vĩnh viễn trong khi thiếu thời hạn hợp đồng mặt bằng ACV vốn giao không đấu thầu; (2) truy thu tiền thuê đất để ở mức WARNING, không tra lại; (3) xác suất trượt thầu Long Thành ngầm 0,5 không có cơ sở. Chiều ngược lại, báo cáo bỏ sót mùa vụ Q4 (BQ: DT Q4 cao hơn TB Q1–Q3 10–25%), có thể làm tâm cao hơn +2…+5%; hệ số cắt 86% của E17 #2 dựa trên tiền lệ khác bản chất; E17 #3 cộng GTGT không bù trừ VLĐ. Theo bằng chứng hiện có, tâm có rủi ro hai chiều; chiều xuống lớn hơn về độ lớn nhưng chưa định lượng được, chiều lên nhỏ hơn nhưng có dữ liệu.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261125w4/SAS/skeptic/r1_raw.md"
+}

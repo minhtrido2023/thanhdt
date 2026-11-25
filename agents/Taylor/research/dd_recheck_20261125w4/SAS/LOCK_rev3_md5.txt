@@ -1,0 +1,16 @@
+94221da19639fbf0a250020086764ce6  PREREG_rev3.md
+66d0e4bfb6429a3db38bcf267347285a  calc/assumptions_rev3.json
+1856914f37f62a170056a9097cebec3e  calc/model_sas_rev3.py
+c2481aea192d08eeb3e6fdf688502e23  src_ocr/PNG_md5.txt
+f8cdd02296fb79421b11a2c796601b5d  src_ocr/h1_10.txt
+1db45df21b601a6fb516989605248d83  src_ocr/h1_13.txt
+e33e5b7e90d16cb19057e7beeaa172fc  src_ocr/h1_52.txt
+23bd26120bc0ce6997189ebb7ce9a7a1  src_ocr/q3_07.txt
+b54aee9395ff653258818ff92e5dba66  src_ocr/q3_11.txt
+b36577a06f8096be2f707ebf98355f51  src_ocr/q3_26.txt
+1ce1ae02ab1875ccec273bd7adfd75c4  src_ocr/q3_27.txt
+0a5f493dc8a189b548aa28faafd8d1aa  src_ocr/q3_28.txt
+904ba833e06281e6e54cdc2f9d8e6ccf  src_ocr/q3_35.txt
+4af1ed71777f6340a5dca270544886a5  src_ocr/q3_36.txt
+c2481aea192d08eeb3e6fdf688502e23  src_ocr/PNG_md5.txt
+f8ed20ab467d4a5307e4857b2c8ff28a  src_ocr/README.md

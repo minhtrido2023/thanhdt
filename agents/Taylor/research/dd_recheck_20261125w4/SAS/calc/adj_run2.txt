@@ -1,0 +1,13 @@
+tâm base 27,477
+  #1_N0_dinh_bien [B] p 0.35 (0.15, 0.55) m -11.69% (dải m -5.85%..-11.69%) p×m -4.09%
+  #2_phai_thu_DH_du_an [C+] p 0.5 (0.25, 0.75) m -0.69% (dải m -0.69%..-1.85%) p×m -0.35%
+  #3_thue_GTGT_VLD [B] p 0.35 (0.15, 0.55) m +3.34% (dải m +1.67%..+3.34%) p×m +1.17%
+  #4_mua_vu_Q4 [B] p 0.35 (0.15, 0.55) m +2.50% (dải m +1.64%..+3.98%) p×m +0.87%
+  mùa vụ s 2023 1.104, 2024 1.118, 2025 1.252 TB 1.158
+Σp×m -2.40% ⇒ tuyến tính 26,819 | MÔ HÌNH tổ hợp 26,803 (-2.45%) | dải 25,459–28,287
+  C_hop_dong_thue_27_nam: -1.72% (27,004)
+  C_LongThanh_Delta_-10pp: -7.45% (25,430)
+  C_LongThanh_Delta_+10pp: +7.45% (29,524)
+  C_bien_vh_10pct: -22.23% (21,370)
+  C_co_tuc_von_hoa: 4_co_tuc_von_hoa_12.8 -4.36%; 4_co_tuc_von_hoa_71.0 +5.43%; 4_co_tuc_von_hoa_100.0 +10.31%; 6_HTK_-10pct -0.52%; A6_bo_toan_bo_phai_thu_DH -6.21%
+  LUAT_E15_Ke12.3: +5.95% (29,113)
