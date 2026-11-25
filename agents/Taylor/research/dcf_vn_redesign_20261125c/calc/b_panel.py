@@ -112,7 +112,7 @@ def pick_n(g):
     a = g.OShares.values.astype(float); b = g.N_b.values; pf = np.log(g.price_rel.values / g.close_rel.values)
     n = np.empty(len(g)); how = np.empty(len(g), object); n[0] = a[0]; how[0] = "OS"
     for i in range(1, len(g)):
-        if not np.isfinite(b[i]) or abs(np.log(a[i] / b[i])) < 0.05:
+        if os.environ.get("PICK_OS") == "1" or not np.isfinite(b[i]) or abs(np.log(a[i] / b[i])) < 0.05:   # PICK_OS=1: độ nhạy V3.1 mục 4 — luôn dùng OShares
             n[i] = a[i]; how[i] = "OS"; continue
         pred = np.log(n[i - 1]) - (pf[i] - pf[i - 1])
         if abs(np.log(b[i]) - pred) < abs(np.log(a[i]) - pred):
