@@ -1,0 +1,26 @@
+{
+ "C4": {
+  "share_changed_vs_D0_in_univ": 0.6698019970691477,
+  "median_roe_n_minus_tc_in_univ": 0.0,
+  "median_dlv_in_univ": 0.0
+ },
+ "C5": {
+  "share_changed_vs_D0_in_univ": 0.8462154517261357,
+  "median_roe_n_minus_tc_in_univ": -0.004462403400947029,
+  "median_dlv_in_univ": -0.023298229540994697
+ },
+ "D0_recompute_maxabs": 3.774758283725532e-15,
+ "share_in_univ_rows_CYC": 0.2568755750945711,
+ "grp_in_univ": {
+  "CYC_MID": 13675,
+  "CYC_HI": 12539,
+  "CYC_LO": 10160,
+  "NA": 9546,
+  "FIN": 7191,
+  "none": 3039,
+  "COMM": 2536
+ },
+ "n_univ_rows_ALL": 58686,
+ "n_univ_rows_CYC": 15075,
+ "n_univ_rows_REST": 43611
+}
