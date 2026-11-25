@@ -1,0 +1,63 @@
+{
+ "cases": {
+  "KT_2025_actual": {
+   "center": 18803,
+   "d_pct": -10.752
+  },
+  "KT_2026_actual": {
+   "center": 18595,
+   "d_pct": -11.743
+  },
+  "KT_R_2026": {
+   "center": 18735,
+   "d_pct": -11.076
+  }
+ },
+ "control": {
+  "center_adj_w2": 20587,
+  "center_base": 21069
+ },
+ "e17_new": {
+  "center_adj": 18971,
+  "d_pct_vs_adj_w2": -7.847,
+  "d_pct_vs_base": -9.955,
+  "high": 19644,
+  "low": 18621,
+  "sum_lin_pct": -9.861
+ },
+ "facts": {
+  "cash_div": 8054999.9,
+  "hn_residual_2026": 2418617,
+  "k_pct": {
+   "HN_2025": 8.245,
+   "HN_2026": 9.032,
+   "R_2025": 8.0,
+   "R_2026": 8.502
+  },
+  "ktpl_r_2024": 1586443,
+  "nci_div_in_lctt": 502134.0999999996,
+  "r_ktpl_liab_net_inc": 1428791,
+  "r_residual_2026": 2323620,
+  "rights": 8054999.91,
+  "stock_div": 12082499.86
+ },
+ "rev6": {
+  "adj": {
+   "center_adj": 18731,
+   "d_pct_vs_rev6": 0.732,
+   "high": 19088,
+   "low": 18621,
+   "m_ppl_book_pct": -0.317,
+   "m_roepath_pct": 2.579
+  },
+  "center": 18595,
+  "d_pct_vs_rev5": -11.743,
+  "k_low_center": 18803,
+  "k_point_pct": 9.032,
+  "n": 45,
+  "pct_below_19250": 0.6,
+  "rule085": 15806,
+  "zone_high": 24140,
+  "zone_low": 13151
+ }
+}
