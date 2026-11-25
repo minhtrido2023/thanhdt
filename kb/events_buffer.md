@@ -988,3 +988,49 @@
 
 ## Consolidation 2026-11-25T06:30:29Z
 - [2026-11-25T06:30:20Z] Wags/finding — work-tree verify 2026-11-25: {"closed": 0, "updated": 0, "kept_open": 0, "note": "attention.need_user=0, overdue=0 (rebuilt after work_tree_build rc=0); nothing to verify"}
+
+## Consolidation 2026-11-25T06:50:13Z
+- [2026-11-25T06:37:06Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT rev6 w4: doc handoff, kiem worktree"}
+- [2026-11-25T06:37:26Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "tạo worktree, đọc mẫu"}
+- [2026-11-25T06:37:43Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "đọc PREREG + probe w3"}
+- [2026-11-25T06:37:49Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:37:52Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:37:56Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: doc r5 + skeptic r1"}
+- [2026-11-25T06:38:44Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "đọc r3 + 5F, khôi phục calc"}
+- [2026-11-25T06:38:45Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: truy thuê đất + cầm cố; đọc PREREG_adj_v2"}
+- [2026-11-25T06:38:49Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:38:52Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:39:50Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:39:52Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:40:16Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: chot huong base D4+o D, doc so"}
+- [2026-11-25T06:40:50Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:40:52Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:40:57Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: assumptions_rev6 khoa, sang mo hinh"}
+- [2026-11-25T06:40:59Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "OCR BCTC Q3 thuyết minh"}
+- [2026-11-25T06:41:50Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: base rev6 61697/55527 sau CK; pha sau khoa E16/V6/ADV"}
+- [2026-11-25T06:41:50Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:41:52Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:42:50Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:42:53Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:43:24Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "OCR H1 soát xét"}
+- [2026-11-25T06:43:26Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: viet REPORT_recheck rev6"}
+- [2026-11-25T06:43:39Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: chay skeptic DD_GENERAL r1 tren REPORT_recheck rev6"}
+- [2026-11-25T06:43:50Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:43:53Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 7, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:44:50Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:44:53Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 8, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:45:19Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "chuẩn bị khoá PREREG rev3"}
+- [2026-11-25T06:45:50Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:45:53Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 9, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:46:51Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:46:53Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 10, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:47:51Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:47:54Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 11, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:47:58Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "in_progress", "note": "PAT: skeptic r1 INCONCLUSIVE; dung E17 + proposal"}
+- [2026-11-25T06:48:02Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "mô hình rev3 chạy xong (tâm 27.477), viết REPORT"}
+- [2026-11-25T06:48:51Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:48:54Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 12, "job_id": "Taylor_20261125_063651", "source": "watcher"}
+- [2026-11-25T06:49:36Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "in_progress", "note": "REPORT rev3 xong, chạy skeptic DD_GENERAL"}
+- [2026-11-25T06:49:49Z] Taylor/finding — dd-w4-PAT-rev6 xong: 55.527 sau CK (-7,18%), REFUTED_OPEN, E17 57.872: {"ticker": "PAT", "job": "Taylor_20261125_063651", "branch": "session/Taylor_20261125_063651", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-dd-w4-pat-20261125", "commit": "a82bf4871", "dir": "agents/Taylor/research/dd_recheck_20261125w4/PAT", "ledger_rev": 4, "dd_date": "2026-11-17", "center_post_ck": 55527, "center_pre_ck": 61697, "center_prev": 59823, "delta_pct": -7.18, "zone_p25_p75": [40485, 67228], "gate_085": 47198, "center_ke123_post_ck": 59778, "skeptic": "r1 INCONCLUSIVE/medium (0.89 USD)", "skeptic_final": "REFUTED_OPEN", "center_adj": 57872, "center_adj_range": [56700, 59045], "center_adj_delta_pct": 4.22, "adj_items": "2 bac B, ca hai chieu len (o O2 +6.18%xp0.5; ton kho +2.27%xp0.5)", "downside_C": {"thue_dat_2034_khong_gia_han_pct": -28.7, "bao_dam_cheo_pct": -2.76, "dinh_chi_6thang_pct": -2.72}, "label": "gia 70.200 (17/11) tren P75 => khong bien an toan, khong mua", "adv_median_ty": 0.588, "open": ["HD thue dat KCN + quyen gia han", "legal-vn: phap nhan PAT D.235", "doi chieu BCTC Q3 goc"], "next": "Mike ghi LEDGER_PROPOSAL rev4 roi center_adj rev5 sau user duyet; merge", "measured_by": "agents/Taylor/research/dd_recheck_20261125w4/PAT/calc/run1.txt + sens_run1.txt + skeptic/r1.json; selfcheck --ledger /tmp/pat_ledger_tmp.json 0 loi x3 TZ"}
+- [2026-11-25T06:49:52Z] Taylor/heartbeat — Taylor_20261125_063648: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261125_063648", "source": "watcher"}
+- [2026-11-25T06:49:55Z] Taylor/heartbeat — Taylor_20261125_063651: {"status": "still_running", "elapsed_min": 13, "job_id": "Taylor_20261125_063651", "source": "watcher"}
