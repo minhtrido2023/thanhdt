@@ -1,0 +1,4 @@
+# HPG — ERRATA cho REPORT_recheck_HPG.md (25/11/2026, sau skeptic r1 CONFIRMED)
+REPORT_recheck_HPG.md GIỮ NGUYÊN (md5 = `report_md5` trong `skeptic/r1.json`, để `dd_ledger_append_confirmed.py` khớp). Đính chính văn bản, KHÔNG đổi số:
+1. **§0 Bước 0 (iii) và §3 dòng D4** ghi "vốn tăng thêm sinh lời = Ke" — SAI so với code `hpg_r3.py` (`ri`, ret='capex'): chỉ cam kết vốn 19.472 tỷ + XDCB 16.113 tỷ sinh lời = r; phần vốn giữ lại VƯỢT cam kết sinh lời lãi tiền gửi 12T sau thuế 5,92% vĩnh viễn (r3 C1), tức thấp hơn Ke. g_RI = 0 nghĩa là RI terminal không tăng, không phải RONIC = Ke cho phần vượt. Nếu áp RONIC = Ke cho cả phần vượt: tâm **22.971 (+7,7%)** (skeptic r1; tái lập trong `calc/calc_adj.py`, `sens.excess_retained_at_Ke`). Đây là tham số luật (diễn giải D4/V4), ghi ở ADJ_CENTER §2 [LUẬT], không vào Σ.
+2. Thiếu hạng mục trích KTPL + thù lao HĐQT/BĐH từ LNST (2,60% LNST 2025) — đưa vào tâm kỳ vọng điều chỉnh (ADJ_CENTER #1), không đổi tâm base.

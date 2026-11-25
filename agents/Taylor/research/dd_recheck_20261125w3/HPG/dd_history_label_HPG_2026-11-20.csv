@@ -1,0 +1,2 @@
+ticker,dd_date,rev,skeptic_final,asof,center,price_asof,pc_asof,label,label_v1,reasons,demote_k,demote_neff,pct_fade,pct_hold,terc_fade,terc_hold,n_fade,n_hold,n_eff_hold,n_eff_fade,k_fade,k_hold,hist_med_fade,hist_med_hold,hist_p25_fade,hist_p75_fade,hist_p25_hold,hist_p75_hold,ROE5Y,roe_ttm,roe_ttm_over_5y,warn
+HPG,2026-10-31,4,CONFIRMED,2026-11-20,21338,20450,0.958384,KHÔNG CHẮC (rẻ…trung tính),KHÔNG CHẮC (rẻ…trung tính),,0,0,20.8333,60,RẺ,TRUNG TÍNH,120,120,5.39764,5.16013,1.07739,0.902039,1.12045,0.872456,0.998678,1.48731,0.739501,1.11494,0.16878,0.183504,1.08724,
