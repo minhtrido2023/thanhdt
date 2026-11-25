@@ -339,7 +339,12 @@ case "$_exp_out" in
   *) EXP_TDAY=""; _exp_err="$(echo "$_exp_out" | tail -1)" ;;
 esac
 
-_min_prune_names=200   # bình thường ~225-265 mã/ngày; <200 = bảng bị ghi thiếu
+# Độ sâu: 2026-11-25 bỏ ngưỡng cứng 200 (báo động giả 23/11: 197 mã, universe co dần 219→202
+# trung vị/tháng T7→T11). Dùng CHUNG cổng tương đối với bq_freshness_check.sh + daily_refresh:
+# bin/prune_depth_gate.py, đo trên NGÀY HOÀN CHỈNH gần nhất (BQ_MAXDAY). rc 0 PASS · 1 FAIL · 2 KHÔNG ĐO ĐƯỢC.
+_pdg_out="$(timeout 240 python3 "${PRUNE_DEPTH_GATE_BIN:-$ROOT/bin/prune_depth_gate.py}" --date "$BQ_MAXDAY" 2>&1)"; _pdg_rc=$?
+_pdg_line="$(printf '%s\n' "$_pdg_out" | grep -m1 '^PRUNE_DEPTH ')"
+[ -n "$_pdg_line" ] || _pdg_line="$(printf '%s' "$_pdg_out" | tr '\n' ' ' | cut -c1-240)"
 if [ -n "$EXP_TDAY" ]; then
   _prune_fresh=0; [ "$BQ_MAXDAY" = "$EXP_TDAY" ] && _prune_fresh=1
   _prune_stale_msg="ngày hoàn chỉnh mới nhất=${BQ_MAXDAY} nhưng phiên giao dịch gần nhất=${EXP_TDAY} (lag ${BQ_LAG}d lịch)"
@@ -352,10 +357,12 @@ else
   _prune_ok_msg="lag=${BQ_LAG}d, ${BQ_NAMES} mã ✓ (fallback ngày lịch — lỗi tra lịch nghỉ: ${_exp_err:-không rõ})"
 fi
 
-if [ "$_prune_fresh" = "1" ] && [ "$BQ_NAMES" -ge "$_min_prune_names" ] 2>/dev/null; then
+if [ "$_prune_fresh" = "1" ] && [ "$_pdg_rc" -eq 0 ]; then
   _ok "BQ ticker_prune: $_prune_ok_msg"
-elif [ "$BQ_NAMES" -lt "$_min_prune_names" ] 2>/dev/null; then
-  _warn "BQ ticker_prune: ngày mới nhất (${BQ_MAXDAY}) chỉ có ${BQ_NAMES} mã (<${_min_prune_names}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột; ref_price/screening không tin được."
+elif [ "$_pdg_rc" -eq 1 ]; then
+  _warn "BQ ticker_prune: ngày mới nhất (${BQ_MAXDAY}) bị ghi thiếu — ${_pdg_line} (tụt >10% so với trung vị 20 phiên hoặc dưới sàn 150) — ref_price/screening không tin được."
+elif [ "$_pdg_rc" -ne 0 ]; then
+  _warn "BQ ticker_prune: KHÔNG ĐO ĐƯỢC độ sâu ngày ${BQ_MAXDAY} (rc=${_pdg_rc}: ${_pdg_line}) — fail-closed, kiểm tra thủ công trước khi tin ref_price."
 else
   _warn "BQ ticker_prune: $_prune_stale_msg — giá ref_price trong plan có thể cũ; kiểm tra trước khi đặt lệnh."
 fi
