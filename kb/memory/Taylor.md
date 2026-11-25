@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-24T10:13:25Z] [dd-recheck nhóm A 24/11] XONG job Taylor_20261124_095514: VGS/TCH/DRI/SIP tâm 0%, skeptic r1 đều INCONCLUSIVE, 4 LEDGER_PROPOSAL REFUTED_OPEN (DRI/SIP hạ từ CONFIRMED backfill) — CHỜ Mike áp sổ + xử lý TRIM_DD xoá đầu vào calc khoá
 - [2026-11-24T10:25:24Z] [dd-recheck nhóm B 24/11] XONG job Taylor_20261124_095517: FPT/NNC/DGC tâm 0%, cả 3 skeptic r1 INCONCLUSIVE (thiếu hạng mục), worktree wt-1574720404268912680b commits d2fe430f1/97ef0a396/5d276f5e6 — CHỜ Mike duyệt LEDGER_PROPOSAL + quyết FULL
 - [2026-11-24T10:51:25Z] [dd-adjcenter pilot FPT 24/11] XONG job Taylor_20261124_104632: tâm adj 56.204 (−1,93%), nhánh session/adjpilot 0d52b34ec (wt-adjpilot, chưa merge) — CHỜ Mike chốt 3 sửa PREREG (C+, dải p×m, luật r ngoài Σ) trước fan-out 7 mã
 - [2026-11-24T11:11:59Z] [dd-adjcenter g1 24/11] XONG job Taylor_20261124_110049: FPT 55.668 / TCH 15.152 / VGS 25.148 (nhánh session/adj-g1, wt-adj-g1, chưa merge) — CHỜ Mike merge + skeptic; VGS phát hiện tồn quỹ KTPL 36,1 tỷ chưa trừ
@@ -28,3 +27,4 @@
 - [2026-11-25T00:41:01Z] [dcf-vn-redesign V3 25/11] XONG job Taylor_20261125_001435: nhánh session/Taylor_20261124_170355 commit 152e83c11 (wt-dcf-v3-20261125) — CHỜ Mike quant-skeptic V3 + user quyết (E/P hay mô hình cho cổng mềm; chọn ENS2 vs ENS1w)
 - [2026-11-25T01:10:24Z] ĐANG DỞ: job Taylor_20261125_011012 dcf-earnings-forecast (phase1 kiểm kê+PRELOCK) | NEXT: worktree wt-dcf-earnfc-20261125d
 - [2026-11-25T01:21:33Z] [dcf-earnings-forecast 25/11] XONG job Taylor_20261125_011012: nhánh session/Taylor_20261125_011012 cec37fa11 (wt-dcf-earnfc-20261125d) — D0imp tệ hơn naive, gap≈sai số earnings của D0, C2 không vượt E/P — CHỜ Mike quant-skeptic + chạy lại C sau V3.1
+- [2026-11-25T01:30:05Z] [dcf-vn-redesign V3.1 25/11] XONG job Taylor_20261125_011009: commit 1a279d12f nhánh session/Taylor_20261124_170355 (wt-dcf-v3-20261125) — CHỜ Mike merge; luật §5 mong manh ENS2 vs ENS1 (KD 90/120 đổi chọn); nên GDKHQ đối chiếu mã vắng BQ còn mở

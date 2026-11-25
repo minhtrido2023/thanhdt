@@ -2794,3 +2794,6 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T09:53:16Z] [dd-recheck pilot HHS 24/11] XONG job Taylor_20261124_094353: worktree wt-1574720404268912680 commit bd92fae86, tam khong doi 10.805, skeptic r1 REFUTED (CK base cu) — CHO Mike duyet quy trinh + user chot CK holding truoc rev8/fan-out 7 ma
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T10:13:25Z] [dd-recheck nhóm A 24/11] XONG job Taylor_20261124_095514: VGS/TCH/DRI/SIP tâm 0%, skeptic r1 đều INCONCLUSIVE, 4 LEDGER_PROPOSAL REFUTED_OPEN (DRI/SIP hạ từ CONFIRMED backfill) — CHỜ Mike áp sổ + xử lý TRIM_DD xoá đầu vào calc khoá
