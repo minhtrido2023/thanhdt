@@ -1,79 +1,158 @@
-# Dự báo earnings quý ↔ khoảng cách tâm-giá — REPORT (job Taylor_20261125_011012, 25/11/2026)
+# Dự báo earnings quý ↔ tâm-giá, vòng J3: vá theo quant-skeptic + chu kỳ hàng hoá/ngành (job Taylor_20261125_014736, 25/11/2026)
 
-Chỉ nghiên cứu, chưa qua quant-skeptic. Không sửa production, không wire. Thiết kế khoá trước ở `PRELOCK.md` (commit 6e0f65b6f); mọi test dưới đây là test đã khai, không thêm biến thể.
-Nguồn số: `out/A_summary.csv`, `out/A_segments.csv`, `out/B_results.csv`, `out/B_gap_by_cu.csv`, `out_C/metrics2_C.csv`, `out_C/C_diff.csv`, `out_C/C_pbo.json` (md5 ở `MD5SUMS`).
+Chỉ nghiên cứu. Chưa qua quant-skeptic J3, không tự xưng CONFIRMED. Không sửa production, không wire, không merge, không email.
+Bản J2 giữ nguyên ở `REPORT_J2.md` (+ `MD5SUMS_J2`). Thiết kế: `PRELOCK.md` (J2) + `PRELOCK_J3_CYCLE.md`. Addendum commit `e7d39ee57`, trước mọi dòng code chu kỳ.
+Commit theo bước: vá J2 `1304ad1dd` → PRELOCK chu kỳ `e7d39ee57` → A'/B' `3468caa42` → C' `38fe36954`.
+Panel định giá: V3.1 (`in_snapshot_v31/vp2.parquet` md5 `3b89e78d…`, đã vá vốn hoá ảo).
 
-## Kết luận (4 dòng)
-1. **Luận đề của user ĐÚNG về mặt mô tả**: khoảng cách tâm-giá của D0 phần lớn là SAI SỐ DỰ BÁO EARNINGS NGẦM của chính mô hình. D0 giả định ROE = trung bình 5 năm; giả định này dự báo LNST quý **tệ hơn naive mùa vụ 18–27%** và **lạc quan có hệ thống**. Mã mà D0 đánh giá quá cao earnings thì bị D0 gọi là "rẻ" — và thị trường đúng.
-2. **Mô hình dự báo đơn giản (ENS) hơn naive ~10–12% ở quý kế** (cả IS và OOS, CI 99,3% < 1); từ quý thứ 3 trở đi không hơn. Sai số trung vị vẫn ~1,06% vốn chủ/quý, MdAPE ~45% ⇒ earnings quý VN khó dự báo, lợi thế nhỏ.
-3. **Giá KHÔNG "hội tụ về tâm" khi earnings lộ** (B3 null cả hai era). Thông tin thị trường có trước về earnings tương lai được E/P bắt tốt hơn gap D0.
-4. **Vòng cập nhật**: C2 (hiệu chỉnh thiên lệch, co về ngành) nâng IC36 OOS của D0 +0,022 (CI 99,17% [+0,011; +0,046]), IS ≈ 0, không làm xấu U-hit/cảnh báo đắt — **nhưng vẫn dưới E/P đơn giản (0,230 vs 0,256) và IC phần dư không tăng** ⇒ theo tiêu chí khoá: **chưa đạt "đáng nghiên cứu tiếp"**, cải thiện chủ yếu là kéo D0 về phía E/P.
+## Kết luận (đọc trước)
+1. **KL1 J2 viết lại (đúng hơn và hẹp hơn):** quan hệ "gap tâm-giá ↔ sai số earnings của D0" (B1) **gần như là hằng đẳng thức**.
+   Có một null không dùng giá: `nlv = log vb(ROE 5 năm) − log vb(ROE TTM)`, tức "D0 lạc quan bao nhiêu so với earnings hiện tại".
+   Null này cho IC với sai số tích luỹ −0,892 (IS) / −0,865 (OOS); gap chỉ cho −0,453 / −0,302.
+   Kiểm soát nlv xong, gap chỉ còn +0,013 / +0,049, sai dấu và gần 0. R² hạng của gap: 0,21 (IS) / 0,095 (OOS).
+   ⇒ Bỏ chữ "phần lớn". Câu đúng là: *D0 lệch giá chủ yếu vì ROE 5 năm ≠ ROE hiện tại. Điều này đọc được thẳng từ báo cáo tài chính, không cần giá.*
+2. **Giá có thêm một phần thông tin, nhưng hẹp:** gap có báo trước sai số TƯƠNG LAI của chính D0 (u4), kể cả sau 4 biến kiểm soát và −ROE_ttm: −0,132 IS / −0,108 OOS, CI loại 0, 6/6 năm âm.
+   Gap **không** báo trước surprise thật so với dự báo tốt: với ENS, sau −ROE_ttm còn −0,116 IS / −0,009 OOS (OOS null).
+3. **KL3 J2 viết lại:** giá có trôi về phía tâm giữa 2 kỳ công bố ở OOS. Sau E/P và −ROE_ttm còn +0,058 [+0,030; +0,088], 6/7 năm dương.
+   Nhưng IS là −0,021, khác dấu ⇒ theo tiêu chí khoá thì chưa phải "thông tin". Quanh ngày công bố (±2 phiên) null ở cả hai era.
+   Câu đúng: "không có hội tụ tập trung quanh ngày công bố; trôi giữa kỳ chỉ thấy ở OOS".
+4. **Chu kỳ, phần mô tả (A'):** thiên lệch earnings ngầm của D0 **đổi dấu theo pha chu kỳ, rất nhất quán**.
+   - Ở đỉnh (ROE TTM > trung vị 8 năm + 0,5 sd): D0 đánh giá THẤP earnings quý kế. Dương ở 5–7/7 năm.
+   - Ở đáy: D0 đánh giá CAO. Âm ở **6/6 năm IS và 7/7 năm OOS, ở mọi tercile độ chu kỳ**.
+   - Biên độ ở đáy gấp ~2 lần ở đỉnh. Đây chính là nguồn của thiên lệch lạc quan −0,42%/quý ở J2.
+   - Nhóm chu kỳ cao (CYC_HI) chiếm 25% sự kiện nhưng **44% tổng |sai số| D0** (OOS).
+   - Cùng lúc, ở đỉnh của CYC_HI, các dự báo ngoại suy (ENS, naive) **tệ hơn D0**. MdAE OOS: ENS 3,63%, naive 3,25%, D0 2,62%. ENS lạc quan −2,0%/quý vì đỉnh tự hồi.
+   ⇒ Giả thuyết của user đúng về MÔ TẢ. Lưu ý: dấu đổi theo pha phần lớn là cơ học, vì lợi nhuận bám pha hiện tại còn D0 neo vào trung bình quá khứ. Đây không phải thông tin mới.
+5. **Chu kỳ, phần mô hình hoá dự báo (B'): NO-GO theo tiêu chí khoá.**
+   - ENS có tốc độ hồi quy theo pha (ENSph) so với ENS, h = 1: R 1,004 (IS) / 1,000 (OOS).
+   - Yếu tố giá hàng hoá World Bank (COMMF, β fit trên IS) làm dự báo nhóm hàng hoá **tệ hơn naive ở OOS**: R 1,336, chỉ 1/7 năm tốt hơn. Ghép vào ENS (ENScm) thì OOS 1,035.
+   - ROE xuyên chu kỳ 8 năm (D0tc8) không tốt hơn ROE 5 năm: 1,041 / 1,041.
+   - Giá hàng hoá giải thích được hướng thay đổi lợi nhuận (IC ~0,45, đã có từ `commodity_cycle_te_20261026`). Nhưng nó không cải thiện mức dự báo quý so với ENS.
+6. **Chu kỳ, phần tâm định giá (C'):** không biến thể nào đạt tiêu chí khoá. Có một mô tả đáng ghi:
+   - Ở mã chu kỳ (COMM + CYC_HI), tâm theo earnings chuẩn hoá (D0) xếp hạng lợi suất 36 tháng **tốt hơn E/P ở 7/10 năm**. IS rất mạnh: IC36 0,220 so với 0,035.
+   - Ở mã không chu kỳ thì ngược hẳn: E/P thắng D0 **10/10 năm**.
+   - Nhưng ở mã chu kỳ, D0 thua E/P trong 2021–2023. DSR 0,54 < 0,95.
+   - C4 (ROE 8 năm) trong nhóm chu kỳ: OOS +0,076 so với D0 (4/4 năm), vượt E/P (0,223 so với 0,169). Nhưng IS −0,045 (1/6 năm), PBO 0,52 ⇒ **trượt, không đọc như cải thiện**.
+   ⇒ Hàm ý đáng đem ra skeptic: **chọn neo định giá theo độ chu kỳ** (chu kỳ → earnings chuẩn hoá; không chu kỳ → E/P). Đây là giả thuyết MÔ TẢ, chưa pre-register, chưa có OOS mới.
 
-## A. Năng lực dự báo LNST quý (h = 1; sai số e = (thực − dự báo)/vốn chủ gốc)
-| Mô hình | MdAE IS | R vs naive IS [CI99,3] | MdAE OOS | R vs naive OOS [CI99,3] | thiên lệch trung vị OOS | hit hướng OOS |
-|---|---|---|---|---|---|---|
-| SRW (naive mùa vụ) | 1,20% | 1 | 1,21% | 1 | +0,15% | — |
-| TTM4 | 1,09% | 0,922 [0,873; 0,989] | 1,06% | 0,884 [0,843; 0,935] | 0,00% | 70,6% |
-| MxR (biên × doanh thu) | 1,09% | 0,916 [0,877; 0,969] | 1,09% | 0,898 [0,862; 0,935] | −0,02% | 67,1% |
-| MR (ROE về TB 5 năm, φ 0,65/năm) | 1,09% | 0,924 [0,886; 0,981] | 1,06% | 0,883 [0,836; 0,934] | −0,05% | 70,6% |
-| **ENS** = trung vị(SRWD, MxR, MR) | **1,06%** | **0,903 [0,853; 0,952]** | **1,06%** | **0,876 [0,848; 0,906]** | −0,04% | 68,2% |
-| SRWD (Foster drift) | 1,44% | 1,211 | 1,47% | 1,215 | 0,00% | 55,2% |
-| **D0imp** = roe_tc5·E/4 (earnings ngầm của D0) | 1,52% | **1,271 [1,218; 1,407]** | 1,42% | **1,182 [1,090; 1,277]** | **−0,42%** | 64,2% |
-- N: IS 5.758 sự kiện / 24 quý / 6 năm; OOS 10.609 / 27 quý / 7 năm (mẫu chung mọi mô hình). CI = bootstrap khối năm.
-- h=2: ENS OOS 0,918 [0,872; 0,958] đạt, IS 0,964 [0,932; 1,016] KHÔNG đạt. h=3,4: không mô hình nào đạt cả hai era ⇒ năng lực dự báo chỉ có ở 1–2 quý.
-- D0imp lệch âm ở mọi lớp quy mô/biến động, nặng nhất nhóm biến động ROE cao (OOS −0,96%/quý ≈ −3,8 điểm ROE/năm) và bất động sản (OOS R 1,52). Ngân hàng là ngoại lệ: D0imp lệch DƯƠNG (+0,46%/quý — ROE ngân hàng tăng nhanh hơn trung bình 5 năm).
-- ENS hơn naive ở hầu hết ngành; không hơn ở chứng khoán IS (R 1,04) và bất động sản (R ~0,96) — mô tả, chưa có CI theo lớp.
-
-## B. Sai số dự báo giải thích gì về gap = log(tâm D0 / vốn hoá) tại ngày công bố
-gap tính bằng giá THÔ × số CP cùng ngày công bố (không dùng mc tháng của panel — tránh lỗi mc V3.1). N: IS 5.848 / OOS 10.973 sự kiện; theo quý rồi bootstrap năm.
-| Test | IS IC [CI95] | OOS IC [CI95] | Đọc |
+## Bảng delta J2 → J3
+| Mục | J2 | J3 | Nguồn |
 |---|---|---|---|
-| B1 gap vs sai số D0imp tích luỹ 4 quý | **−0,453 [−0,512; −0,386]** | **−0,302 [−0,344; −0,264]** | mô hình đánh giá cao earnings ⇒ "rẻ" |
-| B1 cùng, kiểm soát E/P, quy mô, chất lượng, momentum | −0,404 [−0,459; −0,348] | −0,361 [−0,396; −0,326] | không phải hiệu ứng E/P |
-| B1 \|gap\| vs \|sai số ENS tích luỹ\| | +0,074 [+0,032; +0,116] | +0,059 [+0,031; +0,088] | độ lớn có liên hệ, yếu |
-| B2 gap → sai số D0imp 4 quý TỚI | −0,519 | −0,357 [−0,382; −0,331] | gap dự báo D0 sẽ còn sai tiếp |
-| B2 gap → sai số ENS 4 quý tới | −0,143 | −0,055 [−0,073; −0,029] | |
-| B2 cùng, sau 4 kiểm soát | +0,005 [−0,016; +0,023] | +0,038 [+0,009; +0,071] | gap ≈ không thêm gì về surprise thật |
-| B2 null: E/P → sai số ENS 4 quý tới | −0,334 | −0,259 | E/P cao báo trước earnings giảm |
-| ΔIC (gap − E/P) cho sai số ENS | +0,191 [+0,163; +0,212] | +0,203 [+0,118; +0,298] | gap KÉM E/P về "thị trường biết trước" |
-| B3 gap → lợi suất giữa 2 kỳ công bố (~60 phiên) | −0,007 [−0,039; +0,020] | +0,109 [+0,070; +0,147] | OOS dương nhưng… |
-| B3 null E/P → cùng cửa sổ | +0,031 | +0,129 [+0,091; +0,169] | …E/P cao hơn; Δ CI chứa 0 |
-| B3 gap → lợi suất quanh công bố kế (±2 phiên) | −0,013 [−0,067; +0,038] | +0,005 [−0,022; +0,034] | **không hội tụ khi earnings lộ** |
-| B3 tập trung (IC/phiên quanh công bố − IC/phiên trước đó) | −0,003 [−0,016; +0,009] | −0,001 [−0,007; +0,007] | null |
-| B3 SUE → lợi suất ±2 phiên (đối chứng: phản ứng earnings có tồn tại) | +0,038 [+0,024; +0,054] | +0,028 [+0,015; +0,040] | thị trường có phản ứng, nhỏ |
-Mô tả (tercile sai số D0imp 4 quý, `B_gap_by_cu.csv`): mã mà D0 đánh giá CAO earnings ~7–9 điểm ROE/năm có gap trung vị +0,27 (IS) / +0,02 (OOS); mã D0 đánh giá THẤP ~5–8 điểm có gap −0,41 / −0,46.
-⇒ Chênh "tâm vs giá" của D0 phần lớn là giá đã phản ánh earnings hiện tại mà D0 (bám ROE 5 năm) chậm nhận ra. Đây là vấn đề của mô hình, không phải cơ hội giá.
+| B1 IC(gap, cu) IS / OOS | −0,453 / −0,302 | không đổi (V3.1 không đổi MC_rel ngày công bố trên mẫu B) | `out_J3/B_results.csv` |
+| Null không giá −ROE_ttm → cu | chưa có | −0,436 / −0,507 | như trên |
+| Null không giá nlv → cu | chưa có | **−0,892 / −0,865** | như trên |
+| Gap tăng thêm trên nlv | chưa có | +0,013 [−0,004; +0,030] / +0,049 [+0,023; +0,074] | như trên |
+| Gap tăng thêm trên −ROE_ttm + 4 kiểm soát | chưa có | −0,062 / −0,055 (1/5, 1/7 năm dương) | như trên |
+| B1_ctrlEP (J2 có chạy, không báo) | −0,679 / −0,591 | báo lại: kiểm soát E/P làm gap MẠNH hơn, vì gap = log vb + log(E/MC) | như trên |
+| R² hạng gap theo cu (TB theo quý) | không báo | 0,211 / 0,095 | cột `R2rank_q_mean` |
+| B2 gap → u4, sau 4 kiểm soát + −ROE_ttm | chưa có | −0,132 / −0,108 (CI loại 0) | như trên |
+| B3 gap → r_pre, sau E/P + −ROE_ttm | chưa có | −0,021 / **+0,058** [+0,030; +0,088] | như trên |
+| Đa kiểm định | CI95 thô | thêm p bootstrap + BH theo era (44 test có p/era); kết luận chính không đổi | cột `q_BH` |
+| C2 IC36 OOS (route tĩnh, mc_old) | 0,230 | 0,227 (V3.1 + route PIT); route tĩnh trên V3.1: 0,232 ⇒ route tĩnh làm phồng +0,005 | `out_J3C/`, `out_J3C_static/` |
+| C2 − D0 OOS / IS | +0,022 CI99,17 [+0,011; +0,046] / +0,001 | +0,017, **4/4 năm dương** / −0,000, 4/6 năm | `out_J3C/C_diff.csv` |
+| C2 − E/P OOS | −0,026 | −0,031, 1/4 năm dương | như trên |
+| C2 IC phần dư 5 biến (V3.1) OOS | — | 0,039 (D0 0,086) ⇒ C2 làm GIẢM thông tin riêng | `out_J3C/metrics2_C.csv` |
+| PBO {D0, C1, C2, C3} | 0,187 | 0,242 | `out_J3C/C_pbo.json` |
 
-## C. Vòng cập nhật (code đo V3 `d_metrics2.py` nguyên văn md5 6b36320c…; chân control D0 và E/P tái lập ĐÚNG từng số V3)
-| | IC36 IS | IC36 OOS | ΔIC36 vs D0 OOS [CI99,17] | ΔIC36 vs D0 IS [CI99,17] | IC36 phần dư OOS | U-hit IS/OOS | cảnh báo đắt đúng (O_right_rel) IS/OOS |
+## A. Vá J2: B (gap ↔ sai số), 44 test có p/era, BH
+Toàn bảng ở `out_J3/B_results.csv` (cột `IC`, `ci95_*`, `p_boot`, `q_BH`, `R2rank_q_mean`, `n_pos_yr`). Các test then chốt:
+| Test | IS | OOS | Đọc |
+|---|---|---|---|
+| gap → cu | −0,453 | −0,302 | J2 |
+| nlv → cu (không giá) | −0,892 | −0,865 | null mạnh hơn gap gần 2 lần |
+| gap \| nlv → cu | +0,013 | +0,049 | gap không thêm gì |
+| gap \| −ROE_ttm, 4 kiểm soát → cu | −0,062 | −0,055 | phần còn lại nhỏ |
+| gap → u4 (sai số D0 4 quý tới) | −0,519 | −0,357 | |
+| nlv → u4 | −0,591 | −0,493 | |
+| gap \| nlv → u4 | −0,249 | −0,167 | giá biết thêm về việc D0 sẽ còn sai |
+| gap \| −ROE_ttm → eps4 (surprise so với ENS) | −0,116 | −0,009 [−0,040; +0,036] | OOS null |
+| gap \| E/P, −ROE_ttm → r_pre | −0,021 [−0,043; +0,002] | +0,058 [+0,030; +0,088] | khác dấu giữa 2 era |
+- Hạn chế vintage/Q4 (skeptic (6)): `NP_P1(q) = NP_P0(q−1)` ở 99,3% chỉ chứng minh nhất quán **trong 1 vintage**.
+  Q4 có K ≈ 30 ngày sau cuối quý, nên số Q4 trong vintage này có thể đã là số kiểm toán, không phải số công bố đầu tiên.
+  Không đo được ⇒ sai số A ở quý Q4 có thể bị đánh giá thấp. Áp cho cả J2 và J3.
+
+## B. Chu kỳ (PRELOCK_J3_CYCLE)
+**Nguồn:** chỉ World Bank CMO tháng (5 họ: cao su RSS3, dầu thô TB, urê, DAP, đường thế giới; biết sau cuối tháng 35 ngày; 1 vintage 03/11/2026).
+Các nguồn bị loại kèm lý do nằm ở PRELOCK §0: TE và sunsirs (không PIT, không phủ IS), BDI và heo (chuỗi ngắn), xút (tổng hợp, không phải số đo).
+Thép, thuỷ sản, chăn nuôi, vận tải, KCN, xi măng **không có chuỗi giá PIT phủ IS**. Các ngành này chỉ vào được qua độ chu kỳ tính từ chính LNST.
+**Nhóm:**
+- COMM: 20 mã của bản đồ đóng băng 2026-10-25. PRELOCK ghi "~19", số đúng là 20; 15 mã có trong mẫu IS, 19 mã trong OOS.
+- FIN: route PIT ngân hàng, chứng khoán, bảo hiểm.
+- CYC_HI / MID / LO: tercile sd ROE_ttm trong 32 quý (PIT).
+- Pha: ROE_ttm so với trung vị 32 quý trước, ±0,5 sd.
+
+### B.1 A' — sai số h = 1 theo nhóm × pha (`out_CY/A2_grp_phase.csv`; e > 0 = thực tế cao hơn dự báo)
+| OOS | n | MdAE naive | MdAE ENS | MdAE D0 | thiên lệch ENS | thiên lệch D0 | năm D0 dương / âm |
 |---|---|---|---|---|---|---|---|
-| D0 (control) | 0,138 | 0,208 | — | — | 0,110 | 60,3% / 70,5% | 71,0% / 68,1% |
-| C1 hiệu chỉnh thiên lệch theo mã | 0,120 | 0,210 | +0,002 [−0,016; +0,057] | −0,018 [−0,055; +0,016] | 0,050 | 63,9% / 74,1% | 70,1% / 69,5% |
-| **C2 co về ngành** | 0,139 | **0,230** | **+0,022 [+0,011; +0,046]** | +0,001 [−0,030; +0,025] | 0,105 | 58,9% / 72,0% | 70,4% / 68,7% |
-| C3 roe_n = dự báo ENS 4 quý | 0,122 | 0,201 | −0,007 [−0,048; +0,060] | −0,015 | 0,022 | 66,5% / 79,4% | 69,7% / 67,0% |
-| E/P (null) | 0,130 | **0,256** | C2 − E/P: −0,026 [−0,098; +0,020] | | −0,102 | — | — |
-- Tiêu chí khoá: C2 đạt 3/4 vế (ΔOOS CI>0, ΔIS ≥ 0, U-hit/cảnh báo đắt không tệ hơn quá 5pp) và **TRƯỢT vế "IC36 OOS ≥ E/P"** ⇒ "cải thiện D0 nhưng không hơn E/P". C1, C3 trượt.
-- IC phần dư (sau E/P, B/P, quy mô) của C2 0,105 ≈ D0 0,110 ⇒ phần cải thiện trùng thông tin E/P, không phải thông tin mới.
-- C3 có U-hit cao hơn (79% OOS) nhưng IC phần dư sụp (0,022) và số sự kiện khác (282 vs 224) — không đọc như cải thiện.
-- PBO (CSCV, IC36 năm 2014–2023, 4 cấu hình, 252 cách chia) = 0,187 — tham khảo; N năm nhỏ.
-- **N độc lập rất mỏng**: OOS 36T = 15 as-of quý / 4 năm ≈ 1,3 cửa sổ 36T không chồng lấn; CI khối năm với 4 khối hẹp giả. Không đủ để wire.
+| CYC_HI đỉnh | 569 | 3,25% | **3,63%** | 2,62% | −2,02% | +1,24% | 7 / 0 |
+| CYC_HI giữa | 948 | 1,56% | 1,28% | 1,73% | −0,11% | −0,30% | 1 / 6 |
+| CYC_HI đáy | 1.088 | 1,79% | 1,51% | **2,92%** | +0,37% | **−2,24%** | 0 / 7 |
+| CYC_MID đỉnh / đáy | 552 / 1.219 | 1,89 / 1,04% | 1,77 / 0,95% | 1,63 / 1,73% | −0,76 / +0,09% | +0,68 / −1,40% | 6/1 · 0/7 |
+| CYC_LO đỉnh / đáy | 608 / 838 | 0,96 / 0,68% | 0,87 / 0,55% | 0,82 / 1,09% | −0,22 / 0,00% | +0,24 / −0,87% | 6/1 · 0/7 |
+| COMM đỉnh / đáy | 141 / 103 | 1,46 / 0,88% | 1,46 / 0,85% | 1,54 / 0,93% | −0,48 / +0,19% | +1,01 / −0,42% | 5/2 · 1/6 |
+| FIN đỉnh / đáy | 555 / 309 | 1,25 / 1,21% | 1,13 / 0,94% | 1,40 / 1,31% | −0,03 / +0,43% | +0,93 / −0,91% | 7/0 · 0/7 |
+- IS cùng dạng: CYC_HI đỉnh +1,59%, 5/1 năm; đáy −2,75%, 0/6. COMM IS chỉ có pha đáy và giữa đủ 30 sự kiện; đáy −2,99%, 0/6.
+- Tỉ trọng tổng |sai số D0| (OOS): CYC_HI 44,4% trên 24,9% số sự kiện; COMM 2,6% trên 4,2%; CYC_LO 9,7% trên 20,3%.
+  IS: CYC_HI 31,7% trên 20,3% (`out_CY/A2_grp.csv`).
+- COMM theo pha giá hàng hoá (`A2_comm.csv`): IS pha giá THẤP, D0 −3,13%/quý (161 sự kiện). OOS nhỏ (−0,43%).
+  Thiên lệch IS của COMM nặng nhất ở DAP (−3,3%) và dầu (−2,5%). OOS gần 0 ở mọi họ.
+- **N thật:** dấu theo pha đồng nhất ở 6–7/7 năm và 3 tercile. Nhưng các pha tương quan chéo theo năm, và mẫu chỉ có ~2–3 chu kỳ lớn ⇒ đây là mô tả, không phải xác suất.
 
-## Hạn chế
-- 1 vintage `ticker_financial`: không đo restatement giữa các lần công bố (chỉ kiểm nội bộ: NP_P1(q) = NP_P0(q−1) ở 99,3%).
-- Survivorship: 4.053 quý của mã huỷ niêm yết (nguồn VND) không có NP_P* ⇒ vắng ở A/B; sai số D0imp thật có thể còn tệ hơn.
-- C dùng mc tháng của panel V3 (mc_old phồng theo tỉ suất cổ tức; V3.1 đang vá). D0 và biến thể chung mc nên Δ cùng thước; mức tuyệt đối cần chạy lại sau V3.1 (`d_update.py` + `d_metrics2.py`, ~1 phút).
-- C3 dùng `nanmedian` ENS (cho phép thiếu MxR), A dùng ENS chỉ khi đủ 3 thành phần — khác nhỏ, ghi rõ.
-- Không có chi phí/khả năng giao dịch: đây là đo năng lực dự báo và chất lượng mô hình định giá, không phải chiến lược.
+### B.2 B' — 5 dự báo có chu kỳ, h = 1 (`out_CY/B2_pairs.csv`; R = trung bình nhân tỉ lệ MdAE theo quý; "năm tốt" = số năm R < 1)
+| So sánh | ALL IS | ALL OOS | CYC_HI OOS | COMM IS | COMM OOS |
+|---|---|---|---|---|---|
+| ENSph / ENS | 1,004 (1/6) | 1,000 (4/7) | 0,995 (3/7) | 1,027 (0/6) | 1,011 (2/7) |
+| MRph / MR | 1,015 | 1,009 (0/7) | 0,997 | 1,044 | 0,993 (5/7) |
+| D0tc8 / D0imp | 1,041 | 1,041 | 1,091 | 1,281 | 1,214 |
+| COMMF / naive | — | — | — | 0,959 (3/6) | **1,336 (1/7)** |
+| ENScm / ENS | 0,998 | 0,998 | 0,995 | 0,995 | 1,035 (2/7) |
+- Tiêu chí khoá "R < 1 cả 2 era và ≥ 5/7 năm OOS": **không biến thể nào đạt**. Ở h = 4, ENScm/ENS trong COMM+CYC_HI OOS là 0,968 (4/6), nhưng IS 1,032 ⇒ trượt.
+- φ fit trên IS (`out_CY/cycle_fit.json`; 3.851 gốc): HI-đáy 0,385 (hồi nhanh), HI-đỉnh 0,692, ba ô khác chạm trần 1.
+  ⇒ ROE ở đáy của mã chu kỳ cao hồi về trung bình nhanh, nhưng nhanh đến mức D0 (giả định hồi tức thì) vẫn đánh giá cao quý kế.
+- β COMMF (IS, 17 mã): 0,160 · 0,134 · 0,049 · −0,124 (h = 1..4). Đổi dấu ở h = 4, và độ lớn không chuyển sang OOS.
+- COMM dùng ngưỡng ≥ 8 sự kiện/quý (các nhóm khác ≥ 20), vì COMM chỉ có ~15 sự kiện/quý. Ngưỡng chọn khi kết quả COMM đầu tiên bị lọc rỗng, trước khi xem số COMM; không có trong PRELOCK.
 
-## Hàm ý cho mô hình định giá (đề xuất, chưa có quyết định)
-- Earnings ngầm của RIM-VN D0 (ROE = TB 5 năm) là MẮT XÍCH YẾU NHẤT: tệ hơn naive. Bất kỳ bản tâm giá nào nên hiển thị kèm "earnings ngầm vs dự báo ENS vs thực tế 4 quý" — một dòng chẩn đoán vì sao tâm lệch giá (display-only).
-- Muốn tâm bám earnings tốt hơn: C2 là ứng viên duy nhất qua vế cải thiện; nhưng không vượt E/P ⇒ chưa có cơ sở thay D0. Nếu user muốn đi tiếp: chạy lại sau V3.1, rồi quant-skeptic.
-- Không mở tín hiệu giao dịch từ "gap lớn sẽ đóng khi earnings lộ" — B3 null.
+### B.3 C' — tâm D0 chu kỳ-hoá (`out_CYC_{ALL,CYC,REST}/`, code đo `d_metrics2.py` V3.1)
+| IC36 IS / OOS | D0 | C2 | C4 (ROE 8 năm) | C5 (theo pha) | E/P |
+|---|---|---|---|---|---|
+| ALL | 0,139 / 0,210 | 0,138 / 0,227 | 0,113 / 0,217 | 0,121 / 0,216 | 0,130 / **0,258** |
+| CYC (COMM + CYC_HI, 25,7% dòng) | **0,220** / 0,147 | 0,196 / 0,134 | 0,175 / **0,223** | 0,122 / 0,157 | 0,035 / 0,169 |
+| REST | 0,120 / 0,234 | 0,128 / 0,260 | 0,098 / 0,217 | 0,126 / 0,235 | **0,162 / 0,292** |
+- CYC và REST: IC và chuẩn EW được tính TRONG tập con, bằng cách che `in_universe`. Selfcheck đã tính lại D0 CYC OOS 0,1474 bằng vòng lặp tự viết và khớp.
+- Tiêu chí khoá (≥ 4/6 năm IS ∧ ≥ 3/4 năm OOS ∧ ≥ E/P): C4 trên CYC đạt OOS 4/4 và vượt E/P, nhưng **IS 1/6** ⇒ trượt. C5 trượt. C2 trên REST đạt 4/6 và 4/4 nhưng < E/P (0/4 năm) ⇒ trượt.
+- U-hit và cảnh báo đắt (O_right_rel) so với D0: phía TỆ hơn quá 5pp có 2 ca. C2 trên CYC: U-hit IS −6,6pp. C5 trên CYC: cảnh báo đắt IS −5,1pp. Phía tốt hơn: C5 trên CYC có U-hit OOS +22,9pp, nhưng IC trượt.
+- DSR (chuỗi Δ theo năm 2014–2023, N thử = 7, `out_CYC_ALL/dsr_cycle.json`):
+  - C2−D0: ALL 0,33, REST 0,74.
+  - C4−D0 CYC: 0,11.
+  - **D0−E/P trong CYC: 0,54, 7/10 năm**. D0−E/P trong REST: 0,00, 0/10 năm.
+  - Tất cả < 0,95.
+- PBO {D0, C2, C4, C5}: ALL 0,214 · **CYC 0,520** · REST 0,159.
+
+## Selfcheck độc lập (`calc/i_selfcheck_j3.py` → `out_CY/selfcheck_{noTZ,ICT}.txt`)
+4/4 PASS. Mỗi số tính lại bằng một đường code khác:
+- IC(nlv, cu) OOS: tính bằng scipy spearmanr theo quý, ra −0,8651.
+- Thiên lệch D0 ở CYC_HI đỉnh / đáy OOS: tính từ `fc.parquet` của b_forecast thay vì `fc_cy`, ra +0,0124 / −0,0224.
+- IC36 D0 trong CYC OOS: vòng lặp tháng quý tự viết, ra 0,1474.
+- Ngoài ra, `f_cycle.py` tính lại SRW/ENS/D0imp, lệch tối đa 0,0 so với `b_forecast.py`; `g_cycle_update.py` tái lập D0, lệch tối đa 0,0.
+Hai lần chạy (`env -u TZ PYTHONHASHSEED=0` và `TZ=Asia/Ho_Chi_Minh PYTHONHASHSEED=12345`) cho cùng md5 `e2b294d27600fd9e91facde1e5f06492`.
+
+## Hạn chế (cộng dồn J2)
+- 1 vintage `ticker_financial` (xem mục A, Q4). Mã huỷ niêm yết vắng ở A/B (survivorship).
+- WB CMO chỉ có 1 vintage. Bản đồ COMM theo mô tả kinh doanh HIỆN TẠI: có nguy cơ hindsight nhẹ về mô hình kinh doanh, không phải về kết quả.
+- Pha và độ chu kỳ chỉ dựa trên LNST của chính mã. Không có chỉ số ngành độc lập cho thép, thuỷ sản, KCN, xi măng.
+- Kiểm soát `nlv` dùng cùng hàm rim_vb với D0. Đó là điểm mấu chốt: tách "phần do cấu trúc mô hình" khỏi "phần do giá".
+- OOS của C chỉ có 15 mốc as-of / 4 năm, tức ~1,3 cửa sổ 36 tháng độc lập. Mọi kết luận C là yếu theo cấu trúc.
+
+## Hàm ý (đề xuất, chưa quyết)
+- Hiển thị kèm tâm D0 một dòng chẩn đoán: "pha chu kỳ (đỉnh/giữa/đáy) + earnings ngầm so với ENS so với 4 quý thực". Ở đáy của mã chu kỳ, D0 gần như chắc chắn quá lạc quan về quý kế (7/7 năm). Display-only.
+- Không wire C2/C4/C5. Không dùng yếu tố giá hàng hoá WB để dự báo mức LNST quý.
+- Ứng viên PREREG mới, nếu user muốn đi tiếp: "neo theo độ chu kỳ" (CYC → D0, REST → E/P), khoá trước, kiểm bằng OOS tương lai 2024+. Hiện mới là mô tả, DSR 0,54.
 
 ## Tái lập
 ```
-cd agents/Taylor/research/dcf_earnings_forecast_20261125d/calc; PY=/home/trido/thanhdt/wc_venv/bin/python
-$PY a_events.py && $PY b_forecast.py && $PY c_gap.py && $PY d_update.py
-OUT_DIR=$PWD/../out_C ONLY=D0,C1,C2,C3,EP SFX=_C $PY ../in_snapshot/d_metrics2.py && $PY e_cdiff.py
+cd agents/Taylor/research/dcf_earnings_forecast_20261125d; PY=/home/trido/thanhdt/wc_venv/bin/python
+export SNAP_DIR=$PWD/in_snapshot_v31 OUT_DIR=$PWD/out_J3; (cd calc && $PY a_events.py && $PY b_forecast.py && $PY c_gap.py)
+VARIANTS=C1,C2,C3 bash run_j3.sh out_J3C D0,C1,C2,C3,EP; ROUTE_STATIC=1 bash run_j3.sh out_J3C_static D0,C2
+(cd calc && $PY f_cycle.py && $PY g_cycle_update.py) && bash run_cyc.sh && (cd calc && $PY h_dsr.py && $PY i_selfcheck_j3.py)
 ```
-Đầu vào snapshot `in_snapshot/vp2.parquet` md5 daaa63ec… (= V3 152e83c11); cache `data/bq_cache` tại 25/11/2026.
+Cần `in_snapshot_v31/vp2.parquet` (copy từ `wt-dcf-v3-20261125/.../out_F/`) và `in_cycle/CMO-Historical-Data-Monthly.xlsx` (copy từ `data/_wb_cache/`). Parquet và xlsx bị gitignore; md5 ở `MD5SUMS`.
