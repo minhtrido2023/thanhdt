@@ -279,3 +279,12 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T16:49:29Z] [24/11 23:5x] DCF-VN v2 XONG: Taylor V2 verify OK + quant-skeptic CONFIRMED/medium (B-1 E/P null, B-2 rating gate 1,1-3,5đ). Đã post user, đang chờ user quyết: có cho Taylor 1 vòng sửa báo cáo không. KHÔNG merge/wire/email.
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T16:55:23Z] [24/11 23:55 ICT] ĐÍNH CHÍNH: 24/11/2026 là NGÀY NGHỈ GIAO DỊCH (Ngày Văn hóa, SSI báo 23/11; vn_market commit 51b091077 landed 00:01 ICT 24/11, SAU chuỗi 19:00 ngày 23/11). Plan 24/11 KHÔNG cần. Plan THẬT còn thiếu = 25/11 (hạn 08:30 ICT 25/11). Nguyên nhân gốc: ticker_prune trôi 219→202 (T7→T11), 23/11=197 (rớt LHG/EVS/MIG) <ngưỡng cứng 200 (bq_freshness_check.sh:419 + daily_refresh_v34b_linux.sh:66) ⇒ DT5G không publish (as_of 20/11) ⇒ không dispatch DollarBill. Bus q plan-t1-not-ready-2026-11-24-* là báo động GIẢ (cần đóng, kèm bằng chứng). Chờ user duyệt: runbook tối nay + sửa ngưỡng + lịch nghỉ lễ. Memory cũ ghi 'plan 24/11 chưa tồn tại' là SAI.
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T17:04:02Z] [25/11 00:1x] User duyệt Taylor sửa báo cáo V2. Topic mới 1574832773489754163; job Taylor V3 Taylor_20261124_170355 (sonnet/medium). Topic cũ 1574816971986313368 DỪNG; phiên topic mới tự poll→verify→quant-skeptic 1 vòng→báo user; KHÔNG wire/merge/email.
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T17:04:50Z] [25/11 00:1x] Topic 1574832773489754163 (DCF-VN v2 vòng sửa): poll Taylor_20261124_170355 (V3) qua ScheduleWakeup 900-1200s; xong→verify+quant-skeptic 1 vòng, KHÔNG wire/merge/email. Handoff agents/Taylor/research/dcf_vn_redesign_20261125c/HANDOFF.md

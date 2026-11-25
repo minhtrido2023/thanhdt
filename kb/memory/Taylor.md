@@ -15,8 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-24T10:25:24Z] [dd-recheck nhóm B 24/11] XONG job Taylor_20261124_095517: FPT/NNC/DGC tâm 0%, cả 3 skeptic r1 INCONCLUSIVE (thiếu hạng mục), worktree wt-1574720404268912680b commits d2fe430f1/97ef0a396/5d276f5e6 — CHỜ Mike duyệt LEDGER_PROPOSAL + quyết FULL
-- [2026-11-24T10:51:25Z] [dd-adjcenter pilot FPT 24/11] XONG job Taylor_20261124_104632: tâm adj 56.204 (−1,93%), nhánh session/adjpilot 0d52b34ec (wt-adjpilot, chưa merge) — CHỜ Mike chốt 3 sửa PREREG (C+, dải p×m, luật r ngoài Σ) trước fan-out 7 mã
 - [2026-11-24T11:11:59Z] [dd-adjcenter g1 24/11] XONG job Taylor_20261124_110049: FPT 55.668 / TCH 15.152 / VGS 25.148 (nhánh session/adj-g1, wt-adj-g1, chưa merge) — CHỜ Mike merge + skeptic; VGS phát hiện tồn quỹ KTPL 36,1 tỷ chưa trừ
 - [2026-11-24T11:14:24Z] [dd-adjcenter g2 24/11] XONG job Taylor_20261124_110052: DRI 15.164 / SIP 57.261 (tổ hợp) / HHS 11.593 display — nhánh session/adj-g2 b4f7b48c6 (wt-adj-g2, chưa merge) — CHỜ Mike merge
 - [2026-11-24T11:14:51Z] [dd-adjcenter g3 24/11] XONG job Taylor_20261124_110054: NNC 58.914 (−3,85%), DGC 41.132 (−1,71%); nhánh session/adj-g3 (wt-adj-g3) 13a13e91f chưa merge — CHỜ Mike merge; phát hiện KTPL-flow thiếu ở DGC (cùng lớp FPT/NNC) ⇒ nên soát 5 mã còn lại
@@ -28,3 +26,5 @@
 - [2026-11-25T01:10:24Z] ĐANG DỞ: job Taylor_20261125_011012 dcf-earnings-forecast (phase1 kiểm kê+PRELOCK) | NEXT: worktree wt-dcf-earnfc-20261125d
 - [2026-11-25T01:21:33Z] [dcf-earnings-forecast 25/11] XONG job Taylor_20261125_011012: nhánh session/Taylor_20261125_011012 cec37fa11 (wt-dcf-earnfc-20261125d) — D0imp tệ hơn naive, gap≈sai số earnings của D0, C2 không vượt E/P — CHỜ Mike quant-skeptic + chạy lại C sau V3.1
 - [2026-11-25T01:30:05Z] [dcf-vn-redesign V3.1 25/11] XONG job Taylor_20261125_011009: commit 1a279d12f nhánh session/Taylor_20261124_170355 (wt-dcf-v3-20261125) — CHỜ Mike merge; luật §5 mong manh ENS2 vs ENS1 (KD 90/120 đổi chọn); nên GDKHQ đối chiếu mã vắng BQ còn mở
+- [2026-11-25T01:47:52Z] ĐANG DỞ: job Taylor_20261125_014736 J3 earnings+chu kỳ (wt-dcf-earnfc-20261125d) | NEXT: vá J2 → PRELOCK addendum → chu kỳ
+- [2026-11-25T02:01:39Z] [dcf-earnfc J3 25/11] XONG job Taylor_20261125_014736: nhánh session/Taylor_20261125_011012 1d74c6474 (wt-dcf-earnfc-20261125d) — B'/C' NO-GO, A' thiên lệch D0 đổi dấu theo pha; ứng viên PREREG 'neo theo độ chu kỳ' — CHỜ Mike quant-skeptic 1 vòng + user

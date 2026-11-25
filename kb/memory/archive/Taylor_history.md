@@ -2797,3 +2797,9 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T10:13:25Z] [dd-recheck nhóm A 24/11] XONG job Taylor_20261124_095514: VGS/TCH/DRI/SIP tâm 0%, skeptic r1 đều INCONCLUSIVE, 4 LEDGER_PROPOSAL REFUTED_OPEN (DRI/SIP hạ từ CONFIRMED backfill) — CHỜ Mike áp sổ + xử lý TRIM_DD xoá đầu vào calc khoá
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T10:25:24Z] [dd-recheck nhóm B 24/11] XONG job Taylor_20261124_095517: FPT/NNC/DGC tâm 0%, cả 3 skeptic r1 INCONCLUSIVE (thiếu hạng mục), worktree wt-1574720404268912680b commits d2fe430f1/97ef0a396/5d276f5e6 — CHỜ Mike duyệt LEDGER_PROPOSAL + quyết FULL
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T10:51:25Z] [dd-adjcenter pilot FPT 24/11] XONG job Taylor_20261124_104632: tâm adj 56.204 (−1,93%), nhánh session/adjpilot 0d52b34ec (wt-adjpilot, chưa merge) — CHỜ Mike chốt 3 sửa PREREG (C+, dải p×m, luật r ngoài Σ) trước fan-out 7 mã
