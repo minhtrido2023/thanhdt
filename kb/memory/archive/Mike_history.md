@@ -291,3 +291,6 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T17:05:43Z] [25/11 00:08 ICT] User duyệt B. Dispatched Wags_20261124_170537 (opus/high, --bg, timeout 90') sửa 5 hạng mục (ngưỡng tương đối depth, lịch nghỉ lễ cảnh báo, cổng biết ngày nghỉ + tự đóng q, tăng cấp 07:30, dòng trạng thái plan bản tin 08:00). Xong → arch-reviewer 1 lần → merge. CHƯA làm A (dựng plan 25/11 cần DT5G publish cho 23/11 + DollarBill) — chờ user 'bắt đầu A'; hạn 08:30 ICT 25/11.
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T17:28:19Z] [25/11 00:30 ICT] A XONG: DT5G publish as_of 23/11 (state 3), DollarBill dựng plan_SpaceX/ZaloPay_2026-11-25 (HOLD ALL 0 lệnh), đã send_plan_report 00:27 chờ user duyệt (trước 08:45). 4 bus q plan-t1-not-ready (24/11 holiday + 25/11) đã đóng có bằng chứng. Lưu ý: ngưỡng nới 190 chỉ lần này; ZaloPay LAG 12 mã PACK_STALE (morning mode bỏ lag_dd_pack) + recommend CSV 23/11 thiếu ⇒ HOLD ALL có thể do thiếu input; feed corp-action 25/11 không snapshot. B: Wags_20261124_170537 đang chạy → arch-reviewer → user duyệt merge.
