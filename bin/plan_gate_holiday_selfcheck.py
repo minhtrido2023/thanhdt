@@ -101,7 +101,7 @@ def part_a():
     for d in ("2026-11-25", "2026-11-24"):
         r = subprocess.run([sys.executable, str(HERE / "trading_calendar.py"), "--evidence", d], env=env_wc(str(bad)),
                            capture_output=True, text=True, timeout=60)
-        chk(r.returncode == 2 and "ERROR" in r.stdout and "Traceback" not in r.stderr,
+        chk(r.returncode == 2 and "không import được trading_bot.vn_market" in r.stdout and "Traceback" not in r.stderr,
             f"A7 vn_market import hỏng ⇒ --evidence {d} rc=2 (KHÔNG rc=1 'ngày giao dịch', không traceback) §28",
             r.stdout + r.stderr)
 
