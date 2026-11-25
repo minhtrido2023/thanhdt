@@ -154,8 +154,8 @@ def build_panel(D, frozen, use_vnd=True, poison=None, route_global=False, mc_pit
     uni["time"] = pd.to_datetime(uni.time).astype(NS); uni["in_universe"] = True
     uni = cut(hurt(uni, "time"), "time")
     last_trade = pd.concat([px[px.Volume.fillna(0) > 0].groupby("ticker").time.max(), dead[dead.Volume > 0].groupby("ticker").time.max()])
-    allpx = pd.concat([px[["ticker", "time", "Close", "Price", "Volume", "tv", "src"]], dead[["ticker", "time", "Close", "Price", "Volume", "tv", "src", "in_universe"]]],
-                      ignore_index=True)
+    allpx = pd.concat([px[["ticker", "time", "Close", "Price", "Volume", "tv", "src"]]]
+                      + ([dead[["ticker", "time", "Close", "Price", "Volume", "tv", "src", "in_universe"]]] if len(dead) else []), ignore_index=True)
     allpx = allpx[allpx.time <= allpx.ticker.map(last_trade)].sort_values(["ticker", "time"]).reset_index(drop=True)
     allpx["ym"] = allpx.time.dt.to_period("M")
     # ---- 2. BCTC ----
@@ -240,6 +240,8 @@ def build_panel(D, frozen, use_vnd=True, poison=None, route_global=False, mc_pit
         pan["mc"] = np.where(_sevent & pan.N_next.isna() & np.isfinite(pan.mc_old), pan.mc_old, pan.mc)
     pan["event_no_next"] = (_sevent & pan.N_next.isna()).values
     pan["n_next_used"] = (_sevent & _nn.notna()).values
+    if "in_universe" not in pan.columns:                      # chỉ khi --no-vnd (không có cột in_universe của nhánh VND)
+        pan["in_universe"] = np.nan
     pan = pan.merge(uni[["ticker", "time"]].assign(iu_bq=True), on=["ticker", "time"], how="left")
     pan["in_universe"] = np.where(pan.src == "BQ", pan.iu_bq.fillna(False), pan.in_universe.fillna(False)).astype(bool); pan = pan.drop(columns=["iu_bq", "src_f"], errors="ignore")
     rat = c.execute(f"SELECT ticker, CAST(time AS DATE) AS time, route, rating FROM read_parquet('{WC}/data/bq_cache/fa_ratings_8l.parquet')").df()
@@ -414,6 +416,12 @@ def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag="", route_glo
         del nxt
     else:
         D = None
+    vnd_max = None
+    if use_vnd:                                               # snapshot VNDirect đóng băng: as-of sau ngày cuối của snapshot ⇒ mã chỉ-có-ở-VND thiếu giá tháng mới
+        _d = [pd.read_csv(f, usecols=["date"]).date.dropna() for f in glob.glob(os.path.join(frozen, "delisted", "px_*.csv"))]
+        vnd_max = max((str(x.max()) for x in _d if len(x)), default=None)
+        if D is not None and vnd_max is not None and pd.Timestamp(vnd_max) < D:
+            print(f"WARN: snapshot VND dừng ở {vnd_max} < D {D.date()} — mã chỉ-có-ở-VND (vd GEL/HPA/DSH) dùng giá cũ/vắng tháng này", file=sys.stderr)
     pan = build_panel(D, frozen, use_vnd=use_vnd, poison=poison, route_global=route_global, mc_pit=mc_pit)
     pan, beta = models(pan)
     os.makedirs(out_dir, exist_ok=True)
@@ -427,7 +435,7 @@ def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag="", route_glo
         iu = o[o.in_universe]
         meta = {"asof_ym": ym, "mode": mode, "D": str(o.asof_date.iloc[0].date()) if len(o) else None, "rows": int(len(o)), "in_universe": int(len(iu)),
                 "in_universe_lv_ENS2_ok": int(iu.lv_ENS2.notna().sum()), "n_next_used_in_univ": int(iu.n_next_used.sum()),
-                "use_vnd": use_vnd, "mc_pit": mc_pit, "route_global": route_global, "event_no_next_in_univ": int(iu.event_no_next.sum()), "frozen_files_verified": n_frozen, "hed_beta_frozen_2020-01": beta,
+                "use_vnd": use_vnd, "vnd_px_max_date": vnd_max, "mc_pit": mc_pit, "route_global": route_global, "event_no_next_in_univ": int(iu.event_no_next.sum()), "frozen_files_verified": n_frozen, "hed_beta_frozen_2020-01": beta,
                 "inputs_md5": {k: md5f(p) for k, p in (("ticker_financial", f"{WC}/data/bq_cache/ticker_financial.parquet"),
                                                        ("fa_ratings_8l", f"{WC}/data/bq_cache/fa_ratings_8l.parquet"))},
                 "script_md5": md5f(os.path.abspath(__file__))}

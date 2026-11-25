@@ -12,7 +12,7 @@ User duyệt đăng ký 25/11 18:44 ICT. Tôi KHÔNG sửa `mike/kb/paper_progra
 - Bắt được 1 lỗi của chính tôi trong lúc test (căn chỉnh chỉ số rolling ⇒ n=193 sai) — đã sửa, n=333. File thử `out/paper_cell_TEST_2026-10.csv` KHÔNG phải sổ thật.
 
 ## Phụ thuộc phải giải quyết TRƯỚC khi cài cron (chưa giải quyết)
-1. **`lv_ENS2` cần panel V3.1 dựng lại hằng tháng** (`b_panel.py` đọc BCTC + giá + mã vắng BQ). Hiện panel chỉ là sản phẩm nghiên cứu (as-of mới nhất 2026-11-23, universe_pit
+1. **[CẬP NHẬT job Taylor_20261125_115701]** đã có `dcf_lvens2_incremental_20261125/calc/lvens2_incremental.py` + `paper_cell_monthly.py --lvens2-from`; lệnh cron mới + 3 việc phải quyết ở `dcf_lvens2_incremental_20261125/REPORT.md` §5 (thay dòng cron bên dưới). Nội dung cũ: **`lv_ENS2` cần panel V3.1 dựng lại hằng tháng** (`b_panel.py` đọc BCTC + giá + mã vắng BQ). Hiện panel chỉ là sản phẩm nghiên cứu (as-of mới nhất 2026-11-23, universe_pit
    chưa phủ). Chưa đo chi phí dựng lại; cần Mike/Winston quyết ai dựng và khi nào, hoặc tôi viết bản `lv_ENS2` incremental (job riêng). Không có cái này cron vô nghĩa.
 2. as-of là NGÀY GIAO DỊCH CUỐI THÁNG; cần `data/bq_cache/universe_pit` và `ticker` đã sync tới ngày đó (BQ sync 23:45 ICT; universe_pit 19:00 ICT) ⇒ chạy từ ngày làm việc 1–2 của tháng sau.
 
