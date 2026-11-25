@@ -273,3 +273,6 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T16:01:22Z] [24/11 23:0x] Topic 1574816971986313368 (DCF-VN v2): poll Taylor V2 job Taylor_20261124_160038 (fable/high, running); xong→verify md5/selfcheck 2 TZ/PIT→quant-skeptic 1 vòng→post user; KHÔNG wire/merge/email. Handoff agents/Taylor/research/dcf_vn_redesign_20261124b/HANDOFF.md
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T16:40:13Z] [24/11 23:5x] Taylor V2 xong, Mike verify md5/selfcheck/PIT OK; đang chạy quant-skeptic 1 vòng; sau đó post tóm tắt user, KHÔNG merge/wire/email. Worktree wt-dcf-vn-redesign-20261124b, commit 5ae76594d.

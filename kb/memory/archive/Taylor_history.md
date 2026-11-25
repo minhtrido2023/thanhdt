@@ -2788,3 +2788,9 @@
 - [2026-11-24T04:00:55Z] [CK holding v2 24/11] XONG job Taylor_20261124_032640: N=12 trung vi 6,5% (IQR -19..38%), khong du lam base HHS -> khuyen 0% + dai 0/6.5/23/38% — CHO Mike quant-skeptic + user chot Viec 1
 - [2026-11-24T04:56:41Z] [CK holding v3 24/11] XONG job Taylor_20261124_041821: N=13 trung vi 1,5% (ex-KSF 5,6%), dai trung tam -12/1,5/+23% (34,9pp, KHONG dat 20pp) — CHO Mike quant-skeptic + commit + user chot base HHS
 - [2026-11-24T06:09:21Z] [CK holding v4 24/11] XONG job Taylor_20261124_053704: hull(a)u(d) -11.9/1.5/+14.4% (26.3pp, KHONG dat), de xuat HHS 0%/+6/+14/+37 khop skeptic — CHO Mike quant-skeptic vong cuoi + commit + user chot dai
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T08:16:37Z] [CK holding v5 24/11] XONG job Taylor_20261124_073243: hien tai 19,7% (PAN), median -3,2% N=12, hull 36,5pp KHONG dat; +6% mat cho dua — CHO Mike skeptic phan doi + commit + user chot dai
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T09:53:16Z] [dd-recheck pilot HHS 24/11] XONG job Taylor_20261124_094353: worktree wt-1574720404268912680 commit bd92fae86, tam khong doi 10.805, skeptic r1 REFUTED (CK base cu) — CHO Mike duyet quy trinh + user chot CK holding truoc rev8/fan-out 7 ma
