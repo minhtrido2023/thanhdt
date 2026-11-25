@@ -1296,3 +1296,13 @@
 - [2026-11-25T16:57:41Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 54, "job_id": "Taylor_20261125_160331", "source": "watcher"}
 - [2026-11-25T16:58:42Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 55, "job_id": "Taylor_20261125_160331", "source": "watcher"}
 - [2026-11-25T16:59:42Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 56, "job_id": "Taylor_20261125_160331", "source": "watcher"}
+
+## Consolidation 2026-11-25T17:07:01Z
+- [2026-11-25T17:00:42Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 57, "job_id": "Taylor_20261125_160331", "source": "watcher"}
+- [2026-11-25T17:01:42Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 58, "job_id": "Taylor_20261125_160331", "source": "watcher"}
+- [2026-11-25T17:02:42Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 59, "job_id": "Taylor_20261125_160331", "source": "watcher"}
+- [2026-11-25T17:03:42Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 60, "job_id": "Taylor_20261125_160331", "source": "watcher"}
+- [2026-11-25T17:04:43Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 61, "job_id": "Taylor_20261125_160331", "source": "watcher"}
+- [2026-11-25T17:05:43Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 62, "job_id": "Taylor_20261125_160331", "source": "watcher"}
+- [2026-11-25T17:06:31Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "in_progress", "note": "selfcheck PASS 9/9; dang dung final 6 thang"}
+- [2026-11-25T17:06:43Z] Taylor/heartbeat — Taylor_20261125_160331: {"status": "still_running", "elapsed_min": 63, "job_id": "Taylor_20261125_160331", "source": "watcher"}
