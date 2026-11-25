@@ -1,0 +1,63 @@
+{
+ "facts": {
+  "stock_div": 12082499.86,
+  "rights": 8054999.91,
+  "cash_div": 8054999.9,
+  "nci_div_in_lctt": 502134.0999999996,
+  "hn_residual_2026": 2418617,
+  "r_residual_2026": 2323620,
+  "ktpl_r_2024": 1586443,
+  "r_ktpl_liab_net_inc": 1428791,
+  "k_pct": {
+   "HN_2026": 9.032,
+   "HN_2025": 8.245,
+   "R_2026": 8.502,
+   "R_2025": 8.0
+  }
+ },
+ "control": {
+  "center_base": 21069,
+  "center_adj_w2": 20587
+ },
+ "cases": {
+  "KT_2026_actual": {
+   "center": 18595,
+   "d_pct": -11.743
+  },
+  "KT_2025_actual": {
+   "center": 18803,
+   "d_pct": -10.752
+  },
+  "KT_R_2026": {
+   "center": 18735,
+   "d_pct": -11.076
+  }
+ },
+ "e17_new": {
+  "center_adj": 18971,
+  "d_pct_vs_base": -9.955,
+  "d_pct_vs_adj_w2": -7.847,
+  "low": 18621,
+  "high": 19644,
+  "sum_lin_pct": -9.861
+ },
+ "rev6": {
+  "k_point_pct": 9.032,
+  "center": 18595,
+  "zone_low": 13151,
+  "zone_high": 24140,
+  "pct_below_19250": 0.6,
+  "n": 45,
+  "d_pct_vs_rev5": -11.743,
+  "k_low_center": 18803,
+  "rule085": 15806,
+  "adj": {
+   "center_adj": 18731,
+   "d_pct_vs_rev6": 0.732,
+   "low": 18621,
+   "high": 19088,
+   "m_roepath_pct": 2.579,
+   "m_ppl_book_pct": -0.317
+  }
+ }
+}

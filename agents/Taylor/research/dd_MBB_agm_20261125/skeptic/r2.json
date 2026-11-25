@@ -1,0 +1,24 @@
+{
+  "case_topic": "MBB DD rev6 (25/11/2026) — đóng KTPL k=9,03%, tâm 21.069→18.595, vùng 13.151–24.140, E17 18.731",
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "mode": "DD_GENERAL",
+  "reviewer": "fundamental-skeptic r2 (Mike dispatch, 25/11/2026)",
+  "independent_verification": "Đọc ảnh BCTC gốc và tự tính lại: 28.462.814−12.082.500−8.055.000−5.906.697=2.418.617=9,032% LN MB 2025; KT HN 2025 1.866.219/22.633.757=8,245%; riêng 1.775.629/22.195.364=8,000%; LCTT 2025 1.830.682+241.910=2.072.592. Chạy lại calc_agm.py scratch: md5 8faeda25 trùng run1/run2; probe k=10,75%→18.143, k=11,54%→17.938, trừ trễ 1 năm→18.619.",
+  "killer_objection": "Rev6 lấy clean-surplus làm lý do đưa KTPL vào tâm base nhưng bỏ khoản 'Quỹ khác: sử dụng' (≈2–2,8% LN/năm, 3 kỳ liền: 348.289 2024 / 620.313 2025 / 460.531 9T26; hn_p44.png, cm_p41_n22.png; REPORT.md:30) cũng rời VCSH ⇒ tâm còn cao ~2,4–3,8% (18.143…~17.900); cộng nhu cầu vốn/CAR chưa mô hình, cùng chiều.",
+  "stale_numbers_rev5_in_rev6": [
+    "LEDGER_PROPOSAL_MBB.json:42 ROE_T ±2pp ghi 18.742/23.396, đúng trên rev6 16.568/20.622",
+    "adj.json:107 HARD ABANDON ghi 18.969, đúng 16.762",
+    "adj.json:71 bỏ chênh terminal ghi 17.961 (−14,75%), đúng 17.264 (−7,15%)",
+    "adj.json:78 Ke 12,3% ghi 23.659, đúng 20.855 (+12,15%)",
+    "adj.json:171 lãi huy động ±50bp ghi −942/+1.019, đúng −823/+888",
+    "LEDGER 'RONIC>Ke: 25.317' cũng là số cũ (chưa tính lại)"
+  ],
+  "recommended_followups": [
+    "Thêm rò 'Quỹ khác: sử dụng' vào k (bậc A, 3 kỳ) hoặc nêu lý do vì sao nó không rời cổ đông; chạy lại tâm",
+    "Tính lại toàn bộ độ nhạy trong LEDGER notes và adj.json sensitivity_only/trigger_table trên base rev6 trước khi ghi sổ",
+    "Cho dải E17 đối xứng theo k (thêm k khoảng 9,8% theo xu hướng tăng 8,0→8,5 riêng)",
+    "Lấy CAR/Tier1 30/09 và đối chiếu tăng trưởng tín dụng với VCSH giữ lại sau k; quét pháp lý sau 05/11"
+  ],
+  "skeptic_final_recommendation": "giữ REFUTED_OPEN, không nâng nhãn"
+}
