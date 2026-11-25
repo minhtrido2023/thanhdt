@@ -54,3 +54,4 @@
 - [2026-11-25T11:50:51Z] [dcf-behav 25/11] XONG job Taylor_20261125_114526: 83d5f99c3 (wt-dcf-behav-20261125) PLAN/PRELOCK sửa theo skeptic + paper_cell_monthly — CHỜ Mike skeptic vòng 2 + duyệt entry registry/cron; blocker: lv_ENS2 cần panel dựng lại hằng tháng; user quyết G1 (dự kiến NO-GO 1)
 - [2026-11-25T11:57:36Z] ĐANG DỞ: job Taylor_20261125_115701 lv_ENS2 incremental (wt-dcf-lvens2-inc-20261125) | NEXT: đo b_panel.py
 - [2026-11-25T12:33:54Z] [lvens2-inc 25/11] XONG job Taylor_20261125_115701: 6eb45da21 (wt-dcf-lvens2-inc-20261125) — v31 khớp vp2 Δ=0, PIT lệch do N_next/route look-ahead của V3.1 — CHỜ Mike/user: mc strict vs step (skeptic), chỗ đặt snapshot VND, duyệt cron
+- [2026-11-25T16:04:27Z] ĐANG DỞ: job Taylor_20261125_160331 lvens2 pit2 (skeptic REFUTED fixes 1-6), worktree wt-dcf-lvens2-pit2-20261126 dir dcf_lvens2_pit2_20261126 | NEXT: đọc lvens2_incremental.py, data_registry CA/oshares
