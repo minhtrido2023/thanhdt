@@ -1,0 +1,33 @@
+{
+ "asof_ym": "2026-09",
+ "mode": "pit",
+ "D": "2026-09-30",
+ "rows": 1078,
+ "in_universe": 355,
+ "in_universe_lv_ENS2_ok": 349,
+ "n_next_used_in_univ": 0,
+ "use_vnd": true,
+ "frozen_files_verified": 1339,
+ "hed_beta_frozen_2020-01": {
+  "c": -2.6699711833708677,
+  "tc": 1.885210691386259,
+  "roe": 2.644589076083241,
+  "loss": 0.034264697717849825,
+  "revg": 0.000545179492388729,
+  "po": 0.17579498263072094,
+  "lev": 0.058538652915715444,
+  "sd": -0.10586701441062084,
+  "le": 0.07195583226662682,
+  "r_BANK": 0.16587445409432955,
+  "r_CYCLICAL": -0.19085055656023908,
+  "r_INSURANCE": 0.09952350223029259,
+  "r_POWER": 0.10778433369121883,
+  "r_REALESTATE": 0.07391911493002708,
+  "r_SECURITIES": 0.13647614314714024
+ },
+ "inputs_md5": {
+  "ticker_financial": "4bb3c9d98da5449e83d4f8fccf5ee1cf",
+  "fa_ratings_8l": "8d2f600de6646c8f9a761a948a97d8d9"
+ },
+ "script_md5": "4b1df736d6e5d9008d62d305cd77afd7"
+}

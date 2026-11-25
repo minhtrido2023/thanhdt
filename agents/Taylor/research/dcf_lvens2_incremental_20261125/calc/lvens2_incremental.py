@@ -25,7 +25,7 @@ NS = "datetime64[ns]"
 KD_Q, KD_Y = 45, 90
 R = 0.1225; GT = 0.055; H = 10
 FIN_ROUTES = ["BANK", "INSURANCE", "SECURITIES"]
-OUTCOLS = ["ticker", "ym", "time", "known", "src", "route", "in_universe", "E", "mc", "n_next_used",
+OUTCOLS = ["ticker", "ym", "time", "known", "src", "route", "in_universe", "E", "mc", "n_next_used", "event_no_next",
            "lv_D0B", "lv_DDM", "lv_EPV", "lv_MULT", "lv_HEDf", "lv_ENS2", "n_ENS2"]
 
 
@@ -119,7 +119,7 @@ def ssum(df, cols):
     return df[cols].sum(axis=1, min_count=len(cols))
 
 
-def build_panel(D, frozen, use_vnd=True, poison=None):
+def build_panel(D, frozen, use_vnd=True, poison=None, route_global=False, mc_pit="strict"):
     """b_panel.py mục 1–3. D=None ⇒ không cắt (mode v31). poison(df, timecol) — chỉ dùng trong selfcheck PIT: phá dữ liệu SAU D."""
     c = duckdb.connect()
     cut = (lambda df, col: df[df[col] <= D]) if D is not None else (lambda df, col: df)
@@ -234,12 +234,18 @@ def build_panel(D, frozen, use_vnd=True, poison=None):
     _N = np.where(_sevent & _nn.notna(), _nn, pan.N)
     _mc_new = pan.Price * _N
     pan["mc"] = np.where(np.isfinite(_mc_new) & (pan.Price > 0), _mc_new, pan.mc_old)
+    if mc_pit == "step":
+        # [BIẾN THỂ PIT, không có trong V3.1] có sự kiện từ ngày công bố mà kỳ BCTC kế CHƯA công bố ở D ⇒ dùng mc_old = Price×N×hệ số giá
+        # (bắt được thưởng/chia tách; sai số = tỉ suất cổ tức tiền nếu sự kiện chỉ là cổ tức tiền). strict = đúng code V3.1 (N cũ).
+        pan["mc"] = np.where(_sevent & pan.N_next.isna() & np.isfinite(pan.mc_old), pan.mc_old, pan.mc)
+    pan["event_no_next"] = (_sevent & pan.N_next.isna()).values
     pan["n_next_used"] = (_sevent & _nn.notna()).values
     pan = pan.merge(uni[["ticker", "time"]].assign(iu_bq=True), on=["ticker", "time"], how="left")
     pan["in_universe"] = np.where(pan.src == "BQ", pan.iu_bq.fillna(False), pan.in_universe.fillna(False)).astype(bool); pan = pan.drop(columns=["iu_bq", "src_f"], errors="ignore")
     rat = c.execute(f"SELECT ticker, CAST(time AS DATE) AS time, route, rating FROM read_parquet('{WC}/data/bq_cache/fa_ratings_8l.parquet')").df()
     rat["time"] = pd.to_datetime(rat.time).astype(NS)
-    rat = cut(hurt(rat, "time"), "time")
+    if not route_global:                                     # chẩn đoán: --route-global giữ route cuối toàn bảng (như vp2) để tách nguồn lệch
+        rat = cut(hurt(rat, "time"), "time")
     rat = rat.sort_values("time"); route = rat.groupby("ticker").route.last()
     pan["route"] = pan.ticker.map(route).fillna("COMPOUNDER")
     pan = pan.sort_values(["ticker", "ym"]).reset_index(drop=True)
@@ -392,7 +398,7 @@ def last_session(ym):
     return None if D is None else pd.Timestamp(D)
 
 
-def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag=""):
+def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag="", route_global=False, mc_pit="strict"):
     n_frozen = verify_frozen(frozen) if use_vnd else 0
     if mode == "pit":
         assert len(yms) == 1, "mode pit: một as-of mỗi lần (dữ liệu cắt theo as-of)"
@@ -408,10 +414,10 @@ def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag=""):
         del nxt
     else:
         D = None
-    pan = build_panel(D, frozen, use_vnd=use_vnd, poison=poison)
+    pan = build_panel(D, frozen, use_vnd=use_vnd, poison=poison, route_global=route_global, mc_pit=mc_pit)
     pan, beta = models(pan)
     os.makedirs(out_dir, exist_ok=True)
-    sfx = ("" if mode == "pit" else "_" + mode) + ("" if use_vnd else "_novnd") + tag
+    sfx = ("" if mode == "pit" else "_" + mode) + ("" if use_vnd else "_novnd") + ("_routeglobal" if route_global else "") + ("" if mc_pit == "strict" else "_mc" + mc_pit) + tag
     for ym in yms:
         o = pan[pan.ym == ym][OUTCOLS].sort_values("ticker").reset_index(drop=True)
         o["asof_date"] = (D if D is not None else o.time.max())
@@ -421,7 +427,7 @@ def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag=""):
         iu = o[o.in_universe]
         meta = {"asof_ym": ym, "mode": mode, "D": str(o.asof_date.iloc[0].date()) if len(o) else None, "rows": int(len(o)), "in_universe": int(len(iu)),
                 "in_universe_lv_ENS2_ok": int(iu.lv_ENS2.notna().sum()), "n_next_used_in_univ": int(iu.n_next_used.sum()),
-                "use_vnd": use_vnd, "frozen_files_verified": n_frozen, "hed_beta_frozen_2020-01": beta,
+                "use_vnd": use_vnd, "mc_pit": mc_pit, "route_global": route_global, "event_no_next_in_univ": int(iu.event_no_next.sum()), "frozen_files_verified": n_frozen, "hed_beta_frozen_2020-01": beta,
                 "inputs_md5": {k: md5f(p) for k, p in (("ticker_financial", f"{WC}/data/bq_cache/ticker_financial.parquet"),
                                                        ("fa_ratings_8l", f"{WC}/data/bq_cache/fa_ratings_8l.parquet"))},
                 "script_md5": md5f(os.path.abspath(__file__))}
@@ -434,9 +440,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--asof-ym", required=True, nargs="+"); ap.add_argument("--mode", choices=["pit", "v31"], default="pit")
     ap.add_argument("--out-dir", default=os.path.join(HERE, "..", "out")); ap.add_argument("--frozen", default=FROZEN)
-    ap.add_argument("--no-vnd", action="store_true")
+    ap.add_argument("--no-vnd", action="store_true"); ap.add_argument("--route-global", action="store_true", help="CHẨN ĐOÁN, không dùng cho sổ: route cuối toàn bảng (look-ahead)")
+    ap.add_argument("--mc-pit", choices=["strict", "step"], default="strict", help="strict = code V3.1 (N cũ khi chưa có kỳ kế); step = mc_old khi có sự kiện chưa xác nhận")
     a = ap.parse_args()
-    return run(a.asof_ym, a.mode, a.out_dir, a.frozen, use_vnd=not a.no_vnd)
+    return run(a.asof_ym, a.mode, a.out_dir, a.frozen, use_vnd=not a.no_vnd, route_global=a.route_global, mc_pit=a.mc_pit)
 
 
 if __name__ == "__main__":

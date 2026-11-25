@@ -1,0 +1,18 @@
+2016-02 [pit] D=2016-02-29 rows=716 in_univ=279 ENS2_ok=276 -> out/pit/lvens2_2016-02.parquet
+WALL 20.78s RSS 804444KB
+2021-04 [pit] D=2021-04-29 rows=1060 in_univ=447 ENS2_ok=445 -> out/pit/lvens2_2021-04.parquet
+WALL 31.10s RSS 1413636KB
+2021-10 [pit] D=2021-10-29 rows=1090 in_univ=538 ENS2_ok=534 -> out/pit/lvens2_2021-10.parquet
+WALL 32.35s RSS 1480960KB
+2026-05 [pit] D=2026-05-29 rows=1090 in_univ=402 ENS2_ok=396 -> out/pit/lvens2_2026-05.parquet
+WALL 40.78s RSS 2014864KB
+2026-06 [pit] D=2026-06-30 rows=1076 in_univ=389 ENS2_ok=383 -> out/pit/lvens2_2026-06.parquet
+WALL 40.79s RSS 1987856KB
+2026-07 [pit] D=2026-07-31 rows=1070 in_univ=368 ENS2_ok=362 -> out/pit/lvens2_2026-07.parquet
+WALL 41.12s RSS 2035992KB
+2026-08 [pit] D=2026-08-28 rows=1068 in_univ=359 ENS2_ok=353 -> out/pit/lvens2_2026-08.parquet
+WALL 41.24s RSS 2033452KB
+2026-09 [pit] D=2026-09-30 rows=1078 in_univ=355 ENS2_ok=349 -> out/pit/lvens2_2026-09.parquet
+WALL 98.60s RSS 2020800KB
+2026-10 [pit] D=2026-10-30 rows=1086 in_univ=344 ENS2_ok=338 -> out/pit/lvens2_2026-10.parquet
+WALL 41.26s RSS 2034108KB
