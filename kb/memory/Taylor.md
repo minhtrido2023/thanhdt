@@ -36,3 +36,4 @@
 - [2026-11-25T05:32:58Z] ĐANG DỞ: job Taylor_20261125_053004 (resume 032446) w3 B — NT2 f810b55c0, PVT 851182687 XONG | NEXT: SZL (REFUTED_OPEN ⇒ E17 từ hạng mục skeptic cũ), wt-dd-recheck-w3b-20261125
 - [2026-11-25T05:33:12Z] [dd-recheck w3 A 25/11] XONG job Taylor_20261125_053002 (wt-dd-recheck-w3a-20261125): DDV d441f3d20, HPG 858fb490c MECH+adj; SAS c4d23c4cc DỪNG Bước0 D4 −13,4% — CHỜ Mike ghi sổ/merge + user chọn SAS rev3 (a)/(b)
 - [2026-11-25T05:38:24Z] [dd-recheck w3 C 25/11] XONG cả 4 mã (VLB/DCM MECH, PAT dừng B0, HHS dd4e59363 REFUTED_OPEN adj 11.593) — CHỜ Mike merge + user quyết HHS: center_adj 11.593 vs 13.969; biên 52% vs 3c
+- [2026-11-25T05:42:32Z] [dd-recheck w3 B 25/11] XONG job Taylor_20261125_053004: NT2 f810b55c0 / PVT 851182687 / SZL 8bc49a2af (wt-dd-recheck-w3b-20261125) — CHỜ Mike ghi sổ (proposal trước, rồi center_adj) + merge sau user duyệt
