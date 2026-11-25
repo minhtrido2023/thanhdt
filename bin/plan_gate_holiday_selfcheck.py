@@ -94,6 +94,16 @@ def part_a():
         "A5e mốc KHÔNG còn đọc từ trading_bot/vn_market.py", "")
     rc, out = py("import trading_calendar as T;print(T.non_trading_evidence('2026-11-24'))", old_calendar_wc())
     chk(out.strip() == "None", "A6 lịch CŨ (chưa khai 24/11) ⇒ 24/11 bị coi là ngày giao dịch (đúng hiện trạng sự cố)", out)
+    bad = Path(tempfile.mkdtemp(prefix="pgh_badvm_")); G.TMP.append(bad)
+    (bad / "trading_bot").mkdir()
+    (bad / "trading_bot" / "__init__.py").write_text("")
+    (bad / "trading_bot" / "vn_market.py").write_text("<<<<<<< HEAD\n")
+    for d in ("2026-11-25", "2026-11-24"):
+        r = subprocess.run([sys.executable, str(HERE / "trading_calendar.py"), "--evidence", d], env=env_wc(str(bad)),
+                           capture_output=True, text=True, timeout=60)
+        chk(r.returncode == 2 and "ERROR" in r.stdout and "Traceback" not in r.stderr,
+            f"A7 vn_market import hỏng ⇒ --evidence {d} rc=2 (KHÔNG rc=1 'ngày giao dịch', không traceback) §28",
+            r.stdout + r.stderr)
 
 
 def part_b():
