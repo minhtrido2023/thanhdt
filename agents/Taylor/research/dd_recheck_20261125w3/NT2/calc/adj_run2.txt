@@ -1,0 +1,78 @@
+{
+ "center_base": 24003,
+ "center_adj": 25038,
+ "adj_pct": 0.04312,
+ "range_low": 21938,
+ "range_high": 29039,
+ "sum_pm_linear_pct": 0.04312,
+ "items": {
+  "N1_bien_LNST_het_khau_hao": {
+   "bac": "B",
+   "input": 121.0,
+   "input_range": [
+    29.0,
+    214.0
+   ],
+   "m_pct": 0.09039,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_pct": 0.04519,
+   "pm_min": 0.00542,
+   "pm_max": 0.11989
+  },
+  "N2_FCF_tru_LNST_het_khau_hao": {
+   "bac": "B",
+   "input": 66.0,
+   "input_range": [
+    -136.0,
+    252.0
+   ],
+   "m_pct": 0.0493,
+   "p": 0.35,
+   "p_range": [
+    0.15,
+    0.55
+   ],
+   "pm_pct": 0.01726,
+   "pm_min": -0.05588,
+   "pm_max": 0.10353
+  },
+  "N3_no_ngan_han_ngoai_netcash": {
+   "bac": "A",
+   "input": -91.88,
+   "input_range": [
+    -91.88,
+    -91.88
+   ],
+   "m_pct": -0.01317,
+   "p": 0.9,
+   "p_range": [
+    0.75,
+    1.0
+   ],
+   "pm_pct": -0.01186,
+   "pm_min": -0.01317,
+   "pm_max": -0.00988
+  },
+  "N4_trich_KTPL_hang_nam": {
+   "bac": "C+",
+   "input": -20.0,
+   "input_range": [
+    -40.0,
+    -20.0
+   ],
+   "m_pct": -0.01494,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_pct": -0.00747,
+   "pm_min": -0.02241,
+   "pm_max": -0.00373
+  }
+ }
+}

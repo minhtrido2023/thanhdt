@@ -1,0 +1,108 @@
+{
+ "ticker": "PVT",
+ "dd_date": "2026-10-29",
+ "rev": 3,
+ "center_base": 18956,
+ "center_adj": 18184,
+ "range_low": 16806,
+ "range_high": 18586,
+ "adj_pct": -0.04072,
+ "method": "PREREG_adj v1+v2; chạy qua mô hình r3 + D4 (k nhân LN mẹ, d27/dq4)",
+ "items": {
+  "P1_trich_KTPL_tu_LN_me": {
+   "bac": "B",
+   "input": 0.0747,
+   "input_range": [
+    0.0747,
+    0.145
+   ],
+   "m_pct": -0.0747,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_max": -0.01867,
+   "pm_min": -0.10875,
+   "pm_pct": -0.03735
+  },
+  "P2_hoan_nhap_du_phong_sua_chua_lon_TT99": {
+   "bac": "B",
+   "input": -73.2,
+   "input_range": [
+    -36.6,
+    -73.2
+   ],
+   "m_pct": -0.00699,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_max": -0.00087,
+   "pm_min": -0.00525,
+   "pm_pct": -0.0035
+  }
+ },
+ "sensitivity_only": [
+  "C1 chi dry-dock tiền mặt vs hoàn nhập (xuống)",
+  "C2 ý kiến kiểm toán FY2025/soát xét H1 (xuống)",
+  "C3 NPV tàu mua thêm/quyền PDV (lên)",
+  "C4 đáo hạn TC/spot (hai chiều)",
+  "C5 Q4 mùa vụ (lên)"
+ ],
+ "law_params_not_in_sum": [
+  "L1 r 13,5% vs dải Ke: E15 20.798 (+9,72%)",
+  "L2 terminal RONIC = Ke (D4, đã trong base)"
+ ],
+ "trigger_table": [
+  {
+   "event": "trích KTPL ≈7,5% xác nhận (P1 A p0,90)",
+   "date": "2027-03/2027-04",
+   "direction": "down",
+   "delta_pct": -0.03104
+  },
+  {
+   "event": "trích KTPL ≈14,5% (p0,90)",
+   "date": "2027-03/2027-04",
+   "direction": "down",
+   "delta_pct": -0.09676
+  },
+  {
+   "event": "không trích KTPL từ LN mẹ (k=0)",
+   "date": "BCTC năm 2026",
+   "direction": "up",
+   "delta_pct": 0.0388
+  },
+  {
+   "event": "hoàn nhập TT99 lặp lại cả năm (P2 A)",
+   "date": "2027-03",
+   "direction": "down",
+   "delta_pct": -0.00281
+  },
+  {
+   "event": "chi dry-dock tiền mặt ≈ hoàn nhập (P2 đóng)",
+   "date": "BCTC năm",
+   "direction": "up",
+   "delta_pct": 0.00351
+  },
+  {
+   "event": "ý kiến kiểm toán FY2025 ngoại trừ",
+   "date": "khi đọc được",
+   "direction": "down",
+   "delta_pct": "chạy lại np27; ≈-335 đ"
+  },
+  {
+   "event": "TC đáo hạn/cước đảo chiều",
+   "date": "theo hợp đồng",
+   "direction": "both",
+   "delta_pct": "chạy lại trục kịch bản"
+  }
+ ],
+ "prereg_md5": {
+  "PREREG_adj.md": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2.md": "835dfc1e07f9c67ac7f6c3028b529d13",
+  "ADJ_PREREG_PVT.md": "9d8b4c5385260ad40c863a206eba5c67"
+ },
+ "skeptic_verdict": "agents/Taylor/research/dd_recheck_20261125w3/PVT/skeptic/r1.json"
+}

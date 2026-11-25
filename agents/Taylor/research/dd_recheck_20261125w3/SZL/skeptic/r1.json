@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261125w3/SZL/REPORT_recheck_SZL.md",
+  "report_md5": "33e276f6850a7abfb1d6565d870e8767",
+  "brief_md5": "057958168d5bd150009fc0ecd7a44f14",
+  "model": "opus",
+  "cost_usd": 1.3015732000000002,
+  "started_at_ict": "2026-11-25T12:37:27+07:00",
+  "summary": "Base centre 26.183 reproduces and every load-bearing figure I checked against the Q3/2026 page images matches. The E17 adjustment (+8,87%) is arithmetically correct but methodologically uneven. It adds selected current assets while leaving out ~63,7 bn of operating liabilities, which is roughly offset by equally omitted operating assets. It also calls customer advances 'not read' although they are on the balance-sheet face (14,54 bn). No quantifiable gap exceeds 5% of centre in either direction: the too-high items are about −1,1% each and the too-low ones +0,9% to +4%. Audited FY2025 and current legal status are still missing, and the 2% NAV / ≥2-session sizing is infeasible at ADV 0,46 bn/day. INCONCLUSIVE, medium. The report's market price (27.700) was ignored in this judgement.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261125w3/SZL/skeptic/r1_raw.md"
+}

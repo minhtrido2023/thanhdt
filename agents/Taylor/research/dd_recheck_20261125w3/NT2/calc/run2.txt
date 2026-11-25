@@ -1,0 +1,81 @@
+{
+ "control_stdout_md5": "f2c6788a0c53c0cdf7b7acddb941b4ae",
+ "r_base": 0.135,
+ "center_pre": 24226,
+ "rows": [
+  {
+   "label": "12,3% E15/dau duoi Ke",
+   "r": 0.123,
+   "center": 24638,
+   "p10": 18629,
+   "p90": 30663,
+   "d_center": 634,
+   "d_pct": 0.0264,
+   "pct_below_px": 0.3231
+  },
+  {
+   "label": "12,5% (-100bp)",
+   "r": 0.125,
+   "center": 24528,
+   "p10": 18585,
+   "p90": 30483,
+   "d_center": 525,
+   "d_pct": 0.0219,
+   "pct_below_px": 0.3281
+  },
+  {
+   "label": "13,0% (-50bp)",
+   "r": 0.13,
+   "center": 24261,
+   "p10": 18449,
+   "p90": 30043,
+   "d_center": 258,
+   "d_pct": 0.0107,
+   "pct_below_px": 0.3419
+  },
+  {
+   "label": "13,4% dau tren Ke",
+   "r": 0.134,
+   "center": 24054,
+   "p10": 18319,
+   "p90": 29704,
+   "d_center": 51,
+   "d_pct": 0.0021,
+   "pct_below_px": 0.3569
+  },
+  {
+   "label": "13,5% BASE",
+   "r": 0.135,
+   "center": 24003,
+   "p10": 18301,
+   "p90": 29619,
+   "d_center": 0,
+   "d_pct": 0.0,
+   "pct_below_px": 0.3569
+  },
+  {
+   "label": "14,0% (+50bp)",
+   "r": 0.14,
+   "center": 23754,
+   "p10": 18165,
+   "p90": 29294,
+   "d_center": -249,
+   "d_pct": -0.0104,
+   "pct_below_px": 0.37
+  },
+  {
+   "label": "14,5% (+100bp)",
+   "r": 0.145,
+   "center": 23513,
+   "p10": 18023,
+   "p90": 28894,
+   "d_center": -490,
+   "d_pct": -0.0204,
+   "pct_below_px": 0.375
+  }
+ ],
+ "dep_now": {
+  "rate": 0.07400000000000001,
+  "src": "cctg_12m(2026-11-02)"
+ }
+}
