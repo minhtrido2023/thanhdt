@@ -2809,3 +2809,6 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T11:14:24Z] [dd-adjcenter g2 24/11] XONG job Taylor_20261124_110052: DRI 15.164 / SIP 57.261 (tổ hợp) / HHS 11.593 display — nhánh session/adj-g2 b4f7b48c6 (wt-adj-g2, chưa merge) — CHỜ Mike merge
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T11:14:51Z] [dd-adjcenter g3 24/11] XONG job Taylor_20261124_110054: NNC 58.914 (−3,85%), DGC 41.132 (−1,71%); nhánh session/adj-g3 (wt-adj-g3) 13a13e91f chưa merge — CHỜ Mike merge; phát hiện KTPL-flow thiếu ở DGC (cùng lớp FPT/NNC) ⇒ nên soát 5 mã còn lại
