@@ -1,0 +1,31 @@
+{
+ "E/BVPS": {
+  "n": 80,
+  "n_live_value": 78,
+  "share_refused": 0.025000000000000022,
+  "share_absdiff_gt5pct": 0.9871794871794872,
+  "share_absdiff_gt15pct": 0.6153846153846154,
+  "median_absdiff": 0.18871444132903276,
+  "methods": {
+   "ANCHOR_UNVERIFIED": 45,
+   "ANCHOR_ONLY": 18,
+   "FIN_FALLBACK": 10,
+   "AIS_EXACT": 5,
+   "AIS_UNCERTIFIED": 2
+  }
+ },
+ "OS": {
+  "n": 30,
+  "n_live_value": 29,
+  "share_refused": 0.033333333333333326,
+  "share_absdiff_gt5pct": 0.0,
+  "share_absdiff_gt15pct": 0.0,
+  "median_absdiff": 0.0,
+  "methods": {
+   "ANCHOR_ONLY": 16,
+   "ANCHOR_UNVERIFIED": 11,
+   "FIN_FALLBACK": 2,
+   "AIS_UNCERTIFIED": 1
+  }
+ }
+}

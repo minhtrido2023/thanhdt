@@ -1,0 +1,22 @@
+PASS NAV S1_ENS1w_f1 lệch 0.000885 VND trên 222,461,082,343
+PASS NAV S1_ENS2_f1 lệch 0.000610 VND trên 254,412,126,912
+PASS NAV S1_D0_f1 lệch 0.000366 VND trên 279,856,785,779
+PASS NAV S3f_f1 lệch 0.000580 VND trên 208,981,054,651
+PASS NAV S3f_ENS2_f1 lệch 0.000610 VND trên 201,399,898,675
+PASS NAV S7_D0_f1 lệch 0.000702 VND trên 147,509,582,977
+PASS NAV S7_EPN_E2_f1 lệch 0.000305 VND trên 134,940,416,328
+PASS D0 V/B vòng lặp thuần (200 dòng) lệch tối đa 3.55e-15
+PASS PIT known ≤ time 188947 dòng; tuổi BCTC tối đa 200 ngày
+PASS hệ số hedonic đóng băng 2019-12 (tính lại từ dòng thô 2015-01..2019-12) lệch hệ số tối đa 4.58e-05; tháng dùng 24181..24240 < 24241
+PASS IC36 ENS1w IS (scipy) 0.151906 vs 0.151906
+PASS IC36 ENS1w OOS (scipy) 0.222679 vs 0.222679
+PASS U-hit ENS1w IS (vòng lặp pandas) 266 sự kiện, 0.6278 vs 266, 0.6278
+PASS cảnh báo đắt D0 IS đúng-tương đối (vòng lặp pandas) 298/420 = 0.7095 vs 0.7095
+PASS U-hit ENS1w OOS (vòng lặp pandas) 240 sự kiện, 0.6875 vs 240, 0.6875
+PASS cảnh báo đắt D0 OOS đúng-tương đối (vòng lặp pandas) 323/474 = 0.6814 vs 0.6814
+PASS giá T+1 holdings EW_f1 (400 dòng ngẫu nhiên + ≤300 dòng ret ≤ −45%, tính lại từ px_t1 thô) lệch tối đa 2.22e-16; 40 dòng thuộc nhánh ngừng giao dịch
+PASS cảnh báo đắt EPN_E2 IS đúng-tương đối (vòng lặp pandas) 244/350 = 0.6971 vs 0.6971
+PASS cảnh báo đắt ENS2 IS đúng-tương đối (vòng lặp pandas) 270/384 = 0.7031 vs 0.7031
+PASS cảnh báo đắt EPN_E2 OOS đúng-tương đối (vòng lặp pandas) 308/446 = 0.6906 vs 0.6906
+PASS cảnh báo đắt ENS2 OOS đúng-tương đối (vòng lặp pandas) 293/425 = 0.6894 vs 0.6894
+TỔNG: PASS
