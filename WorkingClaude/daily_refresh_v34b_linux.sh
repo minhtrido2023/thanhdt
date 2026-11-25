@@ -94,7 +94,7 @@ elif [ "$_hol" != "TRADING" ]; then
 fi
 # HOLIDAY-END
 # PRUNE-GATE-BEGIN (2026-11-25): cổng độ sâu dùng CHUNG với bq_freshness_check.sh — một nguồn
-# mike/bin/prune_depth_gate.py: FAIL khi n < max(150, ⌈0,90 × trung vị 20 phiên trước⌉). Ngưỡng cứng
+# mike/bin/prune_depth_gate.py: FAIL khi n < max(150, ⌈0,90 × trung vị 20 phiên trước ĐÃ QUA CỔNG⌉ — phiên FAIL không vào trung vị). Ngưỡng cứng
 # MIN_TICKERS=200 cũ chặn oan phiên thật 23/11 (197 mã; universe co dần 219→202 trung vị/tháng T7→T11).
 # Chưa ingest ⇒ n=0 ⇒ FAIL ⇒ chờ như cũ. rc 2 (KHÔNG ĐO ĐƯỢC: bq lỗi/thiếu lịch sử) ⇒ cũng coi là chưa sẵn
 # sàng (fail-closed), log nguyên dòng thật.
