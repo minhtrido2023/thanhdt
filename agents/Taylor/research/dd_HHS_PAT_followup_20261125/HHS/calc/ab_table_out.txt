@@ -1,0 +1,4 @@
+src md5 82f1f00451ea3595a5f15abc28d755ca
+A  biên s_obs 52,05%: base(CK0) 13969 [12422–15564] +29.3% | adj E17(CK20) 11593 [10322–12876] +7.3% | dải adj 11593–13969 | EX k1 base 11615 adj 10227 | B vs A base +0.00% adj +0.00%
+B1 biên TB peer 37,7%: base(CK0) 12357 [10940–13839] +14.4% | adj E17(CK20) 10303 [9121–11553] -4.6% | dải adj 10303–12357 | EX k1 base 10673 adj 9473 | B vs A base -11.54% adj -11.13%
+B2 biên TCH 29,9%: base(CK0) 11774 [10390–13240] +9.0% | adj E17(CK20) 9837 [8701–11078] -9.0% | dải adj 9837–11774 | EX k1 base 10333 adj 9201 | B vs A base -15.71% adj -15.15%
