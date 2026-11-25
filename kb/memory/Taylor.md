@@ -41,3 +41,6 @@
 - [2026-11-25T06:37:34Z] ĐANG DỞ: job Taylor_20261125_063651 DD w4 PAT rev6 (wt-dd-w4-pat-20261125) | NEXT: đọc w3 SUMMARY + skill + mẫu
 - [2026-11-25T06:49:49Z] [dd-w4 PAT 25/11] XONG job Taylor_20261125_063651: a82bf4871 (wt-dd-w4-pat-20261125) — rev4 55.527 sau CK REFUTED_OPEN, E17 57.872 — CHỜ Mike ghi sổ+merge; mở: HĐ thuê đất 2034 (−28,7%), legal pháp nhân Đ.235
 - [2026-11-25T06:57:44Z] [dd-recheck w4 SAS 25/11] XONG job Taylor_20261125_063648: d0fc3aea2 (wt-dd-w4-sas-20261125) rev3 27.477 (−13,2%, TRÊN), E17 26.803 — CHỜ Mike ghi sổ + merge sau user duyệt
+- [2026-11-25T08:03:04Z] ĐANG DỞ: job Taylor_20261125_080254 DD PVP Aframax#3 ĐHĐCĐ 23/10 (wt-dd-pvp-afx-20261125) | NEXT: đọc pvp-dd-20261029.md + tìm văn kiện
+- [2026-11-25T08:03:37Z] ĐANG DỞ: job Taylor_20261125_080251 MBB NQ ĐHĐCĐ 2026 (KTPL), wt-dd-mbb-agm-20261125 | NEXT: tải NQ/BB gốc
+- [2026-11-25T08:04:49Z] ĐANG DỞ: job Taylor_20261125_080257 HHS A/B + PAT nhãn thuê đất (wt-dd-hhs-pat-fu-20261125) | NEXT: đọc HHS ref-range + rev9 w3, PAT rev4
