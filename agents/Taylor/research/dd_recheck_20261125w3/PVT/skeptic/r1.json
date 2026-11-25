@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261125w3/PVT/REPORT_recheck_PVT.md",
+  "report_md5": "43b7dd2ee0d2f3447bdbf3aa11540ded",
+  "brief_md5": "7b8c40f47fe8fa36cd40a0b1b74bbaa3",
+  "model": "opus",
+  "cost_usd": 0.9080201999999999,
+  "started_at_ict": "2026-11-25T10:38:50+07:00",
+  "summary": "Phần cơ học của bản recheck đúng và tái lập được: đổi D4 (RONIC=Ke) cho +0,61%, mọi số đầu vào then chốt khớp BCTC Q3/2026 và BQ, tính tay kịch bản cơ sở khớp. Khi RONIC=Ke, terminal ≈ LN/r nên g và tỷ lệ giữ lại không còn tác động. Lỗi nằm ở khoản bị thiếu: mô hình coi 100% LNST mẹ là của cổ đông, trong khi bảng biến động VCSH FY2025 cho thấy ~7,5% LN mẹ đi vào quỹ khen thưởng phúc lợi (nợ phải trả, trả cho người lao động). Áp khoản này, tâm còn khoảng 17.500–18.000 (−5…−7,5%), vượt ngưỡng 5% ⇒ REFUTED. Độ tin cậy trung bình vì 9T/2026 chưa thấy dòng trích, cần NQ ĐHĐCĐ 2026 để chốt. Chiều rẻ: r base nằm trên dải Ke (giữa dải ≈ +5%) nhưng đó là luật neo; không tìm thấy khoản tăng nào có bằng chứng độc lập. Bỏ qua giá 20.550 có trong báo cáo khi đánh giá.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261125w3/PVT/skeptic/r1_raw.md"
+}

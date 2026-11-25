@@ -1,0 +1,52 @@
+{
+ "center_base": 18956,
+ "center_adj": 18184,
+ "adj_pct": -0.04072,
+ "range_low": 16806,
+ "range_high": 18586,
+ "sum_pm_linear_pct": -0.04085,
+ "items": {
+  "P1_trich_KTPL_tu_LN_me": {
+   "bac": "B",
+   "input": 0.0747,
+   "input_range": [
+    0.0747,
+    0.145
+   ],
+   "m_pct": -0.0747,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_pct": -0.03735,
+   "pm_min": -0.10875,
+   "pm_max": -0.01867
+  },
+  "P2_hoan_nhap_du_phong_sua_chua_lon_TT99": {
+   "bac": "B",
+   "input": -73.2,
+   "input_range": [
+    -36.6,
+    -73.2
+   ],
+   "m_pct": -0.00699,
+   "p": 0.5,
+   "p_range": [
+    0.25,
+    0.75
+   ],
+   "pm_pct": -0.0035,
+   "pm_min": -0.00525,
+   "pm_max": -0.00087
+  }
+ },
+ "triggers": {
+  "P1_len_A_k7.47_p0.90": -0.03104,
+  "P1_len_A_k14.5_p0.90": -0.09676,
+  "P1_dong_k0": 0.0388,
+  "P2_len_A_p0.90_m73.2": -0.00281,
+  "P2_dong_chi_dry_dock_bang_hoan_nhap": 0.00351
+ },
+ "ck": 0.0067107028680423175
+}

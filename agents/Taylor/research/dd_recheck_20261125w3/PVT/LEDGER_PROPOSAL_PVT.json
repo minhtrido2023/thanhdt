@@ -1,0 +1,51 @@
+{
+ "entry": {
+  "ticker": "PVT",
+  "skeptic_final": "REFUTED_OPEN",
+  "skeptic_final_basis": "skeptic_run",
+  "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261125w3/PVT/skeptic/r1.json",
+  "audited_fy_missing": false,
+  "dd_date": "2026-10-29",
+  "rev": 3,
+  "bctc_quarter": "2026Q3",
+  "zone_low": 15021,
+  "center": 18956,
+  "center_kind": "expected_weighted",
+  "center_desc": "kỳ vọng trọng số lưới 90 kết cục, terminal RONIC = Ke (D4), sau CK 0,67% @5 tỷ",
+  "zone_high": 23164,
+  "center_range": null,
+  "price_ref": 20550,
+  "price_date": "2026-11-06",
+  "verdict_label": "TRONG vùng: giá 20.550 cao hơn tâm 18.956 +8,4%; 67,1% trọng số kết cục dưới giá. Luật sổ (giá < tâm −15%): KHÔNG đạt (ngưỡng 16.113); §2.5 không đủ điều kiện",
+  "skeptic_status": "recheck đợt 3 25/11 (luật B5+D4+E15/E16): dd_skeptic_run DD_GENERAL r1 = REFUTED medium (report_md5 khớp, 0,91 USD). Cơ học đúng (D4 +0,61% tái lập, đầu vào khớp BCTC Q3/26 + BQ). Đòn chính: mô hình coi 100% LNST mẹ thuộc cổ đông trong khi FY2025 ~7,5% LN mẹ đi vào quỹ KTPL ⇒ tâm ~17.500–18.000 (ước lượng skeptic). Không sửa mô hình trong recheck ⇒ E17 tâm điều chỉnh 18.184 (−4,07%, dải 16.806–18.586) ở ADJ_CENTER.md.",
+  "source_file": "agents/Taylor/research/dd_recheck_20261125w3/PVT/REPORT_recheck_PVT.md",
+  "report_md5": "43b7dd2ee0d2f3447bdbf3aa11540ded",
+  "evidence": [
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w3/PVT/REPORT_recheck_PVT.md",
+    "quote": "**TÂM (base, r 13,5%, terminal RONIC = Ke, sau CK 0,67% @5 tỷ): 18.956 đ/cp — vùng 15.021–23.164 (P10–P90 lưới 90 kết cục). Đổi +0,61% so với r3 (18.841; 13.903–24.207) do áp D4.**",
+    "fields": [
+     "center",
+     "zone_low",
+     "zone_high"
+    ]
+   },
+   {
+    "file": "agents/Taylor/research/dd_recheck_20261125w3/PVT/REPORT_recheck_PVT.md",
+    "quote": "- **Nhãn** (giá 20.550, BQ 06/11/2026, kế thừa r3): **TRONG vùng** (+8,4% so tâm; 67,1% trọng số kết cục dưới giá). Luật 4 KHÔNG ĐẠT (ngưỡng 0,85 × 18.956 = 16.113). Nhãn không đổi so với r3.",
+    "fields": [
+     "price_ref"
+    ]
+   }
+  ],
+  "assumptions_file": "agents/Taylor/research/dd_redo_20261105/PVT/calc_r3/LOCK_md5.txt",
+  "assumptions_md5": "d3661962465620cb74d508e14fee1e08",
+  "notes": "Recheck: D4 (RONIC=Ke) tâm 18.841→18.956 (+0,61%), vùng 13.903–24.207→15.021–23.164; nhãn TRONG không đổi. E15 Tâm @ Ke 12,3% = 20.798 (+9,72%); dải Ke 20.798/19.097; ±100bp 20.466/17.656. E16 RẺ (phân vị fade 16/hold 18, N≈4.5, chỉ hiển thị). V6 V_ngắn 22.045 / V_dài không có (FCFE 3 năm ≤0 do pha mua tàu). V8 trần 2% NAV. D3: TT99 ngừng trích trước sửa chữa lớn ⇒ LN 2026 thiên lệch tăng (E17 P2). calc_r3 bị TRIM: khôi phục git archive 14ad1c925^; thay đổi D4 ở calc/calc_recheck.py. r 13,5% neo 7,40% (Δ=0 tới 25/11). WARNING: PVT Logistics chào bán thêm; ý kiến kiểm toán 2025 chưa kiểm.",
+  "null_reason": "center_range: nguồn không cho khoảng tâm",
+  "expires_on": "2027-02-26",
+  "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+  "recorded_at": "2026-11-25T12:45:00+07:00",
+  "supersedes": "PVT@2026-10-29#2",
+  "correction_reason": "recheck đợt 3 theo dd_recheck_20261125w3/HANDOFF.md: áp D4 terminal RONIC = Ke (+0,61%), thêm E15/E16/dải Ke/V6/V8 + soát D3; skeptic DD_GENERAL r1 REFUTED ⇒ REFUTED_OPEN (thay nhãn CONFIRMED backfill rule_backfill_20261122). Nhãn TRONG không đổi."
+ }
+}
