@@ -134,6 +134,7 @@ def exp_outcome(ev, EX36, F36):
 
 LVS = {m: dense(pan["lv_" + m].values) for m in MODELS}
 EPd = dense(pan.ep.values); BPd = dense(np.log(pan.bp.where(pan.bp > 0)).values); SZd = dense(np.log(pan.mc.values))
+RQd = dense(pan.roe_tc5.values); NMd = dense(pan.npm_med5.values)   # [V3.1 mục 5] kiểm soát thêm chất lượng/biên lợi nhuận
 rows = []; icy = []; base = {}
 for sname, sc in SC.items():
     S = sc["S"]
@@ -160,6 +161,7 @@ for mname in MODELS:
                     for (t, y, v, nn) in icl:
                         icy.append({"model": mname, "scope": sname, "t": t, "year": y, "ic36": v, "n": nn})
             icr = ic_dates(LV, sc["EX"][36], S, lo, hi, resid=[EPd, BPd, SZd]); r["ic36_resid"], r["ic36_resid_lo"], r["ic36_resid_hi"], _ = boot_year(icr)
+            icr2 = ic_dates(LV, sc["EX"][36], S, lo, hi, resid=[EPd, BPd, SZd, RQd, NMd]); r["ic36_resid2"], r["ic36_resid2_lo"], r["ic36_resid2_hi"], _ = boot_year(icr2)
             if sname == "ALL" and mname in ("D0", "D0B", "ENS1", "ENS2", "MULT", "HEDf", "EP", "ENS1w", "META", "A_pit", "A_RI"):
                 r["ic36_tk_lo"], r["ic36_tk_hi"] = boot_ticker(LV, sc["EX"][36], S, lo, hi)
             if not is_rank_only:

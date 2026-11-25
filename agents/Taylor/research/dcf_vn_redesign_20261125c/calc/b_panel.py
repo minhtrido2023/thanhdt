@@ -168,7 +168,8 @@ def load_dead_fs():
         if k not in w.columns:
             w[k] = np.nan
     w = w.sort_values(["ticker", "fq"]).reset_index(drop=True)
-    w["known"] = w.fq + pd.to_timedelta(np.where(w.fq.dt.month == 12, 90, 45), unit="D")
+    KD_Q = int(os.environ.get("KD_Q", 45)); KD_Y = int(os.environ.get("KD_Y", 90))   # [V3.1 mục 7] độ nhạy ngày công bố nhánh VNDirect
+    w["known"] = w.fq + pd.to_timedelta(np.where(w.fq.dt.month == 12, KD_Y, KD_Q), unit="D")
     w["E"] = w["14000"]; w["N"] = w["14110"] / 10000.0
     g = w.groupby("ticker")
     w["np_ttm"] = g["23000"].transform(lambda s: s.rolling(4, min_periods=4).sum()); w["np_prev"] = g.np_ttm.shift(4)

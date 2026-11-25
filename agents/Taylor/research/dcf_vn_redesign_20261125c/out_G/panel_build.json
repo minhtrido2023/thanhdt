@@ -1,0 +1,196 @@
+{
+ "vintage_overlap_2013_01": {
+  "n": 13834,
+  "share_abs_dlog_gt_0.5pct": 0.011131993638860778
+ },
+ "dead": {
+  "tickers_with_px": 640,
+  "tickers_ever_in_universe": 92,
+  "in_universe_rows_daily_2014plus": 62899
+ },
+ "gate_check_vs_universe_pit": {
+  "n": 512576,
+  "agree": 0.9966483019103508,
+  "recall_of_pit": 0.992830989086514,
+  "precision_vs_pit": 0.9969776297001428
+ },
+ "fix1_vintage": {
+  "n": 58719,
+  "share_abs_gt_2pct": 0.24625759975476422,
+  "tickers_gt_2pct": 378,
+  "p50_abs": 0.0,
+  "p95_abs": 0.10619194751654802
+ },
+ "fix2_basis": {
+  "n": 58719,
+  "rows_N_from_E_over_BVPS": 1458,
+  "rows_OS_kept_despite_mismatch": 4675,
+  "share_abs_dlogBP_gt_15pct": 0.045913588446669734,
+  "rows_abs_dlogBP_gt_15pct": 2696,
+  "E_src_counts": {
+   "TA-L": 58586,
+   "BVPSxOS": 1133
+  }
+ },
+ "fix2_HPG": [
+  {
+   "time": "2018-10-30",
+   "q": "2018Q3",
+   "BVPS/Price_cu": 0.4749,
+   "E/MC_moi": 0.4749,
+   "N_how": "OS",
+   "N_trieu": 2123.9,
+   "OShares_trieu": 2123.9
+  },
+  {
+   "time": "2019-01-30",
+   "q": "2018Q4",
+   "BVPS/Price_cu": 0.6593,
+   "E/MC_moi": 0.6593,
+   "N_how": "OS",
+   "N_trieu": 2123.9,
+   "OShares_trieu": 2123.9
+  },
+  {
+   "time": "2019-04-25",
+   "q": "2019Q1",
+   "BVPS/Price_cu": 0.4619,
+   "E/MC_moi": 0.6004,
+   "N_how": "OS*",
+   "N_trieu": 2123.9,
+   "OShares_trieu": 2123.9
+  },
+  {
+   "time": "2019-08-01",
+   "q": "2019Q2",
+   "BVPS/Price_cu": 0.7092,
+   "E/MC_moi": 0.7092,
+   "N_how": "OS",
+   "N_trieu": 2761.1,
+   "OShares_trieu": 2761.1
+  },
+  {
+   "time": "2019-10-28",
+   "q": "2019Q3",
+   "BVPS/Price_cu": 0.7513,
+   "E/MC_moi": 0.7513,
+   "N_how": "OS",
+   "N_trieu": 2761.1,
+   "OShares_trieu": 2761.1
+  }
+ ],
+ "vnd_n_fix31": {
+  "rows": 4465,
+  "step_applied": 83,
+  "step_candidate_|pf_fq-pf|>0.3%": 492,
+  "no_next_quarter": 302
+ },
+ "jump_VND": {
+  "v2_N_vongop_cuoi_quy": {
+   "n": 4163,
+   "share_gt15": 0.050924813836175836
+  },
+  "v3_hieu_chinh_su_kien": {
+   "n": 4163,
+   "share_gt15": 0.03939466730723036
+  },
+  "rows_changed_gt5pct": 72,
+  "rows": 4465
+ },
+ "jump_BQ": {
+  "n": 58451,
+  "share_gt15": 0.036355237720483824,
+  "by_how": {
+   "E/BVPS": [
+    1458,
+    0.08024691358024691
+   ],
+   "OS": [
+    52318,
+    0.03482549027103483
+   ],
+   "OS*": [
+    4675,
+    0.03978609625668449
+   ]
+  }
+ },
+ "jump_BQ_OShares_only": {
+  "n": 58451,
+  "share_gt15": 0.037758122187815435
+ },
+ "mc_fix31": {
+  "rows": 188869,
+  "price_missing_fallback": 159,
+  "rows_event_since_filing": 29847,
+  "rows_stock_step_applied": 5891,
+  "rows_event_no_next_confirm": 23956,
+  "p50_abs_dlog_mc_new_vs_old_in_univ": 0.00016018227204466385,
+  "share_abs_dlog_gt_0.2pct_in_univ": 0.14744289123764065,
+  "share_abs_dlog_gt_10pct_in_univ": 0.01674053869757927
+ },
+ "mc_fix31_VNM_2019": [
+  {
+   "ym": "2019-04",
+   "mc_old_tyVND": 226031,
+   "mc_new_tyVND": 226031,
+   "dlog": 0.0
+  },
+  {
+   "ym": "2019-05",
+   "mc_old_tyVND": 225520,
+   "mc_new_tyVND": 225508,
+   "dlog": -0.0
+  },
+  {
+   "ym": "2019-06",
+   "mc_old_tyVND": 216733,
+   "mc_new_tyVND": 214190,
+   "dlog": -0.0118
+  },
+  {
+   "ym": "2019-07",
+   "mc_old_tyVND": 214555,
+   "mc_new_tyVND": 214538,
+   "dlog": -0.0001
+  },
+  {
+   "ym": "2019-08",
+   "mc_old_tyVND": 214207,
+   "mc_new_tyVND": 214189,
+   "dlog": -0.0001
+  }
+ ],
+ "panel": {
+  "rows": 188869,
+  "tickers": 1558,
+  "in_universe_rows_2014plus": 56546,
+  "by_src": {
+   "BQ": 53694,
+   "VND": 2852
+  },
+  "tickers_in_universe_by_src": {
+   "BQ": 757,
+   "VND": 79
+  },
+  "ended36_rows_in_universe_asof<=2023-10": {
+   "BQ": 74,
+   "VND": 1035
+  },
+  "rows_in_universe_asof<=2023-10": {
+   "BQ": 38846,
+   "VND": 2739
+  }
+ },
+ "dead_named_in_universe": [
+  "AMD",
+  "ART",
+  "FLC",
+  "GTN",
+  "HAI",
+  "HVG",
+  "KSA",
+  "ROS",
+  "TGG"
+ ]
+}
