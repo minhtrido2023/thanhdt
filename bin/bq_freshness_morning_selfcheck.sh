@@ -24,19 +24,20 @@ chk "header: 18:30 T4 -> phiên 10-14, plan 10-15 (như cron)" "$(hdr 2026-10-14
 chk "header: 10:00 T5 -> TỪ CHỐI (rào giờ)" "$(hdr 2026-10-15T10:00:00 1 | grep -c 'TỪ CHỐI')" "1"
 chk "header: mode tắt -> TODAY giữ nguyên" "$(hdr 2026-10-15T10:00:00 0)" "rc=0 CAL "
 
+TODAY_ICT="$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)"   # khối NEXT đọc $TODAY (đã neo ICT ở script thật, §16)
 nxt() { # $1=MORNING $2=MORNING_NEXT
   local sb; sb="$(mktemp -d)"; ln -s "$WC/trading_bot" "$sb/trading_bot"
-  env -u TZ bash -c "WORKDIR=$sb; MORNING=$1; MORNING_NEXT=$2; $NEXTB
+  env -u TZ bash -c "WORKDIR=$sb; TODAY=$TODAY_ICT; MORNING=$1; MORNING_NEXT=$2; $NEXTB
 echo \"NEXT=\$NEXT_TRADING_DAY\"" 2>&1 | tail -1; rm -rf "$sb"; }
 chk "NEXT: morning=1 -> lấy MORNING_NEXT (không phải next_trading_day(hôm nay))" "$(nxt 1 2026-10-15)" "NEXT=2026-10-15"
 EXP="$(env -u TZ python3 -c "
 import sys; sys.path.insert(0,'$WC')
-from trading_bot.vn_market import next_trading_day; import datetime as dt; print('NEXT='+str(next_trading_day(dt.date.today())))")"
+from trading_bot.vn_market import next_trading_day; import datetime as dt; print('NEXT='+str(next_trading_day(dt.date.fromisoformat('$TODAY_ICT'))))")"
 chk "NEXT: morning=0 -> next_trading_day(hôm nay) như cũ" "$(nxt 0 2026-10-15)" "$EXP"
 
-skip() { # $1=MORNING $2=file-exists(1/0) $3=FORCE
+skip() { # $1=MORNING $2=file-exists(1/0) $3=FORCE $4=gán thêm (vd BQF_SKIP_EXISTING_PLANS=1 / _HOL_LAPBU=1)
   local sb; sb="$(mktemp -d)"; mkdir -p "$sb/data/trade_plans"; [ "$2" = 1 ] && : > "$sb/data/trade_plans/plan_X_2026-10-15.json"
-  env -u TZ bash -c "WORKDIR=$sb; MORNING=$1; ACCT=X; NEXT_TRADING_DAY=2026-10-15; MIKE_MORNING_FORCE=$3
+  env -u TZ bash -c "WORKDIR=$sb; MORNING=$1; ACCT=X; NEXT_TRADING_DAY=2026-10-15; MIKE_MORNING_FORCE=$3; ${4:-:}
 for ACCT in X; do
 $SKIP
 echo DISPATCHED
@@ -45,4 +46,8 @@ r="$(skip 1 1 0)"; [ "$r" = "DISPATCHED" ] && { echo "FAIL SKIP: morning + plan 
 chk "SKIP: morning + plan CHƯA có -> dispatch" "$(skip 1 0 0)" "DISPATCHED"
 chk "SKIP: morning + plan có + FORCE=1 -> dispatch" "$(skip 1 1 1)" "DISPATCHED"
 chk "SKIP: mode tắt + plan có -> dispatch (cron cũ)" "$(skip 0 1 0)" "DISPATCHED"
+# 25/11 (arch-review vòng 2 #3): retry plan_gate_recovery + nhánh ngày nghỉ lập bù cũng KHÔNG ghi đè
+r="$(skip 0 1 0 BQF_SKIP_EXISTING_PLANS=1)"; [ "$r" = "DISPATCHED" ] && { echo "FAIL SKIP: retry (BQF_SKIP_EXISTING_PLANS=1) + plan có vẫn dispatch"; fail=1; } || echo "OK   SKIP: retry + plan có -> không dispatch"
+r="$(skip 0 1 0 _HOL_LAPBU=1)"; [ "$r" = "DISPATCHED" ] && { echo "FAIL SKIP: ngày nghỉ lập bù + plan có vẫn dispatch"; fail=1; } || echo "OK   SKIP: ngày nghỉ lập bù + plan có -> không dispatch"
+chk "SKIP: retry + plan CHƯA có -> dispatch" "$(skip 0 0 0 BQF_SKIP_EXISTING_PLANS=1)" "DISPATCHED"
 [ "$fail" = 0 ] && echo "selfcheck: PASS" || { echo "selfcheck: FAIL"; exit 1; }

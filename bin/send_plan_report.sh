@@ -1621,7 +1621,13 @@ if [ "$STATUS" = "ESCALATE" ]; then
   REASON="$(echo "$RESULT" | sed -n '2p')"
   DETAIL="$(echo "$RESULT" | tail -n +3)"
   SC_TAG=""
-  [ "$SECOND_CHANCE" = "1" ] && SC_TAG=" [second-chance 23:00 — lần kiểm tra CUỐI trong đêm, sáng mai chỉ còn ops_health_check 08:20]"
+  # Nhãn theo GIỜ THẬT (arch-review vòng 2 việc B, 25/11): --second-chance còn được gọi ngoài 23:00 (retry sáng).
+  if [ "$SECOND_CHANCE" = "1" ]; then
+    case "$NOW_ICT" in
+      23:*) SC_TAG=" [second-chance $NOW_ICT — lần kiểm tra CUỐI trong đêm, sáng mai chỉ còn ops_health_check 08:20]" ;;
+      *)    SC_TAG=" [second-chance $NOW_ICT]" ;;
+    esac
+  fi
   MSG="🔴 [$TODAY $NOW_ICT] Plan T+1 CHƯA SẴN SÀNG ($REASON)$SC_TAG — $DETAIL Cần Mike hoặc user kiểm tra thủ công, KHÔNG tự phục hồi."
   echo "$MSG"
   if [ "$DRY_RUN" = "0" ]; then
@@ -1692,12 +1698,16 @@ SUMMARY="$(echo "$RESULT" | tail -n +2)"
 
 # Ngữ cảnh second-chance: user cần biết đây là bản gửi lại/gửi muộn, không phải report 21:00 thường.
 if [ "$PLAN_CHANGED_AFTER_SEND" = "1" ]; then
-  SUMMARY="🔁 **PLAN ĐÃ THAY ĐỔI sau lần gửi 21:00** — bản dưới đây là bản MỚI trên đĩa, cần duyệt lại theo bản này (second-chance 23:00):
+  SUMMARY="🔁 **PLAN ĐÃ THAY ĐỔI sau lần gửi 21:00** — bản dưới đây là bản MỚI trên đĩa, cần duyệt lại theo bản này (second-chance, gửi lúc $NOW_ICT):
 $SUMMARY"
 elif [ "$SECOND_CHANCE" = "1" ]; then
-  SUMMARY="🔁 **GỬI MUỘN (second-chance 23:00)** — lần gửi 21:00 không thành công/plan chưa sẵn sàng lúc đó, đây là lần đầu plan này tới tay user:
+  SUMMARY="🔁 **GỬI MUỘN (second-chance, gửi lúc $NOW_ICT)** — lần gửi 21:00 không thành công/plan chưa sẵn sàng lúc đó, đây là lần đầu plan này tới tay user:
 $SUMMARY"
 fi
+# PLAN_REPORT_NOTE (25/11, plan_gate_recovery retry buổi sáng): cảnh báo bắt buộc đứng ĐẦU bản gửi —
+# vd "chuỗi inject_discretionary/auto_exit CHƯA chạy cho plan này". Rỗng ⇒ y hệt cũ.
+[ -n "${PLAN_REPORT_NOTE:-}" ] && SUMMARY="${PLAN_REPORT_NOTE}
+$SUMMARY"
 
 echo "$SUMMARY"
 if [ "$DRY_RUN" = "0" ]; then

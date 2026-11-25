@@ -59,6 +59,17 @@ WC_ROOT="$(cd "$ROOT/.." && pwd)"
 export TZ=Asia/Ho_Chi_Minh
 
 QUIET="${1:-}"
+# RUN-LOCK (arch-review vòng 2 việc B, 25/11/2026): MỘT lượt chạy tại một thời điểm — 19:00 cron, retry của
+# bin/plan_gate_recovery.py và lệnh chạy tay KHÔNG được chạy song song (mỗi lượt dispatch DollarBill ⇒ 2 lượt =
+# 2 writer cùng plan). Bận ⇒ in rõ, exit 75 (EX_TEMPFAIL), KHÔNG làm gì. fd 9 KHÔNG truyền cho DollarBill
+# (dispatch --bg chạy nền lâu ⇒ phải đóng fd để khoá nhả khi script kết thúc).
+_BQF_LOCK="${BQF_LOCK_FILE:-$ROOT/state/locks/bq_freshness_check.lock}"
+mkdir -p "$(dirname "$_BQF_LOCK")" 2>/dev/null
+exec 9>"$_BQF_LOCK"
+if ! flock -n 9; then
+  echo "BQF_LOCKED: bq_freshness_check.sh đang có lượt khác chạy (khoá $_BQF_LOCK) — KHÔNG chạy song song (tránh dispatch DollarBill 2 lần). Đợi lượt kia xong."
+  exit 75
+fi
 PROJECT="lithe-record-440915-m9"
 MAX_PRICE_LAG=2      # trading days: cho phép gap weekend/nghỉ lễ
 MAX_STATE_LAG=0      # trading days cho DT5G regime — SIẾT 2→1 (2026-07-10) rồi 1→0
@@ -151,19 +162,15 @@ DISCORD_STALE_CHANNEL="trading_daily"   # tên trong kb/discord_channels.json
 if [ "$MORNING" != "1" ]; then
   _hol_ev="$(python3 "$ROOT/bin/trading_calendar.py" --evidence "$TODAY" 2>&1)"; _hol_rc=$?
   if [ "$_hol_rc" -eq 0 ]; then
-    _hol_missing="$(cd "$WORKDIR" && python3 -c "
-import os, sys
-from trading_bot.config import live_dnse_labels
-labs = live_dnse_labels()
-if not labs: sys.exit(3)
-print(' '.join(a for a in labs if not os.path.isfile('data/trade_plans/plan_%s_$NEXT_TRADING_DAY.json' % a)))
-" 2>&1)"; _hm_rc=$?
+    # "plan có" = MỘT định nghĩa chung bin/plan_presence.py (OK = plan_date khớp + orders list).
+    _hol_missing="$(WORKDIR_8L="$WORKDIR" python3 "$ROOT/bin/plan_presence.py" --date "$NEXT_TRADING_DAY" --wc "$WORKDIR" --list not-ok 2>&1)"; _hm_rc=$?
     if [ "$_hm_rc" -eq 0 ] && [ -z "$_hol_missing" ]; then
       echo "=== BQ Freshness Check — $TODAY $NOW_ICT ==="
       echo "NGÀY NGHỈ, BỎ QUA: $_hol_ev — plan $NEXT_TRADING_DAY đã có đủ mọi account live."
       exit 0
     fi
-    echo "NGÀY NGHỈ ($_hol_ev) nhưng plan $NEXT_TRADING_DAY còn thiếu (${_hol_missing:-?}, rc=$_hm_rc) — chạy các cổng như thường để lập bù."
+    echo "NGÀY NGHỈ ($_hol_ev) nhưng plan $NEXT_TRADING_DAY còn thiếu (${_hol_missing:-?}, rc=$_hm_rc) — chạy các cổng như thường để lập bù (CHỈ account chưa có file plan — SKIP-EXISTING)."
+    _HOL_LAPBU=1
   fi
 fi
 # HOLIDAY-SKIP-END
@@ -1037,9 +1044,12 @@ for ACCT in $LIVE_LABELS; do
   echo; echo "--- [pipeline-4] dispatch DollarBill lập plan T+1 cho $ACCT ---"
   # MORNING-SKIP-BEGIN (arch-review 2026-10-15 B2): morning mode KHÔNG ghi đè plan đích đã tồn tại
   # (có thể đã duyệt/đang chạy; run_bot 13:00 resume đọc file này). Ép: MIKE_MORNING_FORCE=1.
-  if [ "${MORNING:-0}" = "1" ] && [ -e "$WORKDIR/data/trade_plans/plan_${ACCT}_${NEXT_TRADING_DAY}.json" ] \
+  # 25/11/2026 (arch-review vòng 2 việc B #3): CÙNG guard cho mọi lượt LẬP BÙ — retry của plan_gate_recovery
+  # (BQF_SKIP_EXISTING_PLANS=1) và nhánh ngày nghỉ còn thiếu plan (_HOL_LAPBU=1): chỉ account CHƯA có file.
+  if { [ "${MORNING:-0}" = "1" ] || [ "${BQF_SKIP_EXISTING_PLANS:-0}" = "1" ] || [ "${_HOL_LAPBU:-0}" = "1" ]; } \
+     && [ -e "$WORKDIR/data/trade_plans/plan_${ACCT}_${NEXT_TRADING_DAY}.json" ] \
      && [ "${MIKE_MORNING_FORCE:-0}" != "1" ]; then
-    echo "  [SKIP-MORNING] plan_${ACCT}_${NEXT_TRADING_DAY}.json ĐÃ TỒN TẠI — không ghi đè (ép: MIKE_MORNING_FORCE=1)"
+    echo "  [SKIP-EXISTING] plan_${ACCT}_${NEXT_TRADING_DAY}.json ĐÃ TỒN TẠI — không ghi đè (morning=${MORNING:-0} retry=${BQF_SKIP_EXISTING_PLANS:-0} holiday=${_HOL_LAPBU:-0}; ép: MIKE_MORNING_FORCE=1)"
     continue
   fi
   # MORNING-SKIP-END
@@ -1122,7 +1132,7 @@ except Exception:
   rm -f "$_manual_err"
   "$ROOT/bin/dispatch.sh" DollarBill \
     "Lập plan T+1 cho tài khoản $ACCT. Đọc DT5G từ deploy_golive_dt5g_v4/golive_state_today.json và recommend output mới nhất trong data/. Ghi plan vào data/trade_plans/plan_${ACCT}_${NEXT_TRADING_DAY}.json — dùng ĐÚNG NGUYÊN VĂN ngày $NEXT_TRADING_DAY (đã tính sẵn bằng next_trading_day(), bỏ T7/CN/lễ) làm plan_date và tên file, TUYỆT ĐỐI KHÔNG tự suy ra 'ngày mai' bằng cách cộng 1 vào ngày hôm nay (sự cố thật 2026-07-10: dispatch thứ Sáu tự tính '07-11' là ngày mai, nhưng đó là thứ Bảy không phải ngày giao dịch, đúng ra phải là 07-13 thứ Hai). Ngày hôm nay: ${CAL_TODAY:-$TODAY} (ICT).${MORNING_NOTE}${NAV_NOTE}${EGG_NOTE}${CAPIT_NOTE}${LAG_DD_NOTE}${LAG_ZONE_NOTE}${HOLDS_NOTE}${CORP_ACTION_NOTE}${MANUAL_NOTE} YÊU CẦU VĂN PHONG (user 2026-07-07): kết thúc final message bằng 3-5 dòng tóm tắt DỄ HIỂU cho người đọc không chuyên — bắt buộc nêu rõ: Account nào · plan ngày nào · hành động chính (HOLD hay mấy lệnh gì) · VÌ SAO 1-2 câu · trạng thái duyệt — vì message này được đăng nguyên văn vào Discord plan channel. Lệnh MUA size bằng tiền bán cùng ngày: trừ phí ${FEE_NOTE} + chừa biên giá, đừng size khít ref price. BẮT BUỘC VỀ GIÁ THAM CHIẾU (user 2026-07-09, tái diễn nhiều lần): mtm_price_ref/ref_price của MỌI mã trong plan phải lấy từ DNSE live quote (dnse_api.py secdef/latest_trade — giá đóng cửa THẬT hôm nay $TODAY) — TUYỆT ĐỐI KHÔNG dùng giá đóng cửa BQ ('ticker'/'ticker_1m' close) làm ref_price, vì BQ cache local chỉ sync đêm 23:45 ICT nên tại giờ bạn chạy (~19:00) BQ cache luôn trễ ít nhất 1 ngày giao dịch — dùng BQ ở đây LUÔN cho ra giá sai/cũ, không phải thỉnh thoảng. Sự cố thật đã xảy ra: plan ZaloPay 07-10 có 2/4 mã (BID, MBB) dùng nhầm 'BQ close 07-08' lệch tới +5.7% so với giá đóng cửa thật 07-09, trong khi 2 mã còn lại dùng đúng DNSE live. Nếu DNSE live quote lỗi/thiếu cho 1 mã nào đó, ghi rõ note 'THIẾU GIÁ LIVE — cần kiểm tra tay' thay vì âm thầm dùng BQ thay thế." \
-    --bg 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
+    --bg 9>&- 2>/dev/null || echo "  [WARN] dispatch DollarBill cho $ACCT fail — check mike/logs/"
 done
 
 echo; echo "=== EOD PIPELINE DONE — $(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT') ==="

@@ -11,6 +11,7 @@ Ca thật: lễ 24/11/2026 khai vào vn_market.py lúc 00:01 24/11, SAU khi chu�
   D. send_plan_report NONTRADING-GUARD: ngày đích 24/11 ⇒ 'ngày nghỉ, bỏ qua' exit 0; 25/11 ⇒ chạy tiếp.
   E. bq_freshness HOLIDAY-SKIP: 24/11 + plan 25/11 đủ ⇒ 'NGÀY NGHỈ, BỎ QUA' exit 0; thiếu plan ⇒ chạy tiếp cổng.
   F. trading_calendar_watch: liệt kê ngày chưa xác nhận, không tự đổi lịch.
+  G. bq_freshness_check.sh RUN-LOCK (arch-review vòng 2 #4): không chạy song song.
 Env WORKDIR_8L_NEW = gốc WC có vn_market ĐÃ có 24/11 (mặc định canonical).
 """
 import json
@@ -132,6 +133,16 @@ def part_c():
     rc, out = py(code, old_calendar_wc())
     r = json.loads(out.strip().splitlines()[-1]) if rc == 0 else ["x"]
     chk(r[0] is None, "C4 lịch CŨ ⇒ housekeeping KHÔNG đóng 24/11 (không đoán lễ)", out)
+    # C5/C6 (arch-review vòng 2 #1): r2 mở VÌ plan tồn tại nhưng hỏng ⇒ file có + plan_date khớp KHÔNG đóng r2;
+    # câu thường (không r2) giữ hành vi cũ.
+    (td / "plan_SpaceX_2026-11-25.json").write_text(json.dumps({"plan_date": "2026-11-25", "orders": "BROKEN", "account": "WRONG"}))
+    code2 = ("import bus_question_housekeeping as H, pathlib, json;p=pathlib.Path(%r);"
+             "print(json.dumps([H.plan_t1_resolved(p,t) for t in ('plan-t1-not-ready-r2-2026-11-25-SpaceX',"
+             "'plan-t1-not-ready-2026-11-25-SpaceX')]))") % str(td)
+    rc, out = py(code2, NEW_WC)
+    r = json.loads(out.strip().splitlines()[-1]) if rc == 0 else ["x", None]
+    chk(r[0] is None, "C5 r2 + plan HỎNG (orders BROKEN, account sai) ⇒ KHÔNG đóng (để probe marker+md5)", out)
+    chk(r[1] and "exists with plan_date=2026-11-25" in r[1], "C6 câu thường + file có plan_date khớp ⇒ hành vi cũ giữ nguyên", out)
 
 
 def extract(path, b, e):
@@ -165,7 +176,7 @@ def part_e():
         (wc / "trading_bot" / "config.py").write_text("def live_dnse_labels():\n    return ['SpaceX', 'ZaloPay']\n")
         (wc / "data" / "trade_plans").mkdir(parents=True)
         for a in plans:
-            (wc / "data" / "trade_plans" / f"plan_{a}_2026-11-25.json").write_text("{}")
+            (wc / "data" / "trade_plans" / f"plan_{a}_2026-11-25.json").write_text('{"plan_date": "2026-11-25", "orders": []}')
         script = (f'ROOT="{HERE.parent}"; WORKDIR="{wc}"; MORNING=0; TODAY=2026-11-24; NEXT_TRADING_DAY=2026-11-25; '
                   f'NOW_ICT="19:00 ICT"\n{blk}\necho CONTINUED')
         r = subprocess.run(["bash", "-c", script], env=env_wc(NEW_WC), capture_output=True, text=True, timeout=60)
@@ -191,9 +202,28 @@ def part_f():
         "F2 watch KHÔNG ghi/đổi lịch (chỉ cảnh báo)", "")
 
 
+def part_g():
+    """RUN-LOCK bq_freshness_check.sh: lượt khác đang giữ khoá ⇒ exit 75, không làm gì (không BQ/dispatch)."""
+    td = Path(tempfile.mkdtemp(prefix="pgh_lock_")); G.TMP.append(td)
+    lk = td / "bqf.lock"
+    h = subprocess.Popen([sys.executable, "-c", "import fcntl,os,sys,time;fd=os.open(sys.argv[1],os.O_RDWR|os.O_CREAT);"
+                          "fcntl.flock(fd,fcntl.LOCK_EX);print('held',flush=True);time.sleep(60)", str(lk)],
+                         stdout=subprocess.PIPE, text=True)
+    h.stdout.readline()
+    try:
+        r = subprocess.run(["bash", str(HERE / "bq_freshness_check.sh"), "--quiet"], env=env_wc(NEW_WC, BQF_LOCK_FILE=str(lk)),
+                           capture_output=True, text=True, timeout=60)
+    finally:
+        h.kill()
+    chk(r.returncode == 75 and "BQF_LOCKED" in r.stdout and "BQ Freshness Check" not in r.stdout,
+        "G1 bq_freshness_check.sh: lượt khác giữ khoá ⇒ exit 75 BQF_LOCKED, không chạy gì", r.stdout + r.stderr)
+    src = (HERE / "bq_freshness_check.sh").read_text()
+    chk("--bg 9>&-" in src, "G2 dispatch DollarBill --bg đóng fd khoá (khoá nhả khi script xong, không theo job nền)", "")
+
+
 if __name__ == "__main__":
     try:
-        part_a(); part_b(); part_c(); part_d(); part_e(); part_f()
+        part_a(); part_b(); part_c(); part_d(); part_e(); part_f(); part_g()
     finally:
         for d in G.TMP:
             shutil.rmtree(d, ignore_errors=True)

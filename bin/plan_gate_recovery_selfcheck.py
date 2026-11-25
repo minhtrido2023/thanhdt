@@ -30,9 +30,15 @@ FAKE = {
  "prune_depth_gate.py": '#!/usr/bin/env python3\nimport sys,os\nrc=int(open(os.environ["SB"]+"/depth_rc").read())\n'
      'print("PRUNE_DEPTH %s date=%s n=197 threshold=183" % ({0:"PASS",1:"FAIL"}.get(rc,"UNMEASURABLE"), sys.argv[-1]))\n'
      'open(os.environ["SB"]+"/calls.log","a").write("depth "+sys.argv[-1]+"\\n");sys.exit(rc)\n',
- "bq_freshness_check.sh": '#!/bin/bash\necho "bqf MORNING=${MIKE_MORNING_RUN:-0} $*" >> "$SB/calls.log"\n'
-     'rc=$(cat "$SB/bqf_rc"); [ "$rc" = 0 ] && for a in SpaceX ZaloPay; do echo "{\\"plan_date\\":\\"$(cat $SB/next)\\",\\"orders\\":[]}" > "$SB/wc/data/trade_plans/plan_${a}_$(cat $SB/next).json"; done; exit $rc\n',
- "send_plan_report.sh": '#!/bin/bash\necho "send $*" >> "$SB/calls.log"\n',
+ "bq_freshness_check.sh": '#!/bin/bash\necho "bqf MORNING=${MIKE_MORNING_RUN:-0} SKIP_EXISTING=${BQF_SKIP_EXISTING_PLANS:-0} $*" >> "$SB/calls.log"\n'
+     # mốc retry phải có TRƯỚC khi chuỗi chạy (§3/§5) — fake ghi lại điều nó thấy
+     '[ -f "$SB/state/plan_gate_recovery/$(cat $SB/next).json" ] && echo "bqf_saw_mark=1" >> "$SB/calls.log"\n'
+     # mô phỏng guard thật: SKIP_EXISTING ⇒ không ghi đè file đã có
+     'rc=$(cat "$SB/bqf_rc"); [ "$rc" = 0 ] && for a in SpaceX ZaloPay; do f="$SB/wc/data/trade_plans/plan_${a}_$(cat $SB/next).json"; '
+     '[ "${BQF_SKIP_EXISTING_PLANS:-0}${MIKE_MORNING_RUN:-0}" != 00 ] && [ -e "$f" ] && continue; echo "dispatch $a" >> "$SB/calls.log"; '
+     'echo "{\\"plan_date\\":\\"$(cat $SB/next)\\",\\"orders\\":[]}" > "$f"; done; exit $rc\n',
+ "send_plan_report.sh": '#!/bin/bash\necho "send $* NOTE=${PLAN_REPORT_NOTE:+yes}" >> "$SB/calls.log"\n',
+ "late_plan_catchup.sh": '#!/bin/bash\necho "late_plan_catchup" >> "$SB/calls.log"\n',
  "notify.sh": '#!/bin/bash\necho "TELEGRAM $1" >> "$SB/calls.log"; exit $(cat "$SB/notify_rc" 2>/dev/null || echo 0)\n',
  "notify_thread.sh": '#!/bin/bash\necho "DISCORD[$2] $1" >> "$SB/calls.log"; exit $(cat "$SB/notify_rc" 2>/dev/null || echo 0)\n',
 }
@@ -41,7 +47,7 @@ REFRESH = ('#!/bin/bash\necho "refresh MORNING=${MIKE_MORNING_RUN:-0}" >> "$SB/c
 
 
 def sandbox(session, nxt, asof="2026-11-20", kinds=("prune_depth", "dt5g_publisher"), failed=True,
-            gl_session=None, depth_rc=0, bqf_rc=0, plans=()):
+            gl_session=None, depth_rc=0, bqf_rc=0, plans=(), raw_plans=None):
     sb = Path(tempfile.mkdtemp(prefix="pgr_sc_")); TMP.append(sb)
     (sb / "bin").mkdir()
     for n, body in FAKE.items():
@@ -56,6 +62,8 @@ def sandbox(session, nxt, asof="2026-11-20", kinds=("prune_depth", "dt5g_publish
     (wc / "daily_refresh_v34b_linux.sh").write_text(REFRESH); (wc / "daily_refresh_v34b_linux.sh").chmod(0o755)
     for a in plans:
         (wc / "data" / "trade_plans" / f"plan_{a}_{nxt}.json").write_text(json.dumps({"plan_date": nxt, "orders": []}))
+    for a, body in (raw_plans or {}).items():
+        (wc / "data" / "trade_plans" / f"plan_{a}_{nxt}.json").write_text(body)
     (sb / "state").mkdir()
     (sb / "state" / "bq_freshness_gate_last.json").write_text(json.dumps(
         {"session": gl_session or session, "next_trading_day": nxt, "failed": failed, "data_fail_kinds": list(kinds)}))
@@ -67,7 +75,7 @@ def sandbox(session, nxt, asof="2026-11-20", kinds=("prune_depth", "dt5g_publish
 def run(sb, mode, now, **env):
     e = dict(os.environ, SB=str(sb), PGR_WC_ROOT=str(sb / "wc"), PGR_STATE_DIR=str(sb / "state"),
              PGR_BIN=str(sb / "bin"), WORKDIR_8L=NEW_WC, MIKE_NOW_ICT=now, PGR_PLAN_WAIT_S="1",
-             PGR_REFRESH_SCRIPT="__no_such_script_pgr_sc__.sh")
+             PGR_REFRESH_SCRIPT="__no_such_script_pgr_sc__.sh", BQF_LOCK_FILE=str(sb / "bqf.lock"))
     e.update(env)
     r = subprocess.run([sys.executable, str(TARGET), mode], env=e, capture_output=True, text=True, timeout=120)
     calls = (sb / "calls.log").read_text() if (sb / "calls.log").exists() else ""
@@ -79,15 +87,31 @@ def st(sb, d):
     return json.loads(p.read_text()) if p.exists() else {}
 
 
+def sent(c):
+    return any(l.startswith("send ") for l in c.splitlines())
+
+
+def hold(path):
+    """Giữ flock trên path trong tiến trình con (mô phỏng lượt khác đang chạy)."""
+    return subprocess.Popen([sys.executable, "-c", "import fcntl,os,sys,time;fd=os.open(sys.argv[1],os.O_RDWR|os.O_CREAT);"
+                             "fcntl.flock(fd,fcntl.LOCK_EX);print('held',flush=True);time.sleep(60)", str(path)],
+                            stdout=subprocess.PIPE, text=True)
+
+
 def main():
-    # R1 ca thật 23/11 20:00 (lịch mới): FAIL dữ liệu nền, đo lại đạt ⇒ retry 1 lần đủ chuỗi
+    # R1 ca thật 23/11 20:00 (lịch mới): FAIL dữ liệu nền, đo lại đạt ⇒ retry 1 lần; TRƯỚC 21:00 KHÔNG tự gửi
     sb = sandbox("2026-11-23", "2026-11-25")
     rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
-    chk(rc == 0 and "refresh MORNING=1" in c and "bqf MORNING=0 --quiet" in c
-        and "send --account SpaceX --second-chance --plan-date 2026-11-25" in c
-        and "send --account ZaloPay --second-chance --plan-date 2026-11-25" in c
+    chk(rc == 0 and "refresh MORNING=1" in c and "bqf MORNING=0 SKIP_EXISTING=1 --quiet" in c
+        and not sent(c) and not any(l == "late_plan_catchup" for l in c.splitlines())
         and st(sb, "2026-11-25")["retry"]["result"] == "ok" and "DISCORD[trading_daily] ✅" in c,
-        "R1 23/11 20:00 cổng FAIL dữ liệu nền + đo lại đạt ⇒ refresh→bq_freshness→gửi lại plan 25/11, ghi result=ok", out + c)
+        "R1 23/11 20:00 cổng FAIL dữ liệu nền + đo lại đạt ⇒ refresh→bq_freshness(skip-existing), KHÔNG tự gửi trước 21:00", out + c)
+    chk("bqf_saw_mark=1" in c, "R1b mốc retry đã ghi TRƯỚC khi chuỗi chạy (bq_freshness thấy file mốc) — §3", c)
+    # R1c sau 21:00 ⇒ gửi qua late_plan_catchup (chạy chuỗi park/inject/auto_exit rồi mới gửi), không send trực tiếp
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23")
+    rc, out, c = run(sb, "--retry", "2026-11-23T21:20:00")
+    chk(rc == 0 and "late_plan_catchup" in c.splitlines() and not sent(c),
+        "R1c 21:20 ⇒ bin/late_plan_catchup.sh, KHÔNG send_plan_report trực tiếp", out + c)
     n_before = c.count("\n")
     rc, out, c = run(sb, "--retry", "2026-11-23T20:20:00")
     chk("OK plan đủ" in out and c.count("\n") == n_before, "R2 lượt sau, plan đã đủ ⇒ không làm gì", out)
@@ -133,8 +157,40 @@ def main():
     # R10 sáng 25/11 05:00 (sau lễ 24/11): phiên=23/11, plan=25/11, bq_freshness MORNING=1; as_of đã đúng ⇒ không refresh
     sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23")
     rc, out, c = run(sb, "--retry", "2026-11-25T05:00:00")
-    chk(rc == 0 and "phiên=2026-11-23 plan=2026-11-25" in out and "refresh" not in c and "bqf MORNING=1" in c,
-        "R10 05:00 25/11: phiên 23/11 (bỏ lễ 24/11), as_of đúng ⇒ chỉ bq_freshness morning mode", out + c)
+    chk(rc == 0 and "phiên=2026-11-23 plan=2026-11-25" in out and "refresh" not in c and "bqf MORNING=1" in c
+        and "send --account SpaceX --second-chance --plan-date 2026-11-25 NOTE=yes" in c
+        and "send --account ZaloPay --second-chance --plan-date 2026-11-25 NOTE=yes" in c
+        and "TELEGRAM ✅" in c and "auto_exit_inject" in c and "CHƯA chạy" in c,
+        "R10 05:00 25/11: phiên 23/11, bq_freshness morning; gửi kèm cảnh báo chuỗi inject/auto-exit CHƯA chạy (+Telegram)", out + c)
+    # R12 1 account ĐÃ có plan (đã duyệt) ⇒ KHÔNG bị ghi đè, chỉ lập + gửi account vắng
+    appr = json.dumps({"plan_date": "2026-11-25", "orders": [{"ticker": "AAA"}], "approved_by": "user"})
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23", raw_plans={"SpaceX": appr})
+    rc, out, c = run(sb, "--retry", "2026-11-25T05:00:00")
+    sp = (sb / "wc" / "data" / "trade_plans" / "plan_SpaceX_2026-11-25.json").read_text()
+    chk(sp == appr and "dispatch SpaceX" not in c and "dispatch ZaloPay" in c and "SKIP_EXISTING=1" in c
+        and "send --account ZaloPay" in c and "send --account SpaceX" not in c,
+        "R12 SpaceX đã có plan duyệt ⇒ không ghi đè, không gửi lại; chỉ ZaloPay được lập + gửi", out + c)
+    # R13 plan CÓ FILE nhưng hỏng ⇒ không retry (không ghi đè), để tăng cấp
+    sb = sandbox("2026-11-23", "2026-11-25", plans=("SpaceX",),
+                 raw_plans={"ZaloPay": json.dumps({"plan_date": "2026-11-25", "orders": "BROKEN"})})
+    rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
+    chk("INVALID" in out and "bqf" not in c and not st(sb, "2026-11-25"), "R13 plan hỏng (orders không phải list) ⇒ SKIP, không ghi đè", out + c)
+    # R14 khoá: retry khác đang chạy ⇒ LOCKED; bq_freshness đang chạy ⇒ WAIT (không đánh dấu)
+    sb = sandbox("2026-11-23", "2026-11-25")
+    h = hold(sb / "state" / "locks" / "plan_gate_recovery_retry.lock") if (sb / "state" / "locks").mkdir() is None else None
+    h.stdout.readline()
+    try:
+        rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
+    finally:
+        h.kill()
+    chk("LOCKED" in out and "bqf" not in c and not st(sb, "2026-11-25"), "R14 flock retry đang bị giữ ⇒ LOCKED, không làm gì", out + c)
+    h = hold(sb / "bqf.lock"); h.stdout.readline()
+    try:
+        rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
+    finally:
+        h.kill()
+    chk("WAIT" in out and "bq_freshness_check.sh đang chạy" in out and "bqf" not in c and not st(sb, "2026-11-25"),
+        "R15 bq_freshness đang giữ khoá ⇒ WAIT, không đánh dấu retry", out + c)
     # R11 bị kill giữa chừng (mốc retry có, chưa có result) ⇒ không chạy lại
     sb = sandbox("2026-11-23", "2026-11-25")
     (sb / "state" / "plan_gate_recovery").mkdir()
@@ -174,6 +230,34 @@ def main():
     sb = sandbox("2026-11-23", "2026-11-25", depth_rc=1)
     rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
     chk("KHÔNG nới ngưỡng" in out, "E8 dữ liệu nền vẫn dưới ngưỡng ⇒ tin nói rõ KHÔNG nới ngưỡng", out)
+    # E9 plan CÓ FILE nhưng hỏng ⇒ vẫn là THIẾU (kiểm nội dung, không chỉ tồn tại file)
+    sb = sandbox("2026-11-23", "2026-11-25", plans=("SpaceX",),
+                 raw_plans={"ZaloPay": json.dumps({"plan_date": "2026-11-25", "orders": "BROKEN"})})
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk("CHƯA CÓ: ZaloPay." in out and "TELEGRAM 🚨" in c, "E9 ZaloPay orders hỏng ⇒ tăng cấp đúng ZaloPay", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", raw_plans={"SpaceX": json.dumps({"plan_date": "2026-11-24", "orders": []})},
+                 plans=("ZaloPay",))
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk("CHƯA CÓ: SpaceX." in out, "E9b plan_date sai ⇒ coi là thiếu", out)
+    # E10 retry ĐANG CHẠY (mốc có, chưa result, khoá bị giữ) ⇒ nói rõ + cấm chạy tay song song
+    sb = sandbox("2026-11-23", "2026-11-25")
+    (sb / "state" / "plan_gate_recovery").mkdir()
+    (sb / "state" / "plan_gate_recovery" / "2026-11-25.json").write_text(json.dumps({"retry": {"started_at": "2026-11-25T07:20:00"}}))
+    (sb / "state" / "locks").mkdir()
+    h = hold(sb / "state" / "locks" / "plan_gate_recovery_retry.lock"); h.stdout.readline()
+    try:
+        rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    finally:
+        h.kill()
+    chk("ĐANG CHẠY (bắt đầu 2026-11-25T07:20:00" in out and "KHÔNG chạy tay bq_freshness_check.sh" in out
+        and "chưa chạy" not in out, "E10 retry đang chạy ⇒ không báo 'chưa chạy', cảnh báo không chạy tay song song", out)
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:40:00")
+    chk("ALREADY_ESCALATED" in out, "E10b đã tăng cấp ⇒ không lặp", out)
+    sb = sandbox("2026-11-23", "2026-11-25")
+    (sb / "state" / "plan_gate_recovery").mkdir()
+    (sb / "state" / "plan_gate_recovery" / "2026-11-25.json").write_text(json.dumps({"retry": {"started_at": "2026-11-25T07:20:00"}}))
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk("bị NGẮT giữa chừng" in out and "KHÔNG chạy tay" not in out, "E11 mốc có, không ai giữ khoá ⇒ 'bị NGẮT giữa chừng'", out)
     src = TARGET.read_text()
     chk(all(x not in src for x in ("bot_execute", "run_bot.sh", "BOT_STOP\"", "trading_rules.json\"", "dispatch.sh")),
         "B1 ranh giới: script không gọi bot/đặt lệnh/BOT_STOP/trading_rules/dispatch trực tiếp", "")
