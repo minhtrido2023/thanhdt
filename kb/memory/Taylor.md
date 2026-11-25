@@ -44,3 +44,4 @@
 - [2026-11-25T08:03:04Z] ĐANG DỞ: job Taylor_20261125_080254 DD PVP Aframax#3 ĐHĐCĐ 23/10 (wt-dd-pvp-afx-20261125) | NEXT: đọc pvp-dd-20261029.md + tìm văn kiện
 - [2026-11-25T08:03:37Z] ĐANG DỞ: job Taylor_20261125_080251 MBB NQ ĐHĐCĐ 2026 (KTPL), wt-dd-mbb-agm-20261125 | NEXT: tải NQ/BB gốc
 - [2026-11-25T08:04:49Z] ĐANG DỞ: job Taylor_20261125_080257 HHS A/B + PAT nhãn thuê đất (wt-dd-hhs-pat-fu-20261125) | NEXT: đọc HHS ref-range + rev9 w3, PAT rev4
+- [2026-11-25T08:09:33Z] [dd-PVP-aframax 25/11] XONG job Taylor_20261125_080254: 0d7d42055 (wt-dd-pvp-afx-20261125) tâm giữ 23.099, E17 22.838 — CHỜ Mike ghi rev5 + đọc NQ ĐHĐCĐ sau 30/11 (thông qua ⇒ rev tâm 22.932)
