@@ -1,0 +1,13 @@
+100% CS: 14.23 tỷ kWh; 9 tỷ kWh = 63.3 %; Qc65% = 9.25 tỷ kWh; 75-80% = 10.67 11.38
+thực 9T 3,757 tỷ kWh: CF 35.3 %; năm hoá 5.01
+MMBtu: term 20,7 -> tỷ kWh 3.16 = 22.2 % CS
+cần cho 9 tỷ kWh 58.9 ; cho 5,0 tỷ 32.8 ; 9T thực 24.6 vs nhận 23,8; 75% CS 69.8 80% 74.5
+term/need9: 35.2 % ; term/need_actual: 63.2
+FY25 USD% 73.8
+Q3 USD-bank 15297.5 76.0 %; VND-bank 4837.2
+±1% USD/VND tỷ 153.0 sau thuế 136.3 đ/cp 44.4
++100bp LT tỷ 201.3 sau thuế 179.4 đ/cp 58.5 % LNST cốt lõi nămhoá 3.35
+lãi vay: 2025 KQKD+vh 1446.4 2024 1003.6 2026E 2048.0 ratio KQKD 3.12 ratio kinh tế 1.42
+LNST 1500 ROE 16.7 V 11111 + 2111 tỷ = 688 đ/cp; tâm9387+ 10075
+LNST 2500 ROE 27.8 V 18519 + 9519 tỷ = 3103 đ/cp; tâm9387+ 12490
+NPV0 LNST 1215 ; margin 4.3 8.3 ; giá/kWh 3333 3889
