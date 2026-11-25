@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261125w3/NT2/REPORT_recheck_NT2.md",
+  "report_md5": "33c388dc71a15a73ec8d73574df1be66",
+  "brief_md5": "7cabdfaf0d6a6a5d62a48ab9c8ec29c3",
+  "model": "opus",
+  "cost_usd": 1.0095948,
+  "started_at_ict": "2026-11-25T10:28:05+07:00",
+  "summary": "The recheck faithfully reproduces r3 (control md5, net cash and annuity factor verified) and correctly adds the Ke-band and E15/E16 rows, whose effect is small (+0,2…+2,6%). But the model it reuses has a load-bearing inconsistency: the base cash flow equals a normalised NP taken from margins burdened by ~550bn/yr of now-ended depreciation, while the fleet's own BQ cash-flow data show FCF above NP in 10 of 11 years and averaging ~938bn/yr in 2022–25 versus a model operating centre of ~632. That points to a centre roughly 11–16% too low, partly offset by too-high items that were never checked: welfare-fund appropriation, payables omitted from net claims, and CIT-incentive expiry. I could not re-open the source PDF to check those. The verdict is REFUTED (medium): the FCF base must be rebuilt consistently and the balance-sheet claims completed before the centre can stand.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261125w3/NT2/skeptic/r1_raw.md"
+}
