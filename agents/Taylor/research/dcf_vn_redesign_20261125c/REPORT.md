@@ -1,11 +1,33 @@
-# Định giá đa proxy cho thị trường Việt Nam — vòng 3 (V3: sửa theo quant-skeptic; job Taylor_20261125_001435, tiếp nối Taylor_20261124_170355)
+# Định giá đa proxy cho thị trường Việt Nam — vòng 3 (V3.1 = V3 + vá non-blocking; V3: sửa theo quant-skeptic; job Taylor_20261125_001435, tiếp nối Taylor_20261124_170355)
 
 Taylor · 2026-11-25 · CHỈ NGHIÊN CỨU + ĐỀ XUẤT. Bản V2 giữ nguyên ở `REPORT_V2.md`. Không sửa `dcf_valuation.py`, không wire. **Chưa qua quant-skeptic — không
 được coi là CONFIRMED.** Tiêu chí khoá trước ở `PRELOCK.md` (commit `f303028e8`, trước khi chạy mô hình mới).
 Quy ước: tiền nhàn rỗi **pin0% (đầu sàn)**, phí 0,1%/chiều, khớp T+1, mã ngừng giao dịch mất 50% trên giá cuối (cận 0%
 và 100% báo kèm). IS = as-of 2014-01→2019-12, OOS = 2020-01→2023-10.
 
-## 0. Kết luận trước (V3)
+## V3.1 changelog (job Taylor_20261125_011009 — vá non-blocking theo quant-skeptic V3, CONFIRMED/medium; **chưa qua skeptic V3.1, không phải CONFIRMED**)
+
+Bản V3 giữ nguyên ở `REPORT_V3.md`. **Cách đọc số trong file này:** §0 và các khối đánh dấu *V3.1* dùng `out_F/` (V3.1 = V3 + mục 1); các bảng chi tiết §1–§5 còn lại là số V3 (`out/`) — chênh V3 → V3.1 ở bảng dưới;
+bảng đầy đủ V3.1: `out_F/tables.md`. Tiêu chí khoá `PRELOCK.md` KHÔNG đổi. Mục 3–8 dưới đây đều là **độ nhạy / sửa chữ**, không phải tiêu chí mới.
+
+**Kết luận không đổi sau V3.1:** mục tiêu 1 KHÔNG đạt (U-hit ENS1w 62,6 / 67,1%, ENS2 64,6 / 68,0% so với null giá 70,2 / 78,4%); mục tiêu 2 đạt theo tiêu chí khoá nhưng null E/P đạt cùng tiêu chí
+(E/P: đúng 67,1 / 67,9%, sai 16,6 / 19,1% so nền 61,4 / 58,7 và 21,9 / 21,6%); luật §5 vẫn chọn **ENS2**; lens chưa phải alpha (DSR phần vượt trội ENS1w 0,16, ENS2 0,39, D0 0,50 — đều < 0,95); không thay E/P bằng mô hình.
+**Hai điều thay đổi theo hướng bất lợi cho V3:** (i) sàn thanh khoản 5 tỷ, E/P-công-bằng thắng mô hình (mục 3); (ii) lựa chọn ENS2 so ENS1 **mong manh** — khi dời ngày công bố nhánh VNDirect +45→+90 / +90→+120 ngày, luật §5 chọn **ENS1** (hoà trong 1 điểm; mục 7).
+
+| # | Việc | Làm gì / artifact | Kết quả (V3 → V3.1) |
+|---|---|---|---|
+| 1 | Vốn hoá ảo (đòn 8) | `b_panel.py`: `mc = Price_thô(d) × N(d)`; N chỉ bước khi (a) hệ số `Close/Price` đổi so với ngày công bố **và** (b) kỳ BCTC kế xác nhận N đổi > 1% ⇒ N = N_kế; cổ tức tiền không đổi N. Nhánh VND (`N_v3`): chỉ áp bước hệ số giá khi kỳ kế xác nhận cùng hướng (cùng nguyên lý `pick_n`). `MC_OLD=1` tái lập V3. Artifact: `out_F/`, `out_F/mc_fix_delta.json`, `calc/j_delta.py out out_F` | 14,4% dòng in-universe 2014+ (8.135 / 56.549; 695 / 836 mã) đổi mc > 0,2%; 1,6% đổi > 10%; VNM 2019-06: mc 216.733 → 214.190 tỷ (−1,18%). **S1 ENS1w 12,87 → 12,20** (IS 5,81 → 4,58; OOS 19,05 → 18,92); S1 D0 14,99 → 14,33; **S3f 12,30 → 12,79**; S7 ENS1w 8,83 → 8,74, S7 D0 9,17 → 9,24, S7 E/P 8,55 → 8,47; EW 6,12 không đổi. IC36 ENS1w IS 0,152 → 0,154, OOS 0,223 → 0,224; ENS2 0,146 / 0,190 → 0,149 / 0,193. Số cờ (IS/OOS): ENS1w 433 / 507 → 428 / 502; ENS2 384 / 426 → 385 / 428; D0 420 / 475 → 419 / 473. Đúng ENS1w 71,6 / 71,8 → 71,3 / 72,1. **Không đổi kết luận chính**; có đổi mức: S1 thấp hơn ~0,7 điểm/năm |
+| 2 | Sửa chữ | "E/P cao nhất" → **THẤP nhất** (2 chỗ); hedonic KHÔNG bị embargo (đóng băng 2020-01); "10,0%" → 8,85% (V3; V3.1: 8,97%) | `c_models2.py` ascending=True; `out/bt2_dsr.json`, `out_F/bt2_dsr.json` |
+| 3 | Sàn 5 tỷ (năng lực, §5) | Sàn thanh khoản 0 / 1 / 5 tỷ (V3.1): S1 ENS1w **11,30 / 12,20 / 11,03%**; S3f (E/P công bằng) **12,57 / 12,79 / 15,09%**. Ở 5 tỷ E/P thắng mô hình 4,06 điểm (V3: 14,90 so 11,79 — `bt2_summary.csv`) ⇒ **ủng hộ "không thay E/P"** | `out_F/bt2_summary.csv` (`S1_ENS1w_f{0,1,5}`, `S3f_f{0,1,5}`) |
+| 4 | `oshares_xcheck` | Khử 4 dòng trùng (cùng mã, cùng ngày công bố): **76** dòng E/BVPS duy nhất (V3 ghi 80). 4 ca `AIS_EXACT`: CII +39%, SSI +22%, PC1 +5%, NBB +3% (N so live) ⇒ nhánh E/BVPS lệch ⇒ bằng chứng **nghiêng về OShares**. Độ nhạy N = OShares (`out_H`, `PICK_OS=1`): S1 ENS1w 12,20 → 12,23, S1 D0 14,33 → 14,30, S3f 12,79 → 13,14, S7 ENS1w 8,74 → 9,08, S7 E/P 8,47 → 8,49; IC ENS1w IS 0,154 → 0,161, OOS 0,224 → 0,220; luật §5 vẫn ENS2; nhảy vốn hoá > 15%: 3,78% (so 8,0% ở dòng E/BVPS của V3) | `out_F/oshares_xcheck.json`, `out_F/oshares_xcheck_ais_exact.csv`, `out_H/` |
+| 5 | IC phần dư | Thêm kiểm soát ROE_tc5 và npm_med5 (ngoài E/P, B/P, quy mô): `ic36_resid2` ENS1w IS 0,059 [0,03; 0,08] / OOS 0,093 [0,08; 0,10]; ENS2 0,056 [0,02; 0,08] / 0,049 [0,03; 0,07]; D0 0,035 / 0,086 (từ 0,072 / 0,118; 0,070 / 0,081; 0,046 / 0,109). Còn dương, CI không chứa 0, **nhưng giảm 18–40% so IC phần dư 3 biến** và chỉ kiểm soát 5 biến ⇒ sửa §0 và §6: bỏ chữ "đã chứng minh" | `out_F/metrics2.csv` cột `ic36_resid2*` |
+| 6 | CI cho S7 | Bootstrap theo năm lịch (13 năm, B = 2000, `calc/m_bootstrap_s7.py`): S7 − EW: ENS1w +2,62 [+1,12; +4,17], ENS2 +2,27 [+0,95; +4,03], D0 +3,12 [+1,72; +4,73], E/P +2,35 [+0,52; +4,32]; **S7 mô hình − E/P: ENS1w +0,26 [−1,31; +2,01], ENS2 − E/P_E2 +0,13 [−1,53; +2,82], D0 +0,76 [−0,99; +2,99] — đều chứa 0** | `out_F/s7_bootstrap.json` (CAGR tính lại khớp `bt2_summary`) |
+| 7 | Độ nhạy `known` VNDirect | `KD_Q=90 KD_Y=120` (thay 45 / 90), `out_G/`: mục tiêu 1: U-hit ENS1w 62,6 / 67,1 → 61,5 / 67,9; ENS2 64,6 / 68,0 → 64,6 / 67,8. Mục tiêu 2: ENS1w đúng 71,3 / 72,1 → 71,6 / 72,2, sai 15,2 / 17,3 → 14,7 / 17,3. S1 ENS1w 12,20 → 12,13; S3f 12,79 → 12,79; S7 ENS1w 8,74 → 8,83, S7 E/P 8,47 → 8,45. **Luật §5 chọn ENS1 (hoà ENS1/ENS2/D0B/D0J trong 1 điểm), không phải ENS2** | `out_G/`, `calc/j_delta.py out_F out_G`, `out_G/tables.md` |
+| 8 | NB-1 nhánh VND | Làm một phần: `N_v3` qua kiểm "kỳ kế xác nhận" (tương tự `pick_n`): chỉ 54 / 270 dòng ứng viên (|bước hệ số giá| > 0,3%) được áp bước; 298 dòng không có kỳ kế ⇒ KHÔNG áp (bảo thủ). Nhảy vốn hoá > 15% (mọi dòng VND): 3,96 → 3,91%. **Chưa làm:** đối chiếu bảng GDKHQ độc lập cho mã vắng BQ (chưa kiểm `corporate_action_bq` có phủ các mã này không) — việc còn mở | `out_F/panel_build.json` (`vnd_n_fix31`, `jump_VND`) |
+
+**Giới hạn V3.1 nói thẳng:** (a) độ nhạy mục 4 và 7 thay đổi mức CAGR từng chiến lược ±0,1–0,4 điểm/năm, trong nhiễu CI; riêng chọn ENS2 vs ENS1 là lỗ hổng thật của luật §5 (hoà nhiều ứng viên, chọn theo thứ tự ưu tiên); (b) panel VNDirect không tái lập từ repo (§7); (c) tự kiểm `g_selfcheck3` V3.1: **22/22 PASS**, 3 lần chạy (`env -u TZ` + `PYTHONHASHSEED=0`, `TZ=Asia/Ho_Chi_Minh` + 12345, `TZ=America/New_York` + 777) cho **cùng md5 `0aa0e379a78339fec2d3b98d6555218f`** (`out_F/selfcheck3_{noTZ,ICT,NY}.txt`).
+
+## 0. Kết luận trước (V3; số V3.1 xem changelog ở trên)
 
 **Thay đổi so với V2 — nói thẳng:** (a) công "không mở mới khi đắt" của mô hình **không tách được khỏi cảnh báo E/P** cùng tỉ lệ cờ;
 (b) sau khi embargo nhãn 36 tháng khi fit trọng số, **luật chọn §5 khoá trước chọn `ENS2`, không còn `ENS1w`**; (c) công của cổng
@@ -22,7 +44,7 @@ rating bị V2 thổi phồng. Ba kết luận chính của V2 (mục tiêu 2 đ
      Với bản được luật chọn: ENS2 − E/P cùng cờ: +0,6 [−8,2; +12,6] / −0,1 [−8,2; +7,8]. D0 − E/P: +3,6 [−3,5; +12,2] / +0,9 [−4,6; +8,6]
      (CI bootstrap theo năm sự kiện, không hiệu chỉnh đa so sánh).
    - **Bằng chứng không phân biệt ENS1w/ENS2 với E/P cho công "đạt ⇒ không mở mới"** (chỉ ENS1w ở OOS có CI không chứa 0, và V2 chọn
-     ENS1w bằng trọng số fit IS). Phần thông tin thêm duy nhất đã chứng minh được của mô hình là **IC phần dư** (§1, §3).
+     ENS1w bằng trọng số fit IS). Phần thông tin thêm của mô hình duy nhất còn thấy được là **IC phần dư**, nhưng chỉ ở mức *không bị loại bởi 5 biến kiểm soát* (E/P, B/P, quy mô, ROE trung vị 5 năm, biên ròng trung vị 5 năm — V3.1 mục 5): ENS1w 0,059 / 0,093, ENS2 0,056 / 0,049 (CI khối năm không chứa 0); **không** phải bằng chứng 'thông tin riêng' đã chứng minh — còn nhiều yếu tố chưa kiểm soát (động lượng, đòn bẩy, ngành).
    - Cảnh báo vẫn có độ trễ dài, không phải tín hiệu bán (trung vị 13 tháng IS / 6 tháng OOS tới đỉnh; ca VNM, §4).
 3. **Bộ mô hình do luật §5 chọn = `ENS2`** (trung vị 5 mô hình, không fit; điểm IS 3,09 điểm so với 2,75 của ENS1w; hoà trong 1 điểm với
    ENS1w, META, D0J nên áp thứ tự ưu tiên không-fit). V2 chọn ENS1w vì trọng số IC IS chưa embargo; chênh giữa hai là 0,3 điểm — **lựa chọn
@@ -33,13 +55,12 @@ rating bị V2 thổi phồng. Ba kết luận chính của V2 (mục tiêu 2 đ
    so với universe 6,12%. E/P công bằng cùng số mã: 12,30% (OOS 20,33) cho ENS1w, 11,96% (OOS 18,63) cho ENS2 ⇒ ENS1w **thua** E/P ở OOS
    (−1,28 điểm), ENS2 **hơn** E/P ở OOS (+2,08), nhưng mốc E/P công bằng tự nó lệch 1,7 điểm OOS chỉ vì số mã đổi 37 → 40: nhiễu cỡ đó.
    DSR phần vượt trội so với universe: ENS1w 0,20, ENS2 0,47, D0 0,56 (< 0,95; N = 57, độ nhạy N = 80 vẫn < 0,95).
-6. **Tránh đắt (S7): bỏ mã đang bị cảnh báo khỏi universe cộng 2,2–3,1 điểm/năm (ENS1w 8,83%, ENS2 8,31%, D0 9,17% so với 6,12%) — nhưng
-   E/P cùng tỉ lệ cờ cho 8,55% (ENS2 so E/P cùng cờ: 8,31 so 8,38).** ENS1w − E/P = +0,28 điểm/năm (IS +0,16, OOS +0,39), không CI,
-   nhỏ so với nhiễu. Tách theo loại cờ (§3.3): loại riêng mã chỉ-mô hình-cờ cho 5,90% (≈ universe), loại riêng mã chỉ-E/P-cờ 6,01% —
+6. **Tránh đắt (S7): bỏ mã đang bị cảnh báo khỏi universe cộng 2,2–3,1 điểm/năm [số V3; V3.1: ENS1w +2,62 CI95 khối-năm [+1,12; +4,17], ENS2 +2,27 [+0,95; +4,03], D0 +3,12 [+1,72; +4,73] so với EW 6,12%; E/P cùng cờ +2,35 [+0,52; +4,32]] (V3: ENS1w 8,83%, ENS2 8,31%, D0 9,17%) — nhưng
+   E/P cùng tỉ lệ cờ cho 8,55% (ENS2 so E/P cùng cờ: 8,31 so 8,38).** ENS1w − E/P = +0,28 điểm/năm (IS +0,16, OOS +0,39) ở V3; **V3.1 có CI** (bootstrap 13 năm lịch, B = 2000): ENS1w − E/P +0,26 [−1,31; +2,01], ENS2 − E/P_E2 +0,13 [−1,53; +2,82], D0 − E/P +0,76 [−0,99; +2,99] — đều chứa 0; chênh S7 mô hình so E/P là nhiễu. Tách theo loại cờ (§3.3): loại riêng mã chỉ-mô hình-cờ cho 5,90% (≈ universe), loại riêng mã chỉ-E/P-cờ 6,01% —
    không loại nào một mình mang lại mức tăng.
 7. **Kiến nghị rõ (theo yêu cầu):** cho công mềm "cảnh báo đắt ⇒ không mở mới", **KHÔNG nên thay E/P bằng ENS1w/ENS2 dựa trên bằng
    chứng này** — E/P đạt cùng tiêu chí, đơn giản, không fit tham số. Nếu muốn dùng mô hình: hiển thị **cùng** E/P, coi cờ đồng thuận
-   (cả hai cùng báo) là mức cảnh báo cao hơn; không coi mô hình là nguồn thông tin riêng cho tới khi có kiểm định ngoài mẫu mới (ngoài 2023-10).
+   (cả hai cùng báo) là mức cảnh báo cao hơn; không coi mô hình là nguồn thông tin riêng: IC phần dư còn dương sau 5 biến kiểm soát (V3.1) nhưng chưa kiểm soát hết các yếu tố khác; cần kiểm định ngoài mẫu mới (ngoài 2023-10).
 8. **Đính chính vòng 1 (giữ từ V2):** FCFE chỉ là lỗi gốc ở OOS; sống sót là thật (EW 8,25% chỉ-BQ so 6,12% có mã vắng BQ — V2 ghi 5,96/8,09,
    nay đổi vì NB-2); mô hình không nhận ra nhóm "sổ sách đẹp rồi sụp".
 
@@ -129,12 +150,12 @@ Mỗi mục: số `trước` = tái lập V2 (`out_A/`), `sau` = `out/`. Chạy 
 
 | Mục | Việc làm | Kết quả |
 |---|---|---|
-| B-1 | Null "cảnh báo E/P cùng số cờ mỗi tháng" (`h_null_ep.py` + khối trong `c_models2.py`): mỗi tháng, trong universe, gán cờ cho đúng k mã có E/P cao nhất (k = số cờ của mô hình trong tháng đó), rồi chạy **cùng** luật 6 tháng liền + 36 tháng bấm lại; cùng nền vô điều kiện. Thêm 3 tổ hợp: cả hai cờ (WBOTH), chỉ mô hình (WONLY), chỉ E/P (EONLY). Cũng làm bản khớp cờ ENS2 (hậu tố `_E2`). Script tự tạo, không dùng `/tmp` của skeptic | §3.3: E/P đạt cùng tiêu chí mục tiêu 2; §5: S7 E/P cùng cờ 8,55% so ENS1w 8,83%. Không tái lập được đúng số của skeptic (69,3 / 69,5 đúng; 17,1 / 17,4 sai) vì định nghĩa chọn cờ khác (k theo tháng tại đây); 67,3 / 67,2 và 16,9 / 19,4 |
+| B-1 | Null "cảnh báo E/P cùng số cờ mỗi tháng" (`h_null_ep.py` + khối trong `c_models2.py`): mỗi tháng, trong universe, gán cờ cho đúng k mã có E/P THẤP nhất (đắt nhất; `c_models2.py` rank ascending=True) (k = số cờ của mô hình trong tháng đó), rồi chạy **cùng** luật 6 tháng liền + 36 tháng bấm lại; cùng nền vô điều kiện. Thêm 3 tổ hợp: cả hai cờ (WBOTH), chỉ mô hình (WONLY), chỉ E/P (EONLY). Cũng làm bản khớp cờ ENS2 (hậu tố `_E2`). Script tự tạo, không dùng `/tmp` của skeptic | §3.3: E/P đạt cùng tiêu chí mục tiêu 2; §5: S7 E/P cùng cờ 8,55% so ENS1w 8,83%. Không tái lập được đúng số của skeptic (69,3 / 69,5 đúng; 17,1 / 17,4 sai) vì định nghĩa chọn cờ khác (k theo tháng tại đây); 67,3 / 67,2 và 16,9 / 19,4 |
 | B-2 | Viết lại công cổng rating | §5 và §6 mục 2 |
 | NB-2 | `e_bt2.period_ret` lấy giá T+1 từ **toàn bộ dữ liệu giá** (`out/px_t1.parquet`: giá phiên đầu mỗi tháng của mọi mã); thiếu tháng ⇒ lấy phiên đầu tháng kế tiếp còn giao dịch; chỉ khi mã **không còn phiên nào** từ tháng đó mới áp mức mất 50% trên giá cuối **của chính mã đó**. Bỏ `last_close` toàn cục | Universe EW 5,96 → 6,12%; S1 ENS1w 13,51 → 13,25; S1 D0 14,99 → 14,99; S3f 13,14 → 13,16; S7 ENS1w 8,30 → 8,46; S7 D0 9,00 → 9,17. Selfcheck 8 tính lại giá T+1 của 400 dòng ngẫu nhiên + ≤ 300 dòng lợi suất ≤ −45% từ `px_t1` thô, lệch tối đa 2,2e-16, 40 dòng thuộc nhánh ngừng giao dịch |
 | NB-1 | Nhánh VND: N = vốn góp cuối quý × hệ số sự kiện (bonus/chia tách/quyền) xảy ra giữa cuối quý và ngày công bố, suy từ bước nhảy log(Price/Close) giữa hai ngày — cùng nguyên lý `pick_n` của nhánh BQ. **Không** dùng bảng GDKHQ (chưa kiểm). `VND_N_OLD=1` quay về cách V2 | Cú nhảy vốn hoá > 15% (sau điều chỉnh hệ số giá): dòng VND 5,07 → **4,22%**, riêng in-universe 2014+ 9,44 → **7,51%** (skeptic đo 8,9%); thước đo thay thế chỉ trên dòng VND: 4,70 → 3,96% (4.192 dòng); 167 / 4.490 dòng VND đổi N > 5%. Nhánh BQ (đo lại, in-universe 2014+): OS 3,0%, OS* 3,4%, E/BVPS **10,3%** (n = 497) — skeptic 2,8 / 9,7. Tác động lên kết quả: D0 không đổi ở 3 chữ số; S1 ENS1w 13,25 → 13,26 |
 | NB-1b | Đối chiếu nhánh E/BVPS với `oshares_live.oshares_at(live=False)` (BQ nay chạy được; V2 ghi lỗi). Mẫu 80 dòng E/BVPS in-universe 2014+ + 30 dòng OS làm đối chứng (`calc/l_oshares_xcheck.py`, `out/oshares_xcheck.json`) | OS đối chứng: lệch 0,0% (29/29 có số, 1 bị từ chối). **E/BVPS: 78/80 có số live; lệch > 5% ở 98,7%, > 15% ở 61,5%, trung vị |log N/N_live| = 0,189.** Nhưng chính `oshares_live` chỉ chứng nhận được 5/80 ca (AIS_EXACT); 45 ANCHOR_UNVERIFIED, 18 ANCHOR_ONLY, 10 FIN_FALLBACK ⇒ **không thể gọi bên nào là đúng**. Nhánh này chỉ 497 / 19.723 dòng (2,5%). **Chưa chạy** độ nhạy thay N bằng số live (mẫu quá nhỏ, 80 dòng) |
-| NB-3 | Embargo: mọi bước FIT trên IS (trọng số ENS1w, chọn theo ngành META, hedonic) loại as-of sau 2016-12 (nhãn 36T của 2016-12 xong 2019-12) ⇒ không chồng lên OOS 2020-01+ | Trọng số ENS1w (D0B / DDM / EPV / MULT / HEDf): 0,117 / 0,048 / 0,122 / 0,134 / 0,065 → **0,101 / 0 / 0,097 / 0,048 / 0** (IC IS embargo của DDM −0,019, HEDf −0,100 ⇒ trọng số 0). ENS1w IC IS 0,150 → 0,152; **OOS 0,204 → 0,223**; cảnh báo đúng 70,5 / 69,9 → 71,6 / 71,8%; U-hit 66,3 / 68,0 → 62,8 / 68,8%; S1 ENS1w 13,26 → 12,87 (IS 5,18 → 5,81; OOS 20,41 → 19,05). META: BANK chọn ENS2 (IC −0,186); CYCLICAL chọn DDM (0,286 thay 0,197 ở ENS2). **Luật §5 đổi chọn ENS1w → ENS2** (§3). OOS **tăng** khi bỏ nhãn chồng lấn, không giảm ⇒ không thấy dấu hiệu lợi thế OOS của V2 đến từ chồng nhãn |
+| NB-3 | Embargo: mọi bước FIT trên IS (trọng số ENS1w, chọn theo ngành META) loại as-of sau 2016-12; hedonic KHÔNG bị embargo — hệ số đóng băng tại 2020-01 (`FRZ`), không dùng nhãn tương lai (nhãn 36T của 2016-12 xong 2019-12) ⇒ không chồng lên OOS 2020-01+ | Trọng số ENS1w (D0B / DDM / EPV / MULT / HEDf): 0,117 / 0,048 / 0,122 / 0,134 / 0,065 → **0,101 / 0 / 0,097 / 0,048 / 0** (IC IS embargo của DDM −0,019, HEDf −0,100 ⇒ trọng số 0). ENS1w IC IS 0,150 → 0,152; **OOS 0,204 → 0,223**; cảnh báo đúng 70,5 / 69,9 → 71,6 / 71,8%; U-hit 66,3 / 68,0 → 62,8 / 68,8%; S1 ENS1w 13,26 → 12,87 (IS 5,18 → 5,81; OOS 20,41 → 19,05). META: BANK chọn ENS2 (IC −0,186); CYCLICAL chọn DDM (0,286 thay 0,197 ở ENS2). **Luật §5 đổi chọn ENS1w → ENS2** (§3). OOS **tăng** khi bỏ nhãn chồng lấn, không giảm ⇒ không thấy dấu hiệu lợi thế OOS của V2 đến từ chồng nhãn |
 | NB-4 | Khai báo: **OOS chỉ là lần nhìn thứ hai.** D0, r = 12,25% và ngưỡng chọn (0,8 / 0,67 / 6 tháng) được chốt sau khi vòng 1 đã thấy 2014-2023; PRELOCK V2 khoá chọn **mô hình** và **tiêu chí**, không khoá r, g, ngưỡng. N biến thể đếm lại: 51 mô hình + 6 chiến lược + 8 cờ null/tổ hợp (EPN, WBOTH, WONLY, EONLY × 2) + S3f_ENS2, S1_ENS2, 8 S7 ⇒ N hiệu dụng cho DSR giữ 57, báo độ nhạy N = 80 (mọi DSR vượt trội < 0,95) | §7 |
 | NB-5 | U-static có nền khớp ngưỡng: nền cố định "tăng ≥ 25% tại một thời điểm" 69,5 / 68,1% so nền khớp mức tăng cần thiết trung bình 59,9 / 56,5% (ENS1w, n = 266 / 240; `out/null_ep.json` khối `ustatic_matched_baseline`). | U-static ENS1w 61,7 / 65,8% hơn nền khớp **+1,7 (IS) / +9,3 (OOS)** điểm, so với nền cố định −7,8 / −2,2. Tiêu chí khoá trước (≥ 5 điểm) trượt ở IS ngay cả với nền công bằng ⇒ **kết luận mục tiêu 1 không đổi** |
 | NB-6 | Trung vị PIT (lát cắt tháng) thay trung vị toàn mẫu cho `roe_sd5` và `ltv` trong hedonic; xoá biến `gapfill` không dùng; PRELOCK ghi "~23:35" nhưng commit `f303028e8` ghi **23:12:19 +0700** — lấy theo commit | HEDf tâm HPG 12/2018 8.145 → 8.151; IC đổi ≤ 0,001. Bản V3 không chỉnh PRELOCK (giữ tiêu chí khoá) |
@@ -198,7 +219,7 @@ CI cụm theo mã (B = 500) của ENS1w: [0,10; 0,20] / [0,15; 0,26] — hẹp h
 
 ### 3.3 Cảnh báo đắt: mô hình vs null E/P cùng tỉ lệ cờ (B-1)
 
-Cùng luật 6 tháng liền + 36 tháng bấm lại; cờ E/P = k mã có E/P cao nhất mỗi tháng, k = số cờ của mô hình trong tháng đó (trong universe). `EPN` khớp
+Cùng luật 6 tháng liền + 36 tháng bấm lại; cờ E/P = k mã có E/P THẤP nhất (đắt nhất) mỗi tháng, k = số cờ của mô hình trong tháng đó (trong universe). `EPN` khớp
 cờ ENS1w; `*_E2` khớp cờ ENS2. WBOTH = cả hai cùng cờ cùng tháng; WONLY = chỉ mô hình; EONLY = chỉ E/P. "Đúng-tuyệt-đối" = mã giảm giá 36T. Nền vô điều
 kiện: đúng-tương-đối 61,4 / 58,7%, báo sai 21,9 / 21,6%. Nguồn `out/null_ep.csv`, `out/null_ep.json`, `out/log_n.txt`; số cờ khớp bản trong `metrics2.csv`.
 
@@ -311,12 +332,13 @@ rating 8L ≤ 3, ra khi giá > tâm. Số V2 trong ngoặc khi khác.
   8,14 và loại hợp 8,55–8,83): lợi ích nằm ở mã bị **cả hai** hoặc ít nhất một loại cờ cùng lúc — chưa đủ dữ liệu để quy cho mô hình.
 - **Sức chứa:** sàn thanh khoản 0 / 1 tỷ / 5 tỷ: 11,66 / 12,87 / 11,79% (V2: 12,13 / 13,51 / 12,67); bỏ trần vị thế 13,51% (V2: 14,08) ⇒ trần lấy đi 0,6 điểm,
   không đổi kết luận "phần vượt trội không đến từ mã kém thanh khoản". Ở sàn 5 tỷ IS chỉ 0,59%/năm, OOS 21,99%.
+  **V3.1 (mục 3):** ở sàn 5 tỷ, E/P công bằng (S3f_f5) **15,09%** so mô hình (S1 ENS1w_f5) **11,03%** (V3: 14,90 so 11,79; `out_F/bt2_summary.csv`) — E/P thắng mô hình 4,06 điểm khi thanh khoản siết ⇒ ủng hộ 'không thay E/P bằng mô hình'.
 - **Cổng rating 8L ≤ 3 — SỬA (B-2).** V2 viết "bỏ cổng mất 3,5 điểm" và sai về nguồn: mã vắng BQ không có rating nên S1 tự loại chúng, đó là lợi thế giả. Tách ba
   trạng thái cho ENS1w: **S1 (có cổng, mã vắng BQ bị loại tự động) 12,87%** · **S1 deadin (có cổng, mã vắng BQ lọt cổng) 10,56%** (IS 2,02, OOS 18,15) ·
   **S2 (không cổng) 10,34%** (IS 0,96, OOS 18,75). ⇒ Cổng rating đóng góp **0,22 điểm/năm** trên cùng điều kiện (10,56 − 10,34; IS +1,06, OOS −0,60); phần còn lại
   **2,31 điểm (12,87 − 10,56) là lợi thế sống sót** do loại tự động mã đã hủy niêm yết. V2: 1,08 và 2,38 (cùng cấu trúc). D0: S1 14,99 so deadin 12,42 (2,57 điểm
   lợi thế sống sót). **Không thể nói cổng rating tạo lợi nhuận;** việc giữ nó là chính sách rủi ro/chất lượng của fleet, không phải kết quả đo ở đây.
-- **Cận dưới trung thực của S1:** lọt hết qua cổng rating: ENS1w 10,56% (IS 2,02, OOS 18,15; 10,0% tỉ trọng ở mã về sau rời sàn — số V2, chưa đo lại), D0 12,42%, E/P công bằng cùng điều kiện
+- **Cận dưới trung thực của S1:** lọt hết qua cổng rating: ENS1w 10,56% (IS 2,02, OOS 18,15; 8,85% tỉ trọng ở mã về sau rời sàn — `bt2_dsr.json` của V3 (`out/`); V3.1: 8,97%, `out_F/bt2_dsr.json`), D0 12,42%, E/P công bằng cùng điều kiện
   12,34% (S3f deadin) ⇒ **ở cận dưới ENS1w thua E/P 1,8 điểm, D0 hơn 0,1 điểm.**
 - **Tâm cắt giá nhiều hơn không tạo giá trị:** Lớp 2 chọn mã cho 7,48%, null 2,57%. Lớp 2 chỉ để hiển thị.
 - **Sizing theo đồng thuận hai lớp không thêm gì** (12,72 so 12,87).
@@ -348,7 +370,7 @@ Tham số và lý do (không tham số nào fit theo giá của chính mã):
 
 Cách dùng để tạo giá trị, xếp theo độ chắc của bằng chứng:
 1. **Cảnh báo đắt = "không mở mới / không tăng tỉ trọng", không phải lệnh bán.** Ghi kèm phân phối độ trễ: trung vị 6–13 tháng tới đỉnh, một phần tư tới
-   một phần sáu không nguội trong 3 năm. **Bằng chứng V3 không cho thấy mô hình vượt E/P cho công này** (+2,2–3,1 điểm/năm của S7 gần như đều có ở E/P cùng cờ,
+   một phần sáu không nguội trong 3 năm. **Bằng chứng V3 không cho thấy mô hình vượt E/P cho công này** (+2,2–3,1 điểm/năm của S7 gần như đều có ở E/P cùng cờ; V3.1: hiệu mô hình − E/P có CI chứa 0, `out_F/s7_bootstrap.json`;
    8,55 so 8,83): nếu làm cổng mềm, E/P là mốc đơn giản đã đạt cùng tiêu chí; mô hình là thông tin bổ sung cần kiểm định ngoài mẫu mới.
 2. **Vùng mua = giá ≤ 0,8 × tâm Lớp 1.** Cổng rating 8L ≤ 3 giữ như chính sách chất lượng hiện hành của fleet, **nhưng V3 không chứng minh nó tăng lợi nhuận**:
    trên cùng điều kiện nó thêm 0,22 điểm/năm (IS +1,06, OOS −0,60); phần "mất 3,5 điểm khi bỏ cổng" của V2 gồm ~2,3 điểm lợi thế sống sót giả (mã vắng BQ không có rating
@@ -372,8 +394,7 @@ Cách dùng để tạo giá trị, xếp theo độ chắc của bằng chứng
 - **Lợi suất vượt trội đo so với trung bình số học của universe** nên âm với đa số mã (61% / 59%); mọi tỉ lệ "đúng" phải
   đọc cùng nền vô điều kiện đã ghi cạnh.
 - **Route 8L không PIT trước 2026** (bội số ngành, hedonic, EPV, độ bền ngân hàng đều dùng route hiện tại).
-- **Cách chọn số cổ phiếu ở lỗi 2 là suy luận** (liên tục với bước nhảy hệ số điều chỉnh giá). Đối chiếu V3 với `oshares_live` (mẫu 80 dòng E/BVPS): lệch > 5% ở 98,7% — nhưng
-  `oshares_live` chỉ chứng nhận 5/80 ca, nên chưa kết luận bên nào đúng; nhánh E/BVPS có nhảy vốn hoá > 15% ở 10,3% dòng in-universe (vs ~3% nhánh OS). Chưa chạy độ nhạy thay N.
+- **Cách chọn số cổ phiếu ở lỗi 2 là suy luận** (liên tục với bước nhảy hệ số điều chỉnh giá). Đối chiếu V3.1 với `oshares_live` (**76 dòng E/BVPS duy nhất** sau khử 4 dòng trùng, V3 ghi 80): lệch > 5% ở 98,6%; 4 ca `AIS_EXACT` (chứng nhận) cho N(E/BVPS) / live = CII 1,394, SSI 1,217, PC1 1,054, NBB 1,027 (`out_F/oshares_xcheck_ais_exact.csv`) ⇒ nhánh E/BVPS lệch cả 4/4 ca có chứng nhận, **bằng chứng nghiêng về OShares**. Độ nhạy thay N = OShares (V3.1 `out_H`, changelog mục 4) thay đổi S1 ENS1w 12,20 → 12,23, S3f 12,79 → 13,14, S7 ENS1w 8,74 → 9,08, luật §5 vẫn ENS2; nhánh E/BVPS có nhảy vốn hoá > 15% ở 10,3% dòng in-universe (vs ~3% nhánh OS). Độ nhạy thay N đã chạy (V3.1).
   Nhánh VND dùng hệ số sự kiện suy từ bước nhảy giá, chưa kiểm bảng GDKHQ.
 - **`EBITDA_P0` không dùng được** ⇒ họ EV/EBITDA được thay bằng EV/EBIT; chưa có D&A để dựng lại EBITDA.
 - Chưa đo ở quy ước pin1M (đầu trần); chưa mô hình hoá slippage và thuế; MaxDD ~−44% không phù hợp làm sổ độc lập.
@@ -415,10 +436,12 @@ cd agents/Taylor/research/dcf_vn_redesign_20261125c ; PY=/home/trido/thanhdt/wc_
 # out/ không nằm trong git (parquet bị .gitignore): panel/phụ trợ đọc từ out/ của lần chạy; MD5SUMS ở thư mục này.
 (cd calc; $PY a0_fetch_delisted.py)            # VNDirect -> out/delisted/ (669 mã); đối chiếu MD5SUMS_delisted.txt
 # out/px_pre2013_d.csv: bq query ticker 2006-01-01..2013-01-31 (Close, Price, Volume)
-bash run_stage.sh out b c d e f n              # b_panel, c_models2 (EMBARGO=1 PITMED=1 mặc định), d_metrics2, e_bt2, f_proxy_diag, h_null_ep
+bash run_stage.sh out b c d e f n              # (V3.1: out_F — cùng lệnh, mc mới; out_G: KD_Q=90 KD_Y=120; out_H: PICK_OS=1; MC_OLD=1 tái lập V3; cần symlink out/delisted + copy px_pre2013_d.csv, engine_A2.parquet)
+# b_panel, c_models2 (EMBARGO=1 PITMED=1 mặc định), d_metrics2, e_bt2, f_proxy_diag, h_null_ep
 EMBARGO=0 bash run_stage.sh out_E c d e n      # nhánh tách NB-3 (cần symlink panel/px từ ../out)
 $PY calc/a_engine_total.py ; $PY calc/j_delta.py out_A out_C out ; $PY calc/k_tables.py
-$PY calc/l_oshares_xcheck.py                   # cần BQ (oshares_live)
+$PY calc/l_oshares_xcheck.py                   # cần BQ (oshares_live); V3.1: OUT_DIR=out_F, khử trùng
+OUT_DIR=$PWD/out_F $PY calc/m_bootstrap_s7.py ; OUT_DIR=$PWD/out_F $PY calc/n_mc_delta.py   # V3.1 mục 6, mục 1
 $PY calc/g_selfcheck3.py                       # chạy dưới env -u TZ, TZ=Asia/Ho_Chi_Minh, TZ=America/New_York
 ```
 Tự kiểm độc lập `g_selfcheck3.py`: **21/21 PASS**; sáu lần chạy — ba lần đầu (`out/selfcheck3_{noTZ,ICT,NY}.txt`, seed không ghi) và ba lần V3b với `env -u TZ` + `PYTHONHASHSEED=0`, `TZ=Asia/Ho_Chi_Minh` + `12345`, `TZ=America/New_York` + `777` (`out/selfcheck3b_*.txt`) — cho
