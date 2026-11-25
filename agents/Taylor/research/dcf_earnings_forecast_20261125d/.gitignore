@@ -1,2 +1,3 @@
 in_snapshot/*.parquet
 out/*.parquet
+out_C/*.parquet
