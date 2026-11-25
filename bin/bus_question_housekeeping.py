@@ -140,13 +140,18 @@ def plan_t1_resolved(plans_dir, topic):
     if r2:
         return None
     path = plans_dir / f"plan_{account}_{date}.json"
+    # arch-review vòng cuối #9: "plan có" = MỘT định nghĩa (plan_presence.classify == OK: plan_date khớp + orders
+    # là list) + đúng account — file có nhưng hỏng/account sai KHÔNG phải bằng chứng phục hồi.
+    import plan_presence as _pp
+    if _pp.classify(path, date) != "OK":
+        return None
     try:
         plan = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
         return None
-    if not isinstance(plan, dict) or str(plan.get("plan_date")) != date:
+    if plan.get("account") not in (None, account):
         return None
-    n = len(plan.get("orders") or []) if isinstance(plan.get("orders"), list) else "?"
+    n = len(plan["orders"])
     return f"{path.name} exists with plan_date={date} (orders={n}, approved_by={plan.get('approved_by')!r})"
 
 
