@@ -1,0 +1,2 @@
+ticker,dd_date,rev,skeptic_final,asof,center,price_asof,pc_asof,label,label_v1,reasons,demote_k,demote_neff,pct_fade,pct_hold,terc_fade,terc_hold,n_fade,n_hold,n_eff_hold,n_eff_fade,k_fade,k_hold,hist_med_fade,hist_med_hold,hist_p25_fade,hist_p75_fade,hist_p25_hold,hist_p75_hold,ROE5Y,roe_ttm,roe_ttm_over_5y,warn
+DDV,2026-10-28,2,CONFIRMED,2026-11-20,15911,14600,0.917604,RẺ,RẺ,,0,0,5.83333,0,RẺ,RẺ,120,60,2.92504,5.02058,0.961755,0.830677,1.82362,2.17715,1.45562,2.28091,1.35154,2.82318,0.16224,0.178203,1.09839,

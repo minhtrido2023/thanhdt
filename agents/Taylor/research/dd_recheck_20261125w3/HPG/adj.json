@@ -1,0 +1,134 @@
+{
+ "ticker": "HPG",
+ "dd_date": "2026-10-31",
+ "rev": 5,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_032443",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13",
+  "PREREG_adj_HPG": "1544c2276d1eaa2dd45a9219a1b2f4e3"
+ },
+ "blind_to_price": true,
+ "center_base": 21338,
+ "center_base_source": "LEDGER_PROPOSAL_HPG.json rev5 center (= sổ rev4, không đổi)",
+ "center_adj": 20203,
+ "range_low": 19823,
+ "range_high": 20956,
+ "sum_pm_pct": -5.317,
+ "method": "tổ hợp trong mô hình hpg_r3 (|Σ|>5%)",
+ "items": [
+  {
+   "name": "Trích KTPL + thù lao HĐQT/BĐH từ LNST 2,60% [1,43%] (401,5/15.453,2 tỷ)",
+   "dir": "down",
+   "evidence_tier": "A",
+   "source": "dd_HPG_20261031/calc/notes_bs.md:94,112 (khôi phục d73418593^); skeptic/r1_raw.md missing_items(1)",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": -2.283,
+   "mag_range_pct": [
+    -2.283,
+    -1.259
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -2.055
+  },
+  {
+   "name": "Đếm trùng cam kết vốn 30/06 với XDCB 30/09: chi Q3 ≈ 6.294 tỷ (ước lượng cận trên)",
+   "dir": "down",
+   "evidence_tier": "B",
+   "source": "notes_bs.md:44,73,103; REPORT_r3 §4",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -1.513,
+   "mag_range_pct": [
+    -1.513,
+    -0.754
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -0.756
+  },
+  {
+   "name": "ETR thép thực 6T26 6,55% < ~12% ngầm trong TAXF",
+   "dir": "down",
+   "evidence_tier": "B",
+   "source": "notes_bs.md:103; skeptic/r1_raw.md (ETR 6,5% ⇒ −2,2%)",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -2.136,
+   "mag_range_pct": [
+    -2.136,
+    -1.1
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.068
+  },
+  {
+   "name": "Nhánh TỐT đếm trùng lợi ích capex (bản J)",
+   "dir": "down",
+   "evidence_tier": "B",
+   "source": "REPORT_r3 §4/§10 mục 2; calc hpg_r3 bản J 20.673",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -3.118,
+   "mag_range_pct": [
+    -3.118,
+    -1.559
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.559
+  }
+ ],
+ "sensitivity_only": [
+  {
+   "name": "Capex tuân thủ môi trường (D3), cận trên bản I",
+   "dir": "down",
+   "tier": "C",
+   "sens": "20456"
+  },
+  {
+   "name": "Mốc thuế 2030 / ETR vĩnh viễn",
+   "dir": "both",
+   "tier": "C",
+   "sens": "20648 / 22119"
+  },
+  {
+   "name": "KTPL ở trần 5% NQ 2026",
+   "dir": "down",
+   "tier": "C",
+   "sens": "20400"
+  },
+  {
+   "name": "Trục TLSH r2",
+   "dir": "down",
+   "tier": "C",
+   "sens": "21144"
+  },
+  {
+   "name": "[LUẬT] Ke 12,3% (E15)",
+   "dir": "up",
+   "tier": "law",
+   "sens": "23625"
+  },
+  {
+   "name": "[LUẬT] vốn vượt cam kết sinh lời = Ke",
+   "dir": "up",
+   "tier": "law",
+   "sens": "22971"
+  },
+  {
+   "name": "[LUẬT] g_RI kiểu r2",
+   "dir": "up",
+   "tier": "law",
+   "sens": "22530"
+  }
+ ],
+ "mechanical": "Cổ tức 2026 15% chưa rõ hình thức: cổ phiếu ⇒ chỉ đổi cơ sở số cp khi GDKHQ (tâm/cp × 1/1,15); tiền ⇒ trừ cơ học",
+ "trigger_table": "ADJ_CENTER.md §3",
+ "calc": "calc/calc_adj.py",
+ "calc_out_md5": "836061bf0d65ebf346ccdc6f5d762300"
+}
