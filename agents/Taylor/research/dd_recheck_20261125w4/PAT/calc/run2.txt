@@ -1,0 +1,25 @@
+CONTROL r5 66,470.1
+BASE rev6 (D4 + ô D) truoc CK 61,696.8  sau CK 55,527.1  sum_p 1.0000000000 leaves 9072
+per_q {'0.0': 63846, '0.25': 61412, '0.4': 59832}
+quantiles sau CK {'P10': 30982, 'P25': 40485, 'P50': 57116, 'P75': 67228, 'P90': 85356}
+D4+O2 (w3) 65,510  tv_share 0.084
+r 0.123: 66,420 (+7.66%) sau CK 59,778
+r 0.125: 65,567 (+6.27%) sau CK 59,010
+r 0.13: 63,554 (+3.01%) sau CK 57,198
+r 0.134: 62,057 (+0.58%) sau CK 55,851
+r 0.14: 59,979 (-2.78%) sau CK 53,981
+r 0.145: 58,386 (-5.37%) sau CK 52,547
+combo D|inv0.00: 61,697 (+0.00%)
+combo D|inv44.44: 63,095 (+2.27%)
+combo O2|inv0.00: 65,510 (+6.18%)
+combo O2|inv44.44: 66,908 (+8.45%)
+E17 p_mid: 64,302 (+4.22%) sau CK 57,872
+E17 p_low: 63,000 (+2.11%) sau CK 56,700
+E17 p_high: 65,605 (+6.33%) sau CK 59,045
+E17 tuyen tinh 64,302
+C bao_dam_cheo_42.6: 59,993 (-2.76%) sau CK 53,994
+C 70ty_menh_gia: 63,501 (+2.92%) sau CK 57,151
+C thue_dat_het_2034_hoannguyen0: 43,998 (-28.69%) sau CK 39,598
+C thue_dat_het_2034_hoannguyen50: 43,237 (-29.92%) sau CK 38,913
+C thue_dat_het_2042_hoannguyen0: 54,630 (-11.45%) sau CK 49,167
+C thue_dat_het_2042_hoannguyen50: 54,354 (-11.90%) sau CK 48,918

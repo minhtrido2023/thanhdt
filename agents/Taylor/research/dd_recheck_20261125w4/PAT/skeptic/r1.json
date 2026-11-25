@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261125w4/PAT/REPORT_recheck_PAT.md",
+  "report_md5": "f02c83e9f13f954bb30f74606e9a80fc",
+  "brief_md5": "3fd3de96128875cda572f03504eaa33b",
+  "model": "opus",
+  "cost_usd": 0.8940721999999999,
+  "started_at_ict": "2026-11-25T13:43:39+07:00",
+  "summary": "Tái lập được cơ học mô hình rev6 (tâm trước CK 61.697, tiền ròng 357,35, V6 ≈ 97,7k, phân bổ GPMB 8,07 năm), cách đọc lại cầm cố và kiểm toán FY2025 đúng. Tuy vậy tâm chưa đứng vững theo cả hai chiều. Chiều đắt: luật D4 chỉ áp cuối kỳ trong khi chuỗi 2028–2045 vẫn tăng 2%/năm không tái đầu tư (g=0 ⇒ −8,5%); hạn thuê đất 2034 (−28,7%) chỉ là suy luận và không có xác suất; trách nhiệm pháp nhân theo Điều 235 / đình chỉ P4 vắng mặt; capex tuân thủ không có số, và đệm capex bị dùng hai lần. Chiều rẻ: chuyển ô O2 sang D (−5,82%) là điều chỉnh xuống thiếu bằng chứng độc lập, có Q2/26 ngược chiều; r 13,5% nằm trên dải Ke; tồn kho dư và khoản 70 tỷ bị đặt ở mức xấu nhất. Các nhãn giá thị trường trong báo cáo đã được bỏ qua khi đánh giá. Cần HĐ thuê đất, tình trạng pháp lý của pháp nhân và nghị quyết capex trước khi có thể CONFIRMED.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261125w4/PAT/skeptic/r1_raw.md"
+}

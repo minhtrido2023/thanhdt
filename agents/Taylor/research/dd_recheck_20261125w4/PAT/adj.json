@@ -1,0 +1,167 @@
+{
+ "ticker": "PAT",
+ "dd_date": "2026-11-17",
+ "rev": 4,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_063651",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13",
+  "assumptions_rev6": "5207e413eb10404ccdf3aa47c7af9916"
+ },
+ "blind_to_price": true,
+ "center_base": 55527,
+ "center_base_source": "LEDGER_PROPOSAL_PAT.json rev4 center (sau CK 10%)",
+ "center_adj": 57872,
+ "range_low": 56700,
+ "range_high": 59045,
+ "method": "chạy lại mô hình tổ hợp 4 ô (cell D/O2 × tồn kho 0/44,44) trọng số p, nhân CK 0,9 (không cộng tuyến tính; kiểm tuyến tính trùng 64302 trước CK)",
+ "center_adj_pre_ck": 64302,
+ "sigma_pct": 4.223,
+ "items": [
+  {
+   "name": "Ô (A tắt, B bật) ở mức O2 (Q2/26 sau 17/03 là quan sát của ô)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "source": "agents/Taylor/research/dd_PAT_objective_20261114/factpack/F4_history_quarterly_bq.md:74; agents/Taylor/research/dd_PAT_rebuttal_20261117/A/A1_ore_mine_recovery.md:133,143",
+   "note": "base ô theo D = 50/50 giữa O2 và mức chưa giải quyết; hạng mục = ô thật ra ở O2. 1 quan sát (Q2/26 LNST% 21,2%); Q3/26 13,5% KHÔNG phải quan sát của ô (B suy giảm từ T6) nên không tính ngược. m đo bằng mô hình (D4, cell O2).",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": 6.18,
+   "mag_range_pct": [
+    6.18,
+    6.18
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 3.09
+  },
+  {
+   "name": "Giải phóng tồn kho dư 44,44 tỷ (30/09: 120,19 vs TB 3 mốc 75,75)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "source": "agents/Taylor/research/dd_PAT_objective_20261114/factpack/F2_costs_relatedparty_legal.md:79; agents/Taylor/research/dd_PAT_rebuttal_20261117/C/r5/calc_r5/model_r5.py:INV_EXCESS",
+   "note": "dư so với lịch sử 3 mốc của chính mã; 1 quan sát (Q3/26); nền 31/12/25 bị UHY ngoại trừ (định tính, không phải số ngược). m đo bằng mô hình (inv=44,44, giải phóng khi cung bình thường hoá).",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": 2.266,
+   "mag_range_pct": [
+    2.266,
+    2.266
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 1.133
+  }
+ ],
+ "sensitivity_only": [
+  {
+   "name": "Thuê đất KCN hết ~2034 không gia hạn (suy từ phân bổ GPMB 16 năm, còn 13,158 tỷ ~1,63/năm)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "mag_pct": -28.687,
+   "note": "+hoàn nguyên 50 tỷ (ước lượng): -29.92%; hết 2042: -11.45%. Ngày suy từ BCTC, xác suất không gia hạn không có dữ liệu",
+   "counted_in_center": false
+  },
+  {
+   "name": "Bảo đảm chéo Vietinbank 40 tỷ + 100.000 USD cho công ty thành viên bị thực hiện",
+   "dir": "down",
+   "evidence_tier": "C",
+   "mag_pct": -2.762,
+   "note": "độ lớn từ TM4 Q3 (A); dư nợ bên được bảo đảm KHÔNG NÊU ⇒ xác suất không có dữ liệu",
+   "counted_in_center": false
+  },
+  {
+   "name": "Pháp nhân PAT bị truy cứu Đ.235/Đ.76 BLHS, đình chỉ lò P4 6 tháng (2027)",
+   "dir": "down",
+   "evidence_tier": "C",
+   "mag_pct": -2.718,
+   "note": "pháp lý chỉ WARNING; chưa có quyết định đích danh PAT; độ lớn ước lượng cơ học (½ EBIT 2027 sau thuế)",
+   "counted_in_center": false
+  },
+  {
+   "name": "Capex/chi phí tuân thủ môi trường (D3) X tỷ một lần",
+   "dir": "down",
+   "evidence_tier": "C",
+   "mag_pct": null,
+   "note": "không có số (F1); hoà vốn −X/25 nghìn đ/cp trước CK",
+   "counted_in_center": false
+  },
+  {
+   "name": "ΔVLĐ phần ngoài tồn kho",
+   "dir": "up",
+   "evidence_tier": "C",
+   "mag_pct": null,
+   "note": "chưa đo",
+   "counted_in_center": false
+  },
+  {
+   "name": "70 tỷ BIDV hoàn theo mệnh giá",
+   "dir": "up",
+   "evidence_tier": "C",
+   "mag_pct": 2.925,
+   "note": "thời hạn bảo lãnh tiền điện không có dữ liệu",
+   "counted_in_center": false
+  },
+  {
+   "name": "[LUẬT] r 13,5% vs Ke 12,3% (E15)",
+   "dir": "up",
+   "evidence_tier": "law",
+   "mag_pct": 7.655,
+   "counted_in_center": false
+  },
+  {
+   "name": "[LUẬT] RONIC=Ke cả pha tường minh (g=0) — V5 cấm trừ ở pha dự báo cho NARROW",
+   "dir": "down",
+   "evidence_tier": "law",
+   "mag_pct": -8.473,
+   "counted_in_center": false
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "HĐ thuê đất KCN / thuyết minh BCTC năm 2026 (thời hạn, quyền gia hạn, hoàn nguyên)",
+   "expected": "BCTC KT 2026 (~Q1-Q2/2027) hoặc CBTT",
+   "effect": "hết 2034 không quyền gia hạn ⇒ C→A: tâm × (1 − 0,287×p); có quyền gia hạn/hạn ≥2050 ⇒ đóng hạng mục, 0",
+   "delta_center_post_ck": "tới −15.900 đ/cp (−28,7%) ở p=1"
+  },
+  {
+   "event": "BCTC Q4/2026 — biên LNST Q4 và tồn kho 31/12/2026",
+   "expected": "cuối 01/2027",
+   "effect": "tồn kho về ~75 tỷ ⇒ hạng mục 2 thành A p0,9 (+0,9pp); biên ≤13% trong trạng thái A tắt/B bật ⇒ quan sát ngược, p hạng mục 1 → 0,35 (−0,9pp); ≥20% ⇒ 2 quan sát, p giữ 0,5",
+   "delta_center_post_ck": "+505 / −515 đ/cp"
+  },
+  {
+   "event": "Quyết định tố tụng đích danh pháp nhân PAT (Đ.235) / đình chỉ lò",
+   "expected": "theo tiến độ vụ án",
+   "effect": "mỗi 6 tháng đình chỉ ≈ −2,7%; WARNING, chạy lại mô hình rev mới",
+   "delta_center_post_ck": "≈ −1.500 đ/cp / 6 tháng"
+  },
+  {
+   "event": "Thuyết minh bảo đảm TM4 Q4/2026",
+   "expected": "cuối 01/2027",
+   "effect": "gỡ bảo đảm chéo ⇒ đóng; bị thực hiện ⇒ A −2,76%",
+   "delta_center_post_ck": "0 / −1.530 đ/cp"
+  },
+  {
+   "event": "NQ ĐHĐCĐ 2027 / HĐQT: capex môi trường xỉ P4, khắc phục đổ thải",
+   "expected": "~04/2027",
+   "effect": "có số X tỷ ⇒ vào base (D3): −X/25 nghìn đ/cp trước CK",
+   "delta_center_post_ck": "−36 đ/cp mỗi tỷ"
+  },
+  {
+   "event": "Tờ trình GD bên liên quan DLC–PAT (nguyên tắc giá P4)",
+   "expected": "ĐHĐCĐ 2027",
+   "effect": "cập nhật nút T, chạy lại cây (rev mới)",
+   "delta_center_post_ck": "r5 §2: nút T 0,80/0,15/0,05 ≈ −4,9%"
+  },
+  {
+   "event": "Lãi huy động 12T hiệu dụng ±50bp (β=1)",
+   "expected": "hằng tháng",
+   "effect": "r ±50bp",
+   "delta_center_post_ck": "+3,0% / −2,8%"
+  }
+ ],
+ "dividend_note": "không có cổ tức tiền đã công bố chưa GDKHQ được đọc trong nguồn (kiểm 25/11 trên file nguồn; cần kiểm chứng CBTT)",
+ "calc": "agents/Taylor/research/dd_recheck_20261125w4/PAT/calc/model_r6.py + post_skeptic_sens.py"
+}

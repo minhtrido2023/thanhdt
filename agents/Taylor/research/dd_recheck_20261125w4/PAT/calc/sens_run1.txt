@@ -1,0 +1,5 @@
+g0: 56,469.5 (-8.47%) sau CK 50,823
+g1: 58,942.8 (-4.46%) sau CK 53,049
+ebit27_base_path: 101.7
+loss_6m_pv: 41.9
+dinhchi_6thang: 60,019.9 (-2.72%) sau CK 54,018
