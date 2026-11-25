@@ -2,7 +2,7 @@
 """b_forecast.py — PRELOCK §2 (A). In: ../out/events.parquet. Out: ../out/fc.parquet (dự báo + sai số), ../out/A_*.csv, ../out/A_summary.json"""
 import os, json
 import numpy as np, pandas as pd
-HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "..", "out")
+HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.environ.get("OUT_DIR") or os.path.join(HERE, "..", "out")
 SEED = 20261125; B = 2000
 ev = pd.read_parquet(os.path.join(OUT, "events.parquet"))
 ev = ev[ev.iuK & ev.hist8 & (ev.E > 0) & ev.era.isin(["IS", "OOS"])].copy().reset_index(drop=True)

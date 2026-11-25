@@ -3,7 +3,7 @@
 In: ../out/events.parquet, ../out/fc.parquet, data/bq_cache/ticker, universe_pit. Out: ../out/B_*.csv, ../out/gapev.parquet"""
 import os, json
 import numpy as np, pandas as pd, duckdb
-HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "..", "out"); WC = "/home/trido/thanhdt/WorkingClaude"
+HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.environ.get("OUT_DIR") or os.path.join(HERE, "..", "out"); WC = "/home/trido/thanhdt/WorkingClaude"
 SEED = 20261125; B = 2000
 ev = pd.read_parquet(os.path.join(OUT, "events.parquet"))
 ev = ev[ev.iuK & ev.hist8 & (ev.E > 0) & ev.era.isin(["IS", "OOS"]) & ev.V_D0.notna() & (ev.MC_rel > 0)].copy()
@@ -25,6 +25,19 @@ fut["eps4"] = fut[[f"e_ENS_h{h}" for h in range(1, 5)]].sum(axis=1, min_count=4)
 fut["eps1f"] = fut.e_ENS_h1
 ev = ev.merge(fut[["ticker", "qp", "eps4", "u4", "eps1f"]].rename(columns={"qp": "qps"}), on=["ticker", "qps"], how="left")
 ev["gap"] = np.log(ev.V_D0 / ev.MC_rel); ev["ep"] = ev.np_ttm / ev.MC_rel; ev["bp"] = ev.E / ev.MC_rel; ev["lsize"] = np.log(ev.MC_rel)
+# [J3 vá skeptic (1)] null KHÔNG GIÁ, KHÔNG MÔ HÌNH: nroe = −ROE_ttm; nlv = log vb(tc5) − log vb(ROE_ttm) (cùng rim_vb của D0)
+def rim_vb(roe_n, r=0.1225, gT=0.055, ret=None, kappa=0.4, H=10):          # chép nguyên văn d_update.py
+    roe_lr = r + kappa * (roe_n - r); B = np.ones_like(roe_n); pv = np.zeros_like(roe_n)
+    for t in range(1, H + 1):
+        roe_t = roe_n + (roe_lr - roe_n) * t / 10.0
+        g_raw = np.clip(roe_t * ret, 0, 0.15); g_t = gT + (g_raw - gT) * (H - t) / (H - 1.0)
+        g_t = np.minimum(g_t, np.maximum(roe_t, 0.0))
+        pv += (roe_t - r) * B / (1 + r) ** t; B = B * (1 + g_t)
+    g_term = np.minimum(gT, np.maximum(roe_lr, 0.0))
+    return np.maximum(1 + pv + (roe_lr - r) * B / (r - g_term) / (1 + r) ** H, 0.2)
+ev["roe_ttm"] = ev.np_ttm / ev.E; ev["nroe"] = -ev.roe_ttm
+_ret = (1 - ev.payout.fillna(0.3)).clip(0.1, 1.0).values
+ev["nlv"] = np.log(rim_vb(ev.roe_tc5.clip(-0.1, 0.4).values, ret=_ret)) - np.log(rim_vb(ev.roe_ttm.clip(-0.1, 0.5).values, ret=_ret))
 # ---- giá ngày (Close điều chỉnh) ----
 c = duckdb.connect()
 px = c.execute(f"SELECT ticker, CAST(time AS DATE) AS time, Close FROM read_parquet('{WC}/data/bq_cache/ticker/*.parquet') WHERE Close > 0 AND time >= '2012-01-01'").df()
@@ -75,8 +88,10 @@ def boot(icd, seed=SEED, lo=2.5, hi=97.5):
     if len(icd) == 0:
         return np.nan, np.nan, np.nan
     ys = icd.yr.unique(); rng = np.random.RandomState(seed); by = {y: icd.ic[icd.yr == y].values for y in ys}
-    res = [np.concatenate([by[y] for y in rng.choice(ys, len(ys))]).mean() for _ in range(B)]
+    res = np.array([np.concatenate([by[y] for y in rng.choice(ys, len(ys))]).mean() for _ in range(B)])
+    PV[0] = float(min(1.0, 2 * min((res <= 0).mean(), (res >= 0).mean())))     # p bootstrap 2 phía (J3: cho BH)
     return float(icd.ic.mean()), float(np.percentile(res, lo)), float(np.percentile(res, hi))
+PV = [np.nan]
 def bootdiff(a, b, seed=SEED):
     m = a.merge(b, on=["q", "yr"], suffixes=("_a", "_b")); m["ic"] = m.ic_a - m.ic_b
     return boot(m[["q", "yr", "ic"]].assign(n=0), seed)
@@ -88,7 +103,16 @@ tests = [("B1", "gap", "cu", None, False, False), ("B1", "gap", "ceps", None, Fa
          ("B2null", "ep", "eps4", None, False, False), ("B2null", "bp", "eps4", None, False, False), ("B2null", "ep", "u4", None, False, False), ("B2null", "bp", "u4", None, False, False),
          ("B3", "gap", "r_pre", None, False, False), ("B3", "gap", "r_ann", None, False, False), ("B3_ctrl4", "gap", "r_pre", CT, False, False), ("B3_ctrl4", "gap", "r_ann", CT, False, False),
          ("B3null", "ep", "r_pre", None, False, False), ("B3null", "ep", "r_ann", None, False, False), ("B3null", "bp", "r_pre", None, False, False), ("B3null", "bp", "r_ann", None, False, False),
-         ("B3sue", "sue", "r_ann", None, False, False), ("B3sue", "eps", "r_ann", None, False, False)]
+         ("B3sue", "sue", "r_ann", None, False, False), ("B3sue", "eps", "r_ann", None, False, False),
+         # [J3] null không giá + phần IC TĂNG THÊM của gap trên null (gap phần dư hạng sau null)
+         ("B1null", "nroe", "cu", None, False, False), ("B1null", "nlv", "cu", None, False, False),
+         ("B1null_ctrl4", "nroe", "cu", CT, False, False), ("B1null_ctrl4", "nlv", "cu", CT, False, False),
+         ("B1inc", "gap", "cu", ["nroe"], False, False), ("B1inc", "gap", "cu", ["nlv"], False, False), ("B1inc", "gap", "cu", ["nroe", "nlv"], False, False),
+         ("B1inc_ctrl4", "gap", "cu", CT + ["nroe"], False, False), ("B1inc_ctrl4", "gap", "cu", CT + ["nlv"], False, False),
+         ("B2null", "nroe", "u4", None, False, False), ("B2null", "nlv", "u4", None, False, False),
+         ("B2inc", "gap", "u4", ["nroe"], False, False), ("B2inc", "gap", "u4", ["nlv"], False, False), ("B2inc_ctrl4", "gap", "u4", CT + ["nroe"], False, False),
+         ("B2null", "nroe", "eps4", None, False, False), ("B2inc", "gap", "eps4", ["nroe"], False, False),
+         ("B3null", "nroe", "r_pre", None, False, False), ("B3inc", "gap", "r_pre", ["nroe"], False, False), ("B3inc", "gap", "r_pre", ["ep", "nroe"], False, False)]
 res = []; SER = {}
 for era in ("IS", "OOS"):
     d = ev[ev.era == era]
@@ -96,10 +120,15 @@ for era in ("IS", "OOS"):
         s = ic_series(d, x, y, ct, ax, ay); SER[(era, tag, x, y)] = s
         m, lo, hi = boot(s)
         res.append({"era": era, "test": tag, "x": ("|" + x + "|") if ax else x, "y": ("|" + y + "|") if ay else y, "ctrl": ",".join(ct) if ct else "", "IC": m, "ci95_lo": lo, "ci95_hi": hi,
-                    "n_q": len(s), "n_yr": int(s.yr.nunique()) if len(s) else 0, "n_ev_mean": float(s.n.mean()) if len(s) else np.nan})
+                    "n_q": len(s), "n_yr": int(s.yr.nunique()) if len(s) else 0, "n_ev_mean": float(s.n.mean()) if len(s) else np.nan, "p_boot": PV[0],
+                    "R2rank_q_mean": float((s.ic ** 2).mean()) if len(s) else np.nan, "n_pos_yr": int((s.groupby("yr").ic.mean() > 0).sum()) if len(s) else 0})
     for y in ("eps4", "u4", "r_pre", "r_ann"):
         m, lo, hi = bootdiff(SER[(era, "B2" if y in ("eps4", "u4") else "B3", "gap", y)], SER[(era, "B2null" if y in ("eps4", "u4") else "B3null", "ep", y)])
         res.append({"era": era, "test": "dIC_gap_minus_EP", "x": "gap-ep", "y": y, "ctrl": "", "IC": m, "ci95_lo": lo, "ci95_hi": hi})
+    for nul in ("nroe", "nlv"):   # [J3] ΔIC(gap − null không giá) cho B1 (cu) và B2 (u4); âm = gap mạnh hơn (cùng chiều âm)
+        for tg, y in (("B1", "cu"), ("B2", "u4")):
+            m, lo, hi = bootdiff(SER[(era, tg, "gap", y)], SER[(era, tg + "null", nul, y)])
+            res.append({"era": era, "test": f"dIC_gap_minus_{nul}", "x": f"gap-{nul}", "y": y, "ctrl": "", "IC": m, "ci95_lo": lo, "ci95_hi": hi})
     # tập trung quanh công bố: IC/phiên (khai PRELOCK) + chênh tercile trên−dưới /phiên (bổ sung)
     npre = float(d.n_pre.median()); nann = 4.0
     a = SER[(era, "B3", "gap", "r_pre")].copy(); b = SER[(era, "B3", "gap", "r_ann")].copy()
@@ -117,7 +146,13 @@ for era in ("IS", "OOS"):
     for col in ("pre", "ann"):
         m, lo, hi = boot(spd.rename(columns={col: "ic"})[["q", "yr", "ic"]])
         res.append({"era": era, "test": "B3_T3minusT1_bp_per_session", "x": "gap", "y": col, "ctrl": "", "IC": m * 1e4, "ci95_lo": lo * 1e4, "ci95_hi": hi * 1e4, "n_q": len(spd)})
-R = pd.DataFrame(res); R.to_csv(os.path.join(OUT, "B_results.csv"), index=False)
+R = pd.DataFrame(res)
+# [J3 vá skeptic (5)] hiệu chỉnh đa kiểm định: BH theo era trên mọi test có p_boot (p bootstrap rời rạc, sàn 1/B)
+for era in ("IS", "OOS"):
+    mm = (R.era == era) & R.p_boot.notna(); p = R.loc[mm, "p_boot"].clip(lower=1.0 / B).values; o = np.argsort(p); n = len(p)
+    q = np.empty(n); q[o] = np.minimum.accumulate((p[o] * n / np.arange(1, n + 1))[::-1])[::-1]; R.loc[mm, "q_BH"] = np.minimum(q, 1)
+    R.loc[mm, "n_tests_era"] = n
+R.to_csv(os.path.join(OUT, "B_results.csv"), index=False)
 # mô tả: gap theo tercile cu (OOS+IS)
 ds = []
 for era in ("IS", "OOS"):

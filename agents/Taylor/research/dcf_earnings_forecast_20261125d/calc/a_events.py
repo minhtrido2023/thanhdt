@@ -6,7 +6,8 @@ known K = max(time, Release_Date) (bảo thủ). Mọi trường của dòng q �
 Out: ../out/events.parquet, ../out/inventory.json"""
 import os, json
 import numpy as np, pandas as pd, duckdb
-HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(HERE, "..", "out"); SNAP = os.path.join(HERE, "..", "in_snapshot")
+HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.environ.get("OUT_DIR") or os.path.join(HERE, "..", "out"); SNAP = os.environ.get("SNAP_DIR") or os.path.join(HERE, "..", "in_snapshot")   # J3: SNAP_DIR=in_snapshot_v31 OUT_DIR=out_J3
+os.makedirs(OUT, exist_ok=True)
 WC = "/home/trido/thanhdt/WorkingClaude"
 c = duckdb.connect()
 cols = ",".join([f"NP_P{k}" for k in range(8)] + [f"Revenue_P{k}" for k in range(8)])

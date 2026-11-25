@@ -1,0 +1,23 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-earnfc-20261125d/agents/Taylor/research/dcf_earnings_forecast_20261125d/calc/d_update.py:39: RuntimeWarning: All-NaN slice encountered
+  f = np.nanmedian(np.vstack([NP[:, 4 - h] + drift, RV[:, 4 - h] * (1 + gg) * mm, E * (rbar + 0.65 ** (h / 4) * (rho - rbar)) / 4]), axis=0)
+{
+ "route_pit_share_na_in_univ": 0.0,
+ "route_pit_ne_static_in_univ": 0.0,
+ "C1": {
+  "share_changed_vs_D0_in_univ": 0.8393483965511366,
+  "median_dlv_in_univ": 0.0,
+  "median_roe_n_minus_tc_in_univ": -0.0005732452420901257
+ },
+ "C2": {
+  "share_changed_vs_D0_in_univ": 0.8790853014347545,
+  "median_dlv_in_univ": -0.0030659481128516575,
+  "median_roe_n_minus_tc_in_univ": -0.0032427398089454954
+ },
+ "C3": {
+  "share_changed_vs_D0_in_univ": 0.822734553385816,
+  "median_dlv_in_univ": 0.0,
+  "median_roe_n_minus_tc_in_univ": -0.00045118958914380954
+ },
+ "D0_recompute_maxabs": 0.0,
+ "u_median_in_univ_annual_ROEpts": -0.00664374110762595
+}

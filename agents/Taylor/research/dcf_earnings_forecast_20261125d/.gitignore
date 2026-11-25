@@ -1,3 +1,8 @@
 in_snapshot/*.parquet
 out/*.parquet
 out_C/*.parquet
+in_snapshot_v31/*.parquet
+out_J3/*.parquet
+out_J3C/*.parquet
+out_CY/*.parquet
+out_CYC*/*.parquet
