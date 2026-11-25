@@ -99,14 +99,14 @@ MAX_RR_QAGE=135      # calendar days từ NGÀY CUỐI QUÝ của MAX(quarter) t
                      # bảng orphan (verify 07-11: MAX(quarter)=2025Q4 — ĐÃ stale ~2 quý; consumer duy nhất
                      # = sync_bq_cache/preflight cache list, KHÔNG có consumer production trong chuỗi
                      # chọn-mã) → block sẽ chặn oan DollarBill vì 1 bảng research chết.
-TODAY="$(date +%Y-%m-%d)"
+TODAY="$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)"   # §16: neo ICT (2026-11-25; trước đây dựa vào TZ của cron)
 # MORNING MODE (opt-in, 2026-10-15, user duyệt): MIKE_MORNING_RUN=1 ⇒ chạy tay buổi sáng khi BQ xong muộn
 # sau chuỗi 18:30 hôm trước. TODAY = PHIÊN gần nhất đã có dữ liệu EOD (bin/expected_session.py, cutoff
 # 17:00 ICT) thay vì ngày lịch; NEXT_TRADING_DAY = ngày giao dịch kế tiếp sau phiên đó (= hôm nay).
 # Cron KHÔNG đặt biến này ⇒ hành vi 19:00 y nguyên. Mọi cổng khác GIỮ NGUYÊN; chỉ điều kiện mtime của
 # publisher DT5G đổi (xem gate dưới): phải >= phiên và <= hôm nay thay vì == hôm nay.
 MORNING="${MIKE_MORNING_RUN:-0}"
-CAL_TODAY="$(date +%Y-%m-%d)"   # ngày LỊCH (khác TODAY=phiên ở morning mode)
+CAL_TODAY="$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)"   # ngày LỊCH (khác TODAY=phiên ở morning mode)
 if [ "$MORNING" = "1" ]; then
   _sess="$(python3 "$(dirname "${BASH_SOURCE[0]}")/expected_session.py" --morning 2>/tmp/.expected_session_err.$$)"; _sess_rc=$?
   _sess_err="$(cat /tmp/.expected_session_err.$$ 2>/dev/null)"; rm -f /tmp/.expected_session_err.$$
@@ -120,6 +120,7 @@ fi
 NOW_ICT="$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M ICT')"
 FAILED=0
 WARNED=0
+GATE_FAIL_KINDS=""   # cổng DỮ LIỆU NỀN fail (prune_depth / dt5g_publisher) — ghi ra state/bq_freshness_gate_last.json cho plan_gate_recovery.py (§14)
 
 WORKDIR="${WORKDIR_8L:-/home/trido/thanhdt/WorkingClaude}"
 PY="${DNA_PYEXE:-python3}"
@@ -131,7 +132,7 @@ PY="${DNA_PYEXE:-python3}"
 NEXT_TRADING_DAY="$(cd "$WORKDIR" && python3 -c "
 from trading_bot.vn_market import next_trading_day
 import datetime as dt
-print(next_trading_day(dt.date.today()))
+print(next_trading_day(dt.date.fromisoformat('$TODAY')))  # §16: từ TODAY đã neo ICT, không date.today() trần
 " 2>/dev/null)"
 [ "$MORNING" = "1" ] && NEXT_TRADING_DAY="$MORNING_NEXT"
 if [ -z "$NEXT_TRADING_DAY" ]; then
@@ -141,6 +142,31 @@ fi
 
 # Discord: Trading Daily thread — mọi nội dung giao dịch hàng ngày gộp về 1 topic.
 DISCORD_STALE_CHANNEL="trading_daily"   # tên trong kb/discord_channels.json
+
+# HOLIDAY-SKIP-BEGIN (2026-11-25, sự cố "không ra plan 25/11"): cron chạy T2-T6 kể cả lễ giữa tuần. Ngày
+# KHÔNG giao dịch (lịch vn_market qua bin/trading_calendar.py) mà plan cho $NEXT_TRADING_DAY ĐÃ CÓ đủ mọi
+# account live ⇒ "ngày nghỉ, bỏ qua", exit 0 (không chạy lại chuỗi, không dispatch DollarBill ghi đè plan).
+# Plan còn THIẾU ⇒ chạy tiếp các cổng như thường: FAIL lúc đó là THẬT (plan phiên kế thiếu), không phải
+# do ngày nghỉ. Morning mode không vào nhánh này. Lịch/danh sách account lỗi ⇒ không đoán, chạy tiếp.
+if [ "$MORNING" != "1" ]; then
+  _hol_ev="$(python3 "$ROOT/bin/trading_calendar.py" --evidence "$TODAY" 2>&1)"; _hol_rc=$?
+  if [ "$_hol_rc" -eq 0 ]; then
+    _hol_missing="$(cd "$WORKDIR" && python3 -c "
+import os, sys
+from trading_bot.config import live_dnse_labels
+labs = live_dnse_labels()
+if not labs: sys.exit(3)
+print(' '.join(a for a in labs if not os.path.isfile('data/trade_plans/plan_%s_$NEXT_TRADING_DAY.json' % a)))
+" 2>&1)"; _hm_rc=$?
+    if [ "$_hm_rc" -eq 0 ] && [ -z "$_hol_missing" ]; then
+      echo "=== BQ Freshness Check — $TODAY $NOW_ICT ==="
+      echo "NGÀY NGHỈ, BỎ QUA: $_hol_ev — plan $NEXT_TRADING_DAY đã có đủ mọi account live."
+      exit 0
+    fi
+    echo "NGÀY NGHỈ ($_hol_ev) nhưng plan $NEXT_TRADING_DAY còn thiếu (${_hol_missing:-?}, rc=$_hm_rc) — chạy các cổng như thường để lập bù."
+  fi
+fi
+# HOLIDAY-SKIP-END
 
 # _check <label> <table> <colexpr> <max_lag> <trading|calendar> [BLOCK|WARN]
 #   colexpr = biểu thức SQL đầy đủ với alias `t.` (vd "t.time", "DATE(t.updated_at)",
@@ -413,36 +439,35 @@ echo "=== BQ Freshness Check — $TODAY $NOW_ICT ==="
 
 _check "ticker_prune (EOD price)"         "tav2_bq.ticker_prune"              "t.time"  $MAX_PRICE_LAG  "trading"  || true
 # --- ticker_prune DEPTH check (2026-07-15, sự cố upstream ghi đè bảng): MAX(time) vẫn
-# advance khi bảng bị moi ruột (7-10 mã/ngày từ 07-08 thay vì ~225-265) → lag-check một
-# mình mù hoàn toàn, suýt cho DollarBill lập plan trên universe 7 mã. Đếm số mã của
-# NGÀY MỚI NHẤT: < MIN_PRUNE_NAMES ⇒ FAIL như stale (block pipeline/DollarBill).
-MIN_PRUNE_NAMES=200   # daily_refresh_v34b precheck dùng cùng ngưỡng (bình thường ~225-265)
-# §28: tách "bq lỗi/không trả số" (KHÔNG biết bảng có bị moi ruột không) khỏi "đếm được và quá ít".
+# advance khi bảng bị moi ruột (7-10 mã/ngày từ 07-08) → lag-check một mình mù hoàn toàn, suýt
+# cho DollarBill lập plan trên universe 7 mã. Đếm số mã của NGÀY MỚI NHẤT.
+# 2026-11-25 (sự cố "không ra plan 25/11", user duyệt B): ngưỡng cứng 200 chặn oan phiên THẬT 23/11
+# (197 mã) vì universe co dần (trung vị/tháng 2026: 219→215→212→205→202). Thay bằng ngưỡng TƯƠNG
+# ĐỐI dùng chung với daily_refresh_v34b_linux.sh step [0] — MỘT nguồn: bin/prune_depth_gate.py
+# (FAIL khi n < max(150, ⌈0,90 × trung vị 20 phiên trước⌉); số đo + căn cứ trong docstring).
+# §28: rc 0 PASS · 1 FAIL (đếm được và quá ít) · 2 KHÔNG ĐO ĐƯỢC (bq lỗi / output lạ / thiếu lịch sử) ⇒ fail-closed.
 # PRUNE_DEPTH_BEGIN (marker cho bq_freshness_check_selfcheck.py — nó trích đúng khối này)
-prune_out=$(bq query --use_legacy_sql=false --project_id="$PROJECT" --format=csv --quiet \
-  "SELECT COUNT(DISTINCT t.ticker) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS t
-   WHERE t.time = (SELECT MAX(x.time) FROM \`${PROJECT}.tav2_bq.ticker_prune\` AS x)" 2>&1)
+prune_out="$(timeout 240 python3 "${PRUNE_DEPTH_GATE_BIN:-$ROOT/bin/prune_depth_gate.py}" --latest 2>&1)"
 prune_rc=$?
-prune_names="$(printf '%s\n' "$prune_out" | tail -1 | tr -d '[:space:]')"
-if [ $prune_rc -ne 0 ] || ! printf '%s' "$prune_names" | grep -qE '^[0-9]+$'; then
-  prune_snip="$(printf '%s' "$prune_out" | tr '\n' ' ' | cut -c1-200)"
-  if [ $prune_rc -ne 0 ]; then
-    depth_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): ticker_prune depth — bq lỗi kết nối/quyền (rc=$prune_rc: ${prune_snip}). KHÔNG kết luận được bảng có bị moi ruột hay không; kiểm tra auth/quota/network. Chặn pipeline/DollarBill (fail-closed)."
-  else
-    depth_msg="⚠️ BQ DATA BẤT THƯỜNG ($TODAY $NOW_ICT): ticker_prune depth — bq trả giá trị không phải số dù rc=0 (raw: ${prune_snip}). KHÔNG PHẢI lỗi kết nối BQ, đừng kiểm tra auth/quota — kiểm tra bảng/cột/schema. Chặn pipeline/DollarBill (fail-closed)."
-  fi
-  echo "FAIL ticker_prune depth: bq lỗi/không trả số (rc=$prune_rc, raw: ${prune_snip})"
-  "$ROOT/bin/notify.sh" "$depth_msg" 2>/dev/null || true
-  "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
-  FAILED=1
-elif [ "$prune_names" -ge "$MIN_PRUNE_NAMES" ]; then
-  [ -z "$QUIET" ] && echo "OK   ticker_prune depth: ${prune_names} mã ngày mới nhất (≥${MIN_PRUNE_NAMES})"
+prune_line="$(printf '%s\n' "$prune_out" | grep -m1 '^PRUNE_DEPTH ')"
+[ -n "$prune_line" ] || prune_line="$(printf '%s' "$prune_out" | tr '\n' ' ' | cut -c1-240)"
+if [ "$prune_rc" -eq 0 ]; then
+  [ -z "$QUIET" ] && echo "OK   ticker_prune depth: ${prune_line}"
 else
-  depth_msg="⚠️ BQ DEPTH ($TODAY $NOW_ICT): ticker_prune ngày mới nhất chỉ có ${prune_names} mã (<${MIN_PRUNE_NAMES}, bình thường ~225-265) — bảng bị ghi thiếu/moi ruột dù MAX(time) vẫn advance. Chặn pipeline/DollarBill."
-  echo "FAIL ticker_prune depth: ${prune_names} mã (<${MIN_PRUNE_NAMES}) — bảng bị ghi thiếu"
+  if [ "$prune_rc" -eq 1 ]; then
+    depth_msg="⚠️ BQ DEPTH ($TODAY $NOW_ICT): ticker_prune ngày mới nhất bị ghi thiếu — ${prune_line}. Số mã tụt >10% so với trung vị 20 phiên trước (hoặc dưới sàn tuyệt đối 150) ⇒ nghi bảng bị ghi thiếu/moi ruột dù MAX(time) vẫn advance. Chặn pipeline/DollarBill."
+    echo "FAIL ticker_prune depth: ${prune_line} — bảng bị ghi thiếu"
+  elif printf '%s' "$prune_line" | grep -q 'bq rc='; then
+    depth_msg="⚠️ BQ QUERY FAILED ($TODAY $NOW_ICT): ticker_prune depth — bq lỗi kết nối/quyền (${prune_line}). KHÔNG kết luận được bảng có bị ghi thiếu hay không; kiểm tra auth/quota/network. Chặn pipeline/DollarBill (fail-closed)."
+    echo "FAIL ticker_prune depth: bq lỗi (rc=$prune_rc, ${prune_line})"
+  else
+    depth_msg="⚠️ BQ DATA BẤT THƯỜNG ($TODAY $NOW_ICT): ticker_prune depth KHÔNG ĐO ĐƯỢC (rc=$prune_rc: ${prune_line}). KHÔNG PHẢI lỗi kết nối BQ, đừng kiểm tra auth/quota — kiểm tra bảng/cột/schema hoặc thiếu 20 phiên lịch sử. Chặn pipeline/DollarBill (fail-closed)."
+    echo "FAIL ticker_prune depth: không đo được (rc=$prune_rc, ${prune_line})"
+  fi
   "$ROOT/bin/notify.sh" "$depth_msg" 2>/dev/null || true
   "$ROOT/bin/notify_thread.sh" "$depth_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   FAILED=1
+  GATE_FAIL_KINDS="$GATE_FAIL_KINDS prune_depth"
 fi
 # PRUNE_DEPTH_END
 _check_price_freeze || true
@@ -490,14 +515,14 @@ import json
 d = json.load(open('$STATE_JSON_F', encoding='utf-8'))
 print(d.get('as_of', '?'), 'ok' if d.get('bq_publish_ok') else 'FAIL')
 " 2>/dev/null)"
-  DT5G_JSON_MDATE="$(date -d @"$(stat -c %Y "$STATE_JSON_F")" +%Y-%m-%d 2>/dev/null)"
+  DT5G_JSON_MDATE="$(TZ=Asia/Ho_Chi_Minh date -d @"$(stat -c %Y "$STATE_JSON_F")" +%Y-%m-%d 2>/dev/null)"
   if [ "${DT5G_AS_OF:-?}" != "$LAST_TRADING_DAY" ]; then
     dt5g_pub_reason="golive_state_today.json as_of=${DT5G_AS_OF:-?} ≠ phiên gần nhất $LAST_TRADING_DAY"
   elif [ "${DT5G_PUB_OK:-FAIL}" != "ok" ]; then
     dt5g_pub_reason="golive_state_today.json bq_publish_ok=false — publish lên BQ đã HỎNG"
   elif [ "${MORNING:-0}" = "1" ]; then
     # Morning mode: publisher phải chạy SAU phiên (mtime >= phiên) và không ở tương lai (<= hôm nay lịch).
-    if [[ "$DT5G_JSON_MDATE" < "$TODAY" || "$DT5G_JSON_MDATE" > "${CAL_TODAY:-$(date +%Y-%m-%d)}" ]]; then
+    if [[ "$DT5G_JSON_MDATE" < "$TODAY" || "$DT5G_JSON_MDATE" > "${CAL_TODAY:-$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)}" ]]; then
       dt5g_pub_reason="golive_state_today.json mtime=$DT5G_JSON_MDATE ngoài [$TODAY, hôm nay] — publisher của ta KHÔNG chạy sau phiên $TODAY"
     fi
   elif [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_JSON_MDATE" != "$TODAY" ]; then
@@ -510,9 +535,10 @@ if [ -n "$dt5g_pub_reason" ]; then
   "$ROOT/bin/notify.sh" "$pub_msg" 2>/dev/null || true
   "$ROOT/bin/notify_thread.sh" "$pub_msg" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
   FAILED=1
+  GATE_FAIL_KINDS="$GATE_FAIL_KINDS dt5g_publisher"
 else
   [ -z "$QUIET" ] && echo "OK   DT5G publisher-evidence: golive_state_today.json as_of=$DT5G_AS_OF (phiên gần nhất), bq_publish_ok=true, mtime=$DT5G_JSON_MDATE"
-  DT5G_CSV_MDATE="$(date -d @"$(stat -c %Y "$DT5G_CSV_F" 2>/dev/null || echo 0)" +%Y-%m-%d 2>/dev/null)"
+  DT5G_CSV_MDATE="$(TZ=Asia/Ho_Chi_Minh date -d @"$(stat -c %Y "$DT5G_CSV_F" 2>/dev/null || echo 0)" +%Y-%m-%d 2>/dev/null)"
   if [ "${MORNING:-0}" != "1" ] && [ "$IS_TRADING_TODAY" = "1" ] && [ "$DT5G_CSV_MDATE" != "$TODAY" ]; then
     csv_msg="🟡 DT5G CSV MIRROR ($TODAY $NOW_ICT): data/vnindex_5state_dt5g_live.csv mtime=${DT5G_CSV_MDATE:-MISSING} ≠ hôm nay dù publish BQ OK — export CSV từ BQ đã lỗi. Production (BQ) vẫn ĐÚNG; nhóm script nghiên cứu đọc CSV này đang dùng bản cũ. Không chặn pipeline."
     echo "WARN DT5G csv mirror: mtime=${DT5G_CSV_MDATE:-MISSING} ≠ $TODAY — non-blocking"
@@ -760,6 +786,20 @@ if [ "${MORNING:-0}" != "1" ]; then
   fi
 fi
 
+# GATE-LAST-BEGIN (2026-11-25): artifact kết quả cổng cho consumer plan_gate_recovery.py (retry 1 lần /
+# tăng cấp 07:30). Ghi atomic; lỗi ghi KHÔNG chặn chuỗi (consumer thiếu file ⇒ không retry, chỉ tăng cấp).
+_gl_dir="${BQF_STATE_DIR:-$ROOT/state}"
+mkdir -p "$_gl_dir" 2>/dev/null && python3 -c "
+import json, os, sys, datetime as dt
+from zoneinfo import ZoneInfo
+p = sys.argv[1]
+rec = {'session': sys.argv[2], 'next_trading_day': sys.argv[3], 'failed': sys.argv[4] != '0',
+       'data_fail_kinds': sys.argv[5].split(), 'morning': sys.argv[6] == '1',
+       'written_at': dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).isoformat(timespec='seconds')}
+open(p + '.tmp', 'w').write(json.dumps(rec, ensure_ascii=False)); os.replace(p + '.tmp', p)
+" "$_gl_dir/bq_freshness_gate_last.json" "$TODAY" "${NEXT_TRADING_DAY:-}" "$FAILED" "${GATE_FAIL_KINDS:-}" "${MORNING:-0}" 2>/dev/null \
+  || echo "  [WARN] không ghi được $_gl_dir/bq_freshness_gate_last.json — plan_gate_recovery sẽ không retry tự động"
+# GATE-LAST-END
 if [ "$FAILED" -ne 0 ]; then
   STALE_SUMMARY="⛔ BQ STALE $TODAY $NOW_ICT — DollarBill bị BLOCK, không lập plan hôm nay. Kiểm tra: mike/logs/bq_freshness.log"
   "$ROOT/bin/notify_thread.sh" "$STALE_SUMMARY" "$DISCORD_STALE_CHANNEL" 2>/dev/null || true
