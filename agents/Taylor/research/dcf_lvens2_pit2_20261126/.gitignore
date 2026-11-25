@@ -1,0 +1,6 @@
+out/regress/
+out/pit/
+out/v31/
+out/vintage/
+out/sc/
+out/*.parquet
