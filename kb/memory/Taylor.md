@@ -40,3 +40,4 @@
 - [2026-11-25T06:37:04Z] ĐANG DỞ: job Taylor_20261125_063648 DD w4 SAS rev mới (D4 đầy đủ), worktree wt-dd-w4-sas-20261125 | NEXT: đọc w3 SAS SUMMARY + mẫu FPT
 - [2026-11-25T06:37:34Z] ĐANG DỞ: job Taylor_20261125_063651 DD w4 PAT rev6 (wt-dd-w4-pat-20261125) | NEXT: đọc w3 SUMMARY + skill + mẫu
 - [2026-11-25T06:49:49Z] [dd-w4 PAT 25/11] XONG job Taylor_20261125_063651: a82bf4871 (wt-dd-w4-pat-20261125) — rev4 55.527 sau CK REFUTED_OPEN, E17 57.872 — CHỜ Mike ghi sổ+merge; mở: HĐ thuê đất 2034 (−28,7%), legal pháp nhân Đ.235
+- [2026-11-25T06:57:44Z] [dd-recheck w4 SAS 25/11] XONG job Taylor_20261125_063648: d0fc3aea2 (wt-dd-w4-sas-20261125) rev3 27.477 (−13,2%, TRÊN), E17 26.803 — CHỜ Mike ghi sổ + merge sau user duyệt
