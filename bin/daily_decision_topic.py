@@ -137,6 +137,53 @@ NOISE_TOPIC_RE = re.compile(r"^(selfcheck-red|wake|wags-fix-not-confirmed|wags-a
                             r"wags-arch-review-round2-unresolved|daily-retro-draft-failed)")
 
 
+def plan_status_line(now, wc=None):
+    """1 dòng 'Plan phiên kế tiếp' đọc từ ARTIFACT thật (file plan + golive_state_today.json + lịch vn_market),
+    KHÔNG từ bus question (2026-11-25, sự cố "không ra plan 25/11": bus báo giả 24/11, thiếu thật 25/11).
+    Lỗi đọc ⇒ nói ra nguyên nhân (§29), không im lặng."""
+    wc = wc or os.environ.get("PLAN_STATUS_WC") or os.path.dirname(ROOT)
+    try:
+        os.environ.setdefault("WORKDIR_8L", wc)
+        sys.path.insert(0, os.path.join(ROOT, "bin"))
+        import datetime as _dt
+        import trading_calendar as tc
+        today = now.date()
+        d = today
+        while not tc.is_trading_day(d):
+            d += _dt.timedelta(days=1)
+        prev = d - _dt.timedelta(days=1)
+        while not tc.is_trading_day(prev):
+            prev -= _dt.timedelta(days=1)
+        r = subprocess.run([sys.executable, "-c", "from trading_bot.config import live_dnse_labels;"
+                            "print(' '.join(live_dnse_labels()))"], cwd=wc, capture_output=True, text=True, timeout=60)
+        accts = r.stdout.split()
+        if r.returncode != 0 or not accts:
+            raise RuntimeError(f"không đọc được account live: {(r.stderr or r.stdout).strip()[-160:]}")
+        parts = []
+        for a in accts:
+            try:
+                with open(os.path.join(wc, "data", "trade_plans", f"plan_{a}_{d}.json"), encoding="utf-8") as f:
+                    pj = json.load(f)
+                ok = str(pj.get("plan_date", pj.get("date"))) == str(d)
+                parts.append(f"{a} {'có' + (' (đã duyệt)' if pj.get('approved_by') else ' (chưa duyệt)') if ok else 'KHÔNG (sai plan_date)'}")
+            except FileNotFoundError:
+                parts.append(f"{a} ❌ KHÔNG")
+            except (OSError, ValueError) as exc:
+                parts.append(f"{a} ⚠️ đọc lỗi ({type(exc).__name__})")
+        try:
+            with open(os.path.join(wc, "deploy_golive_dt5g_v4", "golive_state_today.json"), encoding="utf-8") as f:
+                asof = str(json.load(f).get("as_of", "?"))
+            dt5g = f"DT5G as_of {asof}" + (" ✅" if asof == str(prev) else f" ⚠️ (cần {prev})")
+        except (OSError, ValueError) as exc:
+            dt5g = f"DT5G as_of ⚠️ không đọc được ({type(exc).__name__})"
+        u = tc.upcoming(today, 14)
+        hol = ", ".join(tc.fmt_day(x) for x in u["holidays"]) or "không có (14 ngày)"
+        unc = f" · {len(u['unconfirmed'])} ngày T2-T6 chưa xác nhận lịch" if u["unconfirmed"] else ""
+        return f"📋 Plan phiên kế tiếp ({tc.fmt_day(d)}): " + " · ".join(parts) + f" · {dt5g} · ngày nghỉ sắp tới: {hol}{unc}"
+    except Exception as exc:  # noqa: BLE001
+        return f"📋 Plan phiên kế tiếp: ⚠️ KHÔNG đọc được trạng thái ({type(exc).__name__}: {exc}) — tự kiểm data/trade_plans/"
+
+
 def build(now):
     pend = pending_questions()
     noise = [p for p in pend if NOISE_TOPIC_RE.match(p["topic"])]
@@ -149,7 +196,7 @@ def build(now):
         real.append(p)
     real.sort(key=lambda p: (-p["age_days"], p["topic"]))
     det = question_details(real)
-    lines = [f"**Việc cần anh quyết — {now:%d.%m.%Y}**", ""]
+    lines = [f"**Việc cần anh quyết — {now:%d.%m.%Y}**", plan_status_line(now), ""]
     wt = work_tree_section(now)
     if wt:
         lines += [wt, ""]
