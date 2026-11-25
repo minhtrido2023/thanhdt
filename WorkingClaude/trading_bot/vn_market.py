@@ -44,6 +44,12 @@ _VARIABLE_HOLIDAYS: set = {
     dt.date(2026, 11, 24),
 }
 
+# Mốc NGƯỜI đã đối chiếu lịch nghỉ SSI/HOSE tới hết ngày này (date hoặc None = chưa xác nhận ngày nào).
+# CHỈ dùng cho cảnh báo mike/bin/trading_calendar_watch.py (ngày T2-T6 sau mốc ⇒ nhắc đối chiếu) —
+# KHÔNG ảnh hưởng is_holiday/session_phase/next_trading_day. Sau khi đối chiếu: thêm ngày nghỉ vào
+# _VARIABLE_HOLIDAYS (nếu có) rồi nâng mốc này. Thêm 2026-11-25 (lễ 24/11 khai muộn ⇒ báo động giả).
+CALENDAR_CONFIRMED_THROUGH = None
+
 # (tên phiên, giờ bắt đầu, giờ kết thúc, có được đặt LO liên tục không)
 SESSIONS = [
     ("PRE",       dt.time(0, 0),   dt.time(9, 0),   False),
