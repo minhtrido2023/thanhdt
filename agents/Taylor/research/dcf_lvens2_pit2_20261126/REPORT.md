@@ -22,7 +22,7 @@ Chỉ nghiên cứu, DISPLAY-ONLY: KHÔNG cron, KHÔNG chèn registry, KHÔNG wi
    Ô đổi do bank E là **thật** (KLB, MSB). Phần còn lại là mã sát trung vị (|v−0,5|<0,05), tức artefact ngưỡng.
 
 ## 1. Đổi gì so với bản đã merge (`lvens2_incremental.py` md5 `357f69c5…` → `calc/lvens2_pit2.py`)
-- **Hồi quy:** `--mc-pit strict|step --no-eguard` cho lại bản merge **Δ=0** (2026-10, 1.086 dòng, mọi cột lv, mc, E).
+- **Hồi quy:** `--mc-pit strict|step --no-eguard` cho lại bản merge **Δ=0** (2026-10, 1.086 dòng, mọi cột lv, mc, E). Đã chạy lại `strict --no-eguard` với script cuối `ad565e0d`, vẫn Δ=0 (`out/regress_vs_merged_2026-10.txt`).
 - **mc `stepca`/`stepcar`:** mc = Price(D) × N_row × Π(1+exercise_ratio), lấy trên `tav2_bq.corporate_action` ISS, status ≠ not_executed, ratio > 0,
   method ∈ {Trả Cổ tức bằng Cổ phiếu, Cổ phiếu thưởng} (stepcar thêm Quyền mua CP cho Cổ đông hiện hữu), với ngày BCTC < ex ≤ D và public_date ≤ D. **Không bao giờ dùng DIV.**
   Nguồn là extract đóng băng `out/ca/ca_extract_20261125.csv` (34.159 dòng ISS/DIV/AIS, md5 `28418e9d…`, kiểm fail-closed). Đã dedup (ticker, ex, method, ratio).
