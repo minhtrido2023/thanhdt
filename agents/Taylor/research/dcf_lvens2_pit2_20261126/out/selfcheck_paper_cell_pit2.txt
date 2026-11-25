@@ -1,0 +1,27 @@
+T1 ghi 2026-09
+ĐÃ GHI out/sc_ledger/led.csv
+rc=0
+T2 ghi 2026-10
+ĐÃ GHI out/sc_ledger/led.csv
+T3 chạy lại 2026-10
+SKIP: 2026-10 đã có trong out/sc_ledger/led.csv (append-only, idempotent)
+rc=0
+T4 đổi biến thể giữa chừng (2026-08 stepca)
+FAIL-CLOSED: sổ đã có 2026-09 với mc_pit=stepcar script=5424ca54 ≠ stepca/5424ca54 — đổi biến thể/script giữa chừng: mở sổ MỚI (tên file mới), không trộn
+rc=3
+T5 file sai biến thể so với expect
+FAIL-CLOSED: sidecar mc_pit=stepca mode=pit vintage=False nocut=[] eguard=True — cần mc_pit=stepcar, mode pit, cache hiện tại, không mutation, eguard bật
+rc=3
+T6 file sai tháng
+FAIL-CLOSED: out/final/lvens2_2026-07_mcstepcar.parquet ym=['2026-07'] asof=['2026-07-31'] mode/mc=['pit']/['stepcar'] không khớp 2026-08/2026-08-28
+rc=3
+f8e01be11bf4803e706edb2882e2b9df  out/sc_ledger/led.csv
+T7 sửa 1 dòng cũ rồi ghi 2026-08
+FAIL-CLOSED: khối 2026-09 trong sổ đã bị sửa (md5 khác sidecar)
+rc=3
+T8 khôi phục rồi ghi 2026-08 (append thật: 2 khối cũ giữ nguyên byte)
+ĐÃ GHI out/sc_ledger/led.csv
+prefix bytes unchanged: PASS
+T9 cache ticker_financial cũ (max_time 2026-10-01 < D 2026-10-30 − 10)
+FAIL-CLOSED: cache ticker_financial max_time=2026-10-01 < D 2026-10-30 − 10 ngày
+rc=3

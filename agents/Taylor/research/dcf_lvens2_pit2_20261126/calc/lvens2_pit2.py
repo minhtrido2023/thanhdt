@@ -76,7 +76,9 @@ def e_guard(F, ca, Dcut=None, tol=0.06):
     Hệ số mang theo qua các dòng CÙNG OShares, reset khi OShares đổi. Tụt KHÔNG giải thích được (cổ tức tiền, lỗ, dòng đầu sai) ⇒ giữ E_raw (không lan truyền)."""
     Er = F.E.values.astype(float); E = Er.copy(); fix = np.zeros(len(F), bool); unex = np.zeros(len(F), bool)
     bo = (F.E_src.values == "BVPSxOS"); t = F.known.values; tk = F.ticker.values; os_ = F.OShares.values.astype(float)
-    ev = {k: g.sort_values("ex") for k, g in ca.groupby("ticker")}
+    # gộp sự kiện CÙNG ngày ex thành 1 bước (đi ex cùng nhau) ⇒ tích tiền tố không phụ thuộc thứ tự dòng (bản trước: quicksort không ổn định — selfcheck poison bắt được)
+    agg = ca.groupby(["ticker", "ex"]).agg(pub=("pub", "max"), exercise_ratio=("exercise_ratio", lambda r: float(np.prod(1.0 + r.values)) - 1.0)).reset_index()
+    ev = {k: g.sort_values("ex", kind="mergesort") for k, g in agg.groupby("ticker")}
     k = 1.0
     for i in range(len(F)):
         if i == 0 or not bo[i] or tk[i] != tk[i - 1] or not bo[i - 1] or (t[i] - t[i - 1]) > np.timedelta64(200, "D") or not (np.isfinite(E[i - 1]) and E[i - 1] > 0):

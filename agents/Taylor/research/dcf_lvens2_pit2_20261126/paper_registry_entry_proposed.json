@@ -1,0 +1,42 @@
+{
+ "id": "behav_cell_ledger",
+ "name": "Sổ ô bốn-ô (tâm nội tại lv_ENS2 × điểm thừa nhận hi52) hằng tháng, universe_pit — theo dõi paper, DISPLAY-ONLY",
+ "owner": "Taylor",
+ "start": "2026-11-30",
+ "end": null,
+ "review_date": "2027-11-30",
+ "reporting": false,
+ "reporting_reason": "Chưa có nhãn nào đóng trước 2027-11; không có gì để báo cáo. Đọc 1 lần khi nhãn 12 tháng của as-of 2026-11 đóng.",
+ "behavior_contract": "LOG_ONLY_NO_BROKER_PATH",
+ "feature_flag": "N/A — sổ append-only (paper_cell_ledger_pit2.csv + .blocks.jsonl); không sizing/gate/luật lệnh, không đụng dcf_valuation.py; cron CHƯA cài (chờ user duyệt)",
+ "objective": "Ghi nhận trước (không nhìn lại được) ô bốn-ô + điểm hi52 của từng mã trong universe_pit mỗi cuối tháng từ as-of 2026-11, để có bằng chứng ngoài-mẫu sạch duy nhất cho nhánh 'tâm hành vi' (pilot G0 YẾU; dữ liệu 2015–2025 đã bị nhìn). Chấp nhận trước rằng có thể mãi là hiển thị. Spec: agents/Taylor/research/dcf_vn_behavioral_20261125/PLAN.md, PRELOCK_PROPOSED.md §7.",
+ "end_or_trigger": "LUẬT KHAI TRƯỚC: đọc lần đầu khi nhãn 12 tháng của as-of 2026-11 đóng (2027-11-30): ΔIC/DiD theo PRELOCK_PROPOSED §4 (CI rộng nhất), N độc lập = số tháng-cụm đã đóng — 1 tháng ≠ bằng chứng; kết luận chỉ khi ≥ 12 as-of đã đóng nhãn (2028-11). Không tự đóng, không tự gia hạn — quá mốc ⇒ báo user.",
+ "gate_criteria": [
+  {
+   "status": "pending",
+   "text": "Sổ đúng luật: append-only thật (mở 'a' + md5 từng khối tháng trong sidecar, kiểm lại trước mỗi lần ghi), mỗi asof_ym đúng 1 lần, fail-closed khi universe_pit không phủ D, cache ticker_financial/fa_ratings_8l max_time < D−10, đổi mc_pit/script giữa chừng (paper_cell_monthly_pit2.py)"
+  },
+  {
+   "status": "pending",
+   "text": "mc_pit KHOÁ = stepcar (PRELOCK dcf_lvens2_pit2_20261126, chọn trước mọi kết quả forward); đổi biến thể ⇒ sổ MỚI tên khác"
+  },
+  {
+   "status": "pending",
+   "text": "quant-skeptic vòng 2 trên lvens2_pit2 (stepcar + e_guard) CONFIRMED trước khi cài cron"
+  },
+  {
+   "status": "pending",
+   "text": "Nhãn 12 tháng đóng ≥ 12 as-of trước khi kết luận bất cứ điều gì; quant-skeptic CONFIRMED + user duyệt riêng trước mọi wire/hiển thị DD"
+  }
+ ],
+ "data_sources": [
+  "tav2_mike.universe_pit (cache data/bq_cache/universe_pit, CANONICAL)",
+  "tav2_bq.ticker + ticker_financial + fa_ratings_8l (cache data/bq_cache; OShares/BVPS TRAP — xử lý bằng stepcar + e_guard, cờ E_unexpl)",
+  "tav2_bq.corporate_action — extract ĐÓNG BĂNG 2026-11-25 (md5 28418e9d…) trong dcf_lvens2_pit2_20261126/out/ca; cần làm mới hằng tháng = đổi md5 ⇒ xem REPORT §5",
+  "snapshot VNDirect đóng băng data/research_frozen/dcf_v31_inputs (KHÔNG fetch)",
+  "lv_ENS2 = dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py --mc-pit stepcar (dựng mỗi tháng, ~1,7 phút, RSS ~2,1 GB)"
+ ],
+ "today_activity": "agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/paper_cell_monthly_pit2.py --asof-ym <YYYY-MM> --lvens2-from <lvens2_YYYY-MM_mcstepcar.parquet> --dry-run",
+ "review_short": "Sổ ô hằng tháng; chưa đọc trước 2027-11",
+ "notes": "Bản pit2 thay entry cũ (job Taylor_20261125_160331, sau quant-skeptic REFUTED vòng 1). KHÔNG chèn registry, KHÔNG cron — chờ user duyệt."
+}
