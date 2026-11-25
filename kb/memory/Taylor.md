@@ -32,3 +32,6 @@
 - [2026-11-25T03:36:25Z] ĐANG DỞ: job Taylor_20261125_032446 w3 B — NT2 XONG f810b55c0 | NEXT: PVT bước 0 (wt-dd-recheck-w3b-20261125)
 - [2026-11-25T03:36:38Z] ĐANG DỞ: job Taylor_20261125_032448 DD w3 C — VLB, DCM XONG; NEXT PAT→HHS (wt-dd-w3c-20261125)
 - [2026-11-25T03:38:50Z] ĐANG DỞ: job Taylor_20261125_032448 DD w3 C — VLB/DCM MECH, PAT DỪNG Bước0 (D4); NEXT HHS (wt-dd-w3c-20261125)
+- [2026-11-25T05:31:08Z] ĐANG DỞ: job Taylor_20261125_053002 (resume 032443) w3 A — DDV d441f3d20, HPG 858fb490c XONG | NEXT: SAS (wt-dd-recheck-w3a-20261125)
+- [2026-11-25T05:32:58Z] ĐANG DỞ: job Taylor_20261125_053004 (resume 032446) w3 B — NT2 f810b55c0, PVT 851182687 XONG | NEXT: SZL (REFUTED_OPEN ⇒ E17 từ hạng mục skeptic cũ), wt-dd-recheck-w3b-20261125
+- [2026-11-25T05:33:12Z] [dd-recheck w3 A 25/11] XONG job Taylor_20261125_053002 (wt-dd-recheck-w3a-20261125): DDV d441f3d20, HPG 858fb490c MECH+adj; SAS c4d23c4cc DỪNG Bước0 D4 −13,4% — CHỜ Mike ghi sổ/merge + user chọn SAS rev3 (a)/(b)
