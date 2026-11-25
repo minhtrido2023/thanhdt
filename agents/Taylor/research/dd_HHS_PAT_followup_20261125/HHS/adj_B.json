@@ -1,0 +1,157 @@
+{
+ "ticker": "HHS",
+ "dd_date": "2026-11-01",
+ "rev": 9,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_080257",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13"
+ },
+ "blind_to_price": true,
+ "center_base": 12357,
+ "center_base_source": "LEDGER_PROPOSAL_HHS_B.json rev9 center (biên TB peer 37,7%, CK holding 0%)",
+ "method": "như adj.json w3 (Σ p×m = 0; tâm adj = đổi nền CK về mốc đo +20%) trên lưới biên TB peer 37,7% — calc_adj_hhs.py w3 'TB peer 37,7% | CK 0.2'.",
+ "items": [],
+ "base_shift": {
+  "name": "CK holding 0% → +20% (mốc đo hiện tại v5 19,7%, khoảng đo 15–23%; 0% user ghi 'không phải tâm đo được, cận trên có lợi cho HHS')",
+  "center": 11593,
+  "pct": -17.01,
+  "source": "kb/projects/ck-hhs-reference-range-20261124.md; calc/calc_rev9_out.json display_band_ck h=0.2; skeptic/r1.json killer (1)",
+  "conflict_flag": "HANDOFF đợt 3 ghi dải CK 'DISPLAY-ONLY, KHÔNG vào base/ledger'. Nếu Mike/user hiểu center_adj là ledger ⇒ phương án thay thế center_adj = 13.969 (Σ=0, không đổi nền) — CHỜ quyết định, không tự chọn im lặng."
+ },
+ "sum_p_m_pct_linear": 0.0,
+ "aggregation": "Σ=0 ⇒ không cần tổ hợp",
+ "center_adj": 10303,
+ "range_low": 10303,
+ "range_high": 12357,
+ "range_basis": "dải CK holding user chốt 0…+20% (cực trị), Σ hạng mục = 0",
+ "dividend_mech": {
+  "status": "còn quyền 5:3 @10.000 + CP 7% chưa GDKHQ (NQ 10 lấy ý kiến 14–25/12/2026)",
+  "center_adj_ex_k1": 10227,
+  "center_base_ex_k1": 11615
+ },
+ "sensitivity_only": [
+  {
+   "name": "[LUẬT 3c] biên HTK cũ về TB peer 37,7% (moat NONE; ADDENDUM_5F_r1 §2) @CK 20%",
+   "value": 10303,
+   "pct_vs_adj": -11.13,
+   "p10": 9121,
+   "reason": "tham số luật (moat) — PREREG_adj §1; r3 chuyển sang s_obs 52% theo skeptic trước ⇒ xung đột 2 tài liệu, trình user"
+  },
+  {
+   "name": "[LUẬT 3c] biên = TCH 29,9% @CK 20%",
+   "value": 9837,
+   "pct_vs_adj": -15.15,
+   "p10": 8701,
+   "reason": "như trên, chọn peer đối thủ trực tiếp"
+  },
+  {
+   "name": "[LUẬT 3c] biên peer 37,7% @CK 0%",
+   "value": 12357,
+   "pct_vs_base": -11.54
+  },
+  {
+   "name": "[LUẬT] r 12,3% (E15) @CK 0%",
+   "value": 14255,
+   "pct_vs_base": 2.05
+  },
+  {
+   "name": "[LUẬT] r 12,3% @CK 20% (ADJ 24/11)",
+   "value": 11821,
+   "pct_vs_adj": 1.97
+  },
+  {
+   "name": "CK v5 trung vị −3,24% (premium) @biên obs",
+   "value": 14354,
+   "pct_vs_base": 2.76,
+   "reason": "user chốt dải 0…+20%, ngoài dải ⇒ chỉ ghi"
+  },
+  {
+   "name": "Chi phí hoàn thiện NC-II G10 (5/10/20% giá gốc HTK không sinh biên) @CK20 (ước lượng ×0,8)",
+   "vnd": [
+    -281,
+    -562,
+    -1122
+   ],
+   "reason": "C — chưa chắc dấu (errata r3)"
+  },
+  {
+   "name": "Nghĩa vụ NƠXH / KL 08/KL-TTTP",
+   "vnd": null,
+   "reason": "C — chưa có số; pháp lý WARNING"
+  },
+  {
+   "name": "Cơ cấu HH1–HH4",
+   "pct": [
+    -9.0,
+    -2.3
+   ],
+   "reason": "đã nằm trong trục ds ±15pp — đếm hai lần nếu cộng (skeptic tính kỳ vọng ≈ −1,35%)"
+  },
+  {
+   "name": "Thiếu vốn I.14 1.803,2 tỷ ⇒ pha loãng thêm",
+   "vnd": null,
+   "reason": "C — chưa có cấu trúc vốn"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "Lấy ý kiến cổ đông NQ 10 giữ quyền 5:3 @10.000 + CP 7%",
+   "when": "14–25/12/2026",
+   "direction": "down",
+   "delta_vnd": -1366,
+   "delta_pct": -11.78,
+   "note": "sau GDKHQ dùng EX k=1 10.227"
+  },
+  {
+   "event": "User/Mike chốt luật 3c cho biên HTK cũ (peer 37,7% / TCH 29,9%)",
+   "when": "chờ quyết định",
+   "direction": "down",
+   "delta_pct": [
+    -15.15,
+    -11.13
+   ]
+  },
+  {
+   "event": "Quét lại CK holding v5",
+   "when": "hằng quý",
+   "direction": "both",
+   "delta_vnd_per_pp": -119
+  },
+  {
+   "event": "HHS nhận cổ tức tiền từ CRV",
+   "when": "khi công bố",
+   "direction": "up",
+   "delta_vnd_max": 2376,
+   "note": "nghiêng về đầu 0%"
+  },
+  {
+   "event": "Dự toán hoàn thiện NC-II (G10) công bố",
+   "when": "BCTN 2026 / CBTT",
+   "direction": "down",
+   "delta_vnd_per_10pct": -562
+  },
+  {
+   "event": "BCTC KT NĐL: BV < 10.000",
+   "when": "~03/2027",
+   "direction": "down",
+   "note": "EX dùng k đo được; k 0,8 ⇒ EX 9.536"
+  },
+  {
+   "event": "BCTC soát xét/KT CRV xác nhận biên NC-II 52%",
+   "when": "BCTC 2026",
+   "direction": "up",
+   "note": "củng cố s_obs, giảm trọng 3c"
+  },
+  {
+   "event": "Lãi huy động 12T ±50bp (V1)",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_vnd": [
+    -115,
+    118
+   ]
+  }
+ ]
+}
