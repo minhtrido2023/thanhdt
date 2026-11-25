@@ -154,22 +154,23 @@ def plan_status_line(now, wc=None):
         prev = d - _dt.timedelta(days=1)
         while not tc.is_trading_day(prev):
             prev -= _dt.timedelta(days=1)
-        r = subprocess.run([sys.executable, "-c", "from trading_bot.config import live_dnse_labels;"
-                            "print(' '.join(live_dnse_labels()))"], cwd=wc, capture_output=True, text=True, timeout=60)
-        accts = r.stdout.split()
-        if r.returncode != 0 or not accts:
-            raise RuntimeError(f"không đọc được account live: {(r.stderr or r.stdout).strip()[-160:]}")
+        # "plan có" + "đã duyệt" = định nghĩa chung bin/plan_presence.py — duyệt theo ĐÚNG gate executor
+        # trading_bot.plan.approval_block_reason (arch-review vòng 2 #5: placeholder 'pending'/'None'/'mike'
+        # KHÔNG phải đã duyệt; approved_by_user được tính; HOLD không cần duyệt).
+        import plan_presence as pp
+        accts = pp.live_accounts(wc)
+        appr_txt = {"APPROVED": "có (đã duyệt)", "NEEDS_APPROVAL": "có (CHƯA duyệt)",
+                    "HOLD": "có (HOLD — không cần duyệt)", "NOT_REQUIRED": "có (không yêu cầu duyệt)"}
         parts = []
         for a in accts:
-            try:
-                with open(os.path.join(wc, "data", "trade_plans", f"plan_{a}_{d}.json"), encoding="utf-8") as f:
-                    pj = json.load(f)
-                ok = str(pj.get("plan_date", pj.get("date"))) == str(d)
-                parts.append(f"{a} {'có' + (' (đã duyệt)' if pj.get('approved_by') else ' (chưa duyệt)') if ok else 'KHÔNG (sai plan_date)'}")
-            except FileNotFoundError:
+            c = pp.classify(pp.plan_path(wc, a, d), d)
+            if c == "MISSING":
                 parts.append(f"{a} ❌ KHÔNG")
-            except (OSError, ValueError) as exc:
-                parts.append(f"{a} ⚠️ đọc lỗi ({type(exc).__name__})")
+            elif c == "INVALID":
+                parts.append(f"{a} ⚠️ CÓ FILE NHƯNG HỎNG (sai plan_date/orders/JSON)")
+            else:
+                st = pp.approval(wc, a, d)
+                parts.append(f"{a} {appr_txt.get(st, f'có (⚠️ không đọc được trạng thái duyệt: {st})')}")
         try:
             with open(os.path.join(wc, "deploy_golive_dt5g_v4", "golive_state_today.json"), encoding="utf-8") as f:
                 asof = str(json.load(f).get("as_of", "?"))
