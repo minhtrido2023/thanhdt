@@ -52,3 +52,4 @@
 - [2026-11-25T10:43:16Z] ĐANG DỞ: job Taylor_20261125_104308 dcf-vn-behavioral (plan + pilot tâm hành vi) | NEXT: kiểm kê dữ liệu, đọc REPORT 20261125c
 - [2026-11-25T10:55:06Z] [dcf-vn-behavioral 25/11] XONG job Taylor_20261125_104308: 7294cf0d1 nhánh session/Taylor_20261125_104308 (wt-dcf-behav-20261125) — pilot YẾU, tâm hành vi không hơn giá hôm nay về mức; đề xuất bốn ô nội tại × hi52 — CHỜ Mike quant-skeptic 1 vòng + user duyệt G1 hẹp/dừng
 - [2026-11-25T11:50:51Z] [dcf-behav 25/11] XONG job Taylor_20261125_114526: 83d5f99c3 (wt-dcf-behav-20261125) PLAN/PRELOCK sửa theo skeptic + paper_cell_monthly — CHỜ Mike skeptic vòng 2 + duyệt entry registry/cron; blocker: lv_ENS2 cần panel dựng lại hằng tháng; user quyết G1 (dự kiến NO-GO 1)
+- [2026-11-25T11:57:36Z] ĐANG DỞ: job Taylor_20261125_115701 lv_ENS2 incremental (wt-dcf-lvens2-inc-20261125) | NEXT: đo b_panel.py
