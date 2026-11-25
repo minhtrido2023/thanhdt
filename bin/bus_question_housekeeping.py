@@ -111,7 +111,7 @@ def selfcheck_resolved(root, topic):
     return None
 
 
-PLAN_T1_RE = re.compile(r"^plan-t1-not-ready-(\d{4}-\d{2}-\d{2})-([A-Za-z0-9_]+)$")
+PLAN_T1_RE = re.compile(r"^plan-t1-not-ready-(r2-)?(\d{4}-\d{2}-\d{2})-([A-Za-z0-9_]+)$")
 META_RE = re.compile(r"^(wags-fix-not-confirmed|wags-autofix-review-needed|"
                      r"wags-arch-review-round2-unresolved): coord-(\d{4}-\d{2}-\d{2})$")
 META_EXPIRE_DAYS = 3
@@ -122,15 +122,36 @@ def plan_t1_resolved(plans_dir, topic):
     m = PLAN_T1_RE.match(topic)
     if not m:
         return None
-    date, account = m.groups()
+    r2, date, account = m.groups()
+    # 2026-11-25: ngày đích KHÔNG giao dịch theo lịch hiện tại (lễ khai muộn, vd 24/11/2026) ⇒ không cần
+    # plan ⇒ đóng với bằng chứng is_holiday. Lịch lỗi ⇒ không đoán, xét file plan như cũ.
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import trading_calendar as _tc
+        ev = _tc.non_trading_evidence(date)
+    except Exception:  # noqa: BLE001
+        ev = None
+    if ev:
+        return f"{ev} — không cần plan_{account}_{date}.json, câu hỏi là báo động giả"
+    # arch-review vòng 2 #1 (25/11): câu `-r2-` mở lúc 23:00 CHÍNH VÌ plan tồn tại nhưng HỎNG/đổi sau khi câu
+    # cũ đã đóng (send_plan_report.sh GATE_BLOCK_PLAN_T1) ⇒ "file có + plan_date khớp" KHÔNG phải bằng chứng
+    # phục hồi. r2 chỉ đóng ở đây bằng bằng chứng ngày nghỉ; còn lại để gate_block_question sweep đóng theo
+    # probe marker-đã-gửi + md5 khớp (cmd_probe_plan_t1) — tiêu chí đúng duy nhất.
+    if r2:
+        return None
     path = plans_dir / f"plan_{account}_{date}.json"
+    # arch-review vòng cuối #9: "plan có" = MỘT định nghĩa (plan_presence.classify == OK: plan_date khớp + orders
+    # là list) + đúng account — file có nhưng hỏng/account sai KHÔNG phải bằng chứng phục hồi.
+    import plan_presence as _pp
+    if _pp.classify(path, date) != "OK":
+        return None
     try:
         plan = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
         return None
-    if not isinstance(plan, dict) or str(plan.get("plan_date")) != date:
+    if plan.get("account") not in (None, account):
         return None
-    n = len(plan.get("orders") or []) if isinstance(plan.get("orders"), list) else "?"
+    n = len(plan["orders"])
     return f"{path.name} exists with plan_date={date} (orders={n}, approved_by={plan.get('approved_by')!r})"
 
 

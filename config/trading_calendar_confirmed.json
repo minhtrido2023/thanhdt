@@ -1,0 +1,7 @@
+{
+  "_doc": "Mốc NGƯỜI đã đối chiếu lịch nghỉ giao dịch SSI/HOSE tới hết ngày confirmed_through (YYYY-MM-DD). Chỉ dùng cho cảnh báo bin/trading_calendar_watch.py + dòng trạng thái 08:00 — KHÔNG ảnh hưởng is_holiday/next_trading_day (nguồn lịch duy nhất vẫn là trading_bot/vn_market.py). Cách cập nhật: đối chiếu thông báo SSI/HOSE; có ngày nghỉ ⇒ thêm vào _VARIABLE_HOLIDAYS trong vn_market.py TRƯỚC; rồi đặt confirmed_through + source (link/tên thông báo) + confirmed_by + confirmed_at. Thiếu source ⇒ mốc bị BỎ QUA (không nhận mốc không có nguồn). null = chưa xác nhận ngày nào ⇒ cảnh báo mọi T2-T6 trong 14 ngày (fail-safe về phía cảnh báo). Tạo 2026-11-25, CHƯA điền: chưa có nguồn xác nhận lịch nghỉ trong tay — user điền.",
+  "confirmed_through": null,
+  "source": null,
+  "confirmed_by": null,
+  "confirmed_at": null
+}

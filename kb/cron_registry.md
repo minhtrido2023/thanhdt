@@ -213,3 +213,32 @@ Làm mới cache r* cho dòng hiển thị DCF (display-only). Đề xuất + ru
 | Lịch | Script | Đọc | Ghi | Phụ thuộc | Kiểm |
 |---|---|---|---|---|---|
 | **10:10 ICT ngày 1 hằng tháng — CÀI THẬT** (đã dời khỏi 07:30 để khỏi trùng 00:30 UTC; host cron parse UTC): `10 3 1 * * cd /home/trido/thanhdt/WorkingClaude && timeout 600 python3 mike/bin/dd_forward_outcome.py --post-bus >> mike/logs/dd_forward_outcome.log 2>&1`. Trùng giờ 00:30 UTC với `paper_programs_daily_report` (`30 0 * * 2-6`) và 07:30 ICT `corp_action_daily.sh` — nhẹ (vài giây BQ, stdlib), không chia sẻ file; nếu Mike muốn tách thì dời 07:45 (`45 0 1 * *`) | `mike/bin/dd_forward_outcome.py` (stdlib; READ-ONLY) | `kb/dd_price_zones.json`; BQ `tav2_bq.ticker` lịch sử (Close/Price, VNINDEX) — KHÔNG same-day (§6); `data/benchmark/vnindex_tr_daily.csv` | `agents/Taylor/research/dd_label_20261124/forward/{outcomes.csv,summary.md}` (nguyên tử tmp+replace); `--post-bus` ghi 1 dòng finding `dd-forward-outcome-monthly` **chỉ khi** ≥30 ngày-DD độc lập có kết quả (ngưỡng kết luận) | bq CLI + `wc_env.sh`; sổ DD; VNINDEX TR (cron 00:35 ICT T3–T7) | `summary.md` đầu dòng 3 = ngày chạy; `bin/dd_forward_outcome_selfcheck.py` (PASS ×16 tại 2026-11-24). **Mốc đánh giá chính thức 2027-03-31** (h=63 mới có ~½ entry; h=126/252 chưa thể đủ). Gỡ khi hết nhu cầu chẩn đoán. |
+
+## plan_gate_recovery + trading_calendar_watch — CHƯA CÀI (nhánh `wags/plan-gate-rootfix-20261125`, cài khi merge + user duyệt)
+Mỗi dòng **source `wc_env.sh`** trước (arch-review vòng cuối #1: thiếu `CLOUDSDK_CONFIG` ⇒ bq `invalid_scope`; script cũng tự nạp — hai lớp). Host cron parse giờ theo **UTC** (dòng `TZ=Asia/Ho_Chi_Minh` đầu crontab chỉ là env cho script, không đổi cách
+parse — xem dòng `vn_realestate_monthly_check`); mọi dòng dưới đã quy đổi ICT→UTC, kể cả **lệch thứ** cho giờ
+sáng trước 07:00 ICT (T2 05:00 ICT = CN 22:00 UTC ⇒ dow 0-4).
+```
+# plan_gate_recovery --retry: tối 19:40-23:20 ICT mỗi 20' TRỪ 21:00/23:00 (giờ send_plan_report — tránh đua)
+40 12 * * 1-5 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --retry >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 19:40 ICT T2-T6
+0,20,40 13 * * 1-5 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --retry >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 20:00/20:20/20:40 ICT T2-T6
+20,40 14 * * 1-5 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --retry >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 21:20/21:40 ICT T2-T6
+0,20,40 15 * * 1-5 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --retry >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 22:00/22:20/22:40 ICT T2-T6
+20 16 * * 1-5 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --retry >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 23:20 ICT T2-T6
+# plan_gate_recovery --retry: sáng 05:00-07:00 ICT T2-T6 mỗi 20'
+0,20,40 22-23 * * 0-4 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --retry >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 05:00-06:40 ICT T2-T6 (= CN-T5 UTC)
+0 0 * * 1-5 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --retry >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 07:00 ICT T2-T6
+# tăng cấp 1 lần (07:40 = lượt bù khi 07:30 không kênh nào nhận)
+30,40 0 * * 1-5 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/plan_gate_recovery.py --escalate >> /home/trido/thanhdt/WorkingClaude/mike/logs/plan_gate_recovery.log 2>&1   # 07:30/07:40 ICT T2-T6
+# nhắc lịch giao dịch chưa xác nhận (14 ngày tới)
+8 1 * * 1 . /home/trido/thanhdt/WorkingClaude/wc_env.sh && /home/trido/thanhdt/WorkingClaude/mike/bin/trading_calendar_watch.py >> /home/trido/thanhdt/WorkingClaude/mike/logs/trading_calendar_watch.log 2>&1   # 08:08 ICT thứ Hai
+```
+§11 bốn câu: (1) **Đọc**: file plan `data/trade_plans/` (DollarBill ghi ~19:0x), `state/bq_freshness_gate_last.json`
+(bq_freshness 19:00 ghi), `golive_state_today.json`, BQ `ticker_prune` LIVE qua `prune_depth_gate.py --date`
+(partition-pruned 150 ngày), lịch `vn_market.py`, mốc `config/trading_calendar_confirmed.json`. (2) **Tươi lúc**:
+gate_last ghi lúc bq_freshness kết thúc (~19:0x) ⇒ lượt đầu 19:40; plan T+1 hạn 08:30 ⇒ escalate 07:30 (còn 1h).
+(3) **Phụ thuộc/không đua**: retry giữ flock `state/locks/plan_gate_recovery_retry.lock` + kiểm khoá RUN-LOCK của
+`bq_freshness_check.sh` (bận ⇒ WAIT); bỏ 21:00/23:00 + chỉ gửi từ 21:15 (late_plan_catchup có khoá mkdir riêng);
+trước 21:15 không gửi (cron 20:20→20:50→21:00 lo). (4) **Kiểm**: `logs/plan_gate_recovery.log` + mốc
+`state/plan_gate_recovery/<plan_date>.json` (retry/escalated), selfcheck `bin/plan_gate_recovery_selfcheck.py`,
+`bin/plan_gate_holiday_selfcheck.py`, `bin/prune_depth_gate_selfcheck.py`.

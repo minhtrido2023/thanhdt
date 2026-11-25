@@ -55,6 +55,7 @@ PROJECT="fake-project"
 FAILED=0
 WARNED=0
 QUIET=""
+GATE_FAIL_KINDS=""
 """
 
 
@@ -196,26 +197,66 @@ def extract_prune_depth():
     if start is None or end is None:
         print("FAIL: markers PRUNE_DEPTH_BEGIN/END not found — selfcheck stale", file=sys.stderr)
         sys.exit(1)
-    return "MIN_PRUNE_NAMES=200\n" + "\n".join(lines[start:end])
+    return "\n".join(lines[start:end])
+
+
+# 20 phiên THẬT trước 23/11/2026 (BQ ticker_prune, đo 25/11) — trung vị 203 ⇒ ngưỡng 183.
+REAL_PRIOR_2311 = [("2026-10-26", 206), ("2026-10-27", 205), ("2026-10-28", 204), ("2026-10-29", 204),
+                   ("2026-10-30", 203), ("2026-11-02", 204), ("2026-11-03", 204), ("2026-11-04", 203),
+                   ("2026-11-05", 203), ("2026-11-06", 202), ("2026-11-09", 203), ("2026-11-10", 201),
+                   ("2026-11-11", 201), ("2026-11-12", 203), ("2026-11-13", 202), ("2026-11-16", 202),
+                   ("2026-11-17", 201), ("2026-11-18", 201), ("2026-11-19", 201), ("2026-11-20", 200)]
+
+
+def run_prune_block(bq_body, bq_rc=0):
+    """Chạy khối PRUNE_DEPTH thật + bin/prune_depth_gate.py THẬT (cùng thư mục), `bq` giả trên PATH."""
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        fake = root / "fakebin"
+        fake.mkdir()
+        (fake / "bq.out").write_text(bq_body)
+        (fake / "bq").write_text(f'#!/bin/bash\ncat "{fake}/bq.out"\nexit {bq_rc}\n')
+        (fake / "bq").chmod(0o755)
+        gate = Path(__file__).with_name("prune_depth_gate.py")
+        snippet = (f'export PATH="{fake}:$PATH"\nPRUNE_DEPTH_GATE_BIN="{gate}"\n' + extract_prune_depth())
+        return run_bash(snippet, "command bq \"$@\"", ":", root)[0]
+
+
+def _csv(prior, last=None):
+    rows = list(prior) + ([last] if last else [])
+    return "dt,n\n" + "".join(f"{d},{n}\n" for d, n in rows)
 
 
 def case_prune_depth_separates_bq_error_from_gutted_table():
-    """§28: bq rc!=0 / rc=0-không-phải-số / số thấp / số OK là 4 trường hợp KHÁC nhau."""
-    def run(stub):
-        with tempfile.TemporaryDirectory() as td:
-            return run_bash(extract_prune_depth(), stub, ":", Path(td))[0]
-    out = run('echo "ERROR: auth expired"; return 1')
-    check("prune-depth rc!=0 => BQ QUERY FAILED, không nói 'moi ruột', chặn",
-          "BQ QUERY FAILED" in out and "moi ruột dù" not in out and "FAILED=1" in out, extra=out)
-    out = run('echo "f0_"; echo ""; return 0')
-    check("prune-depth rc=0 không phải số => BQ DATA BẤT THƯỜNG, KHÔNG nói auth/quota là nguyên nhân, chặn",
+    """§28: bq rc!=0 / rc=0-output-lạ / thiếu lịch sử / ghi thiếu / bình thường là các trường hợp KHÁC nhau.
+    Ngưỡng tương đối (25/11): 23/11 197 mã phải QUA; ghi thiếu 150 / moi ruột 7 phải CHẶN."""
+    out = run_prune_block("ERROR: auth expired\n", bq_rc=1)
+    check("prune-depth bq rc!=0 => BQ QUERY FAILED, không nói 'ghi thiếu', chặn",
+          "BQ QUERY FAILED" in out and "bị ghi thiếu —" not in out and "FAILED=1" in out, extra=out)
+    out = run_prune_block("f0_\nNULL\n")
+    check("prune-depth rc=0 output lạ => BQ DATA BẤT THƯỜNG, KHÔNG nói auth/quota là nguyên nhân, chặn",
           "BQ DATA BẤT THƯỜNG" in out and "KHÔNG PHẢI lỗi kết nối" in out and "FAILED=1" in out, extra=out)
-    out = run('echo "f0_"; echo "7"; return 0')
-    check("prune-depth 7 mã => BQ DEPTH (moi ruột), chặn",
-          "BQ DEPTH" in out and "moi ruột" in out and "FAILED=1" in out, extra=out)
-    out = run('echo "f0_"; echo "250"; return 0')
-    check("prune-depth 250 mã => OK, không notify, không chặn",
+    out = run_prune_block(_csv(REAL_PRIOR_2311[-5:], ("2026-11-23", 197)))
+    check("prune-depth chỉ 5 phiên lịch sử => KHÔNG ĐO ĐƯỢC trung vị, fail-closed chặn",
+          "BQ DATA BẤT THƯỜNG" in out and "UNMEASURABLE" in out and "FAILED=1" in out, extra=out)
+    out = run_prune_block(_csv(REAL_PRIOR_2311, ("2026-11-23", 197)))
+    check("prune-depth CA THẬT 23/11: 197 mã vs trung vị 203 (ngưỡng 183) => QUA, không notify",
           "NOTIFY" not in out and "FAILED=0" in out, extra=out)
+    out = run_prune_block(_csv(REAL_PRIOR_2311, ("2026-11-23", 182)))
+    check("prune-depth biên: 182 < ngưỡng 183 => CHẶN (biên dưới đúng 1 mã)",
+          "BQ DEPTH" in out and "threshold=183" in out and "FAILED=1" in out, extra=out)
+    out = run_prune_block(_csv(REAL_PRIOR_2311, ("2026-11-23", 150)))
+    check("prune-depth partial-write 202→150 => BQ DEPTH, chặn",
+          "BQ DEPTH" in out and "ghi thiếu" in out and "FAILED=1" in out, extra=out)
+    out = run_prune_block(_csv(REAL_PRIOR_2311, ("2026-11-23", 7)))
+    check("prune-depth moi ruột 7 mã => BQ DEPTH, chặn", "BQ DEPTH" in out and "FAILED=1" in out, extra=out)
+    low = [(d, 160) for d, _ in REAL_PRIOR_2311]
+    out = run_prune_block(_csv(low, ("2026-11-23", 149)))
+    check("prune-depth sàn tuyệt đối: trung vị trôi về 160 nhưng 149 < sàn 150 => chặn",
+          "BQ DEPTH" in out and "threshold=150" in out and "FAILED=1" in out, extra=out)
+    out = run_prune_block(_csv(REAL_PRIOR_2311, ("2026-11-23", 197)))
+    check("prune-depth thông báo cũ 'bình thường ~225-265' đã bỏ khỏi code",
+          "225-265" not in Path(__file__).with_name("bq_freshness_check.sh").read_text(), extra="")
 
 
 def extract_pipeline0():
