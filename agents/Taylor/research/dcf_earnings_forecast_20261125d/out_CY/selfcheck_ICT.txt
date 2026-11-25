@@ -1,0 +1,6 @@
+PASS B1null OOS IC(nlv,cu): recompute=-0.8651 artifact=-0.8651 tol=0.0005
+PASS A' OOS CYC_HI PEAK bias D0imp: recompute=0.0124 artifact=0.0124 tol=1e-06
+PASS A' OOS CYC_HI TROUGH bias D0imp: recompute=-0.0224 artifact=-0.0224 tol=1e-06
+PASS C' CYC IC36 OOS D0: recompute=0.1474 artifact=0.1474 tol=0.005
+n_dates_C3 15
+ALL_PASS

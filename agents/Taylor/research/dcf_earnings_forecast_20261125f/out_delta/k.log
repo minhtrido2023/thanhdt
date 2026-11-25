@@ -1,0 +1,9 @@
+era                ctrl      IC  ci95_lo  ci95_hi  n_q  n_pos_yr  n_yr
+ IS ctrl4+nroe (J3 KL2) -0.1323  -0.1593  -0.1141   24         0     6
+ IS                 nlv -0.2491  -0.2844  -0.2084   24         0     6
+ IS           ctrl4+nlv -0.0552  -0.0736  -0.0386   24         0     6
+ IS      ctrl4+nroe+nlv -0.0551  -0.0870  -0.0353   24         0     6
+OOS ctrl4+nroe (J3 KL2) -0.1078  -0.1398  -0.0638   24         0     6
+OOS                 nlv -0.1672  -0.1910  -0.1412   24         0     6
+OOS           ctrl4+nlv -0.0515  -0.0910  -0.0020   24         1     6
+OOS      ctrl4+nroe+nlv -0.0541  -0.0859  -0.0106   24         1     6

@@ -1,0 +1,4 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-earnfc-20261125d/agents/Taylor/research/dcf_earnings_forecast_20261125d/in_snapshot_v31/d_metrics2.py:39: RuntimeWarning: Mean of empty slice
+  bm = np.log(np.nanmean(np.where(S, np.exp(f), np.nan), axis=1))
+D0 done
+C2 done

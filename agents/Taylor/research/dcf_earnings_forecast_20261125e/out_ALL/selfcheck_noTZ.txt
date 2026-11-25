@@ -1,0 +1,14 @@
+PASS IC36 OOS P1: recompute=0.2186 artifact=0.2186 tol=0.005
+PASS IC36 OOS M4: recompute=0.2205 artifact=0.2205 tol=0.005
+PASS IC36 OOS EP: recompute=0.2566 artifact=0.2566 tol=0.005
+PASS dIC36 OOS M4-P1: recompute=0.0019 artifact=0.0019 tol=0.002
+PASS dIC36 OOS EP-P1 (EP>P1): recompute=0.0381 artifact=0.0381 tol=0.005
+n_dates_OOS 15
+PASS phi P1 (lstsq): recompute=0.4663 artifact=0.4663 tol=0.001
+n_fit_recompute 4254 artifact 4254
+PASS LOO S1 mismatches (300 dòng): recompute=0.0000 artifact=0.0000 tol=0.0
+PASS PIT violations sig_rows: recompute=0.0000 artifact=0.0000 tol=0.0
+PASS mc V3.2 ACG 2022-03 |log(mc32/mc_old)|<0.1: recompute=1.0000 artifact=1.0000 tol=0.0
+PASS mc V3.2 ABI 2025-07 |log(mc32/mc_old)|<0.1: recompute=1.0000 artifact=1.0000 tol=0.0
+PASS mc V3.2 TCB 2024-05 |log(mc32/mc_old)|<0.1: recompute=1.0000 artifact=1.0000 tol=0.0
+ALL_PASS

@@ -1,0 +1,257 @@
+{
+ "wb_last_month": "2026-10",
+ "wb_nonnull_from_2006": {
+  "rubber": 250,
+  "crude oil": 250,
+  "urea": 250,
+  "DAP": 250,
+  "sugar": 250
+ },
+ "n_COMM_events_with_c": 1240,
+ "phi": {
+  "HI|MID": {
+   "n": 719,
+   "phi_raw": 1.021143302017267,
+   "phi": 1.0
+  },
+  "HI|PEAK": {
+   "n": 303,
+   "phi_raw": 0.6923990399988369,
+   "phi": 0.6923990399988369
+  },
+  "HI|TROUGH": {
+   "n": 319,
+   "phi_raw": 0.3851879760940409,
+   "phi": 0.3851879760940409
+  },
+  "LO|MID": {
+   "n": 318,
+   "phi_raw": 0.5568502542016297,
+   "phi": 0.5568502542016297
+  },
+  "LO|PEAK": {
+   "n": 378,
+   "phi_raw": 1.2043152070663619,
+   "phi": 1.0
+  },
+  "LO|TROUGH": {
+   "n": 365,
+   "phi_raw": 0.7793759235267101,
+   "phi": 0.7793759235267101
+  },
+  "MID|MID": {
+   "n": 568,
+   "phi_raw": 0.7455693036458992,
+   "phi": 0.7455693036458992
+  },
+  "MID|PEAK": {
+   "n": 475,
+   "phi_raw": 1.3167634794427712,
+   "phi": 1.0
+  },
+  "MID|TROUGH": {
+   "n": 406,
+   "phi_raw": 0.6193310956162781,
+   "phi": 0.6193310956162781
+  }
+ },
+ "phi_fit_n": 3851,
+ "beta_COMMF": {
+  "1": {
+   "n": 309,
+   "beta": 0.1604766436941593,
+   "n_tickers": 17
+  },
+  "2": {
+   "n": 295,
+   "beta": 0.133680659094533,
+   "n_tickers": 17
+  },
+  "3": {
+   "n": 279,
+   "beta": 0.04923149364263283,
+   "n_tickers": 17
+  },
+  "4": {
+   "n": 263,
+   "beta": -0.1235973480709736,
+   "n_tickers": 17
+  }
+ },
+ "recompute_vs_b_forecast_maxabs": {
+  "SRW": 0.0,
+  "ENS": 0.0,
+  "D0imp": 0.0
+ }
+}
+era     grp    n  n_tk  MdAE_ENS  MdAE_D0imp  R_D0imp_vs_SRW  bias_D0imp  share_n  share_absD0imp_err
+ IS    COMM  294    15    0.0111      0.0240          1.7852     -0.0208   0.0511              0.0591
+ IS  CYC_HI 1171   134    0.0151      0.0210          1.2013     -0.0029   0.2034              0.3166
+ IS  CYC_LO 1017   124    0.0082      0.0114          1.3782     -0.0027   0.1766              0.1140
+ IS CYC_MID 1498   158    0.0113      0.0175          1.3023     -0.0019   0.2602              0.2494
+ IS     FIN  688    52    0.0084      0.0098          1.0544      0.0013   0.1195              0.0815
+ IS     NaN 1090   207    0.0110      0.0148          1.1833     -0.0048   0.1893              0.1795
+OOS    COMM  444    19    0.0091      0.0101          0.9315      0.0008   0.0419              0.0263
+OOS  CYC_HI 2643   244    0.0172      0.0241          1.2307     -0.0085   0.2491              0.4444
+OOS  CYC_LO 2158   216    0.0065      0.0086          1.1648     -0.0030   0.2034              0.0974
+OOS CYC_MID 2695   272    0.0109      0.0146          1.2149     -0.0071   0.2540              0.1930
+OOS     FIN 1569    81    0.0104      0.0123          1.0073      0.0019   0.1479              0.1054
+OOS     NaN 1100   182    0.0115      0.0154          1.2339     -0.0067   0.1037              0.1335
+ h era     grp  phase    n  n_tk  MdAE_SRW  MdAE_ENS  MdAE_D0imp  bias_ENS  bias_D0imp  D0imp_bias_yrs_pos  D0imp_bias_yrs_neg  share_absD0imp_err
+ 1  IS    COMM    MID   62    10    0.0120    0.0103      0.0112   -0.0075     -0.0069                   0                   6              0.0071
+ 1  IS    COMM     NA   67     8    0.0193    0.0196      0.0242   -0.0082     -0.0197                   0                   6              0.0166
+ 1  IS    COMM TROUGH  157    12    0.0117    0.0088      0.0307   -0.0007     -0.0299                   0                   6              0.0326
+ 1  IS  CYC_HI    MID  597    95    0.0133    0.0114      0.0147   -0.0018     -0.0022                   2                   4              0.1012
+ 1  IS  CYC_HI     NA   32    32    0.0278    0.0235      0.0287   -0.0035      0.0015                   3                   2              0.0110
+ 1  IS  CYC_HI   PEAK  300    73    0.0290    0.0307      0.0263   -0.0204      0.0159                   5                   1              0.1058
+ 1  IS  CYC_HI TROUGH  242    63    0.0163    0.0141      0.0316    0.0011     -0.0275                   0                   6              0.0986
+ 1  IS  CYC_LO    MID  318    80    0.0074    0.0070      0.0080   -0.0006     -0.0019                   0                   6              0.0255
+ 1  IS  CYC_LO     NA   39    39    0.0091    0.0101      0.0152   -0.0025     -0.0087                   0                   6              0.0047
+ 1  IS  CYC_LO   PEAK  310    69    0.0097    0.0099      0.0110   -0.0014      0.0045                   6                   0              0.0377
+ 1  IS  CYC_LO TROUGH  350    71    0.0080    0.0078      0.0149    0.0004     -0.0117                   0                   6              0.0461
+ 1  IS CYC_MID    MID  567   113    0.0116    0.0102      0.0124   -0.0009     -0.0031                   1                   5              0.0763
+ 1  IS CYC_MID     NA   33    33    0.0173    0.0169      0.0225    0.0020     -0.0022                   3                   3              0.0082
+ 1  IS CYC_MID   PEAK  500    83    0.0174    0.0161      0.0197   -0.0048      0.0138                   6                   0              0.0959
+ 1  IS CYC_MID TROUGH  398    94    0.0112    0.0092      0.0211    0.0010     -0.0162                   0                   6              0.0690
+ 1  IS     FIN    MID  205    34    0.0085    0.0086      0.0080    0.0007      0.0015                   2                   4              0.0177
+ 1  IS     FIN     NA  228    35    0.0095    0.0081      0.0093    0.0019      0.0014                   5                   1              0.0245
+ 1  IS     FIN   PEAK  179    28    0.0108    0.0096      0.0120   -0.0027      0.0066                   3                   3              0.0271
+ 1  IS     FIN TROUGH   76    20    0.0059    0.0059      0.0124    0.0019     -0.0080                   0                   6              0.0121
+ 1  IS      NA     NA 1090   207    0.0125    0.0110      0.0148   -0.0008     -0.0048                   1                   5              0.1795
+ 1 OOS    COMM    MID  179    17    0.0103    0.0070      0.0080    0.0018      0.0010                   4                   3              0.0085
+ 1 OOS    COMM   PEAK  141    17    0.0146    0.0146      0.0154   -0.0048      0.0101                   5                   2              0.0123
+ 1 OOS    COMM TROUGH  103    15    0.0088    0.0085      0.0093    0.0019     -0.0042                   1                   6              0.0046
+ 1 OOS  CYC_HI    MID  948   173    0.0156    0.0128      0.0173   -0.0011     -0.0030                   1                   6              0.0924
+ 1 OOS  CYC_HI     NA   38    38    0.0370    0.0373      0.0366   -0.0121     -0.0209                   2                   5              0.0093
+ 1 OOS  CYC_HI   PEAK  569   133    0.0325    0.0363      0.0262   -0.0202      0.0124                   7                   0              0.1118
+ 1 OOS  CYC_HI TROUGH 1088   150    0.0179    0.0151      0.0292    0.0037     -0.0224                   0                   7              0.2309
+ 1 OOS  CYC_LO    MID  660   145    0.0059    0.0053      0.0061    0.0000     -0.0009                   1                   6              0.0229
+ 1 OOS  CYC_LO     NA   52    52    0.0116    0.0081      0.0090   -0.0004     -0.0021                   0                   7              0.0039
+ 1 OOS  CYC_LO   PEAK  608   137    0.0096    0.0087      0.0082   -0.0022      0.0024                   6                   1              0.0288
+ 1 OOS  CYC_LO TROUGH  838   153    0.0068    0.0055      0.0109    0.0000     -0.0087                   0                   7              0.0418
+ 1 OOS CYC_MID    MID  889   189    0.0105    0.0093      0.0107   -0.0018     -0.0044                   0                   7              0.0457
+ 1 OOS CYC_MID     NA   35    35    0.0128    0.0192      0.0207   -0.0007     -0.0103                   1                   5              0.0023
+ 1 OOS CYC_MID   PEAK  552   137    0.0189    0.0177      0.0163   -0.0076      0.0068                   6                   1              0.0550
+ 1 OOS CYC_MID TROUGH 1219   196    0.0104    0.0095      0.0173    0.0009     -0.0140                   0                   7              0.0899
+ 1 OOS     FIN    MID  452    66    0.0120    0.0097      0.0103   -0.0006     -0.0012                   2                   5              0.0260
+ 1 OOS     FIN     NA  253    35    0.0120    0.0110      0.0111    0.0010      0.0042                   4                   3              0.0163
+ 1 OOS     FIN   PEAK  555    64    0.0125    0.0113      0.0140   -0.0003      0.0093                   7                   0              0.0417
+ 1 OOS     FIN TROUGH  309    47    0.0121    0.0094      0.0131    0.0043     -0.0091                   0                   7              0.0214
+ 1 OOS      NA     NA 1100   182    0.0125    0.0115      0.0154   -0.0009     -0.0067                   1                   6              0.1335
+ h era       scope model   ref     R  ci99_lo  ci99_hi  n_ev  n_q  n_yr  yrs_better
+ 1  IS         ALL ENSph   ENS 1.004    0.996    1.007  5758   24     6           1
+ 1  IS         ALL  MRph    MR 1.015    0.997    1.032  5846   24     6           2
+ 1  IS         ALL D0tc8 D0imp 1.041    0.970    1.124  4436   24     6           2
+ 1  IS         ALL ENSph   SRW 0.906    0.858    0.956  5758   24     6           6
+ 1  IS         ALL   ENS   SRW 0.902    0.853    0.951  5758   24     6           6
+ 1  IS         ALL D0tc8   SRW 1.342    1.272    1.419  4706   24     6           0
+ 1  IS         ALL ENScm   ENS 0.998    0.985    1.016  5758   24     6           3
+ 1  IS         ALL ENScm   SRW 0.901    0.861    0.948  5758   24     6           6
+ 1  IS        COMM ENSph   ENS 1.027    1.011    1.049   294   24     6           0
+ 1  IS        COMM  MRph    MR 1.044    1.004    1.108   294   24     6           0
+ 1  IS        COMM D0tc8 D0imp 1.281    0.899    1.620   198   19     6           2
+ 1  IS        COMM ENSph   SRW 0.805    0.686    0.940   294   24     6           5
+ 1  IS        COMM   ENS   SRW 0.784    0.674    0.921   294   24     6           5
+ 1  IS        COMM D0tc8   SRW 2.208    1.740    2.748   261   24     6           0
+ 1  IS        COMM COMMF   SRW 0.959    0.683    1.240   322   24     6           3
+ 1  IS        COMM COMMF   ENS 1.215    0.937    1.584   294   24     6           2
+ 1  IS        COMM ENScm   ENS 0.995    0.868    1.173   294   24     6           3
+ 1  IS        COMM ENScm   SRW 0.780    0.700    0.863   294   24     6           6
+ 1  IS      CYC_HI ENSph   ENS 1.014    0.959    1.061  1171   24     6           1
+ 1  IS      CYC_HI  MRph    MR 1.006    0.936    1.054  1177   24     6           2
+ 1  IS      CYC_HI D0tc8 D0imp 1.218    1.088    1.370  1177   24     6           0
+ 1  IS      CYC_HI ENSph   SRW 0.871    0.755    1.020  1171   24     6           5
+ 1  IS      CYC_HI   ENS   SRW 0.859    0.762    0.976  1171   24     6           5
+ 1  IS      CYC_HI D0tc8   SRW 1.371    1.240    1.476  1274   24     6           0
+ 1  IS      CYC_HI ENScm   ENS 1.014    0.959    1.061  1171   24     6           1
+ 1  IS      CYC_HI ENScm   SRW 0.871    0.755    1.020  1171   24     6           5
+ 1  IS     CYC_MID ENSph   ENS 1.003    0.991    1.016  1498   24     6           2
+ 1  IS     CYC_MID  MRph    MR 1.015    1.000    1.032  1501   24     6           1
+ 1  IS     CYC_MID D0tc8 D0imp 0.895    0.814    0.983  1501   24     6           5
+ 1  IS     CYC_MID ENSph   SRW 0.872    0.796    1.004  1498   24     6           5
+ 1  IS     CYC_MID   ENS   SRW 0.870    0.798    0.998  1498   24     6           5
+ 1  IS     CYC_MID D0tc8   SRW 1.193    1.073    1.345  1607   24     6           0
+ 1  IS     CYC_MID ENScm   ENS 1.003    0.991    1.016  1498   24     6           2
+ 1  IS     CYC_MID ENScm   SRW 0.872    0.796    1.004  1498   24     6           5
+ 1  IS      CYC_LO ENSph   ENS 0.991    0.970    1.008  1017   24     6           3
+ 1  IS      CYC_LO  MRph    MR 0.999    0.986    1.009  1021   24     6           3
+ 1  IS      CYC_LO D0tc8 D0imp 0.921    0.834    1.026  1021   24     6           4
+ 1  IS      CYC_LO ENSph   SRW 0.951    0.844    1.074  1017   24     6           5
+ 1  IS      CYC_LO   ENS   SRW 0.960    0.839    1.079  1017   24     6           4
+ 1  IS      CYC_LO D0tc8   SRW 1.226    1.142    1.336  1060   24     6           0
+ 1  IS      CYC_LO ENScm   ENS 0.991    0.970    1.008  1017   24     6           3
+ 1  IS      CYC_LO ENScm   SRW 0.951    0.844    1.074  1017   24     6           5
+ 1  IS         FIN ENSph   ENS 0.996    0.984    1.005   673   20     5           2
+ 1  IS         FIN  MRph    MR 0.973    0.947    0.996   734   22     6           5
+ 1  IS         FIN D0tc8 D0imp 0.981    0.848    1.300   424   17     5           3
+ 1  IS         FIN ENSph   SRW 0.924    0.766    1.171   673   20     5           3
+ 1  IS         FIN   ENS   SRW 0.927    0.766    1.176   673   20     5           3
+ 1  IS         FIN D0tc8   SRW 1.078    0.945    1.386   424   17     5           2
+ 1  IS         FIN ENScm   ENS 0.996    0.984    1.005   673   20     5           2
+ 1  IS         FIN ENScm   SRW 0.924    0.766    1.171   673   20     5           3
+ 1  IS COMM+CYC_HI ENSph   ENS 1.015    1.004    1.028  1465   24     6           1
+ 1  IS COMM+CYC_HI  MRph    MR 1.031    0.986    1.102  1471   24     6           2
+ 1  IS COMM+CYC_HI D0tc8 D0imp 1.202    1.079    1.329  1410   24     6           0
+ 1  IS COMM+CYC_HI ENSph   SRW 0.891    0.789    1.022  1465   24     6           5
+ 1  IS COMM+CYC_HI   ENS   SRW 0.878    0.781    0.999  1465   24     6           5
+ 1  IS COMM+CYC_HI D0tc8   SRW 1.575    1.463    1.680  1535   24     6           0
+ 1  IS COMM+CYC_HI ENScm   ENS 1.002    0.949    1.056  1465   24     6           3
+ 1  IS COMM+CYC_HI ENScm   SRW 0.879    0.803    0.988  1465   24     6           5
+ 1 OOS         ALL ENSph   ENS 1.000    0.993    1.007 10609   27     7           4
+ 1 OOS         ALL  MRph    MR 1.009    1.002    1.018 10625   27     7           0
+ 1 OOS         ALL D0tc8 D0imp 1.041    0.992    1.098  9271   27     7           2
+ 1 OOS         ALL ENSph   SRW 0.876    0.849    0.904 10609   27     7           7
+ 1 OOS         ALL   ENS   SRW 0.876    0.849    0.905 10609   27     7           7
+ 1 OOS         ALL D0tc8   SRW 1.243    1.126    1.380  9632   27     7           0
+ 1 OOS         ALL ENScm   ENS 0.998    0.990    1.005 10609   27     7           5
+ 1 OOS         ALL ENScm   SRW 0.874    0.848    0.900 10609   27     7           7
+ 1 OOS        COMM ENSph   ENS 1.011    1.000    1.027   444   27     7           2
+ 1 OOS        COMM  MRph    MR 0.993    0.957    1.048   444   27     7           5
+ 1 OOS        COMM D0tc8 D0imp 1.214    0.970    1.594   426   27     7           2
+ 1 OOS        COMM ENSph   SRW 0.883    0.712    1.127   444   27     7           5
+ 1 OOS        COMM   ENS   SRW 0.873    0.703    1.117   444   27     7           5
+ 1 OOS        COMM D0tc8   SRW 1.066    0.730    1.475   438   27     7           3
+ 1 OOS        COMM COMMF   SRW 1.336    1.024    1.718   456   27     7           1
+ 1 OOS        COMM COMMF   ENS 1.556    1.394    1.780   444   27     7           0
+ 1 OOS        COMM ENScm   ENS 1.035    0.937    1.117   444   27     7           2
+ 1 OOS        COMM ENScm   SRW 0.904    0.743    1.124   444   27     7           5
+ 1 OOS      CYC_HI ENSph   ENS 0.995    0.970    1.017  2643   27     7           3
+ 1 OOS      CYC_HI  MRph    MR 0.997    0.947    1.049  2651   27     7           2
+ 1 OOS      CYC_HI D0tc8 D0imp 1.091    1.015    1.190  2651   27     7           1
+ 1 OOS      CYC_HI ENSph   SRW 0.879    0.846    0.912  2643   27     7           7
+ 1 OOS      CYC_HI   ENS   SRW 0.883    0.839    0.926  2643   27     7           7
+ 1 OOS      CYC_HI D0tc8   SRW 1.313    1.130    1.578  2754   27     7           0
+ 1 OOS      CYC_HI ENScm   ENS 0.995    0.970    1.017  2643   27     7           3
+ 1 OOS      CYC_HI ENScm   SRW 0.879    0.846    0.912  2643   27     7           7
+ 1 OOS     CYC_MID ENSph   ENS 1.002    0.996    1.008  2695   27     7           3
+ 1 OOS     CYC_MID  MRph    MR 1.010    0.996    1.028  2695   27     7           2
+ 1 OOS     CYC_MID D0tc8 D0imp 1.039    0.969    1.112  2695   27     7           3
+ 1 OOS     CYC_MID ENSph   SRW 0.945    0.845    1.060  2695   27     7           4
+ 1 OOS     CYC_MID   ENS   SRW 0.943    0.845    1.057  2695   27     7           5
+ 1 OOS     CYC_MID D0tc8   SRW 1.313    1.141    1.520  2820   27     7           0
+ 1 OOS     CYC_MID ENScm   ENS 1.002    0.996    1.008  2695   27     7           3
+ 1 OOS     CYC_MID ENScm   SRW 0.945    0.845    1.060  2695   27     7           4
+ 1 OOS      CYC_LO ENSph   ENS 1.013    1.001    1.027  2158   27     7           1
+ 1 OOS      CYC_LO  MRph    MR 1.020    1.002    1.038  2158   27     7           2
+ 1 OOS      CYC_LO D0tc8 D0imp 0.941    0.906    0.991  2158   27     7           6
+ 1 OOS      CYC_LO ENSph   SRW 0.871    0.822    0.928  2158   27     7           7
+ 1 OOS      CYC_LO   ENS   SRW 0.859    0.816    0.908  2158   27     7           7
+ 1 OOS      CYC_LO D0tc8   SRW 1.095    0.948    1.265  2233   27     7           3
+ 1 OOS      CYC_LO ENScm   ENS 1.013    1.001    1.027  2158   27     7           1
+ 1 OOS      CYC_LO ENScm   SRW 0.871    0.822    0.928  2158   27     7           7
+ 1 OOS         FIN ENSph   ENS 1.002    0.993    1.011  1569   27     7           2
+ 1 OOS         FIN  MRph    MR 1.007    0.995    1.021  1577   27     7           2
+ 1 OOS         FIN D0tc8 D0imp 1.129    1.041    1.198  1341   27     7           1
+ 1 OOS         FIN ENSph   SRW 0.809    0.741    0.883  1569   27     7           7
+ 1 OOS         FIN   ENS   SRW 0.808    0.737    0.885  1569   27     7           7
+ 1 OOS         FIN D0tc8   SRW 1.138    0.981    1.274  1387   27     7           1
+ 1 OOS         FIN ENScm   ENS 1.002    0.993    1.011  1569   27     7           2
+ 1 OOS         FIN ENScm   SRW 0.809    0.741    0.883  1569   27     7           7
+ 1 OOS COMM+CYC_HI ENSph   ENS 1.001    0.982    1.025  3087   27     7           3
+ 1 OOS COMM+CYC_HI  MRph    MR 1.022    0.975    1.060  3095   27     7           2
+ 1 OOS COMM+CYC_HI D0tc8 D0imp 1.113    1.041    1.203  3077   27     7           0
+ 1 OOS COMM+CYC_HI ENSph   SRW 0.858    0.804    0.917  3087   27     7           7
+ 1 OOS COMM+CYC_HI   ENS   SRW 0.857    0.806    0.914  3087   27     7           7
+ 1 OOS COMM+CYC_HI D0tc8   SRW 1.291    1.111    1.557  3192   27     7           0
+ 1 OOS COMM+CYC_HI ENScm   ENS 1.008    0.985    1.034  3087   27     7           3
+ 1 OOS COMM+CYC_HI ENScm   SRW 0.864    0.817    0.914  3087   27     7           7

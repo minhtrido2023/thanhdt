@@ -1,0 +1,105 @@
+{
+ "src": "/home/trido/thanhdt/WorkingClaude/wt-dcf-earnfc-20261125d/agents/Taylor/research/dcf_earnings_forecast_20261125e/calc/../../dcf_earnings_forecast_20261125d/in_snapshot_v31/vp2.parquet",
+ "V31_reproduce_maxabs_dlog": 0.0,
+ "rows_total": 188947,
+ "rows_step31": 5896,
+ "rows_step32": 4293,
+ "rows_changed_all": 1603,
+ "rows_changed_in_univ_2014p": 609,
+ "n_in_univ_2014p": 56549,
+ "share_changed_in_univ_2014p": 0.010769421209924137,
+ "p50_abs_shift_changed": 0.23587382745124827,
+ "cases": [
+  {
+   "ticker": "ACG",
+   "ym": "2022-01",
+   "mc_v31_ty": 9185,
+   "mc_v32_ty": 9185,
+   "mc_old_ty": 9183
+  },
+  {
+   "ticker": "ACG",
+   "ym": "2022-02",
+   "mc_v31_ty": 9360,
+   "mc_v32_ty": 9360,
+   "mc_old_ty": 9359
+  },
+  {
+   "ticker": "ACG",
+   "ym": "2022-03",
+   "mc_v31_ty": 13978,
+   "mc_v32_ty": 9018,
+   "mc_old_ty": 9462
+  },
+  {
+   "ticker": "ACG",
+   "ym": "2022-04",
+   "mc_v31_ty": 9631,
+   "mc_v32_ty": 9631,
+   "mc_old_ty": 9632
+  },
+  {
+   "ticker": "ABI",
+   "ym": "2025-06",
+   "mc_v31_ty": 2222,
+   "mc_v32_ty": 2222,
+   "mc_old_ty": 2223
+  },
+  {
+   "ticker": "ABI",
+   "ym": "2025-07",
+   "mc_v31_ty": 2838,
+   "mc_v32_ty": 2027,
+   "mc_old_ty": 2106
+  },
+  {
+   "ticker": "ABI",
+   "ym": "2025-08",
+   "mc_v31_ty": 3122,
+   "mc_v32_ty": 2230,
+   "mc_old_ty": 2237
+  },
+  {
+   "ticker": "ABI",
+   "ym": "2025-09",
+   "mc_v31_ty": 2331,
+   "mc_v32_ty": 2331,
+   "mc_old_ty": 2339
+  },
+  {
+   "ticker": "ABI",
+   "ym": "2025-10",
+   "mc_v31_ty": 2179,
+   "mc_v32_ty": 2179,
+   "mc_old_ty": 2179
+  },
+  {
+   "ticker": "TCB",
+   "ym": "2024-04",
+   "mc_v31_ty": 164149,
+   "mc_v32_ty": 164149,
+   "mc_old_ty": 164075
+  },
+  {
+   "ticker": "TCB",
+   "ym": "2024-05",
+   "mc_v31_ty": 331116,
+   "mc_v32_ty": 165558,
+   "mc_old_ty": 170697
+  },
+  {
+   "ticker": "TCB",
+   "ym": "2024-06",
+   "mc_v31_ty": 164501,
+   "mc_v32_ty": 164501,
+   "mc_old_ty": 169556
+  },
+  {
+   "ticker": "TCB",
+   "ym": "2024-07",
+   "mc_v31_ty": 163797,
+   "mc_v32_ty": 163797,
+   "mc_old_ty": 163845
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+{
+ "fin_rows": 68802,
+ "fin_tickers": 1306,
+ "K_minus_qend_days_p50": 32.0,
+ "revision_NP_P1_vs_prevP0": {
+  "n": 59540,
+  "share_exact_lt_0.1pct": 0.9931306684581793,
+  "share_gt_5pct": 0.0038293584145112527
+ },
+ "vp_quarters_total": 63373,
+ "vp_quarters_src": {
+  "BQ": 59320,
+  "VND": 4053
+ },
+ "events_with_vp": 59320,
+ "known_vp_vs_K_days": {
+  "count": 59320.0,
+  "mean": 0.01,
+  "std": 0.16,
+  "min": 0.0,
+  "25%": 0.0,
+  "50%": 0.0,
+  "75%": 0.0,
+  "max": 11.0
+ },
+ "inventory": {
+  "IS": {
+   "events": 6118,
+   "tickers": 487,
+   "report_quarters": 24,
+   "years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019
+   ],
+   "with_A1": 6116,
+   "with_A4": 6106,
+   "with_rev8": 6036,
+   "with_V_D0": 5848,
+   "route": {
+    "COMPOUNDER": 3826,
+    "REALESTATE": 935,
+    "SECURITIES": 406,
+    "CYCLICAL": 368,
+    "BANK": 247,
+    "POWER": 226,
+    "INSURANCE": 110
+   },
+   "events_per_quarter_p50": 258.0
+  },
+  "OOS": {
+   "events": 11338,
+   "tickers": 671,
+   "report_quarters": 28,
+   "years": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+   ],
+   "with_A1": 10986,
+   "with_A4": 9770,
+   "with_rev8": 11330,
+   "with_V_D0": 10973,
+   "route": {
+    "COMPOUNDER": 6924,
+    "REALESTATE": 1799,
+    "SECURITIES": 841,
+    "BANK": 630,
+    "CYCLICAL": 588,
+    "POWER": 370,
+    "INSURANCE": 186
+   },
+   "events_per_quarter_p50": 412.0
+  }
+ },
+ "note_survivorship": "sự kiện chỉ từ ticker_financial (mã có trong BQ); mã huỷ niêm yết chỉ có ở nguồn VND của panel V3 (src=VND) không có NP_P* ⇒ thiếu ở A"
+}

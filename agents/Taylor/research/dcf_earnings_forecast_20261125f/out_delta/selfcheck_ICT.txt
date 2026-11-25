@@ -1,0 +1,10 @@
+PASS panel V3.2 md5=a24678ff0a8b2166ac3328624cc0cd13
+PASS out_J3C ACG 2022-03 mc (tỷ, V3.2 = 9.018): recompute=9018.2326 artifact=9018.0000 tol=1.0
+PASS out_CYC_CYC ACG 2022-03 mc (tỷ, V3.2 = 9.018): recompute=9018.2326 artifact=9018.0000 tol=1.0
+PASS CYC IC36 OOS D0 (n=15): recompute=0.1468 artifact=0.1468 tol=0.005
+PASS CYC IC36 OOS C4 (n=15): recompute=0.2202 artifact=0.2202 tol=0.005
+PASS CYC IC36 OOS EP (n=15): recompute=0.1665 artifact=0.1665 tol=0.005
+PASS KL6 CYC OOS EP 0.1665 >= D0 0.1468; D0>EP năm IS 6/6, OOS 1/4
+PASS KL2 IS IC(gap|ctrl4+nroe+nlv, u4): recompute=-0.0551 artifact=-0.0551 tol=0.0005
+PASS KL2 OOS IC(gap|ctrl4+nroe+nlv, u4): recompute=-0.0541 artifact=-0.0541 tol=0.0005
+ALL_PASS
