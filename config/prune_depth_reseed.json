@@ -1,0 +1,7 @@
+{
+  "_doc": "LỐI THOÁT CỦA NGƯỜI cho cổng độ sâu ticker_prune (bin/prune_depth_gate.py, arch-review vòng cuối #4 25/11/2026). Trung vị neo vào phiên đã qua cổng ⇒ universe co THẬT >10% một lần sẽ bị chặn tới khi người xác nhận. Khi team dữ liệu XÁC NHẬN universe co thật (không phải ghi thiếu/moi ruột): đặt reseed_from = phiên đầu tiên của universe mới (YYYY-MM-DD) + source (link/tên tin nhắn/ticket bằng chứng) + confirmed_by + confirmed_at. Ngày xét ≥ reseed_from ⇒ lịch sử trước mốc bị bỏ; sàn tuyệt đối 150 vẫn giữ. Thiếu source / ngày sai / JSON hỏng ⇒ BỎ QUA (vẫn chặn — fail-closed). null = không reseed (mặc định).",
+  "reseed_from": null,
+  "source": null,
+  "confirmed_by": null,
+  "confirmed_at": null
+}

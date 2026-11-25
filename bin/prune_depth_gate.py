@@ -21,6 +21,17 @@ sau chỉ được NHẬN vào lịch sử nếu chính nó QUA ngưỡng tính 
 THẬT >10% một lần sẽ bị chặn tới khi NGƯỜI xác nhận (không tự hợp thức hoá) — LOOKBACK 150 ngày (~100 phiên) để
 hạt giống còn sạch kể cả chuỗi ghi thiếu dài ~2-3 tháng.
 
+LỐI THOÁT CỦA NGƯỜI (arch-review vòng cuối #4, 25/11): universe co THẬT >10% một lần ⇒ neo trên chặn ~cả
+LOOKBACK. Người đã đối chiếu (team dữ liệu) ghi `config/prune_depth_reseed.json` {"reseed_from": "<phiên đầu tiên
+của universe mới>", "source": "<bằng chứng>"} (cùng khuôn config/trading_calendar_confirmed.json) ⇒ với ngày xét
+≥ reseed_from, lịch sử TRƯỚC reseed_from bị bỏ; trong lúc chưa đủ WINDOW phiên mới, ngưỡng = max(sàn, ⌈RATIO ×
+trung vị các phiên mới đã nhận⌉) (chưa có phiên nào ⇒ chỉ sàn). Thiếu source / ngày sai / JSON hỏng ⇒ BỎ QUA
+(vẫn chặn — fail-closed). Sàn 150 KHÔNG bao giờ bị reseed nới.
+
+Env (arch-review vòng cuối #1): cron / `env -i` không source wc_env.sh ⇒ bq thiếu CLOUDSDK_CONFIG ⇒ "invalid_scope:
+Bad Request". ensure_wc_env() nạp CLOUDSDK_CONFIG/DNA_PYEXE + nối PATH từ wc_env.sh khi CLOUDSDK_CONFIG chưa có;
+vẫn thiếu ⇒ UNMEASURABLE nói rõ lý do env (không gọi bq).
+
 Fail-closed: không đủ WINDOW phiên trước / BQ lỗi / output lạ ⇒ rc=2 (KHÔNG ĐO ĐƯỢC) — caller chặn.
 
 CLI:
@@ -44,9 +55,58 @@ FLOOR = 150
 RATIO = 0.90
 WINDOW = 20
 LOOKBACK_DAYS = 150  # ~100 phiên: hạt giống 20 + đủ dài để chuỗi ghi thiếu không chiếm hạt giống — partition-pruned, rẻ
+MIKE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WC_ENV = os.environ.get("PDG_WC_ENV") or os.path.join(os.path.dirname(MIKE_ROOT), "wc_env.sh")
+RESEED_FILE = os.environ.get("PDG_RESEED_FILE") or os.path.join(MIKE_ROOT, "config", "prune_depth_reseed.json")
+RUNBOOK = ("RUNBOOK: universe co THẬT (đã đối chiếu team dữ liệu) ⇒ ghi config/prune_depth_reseed.json "
+           "{reseed_from: <phiên đầu của universe mới>, source: <bằng chứng>} rồi chạy lại; ghi thiếu/moi ruột ⇒ "
+           "KHÔNG reseed, KHÔNG nới ngưỡng")
 PROJECT = os.environ.get("BQ_PROJECT", "lithe-record-440915-m9")
 TABLE = f"`{PROJECT}.tav2_bq.ticker_prune`"
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def ensure_wc_env(env=None, wc_env=None):
+    """CLOUDSDK_CONFIG chưa có ⇒ nạp từ wc_env.sh (CLOUDSDK_CONFIG, DNA_PYEXE; PATH nối thêm). Không ghi đè biến
+    đã đặt (TZ/WORKDIR_8L KHÔNG nhập). → None nếu env dùng được, ngược lại chuỗi lý do (caller fail-closed)."""
+    env = os.environ if env is None else env
+    if env.get("CLOUDSDK_CONFIG"):
+        return None
+    path = wc_env or WC_ENV
+    if not os.path.isfile(path):
+        return f"thiếu CLOUDSDK_CONFIG và không thấy {path} để nạp (cron phải source wc_env.sh)"
+    try:
+        r = subprocess.run(["bash", "-c", '. "$1" >/dev/null 2>&1; env -0', "_", path], capture_output=True,
+                           timeout=30, env=dict(env))
+        got = dict(x.split("=", 1) for x in r.stdout.decode("utf-8", "replace").split("\0") if "=" in x)
+    except Exception as exc:  # noqa: BLE001
+        return f"thiếu CLOUDSDK_CONFIG, nạp {path} lỗi: {type(exc).__name__}: {exc}"
+    for k in ("CLOUDSDK_CONFIG", "DNA_PYEXE"):
+        if got.get(k) and not env.get(k):
+            env[k] = got[k]
+    cur = [x for x in env.get("PATH", "").split(":") if x]
+    env["PATH"] = ":".join(cur + [x for x in got.get("PATH", "").split(":") if x and x not in cur])
+    return None if env.get("CLOUDSDK_CONFIG") else f"thiếu CLOUDSDK_CONFIG sau khi nạp {path}"
+
+
+def load_reseed(path=None):
+    """→ (reseed_from: date|None, note). Thiếu file/null ⇒ (None, ""). Có mà thiếu source/ngày sai/hỏng ⇒ (None, lý do)."""
+    path = path or RESEED_FILE
+    try:
+        with open(path, encoding="utf-8") as f:
+            j = json.load(f)
+    except FileNotFoundError:
+        return None, ""
+    except (OSError, ValueError) as exc:
+        return None, f"reseed_bỏ_qua=file hỏng ({type(exc).__name__})"
+    if not isinstance(j, dict) or not j.get("reseed_from"):
+        return None, ""
+    src = str(j.get("source") or "").strip()
+    if not src:
+        return None, "reseed_bỏ_qua=thiếu source (không nhận reseed không có bằng chứng)"
+    if not DATE_RE.match(str(j["reseed_from"])):
+        return None, f"reseed_bỏ_qua=reseed_from sai định dạng {j['reseed_from']!r}"
+    return str(j["reseed_from"]), f"source={src[:80]}"
 
 
 def threshold(hist, floor=FLOOR, ratio=RATIO, window=WINDOW):
@@ -71,9 +131,15 @@ def accepted_history(prior, floor=FLOOR, ratio=RATIO, window=WINDOW):
     return acc, dropped
 
 
-def decide(n, prior, floor=FLOOR, ratio=RATIO, window=WINDOW):
-    """→ (verdict, info). prior = list số mã của các phiên TRƯỚC ngày xét (cũ→mới)."""
+def decide(n, prior, floor=FLOOR, ratio=RATIO, window=WINDOW, reseeded=False):
+    """→ (verdict, info). prior = list số mã của các phiên TRƯỚC ngày xét (cũ→mới). reseeded=True: prior đã cắt
+    từ reseed_from (người xác nhận) ⇒ chưa đủ WINDOW vẫn đo được: trung vị phiên mới đã nhận, rỗng ⇒ chỉ sàn."""
     acc, dropped = accepted_history(prior, floor, ratio, window)
+    if reseeded and len(acc) < window:
+        med, thr = (threshold(acc, floor, ratio, window) if acc else (None, floor))
+        info = {"n": n, "median": med, "threshold": thr, "floor": floor, "ratio": ratio, "window": len(acc),
+                "dropped": dropped, "reseeded": True}
+        return ("PASS" if n >= thr else "FAIL"), info
     if len(acc) < window:
         return "UNMEASURABLE", {"n": n, "reason": f"chỉ có {len(acc)}/{window} phiên trước hợp lệ (≥ sàn {floor}) — "
                                                   "không tính được trung vị"}
@@ -87,15 +153,20 @@ def fmt(verdict, date, info):
     if verdict == "UNMEASURABLE":
         return f"PRUNE_DEPTH UNMEASURABLE date={date} n={info.get('n')} reason={info['reason']}"
     med = info["median"]
-    med_s = str(int(med)) if float(med).is_integer() else f"{med:.1f}"
+    med_s = "—" if med is None else (str(int(med)) if float(med).is_integer() else f"{med:.1f}")
     drop = f" loại_khỏi_trung_vị={info['dropped']} phiên FAIL trước đó" if info.get("dropped") else ""
+    rs = f" {info['reseed']}" if info.get("reseed") else ""
+    rb = f" | {RUNBOOK}" if verdict == "FAIL" else ""
     return (f"PRUNE_DEPTH {verdict} date={date} n={info['n']} threshold={info['threshold']} "
             f"median{info['window']}={med_s} (=max(sàn {info['floor']}, ⌈{info['ratio']:.2f}×trung vị phiên đã qua cổng⌉))"
-            + drop)
+            + drop + rs + rb)
 
 
 def query_counts(date_arg):
-    """→ (date, n, prior). date_arg=None ⇒ MAX(time)."""
+    """→ (date, n, prior_pairs[(date, n)]). date_arg=None ⇒ MAX(time)."""
+    env_err = ensure_wc_env()
+    if env_err:
+        raise RuntimeError(f"env: {env_err}")
     target = f"DATE('{date_arg}')" if date_arg else f"(SELECT MAX(x.time) FROM {TABLE} AS x)"
     sql = (f"WITH tg AS (SELECT {target} AS d) "
            f"SELECT t.time AS dt, COUNT(DISTINCT t.ticker) AS n FROM {TABLE} AS t, tg "
@@ -115,7 +186,7 @@ def query_counts(date_arg):
         raise RuntimeError("bq không trả phiên nào trong cửa sổ — bảng rỗng/ngày sai")
     date = date_arg or pairs[-1][0]
     n = next((c for d, c in pairs if d == date), 0)
-    prior = [c for d, c in pairs if d < date]
+    prior = [(d, c) for d, c in pairs if d < date]
     return date, n, prior
 
 
@@ -129,7 +200,8 @@ def main(argv=None):
     try:
         if a.counts_json:
             j = json.loads(a.counts_json)
-            date, n, prior = j["date"], int(j["n"]), list(j["prior"])
+            date, n = j["date"], int(j["n"])
+            prior = [tuple(x) if isinstance(x, (list, tuple)) else (None, x) for x in j["prior"]]
         else:
             if a.date and not DATE_RE.match(a.date):
                 raise RuntimeError(f"--date sai định dạng: {a.date!r}")
@@ -137,7 +209,14 @@ def main(argv=None):
     except Exception as exc:  # noqa: BLE001 — mọi lỗi đo ⇒ fail-closed, nói rõ nguyên nhân
         print(f"PRUNE_DEPTH UNMEASURABLE date={a.date or 'latest'} reason={type(exc).__name__}: {exc}")
         return 2
-    verdict, info = decide(n, prior)
+    rfrom, rnote = load_reseed()
+    active = bool(rfrom) and str(date) >= rfrom and all(d is not None for d, _ in prior)
+    counts = [int(c) for d, c in prior if not active or str(d) >= rfrom]
+    verdict, info = decide(n, counts, reseeded=active)
+    if active:
+        info["reseed"] = f"RESEED_FROM={rfrom} ({rnote}; lịch sử trước mốc bị bỏ theo xác nhận của người)"
+    elif rnote or rfrom:
+        info["reseed"] = rnote or f"reseed_from={rfrom} chưa hiệu lực cho ngày {date}"
     print(fmt(verdict, date, info))
     return {"PASS": 0, "FAIL": 1}.get(verdict, 2)
 

@@ -3,6 +3,7 @@
 Không gọi BQ thật: decide() trực tiếp + main() với `bq` giả trên PATH (đường query_counts).
 Mỗi ca ghi rõ mutation nó giết."""
 import datetime as dt
+import json
 import os
 import subprocess
 import sys
@@ -36,16 +37,59 @@ def v(n, prior):
     return verdict, info
 
 
-def run_cli(rows, date_arg=None):
-    """rows=[(date, n)] ⇒ bq giả in CSV; chạy main() thật qua subprocess."""
+FAKE_BQ = r"""#!/usr/bin/env python3
+# bq giả: lọc hàng theo ĐÚNG cửa sổ trong SQL (INTERVAL N DAY quanh DATE('x') hoặc MAX) — giết mutant LOOKBACK;
+# ghi CLOUDSDK_CONFIG thấy được ra file; CLOUDSDK_CONFIG sai/thiếu ⇒ lỗi y như bq thật (invalid_scope).
+import datetime as dt, json, os, re, sys
+here = os.path.dirname(os.path.abspath(__file__))
+open(os.path.join(here, "cloudsdk_seen"), "a").write(repr(os.environ.get("CLOUDSDK_CONFIG")) + "\n")
+want = open(os.path.join(here, "want_cfg")).read().strip() if os.path.exists(os.path.join(here, "want_cfg")) else ""
+if want and os.environ.get("CLOUDSDK_CONFIG") != want:
+    print("BigQuery error in query operation: invalid_scope: Bad Request", file=sys.stderr); sys.exit(1)
+rows = json.load(open(os.path.join(here, "rows.json")))
+sql = sys.argv[-1]
+m = re.search(r"DATE\('(\d{4}-\d{2}-\d{2})'\)", sql)
+tg = dt.date.fromisoformat(m.group(1)) if m else max(dt.date.fromisoformat(d) for d, _ in rows)
+lb = int(re.search(r"INTERVAL (\d+) DAY", sql).group(1))
+print("dt,n")
+for d, n in rows:
+    if tg - dt.timedelta(days=lb) <= dt.date.fromisoformat(d) <= tg:
+        print(f"{d},{n}")
+"""
+
+
+def run_cli(rows, date_arg=None, reseed=None, envi=False, wc_env=None, want_cfg=None):
+    """rows=[(date, n)] ⇒ bq giả (lọc theo cửa sổ SQL); chạy main() thật qua subprocess.
+    reseed=dict ⇒ file reseed tạm; None ⇒ file không tồn tại. envi=True ⇒ `env -i` (như cron trần)."""
     td = Path(tempfile.mkdtemp(prefix="pdg_sc_"))
-    csv = "dt,n\\n" + "".join(f"{d},{n}\\n" for d, n in rows)
-    (td / "bq").write_text(f'#!/bin/bash\nprintf "{csv}"\n')
+    (td / "bq").write_text(FAKE_BQ)
     (td / "bq").chmod(0o755)
+    (td / "rows.json").write_text(json.dumps(rows))
+    if want_cfg:
+        (td / "want_cfg").write_text(want_cfg)
+    rf = td / "reseed.json"
+    if reseed is not None:
+        rf.write_text(reseed if isinstance(reseed, str) else json.dumps(reseed))
     args = ["--date", date_arg] if date_arg else ["--latest"]
-    r = subprocess.run([sys.executable, str(TARGET)] + args, capture_output=True, text=True, timeout=60,
-                       env=dict(os.environ, PATH=f"{td}:{os.environ['PATH']}"))
+    if envi:
+        env = {"PATH": f"{td}:/usr/bin:/bin", "PDG_RESEED_FILE": str(rf)}
+        if wc_env:
+            env["PDG_WC_ENV"] = wc_env
+    else:
+        env = dict(os.environ, PATH=f"{td}:{os.environ['PATH']}", PDG_RESEED_FILE=str(rf))
+    r = subprocess.run([sys.executable, str(TARGET)] + args, capture_output=True, text=True, timeout=60, env=env)
+    seen = (td / "cloudsdk_seen").read_text() if (td / "cloudsdk_seen").exists() else ""
+    run_cli.seen = seen
     return r.returncode, r.stdout + r.stderr
+
+
+def weekdays(n, start="2026-04-01"):
+    d, out = dt.date.fromisoformat(start), []
+    while len(out) < n:
+        if d.weekday() < 5:
+            out.append(str(d))
+        d += dt.timedelta(days=1)
+    return out
 
 
 def days(n, start="2026-08-01"):
@@ -94,6 +138,58 @@ def main():
     rc, out = run_cli([(d, 202) for d in days(30)] + [(d, 170) for d in days(45)[30:]])
     chk(rc == 1 and "PRUNE_DEPTH FAIL" in out and "n=170" in out,
         "T7d --latest chuỗi 15 phiên ghi thiếu qua đường BQ ⇒ vẫn CHẶN rc=1", out)
+    # T8 (vòng cuối #5a): phiên ĐÚNG BẰNG ngưỡng PHẢI vào lịch sử  [giết: accepted_history >= → >]
+    vd, info = v(200, [200] * 20 + [180])
+    chk(vd == "PASS" and info["dropped"] == 0, "T8 phiên trước = ngưỡng (180) được NHẬN vào lịch sử (dropped=0)  [giết: >= → >]", info)
+    vd, info = v(150, [150] * 20)
+    chk(vd == "PASS", "T8b hạt giống đúng bằng sàn 150 được nhận  [giết: x >= floor → >]", info)
+    # T9 (vòng cuối #5b): qua ĐƯỜNG QUERY (bq giả lọc theo INTERVAL của SQL): 25 phiên 202 rồi 45 phiên ghi thiếu
+    # 170 (≈98 ngày lịch) ⇒ LOOKBACK 150 còn hạt giống sạch ⇒ CHẶN; LOOKBACK 75 chỉ còn ~8 phiên 202 ⇒ tự qua.
+    ds = weekdays(70)
+    rows = [(d, 202) for d in ds[:25]] + [(d, 170) for d in ds[25:]]
+    rc, out = run_cli(rows)
+    chk(rc == 1 and "n=170" in out and "threshold=182" in out,
+        "T9 --latest chuỗi ghi thiếu 45 phiên (≥40) qua đường query ⇒ vẫn CHẶN  [giết: LOOKBACK 150 → 75]", out)
+    rc, out = run_cli(rows, date_arg=ds[-1])
+    chk(rc == 1 and "threshold=182" in out, "T9b --date cùng chuỗi ⇒ CHẶN", out)
+    # T10 (vòng cuối #1): `env -i` (cron trần, không source wc_env.sh) ⇒ tự nạp CLOUDSDK_CONFIG ĐÚNG từ wc_env.sh
+    wc_env = Path(P.WC_ENV)
+    want = next((l.split("=", 1)[1].split()[0] for l in wc_env.read_text().splitlines()
+                 if l.startswith("export CLOUDSDK_CONFIG=")), None) if wc_env.is_file() else None
+    ok_rows = [(d, 203) for d in weekdays(21)]
+    rc, out = run_cli(ok_rows, envi=True, want_cfg=want or "x")
+    chk(want and rc == 0 and "PRUNE_DEPTH PASS" in out and run_cli.seen.strip() == repr(want),
+        f"T10 env -i ⇒ bq thấy CLOUDSDK_CONFIG={want} (nạp từ {wc_env}), PASS", out + " seen=" + run_cli.seen)
+    rc, out = run_cli(ok_rows, envi=True, wc_env="/nonexistent/wc_env.sh", want_cfg=want or "x")
+    chk(rc == 2 and "UNMEASURABLE" in out and "CLOUDSDK_CONFIG" in out and not run_cli.seen,
+        "T10b env -i + không có wc_env.sh ⇒ UNMEASURABLE nêu rõ thiếu CLOUDSDK_CONFIG, KHÔNG gọi bq", out)
+    rc, out = run_cli(ok_rows, want_cfg="/wrong/cfg")
+    chk(rc == 2 and "invalid_scope" in out, "T10c bq lỗi auth ⇒ UNMEASURABLE trích lỗi thật (invalid_scope)", out)
+    # T11 (vòng cuối #4): universe co THẬT −12% (202 → 178) — lối thoát của người qua file reseed
+    ds = weekdays(34)
+    rows = [(d, 202) for d in ds[:30]] + [(ds[30], 178)]
+    rc, out = run_cli(rows)
+    chk(rc == 1 and "RUNBOOK" in out and "prune_depth_reseed.json" in out,
+        "T11 co −12% một lần, không có reseed ⇒ CHẶN, dòng FAIL kèm RUNBOOK lối thoát", out)
+    good = {"reseed_from": ds[30], "source": "team dữ liệu xác nhận universe co (ticket X)"}
+    rc, out = run_cli(rows, reseed=good)
+    chk(rc == 0 and "RESEED_FROM=" + ds[30] in out and "threshold=150" in out,
+        "T11b file reseed hợp lệ (reseed_from = phiên co) ⇒ QUA (chưa có phiên mới ⇒ chỉ sàn)", out)
+    rows3 = rows + [(ds[31], 178), (ds[32], 177), (ds[33], 178)]
+    rc, out = run_cli(rows3, reseed=good)
+    chk(rc == 0 and "threshold=161" in out, "T11c 3 phiên sau reseed ⇒ ngưỡng theo trung vị universe MỚI (161), QUA", out)
+    rc, out = run_cli(rows3[:-1] + [(ds[33], 120)], reseed=good)
+    chk(rc == 1 and "n=120" in out, "T11d sau reseed vẫn chặn rớt đột ngột (120 < 161) — reseed không phải tắt cổng", out)
+    rc, out = run_cli(rows, reseed={"reseed_from": ds[30], "source": ""})
+    chk(rc == 1 and "thiếu source" in out, "T11e reseed THIẾU source ⇒ bỏ qua, vẫn CHẶN (fail-closed)", out)
+    rc, out = run_cli(rows, reseed="{hỏng")
+    chk(rc == 1 and "file hỏng" in out, "T11f file reseed hỏng ⇒ bỏ qua, vẫn CHẶN", out)
+    rc, out = run_cli(rows, reseed={"reseed_from": "25/11/2026", "source": "x"})
+    chk(rc == 1 and "sai định dạng" in out, "T11g reseed_from sai định dạng ⇒ bỏ qua, vẫn CHẶN", out)
+    rc, out = run_cli(rows[:-1] + [(ds[30], 7)], reseed=good)
+    chk(rc == 1 and "threshold=150" in out, "T11h reseed KHÔNG nới sàn: 7 mã ⇒ CHẶN", out)
+    shipped = json.loads((HERE.parent / "config" / "prune_depth_reseed.json").read_text())
+    chk(shipped.get("reseed_from") is None and shipped.get("source") is None, "T11i file giao kèm nhánh: reseed TẮT", shipped)
 
 
 if __name__ == "__main__":
