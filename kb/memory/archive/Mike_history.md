@@ -264,3 +264,12 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T14:05:40Z] [24/11 21:1x ICT] topic 1574787670264123522: dispatch Taylor_20261124_140534 (fable/high, timeout 4h) thiết kế lại DCF VN (tiêu chí user: tâm cắt giá ≤3 năm; ca VCS2015/DGC2016/VNM2011/HPG2019). Xong → quant-skeptic verify → trình user; KHÔNG wire. Brief: /tmp/mike_dcf_vn/brief.md. Poll ScheduleWakeup tăng dần.
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T15:46:17Z] [24/11 22:5x] DCF-VN: Taylor xong (REPORT ở wt-dcf-vn-redesign-20261124, commit 6937c5cc2, chưa merge); quant-skeptic INCONCLUSIVE/medium. Chờ user quyết: (a) rerun sửa vintage giá/PIT shares/mã huỷ niêm yết, (b) chấp nhận tâm lớp 2 dùng giá quá khứ không. KHÔNG wire.
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T16:00:41Z] [24/11 23:0x] user duyệt rerun DCF-VN + tâm lớp 2; mở topic mới 1574816971986313368, dispatch Taylor V2 (fable/high) đa proxy. Topic cũ 1574787670264123522 DỪNG; phiên topic mới poll+quant-skeptic. HANDOFF: agents/Taylor/research/dcf_vn_redesign_20261124b/HANDOFF.md
+
+## Archived 2026-11-25 (keep=12 days=0 require_done=False)
+- [2026-11-24T16:01:22Z] [24/11 23:0x] Topic 1574816971986313368 (DCF-VN v2): poll Taylor V2 job Taylor_20261124_160038 (fable/high, running); xong→verify md5/selfcheck 2 TZ/PIT→quant-skeptic 1 vòng→post user; KHÔNG wire/merge/email. Handoff agents/Taylor/research/dcf_vn_redesign_20261124b/HANDOFF.md
