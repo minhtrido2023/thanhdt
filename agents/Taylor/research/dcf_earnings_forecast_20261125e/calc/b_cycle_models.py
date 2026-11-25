@@ -44,7 +44,8 @@ def loo_median(v):
 vp = vp.sort_values(["ym", "icb", "ticker"]).reset_index(drop=True)
 for k in ("x1", "x2", "x3", "x4"):
     s = np.full(len(vp), np.nan)
-    for _, idx in vp[vp.icb.notna()].groupby(["ym", "icb"]).indices.items():
+    for _, lab in vp[vp.icb.notna()].groupby(["ym", "icb"]).groups.items():   # [J4 selfcheck] .groups = NHÃN (= vị trí vì đã reset_index); .indices trên frame đã lọc = vị trí tương đối ⇒ lệch dòng
+        idx = np.asarray(lab)
         s[idx] = loo_median(vp[k].values[idx])
     vp["S" + k[1]] = s
     vp["R" + k[1]] = vp.groupby("ym")["S" + k[1]].rank(pct=True) - 0.5          # hạng phần trăm cross-section tháng
