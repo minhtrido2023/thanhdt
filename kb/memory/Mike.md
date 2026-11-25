@@ -10,3 +10,4 @@
 - Giữ nguyên: DRI bán hết/TV1 không giữ; 4 quy tắc user 02/11 (kb/projects/dd-flag-rules-20261102.md).
 - Tồn: prevention retro 22/11 (fleet_backup alert…), grep ngưỡng cứng 200 toàn repo, backup 24/11 lỡ chu kỳ chưa rõ nguyên nhân.
 
+- [2026-11-25T17:35:45Z] [26/11 00:37] User duyệt B1+skeptic vòng 2, thứ tự Mike chọn: B1 trước (Taylor_20261125_173540, cùng nhánh pit2) → xong thì quant-skeptic vòng 2 trên script cuối → trình user + xin duyệt merge/cron/registry
