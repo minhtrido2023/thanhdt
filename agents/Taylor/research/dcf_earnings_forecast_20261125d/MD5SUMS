@@ -2,5 +2,10 @@ be7b28dd98ffb12cc0edee1935837788  in_snapshot/c_models2.py
 6b36320cf15cac61fced833a502be778  in_snapshot/d_metrics2.py
 a9771b3d3181568a126cd34b8cbaa285  in_snapshot/panel2.parquet
 daaa63ec56789b30c5c148790644b90f  in_snapshot/vp2.parquet
+d3fd6937c0fbddeef5f85fcf8b43c1f9  out/A_by_year.csv
+cd2243ac4ccc156126d63f411af44439  out/A_meta.json
+4e9a4a8c78ff2817199ac84d134076e7  out/A_segments.csv
+42f28dfc8246dd4e20d2854fd473b6c7  out/A_summary.csv
 1b75e90a7550d7e9a224fa794407edff  out/events.parquet
+684dcc2a9dcb7204f920e02cf336283b  out/fc.parquet
 368ddb7fd216da1c7dbdd2fb47508800  out/inventory.json
