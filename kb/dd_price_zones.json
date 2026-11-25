@@ -9209,6 +9209,211 @@
    "center_adj_high": 20956,
    "center_adj_basis": "agents/Taylor/research/dd_recheck_20261125w3/HPG/adj.json",
    "center_adj_md5": "e066265f12b97dd1b34acdcdefceddf1"
+  },
+  {
+   "ticker": "PAT",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261125w4/PAT/skeptic/r1.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-11-17",
+   "rev": 4,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 40485,
+   "center": 55527,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng cây kịch bản rev6 (9.072 lá; = r5 + D4 terminal RONIC=Ke + ô (A tắt,B bật) theo D như r4) SAU chiết khấu thanh khoản 10% (GTGD trung vị 0,588 tỷ/phiên, bq 0,993; 64 phiên 21/08–23/11/2026, BQ tự đo); r 13,5%, g 2%; mù giá; trước chiết khấu 61.697",
+   "zone_high": 67228,
+   "center_range": null,
+   "center_alt": 61697,
+   "center_alt_kind": "expected_weighted",
+   "price_ref": 70200,
+   "price_date": "2026-11-17",
+   "verdict_label": "Giá 70.200 (17/11) cao hơn tâm sau CK 55.527 (+26,4%) và trên P75 67.228; cổng 0,85×tâm = 47.198 không đạt ⇒ KHÔNG biên an toàn, không mua. Tâm @Ke 12,3% 59.778; tâm kỳ vọng điều chỉnh 57.872 (56.700–59.045) vẫn < giá. Rủi ro xuống lớn nhất chưa có xác suất: thuê đất KCN hết ~2034 không gia hạn (−28,7%). Pháp lý chỉ WARNING.",
+   "skeptic_status": "Skeptic r1 (25/11, DD_GENERAL, opus, 0,89 USD) trên REPORT_recheck rev6 (md5 f02c83e9): INCONCLUSIVE/medium. Tái lập 61.697, tiền ròng 357,35, đọc lại cầm cố đúng. Mở: hạn HĐ thuê đất (2034 suy từ GPMB, −28,7%), trách nhiệm pháp nhân Đ.235/đình chỉ lò (~−2,7%/6 tháng), capex môi trường (không số), tăng trưởng không tái đầu tư pha tường minh (g=0 −8,47%, xếp LUẬT V5). Đính chính văn bản ở Phụ lục E, tâm không đổi ⇒ xác nhận cơ học.",
+   "source_file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/REPORT_recheck_PAT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/REPORT_recheck_PAT.md",
+     "quote": "**TÂM rev6 (r 13,5%, g 2%, sau CK thanh khoản 10%): 55.527 đ/cp** (trước CK 61.697). Vùng P25–P75 sau CK **40.485 – 67.228**; P10–P90 30.982 – 85.356; trung vị 57.116.",
+     "fields": [
+      "center",
+      "center_alt",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/REPORT_recheck_PAT.md",
+     "quote": "- **Nhãn** (giá 70.200, 17/11, kế thừa): giá cao hơn tâm sau CK 26,4% và **trên P75 (67.228)** — cao hơn vùng hợp lý, trong P90. Cổng 0,85 × tâm sau CK = **47.198** không đạt ⇒ **không có biên an toàn, không mua** (kết luận r5 giữ, nay đã kiểm lại sau khi làm đầy đủ — mọi biến thể chiều lên trong §3/§7 vẫn < 70.200).",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/assumptions_rev6.md",
+   "assumptions_md5": "5207e413eb10404ccdf3aa47c7af9916",
+   "null_reason": "center_range: nguồn không cho khoảng tâm bắt đầu từ tâm",
+   "expires_on": "2027-03-17",
+   "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc tờ trình GD bên liên quan DLC–PAT hoặc 120 ngày",
+   "notes": "rev6 đầy đủ theo phương án (a) user 25/11 13:3x. CỔNG 0,85×tâm sau CK = 47.198. Bắc cầu rev3→rev4: D4 −1,44%, ô D −5,82%. Độ nhạy: r 12,3–14,5% 59.778–52.547 sau CK; thuê đất hết 2034/2042 không gia hạn 39.598/49.167 sau CK; bảo đảm chéo 42,6 tỷ −2,76%; đình chỉ 6 tháng −2,72%; g=0 −8,47% [LUẬT]. V6: V_ngắn ~97.800 / V_dài 61.697, D 0,46 < ln2. Sizing: không đề xuất; nếu có ≤0,5% NAV (thanh khoản 0,06–0,12 tỷ/phiên). HARD ABANDON §3 #4 (giá chuyển giao DLC, nút T). Mốc: BCTC Q4/2026 (tồn kho 31/12, biên Q4, TM4 bảo đảm), HĐ thuê đất/BCTC KT 2026, tố tụng pháp nhân, tờ trình GD bên liên quan ĐHĐCĐ 2027. Tâm kỳ vọng điều chỉnh E17: adj.json (Mike ghi sau proposal).",
+   "supersedes": "PAT@2026-11-17#3",
+   "correction_reason": "DD rev6 đầy đủ: áp D4 (RONIC terminal = Ke, user 22/11) + bỏ bước O2 \"H1/26 sạch\" (killer skeptic r1 cũ, A1:133,143); skeptic r1 mới INCONCLUSIVE ⇒ REFUTED_OPEN."
+  },
+  {
+   "ticker": "SAS",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261125w4/SAS/skeptic/r1.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-10-26",
+   "rev": 3,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 22430,
+   "center": 27477,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 45 kết cục (Δ Long Thành × N0 × r; D4 TV = E2028/r), sau CK 5,93% @5 tỷ",
+   "zone_high": 32420,
+   "center_range": null,
+   "price_ref": 34200,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRÊN vùng: giá 34.200 cao hơn tâm 27.477 +24,5%, trên P90 32.420; 95,6% trọng số kết cục dưới giá (sleeve 40 tr: tâm 29.053, P90 34.279 ⇒ TRONG sát mép trên). Luật sổ (giá < tâm −15% = 23.355): KHÔNG đạt. §2.5 không đủ điều kiện. Rev2 (31.658) nhãn TRONG — đổi do D4.",
+   "skeptic_status": "rev3 đầy đủ 25/11 (D4 + lãi Q4 + thuyết minh): dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (1,09 USD). Cơ học đúng (tâm điểm giữa tái lập 29.159/≈27.430; D4 đúng; biên vận hành 12,57%/15,42% khớp). Mở: thời hạn hợp đồng mặt bằng ACV (TV vĩnh viễn), q trượt thầu Long Thành ngầm 0,5 (±10pp ≈ ±7,45%), đỉnh biên nhiều năm. Đã áp: E17 #2→C+, #3 bù trừ VLĐ, thêm #4 mùa vụ Q4; truy thu thuê đất đã hạch toán/nộp; soát xét H1 chấp nhận. Tâm base không đổi sau đính chính ⇒ không phản biện lại.",
+   "source_file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+     "quote": "**TÂM (base rev3, r 13,5%, D4 RONIC = Ke, sau CK 5 tỷ 5,93%): 27.477 đ/cp — vùng P10–P90 22.430–32.420** (trước CK 29.208; P50 27.384). Δ so với r3: **−13,21%**.",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+     "quote": "## 6. Sau khoá — nhãn (giá 34.200, BQ 06/11/2026, kế thừa r3)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/LOCK_rev3_md5.txt",
+   "assumptions_md5": "6ac277a4fee4a2eac2c423f448831d3a",
+   "expires_on": "2027-02-23",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-25T14:20:00+07:00",
+   "supersedes": "SAS@2026-10-26#2",
+   "correction_reason": "rev3 đầy đủ theo HANDOFF đợt 4 phương án (a), user duyệt 25/11 13:3x: D4 terminal RONIC = Ke (moat NARROW, r3 RONIC ngầm ∞) 31.658 → 27.426; + lãi tiền gửi Q4/26 +51 ⇒ 27.477 (−13,21%); E15 29.113 (+5,95%); E16 KHÔNG CHẮC (1.99, cờ ĐỈNH LỢI NHUẬN); nhãn TRONG → TRÊN.",
+   "report_md5": "2a01d185b33bb8e929b1f08d4e2c9f2d"
+  },
+  {
+   "ticker": "PAT",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261125w4/PAT/skeptic/r1.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-11-17",
+   "rev": 5,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 40485,
+   "center": 55527,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng cây kịch bản rev6 (9.072 lá; = r5 + D4 terminal RONIC=Ke + ô (A tắt,B bật) theo D như r4) SAU chiết khấu thanh khoản 10% (GTGD trung vị 0,588 tỷ/phiên, bq 0,993; 64 phiên 21/08–23/11/2026, BQ tự đo); r 13,5%, g 2%; mù giá; trước chiết khấu 61.697",
+   "zone_high": 67228,
+   "center_range": null,
+   "center_alt": 61697,
+   "center_alt_kind": "expected_weighted",
+   "price_ref": 70200,
+   "price_date": "2026-11-17",
+   "verdict_label": "Giá 70.200 (17/11) cao hơn tâm sau CK 55.527 (+26,4%) và trên P75 67.228; cổng 0,85×tâm = 47.198 không đạt ⇒ KHÔNG biên an toàn, không mua. Tâm @Ke 12,3% 59.778; tâm kỳ vọng điều chỉnh 57.872 (56.700–59.045) vẫn < giá. Rủi ro xuống lớn nhất chưa có xác suất: thuê đất KCN hết ~2034 không gia hạn (−28,7%). Pháp lý chỉ WARNING.",
+   "skeptic_status": "Skeptic r1 (25/11, DD_GENERAL, opus, 0,89 USD) trên REPORT_recheck rev6 (md5 f02c83e9): INCONCLUSIVE/medium. Tái lập 61.697, tiền ròng 357,35, đọc lại cầm cố đúng. Mở: hạn HĐ thuê đất (2034 suy từ GPMB, −28,7%), trách nhiệm pháp nhân Đ.235/đình chỉ lò (~−2,7%/6 tháng), capex môi trường (không số), tăng trưởng không tái đầu tư pha tường minh (g=0 −8,47%, xếp LUẬT V5). Đính chính văn bản ở Phụ lục E, tâm không đổi ⇒ xác nhận cơ học.",
+   "source_file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/REPORT_recheck_PAT.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/REPORT_recheck_PAT.md",
+     "quote": "**TÂM rev6 (r 13,5%, g 2%, sau CK thanh khoản 10%): 55.527 đ/cp** (trước CK 61.697). Vùng P25–P75 sau CK **40.485 – 67.228**; P10–P90 30.982 – 85.356; trung vị 57.116.",
+     "fields": [
+      "center",
+      "center_alt",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/REPORT_recheck_PAT.md",
+     "quote": "- **Nhãn** (giá 70.200, 17/11, kế thừa): giá cao hơn tâm sau CK 26,4% và **trên P75 (67.228)** — cao hơn vùng hợp lý, trong P90. Cổng 0,85 × tâm sau CK = **47.198** không đạt ⇒ **không có biên an toàn, không mua** (kết luận r5 giữ, nay đã kiểm lại sau khi làm đầy đủ — mọi biến thể chiều lên trong §3/§7 vẫn < 70.200).",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_recheck_20261125w4/PAT/assumptions_rev6.md",
+   "assumptions_md5": "5207e413eb10404ccdf3aa47c7af9916",
+   "null_reason": "center_range: nguồn không cho khoảng tâm bắt đầu từ tâm",
+   "expires_on": "2027-03-17",
+   "expires_basis": "BCTC Q4/2026 (~cuối 01/2027) hoặc tờ trình GD bên liên quan DLC–PAT hoặc 120 ngày",
+   "notes": "rev6 đầy đủ theo phương án (a) user 25/11 13:3x. CỔNG 0,85×tâm sau CK = 47.198. Bắc cầu rev3→rev4: D4 −1,44%, ô D −5,82%. Độ nhạy: r 12,3–14,5% 59.778–52.547 sau CK; thuê đất hết 2034/2042 không gia hạn 39.598/49.167 sau CK; bảo đảm chéo 42,6 tỷ −2,76%; đình chỉ 6 tháng −2,72%; g=0 −8,47% [LUẬT]. V6: V_ngắn ~97.800 / V_dài 61.697, D 0,46 < ln2. Sizing: không đề xuất; nếu có ≤0,5% NAV (thanh khoản 0,06–0,12 tỷ/phiên). HARD ABANDON §3 #4 (giá chuyển giao DLC, nút T). Mốc: BCTC Q4/2026 (tồn kho 31/12, biên Q4, TM4 bảo đảm), HĐ thuê đất/BCTC KT 2026, tố tụng pháp nhân, tờ trình GD bên liên quan ĐHĐCĐ 2027. Tâm kỳ vọng điều chỉnh E17: adj.json (Mike ghi sau proposal).",
+   "supersedes": "PAT@2026-11-17#4",
+   "correction_reason": "thêm tâm kỳ vọng điều chỉnh E17 (user duyệt 24/11/2026 19:10): 57872 đ/cp, dải 56700–59045; tâm base/vùng/nhãn/skeptic_final GIỮ NGUYÊN, tâm adj KHÔNG thay tâm base trong luật 0,85×tâm/luật 4",
+   "center_adj": 57872,
+   "center_adj_low": 56700,
+   "center_adj_high": 59045,
+   "center_adj_basis": "agents/Taylor/research/dd_recheck_20261125w4/PAT/adj.json",
+   "center_adj_md5": "50ef67294926a747467ea3b4f9be71e3",
+   "recorded_at": "2026-11-25T14:48:35+07:00"
+  },
+  {
+   "ticker": "SAS",
+   "skeptic_final": "REFUTED_OPEN",
+   "skeptic_final_basis": "skeptic_run",
+   "skeptic_verdict_path": "agents/Taylor/research/dd_recheck_20261125w4/SAS/skeptic/r1.json",
+   "audited_fy_missing": false,
+   "dd_date": "2026-10-26",
+   "rev": 4,
+   "bctc_quarter": "2026Q3",
+   "zone_low": 22430,
+   "center": 27477,
+   "center_kind": "expected_weighted",
+   "center_desc": "kỳ vọng trọng số lưới 45 kết cục (Δ Long Thành × N0 × r; D4 TV = E2028/r), sau CK 5,93% @5 tỷ",
+   "zone_high": 32420,
+   "center_range": null,
+   "price_ref": 34200,
+   "price_date": "2026-11-06",
+   "verdict_label": "TRÊN vùng: giá 34.200 cao hơn tâm 27.477 +24,5%, trên P90 32.420; 95,6% trọng số kết cục dưới giá (sleeve 40 tr: tâm 29.053, P90 34.279 ⇒ TRONG sát mép trên). Luật sổ (giá < tâm −15% = 23.355): KHÔNG đạt. §2.5 không đủ điều kiện. Rev2 (31.658) nhãn TRONG — đổi do D4.",
+   "skeptic_status": "rev3 đầy đủ 25/11 (D4 + lãi Q4 + thuyết minh): dd_skeptic_run DD_GENERAL r1 = INCONCLUSIVE medium (1,09 USD). Cơ học đúng (tâm điểm giữa tái lập 29.159/≈27.430; D4 đúng; biên vận hành 12,57%/15,42% khớp). Mở: thời hạn hợp đồng mặt bằng ACV (TV vĩnh viễn), q trượt thầu Long Thành ngầm 0,5 (±10pp ≈ ±7,45%), đỉnh biên nhiều năm. Đã áp: E17 #2→C+, #3 bù trừ VLĐ, thêm #4 mùa vụ Q4; truy thu thuê đất đã hạch toán/nộp; soát xét H1 chấp nhận. Tâm base không đổi sau đính chính ⇒ không phản biện lại.",
+   "source_file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+   "evidence": [
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+     "quote": "**TÂM (base rev3, r 13,5%, D4 RONIC = Ke, sau CK 5 tỷ 5,93%): 27.477 đ/cp — vùng P10–P90 22.430–32.420** (trước CK 29.208; P50 27.384). Δ so với r3: **−13,21%**.",
+     "fields": [
+      "center",
+      "zone_low",
+      "zone_high"
+     ]
+    },
+    {
+     "file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/REPORT_recheck_SAS.md",
+     "quote": "## 6. Sau khoá — nhãn (giá 34.200, BQ 06/11/2026, kế thừa r3)",
+     "fields": [
+      "price_ref"
+     ]
+    }
+   ],
+   "assumptions_file": "agents/Taylor/research/dd_recheck_20261125w4/SAS/LOCK_rev3_md5.txt",
+   "assumptions_md5": "6ac277a4fee4a2eac2c423f448831d3a",
+   "expires_on": "2027-02-23",
+   "expires_basis": "dd_date+120 (mặc định); công cụ ghi đè bằng ngày công bố BCTC quý mới hơn đọc lúc chạy (PIT)",
+   "recorded_at": "2026-11-25T14:48:35+07:00",
+   "supersedes": "SAS@2026-10-26#3",
+   "correction_reason": "thêm tâm kỳ vọng điều chỉnh E17 (user duyệt 24/11/2026 19:10): 26803 đ/cp, dải 25459–28287; tâm base/vùng/nhãn/skeptic_final GIỮ NGUYÊN, tâm adj KHÔNG thay tâm base trong luật 0,85×tâm/luật 4",
+   "report_md5": "2a01d185b33bb8e929b1f08d4e2c9f2d",
+   "center_adj": 26803,
+   "center_adj_low": 25459,
+   "center_adj_high": 28287,
+   "center_adj_basis": "agents/Taylor/research/dd_recheck_20261125w4/SAS/adj.json",
+   "center_adj_md5": "06babc2137e192619875c8226894b0b3"
   }
  ],
  "center_kinds": [
