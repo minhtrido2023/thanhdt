@@ -1,0 +1,10 @@
+2026-10: as-of 2026-10-30 n=333 (BANK 24) panel_time_match=1.000
+cell
+RE_CHUA_THUA_NHAN    91
+DAT_CON_NEO          90
+RE_DUOC_THUA_NHAN    77
+DAT_DANG_NGUOI       75
+ĐÃ GHI out/paper_cell_TEST_2026-10.csv
+SKIP: 2026-10 đã có trong out/paper_cell_TEST_2026-10.csv (append-only, idempotent)
+FAIL-CLOSED: universe_pit không phủ 2026-11-23 (max 2026-11-20) — KHÔNG ghi 2026-11
+rc_last=3
