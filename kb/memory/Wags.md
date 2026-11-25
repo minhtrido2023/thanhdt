@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Wags_history.md` — không mất, không auto-load.
 
-- [2026-10-26T01:21:37Z] [2026-10-26] Câu Mike/retro-pattern-recurring-wakeup-warning-nonblocking-still-missed CHỜ USER A/B/C (đã relay); trả lời => close_bus_question --decided-by-user. Checker sẽ còn báo tới khi user trả lời — không phải bug.
 - [2026-10-30T01:20:36Z] [2026-10-30] Câu Mike/retro-pattern-recurring-drift-checker-runs-before-evidence CHỜ USER A/B (đã relay 29/10 17:31Z); trả lời => close_bus_question --decided-by-user; A => sửa plan_position_drift_check + dời cron (cần duyệt).
 - [2026-11-03T01:20:42Z] [2026-11-03] Câu Taylor/pnj-bctc-q3-review-trigger CHỜ USER A/B (đã relay Discord 02/11 qua pnj_q3_review_watch). User trả lời ⇒ close_bus_question --decided-by-user; checker báo tới lúc đó là đúng, không phải bug.
 - [2026-11-05T06:35:00Z] [2026-11-05] Câu Mike/retro-pattern-recurring-dd-multi-round-assumption-unlocked CHỜ USER A/B/C. Đóng: close_bus_question.py "Mike/retro-pattern-recurring-dd-multi-round-assumption-unlocked" --resolution '<A/B/C+tóm tắt>' --evidence '<commit SKILL.md|lý do C>' --decided-by-user. A/B ⇒ sửa ~/.claude/skills/due-diligence/SKILL.md GỘP 1 lần với DD_SKILL_PROPOSAL.md của Taylor (lock giả định=bước 0, macro sau lấy BCTC).
@@ -27,3 +26,4 @@
 - [2026-11-13T12:28:36Z] [13/11] book_clearing fix 36ffb5449 (arch APPROVED) CHỜ USER A/B qua question Wags/selfcheck-red-sweep-20261113-book-clearing-merge-approval; A ⇒ merge vào master + close_bus_question 'Wags/selfcheck-red: mike/bin/book_clearing_g3_selfcheck.py'. Đĩa / 96% cần dọn.
 - [2026-11-17T01:20:57Z] [2026-11-17] Câu Mike/retro-pattern-recurring-bq-raw-gap-wire-0b-unmerged CHỜ USER A/B (relay 16/11 17:31Z). A ⇒ wire [0b] ticker_integrity_precheck vào bq_freshness_check.sh sau step [0] + arch-reviewer, rồi close_bus_question --decided-by-user. Checker báo tới lúc đó là đúng.
 - [2026-11-20T10:07:07Z] [2026-11-20] Chờ user A/B: weekly_orphan_review bảo vệ cả thư mục ⇒ TRIM_DD gần tắt cho 36/57 dd_* (~1,9GB); B = guard mức file trong nhánh is_dd (weekly_orphan_review.py ~125). Nêu trong finding selfcheck-red-owner-sweep-2026-11-20-Wags.
+- [2026-11-25T00:35:37Z] [25/11] Việc B plan-gate XONG trên nhánh wags/plan-gate-rootfix-20261125 (mike f50fa4ef2, outer d14a8eea1), CHƯA merge — chờ arch-reviewer + user; merge mike trước outer; cron watch/retry/escalate cài khi merge.
