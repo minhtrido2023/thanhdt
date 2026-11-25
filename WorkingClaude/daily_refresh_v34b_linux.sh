@@ -54,7 +54,7 @@ TODAY_ICT="$(TZ='Asia/Ho_Chi_Minh' date +%Y-%m-%d)"
 # MORNING MODE (opt-in, 2026-10-15, user duyệt): MIKE_MORNING_RUN=1 ⇒ chạy tay buổi sáng khi BQ xong muộn
 # sau chuỗi 18:30. Kiểm tra ingest theo PHIÊN gần nhất đã có dữ liệu EOD (mike/bin/expected_session.py,
 # cutoff 17:00 ICT) thay vì ngày lịch — nếu không, buổi sáng ticker_prune "hôm nay" luôn = 0 và script
-# chờ ~1,5h rồi die. Cron KHÔNG đặt biến này ⇒ hành vi 18:30 y nguyên. Ngưỡng MIN_TICKERS giữ nguyên.
+# chờ ~1,5h rồi die. Cron KHÔNG đặt biến này ⇒ hành vi 18:30 y nguyên. Cổng độ sâu (PRUNE-GATE bên dưới) giữ nguyên.
 if [ "${MIKE_MORNING_RUN:-0}" = "1" ]; then
   # MORNING-BEGIN
   _sess="$(python3 "$WORKDIR_8L/mike/bin/expected_session.py" --session 2>&1)"
@@ -63,27 +63,62 @@ if [ "${MIKE_MORNING_RUN:-0}" = "1" ]; then
   TODAY_ICT="$_sess"
   # MORNING-END
 fi
-MIN_TICKERS=200   # historical daily count is ~260-270; 200 comfortably excludes a partial trickle
+# HOLIDAY-BEGIN (2026-11-25, sự cố "không ra plan 25/11"): cron chạy T2-T6 kể cả lễ giữa tuần. Ngày
+# KHÔNG giao dịch (trading_bot.vn_market — nguồn lịch duy nhất) không có ingest ⇒ step [0] cũ chờ 1,5h
+# rồi ABORT (FAIL giả, 24/11/2026). Giờ ghi rõ "ngày nghỉ, bỏ qua" + đối chiếu DT5G as_of với phiên gần
+# nhất (nếu as_of cũ thì nói THẬT + lệnh khôi phục, không giả vờ OK), exit 0. Morning mode không vào nhánh
+# này (TODAY_ICT đã là phiên). Lịch lỗi ⇒ KHÔNG đoán, chạy tiếp như ngày giao dịch (cổng [0] tự chặn).
+_hol="$(cd "$WORKDIR_8L" && python3 -c "
+import datetime as dt
+from trading_bot.vn_market import is_holiday
+d = dt.date.fromisoformat('$TODAY_ICT')
+if d.weekday() < 5 and not is_holiday(d):
+    print('TRADING')
+else:
+    p = d - dt.timedelta(days=1)
+    while p.weekday() >= 5 or is_holiday(p):
+        p -= dt.timedelta(days=1)
+    print('NONTRADING', p, 'is_holiday=%s' % is_holiday(d), 'weekday=%d' % d.weekday())
+" 2>&1)"
+if [ "${_hol%% *}" = "NONTRADING" ]; then
+  read -r _ _last_sess _hol_ev1 _hol_ev2 <<< "$_hol"
+  _asof="$(python3 -c "import json;print(json.load(open('deploy_golive_dt5g_v4/golive_state_today.json')).get('as_of','?'))" 2>/dev/null || echo '?')"
+  if [ "$_asof" = "$_last_sess" ]; then
+    echo "  NGÀY NGHỈ, BỎ QUA: $TODAY_ICT không giao dịch ($_hol_ev1 $_hol_ev2) — DT5G as_of=$_asof = phiên gần nhất, không có gì để tính."
+  else
+    echo "  NGÀY NGHỈ, BỎ QUA: $TODAY_ICT không giao dịch ($_hol_ev1 $_hol_ev2) — NHƯNG DT5G as_of=$_asof ≠ phiên gần nhất $_last_sess (publish phiên đó đã hỏng). Khôi phục: cd $WORKDIR_8L && MIKE_MORNING_RUN=1 ./daily_refresh_v34b_linux.sh"
+  fi
+  exit 0
+elif [ "$_hol" != "TRADING" ]; then
+  echo "  [WARN] không đọc được lịch giao dịch (${_hol}) — chạy tiếp như ngày giao dịch, cổng [0] tự chặn nếu không có ingest"
+fi
+# HOLIDAY-END
+# PRUNE-GATE-BEGIN (2026-11-25): cổng độ sâu dùng CHUNG với bq_freshness_check.sh — một nguồn
+# mike/bin/prune_depth_gate.py: FAIL khi n < max(150, ⌈0,90 × trung vị 20 phiên trước⌉). Ngưỡng cứng
+# MIN_TICKERS=200 cũ chặn oan phiên thật 23/11 (197 mã; universe co dần 219→202 trung vị/tháng T7→T11).
+# Chưa ingest ⇒ n=0 ⇒ FAIL ⇒ chờ như cũ. rc 2 (KHÔNG ĐO ĐƯỢC: bq lỗi/thiếu lịch sử) ⇒ cũng coi là chưa sẵn
+# sàng (fail-closed), log nguyên dòng thật.
+_PRUNE_GATE="${PRUNE_DEPTH_GATE_BIN:-$WORKDIR_8L/mike/bin/prune_depth_gate.py}"
+_PRUNE_SLEEP="${PRUNE_GATE_SLEEP_S:-900}"
 ready=0
 for attempt in $(seq 1 6); do
-  n="$(bq query --use_legacy_sql=false --project_id="$PJ" --format=csv --quiet \
-    "SELECT COUNT(DISTINCT ticker) FROM tav2_bq.ticker_prune WHERE time = DATE('$TODAY_ICT')" \
-    2>/dev/null | tail -1)"
-  n="${n:-0}"
-  if [ "$n" -ge "$MIN_TICKERS" ] 2>/dev/null; then
-    echo "  ready: ticker_prune has $n tickers for $TODAY_ICT (attempt $attempt)"
+  _g="$(timeout 240 python3 "$_PRUNE_GATE" --date "$TODAY_ICT" 2>&1)"; _grc=$?
+  _gl="$(printf '%s\n' "$_g" | grep -m1 '^PRUNE_DEPTH ' || printf '%s' "$_g" | tr '\n' ' ' | cut -c1-240)"
+  if [ "$_grc" -eq 0 ]; then
+    echo "  ready: $_gl (attempt $attempt)"
     ready=1; break
   fi
-  echo "  not ready yet: ticker_prune has ${n:-0} tickers for $TODAY_ICT (need >=$MIN_TICKERS) — attempt $attempt/6, waiting 15m"
-  [ "$attempt" -lt 6 ] && sleep 900
+  echo "  not ready yet (rc=$_grc): $_gl — attempt $attempt/6, waiting $((_PRUNE_SLEEP/60))m"
+  [ "$attempt" -lt 6 ] && sleep "$_PRUNE_SLEEP"
 done
+# PRUNE-GATE-END
 # CẢNH BÁO (sửa 2026-07-31, Winston_20260731_014953): lý do cũ ghi ở đây — "bq_freshness_check
 # sẽ chặn DollarBill vì dt5g_live không advance" — ĐÃ SAI từ 2026-06-08: bảng dt5g_live có
 # writer thứ hai (pipeline kaffa_v2 team dữ liệu, ~17:12 ICT) vẫn đẩy MAX(time)=hôm nay kể cả
 # khi chain này abort ở đây. Cái CHẶN thật bây giờ là gate publisher-evidence trong
 # bq_freshness_check.sh (golive_state_today.json as_of/mtime/bq_publish_ok — writer ngoài không
 # ghi được file local đó).
-[ "$ready" = 1 ] || die "ticker_prune still incomplete for $TODAY_ICT after 6 attempts (~1.5h) — refusing to compute DT5G on a stale/partial day. bq_freshness_check.sh's PUBLISHER-EVIDENCE gate will BLOCK DollarBill downstream since golive_state_today.json won't be written today."
+[ "$ready" = 1 ] || die "ticker_prune still incomplete for $TODAY_ICT after 6 attempts (~1.5h; last: ${_gl:-?}) — refusing to compute DT5G on a stale/partial day. bq_freshness_check.sh's PUBLISHER-EVIDENCE gate will BLOCK DollarBill downstream since golive_state_today.json won't be written today."
 
 # --- 0b. ticker integrity precheck (2026-11-15, incident 2026-11-13-ticker-raw-lost-U-Y-block-5-sessions) ---
 # `ticker` từng bị writer ngoài làm thủng (VNINDEX 09-12/11 + khối W-Y 13/11) trong khi ticker_1m/
