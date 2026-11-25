@@ -15,7 +15,7 @@ Phương pháp: `dd_adjcenter_20261124/PREREG_adj.md` (md5 `ef5157cb…`) + `PRE
 | I4 | Năm 1 cơ sở xuất phát từ lõi Q3/26 ×4 = 403,0 thay TTM 357,4 (fade 2 năm giữ nguyên). Thấp: 9T/26 năm hoá 352,8 | ↑ | +1,14 [−0,11; +1,14] | B | 0,35 [0,15; 0,55] — ngược: 9T/26 năm hoá < TTM; KH 2026 LNTT 275 | +0,40 |
 | | **Σ tuyến tính** | | | | | **−3,40** |
 
-Nguồn: I1 — `dd_VLB_20261122/skeptic/r3_raw.md:9-14` + `model/dcf_vlb_r4.py` (OP_FY24/OP_FY25 từ KT25 tr.13); I2 — `dcf_vlb_r4.py:30` (wc_liab 54,215) + `r3_raw.md:16-18`; I3 — `src/BCTC_KiemToan_2025.pdf` tr.14 PDF (LCTT mã 02/12/21), `src/BCTC_Q3_2026.pdf` tr.6 PDF (mã 02/12/21), BCTN 2025 tr.54-55 (đền bù 71,883 tỷ/47.417,8 m²) + `r3_raw.md:29-36`; I4 — `src/BCTC_Q3_2026.pdf` tr.5 PDF (mã 30, 21) + `r3_raw.md:26-27`.
+Nguồn: I1 — `dd_VLB_20261122/skeptic/r3_raw.md:9-14` + `model/dcf_vlb_r4.py` (OP_FY24/OP_FY25 từ KT25 tr.13); I2 — `dcf_vlb_r4.py:30` (wc_liab 54,215) + `r3_raw.md:15-18`; I3 — `src/BCTC_KiemToan_2025.pdf` tr.14 PDF (LCTT mã 02/12/21), `src/BCTC_Q3_2026.pdf` tr.6 PDF (mã 02/12/21), BCTN 2025 tr.54-55 (đền bù 71,883 tỷ/47.417,8 m²) + `r3_raw.md:24-29`; I4 — `src/BCTC_Q3_2026.pdf` tr.5 PDF (mã 30, 21) + `r3_raw.md:23`.
 Chống đếm hai lần: I3 GỘP "khấu hao không cộng lại" (↑) và "đền bù diện tích còn lại" (↓) của r3 vì là cùng một dòng tiền (đền bù trả qua chi phí trả trước, phân bổ vào LNST); phần có lịch sử vào I3, phần vượt lịch sử = C. I1 (mức giữa chu kỳ) và I4 (điểm xuất phát năm 1) tác động hai tham số khác nhau của cùng đường LN — tổ hợp kiểm tra chênh 0,27pp.
 
 ## 2. Chỉ độ nhạy — không vào tâm

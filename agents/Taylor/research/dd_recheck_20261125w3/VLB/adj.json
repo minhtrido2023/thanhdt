@@ -46,7 +46,7 @@
    ],
    "counted_in_center": true,
    "contrib_pct": -0.979,
-   "source": "dd_VLB_20261122/model/dcf_vlb_r4.py:30; skeptic/r3_raw.md:16-18",
+   "source": "dd_VLB_20261122/model/dcf_vlb_r4.py:30; skeptic/r3_raw.md:15-18",
    "note": "B 1 quan sát"
   },
   {
@@ -64,7 +64,7 @@
    ],
    "counted_in_center": true,
    "contrib_pct": -1.141,
-   "source": "dd_VLB_20261122/src/BCTC_KiemToan_2025.pdf tr.14 PDF (LCTT mã 02,12,21); src/BCTC_Q3_2026.pdf tr.6 PDF; BCTN_2025.pdf tr.54-55; skeptic/r3_raw.md:29-36",
+   "source": "dd_VLB_20261122/src/BCTC_KiemToan_2025.pdf tr.14 PDF (LCTT mã 02,12,21); src/BCTC_Q3_2026.pdf tr.6 PDF; BCTN_2025.pdf tr.54-55; skeptic/r3_raw.md:24-29",
    "note": "B 3 kỳ dấu trái nhau ⇒ nhánh ngược; gộp 2 hạng mục r3 (khấu hao ↑, đền bù ↓) vì cùng một dòng tiền"
   },
   {
@@ -82,7 +82,7 @@
    ],
    "counted_in_center": true,
    "contrib_pct": 0.397,
-   "source": "dd_VLB_20261122/src/BCTC_Q3_2026.pdf tr.5 PDF (mã 30, 21); skeptic/r3_raw.md:26-27",
+   "source": "dd_VLB_20261122/src/BCTC_Q3_2026.pdf tr.5 PDF (mã 30, 21); skeptic/r3_raw.md:23",
    "note": "B nhánh ngược: 9T/26 năm hoá 352,8 < TTM; KH 2026 LNTT 275"
   }
  ],

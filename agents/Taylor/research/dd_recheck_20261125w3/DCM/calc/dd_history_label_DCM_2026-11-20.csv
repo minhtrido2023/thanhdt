@@ -1,0 +1,2 @@
+ticker,dd_date,rev,skeptic_final,asof,center,price_asof,pc_asof,label,label_v1,reasons,demote_k,demote_neff,pct_fade,pct_hold,terc_fade,terc_hold,n_fade,n_hold,n_eff_hold,n_eff_fade,k_fade,k_hold,hist_med_fade,hist_med_hold,hist_p25_fade,hist_p75_fade,hist_p25_hold,hist_p75_hold,ROE5Y,roe_ttm,roe_ttm_over_5y,warn
+DCM,2026-11-04,4,REFUTED_OPEN,2026-11-20,27393,30400,1.10977,RẺ,RẺ,,0,0,30,0.833333,RẺ,RẺ,120,120,4.35675,3.9105,0.917049,0.61361,1.32346,1.63492,1.03382,1.5955,1.40258,2.13714,0.225365,0.228615,1.01442,

@@ -1,0 +1,182 @@
+{
+ "ticker": "DCM",
+ "dd_date": "2026-11-04",
+ "rev": 5,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_032448",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13"
+ },
+ "blind_to_price": true,
+ "center_base": 27393,
+ "center_base_source": "LEDGER_PROPOSAL_DCM.json rev5 center (= sổ rev4 REPORT_rev9, không đổi)",
+ "method": "chạy lại lưới model_r9 (2.430 kết cục, CK 0,585%) từng hạng mục bằng ghi đè hàm trong bộ nhớ (calc/calc_adj_dcm.py; CONTROL 27.393); tuyến tính vì |Σ|≤5%; tổ hợp kiểm tra 26.309",
+ "items": [
+  {
+   "id": "D1_khcn_forced_spend",
+   "name": "Quỹ KH&CN: phần chi bắt buộc cho KH&CN không thành TSCĐ (f gộp 2024–25 38,7%) có giá trị 0 thay v",
+   "dir": "down",
+   "evidence_tier": "B",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": -3.254,
+   "mag_range_pct": [
+    -5.205,
+    -1.601
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -1.627,
+   "source": "dd_DCM_20261104/png_r7/kt25_p37.png (TM25 KT 2025: sử dụng 39,50/75,82, chuyển TSCĐ 11,80/13,51, trích 44,78/187,99); REPORT_rev9.md §1a T1, §9; skeptic/r4_raw.md:14-17",
+   "note": "B 2 kỳ cùng hướng"
+  },
+  {
+   "id": "D2_regression_overpredict",
+   "name": "Hồi quy đoán cao 2024–25: dịch tung độ gốc mỗi cửa sổ bằng phần dư TB (r5 −153,6; ex22 −163,1 tỷ)",
+   "dir": "down",
+   "evidence_tier": "B",
+   "p": 0.35,
+   "p_low": 0.15,
+   "p_high": 0.55,
+   "mag_pct": -6.715,
+   "mag_range_pct": [
+    -12.3,
+    -1.131
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -2.35,
+   "source": "dd_DCM_20261104/calc/model_r9.py fit_bd9 (phần dư tái lập REPORT_rev9 §1a T7); skeptic/r4_raw.md:18",
+   "note": "B nhánh ngược: r5 2024 +65,6; 9T/26 LNTT 2.562,9"
+  }
+ ],
+ "sum_p_m_pct_linear": -3.977,
+ "sum_pct_combo": -3.957,
+ "aggregation": "|Σ|=3,98% ≤5% ⇒ tuyến tính",
+ "center_adj": 26303,
+ "range_low": 24470,
+ "range_high": 27236,
+ "dividend_mech": {
+  "status": "không có cổ tức tiền chưa GDKHQ trong dữ liệu rev9",
+  "vnd": 0
+ },
+ "center_adj_ex_div": 26303,
+ "sensitivity_only": [
+  {
+   "name": "[LUẬT] r 13,5% vs dải Ke (E15)",
+   "value": 28941,
+   "pct": 5.65
+  },
+  {
+   "name": "Khí 2035+ trục 0,5/0,25/0,25",
+   "value": 22574,
+   "pct": -17.59,
+   "reason": "C"
+  },
+  {
+   "name": "Quỹ KH&CN mất 100% (rev7)",
+   "value": 25009,
+   "pct": -8.7,
+   "reason": "C — hoàn nhập chưa kiểm"
+  },
+  {
+   "name": "Hạn thuê đất Cà Mau 2042/2047",
+   "vnd": [
+    -1873,
+    -994
+   ],
+   "reason": "C"
+  },
+  {
+   "name": "332 tỷ phong toả MBV",
+   "vnd": -627,
+   "reason": "C"
+  },
+  {
+   "name": "4 cửa sổ hồi quy",
+   "value": 29405,
+   "pct": 7.34,
+   "reason": "đặc tả; ngược D2"
+  },
+  {
+   "name": "Thuế XK 0% P=0,55",
+   "value": 28423,
+   "pct": 3.76,
+   "reason": "C"
+  }
+ ],
+ "trigger_table": [
+  {
+   "event": "BCTC KT 2026: LNST 2026 vs hồi quy",
+   "when": "~03/2027",
+   "direction": "both",
+   "delta_pct": [
+    -2.0,
+    1.3
+   ],
+   "note": "D2 p"
+  },
+  {
+   "event": "TM quỹ KH&CN KT 2026",
+   "when": "~03/2027",
+   "direction": "both",
+   "delta_pct": [
+    -1.0,
+    0.8
+   ],
+   "note": "D1 f"
+  },
+  {
+   "event": "Văn bản hoàn nhập quỹ KH&CN cho DN ngoài DNNN",
+   "when": "bất kỳ",
+   "direction": "down",
+   "delta_pct": [
+    -8.7,
+    0
+   ],
+   "note": "ước lượng: cận rev7"
+  },
+  {
+   "event": "Hạn thuê đất Cà Mau",
+   "when": "bất kỳ",
+   "direction": "down",
+   "delta_pct": [
+    -6.8,
+    -3.6
+   ],
+   "note": "C→A"
+  },
+  {
+   "event": "SĐBS 12 / giá khí sau 2034",
+   "when": "bất kỳ",
+   "direction": "both",
+   "delta_pct": [
+    -17.6,
+    null
+   ],
+   "note": "trục khí 2035+"
+  },
+  {
+   "event": "Thuế XK phân bón 0%",
+   "when": "bất kỳ",
+   "direction": "up",
+   "delta_pct": [
+    3.8,
+    3.8
+   ],
+   "note": "C→A"
+  },
+  {
+   "event": "Lãi huy động 12T ±50bp",
+   "when": "liên tục",
+   "direction": "both",
+   "delta_pct": [
+    -2.06,
+    2.22
+   ],
+   "note": "V1"
+  }
+ ],
+ "legal": "WARNING — HĐ khí bên liên quan khép kín, SĐBS 12 dự thảo, 332 tỷ MBV; không vào tâm",
+ "caveat": "MÙ GIÁ; f 9T/26 chưa tách phần chuyển TSCĐ; D2 giả định phần dư 2024–25 kéo dài cho mọi năm tương lai ở cùng spread"
+}
