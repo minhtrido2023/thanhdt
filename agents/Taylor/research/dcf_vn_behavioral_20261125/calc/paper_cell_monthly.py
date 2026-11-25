@@ -5,7 +5,9 @@ Nguồn (đã tra mike/kb/data_registry/): universe_pit (data/bq_cache/universe_
 · lv_ENS2 + route = panel V3.1 `vp2.parquet` (cần dựng lại hằng tháng — xem PAPER_REGISTRY_PROPOSED.md).
 Fail-closed: universe_pit không phủ ngày as-of ⇒ rc=3, KHÔNG ghi. Ô: v = hạng lv_ENS2 (trong nhóm route BANK / phi-BANK nếu ≥15 mã, else toàn universe),
 a = hạng hi52 = log(Close / max Close 252 phiên) toàn universe; ô theo trung vị v,a (>=0,5 = cao). Nhãn ô là MÔ TẢ (giả thuyết), không phải tín hiệu.
-Dùng:  python paper_cell_monthly.py --asof-ym 2026-10 [--ledger PATH] [--panel PATH] [--dry-run]"""
+Dùng:  python paper_cell_monthly.py --asof-ym 2026-10 [--ledger PATH] [--panel PATH | --lvens2-from PARQUET] [--dry-run]
+--lvens2-from: parquet MỘT tháng do dcf_lvens2_incremental_20261125/calc/lvens2_incremental.py dựng (không cần vp2.parquet); fail-closed nếu
+  ym/asof_date của file khác tháng/ngày as-of tính ở đây, hoặc file không phải mode pit."""
 import argparse, hashlib, os, sys, glob, csv
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -25,7 +27,8 @@ def md5(p):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--asof-ym", required=True); ap.add_argument("--ledger", default=LEDGER)
-    ap.add_argument("--panel", default=PANEL); ap.add_argument("--dry-run", action="store_true"); a = ap.parse_args()
+    ap.add_argument("--panel", default=PANEL); ap.add_argument("--lvens2-from", default=None); ap.add_argument("--allow-v31", action="store_true", help="selfcheck: nhận file mode v31")
+    ap.add_argument("--dry-run", action="store_true"); a = ap.parse_args()
     ym = a.asof_ym
     if os.path.exists(a.ledger) and (pd.read_csv(a.ledger, usecols=["asof_ym"]).asof_ym == ym).any():
         print(f"SKIP: {ym} đã có trong {a.ledger} (append-only, idempotent)"); return 0
@@ -42,14 +45,24 @@ def main():
     px = px.sort_values(["ticker", "time"]).reset_index(drop=True); g = px.groupby("ticker")
     px["hi52"] = np.log(px.Close) - np.log(g.Close.rolling(252, min_periods=120).max().reset_index(level=0, drop=True).sort_index().values)
     f = px[px.time == D][["ticker", "hi52"]]
-    pan = pd.read_parquet(a.panel, columns=["ticker", "ym", "time", "route", "lv_ENS2"]); pan = pan[pan.ym.astype(str) == ym]
+    if a.lvens2_from:
+        src = a.lvens2_from
+        if not os.path.exists(src):
+            print(f"FAIL-CLOSED: không có {src} — chạy lvens2_incremental.py --asof-ym {ym} trước", file=sys.stderr); return 3
+        pan = pd.read_parquet(src, columns=["ticker", "ym", "time", "route", "lv_ENS2", "asof_date", "mode"])
+        if set(pan.ym.astype(str)) != {ym} or set(pd.to_datetime(pan.asof_date)) != {D} or (set(pan["mode"]) != {"pit"} and not a.allow_v31):
+            print(f"FAIL-CLOSED: {src} ym={sorted(set(pan.ym.astype(str)))} asof={sorted(set(pan.asof_date.astype(str)))} mode={sorted(set(pan['mode']))} "
+                  f"không khớp {ym}/{D.date()}/pit", file=sys.stderr); return 3
+    else:
+        src = a.panel
+        pan = pd.read_parquet(a.panel, columns=["ticker", "ym", "time", "route", "lv_ENS2"]); pan = pan[pan.ym.astype(str) == ym]
     d = ud[ud.in_universe].merge(f, on="ticker").merge(pan[["ticker", "time", "route", "lv_ENS2"]].rename(columns={"time": "ptime"}), on="ticker").dropna(subset=["hi52", "lv_ENS2"]).copy()
     if len(d) < 50: print(f"FAIL-CLOSED: chỉ {len(d)} mã đủ dữ liệu ở {ym}", file=sys.stderr); return 3
     d["v_all"] = d.lv_ENS2.rank(pct=True); d["a"] = d.hi52.rank(pct=True); d["isb"] = d.route == "BANK"
     d["v_grp"] = d.groupby("isb").lv_ENS2.rank(pct=True); n = d.groupby("isb").ticker.transform("size"); d["v_grp"] = np.where(n >= MINGRP, d.v_grp, d.v_all)
     d["cell"] = [CELL[(int(v >= 0.5), int(x >= 0.5))] for v, x in zip(d.v_grp, d.a)]
     d["panel_time_match"] = (d.ptime == D); d["asof_ym"] = ym; d["asof_date"] = D.date()
-    d["computed_at_ict"] = datetime.now(_ICT).strftime("%Y-%m-%d %H:%M"); d["panel_md5"] = md5(a.panel)
+    d["computed_at_ict"] = datetime.now(_ICT).strftime("%Y-%m-%d %H:%M"); d["panel_md5"] = md5(src)
     out = d[COLS].sort_values("ticker")
     print(f"{ym}: as-of {D.date()} n={len(out)} (BANK {int(d.isb.sum())}) panel_time_match={out.panel_time_match.mean():.3f}"); print(out.cell.value_counts().to_string())
     if a.dry_run: print("dry-run: không ghi"); return 0

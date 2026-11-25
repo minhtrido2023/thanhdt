@@ -1,0 +1,416 @@
+[
+ {
+  "file": "lvens2_2016-02_v31.parquet",
+  "ym": "2016-02",
+  "n_new": 759,
+  "n_vp2": 759,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 276,
+  "n_univ_ENS2_vp2": 276,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2021-04_v31.parquet",
+  "ym": "2021-04",
+  "n_new": 1119,
+  "n_vp2": 1119,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 445,
+  "n_univ_ENS2_vp2": 445,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2021-10_v31.parquet",
+  "ym": "2021-10",
+  "n_new": 1133,
+  "n_vp2": 1133,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 534,
+  "n_univ_ENS2_vp2": 534,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2026-05_v31.parquet",
+  "ym": "2026-05",
+  "n_new": 1105,
+  "n_vp2": 1105,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 396,
+  "n_univ_ENS2_vp2": 396,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2026-06_v31.parquet",
+  "ym": "2026-06",
+  "n_new": 1100,
+  "n_vp2": 1100,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 383,
+  "n_univ_ENS2_vp2": 383,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2026-07_v31.parquet",
+  "ym": "2026-07",
+  "n_new": 1087,
+  "n_vp2": 1087,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 362,
+  "n_univ_ENS2_vp2": 362,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2026-08_v31.parquet",
+  "ym": "2026-08",
+  "n_new": 1091,
+  "n_vp2": 1091,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 353,
+  "n_univ_ENS2_vp2": 353,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2026-09_v31.parquet",
+  "ym": "2026-09",
+  "n_new": 1096,
+  "n_vp2": 1096,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 349,
+  "n_univ_ENS2_vp2": 349,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ },
+ {
+  "file": "lvens2_2026-10_v31.parquet",
+  "ym": "2026-10",
+  "n_new": 1092,
+  "n_vp2": 1092,
+  "only_new": [],
+  "only_vp2": [],
+  "route_diff": 0,
+  "in_univ_diff": 0,
+  "time_diff": 0,
+  "n_univ_ENS2_new": 338,
+  "n_univ_ENS2_vp2": 338,
+  "lv_D0B": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_DDM": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_EPV": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_MULT": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_HEDf": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "lv_ENS2": {
+   "max_abs": 0.0,
+   "n_gt_1e-9": 0,
+   "nan_mismatch": 0
+  },
+  "ENS2_bad_tickers": [],
+  "ENS2_bad_in_univ": 0,
+  "ENS2_univ_max_abs": 0.0
+ }
+]
