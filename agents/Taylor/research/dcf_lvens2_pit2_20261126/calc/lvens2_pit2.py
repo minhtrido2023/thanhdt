@@ -299,18 +299,21 @@ def build_panel(D, frozen, use_vnd=True, poison=None, route_global=False, mc_pit
     _N = np.where(_sevent & _nn.notna(), _nn, pan.N)
     _mc_new = pan.Price * _N
     pan["mc"] = np.where(np.isfinite(_mc_new) & (pan.Price > 0), _mc_new, pan.mc_old)
+    pan["mc_strict"] = pan.mc
+    pan["mc_step"] = np.where(_sevent & pan.N_next.isna() & np.isfinite(pan.mc_old), pan.mc_old, pan.mc)
     if mc_pit == "step":
         # [BIẾN THỂ PIT, không có trong V3.1] có sự kiện từ ngày công bố mà kỳ BCTC kế CHƯA công bố ở D ⇒ dùng mc_old = Price×N×hệ số giá
         # (bắt được thưởng/chia tách; sai số = tỉ suất cổ tức tiền nếu sự kiện chỉ là cổ tức tiền). strict = đúng code V3.1 (N cũ).
         pan["mc"] = np.where(_sevent & pan.N_next.isna() & np.isfinite(pan.mc_old), pan.mc_old, pan.mc)
-    pan["ca_ratio"] = 1.0; pan["ca_n"] = 0
-    if mc_pit in ("stepca", "stepcar"):
-        # [pit2] chỉ sự kiện ĐỔI SỐ CP (thưởng/cổ tức CP; stepcar + quyền mua) có ex trong (ngày BCTC, as-of] và public_date ≤ as-of; KHÔNG cổ tức tiền
-        cae = _hurt(ca if ca is not None else load_ca(), "ex", "ca")
-        cae = cutonly(cutonly(cae, "ex", "ca"), "pub", "ca")
-        f, n = ca_factor(pan, cae, include_rights=(mc_pit == "stepcar"))
-        pan["ca_ratio"] = f; pan["ca_n"] = n
-        pan["mc"] = np.where(pan.N_next.isna() & (n > 0) & (pan.Price > 0), pan.Price * pan.N * f, pan.mc)
+    # [pit2] stepca/stepcar: chỉ sự kiện ĐỔI SỐ CP (thưởng/cổ tức CP; stepcar + quyền mua) có ex trong (ngày BCTC, as-of] và public_date ≤ as-of; KHÔNG cổ tức tiền
+    cae = _hurt(ca if ca is not None else load_ca(), "ex", "ca")
+    cae = cutonly(cutonly(cae, "ex", "ca"), "pub", "ca")
+    for v, rr in (("stepca", False), ("stepcar", True)):
+        f, n = ca_factor(pan, cae, include_rights=rr)
+        pan["mc_" + v] = np.where(pan.N_next.isna() & (n > 0) & (pan.Price > 0), pan.Price * pan.N * f, pan.mc_strict)
+        pan["ca_ratio_" + v] = f; pan["ca_n_" + v] = n
+    pan["ca_ratio"] = pan.get("ca_ratio_" + mc_pit, 1.0); pan["ca_n"] = pan.get("ca_n_" + mc_pit, 0)
+    pan["mc"] = pan["mc_" + mc_pit]
     pan["N_mc"] = pan.mc / pan.Price
     pan["event_no_next"] = (_sevent & pan.N_next.isna()).values
     pan["n_next_used"] = (_sevent & _nn.notna()).values
@@ -513,7 +516,16 @@ def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag="", route_glo
         vnd_max = max((str(x.max()) for x in _d if len(x)), default=None)
         if D is not None and vnd_max is not None and pd.Timestamp(vnd_max) < D:
             print(f"WARN: snapshot VND dừng ở {vnd_max} < D {D.date()} — mã chỉ-có-ở-VND (vd GEL/HPA/DSH) dùng giá cũ/vắng tháng này", file=sys.stderr)
-    pan = build_panel(D, frozen, use_vnd=use_vnd, poison=poison, route_global=route_global, mc_pit=mc_pit, nocut=nocut, eguard=eguard, ca=ca)
+    variants = list(MC_TAG) if mc_pit == "all" else [mc_pit]
+    pan0 = build_panel(D, frozen, use_vnd=use_vnd, poison=poison, route_global=route_global, mc_pit=variants[0], nocut=nocut, eguard=eguard, ca=ca)
+    for v in variants:
+        pan = pan0.copy(); pan["mc"] = pan["mc_" + v]; pan["N_mc"] = pan.mc / pan.Price
+        pan["ca_ratio"] = pan.get("ca_ratio_" + v, 1.0); pan["ca_n"] = pan.get("ca_n_" + v, 0)
+        rc = _emit(pan, v, yms, mode, D, out_dir, frozen, use_vnd, route_global, eguard, nocut, tag, vnd_max, n_frozen, fresh, dump_panel if v == variants[0] else None)
+    return rc
+
+
+def _emit(pan, mc_pit, yms, mode, D, out_dir, frozen, use_vnd, route_global, eguard, nocut, tag, vnd_max, n_frozen, fresh, dump_panel):
     if dump_panel:                                            # đo sai số mc mọi tháng (mc_err.py) — cột tối thiểu, mọi tháng
         pan[["ticker", "ym", "time", "known", "src", "in_universe", "N", "N_next", "Price", "Close", "price_rel", "close_rel", "E", "E_raw", "E_fix"]].to_parquet(dump_panel, index=False)
     pan, beta = models(pan)
@@ -549,7 +561,7 @@ def main():
     ap.add_argument("--asof-ym", required=True, nargs="+"); ap.add_argument("--mode", choices=["pit", "v31"], default="pit")
     ap.add_argument("--out-dir", default=os.path.join(HERE, "..", "out")); ap.add_argument("--frozen", default=FROZEN)
     ap.add_argument("--no-vnd", action="store_true"); ap.add_argument("--route-global", action="store_true", help="CHẨN ĐOÁN, không dùng cho sổ: route cuối toàn bảng (look-ahead)")
-    ap.add_argument("--mc-pit", choices=list(MC_TAG), default="strict")
+    ap.add_argument("--mc-pit", choices=list(MC_TAG) + ["all"], default="strict", help="all = dựng 1 lần, ghi 4 biến thể")
     ap.add_argument("--no-eguard", action="store_true", help="CHẨN ĐOÁN: tắt chặn E ngân hàng (như bản đã merge)")
     ap.add_argument("--cache-root", default=CACHE, help="selfcheck vintage: thư mục cache cũ (vd data/bq_cache_asof20260728)")
     ap.add_argument("--dump-panel", default=None)
