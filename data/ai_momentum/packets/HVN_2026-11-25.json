@@ -1,0 +1,79 @@
+{
+ "event_id": "HVN_2026-11-25",
+ "ticker": "HVN",
+ "T": "2026-11-25",
+ "stats": {
+  "mom20": 0.15676959619952502,
+  "idio20": 0.19900880794613507,
+  "volr": 1.991418820087762,
+  "newhi_3m": true,
+  "liq_bn": 29.836542,
+  "route_8l": "COMPOUNDER",
+  "rating_8l_asof": 2,
+  "rating_eff_date": "2026-11-02",
+  "dd_flag": true
+ },
+ "sector_context": {
+  "route_ret20_median": -0.07114624505928857,
+  "route_n": 195,
+  "ticker_pct_in_route": 0.9948453608247423,
+  "icb": "5751",
+  "icb_ret20_median": 0.03686982693754692,
+  "icb_n": 3,
+  "vnindex_ret20": -0.04223921174661005
+ },
+ "financials_released_le_T": [
+  {
+   "quarter": "2026Q1",
+   "Release_Date": "2026-04-01",
+   "NP_P0": 4388011721217.0,
+   "NP_P4": 3400942857462.0,
+   "Revenue_P0": 36946545440205.0,
+   "Revenue_YoY_P0": 0.206354772172107,
+   "GPM_P0": 0.1484748565,
+   "PE": 8.5085624627955,
+   "PB": 6.205171819521108,
+   "ROE_Trailing": -0.3727714942221379
+  },
+  {
+   "quarter": "2026Q2",
+   "Release_Date": "2026-07-31",
+   "NP_P0": -735458547203.0,
+   "NP_P4": 2855811194166.0,
+   "Revenue_P0": 38365795734759.0,
+   "Revenue_YoY_P0": 0.3678159370111122,
+   "GPM_P0": 0.1140387019,
+   "PE": 14.542266563540514,
+   "PB": 6.516028142895418,
+   "ROE_Trailing": 0.5221697536083896
+  },
+  {
+   "quarter": "2026Q3",
+   "Release_Date": "2026-11-02",
+   "NP_P0": 144750310266.0,
+   "NP_P4": 617199713699.0,
+   "Revenue_P0": 39168020314112.0,
+   "Revenue_YoY_P0": 0.2865229449989896,
+   "GPM_P0": 0.100249066,
+   "PE": 15.476024679372674,
+   "PB": 6.147660870885543,
+   "ROE_Trailing": 0.4329334746206787
+  }
+ ],
+ "news_le_T": [
+  {
+   "public_date": "2026-07-30",
+   "public_datetime": "2026-07-30T22:05:00",
+   "ingested_date": "2026-09-14",
+   "title": "Vietnam Airlines (HVN): Lợi nhuận hợp nhất 6 tháng đạt hơn 3.852 tỷ đồng",
+   "codes": "MA"
+  },
+  {
+   "public_date": "2026-07-31",
+   "public_datetime": "2026-07-31T09:05:00",
+   "ingested_date": "2026-09-14",
+   "title": "HVN giải trình lỗ sau thuế quý 2 trên báo cáo tài chính Công ty mẹ và Hợp nhất",
+   "codes": "MA"
+  }
+ ]
+}
