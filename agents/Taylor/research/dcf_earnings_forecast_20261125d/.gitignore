@@ -6,3 +6,4 @@ out_J3/*.parquet
 out_J3C/*.parquet
 out_CY/*.parquet
 out_CYC*/*.parquet
+in_cycle/*.xlsx
