@@ -259,6 +259,25 @@ def part_e2():
         and "DISPATCH SpaceX" not in o,
         "E4 E2E lễ 24/11: HOLIDAY-SKIP → MORNING-SKIP thật: SpaceX (có plan) KHÔNG dispatch, ZaloPay dispatch  [giết: xoá _HOL_LAPBU=1]", o)
 
+    # E5 (arch-review vòng cuối P2): đường RETRY (plan_gate_recovery) — ngày giao dịch thường, MORNING=0, KHÔNG có cờ lễ,
+    # chỉ BQF_SKIP_EXISTING_PLANS=1 ⇒ SpaceX (đã có plan) KHÔNG bị ghi đè; =0 ⇒ cả hai dispatch (đối chứng).
+    script2 = (f'ROOT="{HERE.parent}"; WORKDIR="{wc}"; MORNING=0; TODAY=2026-11-24; NEXT_TRADING_DAY=2026-11-25\n'
+               f'for ACCT in SpaceX ZaloPay; do\n{ms}\necho "DISPATCH $ACCT"\ndone')
+    for val, want_skip in (("1", True), ("0", False)):
+        env2 = env_wc(NEW_WC)
+        for k in ("_HOL_LAPBU", "MIKE_MORNING_FORCE", "MIKE_MORNING_RUN"):
+            env2.pop(k, None)
+        env2["BQF_SKIP_EXISTING_PLANS"] = val
+        r2 = subprocess.run(["bash", "-c", script2], env=env2, capture_output=True, text=True, timeout=60)
+        o2 = r2.stdout + r2.stderr
+        if want_skip:
+            ok = "[SKIP-EXISTING] plan_SpaceX_2026-11-25.json" in o2 and "retry=1" in o2 \
+                and "DISPATCH SpaceX" not in o2 and "DISPATCH ZaloPay" in o2
+        else:
+            ok = "SKIP-EXISTING" not in o2 and "DISPATCH SpaceX" in o2 and "DISPATCH ZaloPay" in o2
+        chk(ok, f"E5 retry BQF_SKIP_EXISTING_PLANS={val}: " + ("SpaceX (có plan) KHÔNG dispatch" if want_skip else "đối chứng cả hai dispatch")
+            + "  [giết: xoá điều kiện BQF_SKIP_EXISTING_PLANS ở bq_freshness_check.sh:1081]", o2)
+
 
 def part_h():
     """vòng cuối #5e: late_plan_catchup.check_status — approved_by_user là ĐÃ DUYỆT ⇒ APPROVED ⇒ REFUSE."""

@@ -114,17 +114,15 @@ def threshold(hist, floor=FLOOR, ratio=RATIO, window=WINDOW):
     return med, max(floor, math.ceil(ratio * med))
 
 
-def accepted_history(prior, floor=FLOOR, ratio=RATIO, window=WINDOW):
+def accepted_history(prior, floor=FLOOR, ratio=RATIO, window=WINDOW, gate_seed=False):
     """prior (cũ→mới) → (đã nhận, số phiên bị loại). Hạt giống = WINDOW phiên đầu có n ≥ sàn; sau đó chỉ nhận
-    phiên QUA ngưỡng tính trên lịch sử ĐÃ NHẬN trước nó (phiên FAIL không đầu độc trung vị)."""
+    phiên QUA ngưỡng tính trên lịch sử ĐÃ NHẬN trước nó (phiên FAIL không đầu độc trung vị).
+    gate_seed=True (pha reseed): phiên đầu sau reseed do người xác nhận ⇒ nhận theo sàn; các phiên kế tiếp phải
+    qua ngưỡng của lịch sử đã nhận ngay cả khi chưa đủ WINDOW (phiên FAIL không lọt vào trung vị)."""
     acc, dropped = [], 0
     for x in (int(v) for v in prior):
-        if len(acc) < window:
-            if x >= floor:
-                acc.append(x)
-            else:
-                dropped += 1
-        elif x >= threshold(acc, floor, ratio, window)[1]:
+        seeding = len(acc) < window and not (gate_seed and acc)
+        if x >= (floor if seeding else threshold(acc, floor, ratio, window)[1]):
             acc.append(x)
         else:
             dropped += 1
@@ -134,7 +132,7 @@ def accepted_history(prior, floor=FLOOR, ratio=RATIO, window=WINDOW):
 def decide(n, prior, floor=FLOOR, ratio=RATIO, window=WINDOW, reseeded=False):
     """→ (verdict, info). prior = list số mã của các phiên TRƯỚC ngày xét (cũ→mới). reseeded=True: prior đã cắt
     từ reseed_from (người xác nhận) ⇒ chưa đủ WINDOW vẫn đo được: trung vị phiên mới đã nhận, rỗng ⇒ chỉ sàn."""
-    acc, dropped = accepted_history(prior, floor, ratio, window)
+    acc, dropped = accepted_history(prior, floor, ratio, window, gate_seed=reseeded)
     if reseeded and len(acc) < window:
         med, thr = (threshold(acc, floor, ratio, window) if acc else (None, floor))
         info = {"n": n, "median": med, "threshold": thr, "floor": floor, "ratio": ratio, "window": len(acc),

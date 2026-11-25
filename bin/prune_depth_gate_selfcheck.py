@@ -188,6 +188,10 @@ def main():
     chk(rc == 1 and "sai định dạng" in out, "T11g reseed_from sai định dạng ⇒ bỏ qua, vẫn CHẶN", out)
     rc, out = run_cli(rows[:-1] + [(ds[30], 7)], reseed=good)
     chk(rc == 1 and "threshold=150" in out, "T11h reseed KHÔNG nới sàn: 7 mã ⇒ CHẶN", out)
+    rows_j = rows + [(ds[31], 155), (ds[32], 155)]
+    rc, out = run_cli(rows_j, reseed=good)
+    chk(rc == 1 and "n=155" in out and "threshold=161" in out,
+        "T11j reseed 178 → 155 (FAIL) → 155: phiên FAIL KHÔNG vào trung vị pha hạt giống ⇒ vẫn CHẶN (reviewer P2)", out)
     shipped = json.loads((HERE.parent / "config" / "prune_depth_reseed.json").read_text())
     chk(shipped.get("reseed_from") is None and shipped.get("source") is None, "T11i file giao kèm nhánh: reseed TẮT", shipped)
 
