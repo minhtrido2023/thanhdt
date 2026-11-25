@@ -1,0 +1,14 @@
+entries 177
+entry thêm: HHS@2026-11-01 rev→10 center_adj=11593 [11593–13969] basis=agents/Taylor/research/dd_recheck_20261125w3/HHS/adj.json
+ĐÃ GHI /tmp/ddpz_A_Az6p.json (1 entry)
+SC=A TZ=UTC rc=0 -- sổ 178 entry / 36 mã; lỗi 0
+SC=A TZ=Asia/Ho_Chi_Minh rc=0 -- sổ 178 entry / 36 mã; lỗi 0
+SC=A TZ=America/New_York rc=0 -- sổ 178 entry / 36 mã; lỗi 0
+final entries 178
+entries 177
+entry thêm: HHS@2026-11-01 rev→10 center_adj=10303 [10303–12357] basis=agents/Taylor/research/dd_HHS_PAT_followup_20261125/HHS/adj_B.json
+ĐÃ GHI /tmp/ddpz_B_JDrl.json (1 entry)
+SC=B TZ=UTC rc=0 -- sổ 178 entry / 36 mã; lỗi 0
+SC=B TZ=Asia/Ho_Chi_Minh rc=0 -- sổ 178 entry / 36 mã; lỗi 0
+SC=B TZ=America/New_York rc=0 -- sổ 178 entry / 36 mã; lỗi 0
+final entries 178

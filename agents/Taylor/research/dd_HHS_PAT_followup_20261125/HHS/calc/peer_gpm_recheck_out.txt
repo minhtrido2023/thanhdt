@@ -1,0 +1,16 @@
+AGG: TB 36.6% (min 15.5, max 78.2, n=7)
+CEO: TB 31.3% (min 14.0, max 44.1, n=10)
+DIG: TB 27.3% (min 18.1, max 40.8, n=10)
+DXG: TB 54.1% (min 45.9, max 64.9, n=10)
+HDC: TB 33.2% (min 17.9, max 44.7, n=10)
+HDG: TB 48.3% (min 29.6, max 62.7, n=10)
+KDH: TB 46.8% (min 14.7, max 76.0, n=10)
+KHG: TB 26.7% (min 8.4, max 51.7, n=5)
+NLG: TB 40.1% (min 28.3, max 49.1, n=10)
+NTL: TB 33.3% (min -35.9, max 64.5, n=10)
+NVL: TB 39.4% (min 0.9, max 97.4, n=10)
+PDR: TB 55.3% (min 24.0, max 90.9, n=10)
+SCR: TB 16.2% (min -33.5, max 41.0, n=10)
+VHM: TB 39.2% (min 26.0, max 53.2, n=9)
+DEV n=14 TB-của-TB 37.7% trung vị 37.9% | IQR 30.3–47.2%
+TCH TB 29.9% min 19.0 max 38.4 n=10
