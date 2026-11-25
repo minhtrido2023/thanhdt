@@ -1,0 +1,83 @@
+PASS số chuẩn có mặt
+PASS số lệch bị bắt (7.700/9.960/19.500)
+PASS rev=2 hợp lệ
+PASS rev=2 thiếu supersedes bị bắt
+PASS rev=2 supersedes sai bị bắt
+PASS rev=3 nhảy cóc bị bắt
+PASS rev=2 thiếu correction_reason bị bắt
+PASS quote_numbers: token ≥1000 không bị ×1000
+PASS expires_on hợp lệ → sạch
+PASS expires_on null bị bắt
+PASS expires_on thiếu bị bắt
+PASS expires_on sai định dạng bị bắt
+PASS khoá khớp → sạch
+PASS khoá lệch bị bắt
+PASS nguồn bị sửa sau ghi sổ bị bắt
+PASS entry mới thiếu khoá bị bắt
+PASS entry cũ (trước 08/11) thiếu khoá được miễn
+PASS center_adj: bộ đủ → sạch
+PASS center_adj: không có trường nào → bỏ qua
+PASS center_adj: thiếu 1 trường bị bắt
+PASS center_adj: md5 lệch bị bắt
+PASS center_adj: file adj.json mất bị bắt
+PASS center_adj: ticker lệch bị bắt
+PASS center_adj: giá trị lệch adj.json bị bắt
+PASS center_adj: low lệch adj.json bị bắt
+PASS center_adj: adj ngoài [low,high] bị bắt
+PASS center_adj: low=0 bị bắt
+PASS center_adj: bool bị bắt
+PASS center_adj: skeptic_final=NONE bị bắt
+PASS center_adj: thiếu skeptic_final bị bắt
+PASS center_adj: center=None bị bắt
+PASS center_adj: center=0 bị bắt
+PASS center_adj: center_base adj.json lệch tâm entry (rev khác) bị bắt
+PASS center_adj: dd_date adj.json ≠ entry bị bắt
+PASS center_adj: rev adj.json ≠ entry bị bắt
+PASS center_adj: rev mới + supersedes đúng rev adj.json (4→5) → sạch
+PASS center_adj: supersedes trỏ rev khác rev adj.json bị bắt
+PASS center_adj: supersedes trỏ ticker khác bị bắt
+PASS center_adj: supersedes trỏ dd_date khác bị bắt
+PASS center_adj: supersedes hỏng định dạng bị bắt
+PASS center_adj: supersedes đúng nhưng dd_date adj.json lệch bị bắt
+PASS center_adj: mang theo qua 1 rev (tổ tiên cùng md5+center) → sạch
+PASS center_adj: mang theo qua 2 rev → sạch
+PASS center_adj: tổ tiên KHÁC md5 ⇒ chuỗi đứt, bị bắt
+PASS center_adj: tổ tiên KHÁC center ⇒ chuỗi đứt, bị bắt
+PASS center_adj: không có prior ⇒ mang theo bị bắt (fail-closed)
+PASS center_adj: chuỗi đứt ở giữa (thiếu rev 6) bị bắt
+PASS center_adj: adj.json thiếu rev bị bắt
+PASS center_adj: adj.json thiếu dd_date bị bắt
+PASS center_adj: adj.json là list ⇒ lỗi chứ không crash
+PASS center_adj: adj.json center_adj là chuỗi ⇒ lỗi chứ không crash
+PASS center_adj: adj.json JSON hỏng bị bắt
+PASS center_adj: basis đường dẫn tuyệt đối bị bắt
+PASS center_adj: basis thoát root bị bắt
+PASS skeptic_final: entry mới đủ trường → sạch
+PASS skeptic_final: entry mới thiếu skeptic_final bị bắt
+PASS skeptic_final: enum sai bị bắt
+PASS skeptic_final: thiếu recorded_at, dd_date ≥23/11 ⇒ bị bắt
+PASS skeptic_final: thiếu recorded_at + thiếu dd_date ⇒ fail-closed bị bắt
+PASS skeptic_final: thiếu recorded_at, dd_date 18/11 (DBC/POW/LLM) được miễn
+PASS skeptic_final: CONFIRMED mâu thuẫn skeptic_status (entry mới) bị bắt
+PASS skeptic_final: CONFIRMED khớp skeptic_status sạch (entry mới) qua
+PASS skeptic_final_basis ngoài enum bị bắt
+PASS skeptic_final: recorded_at UTC sang ngày 23 ICT bị bắt
+PASS skeptic_final: recorded_at UTC 22/11 16:59Z (=23:59 ICT 22/11) được miễn
+PASS lock: recorded_at UTC sang ngày ≥08/11 ICT thiếu khoá bị bắt
+PASS skeptic_final: entry cũ thiếu trường được miễn
+PASS skeptic_final: entry cũ có enum sai vẫn bị bắt
+PASS audited_fy_missing không phải bool bị bắt
+PASS skeptic_verdict_path null được phép
+PASS skeptic_verdict_path trỏ THƯ MỤC bị bắt
+PASS skeptic_verdict_path trỏ file không tồn tại bị bắt
+PASS A4: entry mới, path hợp lệ + CONFIRMED khớp ⇒ sạch
+PASS A4: entry mới path=null bị bắt
+PASS A4: JSON hỏng bị bắt
+PASS A4: verdict ngoài enum bị bắt
+PASS A4: skeptic_final=CONFIRMED nhưng verdict REFUTED bị bắt
+PASS A4: verdict CONFIRMED nhưng skeptic_final=NONE bị bắt
+PASS A4: REFUTED + skeptic_final=REFUTED_OPEN sạch
+PASS A4: entry cũ (trước ngày bật) path=null được miễn
+PASS A4: mặc định 9999-12-31 ⇒ chưa bật, path=null qua
+PASS center_adj trên sổ thật: mang theo qua rev sau KHÔNG bị chặn
+-- sổ 176 entry / 36 mã; lỗi 0

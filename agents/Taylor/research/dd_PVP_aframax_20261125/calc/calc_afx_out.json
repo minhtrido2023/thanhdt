@@ -1,0 +1,87 @@
+{
+ "ticker": "PVP",
+ "liq_disc_5ty": 0.01984292078214305,
+ "base": {
+  "center": 23099,
+  "p10": 13799,
+  "p50": 23982,
+  "p90": 30338
+ },
+ "variants": {
+  "A_mot_tau_80": {
+   "center": 22932,
+   "p10": 13363,
+   "p50": 23982,
+   "p90": 30338,
+   "d_vnd": -167,
+   "d_pct": -0.72,
+   "why": "nhanh \"mot tau\" = DT-08/26/TBD 80 tr USD (thay Aframax #2 56,5 da gop vao dong 116 tai to trinh 3); trong so giu"
+  },
+  "B_mot_tau_80_khong_005": {
+   "center": 22769,
+   "p10": 13298,
+   "p50": 23982,
+   "p90": 30336,
+   "d_vnd": -330,
+   "d_pct": -1.43,
+   "why": "do nhay: van kien da hoan thien + DHDCD da trieu tap => \"khong\" 0,15->0,05 [UL]"
+  },
+  "C_mot_tau_80_khong_030": {
+   "center": 23249,
+   "p10": 13696,
+   "p50": 23982,
+   "p90": 30360,
+   "d_vnd": 150,
+   "d_pct": 0.65,
+   "why": "do nhay: khong thong qua / khong tim duoc tau (to trinh 3: it chu tau chao ban) [UL]"
+  },
+  "D_chi_mot_tau_80_chac": {
+   "center": 23054,
+   "p10": 14725,
+   "p50": 23982,
+   "p90": 30360,
+   "d_vnd": -45,
+   "d_pct": -0.19,
+   "why": "do nhay: chac chan mua dung 1 tau 80"
+  },
+  "E_ca_goi_116_chac": {
+   "center": 22323,
+   "p10": 12067,
+   "p50": 23982,
+   "p90": 30207,
+   "d_vnd": -776,
+   "d_pct": -3.36,
+   "why": "do nhay: chac chan dung het 116"
+  },
+  "F_npv0_moi_nhanh_A": {
+   "center": 24678,
+   "p10": 20474,
+   "p50": 23982,
+   "p90": 30338,
+   "d_vnd": 1579,
+   "d_pct": 6.84,
+   "why": "NPV tau moi = 0 moi kich ban (luat 03/11 thuan) — khong phu thuoc gia tri mua"
+  },
+  "G_m30_vo_dieu_kien_A": {
+   "center": 18328,
+   "p10": 12451,
+   "p50": 17780,
+   "p90": 24926,
+   "d_vnd": -4771,
+   "d_pct": -20.65,
+   "why": "NPV -30% vo dieu kien voi nhanh mot tau 80"
+  }
+ },
+ "xcheck_m30": {
+  "price_10y": {
+   "2023": 55.0,
+   "2024": 52.0,
+   "2025": 55.0,
+   "T10_2026": 80.0,
+   "bq_T4_T10_2026": 72.14
+  },
+  "mean_2023_2025": 54.0,
+  "drop_if_revert_from_80": 0.3212,
+  "note": "gia tri tai san quay ve TB 2023-25 => -32,1% gia mua 79,55 (mark-to-market, khong phai NPV dong tien); chi KIEM CHEO dau/do lon nhanh xau, khong doi tham so"
+ }
+}

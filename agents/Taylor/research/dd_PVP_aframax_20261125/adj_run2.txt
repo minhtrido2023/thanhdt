@@ -1,0 +1,1 @@
+{"sum_p_m_pct": -1.128, "center_adj": 22838, "range_low": 22600, "range_high": 23044}
