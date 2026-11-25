@@ -3,15 +3,15 @@
  "dd_date": "2026-10-31",
  "rev": 6,
  "asof": "2026-11-25",
- "job": "Taylor_20261125_080251",
+ "job": "Taylor_20261125_082754",
  "prereg_md5": {
   "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
   "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13"
  },
  "blind_to_price": true,
- "center_base": 18595,
- "center_base_source": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT.md §3 (rev6, KTPL k=9,03% vào base)",
- "method": "chạy lại mô hình RI r3 tổ hợp với k=9,03% (calc/calc_agm.py; CONTROL 21.069/20.587/vùng rev5)",
+ "center_base": 17925,
+ "center_base_source": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md §1 (rev6', k=11,59% = KTPL 9,03% + quỹ khác 2,56% vào base)",
+ "method": "chạy lại mô hình RI r3 tổ hợp với k=11,59% (calc/calc_agm_v2.py; run1=run2 md5 5ed5af00; CONTROL 21.069/vùng rev5/18.595/25.317/18.969/18.742/23.396)",
  "items": [
   {
    "name": "Đường ROE 2027–29 thấp hơn ROE TTM 20,7% / mục tiêu BLĐ 22–24% (dịch +1,5/+1/+1pp, ROE_T giữ)",
@@ -20,15 +20,15 @@
    "p": 0.35,
    "p_low": 0.15,
    "p_high": 0.55,
-   "mag_pct": 2.579,
+   "mag_pct": 2.533,
    "mag_range_pct": [
-    2.579,
-    2.579
+    2.533,
+    2.533
    ],
    "counted_in_center": true,
    "note": "ROE ≥20% nhiều kỳ (TTM 20,7%), nhưng có quan sát NGƯỢC bằng số: chi phí tín dụng Q3 1,65% > 9T 1,46%, nhóm 2 HN +67% YTD, bao phủ 93,7→84,7% ⇒ nhánh Bneg 0,35. Chỉ dịch pha 2027–29; ROE_T không đổi (ROE_T là tham số luật). Skeptic đo phương án cả T17 = +8,5% (gồm phần luật).",
    "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:31; agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§3 bảng chất lượng tài sản",
-   "contrib_pct": 0.903
+   "contrib_pct": 0.887
   },
   {
    "name": "Phát hành riêng lẻ 200 tr CP (~2%) chưa vào mô hình",
@@ -37,74 +37,84 @@
    "p": 0.5,
    "p_low": 0.25,
    "p_high": 0.75,
-   "mag_pct": -0.317,
+   "mag_pct": -0.256,
    "mag_range_pct": [
-    -0.317,
-    -0.077
+    -0.256,
+    0.251
    ],
    "counted_in_center": true,
-   "note": "Nguồn thứ cấp (Vietcap 07/08/2026: 200 tr CP, 27 tr cho Viettel). Giá phát hành chưa biết: m tại BVPS 15.594 (−0,51%) … 1,3×BVPS (−0,08%). 1 quan sát ⇒ B1. Skeptic ước −1…−2% (không nêu giá) — số đo mô hình nhỏ hơn. m đo lại trên base rev6 (k 9,03%); cận trên 1,3×BVPS giữ số đợt 2.",
+   "note": "Nguồn thứ cấp (Vietcap 07/08/2026: 200 tr CP, 27 tr cho Viettel). Giá phát hành chưa biết: m tại BVPS 15.594 (−0,26%) … 1,3×BVPS 20.272 (+0,25%, giá > tâm rev6' ⇒ tích cực). Tâm dùng BVPS (bảo thủ). 1 quan sát ⇒ B1. m đo trên base rev6' (k 11,59%).",
    "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:9,26; /tmp/ddrestore_MBB/agents/Taylor/research/dd_MBB_20261031/src/web_facts.md:13",
-   "contrib_pct": -0.159
+   "contrib_pct": -0.128
   }
  ],
- "sum_p_m_pct_linear": 0.744,
- "sum_pct_combo": 0.732,
- "aggregation": "combo rerun trên base rev6",
- "center_adj": 18731,
- "range_low": 18621,
- "range_high": 19088,
- "range_linear_pct": [
-  -8.652,
-  0.021
- ],
+ "sum_p_m_pct_linear": 0.759,
+ "sum_pct_combo": 0.746,
+ "aggregation": "combo rerun trên base rev6'; dải lưới p×m×k với k ∈ {9,78%; 12,56%} (ĐỐI XỨNG theo k)",
+ "center_adj": 18059,
+ "range_low": 17709,
+ "range_high": 18678,
  "dividend_mech": {
   "status": "cổ tức tiền 10% (8.055.000 tr) ĐÃ chi trong 9T/2026 (LCTT HN Q3); CP thưởng 15% + quyền mua 10:1 đã vào số CP 10.068.749.885 ⇒ không có quyền chưa GDKHQ",
   "vnd": 0
  },
- "center_adj_ex_div": 18731,
+ "center_adj_ex_div": 18059,
  "sensitivity_only": [
   {
    "name": "[LUẬT] chênh ROE_T−Ke vĩnh viễn trên sổ 2029 (quy ước user 08/11: NARROW không thưởng, không trừ)",
    "dir": "down",
    "evidence_tier": "rule",
-   "sensitivity": "bỏ chênh terminal (ROE_T=Ke) ⇒ 17961 (-14.75%)",
+   "sensitivity": "bỏ chênh terminal (ROE_T=Ke) ⇒ 17.070 (−4,77%)",
    "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:22"
   },
   {
    "name": "[LUẬT] r 13,5% vs dải Ke (E15)",
    "dir": "up",
    "evidence_tier": "rule",
-   "sensitivity": "Ke 12,3% ⇒ 23.659 (+12,30%); 13,4% ⇒ 21.266 (+0,94%)",
+   "sensitivity": "Ke 12,3% ⇒ 20.095 (+12,11%); 13,4% ⇒ 18.090 (+0,92%)",
    "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§2"
+  },
+  {
+   "name": "[LUẬT] ROE_T ±2pp",
+   "dir": "both",
+   "evidence_tier": "rule",
+   "sensitivity": "15.979 / 19.871 (±10,86%)",
+   "source": "agents/Taylor/research/dd_MBB_agm_20261125/calc/calc_agm_v2_out.json"
+  },
+  {
+   "name": "[LUẬT] RONIC>Ke (g_RI=g_T)",
+   "dir": "up",
+   "evidence_tier": "rule",
+   "sensitivity": "19.913 (+11,09%)",
+   "source": "agents/Taylor/research/dd_MBB_agm_20261125/calc/calc_agm_v2_out.json"
   },
   {
    "name": "Xây lại bao phủ 93,7% (thiếu 1.940 tỷ DP)",
    "dir": "down",
    "evidence_tier": "C",
-   "sensitivity": "20877 (-0.91%)",
+   "sensitivity": "17.762 (−0,91%)",
    "why_not_center": "trùng nhánh XẤU (DP Q4 7.500 'xây lại bao phủ', trọng số 0,275) ⇒ cấm đếm hai lần",
    "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§3"
   },
   {
-   "name": "Nhu cầu vốn: tín dụng 18–35%/năm vs VCSH +12,6%/năm, CAR riêng 30/06 10,28%",
+   "name": "Nhu cầu vốn: tín dụng 18–35%/năm vs VCSH giữ lại ≈10,5%/năm (ước lượng, sau k 11,59%), CAR riêng 30/06 10,28%",
    "dir": "down",
    "evidence_tier": "C",
-   "sensitivity": "chưa định lượng (không có CAR 30/09, không có kế hoạch phát hành thêm ngoài 200 tr CP)",
-   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:24"
+   "sensitivity": "ngoài Σ: CAR 30/09 không có nguồn gốc (thứ cấp CAR HN Q2 ~10,7%); RI RONIC=Ke ⇒ phát hành ≥BVPS gần trung tính (riêng lẻ tại BVPS −0,26%); chỉ phát hành <BVPS mới giảm",
+   "source": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md §4"
   },
   {
    "name": "Phải thu bán nợ MBV 11.248 (số dư 30/09 chưa kiểm)",
    "dir": "down",
    "evidence_tier": "C",
-   "sensitivity": "bản E (mất 30%, p 0,20) ⇒ 20.983 (−0,41%)",
+   "sensitivity": "bản E (mất 30%, p 0,20) ⇒ 17.852 (−0,41%)",
    "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§4"
   },
   {
    "name": "Nghĩa vụ gánh lỗ MBV ≥15.688",
    "dir": "down",
    "evidence_tier": "C",
-   "sensitivity": "cờ HARD ABANDON: CO_SO = 18.969",
+   "sensitivity": "cờ HARD ABANDON: CO_SO = 16.163 (−9,83%)",
    "source": "REPORT_r3.md §10"
   },
   {
@@ -115,18 +125,18 @@
    "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/skeptic/r1_raw.md:33-34"
   },
   {
-   "name": "Pháp lý sau 05/11 chưa quét",
+   "name": "Pháp lý sau 05/11 (quét 25/11: không thấy tin thanh tra/xử phạt mới)",
    "dir": "down",
    "evidence_tier": "warning",
    "sensitivity": "chỉ WARNING",
-   "source": "agents/Taylor/research/dd_recheck_20261124w2/MBB/REPORT_recheck_MBB.md:§5"
+   "source": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md §4"
   },
   {
-   "name": "k năm trước (8,25%) thay 9,03%",
-   "dir": "up",
+   "name": "k thấp 9,78% (KTPL 8,25% + quỹ khác 1,54%) / k cao 12,56% (KTPL 9,82% xu hướng + quỹ khác 2,74%)",
+   "dir": "both",
    "evidence_tier": "A",
-   "sensitivity": "tâm base 18803 (+1.12%)",
-   "source": "agents/Taylor/research/dd_MBB_agm_20261125/calc/calc_agm_out.json"
+   "sensitivity": "tâm base 18.396 (+2,63%) / 17.674 (−1,40%) — đã vào dải E17",
+   "source": "agents/Taylor/research/dd_MBB_agm_20261125/calc/calc_agm_v2_out.json"
   }
  ],
  "trigger_table": [
@@ -135,7 +145,7 @@
    "when": "≤ cuối 01/2027",
    "direction": "up",
    "delta_vnd": null,
-   "delta_pct": 0.82,
+   "delta_pct": 0.747,
    "note": "mất quan sát ngược ⇒ p ROE 0,35→0,65"
   },
   {
@@ -143,16 +153,16 @@
    "when": "≤ cuối 01/2027",
    "direction": "down",
    "delta_vnd": null,
-   "delta_pct": null,
-   "note": "mốc r3 §10 ⇒ trọng số về 0,35/0,45/0,20 = 20.419 (−3,1%), ROE path p→0,15"
+   "delta_pct": -2.963,
+   "note": "mốc r3 §10 ⇒ trọng số về 0,35/0,45/0,20 = 17.394 (−2,96%), ROE path p→0,15"
   },
   {
    "event": "Giá/khối lượng phát hành riêng lẻ chốt",
    "when": "khi CBTT",
-   "direction": "down",
+   "direction": "both",
    "delta_vnd": null,
    "delta_pct": null,
-   "note": "B→A: giá ≥BVPS ⇒ −0,08…−0,51%"
+   "note": "B→A: giá BVPS…1,3×BVPS ⇒ −0,26…+0,25%"
   },
   {
    "event": "CAR/Tier1 30/09 + kế hoạch tăng vốn 2027",
@@ -160,15 +170,15 @@
    "direction": "down",
    "delta_vnd": null,
    "delta_pct": null,
-   "note": "C→B nếu có phát hành mới"
+   "note": "CAR 30/09 chưa có nguồn gốc; C→B nếu có phát hành mới <BVPS"
   },
   {
    "event": "Lãi huy động 12T ±50bp (V1)",
    "when": "liên tục",
    "direction": "both",
    "delta_vnd": null,
-   "delta_pct": -4.47,
-   "note": "+50bp −942 (−4,47%); −50bp +1.019 (+4,83%)"
+   "delta_pct": -4.407,
+   "note": "+50bp −790 (−4,41%); −50bp +853 (+4,76%)"
   },
   {
    "event": "Văn bản nghĩa vụ MBV",
@@ -179,8 +189,8 @@
    "note": "≥15.688 ⇒ HARD ABANDON"
   }
  ],
- "caveat": "MÙ GIÁ; NQ ĐHĐCĐ 2026 gốc chưa đọc được (MB 403) — tỷ lệ lấy từ dòng thực hiện trong BCTC KT/soát xét",
- "sum_p_m_pct": 0.744,
+ "caveat": "MÙ GIÁ; NQ ĐHĐCĐ 2026 gốc chưa đọc được (MB 403) — tỷ lệ lấy từ dòng thực hiện trong BCTC KT/soát xét; CAR 30/09 chưa có nguồn gốc",
+ "sum_p_m_pct": 0.759,
  "closed_items": [
   {
    "name": "Rò LN sang quỹ KTPL + quỹ thưởng BĐH",
@@ -188,7 +198,19 @@
    "k_pct": 9.032,
    "evidence": "BCTC KT riêng 2025 TM25.1: 1.586.443 (2024), 1.775.629 (2025 = 8,00% LN riêng 2024); BCTC KT HN 2025 TM26.1: 1.866.219 (8,25% LN MB 2024); HN Q3/26 TM22.1 dư LNCPP 2.418.617 = 9,03% LN MB 2025",
    "source": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT.md §1–§2"
+  },
+  {
+   "name": "Rò LN 'Quỹ khác: sử dụng' (skeptic r2 killer)",
+   "status": "ĐÓNG — bậc A, vào TÂM BASE rev6'",
+   "k_pct": 2.558,
+   "evidence": "KT HN 2025 TM26.1: 'Sử dụng các quỹ trong năm' (348.289) 2024 / (620.313) 2025 ở cột Quỹ khác VÀ cột Tổng cộng; HN Q3/26 TM22.1 (460.531), cân tổng VCSH HN/riêng; TM4.24.4 quỹ khác từ LNST do ĐHĐCĐ duyệt. Điểm = trích 2026 685.043/LN 2025; thấp 1,54% (sử dụng 2024), cao 2,74%",
+   "source": "agents/Taylor/research/dd_MBB_agm_20261125/REPORT_v2.md §1"
   }
  ],
- "supersedes": "adj.json đợt 2 (agents/Taylor/research/dd_recheck_20261124w2/MBB/adj.json)"
+ "supersedes": "adj.json đợt 2 (agents/Taylor/research/dd_recheck_20261124w2/MBB/adj.json)",
+ "range_k_only": [
+  17807,
+  18532
+ ],
+ "skeptic_ref": "agents/Taylor/research/dd_MBB_agm_20261125/skeptic/r2.json"
 }

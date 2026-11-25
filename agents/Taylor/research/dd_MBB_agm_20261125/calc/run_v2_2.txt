@@ -1,0 +1,167 @@
+{
+ "facts": {
+  "k_ktpl_pct": {
+   "lo": 8.245,
+   "pt": 9.032,
+   "hi": 9.818
+  },
+  "k_qk_pct": {
+   "lo": 1.539,
+   "pt": 2.558,
+   "hi": 2.741
+  },
+  "k_total_pct": {
+   "lo": 9.784,
+   "pt": 11.59,
+   "hi": 12.559
+  },
+  "qk_use_same_year_pct": {
+   "2024": 1.539,
+   "2025": 2.316,
+   "9T26": 1.936
+  },
+  "qk_alloc_pct": {
+   "2025": 2.459,
+   "2026": 2.558
+  },
+  "bvps": 15594
+ },
+ "control": {
+  "rev5_center": 21069,
+  "rev5_zone": [
+   14729,
+   27577
+  ],
+  "rev6_center": 18595,
+  "rev5_RONIC": 25317,
+  "rev5_HARD": 18969,
+  "rev5_ROET": [
+   18742,
+   23396
+  ]
+ },
+ "rev6p": {
+  "center": 17925,
+  "zone_low": 12719,
+  "zone_high": 23215,
+  "n": 45,
+  "pct_below_19250": 0.6413,
+  "d_pct_vs_rev6": -3.603,
+  "d_pct_vs_rev5": -14.922,
+  "rule085": 15236
+ },
+ "both": {
+  "without_quy_khac": {
+   "k_pct": 9.032,
+   "center": 18595,
+   "zone": [
+    13151,
+    24140
+   ]
+  },
+  "with_quy_khac": {
+   "k_pct": 11.59,
+   "center": 17925,
+   "zone": [
+    12719,
+    23215
+   ]
+  }
+ },
+ "k_sens": {
+  "k_lo": {
+   "k_pct": 9.784,
+   "center": 18396,
+   "d_pct": 2.631
+  },
+  "k_hi": {
+   "k_pct": 12.559,
+   "center": 17674,
+   "d_pct": -1.396
+  },
+  "k_ktpl_hi_only": {
+   "k_pct": 12.376,
+   "center": 17721,
+   "d_pct": -1.134
+  },
+  "k_qk_usage_9T26": {
+   "k_pct": 10.968,
+   "center": 18086,
+   "d_pct": 0.902
+  }
+ },
+ "sens": {
+  "ROE_T_-2pp": {
+   "center": 15979,
+   "d_pct": -10.856
+  },
+  "ROE_T_+2pp": {
+   "center": 19871,
+   "d_pct": 10.856
+  },
+  "no_term_premium": {
+   "center": 17070,
+   "d_pct": -4.766
+  },
+  "Ke_12.3": {
+   "center": 20095,
+   "d_pct": 12.11
+  },
+  "Ke_13.4": {
+   "center": 18090,
+   "d_pct": 0.923
+  },
+  "r_+50bp": {
+   "center": 17135,
+   "d_pct": -4.407
+  },
+  "r_-50bp": {
+   "center": 18778,
+   "d_pct": 4.762
+  },
+  "r_+100bp": {
+   "center": 16402,
+   "d_pct": -8.497
+  },
+  "r_-100bp": {
+   "center": 19703,
+   "d_pct": 9.923
+  },
+  "RONIC_gt_Ke": {
+   "center": 19913,
+   "d_pct": 11.094
+  },
+  "cov_restore_1940": {
+   "center": 17762,
+   "d_pct": -0.909
+  },
+  "PT_MBV_loss30_p020": {
+   "center": 17852,
+   "d_pct": -0.406
+  },
+  "weights_r2_035_045_020": {
+   "center": 17394,
+   "d_pct": -2.963
+  },
+  "HARD_ABANDON_CO_SO_MBV15688": {
+   "center": 16163,
+   "d_pct": -9.827
+  }
+ },
+ "e17": {
+  "m2_roepath_pct": 2.533,
+  "m3_ppl_pct": [
+   -0.256,
+   0.251
+  ],
+  "center_adj": 18059,
+  "d_pct_vs_base": 0.746,
+  "low": 17709,
+  "high": 18678,
+  "range_k_only": [
+   17807,
+   18532
+  ],
+  "trigger_roe_q4_up_pct": 0.747
+ }
+}
