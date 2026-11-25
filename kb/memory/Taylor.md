@@ -56,3 +56,4 @@
 - [2026-11-25T12:33:54Z] [lvens2-inc 25/11] XONG job Taylor_20261125_115701: 6eb45da21 (wt-dcf-lvens2-inc-20261125) — v31 khớp vp2 Δ=0, PIT lệch do N_next/route look-ahead của V3.1 — CHỜ Mike/user: mc strict vs step (skeptic), chỗ đặt snapshot VND, duyệt cron
 - [2026-11-25T16:04:27Z] ĐANG DỞ: job Taylor_20261125_160331 lvens2 pit2 (skeptic REFUTED fixes 1-6), worktree wt-dcf-lvens2-pit2-20261126 dir dcf_lvens2_pit2_20261126 | NEXT: đọc lvens2_incremental.py, data_registry CA/oshares
 - [2026-11-25T17:17:56Z] [lvens2-pit2 26/11] XONG job Taylor_20261125_160331: 58e35d1dd (wt-dcf-lvens2-pit2-20261126) stepcar+e_guard, selfcheck PASS 3TZ — CHỜ Mike quant-skeptic vòng 2 + merge; blocker cron B1 CA_MD5 hardcode
+- [2026-11-25T18:12:08Z] [lvens2-pit2 B1 26/11] XONG job Taylor_20261125_173540: script_md5 3f5041d6 (wt-dcf-lvens2-pit2-20261126) — CHỜ Mike quant-skeptic vòng 2 (B2) + B3 VND + merge/cron sau user duyệt
