@@ -14,6 +14,13 @@ Số đo (BQ ticker_prune 2012-01-03→2026-11-23, 3.695 phiên có đủ 20 phi
     (đáy 2017+), thấp hơn 197 hiện tại; universe co dưới 150 = cần người xem lại, không tự qua.
   * ca 23/11 (đo BQ 25/11): 197 vs trung vị 20 phiên trước 203 ⇒ ngưỡng 183 ⇒ QUA.  202→150 ⇒ CHẶN.
 
+Trung vị NEO vào phiên ĐÃ QUA CỔNG (arch-review vòng 2 #6, 25/11): trước đây trung vị lấy 20 phiên trước BẤT KỂ
+phiên đó có FAIL không ⇒ một chuỗi ghi thiếu kéo dài tự đầu độc trung vị (202 rồi chuỗi 170: phiên thứ 11 ngưỡng
+còn 153 ⇒ cổng tự cho qua). Giờ duyệt lịch sử theo thời gian: WINDOW phiên đầu (≥ sàn) làm hạt giống, mỗi phiên
+sau chỉ được NHẬN vào lịch sử nếu chính nó QUA ngưỡng tính trên lịch sử đã nhận trước nó. Hệ quả cố ý: universe co
+THẬT >10% một lần sẽ bị chặn tới khi NGƯỜI xác nhận (không tự hợp thức hoá) — LOOKBACK 150 ngày (~100 phiên) để
+hạt giống còn sạch kể cả chuỗi ghi thiếu dài ~2-3 tháng.
+
 Fail-closed: không đủ WINDOW phiên trước / BQ lỗi / output lạ ⇒ rc=2 (KHÔNG ĐO ĐƯỢC) — caller chặn.
 
 CLI:
@@ -36,20 +43,43 @@ import sys
 FLOOR = 150
 RATIO = 0.90
 WINDOW = 20
-LOOKBACK_DAYS = 75   # đủ 20 phiên kể cả Tết (~9 ngày nghỉ liền) — partition-pruned, rẻ
+LOOKBACK_DAYS = 150  # ~100 phiên: hạt giống 20 + đủ dài để chuỗi ghi thiếu không chiếm hạt giống — partition-pruned, rẻ
 PROJECT = os.environ.get("BQ_PROJECT", "lithe-record-440915-m9")
 TABLE = f"`{PROJECT}.tav2_bq.ticker_prune`"
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
+def threshold(hist, floor=FLOOR, ratio=RATIO, window=WINDOW):
+    med = statistics.median(hist[-window:])
+    return med, max(floor, math.ceil(ratio * med))
+
+
+def accepted_history(prior, floor=FLOOR, ratio=RATIO, window=WINDOW):
+    """prior (cũ→mới) → (đã nhận, số phiên bị loại). Hạt giống = WINDOW phiên đầu có n ≥ sàn; sau đó chỉ nhận
+    phiên QUA ngưỡng tính trên lịch sử ĐÃ NHẬN trước nó (phiên FAIL không đầu độc trung vị)."""
+    acc, dropped = [], 0
+    for x in (int(v) for v in prior):
+        if len(acc) < window:
+            if x >= floor:
+                acc.append(x)
+            else:
+                dropped += 1
+        elif x >= threshold(acc, floor, ratio, window)[1]:
+            acc.append(x)
+        else:
+            dropped += 1
+    return acc, dropped
+
+
 def decide(n, prior, floor=FLOOR, ratio=RATIO, window=WINDOW):
-    """→ (verdict, info). prior = list số mã của các phiên TRƯỚC ngày xét (cũ→mới), đã có dữ liệu."""
-    prior = [int(x) for x in prior if int(x) > 0][-window:]
-    if len(prior) < window:
-        return "UNMEASURABLE", {"n": n, "reason": f"chỉ có {len(prior)}/{window} phiên trước có dữ liệu — không tính được trung vị"}
-    med = statistics.median(prior)
-    thr = max(floor, math.ceil(ratio * med))
-    info = {"n": n, "median": med, "threshold": thr, "floor": floor, "ratio": ratio, "window": window}
+    """→ (verdict, info). prior = list số mã của các phiên TRƯỚC ngày xét (cũ→mới)."""
+    acc, dropped = accepted_history(prior, floor, ratio, window)
+    if len(acc) < window:
+        return "UNMEASURABLE", {"n": n, "reason": f"chỉ có {len(acc)}/{window} phiên trước hợp lệ (≥ sàn {floor}) — "
+                                                  "không tính được trung vị"}
+    med, thr = threshold(acc, floor, ratio, window)
+    info = {"n": n, "median": med, "threshold": thr, "floor": floor, "ratio": ratio, "window": window,
+            "dropped": dropped}
     return ("PASS" if n >= thr else "FAIL"), info
 
 
@@ -58,8 +88,10 @@ def fmt(verdict, date, info):
         return f"PRUNE_DEPTH UNMEASURABLE date={date} n={info.get('n')} reason={info['reason']}"
     med = info["median"]
     med_s = str(int(med)) if float(med).is_integer() else f"{med:.1f}"
+    drop = f" loại_khỏi_trung_vị={info['dropped']} phiên FAIL trước đó" if info.get("dropped") else ""
     return (f"PRUNE_DEPTH {verdict} date={date} n={info['n']} threshold={info['threshold']} "
-            f"median{info['window']}={med_s} (=max(sàn {info['floor']}, ⌈{info['ratio']:.2f}×trung vị⌉))")
+            f"median{info['window']}={med_s} (=max(sàn {info['floor']}, ⌈{info['ratio']:.2f}×trung vị phiên đã qua cổng⌉))"
+            + drop)
 
 
 def query_counts(date_arg):
