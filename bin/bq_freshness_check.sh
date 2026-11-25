@@ -65,11 +65,43 @@ QUIET="${1:-}"
 # (dispatch --bg chạy nền lâu ⇒ phải đóng fd để khoá nhả khi script kết thúc).
 _BQF_LOCK="${BQF_LOCK_FILE:-$ROOT/state/locks/bq_freshness_check.lock}"
 mkdir -p "$(dirname "$_BQF_LOCK")" 2>/dev/null
-exec 9>"$_BQF_LOCK"
+exec 9<>"$_BQF_LOCK"   # <> (KHÔNG >): mở không cắt file ⇒ lượt bị chặn còn đọc được pid người giữ khoá
 if ! flock -n 9; then
-  echo "BQF_LOCKED: bq_freshness_check.sh đang có lượt khác chạy (khoá $_BQF_LOCK) — KHÔNG chạy song song (tránh dispatch DollarBill 2 lần). Đợi lượt kia xong."
+  # BQF-LOCKED-BEGIN (arch-review vòng cuối #8): đường cron bị chặn ⇒ BÁO trading_daily (kèm pid giữ khoá) thay
+  # vì chỉ ghi log, VÀ ghi gate_last 'bqf_locked' để plan_gate_recovery --retry không SKIP vô lý (không ghi đè
+  # gate_last mà lượt đang giữ khoá đã ghi cho cùng phiên). Caller tự xử rc 75 (retry) đặt BQF_LOCKED_NOTIFY=0.
+  _lk_pid="$(head -c 32 "$_BQF_LOCK" 2>/dev/null | tr -dc '0-9')"
+  _lk_cmd="$( [ -n "$_lk_pid" ] && tr '\0' ' ' < "/proc/$_lk_pid/cmdline" 2>/dev/null | cut -c1-160)"
+  _lk_who="pid ${_lk_pid:-?}${_lk_cmd:+ ($_lk_cmd)}"
+  [ -n "$_lk_pid" ] && [ -z "$_lk_cmd" ] && _lk_who="pid $_lk_pid (không còn trong /proc — khoá do tiến trình khác giữ)"
+  echo "BQF_LOCKED: bq_freshness_check.sh đang có lượt khác chạy (khoá $_BQF_LOCK, $_lk_who) — KHÔNG chạy song song (tránh dispatch DollarBill 2 lần). Đợi lượt kia xong."
+  if [ "${MIKE_MORNING_RUN:-0}" != "1" ]; then
+    _lk_today="$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%d)"
+    _lk_next="$(cd "${WORKDIR_8L:-$ROOT/..}" && python3 -c "import datetime as d,sys;from trading_bot.vn_market import next_trading_day as n;print(n(d.date.fromisoformat(sys.argv[1])))" "$_lk_today" 2>/dev/null)"
+    _lk_dir="${BQF_STATE_DIR:-$ROOT/state}"
+    mkdir -p "$_lk_dir" 2>/dev/null && python3 -c "
+import json, os, sys, datetime as dt
+from zoneinfo import ZoneInfo
+p, today, nxt, pid = sys.argv[1:5]
+try:
+    cur = json.load(open(p))
+except (OSError, ValueError):
+    cur = {}
+if cur.get('session') == today and cur.get('next_trading_day') == nxt and not cur.get('locked_by_pid'):
+    print('  gate_last: giữ kết quả lượt đang giữ khoá đã ghi cho phiên ' + today); sys.exit(0)
+rec = {'session': today, 'next_trading_day': nxt, 'failed': True, 'data_fail_kinds': ['bqf_locked'], 'morning': False,
+       'locked_by_pid': pid or None, 'written_at': dt.datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).isoformat(timespec='seconds')}
+open(p + '.tmp', 'w').write(json.dumps(rec, ensure_ascii=False)); os.replace(p + '.tmp', p)
+print('  gate_last: ghi bqf_locked cho phiên ' + today)
+" "$_lk_dir/bq_freshness_gate_last.json" "$_lk_today" "$_lk_next" "$_lk_pid" 2>&1 || echo "  [WARN] không ghi được gate_last bqf_locked"
+  fi
+  if [ "${BQF_LOCKED_NOTIFY:-1}" != "0" ]; then
+    "$ROOT/bin/notify_thread.sh" "🟠 BQ FRESHNESS KHÔNG CHẠY ($(TZ=Asia/Ho_Chi_Minh date +'%d/%m %H:%M') ICT): lượt khác đang giữ khoá $_BQF_LOCK — $_lk_who. Lượt này KHÔNG kiểm cổng, KHÔNG dispatch DollarBill (tránh 2 writer cùng plan). Nếu lượt kia không tự ra plan: plan_gate_recovery --retry (đã ghi gate_last bqf_locked) sẽ thử lại khi khoá nhả; kiểm data/trade_plans/." "trading_daily" 2>/dev/null || true
+  fi
+  # BQF-LOCKED-END
   exit 75
 fi
+printf '%s\n' "$$" > "$_BQF_LOCK" 2>/dev/null || true   # pid người giữ khoá (cho thông điệp của lượt bị chặn)
 PROJECT="lithe-record-440915-m9"
 MAX_PRICE_LAG=2      # trading days: cho phép gap weekend/nghỉ lễ
 MAX_STATE_LAG=0      # trading days cho DT5G regime — SIẾT 2→1 (2026-07-10) rồi 1→0
