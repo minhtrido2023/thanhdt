@@ -1,0 +1,111 @@
+{
+ "ticker": "DDV",
+ "dd_date": "2026-10-28",
+ "rev": 3,
+ "asof": "2026-11-25",
+ "job": "Taylor_20261125_032443",
+ "prereg_md5": {
+  "PREREG_adj": "ef5157cb3f762d58623ed550ebc214c7",
+  "PREREG_adj_v2": "835dfc1e07f9c67ac7f6c3028b529d13",
+  "PREREG_adj_DDV": "215e58ec1f7ef6d399e2bd353d427dc6"
+ },
+ "blind_to_price": true,
+ "center_base": 15911,
+ "center_base_source": "LEDGER_PROPOSAL_DDV.json rev3 center (= sổ rev2, không đổi)",
+ "center_adj": 15050,
+ "range_low": 14401,
+ "range_high": 16264,
+ "sum_pm_pct": -5.409,
+ "method": "tổ hợp trong mô hình r3 (|Σ|>5%)",
+ "items": [
+  {
+   "name": "Trích quỹ KTPL hằng năm từ LNST 10,19% [8,94%] LNST 2025",
+   "dir": "down",
+   "evidence_tier": "A",
+   "source": "en_p1.txt:180,207-213 (dd_DDV_20261026/src, khôi phục ae0ff5446^); skeptic/r1_raw.md missing_items(1)",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": -6.744,
+   "mag_range_pct": [
+    -6.744,
+    -5.92
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -6.07
+  },
+  {
+   "name": "Tồn quỹ KTPL 80,22 tỷ chưa trừ khỏi NC",
+   "dir": "down",
+   "evidence_tier": "A",
+   "source": "en_p1.txt:180",
+   "p": 0.9,
+   "p_low": 0.75,
+   "p_high": 1.0,
+   "mag_pct": -3.4,
+   "mag_range_pct": [
+    -3.4,
+    -3.4
+   ],
+   "counted_in_center": true,
+   "contrib_pct": -3.06
+  },
+  {
+   "name": "Khoản trừ lãi gửi 35,4 → 8,5 (trung điểm proxy TB 2015–25)",
+   "dir": "up",
+   "evidence_tier": "B",
+   "source": "skeptic/r1_raw.md symmetry too_low; dd_redo_20261105/DDV/REPORT_r3.md §1 bước 8",
+   "p": 0.5,
+   "p_low": 0.25,
+   "p_high": 0.75,
+   "mag_pct": 7.441,
+   "mag_range_pct": [
+    2.608,
+    12.275
+   ],
+   "counted_in_center": true,
+   "contrib_pct": 3.721
+  }
+ ],
+ "sensitivity_only": [
+  {
+   "name": "Capex tuân thủ bãi thạch cao",
+   "dir": "down",
+   "tier": "C",
+   "sens": "-674 đ/cp mỗi 100 tỷ"
+  },
+  {
+   "name": "Mức LN giữa chu kỳ (DT FY2025 đỉnh)",
+   "dir": "both",
+   "tier": "C",
+   "sens": "12.452 / 17.254"
+  },
+  {
+   "name": "Tiền ròng bị giữ (vốn hoá lãi gửi)",
+   "dir": "down",
+   "tier": "C",
+   "sens": "11.555"
+  },
+  {
+   "name": "Liven mất p0,10",
+   "dir": "down",
+   "tier": "C",
+   "sens": "-146"
+  },
+  {
+   "name": "[LUẬT] Ke 12,3% (E15)",
+   "dir": "up",
+   "tier": "law",
+   "sens": "16.854"
+  },
+  {
+   "name": "[LUẬT] trọng số 2027 đối xứng",
+   "dir": "up",
+   "tier": "law",
+   "sens": "16.336"
+  }
+ ],
+ "trigger_table": "ADJ_CENTER.md §3",
+ "calc": "calc/calc_adj.py",
+ "calc_out_md5": "46b1548cb8f6680fb5b86955a9f60953"
+}

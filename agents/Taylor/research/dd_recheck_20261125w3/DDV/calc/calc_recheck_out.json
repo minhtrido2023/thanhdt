@@ -1,0 +1,107 @@
+{
+ "control_stdout_md5": "eeee072ded0755b471a9143fc61ad130",
+ "headline": {
+  "below": 0.3791,
+  "center_post": 15911,
+  "center_pre": 16149,
+  "label": "TRONG vùng",
+  "max": 22143,
+  "min": 11308,
+  "n": 405,
+  "p10": 13315,
+  "p25": 14471,
+  "p50": 15919,
+  "p75": 17291,
+  "p90": 18573
+ },
+ "r_axis_bp": [
+  -50,
+  0,
+  50
+ ],
+ "r_axis_w": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "r_base": 0.135,
+ "rows": [
+  {
+   "below": 0.2327,
+   "center": 16854,
+   "d_center": 943,
+   "d_pct": 0.0593,
+   "label": "12,3% E15/dau duoi Ke",
+   "label_zone": "TRONG vùng",
+   "p10": 14093,
+   "p90": 19722,
+   "r": 0.123
+  },
+  {
+   "below": 0.2645,
+   "center": 16684,
+   "d_center": 773,
+   "d_pct": 0.0486,
+   "label": "12,5% (-100bp)",
+   "label_zone": "TRONG vùng",
+   "p10": 13959,
+   "p90": 19495,
+   "r": 0.125
+  },
+  {
+   "below": 0.3267,
+   "center": 16282,
+   "d_center": 371,
+   "d_pct": 0.0233,
+   "label": "13,0% (-50bp)",
+   "label_zone": "TRONG vùng",
+   "p10": 13625,
+   "p90": 18999,
+   "r": 0.13
+  },
+  {
+   "below": 0.3678,
+   "center": 15983,
+   "d_center": 72,
+   "d_pct": 0.0045,
+   "label": "13,4% dau tren Ke",
+   "label_zone": "TRONG vùng",
+   "p10": 13375,
+   "p90": 18653,
+   "r": 0.134
+  },
+  {
+   "below": 0.3791,
+   "center": 15911,
+   "d_center": 0,
+   "d_pct": 0.0,
+   "label": "13,5% BASE",
+   "label_zone": "TRONG vùng",
+   "p10": 13315,
+   "p90": 18573,
+   "r": 0.135
+  },
+  {
+   "below": 0.4295,
+   "center": 15567,
+   "d_center": -344,
+   "d_pct": -0.0216,
+   "label": "14,0% (+50bp)",
+   "label_zone": "TRONG vùng",
+   "p10": 13065,
+   "p90": 18154,
+   "r": 0.14
+  },
+  {
+   "below": 0.4934,
+   "center": 15247,
+   "d_center": -664,
+   "d_pct": -0.0417,
+   "label": "14,5% (+100bp)",
+   "label_zone": "TRONG vùng",
+   "p10": 12812,
+   "p90": 17750,
+   "r": 0.145
+  }
+ ]
+}

@@ -1,0 +1,107 @@
+{
+ "control_stdout_md5": "eeee072ded0755b471a9143fc61ad130",
+ "r_base": 0.135,
+ "r_axis_bp": [
+  -50,
+  0,
+  50
+ ],
+ "r_axis_w": [
+  0.25,
+  0.5,
+  0.25
+ ],
+ "headline": {
+  "n": 405,
+  "center_pre": 16149,
+  "center_post": 15911,
+  "p10": 13315,
+  "p25": 14471,
+  "p50": 15919,
+  "p75": 17291,
+  "p90": 18573,
+  "min": 11308,
+  "max": 22143,
+  "below": 0.3791,
+  "label": "TRONG vùng"
+ },
+ "rows": [
+  {
+   "label": "12,3% E15/dau duoi Ke",
+   "r": 0.123,
+   "center": 16854,
+   "p10": 14093,
+   "p90": 19722,
+   "label_zone": "TRONG vùng",
+   "d_center": 943,
+   "d_pct": 0.0593,
+   "below": 0.2327
+  },
+  {
+   "label": "12,5% (-100bp)",
+   "r": 0.125,
+   "center": 16684,
+   "p10": 13959,
+   "p90": 19495,
+   "label_zone": "TRONG vùng",
+   "d_center": 773,
+   "d_pct": 0.0486,
+   "below": 0.2645
+  },
+  {
+   "label": "13,0% (-50bp)",
+   "r": 0.13,
+   "center": 16282,
+   "p10": 13625,
+   "p90": 18999,
+   "label_zone": "TRONG vùng",
+   "d_center": 371,
+   "d_pct": 0.0233,
+   "below": 0.3267
+  },
+  {
+   "label": "13,4% dau tren Ke",
+   "r": 0.134,
+   "center": 15983,
+   "p10": 13375,
+   "p90": 18653,
+   "label_zone": "TRONG vùng",
+   "d_center": 72,
+   "d_pct": 0.0045,
+   "below": 0.3678
+  },
+  {
+   "label": "13,5% BASE",
+   "r": 0.135,
+   "center": 15911,
+   "p10": 13315,
+   "p90": 18573,
+   "label_zone": "TRONG vùng",
+   "d_center": 0,
+   "d_pct": 0.0,
+   "below": 0.3791
+  },
+  {
+   "label": "14,0% (+50bp)",
+   "r": 0.14,
+   "center": 15567,
+   "p10": 13065,
+   "p90": 18154,
+   "label_zone": "TRONG vùng",
+   "d_center": -344,
+   "d_pct": -0.0216,
+   "below": 0.4295
+  },
+  {
+   "label": "14,5% (+100bp)",
+   "r": 0.145,
+   "center": 15247,
+   "p10": 12812,
+   "p90": 17750,
+   "label_zone": "TRONG vùng",
+   "d_center": -664,
+   "d_pct": -0.0417,
+   "below": 0.4934
+  }
+ ]
+}

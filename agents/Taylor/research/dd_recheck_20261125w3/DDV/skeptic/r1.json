@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verdict": "INCONCLUSIVE",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_recheck_20261125w3/DDV/REPORT_recheck_DDV.md",
+  "report_md5": "1da9333430148f617487e523a79e968a",
+  "brief_md5": "001f2e4dde4d6723571ebdf1f6156ced",
+  "model": "opus",
+  "cost_usd": 0.7871454000000001,
+  "started_at_ict": "2026-11-25T10:28:34+07:00",
+  "summary": "The recheck changes only r and adds display rows; the model is byte-identical to r3 and its arithmetic holds — I recomputed the cycle margin (4,0519%) and an independent centre of 15.905 against 15.911, and the ±50/±100bp rows match r3. Two-sided review: too high — normalised revenue at the FY2025 peak (−21,7% if TB 2021–25 is used), cash possibly retained by Vinachem; too low — interest deduction in the upper half of the historical proxy (≈+7,4%), Ke at the low end (+5,9%), skewed 2027 weights (+425). Neither direction has independent evidence strong enough to change the base. The verdict is INCONCLUSIVE, not CONFIRMED, because of attack 8: the welfare/bonus fund appropriation is missing entirely (estimated −2,7…−5,4% of centre, rate unverified) and the mandatory gypsum compliance capex is still 'cần kiểm chứng' with no number — exactly the failure that cost QTP −41%. Reading the FY2025 profit-distribution note, the AGM resolution and the gypsum environmental licence would close it.",
+  "verdict_raw_path": "agents/Taylor/research/dd_recheck_20261125w3/DDV/skeptic/r1_raw.md"
+}
