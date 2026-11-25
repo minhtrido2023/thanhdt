@@ -14,11 +14,15 @@ gate_block_question chỉ REMIND lặp, không ai tăng cấp.
       với BQF_SKIP_EXISTING_PLANS=1 (CHỈ dispatch DollarBill cho account CHƯA có file plan — không ghi đè
       plan có thể đã duyệt). Plan hỏng (file có, INVALID) KHÔNG retry — cần người, 07:30 tăng cấp.
   Chờ plan của account vắng (≤45'), rồi GỬI theo giờ (arch-review vòng 2 #2 — không bỏ qua chuỗi tối):
-      trước 21:15 ⇒ KHÔNG tự gửi: cron 20:20 merge_park/20:30 inject_discretionary/20:40 auto_exit/20:50 drift
+      TỐI trước 21:15 ⇒ KHÔNG tự gửi: cron 20:20 merge_park/20:30 inject_discretionary/20:40 auto_exit/20:50 drift
                     → 21:00 send_plan_report (+ late_plan_catchup 21:45 nếu plan ra sau chuỗi park) lo;
-      21:15–23:59 ⇒ bin/late_plan_catchup.sh (có khoá; chạy park→merge→inject→auto_exit RỒI mới gửi);
-      sáng / qua 0h ⇒ send_plan_report --second-chance --plan-date NEXT cho ĐÚNG account vắng, đầu bản gửi ghi
-                    rõ chuỗi inject_discretionary/auto_exit/park CHƯA chạy cho plan này (+ Telegram).
+      TỐI 21:15–23:59 ⇒ hàng rào 22:55–23:15 (cron send_plan_report --second-chance 23:00: chờ tới 23:15), rồi
+                    ngày giao dịch: bin/late_plan_catchup.sh (có khoá; park→merge→inject→auto_exit RỒI mới gửi);
+                    NGÀY NGHỈ (late_plan_catchup/park no-op): send_plan_report --second-chance nhãn "TỐI NGÀY NGHỈ";
+      SÁNG (<12:00, gồm qua 0h) ⇒ send_plan_report --second-chance --plan-date NEXT cho ĐÚNG account vắng, đầu bản
+                    gửi ghi rõ chuỗi inject_discretionary/auto_exit/park CHƯA chạy cho plan này (+ Telegram).
+  Độ sâu đo lại: rc1 (dưới ngưỡng) ⇒ đợi; rc2 (KHÔNG ĐO ĐƯỢC: env/auth/BQ) ⇒ đợi + N lượt liên tiếp thì báo 1 lần.
+  bq_freshness rc 75 (BQF_LOCKED) ⇒ gỡ mốc retry, đợi lượt sau (không đốt lượt duy nhất).
   Mốc "đã retry" ghi TRƯỚC khi chạy (bị kill giữa chừng vẫn không lặp — §3 idempotent); flock
   state/locks/plan_gate_recovery_retry.lock ⇒ 2 lượt cron không chồng nhau.
 --escalate (cron 07:30 + 07:40 ICT T2-T6)
@@ -48,10 +52,18 @@ os.environ.setdefault("WORKDIR_8L", str(WC))
 sys.path.insert(0, str(ROOT / "bin"))
 import trading_calendar as TC  # noqa: E402
 import plan_presence as PP  # noqa: E402  — MỘT định nghĩa "plan có" (MISSING/INVALID/OK)
+import prune_depth_gate as PDG  # noqa: E402
 
-DATA_KINDS = {"prune_depth", "dt5g_publisher"}
+# arch-review vòng cuối #1: cron/env -i không source wc_env.sh ⇒ prune_depth_gate → bq thiếu CLOUDSDK_CONFIG ⇒
+# 'invalid_scope' rc=2 ⇒ retry không bao giờ chạy. Nạp env MỘT lần ở đây ⇒ mọi tiến trình con thừa hưởng.
+ENV_ERR = PDG.ensure_wc_env()
+
+DATA_KINDS = {"prune_depth", "dt5g_publisher", "bqf_locked"}  # bqf_locked: cron 19:00 bị khoá chặn (vòng cuối #8)
 PLAN_WAIT_S = int(os.environ.get("PGR_PLAN_WAIT_S", "2700"))
 DEADLINE_HM = "08:30"   # expected_session.py GUARD_HM: morning mode từ chối lập plan cho hôm nay sau mốc này
+UNMEAS_NOTIFY_N = int(os.environ.get("PGR_UNMEAS_NOTIFY_N", "2"))  # rc2 (KHÔNG ĐO ĐƯỢC) N lượt liên tiếp ⇒ báo
+SEND_FENCE = ((22, 55), (23, 15))  # cron send_plan_report --second-chance 23:00 — không gửi đua trong khoảng này
+FENCE_SLEEP_S = os.environ.get("PGR_FENCE_SLEEP_S")  # test: 0
 
 
 def now_ict():
@@ -212,7 +224,11 @@ def cmd_retry(now):
         return 0
     gl = gate_last()
     kinds = sorted(set((gl or {}).get("data_fail_kinds") or []) & DATA_KINDS)
-    if not gl or str(gl.get("session")) != str(session) or not gl.get("failed") or not kinds:
+    # Khớp theo PLAN ĐÍCH (next_trading_day) + phiên cổng trong [phiên dữ liệu, hôm nay]: ngày nghỉ bq_freshness
+    # ghi session = ngày LỊCH (24/11) dù phiên dữ liệu là 23/11 (vòng cuối #7).
+    gls = str((gl or {}).get("session"))
+    if (not gl or str(gl.get("next_trading_day")) != str(nxt) or not (str(session) <= gls <= str(now.date()))
+            or not gl.get("failed") or not kinds):
         print(f"{tag}: SKIP — thiếu plan {miss} nhưng không có bằng chứng cổng 19:00 FAIL vì dữ liệu nền cho phiên "
               f"{session} (gate_last={gl}) — không retry (tăng cấp 07:30 vẫn bắt)")
         return 0
@@ -229,8 +245,7 @@ def cmd_retry(now):
         return 0
     drc, dline = depth(session)
     if drc != 0:
-        print(f"{tag}: CHƯA HỒI PHỤC — {dline} (rc={drc}); KHÔNG nới ngưỡng, đợi lượt sau")
-        return 0
+        return _depth_not_ready(nxt, rec, tag, drc, dline, now, session)
     asof = dt5g_as_of()
     rec["retry"] = {"started_at": now.isoformat(timespec="seconds"), "pid": os.getpid(), "session": str(session),
                     "kinds": kinds, "depth": dline, "dt5g_as_of_before": asof, "missing": miss, "absent": absent}
@@ -243,12 +258,21 @@ def cmd_retry(now):
         steps.append(f"daily_refresh rc={rc} as_of→{asof2}")
         if asof2 != str(session):
             return _retry_done(nxt, rec, tag, steps, f"DT5G vẫn chưa publish phiên {session} (as_of={asof2}): {out[-200:]}")
-    morning = now.date() != session
-    env = {"BQF_SKIP_EXISTING_PLANS": "1"}
+    # Sáng (05:00-07:00, hoặc chờ vắt qua nửa đêm) ⇒ morning mode. TỐI kể cả ngày nghỉ ⇒ KHÔNG morning (như 19:00;
+    # ngày nghỉ bq_freshness tự vào nhánh HOLIDAY-SKIP lập bù) — vòng cuối #7.
+    morning = now.hour < 12
+    env = {"BQF_SKIP_EXISTING_PLANS": "1", "BQF_LOCKED_NOTIFY": "0"}
     if morning:
         env["MIKE_MORNING_RUN"] = "1"
     rc, out = run([str(BIN / "bq_freshness_check.sh"), "--quiet"], env)
     steps.append(f"bq_freshness{' (morning)' if morning else ''} skip-existing rc={rc}")
+    if rc == 75:   # BQF_LOCKED: lượt khác chạy — CHƯA làm gì ⇒ KHÔNG đốt lượt retry duy nhất (vòng cuối #6)
+        rec.pop("retry", None)
+        rec["bqf_locked_waits"] = int(rec.get("bqf_locked_waits") or 0) + 1
+        st_save(nxt, rec)
+        print(f"{tag}: WAIT — bq_freshness_check.sh BQF_LOCKED (rc=75, lượt khác vừa giữ khoá): {out[-160:]} — "
+              "gỡ mốc retry (chưa làm gì), lượt sau thử lại")
+        return 0
     if rc != 0:
         return _retry_done(nxt, rec, tag, steps, f"bq_freshness_check vẫn FAIL: {out[-200:]}")
     t0 = time.time()
@@ -258,25 +282,68 @@ def cmd_retry(now):
     if miss2:
         return _retry_done(nxt, rec, tag, steps, f"DollarBill đã dispatch nhưng sau {PLAN_WAIT_S // 60}' vẫn thiếu plan {miss2}")
     t = now_ict()
-    # Mốc gửi 21:15 (không phải 21:00): tránh đua với cron send_plan_report 21:00 cùng phút. Qua nửa đêm
-    # (chờ plan vắt qua 00:00) ⇒ late_plan_catchup tự no-op (<21:00) ⇒ đi nhánh gửi buổi sáng kèm cảnh báo.
-    evening_send = t.date() == session and (t.hour, t.minute) >= (21, 15)
-    if t.date() == session and not evening_send:
-        steps.append("KHÔNG tự gửi trước 21:15 — chuỗi cron 20:20→20:50 + send_plan_report 21:00 (+ late_plan_catchup 21:45) lo")
-        return _retry_done(nxt, rec, tag, steps, None)
-    if evening_send:
-        rc, out = run([str(BIN / "late_plan_catchup.sh")], timeout=3600)
-        steps.append(f"late_plan_catchup rc={rc}")
-        return _retry_done(nxt, rec, tag, steps, None if rc == 0 else f"late_plan_catchup rc={rc}: {out[-200:]}")
-    # buổi sáng (hoặc chờ plan vắt qua nửa đêm)
+    if t.hour >= 12:   # TỐI (ngày giao dịch hoặc ngày nghỉ)
+        trading_today = TC.is_trading_day(t.date())
+        # Mốc gửi 21:15 (không phải 21:00): tránh đua cron send_plan_report 21:00 — cron đó chạy T2-T6 KỂ CẢ ngày
+        # nghỉ và gửi plan next_trading_day ⇒ trước 21:15 nó (hoặc 23:00 --second-chance) lo.
+        if (t.hour, t.minute) < (21, 15):
+            steps.append("KHÔNG tự gửi trước 21:15 — " + (
+                "chuỗi cron 20:20→20:50 + send_plan_report 21:00 (+ late_plan_catchup 21:45) lo" if trading_today else
+                "NGÀY NGHỈ: send_plan_report 21:00 (+ --second-chance 23:00) gửi plan phiên kế; chuỗi park no-op ngày nghỉ"))
+            return _retry_done(nxt, rec, tag, steps, None)
+        if SEND_FENCE[0] <= (t.hour, t.minute) < SEND_FENCE[1]:
+            wait = ((SEND_FENCE[1][0] - t.hour) * 60 + SEND_FENCE[1][1] - t.minute) * 60 - t.second
+            steps.append(f"HÀNG RÀO 23:00: chờ {max(wait, 0) // 60}' tới 23:15 (cron send_plan_report --second-chance 23:00) rồi mới gửi")
+            print(f"{tag}: {steps[-1]}", flush=True)
+            time.sleep(max(0, int(FENCE_SLEEP_S) if FENCE_SLEEP_S is not None else wait))
+        if trading_today:
+            rc, out = run([str(BIN / "late_plan_catchup.sh")], timeout=3600)
+            steps.append(f"late_plan_catchup rc={rc}")
+            return _retry_done(nxt, rec, tag, steps, None if rc == 0 else f"late_plan_catchup rc={rc}: {out[-200:]}")
+        # tối NGÀY NGHỈ: late_plan_catchup + park_trim/merge_park no-op theo thiết kế ⇒ gửi trực tiếp, ghi rõ.
+        note = (f"⚠️ PLAN LẬP BÙ TỐI NGÀY NGHỈ ({t:%d/%m %H:%M} ICT, retry tự động): hôm nay không giao dịch nên "
+                "late_plan_catchup/park_trim/merge_park KHÔNG chạy (no-op ngày nghỉ) cho plan này — kiểm tra lệnh BÁN "
+                "thoát theo thời gian (auto_exit LAG/BAL/CAPIT) trước khi duyệt.")
+        return _send_direct(nxt, rec, tag, steps, absent, note)
+    # SÁNG (05:00-07:00, hoặc chờ plan vắt qua nửa đêm)
     note = (f"⚠️ PLAN LẬP BÙ BUỔI SÁNG ({t:%H:%M} ICT, retry tự động): chuỗi tối park_trim/jit_unpark/merge_park, "
             "inject_discretionary (20:30) và auto_exit_inject (20:40, đề xuất SELL LAG/BAL/CAPIT) CHƯA chạy cho "
             "plan này — kiểm tra lệnh BÁN thoát theo thời gian trước khi duyệt.")
+    return _send_direct(nxt, rec, tag, steps, absent, note)
+
+
+def _send_direct(nxt, rec, tag, steps, absent, note):
     for a in absent:
         rc, out = run([str(BIN / "send_plan_report.sh"), "--account", a, "--second-chance", "--plan-date", str(nxt)],
                       {"PLAN_REPORT_NOTE": note}, timeout=900)
         steps.append(f"send_plan_report {a} rc={rc}")
     return _retry_done(nxt, rec, tag, steps, None, warn=note)
+
+
+def _depth_not_ready(nxt, rec, tag, drc, dline, now, session):
+    """vòng cuối #2: rc1 (dưới ngưỡng) ≠ rc2 (KHÔNG ĐO ĐƯỢC: env/auth/BQ). rc2 N lượt liên tiếp ⇒ báo 1 lần."""
+    u = dict(rec.get("depth_unmeasurable") or {})
+    if drc == 1:
+        if u.get("streak"):
+            rec["depth_unmeasurable"] = {"streak": 0, "reset_at": now.isoformat(timespec="seconds")}
+            st_save(nxt, rec)
+        print(f"{tag}: CHƯA HỒI PHỤC — dữ liệu nền DƯỚI NGƯỠNG: {dline} (rc=1); KHÔNG nới ngưỡng, đợi lượt sau")
+        return 0
+    streak = int(u.get("streak") or 0) + 1
+    u.update(streak=streak, last=dline, last_at=now.isoformat(timespec="seconds"))
+    print(f"{tag}: KHÔNG ĐO ĐƯỢC độ sâu (rc={drc}, lượt liên tiếp {streak}/{UNMEAS_NOTIFY_N}): {dline} — lỗi ĐO "
+          "(env/auth/BQ), KHÔNG phải kết luận dưới ngưỡng; chưa retry")
+    if streak >= UNMEAS_NOTIFY_N and not u.get("notified_at"):
+        msg = (f"🟠 Plan {nxt}: retry tự động BỊ CHẶN vì KHÔNG ĐO ĐƯỢC độ sâu ticker_prune {streak} lượt liên tiếp "
+               f"(rc={drc}) — đây là lỗi ĐO (env/auth/BQ), KHÔNG phải dữ liệu dưới ngưỡng. Bằng chứng: {dline}. "
+               f"Kiểm: `. {WC}/wc_env.sh && bq ls --project_id={PDG.PROJECT}`; đo lại: "
+               f"`. {WC}/wc_env.sh && python3 {ROOT}/bin/prune_depth_gate.py --date {session}`. "
+               "Đo được + đạt ngưỡng ⇒ lượt retry kế tự chạy; tin này gửi 1 lần.")
+        if notify(msg, telegram=True):
+            u["notified_at"] = now.isoformat(timespec="seconds")
+    rec["depth_unmeasurable"] = u
+    st_save(nxt, rec)
+    return 0
 
 
 def _retry_done(nxt, rec, tag, steps, err, warn=None):
@@ -324,18 +391,28 @@ def cmd_escalate(now):
         rs = f"ĐANG CHẠY (bắt đầu {retry.get('started_at')}, chưa có kết quả)"
     else:
         rs = f"bị NGẮT giữa chừng (bắt đầu {retry.get('started_at')}, không có kết quả, tiến trình không còn)"
-    cause = [f"depth phiên {session}: {dline}",
+    dkind = {0: "đạt ngưỡng", 1: "DƯỚI NGƯỠNG"}.get(drc, "KHÔNG ĐO ĐƯỢC — lỗi đo env/auth/BQ, không phải dưới ngưỡng")
+    cause = [f"depth phiên {session}: {dline} (rc={drc}: {dkind})",
              f"DT5G as_of={asof} (cần {session})",
              f"cổng 19:00 gần nhất: phiên {gl.get('session', '?')} failed={gl.get('failed', '?')} kinds={gl.get('data_fail_kinds', '?')}",
              f"retry tự động: {rs}"]
+    um = rec.get("depth_unmeasurable") or {}
+    if um.get("streak"):
+        cause.append(f"retry đêm qua: KHÔNG ĐO ĐƯỢC {um['streak']} lượt liên tiếp (gần nhất {um.get('last_at')})")
+    if ENV_ERR:
+        cause.append(f"env: {ENV_ERR}")
     cmds = []
     if running or bqf_busy:
         cmds.append("⛔ KHÔNG chạy tay bq_freshness_check.sh lúc này — "
                     + ("retry tự động ĐANG CHẠY" if running else "bq_freshness_check.sh đang có lượt chạy")
                     + " (chạy song song = dispatch DollarBill 2 lần). Đợi nó xong rồi kiểm lại data/trade_plans/.")
-    if drc != 0:
+    if drc == 1:
         cmds.append(f"⛔ Dữ liệu nền CHƯA đạt ngưỡng ({dline}) — KHÔNG nới ngưỡng; kiểm tra ingest ticker_prune với team dữ liệu, "
-                    "đạt ngưỡng rồi mới chạy các lệnh dưới.")
+                    "đạt ngưỡng rồi mới chạy các lệnh dưới (universe co THẬT ⇒ xem RUNBOOK reseed trong dòng trên).")
+    elif drc != 0:
+        cmds.append(f"⛔ KHÔNG ĐO ĐƯỢC độ sâu ticker_prune ({dline}) — lỗi ĐO (env/auth/BQ), KHÔNG phải kết luận dữ liệu "
+                    f"dưới ngưỡng. Kiểm: `. {WC}/wc_env.sh && bq ls --project_id={PDG.PROJECT}`; đo lại "
+                    f"`. {WC}/wc_env.sh && python3 {ROOT}/bin/prune_depth_gate.py --date {session}` — rc 0 rồi mới chạy các lệnh dưới.")
     if asof != str(session):
         cmds.append(f"cd {WC} && MIKE_MORNING_RUN=1 ./daily_refresh_v34b_linux.sh")
     cmds.append(f"MIKE_MORNING_RUN=1 {ROOT}/bin/bq_freshness_check.sh   (morning mode tự bỏ qua account đã có file plan)")

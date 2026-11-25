@@ -30,14 +30,14 @@ FAKE = {
  "prune_depth_gate.py": '#!/usr/bin/env python3\nimport sys,os\nrc=int(open(os.environ["SB"]+"/depth_rc").read())\n'
      'print("PRUNE_DEPTH %s date=%s n=197 threshold=183" % ({0:"PASS",1:"FAIL"}.get(rc,"UNMEASURABLE"), sys.argv[-1]))\n'
      'open(os.environ["SB"]+"/calls.log","a").write("depth "+sys.argv[-1]+"\\n");sys.exit(rc)\n',
- "bq_freshness_check.sh": '#!/bin/bash\necho "bqf MORNING=${MIKE_MORNING_RUN:-0} SKIP_EXISTING=${BQF_SKIP_EXISTING_PLANS:-0} $*" >> "$SB/calls.log"\n'
+ "bq_freshness_check.sh": '#!/bin/bash\necho "bqf MORNING=${MIKE_MORNING_RUN:-0} SKIP_EXISTING=${BQF_SKIP_EXISTING_PLANS:-0} LOCKED_NOTIFY=${BQF_LOCKED_NOTIFY:-1} $*" >> "$SB/calls.log"\n'
      # mốc retry phải có TRƯỚC khi chuỗi chạy (§3/§5) — fake ghi lại điều nó thấy
      '[ -f "$SB/state/plan_gate_recovery/$(cat $SB/next).json" ] && echo "bqf_saw_mark=1" >> "$SB/calls.log"\n'
      # mô phỏng guard thật: SKIP_EXISTING ⇒ không ghi đè file đã có
-     'rc=$(cat "$SB/bqf_rc"); [ "$rc" = 0 ] && for a in SpaceX ZaloPay; do f="$SB/wc/data/trade_plans/plan_${a}_$(cat $SB/next).json"; '
+     'rc=$(cat "$SB/bqf_rc"); [ "$rc" = 75 ] && { echo "BQF_LOCKED: giả"; exit 75; }; [ "$rc" = 0 ] && for a in SpaceX ZaloPay; do f="$SB/wc/data/trade_plans/plan_${a}_$(cat $SB/next).json"; '
      '[ "${BQF_SKIP_EXISTING_PLANS:-0}${MIKE_MORNING_RUN:-0}" != 00 ] && [ -e "$f" ] && continue; echo "dispatch $a" >> "$SB/calls.log"; '
      'echo "{\\"plan_date\\":\\"$(cat $SB/next)\\",\\"orders\\":[]}" > "$f"; done; exit $rc\n',
- "send_plan_report.sh": '#!/bin/bash\necho "send $* NOTE=${PLAN_REPORT_NOTE:+yes}" >> "$SB/calls.log"\n',
+ "send_plan_report.sh": '#!/bin/bash\necho "send $* NOTE=${PLAN_REPORT_NOTE:+yes} HEAD=${PLAN_REPORT_NOTE:0:40}" >> "$SB/calls.log"\n',
  "late_plan_catchup.sh": '#!/bin/bash\necho "late_plan_catchup" >> "$SB/calls.log"\n',
  "notify.sh": '#!/bin/bash\necho "TELEGRAM $1" >> "$SB/calls.log"; exit $(cat "$SB/notify_rc" 2>/dev/null || echo 0)\n',
  "notify_thread.sh": '#!/bin/bash\necho "DISCORD[$2] $1" >> "$SB/calls.log"; exit $(cat "$SB/notify_rc" 2>/dev/null || echo 0)\n',
@@ -47,7 +47,7 @@ REFRESH = ('#!/bin/bash\necho "refresh MORNING=${MIKE_MORNING_RUN:-0}" >> "$SB/c
 
 
 def sandbox(session, nxt, asof="2026-11-20", kinds=("prune_depth", "dt5g_publisher"), failed=True,
-            gl_session=None, depth_rc=0, bqf_rc=0, plans=(), raw_plans=None):
+            gl_session=None, depth_rc=0, bqf_rc=0, plans=(), raw_plans=None, gl_next=None):
     sb = Path(tempfile.mkdtemp(prefix="pgr_sc_")); TMP.append(sb)
     (sb / "bin").mkdir()
     for n, body in FAKE.items():
@@ -66,7 +66,7 @@ def sandbox(session, nxt, asof="2026-11-20", kinds=("prune_depth", "dt5g_publish
         (wc / "data" / "trade_plans" / f"plan_{a}_{nxt}.json").write_text(body)
     (sb / "state").mkdir()
     (sb / "state" / "bq_freshness_gate_last.json").write_text(json.dumps(
-        {"session": gl_session or session, "next_trading_day": nxt, "failed": failed, "data_fail_kinds": list(kinds)}))
+        {"session": gl_session or session, "next_trading_day": gl_next or nxt, "failed": failed, "data_fail_kinds": list(kinds)}))
     for k, v in (("depth_rc", depth_rc), ("bqf_rc", bqf_rc), ("session", session), ("next", nxt)):
         (sb / k).write_text(str(v))
     return sb
@@ -102,7 +102,7 @@ def main():
     # R1 ca thật 23/11 20:00 (lịch mới): FAIL dữ liệu nền, đo lại đạt ⇒ retry 1 lần; TRƯỚC 21:00 KHÔNG tự gửi
     sb = sandbox("2026-11-23", "2026-11-25")
     rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
-    chk(rc == 0 and "refresh MORNING=1" in c and "bqf MORNING=0 SKIP_EXISTING=1 --quiet" in c
+    chk(rc == 0 and "refresh MORNING=1" in c and "bqf MORNING=0 SKIP_EXISTING=1 LOCKED_NOTIFY=0 --quiet" in c
         and not sent(c) and not any(l == "late_plan_catchup" for l in c.splitlines())
         and st(sb, "2026-11-25")["retry"]["result"] == "ok" and "DISCORD[trading_daily] ✅" in c,
         "R1 23/11 20:00 cổng FAIL dữ liệu nền + đo lại đạt ⇒ refresh→bq_freshness(skip-existing), KHÔNG tự gửi trước 21:00", out + c)
@@ -135,11 +135,23 @@ def main():
     # R5 điều kiện chưa hồi phục ⇒ không retry, không ghi mốc (lượt sau thử lại)
     sb = sandbox("2026-11-23", "2026-11-25", depth_rc=1)
     rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
-    chk("CHƯA HỒI PHỤC" in out and "refresh" not in c and "bqf" not in c and not st(sb, "2026-11-25"),
+    chk("CHƯA HỒI PHỤC" in out and "DƯỚI NGƯỠNG" in out and "KHÔNG ĐO ĐƯỢC" not in out and "refresh" not in c
+        and "bqf" not in c and not st(sb, "2026-11-25").get("retry"),
         "R5 depth đo lại vẫn FAIL ⇒ KHÔNG chạy chuỗi, KHÔNG ghi mốc retry (không nới ngưỡng)", out + c)
     sb = sandbox("2026-11-23", "2026-11-25", depth_rc=2)
     rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
-    chk("CHƯA HỒI PHỤC" in out and "bqf" not in c, "R6 depth KHÔNG ĐO ĐƯỢC (rc=2) ⇒ fail-closed, không retry", out + c)
+    chk("KHÔNG ĐO ĐƯỢC" in out and "DƯỚI NGƯỠNG" not in out and "bqf" not in c and "TELEGRAM" not in c,
+        "R6 depth KHÔNG ĐO ĐƯỢC (rc=2) lượt 1 ⇒ fail-closed, nói rõ lỗi ĐO (không phải dưới ngưỡng), chưa báo", out + c)
+    rc, out, c = run(sb, "--retry", "2026-11-23T20:20:00")
+    chk("lượt liên tiếp 2/2" in out and c.count("TELEGRAM 🟠") == 1 and "DISCORD[trading_daily] 🟠" in c
+        and "KHÔNG ĐO ĐƯỢC" in c and "UNMEASURABLE" in c and "wc_env.sh" in c and "bqf" not in c,
+        "R6b rc=2 lượt 2 liên tiếp ⇒ NOTIFY 1 lần (Telegram+Discord) trích bằng chứng thật + lệnh kiểm env/auth (vòng cuối #2)", out + c)
+    rc, out, c = run(sb, "--retry", "2026-11-23T20:40:00")
+    chk(c.count("TELEGRAM 🟠") == 1, "R6c lượt 3 ⇒ không báo lặp", c)
+    (sb / "depth_rc").write_text("1")
+    rc, out, c = run(sb, "--retry", "2026-11-23T21:20:00")
+    chk("DƯỚI NGƯỠNG" in out and st(sb, "2026-11-25")["depth_unmeasurable"]["streak"] == 0,
+        "R6d đo được nhưng dưới ngưỡng ⇒ reset chuỗi rc2, thông điệp DƯỚI NGƯỠNG", out)
     # R7 cổng fail vì lý do KHÁC dữ liệu nền / artifact phiên khác ⇒ không retry
     sb = sandbox("2026-11-23", "2026-11-25", kinds=())
     rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
@@ -238,7 +250,13 @@ def main():
     chk(rc == 0 and st(sb, "2026-11-25").get("escalated"), "E7 07:40 kênh hồi ⇒ gửi + đánh dấu", out)
     sb = sandbox("2026-11-23", "2026-11-25", depth_rc=1)
     rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
-    chk("KHÔNG nới ngưỡng" in out, "E8 dữ liệu nền vẫn dưới ngưỡng ⇒ tin nói rõ KHÔNG nới ngưỡng", out)
+    chk("KHÔNG nới ngưỡng" in out and "CHƯA đạt ngưỡng" in out and "KHÔNG ĐO ĐƯỢC độ sâu" not in out
+        and "rc=1: DƯỚI NGƯỠNG" in out, "E8 rc1 dữ liệu nền dưới ngưỡng ⇒ tin nói rõ KHÔNG nới ngưỡng", out)
+    sb = sandbox("2026-11-23", "2026-11-25", depth_rc=2)
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk("KHÔNG ĐO ĐƯỢC độ sâu ticker_prune" in out and "lỗi ĐO" in out and "CHƯA đạt ngưỡng" not in out
+        and "UNMEASURABLE" in out and "bq ls" in out,
+        "E8b rc2 ⇒ tăng cấp nói KHÔNG ĐO ĐƯỢC (env/auth/BQ), KHÔNG nói 'chưa đạt ngưỡng' (§29, vòng cuối #2)", out)
     # E9 plan CÓ FILE nhưng hỏng ⇒ vẫn là THIẾU (kiểm nội dung, không chỉ tồn tại file)
     sb = sandbox("2026-11-23", "2026-11-25", plans=("SpaceX",),
                  raw_plans={"ZaloPay": json.dumps({"plan_date": "2026-11-25", "orders": "BROKEN"})})
@@ -267,9 +285,104 @@ def main():
     (sb / "state" / "plan_gate_recovery" / "2026-11-25.json").write_text(json.dumps({"retry": {"started_at": "2026-11-25T07:20:00"}}))
     rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
     chk("bị NGẮT giữa chừng" in out and "KHÔNG chạy tay" not in out, "E11 mốc có, không ai giữ khoá ⇒ 'bị NGẮT giữa chừng'", out)
+    new_round(sb_root=None)
     src = TARGET.read_text()
     chk(all(x not in src for x in ("bot_execute", "run_bot.sh", "BOT_STOP\"", "trading_rules.json\"", "dispatch.sh")),
         "B1 ranh giới: script không gọi bot/đặt lệnh/BOT_STOP/trading_rules/dispatch trực tiếp", "")
+
+
+REAL_PDG = TARGET.parent / "prune_depth_gate.py"
+FAKE_BQ = ('#!/usr/bin/env python3\nimport os,sys\nsb=os.path.dirname(os.path.abspath(__file__))\n'
+           'open(sb+"/bq_seen","a").write(repr(os.environ.get("CLOUDSDK_CONFIG"))+"\\n")\n'
+           'if os.environ.get("CLOUDSDK_CONFIG")!=open(sb+"/want_cfg").read().strip():\n'
+           ' print("BigQuery error in query operation: invalid_scope: Bad Request",file=sys.stderr);sys.exit(1)\n'
+           'print("dt,n")\nimport datetime as d\nx=d.date(2026,10,20)\nk=0\n'
+           'while k<20:\n if x.weekday()<5: print(f"{x},203"); k+=1\n x+=d.timedelta(days=1)\n'
+           'print("2026-11-23,197")\n')
+
+
+def wc_env_cfg():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("pdg_sc", REAL_PDG); m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    p = Path(m.WC_ENV)
+    return next((l.split("=", 1)[1].split()[0] for l in p.read_text().splitlines()
+                 if l.startswith("export CLOUDSDK_CONFIG=")), None) if p.is_file() else None
+
+
+def run_envi(sb, mode, now, **extra):
+    """`env -i` như cron trần: CHỈ biến tối thiểu, KHÔNG CLOUDSDK_CONFIG — bq giả ở đầu PATH."""
+    e = {"PATH": f"{sb / 'fakebq'}:/usr/bin:/bin", "SB": str(sb), "PGR_WC_ROOT": str(sb / "wc"),
+         "PGR_STATE_DIR": str(sb / "state"), "PGR_BIN": str(sb / "bin"), "WORKDIR_8L": NEW_WC, "MIKE_NOW_ICT": now,
+         "PGR_PLAN_WAIT_S": "1", "PGR_REFRESH_SCRIPT": "__no_such_script_pgr_sc__.sh", "BQF_LOCK_FILE": str(sb / "bqf.lock")}
+    e.update(extra)
+    r = subprocess.run(["/usr/bin/env", "-i"] + [f"{k}={v}" for k, v in e.items()] + [sys.executable, str(TARGET), mode],
+                       capture_output=True, text=True, timeout=120)
+    calls = (sb / "calls.log").read_text() if (sb / "calls.log").exists() else ""
+    return r.returncode, r.stdout + r.stderr, calls
+
+
+def new_round(sb_root=None):
+    """Ca vòng cuối (arch-review 25/11): #1 env -i, #6 rc75 + hàng rào 23:00, #7 tối ngày nghỉ, cron registry."""
+    want = wc_env_cfg()
+    # R16 (#1) env -i: prune_depth_gate THẬT (bản sao) + bq giả đòi đúng CLOUDSDK_CONFIG của wc_env.sh
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23")
+    shutil.copy(REAL_PDG, sb / "bin" / "prune_depth_gate.py")
+    (sb / "fakebq").mkdir(); (sb / "fakebq" / "bq").write_text(FAKE_BQ); (sb / "fakebq" / "bq").chmod(0o755)
+    (sb / "fakebq" / "want_cfg").write_text(want or "x")
+    rc, out, c = run_envi(sb, "--retry", "2026-11-23T20:00:00")
+    seen = (sb / "fakebq" / "bq_seen").read_text() if (sb / "fakebq" / "bq_seen").exists() else ""
+    chk(want and "RETRY 1/1" in out and "PRUNE_DEPTH PASS" in out and seen.strip() == repr(want),
+        f"R16 env -i (cron trần) ⇒ plan_gate_recovery tự nạp CLOUDSDK_CONFIG={want}, depth THẬT PASS, retry chạy", out + seen)
+    sb2 = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23")
+    shutil.copy(REAL_PDG, sb2 / "bin" / "prune_depth_gate.py")
+    shutil.copytree(sb / "fakebq", sb2 / "fakebq"); (sb2 / "fakebq" / "bq_seen").unlink(missing_ok=True)
+    rc, out, c = run_envi(sb2, "--retry", "2026-11-23T20:00:00", PDG_WC_ENV="/nonexistent/wc_env.sh")
+    chk("KHÔNG ĐO ĐƯỢC" in out and "CLOUDSDK_CONFIG" in out and "bqf" not in c and not (sb2 / "fakebq" / "bq_seen").exists(),
+        "R16b không nạp được wc_env.sh ⇒ KHÔNG ĐO ĐƯỢC nêu rõ thiếu CLOUDSDK_CONFIG, không gọi bq, không retry", out + c)
+    reg = (TARGET.parent.parent / "kb" / "cron_registry.md").read_text()
+    lines = [l for l in reg.splitlines() if ("plan_gate_recovery.py --" in l or "trading_calendar_watch.py >>" in l)
+             and not l.startswith(("#", "|", "§"))]
+    chk(len(lines) == 9 and all(" . /home/trido/thanhdt/WorkingClaude/wc_env.sh && " in l for l in lines),
+        "R16c 9 dòng cron đề xuất (kb/cron_registry.md) đều source wc_env.sh", "\n".join(lines))
+    # R17 (#6) bq_freshness BQF_LOCKED (rc 75) ⇒ CHỜ, gỡ mốc, KHÔNG đốt lượt retry duy nhất
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23", bqf_rc=75)
+    rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
+    r = st(sb, "2026-11-25")
+    chk(rc == 0 and "WAIT" in out and "BQF_LOCKED" in out and "retry" not in r and r.get("bqf_locked_waits") == 1
+        and "TELEGRAM" not in c and "LOCKED_NOTIFY=0" in c,
+        "R17 bq_freshness rc=75 ⇒ WAIT, mốc retry bị gỡ, không báo fail, gọi với BQF_LOCKED_NOTIFY=0", out + c)
+    (sb / "bqf_rc").write_text("0")
+    rc, out, c = run(sb, "--retry", "2026-11-23T20:20:00")
+    chk("RETRY 1/1" in out and st(sb, "2026-11-25")["retry"]["result"] == "ok", "R17b lượt sau khoá nhả ⇒ retry vẫn còn và chạy", out + c)
+    # R18 (#6) hàng rào 23:00: plan ra trong 22:55–23:15 ⇒ chờ tới 23:15 rồi mới late_plan_catchup
+    for now, fenced, mins in (("2026-11-23T22:58:00", True, "17'"), ("2026-11-23T22:55:00", True, "20'"),
+                              ("2026-11-23T22:54:00", False, ""), ("2026-11-23T23:15:00", False, "")):
+        sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23")
+        rc, out, c = run(sb, "--retry", now, PGR_FENCE_SLEEP_S="0")
+        ok = ("HÀNG RÀO 23:00" in out) == fenced and (not fenced or f"chờ {mins}" in out) and "late_plan_catchup" in c.splitlines()
+        chk(ok, f"R18 {now[11:16]} ⇒ {'chờ ' + mins + ' tới 23:15 rồi' if fenced else 'không rào,'} late_plan_catchup", out + c)
+    # R19 (#7) TỐI NGÀY NGHỈ 24/11 (bq_freshness ghi session = ngày lịch 24/11, plan đích 25/11)
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23", gl_session="2026-11-24")
+    rc, out, c = run(sb, "--retry", "2026-11-24T21:20:00")
+    chk(rc == 0 and "phiên=2026-11-23 plan=2026-11-25" in out and "bqf MORNING=0" in c and "late_plan_catchup" not in c.splitlines()
+        and "send --account SpaceX --second-chance --plan-date 2026-11-25 NOTE=yes HEAD=⚠️ PLAN LẬP BÙ TỐI NGÀY NGHỈ" in c
+        and "BUỔI SÁNG" not in out + c,
+        "R19 21:20 tối lễ 24/11 ⇒ bq_freshness KHÔNG morning, gửi trực tiếp nhãn 'TỐI NGÀY NGHỈ' (không 'BUỔI SÁNG')", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23", gl_session="2026-11-24")
+    rc, out, c = run(sb, "--retry", "2026-11-24T20:00:00")
+    chk(rc == 0 and not sent(c) and "late_plan_catchup" not in c.splitlines() and "NGÀY NGHỈ: send_plan_report 21:00" in out
+        and "BUỔI SÁNG" not in out + c and "bqf MORNING=0" in c,
+        "R19b 20:00 tối lễ ⇒ lập plan, KHÔNG tự gửi (send_plan_report 21:00 chạy cả ngày nghỉ lo), không 'BUỔI SÁNG'", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", asof="2026-11-23", gl_session="2026-11-24")
+    rc, out, c = run(sb, "--retry", "2026-11-24T22:58:00", PGR_FENCE_SLEEP_S="0")
+    chk("HÀNG RÀO 23:00" in out and "TỐI NGÀY NGHỈ" in c, "R19c tối lễ 22:58 ⇒ cũng qua hàng rào 23:00", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", kinds=("bqf_locked",))
+    rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
+    chk("RETRY 1/1" in out and "bqf MORNING=0" in c, "R21 cổng 19:00 bị KHOÁ chặn (gate_last bqf_locked) ⇒ retry KHÔNG SKIP (vòng cuối #8)", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", gl_next="2026-11-24")
+    rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
+    chk("SKIP" in out and "bqf" not in c, "R20 artifact cổng cho plan đích KHÁC (24/11 ≠ 25/11) ⇒ SKIP", out + c)
 
 
 if __name__ == "__main__":
