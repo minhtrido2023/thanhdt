@@ -1,0 +1,59 @@
+T1 ghi 2026-09 | PASS | rc=0
+T2 ghi 2026-10 | PASS | rc=0
+T3 chạy lại 2026-10 (SKIP idempotent) | PASS | rc=0
+T3b | PASS | lý do khớp
+T4 đổi biến thể giữa chừng (stepca) | PASS | rc=3
+T4b | PASS | lý do khớp
+T5 file sai biến thể so với expect | PASS | rc=3
+T6 file sai tháng | PASS | rc=3
+T7 sửa 1 dòng cũ rồi ghi | PASS | rc=3
+T7b | PASS | lý do khớp
+T8 khôi phục rồi ghi 2026-08 | PASS | rc=0
+T8b prefix byte cũ giữ nguyên | PASS
+T9a ticker_financial sync 23:14 ngày cuối tháng (< T 23:15) | PASS | rc=3
+T9a2 | PASS | lý do khớp
+T9b ticker_financial sync 23:16 (>= T) ⇒ ghi được | PASS | rc=0
+T9c fa_ratings_8l sync thiếu đêm cuối tháng | PASS | rc=3
+T9c2 | PASS | lý do khớp
+T9d manifest verified=false | PASS | rc=3
+T9d2 | PASS | lý do khớp
+T9e ticker max_time < D | PASS | rc=3
+T9e2 | PASS | lý do khớp
+T9f verified_at trước T | PASS | rc=3
+T9f2 | PASS | lý do khớp
+T9g universe_pit chưa sync đêm cuối tháng | PASS | rc=3
+T9g2 | PASS | lý do khớp
+T9h lvens2 DỰNG trên cache chưa sync | PASS | rc=3
+T9h2 | PASS | lý do khớp
+T9i không sinh parquet khi fail | PASS
+T9j parquet dựng bởi cổng cũ (không sync-v2) | PASS | rc=3
+T10a dựng lvens2 với extract MỚI (md5 mới) | PASS | rc=0
+T10b script_md5 sidecar = md5 file script | PASS
+T13 sổ dùng extract KHÁC extract đã dựng lvens2 | PASS | rc=3
+T13b | PASS | lý do khớp
+T10c sổ đã có khối ca_md5 cũ, ghi khối extract mới | PASS | rc=0
+T10d sổ chứa 2 ca_md5 khác nhau | PASS
+T11 extract md5 SAI | PASS | rc=3
+T12 thiếu LVENS2_CA_MD5 | PASS | rc=3
+T14a +5 ngày (11-05 23:59) ⇒ ghi | PASS | rc=0
+T14b +6 ngày (11-06 00:01) ⇒ chặn | PASS | rc=3
+T14b2 | PASS | lý do khớp
+T14c trong tháng as-of (10-31) ⇒ chặn | PASS | rc=3
+T14d giờ thật (không env), as-of 2026-09 ⇒ chặn | PASS | rc=3
+T14d2 | PASS | lý do khớp
+T14e giờ giả với tên sổ chính ⇒ chặn | PASS | rc=3
+T14e2 | PASS | lý do khớp
+T14f ca bị chặn không tạo file sổ | PASS
+T14g computed_at_ict là giờ thật, không phải giờ giả | PASS
+T15a ca_ratio_stepcar/stepca có mặt, >= 1, stepcar >= stepca | PASS
+T15b mỗi tháng trong sổ có bản sao parquet đúng md5 | PASS
+T16a wrapper end-to-end ghi + commit | PASS | rc=0
+T16a2 | PASS | lý do khớp
+T16b sổ + sidecar + inputs + extract đã vào git, cây sạch cho các file đó | PASS
+T16c chạy lại ⇒ SKIP, không dựng lại | PASS | rc=0
+T16c2 | PASS | lý do khớp
+T16d parquet không bị ghi đè | PASS
+T16e sửa lén sổ + sidecar ⇒ git chặn | PASS | rc=3
+T16e2 | PASS | lý do khớp
+TZ=America/New_York RESULT: PASS
+rc=0

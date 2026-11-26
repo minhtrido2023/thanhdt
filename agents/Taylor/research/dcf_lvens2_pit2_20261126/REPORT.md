@@ -3,6 +3,28 @@
 Nhánh `session/Taylor_20261125_160331`, worktree `wt-dcf-lvens2-pit2-20261126`, tách từ mike master `4a5cba411`. Bản đã merge (`dcf_lvens2_incremental_20261125/`) KHÔNG sửa.
 Chỉ nghiên cứu, DISPLAY-ONLY: KHÔNG cron, KHÔNG chèn registry, KHÔNG wire, KHÔNG email. Snapshot VND đọc từ `data/research_frozen/dcf_v31_inputs/out`, không fetch.
 
+## 0b. VÒNG 3 (job Taylor_20261126_021759, user duyệt 26/11 09:17 ICT) — sửa sổ forward theo quant-skeptic vòng 2
+Skeptic vòng 2: (a) PIT CONFIRMED, (b) mc=stepcar CONFIRMED, (c) sổ/sẵn sàng cron REFUTED. **Số đã đo không đổi:** 24/24 parquet dựng lại bằng script mới giống từng byte với `out/final` (`out/r3_logs/md5_diff.txt`), 2026-10 stepcar vẫn `dea31ba7`; `strict --no-eguard` Δ=0 vs bản merge (`out/regress_vs_merged_2026-10_r3.txt`).
+
+**Ba blocker:**
+1. **Cổng tươi theo ĐỒNG BỘ (`sync_state`, sync-v2).** T = 23:15 ICT ngày làm việc cuối của tháng as-of. Cần: manifest `verified` và `verified_at` ≥ T; mtime `ticker_financial.parquet`, `fa_ratings_8l.parquet`, `ticker/<năm D>`, `universe_pit/<năm D>` ≥ T; `ticker`/`universe_pit` max_time ≥ D. Áp cả lúc dựng lvens2 lẫn lúc ghi sổ; sổ từ chối parquet dựng bằng cổng cũ. Marker là mtime vì `sync_bq_cache.atomic_to_parquet` chỉ thay file khi bảng tải thành công, còn manifest không có timestamp theo bảng.
+   - Mô phỏng 2023-01..2026-10 (`calc/gate_sim.py` → `out/gate_sim_2023_2026.txt`): cổng cũ chặn **18/46** tháng. Cổng mới dưới lịch sync danh nghĩa qua 46/46, nhưng đó là **đúng theo cấu trúc** (cron sync chạy mọi T2–T6), không phải bằng chứng thực nghiệm.
+   - Bằng chứng thực nghiệm chỉ có từ `sync.log` (bắt đầu 2026-06-25): 5 tháng đo được, **4 qua ở lượt chạy đầu**; tháng 2026-06 bị chặn đúng (đêm 06-30 sync lỗi thật).
+   - Cache chưa sync ⇒ fail-closed: selfcheck T9a–T9j.
+2. **Script extract CA:** `calc/ca_extract.sql` + `calc/make_ca_extract.py`, nguồn `tav2_mike.corporate_action_snapshots` (vintage append-only). Atomic, không bao giờ ghi đè, ghi `.md5` và `.meta.json`. Chạy end-to-end cho 202611 (snapshot 2026-11-26, ingest mới nhất 11-25 22:43 ICT): **34.159 dòng, md5 `28418e9d4d91abfa8965ac756bb3d9c4` — trùng từng byte** extract hiện có; query bảng live cũng ra đúng md5 đó. Dựng từ snapshot 11-25 thì md5 `860a2388`: cùng 34.159 `id`, khác 489 ô `ingested_at` (vendor ghi lại dòng mỗi đêm) và 3 ô `event_status`. Nghĩa là muốn tái lập đúng byte phải chỉ định đúng `--snapshot-date`.
+3. **Cổng chạy trễ: fail-closed** (không dùng cờ `late`): chỉ ghi khi hôm nay (ICT) cách **cuối tháng as-of** 1..5 ngày lịch.
+   - Lý do chọn fail-closed: sổ forward chỉ có giá trị khi không ai chọn được ghi hay không sau khi đã thấy giá; dòng trễ có cờ vẫn nằm trong sổ và phụ thuộc người đọc nhớ lọc.
+   - **Lệch so với brief ("now − D"):** neo ở cuối tháng. Neo D thì tháng 2025-01 (Tết, D=01-24, lượt chạy đầu 02-03 = 10 ngày) bị mất vĩnh viễn dù không có phiên nào ở giữa. Trong 46 tháng chỉ tháng đó khác nhau.
+   - `PCM_NOW_ICT` (giờ giả cho selfcheck) bị từ chối với sổ tên `paper_cell_ledger_pit2.csv`; `computed_at_ict` luôn là giờ thật. Đây không phải hàng rào chống người cố ý (đổi tên sổ là lách được).
+
+**Non-blocking:**
+- `selfcheck_pit2.py` chạy cả as-of 2026-05. Lần đầu 2026-05 ra `fin`, `vnd_fs` = BLIND(UNEXPECTED): poison chỉ gài bản sao D+5 khi nguồn không có dòng nào sau D, còn dòng sau D thật bị bước ghép giá (đã cắt) loại. **Đã sửa phép thử** (luôn gài D+5) — sửa SAU khi thấy kết quả, khai rõ; `EXPECT_BLIND` không đổi.
+- Mutation bỏ lọc `pub ≤ D` trong `e_guard`: phép thử đơn vị tổng hợp bắt được (không phụ thuộc tháng); trên dữ liệu thật 2026-05 DETECTED, 2026-10 BLIND(data) — tức ở 2026-10 lớp lọc này không đổi đầu ra.
+- Sổ ghi thêm `ca_ratio_stepcar`, `ca_ratio_stepca` (tính lại từ extract; stepcar phải khớp parquet, extract phải đúng md5 đã dựng lvens2).
+- Parquet đầu vào được sao theo md5 vào `out/ledger_inputs/` (không ghi đè); wrapper bỏ qua dựng lại khi tháng đã có trong sổ.
+- `calc/run_monthly_pit2.sh` commit từng khối tháng vào git và từ chối chạy nếu sổ khác `HEAD` (T16e: sửa lén cả sổ lẫn sidecar vẫn bị chặn). Người tự commit được thì chỉ còn lịch sử git làm dấu vết.
+- `PRELOCK.md`: thêm mục sửa tài liệu e_guard (ghi rõ là sau đo, giữ nguyên văn cũ).
+
 ## 0. Kết luận
 1. **Chọn mc = `stepcar`, theo luật đã khoá TRƯỚC khi đo** (`PRELOCK.md`, commit `ae1563d72`; khai N trials = 4: strict/step/stepca/stepcar).
    Thước đo là sai số số CP ngầm trong mc so với số CP PIT thật tại D (fiinprox, neo ex-right), trên 51.929 ô (mã, tháng) in_universe, 643 mã, 2014-01..2026-08.
@@ -36,7 +58,7 @@ Chỉ nghiên cứu, DISPLAY-ONLY: KHÔNG cron, KHÔNG chèn registry, KHÔNG wi
   - **Bản đầu (đã bỏ, có trong git `a96492ba2`):** E = E_trước + NP_P0 khi tụt >7%. Bản này **lan truyền**: dòng đầu TCB 2018-06 sai cơ sở (BVPS trước niêm yết) làm E TCB
     phình 2× vĩnh viễn (2026-05: 251 T thay vì 187 T). LPB tụt thật vì cổ tức tiền 2025 cũng bị "sửa". Luật giải-thích-bằng-CA bỏ được cả hai ca.
 - **Poison tách cut:** `load()` = poison (mọi nguồn, lúc nạp) rồi mới cắt. `nocut={nguồn}` để làm mutation. `--route-global` giờ vẫn bị poison (chỉ bỏ cắt).
-- **Freshness fail-closed:** manifest cache `ticker_financial`/`fa_ratings_8l` max_time phải ≥ D − 10 ngày. universe_pit phải phủ D (giữ như cũ).
+- **Freshness fail-closed:** (vòng 3 thay bằng cổng đồng bộ sync-v2, §0b.1; luật cũ `max_time ≥ D − 10 ngày` đo ngày nộp BCTC, đã bỏ). universe_pit phải phủ D (giữ như cũ).
 - **`--cache-root`** cho selfcheck vintage (universe_pit luôn đọc cache hiện tại vì cache cũ không có bảng này).
 - Cột mới: `E_raw, E_fix, E_unexpl, N, N_mc, ca_ratio, ca_n, mc_pit`. JSON ghi thêm md5 extract CA, manifest frozen, px_pre2013, cache_root/vintage, freshness.
 
@@ -124,20 +146,49 @@ Giải thích từng ô. **Thật** nghĩa là sửa đúng cơ chế; **artefac
   Cờ này được ghi vào sổ để người đọc biết, KHÔNG được dùng để loại mã.
 
 ## 6. Vận hành (ĐỀ XUẤT — KHÔNG cài; tra `kb/cron_registry.md` §11 trước khi cài)
-**Còn chặn trước khi cài (blocker):**
-- ~~**B1 — Extract CA hằng tháng.**~~ **XONG** (§0.7): `LVENS2_CA`/`LVENS2_CA_MD5` từ env, extract hiện tại đổi tên `out/ca/ca_extract_202611.csv` (+ `.csv.md5`, md5 `28418e9d…`). Tháng sau: thả `ca_extract_<YYYYMM>.csv` + `.csv.md5` mới; script và `script_md5` giữ nguyên, `ca_md5` đổi trong dòng sổ. Selfcheck sổ thêm T10–T12 (extract mới + script giữ nguyên ⇒ ghi được; md5 sai/thiếu ⇒ rc 3). Lưu ý: `.md5` nằm cạnh extract nên chỉ chống hỏng/lệch file, không chống người thay cả hai.
-- **B2 — quant-skeptic vòng 2** trên stepcar + e_guard + vintage (gate trong entry đề xuất).
-- **B3 — Snapshot VND dừng ở 2026-11-23** (giữ nguyên từ bản merge §5.2): DSH/GEL/HPA sẽ thiếu giá từ as-of 2026-11.
+```
+# ĐỀ XUẤT — chưa cài, chờ quant-skeptic vòng 3 + user duyệt. Host cron chạy UTC: 01:05 = 08:05 ICT.
+5 1 1-5 * *  bash /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/run_monthly_pit2.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_cell_monthly_pit2.log 2>&1
+```
+- **Sửa lỗi dòng cron cũ:** `1-3 * 1-5` trong cron nghĩa là "ngày 1–3 **HOẶC** mọi ngày T2–T6", không phải giao. Dòng mới chạy ngày 1–5 mọi thứ, khớp cổng trễ; idempotent.
+- Wrapper: extract CA → `lvens2_pit2.py` → sổ → `git commit` (commit vào nhánh đang checkout của repo mike).
+- Chi phí (đo ở lần dựng lại, `out/r3_logs/rebuild_time.txt`): 52–59 giây/tháng, RSS đỉnh 2,1 GB. Chạy một mình (§32).
+- Rủi ro: cache không qua cổng trong cả cửa sổ 5 ngày ⇒ **mất tháng đó vĩnh viễn** (cố ý). `verified` là cờ chung nên một bảng không liên quan lỗi cũng chặn. Wrapper lỗi chỉ ghi log, **chưa có cảnh báo** — nên thêm khi cài.
+- Giới hạn marker mtime: copy cache không giữ mtime sẽ làm marker trẻ giả.
+- Drift vintage nêu ở §4.4.
 
-**Dòng cron đề xuất** (thay dòng của bản merge; host cron chạy UTC, `5 1` = 08:05 ICT; thứ tự: sync 23:45 ICT ngày D, sau đó ngày làm việc 1–3 tháng sau):
+**Còn mở:** quant-skeptic vòng 3 · B3 snapshot VND dừng 2026-11-23 (DSH/GEL/HPA thiếu giá từ as-of 2026-11) · cảnh báo khi wrapper lỗi · merge + cron sau user duyệt · `data_registry/price-volume/corporate_action_snapshots.md` còn ghi cron snapshot "CHƯA CÀI" trong khi crontab có dòng 23:50 và snapshot có tới 11-26 (chưa sửa, ngoài phạm vi).
+
+## 6b. Hai ý của skeptic LÀM ĐỔI SỐ — chỉ ĐO, KHÔNG áp (`calc/measure_ideas.py`)
+**(a) Kiểm hấp thụ OShares trước khi nhân stepca/stepcar** (luật đặt trước khi đo, `out/measure_absorb.txt`):
 ```
-# ĐỀ XUẤT — chưa cài, chờ B2 (+ B3) + user duyệt. Đường dẫn sau merge: mike/agents/Taylor/research/dcf_lvens2_pit2_20261126
-5 1 1-3 * 1-5  cd /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_lvens2_pit2_20261126 && YM=$(TZ=Asia/Ho_Chi_Minh date -d "$(TZ=Asia/Ho_Chi_Minh date +\%Y-\%m-01) -1 day" +\%Y-\%m) && CAYM=$(TZ=Asia/Ho_Chi_Minh date +\%Y\%m) && export LVENS2_CA_MD5=$(cut -d' ' -f1 out/ca/ca_extract_${CAYM}.csv.md5) && LVENS2_FROZEN=/home/trido/thanhdt/WorkingClaude/data/research_frozen/dcf_v31_inputs/out PYTHONHASHSEED=0 timeout 900 /home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym $YM --mc-pit stepcar --out-dir out/monthly && timeout 300 /home/trido/thanhdt/wc_venv/bin/python calc/paper_cell_monthly_pit2.py --asof-ym $YM --lvens2-from out/monthly/lvens2_${YM}_mcstepcar.parquet >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_cell_monthly_pit2.log 2>&1
+n_cells 51929 N_prev thiếu 82
+stepca           mean|e|=0.01296 >5%=0.0424 | ô có f>1 (n=2011): mean=0.0374
+stepca+absorb    mean|e|=0.01297 >5%=0.0425 | ô có f>1 (n=2011): mean=0.0377
+  stepca: ô bị coi là đã hấp thụ n=42 mã=22 | trong đó bỏ hệ số tốt hơn 27, xấu hơn 15
+stepcar          mean|e|=0.00926 >5%=0.0355 | ô có f>1 (n=2359): mean=0.0200
+stepcar+absorb   mean|e|=0.00921 >5%=0.0352 | ô có f>1 (n=2359): mean=0.0190
+  stepcar: ô bị coi là đã hấp thụ n=60 mã=32 | trong đó bỏ hệ số tốt hơn 42, xấu hơn 18
+ô hấp thụ (stepcar) theo năm: {'2014': 2, '2015': 4, '2016': 3, '2018': 4, '2019': 8, '2020': 7, '2021': 10, '2022': 11, '2023': 5, '2024': 2, '2025': 3, '2026': 1}
 ```
-- Sổ mới: `out/paper_cell_ledger_pit2.csv` + `.blocks.jsonl`. Không trộn với sổ của bản merge (`mc_pit` khác thì sổ sẽ fail-closed).
-- Chi phí: khoảng 53 giây/tháng một luồng, dựng cả 4 biến thể (đo bằng mtime `out/final`: 6 tháng tuần tự 00:06:54→00:11:19). RSS khoảng 2,1 GB (ước lượng, lấy từ bản merge, chưa đo lại). Không tốn BQ.
-  Chạy một mình theo §32.
-- Rủi ro: ngày 1–3 chưa có BCTC quý mới thì panel dùng kỳ cũ hơn. Cách này đúng PIT. Drift vintage nêu ở §4.4.
+Lợi ích rất nhỏ (stepcar mean|e| 0,00926 → 0,00921; trong 60 ô bị coi đã hấp thụ: 42 tốt hơn, 18 xấu hơn). **Đề xuất: không đổi biến thể chính**; nếu muốn thì khai là biến thể mới (N trials +1), sổ mới.
+
+**(b) Roll-forward E = E_kỳ_trước + NP_P0 cho dòng `E_unexpl`** (một bước; 2026-05..10 stepcar so với `out/r3_final`; `out/measure_rollfwd.txt`):
+```
+2026-05 n=391 |Δlv|>0,01=19 >0,05=5 max=0.597 đổi ô=2 [CTG,KLB]
+    E_unexpl: ABB:E×1.16,Δlv+0.128, ACB:E×1.13,Δlv+0.118, KLB:E×1.30,Δlv+0.597, OCB:E×1.15,Δlv+0.136, VBB:E×1.10,Δlv+0.078
+2026-06 n=374 |Δlv|>0,01=17 >0,05=1 max=0.128 đổi ô=0 []
+    E_unexpl: ABB:E×1.16,Δlv+0.128, VBB:E×1.10,Δlv+0.079
+2026-07 n=360 |Δlv|>0,01=19 >0,05=6 max=0.251 đổi ô=2 [BID,MSB]
+    E_unexpl: LPB:E×1.21,Δlv+0.189, MBB:E×1.26,Δlv+0.233, MSB:E×1.20,Δlv+0.181, VAB:E×1.11,Δlv+0.085, VIB:E×1.17,Δlv+0.153, VPB:E×1.29,Δlv+0.251
+2026-08 n=350 |Δlv|>0,01=19 >0,05=2 max=0.251 đổi ô=0 []
+    E_unexpl: LPB:E×1.21,Δlv+0.189, VPB:E×1.29,Δlv+0.251
+2026-09 n=344 |Δlv|>0,01=18 >0,05=1 max=0.189 đổi ô=0 []
+    E_unexpl: LPB:E×1.21,Δlv+0.189
+2026-10 n=333 |Δlv|>0,01=19 >0,05=1 max=0.248 đổi ô=2 [TIN,VVS]
+    E_unexpl: TIN:E×1.26,Δlv+0.248
+```
+Đổi |Δlv|>0,01 ở 17–19 mã mỗi tháng (nhiều hơn số mã `E_unexpl`; phần dư chưa tách nguyên nhân), đổi ô ở 3/6 tháng (6 lượt mã-tháng). Không có chuẩn E thật để nói bản nào đúng hơn. **Đề xuất: không áp**; chỉ cân nhắc sau khi đối chiếu BCTC gốc các mã liệt kê, rồi PRELOCK biến thể mới.
 
 ## 7. Tái lập
 ```bash
@@ -148,12 +199,15 @@ $PY calc/mc_err.py                                                     # §2 →
 for ym in 2026-05 2026-06 2026-07 2026-08 2026-09 2026-10; do $PY calc/lvens2_pit2.py --asof-ym $ym --mc-pit all --out-dir out/final; done   # 1 as-of mỗi lần
 $PY calc/cmp_cells.py out/cmp_cells.json out/cmp_cells_changes.csv     # §5
 $PY calc/selfcheck_pit2.py 2026-10 stepcar out/sc                      # §4.1 (rc 0)
+bash out/r3_run.sh      # vòng 3: dựng lại 6×4 + so md5 + regress (phần selfcheck trong file này đã thay bằng r3_run2.sh)
+bash out/r3_run2.sh     # vòng 3: selfcheck sổ + pit2 (2026-10, 2026-05) dưới 3 TZ, rồi đo rollfwd
+$PY calc/gate_sim.py; $PY calc/measure_ideas.py absorb   # rollfwd chạy trong r3_run2.sh
 TZ=America/New_York $PY calc/selfcheck_pit2.py 2026-10 stepcar out/sc_tz_ny base; env -u TZ $PY calc/selfcheck_pit2.py 2026-10 stepcar out/sc_tz_unset base   # §4.2
-bash calc/selfcheck_paper_cell_pit2.sh                                 # §4.3
+bash calc/selfcheck_paper_cell_pit2.sh                                 # §4.3 (vòng 3: cần out/r3_final)
 for ym in 2026-05 2026-06; do $PY calc/lvens2_pit2.py --asof-ym $ym --mc-pit stepcar --out-dir out/vintage --cache-root /home/trido/thanhdt/WorkingClaude/data/bq_cache_asof20260728; done
 $PY calc/vintage_drift.py out/vintage_drift.json out/vintage_drift_top.csv   # §4.4
 $PY calc/lvens2_pit2.py --asof-ym 2026-10 --mc-pit strict --no-eguard --out-dir out/regress   # hồi quy Δ=0 vs bản merge (§1)
 ```
-md5 (8 ký tự đầu): `lvens2_pit2.py` 3f5041d6 (sau B1; trước B1 ad565e0d) · `selfcheck_paper_cell_pit2.sh` 3a5e884d · `paper_cell_monthly_pit2.py` 65eaf7e4 · `selfcheck_pit2.py` 20e4b7b8 · `mc_err.py` e4ebca73 · `cmp_cells.py` f9a3e94c · `vintage_drift.py` e59ecfe8 ·
+md5 (8 ký tự đầu, sau vòng 3): `lvens2_pit2.py` **90ffb508** (trước 3f5041d6) · `paper_cell_monthly_pit2.py` b50a6a77 · `make_ca_extract.py` 799a7fbd · `ca_extract.sql` 446dddca · `run_monthly_pit2.sh` b53b8264 · `selfcheck_paper_cell_pit2.sh` 35a67e8f · `selfcheck_pit2.py` 223e03fb · `gate_sim.py` 5633fb35 · `measure_ideas.py` 103d2bbb · `mc_err.py` e4ebca73 · `cmp_cells.py` f9a3e94c · `vintage_drift.py` e59ecfe8 ·
 extract CA 28418e9d · manifest frozen 59a5ee62 · cache `ticker_financial` ab5d424d (max_time 2026-11-20) · `fa_ratings_8l` 2ab15311 · final 2026-10 stepcar dea31ba7.
 Không dùng `profit_*`. Không dùng `ticker_prune`. Universe lấy từ `universe_pit`.
