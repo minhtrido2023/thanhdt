@@ -340,13 +340,13 @@ def _timestamp_to_epoch(value):
     return dt.timestamp()
 
 
-def _cache_project_dirs(since_ts):
-    """Claude project dirs for fleet agents, including worktree copies if present."""
+def _iter_agent_project_dirs():
+    """Yield (agent_label, project_dir_path) for fleet agents and worktree/reviewer dirs."""
     proj_root = os.path.join(os.path.expanduser("~"), ".claude", "projects")
     if not os.path.isdir(proj_root):
         return
-    agents = set(AGENT_CATEGORY) | {"Mike"}
-    for name in os.listdir(proj_root):
+    agents = set(AGENT_CATEGORY) | {"Mike", "_reviewers"}
+    for name in sorted(os.listdir(proj_root)):
         if not (
             name.startswith("-home-trido-thanhdt-WorkingClaude-mike-agents-")
             or name.startswith("-home-trido-mike-lite-")
@@ -358,9 +358,125 @@ def _cache_project_dirs(since_ts):
             suffix = name.rsplit("-", 1)[-1]
         if suffix not in agents:
             continue
-        for tf in glob.glob(os.path.join(proj_root, name, "*.jsonl")):
-            if os.path.getmtime(tf) >= since_ts - 86400:
-                yield tf
+        yield suffix, os.path.join(proj_root, name)
+
+
+def _cache_project_dirs(since_ts):
+    """Claude transcript files for fleet agents, including native subagents."""
+    for _, pdir in _iter_agent_project_dirs():
+        for pattern in ("*.jsonl", os.path.join("*", "subagents", "*.jsonl")):
+            for tf in glob.glob(os.path.join(pdir, pattern)):
+                try:
+                    if os.path.getmtime(tf) >= since_ts - 86400:
+                        yield tf
+                except OSError:
+                    continue
+
+
+_WAKEUP_POLL_RE = re.compile(r"claim-reply|ScheduleWakeup|jobs\.sh\s+status")
+
+
+def _short_model_name(model_id):
+    m = (model_id or "").lower()
+    for tier in ("opus", "sonnet", "haiku"):
+        if tier in m:
+            return tier
+    return (model_id or "?").split("-")[0] or "?"
+
+
+def _extract_user_text(msg):
+    content = msg.get("content")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = [
+            c.get("text", "")
+            for c in content
+            if isinstance(c, dict) and c.get("type") == "text" and isinstance(c.get("text"), str)
+        ]
+        return "\n".join(parts)
+    return ""
+
+
+def _scan_transcript_attribution(since_ts):
+    """Attribute full Claude transcript tokens across Mike human/wakeup, subagents, and headless."""
+    buckets = {
+        "mike_interactive_human": {"tokens": 0, "messages": 0},
+        "mike_interactive_wakeup_poll": {"tokens": 0, "messages": 0},
+        "native_subagents": {"tokens": 0, "messages": 0},
+        "headless_and_other_main": {"tokens": 0, "messages": 0},
+    }
+    subagents = {}
+    seen = set()
+
+    for suffix, pdir in _iter_agent_project_dirs():
+        candidates = [(tf, False) for tf in glob.glob(os.path.join(pdir, "*.jsonl"))]
+        candidates += [
+            (tf, True)
+            for tf in glob.glob(os.path.join(pdir, "*", "subagents", "*.jsonl"))
+        ]
+        for tf, is_sub in candidates:
+            try:
+                if os.path.getmtime(tf) < since_ts - 86400:
+                    continue
+            except OSError:
+                continue
+            turn_kind = "human"
+            try:
+                with open(tf, encoding="utf-8", errors="replace") as f:
+                    for line in f:
+                        if '"usage"' not in line and '"role":"user"' not in line and '"role": "user"' not in line:
+                            continue
+                        try:
+                            event = json.loads(line)
+                        except Exception:
+                            continue
+                        msg = event.get("message")
+                        if not isinstance(msg, dict):
+                            continue
+                        if not is_sub and suffix == "Mike" and msg.get("role") == "user":
+                            utxt = _extract_user_text(msg)
+                            if utxt.strip():
+                                turn_kind = "wakeup_poll" if _WAKEUP_POLL_RE.search(utxt) else "human"
+                            continue
+                        usage = msg.get("usage")
+                        if not isinstance(usage, dict):
+                            continue
+                        uid = msg.get("id") or event.get("requestId") or event.get("uuid")
+                        if not uid or uid in seen:
+                            continue
+                        ts = _timestamp_to_epoch(event.get("timestamp"))
+                        if ts is None or ts < since_ts:
+                            continue
+                        seen.add(uid)
+                        tok = (
+                            int(usage.get("input_tokens") or 0)
+                            + int(usage.get("cache_read_input_tokens") or 0)
+                            + int(usage.get("cache_creation_input_tokens") or 0)
+                            + int(usage.get("output_tokens") or 0)
+                        )
+                        if is_sub:
+                            bkey = "native_subagents"
+                            skey = f"{suffix}/{_short_model_name(msg.get('model'))}"
+                            sb = subagents.setdefault(skey, {"tokens": 0, "messages": 0})
+                            sb["tokens"] += tok
+                            sb["messages"] += 1
+                        elif suffix == "Mike":
+                            bkey = "mike_interactive_wakeup_poll" if turn_kind == "wakeup_poll" else "mike_interactive_human"
+                        else:
+                            bkey = "headless_and_other_main"
+                        buckets[bkey]["tokens"] += tok
+                        buckets[bkey]["messages"] += 1
+            except Exception:
+                continue
+
+    total_tokens = sum(v["tokens"] for v in buckets.values())
+    sub_ranked = sorted(subagents.items(), key=lambda kv: -kv[1]["tokens"])
+    return {
+        "total_tokens": total_tokens,
+        "buckets": buckets,
+        "subagents": sub_ranked,
+    }
 
 
 def _scan_cache_usage(since_ts):
@@ -596,6 +712,27 @@ def main():
         )
     else:
         print("  no transcript usage found in window")
+    print()
+    attr = _scan_transcript_attribution(since_ts)
+    print("Transcript token attribution (full ~/.claude/projects window, incl. interactive & subagents):")
+    if attr["total_tokens"]:
+        tot_a = attr["total_tokens"]
+        labels = [
+            ("headless_and_other_main", "headless/agent main"),
+            ("mike_interactive_human", "Mike interactive human"),
+            ("mike_interactive_wakeup_poll", "Mike wakeup_poll"),
+            ("native_subagents", "native subagents"),
+        ]
+        print(f"  total={tot_a / 1e6:,.1f}M tokens across 4 buckets:")
+        for key, lbl in labels:
+            b = attr["buckets"][key]
+            pct = 100.0 * b["tokens"] / tot_a
+            print(f"    {lbl:25s} {b['tokens'] / 1e6:8.1f}M ({pct:4.1f}%)  [{b['messages']} msgs]")
+        if attr["subagents"]:
+            top_sub = ", ".join(f"{k}:{v['tokens'] / 1e6:.1f}M({v['messages']}m)" for k, v in attr["subagents"][:5])
+            print(f"  subagents by parent/model: {top_sub}")
+    else:
+        print("  no attributed transcript tokens found in window")
     print()
     print(f"Commits by type ({commit_total} total):")
     for p in COMMIT_PREFIXES + ["other"]:

@@ -1178,7 +1178,17 @@ def cmd_job_live_for_thread(a):
             continue
         if str(o.get("discord_thread_id", "")) != str(thread_id):
             continue
-        if o.get("status") not in ("running", "retrying"):
+        st = o.get("status")
+        if st in ("done", "failed", "timeout"):
+            # Catch recently completed interactive --wakeup-ack jobs before claim-reply
+            # so hooks/stop.sh F2 does not let a turn end silently mid-flight.
+            if o.get("wakeup_ack") == "ack" and not str(o.get("replied_at") or "").strip():
+                ended_ts = _as_int(o.get("ended_at"), 0)
+                if ended_ts > 0 and 0 <= (n - ended_ts) <= 600:
+                    print(o.get("job_id", "?"))
+                    found += 1
+            continue
+        if st not in ("running", "retrying"):
             continue
         age = _hb_age(o, n, agent_only=True)
         if age == "-":

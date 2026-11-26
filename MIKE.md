@@ -288,21 +288,12 @@ nên nó chỉ tốn tài nguyên + rủi ro vận hành (sự cố Taylor 2026-
 > đọc — ĐỪNG coi đó là gate đang chạy. Monitor thay thế (chỉ cảnh báo, giá chốt, user duyệt
 > 2026-10-12) ĐÃ LIVE từ 2026-10-13 (`bin/nav_loss_brake_monitor.py`, cron 22:05+00:20 ICT; dòng ops_health đã merge 16/10).
 
-**Khi nào dùng native agent:**
-- Task không cần working memory tích lũy của agent đó
-- One-shot, kết quả trả về ngay trong lượt này
-- Không cần write code phức tạp, chỉ cần query/scan/read
+**Khi nào dùng native / isolated subagent vs headless dispatch:**
+- **Tìm kiếm / grep / audit read-only ngắn** (`search`, `grep`, `audit`, Haiku) → ưu tiên `bin/run_subagent.sh <name> "<prompt>"` (chạy từ `agents/_reviewers/` với `--add-dir`, **rẻ hơn ~85-90% context turn đầu** so với `Agent(...)` kế thừa full Mike context) hoặc `Agent(subagent_type="search"|"grep"|"audit")` cho việc 1 lượt nhỏ. Không giữ Mike context khi việc không cần context Mike.
+- **Phản biện DD / quant / arch-review** → dùng `bin/dd_skeptic_run.py` (DD), `bin/verify_finding.sh` (quant-skeptic, tự cô lập ở `agents/_reviewers/`), `bin/wags_autofix.sh` (arch-reviewer) thay vì tự gọi `Agent(...)` thô.
+- **Việc cần working memory (`kb/memory/<id>.md`), sửa code dài, chạy backtest, hay thao tác trading thật (plan-bound)** → dùng headless `bin/dispatch.sh <id> ...` (`Taylor`, `DollarBill`, `Mafee`, `Wags`, `Winston`, `data-ops`). KHÔNG cần daemon; `dispatch.sh` tự inject KB + working memory theo đúng role.
 
-**Khi nào dùng headless dispatch (Taylor/DollarBill/Mafee):**
-- Cần đọc/ghi working memory (`kb/memory/<id>.md`) để giữ mạch nghiên cứu/thực thi qua nhiều lượt
-- Task ghi code, chạy backtest, hoặc thao tác trading thật (plan-bound)
-- KHÔNG cần daemon để làm việc này — `dispatch.sh` tự inject KB + working memory vào mỗi phiên
-  headless mới, độc lập với bất kỳ daemon nào
-
-Native agent definitions: `~/.claude/agents/` (bq-analyst, **data-ops**, corp-scanner,
-**risk-auditor**, **legal-vn**, fleet-scout, quant-skeptic, fundamental-skeptic, macro-strategist,
-arch-reviewer, code-reviewer, memo-optimizer).
-Minimal KB cho native agents: `kb/context_mini.md` (~150 tokens thay vì 1700).
+Native agent definitions: `~/.claude/agents/` (`search`, `grep`, `audit` Haiku; `bq-analyst`, `data-ops`, `corp-scanner`, `risk-auditor`, `legal-vn`, `fleet-scout`, `quant-skeptic`, `fundamental-skeptic`, `macro-strategist`, `arch-reviewer`, `code-reviewer`). Minimal KB: `agents/_reviewers/CLAUDE.md` (~1.5KB) và `kb/context_mini.md`.
 
 Lịch sử gỡ daemon + bảng 2-tier cũ (nguyên văn): `MIKE_ext.md` § Dọn instructions 2026-10-09 → routing 2-tier.
 

@@ -1,7 +1,7 @@
 # MIKE — Agent tổng điều phối fleet (id=Mike)
 
 @/home/trido/thanhdt/WorkingClaude/mike/MIKE.md
-@/home/trido/thanhdt/WorkingClaude/mike/kb/context_pack.md
+<!-- kb/context_pack.md already @-imported inside MIKE.md; avoid duplicate context load -->
 @/home/trido/thanhdt/WorkingClaude/mike/kb/coding_guidelines.md
 
 Bạn là **Mike**, agent tổng. Sổ tay vận hành đầy đủ ở `MIKE.md` (đã import bên trên). Phần dưới là

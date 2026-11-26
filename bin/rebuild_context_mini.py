@@ -1,63 +1,85 @@
 #!/usr/bin/env python3
-"""Rebuild kb/context_taylor_mini.md: freshen RECENT block from context_pack.md each consolidate run.
+"""Refresh kb/context_taylor_mini.md if it carries a RECENT block; skip cleanly in static mode.
 
-Only the <!--RECENT-START-->...<!--RECENT-END--> block and the version tag in the title are
-updated. All other content in context_taylor_mini.md is maintained manually (rarely changes;
-weekly KB audit-lens catches drift).
+Since 2026-10-22, RECENT events live in kb/context_recent.md and hooks/session_start.sh injects
+them directly for mini-pack agents as well. When context_taylor_mini.md has no
+<!--RECENT-START-->...<!--RECENT-END--> marker, this helper is a no-op exit 0.
 """
 
+import os
 import re
 import sys
-import os
+
+
+def _read_version(root: str, pack_content: str) -> str:
+    ver_path = os.path.join(root, "kb", "version.txt")
+    if os.path.exists(ver_path):
+        try:
+            txt = open(ver_path, encoding="utf-8").read().strip()
+            if txt.isdigit():
+                return txt
+        except OSError:
+            pass
+    ver_match = re.search(r"\(v(\d+)\)", pack_content[:200])
+    return ver_match.group(1) if ver_match else "?"
 
 
 def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    src = os.path.join(root, 'kb/context_pack.md')
-    dst = os.path.join(root, 'kb/context_taylor_mini.md')
+    src_recent = os.path.join(root, "kb", "context_recent.md")
+    src_pack = os.path.join(root, "kb", "context_pack.md")
+    dst = os.path.join(root, "kb", "context_taylor_mini.md")
 
-    if not os.path.exists(src):
-        print(f'[rebuild_context_mini] {src} not found, skipping', file=sys.stderr)
-        return
     if not os.path.exists(dst):
-        print(f'[rebuild_context_mini] {dst} not found, skipping', file=sys.stderr)
+        print(f"[rebuild_context_mini] {dst} not found, skipping", file=sys.stderr)
         return
 
-    with open(src, encoding='utf-8') as f:
-        src_content = f.read()
-    with open(dst, encoding='utf-8') as f:
+    with open(dst, encoding="utf-8") as f:
         dst_content = f.read()
 
-    # Extract RECENT block from context_pack.md
-    recent_match = re.search(r'<!--RECENT-START-->(.*?)<!--RECENT-END-->', src_content, re.DOTALL)
-    if not recent_match:
-        print('[rebuild_context_mini] No RECENT block in context_pack.md, skipping', file=sys.stderr)
+    if not re.search(r"<!--RECENT-START-->.*?<!--RECENT-END-->", dst_content, re.DOTALL):
+        print("[rebuild_context_mini] context_taylor_mini.md is static (RECENT injected at SessionStart), skipping")
         return
-    recent_block = recent_match.group(1)
 
-    # Extract version from context_pack.md first line
-    ver_match = re.search(r'\(v(\d+)\)', src_content[:200])
-    ver = ver_match.group(1) if ver_match else '?'
+    pack_content = ""
+    if os.path.exists(src_pack):
+        with open(src_pack, encoding="utf-8") as f:
+            pack_content = f.read()
 
-    # Replace RECENT block in mini file
+    recent_block = ""
+    if os.path.exists(src_recent):
+        with open(src_recent, encoding="utf-8") as f:
+            recent_raw = f.read().strip()
+        if recent_raw:
+            recent_block = f"\n{recent_raw}\n"
+
+    if not recent_block and pack_content:
+        recent_match = re.search(r"<!--RECENT-START-->(.*?)<!--RECENT-END-->", pack_content, re.DOTALL)
+        if recent_match:
+            recent_block = recent_match.group(1)
+
+    if not recent_block:
+        print("[rebuild_context_mini] No RECENT content in context_recent.md or context_pack.md, skipping", file=sys.stderr)
+        return
+
+    ver = _read_version(root, pack_content)
+
     new_dst = re.sub(
-        r'<!--RECENT-START-->.*?<!--RECENT-END-->',
-        f'<!--RECENT-START-->{recent_block}<!--RECENT-END-->',
+        r"<!--RECENT-START-->.*?<!--RECENT-END-->",
+        f"<!--RECENT-START-->{recent_block}<!--RECENT-END-->",
         dst_content,
         flags=re.DOTALL,
     )
-
-    # Update version in title line (first occurrence only)
-    new_dst = re.sub(r'\(v\d+\)', f'(v{ver})', new_dst, count=1)
+    new_dst = re.sub(r"\(v\d+\)", f"(v{ver})", new_dst, count=1)
 
     if new_dst == dst_content:
-        print(f'[rebuild_context_mini] no change (v{ver})')
+        print(f"[rebuild_context_mini] no change (v{ver})")
         return
 
-    with open(dst, 'w', encoding='utf-8') as f:
+    with open(dst, "w", encoding="utf-8") as f:
         f.write(new_dst)
-    print(f'[rebuild_context_mini] updated RECENT block → v{ver}')
+    print(f"[rebuild_context_mini] updated RECENT block → v{ver}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

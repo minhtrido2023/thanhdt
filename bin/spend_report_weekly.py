@@ -114,6 +114,7 @@ def compute_summary(root, days):
     spend_report.ROOT = root
     job_buckets, agent_effort, retry_stats = spend_report._scan_jobs(since_ts)
     cache_usage = spend_report._scan_cache_usage(since_ts)
+    transcript_attribution = spend_report._scan_transcript_attribution(since_ts)
     commit_counts, commit_total = spend_report._scan_commits(days)
 
     empty = {"jobs": 0, "log_bytes": 0, "duration_s": 0, "agents": {}, "models": {}}
@@ -178,6 +179,7 @@ def compute_summary(root, days):
         "agent_effort": agent_effort,
         "retry_stats": retry_stats,
         "cache_usage": cache_usage,
+        "transcript_attribution": transcript_attribution,
         "cost_by_tier": scan_cost_by_tier(root, days),
         "commit_counts": commit_counts,
         "commit_total": commit_total,
@@ -525,6 +527,23 @@ def build_report(report_date, summary, previous, charts):
         f"**{retry['extra_attempts']} attempt** thêm; "
         f"{retry['resume_jobs']} job có prompt resume/re-dispatch."
     )
+    tattr = summary.get("transcript_attribution") or {}
+    if tattr.get("total_tokens", 0) > 0:
+        tot_t = tattr["total_tokens"]
+        bk = tattr.get("buckets", {})
+        parts = []
+        for k, lbl in (
+            ("headless_and_other_main", "Headless/agents"),
+            ("mike_interactive_human", "Mike human"),
+            ("mike_interactive_wakeup_poll", "Mike wakeup"),
+            ("native_subagents", "Subagents"),
+        ):
+            tok = bk.get(k, {}).get("tokens", 0)
+            parts.append(f"{lbl} {tok / 1e6:,.1f}M ({100.0 * tok / tot_t:.0f}%)")
+        lines.append(
+            f"- Toàn cảnh `~/.claude/projects` (gồm interactive & subagent): **{tot_t / 1e6:,.1f}M tok** — "
+            + ", ".join(parts) + "."
+        )
     lines.append("")
 
     lines.append("## Cảnh báo effort / model / retry")

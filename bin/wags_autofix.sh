@@ -73,11 +73,13 @@ PY
   finding="$(printf '%s' "$sel" | python3 -c 'import json,sys; print(json.dumps(json.load(sys.stdin)["finding"], ensure_ascii=False))')"
   trace_id="$(printf '%s' "$sel" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("trace_id") or "")')"
 
-  local sys_prompt log verdict_json
+  local sys_prompt log verdict_json rev_dir
   sys_prompt="$(awk 'NR==1&&/^---$/{f=1;next} f&&/^---$/{f=0;next} !f' "$AGENT_DEF")"
+  rev_dir="$ROOT/agents/_reviewers"
+  [ -d "$rev_dir" ] || rev_dir="$WC_ROOT"
   mkdir -p "$ROOT/logs"
   log="$ROOT/logs/arch_review_$(date -u +%Y%m%d_%H%M%S).log"
-  ( cd "$WC_ROOT" && "$CLAUDE" -p "$sys_prompt
+  ( cd "$rev_dir" && MIKE_SKIP=1 "$CLAUDE" -p "$sys_prompt
 
 --- FINDING CỦA WAGS CẦN AUDIT ---
 $finding
@@ -85,7 +87,7 @@ $finding
 Codebase: $WC_ROOT (fleet tooling ở $ROOT). Mở artifact thật finding trích dẫn (file/commit/
 log/bus event), chạy đủ 7 hướng tấn công, rồi in ĐÚNG khối VERDICT_JSON." \
       --permission-mode auto --allowedTools "Bash Read Grep Glob" \
-      --model opus --max-turns 40 > "$log" 2>"$log.err" ) || true
+      --add-dir "$WC_ROOT" --model opus --max-turns 40 > "$log" 2>"$log.err" ) || true
 
   # Parser tách ra file riêng (2026-08-12) để CÓ selfcheck: bin/wags_verdict_parse_selfcheck.py.
   # Nó vá được khối JSON thiếu dấu đóng ở cuối — sự cố thật 08-11: arch-reviewer kết luận

@@ -594,13 +594,77 @@ _maybe_schedule_usage_resume() {
     "$ROOT/bin/notify.sh" "[dispatch] $id: usage-limit-like failure lặp lại $((n + 1)) lần liên tiếp (job $job_id) — DỪNG auto-resume (chạm trần $cap), có thể KHÔNG PHẢI usage limit thật. Cần người kiểm tra: $lf" 2>/dev/null || true
     return 1
   fi
-  local reset_hhmm resume_at
+  local reset_hhmm probe_epoch log_epoch resume_at
   # Gio reset cung phai lay tu probe CUA PROVIDER — khong co probe thi KHONG DOAN gio reset,
   # roi ve buffer 5h mac dinh o dong duoi (cung ly do §5.4 o _looks_like_usage_limit).
   reset_hhmm=""
   [ -n "${CLI_USAGE_PROBE:-}" ] && \
     reset_hhmm="$(python3 "$ROOT/$CLI_USAGE_PROBE" --oneline 2>/dev/null | awk '{print $4}')"
-  resume_at="$(_parse_reset_epoch "$reset_hhmm")"
+  probe_epoch="$(_parse_reset_epoch "$reset_hhmm")"
+  log_epoch="$(python3 - "$lf" "$ef" <<'PY' 2>/dev/null || true
+import re, sys
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+text = ""
+for p in sys.argv[1:3]:
+    if not p:
+        continue
+    try:
+        with open(p, encoding="utf-8", errors="replace") as f:
+            data = f.read()
+        text += "\n" + data[-4000:]
+    except Exception:
+        pass
+
+MONTHS = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+          "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
+pat = re.compile(
+    r"resets?\s+(?:at\s+)?(?:(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2}),?\s+)?"
+    r"(?:(\d{1,2}):(\d{2})\s*(am|pm)?|(\d{1,2})\s*(am|pm))"
+    r"(?:\s*\(([^)]+)\))?",
+    re.IGNORECASE,
+)
+best = 0
+for m in pat.finditer(text):
+    mon_s, day_s, h1, m1, ap1, h2, ap2, tz_raw = m.groups()
+    hh = int(h1 if h1 is not None else h2)
+    mm = int(m1) if m1 is not None else 0
+    ap = (ap1 or ap2 or "").lower()
+    if ap == "pm" and hh < 12:
+        hh += 12
+    elif ap == "am" and hh == 12:
+        hh = 0
+    if hh > 23 or mm > 59:
+        continue
+    tz_name = (tz_raw or "Asia/Ho_Chi_Minh").strip()
+    try:
+        tz = ZoneInfo(tz_name)
+    except Exception:
+        tz = ZoneInfo("Asia/Ho_Chi_Minh")
+    now_dt = datetime.now(tz)
+    if mon_s and day_s:
+        mon = MONTHS[mon_s.lower()]
+        day = int(day_s)
+        try:
+            cand = now_dt.replace(month=mon, day=day, hour=hh, minute=mm, second=0, microsecond=0)
+            if cand <= now_dt - timedelta(days=30):
+                cand = cand.replace(year=now_dt.year + 1)
+        except ValueError:
+            continue
+    else:
+        cand = now_dt.replace(hour=hh, minute=mm, second=0, microsecond=0)
+        if cand <= now_dt:
+            cand += timedelta(days=1)
+    delta = (cand - now_dt).total_seconds()
+    if 0 < delta <= 8 * 86400:
+        best = max(best, int(cand.timestamp()))
+if best > 0:
+    print(best)
+PY
+)"
+  # Prefer explicit CLI reset message over heuristic probe, else probe, else 5h fallback.
+  resume_at="${log_epoch:-${probe_epoch:-}}"
   [ -n "$resume_at" ] || resume_at=$(( $(date +%s) + 5 * 3600 ))  # unknown reset -> assume full window
   resume_at=$((resume_at + ${DISPATCH_USAGE_RESUME_BUFFER:-600}))
   mkdir -p "$ROOT/bus/pending_resumes"
@@ -1396,7 +1460,7 @@ fi
 JSET job_id="$job_id" from="$from" to="$id" status=running attempt=1 dispatcher_pid="$$" \
      max_attempts=$((RETRIES + 1)) started_at="$_start_ts" \
      deadline=$((_start_ts + TIMEOUT)) logfile="$logfile" discord_thread_id="$_dtid0" \
-     model="${MODEL:-default}" effort="$EFFORT" \
+     model="${MODEL:-default}" effort="$EFFORT" wakeup_ack="${WAKEUP_ACK:-}" \
      provider="$PROVIDER" turn_cap="$([ "$CLI_SUPPORTS_TURNS" = "true" ] && echo "$MAX_TURNS" || echo unsupported)" \
      prompt_summary="$_psum" write_scope="$WRITE_SCOPE" \
      chain_tokens="$_chain_tokens" round_cap="$_round_cap_note"
@@ -1478,6 +1542,11 @@ for t in tasks:
       # đó là agent TỰ NGHĨ RA, không phải luôn xảy ra. Mã hoá thành chỉ dẫn tường minh.
       run_prompt="$dispatch_prompt"
       if [ "$attempt" -gt 1 ]; then
+        local _last_sid _handoff_digest=""
+        _last_sid="${_TELE_SIDS##*,}"
+        if [ -n "$_last_sid" ]; then
+          _handoff_digest="$(timeout 5 python3 "$ROOT/bin/job_handoff_digest.py" --session-id "$_last_sid" --job "$job_id" 2>/dev/null || true)"
+        fi
         run_prompt="$dispatch_prompt
 
 ⚠️ ĐÂY LÀ LẦN THỬ LẠI (attempt $attempt/$max_attempts) sau khi lần trước fail/timeout/hết
@@ -1485,7 +1554,9 @@ lượt. TRƯỚC KHI làm lại từ đầu: chạy 'git status' + 'git diff' �
 (kể cả nested repo, vd mike/ bên trong WorkingClaude/) để xem việc đã làm tới đâu. Nếu code/
 nội dung đã gần xong (chỉ thiếu verify/commit/report bus) → HOÀN TẤT phần còn thiếu thay vì
 viết lại từ đầu (tốn gấp đôi vô ích). Nếu phần dở dang sai/không dùng được → nói rõ lý do rồi
-làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ mà không giải thích."
+làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ mà không giải thích.${_handoff_digest:+
+
+$_handoff_digest}"
       fi
       set +e
       # argv dung TAI DAY (trong tien trinh con), khong phai o tien trinh cha — xem _build_argv.
@@ -1564,6 +1635,7 @@ làm lại có chủ đích, đừng âm thầm ghi đè mất công sức cũ m
           # kéo next_run_at về NOW thay vì chờ hết timer (≤30s thay vì ≤20 phút).
           # Không tạo edge mới — 1 producer duy nhất vẫn là Mike, claim nguyên tử giữ nguyên.
           _preempt_wakeup "$_tid"
+          python3 "$ROOT/bin/ensure_followup_wakeup.py" "$job_id" "$_tid" </dev/null >/dev/null 2>&1 &
         fi
         # Auto-callback: notify the caller agent so it can pick up the result without manual prompt.
         # Only when caller is a real companion agent (not Mike/user — they have other channels).
@@ -1633,6 +1705,7 @@ $_commit_hint}" \
       "$ROOT/bin/notify_thread.sh" "❌ **$id** $why (job \`${job_id}\`). Xem log: $logfile" "$_tid" 2>/dev/null || true
       # (2026-08-22) Preempt wakeup trên cả nhánh fail — Mike thấy ❌ ngay thay vì chờ timer.
       _preempt_wakeup "$_tid"
+      python3 "$ROOT/bin/ensure_followup_wakeup.py" "$job_id" "$_tid" </dev/null >/dev/null 2>&1 &
     fi
     # Also notify the caller agent on failure so it can decide to retry or escalate.
     # Same guard: no callback for auto-callback jobs (prevent loop on failure path too).
@@ -1683,6 +1756,7 @@ $_commit_hint}" \
             _current_maxturns_resume_count _build_argv _emit_full_prompt \
             _new_session_id _record_job_telemetry
   # Chi export SCALAR (bash khong export duoc array — do la ly do _build_argv chay trong con).
+  export CCDB_API_URL="${CCDB_API_URL:-http://127.0.0.1:8199}"
   export ROOT WC_ROOT JOBS_DIR job_id from id ts TIMEOUT RETRIES CLAUDE dispatch_prompt logfile prompt \
          CIRCUIT_DIR CIRCUIT_THRESHOLD CIRCUIT_COOLDOWN MAX_EXT HB_FRESH_S \
          MAX_TURNS MAXTURNS_CEILING MODEL EFFORT \
@@ -1757,18 +1831,23 @@ try:
     with open(sys.argv[2], encoding='utf-8') as f:
         prof = json.load(f)
     b = prof.get('buckets', {}).get(key) or prof.get('global_fallback', {})
-    m = b.get('median_s')
-    print(max(90, min(1200, int(m))) if m else '')
+    p75 = b.get('p75_s')
+    m = p75 if p75 else b.get('median_s')
+    if not m:
+        print('')
+    else:
+        lo = 120 if (p75 and int(p75) < 300) else 300
+        print(max(lo, min(1200, int(m))))
 except Exception:
     print('')
 " "$_wkey" "$ROOT/state/wakeup_profile.json" 2>/dev/null)"
   echo "⚠️ BẮT BUỘC ngay sau dispatch này (MIKE.md §8, sửa 2026-07-07 — Agent tool KHÔNG còn run_in_background):" >&2
   if [ -n "$_wsugg" ]; then
-    echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — lần tỉnh ĐẦU dùng gợi ý wakeup_profile.json cho bucket '$_wkey': ~${_wsugg}s (kẹp [90,1200]); từ lần thứ 2 trở đi mà job vẫn running thì TĂNG DẦN (nhân ~1.6-2x, trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch. Mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup theo bậc thang; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
+    echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — lần tỉnh ĐẦU dùng p75 wakeup_profile.json cho bucket '$_wkey': ~${_wsugg}s (kẹp [120,1200]); từ lần thứ 2 trở đi mà job vẫn running thì đặt NGAY 900-1200s (trần 1200s; _preempt_wakeup sẽ tự kéo wakeup về NOW khi job xong). KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s)." >&2
   else
-    echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — không có gợi ý wakeup_profile.json cho bucket '$_wkey' (file thiếu/hỏng/mẫu quá ít) → dùng ladder mặc định: 3 lần tỉnh ĐẦU ~240-270s; từ lần thứ 4 trở đi mà job vẫn running thì TĂNG DẦN (240→480→900→trần 1200s), không quay lại ngắn trừ khi có job MỚI phát sinh trong batch. Mỗi lần tỉnh chạy '$ROOT/bin/jobs.sh status $job_id'; chưa done → đặt lại wakeup theo bậc thang; done → xử lý ngay. KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s vẫn phủ qua nhiều lần poll)." >&2
+    echo "  1) CƠ CHẾ CHÍNH: ScheduleWakeup THÍCH ỨNG — không có gợi ý wakeup_profile.json cho bucket '$_wkey' → lần tỉnh ĐẦU ~600s; từ lần thứ 2 nếu job còn running → tăng lên 900→1200s (_preempt_wakeup tự kéo về NOW khi job xong). KHÔNG đặt 1 lần chờ dài (worst-case chờ tối đa ~${_ww}s)." >&2
   fi
-  echo "  1b) ScheduleWakeup prompt sẵn dùng (claim-reply là dòng đầu): \"Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [logic poll + post bình thường]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job chưa xong (bình thường ở lần tỉnh sớm, job còn running), post progress bình thường (KHÔNG claim, KHÔNG coi là đã reply), đặt lại ScheduleWakeup như lượt poll thông thường.\"" >&2
+  echo "  1b) ScheduleWakeup prompt sẵn dùng (claim-reply là dòng đầu): \"Đầu tiên: $ROOT/bin/jobs.sh claim-reply $job_id → exit 1 → ScheduleWakeup(noop:true,stop:true), DỪNG. exit 0 → [đọc kết quả và trả lời cuối cùng]. exit 2 → báo job record thiếu, đừng im lặng. exit 3 → job còn running: đặt lại NGAY ScheduleWakeup(900) để ngủ tiếp và DỪNG lượt NGAY (KHÔNG đọc log, KHÔNG chạy bash khác, KHÔNG spam progress) — khi job xong _preempt_wakeup sẽ kéo wakeup về NOW.\"" >&2
   echo "  2) CHỈ nếu schema tool phiên này THẬT SỰ có tham số nền (run_in_background trên Agent/Bash) mới thêm wrapper bọc '$ROOT/bin/jobs.sh wait $job_id --timeout $_ww'. isolation:worktree KHÔNG phải background — cấm dùng thay thế." >&2
   echo "  3) SELF-CHECK: trước khi nói với user bất kỳ điều gì về trạng thái job này (đang chờ/xong/chết), chạy '$ROOT/bin/jobs.sh status $job_id' trong CÙNG turn — không nói từ trí nhớ." >&2
   # 4) Nhắc đóng vòng bus (Wags 2026-08-14, root-cause-A): user quyết qua Discord → Mike

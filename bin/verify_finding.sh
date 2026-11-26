@@ -136,14 +136,26 @@ if [ -n "$bg" ]; then
     dispatcher_pid="$$" prompt_summary="VERIFY: $finding_topic" >/dev/null
 fi
 
+_REV_DIR="$ROOT/agents/_reviewers"
+[ -d "$_REV_DIR" ] || _REV_DIR="$WORKDIR"
+_vf_sid="$(cat /proc/sys/kernel/random/uuid 2>/dev/null || python3 -c 'import uuid; print(uuid.uuid4())' 2>/dev/null || true)"
+if ! [[ "$_vf_sid" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+  _vf_sid=""
+fi
+
 run_and_record() {
-  cd "$WORKDIR"
+  cd "$_REV_DIR"
   set +e
-  "$CLAUDE" -p "$prompt" \
-    --permission-mode auto \
-    --allowedTools "Bash Read Grep Glob" \
-    --max-turns 50 \
-    > "$log" 2>"$log.err"
+  local -a _cmd=(
+    "$CLAUDE" -p "$prompt"
+    --model opus
+    --permission-mode auto
+    --allowedTools "Bash Read Grep Glob"
+    --add-dir "$WORKDIR"
+    --max-turns 50
+  )
+  [ -n "$_vf_sid" ] && _cmd+=( --session-id "$_vf_sid" )
+  MIKE_SKIP=1 "${_cmd[@]}" > "$log" 2>"$log.err"
   _claude_rc=$?
   set -e
 
@@ -207,6 +219,20 @@ PY
     MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" \
       status="$_jstatus" ended_at="$(date +%s)" exit_code="$_claude_rc" \
       result_summary="verdict=$verdict" >/dev/null
+    if [ -n "${_vf_sid:-}" ]; then
+      _tele_out="$(timeout -k 2 "${JOB_TELEMETRY_TIMEOUT:-15}" python3 "$ROOT/bin/job_telemetry.py" "$_vf_sid" 2>/dev/null || true)"
+      if [ -n "$_tele_out" ]; then
+        _u='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+        _tre="^((num_turns|input_tokens|output_tokens|cache_read_tokens|cache_creation_tokens)=[0-9]{1,15}|total_cost_usd=[0-9]{1,9}(\.[0-9]{1,9})?|session_id=${_u})$"
+        _tkvs=()
+        while IFS= read -r _tl; do
+          [[ "$_tl" =~ $_tre ]] && _tkvs+=( "$_tl" )
+        done <<< "$_tele_out"
+        if [ "${#_tkvs[@]}" -gt 0 ]; then
+          MIKE_JOB_OWNER="$job_id" python3 "$ROOT/bin/mike_json.py" job-set "$JOBS_DIR" "$job_id" "${_tkvs[@]}" >/dev/null 2>&1 || true
+        fi
+      fi
+    fi
     # (2026-08-21) Push-wake GỠ BỎ — cùng lý do dispatch.sh/MIKE.md §8: kết quả verify là
     # DỮ LIỆU (event `verification` trên bus + notify dưới đây), không cần spin phiên Mike để
     # resume. Nếu Mike đang chờ verdict để wire thì Mike tự đặt ScheduleWakeup.

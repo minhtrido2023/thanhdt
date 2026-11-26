@@ -114,7 +114,7 @@
     "mike/bin/report_delivery_gate.py": 0,
     "mike/bin/report_delivery_gate_selfcheck.py": 0,
     "mike/bin/report_return_gate.py": 0,
-    "mike/bin/resume_pending.py": 1,
+    "mike/bin/resume_pending.py": 0,
     "mike/bin/routing_retrospective.py": 2,
     "mike/bin/sector_valuation_lens.py": 0,
     "mike/bin/sector_valuation_lens_selfcheck.py": 0,

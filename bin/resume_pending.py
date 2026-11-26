@@ -79,7 +79,19 @@ def fire(fp, rec):
             "(bus/inbox/%s.jsonl) để biết đang làm dở gì, rồi TIẾP TỤC từ đó — KHÔNG bắt đầu "
             "lại từ đầu, KHÔNG lặp lại việc đã xong. Prompt gốc: %s"
         ) % (count, orig_job, agent, agent, prompt)
+    digest = ""
+    try:
+        dr = subprocess.run(
+            [sys.executable, os.path.join(ROOT, "bin", "job_handoff_digest.py"), "--job", orig_job],
+            capture_output=True, text=True, timeout=5)
+        if dr.returncode == 0 and dr.stdout.strip():
+            digest = dr.stdout.strip()
+    except Exception:
+        pass
+    if digest:
+        resume_prompt = resume_prompt + "\n\n" + digest
     env = dict(os.environ, DISPATCH_FROM=frm)
+    env.setdefault("CCDB_API_URL", "http://127.0.0.1:8199")
     # Ghim lại ĐÚNG topic Discord của job gốc (fix 2026-07-22). Cron không có
     # DISCORD_THREAD_ID nên nếu không truyền --thread, job resume rơi về con trỏ global
     # "topic Mike mở phiên gần nhất" = topic user đang đọc. Job record của job gốc đã lưu
@@ -106,9 +118,15 @@ def fire(fp, rec):
     try:
         with open(os.path.join(ROOT, "bus", "jobs", "%s.json" % orig_job),
                   encoding="utf-8") as f:
-            tid = str(json.load(f).get("discord_thread_id") or "")
+            jrec = json.load(f)
+        tid = str(jrec.get("discord_thread_id") or "")
         if tid:
             argv += ["--thread", tid]
+        ack = str(jrec.get("wakeup_ack") or "").strip()
+        if ack == "ack":
+            argv += ["--wakeup-ack"]
+        elif ack == "nofollow":
+            argv += ["--no-followup"]
     except Exception:
         pass  # job record cũ/mất → giữ hành vi cũ (ambient/global), không chặn resume
     try:

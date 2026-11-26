@@ -69,9 +69,9 @@ fi
 
 # Khối MỚI NHẤT (tách khỏi context_pack.md từ 2026-10-22, xem publish_context.sh): ccdb resume
 # mỗi tin nhắn ⇒ SessionStart chạy mỗi lượt, nên chỉ bơm khi version KB đã đổi từ lần agent này
-# thấy trước (hoặc job headless — luôn là phiên mới tinh). Chỉ cho agent có import context_pack.
+# thấy trước (hoặc job headless — luôn là phiên mới tinh). Áp dụng cho agent dùng context_pack hoặc mini packs.
 if { [ "$cur" != "$_old_seen" ] || [ -n "${JOB_ID:-}" ]; } && [ -s "$KB/context_recent.md" ] \
-   && grep -qs 'context_pack' "$ROOT/agents/$id/CLAUDE.md"; then
+   && grep -qsE 'context_pack|context_taylor_mini|context_planning_mini|context_execution_mini|context_dataops_mini' "$ROOT/agents/$id/CLAUDE.md"; then
   cat "$KB/context_recent.md"
 fi
 

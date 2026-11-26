@@ -163,6 +163,13 @@ else
 fi
 echo "$(date -Iseconds) [classifier-denials] $TODAY mike=${_clf_mike:-?} close_bus_question=${_clf_close:-?}" >> "$LOG"
 
+_precollect_block=""
+if [ -f "$ROOT/bin/retro_precollect.py" ]; then
+  _pc_file="$ROOT/state/retro_precollect_${TODAY}.txt"
+  _precollect_block="$(timeout "${DAILY_RETRO_PRECOLLECT_TIMEOUT:-15}" python3 "$ROOT/bin/retro_precollect.py" --day "$TODAY" 2>/dev/null || true)"
+  [ -n "$_precollect_block" ] && printf '%s\n' "$_precollect_block" > "$_pc_file" 2>/dev/null || true
+fi
+
 # --- Bước 1: Mike viết DRAFT (đồng bộ — bash CHỜ THẬT, không dùng &) ------------------
 # DISPATCH_FROM=user bắt buộc — xem fix 2026-07-09 kb_nightly.sh (Friday editorial
 # dispatch bị self-dispatch guard chặn âm thầm nhiều tuần vì thiếu dòng này).
@@ -217,7 +224,9 @@ $_mb_warn_block
    thì không nêu gì.
 2g. CLASSIFIER CHẶN LỆNH (số đếm THÔNG TIN, bash đã đếm + đã tự escalate nếu vượt ngưỡng — ĐỪNG tự đếm lại):
 $_clf_block
-   Chỉ nêu 1 dòng trong retro nếu đáng kể (vượt ngưỡng, hoặc lệnh bus bị chặn lặp lại nhiều ngày).
+   Chỉ nêu 1 dòng trong retro nếu đáng kể (vượt ngưỡng, hoặc lệnh bus bị chặn lặp lại nhiều ngày).${_precollect_block:+
+2h. PRECOLLECT SỰ CỐ & ARTIFACT ($TODAY — bash đã quét sẵn):
+$_precollect_block}
 2b. VERIFY ARTIFACT THẬT trước khi báo bất kỳ vấn đề nào là 'chưa xử lý'/'còn treo' — đây
    là quy tắc BẮT BUỘC (bài học 2026-07-10: chính retro lần đầu đã sai — báo 1 câu hỏi
    'crontab paper-main chưa cài' là còn mở CHỈ vì bus event question chưa có answer, trong
