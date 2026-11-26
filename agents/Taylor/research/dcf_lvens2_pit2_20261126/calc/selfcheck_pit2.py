@@ -54,8 +54,8 @@ def make_poison(D):
         elif name in ("fin", "vnd_fs"):
             num = [c for c in df.columns if c not in (col, "ticker", "quarter", "time", "known", "fq", "fiscalDate", "src", "E_src", "N_how") and pd.api.types.is_numeric_dtype(df[c])]
             df.loc[late, num] = df.loc[late, num] * 0.3
-            if late.sum() == 0 and len(df):                    # chưa có dòng sau D ⇒ gài 1 bản sao mọi mã, ngày D+5
-                x = df.groupby("ticker").tail(1).copy(); x[col] = D + pd.Timedelta(days=5); x[num] = x[num] * 0.3; df = pd.concat([df, x], ignore_index=True)
+            if len(df):     # [v3] LUÔN gài 1 bản sao kỳ mới nhất ≤ D của mọi mã tại D+5: dòng sau D có thật nhưng xa D bị bước ghép giá (đã cắt) loại ⇒ mutation mù
+                x = df[df[col] <= D].sort_values(col, kind="mergesort").groupby("ticker").tail(1).copy(); x[col] = D + pd.Timedelta(days=5); x[num] = x[num] * 0.3; df = pd.concat([df, x], ignore_index=True)
         elif name == "universe":
             x = df.drop_duplicates("ticker").copy(); x[col] = D + pd.Timedelta(days=3); df = pd.concat([df, x], ignore_index=True)
         elif name == "rating":
@@ -82,7 +82,8 @@ def main(ym, mc, out, quick=False):
     base = md5(f"{out}/lvens2_{ym}{sfx}_sc_base.parquet"); pois = md5(f"{out}/lvens2_{ym}{sfx}_sc_poison.parquet")
     rows = [("poison vs base", "PASS" if base == pois else "FAIL", base[:8], pois[:8])]
     only = os.environ.get("SC_ONLY")                          # chạy lại 1 phần (vd SC_ONLY=inner: chỉ base + poison + ca+inner)
-    for s in ([] if (quick or only) else SOURCES):
+    srcs = os.environ.get("SC_SOURCES")
+    for s in ([] if (quick or only) else (srcs.split(",") if srcs else SOURCES)):
         L.run([ym], "pit", out, fr, mc_pit=mc, tag="_sc_mut", poison=make_poison(D), nocut={s})
         m = md5(f"{out}/lvens2_{ym}{sfx}_nocut-{s}_sc_mut.parquet")
         st = "DETECTED" if m != base else ("BLIND(expected)" if s in EXPECT_BLIND else "BLIND(UNEXPECTED)")
