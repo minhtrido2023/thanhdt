@@ -48,6 +48,7 @@
         "bds_kcn",
         "dien_ppa",
         "mo_giay_phep",
+        "holding_sotp",
         "san_xuat_khac"
       ]
     },
@@ -625,6 +626,25 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "required": [
+          "loai_hinh"
+        ],
+        "properties": {
+          "loai_hinh": {
+            "const": "holding_sotp"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "sector": {
+            "$ref": "#/$defs/sector_holding"
+          }
+        }
+      }
     }
   ],
   "$defs": {
@@ -895,6 +915,36 @@
           "$ref": "#/$defs/str_or_kcb"
         }
       }
+    },
+    "sector_holding": {
+      "type": "object",
+      "required": [
+        "listed_subs_nav_pct",
+        "holding_discount_pct",
+        "look_through_debt_bn",
+        "cross_ownership_checked"
+      ],
+      "properties": {
+        "listed_subs_nav_pct": {
+          "$ref": "#/$defs/num_or_kcb"
+        },
+        "holding_discount_pct": {
+          "$ref": "#/$defs/num_or_kcb"
+        },
+        "look_through_debt_bn": {
+          "$ref": "#/$defs/num_or_kcb"
+        },
+        "cross_ownership_checked": {
+          "type": "boolean"
+        },
+        "parent_overhead_bn_yr": {
+          "$ref": "#/$defs/num_or_kcb"
+        },
+        "source": {
+          "$ref": "#/$defs/src"
+        }
+      },
+      "additionalProperties": false
     }
   }
 }
