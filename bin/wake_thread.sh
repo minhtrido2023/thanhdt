@@ -14,7 +14,8 @@
 # no 60s floor (that floor is a policy ScheduleWakeup's harness bridge applies
 # client-side, not a constraint of the underlying /api/tasks endpoint).
 #
-# ⚠️ MANUAL-ONLY PRIMITIVE từ 2026-08-21. TRƯỚC ĐÂY dispatch.sh/_bg_wrapper,
+# ⚠️ MANUAL-ONLY PRIMITIVE từ 2026-08-21 (NGOẠI LỆ DUY NHẤT từ 2026-11-26: resume_pending.py gọi
+# cho record kind=session — lượt Discord bị cắt vì hết quota, xem session_limit_resume.py). TRƯỚC ĐÂY dispatch.sh/_bg_wrapper,
 # verify_finding.sh và wakeup_reconcile.py đều gọi tự động khi job xong. TẤT CẢ đã
 # GỠ (xem MIKE.md §8 "kết quả là DỮ LIỆU, không phải lượt đánh thức"): auto-push là
 # nguồn chung của cả 3 lớp lỗi — miss-wake, double-answer, và resume-session-chết

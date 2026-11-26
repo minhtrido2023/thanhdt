@@ -16,6 +16,10 @@
           {
             "type": "command",
             "command": "/home/trido/thanhdt/WorkingClaude/mike/hooks/user_prompt_submit.sh Mike"
+          },
+          {
+            "type": "command",
+            "command": "python3 /home/trido/thanhdt/WorkingClaude/mike/bin/session_limit_resume.py start"
           }
         ]
       }
@@ -26,6 +30,21 @@
           {
             "type": "command",
             "command": "/home/trido/thanhdt/WorkingClaude/mike/hooks/stop.sh Mike"
+          },
+          {
+            "type": "command",
+            "command": "python3 /home/trido/thanhdt/WorkingClaude/mike/bin/session_limit_resume.py clear"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "matcher": "rate_limit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "setsid -f python3 /home/trido/thanhdt/WorkingClaude/mike/bin/session_limit_resume.py stopfail >>/home/trido/thanhdt/WorkingClaude/mike/logs/session_limit_resume.log 2>&1"
           }
         ]
       }

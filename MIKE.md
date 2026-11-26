@@ -66,8 +66,9 @@ Dấu hiệu (không phải fail thật): log khớp "usage limit"/"rate limit"/
 `bus/pending_resumes/<job_id>.json` (resume_at = reset-time + buffer 10'), **`bin/resume_pending.py`**
 (cron 10') tự `dispatch.sh` lại "TIẾP TỤC từ working memory". Trần lặp `DISPATCH_MAX_USAGE_RESUMES`
 (mặc định 3), quá trần → xử lý fail thường (phòng bug thật đội lốt usage-limit). **Exit code 5**
-(≠ fail thật) = đã queue tự resume, báo user "đang chờ tự chạy tiếp". **Giới hạn: KHÔNG cứu được
-phiên tương tác sống của chính Mike** (turn hiện tại chết là chết) — xem mục 7.
+(≠ fail thật) = đã queue tự resume, báo user "đang chờ tự chạy tiếp". **Phiên Discord tương tác**
+(từ 2026-11-26): lượt đang chạy vẫn chết, nhưng hook `bin/session_limit_resume.py` hẹn tự chạy tiếp
+sau giờ reset (§8). Phiên remote-control/terminal ngoài ccdb: không có — xem mục 7.
 
 **6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02).** Khác usage-limit (transient, chờ
 reset-time): hết lượt là tín hiệu NGÂN SÁCH xác định — retry y trần cũ chỉ tạch lại. 2 lớp:
@@ -80,7 +81,8 @@ model/effort, mang trần đã nâng thêm 1 lần nữa. Trần lặp riêng `D
 như usage-limit, nay giữ nguyên model/effort/max-turns qua mọi lần resume. Chi tiết:
 `kb/incidents/2026-08/2026-08-02-max-turns-auto-continuation.md`. Đoạn gốc đầy đủ: `MIKE_ext.md` § Dọn instructions 2026-10-09 → Quy chuẩn mục 6b.
 
-**7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (chỉ đạo user).** Tự kiểm
+**7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (chỉ đạo user).** *(Phiên Discord đã tự
+resume — mục 6; phần `CronCreate` dưới đây chỉ cho phiên ngoài ccdb.)* Tự kiểm
 `usage_watch.py` thấy ≥~85% giữa task dài chưa xong: chủ động báo TRƯỚC cho user, và tự đề xuất
 `CronCreate` 1 job one-shot NGAY TRONG phiên hiện tại (`recurring: false`, giờ = reset-time + đệm),
 prompt = tiếp tục task đang dở.
@@ -130,6 +132,10 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 > Prompt ScheduleWakeup phải encode dòng claim-reply làm bước đầu. Test: `bin/claim_reply_selfcheck.sh`.
 >
 > **Đo tuân thủ**: `bin/wakeup_audit.py --since <ngày>` (gắn `daily_retro.sh`).
+>
+> **Ngoại lệ DUY NHẤT (2026-11-26, user duyệt): lượt Discord bị cắt vì hết quota.** Hook `StopFailure`
+> (`bin/session_limit_resume.py`) hẹn `bus/pending_resumes/session_<thread>.json`; `resume_pending.py`
+> gọi `wake_thread.sh` sau giờ reset +10' (trần 3 lần liên tiếp; có lượt mới trong thread ⇒ huỷ hẹn).
 >
 > **`wake_thread.sh` giờ là primitive TAY, không caller tự động** (xem header file). Dùng khi biết
 > CHẮC có 1 session sống đang chờ ở thread đích; thread không có session sống ⇒ ccdb mở phiên MỚI

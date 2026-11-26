@@ -36,6 +36,7 @@ import os
 import subprocess
 import sys
 import time
+import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PEND_DIR = os.path.join(ROOT, "bus", "pending_resumes")
@@ -52,7 +53,74 @@ def log(msg):
         pass
 
 
+def api(path, method="GET"):
+    base = os.environ.get("CCDB_API_URL", "http://127.0.0.1:8199").rstrip("/")
+    with urllib.request.urlopen(urllib.request.Request(base + path, method=method), timeout=10) as r:
+        return json.load(r)
+
+
+def say(msg, thread):
+    subprocess.run([os.path.join(ROOT, "bin", "notify_thread.sh"), msg, thread],
+                   capture_output=True, timeout=30)
+
+
+def write_rec(fp, rec):
+    with open(fp + ".tmp", "w", encoding="utf-8") as f:
+        json.dump(rec, f, ensure_ascii=False)
+    os.replace(fp + ".tmp", fp)
+
+
+def fire_session(fp, rec):
+    """Phiên Discord tương tác bị cắt vì quota: đánh thức đúng thread, KHÔNG dispatch job headless."""
+    tid = str(rec["thread_id"])
+    try:
+        busy = any(str(s.get("thread_id")) == tid and s.get("state") == "running"
+                   for s in api("/api/sessions")["sessions"])
+    except Exception as e:
+        log("session list unavailable (%s) — wake anyway" % e)
+        busy = False
+    if busy:  # đừng mở phiên thứ hai song song
+        if not os.path.exists(fp):
+            write_rec(fp, dict(rec, resume_at=int(time.time()) + 600))
+        log("DEFERRED session thread=%s: still running" % tid)
+        return True
+    # Tin nhắn này cũng bỏ archive thread: scheduler ccdb không thấy thread archived thì để task treo mãi.
+    say("▶️ Quota đã reset — tự chạy tiếp lượt bị cắt.", tid)
+    time.sleep(float(os.environ.get("MIKE_UNARCHIVE_WAIT_S", "5")))
+    suffix = "limit-%s-%d" % (tid, int(time.time()))
+    r = subprocess.run([os.path.join(ROOT, "bin", "wake_thread.sh"), tid, rec["prompt"], suffix],
+                       env=dict(os.environ, WAKE_DEBOUNCE_S="0"), capture_output=True, text=True, timeout=30)
+    log("%s session thread=%s -> %s" % ("RESUMED" if r.returncode == 0 else "WAKE-FAILED",
+                                        tid, (r.stdout or r.stderr).strip()[:200]))
+    if r.returncode != 0:
+        return False
+    write_rec(os.path.join(os.path.dirname(fp), "wake_check_%s.json" % tid),
+              {"kind": "wake_check", "agent": "Mike", "thread_id": tid, "orig_job_id": "wake_check_" + tid,
+               "task_name": "dispatch-wake-" + suffix, "resume_at": int(time.time()) + 900})
+    return True
+
+
+def fire_wake_check(rec):
+    """POST thành công chưa phải là đã chạy: task one-shot còn nằm đó = ccdb không tới được thread."""
+    tid = str(rec["thread_id"])
+    stale = [t for t in api("/api/tasks")["tasks"] if t.get("name") == rec["task_name"]]
+    if not stale:
+        log("wake consumed thread=%s" % tid)
+        return True
+    for t in stale:  # xoá, kẻo nó nổ muộn song song với lượt người dùng
+        api("/api/tasks/%d" % int(t["id"]), "DELETE")
+    log("WAKE-STUCK thread=%s task=%s deleted" % (tid, rec["task_name"]))
+    msg = "⚠️ [auto-resume] thread %s: lệnh đánh thức KHÔNG chạy (đã gỡ) — cần nhắn tay vào topic." % tid
+    say(msg, tid)
+    subprocess.run([NOTIFY, msg], capture_output=True, timeout=30)
+    return True
+
+
 def fire(fp, rec):
+    if rec.get("kind") == "session":
+        return fire_session(fp, rec)
+    if rec.get("kind") == "wake_check":
+        return fire_wake_check(rec)
     agent = rec.get("agent")
     prompt = rec.get("prompt", "")
     orig_job = rec.get("orig_job_id", "?")
@@ -160,6 +228,7 @@ def fire(fp, rec):
 def main():
     os.makedirs(PEND_DIR, exist_ok=True)
     now = time.time()
+    woke_session = False
     for fp in sorted(glob.glob(os.path.join(PEND_DIR, "*.json"))):
         try:
             with open(fp, encoding="utf-8") as f:
@@ -170,11 +239,20 @@ def main():
         resume_at = rec.get("resume_at", 0)
         if not resume_at or now < resume_at:
             continue
+        if rec.get("kind") == "session":
+            if woke_session:
+                continue  # 1 phiên/tick: tránh nhiều phiên full-context nổ cùng lúc giờ reset
+            woke_session = True
         try:
             os.remove(fp)  # remove BEFORE firing — see module docstring
         except Exception:
             pass
-        if fire(fp, rec):
+        try:
+            ok = fire(fp, rec)
+        except Exception as e:  # record đã xoá: nuốt exception ở đây = mất việc
+            log("EXCEPTION firing %s: %r" % (fp, e))
+            ok = False
+        if ok:
             continue
         # Dispatch KHÔNG chạy được. Record đã bị xoá ở trên (cố ý, chống double-fire), nên
         # nếu dừng ở đây thì task biến mất không dấu vết — đúng lỗ hổng F9. Khôi phục record
