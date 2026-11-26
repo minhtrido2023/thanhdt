@@ -1,0 +1,13 @@
+{
+  "round": 4,
+  "verdict": "REFUTED",
+  "confidence": "medium",
+  "report_path": "agents/Taylor/research/dd_POW_20261118/REPORT_rev5.md",
+  "report_md5": "e16958c6e1539e143beda8b320c8b0b8",
+  "brief_md5": "b337a8ecbae0501be0b5a0994c12f01c",
+  "model": "opus",
+  "cost_usd": 1.112599,
+  "started_at_ict": "2026-11-26T12:43:56+07:00",
+  "summary": "Rev5 tái lập được số học (9.482/9.387, tổng vốn khớp VCSH mẹ 43.134,5, biên F3 đúng) và Phụ lục F không đổi tâm. Nhưng thay đổi R2-1 của rev4 tạo lỗi đếm hai lần: ROE di sản 8% được dựng bằng cách cộng hồi tố ~2.455 tỷ sau thuế vào lợi nhuận lịch sử (REPORT.md:179; skeptic r1 xác nhận cùng phép dựng), rồi chính khoản đó được ghi thêm ở 1,0x. Gỡ phần hồi tố khỏi ROE (~1,21pp) thì tâm ≈ 8.549 (−8,9%), vượt ngưỡng trọng yếu 5% ⇒ REFUTED. Chiều ngược lại có những upside thật nhưng chưa đủ cơ sở độc lập để vào base: s đo được 0,69 vượt lưới §C, chênh lệch tỷ giá VA1 có thể tái diễn một phần, r cao hơn đầu dải Ke 0,1pp. Hạng mục PPA/nguồn khí và giá trị sổ theo nhà máy vẫn mở như ba vòng trước. Không tra giá; giá DNSE trong báo cáo bị bỏ qua khi đánh giá mô hình.",
+  "verdict_raw_path": "agents/Taylor/research/dd_POW_20261118/skeptic/r4_raw.md"
+}
