@@ -28,6 +28,7 @@ gate_block_question chỉ REMIND lặp, không ai tăng cấp.
 --escalate (cron 07:30 + 07:40 ICT T2-T6)
   Hôm nay là ngày giao dịch mà plan hôm nay còn thiếu ⇒ Telegram + Discord MỘT lần kèm nguyên nhân đo được,
   ĐÚNG lệnh khôi phục và hạn giờ. Không giao dịch ⇒ "ngày nghỉ, bỏ qua".
+  Plan có nhưng không có marker đã gửi và chưa duyệt ⇒ tăng cấp 1 lần kèm lệnh gửi.
 RANH GIỚI CỨNG: KHÔNG tự dựng plan, KHÔNG đặt lệnh, KHÔNG đụng trading_rules.json/BOT_STOP, KHÔNG nới ngưỡng.
 rc: 0 ổn/không cần làm · 1 retry chạy nhưng chưa ra plan · 3 tăng cấp không gửi được kênh nào.
 Env test: MIKE_NOW_ICT, PGR_WC_ROOT, PGR_STATE_DIR, PGR_BIN (thư mục chứa các script được gọi), PGR_PLAN_WAIT_S.
@@ -40,6 +41,7 @@ import os
 import subprocess
 import sys
 import time
+import traceback
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -189,6 +191,35 @@ def lock_busy(path):
     return False
 
 
+def dollarbill_running():
+    """job_id DollarBill đang chạy (record 'running' VÀ pid còn sống VÀ chưa quá deadline+10') hoặc None."""
+    for p in Path(os.environ.get("PGR_JOBS_DIR") or (ROOT / "bus" / "jobs")).glob("DollarBill_*.json"):
+        try:
+            j = json.loads(p.read_text())
+            if (j.get("status") == "running" and Path(f"/proc/{int(j['pid'])}").exists()
+                    and time.time() < float(j["deadline"]) + 600):
+                return j.get("job_id") or p.stem
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+    return None
+
+
+def unsent_plans(date, accts):
+    """Plan OK, chưa duyệt, và KHÔNG có marker đã gửi của send_plan_report.sh."""
+    mdir = Path(os.environ.get("SEND_PLAN_MARKER_DIR") or (STATE / "plan_report_sent"))
+    out = []
+    for a in accts:
+        if plan_class(a, date) != "OK" or (mdir / f"{a}_{date}.json").exists():
+            continue
+        if not json.loads(Path(PP.plan_path(WC, a, date)).read_text()).get("approved_by"):
+            out.append(a)
+    return out
+
+
+def send_cmds(accts, date):
+    return " ; ".join(f"{ROOT}/bin/send_plan_report.sh --account {a} --second-chance --plan-date {date}" for a in accts)
+
+
 def run(cmd, env_extra=None, timeout=7200):
     env = dict(os.environ, **(env_extra or {}))
     try:
@@ -242,6 +273,10 @@ def cmd_retry(now):
         return 0
     if lock_busy(BQF_LOCK):
         print(f"{tag}: WAIT — bq_freshness_check.sh đang chạy (khoá {BQF_LOCK}), đợi lượt sau")
+        return 0
+    job = dollarbill_running()
+    if job:
+        print(f"{tag}: WAIT — job DollarBill đang chạy ({job}), không dispatch chồng; đợi lượt sau")
         return 0
     drc, dline = depth(session)
     if drc != 0:
@@ -368,11 +403,28 @@ def cmd_escalate(now):
     if ev:
         print(f"{tag}: ngày nghỉ, bỏ qua — {ev}")
         return 0
-    miss = missing_plans(today)
-    if not miss:
-        print(f"{tag}: OK plan {today} đủ mọi account — không tăng cấp")
-        return 0
+    accts = PP.live_accounts(WC)
+    miss = missing_plans(today, accts)
+    unsent = unsent_plans(today, accts)
+    unsent_txt = (f"plan {today} ĐÃ CÓ nhưng KHÔNG có marker đã gửi (state/plan_report_sent) và chưa duyệt: "
+                  f"{', '.join(unsent)}. Gửi để duyệt: {send_cmds(unsent, today)} — kiểm tra trước khi duyệt: "
+                  "inject_discretionary/auto_exit_inject đã chạy cho plan này chưa.") if unsent else ""
     rec = st_load(today)
+    if not miss:
+        if not unsent:
+            print(f"{tag}: OK plan {today} đủ mọi account — không tăng cấp")
+            return 0
+        if rec.get("escalated_unsent"):
+            print(f"{tag}: ALREADY_ESCALATED_UNSENT lúc {rec['escalated_unsent'].get('at')} — 1 lần, không lặp")
+            return 0
+        msg = f"🚨 {now:%H:%M} ICT — {unsent_txt} Chưa duyệt ⇒ bot HOLD phiên hôm nay. Tin này gửi 1 lần."
+        print(msg)
+        if not notify(msg, telegram=True):
+            print(f"{tag}: NOTIFY_FAILED — không kênh nào nhận; lượt cron sau gửi lại", file=sys.stderr)
+            return 3
+        rec["escalated_unsent"] = {"at": now.isoformat(timespec="seconds"), "unsent": unsent}
+        st_save(today, rec)
+        return 0
     if rec.get("escalated"):
         print(f"{tag}: ALREADY_ESCALATED lúc {rec['escalated'].get('at')} — 1 lần, không lặp")
         return 0
@@ -415,9 +467,14 @@ def cmd_escalate(now):
                     f"`. {WC}/wc_env.sh && python3 {ROOT}/bin/prune_depth_gate.py --date {session}` — rc 0 rồi mới chạy các lệnh dưới.")
     if asof != str(session):
         cmds.append(f"cd {WC} && MIKE_MORNING_RUN=1 ./daily_refresh_v34b_linux.sh")
+    for a in miss:
+        if plan_class(a, today) == "INVALID":
+            f = PP.plan_path(WC, a, today)
+            cmds.append(f"mv {f} {f}.invalid   (file CÓ nhưng HỎNG ⇒ morning mode sẽ bỏ qua nếu còn; xem nội dung trước khi "
+                        "chuyển; KHÔNG dùng MIKE_MORNING_FORCE=1 — nó ghi đè plan của MỌI account)")
     cmds.append(f"MIKE_MORNING_RUN=1 {ROOT}/bin/bq_freshness_check.sh   (morning mode tự bỏ qua account đã có file plan)")
     cmds.append("khi DollarBill ghi xong: gửi để duyệt — "
-                + " ; ".join(f"{ROOT}/bin/send_plan_report.sh --account {a} --second-chance --plan-date {today}" for a in miss)
+                + send_cmds(miss, today)
                 + " — LƯU Ý chuỗi inject_discretionary/auto_exit_inject (đề xuất SELL thoát theo thời gian) CHƯA chạy "
                   "cho plan lập buổi sáng, kiểm tra trước khi duyệt")
     msg = (f"🚨 TĂNG CẤP {now:%H:%M} ICT — PLAN PHIÊN HÔM NAY {today:%d/%m} CHƯA CÓ: {', '.join(miss)}.\n"
@@ -425,7 +482,8 @@ def cmd_escalate(now):
            "Lệnh khôi phục (chạy tay, theo thứ tự):\n" + "\n".join(f"  {i + 1}) {c}" for i, c in enumerate(cmds)) + "\n"
            f"HẠN: trước {DEADLINE_HM} ICT hôm nay (sau mốc này morning mode từ chối lập plan cho hôm nay). "
            "Quá hạn ⇒ phiên hôm nay không có plan duyệt ⇒ bot HOLD (không đặt lệnh). "
-           "Hệ thống KHÔNG tự dựng plan/đặt lệnh. Tin này gửi 1 lần.")
+           "Hệ thống KHÔNG tự dựng plan/đặt lệnh. Tin này gửi 1 lần."
+           + (f"\nNgoài ra: {unsent_txt}" if unsent else ""))
     print(msg)
     ok = notify(msg, telegram=True)
     if not ok:
@@ -445,10 +503,11 @@ def main(argv=None):
     now = now_ict()
     try:
         return cmd_retry(now) if a.retry else cmd_escalate(now)
-    except RuntimeError as exc:
-        print(f"[plan_gate_recovery] ERROR {exc}", file=sys.stderr)
+    except Exception as exc:  # noqa: BLE001 — lỗi bất kỳ ở --escalate mà chỉ nằm trong log = không ai biết
+        traceback.print_exc()
+        print(f"[plan_gate_recovery] ERROR {type(exc).__name__}: {exc}", file=sys.stderr)
         if a.escalate:
-            notify(f"🚨 plan_gate_recovery --escalate KHÔNG chạy được ({exc}) — tự kiểm plan hôm nay trước {DEADLINE_HM} ICT.",
+            notify(f"🚨 plan_gate_recovery --escalate KHÔNG chạy được ({type(exc).__name__}: {exc}) — tự kiểm plan hôm nay trước {DEADLINE_HM} ICT.",
                    telegram=True)
         return 2
 

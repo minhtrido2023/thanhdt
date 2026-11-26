@@ -53,8 +53,14 @@ def old_calendar_wc():
     return str(d)
 
 
+# 26/11: test KHÔNG đọc config/trading_calendar_confirmed.json THẬT (người điền mốc là A4/F1 đỏ) — dùng mốc rỗng.
+_NULL_CAL = Path(tempfile.mkdtemp(prefix="pgh_cal_")); G.TMP.append(_NULL_CAL)
+(_NULL_CAL / "null.json").write_text('{"confirmed_through": null, "source": null}')
+
+
 def env_wc(wc, **kw):
     e = {k: v for k, v in os.environ.items()}
+    e["TC_CONFIRMED_FILE"] = str(_NULL_CAL / "null.json")
     e["WORKDIR_8L"] = wc
     e.update(kw)
     return e
@@ -90,8 +96,9 @@ def part_a():
     rc, out = py(up, NEW_WC, TC_CONFIRMED_FILE=str(cf / "bad.json"))
     chk("'2026-11-25'" in out and rc == 0, "A5c file hỏng ⇒ coi như chưa xác nhận (fail-safe cảnh báo), không crash", out)
     shipped = json.loads((HERE.parent / "config" / "trading_calendar_confirmed.json").read_text())
-    chk(shipped.get("confirmed_through") is None and shipped.get("source") is None,
-        "A5d file giao kèm nhánh CHƯA điền mốc (không bịa xác nhận) — user điền", shipped)
+    ct, src = shipped.get("confirmed_through"), str(shipped.get("source") or "").strip()
+    chk((ct is None and not src) or (bool(src) and str(ct)[:2] == "20" and len(str(ct)) == 10),
+        "A5d file thật: hoặc CHƯA điền mốc, hoặc mốc YYYY-MM-DD kèm source (không nhận mốc không nguồn)", shipped)
     chk("CALENDAR_CONFIRMED_THROUGH" not in (HERE / "trading_calendar.py").read_text(),
         "A5e mốc KHÔNG còn đọc từ trading_bot/vn_market.py", "")
     rc, out = py("import trading_calendar as T;print(T.non_trading_evidence('2026-11-24'))", old_calendar_wc())

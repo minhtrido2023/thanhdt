@@ -2,6 +2,8 @@
 """Selfcheck bin/prune_depth_gate.py (arch-review vòng 2 việc B #6 + mutation, 25/11/2026).
 Không gọi BQ thật: decide() trực tiếp + main() với `bq` giả trên PATH (đường query_counts).
 Mỗi ca ghi rõ mutation nó giết."""
+import shutil
+import atexit
 import datetime as dt
 import json
 import os
@@ -62,6 +64,7 @@ def run_cli(rows, date_arg=None, reseed=None, envi=False, wc_env=None, want_cfg=
     """rows=[(date, n)] ⇒ bq giả (lọc theo cửa sổ SQL); chạy main() thật qua subprocess.
     reseed=dict ⇒ file reseed tạm; None ⇒ file không tồn tại. envi=True ⇒ `env -i` (như cron trần)."""
     td = Path(tempfile.mkdtemp(prefix="pdg_sc_"))
+    atexit.register(shutil.rmtree, td, True)  # P3-5: không rò /tmp
     (td / "bq").write_text(FAKE_BQ)
     (td / "bq").chmod(0o755)
     (td / "rows.json").write_text(json.dumps(rows))
@@ -193,7 +196,9 @@ def main():
     chk(rc == 1 and "n=155" in out and "threshold=161" in out,
         "T11j reseed 178 → 155 (FAIL) → 155: phiên FAIL KHÔNG vào trung vị pha hạt giống ⇒ vẫn CHẶN (reviewer P2)", out)
     shipped = json.loads((HERE.parent / "config" / "prune_depth_reseed.json").read_text())
-    chk(shipped.get("reseed_from") is None and shipped.get("source") is None, "T11i file giao kèm nhánh: reseed TẮT", shipped)
+    rf, src = shipped.get("reseed_from"), str(shipped.get("source") or "").strip()
+    chk((rf is None and not src) or (bool(src) and bool(P.DATE_RE.match(str(rf)))),
+        "T11i file thật: reseed TẮT, hoặc reseed_from YYYY-MM-DD kèm source (người bật hợp lệ không làm đỏ test)", shipped)
 
 
 if __name__ == "__main__":

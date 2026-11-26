@@ -64,7 +64,10 @@ def sandbox(session, nxt, asof="2026-11-20", kinds=("prune_depth", "dt5g_publish
         (wc / "data" / "trade_plans" / f"plan_{a}_{nxt}.json").write_text(json.dumps({"plan_date": nxt, "orders": []}))
     for a, body in (raw_plans or {}).items():
         (wc / "data" / "trade_plans" / f"plan_{a}_{nxt}.json").write_text(body)
-    (sb / "state").mkdir()
+    (sb / "state" / "plan_report_sent").mkdir(parents=True)
+    for a in plans:  # mặc định: plan có sẵn coi như ĐÃ gửi
+        (sb / "state" / "plan_report_sent" / f"{a}_{nxt}.json").write_text("{}")
+    (sb / "jobs").mkdir()
     (sb / "state" / "bq_freshness_gate_last.json").write_text(json.dumps(
         {"session": gl_session or session, "next_trading_day": gl_next or nxt, "failed": failed, "data_fail_kinds": list(kinds)}))
     for k, v in (("depth_rc", depth_rc), ("bqf_rc", bqf_rc), ("session", session), ("next", nxt)):
@@ -74,7 +77,7 @@ def sandbox(session, nxt, asof="2026-11-20", kinds=("prune_depth", "dt5g_publish
 
 def run(sb, mode, now, **env):
     e = dict(os.environ, SB=str(sb), PGR_WC_ROOT=str(sb / "wc"), PGR_STATE_DIR=str(sb / "state"),
-             PGR_BIN=str(sb / "bin"), WORKDIR_8L=NEW_WC, MIKE_NOW_ICT=now, PGR_PLAN_WAIT_S="1",
+             PGR_BIN=str(sb / "bin"), PGR_JOBS_DIR=str(sb / "jobs"), WORKDIR_8L=NEW_WC, MIKE_NOW_ICT=now, PGR_PLAN_WAIT_S="1",
              PGR_REFRESH_SCRIPT="__no_such_script_pgr_sc__.sh", BQF_LOCK_FILE=str(sb / "bqf.lock"))
     e.update(env)
     r = subprocess.run([sys.executable, str(TARGET), mode], env=e, capture_output=True, text=True, timeout=120)
@@ -286,9 +289,54 @@ def main():
     rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
     chk("bị NGẮT giữa chừng" in out and "KHÔNG chạy tay" not in out, "E11 mốc có, không ai giữ khoá ⇒ 'bị NGẮT giữa chừng'", out)
     new_round(sb_root=None)
+    p3_round()
     src = TARGET.read_text()
     chk(all(x not in src for x in ("bot_execute", "run_bot.sh", "BOT_STOP\"", "trading_rules.json\"", "dispatch.sh")),
         "B1 ranh giới: script không gọi bot/đặt lệnh/BOT_STOP/trading_rules/dispatch trực tiếp", "")
+
+
+def p3_round():
+    """5 mục P3 của arch-review vòng cuối (26/11)."""
+    sb = sandbox("2026-11-23", "2026-11-25", plans=("SpaceX", "ZaloPay"))
+    (sb / "state" / "plan_report_sent" / "ZaloPay_2026-11-25.json").unlink()
+    (sb / "notify_rc").write_text("1")
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk(rc == 3 and not st(sb, "2026-11-25").get("escalated_unsent"), "P1a plan chưa gửi + kênh hỏng ⇒ rc=3, không đánh dấu", out)
+    (sb / "notify_rc").write_text("0")
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:40:00")
+    chk(rc == 0 and "--account ZaloPay --second-chance --plan-date 2026-11-25" in out and "--account SpaceX" not in out
+        and "TELEGRAM 🚨" in c and not sent(c), "P1b plan có, chưa gửi ⇒ tăng cấp kèm lệnh gửi đúng account, không tự gửi", out + c)
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:40:00")
+    chk("ALREADY_ESCALATED_UNSENT" in out, "P1c không lặp", out)
+    sb = sandbox("2026-11-23", "2026-11-25", raw_plans={a: json.dumps(
+        {"plan_date": "2026-11-25", "orders": [], "approved_by": "user"}) for a in ("SpaceX", "ZaloPay")})
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk("OK plan" in out and "TELEGRAM" not in c, "P1d đã duyệt, không marker ⇒ không báo", out + c)
+    sb = sandbox("2026-11-23", "2026-11-25", plans=("SpaceX",))
+    (sb / "state" / "plan_report_sent" / "SpaceX_2026-11-25.json").unlink()
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk("CHƯA CÓ: ZaloPay." in out and "Ngoài ra" in out and "--account SpaceX --second-chance" in out,
+        "P1e thiếu 1 + chưa gửi 1 ⇒ tin tăng cấp nêu cả hai", out)
+    sb = sandbox("2026-11-23", "2026-11-25", plans=("SpaceX",), raw_plans={"ZaloPay": "{hỏng"})
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    i, j = out.find("plan_ZaloPay_2026-11-25.json.invalid"), out.find("bin/bq_freshness_check.sh")
+    chk(0 <= i < j and "KHÔNG dùng MIKE_MORNING_FORCE=1" in out and "plan_SpaceX_2026-11-25.json.invalid" not in out,
+        "P2 plan INVALID ⇒ lệnh chuyển file hỏng đứng TRƯỚC lệnh lập lại, chỉ account hỏng", out)
+    sb = sandbox("2026-11-23", "2026-11-25")
+    (sb / "state" / "bq_freshness_gate_last.json").write_text("[1]")  # JSON đúng cú pháp, sai kiểu ⇒ AttributeError
+    rc, out, c = run(sb, "--escalate", "2026-11-25T07:30:00")
+    chk(rc == 2 and "TELEGRAM 🚨 plan_gate_recovery --escalate KHÔNG chạy được" in c, "P3 lỗi không phải RuntimeError ⇒ vẫn báo người", out + c)
+    now_s = __import__("time").time()
+    for label, job, wait in (
+            ("sống", {"status": "running", "pid": str(os.getpid()), "deadline": str(now_s + 600)}, True),
+            ("pid chết", {"status": "running", "pid": "999999999", "deadline": str(now_s + 600)}, False),
+            ("quá deadline", {"status": "running", "pid": str(os.getpid()), "deadline": str(now_s - 3600)}, False),
+            ("đã done", {"status": "done", "pid": str(os.getpid()), "deadline": str(now_s + 600)}, False)):
+        sb = sandbox("2026-11-23", "2026-11-25")
+        (sb / "jobs" / "DollarBill_x.json").write_text(json.dumps(dict(job, job_id="DollarBill_x")))
+        rc, out, c = run(sb, "--retry", "2026-11-23T20:00:00")
+        ok = ("job DollarBill đang chạy" in out and not st(sb, "2026-11-25").get("retry")) if wait else "RETRY 1/1" in out
+        chk(ok, f"P4 job DollarBill {label} ⇒ " + ("WAIT, không đốt lượt retry" if wait else "retry chạy"), out + c)
 
 
 REAL_PDG = TARGET.parent / "prune_depth_gate.py"
@@ -313,7 +361,7 @@ def wc_env_cfg():
 def run_envi(sb, mode, now, **extra):
     """`env -i` như cron trần: CHỈ biến tối thiểu, KHÔNG CLOUDSDK_CONFIG — bq giả ở đầu PATH."""
     e = {"PATH": f"{sb / 'fakebq'}:/usr/bin:/bin", "SB": str(sb), "PGR_WC_ROOT": str(sb / "wc"),
-         "PGR_STATE_DIR": str(sb / "state"), "PGR_BIN": str(sb / "bin"), "WORKDIR_8L": NEW_WC, "MIKE_NOW_ICT": now,
+         "PGR_STATE_DIR": str(sb / "state"), "PGR_BIN": str(sb / "bin"), "WORKDIR_8L": NEW_WC, "MIKE_NOW_ICT": now, "PGR_JOBS_DIR": str(sb / "jobs"),
          "PGR_PLAN_WAIT_S": "1", "PGR_REFRESH_SCRIPT": "__no_such_script_pgr_sc__.sh", "BQF_LOCK_FILE": str(sb / "bqf.lock")}
     e.update(extra)
     r = subprocess.run(["/usr/bin/env", "-i"] + [f"{k}={v}" for k, v in e.items()] + [sys.executable, str(TARGET), mode],
