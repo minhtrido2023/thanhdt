@@ -23,3 +23,11 @@ Không chọn theo "gần vp2" (vp2 không PIT).
 ## Sửa E ngân hàng (không phải trial — sửa lỗi dữ liệu; luật SỬA SAU khi thấy lan truyền ở bản đầu, xem REPORT §2)
 Dòng có E = BVPS×OShares (không có nợ ngắn/dài hạn ⇒ ngân hàng…): nếu log(E_bo / E_trước) < −0,07 với kỳ trước ≤ 200 ngày ⇒ BVPS đã bị ghi theo cơ sở CP sau sự kiện
 ⇒ E = E_trước + NP_P0 (lãi quý, đại lượng tổng, không phụ thuộc số CP). Chỉ dùng dòng ≤ D. N (pick_n) vẫn tính từ E gốc để không kéo số CP tương lai vào.
+
+---
+## [SỬA TÀI LIỆU SAU ĐO — 2026-11-26, vòng 3] mục "Sửa E ngân hàng" ở trên KHÔNG khớp code
+Giữ nguyên văn cũ ở trên để đối chiếu. Luật "E = E_trước + NP_P0" là bản đầu, đã bỏ (lan truyền, REPORT §2/§3). Mục này viết SAU khi đã thấy kết quả đo, không phải khoá trước.
+Luật đúng theo code (`calc/lvens2_pit2.py::e_guard`, không đổi ở vòng 3):
+- Chỉ dòng E = BVPS×OShares. Gắn cờ nghi ngờ khi log(E_raw×k / E_trước) < −0,07, kỳ trước cách ≤ 200 ngày (k = hệ số cơ sở mang theo các dòng cùng OShares, reset khi OShares đổi).
+- Chỉ SỬA khi mức tụt được giải thích bởi sự kiện đổi số CP đã công bố ≤ D: tồn tại tích tiền tố P = Π(1+r) (ex trong (kỳ trước − 90 ngày, kỳ này + 400 ngày]) với |log(E_trước/(E_raw×k)) − log P| < 0,06 ⇒ k ×= P.
+- E = E_raw × k. Tụt không giải thích được ⇒ giữ nguyên, cờ `E_unexpl`. N (pick_n) vẫn tính từ E gốc.

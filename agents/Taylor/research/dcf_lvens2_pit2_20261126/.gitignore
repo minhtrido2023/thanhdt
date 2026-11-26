@@ -10,3 +10,13 @@ out/sc_tz_ny/
 out/sc_ledger/
 out/vintage/
 out/sc_ledger_*/
+out/r3_final/
+out/r3_regress/
+out/measure_rollfwd/
+out/sc_ledger_r3_*/
+out/sc_r3_*/
+out/r3_nohup.txt
+out/b1/
+out/sc_*/
+out/b1_*
+out/log_b1_*

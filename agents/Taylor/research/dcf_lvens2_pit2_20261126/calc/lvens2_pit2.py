@@ -4,7 +4,8 @@
   (2) E của dòng BVPS×OShares (ngân hàng…): BVPS đã ghi theo cơ sở CP sau sự kiện (rò vintage) — khi E tụt >7%/kỳ VÀ được giải thích bởi sự kiện CA đổi số CP
       công bố ≤ D ⇒ E = E_raw × Π(1+r); tụt không giải thích được ⇒ giữ E_raw, gắn cờ E_unexpl (xem e_guard).
   (3) poison tách khỏi cut: poison áp cho MỌI nguồn lúc nạp; --mutate-nocut <nguồn> bỏ cắt 1 nguồn (mutation test); --cache-root cho selfcheck vintage.
-  (4) freshness fail-closed: manifest cache phải phủ D (ticker) và ticker_financial/fa_ratings_8l max_time ≥ D − FRESH_DAYS.
+  (4) freshness fail-closed theo ĐỒNG BỘ (sync-v2, vòng 3), KHÔNG theo ngày nộp BCTC: manifest verified, và marker đồng bộ của ticker / universe_pit /
+      ticker_financial / fa_ratings_8l ≥ T = 23:15 ICT ngày làm việc cuối của tháng as-of (xem sync_state).
 Phần dưới là docstring gốc (vẫn đúng cho phần không đổi).
 lvens2_incremental.py — dựng lv_ENS2 (tâm nội tại ENS2, mù giá) + route cho MỘT as-of tháng, chỉ dùng dữ liệu ≤ ngày as-of (PIT).
 Phục vụ sổ paper `dcf_vn_behavioral_20261125/calc/paper_cell_monthly.py --lvens2-from <parquet>`. DISPLAY-ONLY: không sizing, không gate,
@@ -24,7 +25,7 @@ Nguồn (tra mike/kb/data_registry/): data/bq_cache/ticker (CANONICAL) · ticker
 Dùng:  python lvens2_incremental.py --asof-ym 2026-10 [--mode pit|v31] [--out-dir DIR] [--frozen DIR] [--no-vnd]
 Ra:    <out-dir>/lvens2_<ym>[_<mode-tag>].parquet + .json (md5 đầu vào, D, số dòng). rc 0 ok · 3 fail-closed."""
 import os, sys, json, glob, hashlib, argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import numpy as np, pandas as pd, duckdb
 WC = os.environ.get("WC_ROOT", "/home/trido/thanhdt/WorkingClaude"); HERE = os.path.dirname(os.path.abspath(__file__))
@@ -51,7 +52,7 @@ def ca_cfg():
 SHARE_METHODS = {"Trả Cổ tức bằng Cổ phiếu", "Cổ phiếu thưởng"}   # đổi số CP cho cổ đông hiện hữu tại ex-date, không có tiền
 RIGHTS = "Quyền mua CP cho Cổ đông hiện hữu"
 EGUARD = -0.07                                    # log(E_bo/E_trước) < EGUARD ⇒ BVPS đã ở cơ sở CP sau sự kiện
-FRESH_DAYS = 10
+SYNC_HHMM = (23, 15)                              # BQ ingest xong ~23:15 ICT; sync_bq_cache_daily.sh cron 23:45 ICT T2–T6
 MC_TAG = {"strict": "", "step": "_mcstep", "stepca": "_mcstepca", "stepcar": "_mcstepcar"}
 
 
@@ -510,16 +511,51 @@ def last_session(ym):
     return None if D is None else pd.Timestamp(D)
 
 
-def freshness(D):
-    """[pit2] fail-closed: ticker_financial / fa_ratings_8l trong cache phải tươi tới gần D (manifest max_time ≥ D − FRESH_DAYS). Trả (ok, chi tiết)."""
-    man = json.load(open(os.path.join(CACHE, "manifest.json"))).get("tables", {})
-    det = {}; ok = True
-    for t in ("ticker_financial", "fa_ratings_8l"):
-        mt = man.get(t, {}).get("max_time")
-        det[t] = mt
-        if mt is None or pd.Timestamp(mt) < D - pd.Timedelta(days=FRESH_DAYS):
-            ok = False
-    return ok, det
+def month_end(ym):
+    return (pd.Period(ym, freq="M").to_timestamp(how="end")).date()
+
+
+def sync_threshold(ym):
+    """T = 23:15 ICT của ngày làm việc (T2–T6) cuối cùng trong tháng ym. Ngày lễ rơi T2–T6 vẫn có sync (cron theo thứ, không theo phiên)."""
+    d = month_end(ym)
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    return datetime(d.year, d.month, d.day, *SYNC_HHMM, tzinfo=ZoneInfo("Asia/Ho_Chi_Minh"))
+
+
+def sync_state(cache, universe_cache, ym, D):
+    """[pit2 v3] fail-closed theo ĐỒNG BỘ cache. Marker = mtime file parquet (sync_bq_cache.atomic_to_parquet chỉ thay file khi bảng tải THÀNH CÔNG; tải lỗi/rỗng
+    giữ file cũ) + manifest verified/verified_at_epoch (verify toàn bộ bảng). ticker_financial, fa_ratings_8l là full_only ⇒ mỗi lần sync ghi lại cả file.
+    ticker, universe_pit chia chunk năm ⇒ xét chunk năm của D, thêm manifest max_time ≥ D. Giới hạn: copy cache mà không giữ mtime sẽ làm marker trẻ giả.
+    Trả (ok, chi tiết)."""
+    T = sync_threshold(ym); bad = []; det = {"rule": "sync-v2", "threshold_ict": T.isoformat()}
+
+    def manifest(root):
+        p = os.path.join(root, "manifest.json")
+        return json.load(open(p)) if os.path.exists(p) else {}
+
+    def mark(name, epoch):
+        det[name] = None if epoch is None else datetime.fromtimestamp(epoch, ZoneInfo("Asia/Ho_Chi_Minh")).isoformat(timespec="seconds")
+        if epoch is None or epoch < T.timestamp():
+            bad.append(f"{name}={det[name]} < {det['threshold_ict']}")
+
+    def mt(p):
+        return os.path.getmtime(p) if os.path.exists(p) else None
+
+    for root, tables in ((cache, ("ticker", "ticker_financial", "fa_ratings_8l")), (universe_cache, ("universe_pit",))):
+        man = manifest(root)
+        if man.get("verified") is not True:
+            bad.append(f"manifest {root} verified={man.get('verified')}")
+        mark(f"verified_at[{os.path.basename(root)}:{tables[0]}]", man.get("verified_at_epoch"))
+        for t in tables:
+            chunked = t in ("ticker", "universe_pit")
+            mark(f"{t}.mtime", mt(os.path.join(root, t, f"{D.year}.parquet") if chunked else os.path.join(root, f"{t}.parquet")))
+            if chunked:
+                mx = man.get("tables", {}).get(t, {}).get("max_time"); det[f"{t}.max_time"] = mx
+                if mx is None or pd.Timestamp(mx) < D:
+                    bad.append(f"{t}.max_time={mx} < D {D.date()}")
+    det["bad"] = bad; det["ok"] = not bad
+    return not bad, det
 
 
 def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag="", route_global=False, mc_pit="strict", nocut=(), eguard=True, dump_panel=None):
@@ -537,9 +573,9 @@ def run(yms, mode, out_dir, frozen, use_vnd=True, poison=None, tag="", route_glo
         now = pd.Timestamp.now(tz="Asia/Ho_Chi_Minh")
         if D.month == now.month and D.year == now.year:
             print(f"FAIL-CLOSED: {yms[0]} là tháng hiện tại — chưa hết tháng", file=sys.stderr); return 3
-        ok, fresh = freshness(D)
+        ok, fresh = sync_state(CACHE, f"{WC}/data/bq_cache", yms[0], D)
         if not ok:
-            print(f"FAIL-CLOSED: cache không tươi so với D {D.date()}: {fresh} (cần ≥ D−{FRESH_DAYS} ngày)", file=sys.stderr); return 3
+            print(f"FAIL-CLOSED: cache chưa đồng bộ tới D {D.date()}: " + "; ".join(fresh["bad"]), file=sys.stderr); return 3
     else:
         D = None
     vnd_max = None

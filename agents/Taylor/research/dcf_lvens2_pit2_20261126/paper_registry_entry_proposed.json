@@ -14,7 +14,7 @@
  "gate_criteria": [
   {
    "status": "pending",
-   "text": "Sổ đúng luật: append-only thật (mở 'a' + md5 từng khối tháng trong sidecar, kiểm lại trước mỗi lần ghi), mỗi asof_ym đúng 1 lần, fail-closed khi universe_pit không phủ D, cache ticker_financial/fa_ratings_8l max_time < D−10, đổi mc_pit/script giữa chừng (paper_cell_monthly_pit2.py)"
+   "text": "Sổ đúng luật: append-only thật (mở 'a' + md5 từng khối tháng trong sidecar, kiểm lại trước mỗi lần ghi), mỗi asof_ym đúng 1 lần, fail-closed khi universe_pit không phủ D, cache chưa đồng bộ (sync-v2: marker ticker/universe_pit/ticker_financial/fa_ratings_8l < 23:15 ICT ngày làm việc cuối tháng, hoặc verified=false), chạy ngoài 1..5 ngày lịch sau cuối tháng, đổi mc_pit/script giữa chừng (paper_cell_monthly_pit2.py); khối tháng được commit git (run_monthly_pit2.sh)"
   },
   {
    "status": "pending",
@@ -32,7 +32,7 @@
  "data_sources": [
   "tav2_mike.universe_pit (cache data/bq_cache/universe_pit, CANONICAL)",
   "tav2_bq.ticker + ticker_financial + fa_ratings_8l (cache data/bq_cache; OShares/BVPS TRAP — xử lý bằng stepcar + e_guard, cờ E_unexpl)",
-  "tav2_bq.corporate_action — extract ĐÓNG BĂNG 2026-11-25 (md5 28418e9d…) trong dcf_lvens2_pit2_20261126/out/ca; cần làm mới hằng tháng = đổi md5 ⇒ blocker B1, REPORT §6",
+  "tav2_bq.corporate_action — extract hằng tháng out/ca/ca_extract_<YYYYMM>.csv(+.md5) do calc/make_ca_extract.py tạo từ tav2_mike.corporate_action_snapshots (202611 md5 28418e9d…)",
   "snapshot VNDirect đóng băng data/research_frozen/dcf_v31_inputs (KHÔNG fetch)",
   "lv_ENS2 = dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py --mc-pit stepcar (dựng mỗi tháng, ~1,7 phút, RSS ~2,1 GB)"
  ],

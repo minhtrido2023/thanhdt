@@ -1,0 +1,8 @@
+n_cells 51929 N_prev thiếu 82
+stepca           mean|e|=0.01296 >5%=0.0424 | ô có f>1 (n=2011): mean=0.0374
+stepca+absorb    mean|e|=0.01297 >5%=0.0425 | ô có f>1 (n=2011): mean=0.0377
+  stepca: ô bị coi là đã hấp thụ n=42 mã=22 | trong đó bỏ hệ số tốt hơn 27, xấu hơn 15
+stepcar          mean|e|=0.00926 >5%=0.0355 | ô có f>1 (n=2359): mean=0.0200
+stepcar+absorb   mean|e|=0.00921 >5%=0.0352 | ô có f>1 (n=2359): mean=0.0190
+  stepcar: ô bị coi là đã hấp thụ n=60 mã=32 | trong đó bỏ hệ số tốt hơn 42, xấu hơn 18
+ô hấp thụ (stepcar) theo năm: {'2014': 2, '2015': 4, '2016': 3, '2018': 4, '2019': 8, '2020': 7, '2021': 10, '2022': 11, '2023': 5, '2024': 2, '2025': 3, '2026': 1}

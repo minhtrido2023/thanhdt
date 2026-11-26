@@ -23,6 +23,22 @@ def leaky_ca_factor(rows, ca, include_rights=False):
     return (pd.Series(1.0, index=rows.index).where(~rows.index.isin(g.index), g.reindex(rows.index)).values, n.reindex(rows.index).fillna(0).astype(int).values)
 
 
+def leaky_eg(orig):
+    """mutation: e_guard không còn lọc public_date ≤ as-of (Dcut bị bỏ ⇒ giới hạn nới tới known+400 ngày)."""
+    return lambda F, ca, Dcut=None, tol=0.06: orig(F, ca, Dcut=None, tol=tol)
+
+
+def eguard_unit(fn):
+    """1 mã ngân hàng, E tụt đúng 1/1,5 ở kỳ 2; sự kiện thưởng 50% CÔNG BỐ SAU D. Đúng PIT = không sửa, gắn cờ E_unexpl. Trả True nếu hành vi đúng."""
+    D = pd.Timestamp("2026-03-31")
+    t = pd.to_datetime(["2025-10-30", "2026-01-30"]).astype(L.NS)
+    F = pd.DataFrame({"ticker": "XXX", "known": t, "E": [150.0, 100.0], "E_src": "BVPSxOS", "OShares": [10.0, 10.0]})
+    ev = lambda pub: pd.DataFrame({"ticker": ["XXX"], "ex": [pd.Timestamp("2026-04-15")], "pub": [pd.Timestamp(pub)], "exercise_ratio": [0.5], "rights": [False]})
+    E_late, fix_late, un_late = fn(F, ev("2026-04-05"), Dcut=D)      # pub > D
+    E_ok, fix_ok, _ = fn(F, ev("2026-03-20"), Dcut=D)                # pub <= D ⇒ phải sửa (chứng minh ca test có răng)
+    return bool(E_late[1] == 100.0 and not fix_late[1] and un_late[1] and fix_ok[1] and abs(E_ok[1] - 150.0) < 1e-9)
+
+
 def md5(p):
     return hashlib.md5(open(p, "rb").read()).hexdigest()
 
@@ -81,6 +97,18 @@ def main(ym, mc, out, quick=False):
         L.ca_factor = orig
     m = md5(f"{out}/lvens2_{ym}{sfx}_nocut-ca_sc_mutinner.parquet")
     rows.append(("mutate-nocut ca+inner(pub)", "DETECTED" if m != base else "BLIND(UNEXPECTED)", base[:8], m[:8]))
+    print(" | ".join(rows[-1]))
+    # [v3] e_guard bỏ lọc public_date ≤ D: (a) phép thử đơn vị tổng hợp, không phụ thuộc tháng (PHẢI bắt được); (b) trên dữ liệu thật + poison (ghi nhận).
+    u_ok, u_mut = eguard_unit(L.e_guard), eguard_unit(leaky_eg(L.e_guard))
+    rows.append(("unit e_guard pub<=D", "PASS" if u_ok and not u_mut else "FAIL", f"real={u_ok}", f"mutant={u_mut}")); print(" | ".join(rows[-1]))
+    orig_eg = L.e_guard; L.e_guard = leaky_eg(orig_eg)
+    try:
+        L.run([ym], "pit", out, fr, mc_pit=mc, tag="_sc_egnopub")
+        L.run([ym], "pit", out, fr, mc_pit=mc, tag="_sc_egnopub_poison", poison=make_poison(D))
+    finally:
+        L.e_guard = orig_eg
+    a_, b_ = md5(f"{out}/lvens2_{ym}{sfx}_sc_egnopub.parquet"), md5(f"{out}/lvens2_{ym}{sfx}_sc_egnopub_poison.parquet")
+    rows.append(("mutate e_guard pub<=D (data)", "DETECTED" if a_ != base else ("DETECTED(poison)" if b_ != base else "BLIND(data)"), base[:8], f"{a_[:8]}/{b_[:8]}"))
     print(" | ".join(rows[-1]))
     bad = [r for r in rows if r[1] in ("FAIL", "BLIND(UNEXPECTED)")]
     print("RESULT:", "PASS" if not bad else f"FAIL {len(bad)}")
