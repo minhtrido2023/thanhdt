@@ -86,27 +86,80 @@ def anomaly_flags_freshness(ref_date=None):
 
 
 CLEAR_VERDICTS = ("SECTOR_OR_MARKET", "TECHNICAL", "NONE_FOUND")   # BAD_COMPANY KHÔNG gỡ được
+# "Không thấy tin" chỉ được gỡ sau khi tin đã có thời gian lộ ra (PNJ 24/09: giá giảm trước tin).
+NONE_FOUND_MIN_DAYS = 7
 
 
 def anomaly_clearances(asof, quiet=False):
     """{(ticker, flag_date)} cờ đã tra tin và NGƯỜI DÙNG duyệt gỡ (data/anomaly_clearances.json).
 
     Gỡ đúng MỘT cờ (ticker + ngày cờ): mã nổ cờ mới ⇒ bị chặn lại. `decided_on <= asof` chống
-    look-ahead khi replay. FAIL-CLOSED: file thiếu/hỏng/dòng thiếu trường ⇒ không gỡ gì."""
+    look-ahead khi replay. Mỗi dòng cần `evidence` + `approval_ref` (link tin nhắn duyệt) —
+    `decided_by` là quy ước tự khai, approval_ref là vết kiểm lại. FAIL-CLOSED: file hỏng ⇒ không
+    gỡ gì; dòng hỏng/thiếu trường ⇒ bỏ riêng dòng đó và cảnh báo."""
     p = os.path.join(WORKDIR, "data", "anomaly_clearances.json")
     if not os.path.exists(p):
         return set()
     try:
         d = pd.Timestamp(asof).date()
         with open(p, encoding="utf-8") as fh:
-            rows = json.load(fh)["clearances"]
-        return {(c["ticker"], c["flag_date"]) for c in rows
-                if c["decided_by"] == "user" and c["verdict"] in CLEAR_VERDICTS
-                and str(c["evidence"] or "").strip() and pd.Timestamp(c["decided_on"]).date() <= d}
+            rows = list(json.load(fh)["clearances"])
     except Exception as ex:
         if not quiet:
             print(f"  WARNING: anomaly_clearances.json không đọc được ({ex}) — KHÔNG gỡ cờ nào")
         return set()
+    out = set()
+    for c in rows:
+        try:
+            on, flag_day = pd.Timestamp(c["decided_on"]).date(), pd.Timestamp(c["flag_date"]).date()
+            ok = (c["decided_by"] == "user" and c["verdict"] in CLEAR_VERDICTS
+                  and str(c["evidence"] or "").strip() and str(c["approval_ref"] or "").strip())
+            if ok and c["verdict"] == "NONE_FOUND":
+                ok = (on - flag_day).days >= NONE_FOUND_MIN_DAYS
+            if not ok:
+                raise ValueError("không đạt điều kiện gỡ")
+            if on <= d:
+                out.add((c["ticker"], c["flag_date"]))
+        except Exception as ex:
+            if not quiet:
+                print(f"  WARNING: dòng gỡ cờ bị BỎ QUA ({ex}): {str(c)[:120]}")
+    return out
+
+
+def _live_and_skipped(asof, ttl_days, quiet):
+    """(cờ còn trong TTL tại `asof` {ticker: ngày}, cờ trong số đó KHÔNG áp dụng {ticker: (ngày, lý do)})."""
+    p = os.path.join(WORKDIR, "data", "anomaly_flags.json")
+    with open(p, encoding="utf-8") as fh:
+        flags = json.load(fh)
+    # chuẩn hoá asof (date / Timestamp / str đều nhận) — sai kiểu ở caller mà rơi vào
+    # except sẽ TẮT ÂM THẦM cả cái gate an toàn này, nên không để nó có cửa xảy ra.
+    d = pd.Timestamp(asof).date()
+    # CỬA SỔ HAI ĐẦU: cutoff <= last_alert <= asof. Chặn trên là chống look-ahead — nếu
+    # chỉ so >= cutoff thì chạy lại cho một ngày quá khứ sẽ áp cả cờ của TƯƠNG LAI
+    # (vd rerun 2025-12: cờ PNJ 07/2026 vẫn "active").
+    lo, hi = str(d - timedelta(days=ttl_days)), str(d)
+    # key bắt đầu bằng "_" là metadata của file (vd `_meta` — dấu độ tươi), KHÔNG phải
+    # mã CK. Bỏ tường minh thay vì dựa vào việc nó tình cờ thiếu `last_alert`.
+    live = {t: str(f.get("last_alert", "")) for t, f in flags.items()
+            if not t.startswith("_") and lo <= str(f.get("last_alert", "")) <= hi}
+    cleared = anomaly_clearances(d, quiet=quiet)
+    skipped = {}
+    for t, a in live.items():
+        r = flags[t].get("retracted")
+        # `on <= asof`: cờ rút hôm nay KHÔNG được viết lại rổ của một ngày replay trong quá khứ
+        if isinstance(r, dict) and str(r.get("on", "9999")) <= hi:
+            skipped[t] = (a, "cờ giá giả đã rút")
+        elif (t, a) in cleared:
+            skipped[t] = (a, "người dùng duyệt gỡ")
+    return live, skipped
+
+
+def anomaly_skipped(asof, ttl_days=ANOMALY_TTL_DAYS):
+    """{ticker: (ngày cờ, lý do)} cờ còn TTL nhưng gate KHÔNG áp dụng — để báo cáo nói ra."""
+    try:
+        return _live_and_skipped(asof, ttl_days, quiet=True)[1]
+    except Exception:
+        return {}
 
 
 def anomaly_excluded(asof, ttl_days=ANOMALY_TTL_DAYS, quiet=False):
@@ -118,26 +171,9 @@ def anomaly_excluded(asof, ttl_days=ANOMALY_TTL_DAYS, quiet=False):
 
     FAIL-SAFE: file thiếu/hỏng → trả set rỗng + log warning, KHÔNG chặn pipeline.
     """
-    p = os.path.join(WORKDIR, "data", "anomaly_flags.json")
     try:
-        flags = json.load(open(p, encoding="utf-8"))
-        # chuẩn hoá asof (date / Timestamp / str đều nhận) — sai kiểu ở caller mà rơi vào
-        # except sẽ TẮT ÂM THẦM cả cái gate an toàn này, nên không để nó có cửa xảy ra.
-        d = pd.Timestamp(asof).date()
-        # CỬA SỔ HAI ĐẦU: cutoff <= last_alert <= asof. Chặn trên là chống look-ahead — nếu
-        # chỉ so >= cutoff thì chạy lại cho một ngày quá khứ sẽ áp cả cờ của TƯƠNG LAI
-        # (vd rerun 2025-12: cờ PNJ 07/2026 vẫn "active").
-        lo, hi = str(d - timedelta(days=ttl_days)), str(d)
-        # key bắt đầu bằng "_" là metadata của file (vd `_meta` — dấu độ tươi), KHÔNG phải
-        # mã CK. Bỏ tường minh thay vì dựa vào việc nó tình cờ thiếu `last_alert`.
-        live = {t: str(f.get("last_alert", "")) for t, f in flags.items()
-                if not t.startswith("_") and lo <= str(f.get("last_alert", "")) <= hi}
-        cleared = anomaly_clearances(d, quiet=quiet)
-        skip = {t for t, a in live.items() if flags[t].get("retracted") or (t, a) in cleared}
-        if skip and not quiet:
-            print("  due-diligence: cờ KHÔNG áp dụng (đã duyệt gỡ / cờ giá giả đã rút): "
-                  + ", ".join(f"{t} {live[t]}" for t in sorted(skip)))
-        return set(live) - skip
+        live, skipped = _live_and_skipped(asof, ttl_days, quiet)
+        return set(live) - set(skipped)
     except Exception as ex:
         if not quiet:
             print(f"  WARNING: due-diligence flags không đọc được ({ex}) — chạy KHÔNG có gate")

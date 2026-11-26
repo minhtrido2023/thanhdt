@@ -99,6 +99,7 @@ os.environ.pop("BQ_LOCAL_CACHE", None)
 from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
+from anomaly_gate import anomaly_skipped as _anomaly_skipped
 from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
 from lag_liquidity_filter import lag_filter_illiquid, bal_filter_thin, ADV_MIN_VND
 from lag_rating_filter import (lag_filter_low_rating, lag_rating_stale_flags,
@@ -956,6 +957,7 @@ dd52_now = float(vnh["dd52"].iloc[-1]) if len(vnh) else -99.0
 vn_cool_now = bool(vnh["vn_cooling"].iloc[-1]) if len(vnh) and pd.notna(vnh["vn_cooling"].iloc[-1]) else False
 
 capit_size, capit_grind, basket, capit_dd_excluded = 0.0, False, [], []
+capit_dd_skipped = {}   # cờ còn TTL nhưng gate KHÔNG áp dụng cho mã trong pool (gỡ có duyệt / cờ giả)
 capit_caps_total, capit_caps, capit_shares, capit_share_mode, capit_share_detail = {}, {}, {}, "n/a", {}
 capit_targets = {}
 if capit_signal_today:
@@ -971,6 +973,10 @@ if capit_signal_today:
         bd = br["time"].iloc[-1]
         e = bq(capit_pool_sql(bd.date()))
         excl = anomaly_excluded(bd.date())
+        capit_dd_skipped = {t: f"cờ {a}: {why}" for t, (a, why) in sorted(_anomaly_skipped(bd.date()).items())
+                            if not e.empty and t in set(e["ticker"])}
+        if capit_dd_skipped:
+            print(f"  CAPIT due-diligence: KHÔNG loại dù có cờ: {capit_dd_skipped}")
         hit = sorted(set(e["ticker"]) & excl) if not e.empty else []
         if hit:
             capit_dd_excluded = hit
@@ -1310,6 +1316,7 @@ status = {
     "capit_breadth_stale": breadth_stale, "capit_breadth_src_max": breadth_src_max,
     "capit_size": round(capit_size, 2), "capit_grind": capit_grind,
     "capit_dd_excluded": capit_dd_excluded,
+    "capit_dd_skipped": capit_dd_skipped,
     # Trần VND tuyệt đối/tên ĐÃ CHIA THEO ACCOUNT — NGUỒN CHUẨN TẮC mà bot_execute.py
     # enforce. Cố tình KHÔNG dựa vào DollarBill copy field này vào plan: executor đọc thẳng
     # artifact ở đây, nên plan generator quên áp cap cũng không làm mất cap.
@@ -1483,6 +1490,8 @@ if breadth_stale:
              f"`mike/bin/build_universe_pit.py --date <ngày>` + `build_universe_pit_quality.py`.")
 if capit_signal_today:
     L.append(f"- 🚨 **WASHOUT GATE FIRED** — state routing size = **{capit_size:.2f}** (grind={capit_grind}, dd52w={dd52_now:.1f}%, vn_cooling={vn_cool_now})")
+    if capit_dd_skipped:
+        L.append("- ⚠️ Cờ bất thường KHÔNG áp dụng: " + "; ".join(f"{t} ({w})" for t, w in capit_dd_skipped.items()))
     # Đòn bẩy margin (§6a) — LUÔN in 1 dòng khi có washout, kể cả khi TẮT: người duyệt plan
     # phải thấy trạng thái của nó, không phải suy ra từ việc thiếu dòng (bài học capit_fired).
     L.append(f"- ⚙️ Đòn bẩy margin CAPIT: **{'ĐANG ÁP' if capit_lever['active'] else 'TẮT'}** "
