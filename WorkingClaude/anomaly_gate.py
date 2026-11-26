@@ -85,6 +85,30 @@ def anomaly_flags_freshness(ref_date=None):
     return {"is_stale": False, "generated_at": str(gen), "reason": ""}
 
 
+CLEAR_VERDICTS = ("SECTOR_OR_MARKET", "TECHNICAL", "NONE_FOUND")   # BAD_COMPANY KHÔNG gỡ được
+
+
+def anomaly_clearances(asof, quiet=False):
+    """{(ticker, flag_date)} cờ đã tra tin và NGƯỜI DÙNG duyệt gỡ (data/anomaly_clearances.json).
+
+    Gỡ đúng MỘT cờ (ticker + ngày cờ): mã nổ cờ mới ⇒ bị chặn lại. `decided_on <= asof` chống
+    look-ahead khi replay. FAIL-CLOSED: file thiếu/hỏng/dòng thiếu trường ⇒ không gỡ gì."""
+    p = os.path.join(WORKDIR, "data", "anomaly_clearances.json")
+    if not os.path.exists(p):
+        return set()
+    try:
+        d = pd.Timestamp(asof).date()
+        with open(p, encoding="utf-8") as fh:
+            rows = json.load(fh)["clearances"]
+        return {(c["ticker"], c["flag_date"]) for c in rows
+                if c["decided_by"] == "user" and c["verdict"] in CLEAR_VERDICTS
+                and str(c["evidence"] or "").strip() and pd.Timestamp(c["decided_on"]).date() <= d}
+    except Exception as ex:
+        if not quiet:
+            print(f"  WARNING: anomaly_clearances.json không đọc được ({ex}) — KHÔNG gỡ cờ nào")
+        return set()
+
+
 def anomaly_excluded(asof, ttl_days=ANOMALY_TTL_DAYS, quiet=False):
     """Set ticker có cờ bất thường còn hiệu lực tại `asof`.
 
@@ -106,8 +130,14 @@ def anomaly_excluded(asof, ttl_days=ANOMALY_TTL_DAYS, quiet=False):
         lo, hi = str(d - timedelta(days=ttl_days)), str(d)
         # key bắt đầu bằng "_" là metadata của file (vd `_meta` — dấu độ tươi), KHÔNG phải
         # mã CK. Bỏ tường minh thay vì dựa vào việc nó tình cờ thiếu `last_alert`.
-        return {t for t, f in flags.items()
+        live = {t: str(f.get("last_alert", "")) for t, f in flags.items()
                 if not t.startswith("_") and lo <= str(f.get("last_alert", "")) <= hi}
+        cleared = anomaly_clearances(d, quiet=quiet)
+        skip = {t for t, a in live.items() if flags[t].get("retracted") or (t, a) in cleared}
+        if skip and not quiet:
+            print("  due-diligence: cờ KHÔNG áp dụng (đã duyệt gỡ / cờ giá giả đã rút): "
+                  + ", ".join(f"{t} {live[t]}" for t in sorted(skip)))
+        return set(live) - skip
     except Exception as ex:
         if not quiet:
             print(f"  WARNING: due-diligence flags không đọc được ({ex}) — chạy KHÔNG có gate")
