@@ -1,0 +1,10 @@
+N tháng 46 | cổng cũ chặn 18
+neo D: lượt đầu cách D >5 ngày: 1 | >5 cả mọi lượt, theo tháng: ['2025-01']
+neo cuối tháng: lượt đầu >5: 0 | max 3
+log sync bắt đầu 2026-06-25 23:45:02+07:00 | tháng đo được từ log: 5 pass: 4
+     ym          D  first_run sync_log_pass_first_run
+2026-06 2026-06-30 2026-07-01                   False
+2026-07 2026-07-31 2026-08-03                    True
+2026-08 2026-08-28 2026-09-01                    True
+2026-09 2026-09-30 2026-10-01                    True
+2026-10 2026-10-30 2026-11-02                    True

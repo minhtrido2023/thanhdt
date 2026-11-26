@@ -1,0 +1,7 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-10 [pit_noeguard] D=2026-10-30 rows=1086 in_univ=344 ENS2_ok=338 ca_step=0 E_fix=0 -> out/r3_regress/lvens2_2026-10_noeguard.parquet
+vs out/regress (bản đã đối chiếu merge): (1086, 28) False
+merged candidates []

@@ -1,0 +1,126 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-05 [pit] D=2026-05-29 rows=1090 in_univ=402 ENS2_ok=396 ca_step=0 E_fix=3 -> out/final/lvens2_2026-05.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-05 [pit_mcstep] D=2026-05-29 rows=1090 in_univ=402 ENS2_ok=396 ca_step=0 E_fix=3 -> out/final/lvens2_2026-05_mcstep.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-05 [pit_mcstepca] D=2026-05-29 rows=1090 in_univ=402 ENS2_ok=396 ca_step=18 E_fix=3 -> out/final/lvens2_2026-05_mcstepca.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-05 [pit_mcstepcar] D=2026-05-29 rows=1090 in_univ=402 ENS2_ok=396 ca_step=20 E_fix=3 -> out/final/lvens2_2026-05_mcstepcar.parquet
+FINAL 2026-05 rc=0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-06 [pit] D=2026-06-30 rows=1076 in_univ=389 ENS2_ok=383 ca_step=0 E_fix=6 -> out/final/lvens2_2026-06.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-06 [pit_mcstep] D=2026-06-30 rows=1076 in_univ=389 ENS2_ok=383 ca_step=0 E_fix=6 -> out/final/lvens2_2026-06_mcstep.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-06 [pit_mcstepca] D=2026-06-30 rows=1076 in_univ=389 ENS2_ok=383 ca_step=49 E_fix=6 -> out/final/lvens2_2026-06_mcstepca.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-06 [pit_mcstepcar] D=2026-06-30 rows=1076 in_univ=389 ENS2_ok=383 ca_step=52 E_fix=6 -> out/final/lvens2_2026-06_mcstepcar.parquet
+FINAL 2026-06 rc=0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-07 [pit] D=2026-07-31 rows=1070 in_univ=368 ENS2_ok=362 ca_step=0 E_fix=1 -> out/final/lvens2_2026-07.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-07 [pit_mcstep] D=2026-07-31 rows=1070 in_univ=368 ENS2_ok=362 ca_step=0 E_fix=1 -> out/final/lvens2_2026-07_mcstep.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-07 [pit_mcstepca] D=2026-07-31 rows=1070 in_univ=368 ENS2_ok=362 ca_step=4 E_fix=1 -> out/final/lvens2_2026-07_mcstepca.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-07 [pit_mcstepcar] D=2026-07-31 rows=1070 in_univ=368 ENS2_ok=362 ca_step=5 E_fix=1 -> out/final/lvens2_2026-07_mcstepcar.parquet
+FINAL 2026-07 rc=0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-08 [pit] D=2026-08-28 rows=1068 in_univ=359 ENS2_ok=353 ca_step=0 E_fix=5 -> out/final/lvens2_2026-08.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-08 [pit_mcstep] D=2026-08-28 rows=1068 in_univ=359 ENS2_ok=353 ca_step=0 E_fix=5 -> out/final/lvens2_2026-08_mcstep.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-08 [pit_mcstepca] D=2026-08-28 rows=1068 in_univ=359 ENS2_ok=353 ca_step=18 E_fix=5 -> out/final/lvens2_2026-08_mcstepca.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-08 [pit_mcstepcar] D=2026-08-28 rows=1068 in_univ=359 ENS2_ok=353 ca_step=18 E_fix=5 -> out/final/lvens2_2026-08_mcstepcar.parquet
+FINAL 2026-08 rc=0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-09 [pit] D=2026-09-30 rows=1078 in_univ=355 ENS2_ok=349 ca_step=0 E_fix=6 -> out/final/lvens2_2026-09.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-09 [pit_mcstep] D=2026-09-30 rows=1078 in_univ=355 ENS2_ok=349 ca_step=0 E_fix=6 -> out/final/lvens2_2026-09_mcstep.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-09 [pit_mcstepca] D=2026-09-30 rows=1078 in_univ=355 ENS2_ok=349 ca_step=35 E_fix=6 -> out/final/lvens2_2026-09_mcstepca.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-09 [pit_mcstepcar] D=2026-09-30 rows=1078 in_univ=355 ENS2_ok=349 ca_step=37 E_fix=6 -> out/final/lvens2_2026-09_mcstepcar.parquet
+FINAL 2026-09 rc=0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-10 [pit] D=2026-10-30 rows=1086 in_univ=344 ENS2_ok=338 ca_step=0 E_fix=3 -> out/final/lvens2_2026-10.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-10 [pit_mcstep] D=2026-10-30 rows=1086 in_univ=344 ENS2_ok=338 ca_step=0 E_fix=3 -> out/final/lvens2_2026-10_mcstep.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-10 [pit_mcstepca] D=2026-10-30 rows=1086 in_univ=344 ENS2_ok=338 ca_step=25 E_fix=3 -> out/final/lvens2_2026-10_mcstepca.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:459: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:489: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-10 [pit_mcstepcar] D=2026-10-30 rows=1086 in_univ=344 ENS2_ok=338 ca_step=30 E_fix=3 -> out/final/lvens2_2026-10_mcstepcar.parquet
+FINAL 2026-10 rc=0

@@ -1,0 +1,234 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+	Command being timed: "/home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym 2026-05 --mc-pit all --out-dir out/r3_final"
+	User time (seconds): 52.27
+	System time (seconds): 4.56
+	Percent of CPU this job got: 106%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:53.49
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2092944
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 9
+	Minor (reclaiming a frame) page faults: 974334
+	Voluntary context switches: 5218
+	Involuntary context switches: 1513
+	Swaps: 0
+	File system inputs: 297280
+	File system outputs: 1008
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+	Command being timed: "/home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym 2026-06 --mc-pit all --out-dir out/r3_final"
+	User time (seconds): 52.16
+	System time (seconds): 2.90
+	Percent of CPU this job got: 106%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:51.51
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2096104
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 4
+	Minor (reclaiming a frame) page faults: 998216
+	Voluntary context switches: 4052
+	Involuntary context switches: 499
+	Swaps: 0
+	File system inputs: 4520
+	File system outputs: 984
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+	Command being timed: "/home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym 2026-07 --mc-pit all --out-dir out/r3_final"
+	User time (seconds): 52.34
+	System time (seconds): 2.97
+	Percent of CPU this job got: 106%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:51.79
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2128776
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 7
+	Minor (reclaiming a frame) page faults: 964844
+	Voluntary context switches: 4201
+	Involuntary context switches: 560
+	Swaps: 0
+	File system inputs: 576
+	File system outputs: 976
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+	Command being timed: "/home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym 2026-08 --mc-pit all --out-dir out/r3_final"
+	User time (seconds): 54.68
+	System time (seconds): 8.15
+	Percent of CPU this job got: 106%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:59.23
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2134196
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 3
+	Minor (reclaiming a frame) page faults: 1025827
+	Voluntary context switches: 3954
+	Involuntary context switches: 746
+	Swaps: 0
+	File system inputs: 1512
+	File system outputs: 976
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+	Command being timed: "/home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym 2026-09 --mc-pit all --out-dir out/r3_final"
+	User time (seconds): 53.04
+	System time (seconds): 2.86
+	Percent of CPU this job got: 106%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:52.36
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2147396
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 2
+	Minor (reclaiming a frame) page faults: 959683
+	Voluntary context switches: 4258
+	Involuntary context switches: 539
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 1008
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+	Command being timed: "/home/trido/thanhdt/wc_venv/bin/python calc/lvens2_pit2.py --asof-ym 2026-10 --mc-pit all --out-dir out/r3_final"
+	User time (seconds): 52.92
+	System time (seconds): 3.10
+	Percent of CPU this job got: 106%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:52.36
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2145180
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 2
+	Minor (reclaiming a frame) page faults: 1004275
+	Voluntary context switches: 4300
+	Involuntary context switches: 532
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 1008
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -1,0 +1,43 @@
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-05 [pit_mcstepcar_rollfwd] D=2026-05-29 rows=1090 in_univ=402 ENS2_ok=396 ca_step=20 E_fix=3 -> out/measure_rollfwd/lvens2_2026-05_mcstepcar_rollfwd.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-06 [pit_mcstepcar_rollfwd] D=2026-06-30 rows=1076 in_univ=389 ENS2_ok=383 ca_step=52 E_fix=6 -> out/measure_rollfwd/lvens2_2026-06_mcstepcar_rollfwd.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-07 [pit_mcstepcar_rollfwd] D=2026-07-31 rows=1070 in_univ=368 ENS2_ok=362 ca_step=5 E_fix=1 -> out/measure_rollfwd/lvens2_2026-07_mcstepcar_rollfwd.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-08 [pit_mcstepcar_rollfwd] D=2026-08-28 rows=1068 in_univ=359 ENS2_ok=353 ca_step=18 E_fix=5 -> out/measure_rollfwd/lvens2_2026-08_mcstepcar_rollfwd.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-09 [pit_mcstepcar_rollfwd] D=2026-09-30 rows=1078 in_univ=355 ENS2_ok=349 ca_step=37 E_fix=6 -> out/measure_rollfwd/lvens2_2026-09_mcstepcar_rollfwd.parquet
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:472: RuntimeWarning: All-NaN slice encountered
+  L["MULT"] = np.where(cnt >= 2, np.nanmedian(me_, axis=0), np.nan)
+/home/trido/thanhdt/WorkingClaude/wt-dcf-lvens2-pit2-20261126/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/lvens2_pit2.py:502: RuntimeWarning: All-NaN slice encountered
+  pan["lv_ENS2"] = np.where(n >= 1, np.nanmedian(a, axis=1), np.nan)
+2026-10 [pit_mcstepcar_rollfwd] D=2026-10-30 rows=1086 in_univ=344 ENS2_ok=338 ca_step=30 E_fix=3 -> out/measure_rollfwd/lvens2_2026-10_mcstepcar_rollfwd.parquet
+2026-05 n=391 |Δlv|>0,01=19 >0,05=5 max=0.597 đổi ô=2 [CTG,KLB]
+    E_unexpl: ABB:E×1.16,Δlv+0.128, ACB:E×1.13,Δlv+0.118, KLB:E×1.30,Δlv+0.597, OCB:E×1.15,Δlv+0.136, VBB:E×1.10,Δlv+0.078
+2026-06 n=374 |Δlv|>0,01=17 >0,05=1 max=0.128 đổi ô=0 []
+    E_unexpl: ABB:E×1.16,Δlv+0.128, VBB:E×1.10,Δlv+0.079
+2026-07 n=360 |Δlv|>0,01=19 >0,05=6 max=0.251 đổi ô=2 [BID,MSB]
+    E_unexpl: LPB:E×1.21,Δlv+0.189, MBB:E×1.26,Δlv+0.233, MSB:E×1.20,Δlv+0.181, VAB:E×1.11,Δlv+0.085, VIB:E×1.17,Δlv+0.153, VPB:E×1.29,Δlv+0.251
+2026-08 n=350 |Δlv|>0,01=19 >0,05=2 max=0.251 đổi ô=0 []
+    E_unexpl: LPB:E×1.21,Δlv+0.189, VPB:E×1.29,Δlv+0.251
+2026-09 n=344 |Δlv|>0,01=18 >0,05=1 max=0.189 đổi ô=0 []
+    E_unexpl: LPB:E×1.21,Δlv+0.189
+2026-10 n=333 |Δlv|>0,01=19 >0,05=1 max=0.248 đổi ô=2 [TIN,VVS]
+    E_unexpl: TIN:E×1.26,Δlv+0.248
+rc=0

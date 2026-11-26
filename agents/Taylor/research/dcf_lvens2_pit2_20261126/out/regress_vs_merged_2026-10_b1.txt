@@ -1,0 +1,2 @@
+rows 1086 1086 same idx True
+regress B1 strict --no-eguard 2026-10 vs merged: max|Δ| {'E': 0.0, 'mc': 0.0, 'lv_D0B': 0.0, 'lv_DDM': 0.0, 'lv_EPV': 0.0, 'lv_MULT': 0.0, 'lv_HEDf': 0.0, 'lv_ENS2': 0.0}

@@ -1,0 +1,55 @@
+{
+ "asof_ym": "2026-06",
+ "mode": "pit",
+ "D": "2026-06-30",
+ "rows": 1076,
+ "in_universe": 389,
+ "in_universe_lv_ENS2_ok": 383,
+ "n_next_used_in_univ": 0,
+ "use_vnd": true,
+ "vnd_px_max_date": "2026-11-23",
+ "mc_pit": "stepcar",
+ "route_global": false,
+ "eguard": true,
+ "nocut": [],
+ "event_no_next_in_univ": 106,
+ "ca_step_in_univ": 52,
+ "E_fix_in_univ": 6,
+ "E_unexpl_in_univ": 2,
+ "E_unexpl_tickers": [
+  "ABB",
+  "VBB"
+ ],
+ "frozen_files_verified": 1339,
+ "hed_beta_frozen_2020-01": {
+  "c": -2.669246182882192,
+  "tc": 1.8815028343500086,
+  "roe": 2.6490831478036667,
+  "loss": 0.03400902641964891,
+  "revg": 0.0003446430061784199,
+  "po": 0.1788113726119498,
+  "lev": 0.058598938424526,
+  "sd": -0.11013339692468252,
+  "le": 0.07189762521388406,
+  "r_BANK": 0.13648579624688112,
+  "r_CYCLICAL": -0.19092880488704525,
+  "r_INSURANCE": 0.09851044377807801,
+  "r_POWER": 0.10709512524692513,
+  "r_REALESTATE": 0.07436895493389631,
+  "r_SECURITIES": 0.1371179416995521
+ },
+ "cache_root": "/home/trido/thanhdt/WorkingClaude/data/bq_cache",
+ "cache_vintage": false,
+ "freshness": {
+  "ticker_financial": "2026-11-20",
+  "fa_ratings_8l": "2026-11-20"
+ },
+ "inputs_md5": {
+  "ticker_financial": "4bb3c9d98da5449e83d4f8fccf5ee1cf",
+  "fa_ratings_8l": "8d2f600de6646c8f9a761a948a97d8d9",
+  "ca_extract": "28418e9d4d91abfa8965ac756bb3d9c4",
+  "frozen_manifest": "59a5ee62990278507fe40848584bcd45",
+  "px_pre2013": "d01c7aa84064b7a1024c6c71e6cea08e"
+ },
+ "script_md5": "5424ca5448411e3e42210935fcee2084"
+}
