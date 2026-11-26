@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Selfcheck: gỡ cờ có người duyệt (anomaly_gate) + rút cờ giá giả (anomaly_scan). Offline."""
 import datetime, io, json, os, sys, tempfile, contextlib
+os.environ.pop("JOB_ID", None)   # chạy trong job headless thì anomaly_clear tự từ chối ⇒ FAIL giả
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 SCAN_DIR = os.environ.get("ANOMALY_SCAN_DIR", os.path.join(HERE, "mike", "agents", "Taylor"))
