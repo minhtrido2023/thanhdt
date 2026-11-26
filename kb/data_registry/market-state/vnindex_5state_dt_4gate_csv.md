@@ -4,7 +4,7 @@ status: CANONICAL
 source: data/vnindex_5state_dt_4gate.csv
 group: market-state
 aka: chuỗi DT4 local (base + DT 4-gate, KHÔNG macro)
-name_alike_trap: tav2_bq.vnindex_5state_dt_4gate (bản BQ ĐÓNG BĂNG 2026-06-02)
+name_alike_trap: tav2_archive.vnindex_5state_dt_4gate (bản BQ ĐÓNG BĂNG 2026-06-02)
 writer: build_dt_4gate.py, step [8] daily 18:30 (non-fatal, advisory-only)
 ---
 
@@ -19,6 +19,6 @@ Chuỗi DT4 (base + DT 4-gate, KHÔNG macro) — research/ablation.
 `build_dt_4gate.py`, step [8] daily 18:30 (non-fatal, advisory-only).
 
 ## Bẫy
-**Cặp name-alike với bảng BQ `vnindex_5state_dt_4gate`** — bản BQ ĐÓNG BĂNG từ 2026-06-02 (verify
-`bq show` 2026-07-11), chỉ bản CSV local này còn sống. `sync_bq_cache.py` vẫn mirror bản BQ frozen
-vào `bq_cache/` → đọc DT4 qua cache/BQ = đọc dữ liệu chết.
+**Cặp name-alike với bảng BQ `vnindex_5state_dt_4gate`** — bản BQ ĐÓNG BĂNG từ 2026-06-02, dời
+sang `tav2_archive` ngày 2026-11-26; chỉ bản CSV local này còn sống. `bq_cache/` còn giữ bản mirror
+cũ đóng băng → đọc DT4 qua cache = đọc dữ liệu chết.

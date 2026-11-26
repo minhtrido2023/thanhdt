@@ -58,11 +58,11 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 | [`sector_read_ngan_hang_quoc_doanh_20261117.md`](sector_read_ngan_hang_quoc_doanh_20261117.md) — sector read BLIND ngân hàng thương mại quốc doanh VN, Bobby 2026-11-17 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`sector_read_dien_mat_troi_thuy_dien_nho_20261120.md`](sector_read_dien_mat_troi_thuy_dien_nho_20261120.md) — sector read BLIND điện mặt trời + thuỷ điện nhỏ, Bobby 2026-11-20 (parent `vn_macro_regime_history.md`) | CANONICAL |
 | [`vnindex_5state.md`](vnindex_5state.md) — tav2_bq.vnindex_5state | TRAP |
-| [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_archive.vnindex_5state_* (dời 2026-11-26) + staging/predeploy còn ở tav2_bq | ARCHIVE |
+| [`vnindex_5state_archive_family.md`](vnindex_5state_archive_family.md) — tav2_archive.vnindex_5state_* (dời 2026-11-26) + predeploy còn ở tav2_bq | ARCHIVE |
 | [`vnindex_5state_csv_local.md`](vnindex_5state_csv_local.md) — data/vnindex_5state.csv | TRAP |
 | [`vnindex_5state_dt5g_live.md`](vnindex_5state_dt5g_live.md) — tav2_bq.vnindex_5state_dt5g_live | CANONICAL — ⚠️ **2 WRITER ĐỘC LẬP** (ta + kaffa_v2 team dữ liệu); ta chỉ tiêu thụ + giám sát, KHÔNG can thiệp writer kia |
 | [`vnindex_5state_dt_10_25_25_csv.md`](vnindex_5state_dt_10_25_25_csv.md) — data/vnindex_5state_dt_10_25_25.csv | DEPRECATED |
-| [`vnindex_5state_dt_4gate_bq.md`](vnindex_5state_dt_4gate_bq.md) — tav2_bq.vnindex_5state_dt_4gate | DEAD |
+| [`vnindex_5state_dt_4gate_bq.md`](vnindex_5state_dt_4gate_bq.md) — tav2_archive.vnindex_5state_dt_4gate | DEAD |
 | [`vnindex_5state_dt_4gate_csv.md`](vnindex_5state_dt_4gate_csv.md) — data/vnindex_5state_dt_4gate.csv | CANONICAL |
 | [`vnindex_5state_tam_quan_v34b_clean.md`](vnindex_5state_tam_quan_v34b_clean.md) — tav2_bq.vnindex_5state_tam_quan_v34b_clean | DERIVED |
 | [`vnindex_5state_v3_4b_full_history_csv.md`](vnindex_5state_v3_4b_full_history_csv.md) — data/vnindex_5state_tam_quan_v3_4b_full_history.csv | CANONICAL |
