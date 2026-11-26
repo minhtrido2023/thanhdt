@@ -90,6 +90,16 @@ CLEAR_VERDICTS = ("SECTOR_OR_MARKET", "TECHNICAL", "NONE_FOUND")   # BAD_COMPANY
 NONE_FOUND_MIN_DAYS = 7
 
 
+def _warn(msg, quiet):
+    """In cảnh báo; lỗi I/O/encoding khi in KHÔNG được lan ra gate (exception ⇒ gate fail-open)."""
+    if quiet:
+        return
+    try:
+        print(msg)
+    except Exception:
+        pass
+
+
 def anomaly_clearances(asof, quiet=False):
     """{(ticker, flag_date)} cờ đã tra tin và NGƯỜI DÙNG duyệt gỡ (data/anomaly_clearances.json).
 
@@ -105,8 +115,7 @@ def anomaly_clearances(asof, quiet=False):
         with open(p, encoding="utf-8") as fh:
             rows = list(json.load(fh)["clearances"])
     except Exception as ex:
-        if not quiet:
-            print(f"  WARNING: anomaly_clearances.json không đọc được ({ex}) — KHÔNG gỡ cờ nào")
+        _warn(f"  WARNING: anomaly_clearances.json không đọc được ({ex}) — KHÔNG gỡ cờ nào", quiet)
         return set()
     out = set()
     for c in rows:
@@ -121,8 +130,7 @@ def anomaly_clearances(asof, quiet=False):
             if on <= d:
                 out.add((c["ticker"], c["flag_date"]))
         except Exception as ex:
-            if not quiet:
-                print(f"  WARNING: dòng gỡ cờ bị BỎ QUA ({ex}): {str(c)[:120]}")
+            _warn(f"  WARNING: dòng gỡ cờ bị BỎ QUA ({ex}): {str(c)[:120]}", quiet)
     return out
 
 
@@ -178,6 +186,46 @@ def anomaly_excluded(asof, ttl_days=ANOMALY_TTL_DAYS, quiet=False):
         if not quiet:
             print(f"  WARNING: due-diligence flags không đọc được ({ex}) — chạy KHÔNG có gate")
         return set()
+
+
+def capit_user_excluded(asof):
+    """Mã người dùng LOẠI TAY khỏi rổ CAPIT (data/capit_user_exclusions.json) → ({ticker: lý do}, lỗi).
+
+    Chỉ nhận dòng `decided_by == "user"` có `approval_ref`, hiệu lực `from <= asof <= until`
+    (bắt buộc có `until` — không loại vĩnh viễn ngầm). KHÔNG phải cờ bất thường: chỉ golive CAPIT
+    đọc. File hỏng ⇒ không loại gì NHƯNG trả chuỗi lỗi để golive nói ra (mã user bỏ sẽ quay lại)."""
+    p = os.path.join(WORKDIR, "data", "capit_user_exclusions.json")
+    if not os.path.exists(p):
+        return {}, None
+    try:
+        d = pd.Timestamp(asof).date()
+        with open(p, encoding="utf-8") as fh:
+            rows = list(json.load(fh)["exclusions"])
+    except Exception as ex:
+        return {}, f"capit_user_exclusions.json không đọc được: {ex}"
+    out, bad = {}, []
+    for c in rows:
+        try:
+            lo, hi = pd.Timestamp(c["from"]).date(), pd.Timestamp(c["until"]).date()
+            if c["decided_by"] != "user" or not str(c["approval_ref"] or "").strip():
+                raise ValueError("thiếu decided_by=user / approval_ref")
+            if lo > hi:
+                raise ValueError("from > until")
+            if lo <= d <= hi:
+                out[str(c["ticker"]).strip().upper()] = f"user loại đến {hi}: {c.get('reason', '')}"
+        except Exception as ex:
+            bad.append(f"{str(c)[:80]} ({ex})")
+    return out, (f"dòng loại tay KHÔNG hợp lệ: {bad}" if bad else None)
+
+
+def capit_apply_user_exclusions(pool, asof):
+    """Bỏ mã user loại tay khỏi `pool` (DataFrame có cột ticker) → (pool mới, {mã bị bỏ: lý do}, lỗi).
+    Chỉ báo mã THỰC SỰ nằm trong pool."""
+    uex, err = capit_user_excluded(asof)
+    dropped = {t: r for t, r in sorted(uex.items()) if not pool.empty and t in set(pool["ticker"])}
+    if dropped:
+        pool = pool[~pool["ticker"].isin(list(dropped))]
+    return pool, dropped, err
 
 
 def insider_sell_flagged(asof, ttl_days=INSIDER_TTL_DAYS, quiet=False):

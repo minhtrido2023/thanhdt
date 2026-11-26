@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Selfcheck: gỡ cờ có người duyệt (anomaly_gate) + rút cờ giá giả (anomaly_scan). Offline."""
 import datetime, io, json, os, sys, tempfile, contextlib
+os.environ.pop("JOB_ID", None)   # chạy trong job headless thì anomaly_clear tự từ chối ⇒ FAIL giả
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 SCAN_DIR = os.environ.get("ANOMALY_SCAN_DIR", os.path.join(HERE, "mike", "agents", "Taylor"))
@@ -73,12 +74,17 @@ chk("ret khong doi => KHONG rut", rt(flag(ret=-2.6), px(flat, flat)) == [])
 chk("thieu cot Price => KHONG rut", rt(flag(), px(flat, flat).drop(columns="Price")) == [])
 chk("phien co khong co du lieu => KHONG rut", rt(flag(), px(flat, flat).iloc[:-1]) == [])
 chk("cua so du lieu khong phu 30 ngay => KHONG rut", rt(flag(), px(flat, flat).iloc[-5:]) == [])
-chk("thanh khoan < 1 ty => KHONG rut", rt(flag(), px(flat, flat, vol1m=10000)) == [])
+low = px(flat, flat, vol1m=10000); low["Volume"] = 10000   # vol_x=1: chi san GTGD 1 ty chan
+chk("thanh khoan < 1 ty => KHONG rut", rt(flag(), low) == [])
 nan = [20000, 20000, float("nan")]
 chk("gia NaN => KHONG rut", rt(flag(), px(nan, nan)) == [])
 # H3: da rut nhung luat no lai => khoi phuc
 f = flag(retracted={"on": "2026-09-19", "ret_now": -2.5}); rt(f, px(crash, crash))
 chk("H3 luat no lai => bo retracted", "retracted" not in f["AAA"])
+f = flag(retracted={"on": "2026-09-19", "ret_now": -2.5})
+with contextlib.redirect_stdout(io.StringIO()):
+    rt(f, px(early, early))
+chk("phien TRUOC do no lai => cung khoi phuc", "retracted" not in f["AAA"])
 # tier H da ban: nguong VOLSPIKE tier H (>=5x) chi con nhan qua flag['tier']
 vs = px(flat, flat); vs.loc[vs.index[-1], "Volume"] = 6e6
 chk("tier-H da ban van dung nguong H => KHONG rut", rt(flag(), vs, hold=()) == [])
@@ -95,6 +101,8 @@ with contextlib.redirect_stdout(io.StringIO()):
     ret = s.write_flags(alert("2026-09-16"), prices=px(early, early))
 chk("H2 backfill phien cu khong ghi de, khong rut", load()["AAA"]["ret"] == -22.77 and ret == [])
 json.dump(flag(), open(s.FLAGS_PATH, "w"))
+import datetime as _dt
+s._ict_now = lambda: _dt.datetime(2026, 9, 21, 9, 0)
 s.load_universe = lambda now_ict=None: ({"AAA"}, set(), {"is_stale": False, "asof": "x", "reason": ""})
 s.load_prices = lambda *a: px(flat, flat)
 emit = tmp + "/emit.json"; sys.argv = ["x", "--asof", "2026-09-18", "--emit-json", emit]
@@ -109,10 +117,96 @@ assert os.path.dirname(os.path.abspath(ae.__file__)) == os.path.abspath(sys.path
 sent = []
 ae._notify = lambda m, dry: (sent.append(m), True)[1]; ae._dispatch_bg = lambda *a: "job"
 ae.LEDGER = tmp + "/led.json"
+ae.GOLIVE_STATUS, ae.FLAGS, ae.CLEARANCES = tmp + "/golive.json", tmp + "/flags_ae.json", tmp + "/cl_ae.json"
 em = json.load(open(emit))
 with contextlib.redirect_stdout(io.StringIO()):
     ae.escalate(em); ae.escalate(em)
 chk("escalate bao co rut dung 1 lan", len(sent) == 1 and "AAA" in sent[0])
+
+# CAPIT bi co chan => giao tra tin 1 lan, khong tu go
+json.dump({"capit_dd_excluded": ["PVT"]}, open(ae.GOLIVE_STATUS, "w"))
+json.dump({"PVT": {"last_alert": "2026-10-29", "reasons": "IDIOCRASH", "ret": -6.8}}, open(ae.FLAGS, "w"))
+jobs = []; sent.clear(); ae._dispatch_bg = lambda t, p, d: (jobs.append((t, p)), "job")[1]
+with contextlib.redirect_stdout(io.StringIO()):
+    ae.escalate({"asof": "2026-11-27"}); ae.escalate({"asof": "2026-11-27"})
+chk("CAPIT bi chan => giao tra tin dung 1 lan, cam tu ghi",
+    len(jobs) == 1 and jobs[0][0] == "Wendy" and "KHÔNG ghi" in jobs[0][1] and len(sent) == 1)
+json.dump({"clearances": [{"ticker": "PVT", "flag_date": "2026-10-29"}]}, open(ae.CLEARANCES, "w"))
+ae.LEDGER = tmp + "/led2.json"; jobs.clear()
+with contextlib.redirect_stdout(io.StringIO()):
+    ae.escalate({"asof": "2026-11-27"})
+chk("co da duyet go => khong tra tin lai", jobs == [])
+
+# anomaly_clear.py
+import anomaly_clear as ac
+os.makedirs(tmp + "/wc/data"); json.dump({"PVT": {"last_alert": "2026-10-29"}}, open(tmp + "/wc/data/anomaly_flags.json", "w"))
+base = ["PVT", "2026-10-29", "SECTOR_OR_MARKET", "--evidence", "u", "--approval-ref", "r", "--decided-by", "user"]
+def run(argv):
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        try:
+            ac.main(argv, wc=tmp + "/wc"); return True
+        except SystemExit:
+            return False
+chk("anomaly_clear ghi dong hop le", run(base) and run(base)
+    and len(json.load(open(tmp + "/wc/data/anomaly_clearances.json"))["clearances"]) == 1)
+g.WORKDIR = tmp + "/wc"
+chk("dong do anomaly_clear ghi duoc gate chap nhan", ("PVT", "2026-10-29") in g.anomaly_clearances("2099-01-01"))
+chk("sai ngay co / agent / BAD_COMPANY bi tu choi",
+    not run(["PVT", "2026-10-01"] + base[2:]) and not run(base[:-1] + ["agent"])
+    and not run(["PVT", "2026-10-29", "BAD_COMPANY"] + base[3:]))
+
+# loai tay CAPIT
+UX = tmp + "/wc/data/capit_user_exclusions.json"
+chk("khong co file loai tay", g.capit_user_excluded("2026-11-27") == ({}, None))
+row = {"ticker": "VGC", "from": "2026-11-27", "until": "2027-03-15", "decided_by": "user", "approval_ref": "r"}
+def putx(*r): json.dump({"exclusions": list(r)}, open(UX, "w"))
+putx(row)
+chk("loai tay trong han", "VGC" in g.capit_user_excluded("2026-11-27")[0] and "VGC" in g.capit_user_excluded("2027-03-15")[0])
+chk("ngoai han => khong loai", g.capit_user_excluded("2026-11-26")[0] == {} and g.capit_user_excluded("2027-03-16")[0] == {})
+putx({**row, "decided_by": "agent"}); chk("agent => khong loai + bao loi", g.capit_user_excluded("2026-11-27")[0] == {} and g.capit_user_excluded("2026-11-27")[1])
+putx({k: v for k, v in row.items() if k != "until"}, row)
+out, err = g.capit_user_excluded("2026-11-27"); chk("dong thieu until bi bo rieng", list(out) == ["VGC"] and err)
+open(UX, "w").write("{hong"); chk("file hong => tra loi", g.capit_user_excluded("2026-11-27")[1])
+pool = pd.DataFrame({"ticker": ["GAS", "VGC", "PVT"], "pbz": [-1.3, -1.8, -1.5]})
+putx({**row, "ticker": " vgc "}, {**row, "ticker": "ZZZ"})
+p2, dr, err = g.capit_apply_user_exclusions(pool, "2026-11-27")
+chk("loc pool: VGC ra khoi pool, ma ngoai pool khong bao", list(p2.ticker) == ["GAS", "PVT"] and list(dr) == ["VGC"] and not err)
+open(UX, "w").write("{hong"); p2, dr, err = g.capit_apply_user_exclusions(pool, "2026-11-27")
+chk("file hong => pool nguyen + co loi", len(p2) == 3 and dr == {} and err)
+putx({**row, "approval_ref": ""}); chk("loai tay thieu approval_ref => khong loai", g.capit_user_excluded("2026-11-27")[0] == {})
+putx({**row, "from": "2027-04-01"}); chk("from > until => bao loi", g.capit_user_excluded("2026-11-27")[1])
+gsrc = open(os.path.join(HERE, "deploy_golive_dt5g_v4", "golive_recommend_v23.py"), encoding="utf-8").read()
+chk("golive GAN lai pool da loc", gsrc.count("e, capit_user_dropped, capit_user_excl_error = _capit_apply_user_exclusions(e, bd.date())") == 1
+    and gsrc.index("= _capit_apply_user_exclusions(e") < gsrc.index('g = e[e["pbz"] < -1]'))
+
+# anomaly_clear: job headless bi tu choi; NONE_FOUND qua som
+os.environ["JOB_ID"] = "x"; chk("JOB_ID => tu choi ghi", not run(base)); os.environ.pop("JOB_ID")
+yday = str(_dt.date.today() - _dt.timedelta(days=2))
+json.dump({"PVT": {"last_alert": yday}}, open(tmp + "/wc/data/anomaly_flags.json", "w"))
+chk("NONE_FOUND < 7 ngay bi tu choi", not run(["PVT", yday, "NONE_FOUND"] + base[3:]) and run(["PVT", yday] + base[2:]))
+
+# escalate: dispatch loi / co da rut / loi nhanh CAPIT khong lam mat tier-H
+json.dump({"capit_dd_excluded": ["PVT"]}, open(ae.GOLIVE_STATUS, "w"))
+json.dump({"PVT": {"last_alert": "2026-10-29"}}, open(ae.FLAGS, "w"))
+ae.LEDGER, ae.CLEARANCES = tmp + "/led3.json", tmp + "/none.json"; sent.clear()
+ae._dispatch_bg = lambda t, p, d: None
+with contextlib.redirect_stdout(io.StringIO()):
+    ae.escalate({"asof": "2026-11-27"}); ae.escalate({"asof": "2026-11-27"})
+chk("dispatch loi => noi that va thu lai", len(sent) == 2 and all("THẤT BẠI" in m for m in sent))
+jobs.clear(); ae._dispatch_bg = lambda t, p, d: (jobs.append(t), "job")[1]
+json.dump({"PVT": {"last_alert": "2026-10-29", "retracted": {"on": "2026-11-01"}}}, open(ae.FLAGS, "w"))
+with contextlib.redirect_stdout(io.StringIO()):
+    ae.escalate({"asof": "2026-11-27"})
+chk("co da rut => khong tra tin", jobs == [])
+open(ae.FLAGS, "w").write("{hong"); sent.clear(); ae.LEDGER = tmp + "/led4.json"
+with contextlib.redirect_stdout(io.StringIO()):
+    nh, _ns = ae.escalate({"asof": "2026-11-27", "tier_h": [{"ticker": "AAA", "reasons": "X", "ret": -7.0,
+                           "vni_ret": 0.0, "idio": -7.0, "vol_x": 1.0, "close": 1.0}]})
+chk("nhanh CAPIT hong khong chan tier-H", nh == ["AAA"] and "AAA|2026-11-27" in json.load(open(ae.LEDGER)))
+# cua so TTL cua danh sach cờ rut trong write_flags
+json.dump({"AAA": {"last_alert": "2026-07-01", "ret": -9.0, "retracted": {"on": "2026-07-02", "ret_now": -1}}},
+          open(s.FLAGS_PATH, "w"))
+chk("co rut da het TTL khong vao emit", s.write_flags(alert("2026-09-18").iloc[0:0]) == [])
 
 print(f"{'PASS' if not fails else 'FAIL'} ({len(fails)} loi)")
 sys.exit(1 if fails else 0)

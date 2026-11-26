@@ -270,8 +270,16 @@ def _anomaly_note(ticker, asof):
         rec = flags.get(ticker)
         if not rec:
             return ""
-        return (f"⚠ cờ bất thường {rec.get('tier', '?')} [{rec.get('reasons', '?')}] "
+        note = (f"⚠ cờ bất thường {rec.get('tier', '?')} [{rec.get('reasons', '?')}] "
                 f"ngày {rec.get('last_alert', '?')}")
+        try:   # cờ đã gỡ/rút ⇒ nói ra để báo cáo không mâu thuẫn với gate; lỗi ⇒ giữ nguyên cảnh báo
+            from anomaly_gate import anomaly_skipped
+            skip = anomaly_skipped(asof).get(ticker)
+            if skip:
+                note += f" — gate KHÔNG áp dụng ({skip[1]})"
+        except Exception as exc:
+            _log.warning("không đọc được trạng thái gỡ cờ (%s): %s", ticker, exc)
+        return note
     except Exception as exc:
         _log.warning("anomaly flags đọc lỗi (%s): %s", ticker, exc)
         return ""
