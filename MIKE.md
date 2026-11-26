@@ -131,6 +131,10 @@ cao sẽ tự chạy tiếp, nhưng nếu phiên tôi restart giữa chừng th�
 >
 > **Đo tuân thủ**: `bin/wakeup_audit.py --since <ngày>` (gắn `daily_retro.sh`).
 >
+> **Ngoại lệ DUY NHẤT (2026-11-26, user duyệt): lượt Discord bị cắt vì hết quota.** Hook `StopFailure`
+> (`bin/session_limit_resume.py`) hẹn `bus/pending_resumes/session_<thread>.json`; `resume_pending.py`
+> gọi `wake_thread.sh` sau giờ reset +10' (trần 3 lần liên tiếp; có lượt mới trong thread ⇒ huỷ hẹn).
+>
 > **`wake_thread.sh` giờ là primitive TAY, không caller tự động** (xem header file). Dùng khi biết
 > CHẮC có 1 session sống đang chờ ở thread đích; thread không có session sống ⇒ ccdb mở phiên MỚI
 > (tốn phí). An toàn hơn trước: ccdb đã tự retry session mới khi gặp "No conversation found" (commit

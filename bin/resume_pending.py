@@ -62,6 +62,15 @@ def fire(fp, rec):
     if not agent:
         log("SKIP malformed (no agent): %s" % fp)
         return
+    if kind == "session":
+        # Phiên Discord tương tác: đánh thức đúng thread, KHÔNG dispatch job headless.
+        r = subprocess.run(
+            [os.path.join(ROOT, "bin", "wake_thread.sh"), str(rec["thread_id"]), prompt,
+             "limit-%s-%d" % (rec["thread_id"], int(time.time()))],
+            env=dict(os.environ, WAKE_DEBOUNCE_S="0"), capture_output=True, text=True, timeout=30)
+        log("%s session thread=%s -> %s" % ("RESUMED" if r.returncode == 0 else "WAKE-FAILED",
+                                            rec["thread_id"], (r.stdout or r.stderr).strip()[:200]))
+        return r.returncode == 0
     if kind == "max_turns":
         resume_prompt = (
             "[RESUME sau max-turns #%d, job gốc=%s] Task trước đó bị DỪNG GIỮA CHỪNG vì hết "
