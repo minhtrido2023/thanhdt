@@ -854,3 +854,8 @@
 ## Consolidation 2026-11-26T13:07:02Z
 - [2026-11-26T12:10:48Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-11-26", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-11-26.md"}
 - [2026-11-26T12:11:18Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-11-26", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-11-26.md"}
+
+## Consolidation 2026-11-26T13:21:34Z
+- [2026-11-26T13:21:03Z] DollarBill/heartbeat — DollarBill_20261126_132002: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261126_132002", "source": "watcher"}
+- [2026-11-26T13:21:06Z] DollarBill/heartbeat — DollarBill_20261126_132005: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261126_132005", "source": "watcher"}
+- [2026-11-26T13:21:25Z] DollarBill/decision — plan-2026-11-27: {"account": "ZaloPay", "orders": ["GAS 400@68000", "QNS 500@47500", "VGC 700@36750", "VNM 500@52700"], "book": "CAPIT", "total_buy_vnd": 103025000, "egg_transfer_min_vnd": 93900000, "approved": false, "file": "data/trade_plans/plan_ZaloPay_2026-11-27.json", "checks": "load_plan 4 lenh, cap_capit_orders 0 cat, lag calendar check OK, auto_exit dry-run khong candidate"}

@@ -7,3 +7,4 @@
 - [2026-11-24T17:23:07Z] [2026-11-25 00:3x ICT] Plan ZaloPay 11-25 XONG HOLD ALL 0 lenh (chay tay sang); cho user duyet truoc 08:45 (job DollarBill_20261124_172231)
 - [2026-11-25T12:03:35Z] [2026-11-25 19:xx ICT] Plan SpaceX 11-26 XONG HOLD ALL 0 lenh; FPT sat stop -10% (user da mien); cho duyet truoc 08:45 26/11 (job DollarBill_20261125_120302)
 - [2026-11-25T12:03:40Z] [2026-11-25 19:1x ICT] Plan ZaloPay 11-26 XONG HOLD ALL 0 lenh; cho duyet truoc 08:45 26/11 (job DollarBill_20261125_120300)
+- [2026-11-26T13:21:25Z] [2026-11-26 20:2x ICT] Plan ZaloPay 11-27 XONG: CAPIT-2026-11-26 4 lenh mua ~103tr, egg>=93,9tr; cho duyet truoc 08:45 27/11 (job DollarBill_20261126_132002). Plan SpaceX 11-27 luc 20:2x CHUA co file (job rieng)
