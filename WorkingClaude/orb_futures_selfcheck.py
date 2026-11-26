@@ -623,5 +623,53 @@ check(r == "CLOSED" and reads == ["open", "open", "none"], f"open,open,None đ�
 check(len(reds(ev, "không đọc được số lượng")) + len(reds(ev, "BROKER CÒN")) >= 1, "open,open,None ⇒ có ĐỎ (không im lặng)")
 check(len(reds(ev, "BROKER CÒN +1 HĐ")) == 0, "lần đọc cuối None ⇒ KHÔNG nói còn +1 (số cuối không rõ)")
 
+print("44. main(): khoá đang giữ thoát LOCKED trước make_client; working_dates timeout fallback vn_market")
+d44 = tempfile.mkdtemp(dir=ROOT)
+acc44 = os.path.join(d44, "accs.json")
+json.dump({"accounts": [{"label": "SpaceX", "account_id": "0002023347", "enabled": True, "mode": "live",
+                         "orb_futures": {"enabled": False}}]}, open(acc44, "w"))
+saved44 = (OF.DATA_DIR, OF.ACCOUNTS_FILE, OF.make_client)
+try:
+    OF.DATA_DIR = d44
+    OF.ACCOUNTS_FILE = acc44
+    called_mc = [0]
+
+    def boom_mc(prof):
+        called_mc[0] += 1
+        raise AssertionError("không được gọi make_client khi lock đang giữ")
+
+    OF.make_client = boom_mc
+    os.makedirs(os.path.join(d44, "orb_futures"), exist_ok=True)
+    lk44 = os.path.join(d44, "orb_futures", "lock_SpaceX")
+    # Dùng subprocess giữ flock thật để fcntl khác process bị BlockingIOError
+    import subprocess as _sp  # noqa: E402
+    holder = _sp.Popen([sys.executable, "-c",
+                        "import fcntl,sys,time; f=open(sys.argv[1],'a+'); fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB); print('LOCKED_READY', flush=True); time.sleep(10)",
+                        lk44], stdout=_sp.PIPE, text=True)
+    try:
+        assert holder.stdout.readline().strip() == "LOCKED_READY"
+        buf44 = io.StringIO()
+        with _cl.redirect_stdout(buf44):
+            rc44a = OF.main(["--account", "SpaceX", "--once"])
+        check(rc44a == 0 and "LOCKED" in buf44.getvalue() and called_mc[0] == 0,
+              f"flock đang giữ ⇒ main() thoát 0 LOCKED trước make_client (rc={rc44a}, mc={called_mc[0]})")
+    finally:
+        holder.terminate()
+        holder.wait(timeout=5)
+
+    # (b) working_dates() ném TimeoutError ⇒ không crash Traceback, fallback vn_market
+    class TimeoutFake(Fake):
+        def working_dates(self):
+            raise TimeoutError("timed out")
+
+    ck44 = Clock(9, 31, 5)
+    OF.make_client = lambda prof: TimeoutFake(ck44)
+    buf44b = io.StringIO()
+    with _cl.redirect_stdout(buf44b):
+        rc44b = OF.main(["--account", "SpaceX", "--once"])
+    check(rc44b == 0, f"working_dates timeout ⇒ main() không crash, rc={rc44b}")
+finally:
+    OF.DATA_DIR, OF.ACCOUNTS_FILE, OF.make_client = saved44
+
 print(f"\n{'ALL PASS' if not FAILS else f'{len(FAILS)} FAIL'} (TZ={os.environ.get('TZ')})")
 sys.exit(1 if FAILS else 0)

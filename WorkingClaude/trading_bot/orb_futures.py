@@ -943,7 +943,29 @@ def main(argv=None):
     a = ap.parse_args(argv)
     prof, ocfg = load_profile(a.account)
     acc = prof.get("account_id")
-    c = make_client(prof)
+    if not a.plan_block and not a.funding_alert:
+        lock_dir = os.path.join(DATA_DIR, "orb_futures")
+        os.makedirs(lock_dir, exist_ok=True)
+        lock_path = os.path.join(lock_dir, f"lock_{a.account}")
+        with open(lock_path, "a+") as lf:
+            try:
+                fcntl.flock(lf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                print("[orb_fut] tiến trình khác đang giữ khoá — thoát.\nLOCKED")
+                return 0
+    today = dt.datetime.now(ICT).date()
+    try:
+        c = make_client(prof)
+    except Exception as ex:                                         # noqa: BLE001
+        if a.plan_block:
+            if not ocfg["enabled"]:
+                print(plan_block(a.account, None, acc, False)); return 0
+            print(f"⚠️ Không kết nối được DNSE để kiểm ký quỹ phái sinh ({ex.__class__.__name__})."); return 0
+        if a.funding_alert:
+            print(f"[orb_fut] lỗi kết nối DNSE khi funding-alert: {ex!r}", file=sys.stderr)
+            return 1
+        print(f"[orb_fut] {today} tạm thời không kết nối được DNSE ({ex.__class__.__name__}) — watchdog sẽ thử lại.")
+        return 0
     if a.plan_block:
         print(plan_block(a.account, c, acc, ocfg["enabled"])); return 0
     if a.funding_alert:
@@ -955,10 +977,17 @@ def main(argv=None):
         default_notify(f"🔴 **ORB VN30F {a.account} [LIVE]** — không có trading-token DNSE (run_bot 09:05 "
                        "lẽ ra đã tạo) ⇒ BỎ phiên.", red=True)
         return 2
-    wd = c.working_dates()
-    today = dt.datetime.now(ICT).date()
-    if str(today) not in (wd.get("workingDates") or []):
-        print(f"[orb_fut] {today} không phải ngày giao dịch (DNSE working-dates)."); return 0
+    try:
+        wd = c.working_dates()
+        is_td = str(today) in (wd.get("workingDates") or [])
+        src_td = "DNSE working-dates"
+    except Exception as ex:                                         # noqa: BLE001
+        sys.path.insert(0, WC_ROOT)
+        from trading_bot.vn_market import is_holiday
+        is_td = today.weekday() < 5 and not is_holiday(today)
+        src_td = f"vn_market fallback ({ex.__class__.__name__})"
+    if not is_td:
+        print(f"[orb_fut] {today} không phải ngày giao dịch ({src_td})."); return 0
     print(OrbFutures(c, a.account, acc, live).run(once=a.once))
     return 0
 
