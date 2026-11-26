@@ -1,16 +1,7 @@
-# Mike fleet — context_taylor_mini (v4095)
-> Auto-generated RECENT block; static canonical facts maintained manually (weekly audit-lens catches drift).
+# Mike fleet — context_taylor_mini (static canonical)
+> Static canonical facts maintained manually (`kb/context_recent.md` injected at SessionStart).
 > Dùng `bin/kb_recall.sh "keywords"` để lấy section đầy đủ khi cần chi tiết về ops/CAPIT/project.
 > Source đầy đủ: `kb/context_pack.md`.
-
-<!--RECENT-START-->
-## MỚI NHẤT — kết quả gần đây từ toàn fleet
-- [2026-10-21T17:33:35] Mike/finding — daily-retro-2026-10-21: {"entry": "kb/incidents/retro/retro-2026-10-21.md", "incidents": 3, "patterns": 1, "wags": "GAPS FOUND - fixed", "measured_by": "retro finalize job Mike_2026102 …
-- [2026-10-22T00:30:31] Taylor/finding — corp-action-daily 2026-10-22 OK: {"asof": "2026-10-22", "feed_status": "FRESH", "n_track": 14, "n_held": 7, "exright_today": ["ALV", "DWC", "MCP"], "ais_today": ["HMH", "ITC", "VC3", "WTC"], "c …
-- [2026-10-22T02:40:31] Taylor/finding — rights-alert-wire-review-fix-20261022: {"branch": "feat/rights-alert-wire-20261022", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-rights-wire-20261022", "commit": "f3602417a (trên 901b2341c, chư …
-- [2026-10-22T02:57:31] Taylor/finding — lag-rights-patches-20261022 X1,X2,X3,N2,N3 xong, cho arch-review: {"branch": "feat/lag-rights-patches-20261022", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-rights-patches-20261022", "base": "27f844f16", "commits": { …
-- [2026-10-22T03:52:03] Taylor/finding — lag-rights-n1-n4-20261022 xong, chờ arch-review: {"branch": "feat/lag-rights-n1-20261022", "worktree": "/home/trido/thanhdt/WorkingClaude/wt-lag-rights-n1-20261022", "base": "4d250ce71", "commits": {"N1": "9c0 …
-<!--RECENT-END-->
 
 ## Kill-switches
 - `data/BOT_STOP`: tạo file = dừng mọi giao dịch tức thì
@@ -18,15 +9,17 @@
 - V2.5: `trading_rules.json v1.7` → v25_leverage STATUS=DISABLED
 
 ## Đang trading (LIVE)
-SpaceX (DNSE 0002023347) V2.4 LIVE từ 2026-07-01, có margin, run_bot.sh 09:05 ICT.
-ZaloPay (DNSE 0001743768) V2.4 LIVE từ 2026-07-06, CASH-ONLY, DGC excluded (HOSE hạn chế).
+- SpaceX (DNSE 0002023347) V2.4 LIVE từ 2026-07-01, có margin, run_bot.sh 09:05 ICT.
+- ZaloPay (DNSE 0001743768) V2.4 LIVE từ 2026-07-06, CASH-ONLY, **DGC & PNJ EXCLUDED** (PNJ loại cả 2 account từ 2026-09-30, review khi có BCTC Q3/2026).
+- **NEUTRAL parking = 0% (TẮT từ 2026-10-01, `decided_by: user`)**: tiền nhàn rỗi ở Trứng vàng (~8,543%/năm net, rút trong ngày, coi tương đương tiền). Chỉ cảnh báo khi lãi huy động hạ, KHÔNG tự khôi phục park.
+- **4 quy tắc DD (chốt 2026-11-02)**: (1) mã có RED_FLAG / `quality_flag!=OK` loại khỏi plan & cổng mua; (2) DRI bán hết; (3) TV1 không giữ; (4) mã có DD mà giá < tâm 15% được xét discretionary.
 → `kb_recall "trading live capit domain due-diligence"` cho chi tiết sizing/gate/pipeline.
 
 ## Dự án đang mở (pointers)
 - R&D pipeline (paper-only): `kb/projects/rnd-pipeline-tracker.md`
 - universe_pit migration G5-G9: `kb/projects/universe-pit-migration.md`
-- LAG ADV filter tracking (mốc cứng 2026-12-15): `kb/projects/lag-adv-filter-tracking.md`
-- CASH_VENDOR gate: ĐÓNG đến 2026-09-13, cần user xác nhận khi mở lại
+- LAG ADV filter tracking (mốc cứng 2026-12-15 / 2027-03-31): `kb/projects/lag-adv-filter-tracking.md`
+- CASH_VENDOR gate: ĐÓNG, cần user xác nhận khi mở lại
 
 ---
 
@@ -36,10 +29,10 @@ ZaloPay (DNSE 0001743768) V2.4 LIVE từ 2026-07-06, CASH-ONLY, DGC excluded (HO
 = V2.3A + custom30V parking (NEUTRAL) + gated-overflow (bear-washout) + HAG eq_flag fix.
 2 book: **BAL** (momentum SIGNAL_V11, yieldcombo: 1/PE + 1/PCF) + **LAG** (PEAD/earnings drift).
 Allocator w_LAG: {CRISIS 50 / BEAR 0 / NEUTRAL-BULL-EXBULL 65}, band ±10pp.
-**R3 NEUTRAL-only @50B (universe_pit, pin 2026-08-03): CAGR 28.86% / Sharpe 1.90 / DD −17.8% / Calmar 1.62** (Final NAV 1.178,01B).
-Bootstrap 5th-pct: CAGR 18.6%, DD −28.6% (anchor DD ~−29%, KHÔNG phải −18%).
-NEUTRAL parking custom30V = phần tin cậy nhất: +7.4pp Full. (30 mã, cap 0.10)
-V2.5: lever MGE=1.5, DISABLED — chi tiết `kb/projects/v2.5-leverage-nogo.md`.
+- **R3 NEUTRAL-only @50B (`@park=0.30`, pin dải 2026-09-28): `pin0%` 23,37% (Sharpe 1,88 / DD −14,6% / Calmar 1,60) … `pin1M` 25,71%** (DSR 1,0000 · PBO(68) 0,2085; KHÔNG trích 1 số trần trụi; bản 28,86% / +7,4pp cũ ĐÃ SUPERSEDED).
+- **park=0 (`@park=0`, LIVE từ 2026-10-01, pin 2026-10-08): `pin0%` 22,12% … `pin1M` 25,42%** (0,30 vs 0,0 không phân biệt được, P=0,479; giữ/bỏ park do user chốt).
+- **Neo sizing DD (user chốt 2026-11-13): NAV ≤2 tỷ (live) ⇒ DD5 ≈ −33%; 50B nghiên cứu ⇒ −29,09%** (neo −25,2% cũ và ~−29% cũ = LỊCH SỬ).
+- V2.5: lever MGE=1.5, DISABLED — chi tiết `kb/projects/v2.5-leverage-nogo.md`.
 
 ### DT5G — bẫy quan trọng
 Production: `tav2_bq.vnindex_5state_dt5g_live` qua `get_gated_state()`.
