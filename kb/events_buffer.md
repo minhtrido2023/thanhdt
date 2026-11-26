@@ -840,3 +840,8 @@
 
 ## Consolidation 2026-11-26T06:30:20Z
 - [2026-11-26T06:30:15Z] Wags/finding — work-tree verify 2026-11-26 PM: {"closed": 0, "updated": 0, "kept_open": 0, "need_user": 0, "overdue": 0, "inbox": 0, "merged_generated_at": "2026-11-26T13:30:13+07:00", "note": "attention.need_user va attention.overdue deu rong: khong co id nao can xac minh; khong sua ledger; work_tree_build rc=0"}
+
+## Consolidation 2026-11-26T08:07:02Z
+- [2026-11-26T07:29:00Z] Mafee/status — orb_futures_exit: {"account": "SpaceX", "mode": "DRY", "reason": "TIME", "entry": 1763.7, "exit": 1736.0, "pnl_gross_vnd": 2770000, "exit_px_estimated": false}
+- [2026-11-26T07:12:39Z] Mike/finding — session-auto-resume-live: {"summary": "Auto-resume phien Discord khi het quota da merge + thu that 1 topic PASS; ca thread archived chua thu", "commit": "0ba540a7f,3a1ed26ff", "decided_by": "user"}
+- [2026-11-26T07:26:20Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 6320, "deleted_bytes": 765058663, "archived_items": 1894, "archived_bytes": 7385830, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}

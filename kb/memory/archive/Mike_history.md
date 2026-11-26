@@ -294,3 +294,6 @@
 
 ## Archived 2026-11-25 (keep=12 days=0 require_done=False)
 - [2026-11-24T17:28:19Z] [25/11 00:30 ICT] A XONG: DT5G publish as_of 23/11 (state 3), DollarBill dựng plan_SpaceX/ZaloPay_2026-11-25 (HOLD ALL 0 lệnh), đã send_plan_report 00:27 chờ user duyệt (trước 08:45). 4 bus q plan-t1-not-ready (24/11 holiday + 25/11) đã đóng có bằng chứng. Lưu ý: ngưỡng nới 190 chỉ lần này; ZaloPay LAG 12 mã PACK_STALE (morning mode bỏ lag_dd_pack) + recommend CSV 23/11 thiếu ⇒ HOLD ALL có thể do thiếu input; feed corp-action 25/11 không snapshot. B: Wags_20261124_170537 đang chạy → arch-reviewer → user duyệt merge.
+
+## Archived 2026-11-26 (keep=12 days=0 require_done=False)
+- [2026-11-25T17:35:45Z] [26/11 00:37] User duyệt B1+skeptic vòng 2, thứ tự Mike chọn: B1 trước (Taylor_20261125_173540, cùng nhánh pit2) → xong thì quant-skeptic vòng 2 trên script cuối → trình user + xin duyệt merge/cron/registry
