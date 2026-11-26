@@ -185,9 +185,68 @@ for wt in "${!wt_branch_by_path[@]}"; do
     continue
   fi
   if [ -n "$(git -C "$wt" status --porcelain --untracked-files=normal 2>/dev/null || true)" ]; then
-    say "KEEP dirty: $wt [$branch]"
-    N_KEPT_DIRTY=$((N_KEPT_DIRTY+1))
-    continue
+    # Check if dirty ONLY because of untracked leftovers (no tracked modifications).
+    # For an already-merged, inactive worktree, salvage untracked files/dirs to
+    # state/worktree_salvage/ instead of stranding a 4.6GB checkout on disk forever.
+    salvage_dir="$ROOT/state/worktree_salvage/$(basename "$wt")_$(date -u +%Y%m%d_%H%M%S)"
+    check_res="$(python3 - "$wt" "$salvage_dir" "$APPLY" <<'PY' 2>&1
+import os, shutil, subprocess, sys
+
+wt, salvage_dir, apply_mode = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+out = subprocess.check_output(
+    ["git", "-C", wt, "status", "--porcelain=v1", "-z", "--untracked-files=normal"]
+)
+entries = [e for e in out.decode("utf-8", errors="replace").split("\0") if e]
+untracked = []
+for ent in entries:
+    if not ent.startswith("?? "):
+        print("TRACKED_DIRTY")
+        sys.exit(2)
+    untracked.append(ent[3:])
+
+if not untracked:
+    sys.exit(0)
+
+if apply_mode:
+    os.makedirs(salvage_dir, exist_ok=True)
+    for rel in untracked:
+        src = os.path.join(wt, rel.rstrip("/"))
+        dst = os.path.join(salvage_dir, rel.rstrip("/"))
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        if os.path.isdir(src) and not os.path.islink(src):
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        elif os.path.exists(src) or os.path.islink(src):
+            shutil.copy2(src, dst)
+print(f"SALVAGE_OK count={len(untracked)}")
+PY
+)" || check_res="TRACKED_DIRTY"
+    case "$check_res" in
+      SALVAGE_OK*)
+        if [ "$APPLY" = "1" ]; then
+          if git -C "$ROOT" worktree remove --force "$wt" 2>>"$LOG"; then
+            say "SALVAGED untracked -> $salvage_dir & REMOVED merged worktree: $wt [$branch]"
+            N_REMOVED=$((N_REMOVED+1))
+            if git -C "$ROOT" branch -d "$branch" >>"$LOG" 2>&1; then
+              say "DELETED branch: $branch"
+              N_BRANCH_DELETED=$((N_BRANCH_DELETED+1))
+            else
+              say "WARN branch $branch không tự xoá được (xem log)"
+            fi
+          else
+            say "WARN worktree remove thất bại sau salvage: $wt [$branch] (xem log)"
+          fi
+        else
+          say "[dry] SALVAGE untracked -> $salvage_dir & REMOVE merged worktree: $wt [$branch]"
+          N_REMOVED=$((N_REMOVED+1))
+        fi
+        continue
+        ;;
+      *)
+        say "KEEP dirty (tracked modifications): $wt [$branch]"
+        N_KEPT_DIRTY=$((N_KEPT_DIRTY+1))
+        continue
+        ;;
+    esac
   fi
 
   if [ "$APPLY" = "1" ]; then

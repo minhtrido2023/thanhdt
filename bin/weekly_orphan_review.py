@@ -22,7 +22,7 @@ R_ORPHAN_DAYS = 14
 T_IDLE_DAYS = 7
 GRACE_DAYS = 7
 MIN_HEAVY = 1 << 20
-DD_KEEP_EXT = (".py", ".sh")   # DD đã xong: giữ .md (nguồn dùng lại) + script nhỏ; bỏ nguồn tải về/ảnh/pdf/csv tạm (user duyệt 2026-11-19 22:18)
+DD_KEEP_EXT = (".py", ".sh", ".json", ".txt")   # DD đã xong: giữ .md + script/lock/assumptions; bỏ src tải về/ảnh/pdf/csv tạm (user duyệt 2026-11-19 22:18)
 BIG_FILE = 50 << 20
 BIG_FILE_AGE = 30
 NEVER = ("bq_cache", "pinned_ledgers")
@@ -43,15 +43,17 @@ def newest_mtime(path):
     return best
 
 
-def corpus(root):
+def corpus(root, include_kb_json=True):
     """Văn bản mà tham chiếu 'sống' có thể nằm: code, cron, registry. Không gồm chính thư mục research."""
     parent = os.path.dirname(root)
     # kb/*.json: sổ production trỏ thẳng vào file research (kb/dd_price_zones.json ⇒ calc/assumptions*.json,
     # LOCK_*.txt — khoá giả định §DD). Thiếu nó, TRIM_DD 19/11 xoá 28 file khoá ⇒ dd_price_zones_selfcheck đỏ.
-    pats = ["bin/*.py", "bin/*.sh", "*.py", "data/*.json", "kb/*.json",
+    pats = ["bin/*.py", "bin/*.sh", "*.py", "data/*.json",
             os.path.join(parent, "*.py"), os.path.join(parent, "trading_bot", "*.py"),
             os.path.join(parent, "data", "results_registry.md"),
             os.path.join(parent, "data", "pinned_ledgers", "PINS.jsonl")]
+    if include_kb_json:
+        pats.append("kb/*.json")
     out = []
     for g in pats:
         for f in glob.glob(g if os.path.isabs(g) else os.path.join(root, g)):
@@ -60,6 +62,16 @@ def corpus(root):
             except OSError:
                 pass
     out.append(sh(["crontab", "-l"]).stdout)
+    return "\n".join(out)
+
+
+def _kb_json_corpus(root):
+    out = []
+    for f in glob.glob(os.path.join(root, "kb", "*.json")):
+        try:
+            out.append(open(f, errors="ignore").read())
+        except OSError:
+            pass
     return "\n".join(out)
 
 
@@ -86,7 +98,7 @@ def load_keep(root):
     return keep
 
 
-def scan_research(root, now, code, kb, keep, min_heavy):
+def scan_research(root, now, code, kb, keep, min_heavy, kb_json_text=""):
     base = os.path.join(root, "agents", "Taylor", "research")
     items, protected = [], []
     if not os.path.isdir(base):
@@ -111,10 +123,11 @@ def scan_research(root, now, code, kb, keep, min_heavy):
         for root_, _, fs in os.walk(p):
             for f in fs:
                 fp = os.path.join(root_, f)
+                rel_fp = os.path.relpath(fp, root)
                 if f.lower().endswith(".md"):
                     has_md = True
                     continue
-                if is_dd and f.lower().endswith(DD_KEEP_EXT):
+                if is_dd and (f.lower().endswith(DD_KEEP_EXT) or (kb_json_text and rel_fp in kb_json_text)):
                     continue
                 try:
                     heavy.append((fp, os.lstat(fp).st_size))
@@ -272,8 +285,9 @@ def main(argv=None):
         state = json.load(open(sp))
     except (OSError, ValueError):
         state = {}
-    code, kb, keep = corpus(root), kb_corpus(root), load_keep(root)
-    items, protected = scan_research(root, now, code, kb, keep, a.min_heavy)
+    code_all, code_no_kbjson, kb_json_text = corpus(root), corpus(root, include_kb_json=False), _kb_json_corpus(root)
+    kb, keep = kb_corpus(root), load_keep(root)
+    items, protected = scan_research(root, now, code_no_kbjson, kb, keep, a.min_heavy, kb_json_text)
     items += scan_tmp(a.tmp, now, a.min_tmp)
     info = [] if a.no_report_only else scan_report_only(root, now)
     new_state, applied, pending = {}, [], []
@@ -285,7 +299,7 @@ def main(argv=None):
         it["first_seen"] = first
         grace_ok = it["kind"] == "T" or (today - dt.date.fromisoformat(first)).days >= a.grace_days
         if a.apply and grace_ok:
-            it["freed"] = apply_item(root, it, code, now)
+            it["freed"] = apply_item(root, it, code_all, now)
             applied.append(it)
             new_state.pop(it["key"], None)
         else:

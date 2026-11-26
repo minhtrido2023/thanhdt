@@ -354,6 +354,7 @@ tay: `claude login` khi logout, re-pair trong app Claude khi zombie dai dẳng.
 
 - **`bin/dispatch.sh <id> "prompt" [--bg] [--timeout SEC] [--model NAME] [--effort LV] [--write-scope "p1,p2"]`**
   Prompt **≥ 8 BYTE** (bắt buộc). `--bg` trả `job_id` tức thì. `--write-scope` khai file sẽ sửa → HỦY (exit 6) nếu scope trùng job đang LIVE. Guards: self-dispatch chặn; target Mike phải dùng event `question`.
+- **Worktree gọn (`bin/wt_create.sh`)**: KHÔNG chạy `git worktree add` thô trên `mike` (copy hàng trăm MB–nhiều GB `agents/Taylor/research` + `reports`); sửa nhỏ không đụng job live ⇒ sửa thẳng + `--write-scope`, cần tách nhánh ⇒ dùng `bin/wt_create.sh <wt_path> [branch] [--include subpath]`.
 - **`bin/jobs.sh status <id>`** exit-code: `0=done 2=running 3=overdue 5=pending-resume 1=failed/timeout/cancelled/orphaned 4=not-found`.
 - **`bin/jobs.sh cancel <id>`** — CÁCH DUY NHẤT dừng job. ⚠️ ĐỪNG `kill <pid>` thủ công — worker chạy dưới `setsid`, kill wrapper không chạm tới nó.
 - **`bin/jobs.sh claim-reply <id>`** — test-and-set nguyên tử, dùng làm DÒNG ĐẦU mọi wakeup turn. Exit: `0`=giành quyền `1`=đã reply `2`=lỗi đọc `3`=job chưa terminal.

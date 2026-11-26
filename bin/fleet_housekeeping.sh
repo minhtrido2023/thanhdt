@@ -41,10 +41,12 @@ Category DELETE (đã xác minh nội dung, xem báo cáo §2):
   errnoise   logs/*.err chỉ chứa warning stdin của harness
   jobtmp     bus/jobs/*.json.tmp mồ côi (atomic-write bị kill)
   pycache    __pycache__/ (regenerable, đã gitignore cả 2 repo)
+  stateclean state/notify & wake_debounce >2d; state/retro_* >14d; state/{autofix,plan_*,bot_heartbeat,daily_decision_topic,worktree_salvage} >30d
+  ddmedia    agents/Taylor/research/**/*.{pdf,png,jpg,jpeg} >14d (trừ kb/cleanup_keep.txt)
 
 Category ARCHIVE (đảo ngược được, giữ nguyên nội dung):
-  dispatchlog logs/dispatch_*.log  >30d  -> logs/archive/<YYYY-MM>/*.log.gz
-  toollog     logs/{verify_,arch_review_,wags_pipeline_,daily_retro_draft_}* >30d
+  dispatchlog logs/dispatch_*.{log,err} >14d -> logs/archive/<YYYY-MM>/*.gz
+  toollog     logs/{verify_,arch_review_,wags_pipeline_,daily_retro_draft_,selfcheck_weekly_,code_quality_,dd_skeptic_,subagent_}*, *.{verify,out,raw}, run_bot_*.log >14d
   registry    bus/registry/*.json  >30d  -> bus/registry/archive/
   rotate      logs/<cron>.log + bus/_rejected.jsonl >300KB -> .1.gz .2.gz .3.gz
 
@@ -60,7 +62,8 @@ for a in "$@"; do
   esac
 done
 
-DEFAULT_CATS="pid empty errnoise jobtmp pycache dispatchlog toollog registry rotate"
+DEFAULT_CATS="pid empty errnoise jobtmp pycache dispatchlog toollog registry rotate stateclean ddmedia"
+KEEP_DAYS="${HOUSEKEEPING_KEEP_DAYS:-14}"
 want() {
   if [ -n "$ONLY" ]; then case ",$ONLY," in *",$1,"*) return 0 ;; *) return 1 ;; esac; fi
   case " $DEFAULT_CATS " in *" $1 "*) return 0 ;; *) return 1 ;; esac
@@ -91,7 +94,20 @@ denied() {
     */trading_rules.json)                 return 0 ;;
     */agents/*/exp_*|*/agents/*/probe_*)  return 0 ;;
     */.git/*)                             return 0 ;;
-    */run_bot_*)                          return 0 ;;   # bằng chứng thực thi bot
+    */run_bot_*)                          return 0 ;;   # bằng chứng thực thi bot (không được xoá)
+  esac
+  return 1
+}
+
+denied_archive() {
+  case "$1" in
+    */execution_logs/*|*/execution_logs) return 0 ;;
+    */bq_cache*)                          return 0 ;;
+    */_quarantine/*|*/data/archive/*)     return 0 ;;
+    */trade_plans/*|*/plan_*.json)        return 0 ;;
+    */trading_rules.json)                 return 0 ;;
+    */agents/*/exp_*|*/agents/*/probe_*)  return 0 ;;
+    */.git/*)                             return 0 ;;
   esac
   return 1
 }
@@ -107,7 +123,7 @@ do_delete() {   # do_delete <path> <lý do>
 
 do_archive() {  # do_archive <path> <thư mục đích>
   local p="$1" dest="$2" sz base ym
-  if denied "$p"; then say "  DENY-LIST chặn (không động): $p"; return; fi
+  if denied_archive "$p"; then say "  DENY-LIST chặn (không động): $p"; return; fi
   sz=$(stat -c %s "$p" 2>/dev/null || echo 0)
   base="$(basename "$p")"
   ym="$(date -u -d "@$(stat -c %Y "$p")" +%Y-%m 2>/dev/null || echo unknown)"
@@ -292,15 +308,11 @@ fi
 # Taylor_20260630_033117, Taylor_20260630_034617). Đây đúng nhóm job cần điều tra nhất (việc của
 # Wags) ⇒ giữ log của chúng ở hot cho tới khi record rời đi.
 if want dispatchlog; then
-  hdr "dispatchlog — logs/dispatch_*.log >30d -> logs/archive/ (ARCHIVE; giữ lại job non-terminal)"
+  hdr "dispatchlog — logs/dispatch_*.{log,err} >${KEEP_DAYS}d -> logs/archive/ (ARCHIVE; giữ lại job non-terminal)"
   while IFS= read -r f; do
     if jid="$(jobid_of "$f")" && [ -f "$ROOT/bus/jobs/$jid.json" ]; then
       st="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' \
              "$ROOT/bus/jobs/$jid.json" 2>/dev/null || echo '')"
-      # Terminal set lấy từ MỘT nguồn (mike_json.py terminal-statuses). Bản hardcode cũ ở
-      # đây là {done,failed,timeout} — lệch với kb_nightly.sh và với chính mike_json.py, nên
-      # log của job 'orphaned' (26 bản ghi) bị giữ hot vĩnh viễn (2026-08-10, arch-reviewer).
-      # Rỗng = không có record ⇒ vẫn archive như cũ.
       _term="|$(python3 "$ROOT/bin/mike_json.py" terminal-statuses 2>/dev/null | tr '\n' '|')"
       case "$_term" in
         *"|$st|"*) ;;
@@ -308,16 +320,20 @@ if want dispatchlog; then
       esac
     fi
     do_archive "$f" "$ROOT/logs/archive"
-  done < <(find "$ROOT/logs" -maxdepth 1 -type f -name 'dispatch_*.log' -mtime +30 2>/dev/null)
+  done < <(find "$ROOT/logs" -maxdepth 1 -type f \( -name 'dispatch_*.log' -o -name 'dispatch_*.err' \) -mtime "+$KEEP_DAYS" 2>/dev/null)
 fi
 
 # ── 7. toollog ───────────────────────────────────────────────────────────────
 if want toollog; then
-  hdr "toollog — verify_/arch_review_/wags_pipeline_/daily_retro_draft_ >30d -> logs/archive/"
+  hdr "toollog — logs phụ trợ & run_bot >${KEEP_DAYS}d -> logs/archive/"
   while IFS= read -r f; do do_archive "$f" "$ROOT/logs/archive"; done \
     < <(find "$ROOT/logs" -maxdepth 1 -type f \
           \( -name 'verify_*' -o -name 'arch_review_*' -o -name 'wags_pipeline_*' \
-             -o -name 'daily_retro_draft_*' \) -mtime +30 2>/dev/null)
+             -o -name 'daily_retro_draft_*' -o -name 'selfcheck_weekly_*' \
+             -o -name 'code_quality_*' -o -name 'dd_skeptic_*' -o -name 'subagent_*' \
+             -o -name '*.verify' -o -name '*.out' -o -name '*.raw' \) -mtime "+$KEEP_DAYS" 2>/dev/null)
+  while IFS= read -r f; do do_archive "$f" "$ROOT/logs/archive/run_bot"; done \
+    < <(find "$ROOT/logs" -maxdepth 1 -type f -name 'run_bot_*' ! -name '*.gz' -mtime "+$KEEP_DAYS" 2>/dev/null)
 fi
 
 # ── 8. registry — gap duy nhất của bus mà kb_nightly không chạm ──────────────
@@ -374,6 +390,53 @@ if want rotate; then
            # bằng "a" mỗi lần ghi rồi đóng ngay (không giữ fd dài hạn ⇒ không có lỗ sparse).
            # CỐ Ý không nằm dưới bus/inbox/: mọi reader glob inbox/*.jsonl không lọc tên.
            find "$ROOT/bus" -maxdepth 1 -type f -name '_rejected.jsonl' -size +300k 2>/dev/null)
+fi
+
+# ── 9b. stateclean — dọn file dedup/tạm trong state/ ────────────────────────
+if want stateclean; then
+  hdr "stateclean — notify/wake_debounce >2d, retro >${KEEP_DAYS}d, dir state >30d"
+  for _sd in "$ROOT/state/notify" "$ROOT/state/wake_debounce"; do
+    [ -d "$_sd" ] || continue
+    while IFS= read -r f; do do_delete "$f" "dedup cache >2d"; done \
+      < <(find "$_sd" -maxdepth 1 -type f -mtime +2 2>/dev/null)
+  done
+  while IFS= read -r f; do do_delete "$f" "retro draft/precollect >${KEEP_DAYS}d"; done \
+    < <(find "$ROOT/state" -maxdepth 1 -type f \( -name 'retro_draft_*' -o -name 'retro_wags_*' -o -name 'retro_precollect_*' \) -mtime "+$KEEP_DAYS" 2>/dev/null)
+  for _sd in "$ROOT/state/autofix" "$ROOT/state/plan_report_sent" "$ROOT/state/plan_position_drift" \
+             "$ROOT/state/bot_heartbeat" "$ROOT/state/daily_decision_topic" "$ROOT/state/worktree_salvage"; do
+    [ -d "$_sd" ] || continue
+    while IFS= read -r f; do do_delete "$f" "stale state artifact >30d"; done \
+      < <(find "$_sd" -type f -mtime +30 2>/dev/null)
+    if [ "$APPLY" = 1 ]; then
+      find "$_sd" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+    fi
+  done
+fi
+
+# ── 9c. ddmedia — dọn PDF/ảnh tạm >14d trong agents/Taylor/research/ ────────
+if want ddmedia; then
+  hdr "ddmedia — agents/Taylor/research/**/*.{pdf,png,jpg,jpeg} >${KEEP_DAYS}d (trừ cleanup_keep.txt)"
+  _keep_pats=()
+  if [ -f "$ROOT/kb/cleanup_keep.txt" ]; then
+    while IFS= read -r _kl; do
+      _kl="${_kl%%#*}"
+      _kl="$(printf '%s' "$_kl" | xargs)"
+      [ -n "$_kl" ] && _keep_pats+=("${_kl%/}")
+    done < "$ROOT/kb/cleanup_keep.txt"
+  fi
+  if [ -d "$ROOT/agents/Taylor/research" ]; then
+    while IFS= read -r f; do
+      _skip=0
+      for _kp in "${_keep_pats[@]:-}"; do
+        [ -n "$_kp" ] || continue
+        case "$f" in
+          "$ROOT/agents/Taylor/research/$_kp"/*|"$ROOT/$_kp"/*) _skip=1; break ;;
+        esac
+      done
+      [ "$_skip" = 1 ] && continue
+      do_delete "$f" "research PDF/image >${KEEP_DAYS}d"
+    done < <(find "$ROOT/agents/Taylor/research" -type f \( -iname '*.pdf' -o -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \) -mtime "+$KEEP_DAYS" 2>/dev/null)
+  fi
 fi
 
 # ── 10. (ĐÃ GỠ) datacold — arch-review 2026-07-30 bác bỏ ─────────────────────

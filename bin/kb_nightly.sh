@@ -494,7 +494,7 @@ fi           # end BUFFER_LOCK guard (Phase 1a + 1 + 1b + 1b2)
 # uses ended_at (epoch) falling back to started_at. Move = os.rename (atomic, no content
 # change; nothing deleted). 0 records qualify today (board starts ~2026-06-27) — this is the
 # mechanism for when they age. Guarded non-fatal.
-JOB_KEEP_DAYS="${KB_JOB_KEEP_DAYS:-30}"
+JOB_KEEP_DAYS="${KB_JOB_KEEP_DAYS:-14}"
 log "Archiving terminal job records older than ${JOB_KEEP_DAYS}d → bus/jobs/archive/..."
 python3 - "$JOB_KEEP_DAYS" "$ROOT/bus/jobs" "$ROOT/bin/mike_json.py" <<'PYEOF' 2>&1 | tee -a "$LOG" || log "job-archive: python error (non-fatal, board untouched)"
 import sys, os, json, glob, datetime, subprocess

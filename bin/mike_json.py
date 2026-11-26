@@ -2621,6 +2621,10 @@ def cmd_job_get(a):
     1=failed/timeout/unknown 4=not-found."""
     jobs_dir, job_id = a[0], a[1]
     fp = _job_path(jobs_dir, job_id)
+    if not os.path.isfile(fp):
+        arch_fp = _job_path(os.path.join(jobs_dir, "archive"), job_id)
+        if os.path.isfile(arch_fp):
+            fp = arch_fp
     try:
         with open(fp, encoding="utf-8") as f:
             o = json.load(f)

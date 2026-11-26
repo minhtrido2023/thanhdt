@@ -33,6 +33,14 @@ if [ "$show_log" = "--log" ]; then
     echo
     echo "=== log tail: $logfile ==="
     tail -n 100 "$logfile"
+  elif [ -n "$logfile" ]; then
+    _base="$(basename "$logfile")"
+    _gz="$(find "$ROOT/logs/archive" -type f -name "${_base}.gz" 2>/dev/null | head -n 1 || true)"
+    if [ -n "$_gz" ] && [ -f "$_gz" ]; then
+      echo
+      echo "=== log tail (archived): $_gz ==="
+      gzip -dc "$_gz" | tail -n 100
+    fi
   fi
 fi
 

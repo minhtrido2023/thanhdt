@@ -43,6 +43,13 @@ before=$(df --output=used -BM / | tail -1 | tr -dc 0-9)
 rm -rf "$HOME/.cache/pip" "$HOME/.cache/uv" 2>/dev/null
 command -v npm >/dev/null && npm cache clean --force >/dev/null 2>&1
 python3 -m pre_commit gc >/dev/null 2>&1
+find "$HOME/.claude/projects" -type f -name '*.jsonl' -mtime "+${CLAUDE_TRANSCRIPT_KEEP_DAYS:-14}" -delete 2>/dev/null || true
+find "$HOME/.claude/projects" -mindepth 2 -type d -empty -delete 2>/dev/null || true
+for _git_repo in "$ROOT" "$(dirname "$(dirname "$ROOT")")"; do
+  [ -d "$_git_repo/.git" ] || continue
+  git -C "$_git_repo" prune --expire=2.days.ago >/dev/null 2>&1 || true
+  find "$_git_repo/.git/objects/pack" -maxdepth 1 -type f -name 'tmp_pack_*' -mtime +1 -delete 2>/dev/null || true
+done
 after=$(df --output=used -BM / | tail -1 | tr -dc 0-9)
 pct=$(df --output=pcent / | tail -1 | tr -dc 0-9)
 echo "$(TZ=Asia/Ho_Chi_Minh date '+%F %H:%M') disk=${pct}% freed=$((before-after))MB"
