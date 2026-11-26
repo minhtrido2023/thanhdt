@@ -109,6 +109,9 @@ vào `sql_queries/`. Nó tự expand `{Init}` và tự loại điều kiện ch�
 **File dữ liệu local**: `VNINDEX.csv` (lịch sử VNINDEX đầy đủ + chỉ báo + PE, cho phân tích
 offline không cần chạm BQ) · `bigquery_dictionary.json` · `filter.json` · `sql_queries/*.csv`.
 
+- **BQ parquet cache local**: `/home/trido/thanhdt/WorkingClaude/data/bq_cache/` (`ticker_financial.parquet`, `ticker/`, `ticker_1m.parquet`, `ticker_prune/`, `risk_rating.parquet`, `universe_pit/`, `vnindex_5state_dt5g_live.parquet`; danh mục đầy đủ: `mike/kb/data_registry/index.md`).
+- **CẤM quét đệ quy không giới hạn** (`glob(..., recursive=True)`, `rglob`, `find` thiếu `-maxdepth`, `grep -rn` trần) trên `/workspace`, root `WorkingClaude/`, root `WorkingClaude/mike/`, hoặc `~/.claude/` (có symlink & cây dữ liệu hàng trăm nghìn file — bị chặn cơ học bởi `~/.local/bin/agent_cmd_guard.py`). Luôn chỉ rõ thư mục con (`mike/bin`, `mike/hooks`, `mike/kb`, `mike/config`) hoặc `-maxdepth 3` / `--exclude-dir`.
+
 **Nhóm script**: `backtest_*` (backtest chiến lược) · `analyze_*` (chất lượng tín hiệu, pattern,
 market phase) · `market_*` (timing, state machine, allocation) · `score_live_signals.py` /
 `universe_scan.py` (chấm tín hiệu live) · `extract_deals.py`. Tất cả cùng một khuôn: nạp dữ liệu
