@@ -104,6 +104,21 @@ def escalate(emit, dry=False):
                             "type": "UNIVERSE_STALE", "universe_asof": emit.get("universe_asof")}
                 changed = True
 
+    # CỜ GIÁ GIẢ ĐÃ RÚT — hành động TỰ ĐỘNG mở lại cổng mua tiền thật, bắt buộc có người thấy.
+    for x in emit.get("retracted", []):
+        key = f"RETRACT|{x['ticker']}|{x['date']}"
+        if key in led:
+            continue
+        sent = _notify(f"⚠️ **Rút cờ bất thường (tự động)** — `{x['ticker']}` cờ phiên {x['date']}: "
+                       f"đã ghi {x['ret']}%, giá hiện tại {x['ret_now']}% (vendor chỉnh quyền dở dang).\n"
+                       f"  ⇒ mã KHÔNG còn bị loại khỏi rổ CAPIT / LAG DD / paper vì cờ này. "
+                       f"Thấy sai thì báo để khôi phục.", dry)
+        if sent and not dry:
+            ict = datetime.timezone(datetime.timedelta(hours=7))
+            led[key] = {"escalated_at": datetime.datetime.now(ict).isoformat(timespec="seconds"),
+                        "type": "RETRACT"}
+            changed = True
+
     # PRIMARY — tier-H giá/volume → khởi động due-diligence
     for a in emit.get("tier_h", []):
         key = f"{a['ticker']}|{asof}"

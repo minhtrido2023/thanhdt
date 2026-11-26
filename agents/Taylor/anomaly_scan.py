@@ -209,7 +209,7 @@ def load_prices(tickers, start, end):
     con = duckdb.connect()
     con.execute("PRAGMA threads=1")
     tl = "','".join(sorted(tickers))
-    q = (f"select time, ticker, Close, Volume, Volume_1M, VNINDEX from read_parquet({files!r}) "
+    q = (f"select time, ticker, Close, Price, Volume, Volume_1M, VNINDEX from read_parquet({files!r}) "
          f"where ticker in ('{tl}') and time between DATE '{start:%Y-%m-%d}' and DATE '{end:%Y-%m-%d}' "
          f"order by ticker, time")
     return con.execute(q).df()
@@ -297,7 +297,55 @@ def status_check(universe):
     return changes
 
 
-def write_flags(alerts_df, scan_asof=None):
+RETRACT_LOOKBACK_DAYS = 30   # = TTL cờ (anomaly_gate.ANOMALY_TTL_DAYS)
+RETRACT_MIN_VALUE_1M = 1e9   # dưới ngưỡng này vendor còn sửa cả giá thô ⇒ không tự rút
+
+
+def retract_fake_flags(flags, df, hold):
+    """Đánh dấu `retracted` cờ giá do chuỗi chỉnh quyền DỞ DANG của vendor sinh ra (ca VPB
+    18/09/2026: cờ ghi -22,8%, giá thật -2,6%). Không xoá bản ghi. Trả list mã vừa rút.
+
+    Chỉ rút khi ĐỒNG THỜI: (1) mã KHÔNG nổ luật nào ở BẤT KỲ phiên nào từ `last_alert`-30 ngày
+    trở đi trên dữ liệu hiện tại (chốt chính — cú sập thật trước đó vẫn giữ cờ), (2) ret phiên cờ
+    theo `Close` khớp ret theo `Price` (≤1pp) và cả hai khác ret đã ghi >3pp, (3) GTGD 1 tháng
+    ≥1 tỷ. `Price` cùng vendor với `Close` nên KHÔNG phải nguồn độc lập. Thiếu dữ liệu ⇒ không
+    rút. Cờ đã rút mà luật nổ lại ⇒ tự khôi phục."""
+    import pandas as pd
+    if "Price" not in df.columns or df.empty:
+        return []
+    h = set(hold) | {t for t, f in flags.items() if f.get("tier") == "H"}
+    fired = {}
+    for r in compute_signals(df, h).itertuples():
+        fired.setdefault(r.ticker, set()).add(str(r.time.date()))
+    x = df.sort_values(["ticker", "time"])
+    g = x.groupby("ticker")
+    keys = [(t, str(pd.Timestamp(d).date())) for t, d in zip(x["ticker"], x["time"])]
+    now = dict(zip(keys, zip(g["Close"].pct_change(fill_method=None) * 100,
+                             g["Price"].pct_change(fill_method=None) * 100,
+                             x["Volume_1M"] * x["Price"])))
+    first = str(pd.Timestamp(x["time"].min()).date())
+    out = []
+    for t, f in flags.items():
+        if t.startswith("_") or "ret" not in f or not f.get("last_alert"):
+            continue
+        a = f["last_alert"]
+        if f.get("retracted"):
+            if a in fired.get(t, ()):
+                f.pop("retracted")
+            continue
+        lo = str((pd.Timestamp(a) - pd.Timedelta(days=RETRACT_LOOKBACK_DAYS)).date())
+        if (t, a) not in now or lo < first or any(d >= lo for d in fired.get(t, ())):
+            continue
+        adj, raw, value = now[(t, a)]
+        if pd.isna(adj) or pd.isna(raw) or not value >= RETRACT_MIN_VALUE_1M:
+            continue
+        if abs(adj - raw) <= 1 and abs(adj - f["ret"]) > 3 and abs(raw - f["ret"]) > 3:
+            f["retracted"] = {"ret_now": round(float(adj), 2), "on": str(_ict_now().date())}
+            out.append(t)
+    return out
+
+
+def write_flags(alerts_df, scan_asof=None, prices=None, hold=()):
     """Ghi/merge cờ + ĐÓNG DẤU ĐỘ TƯƠI của cả FILE vào `_meta.generated_at`.
 
     `_meta` KHÁC HẲN `last_alert` của từng cờ: `last_alert` = phiên cờ đó nổ (TTL 30 ngày,
@@ -317,10 +365,17 @@ def write_flags(alerts_df, scan_asof=None):
     for _, r in alerts_df.iterrows():
         d = str(r["time"].date())
         f = flags.get(r["ticker"], {})
-        f.update({"last_alert": max(d, f.get("last_alert", "")), "tier": r["tier"],
+        if d < f.get("last_alert", ""):
+            continue                   # backfill phiên CŨ không được ghi đè ret/tier của cờ mới hơn
+        f.pop("retracted", None)       # cờ nổ lại / cờ mới ⇒ chặn lại
+        f.update({"last_alert": d, "tier": r["tier"],
                   "reasons": r["reasons"], "ret": round(float(r["ret"]), 2),
                   "idio": round(float(r["idio"]), 2), "vol_x": round(float(r["vol_x"]), 2)})
         flags[r["ticker"]] = f
+    if prices is not None:
+        for t in retract_fake_flags(flags, prices, hold):
+            print(f"⚠️ RÚT CỜ GIẢ {t} {flags[t]['last_alert']}: ghi {flags[t]['ret']}% — giá hiện tại "
+                  f"{flags[t]['retracted']['ret_now']}%")
     flags["_meta"] = {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "scan_asof": str(scan_asof) if scan_asof is not None else None,
@@ -329,6 +384,10 @@ def write_flags(alerts_df, scan_asof=None):
     tmp = FLAGS_PATH + ".tmp"
     json.dump(flags, open(tmp, "w"), ensure_ascii=False, indent=1)
     os.replace(tmp, FLAGS_PATH)
+    # MỌI cờ đang ở trạng thái rút (không chỉ cờ vừa rút) — lượt trước chết giữa chừng vẫn được
+    # báo; anomaly_escalate tự chống báo trùng bằng ledger.
+    return [{"ticker": t, "date": f["last_alert"], "ret": f.get("ret"), **f["retracted"]}
+            for t, f in flags.items() if not t.startswith("_") and f.get("retracted")]
 
 
 def selftest():
@@ -421,7 +480,7 @@ def main():
     # hợp lệ của một lần scan chạy tốt; nếu chỉ ghi khi có alert thì ngày sạch cũng làm
     # file trông cũ y như ngày scan chết → cảnh báo giả mỗi ngày, WARN mất giá trị.
     if not args.no_flags:
-        write_flags(al, scan_asof=last.date())
+        emit["retracted"] = write_flags(al, scan_asof=last.date(), prices=df, hold=hold)
         print(f"→ đã ghi cờ + dấu độ tươi (_meta.generated_at) vào {FLAGS_PATH}")
     if args.status_check:
         ch = status_check(uni)
