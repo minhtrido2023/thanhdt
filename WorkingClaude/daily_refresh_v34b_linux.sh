@@ -268,7 +268,7 @@ step "[11] sync _v34b_clean <- vnindex_5state"
 # có việc gì ở bảng hạ nguồn. Ghim 3 cột giữ đúng hợp đồng "_v34b_clean == vnindex_5state"
 # (CLAUDE.md) cho mọi consumer, và mọi cột audit thêm sau này cũng tự động không lan xuống.
 bq query --use_legacy_sql=false --project_id="$PJ" \
-  'CREATE OR REPLACE TABLE tav2_bq.vnindex_5state_tam_quan_v34b_clean AS SELECT time, state, state_raw FROM tav2_bq.vnindex_5state' || die "sync _v34b_clean"
+  'CREATE OR REPLACE TABLE tav2_bq.vnindex_5state_tam_quan_v34b_clean OPTIONS(description="[BASE - KHONG PHAI DT5G] Ban copy cua vnindex_5state (3 cot), tao lai moi dem; input cua macro_state_live.py. Lay market state dung vnindex_5state_dt5g_live.") AS SELECT time, state, state_raw FROM tav2_bq.vnindex_5state' || die "sync _v34b_clean"
 
 # --- 3b. restate guard: lịch sử đã đóng có bị viết lại không? ---
 # RCA dt5g_history_restate_rca_20260729.md: chain này rebuild TOÀN BỘ lịch sử mỗi đêm từ
