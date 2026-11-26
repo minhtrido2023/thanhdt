@@ -15,7 +15,6 @@
   không nuôi riêng trong file này.
 - Quá 12 entry thì phần cũ tự sang `kb/memory/archive/Taylor_history.md` — không mất, không auto-load.
 
-- [2026-11-25T08:13:28Z] [dd-MBB KTPL 25/11] XONG job Taylor_20261125_080251: 7c1fad8a2 (wt-dd-mbb-agm-20261125) — k=9,03% ⇒ rev6 18.595 (−11,7%) vùng 13.151–24.140 TRONG, E17 18.731 — CHỜ Mike ghi sổ+merge; NQ gốc chưa đọc (MB 403)
 - [2026-11-25T08:28:03Z] ĐANG DỞ: job Taylor_20261125_082754 MBB rev6' (quỹ khác-sử dụng, E17 đối xứng k, CAR) wt-dd-mbb-agm-20261125 | NEXT: đọc skeptic/r2.json
 - [2026-11-25T08:34:30Z] [dd-MBB rev6' 25/11] XONG job Taylor_20261125_082754: 8881d7289 (wt-dd-mbb-agm-20261125) tâm 17.925 (k 11,59% gồm quỹ khác), E17 18.059 — CHỜ Mike ghi sổ+merge; CAR 30/09 gốc còn mở
 - [2026-11-25T10:43:16Z] ĐANG DỞ: job Taylor_20261125_104308 dcf-vn-behavioral (plan + pilot tâm hành vi) | NEXT: kiểm kê dữ liệu, đọc REPORT 20261125c
@@ -27,3 +26,4 @@
 - [2026-11-25T17:17:56Z] [lvens2-pit2 26/11] XONG job Taylor_20261125_160331: 58e35d1dd (wt-dcf-lvens2-pit2-20261126) stepcar+e_guard, selfcheck PASS 3TZ — CHỜ Mike quant-skeptic vòng 2 + merge; blocker cron B1 CA_MD5 hardcode
 - [2026-11-25T18:12:08Z] [lvens2-pit2 B1 26/11] XONG job Taylor_20261125_173540: script_md5 3f5041d6 (wt-dcf-lvens2-pit2-20261126) — CHỜ Mike quant-skeptic vòng 2 (B2) + B3 VND + merge/cron sau user duyệt
 - [2026-11-26T04:04:11Z] [lvens2-pit2 v3 26/11] XONG job Taylor_20261126_021759: 7649df7c4 (wt-dcf-lvens2-pit2-20261126) — CHỜ Mike quant-skeptic vòng 3 + user duyệt merge/cron; mở: B3 VND dừng 11-23, cảnh báo wrapper
+- [2026-11-26T05:42:58Z] [POW NĐT 26/11] XONG 81c15ddf5 (REV4 9.387, chưa gửi email) — CHỜ Mike skeptic + quyết E17 (sổ chưa có center_adj) trước khi gửi
