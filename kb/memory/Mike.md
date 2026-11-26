@@ -12,3 +12,5 @@
 
 - [2026-11-25T17:35:45Z] [26/11 00:37] User duyệt B1+skeptic vòng 2, thứ tự Mike chọn: B1 trước (Taylor_20261125_173540, cùng nhánh pit2) → xong thì quant-skeptic vòng 2 trên script cuối → trình user + xin duyệt merge/cron/registry
 - [2026-11-25T18:27:55Z] [26/11 01:3x] Skeptic vòng 2 pit2: (a) PIT CONFIRMED, (b) stepcar CONFIRMED, (c) sổ/cron REFUTED — 3 BLOCKING: freshness đo max_time BCTC (fail 39% tháng) → dùng sync; chưa có script tạo extract CA hằng tháng; chưa có cổng chạy trễ >5 ngày. Chờ user: giao Taylor vòng sửa 3 blocking (+non-blocking) rồi mới cron/registry/merge. Nhánh pit2 chưa merge.
+- [2026-11-26T02:18:08Z] [26/11 09:2x] lvens2 pit2 vòng 3: job Taylor_20261126_021759, CHUYỂN sang topic 1575334726393135196 (phiên mới theo dõi qua wake_thread). Topic 1575172709128605866 ĐÓNG — không poll nữa. Chờ user sau vòng 3: merge/cron/registry.
+- [2026-11-26T02:18:47Z] [26/11 09:2x] Phiên topic 1575334726393135196 đã nhận theo dõi Taylor_20261126_021759 (ScheduleWakeup, claim-reply đầu lượt). Xong: kiểm REPORT/commit/md5 2026-10 stepcar=dea31ba7/selfcheck → xin duyệt merge/cron/registry; đổi số thì đề xuất skeptic vòng 3.
