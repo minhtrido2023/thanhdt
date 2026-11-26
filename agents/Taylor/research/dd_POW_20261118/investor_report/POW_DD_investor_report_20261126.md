@@ -1,0 +1,276 @@
+# POW — PV Power: lãi 9 tháng 6.434 tỷ, sản lượng +41% và LNG Nhơn Trạch 3&4 vào vận hành, nhưng ~40% lợi nhuận trước thuế là hồi tố một lần, 23.880 tỷ phải thu EVN chưa về và giá đã trả cho ROE di sản ~13,7% vĩnh viễn
+
+![](figs/fig_00_hero.png)
+
+| Chỉ tiêu | Giá trị | Chỉ tiêu | Giá trị |
+|---|---|---|---|
+| Giá (HOSE) | **13.300 đ** (đóng cửa 25/11/2026; DNSE 26/11 11:29: 13.200) | Vùng giá trị hợp lý | **6.966 – 11.808 đ** |
+| Tâm giá trị (sau chiết khấu thanh khoản 1%) | **9.387 đ** (trước chiết khấu 9.482) | Giá / tâm | **1,42 lần** (1,41 lần tại 13.200) |
+| LNST mẹ 9T/2026 | **6.434,5 tỷ** (+247%); cốt lõi ≈ 3.980–4.063 (ước lượng) | P/B tại tâm · BVPS mẹ | 0,67 · 14.060 đ |
+| Nợ ròng thật 30/9/2026 | **7.348 tỷ** (nợ/VCSH mẹ 0,17) | Phải thu EPTC/EVN | **23.880 tỷ** (+9.827 từ đầu năm) |
+| CFO 9T/2026 | **2.739 tỷ** (9T/25: 3.414) | Thanh khoản · free float | 63,3 tỷ/phiên · ~20% |
+
+**Tâm @ Ke 12,3% (cùng mô hình, chỉ đổi r): 9.861 đ/cp (+5,0% so với tâm).**
+
+So với lịch sử 10 năm của chính mã (thước cơ học thu nhập thặng dư theo ROE 5 năm, KHÔNG dùng tâm định giá; chỉ hiển thị, không phải tín hiệu; số đến 20/11/2026): **KHÔNG CHẮC (trung tính…đắt)**, cờ ĐỈNH LỢI NHUẬN? (ROE 4 quý / 5 năm = 2,70).
+
+**Ba điều cần biết**
+
+- **Tích cực:** sản lượng 9T +41%, nợ ròng giảm còn 7.348 tỷ, Deloitte chấp nhận toàn phần BCTC 2025, Nhơn Trạch 3&4 (1.624 MW) đã vận hành.
+- **Tiêu cực:** khoảng 2.755 tỷ LNTT 9T là hồi tố/hoàn nhập; CFO thấp hơn cùng kỳ vì phải thu EVN phình.
+- **Định giá:** giá nằm trên vùng giá trị hợp lý của mô hình, nhưng P/E thấp hơn và P/B không cao hơn trung vị peer trên lợi nhuận năm đỉnh; chênh lệch là câu hỏi "2026 có lặp lại không".
+
+## 1. Tóm tắt điều hành
+
+| | Nội dung |
+|---|---|
+| **Tình huống** | Nhà phát điện đa nhiên liệu (than, khí, LNG, thuỷ điện), bán điện cho EVN; năm 2026 sản lượng và lợi nhuận tăng vọt, có thêm 1.624 MW LNG. |
+| **Vấn đề** | Lợi nhuận báo cáo lẫn khoản hồi tố tỷ giá, giá khí và chi phí O&M; tiền chưa về (phải thu EVN). |
+| **Câu hỏi** | Giá 13.300 đ đang trả cho mức lợi nhuận bền vững nào? |
+| **Trả lời** | Giá ngầm định ROE mảng di sản ~13,7%/năm vĩnh viễn, so với mức cơ sở 8% của mô hình (ROE công ty mẹ 2019–2025 trung bình 6,2%). Giá trị theo mô hình: 9.387 đ. |
+
+## 2. Luận điểm và điều thị trường đang định giá
+
+| Luận điểm tích cực | Luận điểm tiêu cực |
+|---|---|
+| Sản lượng 9T 18.954 triệu kWh (+41%); LN gộp cốt lõi ≈ 349 đ/kWh (ước lượng) | ~40% LNTT 9T là hồi tố; hợp đồng EVN quyết toán có thể đảo chiều |
+| Nợ ròng 9.414 → 7.348 tỷ; tiền + tiền gửi 30.158 tỷ | Vay ngắn hạn 11.250 → 19.418 tỷ, đồng thời giữ 19.548 tỷ tiền gửi (đòn bẩy carry) |
+| Vị trí hệ thống, giấy phép, quy mô khó nhân bản | ROE tối thiểu 5 năm 3,4%, ROIC 2,0%: chưa năm nào vượt chi phí vốn |
+| Cung điện miền Nam, LNG có Qc tối thiểu 65% (PPA sửa đổi 08/2026) | CFO 9T giảm 20% dù LNST tăng 216%; phải thu EVN ~149 ngày doanh thu |
+
+- **Thị trường đang định giá:** ROE di sản ~13,7% bền vững, tức tổng lợi nhuận khoảng 5.500 tỷ/năm (ước lượng; NT3&4 và dự án mới sinh đúng 13,5%), nhỉnh hơn cốt lõi 2026 năm hoá ~5.350.
+- **Có thể chưa tính:** chênh lệch tỷ giá VA1 còn ~490 tỷ (≈ +141 đ/cp, hai chiều); NT3&4 có giá trị trên sổ sách; cầu điện thiếu nguồn 2027–30; chiều ngược lại, chi phí cải tạo khí thải và hạn nguồn khí các nhà máy cũ.
+- **Có thể đã tính đúng:** năm 2026 là đỉnh sản lượng nhiệt điện; lịch sử POW không cho thấy El Niño ⇒ ROE cao (ROE thấp nhất 3,1–3,2% rơi vào 2023–24).
+
+## 3. Ngành: sản lượng nhiệt điện ở đỉnh chu kỳ, giá do cơ chế và văn bản quyết định
+
+| Động lực | Dữ kiện (nguồn: đọc ngành độc lập 18/11/2026; số liệu công ty) |
+|---|---|
+| Cầu điện | Hệ thống 10T/2026 +9,8%, tháng 10 +14,3%; sản xuất công nghiệp T10 +15,0% |
+| Giá bán | EVN giảm giá bán lẻ 2% từ 01/11/2026; CPI 5,09% hạn chế dư địa tăng giá |
+| Nhiên liệu | Brent T11 96,7 USD (+52% so cùng kỳ, qua đỉnh T10); LNG giao ngay 27,6 USD/MMBtu (16/11), ~2 lần giá hợp đồng |
+| Quy hoạch | Bộ Công Thương: thiếu 4.256 MW nguồn năm 2027; Qc 65% theo NĐ 100/2025 cho LNG, dự thảo 75%/15 năm. Quy hoạch điện VIII điều chỉnh (QĐ 768/QĐ-TTg, 15/4/2025): LNG 22.524 MW đến 2030, nhưng trong 18 dự án LNG mới chỉ 2–3 dự án khởi công và Bộ Công Thương đã đề xuất dời một phần sang 2031–35 ⇒ mục tiêu khó đạt, nguồn hiện hữu ít bị cạnh tranh |
+| Chu kỳ | Người đọc ngành độc lập: 12 tháng tới chính sách/hành chính 0,45 · chu kỳ 0,40 · cấu trúc 0,15 |
+
+- Khối lượng nhiệt điện đang ở **đỉnh chu kỳ** tới mùa khô 2027; thuỷ điện hồi lại có thể giảm huy động.
+- Giá bán là **giá hợp đồng EVN/EPTC**: biên phụ thuộc Qc, giá khí/LNG chuyển trễ và quyết toán, không phải giá thị trường tự do.
+
+## 4. Doanh nghiệp: sáu nhà máy lớn, một khách hàng chính, đang chuyển trọng tâm sang điện khí/LNG
+
+PV Power (POW) là doanh nghiệp phát điện của Tập đoàn Dầu khí Việt Nam (PVN nắm 79,94%), vận hành nhiệt điện than, điện khí, LNG, thuỷ điện và năng lượng tái tạo; ngoài ra cung ứng nhiên liệu và dịch vụ kỹ thuật điện. Theo BCTN 2025, mục tiêu đến 2030 là 7.532 MW (~5% công suất hệ thống), trong đó điện khí/LNG 4.324 MW.
+
+![](figs/fig_04_photos.png)
+
+![](figs/fig_03_maps.png)
+
+| Nhà máy | Nhiên liệu · công suất | Vận hành | Sản lượng 9T/26 (triệu kWh) |
+|---|---|---|---|
+| Vũng Áng 1 (Hà Tĩnh) | Than · 1.200 MW (TMĐT 33.651 tỷ) | 2015 | 5.709 (+20%) |
+| Cà Mau 1&2 (Cà Mau) | Khí · 1.500 MW | 2008 | 4.245 |
+| Nhơn Trạch 1 (Đồng Nai) | Khí · 450 MW | 2009 | 1.014 |
+| Nhơn Trạch 2 (công ty con) | Khí · 750 MW | 2011 | 3.184 (+48%) |
+| Nhơn Trạch 3&4 (Đồng Nai) | LNG · 1.624 MW (TMĐT 32.487 tỷ) | 2025 | 3.757 |
+| Thuỷ điện | Hủa Na 180 MW, Đakđrinh 125 MW, Nậm Nơn 20 MW | 2013–2024 | trong mục "khác" |
+
+![](figs/fig_10_capacity.png)
+
+- **Công suất hợp nhất 5.849 MW** (tự cộng danh mục BCTN 2025); Nhơn Trạch 3&4 thêm 1.624 MW (+38%), nâng nhóm khí/LNG lên 4.324 MW.
+
+- **Khách hàng chính:** EVN/EPTC mua điện; khí từ PV GAS, LNG qua hợp đồng định hạn 20,7 triệu MMBtu/năm 2027–2031 (ký 16/7/2026), phần còn lại mua giao ngay.
+- **Vị thế:** quy mô ~10% nhu cầu điện toàn quốc ngày 14/4/2026 (100 triệu kWh/ngày); BCTC hợp nhất không tách lợi nhuận theo nhà máy.
+
+## 5. Tài chính: lợi nhuận tăng thật, nhưng chưa thành tiền
+
+![](figs/fig_01_np_split.png)
+
+![](figs/fig_02_np_quarterly.png)
+
+- **Một lần ≈ 2.755 tỷ LNTT 9T:** tỷ giá VA1 2019–21 1.103; quyết toán giá khí/tiền điện Cà Mau 991; giảm trích O&M 381; hoàn nhập dự phòng phải thu Q3 ~280 (ước lượng).
+- **Chi phí NT3&4 đã vào KQKD:** lãi vay 9T 1.536 tỷ (cùng kỳ 410), khấu hao +782 tỷ.
+
+![](figs/fig_05_output.png)
+
+![](figs/fig_06_balance_cfo.png)
+
+- **Phải thu EPTC +9.827 tỷ** (DSO ~149 ngày, ước lượng): hồi tố đang nằm ở phải thu; điểm kiểm chính là Q4/26–Q1/27.
+![](figs/fig_11_interest.png)
+
+- **Lãi vay vào KQKD gấp ~3 lần** (1.536 tỷ 9T/26 so với 410) chủ yếu do hết vốn hoá lãi vay NT3&4; cộng cả phần vốn hoá, chi phí lãi vay 2025 là 1.446 tỷ, 2026 năm hoá ~2.048 tỷ (ước lượng) — tăng ~1,4 lần.
+
+| Độ nhạy nợ vay dài hạn 30/9/2026 (20.135 tỷ) | Giá trị |
+|---|---|
+| Cơ cấu đồng tiền | **73,8% USD** tại 31/12/2025 (BCTN); 30/9/2026 ≈ 76% (ước lượng, theo cơ cấu ngân hàng); không chia đồng tiền ở BCTC quý |
+| Loại lãi suất | **100% thả nổi** (BCTN 2025); biên độ và chỉ số tham chiếu không công bố; vay ngắn hạn 19.418 tỷ: chưa biết |
+| USD/VND ±1% | ±153 tỷ đánh giá lại trước thuế (≈ ±44 đ/cp sau thuế); EVN trả chênh lệch tỷ giá trễ nhiều năm |
+| Lãi suất +100 điểm cơ bản | +201 tỷ/năm trước thuế (≈ −58 đ/cp/năm, ~3,4% LNST mẹ cốt lõi năm hoá) |
+
+## 6. LNG Nhơn Trạch 3&4: mảng có độ bất định cao nhất
+
+| Hạng mục | Dữ kiện | Chưa biết |
+|---|---|---|
+| Dự án | 1.624 MW, TMĐT 32.487 tỷ; vận hành 21/11 và 17/12/2025 | — |
+| Hợp đồng điện | PPA sửa đổi 08/2026: Qc tối thiểu dài hạn 65% | Mẫu số của 65%, thời hạn, độ trễ chuyển giá |
+| Thực phát | 3.757 triệu kWh 9T ⇒ hệ số công suất ~35% (ước lượng) | Kế hoạch giao sản lượng 2027 (hạn 15/01/2027) |
+| Nhiên liệu | 8 chuyến LNG 9T; hợp đồng định hạn ≈ 3,2 tỷ kWh/năm (ước lượng) | Điều khoản take-or-pay, công thức giá |
+| Nợ dự án | Citibank & ING 11.262 tỷ; SMBC 4.036 tỷ (nhiều khả năng là USD, thả nổi) | Biên độ, chỉ số tham chiếu |
+
+**Ba lớp bảo đảm của NT3&4 và khoảng hở giữa chúng** (hệ số công suất tính trên 14,23 tỷ kWh/năm tại 1.624 MW)
+
+| Lớp | Dữ kiện đã xác minh | Quy ra hệ số công suất | Khoảng hở |
+|---|---|---|---|
+| 1. Nhiên liệu | Hợp đồng khí LNG tái hoá khung với PV GAS ký 25/02/2025 (cam kết tiêu thụ theo chương trình giao khí năm); xác nhận LNG định hạn lần 1 (16/7/2026): 20,7 triệu MMBtu/năm 2027–2031 | ≈ 3,2 tỷ kWh ≈ **22%** | Phần còn lại phải mua giao ngay/xác nhận mới; tỷ lệ bao phủ nhiên liệu dài hạn chưa công bố |
+| 2. Đầu ra | PPA sửa đổi 08/2026: sản lượng hợp đồng tối thiểu dài hạn **65%** | ≈ 9,25 tỷ kWh ≈ **65%** (mẫu số chưa công bố) | Cao hơn nhiên liệu định hạn ~43 điểm % |
+| 3. Thực tế | Thực phát 9T/2026: 3.757 triệu kWh | ≈ **35%** (năm hoá ~5,0 tỷ kWh, ước lượng) | Thấp hơn Qc ~30 điểm %; nhiên liệu định hạn phủ ~63% nhịp thực phát |
+
+- **Biên upside hiển thị (không đổi tâm):** nếu NT3&4 chạy ≈ 63% công suất (9 tỷ kWh/năm, +80% so với nhịp 2026) và LNST đạt 1.500–2.500 tỷ, ROE trên vốn chủ 9.000 tỷ là 17–28% so với 13,5% của mô hình (NPV = 0 ⇔ LNST 1.215 tỷ). Nếu bền vĩnh viễn, giá trị tăng thêm ≈ +690 đến +3.100 đ/cp (cận trên, vì đời dự án hữu hạn) ⇒ tâm 9.387 lên khoảng 10.100–12.500, vẫn dưới giá 13.300. **Điều kiện cần:** hệ số công suất ≥ ~63% từ 2027; mua thêm ~38 triệu MMBtu LNG/năm ngoài hợp đồng định hạn ở giá chuyển được sang giá điện; EVN thanh toán đúng hạn. Chưa điều kiện nào có số công bố.
+
+- Ghi giảm khi quyết toán 15% / 30% / 50% ⇒ tâm 8.951 / 8.516 / 7.935. Mô hình ghi NT3&4 theo **sổ sách (NPV = 0)**: vốn chủ 9.000 tỷ (ước lượng, dải 8.000–10.000) = chi phí vốn hoá 23–25 nghìn tỷ trừ nợ dự án 15.298.
+
+## 7. Định giá: thu nhập thặng dư trên vốn chủ mẹ, dựng độc lập với giá thị trường
+
+| Kịch bản | ROE mảng di sản | Cơ sở | Xác suất | đ/cp (sau CK 1%) |
+|---|---|---|---|---|
+| Xấu | 4,5% | ≈ 2023–24: khí huy động thấp, Qm < Qc | 25% | **6.966** |
+| Cơ sở | 8,0% | Trung bình 2019–25 điều chỉnh vốn XDCB và hồi tố ≈ 7–8% (ước lượng) | 50% | **9.387** |
+| Tốt | 11,5% | Đỉnh 2019, thiếu nguồn 2027–30 | 25% | **11.808** |
+| **Có trọng số** | | trước / sau chiết khấu thanh khoản 1% | | **9.482 / 9.387** |
+
+![](figs/fig_12_bridge.png)
+
+- **Công thức:** vốn di sản 28.940 tỷ × ROE/r (g = 0) + NT3&4 9.000 + dự án mới 2.740 (theo sổ) + hồi tố sau thuế 2.455 (ghi 1,0×) − chi phí khí thải VA1 kỳ vọng 2.255.
+- **Khí thải (QCVN 19:2024):** bắt buộc từ 01/01/2032; quy mô lấy theo dự án than cùng công suất 1.200 MW (vốn đầu tư 3.485 tỷ, vận hành 572 tỷ/năm; ước lượng).
+- **Khả năng được bù vào giá điện:** không bù / một nửa / đủ, trọng số 40/36/24% (ước lượng) ⇒ tâm nếu không bù 8.860, nếu bù đủ 10.115.
+
+![](figs/fig_07_roe.png)
+
+**Chi phí vốn:** r = **13,5%** tại điểm neo lãi huy động 12 tháng hiệu dụng **7,4%** (đo 26/11/2026, không đổi so với neo); r đi cùng lãi huy động theo β = 1. Khung tham chiếu cho nhà đầu tư trong nước: lãi suất phi rủi ro chuẩn hoá ~6,75% (dải 6,0–7,5%), phần bù cổ phần 5,0–6,1% đo so với mức đó, β ~1,1 ⇒ chi phí vốn 12,3–13,4%. Mức 15,8% là góc nhìn nhà đầu tư nước ngoài (USD, Damodaran).
+
+| Lãi huy động | −100 điểm cơ bản | −50 | Neo | +50 | +100 |
+|---|---|---|---|---|---|
+| Giá trị (sau CK) | 9.775 (+4,1%) | 9.574 (+2,0%) | **9.387** | 9.214 (−1,8%) | 9.053 (−3,6%) |
+
+| Độ nhạy khác (tâm sau CK) | Giá trị |
+|---|---|
+| r = 12,3% · 13,4% · 11% | 9.861 · 9.423 · 10.492 |
+| ROE di sản cả ba kịch bản −2 / +2 điểm % | 8.004 / 10.771 |
+| Chi phí khí thải bằng 0,5 lần / 1,5 lần giả định | 9.751 / 9.023 |
+| Vốn di sản đời hữu hạn 7–11 năm, thu hồi vốn tái đầu tư | 10.350 – 10.902 |
+| NT3&4 ghi giảm 15% – 50% | 8.951 – 7.935 |
+| Khí thải nhà máy khí (minh hoạ) | −1,2% đến −2,4% |
+| Quỹ khen thưởng phúc lợi 3–5% lợi nhuận di sản | 9.221 – 9.110 |
+
+- **Tỉ trọng phần vĩnh viễn:** vốn di sản quy đổi vĩnh viễn ≈ 59% giá trị trước chiết khấu; mô hình không có tăng trưởng (g = 0).
+- **Bối cảnh lãi suất:** lãi suất chiết khấu thị trường ngầm định ≈ 15,1% (147 mã, 30/10/2026), phân vị 75% giai đoạn 2014–2026 (đỉnh 12/2022: 15,9%; đáy 08/2023: 12,1%). TPCP 10 năm 4,56% (25/11/2026), +0,55 điểm % so với 12 tháng trước (nguồn chưa đối chiếu độc lập). Chỉ để tham khảo, không đổi giá trị hợp lý.
+- **Chiết khấu thanh khoản 1%** (ước lượng; dải 0–3%): ADV trung vị 62 phiên 63,3 tỷ/phiên (đo 18/11); giao dịch ≤30 tỷ thoát trong ≤5 phiên ở 10% tham gia.
+
+**Hai nền giá trị (chỉ hiển thị, không đổi tâm)**
+
+| Nền | Giá trị (đ/cp) | Ghi chú |
+|---|---|---|
+| V_ngắn: LNST chuẩn hoá = trung vị TTM mẹ 12 quý (1.444 tỷ), g = 0 | 3.487 | Neo vào giai đoạn trước NT3&4 và năm khí thấp 2023–24 |
+| V_dài: FCFE = CFO − capex | âm | Chu kỳ xây NT3&4 và phải thu phình; FCFE thấp vì đầu tư ⇒ chỉ dùng V_ngắn |
+| Dòng C4, D2 (chỉ theo dõi) | 2.042 · 6.590 | Chưa qua tiêu chí khoá trước |
+
+**Kiểm chéo bằng bội số** (peer điện/khí, đóng cửa 25/11/2026; trailing, peer cũng đang ở năm đỉnh)
+
+| | POW | Trung vị 10 peer |
+|---|---|---|
+| P/E | 5,8 (gồm hồi tố); 7,7 trên LNST mẹ cốt lõi năm hoá; 10,5 trên LN chuẩn hoá (ước lượng) | 8,7 |
+| P/B | 0,88 (trên VCSH tổng); 0,95 (trên VCSH mẹ) | 0,95 |
+| EV/EBITDA | 5,44; ~4,1 trên EBITDA cốt lõi năm hoá (ước lượng) | ~6,0 |
+
+![](figs/fig_08_football_field.png)
+
+- **Cách đọc:** theo bội số trailing POW **không đắt** so với peer; theo mô hình giá cao hơn vùng giá trị vì mô hình dùng ROE chuẩn hoá thay vì năm đỉnh. Khác biệt nằm ở câu hỏi "2026 có lặp lại không".
+- **Kết luận:** giá 13.300 = 1,42 × tâm, **trên** vùng giá trị hợp lý (cận trên 11.808). Tại 13.200 (trong phiên 26/11): 1,41 lần; kết luận không đổi. Giá về dưới 11.808 sẽ nằm trong vùng.
+
+## 8. Rủi ro: chất lượng lợi nhuận và điều khoản LNG
+
+![](figs/fig_09_risk_matrix.png)
+
+| Rủi ro | Tác động ước tính | Dấu hiệu sớm | Ngày kiểm |
+|---|---|---|---|
+| A EVN chậm thu | Chiết khấu thêm; trích lập hồi tố | Phải thu ≥ 20.000 tỷ cuối năm, EVN trả > 180 ngày | 31/12/2026 |
+| B Hồi tố đảo chiều | Quyết toán VA1/Cà Mau giảm giá | Khoản hồi tố mới hoặc điều chỉnh giá đầu tư VA1 | BCTC Q4/2026 |
+| C Điều khoản LNG | NT3&4 lỗ hoặc Qc 2027 < 65% | Công bố ToP, công thức giá, kế hoạch vận hành 2027 | Trước 15/01/2027 |
+| D Giá LNG giao ngay cao kéo dài | Giảm lợi nhuận NT3&4 (chưa đo) | Giá giao ngay so với giá hợp đồng | Hằng tháng |
+| E Hết El Niño | ROE di sản về kịch bản xấu 4,5%: 6.966 (−26% so tâm) | Thuỷ văn 2027, huy động nhiệt điện | H2/2027 |
+| F Quyết toán NT3&4 | Ghi giảm tài sản cố định | Công bố quyết toán dự án | 2027 |
+
+**Những giả định còn mở — đọc trước khi dùng con số tâm**
+
+| Giả định | Điều chưa biết | Hướng và độ lớn |
+|---|---|---|
+| Vốn di sản sinh lời vĩnh viễn | Thời hạn hợp đồng điện và nguồn khí Cà Mau 1&2, Nhơn Trạch 1; giá trị sổ theo nhà máy không công bố | Thấp hơn: tài sản mắc kẹt, tối đa khoảng 6% tâm (ước lượng thô). Cao hơn: thu hồi vốn dần, +10…+16% |
+| Hồi tố ghi đủ mệnh giá | 381 + ~280 tỷ là hoàn nhập dự phòng; thuế có thể 20% thay vì 10,9%; thu tiền có thể kéo dài | Tâm có thể cao khoảng 1–2% (ước lượng) |
+| ROE di sản 8% | Ở cận trên dải 7–8%; dựa một phần vào 2019–21 khi đội máy trẻ hơn | −2 điểm % ⇒ 8.004 |
+| Lợi nhuận chuẩn hoá ≈ 3.900 tỷ/năm | Thấp hơn ~27% so với cốt lõi 2026 năm hoá (~5.350); NT3&4 ghi NPV = 0 | Nếu 2026 bền: giá trị cao hơn |
+| Nghĩa vụ ngoài bảng | Số phải nộp thêm khi quyết toán cổ phần hoá; giá trị giao dịch bên liên quan | Một khoản bằng tiền lệ 728 tỷ ⇒ −235 đ/cp; bên liên quan chưa định lượng |
+
+## 9. Pháp lý, chính sách và quản trị — cảnh báo
+
+- **Kiểm toán FY2025 (Deloitte):** chấp nhận toàn phần; nhấn mạnh chưa phê duyệt quyết toán cổ phần hoá. Không ngoại trừ.
+- **Lợi nhuận phụ thuộc quyết định hành chính:** hồi tố 2026 chiếm ~40% LNTT 9T, có thể đảo chiều khi EVN quyết toán.
+- **Bên liên quan dày:** PVN, PV GAS, PV OIL, PVPS; giá trị từng giao dịch chưa đọc. PVN 79,94% ⇒ free float ~20%.
+- Không thấy khởi tố hay xử phạt trong 83 công bố thông tin 11/2025–11/2026 (chưa tra trực tiếp cơ quan quản lý).
+
+## 10. Lịch xúc tác và mốc đổi nhận định hai chiều
+
+| Mốc | Nhận định tích cực hơn nếu | Nhận định tiêu cực hơn nếu |
+|---|---|---|
+| BCTC Q4/2026 (~30/01/2027) | LNST mẹ Q4 > 2.000 tỷ (khoảng kỳ vọng 900–2.000), phải thu < 20.000 tỷ, CFO năm ≥ 5.000 tỷ | LNST mẹ Q4 < 900 tỷ; phải thu không giảm |
+| 2 quý 2027 liên tiếp | ROE mẹ cốt lõi năm hoá ≥ 11% không hồi tố và CFO ≥ LNST ⇒ ROE cơ sở nâng lên 10% | Lợi nhuận quay về mức 2023–25 |
+| Kế hoạch vận hành 2027 | NT3&4 Qc ≥ 65%; công bố ToP với biên dương | Qc < 65% |
+| Quyết toán VA1/NT3&4 | Duyệt thêm ~490 tỷ chênh lệch tỷ giá (+141 đ/cp) | Điều chỉnh giảm giá đầu tư |
+| Lãi huy động | −100 điểm cơ bản (+4,1%) | +100 điểm cơ bản (−3,6%) |
+| Khí thải VA1: đề xuất đầu tư (~quý 2/2027) và cơ chế giá | Được đưa vào giá (+7,8%) hoặc vốn đầu tư < 1.700 tỷ (~+4%) | Bị từ chối bù (−5,6%) hoặc vốn đầu tư > 5.200 tỷ |
+| Thông tin hạn hợp đồng / giá trị sổ theo nhà máy | Vốn di sản thu hồi trong ≤11 năm (+10…+16%) | Nhà máy khí cũ không còn nguồn khí trước khi khấu hao hết |
+
+Xác suất các mốc là ước lượng của nhóm nghiên cứu (T1 0,60 · T2 0,45 · T3 0,50 · T4 0,65 · đề xuất đầu tư khí thải công bố vốn trong 1.700–5.200 tỷ: 0,60).
+
+## Phụ lục A — Số liệu BCTC chính (tỷ đồng, hợp nhất)
+
+| Chỉ tiêu | Q3/26 | Q3/25 | 9T/26 | 9T/25 |
+|---|---|---|---|---|
+| Doanh thu thuần | 16.772,2 | 7.855,2 | 49.405,5 | 25.404,3 |
+| Lợi nhuận gộp | 2.311,2 | 1.290,8 | 8.701,3 | 3.274,5 |
+| Chi phí tài chính (lãi vay) | 523,1 (616,1) | 295,1 (153,7) | 1.594,2 (1.569,0) | 869,3 (411,0) |
+| LNTT | 2.414,0 | 1.011,8 | 7.743,5 | 2.332,1 |
+| LNST hợp nhất | 2.073,1 | 948,4 | 6.898,6 | 2.182,0 |
+| LNST mẹ | 1.859,6 | 809,3 | 6.434,5 | 1.856,8 |
+
+Bảng cân đối 30/9/2026: tiền 10.609,4 · tiền gửi giữ đến đáo hạn 19.548,3 · vay ngắn hạn 19.418,3 · vay dài hạn 18.087,1 · phải thu KH ngắn hạn 23.964,3 · VCSH mẹ 43.134,5 · số cổ phiếu 3.067.845.688 (gồm 281.024.592 cp chào bán 01/2026, thu 2.810 tỷ).
+
+## Phụ lục B — Đối chiếu dữ liệu thị trường với BCTC gốc
+
+| Chỉ tiêu | Dữ liệu thị trường | BCTC gốc | Ghi chú |
+|---|---|---|---|
+| LNST mẹ Q3/26 · Q3/25 | 1.859,6 · 809,3 | 1.859,6 · 809,3 | Khớp |
+| LNST mẹ 9T/26 | 6.577,8 | 6.434,5 | Lệch +143,3 (Q2 trên dữ liệu thị trường 3.518,6 vs 3.375,3 suy từ BCTC) |
+| CFO 9T/26 | 8.556,7 | 2.739,0 | Cột dòng tiền quý của dữ liệu thị trường không tin cậy; dùng BCTC |
+| P/E trailing 5,8 | gồm hồi tố | — | Không dùng làm cơ sở |
+
+## Phụ lục C — Nguồn
+
+- **Công ty** (pvpower.vn): BCTC hợp nhất Q3/2026 và giải trình, BCTC kiểm toán 2025 (Deloitte), BCTN 2025 (ảnh nhà máy trích từ BCTN; logo từ website), BCTC Q1, Q2/2026 và các công bố thông tin 11/2025–11/2026 (có hồi tố 03/08/2026, sản lượng và LNG 13/10/2026, kế hoạch điều chỉnh 10/11/2026).
+- **Dữ liệu thị trường:** chuỗi tài chính quý, giá, bội số peer đến 25/11/2026 và khối lượng đến 18/11/2026; giá DNSE 25/11 và 26/11/2026; lãi huy động 12 tháng hiệu dụng.
+- **Ngành:** đọc ngành độc lập 18/11/2026 (phát điện); snapshot vĩ mô 18/11/2026.
+- **Khí thải:** QCVN 19:2024/BTNMT; công bố thông tin 19/10/2026 (tư vấn đề xuất đầu tư); hồ sơ khả thi cải tạo khí thải của một nhà máy than 1.200 MW cùng ngành.
+- **Hợp đồng điện Cà Mau 1&2:** vietnamenergy.vn và en.evn.com.vn (ký mới 15/12/2021; thời hạn không công bố).
+- **Bản đồ:** ranh giới geoBoundaries VNM-ADM1 (2008); toạ độ theo OpenStreetMap (phường Vũng Áng, xã Khánh An, xã Đại Phước, huyện Quế Phong; TP.HCM, Hà Nội trung tâm) — vị trí gần đúng. Đakđrinh và Nậm Nơn chưa vẽ do chưa xác minh toạ độ.
+
+## Phụ lục D — Phương pháp và giới hạn
+
+- Thu nhập thặng dư trên VCSH mẹ, g = 0 (không báo độ nhạy g); lợi nhuận chuẩn hoá không dùng năm 2026; chiết khấu thanh khoản 1% (ước lượng).
+- ROE di sản cơ sở 8% là ước lượng (cận trên dải 7–8% của nhóm nghiên cứu); vốn chủ NT3&4 9.000 tỷ là ước lượng.
+- **Chưa có dữ liệu:** lợi nhuận theo nhà máy; Qc/Qm từng nhà máy; ToP và công thức giá LNG; đồng tiền và lãi suất vay ngắn hạn; giá trị từng giao dịch bên liên quan; room ngoại; mực nước hồ thuỷ điện.
+- Ba con số sản lượng (18.954; 19.329; 14.955 triệu kWh) khác định nghĩa, chưa đối chiếu được; báo cáo dùng 18.954 (công bố 13/10/2026).
+- Kế hoạch 2026 điều chỉnh (LNST mẹ 4.317 tỷ) thấp hơn thực hiện 9T vì căn cứ tờ trình tháng 8–9; không đọc là dự báo Q4 lỗ.
+
+## Phụ lục E — Quy trình nghiên cứu
+
+Số liệu đối chiếu trực tiếp với BCTC gốc do công ty công bố. Giả định định giá được lập không dựa trên giá thị trường, rồi mới so với giá. Bối cảnh ngành do một người đọc ngành độc lập soạn khi chưa biết giá cổ phiếu. Số liệu, mô hình và giả định đã được một người phản biện độc lập kiểm tra. Các giới hạn dữ liệu nêu ở Phụ lục D.
+
+## Phụ lục F — Tuyên bố miễn trừ trách nhiệm
+
+Tài liệu này chỉ nhằm mục đích cung cấp thông tin nghiên cứu, không phải lời khuyên, đề nghị hay khuyến nghị mua, bán hoặc nắm giữ bất kỳ chứng khoán nào, và không tính đến mục tiêu, tình hình tài chính hay nhu cầu của từng nhà đầu tư. Thông tin được tổng hợp từ các nguồn được cho là đáng tin cậy tại thời điểm lập, nhưng không được bảo đảm về tính đầy đủ hay chính xác. Các ước lượng, kịch bản và giá trị hợp lý phản ánh giả định tại ngày lập và có thể thay đổi mà không cần thông báo. Kết quả trong quá khứ không bảo đảm kết quả tương lai. Nhà đầu tư cần tự đánh giá và chịu trách nhiệm với quyết định của mình.
