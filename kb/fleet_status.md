@@ -1,9 +1,9 @@
-# Fleet status — 2026-11-26T17:47:37 UTC
+# Fleet status — 2026-11-26T17:47:49 UTC
 
 | agent | title (desktop) | kind | status | last_heartbeat | age(min) | current_task |
 |---|---|---|---|---|---|---|
-| DollarBill | DollarBill | child | dead | 2026-11-26T13:21:49Z | 265 |  |
-| Mike | Mike | child | working | 2026-11-26T17:38:51Z | 8 |  |
+| DollarBill | DollarBill | child | dead | 2026-11-26T13:21:49Z | 266 |  |
+| Mike | Mike | child | working | 2026-11-26T17:47:44Z | 0 |  |
 | Mike_2515063 | mike-b9 | child | dead | 2026-11-25T00:50:01Z | 2457 | resume · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_2835281 | mike-66 | child | dead | 2026-11-25T02:50:01Z | 2337 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
 | Mike_413521 | mike-01 | child | dead | 2026-11-26T06:40:01Z | 667 | interactive · cwd=/home/trido/thanhdt/WorkingClaude/mike/agents/Mike |
@@ -24,6 +24,6 @@
 | workingclaude-5c | workingclaude-5c | child | dead | 2026-11-25T03:30:59Z | 2296 |  |
 | workingclaude-7f | workingclaude-7f | child | dead | 2026-11-25T06:46:17Z | 2101 |  |
 | workingclaude-aa | workingclaude-aa | child | dead | 2026-11-26T05:46:06Z | 721 |  |
-| workingclaude-bd | workingclaude-bd | child | dead | 2026-11-25T05:34:41Z | 2172 |  |
+| workingclaude-bd | workingclaude-bd | child | dead | 2026-11-25T05:34:41Z | 2173 |  |
 | workingclaude-cc | workingclaude-cc | child | dead | 2026-11-26T16:07:23Z | 100 |  |
 | workingclaude-fc | workingclaude-fc | child | dead | 2026-11-25T06:53:02Z | 2094 |  |

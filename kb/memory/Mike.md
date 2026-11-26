@@ -26,3 +26,5 @@
 - Tồn: prevention retro 22/11, grep ngưỡng cứng 200, backup 24/11 lỡ chu kỳ.
 - Giữ nguyên: DRI bán hết/TV1 không giữ; 4 quy tắc 02/11 (kb/projects/dd-flag-rules-20261102.md); park 0%.
 
+- [2026-11-26T17:54:01Z] [27/11 00:55] VGC->PVT ĐÃ ÁP + gửi lại báo cáo plan 27/11 (chưa duyệt). Blacklist cờ bất thường chuyển topic 1575570310676217860 (đã wake). Còn ở topic 1575558136297689179: cron 08:30 kiểm golive_v23_status còn PVT; mirror duyệt plan vào topic 1521183164364754974; hạn 19:00 27/11 golive có thể đưa VGC trở lại (topic mới xử).
+- [2026-11-26T18:03:12Z] [27/11 01:05] topic 1575570310676217860 (cờ CAPIT): đã đo + trình phương án A (gỡ cờ có user duyệt) + B (rút cờ giả VPB), diff agents/Mike/capit_flag_blacklist_20261127/ — CHỜ user 'bắt đầu'; HẠN 19:00 27/11 (golive loại PVT => VGC quay lại; cờ PVT hết TTL từ asof 30/11).
