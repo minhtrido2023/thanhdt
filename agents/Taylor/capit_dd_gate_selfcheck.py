@@ -101,26 +101,28 @@ print("\nD. fail-safe:")
 s = anomaly_excluded(str(sig))
 print(f"   asof là chuỗi '{sig}': {'PASS' if s == excl else 'FAIL (khác kết quả với date)'}")
 ok &= (s == excl)
-bak = FLAGS + ".selfcheck_bak"
-os.rename(FLAGS, bak)
-try:
-    for label, content in [("thiếu file", None), ("JSON hỏng", "{not json"), ("rỗng", "{}")]:
-        if content is None:
-            if os.path.exists(FLAGS):
-                os.remove(FLAGS)
-        else:
-            open(FLAGS, "w").write(content)
-        try:
-            r = anomaly_excluded(sig)
-            p = (r == set())
-        except Exception as ex:
-            r, p = f"RAISED {ex}", False
-        print(f"   {label}: {r} → {'PASS' if p else 'FAIL (phải trả set rỗng, không ném lỗi)'}")
-        ok &= p
-        if os.path.exists(FLAGS):
-            os.remove(FLAGS)
-finally:
-    os.rename(bak, FLAGS)   # luôn khôi phục file thật
+# KHÔNG đụng file cờ LIVE (bản cũ đổi tên nó trong lúc chạy ⇒ gate fail-open, bị kill là mất cờ):
+# trỏ gate dùng chung sang thư mục tạm.
+import anomaly_gate
+_real_workdir = anomaly_gate.WORKDIR
+with tempfile.TemporaryDirectory() as tmp:
+    os.makedirs(os.path.join(tmp, "data"))
+    fake = os.path.join(tmp, "data", "anomaly_flags.json")
+    anomaly_gate.WORKDIR = tmp
+    try:
+        for label, content in [("thiếu file", None), ("JSON hỏng", "{not json"), ("rỗng", "{}")]:
+            if content is not None:
+                with open(fake, "w") as fh:
+                    fh.write(content)
+            try:
+                r = anomaly_excluded(sig)
+                p = (r == set())
+            except Exception as ex:
+                r, p = f"RAISED {ex}", False
+            print(f"   {label}: {r} → {'PASS' if p else 'FAIL (phải trả set rỗng, không ném lỗi)'}")
+            ok &= p
+    finally:
+        anomaly_gate.WORKDIR = _real_workdir
 
 print("\nSELFCHECK", "PASS" if ok else "FAIL")
 sys.exit(0 if ok else 1)

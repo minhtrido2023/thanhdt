@@ -31,6 +31,9 @@ import argparse, json, os, subprocess, datetime
 ROOT = "/home/trido/thanhdt/WorkingClaude/mike"
 WC = "/home/trido/thanhdt/WorkingClaude"
 LEDGER = os.path.join(WC, "data", "anomaly_escalations.json")
+GOLIVE_STATUS = os.path.join(WC, "data", "golive_v23_status.json")
+FLAGS = os.path.join(WC, "data", "anomaly_flags.json")
+CLEARANCES = os.path.join(WC, "data", "anomaly_clearances.json")
 TRADING_DAILY = "trading_daily"   # tên trong kb/discord_channels.json
 NOTIFY = os.path.join(ROOT, "bin", "notify_thread.sh")
 DISPATCH = os.path.join(ROOT, "bin", "dispatch.sh")
@@ -81,6 +84,54 @@ def _dispatch_bg(target, prompt, dry):
     return "issued"
 
 
+def _now_ict_iso():
+    return datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7))).isoformat(timespec="seconds")
+
+
+def _capit_flag_review(led, dry):
+    """Mã bị cờ CHẶN khỏi rổ CAPIT (golive status) → giao tra tin 1 lần / (mã, ngày cờ), rồi XIN
+    user duyệt gỡ. Agent KHÔNG được tự ghi data/anomaly_clearances.json. Trả True nếu đổi ledger."""
+    try:
+        with open(GOLIVE_STATUS, encoding="utf-8") as fh:
+            st = json.load(fh)
+        hit = st.get("capit_dd_excluded") or []
+        if not hit:
+            return False
+        with open(FLAGS, encoding="utf-8") as fh:
+            flags = json.load(fh)
+    except FileNotFoundError:
+        return False
+    done = set()
+    try:
+        with open(CLEARANCES, encoding="utf-8") as fh:
+            done = {(c.get("ticker"), c.get("flag_date")) for c in json.load(fh)["clearances"]}
+    except FileNotFoundError:
+        pass
+    changed = False
+    for tk in hit:
+        f = flags.get(tk) or {}
+        day = f.get("last_alert")
+        key = f"CAPITFLAG|{tk}|{day}"
+        if not day or key in led or (tk, day) in done or f.get("retracted"):
+            continue
+        prompt = (f"[Tra tin cờ CAPIT] Mã {tk} đang bị loại khỏi rổ CAPIT vì cờ giá {f.get('reasons')} "
+                  f"phiên {day} (ret {f.get('ret')}%). Tìm tin về CHÍNH doanh nghiệp từ 5 ngày trước "
+                  f"đến nay, phân loại đúng 1 trong BAD_COMPANY / SECTOR_OR_MARKET / TECHNICAL / "
+                  f"NONE_FOUND, kèm URL và ngày công bố. KHÔNG sửa file nào, KHÔNG ghi "
+                  f"data/anomaly_clearances.json. Ghi lên bus một event question topic "
+                  f"capit-flag-review-{tk}-{day} nêu phân loại + bằng chứng, hỏi user có duyệt gỡ cờ "
+                  f"không (BAD_COMPANY không gỡ được; NONE_FOUND chỉ gỡ sau 7 ngày). Việc ghi gỡ cờ do "
+                  f"phiên tương tác với user làm, KHÔNG phải bạn hay job nối tiếp.")
+        job = _dispatch_bg("Wendy", prompt, dry)
+        _notify(f"🔎 **CAPIT loại `{tk}` vì cờ phiên {day}** — "
+                + ("đã giao tra tin; gỡ cờ chỉ khi user duyệt." if job else
+                   "⚠️ GIAO TRA TIN THẤT BẠI (sẽ thử lại lượt sau); cần xem tay."), dry)
+        if job and not dry:
+            led[key] = {"escalated_at": _now_ict_iso(), "type": "CAPITFLAG", "job": job}
+            changed = True
+    return changed
+
+
 def escalate(emit, dry=False):
     led = _load_ledger()
     asof = emit.get("asof", "?")
@@ -103,21 +154,6 @@ def escalate(emit, dry=False):
                 led[key] = {"escalated_at": datetime.datetime.now().isoformat(timespec="seconds"),
                             "type": "UNIVERSE_STALE", "universe_asof": emit.get("universe_asof")}
                 changed = True
-
-    # CỜ GIÁ GIẢ ĐÃ RÚT — hành động TỰ ĐỘNG mở lại cổng mua tiền thật, bắt buộc có người thấy.
-    for x in emit.get("retracted", []):
-        key = f"RETRACT|{x['ticker']}|{x['date']}"
-        if key in led:
-            continue
-        sent = _notify(f"⚠️ **Rút cờ bất thường (tự động)** — `{x['ticker']}` cờ phiên {x['date']}: "
-                       f"đã ghi {x['ret']}%, giá hiện tại {x['ret_now']}% (vendor chỉnh quyền dở dang).\n"
-                       f"  ⇒ mã KHÔNG còn bị loại khỏi rổ CAPIT / LAG DD / paper vì cờ này. "
-                       f"Thấy sai thì báo để khôi phục.", dry)
-        if sent and not dry:
-            ict = datetime.timezone(datetime.timedelta(hours=7))
-            led[key] = {"escalated_at": datetime.datetime.now(ict).isoformat(timespec="seconds"),
-                        "type": "RETRACT"}
-            changed = True
 
     # PRIMARY — tier-H giá/volume → khởi động due-diligence
     for a in emit.get("tier_h", []):
@@ -172,6 +208,27 @@ def escalate(emit, dry=False):
                         "type": "STATUS", "now": now}
             changed = True
         new_status.append(tk)
+
+    # CỜ GIÁ GIẢ ĐÃ RÚT + CAPIT BỊ CỜ CHẶN — đặt SAU tier-H và bọc try: lỗi ở đây không được
+    # làm mất cảnh báo chính.
+    try:
+        for x in emit.get("retracted", []):
+            key = f"RETRACT|{x['ticker']}|{x['date']}|{x.get('on')}"
+            if key in led:
+                continue
+            sent = _notify(f"⚠️ **Rút cờ bất thường (tự động)** — `{x['ticker']}` cờ phiên {x['date']}: "
+                           f"đã ghi {x['ret']}%, giá hiện tại {x['ret_now']}% (vendor chỉnh quyền dở dang).\n"
+                           f"  ⇒ mã KHÔNG còn bị loại khỏi rổ CAPIT / LAG DD / paper vì cờ này. "
+                           f"Thấy sai thì báo để khôi phục.", dry)
+            if sent and not dry:
+                led[key] = {"escalated_at": _now_ict_iso(), "type": "RETRACT"}
+                changed = True
+    except Exception as ex:
+        print(f"ANOMALY_ESCALATE: lỗi khi báo cờ đã rút: {ex}")
+    try:
+        changed = _capit_flag_review(led, dry) or changed
+    except Exception as ex:
+        print(f"ANOMALY_ESCALATE: lỗi khi mở tra tin cờ CAPIT: {ex}")
 
     if changed:
         _save_ledger(led)

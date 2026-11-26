@@ -329,12 +329,14 @@ def retract_fake_flags(flags, df, hold):
         if t.startswith("_") or "ret" not in f or not f.get("last_alert"):
             continue
         a = f["last_alert"]
-        if f.get("retracted"):
-            if a in fired.get(t, ()):
-                f.pop("retracted")
-            continue
         lo = str((pd.Timestamp(a) - pd.Timedelta(days=RETRACT_LOOKBACK_DAYS)).date())
-        if (t, a) not in now or lo < first or any(d >= lo for d in fired.get(t, ())):
+        refired = any(d >= lo for d in fired.get(t, ()))
+        if f.get("retracted"):
+            if refired:                # đối xứng với điều kiện rút ⇒ khôi phục (chặn lại)
+                f.pop("retracted")
+                print(f"⚠️ KHÔI PHỤC cờ {t} {a}: dữ liệu hiện tại lại nổ luật")
+            continue
+        if (t, a) not in now or lo < first or refired:
             continue
         adj, raw, value = now[(t, a)]
         if pd.isna(adj) or pd.isna(raw) or not value >= RETRACT_MIN_VALUE_1M:
@@ -386,8 +388,10 @@ def write_flags(alerts_df, scan_asof=None, prices=None, hold=()):
     os.replace(tmp, FLAGS_PATH)
     # MỌI cờ đang ở trạng thái rút (không chỉ cờ vừa rút) — lượt trước chết giữa chừng vẫn được
     # báo; anomaly_escalate tự chống báo trùng bằng ledger.
+    cutoff = str(_ict_now().date() - datetime.timedelta(days=RETRACT_LOOKBACK_DAYS))
     return [{"ticker": t, "date": f["last_alert"], "ret": f.get("ret"), **f["retracted"]}
-            for t, f in flags.items() if not t.startswith("_") and f.get("retracted")]
+            for t, f in flags.items()
+            if not t.startswith("_") and isinstance(f.get("retracted"), dict) and f.get("last_alert", "") >= cutoff]
 
 
 def selftest():

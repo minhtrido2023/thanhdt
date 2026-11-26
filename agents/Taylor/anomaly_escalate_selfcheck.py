@@ -32,6 +32,8 @@ AE._dispatch_bg = lambda target, prompt, dry: (DISPATCHES.append((target, prompt
 tmp_ledger = tempfile.NamedTemporaryFile(suffix=".json", delete=False).name
 os.remove(tmp_ledger)  # bắt đầu KHÔNG có ledger
 AE.LEDGER = tmp_ledger
+# Không đọc golive status LIVE — nhánh tra tin cờ CAPIT test riêng ở anomaly_clearance_selfcheck.
+AE.GOLIVE_STATUS = tmp_ledger + ".khong-co"
 
 # DGC 2026-03-17 trip thật (số đo từ BQ cache): ret -6.90%, VNI +1.01%, idio -7.91%
 dgc_emit = {"asof": "2026-03-17", "tier_w_count": 0, "status_changes": [],
