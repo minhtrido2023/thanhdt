@@ -145,19 +145,18 @@ Giải thích từng ô. **Thật** nghĩa là sửa đúng cơ chế; **artefac
 - Cờ `E_unexpl` (E tụt >7% không giải thích được bằng CA ≤ D): 05 ABB/ACB/KLB/OCB/VBB · 06 ABB/VBB · 07 LPB/MBB/MSB/VAB/VIB/VPB · 08 LPB/VPB · 09 LPB · 10 TIN.
   Cờ này được ghi vào sổ để người đọc biết, KHÔNG được dùng để loại mã.
 
-## 6. Vận hành (ĐỀ XUẤT — KHÔNG cài; tra `kb/cron_registry.md` §11 trước khi cài)
+## 6. Vận hành — CÀI 2026-11-26 (user duyệt phương án A, sau quant-skeptic vòng 3 phần (c) CONFIRMED, tin cậy trung bình)
 ```
-# ĐỀ XUẤT — chưa cài, chờ quant-skeptic vòng 3 + user duyệt. Host cron chạy UTC: 01:05 = 08:05 ICT.
-5 1 1-5 * *  bash /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/run_monthly_pit2.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_cell_monthly_pit2.log 2>&1
+# 08:23 ICT ngày 1–5 (host cron UTC 01:23; 08:20 trùng ops_health_check)
+23 1 1-5 * *  bash /home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/run_monthly_pit2.sh >> /home/trido/thanhdt/WorkingClaude/mike/logs/paper_cell_monthly_pit2.log 2>&1
 ```
-- **Sửa lỗi dòng cron cũ:** `1-3 * 1-5` trong cron nghĩa là "ngày 1–3 **HOẶC** mọi ngày T2–T6", không phải giao. Dòng mới chạy ngày 1–5 mọi thứ, khớp cổng trễ; idempotent.
-- Wrapper: extract CA → `lvens2_pit2.py` → sổ → `git commit` (commit vào nhánh đang checkout của repo mike).
-- Chi phí (đo ở lần dựng lại, `out/r3_logs/rebuild_time.txt`): 52–59 giây/tháng, RSS đỉnh 2,1 GB. Chạy một mình (§32).
-- Rủi ro: cache không qua cổng trong cả cửa sổ 5 ngày ⇒ **mất tháng đó vĩnh viễn** (cố ý). `verified` là cờ chung nên một bảng không liên quan lỗi cũng chặn. Wrapper lỗi chỉ ghi log, **chưa có cảnh báo** — nên thêm khi cài.
-- Giới hạn marker mtime: copy cache không giữ mtime sẽ làm marker trẻ giả.
-- Drift vintage nêu ở §4.4.
-
-**Còn mở:** quant-skeptic vòng 3 · B3 snapshot VND dừng 2026-11-23 (DSH/GEL/HPA thiếu giá từ as-of 2026-11) · cảnh báo khi wrapper lỗi · merge + cron sau user duyệt · `data_registry/price-volume/corporate_action_snapshots.md` còn ghi cron snapshot "CHƯA CÀI" trong khi crontab có dòng 23:50 và snapshot có tới 11-26 (chưa sửa, ngoài phạm vi).
+- Wrapper: extract CA → `lvens2_pit2.py` → sổ → `git commit` (nhánh đang checkout của repo mike); thử lại 30×10 giây nếu git bận (rc 4 nếu vẫn không được); lượt sau SKIP + commit bù.
+- rc≠0 ⇒ cảnh báo topic Architecture; gửi hỏng in `NOTIFY_FAILED` để `cron_health_check` bắt.
+- Sổ chỉ ghi khi as-of = phiên cuối tháng theo `trading_bot.vn_market` (T18). Lễ mới chưa khai trong lịch ⇒ fail-closed, phải khai rồi chạy lại trong cửa sổ.
+- Chi phí: thường dưới 1 phút lvens2, RSS ~2,1 GB; skeptic đo được tới 7–10 phút khi host bận (`timeout 900`).
+- Rủi ro còn lại: không qua cổng suốt 5 ngày, hoặc cron không chạy cả 5 ngày (không cảnh báo) ⇒ mất tháng đó. `fleet_backup` commit mỗi đêm nên kiểm `git diff HEAD` chỉ bắt sửa trong ngày; dấu vết còn lại là lịch sử git. Sổ chỉ khoá md5 `lvens2_pit2.py`, không khoá các script còn lại.
+- Snapshot VND dừng 2026-11-23: không chặn sổ (DSH/GEL/HPA không thuộc `universe_pit`); chỉ ảnh hưởng nhẹ thống kê nhóm tham chiếu.
+- Selfcheck sổ sau 4 sửa: 74 ca, 3 TZ. Phản biện: skeptic vòng 3 chạy trên `ed9f95238`; 4 sửa sau đó (N1/N2/N6/N7) do Mike làm, chỉ kiểm bằng selfcheck.
 
 ## 6b. Hai ý của skeptic LÀM ĐỔI SỐ — chỉ ĐO, KHÔNG áp (`calc/measure_ideas.py`)
 **(a) Kiểm hấp thụ OShares trước khi nhân stepca/stepcar** (luật đặt trước khi đo, `out/measure_absorb.txt`):
@@ -208,6 +207,6 @@ for ym in 2026-05 2026-06; do $PY calc/lvens2_pit2.py --asof-ym $ym --mc-pit ste
 $PY calc/vintage_drift.py out/vintage_drift.json out/vintage_drift_top.csv   # §4.4
 $PY calc/lvens2_pit2.py --asof-ym 2026-10 --mc-pit strict --no-eguard --out-dir out/regress   # hồi quy Δ=0 vs bản merge (§1)
 ```
-md5 (8 ký tự đầu, sau vòng 3): `lvens2_pit2.py` **90ffb508** (trước 3f5041d6) · `paper_cell_monthly_pit2.py` b50a6a77 · `make_ca_extract.py` 799a7fbd · `ca_extract.sql` 446dddca · `run_monthly_pit2.sh` b53b8264 · `selfcheck_paper_cell_pit2.sh` 35a67e8f · `selfcheck_pit2.py` 223e03fb · `gate_sim.py` 5633fb35 · `measure_ideas.py` 103d2bbb · `mc_err.py` e4ebca73 · `cmp_cells.py` f9a3e94c · `vintage_drift.py` e59ecfe8 ·
+md5 (8 ký tự đầu, sau vòng 3): `lvens2_pit2.py` **90ffb508** (trước 3f5041d6) · `paper_cell_monthly_pit2.py` 56ef7fca · `make_ca_extract.py` 799a7fbd · `ca_extract.sql` 446dddca · `run_monthly_pit2.sh` ac0ccdf5 · `selfcheck_paper_cell_pit2.sh` bd7c6dcc · `selfcheck_pit2.py` 223e03fb · `gate_sim.py` 5633fb35 · `measure_ideas.py` 103d2bbb · `mc_err.py` e4ebca73 · `cmp_cells.py` f9a3e94c · `vintage_drift.py` e59ecfe8 ·
 extract CA 28418e9d · manifest frozen 59a5ee62 · cache `ticker_financial` ab5d424d (max_time 2026-11-20) · `fa_ratings_8l` 2ab15311 · final 2026-10 stepcar dea31ba7.
 Không dùng `profit_*`. Không dùng `ticker_prune`. Universe lấy từ `universe_pit`.
