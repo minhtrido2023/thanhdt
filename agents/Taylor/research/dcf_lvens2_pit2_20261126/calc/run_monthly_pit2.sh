@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
 # ĐỀ XUẤT — CHƯA cài cron. Một lượt hằng tháng: extract CA → lvens2 (stepcar) → sổ → commit khối tháng vào git (mốc chống sửa lén; .md5 cạnh file không đủ).
 # Đã có tháng trong sổ ⇒ thoát 0, KHÔNG dựng lại (không ghi đè parquet đã dùng). Sổ khác bản đã commit ⇒ rc 3.
-# Env cho selfcheck: PCM_LEDGER, OUT_MONTHLY, CA_DIR, NO_GIT=1, PCM_NOW_ICT (bị từ chối với sổ chính), ASOF_YM, CA_YM.
+# Env cho selfcheck: PCM_LEDGER, OUT_MONTHLY, CA_DIR, NO_GIT=1, PCM_NOW_ICT (bị từ chối với sổ chính), ASOF_YM, CA_YM, ALERT_CMD.
+# rc≠0 ⇒ cảnh báo Discord kèm đuôi log (mất cả cửa sổ ngày 1–5 = mất tháng đó vĩnh viễn). Lượt thử (PCM_LEDGER/PCM_NOW_ICT/NO_GIT) không gửi thật trừ khi tự khai ALERT_CMD.
 set -euo pipefail
+if [ -z "${RUN_MONTHLY_PIT2_INNER:-}" ]; then
+  log=$(mktemp); set +e
+  RUN_MONTHLY_PIT2_INNER=1 bash "$0" "$@" 2>&1 | tee "$log"; rc=${PIPESTATUS[0]}
+  set -e
+  if [ "$rc" -ne 0 ]; then
+    msg="🔴 lvens2 pit2 sổ forward LỖI rc=$rc ($(TZ=Asia/Ho_Chi_Minh date '+%d/%m %H:%M ICT')). Cron chạy lại mỗi ngày tới ngày 5; hết ngày 5 vẫn lỗi = MẤT tháng đó vĩnh viễn. Đuôi log:
+$(tail -n 6 "$log" | cut -c1-300)"
+    if [ -n "${ALERT_CMD:-}" ]; then "$ALERT_CMD" "$msg" || echo "ALERT_FAILED: $ALERT_CMD rc=$?" >&2
+    elif [ -z "${PCM_LEDGER:-}${PCM_NOW_ICT:-}${NO_GIT:-}" ]; then
+      /home/trido/thanhdt/WorkingClaude/mike/bin/notify_thread.sh "$msg" architecture || echo "ALERT_FAILED: notify_thread.sh rc=$?" >&2
+    else echo "ALERT_SKIPPED: lượt thử, không gửi"; fi
+  fi
+  rm -f "$log"; exit "$rc"
+fi
 BASE=$(cd "$(dirname "$0")/.." && pwd); cd "$BASE"
 PY=${PY:-/home/trido/thanhdt/wc_venv/bin/python}
 export LVENS2_FROZEN=${LVENS2_FROZEN:-/home/trido/thanhdt/WorkingClaude/data/research_frozen/dcf_v31_inputs/out} PYTHONHASHSEED=0

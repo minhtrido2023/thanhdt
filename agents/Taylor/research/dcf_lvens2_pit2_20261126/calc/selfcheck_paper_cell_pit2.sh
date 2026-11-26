@@ -78,10 +78,12 @@ ok "T15b mỗi tháng trong sổ có bản sao parquet đúng md5" '"$PY" -c "im
 # ---- T16: wrapper trong repo git tạm (không đụng repo thật) ----
 R=$(mktemp -d /tmp/lv2wrap.XXXXXX); mkdir -p "$R/out/ca"; cp -r calc "$R/calc"; cp out/ca/ca_extract_202611.csv* "$R/out/ca/"
 git -C "$R" init -q; git -C "$R" config user.email sc@localhost; git -C "$R" config user.name selfcheck
-wrap() { env -u LVENS2_CA -u LVENS2_CA_MD5 PCM_LEDGER=out/test_ledger.csv ASOF_YM=2026-10 CA_YM=202611 PCM_NOW_ICT=${NOW[10]} bash "$R/calc/run_monthly_pit2.sh" >"$BASE/$O/last.txt" 2>&1; echo $?; }
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$1" >> "%s/alerts.txt"\n' "$R" > "$R/alert.sh"; chmod +x "$R/alert.sh"
+wrap() { env -u LVENS2_CA -u LVENS2_CA_MD5 ALERT_CMD="${AC-$R/alert.sh}" PCM_LEDGER=out/test_ledger.csv ASOF_YM=2026-10 CA_YM=202611 PCM_NOW_ICT=${NOW[10]} bash "$R/calc/run_monthly_pit2.sh" >"$BASE/$O/last.txt" 2>&1; echo $?; }
 chk "T16a wrapper end-to-end ghi + commit" 0 "$(wrap)"; has T16a2 "ĐÃ COMMIT"
 ok "T16b sổ + sidecar + inputs + extract đã vào git, cây sạch cho các file đó" '[ "$(git -C "$R" ls-files | grep -cE "test_ledger.csv|ledger_inputs/|ca_extract_202611.csv")" -ge 5 ] && git -C "$R" diff --quiet HEAD -- out'
 m1=$(md5sum < "$R/out/monthly/lvens2_2026-10_mcstepcar.parquet"); t1=$(stat -c %y "$R/out/monthly/lvens2_2026-10_mcstepcar.parquet")
+ok "T17a lượt thành công không cảnh báo" '[ ! -e "$R/alerts.txt" ]'
 chk "T16c chạy lại ⇒ SKIP, không dựng lại" 0 "$(wrap)"; has T16c2 SKIP
 ok "T16d parquet không bị ghi đè" '[ "$(stat -c %y "$R/out/monthly/lvens2_2026-10_mcstepcar.parquet")" = "$t1" ] && [ "$(md5sum < "$R/out/monthly/lvens2_2026-10_mcstepcar.parquet")" = "$m1" ]'
 sed -i '2s/2026-10/2026-1O/' "$R/out/test_ledger.csv"; "$PY" - "$R/out/test_ledger.csv" <<'PY'
@@ -92,5 +94,9 @@ s = json.loads(open(p + ".blocks.jsonl").readline()); s["block_md5"] = hashlib.m
 open(p + ".blocks.jsonl", "w").write(json.dumps(s) + "\n")
 PY
 chk "T16e sửa lén sổ + sidecar ⇒ git chặn" 3 "$(wrap)"; has T16e2 "khác bản đã commit"
+ok "T17b lỗi ⇒ đúng 1 cảnh báo, có rc và dòng lỗi thật" '[ "$(grep -c "LỖI rc=3" "$R/alerts.txt")" = 1 ] && grep -q "khác bản đã commit" "$R/alerts.txt"'
+chk "T17c lượt thử không khai ALERT_CMD: giữ rc, không gửi thật" 3 "$(AC='' wrap)"; has T17c2 ALERT_SKIPPED
+printf '#!/usr/bin/env bash\nexit 1\n' > "$R/alert_bad.sh"; chmod +x "$R/alert_bad.sh"
+chk "T17d lệnh cảnh báo hỏng không đổi rc" 3 "$(AC=$R/alert_bad.sh wrap)"; has T17d2 ALERT_FAILED
 rm -rf "$R"
 echo "TZ=${TZ-<unset>} RESULT: $([ $bad = 0 ] && echo PASS || echo "FAIL $bad")"; exit $bad
