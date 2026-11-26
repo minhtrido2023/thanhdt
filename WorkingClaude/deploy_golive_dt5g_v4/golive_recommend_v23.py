@@ -100,7 +100,7 @@ from simulate_holistic_nav import bq
 from signal_v11_sql import SIGNAL_V11
 from anomaly_gate import anomaly_excluded as _anomaly_excluded_shared
 from anomaly_gate import anomaly_skipped as _anomaly_skipped
-from anomaly_gate import capit_user_excluded as _capit_user_excluded
+from anomaly_gate import capit_apply_user_exclusions as _capit_apply_user_exclusions
 from anomaly_gate import anomaly_flags_freshness as _anomaly_flags_freshness
 from lag_liquidity_filter import lag_filter_illiquid, bal_filter_thin, ADV_MIN_VND
 from lag_rating_filter import (lag_filter_low_rating, lag_rating_stale_flags,
@@ -984,11 +984,9 @@ if capit_signal_today:
             capit_dd_excluded = hit
             print(f"  CAPIT due-diligence: loại {hit} khỏi pool (cờ bất thường <{ANOMALY_TTL_DAYS}d)")
             e = e[~e["ticker"].isin(excl)]
-        uex, capit_user_excl_error = _capit_user_excluded(bd.date())
-        capit_user_dropped = {t: r for t, r in sorted(uex.items()) if not e.empty and t in set(e["ticker"])}
+        e, capit_user_dropped, capit_user_excl_error = _capit_apply_user_exclusions(e, bd.date())
         if capit_user_dropped:
             print(f"  CAPIT: loại theo yêu cầu user {capit_user_dropped}")
-            e = e[~e["ticker"].isin(list(capit_user_dropped))]
         if capit_user_excl_error:
             print(f"  WARNING: {capit_user_excl_error}")
         if not e.empty:

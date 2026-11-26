@@ -209,11 +209,23 @@ def capit_user_excluded(asof):
             lo, hi = pd.Timestamp(c["from"]).date(), pd.Timestamp(c["until"]).date()
             if c["decided_by"] != "user" or not str(c["approval_ref"] or "").strip():
                 raise ValueError("thiếu decided_by=user / approval_ref")
+            if lo > hi:
+                raise ValueError("from > until")
             if lo <= d <= hi:
-                out[c["ticker"]] = f"user loại đến {hi}: {c.get('reason', '')}"
+                out[str(c["ticker"]).strip().upper()] = f"user loại đến {hi}: {c.get('reason', '')}"
         except Exception as ex:
             bad.append(f"{str(c)[:80]} ({ex})")
     return out, (f"dòng loại tay KHÔNG hợp lệ: {bad}" if bad else None)
+
+
+def capit_apply_user_exclusions(pool, asof):
+    """Bỏ mã user loại tay khỏi `pool` (DataFrame có cột ticker) → (pool mới, {mã bị bỏ: lý do}, lỗi).
+    Chỉ báo mã THỰC SỰ nằm trong pool."""
+    uex, err = capit_user_excluded(asof)
+    dropped = {t: r for t, r in sorted(uex.items()) if not pool.empty and t in set(pool["ticker"])}
+    if dropped:
+        pool = pool[~pool["ticker"].isin(list(dropped))]
+    return pool, dropped, err
 
 
 def insider_sell_flagged(asof, ttl_days=INSIDER_TTL_DAYS, quiet=False):
