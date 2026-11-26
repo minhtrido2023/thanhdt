@@ -1,28 +1,28 @@
 # Working memory — Mike
 > Cập nhật mỗi khi đổi mạch việc. Bơm vào đầu phiên của Mike.
 
-## Cuối ngày 25/11 → 26/11
-- Retro 25/11 đã ghi: kb/incidents/retro/retro-2026-11-25.md (4 sự cố, P1 = guard dựa suy luận gián tiếp/ngưỡng cứng lỗi thời).
-- plan-gate-rootfix (Wags) ĐÃ merge (mike 617db0720 → outer 1455b6557), cron 12 dòng đã cài. Theo dõi đêm 25/11: bq_freshness 19:00 + plan_gate_recovery.log 19:40+. P3 follow-up (5 mục) chưa làm. Nhắc user nâng mốc config/trading_calendar_confirmed.json (hiện 2026-12-04). Chạy send_plan_report sau 00:00 PHẢI kèm --plan-date.
-- Plan 25/11 + 26/11 đã có; DollarBill HOLD ALL 0 lệnh; park 0%.
-- DD: đợt 2–4 + followup ĐÓNG (sổ 181 entry). Còn chờ: NT2 (BCTC 2026), TCH/DRI/VGS (dữ kiện), PVP đọc NQ/BB gốc sau ĐHĐCĐ 30/11, đợt 5 hoãn. POW: dựng lại báo cáo NĐT theo REV4 (tâm 9.387) + chạy lại fundamental-skeptic TRƯỚC email — chờ user duyệt; DD chỉ email khi user báo.
-- DCF-VN hành vi: topic 1575099485153927261, Taylor_20261125_104308 (fable/medium) lập plan — poll/đọc kết quả ở topic đó. Dòng earnings-forecast + DCF V3.1 đã merge/đóng NO-GO.
-- Giữ nguyên: DRI bán hết/TV1 không giữ; 4 quy tắc user 02/11 (kb/projects/dd-flag-rules-20261102.md).
-- Tồn: prevention retro 22/11 (fleet_backup alert…), grep ngưỡng cứng 200 toàn repo, backup 24/11 lỡ chu kỳ chưa rõ nguyên nhân.
+## Trạng thái cuối ngày 26/11 (retro: kb/incidents/retro/retro-2026-11-26.md, 8 sự cố)
 
-- [2026-11-26T02:18:08Z] [26/11 09:2x] lvens2 pit2 vòng 3: job Taylor_20261126_021759, CHUYỂN sang topic 1575334726393135196 (phiên mới theo dõi qua wake_thread). Topic 1575172709128605866 ĐÓNG — không poll nữa. Chờ user sau vòng 3: merge/cron/registry.
-- [2026-11-26T02:18:47Z] [26/11 09:2x] Phiên topic 1575334726393135196 đã nhận theo dõi Taylor_20261126_021759 (ScheduleWakeup, claim-reply đầu lượt). Xong: kiểm REPORT/commit/md5 2026-10 stepcar=dea31ba7/selfcheck → xin duyệt merge/cron/registry; đổi số thì đề xuất skeptic vòng 3.
-- [2026-11-26T04:19:27Z] [26/11 11:2x] pit2 vòng 3 XONG (commit 7649df7c4, claim-reply done); số không đổi, đã trình user, CHỜ duyệt merge/cron/registry. Selfcheck PIT chạy lại: /tmp/mike_lv2_verify.FC0HTO/scp.txt; xoá out/sc_mike_verify sau khi đọc.
-- [2026-11-26T04:35:19Z] [26/11 11:35] pit2 vòng 3: selfcheck PIT chạy lại PASS rc=0, đã dọn sc_mike_verify. Chỉ còn CHỜ user duyệt: merge / cảnh báo wrapper / skeptic phần (c) / cron+registry trước 01/12.
-- [2026-11-26T05:38:57Z] [26/11 12:40] POW: user duyệt — Taylor_20261126_053853 dựng lại báo cáo NĐT theo sổ (9.387); xong → chạy fundamental-skeptic (MODE: DD_GENERAL) → trình user. KHÔNG email. Topic 1575064839301365845.
-- [2026-11-26T05:43:33Z] [26/11 ~12:5x] pit2: cảnh báo + merge ed9f95238 xong; skeptic vòng 3 phần (c) CONFIRMED medium (không blocking). Cron + registry CHƯA cài: chờ user chọn A (sửa N1/N2/N6/N7 rồi cài, khuyến nghị) / B (cài ngay). Hạn trước 01/12. Lưu ý: 24/11 là ngày NGHỈ (Ngày Văn hoá) — dẫn chứng N1 của skeptic sai, không cần báo Winston. Worktree wt-1575334726393135196.
-- [2026-11-26T05:46:21Z] [26/11 12:47] POW skeptic r4 REFUTED: hồi tố 2.454,7 đếm 2 lần (ROE 8% đã gồm), tâm ≈8.549. Chờ user duyệt rev5-sửa (ROE bỏ điều chỉnh hồi tố) + center_adj E17 + sổ + báo cáo. Bản NĐT 26/11 KHÔNG gửi.
-- [2026-11-26T06:25:11Z] [26/11 ~13:5x] pit2 ĐÓNG: 4 sửa + merge c2cb5f4bf, cron 23 1 1-5 * * (08:23 ICT) cài, registry behav_cell_ledger chèn (user duyệt A). Mốc: 01/12 08:23 lượt thật đầu (as-of 2026-11) — kiểm logs/paper_cell_monthly_pit2.log. Worktree wt-dcf-lvens2-pit2-20261126 giữ (r3_final cho selfcheck).
-- [2026-11-26T06:47:05Z] [26/11 ~14:00] P3 plan-gate: sửa 5/5 + 3 test đỏ trên master (do Mike điền trading_calendar_confirmed 25/11 không chạy lại selfcheck) — commit trên nhánh session/1574968284674138344 (worktree wt-1574968284674138344), 30/30 PASS 3TZ. CHỜ user duyệt merge vào mike master (không đổi cron).
-- [2026-11-26T06:52:42Z] [26/11 ~13:55] P3 plan-gate ĐÓNG: merge 3973d192a, selfcheck master PASS, cron giữ nguyên. Theo dõi logs/plan_gate_recovery.log lượt 19:40/07:30.
-- [2026-11-26T07:12:39Z] 26/11 14:1x: auto-resume phiên Discord LIVE (merge, thử thật PASS topic test 1575408554289143828). Còn: ca thread ARCHIVED — chờ user Close topic test rồi bảo tôi thử; lần hết quota thật đầu tiên → kiểm logs/session_limit_resume.log + resume_pending.log.
-- [2026-11-26T08:54:21Z] [26/11 15:5x] topic 1574228100085059614: user duyệt, đã gắn description BQ cho bảng vnindex_5state* (live/base/vintage/đóng băng). CHỜ duyệt: (1) diff daily_refresh_v34b_linux.sh:271 thêm OPTIONS(description) — không thì mô tả bảng _v34b_clean mất lúc 18:30; (2) dời bảng đóng băng sang tav2_archive (chưa làm; dt_4gate phải gỡ khỏi sync_bq_cache.py trước). Cần kiểm sau 18:30: mô tả dt5g_live còn không (writer ngoài ghi 16:2x).
-- [2026-11-26T09:27:32Z] [26/11 16:3x] topic 1574228100085059614: XONG — 13 bảng vnindex_5state đóng băng dời sang BQ dataset tav2_archive (khôi phục: bq cp); outer commit 026c9d4e1 (description _v34b_clean). Giữ lại tav2_bq: taylor_exp_* (backtest 2008 dùng), staging, dt_4gate (đợt C, sync_bq_cache còn đọc). Chờ user: cập nhật kb/data_registry archive_family (tên dataset mới).
-- [2026-11-26T13:21:09Z] [26/11 20:2x] topic 1574228100085059614 ĐÓNG: lượt daily_refresh 18:30 sau sửa description PASS (base/clean/dt5g max 26/11, mô tả còn). Registry f36ef9f3a. Còn tuỳ user: đợt C (staging, dt_4gate + sync_bq_cache). Quan sát có sẵn: bước [11c] macro_healthcheck báo base STALE (đọc 25/11) cả ngày 20, 25, 26 — chưa điều tra.
-- [2026-11-26T15:24:05Z] [26/11 22:3x] topic 1574228100085059614 ĐÓNG: đợt C xong — dt_4gate+staging sang tav2_archive (tổng 15), gỡ khỏi sync_bq_cache/preflight (outer edba18f1e), registry mike 90c3c31ed. Nếu sync 23:45 26/11 báo preflight FAIL thì xem data/bq_cache/sync.log; khôi phục: bq cp + git revert edba18f1e.
+### GẤP sáng 27/11
 - [2026-11-26T17:38:45Z] [27/11 00:45] topic 1575558136297689179: user đổi rổ CAPIT VGC->PVT (QNS giữ; SIP trượt FSCORE 4). Diff chờ user 'bắt đầu': agents/Mike/capit_swap_20261127/ (python3 swap.py 7.52724E10 --apply, rồi dry.py cần proposed lại; gửi lại plan report --plan-date 2026-11-27; kiểm golive_v23_status còn PVT trước 09:05). Plan chưa duyệt.
+- data/dd_zone_candidates_latest.json (WC root) còn là FIXTURE (selfcheck dd_price_zone_watch đè 26/11 19:54) → bản 08:00 sai tới cron 19:45; mỗi lần chạy selfcheck đó lại đè. CHƯA sửa.
+- VPB ZaloPay: plan-position-drift 20:50 = DRIFT (2 hệ giá 19.700/20.250, KL 930), SpaceX CANNOT_CHECK — kiểm trước 09:05.
+- Claude CLI hết hạn đăng nhập khoảng 03–06/12: nhắc user `claude auth login` / `setup-token`.
+
+### Chờ user
+- POW: skeptic r4 REFUTED (hồi tố 2.454,7 đếm 2 lần, tâm ≈8.549) — chờ duyệt rev5-sửa + center_adj E17 + sổ + báo cáo. Bản NĐT 26/11 KHÔNG gửi; DD chỉ email khi user báo. Topic 1575064839301365845.
+- auto-resume phiên Discord LIVE; ca thread ARCHIVED chờ user Close topic test 1575408554289143828. Lần hết quota thật đầu: logs/session_limit_resume.log + resume_pending.log.
+- Nâng mốc config/trading_calendar_confirmed.json (hiện 2026-12-04); sửa file này phải chạy lại selfcheck đọc nó.
+
+### Còn mở
+- Selfcheck ĐỎ: dt5g_publisher_gate_selfcheck.sh, dd_ledger_append_center_adj_selfcheck.py, freshness_ops_selfcheck.py (thiếu prune_depth_gate.py trong sandbox).
+- Báo giả: send_plan_report so md5 ("PLAN ĐÃ THAY ĐỔI"), kb_ingest_lag, watchdog.sh:119 mỗi 10'. Escalation chờ user: retro-pattern-recurring-guard-judges-by-proxy-not-artifact.
+- Repo mike: 130 file staged chưa commit (gồm code đang chạy production) — chủ chưa rõ; commit phải kèm pathspec.
+- [11c] macro_healthcheck báo base STALE (20/25/26-11) chưa điều tra; vn_interbank_3m cũ.
+- plan-gate P3 đã ĐÓNG (3973d192a): theo dõi logs/plan_gate_recovery.log. send_plan_report sau 00:00 PHẢI kèm --plan-date.
+- pit2 ĐÓNG: 01/12 08:23 lượt thật đầu → logs/paper_cell_monthly_pit2.log (giữ worktree wt-dcf-lvens2-pit2-20261126).
+- DCF-VN hành vi: topic 1575099485153927261 (Taylor_20261125_104308) — theo dõi ở topic đó.
+- DD chờ: NT2 (BCTC 2026), TCH/DRI/VGS (dữ kiện), PVP (NQ/BB sau ĐHĐCĐ 30/11).
+- Tồn: prevention retro 22/11, grep ngưỡng cứng 200, backup 24/11 lỡ chu kỳ.
+- Giữ nguyên: DRI bán hết/TV1 không giữ; 4 quy tắc 02/11 (kb/projects/dd-flag-rules-20261102.md); park 0%.
+
