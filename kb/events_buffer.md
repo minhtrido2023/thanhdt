@@ -859,3 +859,7 @@
 - [2026-11-26T13:21:03Z] DollarBill/heartbeat — DollarBill_20261126_132002: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261126_132002", "source": "watcher"}
 - [2026-11-26T13:21:06Z] DollarBill/heartbeat — DollarBill_20261126_132005: {"status": "still_running", "elapsed_min": 1, "job_id": "DollarBill_20261126_132005", "source": "watcher"}
 - [2026-11-26T13:21:25Z] DollarBill/decision — plan-2026-11-27: {"account": "ZaloPay", "orders": ["GAS 400@68000", "QNS 500@47500", "VGC 700@36750", "VNM 500@52700"], "book": "CAPIT", "total_buy_vnd": 103025000, "egg_transfer_min_vnd": 93900000, "approved": false, "file": "data/trade_plans/plan_ZaloPay_2026-11-27.json", "checks": "load_plan 4 lenh, cap_capit_orders 0 cat, lag calendar check OK, auto_exit dry-run khong candidate"}
+
+## Consolidation 2026-11-26T13:21:52Z
+- [2026-11-26T13:21:45Z] DollarBill/decision — plan-2026-11-27: {"account": "SpaceX", "plan_date": "2026-11-27", "decision": "BUY 4 CAPIT: GAS 600@68000, QNS 900@47500, VGC 1100@36750, VNM 800@52700", "gross_vnd": 166135000, "egg_transfer_min_vnd": 166300000, "egg_transfer_suggest_vnd": 177000000, "approval": "pending", "decided_by": "agent"}
+- [2026-11-26T13:21:45Z] DollarBill/finding — plan-SpaceX-2026-11-27-xong: {"file": "data/trade_plans/plan_SpaceX_2026-11-27.json", "orders": 4, "book": "CAPIT", "checks": "load_plan OK, merge_park OK, lag calendar OK", "cho": "user duyet truoc 08:45 27/11"}
