@@ -47,14 +47,18 @@ def main(mode):
     if mode != "stopfail" or data.get("error") != "rate_limit":
         return
     reset = reset_epoch(data.get("last_assistant_message") or "")
-    if not reset:
-        return  # 429 thoáng qua, không có giờ reset -> không đoán
+    notify = os.path.join(ROOT, "bin", "notify_thread.sh")
+    if not reset:  # không đoán giờ — nhưng phải NÓI là sẽ không tự chạy tiếp
+        msg = (data.get("last_assistant_message") or "")[:200]
+        print("%d thread=%s no reset time in: %r" % (time.time(), thread, msg), file=sys.stderr)
+        subprocess.run([notify, "⚠️ Lượt bị cắt vì rate limit nhưng không đọc được giờ reset — KHÔNG tự "
+                                "chạy tiếp, cần nhắn tay. Lỗi: %s" % msg, thread], timeout=20)
+        return
     try:
         n = int(open(cnt).read())
     except Exception:
         n = 0
     n += 1
-    notify = os.path.join(ROOT, "bin", "notify_thread.sh")
     if n > CAP:
         subprocess.run([notify, "⚠️ Hết quota lần %d liên tiếp — DỪNG auto-resume, cần nhắn tay." % n, thread], timeout=20)
         return

@@ -13,7 +13,8 @@ pat = re.compile(
     r"(?:\s*\(([^)]+)\))?",
     re.IGNORECASE,
 )
-def reset_epoch(text):
+def reset_epoch(text, now=None):
+    """now: tz-aware datetime, only for tests."""
     best = 0
     for m in pat.finditer(text):
         mon_s, day_s, h1, m1, ap1, h2, ap2, tz_raw = m.groups()
@@ -31,7 +32,7 @@ def reset_epoch(text):
             tz = ZoneInfo(tz_name)
         except Exception:
             tz = ZoneInfo("Asia/Ho_Chi_Minh")
-        now_dt = datetime.now(tz)
+        now_dt = now.astimezone(tz) if now else datetime.now(tz)
         if mon_s and day_s:
             mon = MONTHS[mon_s.lower()]
             day = int(day_s)

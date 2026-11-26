@@ -66,8 +66,9 @@ Dấu hiệu (không phải fail thật): log khớp "usage limit"/"rate limit"/
 `bus/pending_resumes/<job_id>.json` (resume_at = reset-time + buffer 10'), **`bin/resume_pending.py`**
 (cron 10') tự `dispatch.sh` lại "TIẾP TỤC từ working memory". Trần lặp `DISPATCH_MAX_USAGE_RESUMES`
 (mặc định 3), quá trần → xử lý fail thường (phòng bug thật đội lốt usage-limit). **Exit code 5**
-(≠ fail thật) = đã queue tự resume, báo user "đang chờ tự chạy tiếp". **Giới hạn: KHÔNG cứu được
-phiên tương tác sống của chính Mike** (turn hiện tại chết là chết) — xem mục 7.
+(≠ fail thật) = đã queue tự resume, báo user "đang chờ tự chạy tiếp". **Phiên Discord tương tác**
+(từ 2026-11-26): lượt đang chạy vẫn chết, nhưng hook `bin/session_limit_resume.py` hẹn tự chạy tiếp
+sau giờ reset (§8). Phiên remote-control/terminal ngoài ccdb: không có — xem mục 7.
 
 **6b. Auto-continuation khi hết turn budget (`--max-turns`, thêm 2026-08-02).** Khác usage-limit (transient, chờ
 reset-time): hết lượt là tín hiệu NGÂN SÁCH xác định — retry y trần cũ chỉ tạch lại. 2 lớp:
@@ -80,7 +81,8 @@ model/effort, mang trần đã nâng thêm 1 lần nữa. Trần lặp riêng `D
 như usage-limit, nay giữ nguyên model/effort/max-turns qua mọi lần resume. Chi tiết:
 `kb/incidents/2026-08/2026-08-02-max-turns-auto-continuation.md`. Đoạn gốc đầy đủ: `MIKE_ext.md` § Dọn instructions 2026-10-09 → Quy chuẩn mục 6b.
 
-**7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (chỉ đạo user).** Tự kiểm
+**7. Khi CHÍNH phiên Mike sắp hết usage limit giữa 1 task dài (chỉ đạo user).** *(Phiên Discord đã tự
+resume — mục 6; phần `CronCreate` dưới đây chỉ cho phiên ngoài ccdb.)* Tự kiểm
 `usage_watch.py` thấy ≥~85% giữa task dài chưa xong: chủ động báo TRƯỚC cho user, và tự đề xuất
 `CronCreate` 1 job one-shot NGAY TRONG phiên hiện tại (`recurring: false`, giờ = reset-time + đệm),
 prompt = tiếp tục task đang dở.
