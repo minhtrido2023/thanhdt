@@ -50,6 +50,12 @@ ok "T9i không sinh parquet khi fail" '! ls "$O"/stale/*.parquet >/dev/null 2>&1
 cp "$(pq 10)" "$O/nofresh.parquet"; "$PY" -c "import json,sys;m=json.load(open(sys.argv[1]));m['freshness']={'ticker_financial':'2026-10-30'};json.dump(m,open(sys.argv[2],'w'))" "$F/lvens2_2026-10_mcstepcar.json" "$O/nofresh.json"
 chk "T9j parquet dựng bởi cổng cũ (không sync-v2)" 3 "$(run 07 --lvens2-from "$O/nofresh.parquet")"
 
+# T18: D phải là phiên cuối tháng — cache giả thiếu trọn phiên 2026-10-30 (mtime mới, qua cổng sync) ⇒ chặn
+mkfake; rm "$FK/ticker"; mkdir "$FK/ticker"; for d in "$WC"/data/bq_cache/ticker/*.parquet; do ln -s "$d" "$FK/ticker/$(basename "$d")"; done
+rm "$FK/ticker/2026.parquet"; "$PY" -c "import duckdb,sys;duckdb.execute(f\"COPY (SELECT * FROM read_parquet('{sys.argv[1]}') WHERE CAST(time AS DATE) <> DATE '2026-10-30') TO '{sys.argv[2]}' (FORMAT parquet)\")" "$WC/data/bq_cache/ticker/2026.parquet" "$FK/ticker/2026.parquet"
+chk "T18 cache thiếu phiên cuối tháng ⇒ chặn" 3 "$(fk)"; has T18b "không phải phiên cuối tháng"
+ok "T18c lịch: 2026-05..10 ra đúng phiên cuối, gồm lễ 31/08" '"$PY" -c "import sys;sys.path.insert(0,\"calc\");import paper_cell_monthly_pit2 as P;got=[str(P.last_session(f\"2026-{m:02d}\")) for m in (5,6,7,8,9,10)];sys.exit(0 if got==[\"2026-05-29\",\"2026-06-30\",\"2026-07-31\",\"2026-08-28\",\"2026-09-30\",\"2026-10-30\"] else 1)"'
+
 # ---- T10–T13 (B1): extract CA là DỮ LIỆU ----
 CA2=$O/ca_extract_new.csv; cp out/ca/ca_extract_202611.csv "$CA2"; echo >> "$CA2"; M2=$(md5sum < "$CA2" | cut -d' ' -f1)
 lv() { "$PY" calc/lvens2_pit2.py --asof-ym 2026-07 --mc-pit stepcar --out-dir "$O/new" >"$O/last.txt" 2>&1; echo $?; }
@@ -97,6 +103,16 @@ chk "T16e sửa lén sổ + sidecar ⇒ git chặn" 3 "$(wrap)"; has T16e2 "khá
 ok "T17b lỗi ⇒ đúng 1 cảnh báo, có rc và dòng lỗi thật" '[ "$(grep -c "LỖI rc=3" "$R/alerts.txt")" = 1 ] && grep -q "khác bản đã commit" "$R/alerts.txt"'
 chk "T17c lượt thử không khai ALERT_CMD: giữ rc, không gửi thật" 3 "$(AC='' wrap)"; has T17c2 ALERT_SKIPPED
 printf '#!/usr/bin/env bash\nexit 1\n' > "$R/alert_bad.sh"; chmod +x "$R/alert_bad.sh"
-chk "T17d lệnh cảnh báo hỏng không đổi rc" 3 "$(AC=$R/alert_bad.sh wrap)"; has T17d2 ALERT_FAILED
+chk "T17d lệnh cảnh báo hỏng không đổi rc" 3 "$(AC=$R/alert_bad.sh wrap)"; has T17d2 NOTIFY_FAILED
+# T19: index.lock bị giữ (consolidate) — sổ trong repo tạm đã khôi phục sạch, dùng sổ mới
+git -C "$R" checkout -q -- out/test_ledger.csv out/test_ledger.csv.blocks.jsonl
+wrap2() { GIT_TRIES=2 GIT_RETRY_S=1 env -u LVENS2_CA -u LVENS2_CA_MD5 ALERT_CMD="$R/alert.sh" PCM_LEDGER=out/t19/led.csv ASOF_YM=2026-10 CA_YM=202611 PCM_NOW_ICT=${NOW[10]} bash "$R/calc/run_monthly_pit2.sh" >"$BASE/$O/last.txt" 2>&1; echo $?; }
+: > "$R/.git/index.lock"
+chk "T19a index.lock bị giữ suốt ⇒ rc 4, không im lặng" 4 "$(wrap2)"; has T19a2 "không commit được khối"
+ok "T19b sổ đã ghi nhưng chưa vào git" '[ -f "$R/out/t19/led.csv" ] && [ -z "$(git -C "$R" ls-files out/t19)" ]'
+rm -f "$R/.git/index.lock"
+chk "T19c lượt sau: SKIP + commit bù" 0 "$(wrap2)"; has T19c2 "ĐÃ COMMIT"
+ok "T19d sổ + sidecar + parquet đầu vào đã vào git" '[ "$(git -C "$R" ls-files out/t19 | grep -cE "led.csv|ledger_inputs/.*parquet")" -ge 3 ]'
+chk "T19e chạy lại nữa: không còn gì để commit" 0 "$(wrap2)"; ok T19e2 '! grep -q "ĐÃ COMMIT" "$O/last.txt"'
 rm -rf "$R"
 echo "TZ=${TZ-<unset>} RESULT: $([ $bad = 0 ] && echo PASS || echo "FAIL $bad")"; exit $bad

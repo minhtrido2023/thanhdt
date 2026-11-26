@@ -36,6 +36,17 @@ def md5(p):
     return md5b(open(p, "rb").read())
 
 
+def last_session(ym):
+    """Phiên giao dịch cuối của tháng theo lịch trading_bot.vn_market (đọc bản canonical, không theo WC_ROOT của cache).
+    Lễ chưa khai trong lịch ⇒ kết quả muộn hơn D thật ⇒ fail-closed (sửa lịch rồi chạy lại trong cửa sổ)."""
+    sys.path.append("/home/trido/thanhdt/WorkingClaude")
+    from trading_bot.vn_market import is_holiday
+    d = L.month_end(ym)
+    while d.weekday() >= 5 or is_holiday(d):
+        d -= timedelta(days=1)
+    return d
+
+
 def fail(msg):
     print("FAIL-CLOSED: " + msg, file=sys.stderr); return 3
 
@@ -102,6 +113,10 @@ def main():
     D = px[px.time.dt.strftime("%Y-%m") == ym].time.max()
     if pd.isna(D):
         return fail(f"không có giá ngày nào của {ym}")
+    want_d = last_session(ym)
+    if D.date() != want_d:
+        return fail(f"as-of {D.date()} trong cache không phải phiên cuối tháng {want_d} theo trading_bot.vn_market "
+                    f"— cache thiếu phiên, hoặc lịch nghỉ chưa khai trong vn_market.py")
     ok, det = L.sync_state(CACHE, CACHE, ym, D)
     if not ok:
         return fail(f"cache chưa đồng bộ tới D {D.date()}: " + "; ".join(det["bad"]))

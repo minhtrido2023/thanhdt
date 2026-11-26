@@ -242,3 +242,7 @@ gate_last ghi lúc bq_freshness kết thúc (~19:0x) ⇒ lượt đầu 19:40; p
 trước 21:15 không gửi (cron 20:20→20:50→21:00 lo). (4) **Kiểm**: `logs/plan_gate_recovery.log` + mốc
 `state/plan_gate_recovery/<plan_date>.json` (retry/escalated), selfcheck `bin/plan_gate_recovery_selfcheck.py`,
 `bin/plan_gate_holiday_selfcheck.py`, `bin/prune_depth_gate_selfcheck.py`.
+
+## lvens2_pit2 sổ ô hằng tháng — ĐÃ CÀI 2026-11-26 (user duyệt phương án A; quant-skeptic vòng 3 phần (c) CONFIRMED; DISPLAY-ONLY)
+`23 1 1-5 * *` (08:23 ICT ngày 1–5; host UTC) → `agents/Taylor/research/dcf_lvens2_pit2_20261126/calc/run_monthly_pit2.sh`, log `mike/logs/paper_cell_monthly_pit2.log`.
+§11: (1) **Đọc** BQ local cache `data/bq_cache` (ticker, ticker_financial, fa_ratings_8l, universe_pit) + `tav2_mike.corporate_action_snapshots` live + snapshot VND đóng băng + `trading_bot.vn_market`. (2) **Tươi lúc** cache sync 23:45 đêm trước; cổng sync-v2 đòi marker ≥ 23:15 ICT ngày làm việc cuối tháng, CA ingest tương ứng. (3) **T-1** là đủ (as-of = cuối tháng trước). (4) **Xung đột** tránh 08:20 (ops_health_check) và :07 (consolidate); RSS ~2,1 GB, thường vài phút. Ghi `out/paper_cell_ledger_pit2.csv` + git commit; consumer: chưa có (đọc lần đầu 2027-11-30). rc≠0 ⇒ cảnh báo Architecture; ngày 1–5 chạy lại, đã ghi thì SKIP.
