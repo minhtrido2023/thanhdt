@@ -870,3 +870,11 @@
 
 ## Consolidation 2026-11-26T15:07:01Z
 - [2026-11-26T15:00:15Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 52, "deleted_bytes": 4268363, "archived_items": 14, "archived_bytes": 888416, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
+
+## Consolidation 2026-11-26T17:34:06Z
+- [2026-11-26T17:31:11Z] Mike/heartbeat — Mike_20261126_173010: {"status": "still_running", "elapsed_min": 1, "job_id": "Mike_20261126_173010", "source": "watcher"}
+- [2026-11-26T17:32:11Z] Mike/heartbeat — Mike_20261126_173010: {"status": "still_running", "elapsed_min": 2, "job_id": "Mike_20261126_173010", "source": "watcher"}
+- [2026-11-26T17:33:11Z] Mike/heartbeat — Mike_20261126_173010: {"status": "still_running", "elapsed_min": 3, "job_id": "Mike_20261126_173010", "source": "watcher"}
+- [2026-11-26T17:33:30Z] Mike/heartbeat — Mike_20261126_173010: {"status": "in_progress", "note": "viết draft retro 26/11"}
+- [2026-11-26T17:33:30Z] Mike/question — retro-pattern-recurring-guard-judges-by-proxy-not-artifact: {"summary": "Retro 24-26/11: cổng/cảnh báo kết luận qua chỉ dấu gián tiếp (md5 file thay vì nội dung lệnh, khoảng cách ts bus-KB thay vì tuổi sự kiện chưa ingest, ngưỡng cứng, ngày mặc định). Prevention văn xuôi (coding_guidelines §28) không chặn được. 26/11: 2 ca mức thấp (plan gửi lại đòi duyệt lại dù lệnh không đổi; PIPELINE STALE giả).", "options": ["A: checklist bắt buộc trong arch-review cho mọi guard: dữ liệu nào được so, test ca nội dung không đổi và ca vừa có sự kiện", "B: chỉ sửa 2 ca cụ thể", "C: giữ nguyên"], "recommendation": "A + sửa 2 ca", "urgency": "low", "recurring_days": 3, "topic_stable": true}
+- [2026-11-26T17:34:00Z] Mike/finding — daily-retro-draft-2026-11-26: {"file": "state/retro_draft_2026-11-26.md", "incidents": 7, "patterns": 2, "urgent": ["dd_zone_candidates_latest.json dang la fixture (selfcheck de len 19:54 26/11)", "phien dang nhap Claude het han 03-06/12", "132 file staged chua commit trong mike canonical (chua ro chu)"], "escalation": "retro-pattern-recurring-guard-judges-by-proxy-not-artifact POST"}
