@@ -3,7 +3,7 @@
 
 Checks:
   1. Manifest exists, verified=true, age < 24h
-  2. All 12 parquet files present and non-empty
+  2. All 11 parquet files present and non-empty
   3. DuckDB can read every table (schema OK, no corrupt files)
   4. Smoke query: cross-table JOIN returns plausible data
   5. Spot check: latest VNINDEX close matches BQ (within tolerance)
@@ -27,7 +27,7 @@ MANIFEST_PATH = os.path.join(CACHE_DIR, "manifest.json")
 EXPECTED_TABLES = [
     "ticker", "ticker_prune", "ticker_financial", "ticker_1m",
     "vnindex_5state_dt5g_live", "vnindex_5state",
-    "vnindex_5state_tam_quan_v34b_clean", "vnindex_5state_dt_4gate",
+    "vnindex_5state_tam_quan_v34b_clean",
     "fa_ratings", "fa_ratings_8l", "custom30v_8l", "risk_rating",
 ]
 

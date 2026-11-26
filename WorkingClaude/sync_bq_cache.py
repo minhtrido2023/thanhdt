@@ -235,18 +235,6 @@ TABLES = {
             FROM `{project}.tav2_bq.vnindex_5state_tam_quan_v34b_clean` AS t
         """,
     },
-    "vnindex_5state_dt_4gate": {
-        "sql": """
-            SELECT t.time, t.state, t.state_raw
-            FROM `{project}.tav2_bq.vnindex_5state_dt_4gate` AS t
-        """,
-        "partition_col": "time",
-        "full_only": True,
-        "verify_sql": """
-            SELECT COUNT(*) AS cnt, MAX(t.time) AS max_time
-            FROM `{project}.tav2_bq.vnindex_5state_dt_4gate` AS t
-        """,
-    },
     # fa_ratings / fa_ratings_8l: weekly refresh (Sat cron) rewrites history in place —
     # fa_ratings DELETE+INSERTs the 2 open quarters (re-rank), fa_ratings_8l republishes
     # the full table. Delta-append by max_time can never pick up rewritten rows (and the
@@ -802,7 +790,6 @@ def main():
             "custom30v_8l": 0, "custom30_8l": 0, "risk_rating": 1,
             "vnindex_5state": 2, "vnindex_5state_dt5g_live": 2,
             "vnindex_5state_tam_quan_v34b_clean": 2,
-            "vnindex_5state_dt_4gate": 2,
             "fa_ratings": 3, "fa_ratings_8l": 3,
             "ticker_financial": 4, "ticker_1m": 5, "universe_pit_q": 5,
             "universe_pit": 5,
