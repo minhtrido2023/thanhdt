@@ -6,25 +6,27 @@ import numpy as np, pandas as pd
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import value_radar as v
 
-R1 = "/home/trido/thanhdt/WorkingClaude/mike/agents/Taylor/research/dd_vs_radar_20261124/R1/calc"
+# Fixture đóng băng NẰM TRONG GIT (data/fixtures/value_radar_norm5/README.md). Trước 11-27 đọc thẳng thư mục
+# research của mike; file tham chiếu bị xoá khỏi đó 25/11 ⇒ selfcheck đỏ dù production không đổi.
+FIX = os.path.join(HERE, "data", "fixtures", "value_radar_norm5")
 fails = []
 def check(name, ok, detail=""):
     print(("PASS " if ok else "FAIL ") + name + (f"  [{detail}]" if detail else ""))
     if not ok: fails.append(name)
 
 # ---- B1 parity: panel R1 đóng băng -> norm5_series == R1 basket_monthly (mọi tháng)
-p = pd.read_parquet(f"{R1}/panel_monthly.parquet"); p["time"] = pd.to_datetime(p["time"])
+p = pd.read_parquet(f"{FIX}/panel.parquet"); p["time"] = pd.to_datetime(p["time"])
 p["mcap"] = p["Price"] * p["OShares"]; p["book"] = p["BVPS"] * p["OShares"]
 p["np_ttm"] = p[["NP_P0", "NP_P1", "NP_P2", "NP_P3"]].sum(axis=1, min_count=4)
 P = p[["time", "ticker", "mcap", "book", "np_ttm"]]
 b = v.norm5_series(P)
-ref = pd.read_csv(f"{R1}/out/basket_monthly.csv", parse_dates=["time"])
+ref = pd.read_csv(f"{FIX}/basket_monthly.csv", parse_dates=["time"])
 m = b.merge(ref, on="time")
 d1 = (m["pe_norm5"] - m["pe_norm_np5"]).abs().max(); d2 = (m["eps_ratio5"] - m["eps_ttm_over_avg5"]).abs().max()
 d3 = (m["p_pe_norm5"] - m["p10_pe_norm_np5"]).abs().max(); d4 = (m["p_eps_ratio5"] - m["p10_eps_ttm_over_avg5"]).abs().max()
 check("B1 parity vs R1 basket_monthly (pe, eps, 2 phân vị) %d tháng" % len(m),
       max(d1 / 14, d2, d3, d4) < 1e-4 and len(m) >= 220, f"maxdiff={d1:.1e},{d2:.1e},{d3:.1e},{d4:.1e}; ref CSV ghi %.6g nên tol 1e-4")
-S = json.load(open(f"{R1}/out/summary.json"))["now"]; last = b.iloc[-1]
+S = json.load(open(f"{FIX}/summary.json"))["now"]; last = b.iloc[-1]
 check("B1 hôm nay == R1 summary.json (14,26 / p1,7 / 1,584 / p100)",
       abs(last.pe_norm5 - S["pe_norm_np5"]) < 1e-9 and abs(last.p_pe_norm5 - S["p10_pe_norm_np5"]) < 1e-9
       and abs(last.eps_ratio5 - S["eps_ttm_over_avg5"]) < 1e-9, f"{last.pe_norm5:.2f} p{last.p_pe_norm5:.1f} {last.eps_ratio5:.3f}")
@@ -68,7 +70,12 @@ base = v.build_value_radar_line(html=False)
 withn = v.build_value_radar_line(html=False, with_norm5=True)
 check("Định dạng: mặc định KHÔNG có dòng norm5 (consumer không đổi)", "chuẩn hoá" not in base and base.count("\n") == 1)
 check("Định dạng: with_norm5 = dòng chính nguyên vẹn + 1 dòng phụ có cờ", withn.startswith(base) and withn.count("\n") == 2 and "LỢI NHUẬN ĐỈNH" in withn)
-v._NORM5_NOW.update(t=_t.time() + 1e6, val=None)
+# val=None KHÔNG phải cache hit (value_radar_norm5_now tính lại, gọi BQ thật) ⇒ ép nguồn panel NÉM LỖI
+# để đi đúng nhánh try/except của production.
+def _boom(*a, **k): raise RuntimeError("selfcheck: nguồn norm5 hỏng")
+orig_up = v.update_norm5_panel; v.update_norm5_panel = _boom
+v._NORM5_NOW.update(t=0.0, val=None)
 check("Fail-safe: norm5 None -> chỉ còn dòng chính", v.build_value_radar_line(html=False, with_norm5=True) == base)
+v.update_norm5_panel = orig_up
 print("TZ=%r -> %s" % (os.environ.get("TZ"), "ALL PASS" if not fails else f"FAIL {fails}"))
 sys.exit(1 if fails else 0)
