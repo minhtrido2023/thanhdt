@@ -14,30 +14,23 @@ KIỂM ĐƯỢC của Q1 → Haiku, phần còn lại của Q1 → Sonnet; (b) "
 KHÔNG đổi: chính sách codex 2026-08-16, cơ chế provider + auto-fallback, cầu chì vòng, bright line
 Fable, mọi cron đang ghim Opus (kể cả `ops_autofix.sh` — xem "Đã cân nhắc và RÚT LẠI" cuối mục).
 
-**🔧 SIẾT LUẬT OPUS — user duyệt 2026-10-18 10:37 ICT (`decided_by: user`), mục này thắng mọi chỗ khác.**
+**🔧 SIẾT LUẬT OPUS — user duyệt 2026-10-18 10:37 ICT, CHỐT CHÍNH THỨC 2026-11-27 (`decided_by: user`), mục này thắng mọi chỗ khác.**
 Đo 7 ngày (12→18/10, `bus/jobs`, job claude): Opus = 57 job / $278 = **86%** chi phí; Sonnet (kể cả
 omit ≡ sonnet) 51 job / $45; Haiku 0 job. Taylor/Opus riêng 46 job = 77% tổng. Taylor opus/high
-n=26, $4,87 trung vị, chạy lại 6/26 (23%); opus/medium n=20, $3,27, chạy lại 1/20 (5%) — khác loại
-việc nên không phải đối chứng, nhưng `high` không cho thấy ít chạy lại hơn. 9 job "VÒNG 2 / sửa
-theo arch-review" chạy Opus = $61 (có cái high $10-15), trong khi vòng 2 trên Sonnet $0,6-1,7/job
-và tuần qua KHÔNG có vòng 3 nào ⇒ chính Mike không áp luật "áp `required_change` ⇒ Sonnet".
-Luật mới:
+n=26, $4,87 trung vị, chạy lại 6/26 (23%); opus/medium n=20, $3,27, chạy lại 1/20 (5%) — `high` không cho thấy ít chạy lại hơn. Đo lại 14 ngày (2026-11-13→27): fleet $1,601 (`native_subagents` 30,5%, `headless` 44,5%, `Mike interactive` 25,0%).
+Luật chính thức (áp dụng mọi tầng, xoá mâu thuẫn với bảng 2026-10-11 cũ):
 1. **Opus CHỈ khi có ≥1 dấu hiệu:** phản biện/review toàn nhánh · chạm tiền hoặc cổng an toàn ·
-   thiết kế MỚI chưa có đặc tả · lỗi chưa rõ nguyên nhân. Không có dấu hiệu nào ⇒ Sonnet/medium.
+   thiết kế MỚI chưa có đặc tả · lỗi chưa rõ nguyên nhân · giả định mô hình DD gốc chưa có khuôn. Không có dấu hiệu nào ⇒ Sonnet/medium.
 2. **Sonnet/medium (omit) cho:** dựng tính năng THEO ĐẶC TẢ user đã duyệt (có SPEC/đề bài chốt;
    arch-review chặn phía sau) · vòng 2 áp `required_change` · sửa lỗi đã định vị file:dòng (nhãn,
-   neo múi giờ…) · cron autofix/sweep chẩn đoán · checkpoint paper-program · kiểm toán chỉ-đọc.
-3. **Opus/high CHỈ:** phản biện, chạm tiền/cổng an toàn, lượt review toàn nhánh (chế độ B).
-   Mọi việc Opus còn lại = `medium`. Thay cho "Opus high = thiết kế backtest MỚI / mọi thứ chạm tiền"
-   ở bảng tầng bên dưới khi hai chỗ lệch nhau.
-4. **Haiku:** giữ cho native `Agent(...)` ngữ cảnh nhỏ; qua `dispatch.sh` chỉ rẻ ~4 lần ⇒ không ép.
-   Các lần gọi native không ghi vào `bus/jobs` nên "Haiku = 0" trong báo cáo có thể là điểm mù đo.
-**Thử đến 2026-10-25 (cùng mốc đợt thử Opus/medium):** QUAY LẠI luật cũ nếu job Taylor chạy Sonnet
-có `attempt>1` ≥ 45% trên ≥ 10 job, HOẶC ≥ 2 chuỗi sinh vòng 3 từ job Sonnet dựng theo đặc tả.
-Ngưỡng là phán đoán đặt trước, mẫu nhỏ. Chưa làm (hoãn tới khi thấy số tuần sau): chốt cơ học
-nhắc trong `dispatch.sh` khi `--model opus` + prompt "VÒNG 2"; hạ `wags_autofix.sh` (phần
-coordination) và `selfcheck_red_owner_sweep.sh` từ Opus xuống Sonnet. `ops_autofix.sh` giữ Opus.
-Báo cáo tuần `spend_report_weekly.py` nay có bảng "Chi phí theo tầng model / effort" (default ≡ sonnet).
+   neo múi giờ…) · cron autofix/sweep chẩn đoán (`wags_autofix.sh` phần điều phối, `selfcheck_red_owner_sweep.sh`, `paper_checkpoint_escalation.sh`) · kiểm toán chỉ-đọc · **DD Phase 1 / đóng gói** (thu thập BCTC, query BQ, tính bảng số, cập nhật/rebuild REV theo khuôn, đóng gói investor report/HTML/PDF, checklist lặp).
+3. **Opus/high CHỈ:** phản biện (`verify_finding.sh`, `arch-reviewer`, `dd_skeptic_run.py`, `dd_blind_valuer_run.py`), chạm tiền/cổng an toàn, lượt review toàn nhánh (chế độ B). Mọi việc Opus còn lại (kể cả DD Phase 2 giả định mô hình mới, `kb_nightly.sh` ctxbloat, `ops_autofix.sh`) = **`medium`** (CHỐT chính thức đợt thử 2026-10-11→10-25).
+4. **Cấm gọi `Agent()` thô cho reviewer / tìm kiếm & CẤM Fable cho subagent:**
+   - `arch-reviewer`, `quant-skeptic`, `fundamental-skeptic` và tìm kiếm/audit độc lập PHẢI chạy qua wrapper cô lập CWD ngoài `WorkingClaude/` + `--strict-mcp-config --disable-slash-commands` (`bin/verify_finding.sh`, `bin/wags_autofix.sh`, `bin/dd_skeptic_run.py`, `bin/dd_blind_valuer_run.py`, `bin/run_subagent.sh`). KHÔNG gọi `Agent(subagent_type=...)` thô từ phiên Mike chính (tránh kế thừa ~54–83K context/MCP/skills).
+   - CẤM dùng `fable` cho subagent review/audit thường.
+   - `livermore`, `risk-auditor`, `legal-vn` hạ frontmatter về `sonnet` (chỉ escalate `opus` bằng cờ khi case giải thích pháp lý/rủi ro thực sự phức tạp).
+5. **Haiku:** giữ cho native `Agent(...)` (`fleet-scout`) / `bin/run_subagent.sh --model haiku`; qua `dispatch.sh` chỉ khi prompt thật ngắn.
+6. **Chốt cơ học trong `dispatch.sh`:** (a) soft-nudge stderr khi `--model opus` gặp từ khoá phase-1/vòng 2/đóng gói báo cáo/áp verdict; (b) `ops_autofix.sh` GIỮ Opus/medium (trực tiếp chạm đường chẩn đoán sự cố bot); (c) `spend_report.py` & `spend_report_weekly.py` tách đủ 5 nhóm gồm `isolated_reviewers` và subagent USD.
 
 Alias của CLI (đo 2026-10-11, CLI 2.1.295): `haiku` → `claude-haiku-5-5`, `sonnet` →
 `claude-sonnet-5-5`, `opus` → `claude-opus-5-5`. Omit `--model` → model ghi trong
@@ -58,21 +51,17 @@ Taylor/Opus 214-243K ⇒ gần như luôn rơi vào bảng giá prompt dài, Hai
 |---|---|---|---|
 | **0** | `haiku` — chủ yếu qua native `Agent(...)` | Kiểm trạng thái job/session (`fleet-scout`), phân loại log + bus event, smoke test, tra KB | CHỈ ĐỌC · dưới ~30 lượt · đầu ra kiểm được bằng mắt/script. KHÔNG dùng cho: ghi code/KB, query BQ, phản biện, bất cứ việc nào mà bỏ sót im lặng sẽ lọt. Qua `dispatch.sh --model haiku` chỉ khi việc thật sự ngắn (lợi ~4 lần, không phải 20) |
 | **1** | omit `--model` (≡ `--model sonnet`), effort omit = medium | Báo cáo ngày/tuần/tháng, plan T+1, Mafee, data-ops, corp-scanner, query BQ, sửa code đã biết đúng chỗ, áp `required_change` | Mặc định. KHÔNG hạ `low`: ở `low` Sonnet 5.5 hay báo xong khi chưa chạy kiểm |
-| **2** | `--model opus` (effort omit = medium; trần lượt tự = 80) | R&D / backtest theo khuôn có sẵn, due diligence, tổng hợp nhiều nguồn, lỗi chưa rõ nguyên nhân | Mặc định MỚI cho việc khó. `dispatch.sh` tự đặt `--max-turns 80` khi `--model opus` (trước đó medium ⇒ 50, thấp hơn trung vị 73 lượt của việc Taylor) |
-| **2+** | `--model opus --effort high` | Phản biện, mọi thứ chạm tiền / cổng an toàn, thiết kế backtest MỚI từ đầu, lượt "review TOÀN BỘ nhánh một lần" (chế độ B) | `xhigh`/`max` chỉ khi đã ĐO được lợi trên việc đó |
+| **2** | `--model opus` (effort omit = medium; trần lượt tự = 80) | DD Phase 2 (giả định mô hình mới chưa có template), lỗi chưa rõ nguyên nhân, thiết kế mới, tổng hợp đa nguồn phức tạp | Mặc định CHÍNH THỨC cho Opus (đã chốt `medium`). `dispatch.sh` tự đặt `--max-turns 80` |
+| **2+** | `--model opus --effort high` | Phản biện (`verify_finding.sh`, `arch-reviewer`, `dd_skeptic_run.py`, `dd_blind_valuer_run.py`), mọi thứ chạm tiền / cổng an toàn, lượt "review TOÀN BỘ nhánh" (chế độ B) | `xhigh`/`max` chỉ khi đã ĐO được lợi; **KHÔNG** dùng cho việc chỉ cần Sonnet/medium ở tầng 1 |
 | **3** | `--model fable --effort high` (trần high) | Chỉ LÊN KẾ HOẠCH việc cực khó | Hiếm; không tự thực thi (bright line bên dưới) |
 
 Không chắc tầng nào → tầng 1. Lưỡng lự 0-hay-1 → 1. Lưỡng lự 2-hay-2+ → hỏi "việc này có phải phản
 biện / chạm tiền / thiết kế mới không?" — không ⇒ 2.
 
-**Reviewer chạy bằng SCRIPT không truyền cờ theo bảng trên — giá trị THẬT đang chạy (2026-10-11):**
-`bin/verify_finding.sh` (quant-skeptic) và `bin/code_quality_weekly.sh` gọi `claude -p` không
-`--model`/`--effort` ⇒ thừa hưởng `~/.claude/settings.json` (`opus[1m]`) + effort mặc định của CLI;
-`bin/wags_autofix.sh:85` (arch-reviewer) truyền `--model opus`, không effort. Tức cả ba đang ở
-Opus nhưng KHÔNG chắc `high`. Chưa sửa trong đợt này — muốn ép `high` thì thêm cờ ở 3 script đó.
-Cron ghim `--model opus` hiện có: `wags_autofix.sh` (2 chỗ), `ops_autofix.sh`,
-`fearbuy_weekly_scan.sh`, `paper_checkpoint_escalation.sh`, `weekly_ops_audit.sh`, `kb_nightly.sh`,
-`selfcheck_red_owner_sweep.sh` — 5 cái sau kèm `--effort high`. Đợt thử dưới KHÔNG đổi cron nào.
+**Kiểm kê script & cron ghim model/cô lập (cập nhật 2026-11-27):**
+- Cô lập chuẩn ngoài `WorkingClaude/` (`bin/isolated_reviewer_dir.sh` + `--strict-mcp-config --disable-slash-commands`): `run_subagent.sh` (mặc định `medium`), `verify_finding.sh` (`opus`/`VERIFY_FINDING_EFFORT=high`), `wags_autofix.sh` `_arch_review` (`opus`/`ARCH_REVIEW_EFFORT=high`), `dd_skeptic_run.py`, `dd_blind_valuer_run.py`, `code_quality_weekly.sh` (Pass 1 mặc định `--provider antigravity` `gemini-4-hydrogen-medium`, fallback Claude Sonnet; Pass 2 `claude` Sonnet `medium`).
+- Cron đã hạ xuống **Sonnet/medium**: `wags_autofix.sh` (dispatch Wags sửa điều phối — `_arch_review` vẫn Opus/high), `selfcheck_red_owner_sweep.sh`, `paper_checkpoint_escalation.sh`, `check_report_cadence.sh`.
+- Cron **GIỮ Opus**: `ops_autofix.sh` (`opus`/`medium`, đường sự cố bot), `kb_nightly.sh` (`_ctxbloat_autofix_one` đã hạ `--effort medium`), `fearbuy_weekly_scan.sh`, `weekly_ops_audit.sh`.
 
 **Chạy thử plan 2026-10-11 (trước khi DollarBill/Mafee được đổi lúc 11:50 cùng ngày).** Chạy lại đề lập plan SpaceX của
 thứ Sáu 09/10 trên Sonnet 5.5, file plan ghi ra `/tmp` (job `DollarBill_20261011_035729`): ra ĐÚNG
@@ -291,7 +280,7 @@ routing claude, tức Sonnet cho việc Q1 vốn được route sang opencode). 
 | **claude** | ✅ mặc định |
 | **opencode** | ✅ dùng được ngay, 0 credentials |
 | **codex** | ✅ gateway: default `ocgo/deepseek-v4-flash`; `gpt-5.6-sol` optional manual plan (usage-limited 2026-08-16) |
-| **antigravity** (`agy`) | ❌ `enabled:false` — cần cài `agy` + login Gemini + điền `models` thật |
+| **antigravity** (`agy`) | ✅ **BẬT từ 2026-11-27** (`/home/trido/.local/bin/agy` v1.5.18) — Gemini 4 (`gemini-4-hydrogen-medium` mặc định, `gemini-4-carbon-*`, `gemini-4-neon-high`, `gemini-3.8-flash-*`, `gemini-pro-orchestrator-neon`). Chỉ cho `Taylor`, `Winston`, `Wendy`, `Spyros`, `Wags`; **CHẶN** `DollarBill`/`Mafee`/`Mike`. Dùng cho: đọc BCTC/tài liệu DD lớn, nghiên cứu read-only, `code_quality_weekly.sh` Pass 1, `second_opinion.sh --provider antigravity`. Hết quota tự fallback sang `claude`. |
 
 ### Codex gateway routing — Phase 1 (2026-08-16)
 

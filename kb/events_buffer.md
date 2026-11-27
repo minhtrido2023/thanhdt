@@ -731,3 +731,6 @@
 ## Consolidation 2026-11-27T06:30:39Z
 - [2026-11-27T06:30:14Z] Wags/heartbeat — Wags_20261127_063003: {"status": "in_progress", "note": "kiểm bằng chứng 2 mục attention"}
 - [2026-11-27T06:30:28Z] Wags/finding — work-tree verify 2026-11-27 chieu: {"closed": 0, "updated": 1, "kept_open": 1, "items": {"proj:vn-realestate-structural-risk-20260826": "updated: review quy da chay (commit 8d29cbaa9, reports/bobby_vn_quarterly_20261127.md) -> due 2027-02-26", "busq:Mike/retro-pattern-recurring-guard-judges-by-proxy-not-artifact": "giu mo: cho user A/B/C"}}
+
+## Consolidation 2026-11-27T08:07:01Z
+- [2026-11-27T07:29:01Z] Mafee/status — orb_futures_exit: {"account": "SpaceX", "mode": "DRY", "reason": "TIME", "entry": 1746.2, "exit": 1754.6, "pnl_gross_vnd": 840000, "exit_px_estimated": false}
