@@ -794,3 +794,59 @@
 - [2026-11-27T10:04:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 34, "job_id": "Wags_20261127_093003", "source": "watcher"}
 - [2026-11-27T10:05:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 35, "job_id": "Wags_20261127_093003", "source": "watcher"}
 - [2026-11-27T10:06:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 36, "job_id": "Wags_20261127_093003", "source": "watcher"}
+
+## Consolidation 2026-11-27T10:57:14Z
+- [2026-11-27T10:07:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 37, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:08:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 38, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:09:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 39, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:10:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 40, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:11:10Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 41, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:12:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 42, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:13:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 43, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:14:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 44, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:15:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 45, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:16:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 46, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:17:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 47, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:18:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 48, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:19:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 49, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:20:11Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 50, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:21:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 51, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:22:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 52, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:23:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 53, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:24:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 54, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:25:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 55, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:26:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 56, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:27:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 57, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:28:12Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 58, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:29:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 59, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:30:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 60, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:31:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 61, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:32:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 62, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:33:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 63, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:34:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 64, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:35:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 65, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:36:13Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 66, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:37:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 67, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:38:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 68, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:39:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 69, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:40:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 70, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:41:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 71, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:42:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 72, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:43:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 73, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:44:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 74, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:45:14Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 75, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:46:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 76, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:47:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 77, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:48:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 78, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:49:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 79, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:50:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 80, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:51:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 81, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:52:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 82, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:53:15Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 83, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:54:16Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 84, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:54:27Z] Wags/answer — selfcheck-red: mike/bin/report_v2_selfcheck.py: {"resolution": "(c) bug production: ký hiệu ⚠ ở dòng norm5 (3c3047fa9) không có trong font BVP ⇒ lint PDF chặn dựng báo cáo tuần/tháng ZaloPay; đổi thành chữ, arch-reviewer APPROVED", "evidence": "c02803fe0 đã merge; arch-reviewer: env -u TZ report_v2_selfcheck --accounts ZaloPay rc=0 0 lỗi; bản chạy đủ trước fix (/tmp/sc_rv2_full.log) chỉ 4 FAIL đều ZaloPay; CHƯA chạy lại đủ 2 tài khoản sau fix", "resolves": ["Wags/selfcheck-red: mike/bin/report_v2_selfcheck.py"], "closed_by": "Wags"}
+- [2026-11-27T10:55:16Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 85, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:56:16Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 86, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T10:57:00Z] Wags/answer — selfcheck-red: mike/bin/report_v2_selfcheck.py: {"resolution": "ĐÍNH CHÍNH evidence lúc đóng: merge c02803fe0 thất bại (index repo chung có file staged của phiên khác); bản đã vào master là 0f1754910 (commit riêng 1 file, nội dung y hệt)", "evidence": "0f1754910; canonical ZaloPay weekly 2026-10-26_to_2026-10-30 dựng rc=0; arch-reviewer APPROVED + selfcheck --accounts ZaloPay rc=0 (worktree); CHƯA chạy lại đủ 2 tài khoản sau fix", "resolves": ["Wags/selfcheck-red: mike/bin/report_v2_selfcheck.py"]}
+- [2026-11-27T10:57:00Z] Wags/finding — selfcheck-red-owner-sweep-2026-11-27-Wags: {"summary": "7/8 CLOSED, 1 OPEN (production_manifest, CẦN USER). 1 bug production đã sửa (báo cáo tuần/tháng ZaloPay không dựng được).", "rows": [{"file": "auto_exit_disc", "class": "b", "status": "CLOSED 9c7bbf599"}, {"file": "dd_ledger_append_confirmed", "class": "b", "status": "CLOSED 9c7bbf599"}, {"file": "dd_history_label", "class": "d", "status": "CLOSED 9c7bbf599"}, {"file": "dd_ledger_append_center_adj", "class": "b", "status": "CLOSED 9c7bbf599"}, {"file": "dt5g_publisher_gate", "class": "b+d", "status": "CLOSED 9c7bbf599"}, {"file": "now_injection", "class": "a", "status": "CLOSED"}, {"file": "report_v2", "class": "c", "status": "CLOSED 0f1754910 (arch-reviewer APPROVED)"}, {"file": "production_manifest", "class": "b", "status": "OPEN - CẦN USER", "reason": "ROOT_TIER 8 gốc mới đã vào master (9c7bbf599, T?=0) nhưng manifest tái sinh không commit được: okf-lint-gate (61df6c43c, 27/11) chặn kb/production_manifest.md >40KB và tăng size. Tôi định thêm file vào SIZE_EXEMPT, bị bộ phân loại quyền chặn (nới cổng kiểm soát); không đi vòng.", "need": "user duyệt A: thêm kb/production_manifest.md vào SIZE_EXEMPT trong bin/okf_lint_gate.py rồi regen+commit; B: đổi generator cho .md <40KB"}], "notes": ["5f372c847 (backup 25/11) ghi xoá 40 file dd_vs_radar_20261124: khôi phục 24 file không-CSV; 16 CSV chưa khôi phục (repo-hygiene-gate cấm), còn ở d84eebe2b; nguyên nhân xoá chưa rõ", "report_v2: chưa chạy lại đủ 2 tài khoản sau fix; lượt đầu bị cắt ở 500s có 1 FAIL SpaceX weekly md5 không tái hiện ở lượt đủ", "repo mike đang có ~129 file staged của phiên khác, không đụng"]}
+- [2026-11-27T10:31:25Z] Winston/status — fa_ratings_8l-refresh-ok: {"rows": 54881}
