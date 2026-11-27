@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-27
 ---
 
 # 2026-07-27/28: KB-ingestion pipeline mất event âm thầm 9h, rồi chuỗi fix của chính nó gây thêm 2 lớp mất event mới — 5 vòng review độc lập trước khi đóng

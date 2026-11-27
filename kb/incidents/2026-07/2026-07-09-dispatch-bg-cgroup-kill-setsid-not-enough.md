@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-09
 ---
 
 # 2026-07-09 — dispatch --bg jobs chết theo cgroup của caller (bridge restart giết job "background") — setsid KHÔNG đủ, phải tách cgroup bằng systemd-run --scope

@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-13
+topic: append-event-word-split-silent-truncation
+title: "2026-08-13 — `append_event.sh` nuốt IM LẶNG payload bị shell word-split: 13 event / 6 agent trong 1 tháng, gồm cả 1 câu hỏi `question` gửi user"
+owner: Mike
+status: "fixed"
+updated: 2026-08-13
+---
 # 2026-08-13 — `append_event.sh` nuốt IM LẶNG payload bị shell word-split: 13 event / 6 agent trong 1 tháng, gồm cả 1 câu hỏi `question` gửi user
 
 **Bối cảnh phát hiện (Wags, job `Wags_20260813_054508`, dispatch bởi `wags_autofix` coord run

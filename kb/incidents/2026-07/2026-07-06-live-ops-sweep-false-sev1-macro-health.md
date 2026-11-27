@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-06
 ---
 
 # 2026-07-06 — Live ops sweep for the day (user asked "is anything still wrong"), found a third, unrelated bug: false SEV1 in the DT5G macro health-check itself

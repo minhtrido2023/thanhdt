@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-10
 ---
 
 # 2026-07-10 (sáng sớm) — `ops_health_check.sh` không bao giờ clear được câu hỏi trả lời bởi agent KHÁC người hỏi — checker match answer PER-FILE, bus ghi theo tác giả

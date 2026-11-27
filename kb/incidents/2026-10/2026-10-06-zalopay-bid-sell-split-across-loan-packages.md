@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-10-06
+topic: zalopay-bid-sell-split-across-loan-packages
+title: "2026-10-06 — `zalopay-bid-sell-split-across-loan-packages`: lệnh BÁN 27 BID bị DNSE từ chối `HTTP 400: Trade quantity not enough` vì vị thế nằm ở 2 gói vay (1258:20 · 1826:7), không gói nào đủ 27"
+owner: Mike
+status: "open-items"
+updated: 2026-10-06
+---
 # 2026-10-06 — `zalopay-bid-sell-split-across-loan-packages`: lệnh BÁN 27 BID bị DNSE từ chối `HTTP 400: Trade quantity not enough` vì vị thế nằm ở 2 gói vay (1258:20 · 1826:7), không gói nào đủ 27
 
 **Trạng thái:** CHẨN ĐOÁN XONG, **CHƯA VÁ** — root cause nằm trong `trading_bot/brokers.py`

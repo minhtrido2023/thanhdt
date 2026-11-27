@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-20
+topic: daily-retro-transport-error-misclassified
+title: "2026-08-20 — retro 2026-08-19 mất vì lỗi TRUYỀN TẢI API, bị log gán nhầm thành \"Mike trả lạc đề\""
+owner: Mike
+status: "fixed (lớp phân loại thứ 3 `API_TRANSPORT_ERROR_RE` + backoff 180s + `$_fail_cause` bơm vào log/notify/bus; selfcheck 8/8 PASS ×4 TZ; retro 2026-08-19 đã chạy bù)"
+updated: 2026-08-20
+---
 # 2026-08-20 — retro 2026-08-19 mất vì lỗi TRUYỀN TẢI API, bị log gán nhầm thành "Mike trả lạc đề"
 
 **Triệu chứng.** ops_health_check 08:20 ICT (run account=ZaloPay) flag: thiếu

@@ -9,6 +9,8 @@ title: >-
 status: open-items
 source: >-
   job Taylor_20260731_025222, report mike/agents/Taylor/research/capit_state_visibility_gap_20260731.md
+owner: Mike
+updated: 2026-07-31
 ---
 
 # 2026-07-31 — CAPIT status visibility gap + interpreter-mismatch artifact overwrite

@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-28
 ---
 
 # 2026-07-28 — `spacex-loanpackageid-order-reject`: SpaceX (margin) TV1 buy orders bị DNSE từ chối `HTTP 400: loanPackageId is required` suốt ~30' phiên chiều, fix mid-session bằng commit 3b2d2c3

@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-11-14
+topic: production-manifest-selfcheck-dbus-false-drift
+title: "2026-11-14 — `production_manifest_selfcheck.sh` FAIL giả dưới cron/headless: file chỉ có gốc systemd bị coi \"rời production\""
+owner: Mike
+status: "logged"
+updated: 2026-11-14
+---
 # 2026-11-14 — `production_manifest_selfcheck.sh` FAIL giả dưới cron/headless: file chỉ có gốc systemd bị coi "rời production"
 
 **Phát hiện:** weekly ops audit 14/11 (job `Mike_20261114_075225`), mục 8 — selfcheck báo `DRIFT 2 dòng`:

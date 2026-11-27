@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-17
 ---
 
 # 2026-07-17 — Preflight depth-check báo động giả "ticker_prune moi ruột" vì upstream ETL ghi dở partition hôm nay ngay trong phiên

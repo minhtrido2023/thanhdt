@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-15
+topic: for-each-live-account-fail-open-va-discover-sessions-ten-file-qua-dai
+title: "2026-08-15 — Weekly ops audit: 2 lỗi IM LẶNG (checker bỏ qua cả 2 account rc=0; discover_sessions chết cả lượt)"
+owner: Mike
+status: "logged"
+updated: 2026-08-15
+---
 # 2026-08-15 — Weekly ops audit: 2 lỗi IM LẶNG (checker bỏ qua cả 2 account rc=0; discover_sessions chết cả lượt)
 
 **Nguồn phát hiện:** weekly_ops_audit.sh (job `Mike_20260814_212442`), mục 1 — sweep

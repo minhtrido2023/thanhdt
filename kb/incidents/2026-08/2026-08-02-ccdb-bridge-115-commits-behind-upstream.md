@@ -13,6 +13,8 @@ origin: >-
   branch it sat on turned out to be local-only, never pushed, and badly stale against upstream
 recorder: Mike, user directive ("nghiên cứu thật kỹ để quyết định giải quyết vấn đề đồng bộ này,
   không để phát sinh trong tương lai nữa")
+owner: Mike
+updated: 2026-08-02
 ---
 
 # 2026-08-02: claude-code-discord-bridge upstream sync + standing drift check

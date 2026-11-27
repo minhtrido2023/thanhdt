@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-10
 ---
 
 # 2026-07-10 (chiều) — DollarBill tự tính sai ngày T+1: thứ Sáu → "ngày mai" = thứ Bảy (không phải ngày giao dịch), đáng lẽ phải là thứ Hai — 2 lần dispatch cùng ngày đều sai

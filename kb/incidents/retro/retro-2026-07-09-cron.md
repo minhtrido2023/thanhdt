@@ -7,6 +7,8 @@ title: >-
 status: open-items
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-09
 ---
 
 # RETRO — 2026-07-09 (cron 22:00, chạy lần đầu qua `bin/daily_retro.sh`): 9 sự cố tổng trong ngày, 1 sự cố mới phát hiện sau bản RETRO thủ công lúc chiều, 2 pattern xuyên suốt — 1 pattern coi như ĐÃ ĐÓNG (chờ quan sát), 1 pattern ESCALATE

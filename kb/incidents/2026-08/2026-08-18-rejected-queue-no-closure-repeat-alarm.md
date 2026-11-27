@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-18
+topic: rejected-queue-no-closure-repeat-alarm
+title: "2026-08-18 — Hàng đợi cách ly `bus/_rejected.jsonl` không có cơ chế ĐÓNG: event đã khôi phục vẫn báo động lặp đủ 24h"
+owner: Mike
+status: "fixed (`bin/bus_rejected_resolve.py` sidecar khoá sha256 dòng thô + §5b lọc theo đó, fail-loud khi sidecar hỏng; selfcheck 20/20 PASS ×4 TZ, checker thật ZaloPay 3→2 điểm)"
+updated: 2026-08-18
+---
 # 2026-08-18 — Hàng đợi cách ly `bus/_rejected.jsonl` không có cơ chế ĐÓNG: event đã khôi phục vẫn báo động lặp đủ 24h
 
 **Phát hiện:** checker `ops_health_check.sh --account ZaloPay` (00:19Z) báo

@@ -47,7 +47,7 @@ def entries():
     """Yield (relative_path, body_text) for every incident file. Skips index files."""
     for dirpath, _dirnames, filenames in os.walk(INCIDENTS_DIR):
         for fn in sorted(filenames):
-            if not fn.endswith(".md") or fn == "index.md":
+            if not fn.endswith(".md") or fn == "index.md" or fn.startswith("archive-"):
                 continue
             full = os.path.join(dirpath, fn)
             try:

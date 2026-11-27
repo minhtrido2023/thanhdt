@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-29
+topic: zalopay-sell-deal-not-found-loanpackage-1826
+title: "2026-09-29 — `zalopay-sell-deal-not-found-loanpackage-1826`: 2.628 `PLACE_FAIL` HTTP 400 `deal not found` — lệnh BÁN gửi gói default account (1258) trong khi 6 mã chỉ có deal ở gói 1826"
+owner: Mike
+status: "open-items"
+updated: 2026-09-29
+---
 # 2026-09-29 — `zalopay-sell-deal-not-found-loanpackage-1826`: 2.628 `PLACE_FAIL` HTTP 400 `deal not found` — lệnh BÁN gửi gói default account (1258) trong khi 6 mã chỉ có deal ở gói 1826
 
 **Trạng thái:** CHẨN ĐOÁN XONG, **CHƯA VÁ** — root cause nằm trong `DNSEBroker.place_order`

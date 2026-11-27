@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-03
+topic: macro-health-false-warn-holiday-calendar-age
+title: "2026-09-03 — preflight false-warn \"macro_health file cũ 21.2h / daily_refresh chưa chạy tối qua?\" trong kỳ nghỉ Quốc khánh"
+owner: Mike
+status: "fixed"
+updated: 2026-09-03
+---
 # 2026-09-03 — preflight false-warn "macro_health file cũ 21.2h / daily_refresh chưa chạy tối qua?" trong kỳ nghỉ Quốc khánh
 
 **What happened.** ops_health_check 12:45 (account=ZaloPay) flag

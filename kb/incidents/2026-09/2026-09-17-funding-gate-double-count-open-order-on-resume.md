@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-17
+topic: funding-gate-double-count-open-order-on-resume
+title: "2026-09-17 — FUNDING gate chặn oan ZaloPay phiên chiều: lệnh MỞ bị tính 2 lần (giữ tiền ở broker + vẫn nằm trong nhu cầu)"
+owner: Mike
+status: "logged"
+updated: 2026-09-17
+---
 # 2026-09-17 — FUNDING gate chặn oan ZaloPay phiên chiều: lệnh MỞ bị tính 2 lần (giữ tiền ở broker + vẫn nằm trong nhu cầu)
 
 **Hiện tượng.** Cron 13:00 ICT `run_bot.sh --account ZaloPay` thoát rc=3: Σ mua còn lại 31.030.070đ

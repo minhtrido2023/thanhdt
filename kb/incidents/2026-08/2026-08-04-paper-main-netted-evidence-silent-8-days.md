@@ -4,6 +4,8 @@ status: fixed (monitoring); production-code fix in progress (Taylor job Taylor_2
 severity: medium — no real capital, but 8 trading days of R&D evidence lost + a monitoring fix
   regressed into the exact failure class it was built to prevent
 date: 2026-08-04
+owner: Mike
+updated: 2026-08-04
 ---
 
 # `net_offsetting_orders()` silently zeroed paper-main evidence for 8 days — a monitoring fix I

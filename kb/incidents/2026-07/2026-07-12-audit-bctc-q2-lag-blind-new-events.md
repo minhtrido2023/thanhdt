@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-12
 ---
 
 # 2026-07-12 — Audit sẵn sàng BCTC Q2/2026 bắt LAG live-candidate pipeline mù sự kiện mới <30 phiên (R1 CRITICAL) + freshness ticker_financial bị 1 mã early-filer reset đồng hồ cả bảng (F1 MEDIUM)

@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-18
+topic: rejected-retry-candidate-heartbeat-shadow
+title: "2026-09-18 — Bộ dò \"ỨNG VIÊN RETRY\" của check 5b chỉ vào HEARTBEAT của watcher, che mất bản retry thật"
+owner: Mike
+status: "logged"
+updated: 2026-09-18
+---
 # 2026-09-18 — Bộ dò "ỨNG VIÊN RETRY" của check 5b chỉ vào HEARTBEAT của watcher, che mất bản retry thật
 
 **Phát hiện:** `ops_health_check.sh --account ZaloPay` (01:20Z) báo 1 bản ghi cách ly trong 24h

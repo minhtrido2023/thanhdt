@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-12
+topic: report-return-gate-worktree-root
+title: "2026-09-12 — `report_return_gate.py` tính gốc cây bằng ĐẾM CẤP: chạy từ worktree là chặn báo cáo nhà đầu tư"
+owner: Mike
+status: "fixed"
+updated: 2026-09-12
+---
 # 2026-09-12 — `report_return_gate.py` tính gốc cây bằng ĐẾM CẤP: chạy từ worktree là chặn báo cáo nhà đầu tư
 
 **Status**: fixed (commit `dd2c0d28` + vòng 2 sau arch-review)

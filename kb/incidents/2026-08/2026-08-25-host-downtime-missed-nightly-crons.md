@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-25
+topic: host-downtime-missed-nightly-crons
+title: "2026-08-25 — retro 2026-08-24 mất vì HOST TẮT ~18 tiếng, không phải bug script"
+owner: Mike
+status: "check#9 nay TRA log thay vì đoán (`52eb62ea`, +3 ca hồi quy, PASS x4 TZ); retro 08-24 + corp_action_daily đã chạy bù; CÒN HỞ: không có @reboot catch-up cho cron đêm"
+updated: 2026-08-25
+---
 # 2026-08-25 — retro 2026-08-24 mất vì HOST TẮT ~18 tiếng, không phải bug script
 
 **Triệu chứng.** ops_health_check (run account=ZaloPay) flag: thiếu

@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-25
+topic: append-event-json-hint-guessed-truncation
+title: "2026-09-25 — Gợi ý chẩn đoán JSON của `append_event.sh` quy CHỤP \"cụt thật\", ca thật chỉ thiếu 1 dấu `}`"
+owner: Mike
+status: "fixed"
+updated: 2026-09-25
+---
 # 2026-09-25 — Gợi ý chẩn đoán JSON của `append_event.sh` quy CHỤP "cụt thật", ca thật chỉ thiếu 1 dấu `}`
 
 **Phát hiện:** `ops_health_check.sh --account ZaloPay` (01:20Z) báo 2 bản ghi cách ly trong 24h

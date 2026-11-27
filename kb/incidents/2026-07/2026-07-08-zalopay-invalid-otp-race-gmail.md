@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-08
 ---
 
 # 2026-07-08 — ZaloPay INVALID_OTP lúc 09:05: race Gmail-OTP giữa 2 cron cùng giây, chung login DNSE — bot tự hồi phục qua heartbeat autoheal, nhưng lộ gap "bot-fail không ai tự chẩn đoán"

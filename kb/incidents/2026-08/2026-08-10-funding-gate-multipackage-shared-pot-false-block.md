@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-10
+topic: funding-gate-multipackage-shared-pot-false-block
+title: "2026-08-10 — FUNDING gate CHẶN OAN plan ZaloPay đã duyệt: cộng tỉ lệ tiêu thụ của 2 gói vay DÙNG CHUNG một hũ tiền"
+owner: Mike
+status: "escalated (chưa vá — nới gate tiền thật, cần user/Taylor + quant-skeptic)"
+updated: 2026-08-10
+---
 # 2026-08-10 — FUNDING gate CHẶN OAN plan ZaloPay đã duyệt: cộng tỉ lệ tiêu thụ của 2 gói vay DÙNG CHUNG một hũ tiền
 
 **Hiện tượng.** 09:05 ICT `run_bot.sh --account ZaloPay` (plan 2026-08-10, `approved_by=user (John)`)

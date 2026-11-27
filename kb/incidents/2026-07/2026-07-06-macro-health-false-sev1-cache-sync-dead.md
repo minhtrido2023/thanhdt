@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-06
 ---
 
 # 2026-07-06 (đêm) — macro_health false-SEV1: mảnh ghép cuối — cache sync chết âm thầm 2 bug

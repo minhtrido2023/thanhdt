@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-11-21
+topic: fleet-backup-blocked-discord-id-gate-2-nights
+title: "2026-11-21 — `fleet_backup.sh`: commit mike-fleet bị discord-id-gate chặn 2 đêm (19+20/11), log vẫn có dòng \"✅ Backup pushed\""
+owner: Mike
+status: "fixed"
+updated: 2026-11-21
+---
 # 2026-11-21 — `fleet_backup.sh`: commit mike-fleet bị discord-id-gate chặn 2 đêm (19+20/11), log vẫn có dòng "✅ Backup pushed"
 
 status: fixed (mike commit `70eeb517d`, weekly ops audit job `Mike_20261120_222134`)

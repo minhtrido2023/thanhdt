@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-02
+topic: lag-liquidity-fidelity-two-fixes
+title: "2026-08-02 — Hai lỗi fidelity thanh khoản sổ LAG: engine mô phỏng một đường live không đi được"
+owner: Mike
+status: "fixed"
+updated: 2026-08-02
+---
 # 2026-08-02 — Hai lỗi fidelity thanh khoản sổ LAG: engine mô phỏng một đường live không đi được
 
 **Job:** `Taylor_20260802_163657` → kết luận lại ở `Taylor_20260802_175754`

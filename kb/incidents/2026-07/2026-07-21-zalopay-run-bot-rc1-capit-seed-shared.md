@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-21
 ---
 
 # 2026-07-21 — ZaloPay run_bot rc=1: 5 lệnh MUA CAPIT mất + executor seed_shared crash

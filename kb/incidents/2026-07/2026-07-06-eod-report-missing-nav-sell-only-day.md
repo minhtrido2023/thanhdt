@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-06
 ---
 
 # 2026-07-06 (late afternoon) — Today's EOD report never posted + NAV computation broke on the first SELL-only day

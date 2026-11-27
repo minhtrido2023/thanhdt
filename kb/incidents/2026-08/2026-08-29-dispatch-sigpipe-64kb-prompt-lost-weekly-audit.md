@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-29
+topic: dispatch-sigpipe-64kb-prompt-lost-weekly-audit
+title: "2026-08-29 — `dispatch.sh` chết rc=141 (SIGPIPE) với prompt > 64KB ⇒ mất trọn 1 tuần weekly ops audit"
+owner: Mike
+status: "fixed"
+updated: 2026-08-29
+---
 # 2026-08-29 — `dispatch.sh` chết rc=141 (SIGPIPE) với prompt > 64KB ⇒ mất trọn 1 tuần weekly ops audit
 
 **Status**: fixed

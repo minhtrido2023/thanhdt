@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-13
+topic: codex-headless-dns-block-tv1-and-smtp
+title: "2026-08-13 — DNS ra ngoài chết trong cửa sổ hẹp 09:14-09:21 ICT, chặn cả đặt lệnh TV1 lẫn gửi email duyệt P0"
+owner: Mike
+status: "logged"
+updated: 2026-08-13
+---
 # 2026-08-13 — DNS ra ngoài chết trong cửa sổ hẹp 09:14-09:21 ICT, chặn cả đặt lệnh TV1 lẫn gửi email duyệt P0
 
 **Bối cảnh phát hiện.** Retro `retro-2026-08-13.md` — 2 sự cố riêng biệt (khác agent, khác giao

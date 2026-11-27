@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-02
 ---
 
 # 2026-07-02 — Background dispatch job died when the coordinator's own session restarted

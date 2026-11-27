@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-12
 ---
 
 # 2026-07-12 — `lag_edge_health.csv`: 2 tiền đề sai liên tiếp về "bug staleness/catch-up" bị bác bỏ sau điều tra sâu — không có bug thật, tốn 2 chu kỳ dispatch để xác nhận

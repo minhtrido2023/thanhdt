@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-26
+topic: append-event-guard-rejects-valid-json-when-helper-missing
+title: "2026-09-26 — guard JSON của `append_event.sh` TỪ CHỐI payload HỢP LỆ khi thiếu helper chẩn đoán"
+owner: Mike
+status: "fixed"
+updated: 2026-09-26
+---
 # 2026-09-26 — guard JSON của `append_event.sh` TỪ CHỐI payload HỢP LỆ khi thiếu helper chẩn đoán
 
 **status**: fixed

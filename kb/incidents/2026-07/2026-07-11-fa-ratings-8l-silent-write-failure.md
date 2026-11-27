@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-11
 ---
 
 # 2026-07-11 — fa_ratings_8l weekly-refresh wrapper bắt đúng 1 lần BQ write "thành công giả" (silent write failure) khi test tay bằng identity read-only — hoạt động ĐÚNG thiết kế, nhưng identity của cron THẬT vẫn chưa xác nhận

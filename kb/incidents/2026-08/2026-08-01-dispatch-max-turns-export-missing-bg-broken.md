@@ -12,6 +12,8 @@ origin: >-
   _bg_wrapper with a variable reference, without adding that variable to the export list that
   hands state to the detached _bg_wrapper process
 recorder: Mike, caught while dispatching Taylor research (job Taylor_20260801_130227 and 2 retries)
+owner: Mike
+updated: 2026-08-01
 ---
 
 # 2026-08-01: `MAX_TURNS` missing from `--bg` export list — every background dispatch fleet-wide broken for ~1h10m

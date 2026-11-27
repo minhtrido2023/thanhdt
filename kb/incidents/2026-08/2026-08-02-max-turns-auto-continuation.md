@@ -11,6 +11,8 @@ origin: >-
   dispatch.sh's retry loop treated a max-turns exhaustion the same as any other transient
   failure (retry unchanged) even though it's a deterministic budget signal, not a fluke
 recorder: Mike, user-reported ("một số job bị failed vì quá 50 tasks... chạy tới chạy lui")
+owner: Mike
+updated: 2026-08-02
 ---
 
 # 2026-08-02: max-turns auto-continuation — stop retrying with the same cap

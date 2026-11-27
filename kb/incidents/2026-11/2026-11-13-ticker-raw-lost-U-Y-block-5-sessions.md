@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-11-13
+topic: ticker-raw-lost-U-Y-block-5-sessions
+title: "2026-11-13 — `tav2_bq.ticker` mất dải mã U*..Y* + VNINDEX 5 phiên (09-13/11) ⇒ DT5G publish abort, không có plan 16/11"
+owner: Mike
+status: "fixed"
+updated: 2026-11-13
+---
 # 2026-11-13 — `tav2_bq.ticker` mất dải mã U*..Y* + VNINDEX 5 phiên (09-13/11) ⇒ DT5G publish abort, không có plan 16/11
 
 status: mitigated (dữ liệu khôi phục 14/11 09:03 ICT); lỗ hổng (3) ĐÃ ĐÓNG ở code, (1) giảm nhẹ, (2) còn mở — daily_refresh wire CHỜ MERGE sau 21:30 ICT 15/11

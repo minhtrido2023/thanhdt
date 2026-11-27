@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-09
+topic: backup-silent-failure-4th-shape-unpushed-commit
+title: "2026-09-09 — Backup silent-failure shape thứ 4: `backup.sh` báo \"already up to date\" trong khi remote thiếu hẳn 1 commit; và 3/3 lần hỏng trước KHÔNG có alert nào"
+owner: Mike
+status: "fixed"
+updated: 2026-09-09
+---
 # 2026-09-09 — Backup silent-failure shape thứ 4: `backup.sh` báo "already up to date" trong khi remote thiếu hẳn 1 commit; và 3/3 lần hỏng trước KHÔNG có alert nào
 
 **Status**: fixed

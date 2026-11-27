@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-04
+topic: macro-health-failed-holiday-tdays
+title: "2026-09-04 — `macro_health=FAILED` (SEV1) giả: `tdays()` của macro_healthcheck.py không trừ nghỉ lễ VN ⇒ DT5G rơi về DT4_only cả đêm"
+owner: Mike
+status: "fixed"
+updated: 2026-09-04
+---
 # 2026-09-04 — `macro_health=FAILED` (SEV1) giả: `tdays()` của macro_healthcheck.py không trừ nghỉ lễ VN ⇒ DT5G rơi về DT4_only cả đêm
 
 **Phát hiện:** `ops_health_check.sh --account ZaloPay` (01:20Z) báo `macro_health=FAILED (SEV1)

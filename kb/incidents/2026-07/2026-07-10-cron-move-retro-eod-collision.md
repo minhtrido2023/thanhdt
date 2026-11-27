@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-10
 ---
 
 # 2026-07-10 (đêm) — retro dời giờ theo lịch EOD mới + dọn 1 va chạm lịch phụ

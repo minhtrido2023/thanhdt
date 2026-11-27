@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-13
 ---
 
 # 2026-07-13 — Unapproved ZaloPay plan (2 real-money orders) was 35 minutes from executing; approval turned out to be procedure-only, not code-enforced

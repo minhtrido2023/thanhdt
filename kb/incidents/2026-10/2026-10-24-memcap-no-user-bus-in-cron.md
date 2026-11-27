@@ -5,6 +5,9 @@ severity: low
 area: infra-memory-guard
 found_by: weekly-ops-audit (Mike_20261023_210300)
 title: memcap.sh không chạy được trong cron/headless (thiếu XDG_RUNTIME_DIR) — selfcheck PASS giả 1/4
+kind: incident
+owner: Mike
+updated: 2026-10-24
 ---
 
 # memcap.sh hỏng ngoài phiên tương tác — `systemd-run --user` không nối được user bus

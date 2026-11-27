@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-20
+topic: wake-push-utf8-surrogate-deletes-ladder
+title: "2026-08-20 — Push wake-on-completion chết im lặng vì UTF-8 surrogate, còn XOÁ mất ladder đang chờ"
+owner: Mike
+status: "hotfix sanitize UTF-8 tại wake_thread.sh (`886d9158`, selfcheck 14/14); kiến trúc reconciler đề xuất chờ duyệt (`agents/Mike/research/wakeup_architecture_redesign_20260820.md`)"
+updated: 2026-08-20
+---
 # 2026-08-20 — Push wake-on-completion chết im lặng vì UTF-8 surrogate, còn XOÁ mất ladder đang chờ
 
 **Phát hiện**: user (John Dinh) tự thấy job `Taylor_20260820_015520` báo done ~12 phút mà thread

@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-12
 ---
 
 # 2026-07-12 — golive_recommend_v23 (money-path) hardcode w_LAG=65% vô điều kiện, lệch edge-conditional gate của pinned R3 — gây REBALANCE flag GIẢ trên output sống 07-11

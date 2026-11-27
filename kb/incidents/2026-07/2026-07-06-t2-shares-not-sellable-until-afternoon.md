@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-06
 ---
 
 # 2026-07-06 (later same day) — Executor didn't know T+2-purchased shares aren't sellable until the afternoon session

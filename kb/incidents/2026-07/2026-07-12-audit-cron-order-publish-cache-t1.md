@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-12
 ---
 
 # 2026-07-12 — Audit cron-order (Winston_20260712_142100) bắt 2 bug production-blocking cùng lúc: C1 CRITICAL publish DT5G qua cache T-1 thay vì live, H2 HIGH freshness-check miscalibrated

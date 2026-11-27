@@ -4,6 +4,9 @@ status: fixed
 severity: medium
 area: report-data-provenance
 found_by: weekly-ops-audit (Mike_20261016_205556)
+kind: incident
+owner: Mike
+updated: 2026-10-16
 ---
 
 # EOD daily report 16/10 mất toàn bộ phần giao dịch — lệnh ATC khớp có `price=None`

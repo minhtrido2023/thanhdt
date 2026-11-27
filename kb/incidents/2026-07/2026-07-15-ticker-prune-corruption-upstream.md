@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-15
 ---
 
 # 2026-07-15 — ticker_prune cũng bị corruption upstream (mở rộng sự cố ticker_financial 07-14): rows 07-08→07-14 bị xóa/ghi đè, daily_refresh 07-14 ABORT, DT5G 07-14 là ffill trên base stale

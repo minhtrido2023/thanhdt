@@ -11,6 +11,8 @@ origin: >-
   job Wags_20260803_054508 (wags_autofix coord-2026-08-03) nhận đúng 2 câu hỏi mà job Wags
   trước đó 4h25 (Wags_20260803_012008) đã triage và Mike weekly editorial 02:38 đã xác nhận lại
 recorder: Wags (Fleet Ops Coordinator), job Wags_20260803_054508
+owner: Mike
+updated: 2026-08-03
 ---
 
 # 2026-08-03 — checker dispatch LẶP Wags cho câu hỏi đã triage "chờ NGƯỜI" — thêm ACK `triaged-needs-human:`

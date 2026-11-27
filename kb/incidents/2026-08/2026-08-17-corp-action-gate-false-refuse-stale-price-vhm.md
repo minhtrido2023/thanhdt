@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-17
+topic: corp-action-gate-false-refuse-stale-price-vhm
+title: "2026-08-17 — Gate corp-action từ chối GIẢ suốt 10 ngày vì đọc `ticker.Price` đông cứng (VHM 1:1)"
+owner: Mike
+status: "fixed (`ced702ac` — lùi về phiên cum không đông cứng, gate 0,78%→0,00%; VHM ghi 8.214.824.008 khớp công bố từng cổ phiếu; regression ACB/HDC/EVG sạch; backlog + ops_health_check xanh)"
+updated: 2026-08-17
+---
 # 2026-08-17 — Gate corp-action từ chối GIẢ suốt 10 ngày vì đọc `ticker.Price` đông cứng (VHM 1:1)
 
 **Triệu chứng.** ops_health_check (SpaceX, 19:21 ICT) cảnh báo mục 6: `1 sự kiện corp-action đã

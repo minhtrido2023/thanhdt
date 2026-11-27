@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-29
+topic: bq-error-on-stdout-empty-diagnosis
+title: "2026-08-29 — `bq` in lỗi ra STDOUT ⇒ `dividend_adjusted_return._bq()` báo \"bq query failed: \" RỖNG"
+owner: Mike
+status: "fixed"
+updated: 2026-08-29
+---
 # 2026-08-29 — `bq` in lỗi ra STDOUT ⇒ `dividend_adjusted_return._bq()` báo "bq query failed: " RỖNG
 
 **Status**: fixed

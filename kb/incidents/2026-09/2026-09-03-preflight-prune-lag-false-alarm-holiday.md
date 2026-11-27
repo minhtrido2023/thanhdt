@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-03
+topic: preflight-prune-lag-false-alarm-holiday
+title: "2026-09-03 — Preflight cảnh báo giả \"BQ ticker_prune lag=6d\" vì ngưỡng đếm NGÀY LỊCH, không biết lịch nghỉ lễ"
+owner: Mike
+status: "fixed (so với phiên giao dịch qua `vn_market.is_holiday`, cùng nguồn bq_freshness_check.sh; harness 5/5 nhánh verbatim, preflight 2 account xanh)"
+updated: 2026-09-03
+---
 # 2026-09-03 — Preflight cảnh báo giả "BQ ticker_prune lag=6d" vì ngưỡng đếm NGÀY LỊCH, không biết lịch nghỉ lễ
 
 **What happened.** `ops_health_check`/`preflight_check.sh` 08:20 ICT (ZaloPay) WARN:

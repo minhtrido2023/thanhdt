@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-07
+topic: plan-merge-left-stale-jit-orders-double-sell
+title: "2026-08-07 — Bước merge để sót lệnh nguồn JIT_UNPARK → plan đã user duyệt sẽ BÁN TRÙNG 1.600cp; không tầng tự động nào chặn"
+owner: Mike
+status: "logged"
+updated: 2026-08-07
+---
 # 2026-08-07 — Bước merge để sót lệnh nguồn JIT_UNPARK → plan đã user duyệt sẽ BÁN TRÙNG 1.600cp; không tầng tự động nào chặn
 
 **What happened.** Wags (job `Wags_20260807_054509`, dispatch triage question tồn đọng) mở

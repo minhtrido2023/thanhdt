@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-26
+topic: baseline-checker-missing-root-only-14day-unclearable-red
+title: "2026-09-26 — `report_return_gate_selfcheck.py` đỏ 14 ngày KHÔNG AI gỡ được: 2 runner chạy 2 thứ khác nhau"
+owner: Mike
+status: "fixed"
+updated: 2026-09-26
+---
 # 2026-09-26 — `report_return_gate_selfcheck.py` đỏ 14 ngày KHÔNG AI gỡ được: 2 runner chạy 2 thứ khác nhau
 
 **status**: fixed

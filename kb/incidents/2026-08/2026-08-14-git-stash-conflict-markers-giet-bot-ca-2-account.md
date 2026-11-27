@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-14
+topic: git-stash-conflict-markers-giet-bot-ca-2-account
+title: "2026-08-14 — `git stash apply` bỏ dở để lại conflict marker trong `trading_bot/config.py` + `executor.py` → bot CHẾT NGAY khi khởi động, CẢ 2 account"
+owner: Mike
+status: "fixed — `git checkout HEAD --` 2 file (ours(stage2)==HEAD từng byte ⇒ không mất việc), stash@{0} giữ nguyên; CÒN MỞ: ai đó vẫn cần resolve stash đúng cách qua Taylor"
+updated: 2026-08-14
+---
 # 2026-08-14 — `git stash apply` bỏ dở để lại conflict marker trong `trading_bot/config.py` + `executor.py` → bot CHẾT NGAY khi khởi động, CẢ 2 account
 
 **Hiện tượng:** cron 09:05 ICT khởi động `run_bot.sh` cho SpaceX và ZaloPay; cả hai thoát rc=1

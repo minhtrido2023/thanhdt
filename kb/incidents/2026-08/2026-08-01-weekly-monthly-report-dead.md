@@ -14,6 +14,8 @@ origin: >-
   thuộc Mike tự nhớ tự soạn trong 1 phiên sống
 recorder: >-
   Mike, user hỏi thẳng "2 task báo cáo tuần/tháng chết mà không ai quản lý" — phát hiện đúng
+owner: Mike
+updated: 2026-08-01
 ---
 
 # 2026-08-01: báo cáo tuần/tháng chết 2 tuần liền

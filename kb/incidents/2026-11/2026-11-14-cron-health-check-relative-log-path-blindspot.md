@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-11-14
+topic: cron-health-check-relative-log-path-blindspot
+title: "2026-11-14 — `cron_health_check.py` resolve log tương đối theo CWD của chính nó ⇒ 10 job báo LOG_MISSING giả VÀ không bao giờ được quét lỗi"
+owner: Mike
+status: "logged"
+updated: 2026-11-14
+---
 # 2026-11-14 — `cron_health_check.py` resolve log tương đối theo CWD của chính nó ⇒ 10 job báo LOG_MISSING giả VÀ không bao giờ được quét lỗi
 
 **Phát hiện:** weekly ops audit 14/11 (job `Mike_20261114_075225`). 12 dòng LOG_MISSING; 10/12 log THẬT tồn tại và tươi

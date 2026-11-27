@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-12
+topic: arch-review-verdict-mat-vi-json-thieu-dau-dong
+title: "2026-08-12 — Verdict CONFIRMED của arch-reviewer bị vứt đi vì JSON thiếu ĐÚNG MỘT dấu `}` → question `wags-arch-review-inconclusive` GIẢ"
+owner: Mike
+status: "fixed (`bin/wags_verdict_parse.py` + selfcheck 37/37, có ca chạy lại trên log thật đã fail)"
+updated: 2026-08-12
+---
 # 2026-08-12 — Verdict CONFIRMED của arch-reviewer bị vứt đi vì JSON thiếu ĐÚNG MỘT dấu `}` → question `wags-arch-review-inconclusive` GIẢ
 
 **Hiện tượng.** `wags_autofix` vòng coord-2026-08-11 báo `INCONCLUSIVE` + post question

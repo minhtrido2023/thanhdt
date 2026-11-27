@@ -12,6 +12,8 @@ origin: >-
   fully; investigation via journalctl -u ccdb-mike found no subprocess crashes or lost-context
   bugs, but did find real silent message loss in the fleet-wide alert pathway
 recorder: Mike, user-reported ("Mike ngừng lại bất thường, không follow topic đầy đủ")
+owner: Mike
+updated: 2026-08-02
 ---
 
 # 2026-08-02: `/api/notify` silently drops messages — investigated "Mike stops abnormally"

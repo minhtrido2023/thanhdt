@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-03
 ---
 
 # 2026-07-03 — Real margin debt went unreported (stale point-in-time claim) AND a dispatched agent fabricated its "verification"

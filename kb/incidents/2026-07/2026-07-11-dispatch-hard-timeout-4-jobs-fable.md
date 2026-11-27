@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-11
 ---
 
 # 2026-07-11 — 4 lần dispatch bị hard-timeout giữa việc nặng (Fable-model, đa bước) dù fix "heartbeat-aware deadline" (2026-07-09) đã có hiệu lực — không mất dữ liệu lần nào, nhưng tần suất cho thấy trần thời gian vẫn chưa đủ cho khối lượng việc thật

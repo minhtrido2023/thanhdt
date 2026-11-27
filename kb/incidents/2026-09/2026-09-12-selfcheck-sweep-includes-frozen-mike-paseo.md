@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-12
+topic: selfcheck-sweep-includes-frozen-mike-paseo
+title: "2026-09-12 — `run_selfchecks.sh` quét cả `mike_paseo/`, một ảnh chụp ĐÓNG BĂNG từ 08-28: 84/248 file (34%) và 3/6 FAIL là bản sao chết"
+owner: Mike
+status: "fixed"
+updated: 2026-09-12
+---
 # 2026-09-12 — `run_selfchecks.sh` quét cả `mike_paseo/`, một ảnh chụp ĐÓNG BĂNG từ 08-28: 84/248 file (34%) và 3/6 FAIL là bản sao chết
 
 **Status**: fixed

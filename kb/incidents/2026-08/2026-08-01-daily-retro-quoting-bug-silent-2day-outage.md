@@ -13,6 +13,8 @@ origin: >-
 recorder: >-
   Mike, phát hiện khi user yêu cầu review toàn diện quy trình vận hành (2026-08-01), không phải
   qua alert/notify nào — script crash TRƯỚC bất kỳ notify.sh nào có thể chạy tới
+owner: Mike
+updated: 2026-08-01
 ---
 
 # 2026-08-01: daily_retro.sh crashed silently 2 đêm liên tiếp (07-31, 08-01)

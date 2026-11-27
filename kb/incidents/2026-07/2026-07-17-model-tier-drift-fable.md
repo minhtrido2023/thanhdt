@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-17
 ---
 
 # 2026-07-17 — Model-tier drift: fable đi từ 0%→58% dispatch trong 3 tuần, compute wall-clock +150% dù job count -76% (user hỏi "token tăng dù không research nặng")

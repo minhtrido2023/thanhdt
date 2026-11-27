@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-11-11
+topic: approved-by-newline-preflight-red-and-lost-decision
+title: "2026-11-11 — Newline trong `approved_by` ⇒ preflight SpaceX RED giả + decision duyệt plan không lên bus"
+owner: Mike
+status: "fixed"
+updated: 2026-11-11
+---
 # 2026-11-11 — Newline trong `approved_by` ⇒ preflight SpaceX RED giả + decision duyệt plan không lên bus
 
 **Phát hiện:** check 5b `ops_health_check.sh --account ZaloPay` (01:20Z) báo 2 bản ghi cách ly; job `Winston_20261111_012010`.

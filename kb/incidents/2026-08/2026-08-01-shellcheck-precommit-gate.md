@@ -12,6 +12,8 @@ origin: >-
   enforce them — the exact bug class documented earlier today (unescaped "/` in dispatch-
   prompt bash strings) recurred a 4th time in a file nobody had touched yet
 recorder: Mike, user mandate ("nghiên cứu chuẩn mực ngành... giải quyết triệt để")
+owner: Mike
+updated: 2026-08-01
 ---
 
 # 2026-08-01: ShellCheck pre-commit gate — encoding the quoting lesson as a tool, not prose

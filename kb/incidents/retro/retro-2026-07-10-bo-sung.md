@@ -7,6 +7,8 @@ title: >-
 status: open-items
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-10
 ---
 
 # RETRO — 2026-07-10 (bổ sung đóng entry — job gốc `Mike_20260710_150001` báo "failed" dù nội dung đã đúng: "Reached max turns (50)" ngay trước bước 8-9)

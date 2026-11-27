@@ -12,6 +12,8 @@ origin: >-
   không kiểm soát được, và yêu cầu một phương án KỸ THUẬT giải quyết triệt để thay vì vá thêm
   một lớp nữa
 recorder: Wags (job Wags_20260802_160902), dispatch từ Mike
+owner: Mike
+updated: 2026-08-02
 ---
 
 # 2026-08-02 — Định tuyến topic Discord: thay 4 lớp vá bằng 1 registry + 1 gate cơ học

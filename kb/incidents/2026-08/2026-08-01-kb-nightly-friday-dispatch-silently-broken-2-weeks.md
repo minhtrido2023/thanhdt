@@ -14,6 +14,8 @@ origin: >-
 recorder: >-
   Mike, phát hiện trong lúc rà soát để làm theo yêu cầu user (thêm opus%-alert vào cùng khối
   prompt) — tự kiểm quoting của đoạn mình sắp sửa nên phát hiện luôn 2 lỗi cũ đã có sẵn
+owner: Mike
+updated: 2026-08-01
 ---
 
 # 2026-08-01: kb_nightly.sh Friday/Saturday editorial dispatch broken 2 tuần liền

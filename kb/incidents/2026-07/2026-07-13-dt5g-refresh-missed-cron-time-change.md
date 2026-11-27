@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-13
 ---
 
 # 2026-07-13 — DT5G refresh thứ Sáu 07-10 KHÔNG chạy: dời giờ cron cùng ngày rơi đúng khe hở giữa slot cũ và slot mới

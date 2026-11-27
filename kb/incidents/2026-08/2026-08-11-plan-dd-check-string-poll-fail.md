@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-11
+topic: plan-dd-check-string-poll-fail
+title: "2026-08-11 — `dd_check` ghi dạng CHUỖI trong plan làm `step()` ném lỗi mỗi lần có FILL (22 POLL_FAIL ZaloPay + 27 SpaceX)"
+owner: Mike
+status: "escalated (chưa vá — điểm vá nằm ở `load_plan()`/executor, vùng cấm Winston)"
+updated: 2026-08-11
+---
 # 2026-08-11 — `dd_check` ghi dạng CHUỖI trong plan làm `step()` ném lỗi mỗi lần có FILL (22 POLL_FAIL ZaloPay + 27 SpaceX)
 
 **Triệu chứng.** `ops_health_check.sh` 12:45 báo `{'POLL_FAIL': 22}` cho ZaloPay

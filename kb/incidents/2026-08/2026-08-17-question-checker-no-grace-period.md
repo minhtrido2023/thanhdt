@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-17
+topic: question-checker-no-grace-period
+title: "2026-08-17 — `ops_health_check` check #5 dispatch job Wags cho câu hỏi mới 4 phút 31 giây tuổi"
+owner: Mike
+status: "fixed"
+updated: 2026-08-17
+---
 # 2026-08-17 — `ops_health_check` check #5 dispatch job Wags cho câu hỏi mới 4 phút 31 giây tuổi
 
 > **Cập nhật cùng ngày (round-2):** khẳng định "60 phút không mất ca nào" trong bản gốc phía

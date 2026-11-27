@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-02
+topic: pe-price-close-adjustment-saga
+title: "2026-08-02 — Saga \"PE có look-ahead giá điều chỉnh\": 6 tuần một phép nhân sai + lần thứ 2 fleet suy diễn nhầm từ một quan sát ĐÚNG"
+owner: Mike
+status: "fixed"
+updated: 2026-08-02
+---
 # 2026-08-02 — Saga "PE có look-ahead giá điều chỉnh": 6 tuần một phép nhân sai + lần thứ 2 fleet suy diễn nhầm từ một quan sát ĐÚNG
 
 **Trạng thái**: ĐÓNG (code đã khôi phục đúng, self-check 2 chiều PASS, quant-skeptic gate ở Bước 5)

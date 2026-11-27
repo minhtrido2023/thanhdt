@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-31
+topic: rejected-retry-candidate-trace-index
+title: "2026-08-31 — Bộ dò \"ỨNG VIÊN RETRY\" của check 5b đọc trace_id ở SAI vị trí ⇒ khẳng định \"event MẤT THẬT\" cho đúng ca word-split"
+owner: Mike
+status: "fixed (`_a[-1]` + bằng chứng thứ hai là topic; selfcheck 30/30 PASS ×4 TZ, mutation bản HEAD giết 4 assertion; checker thật ZaloPay 3→2 điểm, §5b xanh)"
+updated: 2026-08-31
+---
 # 2026-08-31 — Bộ dò "ỨNG VIÊN RETRY" của check 5b đọc trace_id ở SAI vị trí ⇒ khẳng định "event MẤT THẬT" cho đúng ca word-split
 
 **Phát hiện:** `ops_health_check.sh --account ZaloPay` (05:45Z) báo 1 bản ghi cách ly trong 24h

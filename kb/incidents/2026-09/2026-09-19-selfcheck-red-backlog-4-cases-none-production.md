@@ -5,6 +5,7 @@ status: fixed
 severity: low
 owner: Mike (weekly ops audit, job Mike_20260918_204303)
 tags: [selfcheck, cron, drift, false-alarm]
+updated: 2026-09-19
 ---
 
 # 4 selfcheck ĐỎ tồn đọng 1–7 ngày — KHÔNG ca nào là lỗi production

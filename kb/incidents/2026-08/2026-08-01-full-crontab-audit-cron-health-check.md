@@ -11,6 +11,8 @@ origin: >-
   thiếu cơ chế mechanical kiểm tra "job đã lên lịch có thật sự chạy đúng không" cho TOÀN BỘ
   crontab — chỉ phát hiện từng job một khi tình cờ đọc log tay (đúng bài học 2 sự cố cùng ngày)
 recorder: Mike, theo yêu cầu trực tiếp của user
+owner: Mike
+updated: 2026-08-01
 ---
 
 # 2026-08-01: audit toàn bộ crontab — 1 bug thật + 9 gap observability + công cụ mới

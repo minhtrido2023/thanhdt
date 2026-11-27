@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-07
+topic: plan-rewrite-drops-user-approval
+title: "2026-08-07 — Script sửa plan sau khi user đã duyệt LÀM MẤT `approved_by` → bot chặn cả 2 account giữa phiên chiều"
+owner: Mike
+status: "escalated (cần user duyệt lại); đề xuất `approved_orders_hash` CHƯA vá"
+updated: 2026-08-07
+---
 # 2026-08-07 — Script sửa plan sau khi user đã duyệt LÀM MẤT `approved_by` → bot chặn cả 2 account giữa phiên chiều
 
 **Hiện tượng.** `run_bot.sh` cron phiên chiều 13:00 ICT thoát `rc=2` cho CẢ ZaloPay và SpaceX:

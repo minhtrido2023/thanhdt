@@ -4,6 +4,9 @@ status: fixed
 severity: low
 area: notify-routing
 found_by: weekly-ops-audit (Mike_20261023_210300)
+kind: incident
+owner: Mike
+updated: 2026-10-24
 ---
 
 # Tóm tắt RETRO hằng ngày thỉnh thoảng không tới Trading Daily — finalize dispatch không ghim topic

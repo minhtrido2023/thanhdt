@@ -7,6 +7,8 @@ title: >-
 status: open
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031) — vị trí gốc: giữa entry 2026-07-10 (đêm) và 2026-07-10 (sáng sớm)
+owner: Mike
+updated: 2026-07-10
 ---
 
 # Open / not-yet-hardened

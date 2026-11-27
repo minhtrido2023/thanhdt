@@ -7,6 +7,8 @@ title: >-
   NAV lịch sử SpaceX/ZaloPay sai 6 dòng trên 5 phiên, tự triệt tiêu nên sống sót mọi đối soát
 status: fixed
 source: bus (Winston_20260802_082040, Winston_20260802_085555), commit 354eaa88
+owner: Mike
+updated: 2026-08-02
 ---
 
 # NAV đếm 2 lần cổ tức tiền mặt vào tối ngày chốt quyền (last-cum-date)

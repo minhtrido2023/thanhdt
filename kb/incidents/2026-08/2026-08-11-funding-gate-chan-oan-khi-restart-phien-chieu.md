@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-11
+topic: funding-gate-chan-oan-khi-restart-phien-chieu
+title: "2026-08-11 — FUNDING gate chặn OAN ZaloPay khi restart phiên chiều: gate tính trên TOÀN BỘ plan, không trừ phần đã khớp buổi sáng"
+owner: Mike
+status: "**fixed** — commit `911f12b` (2026-08-11T06:22Z, 18 phút SAU khi escalate) `_remaining_quantities()` trừ `parents[*].filled`, fail-closed khi state không kiểm được; selfcheck `plan_funding_gate_selfcheck.py` 103/103. Question đóng bởi Wags coord-2026-08-12 (việc xong nhưng THIẾU event đóng)"
+updated: 2026-08-11
+---
 # 2026-08-11 — FUNDING gate chặn OAN ZaloPay khi restart phiên chiều: gate tính trên TOÀN BỘ plan, không trừ phần đã khớp buổi sáng
 
 **Hiện tượng.** Cron 13:00 ICT (`run_bot.sh --account ZaloPay --auto-otp`, resume state) thoát

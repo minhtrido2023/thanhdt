@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-07
 ---
 
 # 2026-07-07 (chiều) — agent-wrapper-monitor-gap: Agent(isolation:worktree) dùng nhầm làm "background wrapper", Mike mất tín hiệu hoàn tất job — lần 2 lỗi giám sát job nền cùng ngày

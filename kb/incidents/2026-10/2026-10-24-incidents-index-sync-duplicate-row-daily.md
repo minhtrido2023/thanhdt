@@ -5,6 +5,9 @@ severity: low
 area: kb-tooling
 found_by: weekly-ops-audit (Mike_20261023_210300)
 title: incidents_index_sync.py chèn lại cùng 1 dòng MỖI NGÀY — index.md nhân 59 bản trùng
+kind: incident
+owner: Mike
+updated: 2026-10-24
 ---
 
 # incidents_index_sync.py chèn lại cùng 1 dòng mỗi ngày — 59 bản trùng trong index.md

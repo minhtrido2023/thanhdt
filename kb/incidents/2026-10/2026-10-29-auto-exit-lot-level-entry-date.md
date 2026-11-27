@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-10-29
+topic: auto-exit-lot-level-entry-date
+title: "2026-10-29 — auto-exit LAG/BAL quyết định theo mã (ngày vào = MIN) thay vì theo LÔ; dòng EOD lấy FILL đầu tiên"
+owner: Mike
+status: "fixed"
+updated: 2026-10-29
+---
 # 2026-10-29 — auto-exit LAG/BAL quyết định theo mã (ngày vào = MIN) thay vì theo LÔ; dòng EOD lấy FILL đầu tiên
 
 **Phát hiện:** 28/10 (user): EOD báo SCL "ĐÃ QUA T+25 (54 phiên từ 2026-08-10)" dù SCL đã thoát hẳn (SpaceX 30/09, ZaloPay 01-02/10) và vào lại 26/10.

@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-28
+topic: check5b-agent-reason-pairing-and-heartbeat-blindspot
+title: "2026-09-28 — Check 5b ghép NGƯỢC agent↔lý do, và mù ca bản bị chặn CHÍNH LÀ heartbeat"
+owner: Mike
+status: "fixed"
+updated: 2026-09-28
+---
 # 2026-09-28 — Check 5b ghép NGƯỢC agent↔lý do, và mù ca bản bị chặn CHÍNH LÀ heartbeat
 
 **Phát hiện:** `ops_health_check.sh --account ZaloPay` (01:20Z) báo 2 bản ghi cách ly trong

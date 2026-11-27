@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-18
+topic: check10-cua-so-24h-ap-nham-len-mtime-file
+title: "2026-08-18 — check #10 báo \"TIN NHẮN ĐÃ BỊ NUỐT trong 24h qua\" bằng một lỗi 6 ngày trước"
+owner: Mike
+status: "fixed (lọc 24h theo từng bản ghi + 2 ca hồi quy mới, PASS ×4 TZ, checker thật 4→3 điểm; **chưa commit — file mang việc dở của phiên khác, quy tắc 2b**)"
+updated: 2026-08-18
+---
 # 2026-08-18 — check #10 báo "TIN NHẮN ĐÃ BỊ NUỐT trong 24h qua" bằng một lỗi 6 ngày trước
 
 **Triệu chứng.** `ops_health_check.sh --account SpaceX` 02:58 ICT in:

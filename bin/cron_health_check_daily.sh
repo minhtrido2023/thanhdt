@@ -45,19 +45,21 @@ fi
 if ! python3 "$ROOT/bin/incidents_index_sync.py" --check >/tmp/incidents_sync_check.$$ 2>&1; then
   DRIFT="$(cat /tmp/incidents_sync_check.$$)"
   python3 "$ROOT/bin/incidents_index_sync.py" --fix >/dev/null 2>&1 || true
-  if git -C "$ROOT" diff --quiet -- kb/incidents/index.md; then
+  _inc_paths=("kb/incidents/index.md")
+  [ -f "$ROOT/kb/incidents/retro/index.md" ] && ! git -C "$ROOT" diff --quiet -- kb/incidents/retro/index.md 2>/dev/null && _inc_paths+=("kb/incidents/retro/index.md")
+  if git -C "$ROOT" diff --quiet -- "${_inc_paths[@]}"; then
     "$ROOT/bin/notify.sh" "🟡 [cron_health_check] incidents_index_sync phát hiện drift nhưng --fix không đổi gì file — cần người kiểm tay: $DRIFT" 2>/dev/null || true
   else
     # Bắt exit code THẬT của add+commit và chỉ nói "đã commit" khi thật sự có commit — cùng lỗi
     # đã sửa ở consolidate.sh / fleet_backup.sh / kb_nightly.sh Phase 3 + 4.6 (arch-review
     # round 2-5, 2026-08-12): `2>/dev/null || true` nuốt lời từ chối của pre-commit gate rồi
     # dòng notify chạy VÔ ĐIỀU KIỆN, báo cho người là "đã commit" trong khi không có commit nào.
-    # Pathspec `-- kb/incidents/index.md` để commit không cuốn theo thứ phiên khác đang để
+    # Pathspec `-- ...` để commit không cuốn theo thứ phiên khác đang để
     # staged trong index dùng chung (sự cố thật 2026-08-12, commit f827f6df).
-    if cerr="$(git -C "$ROOT" add -- kb/incidents/index.md 2>&1 \
+    if cerr="$(git -C "$ROOT" add -- "${_inc_paths[@]}" 2>&1 \
         && git -C "$ROOT" commit -q -m "chore(incidents): auto-sync index.md ($(date -u +%Y-%m-%d), cron_health_check_daily.sh)
 
-$DRIFT" -- kb/incidents/index.md 2>&1)"; then
+$DRIFT" -- "${_inc_paths[@]}" 2>&1)"; then
       "$ROOT/bin/notify.sh" "🩺 [cron_health_check] incidents_index_sync tự sửa drift + ĐÃ COMMIT: $DRIFT" 2>/dev/null || true
     else
       echo "[cron_health_check] incidents index.md đã sửa TRÊN ĐĨA nhưng commit BỊ TỪ CHỐI — KHÔNG có commit nào, file còn dirty, CẦN COMMIT TAY. git: $cerr"

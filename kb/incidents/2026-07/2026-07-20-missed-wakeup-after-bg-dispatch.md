@@ -7,6 +7,8 @@ title: >-
 status: logged
 source: >-
   kb/INCIDENTS.md (migrate OKF 2026-07-30, job Winston_20260730_144031)
+owner: Mike
+updated: 2026-07-20
 ---
 
 # 2026-07-20 — `missed-wakeup-after-bg-dispatch`: Mike dispatch 2 job `--bg` rồi trả lời câu hỏi khác trong CÙNG lượt, không `ScheduleWakeup` → 2 job xong âm thầm 19 phút (user phát hiện, không phải hệ thống)

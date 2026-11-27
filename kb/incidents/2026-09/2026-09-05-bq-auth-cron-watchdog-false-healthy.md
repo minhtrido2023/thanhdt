@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-09-05
+topic: bq-auth-cron-watchdog-false-healthy
+title: "2026-09-05 — Watchdog money-path báo \"KHỎE\" GIẢ khi `bq` fail auth trong cron; `bq_monthly_pin` chết 2 tháng liền với chẩn đoán RỖNG"
+owner: Mike
+status: "fixed"
+updated: 2026-09-05
+---
 # 2026-09-05 — Watchdog money-path báo "KHỎE" GIẢ khi `bq` fail auth trong cron; `bq_monthly_pin` chết 2 tháng liền với chẩn đoán RỖNG
 
 **Status**: fixed

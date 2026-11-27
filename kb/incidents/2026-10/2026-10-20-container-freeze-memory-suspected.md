@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-10-20
+topic: container-freeze-memory-suspected
+title: "2026-10-20 — Container treo ~2,5h rồi reboot 22:23 ICT (nghi cạn RAM, CHƯA xác nhận kernel)"
+owner: Mike
+status: "logged"
+updated: 2026-10-20
+---
 # 2026-10-20 — Container treo ~2,5h rồi reboot 22:23 ICT (nghi cạn RAM, CHƯA xác nhận kernel)
 
 **Sự thật đo được**

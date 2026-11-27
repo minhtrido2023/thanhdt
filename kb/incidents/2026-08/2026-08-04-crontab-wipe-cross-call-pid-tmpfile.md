@@ -3,6 +3,8 @@ kind: incident
 status: fixed
 severity: near-miss (caught + reverted within ~90s, 0 missed cron ticks, 0 downstream effect)
 date: 2026-08-04
+owner: Mike
+updated: 2026-08-04
 ---
 
 # Crontab briefly wiped to 1 line — `$$`-keyed temp file did not survive across tool calls

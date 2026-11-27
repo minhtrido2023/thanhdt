@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-13
+topic: tv1-ceiling-decision-via-action-not-bus
+title: "2026-08-13 — Quyết định trần giá TV1 đã được THỰC THI qua code + injector, nhưng chưa từng đóng câu hỏi bus gốc bằng event `answer`"
+owner: Mike
+status: "fixed"
+updated: 2026-08-13
+---
 # 2026-08-13 — Quyết định trần giá TV1 đã được THỰC THI qua code + injector, nhưng chưa từng đóng câu hỏi bus gốc bằng event `answer`
 
 **Bối cảnh phát hiện.** Retro `retro-2026-08-13.md`, sự cố #4 — 1 trong 6+ biến thể của Pattern-B

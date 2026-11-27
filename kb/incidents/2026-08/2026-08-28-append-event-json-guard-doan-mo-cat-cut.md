@@ -1,3 +1,12 @@
+---
+kind: incident
+date: 2026-08-28
+topic: append-event-json-guard-doan-mo-cat-cut
+title: "2026-08-28 — Guard JSON của `append_event.sh` ĐOÁN MÒ \"bị cắt cụt\" cho mọi ca ⇒ dispatch ops-autofix mở đầu bằng chẩn đoán sai"
+owner: Mike
+status: "fixed (commit `55b3f34c`: in lỗi parser thật + độ dài payload + cách đọc lỗi; selfcheck +1 ca 6 assertion, PASS ×3 TZ; replay payload thật khớp; event KHÔNG mất — Taylor tự retry +29s, event `6c3a5654`)"
+updated: 2026-08-28
+---
 # 2026-08-28 — Guard JSON của `append_event.sh` ĐOÁN MÒ "bị cắt cụt" cho mọi ca ⇒ dispatch ops-autofix mở đầu bằng chẩn đoán sai
 
 **Phát hiện:** `ops_health_check.sh --account SpaceX` (02:02Z) báo 1 bản ghi cách ly trong 24h,
