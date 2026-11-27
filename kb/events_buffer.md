@@ -734,3 +734,6 @@
 
 ## Consolidation 2026-11-27T08:07:01Z
 - [2026-11-27T07:29:01Z] Mafee/status — orb_futures_exit: {"account": "SpaceX", "mode": "DRY", "reason": "TIME", "entry": 1746.2, "exit": 1754.6, "pnl_gross_vnd": 840000, "exit_px_estimated": false}
+
+## Consolidation 2026-11-27T08:46:42Z
+- [2026-11-27T08:45:06Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 138, "deleted_bytes": 10963090, "archived_items": 5112, "archived_bytes": 5944240, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
