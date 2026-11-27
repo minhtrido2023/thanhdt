@@ -35,11 +35,28 @@ if [ "$show_log" = "--log" ]; then
     tail -n 100 "$logfile"
   elif [ -n "$logfile" ]; then
     _base="$(basename "$logfile")"
-    _gz="$(find "$ROOT/logs/archive" -type f -name "${_base}.gz" 2>/dev/null | head -n 1 || true)"
+    _gz="$(find "$ROOT/logs/archive" -maxdepth 2 -type f -name "${_base}.gz" 2>/dev/null | head -n 1 || true)"
     if [ -n "$_gz" ] && [ -f "$_gz" ]; then
       echo
       echo "=== log tail (archived): $_gz ==="
       gzip -dc "$_gz" | tail -n 100
+    elif [ -d "$ROOT/logs/archive/monthly" ]; then
+      _tb=""
+      _mem=""
+      while IFS= read -r _cand; do
+        [ -f "$_cand" ] || continue
+        _hit="$(tar -tzf "$_cand" 2>/dev/null | grep -E "(^|/)${_base}\.gz$" | head -n 1 || true)"
+        if [ -n "$_hit" ]; then
+          _tb="$_cand"
+          _mem="$_hit"
+          break
+        fi
+      done < <(ls -1t "$ROOT/logs/archive/monthly/"*.tar.gz 2>/dev/null || true)
+      if [ -n "$_tb" ] && [ -n "$_mem" ]; then
+        echo
+        echo "=== log tail (monthly tarball): $_tb ($_mem) ==="
+        tar -xOzf "$_tb" "$_mem" | gzip -dc | tail -n 100
+      fi
     fi
   fi
 fi

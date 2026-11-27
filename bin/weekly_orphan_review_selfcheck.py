@@ -20,6 +20,7 @@ with tempfile.TemporaryDirectory() as t:
         p = os.path.join(R, d, name); os.makedirs(os.path.dirname(p), exist_ok=True)
         open(p, "wb").write(os.urandom(size)); os.utime(p, (old, old))
     mk("old_exp", "panel.csv", 5000); mk("old_exp", "REPORT.md", 100)
+    mk("old_exp", "sb/copied.md", 2500)
     mk("dd_X_1", "src/a.pdf", 5000); mk("dd_X_1", "REPORT.md", 100); mk("dd_X_1", "build.py", 200)
     mk("dd_Y_2", "src/b.pdf", 5000); os.utime(os.path.join(R, "dd_Y_2", "src/b.pdf"), None)   # DD còn đang làm (mới sửa)
     mk("ref_exp", "big.csv", 5000)
@@ -27,8 +28,14 @@ with tempfile.TemporaryDirectory() as t:
     mk("orphan_all", "x.pkl", 5000)
     mk("young", "big.csv", 5000)
     os.utime(os.path.join(R, "young", "big.csv"), None)
+    # exp_* / probe_* outside research/
+    E = os.path.join(root, "agents/Taylor")
+    for ed, fn, sz in [("exp_old_unused", "raw.csv", 5000), ("exp_old_unused", "run.py", 200),
+                       ("exp_old_unused", "REPORT.md", 100), ("exp_with_ref", "raw.csv", 5000)]:
+        ep = os.path.join(E, ed, fn); os.makedirs(os.path.dirname(ep), exist_ok=True)
+        open(ep, "wb").write(os.urandom(sz)); os.utime(ep, (old, old))
     os.makedirs(os.path.join(root, "bin"), exist_ok=True)
-    open(os.path.join(root, "bin/use.py"), "w").write("P='research/ref_exp/big.csv'\n")
+    open(os.path.join(root, "bin/use.py"), "w").write("P='research/ref_exp/big.csv'\nQ='agents/Taylor/exp_with_ref/raw.csv'\n")
     os.makedirs(os.path.join(root, "kb/projects"), exist_ok=True)
     open(os.path.join(root, "kb/projects/n.md"), "w").write("old_exp: NO-GO\n")
     open(os.path.join(root, "kb/cleanup_keep.txt"), "w").write("keep_exp  # lý do\n")
@@ -47,19 +54,24 @@ with tempfile.TemporaryDirectory() as t:
     w.main(common + ["--now", str(now)])
     st = json.load(open(os.path.join(root, "state/orphan_review_state.json")))
     ok("R:old_exp:TRIM" in st, "old_exp (KB nhắc, không code) = TRIM")
+    ok("E:exp_old_unused:TRIM" in st, "exp_old_unused ngoài research = E:TRIM")
+    ok("E:exp_with_ref:TRIM" not in st, "exp_with_ref có code ref được bảo vệ")
     ok("R:orphan_all:REMOVE_DIR" in st, "orphan_all (không md/KB/code) = REMOVE_DIR")
     ok("R:dd_X_1:TRIM_DD" in st, "DD im >3d = TRIM_DD")
     ok(not any(k.startswith(("R:dd_Y_2", "R:ref_exp", "R:keep_exp", "R:young")) for k in st), "DD đang làm/code-ref/keep/young KHÔNG là ứng viên")
     ok(not any(k.startswith("R:dd_Z_3") for k in st), "DD được kb/*.json (sổ dd_price_zones) trỏ tới KHÔNG là ứng viên")
     ok("T:old.bin" in st and "T:new.bin" not in st, "/tmp: chỉ mục cũ")
     ok(os.path.exists(os.path.join(R, "old_exp/panel.csv")), "dry-run không xoá")
-    # 2) --apply lần 1: grace chặn R, T xoá ngay
+    # 2) --apply lần 1: grace chặn R & E, T xoá ngay
     w.main(common + ["--apply", "--now", str(now)])
     ok(os.path.exists(os.path.join(R, "old_exp/panel.csv")), "grace: R chưa xoá lần đầu")
+    ok(os.path.exists(os.path.join(E, "exp_old_unused/raw.csv")), "grace: E chưa xoá lần đầu")
     ok(not os.path.exists(os.path.join(tmp, "old.bin")) and os.path.exists(os.path.join(tmp, "new.bin")), "T xoá không grace, giữ mục mới")
-    # 3) 8 ngày sau: R bị xoá
+    # 3) 8 ngày sau: R & E bị xoá (sb/copied.md cũng bị xoá, chỉ giữ REPORT.md cấp 1)
     w.main(common + ["--apply", "--now", str(now + 8 * 86400)])
-    ok(not os.path.exists(os.path.join(R, "old_exp/panel.csv")) and os.path.exists(os.path.join(R, "old_exp/REPORT.md")), "TRIM xoá file nặng, GIỮ .md")
+    ok(not os.path.exists(os.path.join(R, "old_exp/panel.csv")) and not os.path.exists(os.path.join(R, "old_exp/sb/copied.md")) and os.path.exists(os.path.join(R, "old_exp/REPORT.md")), "TRIM xoá file nặng + sb/*.md lồng, GIỮ .md cấp 1")
+    ok(not os.path.exists(os.path.join(E, "exp_old_unused/raw.csv")) and os.path.exists(os.path.join(E, "exp_old_unused/run.py")) and os.path.exists(os.path.join(E, "exp_old_unused/REPORT.md")), "E:TRIM bỏ raw.csv, GIỮ .py và .md")
+    ok(os.path.exists(os.path.join(E, "exp_with_ref/raw.csv")), "exp_with_ref giữ nguyên")
     ok(not os.path.exists(os.path.join(R, "orphan_all")), "REMOVE_DIR xoá cả thư mục")
     ok(not os.path.exists(os.path.join(R, "dd_X_1/src/a.pdf")) and os.path.exists(os.path.join(R, "dd_X_1/REPORT.md")) and os.path.exists(os.path.join(R, "dd_X_1/build.py")), "TRIM_DD: bỏ pdf tạm, GIỮ .md và .py")
     for d in ("dd_Y_2/src/b.pdf", "dd_Z_3/calc/assumptions.json", "ref_exp/big.csv", "keep_exp/big.csv", "young/big.csv"):

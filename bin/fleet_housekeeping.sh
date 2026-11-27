@@ -36,19 +36,25 @@ fleet_housekeeping.sh [--apply] [--only=cat1,cat2] [--help]
   --only=LIST     Chỉ chạy các category liệt kê (phẩy phân cách).
 
 Category DELETE (đã xác minh nội dung, xem báo cáo §2):
-  pid        logs/.dispatch_*.pid              — 0 reader trong toàn repo
-  empty      logs/*.log|*.err size 0
-  errnoise   logs/*.err chỉ chứa warning stdin của harness
-  jobtmp     bus/jobs/*.json.tmp mồ côi (atomic-write bị kill)
-  pycache    __pycache__/ (regenerable, đã gitignore cả 2 repo)
-  stateclean state/notify & wake_debounce >2d; state/retro_* >14d; state/{autofix,plan_*,bot_heartbeat,daily_decision_topic,worktree_salvage} >30d
-  ddmedia    agents/Taylor/research/**/*.{pdf,png,jpg,jpeg} >14d (trừ kb/cleanup_keep.txt)
+  pid          logs/.dispatch_*.pid              — 0 reader trong toàn repo
+  empty        logs/*.log|*.err size 0
+  errnoise     logs/*.err chỉ chứa warning stdin của harness
+  jobtmp       bus/jobs/*.json.tmp mồ côi (atomic-write bị kill)
+  joblock      bus/jobs/*.lock >1d của job đã terminal hoặc mất hot json
+  draftclean   reports/v2/draft/v2/* >1d ĐÃ có bản chính ở reports/v2/
+  pycache      __pycache__/ (regenerable, đã gitignore cả 2 repo)
+  stateclean   state/notify & wake_debounce >2d; state/retro_* >14d; state/{autofix,plan_*,bot_heartbeat,daily_decision_topic,worktree_salvage,spend_report_routing_dispatch} >30d; crontab backups >14d -> backups/crontab/ (giữ 10)
+  ddmedia      agents/Taylor/research/**/*.{pdf,png,jpg,jpeg} >14d (trừ kb/cleanup_keep.txt)
 
 Category ARCHIVE (đảo ngược được, giữ nguyên nội dung):
-  dispatchlog logs/dispatch_*.{log,err} >14d -> logs/archive/<YYYY-MM>/*.gz
-  toollog     logs/{verify_,arch_review_,wags_pipeline_,daily_retro_draft_,selfcheck_weekly_,code_quality_,dd_skeptic_,subagent_}*, *.{verify,out,raw}, run_bot_*.log >14d
-  registry    bus/registry/*.json  >30d  -> bus/registry/archive/
-  rotate      logs/<cron>.log + bus/_rejected.jsonl >300KB -> .1.gz .2.gz .3.gz
+  dispatchlog  logs/dispatch_*.{log,err} >14d -> logs/archive/<YYYY-MM>/*.gz
+  toollog      logs/{verify_,arch_review_,wags_pipeline_,daily_retro_draft_,selfcheck_weekly_,code_quality_,dd_skeptic_,subagent_}*, *.{verify,out,raw}, run_bot_*.log >14d
+  registry     bus/registry/*.json >7d -> bus/registry/archive/ (trừ roster)
+  rotate       logs/<cron>.log + bus/_rejected.jsonl >300KB -> .1.gz .2.gz .3.gz
+  archivepack  gom nén logs/archive/ (>45d, trừ run_bot/) & bus/jobs/archive/ (>60d) -> monthly/*.tar.gz; purge tarball >180d
+
+Category REPORT-ONLY:
+  proposedwarn liệt kê kb/**/*.proposed* >7d (ngoài kb/proposals/expired/)
 
 Không có category OPT-IN nào. (\`datacold\` đã bị gỡ sau arch-review 2026-07-30 — xem §10 cuối file.)
 EOF
@@ -62,7 +68,7 @@ for a in "$@"; do
   esac
 done
 
-DEFAULT_CATS="pid empty errnoise jobtmp pycache dispatchlog toollog registry rotate stateclean ddmedia"
+DEFAULT_CATS="pid empty errnoise jobtmp joblock draftclean pycache dispatchlog toollog registry rotate stateclean archivepack proposedwarn ddmedia"
 KEEP_DAYS="${HOUSEKEEPING_KEEP_DAYS:-14}"
 want() {
   if [ -n "$ONLY" ]; then case ",$ONLY," in *",$1,"*) return 0 ;; *) return 1 ;; esac; fi
@@ -214,19 +220,20 @@ fi
 # .gitignore (0 backup GitHub) ⇒ với 6 job này, filename+mtime là artifact DUY NHẤT còn sót.
 # Đây đúng lớp lỗi đã bắt được ở `jobtmp`; nay áp CÙNG guard đó cho `empty`.
 if want empty; then
-  hdr "empty — logs/*.log|*.err 0 byte + CÓ job record thật (không thì GIỮ: là dấu vết duy nhất)"
+  hdr "empty — logs/dispatch_*.log|*.err 0 byte + CÓ job record thật (không xoá log target của cron)"
   while IFS= read -r f; do
     [ -s "$f" ] && { say "  bỏ qua (đã có nội dung sau khi quét): $f"; continue; }
-    if jid="$(jobid_of "$f")" && ! has_job_record "$jid"; then
+    jid="$(jobid_of "$f")" || continue
+    if ! has_job_record "$jid"; then
       say "  GIỮ (0 byte NHƯNG không có job record hot lẫn archive — artifact DUY NHẤT): $f"
       continue
     fi
-    if jid="$(jobid_of "$f")" && job_not_terminal "$jid"; then
+    if job_not_terminal "$jid"; then
       say "  GIỮ (job CHƯA kết thúc — logfile là bằng chứng liveness duy nhất của sync dispatch): $f"
       continue
     fi
     do_delete "$f" "0 byte, job record còn tra được"
-  done < <(find "$ROOT/logs" -maxdepth 1 -type f \( -name '*.log' -o -name '*.err' \) -size 0 -mtime +1 2>/dev/null)
+  done < <(find "$ROOT/logs" -maxdepth 1 -type f \( -name 'dispatch_*.log' -o -name 'dispatch_*.err' \) -size 0 -mtime +1 2>/dev/null)
 fi
 
 # ── 3. errnoise — .err chỉ chứa warning boilerplate của harness ───────────────
@@ -271,6 +278,43 @@ if want jobtmp; then
     elif [ -f "$arch" ]; then do_delete "$f" "record thật đã archive: $(basename "$arch")"
     else say "  GIỮ (không có bản đầy đủ ở hot lẫn archive — .tmp là dấu vết DUY NHẤT): $f"; fi
   done < <(find "$ROOT/bus/jobs" -maxdepth 1 -type f -name '*.json.tmp' -mtime +7 2>/dev/null)
+fi
+
+# ── 4b. joblock — bus/jobs/*.lock >1d của job đã terminal hoặc mất hot json ──
+if want joblock; then
+  hdr "joblock — bus/jobs/*.lock >1d (job đã terminal hoặc mất hot json)"
+  _term_locks="|$(python3 "$ROOT/bin/mike_json.py" terminal-statuses 2>/dev/null | tr '\n' '|')"
+  while IFS= read -r f; do
+    _base="${f%.lock}"
+    if [ ! -f "$_base" ]; then
+      do_delete "$f" "lock mồ côi (không còn hot json)"
+      continue
+    fi
+    _st="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' "$_base" 2>/dev/null || echo '')"
+    [ -n "$_st" ] || continue
+    case "$_term_locks" in
+      *"|$_st|"*) do_delete "$f" "lock của job đã terminal ($_st)" ;;
+    esac
+  done < <(find "$ROOT/bus/jobs" -maxdepth 1 -type f -name '*.lock' -mtime +1 2>/dev/null)
+fi
+
+# ── 4c. draftclean — reports/v2/draft/v2/* >1d ĐÃ có bản chính ở reports/v2/ ──
+if want draftclean; then
+  hdr "draftclean — reports/v2/draft/v2/* >1d ĐÃ promote sang reports/v2/"
+  if [ -d "$ROOT/reports/v2/draft/v2" ]; then
+    while IFS= read -r d; do
+      _bn="$(basename "$d")"
+      [ -d "$ROOT/reports/v2/$_bn" ] || continue
+      if denied "$d/"; then say "  DENY-LIST chặn (không động): $d"; continue; fi
+      _sz=$(du -sb "$d" 2>/dev/null | cut -f1); _sz=${_sz:-0}
+      N_DEL=$((N_DEL+1)); B_DEL=$((B_DEL+_sz))
+      if [ "$APPLY" = 1 ]; then
+        rm -rf -- "$d" && say "  DEL_DIR $d/ ($_sz B) — đã có bản promote tại reports/v2/$_bn"
+      else
+        say "  [dry] DEL_DIR $d/ ($_sz B) — đã có bản promote tại reports/v2/$_bn"
+      fi
+    done < <(find "$ROOT/reports/v2/draft/v2" -mindepth 1 -maxdepth 1 -type d -mtime +1 2>/dev/null)
+  fi
 fi
 
 # ── 5. pycache — regenerable theo định nghĩa ─────────────────────────────────
@@ -343,14 +387,14 @@ fi
 # Không phải giả thuyết: bus/registry/Bob.json đang 28 ngày, sẽ vượt 30d ngay tuần chạy đầu.
 ROSTER='Mike Taylor Winston Wendy Spyros Mafee DollarBill Wags Bob'
 if want registry; then
-  hdr "registry — bus/registry/*.json >30d -> archive/ (trừ agent trong roster: $ROSTER)"
+  hdr "registry — bus/registry/*.json >7d -> archive/ (trừ agent trong roster: $ROSTER)"
   while IFS= read -r f; do
     b="$(basename "$f" .json)"
     case " $ROSTER " in
       *" $b "*) say "  GIỮ (agent trong roster — archive sẽ làm biến mất khỏi fleet_health): $f"; continue ;;
     esac
     do_archive "$f" "$ROOT/bus/registry/archive"
-  done < <(find "$ROOT/bus/registry" -maxdepth 1 -type f -name '*.json' -mtime +30 2>/dev/null)
+  done < <(find "$ROOT/bus/registry" -maxdepth 1 -type f -name '*.json' -mtime +7 2>/dev/null)
 fi
 
 # ── 9. rotate — log cron append vô hạn, chưa ai rotate ───────────────────────
@@ -394,7 +438,7 @@ fi
 
 # ── 9b. stateclean — dọn file dedup/tạm trong state/ ────────────────────────
 if want stateclean; then
-  hdr "stateclean — notify/wake_debounce >2d, retro >${KEEP_DAYS}d, dir state >30d"
+  hdr "stateclean — notify/wake_debounce >2d, retro >${KEEP_DAYS}d, dir state/dispatch >30d, crontab >14d"
   for _sd in "$ROOT/state/notify" "$ROOT/state/wake_debounce"; do
     [ -d "$_sd" ] || continue
     while IFS= read -r f; do do_delete "$f" "dedup cache >2d"; done \
@@ -402,6 +446,31 @@ if want stateclean; then
   done
   while IFS= read -r f; do do_delete "$f" "retro draft/precollect >${KEEP_DAYS}d"; done \
     < <(find "$ROOT/state" -maxdepth 1 -type f \( -name 'retro_draft_*' -o -name 'retro_wags_*' -o -name 'retro_precollect_*' \) -mtime "+$KEEP_DAYS" 2>/dev/null)
+  while IFS= read -r f; do do_delete "$f" "spend_report_routing_dispatch >30d"; done \
+    < <(find "$ROOT/state" -maxdepth 1 -type f -name 'spend_report_routing_dispatch_*.json' -mtime +30 2>/dev/null)
+  while IFS= read -r d; do
+    _sz=$(du -sb "$d" 2>/dev/null | cut -f1); _sz=${_sz:-0}
+    N_DEL=$((N_DEL+1)); B_DEL=$((B_DEL+_sz))
+    if [ "$APPLY" = 1 ]; then rm -rf -- "$d" && say "  DEL_DIR $d/ ($_sz B) — plan_redo >30d"
+    else say "  [dry] DEL_DIR $d/ ($_sz B) — plan_redo >30d"; fi
+  done < <(find "$ROOT/state" -maxdepth 1 -name 'plan_redo_*' -mtime +30 2>/dev/null)
+  # Gom crontab_backup_* >14d sang backups/crontab/ (giữ tối đa 10 bản mới nhất)
+  while IFS= read -r f; do
+    _sz=$(stat -c %s "$f" 2>/dev/null || echo 0)
+    if [ "$APPLY" = 1 ]; then
+      mkdir -p "$ROOT/backups/crontab"
+      mv -f -- "$f" "$ROOT/backups/crontab/$(basename "$f")" && say "  MOVE $f -> backups/crontab/ ($_sz B)"
+    else
+      say "  [dry] MOVE $f -> backups/crontab/ ($_sz B)"
+    fi
+  done < <(find "$ROOT/state" -maxdepth 1 -type f \( -name 'crontab_backup_*.txt' -o -name 'crontab_bak_*.txt' -o -name 'crontab_new_*.txt' \) -mtime +14 2>/dev/null)
+  if [ "$APPLY" = 1 ] && [ -d "$ROOT/backups/crontab" ]; then
+    _cb_idx=0
+    while IFS= read -r f; do
+      _cb_idx=$((_cb_idx+1))
+      [ "$_cb_idx" -gt 10 ] && do_delete "$f" "crontab backup cu (giu 10 ban moi nhat)"
+    done < <(ls -1t "$ROOT/backups/crontab/"* 2>/dev/null || true)
+  fi
   for _sd in "$ROOT/state/autofix" "$ROOT/state/plan_report_sent" "$ROOT/state/plan_position_drift" \
              "$ROOT/state/bot_heartbeat" "$ROOT/state/daily_decision_topic" "$ROOT/state/worktree_salvage"; do
     [ -d "$_sd" ] || continue
@@ -411,6 +480,139 @@ if want stateclean; then
       find "$_sd" -mindepth 1 -type d -empty -delete 2>/dev/null || true
     fi
   done
+fi
+
+# ── 9b2. archivepack — gom nén logs/archive (>45d) & bus/jobs/archive (>60d) + TTL 180d ──
+if want archivepack; then
+  hdr "archivepack — gom nén logs/archive (>45d, trừ run_bot/) & bus/jobs/archive (>60d) + purge tarball >180d"
+  _pack_out="$(python3 - "$ROOT" "$APPLY" <<'PYEOF'
+import os, re, sys, tarfile, time
+from datetime import datetime, timezone
+
+root, apply_s = sys.argv[1], sys.argv[2]
+apply_mode = apply_s == "1"
+now = time.time()
+n_arc = 0
+b_arc = 0
+n_del = 0
+b_del = 0
+
+specs = [
+    (os.path.join(root, "logs", "archive"), 45, ".gz", {"monthly", "run_bot"}, 2),
+    (os.path.join(root, "bus", "jobs", "archive"), 60, ".json", {"monthly"}, 1),
+]
+
+for base_dir, min_days, ext, skip_dirs, max_depth in specs:
+    if not os.path.isdir(base_dir):
+        continue
+    buckets = {}
+    stack = [(base_dir, 0)]
+    while stack:
+        cur, dp = stack.pop()
+        if dp > max_depth:
+            continue
+        try:
+            with os.scandir(cur) as it:
+                for de in it:
+                    if de.is_symlink():
+                        continue
+                    if de.is_dir(follow_symlinks=False):
+                        if dp == 0 and de.name in skip_dirs:
+                            continue
+                        stack.append((de.path, dp + 1))
+                    elif de.is_file(follow_symlinks=False) and de.name.endswith(ext):
+                        st = de.stat(follow_symlinks=False)
+                        if (now - st.st_mtime) <= min_days * 86400:
+                            continue
+                        rel_parent = os.path.basename(cur)
+                        if dp >= 1 and re.match(r"^\d{4}-\d{2}$", rel_parent):
+                            ym = rel_parent
+                        else:
+                            ym = datetime.fromtimestamp(st.st_mtime, tz=timezone.utc).strftime("%Y-%m")
+                        buckets.setdefault(ym, []).append((de.path, st.st_size))
+        except OSError:
+            pass
+
+    monthly_dir = os.path.join(base_dir, "monthly")
+    for ym, items in sorted(buckets.items()):
+        tot_sz = sum(s for _, s in items)
+        n_arc += len(items)
+        b_arc += tot_sz
+        target = os.path.join(monthly_dir, f"{ym}.tar.gz")
+        if os.path.exists(target):
+            target = os.path.join(monthly_dir, f"{ym}_{int(now)}.tar.gz")
+        rel_base = os.path.relpath(base_dir, root)
+        if not apply_mode:
+            print(f"MSG|  [dry] PACK {len(items)} file ({tot_sz} B) từ {rel_base}/ -> {os.path.relpath(target, root)}")
+            continue
+        os.makedirs(monthly_dir, exist_ok=True)
+        part = target + ".part"
+        try:
+            with tarfile.open(part, "w:gz") as tf:
+                for fp, _ in items:
+                    tf.add(fp, arcname=os.path.relpath(fp, base_dir))
+            with tarfile.open(part, "r:gz") as tf:
+                names = tf.getnames()
+            if len(names) != len(items):
+                raise RuntimeError(f"tar count mismatch: {len(names)} != {len(items)}")
+            os.replace(part, target)
+            for fp, _ in items:
+                try:
+                    os.remove(fp)
+                except OSError:
+                    pass
+            print(f"MSG|  PACK {len(items)} file ({tot_sz} B) -> {os.path.relpath(target, root)}")
+        except Exception as exc:
+            if os.path.exists(part):
+                os.remove(part)
+            print(f"MSG|  !! archivepack THẤT BẠI ({rel_base}/{ym}): {exc}")
+
+    # Prune empty YYYY-MM subdirs left under logs/archive
+    if apply_mode:
+        for de in os.scandir(base_dir):
+            if de.is_dir(follow_symlinks=False) and re.match(r"^\d{4}-\d{2}$", de.name):
+                try:
+                    if not os.listdir(de.path):
+                        os.rmdir(de.path)
+                except OSError:
+                    pass
+
+    # Purge monthly/*.tar.gz > 180d
+    if os.path.isdir(monthly_dir):
+        for de in sorted(os.scandir(monthly_dir), key=lambda x: x.name):
+            if de.is_file(follow_symlinks=False) and de.name.endswith(".tar.gz"):
+                st = de.stat(follow_symlinks=False)
+                if (now - st.st_mtime) > 180 * 86400:
+                    n_del += 1
+                    b_del += st.st_size
+                    rel_t = os.path.relpath(de.path, root)
+                    if apply_mode:
+                        os.remove(de.path)
+                        print(f"MSG|  DEL  {rel_t} ({st.st_size} B) — tarball >180d")
+                    else:
+                        print(f"MSG|  [dry] DEL  {rel_t} ({st.st_size} B) — tarball >180d")
+
+print(f"STATS|{n_arc}|{b_arc}|{n_del}|{b_del}")
+PYEOF
+  )"
+  while IFS= read -r _pl; do
+    case "$_pl" in
+      MSG\|*) say "${_pl#MSG|}" ;;
+      STATS\|*)
+        IFS='|' read -r _ _pa _pba _pd _pbd <<< "$_pl"
+        N_ARC=$((N_ARC + ${_pa:-0})); B_ARC=$((B_ARC + ${_pba:-0}))
+        N_DEL=$((N_DEL + ${_pd:-0})); B_DEL=$((B_DEL + ${_pbd:-0}))
+        ;;
+    esac
+  done <<< "$_pack_out"
+fi
+
+# ── 9b3. proposedwarn — báo cáo file .proposed quá hạn >7d (report-only) ─────
+if want proposedwarn; then
+  hdr "proposedwarn — kb/**/*.proposed* >7d (chỉ cảnh báo, không tự xoá)"
+  while IFS= read -r f; do
+    say "  WARN: .proposed quá hạn >7d: ${f#"$ROOT"/}"
+  done < <(find "$ROOT/kb" -path "$ROOT/kb/proposals/expired" -prune -o -type f -name '*.proposed*' -mtime +7 -print 2>/dev/null | sort)
 fi
 
 # ── 9c. ddmedia — dọn PDF/ảnh tạm >14d trong agents/Taylor/research/ ────────

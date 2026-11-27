@@ -125,8 +125,10 @@ def scan_research(root, now, code, kb, keep, min_heavy, kb_json_text=""):
                 fp = os.path.join(root_, f)
                 rel_fp = os.path.relpath(fp, root)
                 if f.lower().endswith(".md"):
-                    has_md = True
-                    continue
+                    # Non-DD research: chi giu .md cap 1 (tranh giu ban copy sandbox nhu sb/*.md)
+                    if is_dd or root_ == p:
+                        has_md = True
+                        continue
                 if is_dd and (f.lower().endswith(DD_KEEP_EXT) or (kb_json_text and rel_fp in kb_json_text)):
                     continue
                 try:
@@ -209,7 +211,102 @@ def scan_report_only(root, now):
                 big.append((st.st_size, fp, round((now - st.st_mtime) / 86400)))
     for s, fp, a in sorted(big, reverse=True)[:12]:
         out.append(f"file lớn cũ trong data/ (CHỈ BÁO): {s >> 20}MB, {a}d — {os.path.relpath(fp, parent)}")
+    # kb/**/*.proposed* > 7d (ngoai kb/proposals/expired/)
+    kb_dir = os.path.join(root, "kb")
+    if os.path.isdir(kb_dir):
+        for r_, ds, fs in os.walk(kb_dir):
+            ds[:] = [d for d in ds if os.path.join(r_, d) != os.path.join(kb_dir, "proposals", "expired")]
+            for f in fs:
+                if ".proposed" in f:
+                    fp = os.path.join(r_, f)
+                    try:
+                        age_d = (now - os.lstat(fp).st_mtime) / 86400
+                        if age_d > 7:
+                            out.append(f".proposed quá hạn >7d (CHỈ BÁO): {os.path.relpath(fp, root)} ({round(age_d)}d)")
+                    except OSError:
+                        pass
+    # empty orphan wt-* dirs not in git worktree list
+    wt_paths = set()
+    for blk in sh(["git", "worktree", "list", "--porcelain"], cwd=root).stdout.split("\n\n"):
+        m = re.search(r"^worktree (.+)$", blk, re.M)
+        if m:
+            wt_paths.add(os.path.abspath(m.group(1)))
+    for check_base in [root] + [os.path.join(root, "agents", ag) for ag in ("Mike", "Winston", "Mafee", "DollarBill", "Wags")]:
+        if not os.path.isdir(check_base):
+            continue
+        for n in sorted(os.listdir(check_base)):
+            dp = os.path.join(check_base, n)
+            if n.startswith("wt-") and os.path.isdir(dp) and os.path.abspath(dp) not in wt_paths:
+                try:
+                    if not os.listdir(dp):
+                        out.append(f"wt-* rỗng mồ côi (CHỈ BÁO): {os.path.relpath(dp, root)}")
+                except OSError:
+                    pass
+    # Unmanaged heavy dirs > 1MB & idle > 30d in non-Taylor agents
+    skip_ag_dirs = {".claude", "research", "memory", "state", "tools"}
+    for ag in ("Mike", "Winston", "Mafee", "DollarBill", "Wags"):
+        ag_dir = os.path.join(root, "agents", ag)
+        if not os.path.isdir(ag_dir):
+            continue
+        for n in sorted(os.listdir(ag_dir)):
+            dp = os.path.join(ag_dir, n)
+            if not os.path.isdir(dp) or n in skip_ag_dirs or n.startswith("wt-"):
+                continue
+            age_d = (now - newest_mtime(dp)) / 86400
+            if age_d > 30:
+                sz = sum(os.lstat(os.path.join(r_, f)).st_size for r_, _, fs in os.walk(dp) for f in fs)
+                if sz >= MIN_HEAVY:
+                    out.append(f"dir chưa dọn ở agents/{ag}/ (CHỈ BÁO): {sz >> 20}MB, im {round(age_d)}d — agents/{ag}/{n}")
     return out
+
+
+def scan_taylor_experiments(root, now, code, keep, min_heavy):
+    """Quét agents/Taylor/{exp_*,probe_*}: bảo vệ bằng cleanup_keep + code/cron ref; trim raw data sau grace."""
+    base = os.path.join(root, "agents", "Taylor")
+    items, protected = [], []
+    if not os.path.isdir(base):
+        return items, protected
+    tracked = set(sh(["git", "ls-files", "-z", "agents/Taylor"], cwd=root).stdout.split("\0"))
+    for d in sorted(os.listdir(base)):
+        if not (d.startswith("exp_") or d.startswith("probe_")):
+            continue
+        p = os.path.join(base, d)
+        if not os.path.isdir(p):
+            continue
+        rel = f"agents/Taylor/{d}"
+        if any(rel == k or rel.startswith(k + "/") or d == k for k in keep):
+            protected.append((d, "keep"))
+            continue
+        age = (now - newest_mtime(p)) / 86400
+        if age < R_IDLE_DAYS:
+            continue
+        if d in code:
+            protected.append((d, "code/cron tham chiếu"))
+            continue
+        heavy = []
+        for root_, _, fs in os.walk(p):
+            for f in fs:
+                fp = os.path.join(root_, f)
+                fl = f.lower()
+                if (fl.endswith(".md") and root_ == p) or fl.endswith((".py", ".sh")):
+                    continue
+                try:
+                    heavy.append((fp, os.lstat(fp).st_size))
+                except OSError:
+                    pass
+        hb = sum(s for _, s in heavy)
+        if hb >= min_heavy:
+            items.append({
+                "key": f"E:{d}:TRIM",
+                "kind": "E",
+                "action": "TRIM",
+                "name": d,
+                "bytes": hb,
+                "age": round(age),
+                "why": f"exp/probe im {round(age)}d, không code/cron tham chiếu (giữ .py/.sh + .md cấp 1)",
+                "tracked": sum(1 for fp, _ in heavy if os.path.relpath(fp, root) in tracked),
+            })
+    return items, protected
 
 
 def md5_guard(files, text):
@@ -230,13 +327,26 @@ def apply_item(root, it, text, now):
     if it["kind"] == "T":
         sh(["rm", "-rf", "--", it["name"]])
         return it["bytes"]
-    d = os.path.join(root, "agents", "Taylor", "research", it["name"])
+    if it["kind"] == "E":
+        d = os.path.join(root, "agents", "Taylor", it["name"])
+    else:
+        d = os.path.join(root, "agents", "Taylor", "research", it["name"])
     rel = os.path.relpath(d, root)
+    is_dd = it["action"] == "TRIM_DD"
     if it["action"] == "REMOVE_DIR":
         files = [os.path.join(r, f) for r, _, fs in os.walk(d) for f in fs]
     else:
-        skip = (".md",) + (DD_KEEP_EXT if it["action"] == "TRIM_DD" else ())
-        files = [os.path.join(r, f) for r, _, fs in os.walk(d) for f in fs if not f.lower().endswith(skip)]
+        files = []
+        for r, _, fs in os.walk(d):
+            for f in fs:
+                fl = f.lower()
+                if is_dd and fl.endswith((".md",) + DD_KEEP_EXT):
+                    continue
+                if it["kind"] == "E" and ((fl.endswith(".md") and r == d) or fl.endswith((".py", ".sh"))):
+                    continue
+                if it["kind"] == "R" and not is_dd and fl.endswith(".md") and r == d:
+                    continue
+                files.append(os.path.join(r, f))
     tracked = set(sh(["git", "ls-files", "-z", rel], cwd=root).stdout.split("\0"))
     trk = [f for f in files if os.path.relpath(f, root) in tracked]
     unt = md5_guard([f for f in files if os.path.relpath(f, root) not in tracked], text)
@@ -288,6 +398,9 @@ def main(argv=None):
     code_all, code_no_kbjson, kb_json_text = corpus(root), corpus(root, include_kb_json=False), _kb_json_corpus(root)
     kb, keep = kb_corpus(root), load_keep(root)
     items, protected = scan_research(root, now, code_no_kbjson, kb, keep, a.min_heavy, kb_json_text)
+    e_items, e_prot = scan_taylor_experiments(root, now, code_no_kbjson, keep, a.min_heavy)
+    items += e_items
+    protected += e_prot
     items += scan_tmp(a.tmp, now, a.min_tmp)
     info = [] if a.no_report_only else scan_report_only(root, now)
     new_state, applied, pending = {}, [], []
