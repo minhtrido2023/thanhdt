@@ -16,8 +16,26 @@ echo "==================== fleet_backup $ts ===================="
 "$MIKE/bin/sync_native_agents.sh" || echo "WARN: native-agent sync skipped/failed"
 
 # 2) fleet repo (own git) -> github:mike-fleet  (bus/logs/locks/state are gitignored in mike)
+# Allowlist staging: chi stage cac vung code/config/KB/reports chuan; KHONG dung `git add -A`
+# tren root de tranh keo rac thu nghiem (agents/Taylor/research, exp_*, MagicMock...) vao Git.
 echo "==> Fleet repo -> github:mike-fleet"
-git -C "$MIKE" add -A
+_ALLOW_PATHS=(
+  MIKE.md MIKE_ext.md CHILD_TEMPLATE.md SETUP.md .gitignore .pre-commit-config.yaml
+  bin hooks config kb agents_native systemd templates decision_templates tests
+  webui_work_tree .claude data reports agents/_reviewers
+)
+_stage_paths=()
+for _p in "${_ALLOW_PATHS[@]}"; do
+  [ -e "$MIKE/$_p" ] && _stage_paths+=("$_p")
+done
+for _ag in "$MIKE"/agents/*; do
+  [ -d "$_ag" ] || continue
+  [ -f "$_ag/CLAUDE.md" ] && _stage_paths+=("agents/$(basename "$_ag")/CLAUDE.md")
+  [ -d "$_ag/.claude" ] && _stage_paths+=("agents/$(basename "$_ag")/.claude")
+done
+if [ "${#_stage_paths[@]}" -gt 0 ]; then
+  git -C "$MIKE" add -A -- "${_stage_paths[@]}"
+fi
 # GitHub HARD-rejects any blob >100MB (GH001) — one such file blocks EVERY later push until
 # history is rewritten (incident 2026-11-12: 113MB .pkl in Taylor research via this add -A).
 # Unstage oversized files BEFORE they can enter a commit; file stays on disk, loudly reported.
