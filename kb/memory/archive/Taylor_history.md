@@ -2858,3 +2858,6 @@
 
 ## Archived 2026-11-26 (keep=12 days=0 require_done=False)
 - [2026-11-25T08:13:28Z] [dd-MBB KTPL 25/11] XONG job Taylor_20261125_080251: 7c1fad8a2 (wt-dd-mbb-agm-20261125) — k=9,03% ⇒ rev6 18.595 (−11,7%) vùng 13.151–24.140 TRONG, E17 18.731 — CHỜ Mike ghi sổ+merge; NQ gốc chưa đọc (MB 403)
+
+## Archived 2026-11-27 (keep=12 days=0 require_done=False)
+- [2026-11-25T08:28:03Z] ĐANG DỞ: job Taylor_20261125_082754 MBB rev6' (quỹ khác-sử dụng, E17 đối xứng k, CAR) wt-dd-mbb-agm-20261125 | NEXT: đọc skeptic/r2.json
