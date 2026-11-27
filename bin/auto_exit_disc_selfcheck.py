@@ -254,9 +254,10 @@ def test_rules():
     check("R9 pnl None ⇒ chỉ xét TIME", rules.disc_exit_triggers(None, 3, .1, .1, 25) == [])
     e = dt.date(2026, 11, 6)
     d25 = nth_session_after(e, 25)
-    check("R10 phiên thứ 25 sau 06/11/2026 = 11/12/2026 (vn_market thật)", d25 == dt.date(2026, 12, 11), str(d25))
-    check("R11 count_trading_days(06/11, 11/12) = 25 và (06/11, 10/12) = 24",
-          ps.count_trading_days(e, dt.date(2026, 12, 11)) == 25 and ps.count_trading_days(e, dt.date(2026, 12, 10)) == 24)
+    # 14/12 chứ không phải 11/12: vn_market khai thêm lễ 24/11/2026 (51b091077)
+    check("R10 phiên thứ 25 sau 06/11/2026 = 14/12/2026 (vn_market thật)", d25 == dt.date(2026, 12, 14), str(d25))
+    check("R11 count_trading_days(06/11, 14/12) = 25 và (06/11, 11/12) = 24",
+          ps.count_trading_days(e, dt.date(2026, 12, 14)) == 25 and ps.count_trading_days(e, dt.date(2026, 12, 11)) == 24)
 
 
 def test_injector():

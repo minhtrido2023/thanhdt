@@ -20,8 +20,15 @@ def main():
         led = os.path.join(td, "led.json")
         base = os.path.join(ROOT, "kb", "dd_price_zones.json")
         txt = json.load(open(base, encoding="utf-8"))
-        # bản sao sổ chưa có entry center_adj nào (nếu sổ thật đã ghi) để test lặp lại được
-        txt["entries"] = [e for e in txt["entries"] if e.get("center_adj") is None]
+        # bản sao sổ chưa có entry center_adj nào (nếu sổ thật đã ghi) để test lặp lại được: cắt CẢ ĐUÔI từng mã
+        # từ entry center_adj đầu tiên — bỏ riêng entry đó làm rev đứt quãng khi sau nó còn rev khác (MBB rev5→6)
+        cut, keep_ = set(), []
+        for e in txt["entries"]:
+            if e.get("center_adj") is not None:
+                cut.add(e["ticker"])
+            if e["ticker"] not in cut:
+                keep_.append(e)
+        txt["entries"] = keep_
         open(led, "w", encoding="utf-8").write(json.dumps(txt, ensure_ascii=False, indent=1))
         n0 = len(txt["entries"])
 

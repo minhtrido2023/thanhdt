@@ -51,6 +51,8 @@ for n in notify.sh notify_thread.sh; do
   chmod +x "$SANDBOX/mike/bin/$n"
 done
 
+# touch -d / stat bên dưới phải cùng TZ với nguồn (TZ anchor đã kiểm ở trên) — env -u TZ làm 19:01 thành hôm sau ICT
+export TZ=Asia/Ho_Chi_Minh
 FAILS=0
 # run_case <tên> <today> <as_of|-> <pub_ok true|false|-> <json_mtime|-> <csv_mtime|-> <expect_FAILED> <expect_WARNED> [morning 0|1] [cal_today]
 run_case() {
@@ -72,7 +74,7 @@ run_case() {
   out=$(
     export SANDBOX_LOG="$SANDBOX/notify.log"
     WORKDIR="$SANDBOX/wc"; ROOT="$SANDBOX/mike"; TODAY="$today"
-    NOW_ICT="09:00 ICT"; QUIET=""; FAILED=0; WARNED=0
+    NOW_ICT="09:00 ICT"; QUIET=""; FAILED=0; WARNED=0; GATE_FAIL_KINDS=""
     MORNING="$morning"; CAL_TODAY="$cal"; [ -n "$CAL_TODAY" ] || unset CAL_TODAY
     DISCORD_STALE_CHANNEL="stub-channel"
     eval "$GATE_SRC"

@@ -40,6 +40,9 @@ check(np.allclose(L.vbv_dd(roe, r, g), P.vbv_dd(roe, r, g), rtol=0, atol=1e-12)
       and np.allclose(L.vbv_fade(roe, r), P.vbv_fade(roe, r), rtol=0, atol=1e-12),
       "(1) vbv_dd/vbv_fade trùng D1 proxy.py trên 500 điểm ngẫu nhiên (atol 1e-12)")
 
+# (2)+ chạy trên SỔ ĐÓNG BĂNG đúng vintage D2: sổ sống đổi tâm theo từng lượt DD recheck ⇒ parity k so D2 đỏ oan
+L.LEDGER_REL = os.path.join("bin", "fixtures", "dd_history_label", "ledger_d2.json")
+
 # (2) parity với D2
 df, meta = L.run(None)
 check(len(df) == 36 and (df.label.notna()).all(), f"(2a) sổ có 36 mã có tâm, mỗi mã có nhãn (n={len(df)})")

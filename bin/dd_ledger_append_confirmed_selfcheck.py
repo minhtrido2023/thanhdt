@@ -26,8 +26,9 @@ def call(led, vp, t, write=False):
 
 
 d0 = json.load(open(LEDGER, encoding="utf-8"))
-pick = next(e for e in reversed(d0["entries"]) if e.get("skeptic_final") == "FIXED_UNVERIFIED"
-            and e.get("source_file") and os.path.isfile(os.path.join(ROOT, e["source_file"]))
+# Sổ sống có lúc KHÔNG còn mã FIXED_UNVERIFIED nào ⇒ dựng fixture từ 1 entry cuối REFUTED_OPEN (đổi nhãn trên bản sao)
+pick = next(e for e in reversed(d0["entries"]) if e.get("skeptic_final") in ("FIXED_UNVERIFIED", "REFUTED_OPEN")
+            and e.get("center_adj") is None and e.get("source_file") and os.path.isfile(os.path.join(ROOT, e["source_file"]))
             and m.latest(d0["entries"], e["ticker"]) is e)
 T = pick["ticker"]
 md5 = hashlib.md5(open(os.path.join(ROOT, pick["source_file"]), "rb").read()).hexdigest()

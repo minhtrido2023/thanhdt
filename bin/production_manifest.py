@@ -59,6 +59,12 @@ REF_BASES = [WC, MIKE, os.path.join(MIKE, "bin")]
 # Tầng của GỐC theo basename script gốc (hoặc tên unit/hook). Phân loại theo VAI TRÒ dòng cron.
 T0, T1, T2 = "T0", "T1", "T2"
 ROOT_TIER = {
+    # 2026-11-27 (selfcheck-red sweep): 8 gốc mới 22-26/11
+    "plan_gate_recovery.py": T0,  # retry/tăng cấp cổng plan T+1 — dispatch lại chuỗi lập plan
+    "prune_depth_gate.py": T0,  # cổng dữ liệu chặn lập plan (bq_freshness_check + preflight)
+    "trading_calendar_watch.py": T1, "thesis_card_watch.py": T1, "thesis_cards.py": T1,  # nhắc lịch/thẻ, chỉ đọc
+    "run_monthly_pit2.sh": T1, "dd_forward_outcome.py": T1,  # sổ paper/chẩn đoán hằng tháng
+    "session_limit_resume.py": T2,  # hook resume phiên Discord
     # T0 — đặt lệnh / plan / NAV / báo cáo gửi nhà đầu tư
     "run_bot.sh": T0, "bot_heartbeat.sh": T0, "session_announce.sh": T0,
     "compute_active_nav_all.sh": T0, "inject_discretionary_orders.sh": T0,
