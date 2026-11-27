@@ -108,8 +108,6 @@ q = " ".join(args)
 # --- probe queries KHÔNG phải lag-check: phải khớp TRƯỚC vòng lặp bảng, vì cùng nhắc tên bảng.
 # (thêm 2026-08-08 — script thật đã mọc thêm 3 probe này; sandbox thiếu stub nên chúng rơi vào
 #  nhánh "gap_days" và sinh alert CHẶN giả, xem docstring §sandbox-drift.)
-if "COUNT(DISTINCT t.ticker)" in q and "ticker_prune" in q:
-    print("f0_"); print(conf.get("prune_names", 250)); sys.exit(0)      # depth check
 if "AS n_cur" in q:                                                     # fin-breadth cohort
     print("n_cur,n_prev"); print("%d,%d" % tuple(conf.get("fin_breadth", [240, 250]))); sys.exit(0)
 if "MAX(t.Release_Date)" in q:                                          # lag-pkl BQ reference
@@ -191,6 +189,19 @@ def build_sandbox(tmp: Path) -> dict:
     w(root / "bin" / "macro_indicator_freshness.py",
       "#!/usr/bin/env python3\nprint('OK   macro_indicator (stub selfcheck)')\n")
 
+    # [depth] ticker_prune: từ fcc823970 (2026-11-25) là script riêng bin/prune_depth_gate.py (hợp đồng:
+    # rc=0 + dòng `PRUNE_DEPTH `); thiếu stub ⇒ rc=2 ⇒ BLOCK giả ⇒ S1/S3/S4 đỏ (selfcheck-red 11-25).
+    # Logic ngưỡng của chính cổng đó do selfcheck riêng của nó lo, không pin lại ở đây.
+    w(root / "bin" / "prune_depth_gate.py",
+      "#!/usr/bin/env python3\nprint('PRUNE_DEPTH n=250 (stub selfcheck)')\n")
+    # Hai hook WARN-only gọi `python3 bin/<x>.py` từ $ROOT; stub rc=0 = "chạy ổn, không có gì báo".
+    w(root / "bin" / "pnj_q3_review_watch.py", DT5G_WATCH_STUB)
+    w(root / "bin" / "nav_exdate_forecast.py", DT5G_WATCH_STUB)
+    # Các hook sau publish/dispatch (thiếu file chỉ ra WARN nuốt êm, guard "can't open file" bên dưới bắt).
+    for name in ("gate_source_check", "lag_dd_pack", "lag_dd_ack", "signal_holds", "manual_actions"):
+        w(root / "bin" / f"{name}.py", DT5G_WATCH_STUB)
+    w(workdir / "lag_liq_ledger.py", DT5G_WATCH_STUB)
+
     (workdir / "trading_bot" / "__init__.py").write_text("")
     (workdir / "trading_bot" / "vn_market.py").write_text(
         "import datetime as dt\n"
@@ -261,6 +272,10 @@ def run_gate(sb: dict, lag: dict, lastmod: dict, py_touch: bool):
     check("fake-bq: mọi query của script thật đều có stub (không UNSTUBBED QUERY)",
           not (sb["logs"] / "unstubbed.log").exists(),
           "thêm stub cho query này vào BQ_STUB: " + logread("unstubbed.log").strip()[:600])
+    missing = [ln for ln in (r.stdout + r.stderr + logread("notify_thread.log")).splitlines()
+               if "can't open file" in ln]
+    check("sandbox: script thật không gọi file nào chưa có stub", not missing,
+          "thêm stub vào build_sandbox: " + " | ".join(missing)[:600])
     return (r.returncode, r.stdout + r.stderr,
             logread("notify.log"), logread("notify_thread.log"), logread("dispatch.log"))
 
