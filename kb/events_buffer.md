@@ -737,3 +737,21 @@
 
 ## Consolidation 2026-11-27T08:46:42Z
 - [2026-11-27T08:45:06Z] Wags/status — fleet-housekeeping chạy thật: {"deleted_items": 138, "deleted_bytes": 10963090, "archived_items": 5112, "archived_bytes": 5944240, "only": "default", "log": "/home/trido/thanhdt/WorkingClaude/mike/logs/fleet_housekeeping.log"}
+
+## Consolidation 2026-11-27T09:36:15Z
+- [2026-11-27T09:31:08Z] Taylor/heartbeat — Taylor_20261127_093007: {"status": "still_running", "elapsed_min": 1, "job_id": "Taylor_20261127_093007", "source": "watcher"}
+- [2026-11-27T09:32:09Z] Taylor/heartbeat — Taylor_20261127_093007: {"status": "still_running", "elapsed_min": 2, "job_id": "Taylor_20261127_093007", "source": "watcher"}
+- [2026-11-27T09:33:09Z] Taylor/heartbeat — Taylor_20261127_093007: {"status": "still_running", "elapsed_min": 3, "job_id": "Taylor_20261127_093007", "source": "watcher"}
+- [2026-11-27T09:34:09Z] Taylor/heartbeat — Taylor_20261127_093007: {"status": "still_running", "elapsed_min": 4, "job_id": "Taylor_20261127_093007", "source": "watcher"}
+- [2026-11-27T09:35:09Z] Taylor/heartbeat — Taylor_20261127_093007: {"status": "still_running", "elapsed_min": 5, "job_id": "Taylor_20261127_093007", "source": "watcher"}
+- [2026-11-27T09:36:01Z] Taylor/answer — selfcheck-red: value_radar_norm5_selfcheck.py: {"resolution": "(b)+(d) selfcheck loi: (1) doc tham chieu tu thu muc research mike da bi xoa 25/11; dong bang fixture vao data/fixtures/value_radar_norm5; (2) mock fail-safe val=None khong phai cache hit nen goi du lieu that. Chi sua selfcheck. Commit 9b315e368, merge 2f12dec61 (repo ngoai)", "evidence": "canonical: rc=0 ALL PASS (TZ mac dinh + env -u TZ), 12/12 muc", "resolves": ["Wags/selfcheck-red: value_radar_norm5_selfcheck.py"], "closed_by": "Taylor"}
+- [2026-11-27T09:36:04Z] Taylor/answer — selfcheck-red: freshness_ops_selfcheck.py: {"resolution": "(b) loi thoi: sandbox thieu stub cho script moi cua bq_freshness_check.sh (prune_depth_gate.py...); them stub + guard bao moi 'can't open file'. Chi sua selfcheck. Commit 9b315e368, merge 2f12dec61", "evidence": "canonical: rc=0, 53/53 PASS (TZ mac dinh + env -u TZ)", "resolves": ["Wags/selfcheck-red: freshness_ops_selfcheck.py"], "closed_by": "Taylor"}
+- [2026-11-27T09:36:05Z] Taylor/finding — selfcheck-red-owner-sweep-2026-11-27-Taylor: {"summary": "2/2 CLOSED, 0 OPEN, 0 bug production, 0 CAN USER. Phat hien phu: commit fleet backup 5f372c847 (25/11 00:00 ICT) ghi XOA 40 file tracked trong agents/Taylor/research/dd_vs_radar_20261124 (R1/D1); nguyen nhan CHUA xac dinh; khoi phuc duoc tu 5912851ac, CHUA khoi phuc", "rows": [{"file": "value_radar_norm5_selfcheck.py", "opened": "2026-11-23", "class": "(b)+(d)", "action": "fixture dong bang data/fixtures/value_radar_norm5 + sua mock fail-safe", "status": "CLOSED 9b315e368/2f12dec61"}, {"file": "freshness_ops_selfcheck.py", "opened": "2026-11-25", "class": "(b)", "action": "them stub sandbox + guard cant-open-file", "status": "CLOSED 9b315e368/2f12dec61"}], "measured_by": "$DNA_PYEXE tren canonical HEAD 2f12dec61, ca env -u TZ; git show --name-status 5f372c847"}
+- [2026-11-27T09:36:09Z] Taylor/heartbeat — Taylor_20261127_093007: {"status": "still_running", "elapsed_min": 6, "job_id": "Taylor_20261127_093007", "source": "watcher"}
+- [2026-11-27T09:30:21Z] Wags/heartbeat — Wags_20261127_093003: {"status": "in_progress", "note": "rerun 8 selfchecks"}
+- [2026-11-27T09:31:05Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 1, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T09:32:05Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 2, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T09:33:05Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 3, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T09:34:06Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 4, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T09:35:06Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 5, "job_id": "Wags_20261127_093003", "source": "watcher"}
+- [2026-11-27T09:36:06Z] Wags/heartbeat — Wags_20261127_093003: {"status": "still_running", "elapsed_min": 6, "job_id": "Wags_20261127_093003", "source": "watcher"}
