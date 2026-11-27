@@ -101,16 +101,6 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "mike/bin/dd_forward_outcome_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-11-24T23:33:20Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: mike/bin/dd_forward_outcome_selfcheck.py",
-      "escalated_utc": "2026-11-24T23:33:20Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "mike/bin/dd_history_label_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-11-24T23:33:20Z",
@@ -141,16 +131,6 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "lag_live_schedule_selfcheck.py": {
-      "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-11-25T23:33:04Z",
-      "status": "FAIL",
-      "auto": true,
-      "topic": "selfcheck-red: lag_live_schedule_selfcheck.py",
-      "escalated_utc": "2026-11-25T23:33:04Z",
-      "ack_pending": false,
-      "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
-    },
     "mike/bin/dd_ledger_append_center_adj_selfcheck.py": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
       "since": "2026-11-25T23:33:04Z",
@@ -171,13 +151,13 @@
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     },
-    "mike/bin/plan_gate_holiday_selfcheck.py": {
+    "mike/bin/now_injection_selfcheck.sh": {
       "reason": "TỰ PHÁT HIỆN bởi selfcheck_baseline_diff.py — CHƯA AI TRIAGE. Đây KHÔNG phải 'đỏ đã chấp nhận': nó nằm đây chỉ để không báo động lặp mỗi ngày. Xử lý xong thì XOÁ entry này.",
-      "since": "2026-11-25T23:33:04Z",
+      "since": "2026-11-26T23:34:10Z",
       "status": "FAIL",
       "auto": true,
-      "topic": "selfcheck-red: mike/bin/plan_gate_holiday_selfcheck.py",
-      "escalated_utc": "2026-11-25T23:33:04Z",
+      "topic": "selfcheck-red: mike/bin/now_injection_selfcheck.sh",
+      "escalated_utc": "2026-11-26T23:34:10Z",
       "ack_pending": false,
       "fix_needed": "chủ sở hữu file xác định assertion lỗi thời vs production hỏng"
     }
