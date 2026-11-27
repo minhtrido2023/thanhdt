@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/STALE_screen_sort_bug_20260927.md

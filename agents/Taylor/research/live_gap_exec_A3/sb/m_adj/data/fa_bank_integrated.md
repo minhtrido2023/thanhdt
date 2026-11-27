@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/fa_bank_integrated.md

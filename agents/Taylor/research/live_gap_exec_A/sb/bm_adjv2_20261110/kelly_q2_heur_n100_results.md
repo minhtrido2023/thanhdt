@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112/WorkingClaude/kelly_q2_heur_n100_results.md

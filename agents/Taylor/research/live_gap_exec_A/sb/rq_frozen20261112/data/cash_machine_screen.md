@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/cash_machine_screen.md

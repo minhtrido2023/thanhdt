@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA3-1113-r/WorkingClaude/8L_README.md

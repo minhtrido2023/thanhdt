@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/vvs_truck_cycle_tracker.md

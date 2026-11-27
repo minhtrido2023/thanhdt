@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA6-1113/WorkingClaude/macro_snapshot_20261112.md

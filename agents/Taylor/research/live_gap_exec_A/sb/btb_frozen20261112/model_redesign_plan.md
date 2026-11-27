@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-tb/WorkingClaude/model_redesign_plan.md

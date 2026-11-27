@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-rtb/WorkingClaude/SESSION_SYNTHESIS_2026_06_12.md

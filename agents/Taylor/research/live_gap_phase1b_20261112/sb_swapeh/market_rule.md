@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/market_rule.md

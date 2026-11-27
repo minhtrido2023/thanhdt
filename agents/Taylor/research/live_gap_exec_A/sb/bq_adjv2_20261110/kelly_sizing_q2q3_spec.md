@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA-1112-q/WorkingClaude/kelly_sizing_q2q3_spec.md

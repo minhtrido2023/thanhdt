@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/fa_postcrisis_bear.md

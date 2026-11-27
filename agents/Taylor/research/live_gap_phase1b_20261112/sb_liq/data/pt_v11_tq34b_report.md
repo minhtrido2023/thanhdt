@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/pt_v11_tq34b_report.md

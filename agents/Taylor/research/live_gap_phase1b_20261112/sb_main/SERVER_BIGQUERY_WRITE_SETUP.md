@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/SERVER_BIGQUERY_WRITE_SETUP.md

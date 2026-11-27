@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/kelly_q2_v2_results.md

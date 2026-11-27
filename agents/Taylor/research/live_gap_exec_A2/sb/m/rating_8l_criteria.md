@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/rating_8l_criteria.md

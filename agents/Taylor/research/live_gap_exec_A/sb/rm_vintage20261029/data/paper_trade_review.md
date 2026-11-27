@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/paper_trade_review.md

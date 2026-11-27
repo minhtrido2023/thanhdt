@@ -1,1 +1,0 @@
-/home/trido/thanhdt/wt-livegapA2-1113/WorkingClaude/capit_dividend_gate_framework.md

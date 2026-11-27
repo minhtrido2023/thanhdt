@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/exec_extreme_regime_proposal.md

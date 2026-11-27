@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/SCREEN_SORT_DIRECTION_AUDIT_20260927.md

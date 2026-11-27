@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/TELEGRAM_SETUP.md

@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/data/tune_macro_smoothing.md

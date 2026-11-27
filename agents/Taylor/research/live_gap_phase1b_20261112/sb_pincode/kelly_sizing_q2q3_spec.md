@@ -1,1 +1,0 @@
-/home/trido/thanhdt/WorkingClaude/wt-livegap-pincode-1112b/WorkingClaude/kelly_sizing_q2q3_spec.md

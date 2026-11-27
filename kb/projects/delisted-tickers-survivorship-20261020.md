@@ -1,7 +1,7 @@
 # Mã hủy niêm yết / ngừng giao dịch 2009→2026 và survivorship của backtest (Winston, 2026-10-20)
 
 Job `Winston_20261020_075929`. Chỉ đọc/đo, không sửa dữ liệu. Không dùng `profit_*`.
-CSV chi tiết: `delisted-tickers-survivorship-20261020.csv` (581 mã, 1 dòng/mã) · số liệu phụ: `delisted-tickers-survivorship-20261020.d/`.
+CSV chi tiết: `delisted-tickers-survivorship-20261020.csv` (581 mã, 1 dòng/mã) · số liệu phụ (`.d/` đã chuyển khỏi `kb/` 2026-11-27): `/home/trido/thanhdt/WorkingClaude/data/delisted_tickers_survivorship_20261020/`.
 
 ## Kết luận (6 dòng)
 1. **Nguồn nội bộ có sẵn mà trước đây không ai dùng:** `tav2_bq.corporate_action` có `event_code='SUSP'` = 691 dòng / 581 mã (2009-04→2026-10) kèm **lý do + ngày giao dịch cuối + ngày hủy** trong `event_description_vi`. Đó là danh sách hủy niêm yết/hủy ĐKGD/tạm ngừng — không cần mua dữ liệu mới để có **danh sách + ngày**. Thiếu **giá cuối và BCTC**.
