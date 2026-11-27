@@ -862,3 +862,7 @@
 
 ## Consolidation 2026-11-27T12:04:24Z
 - [2026-11-27T12:04:15Z] DollarBill/decision — plan-2026-11-30: {"account": "ZaloPay", "plan": "data/trade_plans/plan_ZaloPay_2026-11-30.json", "decision": "HOLD ALL, 0 lenh", "state": "NEUTRAL", "egg_transfer_needed_vnd": 0, "open_for_user": "NNC 44750 <= tran 46000, con thieu ~300cp toi 5pct; khong tu dua lenh", "decided_by": "agent"}
+
+## Consolidation 2026-11-27T13:07:02Z
+- [2026-11-27T12:14:51Z] Mafee/status — eod-trading-report: {"account": "ZaloPay", "plan_date": "2026-11-27", "delivered_via": "report_delivery_gate", "artifact": "ZaloPay_daily_report_2026-11-27.md"}
+- [2026-11-27T12:19:28Z] Mafee/status — eod-trading-report: {"account": "SpaceX", "plan_date": "2026-11-27", "delivered_via": "report_delivery_gate", "artifact": "SpaceX_daily_report_2026-11-27.md"}
