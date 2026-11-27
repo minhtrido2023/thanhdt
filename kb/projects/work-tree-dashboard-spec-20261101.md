@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-11-01
+title: "SPEC — Work-Tree Dashboard (webapp tương tác) — user duyệt hướng 2026-11-01 17:35 ICT"
+---
 # SPEC — Work-Tree Dashboard (webapp tương tác) — user duyệt hướng 2026-11-01 17:35 ICT
 
 Kế hoạch gốc (Fable): `kb/projects/work-tree-dashboard-plan-20261101.md`. File này = hợp đồng cho người dựng.

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-07-17
+title: "DCF upgrade — earning-power basis · GDP terminal growth · conditional refresh gate"
+---
 # DCF upgrade — earning-power basis · GDP terminal growth · conditional refresh gate
 
 > ĐÓNG 2026-07-17 (jobs `Taylor_20260717_063638` nghiên cứu → `Taylor_20260717_074106` triển khai).

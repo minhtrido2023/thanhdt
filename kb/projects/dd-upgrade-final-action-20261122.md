@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: DollarBill
+status: closed
+updated: 2026-11-22
+title: "Nâng cấp quy trình DD — bản hành động FINAL (review vòng 2, 22/11/2026)"
+---
 # Nâng cấp quy trình DD — bản hành động FINAL (review vòng 2, 22/11/2026)
 
 Đầu vào: `dd-process-review-20261122.md` (F1–F25), bản bên thứ ba, `dd-process-upgrade-plan-20261122.md` (Mike). **ĐK** = đã kiểm trên file/số đo hôm nay; **SL** = suy luận. Chưa sửa file nào khác; chưa có `decided_by: user` cho bất kỳ mục nào.

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed-nogo
+updated: 2026-11-25
+title: "Dự báo earnings quý ↔ tâm DCF-VN — ĐÓNG NO-GO (J1→J4 + J3.1), 25/11/2026"
+---
 # Dự báo earnings quý ↔ tâm DCF-VN — ĐÓNG NO-GO (J1→J4 + J3.1), 25/11/2026
 
 **Trạng thái: ĐÓNG, KHÔNG wire.** Nghiên cứu thuần; quant-skeptic chỉ chạy cho J2, J3 (cả hai REFUTED/medium, phần vá và NO-GO đứng; phần diễn giải bị bác đã sửa chữ). J4 và J3.1 chưa qua skeptic vì kết luận là NO-GO.

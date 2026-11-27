@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-09-27
+title: "`*_screen.py` sort-direction bug (\"8L top-25\" = 25 mã xấu nhất) — vá 2026-09-27"
+---
 # `*_screen.py` sort-direction bug ("8L top-25" = 25 mã xấu nhất) — vá 2026-09-27
 > Chuyển nguyên văn từ `kb/canonical.md` (trim context_pack 2026-10-08). Mục CÒN PHẢI LÀM vẫn ở file gốc.
 

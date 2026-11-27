@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: parked
+updated: 2026-11-12
+title: "Kế hoạch nghiên cứu — BAL/LAG: backtest tốt, live kém, so với gửi tiết kiệm (2026-11-12)"
+---
 # Kế hoạch nghiên cứu — BAL/LAG: backtest tốt, live kém, so với gửi tiết kiệm (2026-11-12)
 
 > Trạng thái: **DỰ THẢO chờ user duyệt**. Người lập: Mike. Yêu cầu user 12/11 17:19 ICT.

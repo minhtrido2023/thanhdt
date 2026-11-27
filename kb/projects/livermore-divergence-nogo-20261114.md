@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-14
+title: "Phân kỳ RSI + thu hẹp vai Livermore — NO-GO / ĐÓNG 2026-11-14 (user duyệt, `decided_by: user`)"
+---
 # Phân kỳ RSI + thu hẹp vai Livermore — NO-GO / ĐÓNG 2026-11-14 (user duyệt, `decided_by: user`)
 
 **Verdict:** hướng **phân kỳ RSI** = **NO-GO** (0/48 trial). Vai Livermore **thu hẹp về 3 việc cơ học**, bỏ dự báo hướng VNINDEX H20 và "đọc DT5G sớm hơn". Κ **không chạy** (user bỏ). Quant-skeptic không chạy (user không yêu cầu).

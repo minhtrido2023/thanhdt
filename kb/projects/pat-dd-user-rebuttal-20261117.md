@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-11-17
+title: "PAT — phản biện của user 17/11/2026 17:01 ICT vào định giá rev4 (tâm 64.700) — brief cho topic mới"
+---
 # PAT — phản biện của user 17/11/2026 17:01 ICT vào định giá rev4 (tâm 64.700) — brief cho topic mới
 Topic cũ 1571194491489091644 ĐÓNG. Nền: `kb/projects/pat-dd-objective-20261114.md`, `agents/Taylor/research/dd_PAT_objective_20261114/` (FINAL_r2.md, skeptic/, factpack/, investor_report/), sổ `kb/dd_price_zones.json` PAT rev4.
 

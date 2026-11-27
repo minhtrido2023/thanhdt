@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-14
+title: "Đính chính số đã công bố — hàng đợi ghi chú ở báo cáo kế tiếp (user duyệt 2026-10-14)"
+---
 # Đính chính số đã công bố — hàng đợi ghi chú ở báo cáo kế tiếp (user duyệt 2026-10-14)
 
 Cách đính chính (user chốt, Q1 + quyết định bước 3): **MỘT khối ghi chú ngắn ở báo cáo tuần kế tiếp (T7 17/10) + 1 tin vào topic Trading report; KHÔNG phát hành lại, KHÔNG sửa file báo cáo cũ.**

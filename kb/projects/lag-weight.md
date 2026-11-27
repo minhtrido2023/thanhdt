@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-07-12
+title: "LAG-weight (tăng tỷ trọng PEAD)"
+---
 # LAG-weight (tăng tỷ trọng PEAD)
 > Dự án đã đóng — tách khỏi context_pack 2026-07-12. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. ĐÓNG — chấp nhận kết luận mô tả, không tăng trần w_LAG.

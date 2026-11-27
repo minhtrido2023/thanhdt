@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-27
+title: "DRI — kế hoạch kích hoạt hành động (user duyệt 27/10/2026 11:16 ICT, `decided_by: user`)"
+---
 # DRI — kế hoạch kích hoạt hành động (user duyệt 27/10/2026 11:16 ICT, `decided_by: user`)
 Nguồn: DD `agents/Taylor/research/dd_DRI_20261027/REPORT.md` (verdict NON, FV kỳ vọng 11.838 vs 14.700) + Bobby `kb/data_registry/market-state/vn_sector_read_rubber_20261027.md` (CYCLICAL_PEAK, 60/40).
 Vị thế: SpaceX 2.500cp, ZaloPay 1.300cp (sau bán tay 21/10 @15.400). Duyệt NGUYÊN gói đề xuất §6 của DD (kể cả điều kiện (3) giá ≥ 15.100).

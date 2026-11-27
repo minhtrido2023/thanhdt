@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-07-12
+title: "Dự án momentum-deals (đóng kênh MOM_N/MOM_S)"
+---
 # Dự án momentum-deals (đóng kênh MOM_N/MOM_S)
 > Dự án đã đóng — tách khỏi context_pack 2026-07-12. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. KHÉP KÍN — production LIVE, re-pin R3 27.84%/1.84/-18.2/1.53 (commit 4fbd492+9df396d).

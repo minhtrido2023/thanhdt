@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: DollarBill
+status: parked
+updated: 2026-11-02
+title: "4 quy tắc user chốt 02/11/2026 23:01 ICT (`decided_by: user`)"
+---
 # 4 quy tắc user chốt 02/11/2026 23:01 ICT (`decided_by: user`)
 Nguyên văn: "Khi lên plan, mã nào có cờ thì bị loại khỏi candidate của tất cả các book hiện có. DRI theo DD report giá thị trường cao hơn fair price khá nhiều nên quyết định bán hết số còn lại. TV1 hiện tại chưa có biên an toàn nên cũng quyết định không giữ. Mã nào có DD report mà giá rơi dưới tâm 15% có thể đưa vào xem xét dưới dạng candidate của discretionary sleeve."
 

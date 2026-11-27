@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: active
+updated: 2026-08-15
+title: "CASH_VENDOR gate — giữ ĐÓNG, theo dõi tới mốc rà soát"
+---
 # CASH_VENDOR gate — giữ ĐÓNG, theo dõi tới mốc rà soát
 
 **Trạng thái: ĐÓNG (fail-closed), user xác nhận 2026-08-15.** Mở câu hỏi 2026-08-13 (job

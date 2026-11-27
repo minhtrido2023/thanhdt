@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-09-10
+title: "So sánh Kaffa (hệ thống cũ) vs ARIA — 2026-09-10"
+---
 # So sánh Kaffa (hệ thống cũ) vs ARIA — 2026-09-10
 
 User yêu cầu đọc email "Stock report on September 10, 2026 by Kaffa" (Gmail, thread

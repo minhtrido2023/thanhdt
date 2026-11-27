@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-11-26
+title: "Kiến trúc DD & Mô hình Định giá v4 (Spec khoá từ `/grill-me`, 2026-11-26)"
+---
 # Kiến trúc DD & Mô hình Định giá v4 (Spec khoá từ `/grill-me`, 2026-11-26)
 
 > Tài liệu thiết kế đã chốt qua 9 nhánh phỏng vấn `/grill-me` (ngày 26/11/2026). Đây là đặc tả kiến trúc chuẩn cho Phase 0 (công cụ & sửa lỗi cơ học), Phase 1 (`PRELOCK` nghiên cứu định lượng `DS-RIM + 4-Factor r_i + V_mkt`), Phase 2 (kiểm toán `quant-skeptic` & hợp nhất DD/Engine) và Phase 3 (nâng cấp production).

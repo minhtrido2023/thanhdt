@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-09-10
+title: "AMH (Adaptive Market Hypothesis, Andrew Lo) — rà soát độ thích nghi của hệ, 2026-09-10"
+---
 # AMH (Adaptive Market Hypothesis, Andrew Lo) — rà soát độ thích nghi của hệ, 2026-09-10
 
 > Người viết: Mike (trả lời user, topic 1547589883999158363). Nguồn: code + artifact thật tại

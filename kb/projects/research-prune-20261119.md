@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-19
+title: "Dọn research cũ 19/11/2026 (user duyệt 18:55 ICT, `decided_by: user`)"
+---
 # Dọn research cũ 19/11/2026 (user duyệt 18:55 ICT, `decided_by: user`)
 Luật user: DD đã xong chỉ cần cập nhật tiếp → GIỮ; nghiên cứu khác xong và im >3 ngày → xoá.
 ## Đã làm

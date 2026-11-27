@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-11-13
+title: "Decision Inbox — user trả lời \"Duyệt A\" ở Discord → script xác định tự đóng câu hỏi bus (13/11/2026)"
+---
 # Decision Inbox — user trả lời "Duyệt A" ở Discord → script xác định tự đóng câu hỏi bus (13/11/2026)
 
 Lý do: lớp "auto mode classifier" (CCDB_PERMISSION_MODE=auto, `/workspace/ccdb-mike/.env`) chặn 73 lần trong 25 ngày, gồm `close_bus_question.py` — quyết định của user kẹt dù đã duyệt (ca nav-loss-brake-review-20261113). User duyệt triển khai 13/11 15:03 ICT.

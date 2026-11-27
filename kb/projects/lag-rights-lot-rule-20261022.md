@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-22
+title: "Luật lô cổ phiếu quyền mua — LAG (user chốt 22/10/2026 09:40 ICT, phương án A)"
+---
 # Luật lô cổ phiếu quyền mua — LAG (user chốt 22/10/2026 09:40 ICT, phương án A)
 
 - Câu hỏi N1 (audit `agents/Taylor/research/lag_rights_audit_20261022/B2b_B3_park_exit.md`): entry_date của lô cổ phiếu từ quyền mua. User chọn **A — kế thừa entry_date gốc** (không tính 25 phiên mới từ ngày về tài khoản).

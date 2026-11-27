@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-08-22
+title: "Trục 2 mặc định = breadth-tercile PIT — bằng chứng + định nghĩa tính chuẩn"
+---
 # Trục 2 mặc định = breadth-tercile PIT — bằng chứng + định nghĩa tính chuẩn
 > Chuyển nguyên văn từ `kb/canonical.md` (trim context_pack 2026-10-08). Quy ước + ranh giới vẫn ở file gốc.
 

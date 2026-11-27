@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-11-15
+title: "AI-momentum M2 — second_opinion.sh chế độ raw + chẩn đoán deepseek (Wags, 2026-11-15)"
+---
 # AI-momentum M2 — second_opinion.sh chế độ raw + chẩn đoán deepseek (Wags, 2026-11-15)
 Job `Wags_20261115_154609` · nhánh `wags/m2-wrapper-20261115` (worktree `/tmp/wt-m2wrap`) · CHƯA merge main.
 

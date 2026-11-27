@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-09-21
+title: "FTSE nâng hạng — sự kiện cấu trúc ĐÃ KÍCH HOẠT (hiệu lực 2026-09-21)"
+---
 # FTSE nâng hạng — sự kiện cấu trúc ĐÃ KÍCH HOẠT (hiệu lực 2026-09-21)
 > Mở 2026-10-13. Protocol: `kb/projects/amh-structural-break-protocol-20260910.md`. Registry máy đọc:
 > `kb/structural_break_watch.json` (`ftse_msci_upgrade`, status `triggered`). Status: ĐANG RE-VALIDATE.

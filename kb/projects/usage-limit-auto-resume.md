@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: closed
+updated: 2026-07-03
+title: "Usage-limit auto-resume"
+---
 # Usage-limit auto-resume
 > Dự án đã đóng — tách khỏi context_pack 2026-07-03. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. XONG — dispatch.sh phát hiện usage-limit → pending_resumes → resume_pending.py cron.

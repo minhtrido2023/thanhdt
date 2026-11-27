@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-07-13
+title: "Báo cáo tuần 07-06→07-10 + chống tái diễn"
+---
 # Báo cáo tuần 07-06→07-10 + chống tái diễn
 > Dự án đã đóng — tách khỏi context_pack 2026-07-13. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. XONG — đã gửi + WARN check báo cáo tuần/tháng quá hạn (commit 7147ac3).

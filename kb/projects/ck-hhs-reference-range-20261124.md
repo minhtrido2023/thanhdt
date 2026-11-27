@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-24
+title: "Dải tham chiếu chiết khấu holding (HHS) — chốt gọn 0 … +20% (24/11/2026)"
+---
 # Dải tham chiếu chiết khấu holding (HHS) — chốt gọn 0 … +20% (24/11/2026)
 
 > **Hiển thị / tham chiếu, KHÔNG wire.** Chưa dựng rev8 HHS, chưa ghi `dd_price_zones.json`, chưa email.

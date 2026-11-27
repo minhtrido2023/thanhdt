@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-10-30
+title: "DRI — CTCP Đầu tư Cao su Đắk Lắk (UPCoM): hồ sơ tổng hợp đến 30/10/2026"
+---
 # DRI — CTCP Đầu tư Cao su Đắk Lắk (UPCoM): hồ sơ tổng hợp đến 30/10/2026
 Điểm vào duy nhất cho DRI. Chi tiết từng chặng nằm ở các file liên kết; file này không thay chúng.
 

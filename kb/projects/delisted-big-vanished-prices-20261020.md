@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-10-20
+title: "Mã lớn đã biến mất — giá, BCTC, thống kê trực tiếp (Winston, 2026-10-20)"
+---
 # Mã lớn đã biến mất — giá, BCTC, thống kê trực tiếp (Winston, 2026-10-20)
 
 Job `Winston_20261020_091618`. Bước 2 của điều tra survivorship; đọc lại `delisted-tickers-survivorship-20261020.md`. Chỉ đọc/đo, không ghi bảng canonical, không dùng `profit_*`. KHÔNG kết luận lại số pin.

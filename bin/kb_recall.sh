@@ -82,13 +82,16 @@ def split_sections(path):
     return sections
 
 def index_lines(path):
-    """Treat the whole file as one block (for index-style files)."""
+    """Return matching entry lines (or sections if small) for index-style files."""
     if not os.path.exists(path):
         return []
     with open(path, encoding='utf-8') as f:
         lines = [l.rstrip() for l in f if l.strip()]
-    # Return as one section
-    return ['\n'.join(lines)] if lines else []
+    whole = '\n'.join(lines)
+    if len(whole.split()) <= budget:
+        return [whole] if whole else []
+    # Large index: score individual entry/table lines so relevant matches fit within word budget
+    return [ln for ln in lines if not ln.startswith('<!--') and hit_count(ln) > 0]
 
 scored = []
 for src in sources:

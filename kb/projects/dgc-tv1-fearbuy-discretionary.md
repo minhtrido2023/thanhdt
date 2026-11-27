@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-07-28
+title: "DGC + TV1 (PECC1) — due-diligence \"mua khi sợ hãi có tính toán\" (QUALIFIED YES cả hai)"
+---
 # DGC + TV1 (PECC1) — due-diligence "mua khi sợ hãi có tính toán" (QUALIFIED YES cả hai)
 
 > Archived 2026-07-28 từ kb/current_ops.md — user xác nhận (2026-07-28): cả 2 mã

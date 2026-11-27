@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-01
+title: "Work-Tree Dashboard — Pha A (sổ cái + builder + selfcheck) — 2026-11-01"
+---
 # Work-Tree Dashboard — Pha A (sổ cái + builder + selfcheck) — 2026-11-01
 
 Spec: `work-tree-dashboard-spec-20261101.md`. Nhánh `session/1566395318575169687`. Chưa merge, chưa cài crontab.

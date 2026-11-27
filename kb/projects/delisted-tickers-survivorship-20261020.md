@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-10-20
+title: "Mã hủy niêm yết / ngừng giao dịch 2009→2026 và survivorship của backtest (Winston, 2026-10-20)"
+---
 # Mã hủy niêm yết / ngừng giao dịch 2009→2026 và survivorship của backtest (Winston, 2026-10-20)
 
 Job `Winston_20261020_075929`. Chỉ đọc/đo, không sửa dữ liệu. Không dùng `profit_*`.

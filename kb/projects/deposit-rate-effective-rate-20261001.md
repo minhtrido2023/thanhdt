@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-10-01
+title: "Effective rate (Big-4 12M vs CCTG) cho rating_8l/DCF — LIVE 2026-10-01"
+---
 # Effective rate (Big-4 12M vs CCTG) cho rating_8l/DCF — LIVE 2026-10-01
 > Chuyển nguyên văn từ `kb/current_ops.md` (trim context_pack 2026-10-08). Dòng tóm tắt hành vi
 > + trigger xem lại vẫn ở `kb/current_ops.md`.

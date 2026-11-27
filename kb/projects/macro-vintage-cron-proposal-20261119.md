@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-11-19
+title: "ĐỀ XUẤT cron — vintage macro_indicator + commodity_prices (Mike duyệt rồi cài; Winston KHÔNG tự cài)"
+---
 # ĐỀ XUẤT cron — vintage macro_indicator + commodity_prices (Mike duyệt rồi cài; Winston KHÔNG tự cài)
 
 Job `Winston_20261119_090441`. Script: `mike/bin/snapshot_macro_commodity_vintage.py` (+ `_selfcheck.py`). Host = UTC.

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-15
+title: "AI momentum — P1 BUILD (2026-11-15, Taylor, job `Taylor_20261115_154607`)"
+---
 # AI momentum — P1 BUILD (2026-11-15, Taylor, job `Taylor_20261115_154607`)
 Nhánh `research/ai-momentum-p1-20261115` (worktree `agents/Taylor/wt-ai-momentum-p1`), KHÔNG merge main. Chưa cài cron, chưa chạy forward, không tiền/lệnh/plan.
 Bổ sung `ai-momentum-p0-result-20261115.md`. Artifact: `agents/Taylor/research/ai_momentum_20261115/`; md5 trong `PREREG_v2.md5`.

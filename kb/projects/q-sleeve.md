@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-07-12
+title: "Dự án Q-sleeve (rổ nhỏ chất lượng cao)"
+---
 # Dự án Q-sleeve (rổ nhỏ chất lượng cao)
 > Dự án đã đóng — tách khỏi context_pack 2026-07-12. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. NO-GO cả 2 trục, quant-skeptic CONFIRMED.

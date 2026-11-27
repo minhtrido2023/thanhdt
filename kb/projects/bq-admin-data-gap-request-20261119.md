@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-11-19
+title: "Yêu cầu bq_admin — lấp khoảng trống dữ liệu (8 mục) · 19/11/2026"
+---
 # Yêu cầu bq_admin — lấp khoảng trống dữ liệu (8 mục) · 19/11/2026
 
 > Soạn bởi Winston (job `Winston_20261119_090441`) theo `agents/Taylor/research/arch_8l_dt5g_data_leverage_20261119/REPORT.md` §8; user duyệt 19/11. **Văn bản để user chuyển tay cho bq_admin — KHÔNG gọi bq_admin trực tiếp.**

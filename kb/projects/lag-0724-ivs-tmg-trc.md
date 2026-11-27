@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: closed
+updated: 2026-07-28
+title: "LAG 07-24 (IVS/TMG/TRC) — user chốt phương án C, chỉ mua TRC"
+---
 # LAG 07-24 (IVS/TMG/TRC) — user chốt phương án C, chỉ mua TRC
 
 > Archived 2026-07-28 từ kb/current_ops.md — quyết định bound tới 1 phiên giao dịch

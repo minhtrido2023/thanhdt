@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-10-08
+title: "Trim context_pack 2026-10-08 (job Wags_20261008_133659) — mục lục di chuyển"
+---
 # Trim context_pack 2026-10-08 (job Wags_20261008_133659) — mục lục di chuyển
 > Quy tắc: CHỈ DI CHUYỂN nguyên văn, không viết lại sự thật. Mỗi khối dưới đây/ở file đích
 > mang tiêu đề `Chuyển từ kb/<file> L<a>-<b>` (số dòng theo master ea5c066d).

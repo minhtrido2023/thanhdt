@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: active
+updated: 2026-10-30
+title: "oshares_live cho DCF (`DCF_OSHARES_SOURCE`) — ĐÃ BẬT LIVE từ 31/10/2026 15:2x ICT"
+---
 # oshares_live cho DCF (`DCF_OSHARES_SOURCE`) — ĐÃ BẬT LIVE từ 31/10/2026 15:2x ICT
 
 **CUTOVER-MARKER: ĐÃ BẬT — CUTOVER 2026-10-31 15:2x ICT (user duyệt 15:08 ICT; WC merge `session/oshares-flip-20261031`)** (R10 job `Taylor_20261031_064246`; knob `OSHARES_SOURCE_DEFAULT = "live"` trong `dcf_valuation.py`; rollback = đổi 1 từ về `"fin"`). Dòng gốc trước cutover: Ngày bật (đổi 1 từ → `"live"`, cần user duyệt +

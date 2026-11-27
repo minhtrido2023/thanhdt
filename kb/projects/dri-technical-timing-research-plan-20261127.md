@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-27
+title: "Kế hoạch Nghiên cứu Phân tích Kỹ thuật v2 — DRI: Giải phẫu Hành vi NĐT & Thời điểm Ra/Vào Trung hạn"
+---
 # Kế hoạch Nghiên cứu Phân tích Kỹ thuật v2 — DRI: Giải phẫu Hành vi NĐT & Thời điểm Ra/Vào Trung hạn
 
 > **Ngày lập:** 2026-11-27 · **Trạng thái:** ĐÃ DUYỆT TRIỂN KHAI (user duyệt 2026-11-27) · **Phạm vi:** Nghiên cứu thuần (RESEARCH-ONLY), không tự động sửa code production/bot/registry.

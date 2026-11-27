@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-10
+title: "LAG cache về cơ sở giá ĐIỀU CHỈNH (Phương án A) — 2026-11-10"
+---
 # LAG cache về cơ sở giá ĐIỀU CHỈNH (Phương án A) — 2026-11-10
 
 > ✅ **PHÊ CHUẨN bởi user 13/11/2026 09:1x ICT** (`decided_by: user`, qua Mike, job `Taylor_20261113_021438`): trạng thái LIVE của `97b2a7197` (main, chạy từ cron 15:30 ICT 10/11) được GIỮ. Bối cảnh: dòng "CHƯA apply, CHƯA merge" bên dưới đã lỗi thời từ 10/11 — nhánh squash lên `main` ở `97b2a7197` và `papertrade_daily.sh:43` chạy `refresh_lagged_caches.py` từ checkout main ⇒ merge = apply ở lần cron kế. `.pre_adj` sinh 10/11 08:30 UTC còn nguyên (md5 kiểm lại 13/11: `af4b8c1b72f4…` / `afb2484e5fb7…`). arch-review luồng C = NEEDS_CHANGES (code ổn) ⇒ 3 việc vá ở luồng C2 (nhánh `feat/lag-cache-c2-20261113`, commit `b1b91a5e6`, CHƯA merge, chờ arch-reviewer): validate độ phủ Price/Volume_3M_P50, runbook rollback (§7), sửa ghi chép (§4.3/§6.3). Blast radius đã đính chính ở §4.3.

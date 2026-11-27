@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-19
+title: "Kế hoạch rà + dọn MỒ CÔI hằng tuần (user chỉ đạo 2026-11-19 22:08 ICT, `decided_by: user`)"
+---
 # Kế hoạch rà + dọn MỒ CÔI hằng tuần (user chỉ đạo 2026-11-19 22:08 ICT, `decided_by: user`)
 Luật user: thứ gì để quá lâu, không tham chiếu, không định hướng ⇒ dọn; đưa vào lịch hàng tuần để khỏi tích mồ côi (bài học: 63 gitlink worktree mồ côi, 1,4G pkl research đã đóng, ~7G/worktree do `agents/Taylor` được track).
 ## Cơ chế — `bin/weekly_orphan_review.py` (cron Chủ nhật 10:30 ICT = `30 3 * * 0` UTC; log `logs/orphan_review.log`, báo cáo `logs/orphan_review/<ngày>.md`, digest 1 tin qua `bin/notify.sh`)

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-16
+title: "ORB futures sleeve VN30F — đường thực thi LIVE SpaceX (spec, 16/11/2026)"
+---
 # ORB futures sleeve VN30F — đường thực thi LIVE SpaceX (spec, 16/11/2026)
 
 Job `Taylor_20261116_162132` + vòng 2 `Taylor_20261116_165006` (sửa theo arch-review NEEDS_CHANGES + quant-skeptic REFUTED số rủi ro). Trạng thái: **CODE trên nhánh, CHƯA merge, CHƯA cài cron, cờ TẮT, 0 lệnh thật.**

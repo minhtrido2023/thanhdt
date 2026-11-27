@@ -6,6 +6,8 @@ title: Market state / regime (nhóm rủi ro cao nhất — đã có sự cố t
 
 # Market state / regime (nhóm rủi ro cao nhất — đã có sự cố thật)
 
+> **Lưu ý phân loại OKF (2026-11-27):** các file `sector_read_*.md` và `vn_macro_regime_history*.md` bên dưới được giữ nguyên vị trí để tương thích liên kết hiện có trong 31+ hồ sơ DD; **bài đọc ngành / vĩ mô MỚI** ghi vào [`../../research_notes/index.md`](../../research_notes/index.md).
+
 | Nguồn (file) | Status |
 |---|---|
 | [`anomaly_escalations.md`](anomaly_escalations.md) — data/anomaly_escalations.json | DERIVED |

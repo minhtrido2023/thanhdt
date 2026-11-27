@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-09-26
+title: "Đề xuất khai thác dữ liệu FiinPro-X vào ARIA — 2026-09-26"
+---
 # Đề xuất khai thác dữ liệu FiinPro-X vào ARIA — 2026-09-26
 
 > Người viết: Mike (trả lời user, topic 1540662920889761883). Bối cảnh: harvest tự động kết thúc

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-07-13
+title: "Audit dữ liệu 8L (mùa BCTC Q2)"
+---
 # Audit dữ liệu 8L (mùa BCTC Q2)
 > Dự án đã đóng — tách khỏi context_pack 2026-07-13. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. XONG — 8L đầy đủ; 3 fix cache/cadence/doc dispatch (Winston_20260713_103213).

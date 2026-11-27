@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-16
+title: "LAG thoát sớm / stop-loss theo Bayes — NO-GO (user duyệt 16/11/2026 10:43 ICT, `decided_by: user`)"
+---
 # LAG thoát sớm / stop-loss theo Bayes — NO-GO (user duyệt 16/11/2026 10:43 ICT, `decided_by: user`)
 Câu hỏi user: sau mua LAG bao lâu / lỗ bao nhiêu % thì biết deal lỗ, có luật thoát sớm theo xác suất không. Job `Taylor_20261116_031549` (opus). **Chưa qua quant-skeptic** — vì kết luận NO-GO nên không có gì để wire.
 

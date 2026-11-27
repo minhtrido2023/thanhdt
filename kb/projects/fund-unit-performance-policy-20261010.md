@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-10-10
+title: "Tài khoản quản lý = quỹ mở: chính sách đo hiệu suất (user duyệt 2026-10-10 23:57 ICT)"
+---
 # Tài khoản quản lý = quỹ mở: chính sách đo hiệu suất (user duyệt 2026-10-10 23:57 ICT)
 
 `decided_by: user` — user duyệt cả 5 điểm ở topic Discord 1558282936489611354 (phương án Mike

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-10-26
+title: "Đối chiếu `commodity_prices` vs file local — 2026-10-26 (Winston, read-only)"
+---
 # Đối chiếu `commodity_prices` vs file local — 2026-10-26 (Winston, read-only)
 Job Winston_20261026_065210. Không đổi code/cron. Registry: `kb/data_registry/feeds/bq_commodity_prices.md`.
 

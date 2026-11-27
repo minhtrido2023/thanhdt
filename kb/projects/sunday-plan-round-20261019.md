@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: parked
+updated: 2026-10-19
+title: "Vòng plan Chủ nhật mùa BCTC (2026-10-19, Taylor_20261018_173105 · vòng 2 Taylor_20261018_180113)"
+---
 # Vòng plan Chủ nhật mùa BCTC (2026-10-19, Taylor_20261018_173105 · vòng 2 Taylor_20261018_180113)
 
 **Vấn đề:** re-rate 8L chạy mỗi ngày trong cửa sổ BCTC, chuỗi plan chỉ T2-T6 ⇒ BCTC công bố T7/CN không vào plan thứ Hai.

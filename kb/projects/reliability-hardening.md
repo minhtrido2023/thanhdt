@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mafee
+status: closed
+updated: 2026-07-02
+title: "Reliability hardening (4 việc AgentOps)"
+---
 # Reliability hardening (4 việc AgentOps)
 > Dự án đã đóng — tách khỏi context_pack 2026-07-02. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. XONG — circuit breaker + idempotency guard + trace_id + INCIDENTS.md (commit e1d9b7c).

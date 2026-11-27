@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-30
+title: "DCF → domestic_v2 làm mặc định (cutover 2026-10-30 12:48 ICT)"
+---
 # DCF → domestic_v2 làm mặc định (cutover 2026-10-30 12:48 ICT)
 User duyệt bật 30/10 12:08 ("Duyệt bật"); quant-skeptic CONFIRMED (medium) cả vòng knob lẫn vòng bật; arch-reviewer NEEDS_CHANGES (R1 docstring, R2 dcf_earning_power, R3 KB) — đã sửa trước merge.
 Merge: WC main `7a620614` + `2a45372a`, mike `7d8fd89e1`. Rollback: đổi 1 từ `RATE_FRAME_DEFAULT` trong `dcf_valuation.py` → `"legacy"` (md5 legacy `4c0cf6e6ee6b267937c793c7dfda9a44`, 336 mã/145 ok).

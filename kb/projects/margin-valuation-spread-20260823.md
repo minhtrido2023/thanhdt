@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-08-23
+title: "Margin theo khoảng cách định giá + nhận diện đáy cực rẻ (11/2022)"
+---
 # Margin theo khoảng cách định giá + nhận diện đáy cực rẻ (11/2022)
 > Dự án ĐÓNG 2026-08-23 (1 ngày, 5 vòng nghiên cứu liên tiếp trên cùng tập 7 episode dd52≤−20%).
 > Status: **NO-GO cho mọi cơ chế sizing/gate mới. `capit_margin_lever` (dd52≤−20%, f=1,3, CAPIT-only,

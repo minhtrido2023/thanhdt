@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-10-26
+title: "Giám sát độ tươi theo mã — `tav2_bq.commodity_prices` (2026-10-26, Winston)"
+---
 # Giám sát độ tươi theo mã — `tav2_bq.commodity_prices` (2026-10-26, Winston)
 Job Winston_20261026_073850 (user duyệt). Code `bin/commodity_freshness_monitor.py` + selfcheck
 `bin/commodity_freshness_monitor_selfcheck.py`. State `data/commodity_freshness_state.json` (root WorkingClaude).

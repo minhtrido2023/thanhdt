@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: closed
+updated: 2026-10-29
+title: "Quy trình LỆNH TAY / DÒNG TIỀN NGOÀI PLAN — khai một lần, mọi consumer biết (user yêu cầu 29/10/2026 20:20 ICT)"
+---
 # Quy trình LỆNH TAY / DÒNG TIỀN NGOÀI PLAN — khai một lần, mọi consumer biết (user yêu cầu 29/10/2026 20:20 ICT)
 
 ## Vấn đề (đo 29/10)

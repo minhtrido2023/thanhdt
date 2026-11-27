@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-10-26
+title: "Đề nghị bổ sung chuỗi hàng hoá cho `tav2_bq.commodity_prices` (gửi bq_admin)"
+---
 # Đề nghị bổ sung chuỗi hàng hoá cho `tav2_bq.commodity_prices` (gửi bq_admin)
 > Soạn 2026-10-26 (Winston) theo REPORT.md §1 "Hổng còn lại". User chuyển tay. Nguồn gợi ý là `ước lượng` theo hiểu biết thị trường — bq_admin kiểm tra lại.
 

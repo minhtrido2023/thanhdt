@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-07-12
+title: "fa_ratings/8L re-tune + rebuild builder"
+---
 # fa_ratings/8L re-tune + rebuild builder
 > Dự án đã đóng — tách khỏi context_pack 2026-07-12. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. Re-tune 8L NO-GO (16/16); rebuild fa_ratings builder HOÀN TẤT, BQ-write-identity fixed.

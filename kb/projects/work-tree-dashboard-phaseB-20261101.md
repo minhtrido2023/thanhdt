@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed-nogo
+updated: 2026-11-01
+title: "Work-Tree Dashboard — Pha 1 phần B (server + UI) — 2026-11-01"
+---
 # Work-Tree Dashboard — Pha 1 phần B (server + UI) — 2026-11-01
 Spec: `work-tree-dashboard-spec-20261101.md`. Nhánh `session/1566395318575169687`.
 

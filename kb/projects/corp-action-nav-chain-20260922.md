@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-09-22
+title: "Chuỗi corp-action NAV/ex-date 2026-09-22→09-28 — chi tiết vòng review"
+---
 # Chuỗi corp-action NAV/ex-date 2026-09-22→09-28 — chi tiết vòng review
 > Chuyển nguyên văn từ `kb/current_ops.md` + `kb/canonical.md` (trim context_pack 2026-10-08).
 > Tên feature + ngày + commit + hành vi chính + mọi mục CÒN MỞ/CHƯA vá/CẦN USER vẫn ở file gốc.

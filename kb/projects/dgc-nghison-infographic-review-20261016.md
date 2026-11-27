@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-16
+title: "DGC — Nghi Sơn GĐ1: rà soát infographic user gửi 16/10/2026 (cập nhật đánh giá)"
+---
 # DGC — Nghi Sơn GĐ1: rà soát infographic user gửi 16/10/2026 (cập nhật đánh giá)
 
 Nguồn: ảnh chụp màn hình infographic "Nhà máy hóa chất Đức Giang – Nghi Sơn" do user gửi. **User xác nhận 16/10: đây là GIẢ ĐỊNH do AI tạo bởi một bên nghiên cứu — không phải công bố/guidance của DGC** (⇒ không gửi thư IR; mọi số trong ảnh chưa có nguồn). So với `agents/Taylor/research/dgc_nghison_phase1_estimate_20260723.md`. Phân tích: Mike, 16/10, số học tự tính (chưa qua quant-skeptic / fundamental-skeptic).

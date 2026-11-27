@@ -2,6 +2,8 @@
 kind: project
 status: DONG (crontab da cai, dang burn-in alert-only + 1 muc mo Viec B)
 date: 2026-08-13
+owner: Taylor
+updated: 2026-08-13
 ---
 
 # corporate_action BQ integration + paper-report bug fix (2026-08-13)

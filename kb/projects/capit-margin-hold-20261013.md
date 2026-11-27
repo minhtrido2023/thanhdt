@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: parked
+updated: 2026-10-13
+title: "CAPIT margin — TẠM GIỮ: không duyệt ngày margin nào (mở 2026-10-13)"
+---
 # CAPIT margin — TẠM GIỮ: không duyệt ngày margin nào (mở 2026-10-13)
 > User duyệt 2026-10-13 15:21 ICT (`decided_by: user`), topic Discord 1540662920889761883. Status: ĐANG GIỮ —
 > từ 19:30 ICT cùng ngày giữ bằng CÔNG TẮC TỔNG (mục "Cơ chế đang chạy").

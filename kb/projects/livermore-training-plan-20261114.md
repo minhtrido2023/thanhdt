@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-14
+title: "Kế hoạch \"huấn luyện\" Livermore (đọc kỹ thuật VN) — 14/11/2026"
+---
 # Kế hoạch "huấn luyện" Livermore (đọc kỹ thuật VN) — 14/11/2026
 
 Job `Taylor_20261114_061614` · chỉ LẬP KẾ HOẠCH, chưa chạy gì nặng, chưa sửa code production.

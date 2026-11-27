@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-10
+title: "Cổng edge-health THEO THÁNG cho BAL — **NO-GO, user duyệt KHÔNG BẬT** (12/11/2026 17:10 ICT, `decided_by: user`)"
+---
 # Cổng edge-health THEO THÁNG cho BAL — **NO-GO, user duyệt KHÔNG BẬT** (12/11/2026 17:10 ICT, `decided_by: user`)
 Yêu cầu gốc 10/11: tháng BAL âm ⇒ dừng mua mới; dương ⇒ mở lại; âm ⇒ khoá lại. Kèm nghiên cứu "có hơn chạy mù không".
 

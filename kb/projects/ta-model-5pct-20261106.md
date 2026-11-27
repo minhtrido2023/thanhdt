@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-06
+title: "Model kỹ thuật định lượng ±5% bổ trợ Livermore (user yêu cầu 06/11/2026 00:09 ICT)"
+---
 # Model kỹ thuật định lượng ±5% bổ trợ Livermore (user yêu cầu 06/11/2026 00:09 ICT)
 - Deal: pattern → mua → bán được từ CHIỀU T+2 → chốt +5% / cắt lỗ −5%; chỉ mã thanh khoản cao (universe_pit + sàn ADV60).
 - Job: Taylor_20261105_171103 (opus, timeout 4h), thư mục `agents/Taylor/research/ta_model_5pct_20261106/`. PAPER-ONLY.

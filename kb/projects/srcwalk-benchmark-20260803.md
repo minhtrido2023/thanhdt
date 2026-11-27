@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-08-03
+title: "Benchmark `srcwalk` vs `grep` — 2026-08-03"
+---
 # Benchmark `srcwalk` vs `grep` — 2026-08-03
 
 > Status: XONG. Kết luận đã wire vào `WorkingClaude/CLAUDE.md` § Code navigation,

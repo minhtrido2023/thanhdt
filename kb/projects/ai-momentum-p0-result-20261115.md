@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-15
+title: "AI momentum — kết quả P0 (2026-11-15, Taylor, job `Taylor_20261115_150627`)"
+---
 # AI momentum — kết quả P0 (2026-11-15, Taylor, job `Taylor_20261115_150627`)
 
 Bổ sung cho `ai-momentum-research-plan-20261115.md` (không ghi đè). Artifact:

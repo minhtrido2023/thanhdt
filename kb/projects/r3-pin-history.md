@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-10-08
+title: "R3 / V2.4 — lịch sử pin, số SUPERSEDED, diễn giải đo lường"
+---
 # R3 / V2.4 — lịch sử pin, số SUPERSEDED, diễn giải đo lường
 > Chuyển nguyên văn từ `kb/canonical.md` (trim context_pack 2026-10-08). Dải pin hiện hành
 > 23,37%…25,71%, neo DD −25,2%, luật cấm trích 1 số vẫn ở `kb/canonical.md`. Nguồn chuẩn: `data/results_registry.md`.

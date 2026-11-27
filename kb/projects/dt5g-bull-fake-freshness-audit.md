@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-07-13
+title: "DT5G BULL-giả bug → audit freshness toàn hệ thống"
+---
 # DT5G BULL-giả bug → audit freshness toàn hệ thống
 > Dự án đã đóng — tách khỏi context_pack 2026-07-13. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. KHÉP KÍN — EW-leg path fix + CRITICAL custom30V basket fix + F3 re-pin; live không sai.

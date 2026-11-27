@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: parked
+updated: 2026-07-15
+title: "A/B cross-mode (ab_cross vs ab_dip) — PARKED"
+---
 # A/B cross-mode (ab_cross vs ab_dip) — PARKED
 
 > Gỡ khỏi `paper_programs_registry.json` (mảng `programs`, không còn render trong Paper Programs

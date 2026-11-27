@@ -1,3 +1,11 @@
+---
+kind: project
+owner: Bobby (macro-strategist)
+status: closed
+updated: 2026-10-01
+title: "VN Macro Watch 2026-10 — phụ lục ĐA-PROXY chi phí vốn (mốc đầu tiên)"
+---
+
 # VN Macro Watch 2026-10 — phụ lục ĐA-PROXY chi phí vốn (mốc đầu tiên)
 > Bobby (macro-strategist), không-blind, dữ liệu tới 07/10/2026. Chạy lại theo chỉ đạo user 07/10
 > 10:12 ICT: không đọc lãi suất chỉ qua Big-4 tiết kiệm 12M (số bị neo hành chính). Kỳ sau so với bảng này.

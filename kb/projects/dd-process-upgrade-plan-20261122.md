@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-11-22
+title: "Kế hoạch nâng cấp quy trình DD — bản điều chỉnh sau khi đối chiếu review bên thứ ba (22/11/2026)"
+---
 # Kế hoạch nâng cấp quy trình DD — bản điều chỉnh sau khi đối chiếu review bên thứ ba (22/11/2026)
 
 Nguồn: `dd-process-review-20261122.md` (Fable/high, ID F1–F25, P0–P3) + `Khuyen_nghi_Nang_cap_Quy_trinh_Due_Diligence.md` (bên thứ ba, 22/11). Bản bên thứ ba dựng trên đúng số liệu của review gốc (94 entry/36 mã, 14/16 trượt vòng 1, IQR 0,36 vs 1,06, QTP −41%, DRI +45%) và đồng ý với khuyến nghị của review gốc ở Q1, Q2, Q4, Q5, Q6. **Nó trình bày Q1–Q6 là "quyết định chính thức", nhưng chưa có `decided_by: user` — chỉ bạn chốt được.** Chưa sửa file nào; chờ "bắt đầu".

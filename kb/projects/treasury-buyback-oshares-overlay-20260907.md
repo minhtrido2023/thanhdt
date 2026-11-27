@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-09-07
+title: "Treasury-buyback OShares PIT overlay — điều tra + quyết định (2026-09-07/08)"
+---
 # Treasury-buyback OShares PIT overlay — điều tra + quyết định (2026-09-07/08)
 
 ## Câu hỏi gốc

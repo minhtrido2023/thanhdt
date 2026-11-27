@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-06
+title: "Plan — Funnel 8L hằng ngày tìm candidate cho discretionary sleeve (đề xuất 2026-10-06 — ĐÃ CHỐT, user duyệt 2026-10-06; cutloss tự bán ĐÃ BỎ 2026-11-01 ⇒ DD khủng hoảng 7 ngày, user quyết)"
+---
 # Plan — Funnel 8L hằng ngày tìm candidate cho discretionary sleeve (đề xuất 2026-10-06 — ĐÃ CHỐT, user duyệt 2026-10-06; cutloss tự bán ĐÃ BỎ 2026-11-01 ⇒ DD khủng hoảng 7 ngày, user quyết)
 
 ## Vì sao bỏ quét tuần

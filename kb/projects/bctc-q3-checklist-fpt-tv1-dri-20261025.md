@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-25
+title: "Checklist BCTC Q3/2026 — FPT, TV1, DRI (khai TRƯỚC khi có số, 25/10/2026 18:5x ICT)"
+---
 # Checklist BCTC Q3/2026 — FPT, TV1, DRI (khai TRƯỚC khi có số, 25/10/2026 18:5x ICT)
 > Nguồn: đề xuất Mike 25/10 16:15 (user duyệt "làm luôn" 18:45). Khai trước, KHÔNG sửa sau khi thấy số.
 > Trigger: `tav2_bq.ticker_financial` có dòng 2026Q3 của mã (FPT ~28/10, TV1/DRI ~30/10). Chưa có ⇒ "chưa kết luận", không suy từ báo chí.

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-10-13
+title: "Monitor phanh lỗ cấp NAV — CHỈ CẢNH BÁO, LIVE từ 2026-10-13"
+---
 # Monitor phanh lỗ cấp NAV — CHỈ CẢNH BÁO, LIVE từ 2026-10-13
 
 > Nguồn: user chốt 2026-10-12 18:11 + 21:31 ICT (`decided_by: user`); nhánh

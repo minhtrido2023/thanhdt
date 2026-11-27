@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-22
+title: "FPT — MIỄN stop/TIME/TARGET cố định (user 22/11/2026 19:27 ICT, `decided_by: user`)"
+---
 # FPT — MIỄN stop/TIME/TARGET cố định (user 22/11/2026 19:27 ICT, `decided_by: user`)
 
 Nguyên văn: "(a) miễn stop. Discretionary sleeve không cần quy tắc thoát cố định. (B) Tôi tự quyết. (C) Cho phép bạn kiểm tra" (topic Discord "DD nâng cấp 22.11", trả lời thẻ FPT A1 v2).

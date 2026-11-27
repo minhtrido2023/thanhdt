@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-11-04
+title: "Kế hoạch tích hợp `tav2_bq.macro_indicator` (TradingEconomics) — 04/11/2026"
+---
 # Kế hoạch tích hợp `tav2_bq.macro_indicator` (TradingEconomics) — 04/11/2026
 > User duyệt 5 đề xuất 04/11 23:52 ICT (`decided_by: user`). Mọi mục là DISPLAY/CROSS-CHECK/PAPER — KHÔNG gắn gate, KHÔNG đổi sizing.
 

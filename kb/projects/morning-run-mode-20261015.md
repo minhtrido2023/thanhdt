@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: closed
+updated: 2026-10-15
+title: "Morning-run mode (`MIKE_MORNING_RUN=1`) — merged 2026-10-15"
+---
 # Morning-run mode (`MIKE_MORNING_RUN=1`) — merged 2026-10-15
 Sự cố gốc: 14/10 BQ về muộn (sau 19:45 ICT) ⇒ chuỗi 18:30/19:00 không lập plan 15/10; sáng 15/10 BQ đủ nhưng `daily_refresh_v34b_linux.sh`
 và `bq_freshness_check.sh` khóa theo NGÀY LỊCH nên không có đường chạy hợp lệ. User chốt 08:43: bỏ plan 15/10, sửa cổng ngày.

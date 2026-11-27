@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: active
+updated: 2026-10-09
+title: "Corp-action broker-primary — tiêu chí bật live"
+---
 # Corp-action broker-primary — tiêu chí bật live
 
 > Chuyển nguyên văn từ `kb/current_ops.md` 2026-10-09 (kb-hot-size-gate). Lịch sử vòng r1–r10: `agents/Taylor/research/broker-primary-20261004.md`.

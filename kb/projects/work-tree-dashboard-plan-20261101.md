@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-01
+title: "Kế hoạch: Dashboard cây quản lý công việc toàn fleet (Fable lập, 2026-11-01)"
+---
 # Kế hoạch: Dashboard cây quản lý công việc toàn fleet (Fable lập, 2026-11-01)
 
 Trạng thái: **KẾ HOẠCH — chờ user duyệt 5 câu hỏi cuối file**. Chưa code.

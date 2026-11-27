@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: active
+updated: 2026-08-03
+title: "LAG ADV>0 liquidity filter — theo dõi để phân rã edge thật vs hiện vật mô hình fill"
+---
 # LAG ADV>0 liquidity filter — theo dõi để phân rã edge thật vs hiện vật mô hình fill
 
 **Trạng thái: ĐANG MỞ — tích luỹ dữ liệu, KHÔNG kết luận gì cho tới mốc rà soát.**

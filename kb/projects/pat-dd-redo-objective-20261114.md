@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-11-14
+title: "PAT — DD làm lại KHÁCH QUAN, mù giá thật (brief gốc, user 14/11/2026 23:04 ICT)"
+---
 # PAT — DD làm lại KHÁCH QUAN, mù giá thật (brief gốc, user 14/11/2026 23:04 ICT)
 
 ## Chỉ đạo user (nguyên văn)

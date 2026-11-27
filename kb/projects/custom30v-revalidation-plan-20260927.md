@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mafee
+status: parked
+updated: 2026-09-27
+title: "Kế hoạch nghiên cứu — tái thẩm định custom30V sau lỗi đo lường 2026-09-27"
+---
 # Kế hoạch nghiên cứu — tái thẩm định custom30V sau lỗi đo lường 2026-09-27
 
 > Trạng thái: **ĐÃ THỰC HIỆN XONG — user chốt Q3 27/09 + pin dải 2 số 28/09 (xem §8–10)**. Bản gốc "ĐỀ XUẤT, chờ user duyệt" soạn 2026-09-27 16:5x ICT, Mike.

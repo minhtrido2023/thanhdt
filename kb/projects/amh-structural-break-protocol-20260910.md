@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed-nogo
+updated: 2026-09-10
+title: "Structural-break protocol — khi HỆ SINH THÁI thị trường đổi, không phải khi backtest đổi"
+---
 # Structural-break protocol — khi HỆ SINH THÁI thị trường đổi, không phải khi backtest đổi
 
 > Mở 2026-09-10 (AMH review, hướng #6 — user duyệt cả 7 hướng). Chủ: Mike.

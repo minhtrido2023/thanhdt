@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-07-13
+title: "World Cup + rổ lãi suất huy động (Pillar A′)"
+---
 # World Cup + rổ lãi suất huy động (Pillar A′)
 > Dự án đã đóng — tách khỏi context_pack 2026-07-13. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. ĐÓNG cả 2 hướng — N quá mỏng / 0-4 GO, không wire production.

@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-10-21
+title: "SCL (CTCP Sông Đà Cao Cường) — nghiên cứu thêm sau cờ DD `EQ_PHAI_THU_TANG` (21/10/2026)"
+---
 # SCL (CTCP Sông Đà Cao Cường) — nghiên cứu thêm sau cờ DD `EQ_PHAI_THU_TANG` (21/10/2026)
 
 > Yêu cầu: user duyệt "nghiên cứu thêm SCL" 21/10 23:28 ICT. Gói DD: `data/lag_dd/SCL_2026-10-19.json` (FLAG, hash `827ba0a2a6ce832e`),

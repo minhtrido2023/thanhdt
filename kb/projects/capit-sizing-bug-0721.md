@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-07-31
+title: "CAPIT sizing bug 07-21 — ĐÃ ĐÓNG (2026-07-31)"
+---
 # CAPIT sizing bug 07-21 — ĐÃ ĐÓNG (2026-07-31)
 
 > Tách ra khỏi `kb/current_ops.md` 2026-08-01 (token-cost review) — mục này đã ĐÓNG từ 07-31,

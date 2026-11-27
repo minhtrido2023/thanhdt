@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-11-14
+title: "PAT — DD làm lại KHÁCH QUAN, mù giá thật (rev3, 14/11/2026) — kết quả"
+---
 # PAT — DD làm lại KHÁCH QUAN, mù giá thật (rev3, 14/11/2026) — kết quả
 Brief: `kb/projects/pat-dd-redo-objective-20261114.md` (user 14/11 23:04 ICT). Topic Discord 1571194491489091644.
 

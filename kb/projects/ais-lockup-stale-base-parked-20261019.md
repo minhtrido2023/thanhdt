@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: parked
+updated: 2026-10-19
+title: "AIS lock-up stale-base — PARKED 2026-10-19 (user: \"Park\")"
+---
 # AIS lock-up stale-base — PARKED 2026-10-19 (user: "Park")
 
 **Trạng thái:** KHÔNG làm tiếp. `oshares_live` giữ fail-closed (`AIS_UNCERTIFIED`) cho 10 mã (ELC, DCF, HKT, HMS, KSH, PSD, TAL, TCB, TLG, VTK ngày 19/10). Tác động tiền ≈ 0.

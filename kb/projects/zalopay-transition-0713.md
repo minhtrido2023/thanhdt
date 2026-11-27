@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-07-13
+title: "Plan ZaloPay transition day 5/5 (FINAL)"
+---
 # Plan ZaloPay transition day 5/5 (FINAL)
 > Dự án đã đóng — tách khỏi context_pack 2026-07-13. Chi tiết gốc từ kb/current_ops.md.
 > Status: CLOSED. XONG — bán VIB + mua BID, ngày cuối chuỗi transition 07-07→07-13.

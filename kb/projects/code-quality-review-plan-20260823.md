@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-08-23
+title: "Code-quality review định kỳ — kế hoạch (đề xuất 2026-08-23, chờ user duyệt)"
+---
 # Code-quality review định kỳ — kế hoạch (đề xuất 2026-08-23, chờ user duyệt)
 
 > Trạng thái: **ĐỀ XUẤT** — chưa cài gì. Người duyệt: user. Chủ triển khai: Mike (điều phối),

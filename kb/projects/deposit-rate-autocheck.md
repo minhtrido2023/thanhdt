@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Winston
+status: closed
+updated: 2026-07-20
+title: "Deposit-rate auto-crosscheck automation (2026-07-20)"
+---
 # Deposit-rate auto-crosscheck automation (2026-07-20)
 
 **Status: LIVE — quant-skeptic CONFIRMED after 10 rounds of adversarial review.**

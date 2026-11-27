@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: active
+updated: 2026-09-06
+title: "Dự án thay thế `ticker_prune` → `universe_pit` — ĐANG MỞ (checklist G4-G9)"
+---
 # Dự án thay thế `ticker_prune` → `universe_pit` — ĐANG MỞ (checklist G4-G9)
 
 **Quyết định lịch trình (2026-09-06, user, Discord):** không chốt mốc lịch cho toàn dự án.

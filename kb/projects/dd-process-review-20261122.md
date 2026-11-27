@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Taylor
+status: closed
+updated: 2026-11-22
+title: "Review quy trình due diligence (DD) — 22/11/2026"
+---
 # Review quy trình due diligence (DD) — 22/11/2026
 
 Reviewer độc lập, chỉ đọc. Phạm vi: 2 skill, 3 định nghĩa agent, sổ `kb/dd_price_zones.json` (94 entry / 36 mã, 26/10–22/11), script sổ/ứng viên/cổng, 5 nghiên cứu hiệu chuẩn, retro 02–21/11, hồ sơ ca. **ĐK** = đã kiểm trên file/số đo; **SL** = suy luận.

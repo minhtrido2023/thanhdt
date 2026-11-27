@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-10-25
+title: "Trường phái phân tích kỹ thuật trên VN — ĐÓNG 2026-10-25 (user đồng ý đóng hướng này)"
+---
 # Trường phái phân tích kỹ thuật trên VN — ĐÓNG 2026-10-25 (user đồng ý đóng hướng này)
 **Verdict:** đa số KHÔNG edge trên dữ liệu VN; chỉ họ xu hướng/breakout (Ichimoku Tenkan×Kijun trên mây, giá>MA50 dốc lên, no-supply trên MA50) hơn mua ngẫu nhiên, KHÔNG cái nào hơn quy tắc xu hướng đơn giản. Đảo chiều/bắt đáy (nến, stopping volume, MFI<20) không thêm gì so với bối cảnh giảm. Dùng cờ xu hướng lọc lệnh vào LAG/BAL: 0/6 đạt (BAL×52w+vol +7,5pp q=0,25, từ 2021 — chỉ là giả thuyết). quant-skeptic CONFIRMED (medium) kèm sửa câu chữ.
 - Thực nghiệm: `agents/Taylor/research/ta_schools_vn_20261025/REPORT.md`; lọc lệnh vào: `agents/Taylor/research/ta_trend_entry_filter_20261025/REPORT.md`

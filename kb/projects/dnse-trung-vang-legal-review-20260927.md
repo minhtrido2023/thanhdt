@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-09-27
+title: "Trứng vàng DNSE — bản chất pháp lý (legal-vn 2026-09-27)"
+---
 # Trứng vàng DNSE — bản chất pháp lý (legal-vn 2026-09-27)
 > Chuyển nguyên văn từ `kb/current_ops.md` (trim context_pack 2026-10-08). Trạng thái quyết định
 > (user chốt 2026-10-05: Trứng vàng = tương đương tiền) vẫn ở `kb/current_ops.md`.

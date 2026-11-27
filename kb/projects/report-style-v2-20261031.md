@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: active
+updated: 2026-10-31
+title: "Báo cáo tài khoản chuẩn v2 — ngày / tuần / tháng / quý (MỞ, user duyệt khung 2026-10-31)"
+---
 # Báo cáo tài khoản chuẩn v2 — ngày / tuần / tháng / quý (MỞ, user duyệt khung 2026-10-31)
 
 **Khung + luật đầy đủ:** `agents/Taylor/research/report_style_v2_20261031/REPORT_STYLE_V2.md` (+ `DIFF_VS_OLD.md`).

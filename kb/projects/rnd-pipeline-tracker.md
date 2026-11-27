@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: active
+updated: 2026-08-01
+title: "R&D pipeline tracker — mọi mục PAPER-ONLY trừ khi ghi rõ LIVE"
+---
 # R&D pipeline tracker — mọi mục PAPER-ONLY trừ khi ghi rõ LIVE
 
 > Tách ra khỏi `kb/current_ops.md` 2026-08-01 (token-cost review, user mandate) — đây là backlog

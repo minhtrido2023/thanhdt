@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: closed
+updated: 2026-11-05
+title: "Sleeve discretionary — FPT + NNC (user duyệt 05/11/2026 22:11 + chốt chi tiết 22:17 ICT, `decided_by: user`)"
+---
 # Sleeve discretionary — FPT + NNC (user duyệt 05/11/2026 22:11 + chốt chi tiết 22:17 ICT, `decided_by: user`)
 
 Nguyên văn 22:11: "Đồng ý Duyệt mua fpt và nnc cho sleeve discretionary. Các mã này được phép giữ trong vòng 25 phiên. Nếu đạt target 10% thì bán. Còn không sẽ thoái khi quá 25 phiên giao dịch."

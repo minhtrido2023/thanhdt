@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Wags
+status: closed
+updated: 2026-09-27
+title: "Measurement integrity audit — bối cảnh mở cadence (2026-09-27)"
+---
 # Measurement integrity audit — bối cảnh mở cadence (2026-09-27)
 > Chuyển nguyên văn từ `kb/current_ops.md` (trim context_pack 2026-10-08). Lịch review quý vẫn ở file gốc.
 

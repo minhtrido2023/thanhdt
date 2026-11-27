@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-08-26
+title: "VN Real Estate Structural Risk — thesis + playbook (mở 2026-08-26)"
+---
 # VN Real Estate Structural Risk — thesis + playbook (mở 2026-08-26)
 
 **Chủ**: Mike (macro layer, Bobby cung cấp phân tích). **Nguồn đầy đủ**: `mike/reports/bobby_vietnam_realestate_risk_20260826.md`.

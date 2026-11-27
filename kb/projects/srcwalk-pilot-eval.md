@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-08-03
+title: "Pilot đánh giá `srcwalk` — tra cứu code Python bằng AST thay vì grep+Read"
+---
 # Pilot đánh giá `srcwalk` — tra cứu code Python bằng AST thay vì grep+Read
 
 > **Status: ĐÓNG SỚM 2026-08-03 — user chỉ đạo mở toàn fleet, KHÔNG chờ hết cửa sổ 3 tuần.**

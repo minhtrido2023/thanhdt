@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: parked
+updated: 2026-10-29
+title: "Clearing giữa các sổ (PARK ↔ LAG/BAL) — kế hoạch thiết kế (user yêu cầu 29/10/2026 00:32 ICT)"
+---
 # Clearing giữa các sổ (PARK ↔ LAG/BAL) — kế hoạch thiết kế (user yêu cầu 29/10/2026 00:32 ICT)
 
 **Trạng thái: THIẾT KẾ, CHƯA CODE.** Chạm đường tiền (sổ lô → quyết định bán) nên cần user duyệt + quant/arch-review trước khi wire.

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-15
+title: "Kế hoạch nghiên cứu \"AI giải thích momentum + phản biện chéo 2 model\" — đề xuất 2026-11-15 (Taylor, job `Taylor_20261115_144310`; CHỈ KẾ HOẠCH, chưa code, chưa chạy)"
+---
 # Kế hoạch nghiên cứu "AI giải thích momentum + phản biện chéo 2 model" — đề xuất 2026-11-15 (Taylor, job `Taylor_20261115_144310`; CHỈ KẾ HOẠCH, chưa code, chưa chạy)
 
 Nguồn yêu cầu: user John Dinh (Discord 15/11) gửi quy trình 6 bước (chọn mã momentum mạnh → hỏi AI điều gì đang lái → AI đọc tin/công ty/ngành → đưa AI thứ hai tìm thiếu sót → hai model thách thức nhau → nhiều góc nhìn, ít lỗ hổng). Mọi số dưới đây là **đo** (có lệnh/file) hoặc gắn **giả định**.

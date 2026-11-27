@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Mike
+status: closed
+updated: 2026-11-22
+title: "Hàng chờ xác nhận tay — nhãn `skeptic_final` backfill MƠ HỒ (A2, 22/11/2026)"
+---
 # Hàng chờ xác nhận tay — nhãn `skeptic_final` backfill MƠ HỒ (A2, 22/11/2026)
 
 20/95 entry có `skeptic_final_basis=ambiguous_backfill` (luật cố định không đọc chắc được từ văn bản tự do ⇒ gán `FIXED_UNVERIFIED`, KHÔNG tự gán CONFIRMED). **Hạn xác nhận tay: 29/11/2026** (Mike; ưu tiên mã đang giữ / rev cuối). Đóng một mục = thêm rev mới hoặc ghi quyết định vào đây; KHÔNG sửa tại chỗ nhãn của entry cũ (sổ append-only).

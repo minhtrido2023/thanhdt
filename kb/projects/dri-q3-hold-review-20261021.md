@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-10-21
+title: "DRI — đánh giá GIỮ/BÁN sau số liệu Q3/2026 (21/10/2026) — bản NHÁP để skeptic phản biện"
+---
 # DRI — đánh giá GIỮ/BÁN sau số liệu Q3/2026 (21/10/2026) — bản NHÁP để skeptic phản biện
 
 Tác giả: Mike (tự tính, chưa qua skeptic). Mã UPCOM, sleeve discretionary (mua có chủ đích khi giá rẻ).

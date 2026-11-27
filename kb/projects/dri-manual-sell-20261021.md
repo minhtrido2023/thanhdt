@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: closed
+updated: 2026-10-21
+title: "DRI — user bán tay 21/10/2026 (chuyển nguyên văn từ current_ops.md, 21/10 23:5x ICT)"
+---
 # DRI — user bán tay 21/10/2026 (chuyển nguyên văn từ current_ops.md, 21/10 23:5x ICT)
 
 ## DRI — user BÁN TAY 21/10/2026 theo research discretionary sleeve (`decided_by: user`, 22:29 ICT) — ĐÃ XÁC NHẬN, MỌI AGENT KHÔNG HỎI LẠI

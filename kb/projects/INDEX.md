@@ -1,5 +1,76 @@
 ## Dự án đã đóng — 1 dòng/dự án, chi tiết `cat kb/projects/<file>.md`
 <!-- Rút gọn 2026-08-10: mỗi dòng trước đây là 2-4 câu kể lại diễn biến. File này bơm vào MỌI
+- 2026-11-27 Kế hoạch Nghiên cứu Phân tích Kỹ thuật v2 — DRI: Giải phẫu Hành vi NĐT & Thời điểm Ra/Vào Trung hạn → `dri-technical-timing-research-plan-20261127.md` — **CLOSED**
+- 2026-11-24 Dải tham chiếu chiết khấu holding (HHS) — chốt gọn 0 … +20% (24/11/2026) → `ck-hhs-reference-range-20261124.md` — **CLOSED**
+- 2026-11-22 FPT — MIỄN stop/TIME/TARGET cố định (user 22/11/2026 19:27 ICT, decided_by: user) → `fpt-exit-exemption-20261122.md` — **CLOSED**
+- 2026-11-19 Kế hoạch rà + dọn MỒ CÔI hằng tuần (user chỉ đạo 2026-11-19 22:08 ICT, decided_by: user) → `weekly-orphan-review-plan-20261119.md` — **CLOSED**
+- 2026-11-19 Dọn research cũ 19/11/2026 (user duyệt 18:55 ICT, decided_by: user) → `research-prune-20261119.md` — **CLOSED-NOGO**
+- 2026-11-19 ĐỀ XUẤT cron — vintage macro_indicator + commodity_prices (Mike duyệt rồi cài; Winston KHÔNG tự cài) → `macro-vintage-cron-proposal-20261119.md` — **CLOSED**
+- 2026-11-19 Yêu cầu bq_admin — lấp khoảng trống dữ liệu (8 mục) · 19/11/2026 → `bq-admin-data-gap-request-20261119.md` — **CLOSED**
+- 2026-11-16 ORB futures sleeve VN30F — đường thực thi LIVE SpaceX (spec, 16/11/2026) → `orb-futures-sleeve-20261116.md` — **CLOSED**
+- 2026-11-15 Kế hoạch nghiên cứu "AI giải thích momentum + phản biện chéo 2 model" — đề xuất 2026-11-15 (Taylor, job Taylo… → `ai-momentum-research-plan-20261115.md` — **CLOSED-NOGO**
+- 2026-11-15 AI-momentum P1-V3 — nới ngưỡng sự kiện ×2 (PREREG v3) → `ai-momentum-p1-v3-20261115.md` — **CLOSED**
+- 2026-11-15 AI momentum — P1 BUILD (2026-11-15, Taylor, job Taylor_20261115_154607) → `ai-momentum-p1-build-20261115.md` — **CLOSED**
+- 2026-11-15 AI momentum — kết quả P0 (2026-11-15, Taylor, job Taylor_20261115_150627) → `ai-momentum-p0-result-20261115.md` — **CLOSED**
+- 2026-11-15 AI-momentum M2 — second_opinion.sh chế độ raw + chẩn đoán deepseek (Wags, 2026-11-15) → `ai-momentum-m2-wrapper-20261115.md` — **CLOSED**
+- 2026-11-14 Kế hoạch "huấn luyện" Livermore (đọc kỹ thuật VN) — 14/11/2026 → `livermore-training-plan-20261114.md` — **CLOSED**
+- 2026-11-13 Decision Inbox — user trả lời "Duyệt A" ở Discord → script xác định tự đóng câu hỏi bus (13/11/2026) → `decision-inbox-20261113.md` — **CLOSED**
+- 2026-11-12 Kế hoạch nghiên cứu — BAL/LAG: backtest tốt, live kém, so với gửi tiết kiệm (2026-11-12) → `bal-lag-live-gap-research-plan-20261112.md` — **PARKED**
+- 2026-11-12 BAL/LAG backtest-vs-live gap — kết luận tạm GĐ0–GĐ1 (2026-11-12 ~20:20 ICT) → `bal-lag-live-gap-findings-20261112.md` — **PARKED**
+- 2026-11-10 LAG cache về cơ sở giá ĐIỀU CHỈNH (Phương án A) — 2026-11-10 → `lag-cache-adjusted-20261110.md` — **CLOSED**
+- 2026-11-06 Model kỹ thuật định lượng ±5% bổ trợ Livermore (user yêu cầu 06/11/2026 00:09 ICT) → `ta-model-5pct-20261106.md` — **CLOSED-NOGO**
+- 2026-11-05 Sleeve discretionary — FPT + NNC (user duyệt 05/11/2026 22:11 + chốt chi tiết 22:17 ICT, decided_by: user) → `disc-fpt-nnc-approval-20261105.md` — **CLOSED**
+- 2026-11-04 Kế hoạch tích hợp tav2_bq.macro_indicator (TradingEconomics) — 04/11/2026 → `te-macro-integration-plan-20261104.md` — **CLOSED**
+- 2026-11-01 SPEC — Work-Tree Dashboard (webapp tương tác) — user duyệt hướng 2026-11-01 17:35 ICT → `work-tree-dashboard-spec-20261101.md` — **CLOSED**
+- 2026-11-01 Kế hoạch: Dashboard cây quản lý công việc toàn fleet (Fable lập, 2026-11-01) → `work-tree-dashboard-plan-20261101.md` — **CLOSED-NOGO**
+- 2026-11-01 Work-Tree Dashboard — Pha 1 phần B (server + UI) — 2026-11-01 → `work-tree-dashboard-phaseB-20261101.md` — **CLOSED-NOGO**
+- 2026-11-01 Work-Tree Dashboard — Pha A (sổ cái + builder + selfcheck) — 2026-11-01 → `work-tree-dashboard-phaseA-20261101.md` — **CLOSED**
+- 2026-10-31 oshares → live: được / chưa được (ghi 31/10/2026, cho user quyết) → `oshares-live-pros-cons-20261031.md` — **CLOSED**
+- 2026-10-30 DCF → domestic_v2 làm mặc định (cutover 2026-10-30 12:48 ICT) → `dcf-domestic-v2-cutover-20261030.md` — **CLOSED**
+- 2026-10-29 Quy trình LỆNH TAY / DÒNG TIỀN NGOÀI PLAN — khai một lần, mọi consumer biết (user yêu cầu 29/10/2026 20:20 IC… → `manual-deviation-process-20261029.md` — **CLOSED**
+- 2026-10-29 Clearing giữa các sổ (PARK ↔ LAG/BAL) — kế hoạch thiết kế (user yêu cầu 29/10/2026 00:32 ICT) → `book-clearing-plan-20261029.md` — **PARKED**
+- 2026-10-28 ddv-ir-email-20261028 → `ddv-ir-email-20261028.md` — **CLOSED**
+- 2026-10-27 DRI — kế hoạch kích hoạt hành động (user duyệt 27/10/2026 11:16 ICT, decided_by: user) → `dri-triggers-20261027.md` — **CLOSED**
+- 2026-10-26 Đối chiếu commodity_prices vs file local — 2026-10-26 (Winston, read-only) → `commodity-tables-eval-20261026.md` — **CLOSED**
+- 2026-10-26 Giám sát độ tươi theo mã — tav2_bq.commodity_prices (2026-10-26, Winston) → `commodity-freshness-monitor-20261026.md` — **CLOSED**
+- 2026-10-26 Đề nghị bổ sung chuỗi hàng hoá cho tav2_bq.commodity_prices (gửi bq_admin) → `bq-admin-commodity-feed-request-20261026.md` — **CLOSED**
+- 2026-10-25 Checklist BCTC Q3/2026 — FPT, TV1, DRI (khai TRƯỚC khi có số, 25/10/2026 18:5x ICT) → `bctc-q3-checklist-fpt-tv1-dri-20261025.md` — **CLOSED**
+- 2026-10-22 Luật lô cổ phiếu quyền mua — LAG (user chốt 22/10/2026 09:40 ICT, phương án A) → `lag-rights-lot-rule-20261022.md` — **CLOSED**
+- 2026-10-21 DRI — đánh giá GIỮ/BÁN sau số liệu Q3/2026 (21/10/2026) — bản NHÁP để skeptic phản biện → `dri-q3-hold-review-20261021.md` — **CLOSED**
+- 2026-10-21 DRI — user bán tay 21/10/2026 (chuyển nguyên văn từ current_ops.md, 21/10 23:5x ICT) → `dri-manual-sell-20261021.md` — **CLOSED**
+- 2026-10-20 Mã hủy niêm yết / ngừng giao dịch 2009→2026 và survivorship của backtest (Winston, 2026-10-20) → `delisted-tickers-survivorship-20261020.md` — **CLOSED**
+- 2026-10-20 Mã lớn đã biến mất — giá, BCTC, thống kê trực tiếp (Winston, 2026-10-20) → `delisted-big-vanished-prices-20261020.md` — **CLOSED**
+- 2026-10-19 Vòng plan Chủ nhật mùa BCTC (2026-10-19, Taylor_20261018_173105 · vòng 2 Taylor_20261018_180113) → `sunday-plan-round-20261019.md` — **PARKED**
+- 2026-10-19 AIS lock-up stale-base — PARKED 2026-10-19 (user: "Park") → `ais-lockup-stale-base-parked-20261019.md` — **PARKED**
+- 2026-10-16 DGC — Nghi Sơn GĐ1: rà soát infographic user gửi 16/10/2026 (cập nhật đánh giá) → `dgc-nghison-infographic-review-20261016.md` — **CLOSED**
+- 2026-10-15 Morning-run mode (MIKE_MORNING_RUN=1) — merged 2026-10-15 → `morning-run-mode-20261015.md` — **CLOSED**
+- 2026-10-14 Đính chính số đã công bố — hàng đợi ghi chú ở báo cáo kế tiếp (user duyệt 2026-10-14) → `report-corrections-pending-20261014.md` — **CLOSED**
+- 2026-10-13 Monitor phanh lỗ cấp NAV — CHỈ CẢNH BÁO, LIVE từ 2026-10-13 → `nav-loss-brake-monitor-20261013.md` — **CLOSED**
+- 2026-10-13 CAPIT margin — TẠM GIỮ: không duyệt ngày margin nào (mở 2026-10-13) → `capit-margin-hold-20261013.md` — **PARKED**
+- 2026-10-10 Tài khoản quản lý = quỹ mở: chính sách đo hiệu suất (user duyệt 2026-10-10 23:57 ICT) → `fund-unit-performance-policy-20261010.md` — **CLOSED**
+- 2026-10-08 R3 / V2.4 — lịch sử pin, số SUPERSEDED, diễn giải đo lường → `r3-pin-history.md` — **CLOSED**
+- 2026-10-08 Trim context_pack 2026-10-08 (job Wags_20261008_133659) — mục lục di chuyển → `context-pack-trim-20261008.md` — **CLOSED**
+- 2026-10-06 Plan — Funnel 8L hằng ngày tìm candidate cho discretionary sleeve (đề xuất 2026-10-06 — ĐÃ CHỐT, user duyệt 2… → `discretionary-8l-candidate-funnel-plan-20261006.md` — **CLOSED**
+- 2026-10-01 Effective rate (Big-4 12M vs CCTG) cho rating_8l/DCF — LIVE 2026-10-01 → `deposit-rate-effective-rate-20261001.md` — **CLOSED**
+- 2026-09-27 _screen.py sort-direction bug ("8L top-25" = 25 mã xấu nhất) — vá 2026-09-27 → `screen-sort-direction-bug-20260927.md` — **CLOSED**
+- 2026-09-27 Measurement integrity audit — bối cảnh mở cadence (2026-09-27) → `measurement-integrity-audit-20260927.md` — **CLOSED**
+- 2026-09-27 Trứng vàng DNSE — bản chất pháp lý (legal-vn 2026-09-27) → `dnse-trung-vang-legal-review-20260927.md` — **CLOSED**
+- 2026-09-27 Kế hoạch nghiên cứu — tái thẩm định custom30V sau lỗi đo lường 2026-09-27 → `custom30v-revalidation-plan-20260927.md` — **PARKED**
+- 2026-09-26 Đề xuất khai thác dữ liệu FiinPro-X vào ARIA — 2026-09-26 → `fiinprox-data-usage-proposal-20260926.md` — **CLOSED**
+- 2026-09-22 Chuỗi corp-action NAV/ex-date 2026-09-22→09-28 — chi tiết vòng review → `corp-action-nav-chain-20260922.md` — **CLOSED**
+- 2026-09-21 FTSE nâng hạng — sự kiện cấu trúc ĐÃ KÍCH HOẠT (hiệu lực 2026-09-21) → `ftse-upgrade-structural-break-20260921.md` — **CLOSED**
+- 2026-09-14 FiinPro-X trial — kế hoạch khai thác + đối chiếu lấp lỗ hổng dữ liệu (mở 2026-09-14) → `fiinprox-trial-harvest-plan-20260914.md` — **CLOSED**
+- 2026-09-10 So sánh Kaffa (hệ thống cũ) vs ARIA — 2026-09-10 → `kaffa-comparison-20260910.md` — **CLOSED**
+- 2026-09-10 Structural-break protocol — khi HỆ SINH THÁI thị trường đổi, không phải khi backtest đổi → `amh-structural-break-protocol-20260910.md` — **CLOSED-NOGO**
+- 2026-09-10 AMH (Adaptive Market Hypothesis, Andrew Lo) — rà soát độ thích nghi của hệ, 2026-09-10 → `amh-adaptivity-review-20260910.md` — **CLOSED**
+- 2026-09-09 P1 — Giá: 4 consumer đọc marketPrice trần (2026-09-09) → `price-frame-adoption-20260909.md` — **CLOSED**
+- 2026-08-30 CAP_SIGNAL advisory tracking — quyết định 2026-08-30 (decided_by: user) → `cap-signal-advisory-20260830.md` — **CLOSED**
+- 2026-08-26 VN Real Estate Structural Risk — thesis + playbook (mở 2026-08-26) → `vn-realestate-structural-risk-20260826.md` — **CLOSED**
+- 2026-08-23 Code-quality review định kỳ — kế hoạch (đề xuất 2026-08-23, chờ user duyệt) → `code-quality-review-plan-20260823.md` — **CLOSED**
+- 2026-08-22 Trục 2 mặc định = breadth-tercile PIT — bằng chứng + định nghĩa tính chuẩn → `breadth-tercile-axis-20260822.md` — **CLOSED**
+- 2026-08-03 Pilot đánh giá srcwalk — tra cứu code Python bằng AST thay vì grep+Read → `srcwalk-pilot-eval.md` — **CLOSED**
+- 2026-08-03 Benchmark srcwalk vs grep — 2026-08-03 → `srcwalk-benchmark-20260803.md` — **CLOSED**
+- 2026-07-15 A/B cross-mode (ab_cross vs ab_dip) — PARKED → `ab-cross-mode-parked.md` — **PARKED**
      dispatch có context_pack ⇒ tường thuật của việc ĐÃ ĐÓNG là chi phí trả lại mỗi phiên.
      Giữ đúng phần còn quyết định được hành vi sau này: TÊN · FILE · PHÁN QUYẾT (nhất là NO-GO,
      để không ai đề xuất lại). Diễn biến vẫn nguyên trong file chi tiết. -->
@@ -47,3 +118,46 @@
 - [oshares-live-dcf-20261030](oshares-live-dcf-20261030.md) — MỞ: nguồn số CP sống cho DCF (`DCF_OSHARES_SOURCE`), knob TẮT/merge 2026-10-31; bật live cần vá khoá ex-date `price_date=asof` + caller khai `price_date` + user duyệt riêng
 - [report-style-v2-20261031](report-style-v2-20261031.md) — MỞ: báo cáo ngày/tuần/tháng chuẩn v2 (`bin/report_v2/build.py`, PDF+HTML cid, cầu NAV, narrative.json có trần), gắn cadence + EOD (fail-open); quý chưa có lịch
 - [dcf-earnings-forecast-nogo-20261125](dcf-earnings-forecast-nogo-20261125.md) — ĐÓNG NO-GO: dự báo earnings quý/chu kỳ ngành không hơn E/P/ENS (J1→J4+J3.1); gap tâm-giá = đại số persistence; muốn tiếp phải thu thập chuỗi ngành PIT từ 2014; panel V3.2 vá mc; nhánh session/Taylor_20261125_011012 chưa merge
+
+## Dự án đã đóng — Due Diligence (DD cổ phiếu)
+- 2026-11-26 Kiến trúc DD & Mô hình Định giá v4 (Spec khoá từ /grill-me, 2026-11-26) → `dd-valuation-v4-architecture-20261126.md` — **CLOSED**
+- 2026-11-22 VLB — DD 22/11/2026 (pointer) → `vlb-dd-20261122.md` — **CLOSED**
+- 2026-11-22 Nâng cấp quy trình DD — bản hành động FINAL (review vòng 2, 22/11/2026) → `dd-upgrade-final-action-20261122.md` — **CLOSED**
+- 2026-11-22 Kế hoạch nâng cấp quy trình DD — bản điều chỉnh sau khi đối chiếu review bên thứ ba (22/11/2026) → `dd-process-upgrade-plan-20261122.md` — **CLOSED**
+- 2026-11-22 Review quy trình due diligence (DD) — 22/11/2026 → `dd-process-review-20261122.md` — **CLOSED**
+- 2026-11-22 Hàng chờ xác nhận tay — nhãn skeptic_final backfill MƠ HỒ (A2, 22/11/2026) → `dd-ledger-ambiguous-queue-20261122.md` — **CLOSED**
+- 2026-11-20 TTA (Trường Thành, HOSE) — DD 20/11/2026 → `tta-dd-20261120.md` — **CLOSED**
+- 2026-11-18 POW (PV Power) — DD 18/11/2026 (BCTC Q3/2026) → `pow-dd-20261118.md` — **CLOSED**
+- 2026-11-18 DD LLM (Lilama, UPCoM) — 18/11/2026 — pointer → `llm-dd-20261118.md` — **CLOSED**
+- 2026-11-18 DBC (Dabaco) — DD 18/11/2026 (user yêu cầu trong topic 1572457748526800986) → `dbc-dd-20261118.md` — **CLOSED**
+- 2026-11-17 VCB — DD mùa BCTC Q3/2026 (pointer; r4 áp 22/11/2026) → `vcb-dd-20261117.md` — **CLOSED**
+- 2026-11-17 QTP (Nhiệt điện Quảng Ninh) — DD 17/11/2026 → `qtp-dd-20261117.md` — **CLOSED**
+- 2026-11-17 PAT — phản biện của user 17/11/2026 17:01 ICT vào định giá rev4 (tâm 64.700) — brief cho topic mới → `pat-dd-user-rebuttal-20261117.md` — **CLOSED**
+- 2026-11-14 PNJ — DD review trigger BCTC Q3/2026 (14/11/2026) → `pnj-dd-20261114.md` — **PARKED**
+- 2026-11-14 PAT — DD làm lại KHÁCH QUAN, mù giá thật (brief gốc, user 14/11/2026 23:04 ICT) → `pat-dd-redo-objective-20261114.md` — **CLOSED**
+- 2026-11-14 PAT — DD làm lại KHÁCH QUAN, mù giá thật (rev3, 14/11/2026) — kết quả → `pat-dd-objective-20261114.md` — **CLOSED**
+- 2026-11-14 PAT — DD 14/11/2026 (pointer) → `pat-dd-20261114.md` — **CLOSED**
+- 2026-11-12 DD VCP (CTCP Xây dựng và Năng lượng VCP, UPCoM) — 2026-11-12 → `vcp-dd-20261112.md` — **CLOSED**
+- 2026-11-11 DD CST (Than Cao Sơn - TKV) — 2026-11-11 → `cst-dd-20261111.md` — **CLOSED**
+- 2026-11-10 VGS (Ống thép Việt Đức VG PIPE, HNX) — DD 10/11/2026 (pointer) → `vgs-dd-20261110.md` — **CLOSED**
+- 2026-11-09 Cổng LAG: mua cần DD + giá ≤ tâm (user chốt 09/11/2026 19:2x ICT, decided_by: user) → `lag-dd-zone-gate-20261109.md` — **PARKED**
+- 2026-11-04 DD DCM (Đạm Cà Mau / PVCFC) — 04–05/11/2026 → `dcm-dd-20261104.md` — **CLOSED**
+- 2026-11-03 DD MVC (CTCP VLXD Bình Dương, UPCOM) — 2026-11-03 → `mvc-dd-20261103.md` — **CLOSED**
+- 2026-11-02 DD TV1 (PECC1) sau BCTC Q3/2026 — 02/11/2026 (bản hiện hành r8, email ~19:25 ICT) → `tv1-dd-20261102.md` — **CLOSED**
+- 2026-11-02 4 quy tắc user chốt 02/11/2026 23:01 ICT (decided_by: user) → `dd-flag-rules-20261102.md` — **PARKED**
+- 2026-11-01 TV2 (PECC2) — DD khách quan + báo cáo nhà đầu tư (01/11/2026) — THAY bản 28/10 → `tv2-dd-20261101.md` — **CLOSED**
+- 2026-11-01 SIP — DD 01/11/2026 (CTCP Đầu tư Sài Gòn VRG, HOSE) → `sip-dd-20261101.md` — **CLOSED**
+- 2026-11-01 HHS — due diligence 01/11/2026 (pointer, bản v2 sau phản biện) → `hhs-dd-20261101.md` — **CLOSED**
+- 2026-11-01 FPT — DD 01/11/2026 (CTCP FPT, HOSE) → `fpt-dd-20261101.md` — **CLOSED**
+- 2026-10-31 TCH — due diligence 31/10/2026 (pointer, bản v2 sau phản biện) → `tch-dd-20261031.md` — **CLOSED**
+- 2026-10-31 DD MBB — 31/10/2026 (pointer) → `mbb-dd-20261031.md` — **CLOSED**
+- 2026-10-31 DD HPG — 31/10/2026 (cập nhật sau skeptic + đào điểm yếu + báo cáo nhà đầu tư) → `hpg-dd-20261031.md` — **CLOSED**
+- 2026-10-30 DD NNC (CTCP Đá Núi Nhỏ) — 30/10/2026 (trung dung) → `nnc-dd-20261030.md` — **CLOSED**
+- 2026-10-30 DRI — CTCP Đầu tư Cao su Đắk Lắk (UPCoM): hồ sơ tổng hợp đến 30/10/2026 → `dri-dd-summary-20261030.md` — **CLOSED**
+- 2026-10-29 SCL — due diligence 29/10/2026 (pointer) → `scl-dd-20261029.md` — **CLOSED**
+- 2026-10-29 DD PVT (PV Trans) sau BCTC Q3/2026 — 2026-10-29 → `pvt-dd-20261029.md` — **CLOSED**
+- 2026-10-29 DD PVP — 2026-10-29 (pointer) → `pvp-dd-20261029.md` — **CLOSED**
+- 2026-10-29 DGC due diligence 29/10/2026 — pointer → `dgc-dd-20261029.md` — **CLOSED**
+- 2026-10-28 TV2 (PECC2) — due diligence sau BCTC Q3/2026 (28/10/2026) → `tv2-dd-20261028.md` — **CLOSED**
+- 2026-10-28 DDV (DAP-Vinachem) — due diligence nháp 2026-10-28 (Mike, chờ fundamental-skeptic) → `ddv-dd-20261028.md` — **CLOSED**
+- 2026-10-21 SCL (CTCP Sông Đà Cao Cường) — nghiên cứu thêm sau cờ DD EQ_PHAI_THU_TANG (21/10/2026) → `scl-dd-research-20261021.md` — **CLOSED**

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-28
+title: "ddv-ir-email-20261028"
+---
 **Người nhận:** CTCP DAP - VINACHEM (Phòng Tổ chức – Hành chính / người phụ trách công bố thông tin). Email trong BCTC Q3/2026: daphaiphong@gmail.com (anh kiểm tra lại với địa chỉ IR chính thức trên www.dap-vinachem.com.vn trước khi gửi).
 **Tiêu đề:** Đề nghị cung cấp thông tin về cơ cấu mua lưu huỳnh, NH3 và sản lượng – cổ đông DDV
 

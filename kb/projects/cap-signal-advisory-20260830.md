@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-08-30
+title: "CAP_SIGNAL advisory tracking — quyết định 2026-08-30 (decided_by: user)"
+---
 # CAP_SIGNAL advisory tracking — quyết định 2026-08-30 (decided_by: user)
 
 ## Quyết định

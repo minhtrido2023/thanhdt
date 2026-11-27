@@ -1,3 +1,10 @@
+---
+kind: project
+owner: DollarBill
+status: parked
+updated: 2026-11-12
+title: "BAL/LAG backtest-vs-live gap — kết luận tạm GĐ0–GĐ1 (2026-11-12 ~20:20 ICT)"
+---
 # BAL/LAG backtest-vs-live gap — kết luận tạm GĐ0–GĐ1 (2026-11-12 ~20:20 ICT)
 
 > Kế hoạch: `bal-lag-live-gap-research-plan-20261112.md` (user duyệt 12/11 17:40). Artifact: `agents/Taylor/research/live_gap_phase{0,1,1b,1c,2a}_20261112/`.

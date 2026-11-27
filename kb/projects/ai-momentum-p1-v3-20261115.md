@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-11-15
+title: "AI-momentum P1-V3 — nới ngưỡng sự kiện ×2 (PREREG v3)"
+---
 # AI-momentum P1-V3 — nới ngưỡng sự kiện ×2 (PREREG v3)
 
 Job `Taylor_20261115_162439` · nhánh `research/ai-momentum-p1-20261115` (worktree `agents/Taylor/wt-ai-momentum-p1`) · **chưa merge, chưa cron, chưa chạy forward.**

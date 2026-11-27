@@ -1,3 +1,10 @@
+---
+kind: dd
+owner: Mike
+status: parked
+updated: 2026-11-09
+title: "Cổng LAG: mua cần DD + giá ≤ tâm (user chốt 09/11/2026 19:2x ICT, `decided_by: user`)"
+---
 # Cổng LAG: mua cần DD + giá ≤ tâm (user chốt 09/11/2026 19:2x ICT, `decided_by: user`)
 Nguyên văn: "Plan muốn đưa vào lệnh mua cần phải làm due diligence cho candidate trước. Nếu giá không nằm trong, dưới vùng và dưới tâm thì không đưa vào danh sách mua. Hiện nay việc mua theo book lag đang cho thấy performance không ổn định. Mua 2 candidate, cả 2 đều performance kém. Nên cần xét thêm điều kiện này trước khi edge của lag book trở lại bình thường."
 

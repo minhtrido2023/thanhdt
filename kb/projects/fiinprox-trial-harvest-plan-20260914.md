@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mike
+status: closed
+updated: 2026-09-14
+title: "FiinPro-X trial — kế hoạch khai thác + đối chiếu lấp lỗ hổng dữ liệu (mở 2026-09-14)"
+---
 # FiinPro-X trial — kế hoạch khai thác + đối chiếu lấp lỗ hổng dữ liệu (mở 2026-09-14)
 
 **Hạn cứng: trial hết 2026-09-28.** Sau đó không gọi lại được FiinXMCP trừ khi mua.

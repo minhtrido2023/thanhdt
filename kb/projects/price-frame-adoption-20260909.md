@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-09-09
+title: "P1 — Giá: 4 consumer đọc `marketPrice` trần (2026-09-09)"
+---
 # P1 — Giá: 4 consumer đọc `marketPrice` trần (2026-09-09)
 
 **Trạng thái:** CẢ 4 việc ĐÃ WIRE + verify trên dữ liệu thật (commit `65a6103b`, `3ca7fabd`, `9645d2bd`, `1cccc83f`). Thiết kế v2 sau arch-review **NEEDS_CHANGES** (confidence high).

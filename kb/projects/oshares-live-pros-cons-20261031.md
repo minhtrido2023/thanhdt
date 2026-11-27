@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed
+updated: 2026-10-31
+title: "oshares → live: được / chưa được (ghi 31/10/2026, cho user quyết)"
+---
 # oshares → live: được / chưa được (ghi 31/10/2026, cho user quyết)
 
 Trạng thái: R2–R10 ĐÃ MERGE (WC `69bbbd692`, mike master). Knob `OSHARES_SOURCE_DEFAULT = "fin"` — CHƯA bật.

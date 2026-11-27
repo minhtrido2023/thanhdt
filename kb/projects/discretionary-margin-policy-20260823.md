@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Mafee
+status: closed
+updated: 2026-08-23
+title: "Chính sách margin đơn mã cho sleeve fear-buy discretionary"
+---
 # Chính sách margin đơn mã cho sleeve fear-buy discretionary
 > Chốt 2026-08-23 (user duyệt, sau khi đóng sổ `margin-valuation-spread-20260823.md`).
 > Status: **IMPLEMENTED 2026-08-29, sleeve cap RESYNC 2026-08-30** — gate/checker

@@ -1,3 +1,10 @@
+---
+kind: project
+owner: Taylor
+status: closed-nogo
+updated: 2026-11-19
+title: "Mã đầu ngành × nowcast ngành + nowcast KQKD 12 họ — NO-GO (đóng 2026-11-19, user duyệt)"
+---
 # Mã đầu ngành × nowcast ngành + nowcast KQKD 12 họ — NO-GO (đóng 2026-11-19, user duyệt)
 
 Nguồn: `agents/Taylor/research/arch_8l_dt5g_data_leverage_20261119/REPORT.md` (review kiến trúc, Fable/high) →
