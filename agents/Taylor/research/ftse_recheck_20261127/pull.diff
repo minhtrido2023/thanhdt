@@ -1,0 +1,49 @@
+--- orig_pull.py	2026-11-27 08:21:20.130131523 +0700
++++ pull.py	2026-11-27 08:23:48.353282329 +0700
+@@ -1,8 +1,8 @@
+ """Pull panels for FTSE-upgrade re-validation (READ-ONLY, measurement only). Job Taylor_20261013_114456."""
+-import json, urllib.request
++import json, os, subprocess, urllib.request
+ import pandas as pd
+ from google.cloud import bigquery
+-PRJ = "lithe-record-440915-m9"; END = "2026-10-12"   # universe_pit max date at run time
++PRJ = "lithe-record-440915-m9"; END = os.environ["END"]
+ c = bigquery.Client(project=PRJ)
+ q = lambda s: c.query(s).result().to_dataframe()
+ # A. PIT universe panel (tav2_bq.ticker JOIN universe_pit per day) — same join as macro_state_live._breadth_sql
+@@ -19,18 +19,28 @@
+ q(f"""SELECT p.time, p.ticker, COALESCE(p.Price,p.Close)*p.Volume AS turn, p.ROE_Min5Y, p.ROIC5Y, p.FSCORE
+ FROM tav2_bq.ticker_prune AS p WHERE p.time BETWEEN DATE '2013-06-01' AND DATE '{END}'""").to_parquet("panel_capit_prune.parquet")
+ # D. custom30V current members
+-q("""SELECT c.ticker, c.weight, c.liq_rank, c.rebal_date FROM tav2_bq.custom30v_8l AS c
+-WHERE c.rebal_date=(SELECT MAX(c2.rebal_date) FROM tav2_bq.custom30v_8l AS c2)""").to_csv("custom30v_members.csv", index=False)
++q(f"""SELECT c.ticker, c.weight, c.liq_rank, c.rebal_date FROM tav2_bq.custom30v_8l AS c
++WHERE c.rebal_date=(SELECT MAX(c2.rebal_date) FROM tav2_bq.custom30v_8l AS c2 WHERE c2.rebal_date<=DATE '{END}')""").to_csv("custom30v_members.csv", index=False)
+ # E. DT5G live state
+-q("""SELECT s.time, s.state FROM tav2_bq.vnindex_5state_dt5g_live AS s WHERE s.time>='2014-01-01' ORDER BY s.time""").to_csv("dt5g_live.csv", index=False)
++q(f"""SELECT s.time, s.state FROM tav2_bq.vnindex_5state_dt5g_live AS s WHERE s.time BETWEEN '2014-01-01' AND '{END}' ORDER BY s.time""").to_csv("dt5g_live.csv", index=False)
++def get(url):   # curl: urllib gets HTTP 403 from VNDirect
++    return json.loads(subprocess.check_output(["curl", "-sSf", "-m", "60", "-A", "Mozilla/5.0", "-H", "Referer: https://dstock.vndirect.com.vn/", url]))
+ # F. foreign flow VNINDEX (VNDirect finfo, depth 2018-08-30; includes put-through blocks)
+-rows, page = [], 1
++rows, page, total = [], 1, None
+ while True:
+     url = ("https://api-finfo.vndirect.com.vn/v4/foreigns?q=code:VNINDEX~tradingDate:gte:2018-01-01"
+            f"&sort=tradingDate:asc&size=1000&page={page}")
+-    r = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"Referer": "https://dstock.vndirect.com.vn/"}), timeout=40))
++    r = get(url)
+     rows += r["data"]
+-    if page >= r["totalPages"]: break
++    total = total or r["totalPages"]   # API now returns totalPages on page 1 only
++    if page >= total: break
+     page += 1
+-pd.DataFrame(rows).to_csv("foreign_vnindex_vndirect.csv", index=False)
++pd.DataFrame(rows).query("tradingDate <= @END").to_csv("foreign_vnindex_vndirect.csv", index=False)
++# G. per-stock foreign flow, 27 FTSE names (fetch step was not in the original script)
++os.makedirs("fgn_stock", exist_ok=True)
++for t in json.load(open("../orig_meta.json"))["ftse27"]:
++    for tag, flt in [("2018", "tradingDate:gte:2018-01-01~tradingDate:lte:2022-09-02"), ("2022", f"tradingDate:gte:2022-09-05~tradingDate:lte:{END}")]:
++        r = get(f"https://api-finfo.vndirect.com.vn/v4/foreigns?q=code:{t}~{flt}&sort=tradingDate:asc&size=1100&page=1")
++        assert r["totalPages"] <= 1 and (r["data"] or tag == "2018"), (t, tag, r["totalPages"], len(r["data"]))
++        json.dump(r, open(f"fgn_stock/{t}_{tag}.json", "w"))
+ print("ok", len(rows))

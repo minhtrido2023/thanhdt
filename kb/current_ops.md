@@ -110,7 +110,7 @@ quant-skeptic.md`) — audit định kỳ vẫn cần vì đòn 8 chỉ bắt Đ
 ## Macro watch — rủi ro cấu trúc BĐS VN (mở 2026-08-26)
 Bobby classify STRUCTURAL_ACCUMULATION/AMBIGUOUS. Thesis + lead indicators + playbook đã chốt:
 `kb/projects/vn-realestate-structural-risk-20260826.md`. KHÔNG đổi V2.4/DT5G/margin theo thesis này.
-**Review quý — next ~2026-11-26: Bobby refresh lead indicators + quét `kb/structural_break_watch.json`**
+**Review quý — next ~2027-02-26: Bobby refresh lead indicators + quét `kb/structural_break_watch.json`**
 (protocol `kb/projects/amh-structural-break-protocol-20260910.md`; mặc định KHÔNG đổi tham số).
 🔴 **FTSE nâng hạng ĐÃ KÍCH HOẠT, hiệu lực 2026-09-21** (user chốt 10-13) ⇒ backtest mới TÁCH trước/sau ngày đó: `kb/projects/ftse-upgrade-structural-break-20260921.md`
 

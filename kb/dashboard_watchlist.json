@@ -2,16 +2,6 @@
   "_doc": "Nguồn cho khối H/I của bin/daily_dashboard.py (bản tin 08:00). milestones = mốc review KHÔNG nằm trong kb/paper_programs_registry.json (chương trình paper lấy trực tiếp từ registry). research_backlog = đề xuất nghiên cứu còn mở, có nguồn. Thêm/xoá tay khi mốc đổi; mốc đã qua sẽ hiện 'QUÁ HẠN' cho tới khi xoá hoặc đổi status. Seed 2026-10-15 từ kb/current_ops.md + kb/projects/rnd-pipeline-tracker.md.",
   "milestones": [
     {
-      "date": "2026-11-16",
-      "label": "Dọn bundle backup 4,0GB + clone rw_20261113b.git ở /home/trido/git_bundles/ (user duyệt 13/11 20:40: giữ 3 ngày) — CHỈ khi git ls-remote github mike-fleet == master/ancestor và backup cron 00:00 đã push ổn; xoá cần user nhắc lại/ack",
-      "source": "kb/projects/bal-lag-live-gap-findings-20261112.md (GH001 rewrite)"
-    },
-    {
-      "date": "2026-11-26",
-      "label": "Review quý: Bobby refresh lead indicators BĐS + quét structural_break_watch",
-      "source": "kb/current_ops.md"
-    },
-    {
       "date": "2026-12-01",
       "label": "engine_room_oos — review ~6 tháng OOS",
       "source": "kb/paper_programs_registry.json engine_room_oos",
@@ -21,7 +11,7 @@
     },
     {
       "date": "2026-12-15",
-      "label": "Checkpoint LAG ADV>0 filter + mốc xem lại corp-action broker-primary SHADOW",
+      "label": "Checkpoint LAG ADV>0 filter + mốc xem lại corp-action broker-primary SHADOW + FTSE đo lại 60 vs 60 phiên",
       "source": "kb/projects/lag-adv-filter-tracking.md; kb/projects/corp-action-broker-primary-live-criteria.md"
     },
     {
@@ -30,9 +20,19 @@
       "source": "kb/projects/measurement-integrity-audit-20260927.md"
     },
     {
+      "date": "2026-12-28",
+      "label": "Cổ phiếu HNX chuyển sang giao dịch HOSE (theo báo chí) — kiểm biên độ/trường sàn trong universe_pit, fill model, chase-cap TRƯỚC ngày này",
+      "source": "kb/structural_break_watch.json (krx_microstructure)"
+    },
+    {
       "date": "2027-01-25",
       "label": "Opening-window limit-order A/B — mốc quyết định CỨNG (không kết luận sớm)",
       "source": "kb/projects/rnd-pipeline-tracker.md"
+    },
+    {
+      "date": "2027-02-26",
+      "label": "Review quý: Bobby refresh lead indicators BĐS + quét structural_break_watch",
+      "source": "kb/current_ops.md"
     },
     {
       "date": "2027-03-31",

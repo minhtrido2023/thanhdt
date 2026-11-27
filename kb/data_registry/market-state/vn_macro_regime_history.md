@@ -2092,3 +2092,7 @@ trungtamwto.vn 33105 (07/2026) · thitruongtaichinhtiente.vn 86006 (GDP, 03/10) 
 
 ## Pointer cho Bobby — DD VCB đã hoàn tất vòng 4 (22/11/2026)
 - DD VCB (ngân hàng quốc doanh, Q3/2026): giá 52.100 (17/11) TRÊN vùng hợp lý 30.800–42.000 ở r 13,5%; hai biến quyết định = ROE bền (14,6% vs lõi 16,65%) và Ke; cờ Bobby §7.12 (nhóm 2 > 2× tốc độ cho vay) CHẠM (+85% vs +8,5%); cổ tức tiền 2.433 đ/cp sắp có GDKHQ. Hồ sơ: `kb/projects/vcb-dd-20261117.md`. Khi refresh review quý ~2026-11-26 cho ngành ngân hàng: đối chiếu lại KBNN, nhóm 2, NIM với BCTC Q4 (không có lượt đọc mù mới nào cần làm cho VCB trước đó).
+
+## REVIEW QUÝ Q3/2026 — 2026-11-27 (Bobby; KHÔNG phải episode)
+Giữ STRUCTURAL_ACCUMULATION giai đoạn GIỮA, AMBIGUOUS. Kịch bản 6-12T (judgment): A 45-50 · B 25-30 · C 5-10 · D 10-15.
+Báo cáo đầy đủ + nguồn: `mike/reports/bobby_vn_quarterly_20261127.md`.

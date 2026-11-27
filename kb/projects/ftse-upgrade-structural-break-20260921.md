@@ -113,3 +113,11 @@ ngoài dải ở mốc kế tiếp. Dưới mức đó: ghi "không đổi" và 
 `kb/structural_break_watch.json`** (6 sự kiện cấu trúc: nâng hạng, KRX, T+, luật margin, room
 ngoại, sản phẩm mới). Protocol: `kb/projects/amh-structural-break-protocol-20260910.md` —
 sự kiện kích hoạt ⇒ BẮT BUỘC re-validate đúng tầng, mặc định vẫn là KHÔNG đổi tham số.
+
+## Kiểm lại mốc 2026-11-26 (làm 2026-11-27, job `Taylor_20261127_012110` + Bobby BLIND)
+**GIỮ NGUYÊN, không đổi tham số.** 48 phiên sau sự kiện: 1/24 đại lượng ngoài dải p5-p95
+(`T2_top60_pool_names_changed` = 4, dải 5…14,75 — pool ổn định HƠN thường lệ). Chưa chạm điều kiện prereg (cần mốc 60 phiên VÀ mốc kế tiếp).
+Chân control (cắt 10-12) lệch 86 ô so bảng cũ nhưng 0 cờ đổi (dữ liệu BQ/VNDirect đổi sau 10/13).
+Lỗi còn mở: `measure.py` ghi cứng Δ=0 cho `T3_quality_set_n` ⇒ đại lượng này không bao giờ ra ngoài dải.
+Script gốc đã bị xoá ở `60fe58b82` (dọn research 19/11) — bản sống nay ở `agents/Taylor/research/ftse_recheck_20261127/`.
+Mốc kế: 2026-12-15 (60 vs 60), chạy `run.sh` ở thư mục đó.
