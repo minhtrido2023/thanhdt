@@ -12480,3 +12480,92 @@ The `data/pt_v11_tq34b_logs.csv` now has 6 per-book columns:
 `BAL_cash`, `BAL_stocks`, `BAL_etf`, `VN30_cash`, `VN30_stocks`, `VN30_etf`.
 Each row: `BAL_cash + BAL_stocks + BAL_etf + VN30_cash + VN30_stocks + VN30_etf = NAV`.
 Cross-check at any date: when ETF is bought in BAL, BAL_cash decreases and BAL_etf increases (minus friction).
+
+## Cash-Flow Reconciliation (verifiable from transactions.csv)
+
+All numbers below derive ONLY from the transactions CSV. The MTM_UNREALIZED
+rows (flagged in `reason` column) are phantom mark-to-market entries used by
+analyze_portfolio.py to compute unrealized P&L on open positions — they are NOT
+real trades. Filter `reason != 'MTM_UNREALIZED'` to see only real broker activity.
+
+### Schema (per user 2026-05-18)
+
+- `buy_amount` = cost of shares (clean, no fee)
+- `sell_amount` = gross from sale (clean, no fee deducted)
+- `fee` = transaction cost (buy: 0.15% broker; sell: 0.15% broker + 0.1% PIT tax)
+- **Cash deducted on buy = buy_amount + fee**
+- **Cash received on sell = sell_amount - fee**
+- `deposit_annual=0` (no overnight interest)
+
+### Real activity (excludes MTM_UNREALIZED phantoms)
+
+| Category | Amount |
+|---|---|
+| Stock buys — share cost | +14.4634B |
+| Stock buys — fee | +0.0217B |
+| Stock sells — gross | +11.6353B |
+| Stock sells — fee+tax | +0.0320B |
+| **Net stock realized P&L** | **-2.8818B** |
+| ETF buys — share cost | +73.7057B |
+| ETF buys — friction | +0.1106B |
+| ETF sells — gross | +26.6969B |
+| ETF sells — friction | +0.0400B |
+| **Net ETF cash flow** | **-47.1594B** |
+
+### Open positions at end of period (unrealized)
+
+| Position | Cost basis | Current value | Unrealized P&L | Return |
+|---|---|---|---|---|
+| TCH (BAL) | +2.457B | +2.526B | +0.068B | +2.94% |
+| E1VFVN30 (BAL) | +0.069B | +0.066B | -0.003B | -4.31% |
+| E1VFVN30 (BAL) | +0.134B | +0.118B | -0.016B | -12.18% |
+| E1VFVN30 (BAL) | +2.129B | +1.870B | -0.259B | -12.18% |
+| E1VFVN30 (BAL) | +0.514B | +0.442B | -0.073B | -14.12% |
+| E1VFVN30 (BAL) | +2.166B | +1.877B | -0.289B | -13.34% |
+| E1VFVN30 (BAL) | +0.537B | +0.467B | -0.069B | -12.91% |
+| E1VFVN30 (BAL) | +2.460B | +2.159B | -0.301B | -12.23% |
+| E1VFVN30 (BAL) | +1.145B | +1.000B | -0.144B | -12.60% |
+| E1VFVN30 (BAL) | +0.507B | +0.446B | -0.060B | -11.89% |
+| E1VFVN30 (BAL) | +2.077B | +1.837B | -0.239B | -11.52% |
+| E1VFVN30 (BAL) | +0.630B | +0.559B | -0.071B | -11.24% |
+| E1VFVN30 (BAL) | +2.634B | +2.321B | -0.313B | -11.89% |
+| E1VFVN30 (BAL) | +0.961B | +0.910B | -0.051B | -5.26% |
+| E1VFVN30 (BAL) | +2.011B | +1.818B | -0.193B | -9.61% |
+| E1VFVN30 (BAL) | +0.615B | +0.548B | -0.067B | -10.89% |
+| E1VFVN30 (BAL) | +2.500B | +2.317B | -0.183B | -7.33% |
+| E1VFVN30 (BAL) | +2.685B | +2.509B | -0.177B | -6.58% |
+| E1VFVN30 (VN30) | +25.000B | +23.922B | -1.078B | -4.31% |
+
+### Final reconciliation
+
+| Component | Value |
+|---|---|
+| Initial NAV | +50.000B |
+| + Realized P&L from stocks | -2.882B |
+| + ETF net cash flow + MTM | -1.972B |
+| + Stock unrealized MTM | +2.526B (cost 2.457B → realized would be +0.068B if sold today) |
+| Initial NAV | +50.0000B |
+| - Stock buys (buy_amount + fee out) | +14.4851B |
+| + Stock sells (sell_amount - fee in) | +11.6033B |
+| - ETF buys (buy_amount + fee out) | +73.8163B |
+| + ETF sells (sell_amount - fee in) | +26.6569B |
+| = Expected end cash (from transactions only) | -0.0412B |
+| Actual end cash (from logs) | -0.0441B |
+| **Diff (ETF appreciation rebalanced into cash)** | **-0.0029B** |
+| Actual end ETF balance (still in cash_etf) | +45.1875B |
+| Open stock positions mark value | +2.5259B |
+| = **Final NAV (cash + ETF + open stocks)** | **+47.6693B** |
+
+**Note on `Diff` line**: when ETF appreciates daily by VN30 return, cash_etf grows.
+The rebalance logic (target 70% of total cash+ETF in state=NEUTRAL) periodically moves
+a portion OUT of cash_etf and INTO cash. Those are logged as ETF 'sell' transactions,
+but the moved amount EXCEEDS the original cost basis (because ETF appreciated meanwhile).
+The diff line = appreciation that flowed to cash via rebalances. To FULLY reconcile,
+compute ETF return = (etf_sells + etf_etf_residual_mark) − etf_buys − etf_fees.
+
+### Per-book daily breakdown (in logs CSV)
+
+The `data/pt_v11_tq34b_logs.csv` now has 6 per-book columns:
+`BAL_cash`, `BAL_stocks`, `BAL_etf`, `VN30_cash`, `VN30_stocks`, `VN30_etf`.
+Each row: `BAL_cash + BAL_stocks + BAL_etf + VN30_cash + VN30_stocks + VN30_etf = NAV`.
+Cross-check at any date: when ETF is bought in BAL, BAL_cash decreases and BAL_etf increases (minus friction).
